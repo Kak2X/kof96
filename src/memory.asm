@@ -181,7 +181,7 @@ iSndInfo_DataPtr_Low EQU $02 ; Pointer to song data (low byte)
 iSndInfo_DataPtr_High EQU $03 ; Pointer to song data (high byte)
 iSndInfo_FreqDataIdBase EQU $04 ; Base index/note id to Sound_FreqDataTbl for indexes > 0
 iSndInfo_Unused05 EQU $05 ; Unused. Always $81 unless audio is interrupted.
-iSndInfo_DataPtrStackIdx EQU $06 ; Stack index for data pointers saved and restored by Sound_Cmd_PushDataPtr and Sound_Cmd_PopDataPtr. Initialized to $20 (end of SndInfo) and decremented on pushes.
+iSndInfo_DataPtrStackIdx EQU $06 ; Stack index for data pointers saved and restored by Sound_Cmd_Call and Sound_Cmd_Ret. Initialized to $20 (end of SndInfo) and decremented on pushes.
 iSndInfo_LengthTarget EQU $07 ; Handles delays -- the current sound register settings are kept until it matches iSndInfo_LengthTarget Set by song data.
 iSndInfo_LengthTimer EQU $08 ; Increases every time a SndInfo isn't paused/disabled. Once it reaches iSndInfo_LengthTarget it resets.
 iSndInfo_Unknown_Unused_9 EQU $09 ; ??? unused ?

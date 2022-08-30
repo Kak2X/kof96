@@ -95,7 +95,7 @@ for ($chnum = $i = 0; $i < count($asmfile);) {
 			case 0x1D:
 			case 0x1E:
 			case 0x1F:
-				out("snderr \$".fmthexnum($cmdid));
+				out("snderr \$".fmthexnum($cmd));
 				$incPtr = false;
 				break;
 			case 0x03:
@@ -129,10 +129,10 @@ for ($chnum = $i = 0; $i < count($asmfile);) {
 				break;
 			case 0x07:
 				$timerId = getdb($i++);
-				$timerVal = getdb($i++);
+				$timerVal = hexdec(getdb($i++));
 				$ptrLow = getdb($i++);
 				$ptrHigh = getdb($i);
-				out("sndloopcnt \${$timerId}, \${$timerVal}, \${$ptrHigh}{$ptrLow} ; L1F{$ptrHigh}{$ptrLow}"); 
+				out("sndloopcnt \${$timerId}, {$timerVal}, \${$ptrHigh}{$ptrLow} ; L1F{$ptrHigh}{$ptrLow}"); 
 				break;
 			case 0x08:
 				$x = hexdec(getdb($i));
@@ -142,16 +142,16 @@ for ($chnum = $i = 0; $i < count($asmfile);) {
 				out("snd_UNUSED_nr10 $time, $inc, $num");
 				break;
 			case 0x09:
-				$val = hexdec(getdb($i));
+				$val = getdb($i);
 				out("sndenach ".generate_const_label($val, $nr51));
 				break;
 			case 0x0C:
 				$ptrLow = getdb($i++);
 				$ptrHigh = getdb($i);
-				out("sndpush \${$ptrHigh}{$ptrLow} ; L1F{$ptrHigh}{$ptrLow}"); 
+				out("sndcall \${$ptrHigh}{$ptrLow} ; L1F{$ptrHigh}{$ptrLow}"); 
 				break;
 			case 0x0D:
-				out("sndpop");
+				out("sndret");
 				$incPtr = false;				
 				break;
 			case 0x0E:
@@ -212,7 +212,7 @@ for ($chnum = $i = 0; $i < count($asmfile);) {
 				$val = getdb($i);
 				if ($val == "FF")
 					$val = "SNDLEN_INFINITE";
-				out("sndlenret \$".$val);
+				out("sndlenpre \$".$val);
 				break;					
 		}
 		
@@ -227,6 +227,14 @@ for ($chnum = $i = 0; $i < count($asmfile);) {
 		$step = ($cmd >> 3) & 0b1;
 		$ratio = ($cmd) & 0b111;
 		out("sndch4 $freq, $step, $ratio");
+		
+		$newbyte = hexdec(getdb($i));
+		if ($newbyte < 0x80) {
+			$i++;
+			//--
+			out("sndlen ".$newbyte);
+			//--
+		}
 	} else if ($cmd < 0x80) {
 		// Target length only
 		out("sndlen ".$cmd);
