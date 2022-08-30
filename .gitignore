@@ -1,0 +1,25 @@
+# trash
+trash/
+
+# build output
+kof96.gb
+kof96.gbc
+kof96.map
+kof96.o
+kof96.sav
+kof96.sym
+kof96.sn*
+
+# provide your own comparision rom
+original.gb
+original.sav
+original.sym
+
+# not necessary
+tempconv.txt
+tempconv.bin
+tempconv.asm
+shell.cmd
+shell.lnk
+temp.asm
+kof96.asm
