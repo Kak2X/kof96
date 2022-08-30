@@ -1,0 +1,13881 @@
+L1E4000:;I
+	ld   sp, $DD00
+	di
+	rst  $10
+	ld   hl, wMisc_C028
+	res  1, [hl]
+	xor  a
+	ldh  [rBGP], a
+	ldh  [rOBP0], a
+	ldh  [rOBP1], a
+	ld   de, $0003
+	call L0013D3
+	call L000D96
+	call L000D9E
+	xor  a
+	ldh  [$FFE4], a
+	ldh  [$FFE2], a
+	ld   [wFieldScrollX], a
+	ld   [wFieldScrollY], a
+	call L00119E
+	ld   hl, $4F71
+	ld   de, $92F0
+	ld   b, $51
+	call CopyTiles
+	ld   hl, $5481
+	ld   de, $C1CA
+	call DecompressGFX
+	ld   hl, $C1CA
+	ld   de, $8800
+	ld   b, $78
+	call CopyTiles
+	ld   hl, $5B87
+	ld   de, $C1CA
+	call DecompressGFX
+	ld   hl, $C1CA
+	ld   de, Tiles_Begin
+	ld   b, $62
+	call CopyTiles
+	ld   hl, $C194
+	ld   de, $4F2A
+	ld   b, $15
+L1E4066:;J
+	ld   a, [de]
+	ldi  [hl], a
+	inc  de
+	dec  b
+	jp   nz, L1E4066
+	xor  a
+	ld   [$C1B3], a
+	ld   [$C1B4], a
+	ld   [$C1B5], a
+	ld   [$C1B6], a
+	ld   [$C1B1], a
+	ld   [$C1B2], a
+	call L001170
+	and  a, $1F
+	add  a, $07
+	ld   [$C1B7], a
+	call L001170
+	and  a, $1F
+	add  a, $07
+	ld   [$C1B8], a
+	ld   a, [$C163]
+	bit  1, a
+	jp   nz, L1E40FA
+	ld   a, [$C165]
+	or   a
+	jp   z, L1E40B9
+L1E40A3: db $3E;X
+L1E40A4: db $01;X
+L1E40A5: db $EA;X
+L1E40A6: db $B1;X
+L1E40A7: db $C1;X
+L1E40A8: db $21;X
+L1E40A9: db $AB;X
+L1E40AA: db $C1;X
+L1E40AB: db $11;X
+L1E40AC: db $A9;X
+L1E40AD: db $C1;X
+L1E40AE: db $FA;X
+L1E40AF: db $62;X
+L1E40B0: db $C1;X
+L1E40B1: db $CB;X
+L1E40B2: db $47;X
+L1E40B3: db $CA;X
+L1E40B4: db $EF;X
+L1E40B5: db $40;X
+L1E40B6: db $C3;X
+L1E40B7: db $CC;X
+L1E40B8: db $40;X
+L1E40B9:;J
+	ld   a, $01
+	ld   [$C1B2], a
+	ld   hl, $C1AE
+	ld   de, $C1AA
+	ld   a, [$C162]
+	bit  1, a
+	jp   z, L1E40EF
+	ld   a, [$C17F]
+	cp   $0F
+	jp   z, L1E40DC
+	cp   $10
+	jp   z, L1E40DC
+	jp   L1E4108
+L1E40DC: db $E5;X
+L1E40DD: db $21;X
+L1E40DE: db $80;X
+L1E40DF: db $C1;X
+L1E40E0: db $06;X
+L1E40E1: db $00;X
+L1E40E2: db $4F;X
+L1E40E3: db $09;X
+L1E40E4: db $7E;X
+L1E40E5: db $E1;X
+L1E40E6: db $12;X
+L1E40E7: db $22;X
+L1E40E8: db $3E;X
+L1E40E9: db $FF;X
+L1E40EA: db $22;X
+L1E40EB: db $77;X
+L1E40EC: db $C3;X
+L1E40ED: db $08;X
+L1E40EE: db $41;X
+L1E40EF:;J
+	ld   a, $FF
+	ldi  [hl], a
+	ldi  [hl], a
+	ld   [hl], a
+	call L1E4B40
+	jp   L1E4108
+L1E40FA: db $CD;X
+L1E40FB: db $B4;X
+L1E40FC: db $4E;X
+L1E40FD: db $D2;X
+L1E40FE: db $08;X
+L1E40FF: db $41;X
+L1E4100: db $3E;X
+L1E4101: db $01;X
+L1E4102: db $EA;X
+L1E4103: db $B1;X
+L1E4104: db $C1;X
+L1E4105: db $EA;X
+L1E4106: db $B2;X
+L1E4107: db $C1;X
+L1E4108:;J
+	ld   a, [$C1AB]
+	cp   $FF
+	jp   z, L1E4115
+	ld   a, $02
+	ld   [$C1B4], a
+L1E4115:;J
+	ld   a, [$C1AE]
+	cp   $FF
+	jp   z, L1E4122
+	ld   a, $02
+	ld   [$C1B5], a
+L1E4122:;J
+	call L1E4E01
+	call L001F85
+	jp   c, L1E4176
+	ld   hl, $4F51
+	call L001265
+	ld   hl, $99E1
+	ld   c, $EC
+	call L1E49DF
+	ld   hl, $99F1
+	ld   c, $EC
+	call L1E49DF
+	ld   a, [$C1AB]
+	cp   $FF
+	jp   z, L1E415A
+	ld   de, $8F80
+	ld   hl, $99E2
+	ld   c, $F8
+	call L1E4AF1
+	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
+	call L1E4BFD
+L1E415A:;J
+	ld   a, [$C1AE]
+	cp   $FF
+	jp   z, L1E427A
+	ld   de, $8FC0
+	ld   hl, $99F1
+	ld   c, $FC
+	call L1E4AF9
+	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
+	call L1E4BFD
+	jp   L1E427A
+L1E4176:;J
+	ld   hl, $4F62
+	call L001265
+	ld   hl, $99E1
+	ld   c, $EC
+	call L1E49DF
+	ld   a, [$C163]
+	bit  1, a
+	jp   nz, L1E41A0
+	ld   a, [$C165]
+	or   a
+	jp   z, L1E41A0
+L1E4193: db $FA;X
+L1E4194: db $7F;X
+L1E4195: db $C1;X
+L1E4196: db $FE;X
+L1E4197: db $0F;X
+L1E4198: db $CA;X
+L1E4199: db $B0;X
+L1E419A: db $41;X
+L1E419B: db $FE;X
+L1E419C: db $10;X
+L1E419D: db $CA;X
+L1E419E: db $B0;X
+L1E419F: db $41;X
+L1E41A0:;J
+	ld   hl, $99E3
+	ld   c, $F0
+	call L1E49DF
+	ld   hl, $99E5
+	ld   c, $F4
+	call L1E49DF
+	ld   hl, $99F1
+	ld   c, $EC
+	call L1E49DF
+	ld   a, [$C163]
+	bit  1, a
+	jp   nz, L1E41D4
+	ld   a, [$C165]
+	or   a
+	jp   nz, L1E41D4
+	ld   a, [$C17F]
+	cp   $0F
+	jp   z, L1E41E4
+	cp   $10
+	jp   z, L1E41E4
+L1E41D4:
+	ld   hl, $99EF
+	ld   c, $F0
+	call L1E49DF
+	ld   hl, $99ED
+	ld   c, $F4
+	call L1E49DF
+L1E41E4:
+	ld   a, [$C1AB]
+	cp   $FF
+	jp   z, L1E422F
+	ld   de, $8F80
+	ld   hl, $99E2
+	ld   c, $F8
+	call L1E4AF1
+	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
+	call L1E4BFD
+	ld   a, [$C1AC]
+	cp   $FF
+	jp   z, L1E422F
+	ld   de, $91F0
+	ld   hl, $99E4
+	ld   c, $1F
+	call L1E4AF1
+	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
+	call L1E4BFD
+	ld   a, [$C1AD]
+	cp   $FF
+	jp   z, L1E422F
+	ld   de, $9230
+	ld   hl, $99E6
+	ld   c, $23
+	call L1E4AF1
+	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
+	call L1E4BFD
+L1E422F:;J
+	ld   a, [$C1AE]
+	cp   $FF
+	jp   z, L1E427A
+	ld   de, $8FC0
+	ld   hl, $99F1
+	ld   c, $FC
+	call L1E4AF9
+	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
+	call L1E4BFD
+	ld   a, [$C1AF]
+	cp   $FF
+	jp   z, L1E427A
+	ld   de, $9270
+	ld   hl, $99EF
+	ld   c, $27
+	call L1E4AF9
+	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
+	call L1E4BFD
+	ld   a, [$C1B0]
+	cp   $FF
+	jp   z, L1E427A
+	ld   de, $92B0
+	ld   hl, $99ED
+	ld   c, $2B
+	call L1E4AF9
+	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
+	call L1E4BFD
+L1E427A:;J
+	call L000D86
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
+	ld   de, $60E6
+	call L000D76
+	ld   hl, $D693
+	ld   de, $D6A7
+	ld   a, [$D920]
+	bit  7, a
+	jp   nz, L1E429F
+	ld   a, $00
+	ld   [hl], a
+	ld   [de], a
+	inc  de
+	add  a, $04
+	ld   [de], a
+	jp   L1E42A7
+L1E429F:;J
+	ld   a, $10
+	ld   [hl], a
+	ld   [de], a
+	inc  de
+	add  a, $04
+	ld   [de], a
+L1E42A7:;J
+	ld   a, [$C1A9]
+	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
+	call L1E4B99
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
+	ld   de, $60E6
+	call L000D76
+	ld   hl, $D6C1
+	ld   [hl], $10
+	ld   hl, $D6D3
+	ld   de, $D6E7
+	ld   a, [$DA20]
+	bit  7, a
+	jp   nz, L1E42D7
+L1E42CC: db $3E;X
+L1E42CD: db $08;X
+L1E42CE: db $77;X
+L1E42CF: db $12;X
+L1E42D0: db $13;X
+L1E42D1: db $C6;X
+L1E42D2: db $04;X
+L1E42D3: db $12;X
+L1E42D4: db $C3;X
+L1E42D5: db $DF;X
+L1E42D6: db $42;X
+L1E42D7:;J
+	ld   a, $18
+	ld   [hl], a
+	ld   [de], a
+	inc  de
+	add  a, $04
+	ld   [de], a
+	ld   a, [$C1AA]
+	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
+	call L1E4B99
+	ld   hl, wOBJInfo2+iOBJInfo_Status
+	ld   de, $60E6
+	call L000D76
+	ld   hl, wOBJInfo2+iOBJInfo_Status
+	ld   [hl], $00
+	ld   hl, $D703
+	ld   [hl], $78
+	ld   hl, $D705
+	ld   [hl], $00
+	ld   hl, $D70D
+	ld   [hl], $0E
+	ld   hl, $D711
+	ld   [hl], $EB
+	inc  hl
+	ld   [hl], $61
+	ld   hl, wOBJInfo3+iOBJInfo_Status
+	ld   de, $60E6
+	call L000D76
+	ld   hl, wOBJInfo3+iOBJInfo_Status
+	ld   [hl], $00
+	ld   hl, $D743
+	ld   [hl], $78
+	ld   hl, $D745
+	ld   [hl], $30
+	ld   hl, $D74D
+	ld   [hl], $2A
+	ld   hl, $D751
+	ld   [hl], $EB
+	inc  hl
+	ld   [hl], $61
+	ld   hl, wOBJInfo4+iOBJInfo_Status
+	ld   de, $60E6
+	call L000D76
+	ld   hl, wOBJInfo4+iOBJInfo_Status
+	ld   [hl], $00
+	ld   hl, $D783
+	ld   [hl], $18
+	ld   hl, $D785
+	ld   [hl], $30
+	ld   hl, $D78D
+	ld   [hl], $46
+	ld   hl, $D791
+	ld   [hl], $EB
+	inc  hl
+	ld   [hl], $61
+	call L001776
+	call L0014F9
+	ld   a, [$C163]
+	bit  1, a
+	jp   z, L1E436D
+L1E4365: db $CD;X
+L1E4366: db $70;X
+L1E4367: db $11;X
+L1E4368: db $E6;X
+L1E4369: db $03;X
+L1E436A: db $EA;X
+L1E436B: db $66;X
+L1E436C: db $C1;X
+L1E436D:;J
+	ld   a, $C7
+	rst  $18
+	ei
+	call L000408
+	call L000408
+	ld   a, $74
+	ldh  [rOBP0], a
+	ld   a, $74
+	ldh  [rOBP1], a
+	ld   a, $1B
+	ldh  [rBGP], a
+	ld   a, $81
+	call HomeCall_Sound_ReqPlayExId_Stub
+	call L000408
+L1E438B:;J
+	call L00112E
+	call L1E43C2
+	call L1E43CE
+	ld   a, [$C1B4]
+	cp   $04
+	jp   nz, L1E43A7
+	ld   a, [$C1B5]
+	cp   $04
+	jp   nz, L1E43A7
+	jp   L1E43AD
+L1E43A7:;J
+	call L000408
+	jp   L1E438B
+L1E43AD:;J
+	ld   b, $3C
+L1E43AF:;J
+	call L000408
+	dec  b
+	jp   nz, L1E43AF
+	call L001F85
+	jp   nc, L00179D
+	ld   b, $1E
+	ld   hl, $626E
+	rst  $00
+L1E43C2:;C
+	ld   a, $00
+	ld   [$C1B6], a
+	ld   a, [$C1B4]
+	call L1E43DA
+	ret
+L1E43CE:;C
+	ld   a, $01
+	ld   [$C1B6], a
+	ld   a, [$C1B5]
+	call L1E43DA
+	ret
+L1E43DA:;C
+	ld   hl, $43E7
+	ld   d, $00
+	ld   e, a
+	add  hl, de
+	ld   e, [hl]
+	inc  hl
+	ld   d, [hl]
+	push de
+	pop  hl
+	jp   hl
+L1E43E7: db $62
+L1E43E8: db $44
+L1E43E9: db $EE
+L1E43EA: db $43
+L1E43EB: db $ED
+L1E43EC: db $43
+L1E43ED:;I
+	ret
+L1E43EE:;I
+	call L1E4D28
+	call L1E4D71
+	call L1E4ECD
+	jp   c, L1E4446
+	call L1E4EF2
+	jp   c, L1E4446
+	call L1E4EB4
+	jp   c, L1E4446
+	call L1E4B10
+	bit  7, a
+	jp   nz, L1E4446
+	bit  6, a
+	jp   nz, L1E441E
+	bit  4, a
+	jp   nz, L1E4446
+	bit  5, a
+	jp   nz, L1E442D
+	ret
+L1E441E:;J
+	call L1E4D79
+	call L1E4947
+	call L1E4947
+	call L1E4947
+	jp   L1E4433
+L1E442D:;J
+	call L1E4D79
+	call L1E4947
+L1E4433:;J
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E4440
+	ld   a, $00
+	ld   [$C1B4], a
+	ret
+L1E4440: db $3E;X
+L1E4441: db $00;X
+L1E4442: db $EA;X
+L1E4443: db $B5;X
+L1E4444: db $C1;X
+L1E4445: db $C9;X
+L1E4446:;J
+	call L1E4D79
+	call L1E4DB5
+	call L1E4DC8
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E445C
+	ld   a, $04
+	ld   [$C1B4], a
+	ret
+L1E445C:;J
+	ld   a, $04
+	ld   [$C1B5], a
+	ret
+L1E4462:;I
+	call L1E4785
+	call L1E4D1E
+	ret  z
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E447A
+	ld   a, [$C1B1]
+	or   a
+	jp   z, L1E4488
+L1E4477: db $C3;X
+L1E4478: db $81;X
+L1E4479: db $44;X
+L1E447A:;J
+	ld   a, [$C1B2]
+	or   a
+	jp   z, L1E4488
+	call L1E4549
+	jp   c, L1E44F4
+	ret
+L1E4488:;J
+	call L1E4B10
+	bit  7, b
+	jp   nz, L1E44CA
+	bit  6, a
+	jp   nz, L1E44B7
+	bit  4, a
+	jp   nz, L1E44F4
+	bit  3, b
+	jp   nz, L1E4513
+	bit  2, b
+	jp   nz, L1E4519
+	bit  1, b
+	jp   nz, L1E451F
+	bit  0, b
+	jp   nz, L1E4525
+	bit  5, a
+	jp   nz, L1E450F
+	call L1E452E
+	ret
+L1E44B7:;J
+	call L1E4918
+	jp   c, L1E44C4
+	call L1E4947
+	call L1E4947
+	ret
+L1E44C4:;J
+	ld   b, $1C
+	ld   hl, $4380
+	rst  $00
+L1E44CA:;J
+	bit  5, c
+	jp   nz, L1E44D3
+	call L1E4616
+	ret
+L1E44D3: db $FA;X
+L1E44D4: db $63;X
+L1E44D5: db $C1;X
+L1E44D6: db $CB;X
+L1E44D7: db $4F;X
+L1E44D8: db $CA;X
+L1E44D9: db $E1;X
+L1E44DA: db $44;X
+L1E44DB: db $21;X
+L1E44DC: db $25;X
+L1E44DD: db $C0;X
+L1E44DE: db $CB;X
+L1E44DF: db $7E;X
+L1E44E0: db $C8;X
+L1E44E1: db $FA;X
+L1E44E2: db $B6;X
+L1E44E3: db $C1;X
+L1E44E4: db $B7;X
+L1E44E5: db $C2;X
+L1E44E6: db $EE;X
+L1E44E7: db $44;X
+L1E44E8: db $3E;X
+L1E44E9: db $01;X
+L1E44EA: db $EA;X
+L1E44EB: db $B1;X
+L1E44EC: db $C1;X
+L1E44ED: db $C9;X
+L1E44EE: db $3E;X
+L1E44EF: db $01;X
+L1E44F0: db $EA;X
+L1E44F1: db $B2;X
+L1E44F2: db $C1;X
+L1E44F3: db $C9;X
+L1E44F4:;J
+	call L1E49FC
+	ld   a, [$C1B3]
+	or   a
+	ret  z
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E4509
+	ld   a, $02
+	ld   [$C1B4], a
+	ret
+L1E4509:;J
+	ld   a, $02
+	ld   [$C1B5], a
+	ret
+L1E450F:;J
+	call L1E4947
+	ret
+L1E4513:;J
+	call L1E47F6
+	jp   L1E4528
+L1E4519:;J
+	call L1E482E
+	jp   L1E4528
+L1E451F:;J
+	call L1E4866
+	jp   L1E4528
+L1E4525:;J
+	call L1E48B4
+L1E4528:;J
+	ld   a, $8E
+	call HomeCall_Sound_ReqPlayExId
+	ret
+L1E452E:;C
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E453E
+	ld   hl, $C1A9
+	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
+	jp   L1E4544
+L1E453E: db $21;X
+L1E453F: db $AA;X
+L1E4540: db $C1;X
+L1E4541: db $11;X
+L1E4542: db $C0;X
+L1E4543: db $D6;X
+L1E4544:;J
+	ld   a, [hl]
+	call L1E4B91
+	ret
+L1E4549:;C
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E4562
+L1E4550: db $01;X
+L1E4551: db $B7;X
+L1E4552: db $C1;X
+L1E4553: db $21;X
+L1E4554: db $A9;X
+L1E4555: db $C1;X
+L1E4556: db $11;X
+L1E4557: db $80;X
+L1E4558: db $D6;X
+L1E4559: db $CD;X
+L1E455A: db $86;X
+L1E455B: db $45;X
+L1E455C: db $DA;X
+L1E455D: db $85;X
+L1E455E: db $45;X
+L1E455F: db $C3;X
+L1E4560: db $71;X
+L1E4561: db $45;X
+L1E4562:;J
+	ld   bc, $C1B8
+	ld   hl, $C1AA
+	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
+	call L1E4586
+	jp   c, L1E4585
+	push af
+	call L1E4ECD
+	jp   c, L1E4580
+L1E4578: db $CD;X
+L1E4579: db $16;X
+L1E457A: db $46;X
+L1E457B: db $38;X
+L1E457C: db $03;X
+L1E457D: db $F1;X
+L1E457E: db $AF;X
+L1E457F: db $C9;X
+L1E4580:;J
+	pop  af
+	call L1E4B91
+	xor  a
+L1E4585:;J
+	ret
+L1E4586:;C
+	ld   a, [bc]
+	or   a
+	jp   z, L1E45BF
+	dec  a
+	ld   [bc], a
+L1E458D:;J
+	call L001170
+	push hl
+	ld   h, $00
+	ld   l, a
+	push hl
+	sla  l
+	rl   h
+	sla  l
+	rl   h
+	sla  l
+	rl   h
+	sla  l
+	rl   h
+	push hl
+	pop  bc
+	pop  hl
+	sla  l
+	rl   h
+	add  hl, bc
+	ld   a, h
+	pop  hl
+	push af
+	call L1E4902
+	jp   nc, L1E45BA
+	pop  af
+	jp   L1E458D
+L1E45BA:;J
+	pop  af
+	ld   [hl], a
+	scf
+	ccf
+	ret
+L1E45BF:;J
+	push de
+	push hl
+	call L001170
+	and  a, $1F
+	add  a, $07
+	ld   [bc], a
+	ld   a, [$C163]
+	bit  1, a
+	jp   nz, L1E4612
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E45E5
+L1E45D8: db $FA;X
+L1E45D9: db $65;X
+L1E45DA: db $C1;X
+L1E45DB: db $B7;X
+L1E45DC: db $CA;X
+L1E45DD: db $12;X
+L1E45DE: db $46;X
+L1E45DF: db $21;X
+L1E45E0: db $AB;X
+L1E45E1: db $C1;X
+L1E45E2: db $C3;X
+L1E45E3: db $EF;X
+L1E45E4: db $45;X
+L1E45E5:;J
+	ld   a, [$C165]
+	or   a
+	jp   nz, L1E4612
+	ld   hl, $C1AE
+	ld   a, [$C17F]
+	ld   de, $C180
+	add  a, e
+	jp   nc, L1E45FA
+L1E45F9: db $14;X
+L1E45FA:;J
+	ld   e, a
+	ldi  a, [hl]
+	cp   $FF
+	jp   z, L1E4609
+	inc  de
+	ldi  a, [hl]
+	cp   $FF
+	jp   z, L1E4609
+	inc  de
+L1E4609:;J
+	ld   a, [de]
+	pop  hl
+	pop  de
+	ld   [hl], a
+	call L1E4B91
+	scf
+	ret
+L1E4612: db $E1;X
+L1E4613: db $D1;X
+L1E4614: db $37;X
+L1E4615: db $C9;X
+L1E4616:;C
+	ld   a, [wDipSwitch]
+	bit  7, a
+	jr   z, L1E465E
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E463D
+	ld   hl, $C1A9
+	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
+	ld   b, $00
+	push de
+	push hl
+	call L1E4660
+	pop  hl
+	pop  de
+	jp   c, L1E465E
+	ld   a, $1B
+	ldh  [rOBP0], a
+	jp   L1E4653
+L1E463D: db $21;X
+L1E463E: db $AA;X
+L1E463F: db $C1;X
+L1E4640: db $11;X
+L1E4641: db $C0;X
+L1E4642: db $D6;X
+L1E4643: db $06;X
+L1E4644: db $10;X
+L1E4645: db $D5;X
+L1E4646: db $E5;X
+L1E4647: db $CD;X
+L1E4648: db $60;X
+L1E4649: db $46;X
+L1E464A: db $E1;X
+L1E464B: db $D1;X
+L1E464C: db $DA;X
+L1E464D: db $5E;X
+L1E464E: db $46;X
+L1E464F: db $3E;X
+L1E4650: db $1B;X
+L1E4651: db $E0;X
+L1E4652: db $49;X
+L1E4653:;J
+	ld   a, [hl]
+	call L1E4B91
+	ld   a, $93
+	call HomeCall_Sound_ReqPlayExId
+	xor  a
+	ret
+L1E465E:;JR
+	scf
+	ret
+L1E4660:;C
+	ld   a, [hl]
+	cp   $05
+	jp   z, L1E4672
+	cp   $0D
+	jp   z, L1E46E4
+	cp   $11
+	jp   z, L1E46AB
+	scf
+	ret
+L1E4672:;J
+	push af
+	ld   a, [wOBJInfo2+iOBJInfo_Status]
+	bit  7, a
+	jp   nz, L1E471C
+	pop  af
+	ld   c, $00
+	call L1E471F
+	cp   $0C
+	jr   z, L1E4698
+	ld   [hl], $0C
+	ld   de, wOBJInfo2+iOBJInfo_Status
+	call L1E4745
+	ld   hl, $D727
+	ld   [hl], $05
+	inc  hl
+	ld   [hl], $2D
+	jp   L1E471A
+L1E4698:;R
+	ld   [hl], $11
+	ld   de, wOBJInfo2+iOBJInfo_Status
+	call L1E4765
+	ld   hl, $D727
+	ld   [hl], $12
+	inc  hl
+	ld   [hl], $A2
+	jp   L1E471A
+L1E46AB:;J
+	push af
+	ld   a, [wOBJInfo3+iOBJInfo_Status]
+	bit  7, a
+	jp   nz, L1E471C
+	pop  af
+	ld   c, $40
+	call L1E471F
+	cp   $08
+	jr   z, L1E46D1
+	ld   [hl], $08
+	ld   de, wOBJInfo3+iOBJInfo_Status
+	call L1E4745
+	ld   hl, $D767
+	ld   [hl], $11
+	inc  hl
+	ld   [hl], $99
+	jp   L1E471A
+L1E46D1:;R
+	ld   [hl], $12
+	ld   de, wOBJInfo3+iOBJInfo_Status
+	call L1E4765
+	ld   hl, $D767
+	ld   [hl], $13
+	inc  hl
+	ld   [hl], $AB
+	jp   L1E471A
+L1E46E4:;J
+	push af
+	ld   a, [wOBJInfo4+iOBJInfo_Status]
+	bit  7, a
+	jp   nz, L1E471C
+	pop  af
+	ld   c, $80
+	call L1E471F
+	cp   $0E
+	jr   z, L1E470A
+	ld   [hl], $0E
+	ld   de, wOBJInfo4+iOBJInfo_Status
+	call L1E4745
+	ld   hl, $D7A7
+	ld   [hl], $0D
+	inc  hl
+	ld   [hl], $75
+	jp   L1E471A
+L1E470A:;R
+	ld   [hl], $13
+	ld   de, wOBJInfo4+iOBJInfo_Status
+	call L1E4765
+	ld   hl, $D7A7
+	ld   [hl], $14
+	inc  hl
+	ld   [hl], $B4
+L1E471A:;J
+	xor  a
+	ret
+L1E471C: db $F1;X
+L1E471D: db $37;X
+L1E471E: db $C9;X
+L1E471F:;C
+	ld   hl, $0000
+	add  hl, de
+	ld   [hl], $00
+	ld   hl, $0029
+	add  hl, de
+	ld   [hl], c
+	call L1E4736
+	ld   hl, $C194
+	ld   d, $00
+	ld   e, a
+	add  hl, de
+	ld   a, [hl]
+	ret
+L1E4736:;C
+	push af
+	push bc
+	push de
+	push hl
+	ld   b, a
+	ld   c, $00
+	call L1E4E6D
+	pop  hl
+	pop  de
+	pop  bc
+	pop  af
+	ret
+L1E4745:;C
+	ld   hl, $0000
+	add  hl, de
+	ld   [hl], $80
+	ld   a, b
+	ld   hl, $0001
+	add  hl, de
+	ld   [hl], a
+	ld   hl, $0013
+	add  hl, de
+	ld   [hl], $10
+	ld   hl, $0029
+	add  hl, de
+	ld   [hl], $00
+	ld   hl, $001C
+	add  hl, de
+	ld   a, [hl]
+	dec  hl
+	ld   [hl], a
+	ret
+L1E4765:;C
+	ld   hl, $0000
+	add  hl, de
+	ld   [hl], $80
+	ld   a, b
+	ld   hl, $0001
+	add  hl, de
+	ld   [hl], a
+	ld   hl, $0013
+	add  hl, de
+	ld   [hl], $00
+	ld   hl, $0029
+	add  hl, de
+	ld   [hl], $10
+	ld   hl, $001C
+	add  hl, de
+	ld   a, [hl]
+	dec  hl
+	ld   [hl], a
+	ret
+L1E4785:;C
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E4792
+	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
+	jp   L1E4795
+L1E4792:;J
+	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
+L1E4795:;J
+	ld   hl, $0000
+	add  hl, de
+	bit  7, [hl]
+	ret  nz
+	ld   hl, $0029
+	add  hl, de
+	ld   l, [hl]
+	ld   h, $00
+	ld   de, wOBJInfo2+iOBJInfo_Status
+	add  hl, de
+	push hl
+	pop  de
+	ld   hl, $0000
+	add  hl, de
+	bit  7, [hl]
+	ret  z
+	ld   hl, $0013
+	add  hl, de
+	ld   a, [hl]
+	ld   hl, $0029
+	add  hl, de
+	cp   a, [hl]
+	jp   nz, L1E47F0
+	ld   hl, $001B
+	add  hl, de
+	ld   a, [hl]
+	or   a
+	jp   nz, L1E47F0
+	ld   hl, $0027
+	add  hl, de
+	ld   b, [hl]
+	inc  hl
+	ld   c, [hl]
+	push de
+	call L1E4E50
+	pop  de
+	ld   hl, $0000
+	add  hl, de
+	ld   [hl], $00
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E47E5
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
+	jp   L1E47E8
+L1E47E5: db $21;X
+L1E47E6: db $C0;X
+L1E47E7: db $D6;X
+L1E47E8:;J
+	ld   [hl], $80
+	ld   a, $A6
+	call HomeCall_Sound_ReqPlayExId
+	ret
+L1E47F0:;J
+	push de
+	pop  hl
+	call L000C11
+	ret
+L1E47F6:;C
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E4809
+	ld   hl, $C1A9
+	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
+	call L1E4816
+	jp   L1E4812
+L1E4809: db $21;X
+L1E480A: db $AA;X
+L1E480B: db $C1;X
+L1E480C: db $11;X
+L1E480D: db $C0;X
+L1E480E: db $D6;X
+L1E480F: db $CD;X
+L1E4810: db $16;X
+L1E4811: db $48;X
+L1E4812:;J
+	call L1E4B91
+	ret
+L1E4816:;C
+	ld   a, [hl]
+L1E4817:;J
+	add  a, $06
+	cp   $12
+	jp   c, L1E4820
+	sub  a, $12
+L1E4820:;J
+	push af
+	call L1E4902
+	jp   nc, L1E482B
+	pop  af
+	jp   L1E4817
+L1E482B:;J
+	pop  af
+	ld   [hl], a
+	ret
+L1E482E:;C
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E4841
+	ld   hl, $C1A9
+	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
+	call L1E484E
+	jp   L1E484A
+L1E4841: db $21;X
+L1E4842: db $AA;X
+L1E4843: db $C1;X
+L1E4844: db $11;X
+L1E4845: db $C0;X
+L1E4846: db $D6;X
+L1E4847: db $CD;X
+L1E4848: db $4E;X
+L1E4849: db $48;X
+L1E484A:;J
+	call L1E4B91
+	ret
+L1E484E:;C
+	ld   a, [hl]
+L1E484F:;J
+	sub  a, $06
+	bit  7, a
+	jp   z, L1E4858
+	add  a, $12
+L1E4858:;J
+	push af
+	call L1E4902
+	jp   nc, L1E4863
+	pop  af
+	jp   L1E484F
+L1E4863:;J
+	pop  af
+	ld   [hl], a
+	ret
+L1E4866:;C
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E4879
+	ld   hl, $C1A9
+	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
+	call L1E4886
+	jp   L1E4882
+L1E4879: db $21;X
+L1E487A: db $AA;X
+L1E487B: db $C1;X
+L1E487C: db $11;X
+L1E487D: db $C0;X
+L1E487E: db $D6;X
+L1E487F: db $CD;X
+L1E4880: db $86;X
+L1E4881: db $48;X
+L1E4882:;J
+	call L1E4B91
+	ret
+L1E4886:;C
+	ld   a, [hl]
+L1E4887:;J
+	cp   $00
+	jp   z, L1E489F
+	cp   $06
+	jp   z, L1E489F
+	cp   $0C
+	jp   z, L1E489F
+	cp   $0F
+	jp   z, L1E48A4
+	dec  a
+	jp   L1E48A6
+L1E489F:;J
+	add  a, $05
+	jp   L1E48A6
+L1E48A4:;J
+	sub  a, $02
+L1E48A6:;J
+	push af
+	call L1E4902
+	jp   nc, L1E48B1
+	pop  af
+	jp   L1E4887
+L1E48B1:;J
+	pop  af
+	ld   [hl], a
+	ret
+L1E48B4:;C
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E48C7
+	ld   hl, $C1A9
+	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
+	call L1E48D4
+	jp   L1E48D0
+L1E48C7: db $21;X
+L1E48C8: db $AA;X
+L1E48C9: db $C1;X
+L1E48CA: db $11;X
+L1E48CB: db $C0;X
+L1E48CC: db $D6;X
+L1E48CD: db $CD;X
+L1E48CE: db $D4;X
+L1E48CF: db $48;X
+L1E48D0:;J
+	call L1E4B91
+	ret
+L1E48D4:;C
+	ld   a, [hl]
+L1E48D5:;J
+	cp   $05
+	jp   z, L1E48ED
+	cp   $0B
+	jp   z, L1E48ED
+	cp   $11
+	jp   z, L1E48ED
+	cp   $0E
+	jp   z, L1E48F2
+	inc  a
+	jp   L1E48F4
+L1E48ED:;J
+	sub  a, $05
+	jp   L1E48F4
+L1E48F2:;J
+	add  a, $02
+L1E48F4:;J
+	push af
+	call L1E4902
+	jp   nc, L1E48FF
+	pop  af
+	jp   L1E48D5
+L1E48FF:;J
+	pop  af
+	ld   [hl], a
+	ret
+L1E4902:;C
+	push hl
+	ld   hl, $C194
+	add  a, L
+	jp   nc, L1E490B
+L1E490A: db $24;X
+L1E490B:;J
+	ld   l, a
+	ld   a, [hl]
+	cp   $FF
+	jp   nz, L1E4915
+	pop  hl
+	scf
+	ret
+L1E4915:;J
+	pop  hl
+	xor  a
+	ret
+L1E4918:;C
+	ld   a, [$C163]
+	bit  1, a
+	jr   z, L1E4928
+L1E491F: db $21;X
+L1E4920: db $25;X
+L1E4921: db $C0;X
+L1E4922: db $CB;X
+L1E4923: db $7E;X
+L1E4924: db $28;X
+L1E4925: db $1D;X
+L1E4926: db $18;X
+L1E4927: db $07;X
+L1E4928:;R
+	ld   a, [$C17F]
+	or   a
+	jp   nz, L1E4943
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E493B
+	ld   hl, $C1AB
+	jr   L1E493E
+L1E493B: db $21;X
+L1E493C: db $AE;X
+L1E493D: db $C1;X
+L1E493E:;R
+	ld   a, [hl]
+	cp   $FF
+	jr   z, L1E4945
+L1E4943:;J
+	xor  a
+	ret
+L1E4945:;R
+	scf
+	ret
+L1E4947:;C
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E495D
+	ld   de, $C1AD
+	call L1E496A
+	jp   c, L1E4969
+	call L1E4997
+	jp   L1E4969
+L1E495D: db $11;X
+L1E495E: db $B0;X
+L1E495F: db $C1;X
+L1E4960: db $CD;X
+L1E4961: db $6A;X
+L1E4962: db $49;X
+L1E4963: db $DA;X
+L1E4964: db $69;X
+L1E4965: db $49;X
+L1E4966: db $CD;X
+L1E4967: db $BB;X
+L1E4968: db $49;X
+L1E4969:;J
+	ret
+L1E496A:;C
+	call L001F85
+	jp   c, L1E497B
+	ld   b, $00
+	push de
+	pop  hl
+	dec  hl
+	dec  hl
+	ld   a, $FF
+	jp   L1E498D
+L1E497B:;J
+	ld   b, $02
+	push de
+	pop  hl
+	ld   a, $FF
+	cp   a, [hl]
+	jp   nz, L1E4993
+	dec  b
+	dec  hl
+	cp   a, [hl]
+	jp   nz, L1E4993
+	dec  b
+	dec  hl
+L1E498D:;J
+	cp   a, [hl]
+	jp   nz, L1E4993
+	scf
+	ret
+L1E4993:;J
+	ld   [hl], $FF
+	xor  a
+	ret
+L1E4997:;C
+	ld   a, b
+	cp   $01
+	jp   z, L1E49AA
+	cp   $02
+	jp   z, L1E49B2
+	ld   hl, $99E1
+	ld   c, $EC
+	jp   L1E49B7
+L1E49AA:;J
+	ld   hl, $99E3
+	ld   c, $F0
+	jp   L1E49B7
+L1E49B2:;J
+	ld   hl, $99E5
+	ld   c, $F4
+L1E49B7:;J
+	call L1E49DF
+	ret
+L1E49BB: db $78;X
+L1E49BC: db $FE;X
+L1E49BD: db $01;X
+L1E49BE: db $CA;X
+L1E49BF: db $CE;X
+L1E49C0: db $49;X
+L1E49C1: db $FE;X
+L1E49C2: db $02;X
+L1E49C3: db $CA;X
+L1E49C4: db $D6;X
+L1E49C5: db $49;X
+L1E49C6: db $21;X
+L1E49C7: db $F1;X
+L1E49C8: db $99;X
+L1E49C9: db $0E;X
+L1E49CA: db $EC;X
+L1E49CB: db $C3;X
+L1E49CC: db $DB;X
+L1E49CD: db $49;X
+L1E49CE: db $21;X
+L1E49CF: db $EF;X
+L1E49D0: db $99;X
+L1E49D1: db $0E;X
+L1E49D2: db $F0;X
+L1E49D3: db $C3;X
+L1E49D4: db $DB;X
+L1E49D5: db $49;X
+L1E49D6: db $21;X
+L1E49D7: db $ED;X
+L1E49D8: db $99;X
+L1E49D9: db $0E;X
+L1E49DA: db $F4;X
+L1E49DB: db $CD;X
+L1E49DC: db $DF;X
+L1E49DD: db $49;X
+L1E49DE: db $C9;X
+L1E49DF:;JC
+	ldh  a, [rSTAT]
+	bit  1, a
+	jp   nz, L1E49DF
+	ld   a, c
+	ldi  [hl], a
+	inc  a
+	ldd  [hl], a
+	inc  a
+	ld   de, $0020
+	add  hl, de
+	push af
+L1E49F0:;J
+	ldh  a, [rSTAT]
+	bit  1, a
+	jp   nz, L1E49F0
+	pop  af
+	ldi  [hl], a
+	inc  a
+	ld   [hl], a
+	ret
+L1E49FC:;C
+	ld   a, $00
+	ld   [$C1B3], a
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E4A20
+	ld   de, $C1AB
+	ld   a, [$C1A9]
+	ld   c, a
+	call L1E4A36
+	jp   c, L1E4A35
+	call L1E4A91
+	ld   a, $8F
+	call HomeCall_Sound_ReqPlayExId
+	jp   L1E4A35
+L1E4A20:;J
+	ld   de, $C1AE
+	ld   a, [$C1AA]
+	ld   c, a
+	call L1E4A36
+	jp   c, L1E4A35
+	call L1E4AC1
+	ld   a, $8F
+	call HomeCall_Sound_ReqPlayExId
+L1E4A35:;J
+	ret
+L1E4A36:;C
+	ld   a, c
+	call L1E4B01
+	ld   c, a
+	call L001F85
+	jp   nc, L1E4A5D
+	ld   a, [wDipSwitch]
+	bit  5, a
+	jp   nz, L1E4A70
+	ld   a, c
+	push de
+	pop  hl
+	cp   a, [hl]
+	jp   z, L1E4A8F
+	inc  hl
+	cp   a, [hl]
+	jp   z, L1E4A8F
+	inc  hl
+	cp   a, [hl]
+	jp   z, L1E4A8F
+	jp   L1E4A70
+L1E4A5D:;J
+	ld   b, $00
+	ld   a, $FF
+	push de
+	pop  hl
+	cp   a, [hl]
+	jp   nz, L1E4A8F
+	ld   a, c
+	ld   [hl], a
+	ld   a, $FF
+	ld   [$C1B3], a
+	xor  a
+	ret
+L1E4A70:;J
+	ld   b, $00
+	ld   a, $FF
+	push de
+	pop  hl
+	cp   a, [hl]
+	jp   z, L1E4A8B
+	inc  hl
+	inc  b
+	cp   a, [hl]
+	jp   z, L1E4A8B
+	inc  hl
+	inc  b
+	cp   a, [hl]
+	jp   nz, L1E4A8F
+	ld   a, $FF
+	ld   [$C1B3], a
+L1E4A8B:;J
+	ld   a, c
+	ld   [hl], a
+	xor  a
+	ret
+L1E4A8F:;J
+	scf
+	ret
+L1E4A91:;C
+	ld   a, b
+	cp   $01
+	jp   z, L1E4AA8
+	cp   $02
+	jp   z, L1E4AB4
+	ld   a, c
+	ld   de, $8F80
+	ld   hl, $99E2
+	ld   c, $F8
+	jp   L1E4ABD
+L1E4AA8:;J
+	ld   a, c
+	ld   de, $91F0
+	ld   hl, $99E4
+	ld   c, $1F
+	jp   L1E4ABD
+L1E4AB4:;J
+	ld   a, c
+	ld   de, $9230
+	ld   hl, $99E6
+	ld   c, $23
+L1E4ABD:;J
+	call L1E4AF1
+	ret
+L1E4AC1:;C
+	ld   a, b
+	cp   $01
+	jp   z, L1E4AD8
+	cp   $02
+	jp   z, L1E4AE4
+	ld   a, c
+	ld   de, $8FC0
+	ld   hl, $99F1
+	ld   c, $FC
+	jp   L1E4AED
+L1E4AD8:;J
+	ld   a, c
+	ld   de, $9270
+	ld   hl, $99EF
+	ld   c, $27
+	jp   L1E4AED
+L1E4AE4:;J
+	ld   a, c
+	ld   de, $92B0
+	ld   hl, $99ED
+	ld   c, $2B
+L1E4AED:;J
+	call L1E4AF9
+	ret
+L1E4AF1:;C
+	push af
+	sla  a
+	call L001FAC
+	pop  af
+	ret
+L1E4AF9:;C
+	push af
+	sla  a
+	call L001FE7
+	pop  af
+	ret
+L1E4B01:;C
+	push hl
+	push de
+	ld   hl, $C194
+	ld   d, $00
+	ld   e, a
+	add  hl, de
+	ld   a, [hl]
+	and  a, $3F
+	pop  de
+	pop  hl
+	ret
+L1E4B10:;C
+	ld   a, [$C1B6]
+	cp   $00
+	jp   nz, L1E4B1E
+	ld   hl, $FF98
+	jp   L1E4B21
+L1E4B1E: db $21;X
+L1E4B1F: db $AB;X
+L1E4B20: db $FF;X
+L1E4B21:;J
+	ld   c, [hl]
+	inc  hl
+	ld   a, [hl]
+	push af
+	push bc
+	inc  hl
+	inc  hl
+	ld   b, $00
+	ld   c, $08
+L1E4B2C:;J
+	ldi  a, [hl]
+	inc  hl
+	cp   $01
+	jp   nz, L1E4B35
+	set  7, b
+L1E4B35:;J
+	rlc  b
+	dec  c
+	jp   nz, L1E4B2C
+	ld   d, b
+	pop  bc
+	ld   b, d
+	pop  af
+	ret
+L1E4B40:;C
+	ld   hl, $C180
+	ld   b, $0F
+L1E4B45:;J
+	ldi  a, [hl]
+	push bc
+	push hl
+	call L1E4B52
+	pop  hl
+	pop  bc
+	dec  b
+	jp   nz, L1E4B45
+	ret
+L1E4B52:;C
+	bit  7, a
+	ret  z
+	and  a, $7F
+	sla  a
+	ld   de, $4B6D
+	ld   h, $00
+	ld   l, a
+	add  hl, de
+	ld   e, [hl]
+	inc  hl
+	ld   d, [hl]
+	ld   hl, $5FC5
+	ld   bc, $6056
+	call L000E98
+	ret
+L1E4B6D: db $F0
+L1E4B6E: db $92
+L1E4B6F: db $80
+L1E4B70: db $93
+L1E4B71: db $10
+L1E4B72: db $94
+L1E4B73: db $A0
+L1E4B74: db $94
+L1E4B75: db $30
+L1E4B76: db $95
+L1E4B77: db $C0
+L1E4B78: db $95
+L1E4B79: db $50
+L1E4B7A: db $96
+L1E4B7B: db $E0
+L1E4B7C: db $96
+L1E4B7D: db $70
+L1E4B7E: db $97
+L1E4B7F: db $00
+L1E4B80: db $88
+L1E4B81: db $90
+L1E4B82: db $88
+L1E4B83: db $20
+L1E4B84: db $89
+L1E4B85: db $B0
+L1E4B86: db $89
+L1E4B87: db $40
+L1E4B88: db $8A
+L1E4B89: db $D0;X
+L1E4B8A: db $8A;X
+L1E4B8B: db $60;X
+L1E4B8C: db $8B;X
+L1E4B8D: db $F0;X
+L1E4B8E: db $8B;X
+L1E4B8F: db $80
+L1E4B90: db $8C
+L1E4B91:;C
+	push af
+	call L1E4B01
+	call L1E4BFD
+	pop  af
+L1E4B99:;C
+	cp   $0E
+	jp   z, L1E4BAC
+	cp   $0F
+	jp   z, L1E4BAC
+	push af
+	ld   hl, $0027
+	add  hl, de
+	ld   a, [hl]
+	jp   L1E4BB2
+L1E4BAC:;J
+	push af
+	ld   hl, $0028
+	add  hl, de
+	ld   a, [hl]
+L1E4BB2:;J
+	ld   hl, $0013
+	add  hl, de
+	ld   [hl], a
+	pop  af
+	push bc
+	sla  a
+	ld   bc, $4BD3
+	ld   h, $00
+	ld   l, a
+	add  hl, bc
+	push hl
+	pop  bc
+	ld   hl, $0003
+	add  hl, de
+	ld   a, [bc]
+	ld   [hl], a
+	inc  bc
+	ld   hl, $0005
+	add  hl, de
+	ld   a, [bc]
+	ld   [hl], a
+	pop  bc
+	ret
+L1E4BD3: db $00
+L1E4BD4: db $00
+L1E4BD5: db $18
+L1E4BD6: db $00
+L1E4BD7: db $30
+L1E4BD8: db $00
+L1E4BD9: db $48
+L1E4BDA: db $00
+L1E4BDB: db $60
+L1E4BDC: db $00
+L1E4BDD: db $78
+L1E4BDE: db $00
+L1E4BDF: db $00
+L1E4BE0: db $18
+L1E4BE1: db $18
+L1E4BE2: db $18
+L1E4BE3: db $30
+L1E4BE4: db $18
+L1E4BE5: db $48
+L1E4BE6: db $18
+L1E4BE7: db $60
+L1E4BE8: db $18
+L1E4BE9: db $78
+L1E4BEA: db $18
+L1E4BEB: db $00
+L1E4BEC: db $30
+L1E4BED: db $18
+L1E4BEE: db $30
+L1E4BEF: db $30
+L1E4BF0: db $30
+L1E4BF1: db $30
+L1E4BF2: db $30
+L1E4BF3: db $60
+L1E4BF4: db $30
+L1E4BF5: db $78
+L1E4BF6: db $30
+L1E4BF7: db $78;X
+L1E4BF8: db $00;X
+L1E4BF9: db $78;X
+L1E4BFA: db $30;X
+L1E4BFB: db $18;X
+L1E4BFC: db $30;X
+L1E4BFD:;C
+	push af
+	push de
+	ld   b, a
+	ld   a, $80
+	cp   a, e
+	jp   nz, L1E4C17
+	push bc
+	ld   hl, $4C96
+	ld   de, $99A1
+	call L001269
+	pop  bc
+	ld   de, $99A1
+	jp   L1E4C31
+L1E4C17:;J
+	push bc
+	ld   hl, $4C96
+	ld   de, $99AB
+	call L001269
+	pop  bc
+	push bc
+	ld   a, b
+	sla  a
+	ld   bc, $4C46
+	ld   h, $00
+	ld   l, a
+	add  hl, bc
+	ld   e, [hl]
+	inc  hl
+	ld   d, [hl]
+	pop  bc
+L1E4C31:;J
+	ld   a, b
+	sla  a
+	ld   bc, $4C6E
+	ld   h, $00
+	ld   l, a
+	add  hl, bc
+	ld   c, [hl]
+	inc  hl
+	ld   b, [hl]
+	push bc
+	pop  hl
+	call L001269
+	pop  de
+	pop  af
+	ret
+L1E4C46: db $B0
+L1E4C47: db $99
+L1E4C48: db $AD
+L1E4C49: db $99
+L1E4C4A: db $AE
+L1E4C4B: db $99
+L1E4C4C: db $AF
+L1E4C4D: db $99
+L1E4C4E: db $B0
+L1E4C4F: db $99
+L1E4C50: db $AD
+L1E4C51: db $99
+L1E4C52: db $AD
+L1E4C53: db $99
+L1E4C54: db $B0
+L1E4C55: db $99
+L1E4C56: db $AE
+L1E4C57: db $99
+L1E4C58: db $AE
+L1E4C59: db $99
+L1E4C5A: db $AC
+L1E4C5B: db $99
+L1E4C5C: db $AE
+L1E4C5D: db $99
+L1E4C5E: db $AF
+L1E4C5F: db $99
+L1E4C60: db $AD
+L1E4C61: db $99
+L1E4C62: db $AC
+L1E4C63: db $99
+L1E4C64: db $AC
+L1E4C65: db $99
+L1E4C66: db $AB
+L1E4C67: db $99
+L1E4C68: db $AE;X
+L1E4C69: db $99;X
+L1E4C6A: db $AD;X
+L1E4C6B: db $99;X
+L1E4C6C: db $AD;X
+L1E4C6D: db $99;X
+L1E4C6E: db $9F
+L1E4C6F: db $4C
+L1E4C70: db $A3
+L1E4C71: db $4C
+L1E4C72: db $AA
+L1E4C73: db $4C
+L1E4C74: db $B0
+L1E4C75: db $4C
+L1E4C76: db $B5
+L1E4C77: db $4C
+L1E4C78: db $B9
+L1E4C79: db $4C
+L1E4C7A: db $C0
+L1E4C7B: db $4C
+L1E4C7C: db $C7
+L1E4C7D: db $4C
+L1E4C7E: db $CB
+L1E4C7F: db $4C
+L1E4C80: db $D1
+L1E4C81: db $4C
+L1E4C82: db $D7
+L1E4C83: db $4C
+L1E4C84: db $DF
+L1E4C85: db $4C
+L1E4C86: db $E5
+L1E4C87: db $4C
+L1E4C88: db $EA
+L1E4C89: db $4C
+L1E4C8A: db $F1
+L1E4C8B: db $4C
+L1E4C8C: db $F9
+L1E4C8D: db $4C
+L1E4C8E: db $01
+L1E4C8F: db $4D
+L1E4C90: db $0A
+L1E4C91: db $4D
+L1E4C92: db $10
+L1E4C93: db $4D
+L1E4C94: db $17
+L1E4C95: db $4D
+L1E4C96: db $08
+L1E4C97: db $20
+L1E4C98: db $20
+L1E4C99: db $20
+L1E4C9A: db $20
+L1E4C9B: db $20
+L1E4C9C: db $20
+L1E4C9D: db $20
+L1E4C9E: db $20
+L1E4C9F: db $03
+L1E4CA0: db $4B
+L1E4CA1: db $59
+L1E4CA2: db $4F
+L1E4CA3: db $06
+L1E4CA4: db $44
+L1E4CA5: db $41
+L1E4CA6: db $49
+L1E4CA7: db $4D
+L1E4CA8: db $4F
+L1E4CA9: db $4E
+L1E4CAA: db $05
+L1E4CAB: db $54
+L1E4CAC: db $45
+L1E4CAD: db $52
+L1E4CAE: db $52
+L1E4CAF: db $59
+L1E4CB0: db $04
+L1E4CB1: db $41
+L1E4CB2: db $4E
+L1E4CB3: db $44
+L1E4CB4: db $59
+L1E4CB5: db $03
+L1E4CB6: db $52
+L1E4CB7: db $59
+L1E4CB8: db $4F
+L1E4CB9: db $06
+L1E4CBA: db $52
+L1E4CBB: db $4F
+L1E4CBC: db $42
+L1E4CBD: db $45
+L1E4CBE: db $52
+L1E4CBF: db $54
+L1E4CC0: db $06
+L1E4CC1: db $41
+L1E4CC2: db $54
+L1E4CC3: db $48
+L1E4CC4: db $45
+L1E4CC5: db $4E
+L1E4CC6: db $41
+L1E4CC7: db $03
+L1E4CC8: db $4D
+L1E4CC9: db $41
+L1E4CCA: db $49
+L1E4CCB: db $05
+L1E4CCC: db $4C
+L1E4CCD: db $45
+L1E4CCE: db $4F
+L1E4CCF: db $4E
+L1E4CD0: db $41
+L1E4CD1: db $05
+L1E4CD2: db $47
+L1E4CD3: db $45
+L1E4CD4: db $45
+L1E4CD5: db $53
+L1E4CD6: db $45
+L1E4CD7: db $07
+L1E4CD8: db $4B
+L1E4CD9: db $52
+L1E4CDA: db $41
+L1E4CDB: db $55
+L1E4CDC: db $53
+L1E4CDD: db $45
+L1E4CDE: db $52
+L1E4CDF: db $05
+L1E4CE0: db $4D
+L1E4CE1: db $40
+L1E4CE2: db $42
+L1E4CE3: db $49
+L1E4CE4: db $47
+L1E4CE5: db $04
+L1E4CE6: db $49
+L1E4CE7: db $4F
+L1E4CE8: db $52
+L1E4CE9: db $49
+L1E4CEA: db $06
+L1E4CEB: db $4D
+L1E4CEC: db $41
+L1E4CED: db $54
+L1E4CEE: db $55
+L1E4CEF: db $52
+L1E4CF0: db $45
+L1E4CF1: db $07
+L1E4CF2: db $43
+L1E4CF3: db $48
+L1E4CF4: db $49
+L1E4CF5: db $5A
+L1E4CF6: db $55
+L1E4CF7: db $52
+L1E4CF8: db $55
+L1E4CF9: db $07
+L1E4CFA: db $47
+L1E4CFB: db $4F
+L1E4CFC: db $45
+L1E4CFD: db $4E
+L1E4CFE: db $49
+L1E4CFF: db $54
+L1E4D00: db $5A
+L1E4D01: db $08
+L1E4D02: db $4D
+L1E4D03: db $40
+L1E4D04: db $4B
+L1E4D05: db $41
+L1E4D06: db $52
+L1E4D07: db $41
+L1E4D08: db $54
+L1E4D09: db $45
+L1E4D0A: db $05
+L1E4D0B: db $49
+L1E4D0C: db $4F
+L1E4D0D: db $52
+L1E4D0E: db $49
+L1E4D0F: db $60
+L1E4D10: db $06
+L1E4D11: db $4C
+L1E4D12: db $45
+L1E4D13: db $4F
+L1E4D14: db $4E
+L1E4D15: db $41
+L1E4D16: db $60
+L1E4D17: db $06
+L1E4D18: db $4B
+L1E4D19: db $41
+L1E4D1A: db $47
+L1E4D1B: db $55
+L1E4D1C: db $52
+L1E4D1D: db $41
+L1E4D1E:;C
+	ld   a, [wTimer]
+	and  a, $07
+	srl  a
+	jp   L1E4D31
+L1E4D28:;C
+	ld   a, [wTimer]
+	and  a, $0F
+	srl  a
+	srl  a
+L1E4D31:;J
+	cp   $01
+	jp   z, L1E4D45
+	cp   $02
+	jp   z, L1E4D4A
+	cp   $03
+	jp   z, L1E4D4F
+	ld   a, $3C
+	jp   L1E4D51
+L1E4D45:;J
+	ld   a, $34
+	jp   L1E4D51
+L1E4D4A:;J
+	ld   a, $F0
+	jp   L1E4D51
+L1E4D4F:;J
+	ld   a, $F4
+L1E4D51:;J
+	ld   hl, $C1B6
+	bit  0, [hl]
+	jp   nz, L1E4D65
+	push af
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_Status]
+	ld   b, a
+	pop  af
+	bit  7, b
+	ret  z
+	ldh  [rOBP0], a
+	ret
+L1E4D65:;J
+	push af
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_Status]
+	ld   b, a
+	pop  af
+	bit  7, b
+	ret  z
+	ldh  [rOBP1], a
+	ret
+L1E4D71:;C
+	ld   a, [wTimer]
+	bit  3, a
+	jp   nz, L1E4D91
+L1E4D79:;C
+	ld   hl, $4DAF
+	ld   a, [$C1B6]
+	bit  0, a
+	jp   nz, L1E4D8A
+	ld   de, $9A21
+	jp   L1E4D8D
+L1E4D8A:;J
+	ld   de, $9A2E
+L1E4D8D:;J
+	call L001269
+	ret
+L1E4D91:;J
+	ld   hl, $4DA9
+	ld   a, [$C1B6]
+	bit  0, a
+	jp   nz, L1E4DA2
+	ld   de, $9A21
+	jp   L1E4DA5
+L1E4DA2:;J
+	ld   de, $9A2E
+L1E4DA5:;J
+	call L001269
+	ret
+L1E4DA9: db $05
+L1E4DAA: db $53
+L1E4DAB: db $54
+L1E4DAC: db $41
+L1E4DAD: db $52
+L1E4DAE: db $54
+L1E4DAF: db $05
+L1E4DB0: db $20
+L1E4DB1: db $20
+L1E4DB2: db $20
+L1E4DB3: db $20
+L1E4DB4: db $20
+L1E4DB5:;C
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E4DC2
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
+	res  7, [hl]
+	ret
+L1E4DC2:;J
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
+	res  7, [hl]
+	ret
+L1E4DC8:;C
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E4DE0
+	ld   de, $C1AB
+	ld   a, [de]
+	sla  a
+	ld   hl, $D92C
+	ld   [hl], a
+	ld   hl, $D92E
+	ld   [hl], a
+	jp   L1E4DEE
+L1E4DE0:;J
+	ld   de, $C1AE
+	ld   a, [de]
+	sla  a
+	ld   hl, $DA2C
+	ld   [hl], a
+	ld   hl, $DA2E
+	ld   [hl], a
+L1E4DEE:;J
+	inc  hl
+	inc  de
+	ld   b, $02
+L1E4DF2:;J
+	ld   a, [de]
+	cp   $FF
+	jr   z, L1E4DF9
+	sla  a
+L1E4DF9:;R
+	ld   [hl], a
+	inc  hl
+	inc  de
+	dec  b
+	jp   nz, L1E4DF2
+	ret
+L1E4E01:;C
+	ld   b, $00
+	ld   c, $00
+L1E4E05:;J
+	ld   a, b
+	cp   $0E
+	jp   z, L1E4E13
+	cp   $0F
+	jp   z, L1E4E13
+	jp   L1E4E26
+L1E4E13:;J
+	ld   a, [wDipSwitch]
+	bit  7, a
+	jp   nz, L1E4E3F
+	ld   a, $FF
+	ld   [$C1A2], a
+	ld   [$C1A3], a
+	jp   L1E4E44
+L1E4E26:;J
+	ld   a, b
+	cp   $10
+	jp   z, L1E4E2F
+	jp   L1E4E3F
+L1E4E2F:;J
+	ld   a, [wDipSwitch]
+	bit  6, a
+	jp   nz, L1E4E3F
+	ld   a, $FF
+	ld   [$C1A4], a
+	jp   L1E4E44
+L1E4E3F:;J
+	push bc
+	call L1E4E50
+	pop  bc
+L1E4E44:;J
+	ld   a, $09
+	add  c
+	ld   c, a
+	inc  b
+	ld   a, b
+	cp   $12
+	jp   nz, L1E4E05
+	ret
+L1E4E50:;C
+	ld   hl, $4E8A
+	ld   a, b
+	sla  a
+	add  a, L
+	jp   nc, L1E4E5B
+L1E4E5A: db $24;X
+L1E4E5B:;J
+	ld   l, a
+	ld   e, [hl]
+	inc  hl
+	ld   d, [hl]
+	push de
+	pop  hl
+	ld   de, $4F3F
+	ld   a, c
+	ld   b, $03
+	ld   c, $03
+	call L000DC2
+	ret
+L1E4E6D:;C
+	ld   hl, $4E8A
+	ld   a, b
+	sla  a
+	add  a, L
+	jp   nc, L1E4E78
+L1E4E77: db $24;X
+L1E4E78:;J
+	ld   l, a
+	ld   e, [hl]
+	inc  hl
+	ld   d, [hl]
+	push de
+	pop  hl
+	ld   de, $4F48
+	ld   a, c
+	ld   b, $03
+	ld   c, $03
+	call L000DC2
+	ret
+L1E4E8A: db $61
+L1E4E8B: db $98
+L1E4E8C: db $64
+L1E4E8D: db $98
+L1E4E8E: db $67
+L1E4E8F: db $98
+L1E4E90: db $6A
+L1E4E91: db $98
+L1E4E92: db $6D
+L1E4E93: db $98
+L1E4E94: db $70
+L1E4E95: db $98
+L1E4E96: db $C1
+L1E4E97: db $98
+L1E4E98: db $C4
+L1E4E99: db $98
+L1E4E9A: db $C7
+L1E4E9B: db $98
+L1E4E9C: db $CA
+L1E4E9D: db $98
+L1E4E9E: db $CD
+L1E4E9F: db $98
+L1E4EA0: db $D0
+L1E4EA1: db $98
+L1E4EA2: db $21
+L1E4EA3: db $99
+L1E4EA4: db $24
+L1E4EA5: db $99
+L1E4EA6: db $27
+L1E4EA7: db $99
+L1E4EA8: db $2A
+L1E4EA9: db $99
+L1E4EAA: db $2D
+L1E4EAB: db $99
+L1E4EAC: db $30
+L1E4EAD: db $99
+L1E4EAE: db $70
+L1E4EAF: db $98
+L1E4EB0: db $30
+L1E4EB1: db $99
+L1E4EB2: db $24
+L1E4EB3: db $99
+L1E4EB4:;C
+	ld   a, [$C163]
+	bit  1, a
+	jp   z, L1E4ECA
+L1E4EBC: db $FA;X
+L1E4EBD: db $20;X
+L1E4EBE: db $D9;X
+L1E4EBF: db $47;X
+L1E4EC0: db $FA;X
+L1E4EC1: db $20;X
+L1E4EC2: db $DA;X
+L1E4EC3: db $A0;X
+L1E4EC4: db $E6;X
+L1E4EC5: db $80;X
+L1E4EC6: db $28;X
+L1E4EC7: db $02;X
+L1E4EC8: db $37;X
+L1E4EC9: db $C9;X
+L1E4ECA:;J
+	scf
+	ccf
+	ret
+L1E4ECD:;C
+	ld   a, [$C163]
+	bit  1, a
+	jp   nz, L1E4EEF
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E4EE6
+	ld   a, [$C165]
+	or   a
+	jp   z, L1E4EEF
+L1E4EE3: db $C3;X
+L1E4EE4: db $ED;X
+L1E4EE5: db $4E;X
+L1E4EE6:;J
+	ld   a, [$C165]
+	or   a
+	jp   nz, L1E4EEF
+	scf
+	ret
+L1E4EEF:;J
+	scf
+	ccf
+	ret
+L1E4EF2:;C
+	ld   a, [$C163]
+	bit  1, a
+	jp   nz, L1E4F27
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E4F13
+	ld   a, [$C165]
+	or   a
+	jp   nz, L1E4F27
+	ld   a, [$C162]
+	bit  0, a
+	jp   nz, L1E4F25
+	jp   L1E4F27
+L1E4F13: db $FA;X
+L1E4F14: db $65;X
+L1E4F15: db $C1;X
+L1E4F16: db $B7;X
+L1E4F17: db $CA;X
+L1E4F18: db $27;X
+L1E4F19: db $4F;X
+L1E4F1A: db $FA;X
+L1E4F1B: db $62;X
+L1E4F1C: db $C1;X
+L1E4F1D: db $CB;X
+L1E4F1E: db $4F;X
+L1E4F1F: db $C2;X
+L1E4F20: db $25;X
+L1E4F21: db $4F;X
+L1E4F22: db $C3;X
+L1E4F23: db $27;X
+L1E4F24: db $4F;X
+L1E4F25:;J
+	scf
+	ret
+L1E4F27:;J
+	scf
+	ccf
+	ret
+L1E4F2A: db $00
+L1E4F2B: db $03
+L1E4F2C: db $02
+L1E4F2D: db $04
+L1E4F2E: db $05
+L1E4F2F: db $0C
+L1E4F30: db $01
+L1E4F31: db $07
+L1E4F32: db $09
+L1E4F33: db $0B
+L1E4F34: db $0A
+L1E4F35: db $0D
+L1E4F36: db $06
+L1E4F37: db $0E
+L1E4F38: db $10
+L1E4F39: db $10
+L1E4F3A: db $0F
+L1E4F3B: db $08
+L1E4F3C: db $11
+L1E4F3D: db $12
+L1E4F3E: db $13
+L1E4F3F: db $2F
+L1E4F40: db $30
+L1E4F41: db $31
+L1E4F42: db $32
+L1E4F43: db $33
+L1E4F44: db $34
+L1E4F45: db $35
+L1E4F46: db $36
+L1E4F47: db $37
+L1E4F48: db $00
+L1E4F49: db $00
+L1E4F4A: db $00
+L1E4F4B: db $00
+L1E4F4C: db $00
+L1E4F4D: db $00
+L1E4F4E: db $00
+L1E4F4F: db $00
+L1E4F50: db $00
+L1E4F51: db $23
+L1E4F52: db $98
+L1E4F53: db $0E
+L1E4F54: db $50
+L1E4F55: db $4C
+L1E4F56: db $41
+L1E4F57: db $59
+L1E4F58: db $45
+L1E4F59: db $52
+L1E4F5A: db $20
+L1E4F5B: db $20
+L1E4F5C: db $53
+L1E4F5D: db $45
+L1E4F5E: db $4C
+L1E4F5F: db $45
+L1E4F60: db $43
+L1E4F61: db $54
+L1E4F62: db $24
+L1E4F63: db $98
+L1E4F64: db $0C
+L1E4F65: db $54
+L1E4F66: db $45
+L1E4F67: db $41
+L1E4F68: db $4D
+L1E4F69: db $20
+L1E4F6A: db $20
+L1E4F6B: db $53
+L1E4F6C: db $45
+L1E4F6D: db $4C
+L1E4F6E: db $45
+L1E4F6F: db $43
+L1E4F70: db $54
+L1E4F71: db $FF
+L1E4F72: db $FF
+L1E4F73: db $A0
+L1E4F74: db $FB
+L1E4F75: db $D7
+L1E4F76: db $F6
+L1E4F77: db $AE
+L1E4F78: db $EF
+L1E4F79: db $CF
+L1E4F7A: db $EF
+L1E4F7B: db $9B
+L1E4F7C: db $DF
+L1E4F7D: db $D1
+L1E4F7E: db $DD
+L1E4F7F: db $91
+L1E4F80: db $A8
+L1E4F81: db $FF
+L1E4F82: db $FF
+L1E4F83: db $00
+L1E4F84: db $20
+L1E4F85: db $40
+L1E4F86: db $C0
+L1E4F87: db $80
+L1E4F88: db $C0
+L1E4F89: db $80
+L1E4F8A: db $80
+L1E4F8B: db $08
+L1E4F8C: db $8C
+L1E4F8D: db $18
+L1E4F8E: db $1C
+L1E4F8F: db $39
+L1E4F90: db $39
+L1E4F91: db $FF
+L1E4F92: db $FF
+L1E4F93: db $7F
+L1E4F94: db $FF
+L1E4F95: db $3F
+L1E4F96: db $7F
+L1E4F97: db $01
+L1E4F98: db $33
+L1E4F99: db $01
+L1E4F9A: db $21
+L1E4F9B: db $01
+L1E4F9C: db $01
+L1E4F9D: db $C1
+L1E4F9E: db $C1
+L1E4F9F: db $F1
+L1E4FA0: db $F1
+L1E4FA1: db $88
+L1E4FA2: db $A0
+L1E4FA3: db $A0
+L1E4FA4: db $80
+L1E4FA5: db $80
+L1E4FA6: db $80
+L1E4FA7: db $80
+L1E4FA8: db $82
+L1E4FA9: db $80
+L1E4FAA: db $83
+L1E4FAB: db $93
+L1E4FAC: db $9B
+L1E4FAD: db $93
+L1E4FAE: db $9B
+L1E4FAF: db $91
+L1E4FB0: db $9B
+L1E4FB1: db $1B
+L1E4FB2: db $1B
+L1E4FB3: db $01
+L1E4FB4: db $01
+L1E4FB5: db $06
+L1E4FB6: db $C6
+L1E4FB7: db $03
+L1E4FB8: db $03
+L1E4FB9: db $49
+L1E4FBA: db $49
+L1E4FBB: db $0B
+L1E4FBC: db $0B
+L1E4FBD: db $1F
+L1E4FBE: db $9F
+L1E4FBF: db $FE
+L1E4FC0: db $FF
+L1E4FC1: db $F9
+L1E4FC2: db $F9
+L1E4FC3: db $F9
+L1E4FC4: db $F9
+L1E4FC5: db $79
+L1E4FC6: db $79
+L1E4FC7: db $11
+L1E4FC8: db $91
+L1E4FC9: db $01
+L1E4FCA: db $C1
+L1E4FCB: db $01
+L1E4FCC: db $09
+L1E4FCD: db $01
+L1E4FCE: db $91
+L1E4FCF: db $01
+L1E4FD0: db $01
+L1E4FD1: db $C9
+L1E4FD2: db $CD
+L1E4FD3: db $C0
+L1E4FD4: db $E1
+L1E4FD5: db $A0
+L1E4FD6: db $F0
+L1E4FD7: db $C0
+L1E4FD8: db $E0
+L1E4FD9: db $90
+L1E4FDA: db $D9
+L1E4FDB: db $D1
+L1E4FDC: db $DD
+L1E4FDD: db $91
+L1E4FDE: db $DD
+L1E4FDF: db $FF
+L1E4FE0: db $FF
+L1E4FE1: db $CF
+L1E4FE2: db $FF
+L1E4FE3: db $C0
+L1E4FE4: db $C7
+L1E4FE5: db $CC
+L1E4FE6: db $EC
+L1E4FE7: db $60
+L1E4FE8: db $F3
+L1E4FE9: db $3C
+L1E4FEA: db $7F
+L1E4FEB: db $1C
+L1E4FEC: db $BF
+L1E4FED: db $80
+L1E4FEE: db $DE
+L1E4FEF: db $FF
+L1E4FF0: db $FF
+L1E4FF1: db $41
+L1E4FF2: db $F1
+L1E4FF3: db $41
+L1E4FF4: db $E1
+L1E4FF5: db $09
+L1E4FF6: db $E9
+L1E4FF7: db $11
+L1E4FF8: db $D9
+L1E4FF9: db $21
+L1E4FFA: db $B3
+L1E4FFB: db $55
+L1E4FFC: db $7F
+L1E4FFD: db $AB
+L1E4FFE: db $FF
+L1E4FFF: db $FF
+L1E5000: db $FF
+L1E5001: db $FF
+L1E5002: db $FF
+L1E5003: db $D1
+L1E5004: db $F9
+L1E5005: db $A5
+L1E5006: db $F5
+L1E5007: db $D4
+L1E5008: db $F6
+L1E5009: db $A8
+L1E500A: db $E8
+L1E500B: db $CB
+L1E500C: db $EB
+L1E500D: db $A3
+L1E500E: db $EB
+L1E500F: db $D6
+L1E5010: db $D6
+L1E5011: db $FF
+L1E5012: db $FF
+L1E5013: db $20
+L1E5014: db $BE
+L1E5015: db $21
+L1E5016: db $BD
+L1E5017: db $21
+L1E5018: db $BD
+L1E5019: db $92
+L1E501A: db $DB
+L1E501B: db $12
+L1E501C: db $5A
+L1E501D: db $00
+L1E501E: db $29
+L1E501F: db $83
+L1E5020: db $C7
+L1E5021: db $FF
+L1E5022: db $FF
+L1E5023: db $81
+L1E5024: db $EF
+L1E5025: db $01
+L1E5026: db $D7
+L1E5027: db $01
+L1E5028: db $B7
+L1E5029: db $01
+L1E502A: db $2B
+L1E502B: db $01
+L1E502C: db $DB
+L1E502D: db $81
+L1E502E: db $ED
+L1E502F: db $81
+L1E5030: db $D9
+L1E5031: db $90
+L1E5032: db $D0
+L1E5033: db $D0
+L1E5034: db $D6
+L1E5035: db $90
+L1E5036: db $D5
+L1E5037: db $C2
+L1E5038: db $E2
+L1E5039: db $80
+L1E503A: db $D0
+L1E503B: db $D3
+L1E503C: db $D3
+L1E503D: db $92
+L1E503E: db $D2
+L1E503F: db $D5
+L1E5040: db $D5
+L1E5041: db $93
+L1E5042: db $BF
+L1E5043: db $17
+L1E5044: db $BF
+L1E5045: db $16
+L1E5046: db $3F
+L1E5047: db $08
+L1E5048: db $AA
+L1E5049: db $00
+L1E504A: db $49
+L1E504B: db $00
+L1E504C: db $2A
+L1E504D: db $00
+L1E504E: db $08
+L1E504F: db $C1
+L1E5050: db $EF
+L1E5051: db $81
+L1E5052: db $C5
+L1E5053: db $01
+L1E5054: db $B5
+L1E5055: db $01
+L1E5056: db $47
+L1E5057: db $01
+L1E5058: db $B3
+L1E5059: db $01
+L1E505A: db $05
+L1E505B: db $41
+L1E505C: db $45
+L1E505D: db $21
+L1E505E: db $25
+L1E505F: db $C1
+L1E5060: db $D5
+L1E5061: db $AA
+L1E5062: db $EA
+L1E5063: db $C3
+L1E5064: db $E3
+L1E5065: db $AD
+L1E5066: db $ED
+L1E5067: db $CC
+L1E5068: db $ED
+L1E5069: db $AC
+L1E506A: db $EE
+L1E506B: db $CC
+L1E506C: db $EF
+L1E506D: db $AC
+L1E506E: db $EF
+L1E506F: db $FF
+L1E5070: db $FF
+L1E5071: db $26
+L1E5072: db $2F
+L1E5073: db $FF
+L1E5074: db $FF
+L1E5075: db $C3
+L1E5076: db $E3
+L1E5077: db $DC
+L1E5078: db $DD
+L1E5079: db $60
+L1E507A: db $E1
+L1E507B: db $3C
+L1E507C: db $7F
+L1E507D: db $08
+L1E507E: db $9E
+L1E507F: db $FF
+L1E5080: db $FF
+L1E5081: db $01
+L1E5082: db $2B
+L1E5083: db $81
+L1E5084: db $E7
+L1E5085: db $01
+L1E5086: db $D7
+L1E5087: db $01
+L1E5088: db $D9
+L1E5089: db $01
+L1E508A: db $A7
+L1E508B: db $01
+L1E508C: db $1F
+L1E508D: db $01
+L1E508E: db $3F
+L1E508F: db $FF
+L1E5090: db $FF
+L1E5091: db $FF
+L1E5092: db $FF
+L1E5093: db $A3
+L1E5094: db $F3
+L1E5095: db $D3
+L1E5096: db $F7
+L1E5097: db $A3
+L1E5098: db $EF
+L1E5099: db $C3
+L1E509A: db $EF
+L1E509B: db $A0
+L1E509C: db $EE
+L1E509D: db $C1
+L1E509E: db $E8
+L1E509F: db $A7
+L1E50A0: db $E0
+L1E50A1: db $FF
+L1E50A2: db $FF
+L1E50A3: db $FF
+L1E50A4: db $FF
+L1E50A5: db $FF
+L1E50A6: db $FF
+L1E50A7: db $FF
+L1E50A8: db $FF
+L1E50A9: db $FF
+L1E50AA: db $FF
+L1E50AB: db $03
+L1E50AC: db $03
+L1E50AD: db $FC
+L1E50AE: db $00
+L1E50AF: db $FF
+L1E50B0: db $00
+L1E50B1: db $FF
+L1E50B2: db $FF
+L1E50B3: db $D9
+L1E50B4: db $C1
+L1E50B5: db $DF
+L1E50B6: db $C1
+L1E50B7: db $EF
+L1E50B8: db $E1
+L1E50B9: db $EF
+L1E50BA: db $E1
+L1E50BB: db $EF
+L1E50BC: db $E1
+L1E50BD: db $6F
+L1E50BE: db $61
+L1E50BF: db $8F
+L1E50C0: db $01
+L1E50C1: db $CF
+L1E50C2: db $E0
+L1E50C3: db $9F
+L1E50C4: db $C1
+L1E50C5: db $BE
+L1E50C6: db $8E
+L1E50C7: db $F0
+L1E50C8: db $B0
+L1E50C9: db $C0
+L1E50CA: db $C2
+L1E50CB: db $81
+L1E50CC: db $85
+L1E50CD: db $A4
+L1E50CE: db $F5
+L1E50CF: db $D0
+L1E50D0: db $F9
+L1E50D1: db $FF
+L1E50D2: db $00
+L1E50D3: db $FF
+L1E50D4: db $FF
+L1E50D5: db $00
+L1E50D6: db $00
+L1E50D7: db $02
+L1E50D8: db $92
+L1E50D9: db $13
+L1E50DA: db $17
+L1E50DB: db $48
+L1E50DC: db $4E
+L1E50DD: db $80
+L1E50DE: db $97
+L1E50DF: db $0C
+L1E50E0: db $DF
+L1E50E1: db $C7
+L1E50E2: db $C1
+L1E50E3: db $01
+L1E50E4: db $11
+L1E50E5: db $09
+L1E50E6: db $09
+L1E50E7: db $4B
+L1E50E8: db $4B
+L1E50E9: db $21
+L1E50EA: db $2B
+L1E50EB: db $71
+L1E50EC: db $77
+L1E50ED: db $71
+L1E50EE: db $F7
+L1E50EF: db $F1
+L1E50F0: db $F1
+L1E50F1: db $AA
+L1E50F2: db $FE
+L1E50F3: db $90
+L1E50F4: db $98
+L1E50F5: db $A9
+L1E50F6: db $EB
+L1E50F7: db $92
+L1E50F8: db $B6
+L1E50F9: db $80
+L1E50FA: db $C0
+L1E50FB: db $A0
+L1E50FC: db $A0
+L1E50FD: db $C0
+L1E50FE: db $D8
+L1E50FF: db $FF
+L1E5100: db $FF
+L1E5101: db $08
+L1E5102: db $DE
+L1E5103: db $00
+L1E5104: db $CC
+L1E5105: db $02
+L1E5106: db $73
+L1E5107: db $80
+L1E5108: db $3C
+L1E5109: db $01
+L1E510A: db $1C
+L1E510B: db $E1
+L1E510C: db $0C
+L1E510D: db $F1
+L1E510E: db $00
+L1E510F: db $FF
+L1E5110: db $FF
+L1E5111: db $E5
+L1E5112: db $F1
+L1E5113: db $C9
+L1E5114: db $E1
+L1E5115: db $17
+L1E5116: db $87
+L1E5117: db $49
+L1E5118: db $09
+L1E5119: db $B7
+L1E511A: db $37
+L1E511B: db $21
+L1E511C: db $2F
+L1E511D: db $21
+L1E511E: db $2F
+L1E511F: db $FF
+L1E5120: db $FF
+L1E5121: db $FF
+L1E5122: db $FF
+L1E5123: db $80
+L1E5124: db $9F
+L1E5125: db $80
+L1E5126: db $EC
+L1E5127: db $83
+L1E5128: db $DB
+L1E5129: db $82
+L1E512A: db $A6
+L1E512B: db $80
+L1E512C: db $CC
+L1E512D: db $80
+L1E512E: db $AA
+L1E512F: db $80
+L1E5130: db $D5
+L1E5131: db $FF
+L1E5132: db $FF
+L1E5133: db $80
+L1E5134: db $96
+L1E5135: db $45
+L1E5136: db $E7
+L1E5137: db $02
+L1E5138: db $A2
+L1E5139: db $41
+L1E513A: db $55
+L1E513B: db $80
+L1E513C: db $B5
+L1E513D: db $04
+L1E513E: db $AE
+L1E513F: db $0C
+L1E5140: db $6E
+L1E5141: db $FF
+L1E5142: db $FF
+L1E5143: db $65
+L1E5144: db $E7
+L1E5145: db $99
+L1E5146: db $99
+L1E5147: db $C5
+L1E5148: db $C7
+L1E5149: db $61
+L1E514A: db $69
+L1E514B: db $21
+L1E514C: db $B5
+L1E514D: db $05
+L1E514E: db $B5
+L1E514F: db $81
+L1E5150: db $DB
+L1E5151: db $80
+L1E5152: db $C5
+L1E5153: db $80
+L1E5154: db $92
+L1E5155: db $80
+L1E5156: db $D0
+L1E5157: db $80
+L1E5158: db $D8
+L1E5159: db $85
+L1E515A: db $85
+L1E515B: db $84
+L1E515C: db $A4
+L1E515D: db $82
+L1E515E: db $AA
+L1E515F: db $81
+L1E5160: db $D7
+L1E5161: db $0C
+L1E5162: db $6E
+L1E5163: db $0C
+L1E5164: db $DE
+L1E5165: db $46
+L1E5166: db $5F
+L1E5167: db $00
+L1E5168: db $14
+L1E5169: db $08
+L1E516A: db $08
+L1E516B: db $0C
+L1E516C: db $6E
+L1E516D: db $0E
+L1E516E: db $CF
+L1E516F: db $8E
+L1E5170: db $CF
+L1E5171: db $C1
+L1E5172: db $EB
+L1E5173: db $C1
+L1E5174: db $C9
+L1E5175: db $01
+L1E5176: db $11
+L1E5177: db $01
+L1E5178: db $09
+L1E5179: db $A5
+L1E517A: db $A5
+L1E517B: db $25
+L1E517C: db $25
+L1E517D: db $51
+L1E517E: db $55
+L1E517F: db $21
+L1E5180: db $EB
+L1E5181: db $80
+L1E5182: db $C7
+L1E5183: db $80
+L1E5184: db $EB
+L1E5185: db $80
+L1E5186: db $EB
+L1E5187: db $80
+L1E5188: db $C5
+L1E5189: db $B0
+L1E518A: db $B0
+L1E518B: db $EA
+L1E518C: db $E0
+L1E518D: db $D4
+L1E518E: db $C0
+L1E518F: db $FF
+L1E5190: db $FF
+L1E5191: db $86
+L1E5192: db $E7
+L1E5193: db $01
+L1E5194: db $E1
+L1E5195: db $1D
+L1E5196: db $DD
+L1E5197: db $03
+L1E5198: db $C3
+L1E5199: db $0E
+L1E519A: db $7F
+L1E519B: db $04
+L1E519C: db $9C
+L1E519D: db $00
+L1E519E: db $E1
+L1E519F: db $FF
+L1E51A0: db $FF
+L1E51A1: db $E1
+L1E51A2: db $E7
+L1E51A3: db $C1
+L1E51A4: db $E7
+L1E51A5: db $D1
+L1E51A6: db $C3
+L1E51A7: db $99
+L1E51A8: db $81
+L1E51A9: db $17
+L1E51AA: db $47
+L1E51AB: db $2D
+L1E51AC: db $8D
+L1E51AD: db $59
+L1E51AE: db $19
+L1E51AF: db $FF
+L1E51B0: db $FF
+L1E51B1: db $FF
+L1E51B2: db $FF
+L1E51B3: db $AC
+L1E51B4: db $EF
+L1E51B5: db $C8
+L1E51B6: db $DC
+L1E51B7: db $90
+L1E51B8: db $99
+L1E51B9: db $80
+L1E51BA: db $D3
+L1E51BB: db $80
+L1E51BC: db $8B
+L1E51BD: db $C0
+L1E51BE: db $CD
+L1E51BF: db $90
+L1E51C0: db $DE
+L1E51C1: db $FF
+L1E51C2: db $FF
+L1E51C3: db $00
+L1E51C4: db $00
+L1E51C5: db $00
+L1E51C6: db $00
+L1E51C7: db $00
+L1E51C8: db $80
+L1E51C9: db $00
+L1E51CA: db $80
+L1E51CB: db $00
+L1E51CC: db $80
+L1E51CD: db $00
+L1E51CE: db $80
+L1E51CF: db $00
+L1E51D0: db $00
+L1E51D1: db $FF
+L1E51D2: db $FF
+L1E51D3: db $0B
+L1E51D4: db $0F
+L1E51D5: db $05
+L1E51D6: db $07
+L1E51D7: db $03
+L1E51D8: db $03
+L1E51D9: db $01
+L1E51DA: db $03
+L1E51DB: db $01
+L1E51DC: db $01
+L1E51DD: db $01
+L1E51DE: db $01
+L1E51DF: db $01
+L1E51E0: db $01
+L1E51E1: db $D0
+L1E51E2: db $DC
+L1E51E3: db $B0
+L1E51E4: db $B9
+L1E51E5: db $A0
+L1E51E6: db $A0
+L1E51E7: db $92
+L1E51E8: db $D2
+L1E51E9: db $C4
+L1E51EA: db $EC
+L1E51EB: db $A6
+L1E51EC: db $EE
+L1E51ED: db $CC
+L1E51EE: db $DC
+L1E51EF: db $9F
+L1E51F0: db $DF
+L1E51F1: db $00
+L1E51F2: db $40
+L1E51F3: db $04
+L1E51F4: db $E4
+L1E51F5: db $08
+L1E51F6: db $2E
+L1E51F7: db $08
+L1E51F8: db $6A
+L1E51F9: db $04
+L1E51FA: db $76
+L1E51FB: db $40
+L1E51FC: db $72
+L1E51FD: db $84
+L1E51FE: db $F4
+L1E51FF: db $88
+L1E5200: db $FC
+L1E5201: db $01
+L1E5202: db $01
+L1E5203: db $01
+L1E5204: db $01
+L1E5205: db $01
+L1E5206: db $01
+L1E5207: db $01
+L1E5208: db $01
+L1E5209: db $01
+L1E520A: db $01
+L1E520B: db $01
+L1E520C: db $01
+L1E520D: db $01
+L1E520E: db $01
+L1E520F: db $01
+L1E5210: db $03
+L1E5211: db $C0
+L1E5212: db $E8
+L1E5213: db $A6
+L1E5214: db $F6
+L1E5215: db $D1
+L1E5216: db $F9
+L1E5217: db $AB
+L1E5218: db $FB
+L1E5219: db $D4
+L1E521A: db $FD
+L1E521B: db $A9
+L1E521C: db $FD
+L1E521D: db $D4
+L1E521E: db $FC
+L1E521F: db $FF
+L1E5220: db $FF
+L1E5221: db $80
+L1E5222: db $F2
+L1E5223: db $82
+L1E5224: db $F7
+L1E5225: db $C2
+L1E5226: db $F7
+L1E5227: db $C0
+L1E5228: db $E0
+L1E5229: db $DF
+L1E522A: db $C8
+L1E522B: db $BF
+L1E522C: db $98
+L1E522D: db $7F
+L1E522E: db $00
+L1E522F: db $FF
+L1E5230: db $FF
+L1E5231: db $03
+L1E5232: db $03
+L1E5233: db $05
+L1E5234: db $07
+L1E5235: db $33
+L1E5236: db $B7
+L1E5237: db $01
+L1E5238: db $03
+L1E5239: db $C1
+L1E523A: db $01
+L1E523B: db $C1
+L1E523C: db $01
+L1E523D: db $C1
+L1E523E: db $01
+L1E523F: db $FF
+L1E5240: db $FF
+L1E5241: db $FF
+L1E5242: db $FF
+L1E5243: db $FF
+L1E5244: db $80
+L1E5245: db $FF
+L1E5246: db $80
+L1E5247: db $FF
+L1E5248: db $80
+L1E5249: db $FF
+L1E524A: db $80
+L1E524B: db $FF
+L1E524C: db $80
+L1E524D: db $FF
+L1E524E: db $80
+L1E524F: db $FF
+L1E5250: db $80
+L1E5251: db $FF
+L1E5252: db $FF
+L1E5253: db $FF
+L1E5254: db $12
+L1E5255: db $FF
+L1E5256: db $36
+L1E5257: db $BF
+L1E5258: db $7D
+L1E5259: db $DF
+L1E525A: db $68
+L1E525B: db $F7
+L1E525C: db $48
+L1E525D: db $3D
+L1E525E: db $C0
+L1E525F: db $ED
+L1E5260: db $80
+L1E5261: db $FF
+L1E5262: db $FF
+L1E5263: db $FF
+L1E5264: db $53
+L1E5265: db $FF
+L1E5266: db $FB
+L1E5267: db $AF
+L1E5268: db $DD
+L1E5269: db $FF
+L1E526A: db $89
+L1E526B: db $27
+L1E526C: db $89
+L1E526D: db $AD
+L1E526E: db $01
+L1E526F: db $A5
+L1E5270: db $01
+L1E5271: db $FF
+L1E5272: db $80
+L1E5273: db $FF
+L1E5274: db $80
+L1E5275: db $FF
+L1E5276: db $80
+L1E5277: db $DB
+L1E5278: db $80
+L1E5279: db $DB
+L1E527A: db $80
+L1E527B: db $DB
+L1E527C: db $80
+L1E527D: db $EB
+L1E527E: db $80
+L1E527F: db $A5
+L1E5280: db $80
+L1E5281: db $69
+L1E5282: db $82
+L1E5283: db $C9
+L1E5284: db $12
+L1E5285: db $C0
+L1E5286: db $16
+L1E5287: db $80
+L1E5288: db $0E
+L1E5289: db $A0
+L1E528A: db $25
+L1E528B: db $86
+L1E528C: db $17
+L1E528D: db $07
+L1E528E: db $77
+L1E528F: db $03
+L1E5290: db $73
+L1E5291: db $45
+L1E5292: db $11
+L1E5293: db $05
+L1E5294: db $01
+L1E5295: db $45
+L1E5296: db $49
+L1E5297: db $01
+L1E5298: db $BD
+L1E5299: db $3B
+L1E529A: db $F9
+L1E529B: db $79
+L1E529C: db $F9
+L1E529D: db $F9
+L1E529E: db $FF
+L1E529F: db $CD
+L1E52A0: db $CD
+L1E52A1: db $91
+L1E52A2: db $C0
+L1E52A3: db $C6
+L1E52A4: db $C6
+L1E52A5: db $BF
+L1E52A6: db $BF
+L1E52A7: db $C7
+L1E52A8: db $C7
+L1E52A9: db $A8
+L1E52AA: db $F8
+L1E52AB: db $D4
+L1E52AC: db $FC
+L1E52AD: db $A8
+L1E52AE: db $F8
+L1E52AF: db $FF
+L1E52B0: db $FF
+L1E52B1: db $10
+L1E52B2: db $71
+L1E52B3: db $13
+L1E52B4: db $3B
+L1E52B5: db $48
+L1E52B6: db $5C
+L1E52B7: db $E1
+L1E52B8: db $EF
+L1E52B9: db $F0
+L1E52BA: db $F7
+L1E52BB: db $38
+L1E52BC: db $39
+L1E52BD: db $18
+L1E52BE: db $1A
+L1E52BF: db $FF
+L1E52C0: db $FF
+L1E52C1: db $1D
+L1E52C2: db $1D
+L1E52C3: db $83
+L1E52C4: db $B3
+L1E52C5: db $5F
+L1E52C6: db $DF
+L1E52C7: db $8F
+L1E52C8: db $CF
+L1E52C9: db $A7
+L1E52CA: db $A7
+L1E52CB: db $37
+L1E52CC: db $B7
+L1E52CD: db $65
+L1E52CE: db $65
+L1E52CF: db $FF
+L1E52D0: db $FF
+L1E52D1: db $FF
+L1E52D2: db $FF
+L1E52D3: db $C0
+L1E52D4: db $E0
+L1E52D5: db $81
+L1E52D6: db $C1
+L1E52D7: db $C7
+L1E52D8: db $C7
+L1E52D9: db $8D
+L1E52DA: db $CD
+L1E52DB: db $D3
+L1E52DC: db $D3
+L1E52DD: db $8C
+L1E52DE: db $CE
+L1E52DF: db $D0
+L1E52E0: db $D8
+L1E52E1: db $FF
+L1E52E2: db $FF
+L1E52E3: db $6E
+L1E52E4: db $60
+L1E52E5: db $DF
+L1E52E6: db $C0
+L1E52E7: db $DF
+L1E52E8: db $C0
+L1E52E9: db $DF
+L1E52EA: db $C0
+L1E52EB: db $0E
+L1E52EC: db $E0
+L1E52ED: db $00
+L1E52EE: db $00
+L1E52EF: db $1A
+L1E52F0: db $3F
+L1E52F1: db $FF
+L1E52F2: db $FF
+L1E52F3: db $C5
+L1E52F4: db $C7
+L1E52F5: db $63
+L1E52F6: db $67
+L1E52F7: db $15
+L1E52F8: db $77
+L1E52F9: db $23
+L1E52FA: db $77
+L1E52FB: db $05
+L1E52FC: db $F7
+L1E52FD: db $03
+L1E52FE: db $07
+L1E52FF: db $01
+L1E5300: db $C3
+L1E5301: db $80
+L1E5302: db $D2
+L1E5303: db $C2
+L1E5304: db $C3
+L1E5305: db $87
+L1E5306: db $A7
+L1E5307: db $86
+L1E5308: db $A6
+L1E5309: db $A7
+L1E530A: db $B7
+L1E530B: db $A5
+L1E530C: db $B5
+L1E530D: db $A5
+L1E530E: db $BD
+L1E530F: db $D4
+L1E5310: db $D5
+L1E5311: db $08
+L1E5312: db $1A
+L1E5313: db $00
+L1E5314: db $8A
+L1E5315: db $00
+L1E5316: db $06
+L1E5317: db $00
+L1E5318: db $E6
+L1E5319: db $80
+L1E531A: db $DA
+L1E531B: db $00
+L1E531C: db $B2
+L1E531D: db $80
+L1E531E: db $F6
+L1E531F: db $80
+L1E5320: db $F8
+L1E5321: db $03
+L1E5322: db $8B
+L1E5323: db $01
+L1E5324: db $3B
+L1E5325: db $03
+L1E5326: db $17
+L1E5327: db $01
+L1E5328: db $7B
+L1E5329: db $03
+L1E532A: db $9B
+L1E532B: db $01
+L1E532C: db $7B
+L1E532D: db $03
+L1E532E: db $77
+L1E532F: db $05
+L1E5330: db $E7
+L1E5331: db $A6
+L1E5332: db $E6
+L1E5333: db $D7
+L1E5334: db $D7
+L1E5335: db $93
+L1E5336: db $D7
+L1E5337: db $A1
+L1E5338: db $AB
+L1E5339: db $A0
+L1E533A: db $A8
+L1E533B: db $D2
+L1E533C: db $DB
+L1E533D: db $A4
+L1E533E: db $B7
+L1E533F: db $FF
+L1E5340: db $FF
+L1E5341: db $40
+L1E5342: db $C0
+L1E5343: db $BF
+L1E5344: db $BF
+L1E5345: db $80
+L1E5346: db $80
+L1E5347: db $FC
+L1E5348: db $FF
+L1E5349: db $D0
+L1E534A: db $FF
+L1E534B: db $18
+L1E534C: db $3E
+L1E534D: db $00
+L1E534E: db $80
+L1E534F: db $FF
+L1E5350: db $FF
+L1E5351: db $03
+L1E5352: db $77
+L1E5353: db $85
+L1E5354: db $B7
+L1E5355: db $03
+L1E5356: db $37
+L1E5357: db $05
+L1E5358: db $EF
+L1E5359: db $0B
+L1E535A: db $EF
+L1E535B: db $05
+L1E535C: db $CF
+L1E535D: db $03
+L1E535E: db $37
+L1E535F: db $FF
+L1E5360: db $FF
+L1E5361: db $FF
+L1E5362: db $FF
+L1E5363: db $83
+L1E5364: db $A3
+L1E5365: db $82
+L1E5366: db $C7
+L1E5367: db $83
+L1E5368: db $C6
+L1E5369: db $83
+L1E536A: db $8F
+L1E536B: db $87
+L1E536C: db $8F
+L1E536D: db $84
+L1E536E: db $8F
+L1E536F: db $80
+L1E5370: db $9E
+L1E5371: db $FF
+L1E5372: db $FF
+L1E5373: db $0E
+L1E5374: db $B0
+L1E5375: db $74
+L1E5376: db $78
+L1E5377: db $C0
+L1E5378: db $F0
+L1E5379: db $80
+L1E537A: db $C0
+L1E537B: db $00
+L1E537C: db $91
+L1E537D: db $00
+L1E537E: db $21
+L1E537F: db $01
+L1E5380: db $63
+L1E5381: db $FF
+L1E5382: db $FF
+L1E5383: db $01
+L1E5384: db $01
+L1E5385: db $51
+L1E5386: db $31
+L1E5387: db $09
+L1E5388: db $0D
+L1E5389: db $05
+L1E538A: db $87
+L1E538B: db $81
+L1E538C: db $83
+L1E538D: db $81
+L1E538E: db $D1
+L1E538F: db $C1
+L1E5390: db $D1
+L1E5391: db $A8
+L1E5392: db $94
+L1E5393: db $D4
+L1E5394: db $A8
+L1E5395: db $E8
+L1E5396: db $81
+L1E5397: db $80
+L1E5398: db $83
+L1E5399: db $80
+L1E539A: db $80
+L1E539B: db $82
+L1E539C: db $C2
+L1E539D: db $82
+L1E539E: db $B2
+L1E539F: db $A3
+L1E53A0: db $B3
+L1E53A1: db $03
+L1E53A2: db $C7
+L1E53A3: db $01
+L1E53A4: db $0F
+L1E53A5: db $C3
+L1E53A6: db $F3
+L1E53A7: db $03
+L1E53A8: db $0B
+L1E53A9: db $07
+L1E53AA: db $07
+L1E53AB: db $87
+L1E53AC: db $87
+L1E53AD: db $0F
+L1E53AE: db $8F
+L1E53AF: db $1F
+L1E53B0: db $2F
+L1E53B1: db $C1
+L1E53B2: db $D1
+L1E53B3: db $C1
+L1E53B4: db $C1
+L1E53B5: db $D1
+L1E53B6: db $C1
+L1E53B7: db $81
+L1E53B8: db $A1
+L1E53B9: db $C1
+L1E53BA: db $C1
+L1E53BB: db $A5
+L1E53BC: db $A5
+L1E53BD: db $85
+L1E53BE: db $C5
+L1E53BF: db $85
+L1E53C0: db $C5
+L1E53C1: db $A1
+L1E53C2: db $B3
+L1E53C3: db $91
+L1E53C4: db $9B
+L1E53C5: db $88
+L1E53C6: db $8D
+L1E53C7: db $80
+L1E53C8: db $81
+L1E53C9: db $80
+L1E53CA: db $88
+L1E53CB: db $80
+L1E53CC: db $89
+L1E53CD: db $81
+L1E53CE: db $89
+L1E53CF: db $FF
+L1E53D0: db $FF
+L1E53D1: db $1F
+L1E53D2: db $1F
+L1E53D3: db $8F
+L1E53D4: db $8F
+L1E53D5: db $F0
+L1E53D6: db $F0
+L1E53D7: db $F7
+L1E53D8: db $F3
+L1E53D9: db $7A
+L1E53DA: db $F8
+L1E53DB: db $3A
+L1E53DC: db $78
+L1E53DD: db $1C
+L1E53DE: db $BD
+L1E53DF: db $FF
+L1E53E0: db $FF
+L1E53E1: db $8B
+L1E53E2: db $8B
+L1E53E3: db $C1
+L1E53E4: db $DB
+L1E53E5: db $1B
+L1E53E6: db $3B
+L1E53E7: db $15
+L1E53E8: db $77
+L1E53E9: db $03
+L1E53EA: db $F7
+L1E53EB: db $05
+L1E53EC: db $EF
+L1E53ED: db $0B
+L1E53EE: db $DF
+L1E53EF: db $FF
+L1E53F0: db $FF
+L1E53F1: db $FF
+L1E53F2: db $FF
+L1E53F3: db $A6
+L1E53F4: db $EF
+L1E53F5: db $C1
+L1E53F6: db $E7
+L1E53F7: db $80
+L1E53F8: db $D9
+L1E53F9: db $C0
+L1E53FA: db $DA
+L1E53FB: db $98
+L1E53FC: db $DB
+L1E53FD: db $C0
+L1E53FE: db $DB
+L1E53FF: db $90
+L1E5400: db $D3
+L1E5401: db $FF
+L1E5402: db $FF
+L1E5403: db $00
+L1E5404: db $BE
+L1E5405: db $90
+L1E5406: db $DE
+L1E5407: db $48
+L1E5408: db $ED
+L1E5409: db $04
+L1E540A: db $34
+L1E540B: db $00
+L1E540C: db $41
+L1E540D: db $5E
+L1E540E: db $5F
+L1E540F: db $0C
+L1E5410: db $5F
+L1E5411: db $FF
+L1E5412: db $FF
+L1E5413: db $01
+L1E5414: db $FB
+L1E5415: db $01
+L1E5416: db $D3
+L1E5417: db $01
+L1E5418: db $2D
+L1E5419: db $09
+L1E541A: db $ED
+L1E541B: db $05
+L1E541C: db $ED
+L1E541D: db $41
+L1E541E: db $ED
+L1E541F: db $C5
+L1E5420: db $F5
+L1E5421: db $D6
+L1E5422: db $D7
+L1E5423: db $81
+L1E5424: db $CF
+L1E5425: db $80
+L1E5426: db $A9
+L1E5427: db $84
+L1E5428: db $AC
+L1E5429: db $84
+L1E542A: db $AC
+L1E542B: db $86
+L1E542C: db $B6
+L1E542D: db $C2
+L1E542E: db $D7
+L1E542F: db $A3
+L1E5430: db $E7
+L1E5431: db $0C
+L1E5432: db $9E
+L1E5433: db $00
+L1E5434: db $9D
+L1E5435: db $81
+L1E5436: db $DD
+L1E5437: db $00
+L1E5438: db $EB
+L1E5439: db $00
+L1E543A: db $28
+L1E543B: db $01
+L1E543C: db $09
+L1E543D: db $08
+L1E543E: db $DA
+L1E543F: db $C8
+L1E5440: db $F9
+L1E5441: db $E1
+L1E5442: db $F5
+L1E5443: db $81
+L1E5444: db $CB
+L1E5445: db $01
+L1E5446: db $9B
+L1E5447: db $01
+L1E5448: db $0B
+L1E5449: db $41
+L1E544A: db $5B
+L1E544B: db $81
+L1E544C: db $B7
+L1E544D: db $01
+L1E544E: db $F5
+L1E544F: db $03
+L1E5450: db $73
+L1E5451: db $D0
+L1E5452: db $F3
+L1E5453: db $A0
+L1E5454: db $F3
+L1E5455: db $C0
+L1E5456: db $E3
+L1E5457: db $90
+L1E5458: db $D5
+L1E5459: db $B0
+L1E545A: db $B6
+L1E545B: db $F2
+L1E545C: db $F7
+L1E545D: db $FA
+L1E545E: db $FB
+L1E545F: db $FF
+L1E5460: db $FF
+L1E5461: db $00
+L1E5462: db $69
+L1E5463: db $00
+L1E5464: db $13
+L1E5465: db $A0
+L1E5466: db $A0
+L1E5467: db $DE
+L1E5468: db $DE
+L1E5469: db $60
+L1E546A: db $E1
+L1E546B: db $38
+L1E546C: db $7F
+L1E546D: db $80
+L1E546E: db $BE
+L1E546F: db $FF
+L1E5470: db $FF
+L1E5471: db $05
+L1E5472: db $EF
+L1E5473: db $03
+L1E5474: db $67
+L1E5475: db $01
+L1E5476: db $63
+L1E5477: db $01
+L1E5478: db $C1
+L1E5479: db $03
+L1E547A: db $87
+L1E547B: db $07
+L1E547C: db $0F
+L1E547D: db $0F
+L1E547E: db $1F
+L1E547F: db $FF
+L1E5480: db $FF
+L1E5481: db $C7
+L1E5482: db $80
+L1E5483: db $40
+L1E5484: db $FF
+L1E5485: db $00
+L1E5486: db $D4
+L1E5487: db $FE
+L1E5488: db $A8
+L1E5489: db $FD
+L1E548A: db $D1
+L1E548B: db $FB
+L1E548C: db $11
+L1E548D: db $A3
+L1E548E: db $F7
+L1E548F: db $D3
+L1E5490: db $04
+L1E5491: db $A7
+L1E5492: db $EF
+L1E5493: db $C6
+L1E5494: db $04
+L1E5495: db $BA
+L1E5496: db $3D
+L1E5497: db $3E
+L1E5498: db $09
+L1E5499: db $02
+L1E549A: db $21
+L1E549B: db $E3
+L1E549C: db $04
+L1E549D: db $71
+L1E549E: db $B0
+L1E549F: db $44
+L1E54A0: db $00
+L1E54A1: db $5C
+L1E54A2: db $25
+L1E54A3: db $15
+L1E54A4: db $BF
+L1E54A5: db $0B
+L1E54A6: db $DF
+L1E54A7: db $74
+L1E54A8: db $05
+L1E54A9: db $38
+L1E54AA: db $0C
+L1E54AB: db $04
+L1E54AC: db $65
+L1E54AD: db $34
+L1E54AE: db $63
+L1E54AF: db $77
+L1E54B0: db $12
+L1E54B1: db $01
+L1E54B2: db $7B
+L1E54B3: db $A0
+L1E54B4: db $1C
+L1E54B5: db $C0
+L1E54B6: db $EC
+L1E54B7: db $0C
+L1E54B8: db $E0
+L1E54B9: db $1F
+L1E54BA: db $D0
+L1E54BB: db $DB
+L1E54BC: db $91
+L1E54BD: db $B8
+L1E54BE: db $1C
+L1E54BF: db $0C
+L1E54C0: db $1C
+L1E54C1: db $24
+L1E54C2: db $25
+L1E54C3: db $80
+L1E54C4: db $85
+L1E54C5: db $84
+L1E54C6: db $02
+L1E54C7: db $30
+L1E54C8: db $03
+L1E54C9: db $B1
+L1E54CA: db $1C
+L1E54CB: db $30
+L1E54CC: db $C3
+L1E54CD: db $C1
+L1E54CE: db $A4
+L1E54CF: db $58
+L1E54D0: db $F1
+L1E54D1: db $40
+L1E54D2: db $60
+L1E54D3: db $03
+L1E54D4: db $1F
+L1E54D5: db $83
+L1E54D6: db $21
+L1E54D7: db $23
+L1E54D8: db $01
+L1E54D9: db $0D
+L1E54DA: db $1D
+L1E54DB: db $AD
+L1E54DC: db $0C
+L1E54DD: db $68
+L1E54DE: db $17
+L1E54DF: db $DC
+L1E54E0: db $04
+L1E54E1: db $F0
+L1E54E2: db $4C
+L1E54E3: db $B0
+L1E54E4: db $BD
+L1E54E5: db $D8
+L1E54E6: db $2B
+L1E54E7: db $DC
+L1E54E8: db $AE
+L1E54E9: db $00
+L1E54EA: db $96
+L1E54EB: db $00
+L1E54EC: db $8B
+L1E54ED: db $00
+L1E54EE: db $B0
+L1E54EF: db $E7
+L1E54F0: db $00
+L1E54F1: db $88
+L1E54F2: db $00
+L1E54F3: db $43
+L1E54F4: db $C7
+L1E54F5: db $9C
+L1E54F6: db $00
+L1E54F7: db $0D
+L1E54F8: db $EE
+L1E54F9: db $B4
+L1E54FA: db $A0
+L1E54FB: db $04
+L1E54FC: db $06
+L1E54FD: db $04
+L1E54FE: db $00
+L1E54FF: db $F4
+L1E5500: db $C0
+L1E5501: db $DD
+L1E5502: db $3D
+L1E5503: db $98
+L1E5504: db $D7
+L1E5505: db $8D
+L1E5506: db $0C
+L1E5507: db $EC
+L1E5508: db $09
+L1E5509: db $00
+L1E550A: db $33
+L1E550B: db $0D
+L1E550C: db $4D
+L1E550D: db $04
+L1E550E: db $00
+L1E550F: db $07
+L1E5510: db $1F
+L1E5511: db $3D
+L1E5512: db $01
+L1E5513: db $90
+L1E5514: db $40
+L1E5515: db $F7
+L1E5516: db $A7
+L1E5517: db $D0
+L1E5518: db $CF
+L1E5519: db $E0
+L1E551A: db $AF
+L1E551B: db $EF
+L1E551C: db $72
+L1E551D: db $CE
+L1E551E: db $0C
+L1E551F: db $D0
+L1E5520: db $04
+L1E5521: db $DE
+L1E5522: db $C6
+L1E5523: db $3D
+L1E5524: db $FE
+L1E5525: db $51
+L1E5526: db $8C
+L1E5527: db $04
+L1E5528: db $C4
+L1E5529: db $04
+L1E552A: db $24
+L1E552B: db $0E
+L1E552C: db $02
+L1E552D: db $00
+L1E552E: db $14
+L1E552F: db $F2
+L1E5530: db $60
+L1E5531: db $FC
+L1E5532: db $04
+L1E5533: db $E7
+L1E5534: db $3D
+L1E5535: db $DF
+L1E5536: db $01
+L1E5537: db $5C
+L1E5538: db $DD
+L1E5539: db $04
+L1E553A: db $B1
+L1E553B: db $04
+L1E553C: db $CC
+L1E553D: db $C4
+L1E553E: db $03
+L1E553F: db $39
+L1E5540: db $82
+L1E5541: db $04
+L1E5542: db $F9
+L1E5543: db $63
+L1E5544: db $79
+L1E5545: db $9E
+L1E5546: db $C8
+L1E5547: db $8C
+L1E5548: db $D0
+L1E5549: db $03
+L1E554A: db $98
+L1E554B: db $C0
+L1E554C: db $B0
+L1E554D: db $84
+L1E554E: db $A9
+L1E554F: db $8D
+L1E5550: db $04
+L1E5551: db $00
+L1E5552: db $11
+L1E5553: db $E9
+L1E5554: db $CD
+L1E5555: db $E8
+L1E5556: db $04
+L1E5557: db $70
+L1E5558: db $F8
+L1E5559: db $38
+L1E555A: db $94
+L1E555B: db $80
+L1E555C: db $5C
+L1E555D: db $7B
+L1E555E: db $10
+L1E555F: db $3F
+L1E5560: db $08
+L1E5561: db $0D
+L1E5562: db $30
+L1E5563: db $31
+L1E5564: db $20
+L1E5565: db $80
+L1E5566: db $8E
+L1E5567: db $C8
+L1E5568: db $FA
+L1E5569: db $61
+L1E556A: db $FD
+L1E556B: db $21
+L1E556C: db $7D
+L1E556D: db $C8
+L1E556E: db $04
+L1E556F: db $B8
+L1E5570: db $41
+L1E5571: db $E1
+L1E5572: db $C0
+L1E5573: db $45
+L1E5574: db $11
+L1E5575: db $15
+L1E5576: db $32
+L1E5577: db $65
+L1E5578: db $ED
+L1E5579: db $50
+L1E557A: db $34
+L1E557B: db $F4
+L1E557C: db $94
+L1E557D: db $04
+L1E557E: db $A5
+L1E557F: db $BA
+L1E5580: db $88
+L1E5581: db $A0
+L1E5582: db $88
+L1E5583: db $C4
+L1E5584: db $04
+L1E5585: db $C1
+L1E5586: db $28
+L1E5587: db $81
+L1E5588: db $A0
+L1E5589: db $05
+L1E558A: db $FF
+L1E558B: db $00
+L1E558C: db $62
+L1E558D: db $F6
+L1E558E: db $00
+L1E558F: db $72
+L1E5590: db $8C
+L1E5591: db $05
+L1E5592: db $EC
+L1E5593: db $50
+L1E5594: db $D0
+L1E5595: db $06
+L1E5596: db $47
+L1E5597: db $1C
+L1E5598: db $B8
+L1E5599: db $BC
+L1E559A: db $4F
+L1E559B: db $DF
+L1E559C: db $3D
+L1E559D: db $1B
+L1E559E: db $79
+L1E559F: db $F4
+L1E55A0: db $05
+L1E55A1: db $E4
+L1E55A2: db $04
+L1E55A3: db $D5
+L1E55A4: db $B0
+L1E55A5: db $04
+L1E55A6: db $91
+L1E55A7: db $04
+L1E55A8: db $E9
+L1E55A9: db $04
+L1E55AA: db $C9
+L1E55AB: db $3D
+L1E55AC: db $88
+L1E55AD: db $01
+L1E55AE: db $C6
+L1E55AF: db $CF
+L1E55B0: db $F2
+L1E55B1: db $8C
+L1E55B2: db $90
+L1E55B3: db $BB
+L1E55B4: db $88
+L1E55B5: db $43
+L1E55B6: db $9D
+L1E55B7: db $74
+L1E55B8: db $89
+L1E55B9: db $A1
+L1E55BA: db $87
+L1E55BB: db $B1
+L1E55BC: db $04
+L1E55BD: db $3D
+L1E55BE: db $51
+L1E55BF: db $96
+L1E55C0: db $1C
+L1E55C1: db $5C
+L1E55C2: db $28
+L1E55C3: db $40
+L1E55C4: db $2B
+L1E55C5: db $7F
+L1E55C6: db $6B
+L1E55C7: db $90
+L1E55C8: db $00
+L1E55C9: db $F8
+L1E55CA: db $FC
+L1E55CB: db $0D
+L1E55CC: db $A9
+L1E55CD: db $6F
+L1E55CE: db $73
+L1E55CF: db $1D
+L1E55D0: db $43
+L1E55D1: db $0F
+L1E55D2: db $B4
+L1E55D3: db $D9
+L1E55D4: db $C1
+L1E55D5: db $C7
+L1E55D6: db $E1
+L1E55D7: db $F8
+L1E55D8: db $04
+L1E55D9: db $31
+L1E55DA: db $65
+L1E55DB: db $71
+L1E55DC: db $85
+L1E55DD: db $05
+L1E55DE: db $A0
+L1E55DF: db $81
+L1E55E0: db $B0
+L1E55E1: db $84
+L1E55E2: db $06
+L1E55E3: db $BA
+L1E55E4: db $82
+L1E55E5: db $D8
+L1E55E6: db $84
+L1E55E7: db $DA
+L1E55E8: db $0D
+L1E55E9: db $24
+L1E55EA: db $F0
+L1E55EB: db $08
+L1E55EC: db $F3
+L1E55ED: db $E0
+L1E55EE: db $E4
+L1E55EF: db $C0
+L1E55F0: db $00
+L1E55F1: db $C4
+L1E55F2: db $F4
+L1E55F3: db $7E
+L1E55F4: db $38
+L1E55F5: db $FE
+L1E55F6: db $7C
+L1E55F7: db $AC
+L1E55F8: db $04
+L1E55F9: db $C6
+L1E55FA: db $E3
+L1E55FB: db $F1
+L1E55FC: db $07
+L1E55FD: db $00
+L1E55FE: db $11
+L1E55FF: db $83
+L1E5600: db $B9
+L1E5601: db $13
+L1E5602: db $39
+L1E5603: db $03
+L1E5604: db $21
+L1E5605: db $29
+L1E5606: db $2F
+L1E5607: db $6D
+L1E5608: db $F5
+L1E5609: db $00
+L1E560A: db $85
+L1E560B: db $00
+L1E560C: db $74
+L1E560D: db $8C
+L1E560E: db $B4
+L1E560F: db $0A
+L1E5610: db $8B
+L1E5611: db $88
+L1E5612: db $DD
+L1E5613: db $D4
+L1E5614: db $74
+L1E5615: db $AA
+L1E5616: db $64
+L1E5617: db $D5
+L1E5618: db $B0
+L1E5619: db $04
+L1E561A: db $A8
+L1E561B: db $84
+L1E561C: db $7D
+L1E561D: db $3F
+L1E561E: db $7F
+L1E561F: db $C1
+L1E5620: db $C3
+L1E5621: db $24
+L1E5622: db $33
+L1E5623: db $B7
+L1E5624: db $8C
+L1E5625: db $CF
+L1E5626: db $0F
+L1E5627: db $1C
+L1E5628: db $06
+L1E5629: db $1E
+L1E562A: db $22
+L1E562B: db $00
+L1E562C: db $01
+L1E562D: db $3D
+L1E562E: db $25
+L1E562F: db $75
+L1E5630: db $15
+L1E5631: db $00
+L1E5632: db $D1
+L1E5633: db $31
+L1E5634: db $D7
+L1E5635: db $91
+L1E5636: db $04
+L1E5637: db $D0
+L1E5638: db $37
+L1E5639: db $61
+L1E563A: db $FD
+L1E563B: db $38
+L1E563C: db $62
+L1E563D: db $F9
+L1E563E: db $3D
+L1E563F: db $01
+L1E5640: db $8E
+L1E5641: db $80
+L1E5642: db $9C
+L1E5643: db $04
+L1E5644: db $D8
+L1E5645: db $AC
+L1E5646: db $90
+L1E5647: db $F1
+L1E5648: db $2C
+L1E5649: db $81
+L1E564A: db $08
+L1E564B: db $05
+L1E564C: db $C2
+L1E564D: db $E2
+L1E564E: db $D1
+L1E564F: db $3D
+L1E5650: db $94
+L1E5651: db $08
+L1E5652: db $04
+L1E5653: db $2C
+L1E5654: db $04
+L1E5655: db $24
+L1E5656: db $01
+L1E5657: db $6B
+L1E5658: db $20
+L1E5659: db $04
+L1E565A: db $1C
+L1E565B: db $64
+L1E565C: db $04
+L1E565D: db $48
+L1E565E: db $3D
+L1E565F: db $68
+L1E5660: db $EF
+L1E5661: db $00
+L1E5662: db $9C
+L1E5663: db $A8
+L1E5664: db $21
+L1E5665: db $05
+L1E5666: db $00
+L1E5667: db $14
+L1E5668: db $05
+L1E5669: db $E9
+L1E566A: db $80
+L1E566B: db $04
+L1E566C: db $E8
+L1E566D: db $C0
+L1E566E: db $84
+L1E566F: db $A0
+L1E5670: db $A5
+L1E5671: db $B8
+L1E5672: db $55
+L1E5673: db $82
+L1E5674: db $04
+L1E5675: db $86
+L1E5676: db $50
+L1E5677: db $E1
+L1E5678: db $0C
+L1E5679: db $B4
+L1E567A: db $04
+L1E567B: db $55
+L1E567C: db $A4
+L1E567D: db $34
+L1E567E: db $F6
+L1E567F: db $84
+L1E5680: db $19
+L1E5681: db $04
+L1E5682: db $CA
+L1E5683: db $04
+L1E5684: db $45
+L1E5685: db $1F
+L1E5686: db $05
+L1E5687: db $1C
+L1E5688: db $3F
+L1E5689: db $3C
+L1E568A: db $06
+L1E568B: db $FE
+L1E568C: db $B4
+L1E568D: db $F8
+L1E568E: db $84
+L1E568F: db $01
+L1E5690: db $AC
+L1E5691: db $48
+L1E5692: db $00
+L1E5693: db $07
+L1E5694: db $0D
+L1E5695: db $83
+L1E5696: db $28
+L1E5697: db $91
+L1E5698: db $2D
+L1E5699: db $00
+L1E569A: db $2F
+L1E569B: db $04
+L1E569C: db $2B
+L1E569D: db $29
+L1E569E: db $A1
+L1E569F: db $59
+L1E56A0: db $B3
+L1E56A1: db $D0
+L1E56A2: db $9B
+L1E56A3: db $9C
+L1E56A4: db $08
+L1E56A5: db $90
+L1E56A6: db $B2
+L1E56A7: db $A8
+L1E56A8: db $5E
+L1E56A9: db $B6
+L1E56AA: db $B8
+L1E56AB: db $84
+L1E56AC: db $D0
+L1E56AD: db $00
+L1E56AE: db $78
+L1E56AF: db $00
+L1E56B0: db $20
+L1E56B1: db $98
+L1E56B2: db $00
+L1E56B3: db $EC
+L1E56B4: db $ED
+L1E56B5: db $04
+L1E56B6: db $EC
+L1E56B7: db $68
+L1E56B8: db $63
+L1E56B9: db $30
+L1E56BA: db $4C
+L1E56BB: db $B7
+L1E56BC: db $EC
+L1E56BD: db $DE
+L1E56BE: db $E0
+L1E56BF: db $1C
+L1E56C0: db $3D
+L1E56C1: db $47
+L1E56C2: db $E7
+L1E56C3: db $28
+L1E56C4: db $99
+L1E56C5: db $D9
+L1E56C6: db $AC
+L1E56C7: db $C1
+L1E56C8: db $CC
+L1E56C9: db $BD
+L1E56CA: db $0F
+L1E56CB: db $7F
+L1E56CC: db $3C
+L1E56CD: db $1F
+L1E56CE: db $BF
+L1E56CF: db $F8
+L1E56D0: db $04
+L1E56D1: db $3D
+L1E56D2: db $01
+L1E56D3: db $A8
+L1E56D4: db $F8
+L1E56D5: db $02
+L1E56D6: db $D1
+L1E56D7: db $F1
+L1E56D8: db $A2
+L1E56D9: db $E3
+L1E56DA: db $C3
+L1E56DB: db $E6
+L1E56DC: db $B9
+L1E56DD: db $A6
+L1E56DE: db $58
+L1E56DF: db $C5
+L1E56E0: db $DC
+L1E56E1: db $A5
+L1E56E2: db $3D
+L1E56E3: db $6C
+L1E56E4: db $03
+L1E56E5: db $60
+L1E56E6: db $80
+L1E56E7: db $94
+L1E56E8: db $28
+L1E56E9: db $38
+L1E56EA: db $58
+L1E56EB: db $10
+L1E56EC: db $A0
+L1E56ED: db $C0
+L1E56EE: db $40
+L1E56EF: db $87
+L1E56F0: db $7A
+L1E56F1: db $00
+L1E56F2: db $90
+L1E56F3: db $3D
+L1E56F4: db $D0
+L1E56F5: db $00
+L1E56F6: db $71
+L1E56F7: db $7C
+L1E56F8: db $31
+L1E56F9: db $05
+L1E56FA: db $79
+L1E56FB: db $19
+L1E56FC: db $39
+L1E56FD: db $09
+L1E56FE: db $1D
+L1E56FF: db $04
+L1E5700: db $0D
+L1E5701: db $6C
+L1E5702: db $E0
+L1E5703: db $04
+L1E5704: db $94
+L1E5705: db $54
+L1E5706: db $88
+L1E5707: db $99
+L1E5708: db $8F
+L1E5709: db $9F
+L1E570A: db $CF
+L1E570B: db $D9
+L1E570C: db $00
+L1E570D: db $68
+L1E570E: db $C7
+L1E570F: db $C4
+L1E5710: db $04
+L1E5711: db $AB
+L1E5712: db $EB
+L1E5713: db $C0
+L1E5714: db $D9
+L1E5715: db $DC
+L1E5716: db $A0
+L1E5717: db $7F
+L1E5718: db $F8
+L1E5719: db $84
+L1E571A: db $E0
+L1E571B: db $F0
+L1E571C: db $C0
+L1E571D: db $E6
+L1E571E: db $30
+L1E571F: db $A4
+L1E5720: db $08
+L1E5721: db $0C
+L1E5722: db $4D
+L1E5723: db $1C
+L1E5724: db $A4
+L1E5725: db $E4
+L1E5726: db $55
+L1E5727: db $E5
+L1E5728: db $84
+L1E5729: db $05
+L1E572A: db $04
+L1E572B: db $85
+L1E572C: db $04
+L1E572D: db $81
+L1E572E: db $06
+L1E572F: db $54
+L1E5730: db $C9
+L1E5731: db $04
+L1E5732: db $DD
+L1E5733: db $04
+L1E5734: db $D5
+L1E5735: db $04
+L1E5736: db $CD
+L1E5737: db $A3
+L1E5738: db $C1
+L1E5739: db $84
+L1E573A: db $20
+L1E573B: db $E9
+L1E573C: db $AF
+L1E573D: db $EF
+L1E573E: db $D6
+L1E573F: db $F6
+L1E5740: db $AC
+L1E5741: db $0E
+L1E5742: db $FB
+L1E5743: db $D1
+L1E5744: db $F9
+L1E5745: db $A8
+L1E5746: db $A9
+L1E5747: db $00
+L1E5748: db $A8
+L1E5749: db $F3
+L1E574A: db $D1
+L1E574B: db $94
+L1E574C: db $0C
+L1E574D: db $FE
+L1E574E: db $04
+L1E574F: db $1E
+L1E5750: db $3F
+L1E5751: db $FC
+L1E5752: db $00
+L1E5753: db $FC
+L1E5754: db $30
+L1E5755: db $3C
+L1E5756: db $24
+L1E5757: db $2C
+L1E5758: db $3D
+L1E5759: db $84
+L1E575A: db $D9
+L1E575B: db $41
+L1E575C: db $82
+L1E575D: db $AC
+L1E575E: db $29
+L1E575F: db $B1
+L1E5760: db $09
+L1E5761: db $31
+L1E5762: db $39
+L1E5763: db $14
+L1E5764: db $11
+L1E5765: db $EA
+L1E5766: db $D6
+L1E5767: db $3D
+L1E5768: db $02
+L1E5769: db $80
+L1E576A: db $04
+L1E576B: db $83
+L1E576C: db $04
+L1E576D: db $9F
+L1E576E: db $ED
+L1E576F: db $92
+L1E5770: db $84
+L1E5771: db $04
+L1E5772: db $8F
+L1E5773: db $3B
+L1E5774: db $00
+L1E5775: db $C0
+L1E5776: db $06
+L1E5777: db $BD
+L1E5778: db $4D
+L1E5779: db $00
+L1E577A: db $1F
+L1E577B: db $16
+L1E577C: db $61
+L1E577D: db $0C
+L1E577E: db $FD
+L1E577F: db $A0
+L1E5780: db $30
+L1E5781: db $FA
+L1E5782: db $02
+L1E5783: db $F0
+L1E5784: db $0C
+L1E5785: db $D6
+L1E5786: db $03
+L1E5787: db $CE
+L1E5788: db $07
+L1E5789: db $35
+L1E578A: db $D5
+L1E578B: db $12
+L1E578C: db $9E
+L1E578D: db $95
+L1E578E: db $9C
+L1E578F: db $04
+L1E5790: db $98
+L1E5791: db $04
+L1E5792: db $55
+L1E5793: db $90
+L1E5794: db $04
+L1E5795: db $B0
+L1E5796: db $04
+L1E5797: db $A3
+L1E5798: db $04
+L1E5799: db $9B
+L1E579A: db $D0
+L1E579B: db $CD
+L1E579C: db $74
+L1E579D: db $6C
+L1E579E: db $FB
+L1E579F: db $F8
+L1E57A0: db $04
+L1E57A1: db $00
+L1E57A2: db $38
+L1E57A3: db $1D
+L1E57A4: db $A8
+L1E57A5: db $2C
+L1E57A6: db $63
+L1E57A7: db $04
+L1E57A8: db $6E
+L1E57A9: db $04
+L1E57AA: db $78
+L1E57AB: db $1B
+L1E57AC: db $18
+L1E57AD: db $1A
+L1E57AE: db $45
+L1E57AF: db $84
+L1E57B0: db $F1
+L1E57B1: db $2C
+L1E57B2: db $35
+L1E57B3: db $7D
+L1E57B4: db $04
+L1E57B5: db $87
+L1E57B6: db $05
+L1E57B7: db $80
+L1E57B8: db $E0
+L1E57B9: db $60
+L1E57BA: db $EC
+L1E57BB: db $6F
+L1E57BC: db $44
+L1E57BD: db $9E
+L1E57BE: db $04
+L1E57BF: db $57
+L1E57C0: db $8E
+L1E57C1: db $04
+L1E57C2: db $9F
+L1E57C3: db $04
+L1E57C4: db $B3
+L1E57C5: db $04
+L1E57C6: db $38
+L1E57C7: db $04
+L1E57C8: db $5A
+L1E57C9: db $85
+L1E57CA: db $04
+L1E57CB: db $89
+L1E57CC: db $04
+L1E57CD: db $01
+L1E57CE: db $32
+L1E57CF: db $04
+L1E57D0: db $27
+L1E57D1: db $BB
+L1E57D2: db $04
+L1E57D3: db $2D
+L1E57D4: db $0E
+L1E57D5: db $74
+L1E57D6: db $04
+L1E57D7: db $83
+L1E57D8: db $0E
+L1E57D9: db $00
+L1E57DA: db $00
+L1E57DB: db $DF
+L1E57DC: db $5F
+L1E57DD: db $C0
+L1E57DE: db $50
+L1E57DF: db $C6
+L1E57E0: db $4F
+L1E57E1: db $D0
+L1E57E2: db $40
+L1E57E3: db $AE
+L1E57E4: db $AD
+L1E57E5: db $E7
+L1E57E6: db $08
+L1E57E7: db $EF
+L1E57E8: db $04
+L1E57E9: db $7E
+L1E57EA: db $00
+L1E57EB: db $6E
+L1E57EC: db $9A
+L1E57ED: db $CC
+L1E57EE: db $D8
+L1E57EF: db $DE
+L1E57F0: db $F0
+L1E57F1: db $00
+L1E57F2: db $3E
+L1E57F3: db $58
+L1E57F4: db $F1
+L1E57F5: db $0E
+L1E57F6: db $0D
+L1E57F7: db $F3
+L1E57F8: db $3B
+L1E57F9: db $42
+L1E57FA: db $50
+L1E57FB: db $3D
+L1E57FC: db $28
+L1E57FD: db $B8
+L1E57FE: db $32
+L1E57FF: db $79
+L1E5800: db $7E
+L1E5801: db $A0
+L1E5802: db $64
+L1E5803: db $1E
+L1E5804: db $1F
+L1E5805: db $58
+L1E5806: db $0F
+L1E5807: db $0B
+L1E5808: db $70
+L1E5809: db $01
+L1E580A: db $76
+L1E580B: db $06
+L1E580C: db $3D
+L1E580D: db $7F
+L1E580E: db $14
+L1E580F: db $08
+L1E5810: db $A5
+L1E5811: db $06
+L1E5812: db $3F
+L1E5813: db $04
+L1E5814: db $9F
+L1E5815: db $81
+L1E5816: db $48
+L1E5817: db $C1
+L1E5818: db $48
+L1E5819: db $33
+L1E581A: db $61
+L1E581B: db $4E
+L1E581C: db $18
+L1E581D: db $78
+L1E581E: db $38
+L1E581F: db $63
+L1E5820: db $00
+L1E5821: db $74
+L1E5822: db $B9
+L1E5823: db $00
+L1E5824: db $A1
+L1E5825: db $98
+L1E5826: db $D0
+L1E5827: db $44
+L1E5828: db $DB
+L1E5829: db $07
+L1E582A: db $44
+L1E582B: db $A8
+L1E582C: db $14
+L1E582D: db $77
+L1E582E: db $0C
+L1E582F: db $60
+L1E5830: db $05
+L1E5831: db $04
+L1E5832: db $F2
+L1E5833: db $03
+L1E5834: db $00
+L1E5835: db $B0
+L1E5836: db $41
+L1E5837: db $B2
+L1E5838: db $C7
+L1E5839: db $62
+L1E583A: db $83
+L1E583B: db $C4
+L1E583C: db $0E
+L1E583D: db $FF
+L1E583E: db $84
+L1E583F: db $60
+L1E5840: db $4C
+L1E5841: db $9E
+L1E5842: db $04
+L1E5843: db $34
+L1E5844: db $05
+L1E5845: db $C5
+L1E5846: db $88
+L1E5847: db $E7
+L1E5848: db $E6
+L1E5849: db $E0
+L1E584A: db $1B
+L1E584B: db $BC
+L1E584C: db $49
+L1E584D: db $8C
+L1E584E: db $F1
+L1E584F: db $FB
+L1E5850: db $9C
+L1E5851: db $34
+L1E5852: db $04
+L1E5853: db $C8
+L1E5854: db $04
+L1E5855: db $D0
+L1E5856: db $3D
+L1E5857: db $00
+L1E5858: db $4B
+L1E5859: db $18
+L1E585A: db $00
+L1E585B: db $80
+L1E585C: db $26
+L1E585D: db $04
+L1E585E: db $3E
+L1E585F: db $10
+L1E5860: db $05
+L1E5861: db $07
+L1E5862: db $7E
+L1E5863: db $39
+L1E5864: db $F9
+L1E5865: db $67
+L1E5866: db $E7
+L1E5867: db $3D
+L1E5868: db $8D
+L1E5869: db $BD
+L1E586A: db $81
+L1E586B: db $CC
+L1E586C: db $E1
+L1E586D: db $27
+L1E586E: db $B1
+L1E586F: db $71
+L1E5870: db $79
+L1E5871: db $F7
+L1E5872: db $00
+L1E5873: db $71
+L1E5874: db $CF
+L1E5875: db $00
+L1E5876: db $3D
+L1E5877: db $01
+L1E5878: db $C3
+L1E5879: db $DF
+L1E587A: db $83
+L1E587B: db $04
+L1E587C: db $40
+L1E587D: db $C2
+L1E587E: db $64
+L1E587F: db $A0
+L1E5880: db $EA
+L1E5881: db $C0
+L1E5882: db $EC
+L1E5883: db $84
+L1E5884: db $DE
+L1E5885: db $2A
+L1E5886: db $86
+L1E5887: db $9F
+L1E5888: db $3D
+L1E5889: db $BB
+L1E588A: db $04
+L1E588B: db $7D
+L1E588C: db $04
+L1E588D: db $74
+L1E588E: db $90
+L1E588F: db $04
+L1E5890: db $50
+L1E5891: db $FD
+L1E5892: db $05
+L1E5893: db $00
+L1E5894: db $D2
+L1E5895: db $0C
+L1E5896: db $8F
+L1E5897: db $F5
+L1E5898: db $3D
+L1E5899: db $C0
+L1E589A: db $1C
+L1E589B: db $04
+L1E589C: db $DD
+L1E589D: db $04
+L1E589E: db $D9
+L1E589F: db $04
+L1E58A0: db $5E
+L1E58A1: db $A9
+L1E58A2: db $04
+L1E58A3: db $61
+L1E58A4: db $04
+L1E58A5: db $DC
+L1E58A6: db $05
+L1E58A7: db $85
+L1E58A8: db $82
+L1E58A9: db $15
+L1E58AA: db $96
+L1E58AB: db $80
+L1E58AC: db $8B
+L1E58AD: db $04
+L1E58AE: db $81
+L1E58AF: db $04
+L1E58B0: db $88
+L1E58B1: db $04
+L1E58B2: db $3E
+L1E58B3: db $8C
+L1E58B4: db $8E
+L1E58B5: db $74
+L1E58B6: db $34
+L1E58B7: db $04
+L1E58B8: db $C8
+L1E58B9: db $EC
+L1E58BA: db $6C
+L1E58BB: db $94
+L1E58BC: db $84
+L1E58BD: db $08
+L1E58BE: db $6E
+L1E58BF: db $A4
+L1E58C0: db $5C
+L1E58C1: db $64
+L1E58C2: db $99
+L1E58C3: db $07
+L1E58C4: db $05
+L1E58C5: db $27
+L1E58C6: db $22
+L1E58C7: db $B2
+L1E58C8: db $3F
+L1E58C9: db $BF
+L1E58CA: db $8E
+L1E58CB: db $B3
+L1E58CC: db $04
+L1E58CD: db $55
+L1E58CE: db $75
+L1E58CF: db $04
+L1E58D0: db $35
+L1E58D1: db $04
+L1E58D2: db $7B
+L1E58D3: db $04
+L1E58D4: db $67
+L1E58D5: db $90
+L1E58D6: db $0A
+L1E58D7: db $D5
+L1E58D8: db $C3
+L1E58D9: db $F1
+L1E58DA: db $92
+L1E58DB: db $88
+L1E58DC: db $90
+L1E58DD: db $05
+L1E58DE: db $83
+L1E58DF: db $AF
+L1E58E0: db $04
+L1E58E1: db $85
+L1E58E2: db $05
+L1E58E3: db $98
+L1E58E4: db $E0
+L1E58E5: db $C8
+L1E58E6: db $04
+L1E58E7: db $A8
+L1E58E8: db $90
+L1E58E9: db $00
+L1E58EA: db $26
+L1E58EB: db $EE
+L1E58EC: db $9C
+L1E58ED: db $EF
+L1E58EE: db $0D
+L1E58EF: db $5D
+L1E58F0: db $03
+L1E58F1: db $87
+L1E58F2: db $00
+L1E58F3: db $7E
+L1E58F4: db $FE
+L1E58F5: db $18
+L1E58F6: db $9C
+L1E58F7: db $D4
+L1E58F8: db $00
+L1E58F9: db $3D
+L1E58FA: db $04
+L1E58FB: db $43
+L1E58FC: db $E9
+L1E58FD: db $47
+L1E58FE: db $D1
+L1E58FF: db $87
+L1E5900: db $04
+L1E5901: db $0F
+L1E5902: db $A1
+L1E5903: db $87
+L1E5904: db $04
+L1E5905: db $21
+L1E5906: db $1F
+L1E5907: db $41
+L1E5908: db $BD
+L1E5909: db $C0
+L1E590A: db $3D
+L1E590B: db $02
+L1E590C: db $6B
+L1E590D: db $80
+L1E590E: db $07
+L1E590F: db $05
+L1E5910: db $CD
+L1E5911: db $E8
+L1E5912: db $DA
+L1E5913: db $06
+L1E5914: db $3E
+L1E5915: db $D4
+L1E5916: db $95
+L1E5917: db $04
+L1E5918: db $F7
+L1E5919: db $04
+L1E591A: db $E6
+L1E591B: db $06
+L1E591C: db $62
+L1E591D: db $84
+L1E591E: db $32
+L1E591F: db $C6
+L1E5920: db $94
+L1E5921: db $39
+L1E5922: db $2C
+L1E5923: db $01
+L1E5924: db $FB
+L1E5925: db $06
+L1E5926: db $FD
+L1E5927: db $AA
+L1E5928: db $06
+L1E5929: db $3D
+L1E592A: db $C4
+L1E592B: db $5B
+L1E592C: db $04
+L1E592D: db $C8
+L1E592E: db $84
+L1E592F: db $A0
+L1E5930: db $56
+L1E5931: db $CA
+L1E5932: db $F0
+L1E5933: db $C0
+L1E5934: db $B0
+L1E5935: db $A8
+L1E5936: db $04
+L1E5937: db $00
+L1E5938: db $82
+L1E5939: db $80
+L1E593A: db $24
+L1E593B: db $A4
+L1E593C: db $8C
+L1E593D: db $A3
+L1E593E: db $8B
+L1E593F: db $40
+L1E5940: db $95
+L1E5941: db $44
+L1E5942: db $15
+L1E5943: db $91
+L1E5944: db $42
+L1E5945: db $11
+L1E5946: db $14
+L1E5947: db $12
+L1E5948: db $B0
+L1E5949: db $14
+L1E594A: db $78
+L1E594B: db $0B
+L1E594C: db $59
+L1E594D: db $3E
+L1E594E: db $7E
+L1E594F: db $7F
+L1E5950: db $00
+L1E5951: db $1B
+L1E5952: db $8D
+L1E5953: db $20
+L1E5954: db $4A
+L1E5955: db $15
+L1E5956: db $04
+L1E5957: db $05
+L1E5958: db $21
+L1E5959: db $08
+L1E595A: db $03
+L1E595B: db $04
+L1E595C: db $17
+L1E595D: db $A8
+L1E595E: db $21
+L1E595F: db $89
+L1E5960: db $80
+L1E5961: db $94
+L1E5962: db $90
+L1E5963: db $93
+L1E5964: db $A7
+L1E5965: db $BB
+L1E5966: db $A2
+L1E5967: db $14
+L1E5968: db $B9
+L1E5969: db $C8
+L1E596A: db $BA
+L1E596B: db $A2
+L1E596C: db $9D
+L1E596D: db $0C
+L1E596E: db $9C
+L1E596F: db $A0
+L1E5970: db $E8
+L1E5971: db $FF
+L1E5972: db $00
+L1E5973: db $4E
+L1E5974: db $FE
+L1E5975: db $C7
+L1E5976: db $DF
+L1E5977: db $CF
+L1E5978: db $C4
+L1E5979: db $04
+L1E597A: db $1D
+L1E597B: db $E6
+L1E597C: db $E7
+L1E597D: db $7C
+L1E597E: db $B4
+L1E597F: db $18
+L1E5980: db $BD
+L1E5981: db $82
+L1E5982: db $1D
+L1E5983: db $09
+L1E5984: db $63
+L1E5985: db $99
+L1E5986: db $C1
+L1E5987: db $19
+L1E5988: db $05
+L1E5989: db $81
+L1E598A: db $DE
+L1E598B: db $04
+L1E598C: db $DC
+L1E598D: db $39
+L1E598E: db $0C
+L1E598F: db $05
+L1E5990: db $3D
+L1E5991: db $01
+L1E5992: db $83
+L1E5993: db $2A
+L1E5994: db $80
+L1E5995: db $8F
+L1E5996: db $04
+L1E5997: db $9F
+L1E5998: db $04
+L1E5999: db $BF
+L1E599A: db $06
+L1E599B: db $EF
+L1E599C: db $B5
+L1E599D: db $04
+L1E599E: db $DB
+L1E599F: db $04
+L1E59A0: db $42
+L1E59A1: db $12
+L1E59A2: db $04
+L1E59A3: db $3C
+L1E59A4: db $04
+L1E59A5: db $55
+L1E59A6: db $48
+L1E59A7: db $04
+L1E59A8: db $00
+L1E59A9: db $05
+L1E59AA: db $F8
+L1E59AB: db $04
+L1E59AC: db $E0
+L1E59AD: db $15
+L1E59AE: db $A8
+L1E59AF: db $01
+L1E59B0: db $53
+L1E59B1: db $04
+L1E59B2: db $FB
+L1E59B3: db $64
+L1E59B4: db $4D
+L1E59B5: db $C7
+L1E59B6: db $01
+L1E59B7: db $51
+L1E59B8: db $03
+L1E59B9: db $04
+L1E59BA: db $07
+L1E59BB: db $04
+L1E59BC: db $E7
+L1E59BD: db $A1
+L1E59BE: db $B7
+L1E59BF: db $84
+L1E59C0: db $AA
+L1E59C1: db $05
+L1E59C2: db $AF
+L1E59C3: db $04
+L1E59C4: db $EE
+L1E59C5: db $04
+L1E59C6: db $EC
+L1E59C7: db $06
+L1E59C8: db $E8
+L1E59C9: db $A8
+L1E59CA: db $04
+L1E59CB: db $A8
+L1E59CC: db $04
+L1E59CD: db $C1
+L1E59CE: db $4C
+L1E59CF: db $86
+L1E59D0: db $0F
+L1E59D1: db $27
+L1E59D2: db $88
+L1E59D3: db $00
+L1E59D4: db $37
+L1E59D5: db $77
+L1E59D6: db $7E
+L1E59D7: db $00
+L1E59D8: db $41
+L1E59D9: db $C5
+L1E59DA: db $6F
+L1E59DB: db $88
+L1E59DC: db $98
+L1E59DD: db $F6
+L1E59DE: db $76
+L1E59DF: db $8D
+L1E59E0: db $84
+L1E59E1: db $1B
+L1E59E2: db $11
+L1E59E3: db $45
+L1E59E4: db $58
+L1E59E5: db $B1
+L1E59E6: db $54
+L1E59E7: db $D1
+L1E59E8: db $B4
+L1E59E9: db $18
+L1E59EA: db $13
+L1E59EB: db $3B
+L1E59EC: db $B3
+L1E59ED: db $0A
+L1E59EE: db $BB
+L1E59EF: db $65
+L1E59F0: db $71
+L1E59F1: db $A0
+L1E59F2: db $84
+L1E59F3: db $8F
+L1E59F4: db $00
+L1E59F5: db $BF
+L1E59F6: db $BA
+L1E59F7: db $00
+L1E59F8: db $83
+L1E59F9: db $00
+L1E59FA: db $18
+L1E59FB: db $00
+L1E59FC: db $82
+L1E59FD: db $02
+L1E59FE: db $FF
+L1E59FF: db $88
+L1E5A00: db $00
+L1E5A01: db $30
+L1E5A02: db $78
+L1E5A03: db $99
+L1E5A04: db $34
+L1E5A05: db $C7
+L1E5A06: db $DF
+L1E5A07: db $E1
+L1E5A08: db $8F
+L1E5A09: db $A4
+L1E5A0A: db $F1
+L1E5A0B: db $F7
+L1E5A0C: db $38
+L1E5A0D: db $00
+L1E5A0E: db $88
+L1E5A0F: db $00
+L1E5A10: db $3D
+L1E5A11: db $5A
+L1E5A12: db $E5
+L1E5A13: db $20
+L1E5A14: db $01
+L1E5A15: db $00
+L1E5A16: db $7D
+L1E5A17: db $0F
+L1E5A18: db $00
+L1E5A19: db $27
+L1E5A1A: db $9F
+L1E5A1B: db $50
+L1E5A1C: db $97
+L1E5A1D: db $E7
+L1E5A1E: db $0D
+L1E5A1F: db $3D
+L1E5A20: db $01
+L1E5A21: db $68
+L1E5A22: db $A4
+L1E5A23: db $FB
+L1E5A24: db $78
+L1E5A25: db $06
+L1E5A26: db $48
+L1E5A27: db $07
+L1E5A28: db $04
+L1E5A29: db $BE
+L1E5A2A: db $04
+L1E5A2B: db $42
+L1E5A2C: db $3A
+L1E5A2D: db $00
+L1E5A2E: db $FE
+L1E5A2F: db $84
+L1E5A30: db $4C
+L1E5A31: db $0C
+L1E5A32: db $65
+L1E5A33: db $04
+L1E5A34: db $46
+L1E5A35: db $58
+L1E5A36: db $20
+L1E5A37: db $05
+L1E5A38: db $62
+L1E5A39: db $04
+L1E5A3A: db $39
+L1E5A3B: db $F9
+L1E5A3C: db $07
+L1E5A3D: db $DD
+L1E5A3E: db $04
+L1E5A3F: db $23
+L1E5A40: db $2D
+L1E5A41: db $93
+L1E5A42: db $2F
+L1E5A43: db $91
+L1E5A44: db $08
+L1E5A45: db $49
+L1E5A46: db $53
+L1E5A47: db $68
+L1E5A48: db $09
+L1E5A49: db $05
+L1E5A4A: db $85
+L1E5A4B: db $DC
+L1E5A4C: db $04
+L1E5A4D: db $D9
+L1E5A4E: db $81
+L1E5A4F: db $DA
+L1E5A50: db $51
+L1E5A51: db $82
+L1E5A52: db $05
+L1E5A53: db $EA
+L1E5A54: db $04
+L1E5A55: db $E8
+L1E5A56: db $83
+L1E5A57: db $B4
+L1E5A58: db $24
+L1E5A59: db $6D
+L1E5A5A: db $42
+L1E5A5B: db $84
+L1E5A5C: db $05
+L1E5A5D: db $40
+L1E5A5E: db $04
+L1E5A5F: db $B0
+L1E5A60: db $26
+L1E5A61: db $88
+L1E5A62: db $52
+L1E5A63: db $0B
+L1E5A64: db $04
+L1E5A65: db $13
+L1E5A66: db $18
+L1E5A67: db $11
+L1E5A68: db $31
+L1E5A69: db $AC
+L1E5A6A: db $43
+L1E5A6B: db $B1
+L1E5A6C: db $84
+L1E5A6D: db $41
+L1E5A6E: db $24
+L1E5A6F: db $04
+L1E5A70: db $03
+L1E5A71: db $01
+L1E5A72: db $21
+L1E5A73: db $04
+L1E5A74: db $AB
+L1E5A75: db $10
+L1E5A76: db $C1
+L1E5A77: db $02
+L1E5A78: db $E1
+L1E5A79: db $00
+L1E5A7A: db $B6
+L1E5A7B: db $B5
+L1E5A7C: db $9C
+L1E5A7D: db $57
+L1E5A7E: db $EC
+L1E5A7F: db $94
+L1E5A80: db $F0
+L1E5A81: db $14
+L1E5A82: db $F8
+L1E5A83: db $AC
+L1E5A84: db $08
+L1E5A85: db $00
+L1E5A86: db $6A
+L1E5A87: db $FF
+L1E5A88: db $05
+L1E5A89: db $00
+L1E5A8A: db $B3
+L1E5A8B: db $74
+L1E5A8C: db $91
+L1E5A8D: db $84
+L1E5A8E: db $12
+L1E5A8F: db $3F
+L1E5A90: db $8A
+L1E5A91: db $59
+L1E5A92: db $44
+L1E5A93: db $10
+L1E5A94: db $6C
+L1E5A95: db $CC
+L1E5A96: db $00
+L1E5A97: db $30
+L1E5A98: db $EF
+L1E5A99: db $05
+L1E5A9A: db $00
+L1E5A9B: db $18
+L1E5A9C: db $F1
+L1E5A9D: db $95
+L1E5A9E: db $AC
+L1E5A9F: db $00
+L1E5AA0: db $38
+L1E5AA1: db $FA
+L1E5AA2: db $00
+L1E5AA3: db $0D
+L1E5AA4: db $03
+L1E5AA5: db $3D
+L1E5AA6: db $01
+L1E5AA7: db $87
+L1E5AA8: db $00
+L1E5AA9: db $8E
+L1E5AAA: db $01
+L1E5AAB: db $8F
+L1E5AAC: db $8C
+L1E5AAD: db $9E
+L1E5AAE: db $98
+L1E5AAF: db $9C
+L1E5AB0: db $90
+L1E5AB1: db $B8
+L1E5AB2: db $04
+L1E5AB3: db $79
+L1E5AB4: db $B0
+L1E5AB5: db $C0
+L1E5AB6: db $04
+L1E5AB7: db $3D
+L1E5AB8: db $0C
+L1E5AB9: db $C0
+L1E5ABA: db $06
+L1E5ABB: db $5C
+L1E5ABC: db $14
+L1E5ABD: db $61
+L1E5ABE: db $1C
+L1E5ABF: db $18
+L1E5AC0: db $10
+L1E5AC1: db $04
+L1E5AC2: db $04
+L1E5AC3: db $0D
+L1E5AC4: db $E9
+L1E5AC5: db $2E
+L1E5AC6: db $02
+L1E5AC7: db $E3
+L1E5AC8: db $3D
+L1E5AC9: db $1F
+L1E5ACA: db $34
+L1E5ACB: db $78
+L1E5ACC: db $B4
+L1E5ACD: db $47
+L1E5ACE: db $AD
+L1E5ACF: db $CC
+L1E5AD0: db $C7
+L1E5AD1: db $48
+L1E5AD2: db $21
+L1E5AD3: db $04
+L1E5AD4: db $00
+L1E5AD5: db $23
+L1E5AD6: db $28
+L1E5AD7: db $57
+L1E5AD8: db $AD
+L1E5AD9: db $74
+L1E5ADA: db $A0
+L1E5ADB: db $04
+L1E5ADC: db $A1
+L1E5ADD: db $04
+L1E5ADE: db $3C
+L1E5ADF: db $06
+L1E5AE0: db $54
+L1E5AE1: db $93
+L1E5AE2: db $04
+L1E5AE3: db $BB
+L1E5AE4: db $04
+L1E5AE5: db $AA
+L1E5AE6: db $04
+L1E5AE7: db $B3
+L1E5AE8: db $0A
+L1E5AE9: db $56
+L1E5AEA: db $EA
+L1E5AEB: db $A4
+L1E5AEC: db $FA
+L1E5AED: db $54
+L1E5AEE: db $09
+L1E5AEF: db $04
+L1E5AF0: db $7C
+L1E5AF1: db $00
+L1E5AF2: db $89
+L1E5AF3: db $44
+L1E5AF4: db $30
+L1E5AF5: db $32
+L1E5AF6: db $07
+L1E5AF7: db $00
+L1E5AF8: db $27
+L1E5AF9: db $A7
+L1E5AFA: db $94
+L1E5AFB: db $03
+L1E5AFC: db $03
+L1E5AFD: db $11
+L1E5AFE: db $99
+L1E5AFF: db $F3
+L1E5B00: db $F9
+L1E5B01: db $F1
+L1E5B02: db $00
+L1E5B03: db $E0
+L1E5B04: db $27
+L1E5B05: db $E1
+L1E5B06: db $C3
+L1E5B07: db $04
+L1E5B08: db $D7
+L1E5B09: db $D1
+L1E5B0A: db $38
+L1E5B0B: db $5C
+L1E5B0C: db $84
+L1E5B0D: db $20
+L1E5B0E: db $9B
+L1E5B0F: db $82
+L1E5B10: db $64
+L1E5B11: db $94
+L1E5B12: db $8D
+L1E5B13: db $90
+L1E5B14: db $8C
+L1E5B15: db $9C
+L1E5B16: db $AD
+L1E5B17: db $14
+L1E5B18: db $88
+L1E5B19: db $D6
+L1E5B1A: db $FF
+L1E5B1B: db $00
+L1E5B1C: db $88
+L1E5B1D: db $C7
+L1E5B1E: db $04
+L1E5B1F: db $A0
+L1E5B20: db $0C
+L1E5B21: db $7F
+L1E5B22: db $04
+L1E5B23: db $7C
+L1E5B24: db $F8
+L1E5B25: db $3F
+L1E5B26: db $3C
+L1E5B27: db $1F
+L1E5B28: db $5C
+L1E5B29: db $9F
+L1E5B2A: db $24
+L1E5B2B: db $CF
+L1E5B2C: db $3D
+L1E5B2D: db $38
+L1E5B2E: db $84
+L1E5B2F: db $97
+L1E5B30: db $91
+L1E5B31: db $47
+L1E5B32: db $F7
+L1E5B33: db $B4
+L1E5B34: db $6F
+L1E5B35: db $61
+L1E5B36: db $DF
+L1E5B37: db $1C
+L1E5B38: db $38
+L1E5B39: db $74
+L1E5B3A: db $A7
+L1E5B3B: db $44
+L1E5B3C: db $01
+L1E5B3D: db $3D
+L1E5B3E: db $00
+L1E5B3F: db $FE
+L1E5B40: db $04
+L1E5B41: db $98
+L1E5B42: db $07
+L1E5B43: db $FF
+L1E5B44: db $07
+L1E5B45: db $06
+L1E5B46: db $01
+L1E5B47: db $B0
+L1E5B48: db $04
+L1E5B49: db $54
+L1E5B4A: db $07
+L1E5B4B: db $06
+L1E5B4C: db $5F
+L1E5B4D: db $21
+L1E5B4E: db $06
+L1E5B4F: db $20
+L1E5B50: db $46
+L1E5B51: db $5F
+L1E5B52: db $07
+L1E5B53: db $07
+L1E5B54: db $B5
+L1E5B55: db $FF
+L1E5B56: db $01
+L1E5B57: db $5F
+L1E5B58: db $05
+L1E5B59: db $87
+L1E5B5A: db $05
+L1E5B5B: db $B5
+L1E5B5C: db $FF
+L1E5B5D: db $07
+L1E5B5E: db $7B
+L1E5B5F: db $83
+L1E5B60: db $17
+L1E5B61: db $FF
+L1E5B62: db $5F
+L1E5B63: db $06
+L1E5B64: db $C1
+L1E5B65: db $97
+L1E5B66: db $FE
+L1E5B67: db $5E
+L1E5B68: db $03
+L1E5B69: db $04
+L1E5B6A: db $84
+L1E5B6B: db $07
+L1E5B6C: db $7F
+L1E5B6D: db $FF
+L1E5B6E: db $04
+L1E5B6F: db $C0
+L1E5B70: db $FF
+L1E5B71: db $77
+L1E5B72: db $7F
+L1E5B73: db $17
+L1E5B74: db $FF
+L1E5B75: db $5F
+L1E5B76: db $FF
+L1E5B77: db $17
+L1E5B78: db $FF
+L1E5B79: db $FF
+L1E5B7A: db $5F
+L1E5B7B: db $7F
+L1E5B7C: db $FF
+L1E5B7D: db $FF
+L1E5B7E: db $5F
+L1E5B7F: db $7F
+L1E5B80: db $17
+L1E5B81: db $FF
+L1E5B82: db $F0
+L1E5B83: db $5F
+L1E5B84: db $06
+L1E5B85: db $FF
+L1E5B86: db $FE
+L1E5B87: db $78
+L1E5B88: db $00
+L1E5B89: db $4A
+L1E5B8A: db $06
+L1E5B8B: db $00
+L1E5B8C: db $0E
+L1E5B8D: db $0F
+L1E5B8E: db $20
+L1E5B8F: db $07
+L1E5B90: db $17
+L1E5B91: db $00
+L1E5B92: db $69
+L1E5B93: db $03
+L1E5B94: db $10
+L1E5B95: db $0E
+L1E5B96: db $3C
+L1E5B97: db $00
+L1E5B98: db $66
+L1E5B99: db $7F
+L1E5B9A: db $10
+L1E5B9B: db $00
+L1E5B9C: db $77
+L1E5B9D: db $0C
+L1E5B9E: db $3F
+L1E5B9F: db $30
+L1E5BA0: db $3E
+L1E5BA1: db $60
+L1E5BA2: db $78
+L1E5BA3: db $7E
+L1E5BA4: db $FA
+L1E5BA5: db $00
+L1E5BA6: db $E0
+L1E5BA7: db $70
+L1E5BA8: db $10
+L1E5BA9: db $0E
+L1E5BAA: db $F8
+L1E5BAB: db $00
+L1E5BAC: db $CC
+L1E5BAD: db $59
+L1E5BAE: db $FE
+L1E5BAF: db $10
+L1E5BB0: db $EE
+L1E5BB1: db $40
+L1E5BB2: db $30
+L1E5BB3: db $C0
+L1E5BB4: db $FC
+L1E5BB5: db $10
+L1E5BB6: db $6D
+L1E5BB7: db $E0
+L1E5BB8: db $11
+L1E5BB9: db $E0
+L1E5BBA: db $60
+L1E5BBB: db $10
+L1E5BBC: db $0E
+L1E5BBD: db $3C
+L1E5BBE: db $00
+L1E5BBF: db $0B
+L1E5BC0: db $66
+L1E5BC1: db $7F
+L1E5BC2: db $60
+L1E5BC3: db $77
+L1E5BC4: db $10
+L1E5BC5: db $70
+L1E5BC6: db $11
+L1E5BC7: db $70
+L1E5BC8: db $D6
+L1E5BC9: db $50
+L1E5BCA: db $A0
+L1E5BCB: db $3F
+L1E5BCC: db $E0
+L1E5BCD: db $1E
+L1E5BCE: db $10
+L1E5BCF: db $0E
+L1E5BD0: db $79
+L1E5BD1: db $96
+L1E5BD2: db $00
+L1E5BD3: db $CD
+L1E5BD4: db $FF
+L1E5BD5: db $10
+L1E5BD6: db $EF
+L1E5BD7: db $15
+L1E5BD8: db $A0
+L1E5BD9: db $7F
+L1E5BDA: db $B4
+L1E5BDB: db $E0
+L1E5BDC: db $3C
+L1E5BDD: db $10
+L1E5BDE: db $0E
+L1E5BDF: db $8C
+L1E5BE0: db $00
+L1E5BE1: db $DC
+L1E5BE2: db $DE
+L1E5BE3: db $1D
+L1E5BE4: db $FC
+L1E5BE5: db $FE
+L1E5BE6: db $AC
+L1E5BE7: db $10
+L1E5BE8: db $60
+L1E5BE9: db $11
+L1E5BEA: db $CE
+L1E5BEB: db $11
+L1E5BEC: db $B4
+L1E5BED: db $E0
+L1E5BEE: db $C6
+L1E5BEF: db $10
+L1E5BF0: db $0E
+L1E5BF1: db $FF
+L1E5BF2: db $10
+L1E5BF3: db $FC
+L1E5BF4: db $7C
+L1E5BF5: db $15
+L1E5BF6: db $F0
+L1E5BF7: db $40
+L1E5BF8: db $E0
+L1E5BF9: db $10
+L1E5BFA: db $C0
+L1E5BFB: db $12
+L1E5BFC: db $80
+L1E5BFD: db $B0
+L1E5BFE: db $DD
+L1E5BFF: db $11
+L1E5C00: db $0F
+L1E5C01: db $C0
+L1E5C02: db $0F
+L1E5C03: db $0F
+L1E5C04: db $0E
+L1E5C05: db $00
+L1E5C06: db $0E
+L1E5C07: db $52
+L1E5C08: db $FF
+L1E5C09: db $01
+L1E5C0A: db $81
+L1E5C0B: db $11
+L1E5C0C: db $FD
+L1E5C0D: db $83
+L1E5C0E: db $30
+L1E5C0F: db $82
+L1E5C10: db $83
+L1E5C11: db $11
+L1E5C12: db $F9
+L1E5C13: db $86
+L1E5C14: db $FE
+L1E5C15: db $84
+L1E5C16: db $FA
+L1E5C17: db $10
+L1E5C18: db $30
+L1E5C19: db $CC
+L1E5C1A: db $D0
+L1E5C1B: db $11
+L1E5C1C: db $FC
+L1E5C1D: db $80
+L1E5C1E: db $12
+L1E5C1F: db $50
+L1E5C20: db $D8
+L1E5C21: db $83
+L1E5C22: db $D4
+L1E5C23: db $40
+L1E5C24: db $10
+L1E5C25: db $FF
+L1E5C26: db $01
+L1E5C27: db $5B
+L1E5C28: db $10
+L1E5C29: db $5F
+L1E5C2A: db $E7
+L1E5C2B: db $48
+L1E5C2C: db $BD
+L1E5C2D: db $30
+L1E5C2E: db $85
+L1E5C2F: db $63
+L1E5C30: db $10
+L1E5C31: db $A5
+L1E5C32: db $01
+L1E5C33: db $A1
+L1E5C34: db $91
+L1E5C35: db $10
+L1E5C36: db $B1
+L1E5C37: db $49
+L1E5C38: db $30
+L1E5C39: db $41
+L1E5C3A: db $11
+L1E5C3B: db $55
+L1E5C3C: db $60
+L1E5C3D: db $04
+L1E5C3E: db $CD
+L1E5C3F: db $0F
+L1E5C40: db $3D
+L1E5C41: db $5D
+L1E5C42: db $7D
+L1E5C43: db $00
+L1E5C44: db $7F
+L1E5C45: db $75
+L1E5C46: db $C8
+L1E5C47: db $00
+L1E5C48: db $D0
+L1E5C49: db $83
+L1E5C4A: db $89
+L1E5C4B: db $00
+L1E5C4C: db $BA
+L1E5C4D: db $BB
+L1E5C4E: db $CE
+L1E5C4F: db $80
+L1E5C50: db $00
+L1E5C51: db $A7
+L1E5C52: db $F7
+L1E5C53: db $D1
+L1E5C54: db $F1
+L1E5C55: db $A9
+L1E5C56: db $E9
+L1E5C57: db $FF
+L1E5C58: db $A0
+L1E5C59: db $00
+L1E5C5A: db $00
+L1E5C5B: db $0E
+L1E5C5C: db $0D
+L1E5C5D: db $2D
+L1E5C5E: db $63
+L1E5C5F: db $EB
+L1E5C60: db $9F
+L1E5C61: db $88
+L1E5C62: db $00
+L1E5C63: db $27
+L1E5C64: db $F7
+L1E5C65: db $03
+L1E5C66: db $60
+L1E5C67: db $8B
+L1E5C68: db $AB
+L1E5C69: db $91
+L1E5C6A: db $2A
+L1E5C6B: db $D1
+L1E5C6C: db $FF
+L1E5C6D: db $00
+L1E5C6E: db $00
+L1E5C6F: db $0E
+L1E5C70: db $FF
+L1E5C71: db $01
+L1E5C72: db $8D
+L1E5C73: db $82
+L1E5C74: db $10
+L1E5C75: db $9D
+L1E5C76: db $FB
+L1E5C77: db $97
+L1E5C78: db $EF
+L1E5C79: db $91
+L1E5C7A: db $30
+L1E5C7B: db $81
+L1E5C7C: db $44
+L1E5C7D: db $F3
+L1E5C7E: db $12
+L1E5C7F: db $F7
+L1E5C80: db $89
+L1E5C81: db $E3
+L1E5C82: db $10
+L1E5C83: db $E7
+L1E5C84: db $8D
+L1E5C85: db $04
+L1E5C86: db $E1
+L1E5C87: db $8B
+L1E5C88: db $F1
+L1E5C89: db $95
+L1E5C8A: db $ED
+L1E5C8B: db $50
+L1E5C8C: db $AD
+L1E5C8D: db $9F
+L1E5C8E: db $6B
+L1E5C8F: db $AF
+L1E5C90: db $10
+L1E5C91: db $D0
+L1E5C92: db $93
+L1E5C93: db $E0
+L1E5C94: db $99
+L1E5C95: db $F0
+L1E5C96: db $00
+L1E5C97: db $2C
+L1E5C98: db $B3
+L1E5C99: db $BF
+L1E5C9A: db $60
+L1E5C9B: db $9B
+L1E5C9C: db $30
+L1E5C9D: db $00
+L1E5C9E: db $87
+L1E5C9F: db $8F
+L1E5CA0: db $54
+L1E5CA1: db $FF
+L1E5CA2: db $00
+L1E5CA3: db $00
+L1E5CA4: db $0E
+L1E5CA5: db $FF
+L1E5CA6: db $00
+L1E5CA7: db $8F
+L1E5CA8: db $81
+L1E5CA9: db $4A
+L1E5CAA: db $9F
+L1E5CAB: db $10
+L1E5CAC: db $BF
+L1E5CAD: db $82
+L1E5CAE: db $10
+L1E5CAF: db $80
+L1E5CB0: db $11
+L1E5CB1: db $DF
+L1E5CB2: db $AA
+L1E5CB3: db $10
+L1E5CB4: db $FE
+L1E5CB5: db $10
+L1E5CB6: db $AE
+L1E5CB7: db $10
+L1E5CB8: db $AC
+L1E5CB9: db $10
+L1E5CBA: db $98
+L1E5CBB: db $89
+L1E5CBC: db $10
+L1E5CBD: db $D9
+L1E5CBE: db $83
+L1E5CBF: db $D3
+L1E5CC0: db $10
+L1E5CC1: db $D2
+L1E5CC2: db $86
+L1E5CC3: db $11
+L1E5CC4: db $54
+L1E5CC5: db $97
+L1E5CC6: db $50
+L1E5CC7: db $FF
+L1E5CC8: db $01
+L1E5CC9: db $5B
+L1E5CCA: db $10
+L1E5CCB: db $9F
+L1E5CCC: db $F7
+L1E5CCD: db $0E
+L1E5CCE: db $95
+L1E5CCF: db $F3
+L1E5CD0: db $01
+L1E5CD1: db $E3
+L1E5CD2: db $10
+L1E5CD3: db $C0
+L1E5CD4: db $10
+L1E5CD5: db $13
+L1E5CD6: db $81
+L1E5CD7: db $10
+L1E5CD8: db $25
+L1E5CD9: db $21
+L1E5CDA: db $4F
+L1E5CDB: db $E9
+L1E5CDC: db $71
+L1E5CDD: db $69
+L1E5CDE: db $10
+L1E5CDF: db $00
+L1E5CE0: db $79
+L1E5CE1: db $C3
+L1E5CE2: db $CF
+L1E5CE3: db $2B
+L1E5CE4: db $2F
+L1E5CE5: db $EB
+L1E5CE6: db $EF
+L1E5CE7: db $51
+L1E5CE8: db $08
+L1E5CE9: db $59
+L1E5CEA: db $81
+L1E5CEB: db $83
+L1E5CEC: db $9D
+L1E5CED: db $00
+L1E5CEE: db $BE
+L1E5CEF: db $BF
+L1E5CF0: db $8E
+L1E5CF1: db $AA
+L1E5CF2: db $00
+L1E5CF3: db $87
+L1E5CF4: db $00
+L1E5CF5: db $89
+L1E5CF6: db $02
+L1E5CF7: db $FF
+L1E5CF8: db $00
+L1E5CF9: db $00
+L1E5CFA: db $80
+L1E5CFB: db $0E
+L1E5CFC: db $11
+L1E5CFD: db $99
+L1E5CFE: db $A1
+L1E5CFF: db $E1
+L1E5D00: db $6F
+L1E5D01: db $EF
+L1E5D02: db $27
+L1E5D03: db $00
+L1E5D04: db $E7
+L1E5D05: db $23
+L1E5D06: db $73
+L1E5D07: db $8B
+L1E5D08: db $93
+L1E5D09: db $E3
+L1E5D0A: db $F3
+L1E5D0B: db $FF
+L1E5D0C: db $A9
+L1E5D0D: db $00
+L1E5D0E: db $00
+L1E5D0F: db $0E
+L1E5D10: db $FF
+L1E5D11: db $00
+L1E5D12: db $BF
+L1E5D13: db $8D
+L1E5D14: db $10
+L1E5D15: db $52
+L1E5D16: db $95
+L1E5D17: db $40
+L1E5D18: db $87
+L1E5D19: db $10
+L1E5D1A: db $81
+L1E5D1B: db $F9
+L1E5D1C: db $10
+L1E5D1D: db $B3
+L1E5D1E: db $A9
+L1E5D1F: db $10
+L1E5D20: db $F7
+L1E5D21: db $10
+L1E5D22: db $E3
+L1E5D23: db $10
+L1E5D24: db $E9
+L1E5D25: db $89
+L1E5D26: db $F0
+L1E5D27: db $3F
+L1E5D28: db $99
+L1E5D29: db $9D
+L1E5D2A: db $00
+L1E5D2B: db $20
+L1E5D2C: db $00
+L1E5D2D: db $80
+L1E5D2E: db $00
+L1E5D2F: db $31
+L1E5D30: db $41
+L1E5D31: db $9F
+L1E5D32: db $70
+L1E5D33: db $97
+L1E5D34: db $95
+L1E5D35: db $A1
+L1E5D36: db $B9
+L1E5D37: db $EB
+L1E5D38: db $00
+L1E5D39: db $1C
+L1E5D3A: db $B3
+L1E5D3B: db $BB
+L1E5D3C: db $93
+L1E5D3D: db $A0
+L1E5D3E: db $10
+L1E5D3F: db $A0
+L1E5D40: db $8B
+L1E5D41: db $8F
+L1E5D42: db $57
+L1E5D43: db $FF
+L1E5D44: db $00
+L1E5D45: db $00
+L1E5D46: db $0E
+L1E5D47: db $C0
+L1E5D48: db $0F
+L1E5D49: db $0F
+L1E5D4A: db $0E
+L1E5D4B: db $55
+L1E5D4C: db $00
+L1E5D4D: db $0E
+L1E5D4E: db $FF
+L1E5D4F: db $01
+L1E5D50: db $80
+L1E5D51: db $13
+L1E5D52: db $FE
+L1E5D53: db $10
+L1E5D54: db $09
+L1E5D55: db $D6
+L1E5D56: db $A8
+L1E5D57: db $FA
+L1E5D58: db $AC
+L1E5D59: db $50
+L1E5D5A: db $AD
+L1E5D5B: db $D2
+L1E5D5C: db $10
+L1E5D5D: db $2A
+L1E5D5E: db $82
+L1E5D5F: db $DD
+L1E5D60: db $10
+L1E5D61: db $C1
+L1E5D62: db $10
+L1E5D63: db $91
+L1E5D64: db $E0
+L1E5D65: db $81
+L1E5D66: db $21
+L1E5D67: db $88
+L1E5D68: db $AB
+L1E5D69: db $20
+L1E5D6A: db $93
+L1E5D6B: db $8B
+L1E5D6C: db $9B
+L1E5D6D: db $FF
+L1E5D6E: db $00
+L1E5D6F: db $35
+L1E5D70: db $FB
+L1E5D71: db $01
+L1E5D72: db $20
+L1E5D73: db $10
+L1E5D74: db $7F
+L1E5D75: db $10
+L1E5D76: db $5D
+L1E5D77: db $12
+L1E5D78: db $10
+L1E5D79: db $4D
+L1E5D7A: db $11
+L1E5D7B: db $5F
+L1E5D7C: db $10
+L1E5D7D: db $0F
+L1E5D7E: db $31
+L1E5D7F: db $1F
+L1E5D80: db $21
+L1E5D81: db $6A
+L1E5D82: db $49
+L1E5D83: db $10
+L1E5D84: db $A0
+L1E5D85: db $41
+L1E5D86: db $10
+L1E5D87: db $03
+L1E5D88: db $40
+L1E5D89: db $AB
+L1E5D8A: db $00
+L1E5D8B: db $C1
+L1E5D8C: db $C9
+L1E5D8D: db $E5
+L1E5D8E: db $E3
+L1E5D8F: db $A2
+L1E5D90: db $87
+L1E5D91: db $AE
+L1E5D92: db $8F
+L1E5D93: db $58
+L1E5D94: db $BE
+L1E5D95: db $10
+L1E5D96: db $B7
+L1E5D97: db $50
+L1E5D98: db $30
+L1E5D99: db $8E
+L1E5D9A: db $B3
+L1E5D9B: db $83
+L1E5D9C: db $14
+L1E5D9D: db $B1
+L1E5D9E: db $85
+L1E5D9F: db $FF
+L1E5DA0: db $00
+L1E5DA1: db $00
+L1E5DA2: db $0E
+L1E5DA3: db $C5
+L1E5DA4: db $D3
+L1E5DA5: db $10
+L1E5DA6: db $6D
+L1E5DA7: db $F1
+L1E5DA8: db $ED
+L1E5DA9: db $11
+L1E5DAA: db $E1
+L1E5DAB: db $4D
+L1E5DAC: db $71
+L1E5DAD: db $8D
+L1E5DAE: db $4A
+L1E5DAF: db $C1
+L1E5DB0: db $10
+L1E5DB1: db $A1
+L1E5DB2: db $FF
+L1E5DB3: db $00
+L1E5DB4: db $00
+L1E5DB5: db $0E
+L1E5DB6: db $FF
+L1E5DB7: db $98
+L1E5DB8: db $01
+L1E5DB9: db $81
+L1E5DBA: db $FD
+L1E5DBB: db $12
+L1E5DBC: db $51
+L1E5DBD: db $BF
+L1E5DBE: db $C1
+L1E5DBF: db $DB
+L1E5DC0: db $3A
+L1E5DC1: db $C5
+L1E5DC2: db $CD
+L1E5DC3: db $10
+L1E5DC4: db $60
+L1E5DC5: db $10
+L1E5DC6: db $85
+L1E5DC7: db $20
+L1E5DC8: db $AB
+L1E5DC9: db $98
+L1E5DCA: db $10
+L1E5DCB: db $83
+L1E5DCC: db $89
+L1E5DCD: db $20
+L1E5DCE: db $01
+L1E5DCF: db $C3
+L1E5DD0: db $99
+L1E5DD1: db $9B
+L1E5DD2: db $42
+L1E5DD3: db $B9
+L1E5DD4: db $00
+L1E5DD5: db $C9
+L1E5DD6: db $9D
+L1E5DD7: db $E9
+L1E5DD8: db $AD
+L1E5DD9: db $11
+L1E5DDA: db $F9
+L1E5DDB: db $A8
+L1E5DDC: db $70
+L1E5DDD: db $D9
+L1E5DDE: db $70
+L1E5DDF: db $F1
+L1E5DE0: db $30
+L1E5DE1: db $D1
+L1E5DE2: db $81
+L1E5DE3: db $FF
+L1E5DE4: db $A9
+L1E5DE5: db $00
+L1E5DE6: db $00
+L1E5DE7: db $0E
+L1E5DE8: db $FF
+L1E5DE9: db $00
+L1E5DEA: db $DF
+L1E5DEB: db $80
+L1E5DEC: db $20
+L1E5DED: db $AA
+L1E5DEE: db $10
+L1E5DEF: db $FE
+L1E5DF0: db $10
+L1E5DF1: db $BA
+L1E5DF2: db $18
+L1E5DF3: db $F2
+L1E5DF4: db $12
+L1E5DF5: db $F8
+L1E5DF6: db $45
+L1E5DF7: db $88
+L1E5DF8: db $11
+L1E5DF9: db $D8
+L1E5DFA: db $89
+L1E5DFB: db $D0
+L1E5DFC: db $10
+L1E5DFD: db $A1
+L1E5DFE: db $90
+L1E5DFF: db $40
+L1E5E00: db $FF
+L1E5E01: db $00
+L1E5E02: db $FD
+L1E5E03: db $03
+L1E5E04: db $DD
+L1E5E05: db $23
+L1E5E06: db $E5
+L1E5E07: db $0B
+L1E5E08: db $02
+L1E5E09: db $27
+L1E5E0A: db $09
+L1E5E0B: db $4B
+L1E5E0C: db $15
+L1E5E0D: db $5B
+L1E5E0E: db $05
+L1E5E0F: db $11
+L1E5E10: db $53
+L1E5E11: db $80
+L1E5E12: db $10
+L1E5E13: db $51
+L1E5E14: db $07
+L1E5E15: db $11
+L1E5E16: db $03
+L1E5E17: db $01
+L1E5E18: db $41
+L1E5E19: db $61
+L1E5E1A: db $36
+L1E5E1B: db $F1
+L1E5E1C: db $71
+L1E5E1D: db $00
+L1E5E1E: db $70
+L1E5E1F: db $31
+L1E5E20: db $00
+L1E5E21: db $30
+L1E5E22: db $AD
+L1E5E23: db $02
+L1E5E24: db $80
+L1E5E25: db $F5
+L1E5E26: db $88
+L1E5E27: db $D1
+L1E5E28: db $84
+L1E5E29: db $E3
+L1E5E2A: db $10
+L1E5E2B: db $F0
+L1E5E2C: db $6D
+L1E5E2D: db $8E
+L1E5E2E: db $80
+L1E5E2F: db $00
+L1E5E30: db $FF
+L1E5E31: db $11
+L1E5E32: db $00
+L1E5E33: db $00
+L1E5E34: db $0E
+L1E5E35: db $00
+L1E5E36: db $71
+L1E5E37: db $F9
+L1E5E38: db $31
+L1E5E39: db $B1
+L1E5E3A: db $41
+L1E5E3B: db $C1
+L1E5E3C: db $A1
+L1E5E3D: db $21
+L1E5E3E: db $AA
+L1E5E3F: db $11
+L1E5E40: db $01
+L1E5E41: db $00
+L1E5E42: db $E1
+L1E5E43: db $10
+L1E5E44: db $FF
+L1E5E45: db $00
+L1E5E46: db $00
+L1E5E47: db $A4
+L1E5E48: db $0E
+L1E5E49: db $FF
+L1E5E4A: db $00
+L1E5E4B: db $BD
+L1E5E4C: db $83
+L1E5E4D: db $20
+L1E5E4E: db $81
+L1E5E4F: db $FB
+L1E5E50: db $A0
+L1E5E51: db $10
+L1E5E52: db $F3
+L1E5E53: db $10
+L1E5E54: db $E9
+L1E5E55: db $95
+L1E5E56: db $ED
+L1E5E57: db $91
+L1E5E58: db $DD
+L1E5E59: db $A0
+L1E5E5A: db $10
+L1E5E5B: db $CD
+L1E5E5C: db $12
+L1E5E5D: db $E5
+L1E5E5E: db $B1
+L1E5E5F: db $C1
+L1E5E60: db $99
+L1E5E61: db $D9
+L1E5E62: db $20
+L1E5E63: db $8D
+L1E5E64: db $9D
+L1E5E65: db $10
+L1E5E66: db $95
+L1E5E67: db $A5
+L1E5E68: db $D5
+L1E5E69: db $AD
+L1E5E6A: db $DD
+L1E5E6B: db $C5
+L1E5E6C: db $50
+L1E5E6D: db $D0
+L1E5E6E: db $85
+L1E5E6F: db $89
+L1E5E70: db $A9
+L1E5E71: db $F0
+L1E5E72: db $81
+L1E5E73: db $10
+L1E5E74: db $6A
+L1E5E75: db $A1
+L1E5E76: db $20
+L1E5E77: db $00
+L1E5E78: db $F9
+L1E5E79: db $10
+L1E5E7A: db $FF
+L1E5E7B: db $00
+L1E5E7C: db $00
+L1E5E7D: db $BA
+L1E5E7E: db $0E
+L1E5E7F: db $C0
+L1E5E80: db $0F
+L1E5E81: db $0F
+L1E5E82: db $0E
+L1E5E83: db $00
+L1E5E84: db $0E
+L1E5E85: db $FF
+L1E5E86: db $80
+L1E5E87: db $00
+L1E5E88: db $D0
+L1E5E89: db $F0
+L1E5E8A: db $A2
+L1E5E8B: db $E4
+L1E5E8C: db $CC
+L1E5E8D: db $C9
+L1E5E8E: db $8B
+L1E5E8F: db $00
+L1E5E90: db $CA
+L1E5E91: db $84
+L1E5E92: db $8E
+L1E5E93: db $8A
+L1E5E94: db $C4
+L1E5E95: db $80
+L1E5E96: db $A1
+L1E5E97: db $81
+L1E5E98: db $00
+L1E5E99: db $C3
+L1E5E9A: db $97
+L1E5E9B: db $B7
+L1E5E9C: db $DE
+L1E5E9D: db $BF
+L1E5E9E: db $9C
+L1E5E9F: db $9E
+L1E5EA0: db $88
+L1E5EA1: db $18
+L1E5EA2: db $CC
+L1E5EA3: db $C8
+L1E5EA4: db $CA
+L1E5EA5: db $40
+L1E5EA6: db $80
+L1E5EA7: db $C6
+L1E5EA8: db $CE
+L1E5EA9: db $FF
+L1E5EAA: db $88
+L1E5EAB: db $00
+L1E5EAC: db $31
+L1E5EAD: db $71
+L1E5EAE: db $19
+L1E5EAF: db $00
+L1E5EB0: db $49
+L1E5EB1: db $9D
+L1E5EB2: db $8D
+L1E5EB3: db $20
+L1E5EB4: db $0D
+L1E5EB5: db $05
+L1E5EB6: db $11
+L1E5EB7: db $65
+L1E5EB8: db $01
+L1E5EB9: db $E5
+L1E5EBA: db $81
+L1E5EBB: db $E1
+L1E5EBC: db $EA
+L1E5EBD: db $11
+L1E5EBE: db $50
+L1E5EBF: db $01
+L1E5EC0: db $61
+L1E5EC1: db $10
+L1E5EC2: db $15
+L1E5EC3: db $70
+L1E5EC4: db $BD
+L1E5EC5: db $A0
+L1E5EC6: db $30
+L1E5EC7: db $39
+L1E5EC8: db $10
+L1E5EC9: db $35
+L1E5ECA: db $8F
+L1E5ECB: db $CF
+L1E5ECC: db $D6
+L1E5ECD: db $D7
+L1E5ECE: db $02
+L1E5ECF: db $9F
+L1E5ED0: db $DF
+L1E5ED1: db $C9
+L1E5ED2: db $E9
+L1E5ED3: db $AF
+L1E5ED4: db $EF
+L1E5ED5: db $60
+L1E5ED6: db $F7
+L1E5ED7: db $54
+L1E5ED8: db $A6
+L1E5ED9: db $10
+L1E5EDA: db $FF
+L1E5EDB: db $00
+L1E5EDC: db $00
+L1E5EDD: db $0E
+L1E5EDE: db $01
+L1E5EDF: db $7D
+L1E5EE0: db $08
+L1E5EE1: db $11
+L1E5EE2: db $E1
+L1E5EE3: db $C5
+L1E5EE4: db $E9
+L1E5EE5: db $11
+L1E5EE6: db $8D
+L1E5EE7: db $81
+L1E5EE8: db $89
+L1E5EE9: db $4A
+L1E5EEA: db $A1
+L1E5EEB: db $B0
+L1E5EEC: db $61
+L1E5EED: db $FF
+L1E5EEE: db $00
+L1E5EEF: db $00
+L1E5EF0: db $0E
+L1E5EF1: db $FF
+L1E5EF2: db $80
+L1E5EF3: db $00
+L1E5EF4: db $C5
+L1E5EF5: db $8D
+L1E5EF6: db $F5
+L1E5EF7: db $A5
+L1E5EF8: db $89
+L1E5EF9: db $B5
+L1E5EFA: db $A1
+L1E5EFB: db $45
+L1E5EFC: db $91
+L1E5EFD: db $00
+L1E5EFE: db $83
+L1E5EFF: db $81
+L1E5F00: db $AB
+L1E5F01: db $10
+L1E5F02: db $EB
+L1E5F03: db $50
+L1E5F04: db $45
+L1E5F05: db $9B
+L1E5F06: db $10
+L1E5F07: db $FB
+L1E5F08: db $B1
+L1E5F09: db $F1
+L1E5F0A: db $D0
+L1E5F0B: db $A9
+L1E5F0C: db $10
+L1E5F0D: db $54
+L1E5F0E: db $A5
+L1E5F0F: db $10
+L1E5F10: db $A7
+L1E5F11: db $70
+L1E5F12: db $B7
+L1E5F13: db $12
+L1E5F14: db $BD
+L1E5F15: db $B5
+L1E5F16: db $4A
+L1E5F17: db $B9
+L1E5F18: db $01
+L1E5F19: db $89
+L1E5F1A: db $D9
+L1E5F1B: db $70
+L1E5F1C: db $F1
+L1E5F1D: db $11
+L1E5F1E: db $91
+L1E5F1F: db $AA
+L1E5F20: db $50
+L1E5F21: db $FF
+L1E5F22: db $00
+L1E5F23: db $00
+L1E5F24: db $0E
+L1E5F25: db $FF
+L1E5F26: db $00
+L1E5F27: db $8C
+L1E5F28: db $20
+L1E5F29: db $8E
+L1E5F2A: db $98
+L1E5F2B: db $00
+L1E5F2C: db $92
+L1E5F2D: db $B9
+L1E5F2E: db $B1
+L1E5F2F: db $B0
+L1E5F30: db $A0
+L1E5F31: db $91
+L1E5F32: db $11
+L1E5F33: db $A6
+L1E5F34: db $80
+L1E5F35: db $11
+L1E5F36: db $86
+L1E5F37: db $81
+L1E5F38: db $87
+L1E5F39: db $30
+L1E5F3A: db $EA
+L1E5F3B: db $01
+L1E5F3C: db $50
+L1E5F3D: db $10
+L1E5F3E: db $AC
+L1E5F3F: db $70
+L1E5F40: db $B9
+L1E5F41: db $30
+L1E5F42: db $98
+L1E5F43: db $A0
+L1E5F44: db $51
+L1E5F45: db $FF
+L1E5F46: db $00
+L1E5F47: db $0F
+L1E5F48: db $01
+L1E5F49: db $47
+L1E5F4A: db $21
+L1E5F4B: db $33
+L1E5F4C: db $18
+L1E5F4D: db $91
+L1E5F4E: db $93
+L1E5F4F: db $51
+L1E5F50: db $60
+L1E5F51: db $10
+L1E5F52: db $B1
+L1E5F53: db $A3
+L1E5F54: db $41
+L1E5F55: db $00
+L1E5F56: db $65
+L1E5F57: db $C1
+L1E5F58: db $C3
+L1E5F59: db $89
+L1E5F5A: db $CD
+L1E5F5B: db $3B
+L1E5F5C: db $BD
+L1E5F5D: db $39
+L1E5F5E: db $98
+L1E5F5F: db $00
+L1E5F60: db $13
+L1E5F61: db $31
+L1E5F62: db $10
+L1E5F63: db $F0
+L1E5F64: db $7B
+L1E5F65: db $79
+L1E5F66: db $63
+L1E5F67: db $01
+L1E5F68: db $71
+L1E5F69: db $80
+L1E5F6A: db $BE
+L1E5F6B: db $88
+L1E5F6C: db $87
+L1E5F6D: db $A3
+L1E5F6E: db $97
+L1E5F6F: db $11
+L1E5F70: db $09
+L1E5F71: db $B1
+L1E5F72: db $81
+L1E5F73: db $91
+L1E5F74: db $85
+L1E5F75: db $B0
+L1E5F76: db $86
+L1E5F77: db $FF
+L1E5F78: db $00
+L1E5F79: db $40
+L1E5F7A: db $00
+L1E5F7B: db $0E
+L1E5F7C: db $73
+L1E5F7D: db $71
+L1E5F7E: db $6B
+L1E5F7F: db $E9
+L1E5F80: db $FB
+L1E5F81: db $F9
+L1E5F82: db $11
+L1E5F83: db $97
+L1E5F84: db $91
+L1E5F85: db $F7
+L1E5F86: db $10
+L1E5F87: db $EF
+L1E5F88: db $E1
+L1E5F89: db $6F
+L1E5F8A: db $10
+L1E5F8B: db $54
+L1E5F8C: db $FF
+L1E5F8D: db $00
+L1E5F8E: db $00
+L1E5F8F: db $0E
+L1E5F90: db $FF
+L1E5F91: db $00
+L1E5F92: db $A3
+L1E5F93: db $A1
+L1E5F94: db $41
+L1E5F95: db $8B
+L1E5F96: db $10
+L1E5F97: db $97
+L1E5F98: db $C5
+L1E5F99: db $C7
+L1E5F9A: db $CD
+L1E5F9B: db $C1
+L1E5F9C: db $10
+L1E5F9D: db $88
+L1E5F9E: db $40
+L1E5F9F: db $D1
+L1E5FA0: db $89
+L1E5FA1: db $DB
+L1E5FA2: db $10
+L1E5FA3: db $99
+L1E5FA4: db $81
+L1E5FA5: db $B9
+L1E5FA6: db $20
+L1E5FA7: db $85
+L1E5FA8: db $A5
+L1E5FA9: db $12
+L1E5FAA: db $E5
+L1E5FAB: db $95
+L1E5FAC: db $FD
+L1E5FAD: db $8F
+L1E5FAE: db $8D
+L1E5FAF: db $48
+L1E5FB0: db $9B
+L1E5FB1: db $31
+L1E5FB2: db $ED
+L1E5FB3: db $8B
+L1E5FB4: db $F0
+L1E5FB5: db $DF
+L1E5FB6: db $BD
+L1E5FB7: db $D7
+L1E5FB8: db $D5
+L1E5FB9: db $C0
+L1E5FBA: db $30
+L1E5FBB: db $B5
+L1E5FBC: db $70
+L1E5FBD: db $A9
+L1E5FBE: db $11
+L1E5FBF: db $FF
+L1E5FC0: db $00
+L1E5FC1: db $40
+L1E5FC2: db $00
+L1E5FC3: db $0E
+L1E5FC4: db $00
+L1E5FC5: db $09
+L1E5FC6: db $00
+L1E5FC7: db $00
+L1E5FC8: db $00
+L1E5FC9: db $00
+L1E5FCA: db $08
+L1E5FCB: db $08
+L1E5FCC: db $1C
+L1E5FCD: db $1C
+L1E5FCE: db $3E
+L1E5FCF: db $3E
+L1E5FD0: db $1F
+L1E5FD1: db $1F
+L1E5FD2: db $0F
+L1E5FD3: db $0F
+L1E5FD4: db $07
+L1E5FD5: db $07
+L1E5FD6: db $00
+L1E5FD7: db $00
+L1E5FD8: db $00
+L1E5FD9: db $00
+L1E5FDA: db $00
+L1E5FDB: db $00
+L1E5FDC: db $00
+L1E5FDD: db $00
+L1E5FDE: db $00
+L1E5FDF: db $00
+L1E5FE0: db $00
+L1E5FE1: db $00
+L1E5FE2: db $81
+L1E5FE3: db $81
+L1E5FE4: db $C3
+L1E5FE5: db $C3
+L1E5FE6: db $00
+L1E5FE7: db $00
+L1E5FE8: db $00
+L1E5FE9: db $00
+L1E5FEA: db $10
+L1E5FEB: db $10
+L1E5FEC: db $38
+L1E5FED: db $38
+L1E5FEE: db $7C
+L1E5FEF: db $7C
+L1E5FF0: db $F8
+L1E5FF1: db $F8
+L1E5FF2: db $F0
+L1E5FF3: db $F0
+L1E5FF4: db $E0
+L1E5FF5: db $E0
+L1E5FF6: db $03
+L1E5FF7: db $03
+L1E5FF8: db $01
+L1E5FF9: db $01
+L1E5FFA: db $00
+L1E5FFB: db $00
+L1E5FFC: db $00
+L1E5FFD: db $00
+L1E5FFE: db $00
+L1E5FFF: db $00
+L1E6000: db $00
+L1E6001: db $00
+L1E6002: db $01
+L1E6003: db $01
+L1E6004: db $03
+L1E6005: db $03
+L1E6006: db $E7
+L1E6007: db $E7
+L1E6008: db $FF
+L1E6009: db $FF
+L1E600A: db $FF
+L1E600B: db $FF
+L1E600C: db $7E
+L1E600D: db $7E
+L1E600E: db $7E
+L1E600F: db $7E
+L1E6010: db $FF
+L1E6011: db $FF
+L1E6012: db $FF
+L1E6013: db $FF
+L1E6014: db $E7
+L1E6015: db $E7
+L1E6016: db $C0
+L1E6017: db $C0
+L1E6018: db $80
+L1E6019: db $80
+L1E601A: db $00
+L1E601B: db $00
+L1E601C: db $00
+L1E601D: db $00
+L1E601E: db $00
+L1E601F: db $00
+L1E6020: db $00
+L1E6021: db $00
+L1E6022: db $80
+L1E6023: db $80
+L1E6024: db $C0
+L1E6025: db $C0
+L1E6026: db $07
+L1E6027: db $07
+L1E6028: db $0F
+L1E6029: db $0F
+L1E602A: db $1F
+L1E602B: db $1F
+L1E602C: db $3E
+L1E602D: db $3E
+L1E602E: db $1C
+L1E602F: db $1C
+L1E6030: db $08
+L1E6031: db $08
+L1E6032: db $00
+L1E6033: db $00
+L1E6034: db $00
+L1E6035: db $00
+L1E6036: db $C3
+L1E6037: db $C3
+L1E6038: db $81
+L1E6039: db $81
+L1E603A: db $00
+L1E603B: db $00
+L1E603C: db $00
+L1E603D: db $00
+L1E603E: db $00
+L1E603F: db $00
+L1E6040: db $00
+L1E6041: db $00
+L1E6042: db $00
+L1E6043: db $00
+L1E6044: db $00
+L1E6045: db $00
+L1E6046: db $E0
+L1E6047: db $E0
+L1E6048: db $F0
+L1E6049: db $F0
+L1E604A: db $F8
+L1E604B: db $F8
+L1E604C: db $7C
+L1E604D: db $7C
+L1E604E: db $38
+L1E604F: db $38
+L1E6050: db $10
+L1E6051: db $10
+L1E6052: db $00
+L1E6053: db $00
+L1E6054: db $00
+L1E6055: db $00
+L1E6056: db $FF
+L1E6057: db $FF
+L1E6058: db $F7
+L1E6059: db $F7
+L1E605A: db $E3
+L1E605B: db $E3
+L1E605C: db $C1
+L1E605D: db $C1
+L1E605E: db $80
+L1E605F: db $80
+L1E6060: db $C0
+L1E6061: db $C0
+L1E6062: db $E0
+L1E6063: db $E0
+L1E6064: db $F0
+L1E6065: db $F0
+L1E6066: db $FF
+L1E6067: db $FF
+L1E6068: db $FF
+L1E6069: db $FF
+L1E606A: db $FF
+L1E606B: db $FF
+L1E606C: db $FF
+L1E606D: db $FF
+L1E606E: db $FF
+L1E606F: db $FF
+L1E6070: db $7E
+L1E6071: db $7E
+L1E6072: db $3C
+L1E6073: db $3C
+L1E6074: db $18
+L1E6075: db $18
+L1E6076: db $FF
+L1E6077: db $FF
+L1E6078: db $EF
+L1E6079: db $EF
+L1E607A: db $C7
+L1E607B: db $C7
+L1E607C: db $83
+L1E607D: db $83
+L1E607E: db $01
+L1E607F: db $01
+L1E6080: db $03
+L1E6081: db $03
+L1E6082: db $07
+L1E6083: db $07
+L1E6084: db $0F
+L1E6085: db $0F
+L1E6086: db $F8
+L1E6087: db $F8
+L1E6088: db $FC
+L1E6089: db $FC
+L1E608A: db $FE
+L1E608B: db $FE
+L1E608C: db $FF
+L1E608D: db $FF
+L1E608E: db $FF
+L1E608F: db $FF
+L1E6090: db $FE
+L1E6091: db $FE
+L1E6092: db $FC
+L1E6093: db $FC
+L1E6094: db $F8
+L1E6095: db $F8
+L1E6096: db $00
+L1E6097: db $00
+L1E6098: db $00
+L1E6099: db $00
+L1E609A: db $00
+L1E609B: db $00
+L1E609C: db $00
+L1E609D: db $00
+L1E609E: db $00
+L1E609F: db $00
+L1E60A0: db $00
+L1E60A1: db $00
+L1E60A2: db $00
+L1E60A3: db $00
+L1E60A4: db $00
+L1E60A5: db $00
+L1E60A6: db $1F
+L1E60A7: db $1F
+L1E60A8: db $3F
+L1E60A9: db $3F
+L1E60AA: db $7F
+L1E60AB: db $7F
+L1E60AC: db $FF
+L1E60AD: db $FF
+L1E60AE: db $FF
+L1E60AF: db $FF
+L1E60B0: db $7F
+L1E60B1: db $7F
+L1E60B2: db $3F
+L1E60B3: db $3F
+L1E60B4: db $1F
+L1E60B5: db $1F
+L1E60B6: db $F0
+L1E60B7: db $F0
+L1E60B8: db $E0
+L1E60B9: db $E0
+L1E60BA: db $C0
+L1E60BB: db $C0
+L1E60BC: db $80
+L1E60BD: db $80
+L1E60BE: db $C1
+L1E60BF: db $C1
+L1E60C0: db $E3
+L1E60C1: db $E3
+L1E60C2: db $F7
+L1E60C3: db $F7
+L1E60C4: db $FF
+L1E60C5: db $FF
+L1E60C6: db $18
+L1E60C7: db $18
+L1E60C8: db $3C
+L1E60C9: db $3C
+L1E60CA: db $7E
+L1E60CB: db $7E
+L1E60CC: db $FF
+L1E60CD: db $FF
+L1E60CE: db $FF
+L1E60CF: db $FF
+L1E60D0: db $FF
+L1E60D1: db $FF
+L1E60D2: db $FF
+L1E60D3: db $FF
+L1E60D4: db $FF
+L1E60D5: db $FF
+L1E60D6: db $0F
+L1E60D7: db $0F
+L1E60D8: db $07
+L1E60D9: db $07
+L1E60DA: db $03
+L1E60DB: db $03
+L1E60DC: db $01
+L1E60DD: db $01
+L1E60DE: db $83
+L1E60DF: db $83
+L1E60E0: db $C7
+L1E60E1: db $C7
+L1E60E2: db $EF
+L1E60E3: db $EF
+L1E60E4: db $FF
+L1E60E5: db $FF
+L1E60E6: db $80
+L1E60E7: db $00
+L1E60E8: db $00
+L1E60E9: db $28
+L1E60EA: db $00
+L1E60EB: db $40
+L1E60EC: db $00
+L1E60ED: db $00
+L1E60EE: db $00
+L1E60EF: db $00
+L1E60F0: db $00
+L1E60F1: db $00
+L1E60F2: db $00
+L1E60F3: db $00
+L1E60F4: db $00
+L1E60F5: db $80
+L1E60F6: db $1E
+L1E60F7: db $05
+L1E60F8: db $61
+L1E60F9: db $00
+L1E60FA: db $00
+L1E60FB: db $05
+L1E60FC: db $61
+L1E60FD: db $00
+L1E60FE: db $00
+L1E60FF: db $00
+L1E6100: db $00
+L1E6101: db $02
+L1E6102: db $02
+L1E6103: db $C0
+L1E6104: db $D8
+L1E6105: db $27
+L1E6106: db $61
+L1E6107: db $FF
+L1E6108: db $FF
+L1E6109: db $3E
+L1E610A: db $61
+L1E610B: db $FF
+L1E610C: db $FF
+L1E610D: db $55;X
+L1E610E: db $61;X
+L1E610F: db $FF;X
+L1E6110: db $FF;X
+L1E6111: db $6C;X
+L1E6112: db $61;X
+L1E6113: db $FF;X
+L1E6114: db $FF;X
+L1E6115: db $83
+L1E6116: db $61
+L1E6117: db $FF
+L1E6118: db $FF
+L1E6119: db $9D
+L1E611A: db $61
+L1E611B: db $FF
+L1E611C: db $FF
+L1E611D: db $B7
+L1E611E: db $61
+L1E611F: db $FF
+L1E6120: db $FF
+L1E6121: db $D1
+L1E6122: db $61
+L1E6123: db $FF
+L1E6124: db $FF
+L1E6125: db $FF;X
+L1E6126: db $FF;X
+L1E6127: db $90
+L1E6128: db $00
+L1E6129: db $00
+L1E612A: db $FF;X
+L1E612B: db $FF;X
+L1E612C: db $FF;X
+L1E612D: db $31
+L1E612E: db $61
+L1E612F: db $00
+L1E6130: db $00
+L1E6131: db $04
+L1E6132: db $28
+L1E6133: db $0B
+L1E6134: db $00
+L1E6135: db $28
+L1E6136: db $13
+L1E6137: db $04
+L1E6138: db $28
+L1E6139: db $08
+L1E613A: db $0C
+L1E613B: db $30
+L1E613C: db $18
+L1E613D: db $CC
+L1E613E: db $90
+L1E613F: db $00
+L1E6140: db $00
+L1E6141: db $FF;X
+L1E6142: db $FF;X
+L1E6143: db $FF;X
+L1E6144: db $48
+L1E6145: db $61
+L1E6146: db $00
+L1E6147: db $00
+L1E6148: db $04
+L1E6149: db $28
+L1E614A: db $17
+L1E614B: db $00
+L1E614C: db $28
+L1E614D: db $1F
+L1E614E: db $04
+L1E614F: db $28
+L1E6150: db $08
+L1E6151: db $0C
+L1E6152: db $30
+L1E6153: db $30
+L1E6154: db $CC
+L1E6155: db $90;X
+L1E6156: db $00;X
+L1E6157: db $00;X
+L1E6158: db $FF;X
+L1E6159: db $FF;X
+L1E615A: db $FF;X
+L1E615B: db $5F;X
+L1E615C: db $61;X
+L1E615D: db $00;X
+L1E615E: db $00;X
+L1E615F: db $04;X
+L1E6160: db $38;X
+L1E6161: db $0C;X
+L1E6162: db $02;X
+L1E6163: db $38;X
+L1E6164: db $14;X
+L1E6165: db $04;X
+L1E6166: db $28;X
+L1E6167: db $18;X
+L1E6168: db $4C;X
+L1E6169: db $30;X
+L1E616A: db $08;X
+L1E616B: db $8C;X
+L1E616C: db $90;X
+L1E616D: db $00;X
+L1E616E: db $00;X
+L1E616F: db $FF;X
+L1E6170: db $FF;X
+L1E6171: db $FF;X
+L1E6172: db $76;X
+L1E6173: db $61;X
+L1E6174: db $00;X
+L1E6175: db $00;X
+L1E6176: db $04;X
+L1E6177: db $38;X
+L1E6178: db $18;X
+L1E6179: db $02;X
+L1E617A: db $38;X
+L1E617B: db $20;X
+L1E617C: db $04;X
+L1E617D: db $28;X
+L1E617E: db $30;X
+L1E617F: db $4C;X
+L1E6180: db $30;X
+L1E6181: db $08;X
+L1E6182: db $8C;X
+L1E6183: db $90
+L1E6184: db $00
+L1E6185: db $00
+L1E6186: db $FF;X
+L1E6187: db $FF;X
+L1E6188: db $FF;X
+L1E6189: db $8D
+L1E618A: db $61
+L1E618B: db $00
+L1E618C: db $00
+L1E618D: db $05
+L1E618E: db $29
+L1E618F: db $08
+L1E6190: db $06
+L1E6191: db $29
+L1E6192: db $10
+L1E6193: db $08
+L1E6194: db $29
+L1E6195: db $18
+L1E6196: db $0A
+L1E6197: db $28
+L1E6198: db $08
+L1E6199: db $0C
+L1E619A: db $30
+L1E619B: db $18
+L1E619C: db $CC
+L1E619D: db $90
+L1E619E: db $00
+L1E619F: db $00
+L1E61A0: db $FF;X
+L1E61A1: db $FF;X
+L1E61A2: db $FF;X
+L1E61A3: db $A7
+L1E61A4: db $61
+L1E61A5: db $00
+L1E61A6: db $00
+L1E61A7: db $05
+L1E61A8: db $29
+L1E61A9: db $14
+L1E61AA: db $06
+L1E61AB: db $29
+L1E61AC: db $1C
+L1E61AD: db $08
+L1E61AE: db $29
+L1E61AF: db $24
+L1E61B0: db $0A
+L1E61B1: db $28
+L1E61B2: db $08
+L1E61B3: db $0C
+L1E61B4: db $30
+L1E61B5: db $30
+L1E61B6: db $CC
+L1E61B7: db $90
+L1E61B8: db $00
+L1E61B9: db $00
+L1E61BA: db $FF;X
+L1E61BB: db $FF;X
+L1E61BC: db $FF;X
+L1E61BD: db $C1
+L1E61BE: db $61
+L1E61BF: db $00
+L1E61C0: db $00
+L1E61C1: db $05
+L1E61C2: db $37
+L1E61C3: db $08
+L1E61C4: db $06
+L1E61C5: db $37
+L1E61C6: db $10
+L1E61C7: db $08
+L1E61C8: db $37
+L1E61C9: db $18
+L1E61CA: db $0A
+L1E61CB: db $28
+L1E61CC: db $18
+L1E61CD: db $4C
+L1E61CE: db $30
+L1E61CF: db $08
+L1E61D0: db $8C
+L1E61D1: db $90
+L1E61D2: db $00
+L1E61D3: db $00
+L1E61D4: db $FF;X
+L1E61D5: db $FF;X
+L1E61D6: db $FF;X
+L1E61D7: db $DB
+L1E61D8: db $61
+L1E61D9: db $00
+L1E61DA: db $00
+L1E61DB: db $05
+L1E61DC: db $37
+L1E61DD: db $14
+L1E61DE: db $06
+L1E61DF: db $37
+L1E61E0: db $1C
+L1E61E1: db $08
+L1E61E2: db $37
+L1E61E3: db $24
+L1E61E4: db $0A
+L1E61E5: db $28
+L1E61E6: db $30
+L1E61E7: db $4C
+L1E61E8: db $30
+L1E61E9: db $08
+L1E61EA: db $8C
+L1E61EB: db $17
+L1E61EC: db $62
+L1E61ED: db $FF
+L1E61EE: db $FF
+L1E61EF: db $21
+L1E61F0: db $62
+L1E61F1: db $FF
+L1E61F2: db $FF
+L1E61F3: db $0D
+L1E61F4: db $62
+L1E61F5: db $FF
+L1E61F6: db $FF
+L1E61F7: db $35
+L1E61F8: db $62
+L1E61F9: db $FF
+L1E61FA: db $FF
+L1E61FB: db $2B
+L1E61FC: db $62
+L1E61FD: db $FF
+L1E61FE: db $FF
+L1E61FF: db $35
+L1E6200: db $62
+L1E6201: db $FF
+L1E6202: db $FF
+L1E6203: db $0D
+L1E6204: db $62
+L1E6205: db $FF
+L1E6206: db $FF
+L1E6207: db $21
+L1E6208: db $62
+L1E6209: db $FF
+L1E620A: db $FF
+L1E620B: db $FF;X
+L1E620C: db $FF
+L1E620D: db $80
+L1E620E: db $00
+L1E620F: db $00
+L1E6210: db $FF;X
+L1E6211: db $FF;X
+L1E6212: db $FF;X
+L1E6213: db $3F
+L1E6214: db $62
+L1E6215: db $00
+L1E6216: db $00
+L1E6217: db $80
+L1E6218: db $00
+L1E6219: db $00
+L1E621A: db $FF;X
+L1E621B: db $FF;X
+L1E621C: db $FF;X
+L1E621D: db $46
+L1E621E: db $62
+L1E621F: db $00
+L1E6220: db $00
+L1E6221: db $80
+L1E6222: db $00
+L1E6223: db $00
+L1E6224: db $FF;X
+L1E6225: db $FF;X
+L1E6226: db $FF;X
+L1E6227: db $53
+L1E6228: db $62
+L1E6229: db $00
+L1E622A: db $00
+L1E622B: db $80
+L1E622C: db $00
+L1E622D: db $00
+L1E622E: db $FF;X
+L1E622F: db $FF;X
+L1E6230: db $FF;X
+L1E6231: db $5A
+L1E6232: db $62
+L1E6233: db $00
+L1E6234: db $00
+L1E6235: db $80
+L1E6236: db $00
+L1E6237: db $00
+L1E6238: db $FF;X
+L1E6239: db $FF;X
+L1E623A: db $FF;X
+L1E623B: db $67
+L1E623C: db $62
+L1E623D: db $00
+L1E623E: db $00
+L1E623F: db $02
+L1E6240: db $28
+L1E6241: db $13
+L1E6242: db $00
+L1E6243: db $38
+L1E6244: db $13
+L1E6245: db $02
+L1E6246: db $04
+L1E6247: db $28
+L1E6248: db $0C
+L1E6249: db $04
+L1E624A: db $28
+L1E624B: db $14
+L1E624C: db $06
+L1E624D: db $38
+L1E624E: db $0C
+L1E624F: db $08
+L1E6250: db $38
+L1E6251: db $14
+L1E6252: db $0A
+L1E6253: db $02
+L1E6254: db $28
+L1E6255: db $10
+L1E6256: db $0C
+L1E6257: db $38
+L1E6258: db $10
+L1E6259: db $0E
+L1E625A: db $04
+L1E625B: db $28
+L1E625C: db $0C
+L1E625D: db $10
+L1E625E: db $28
+L1E625F: db $14
+L1E6260: db $12
+L1E6261: db $38
+L1E6262: db $0C
+L1E6263: db $14
+L1E6264: db $38
+L1E6265: db $14
+L1E6266: db $16
+L1E6267: db $02
+L1E6268: db $28
+L1E6269: db $10
+L1E626A: db $18
+L1E626B: db $38
+L1E626C: db $10
+L1E626D: db $1A
+L1E626E:;I
+	ld   sp, $DD00
+	di
+	rst  $10
+	xor  a
+	ldh  [rBGP], a
+	ldh  [rOBP0], a
+	ldh  [rOBP1], a
+	ld   [$C1B3], a
+	ld   [$C1B4], a
+	ld   [$C1B5], a
+	ld   [$C1B6], a
+	ld   [$C1B1], a
+	ld   [$C1B2], a
+	ld   [$C1CA], a
+	ld   [$C1CB], a
+	ld   [$C1CC], a
+	ld   [$C1CD], a
+	ld   [$C1CE], a
+	ld   [$C1CF], a
+	ld   [$C1D0], a
+	ld   [$C1D1], a
+	ld   [$C1D2], a
+	ld   [$C1D3], a
+	ld   [$C1D4], a
+	ld   [$C1D5], a
+	ld   [$C1D6], a
+	ld   [$C1D7], a
+	ld   [$C1D8], a
+	ld   [$C1D9], a
+	ld   [$C1DA], a
+	ld   [$C1DB], a
+	ld   a, [$C163]
+	cp   $01
+	jp   nz, L1E62E1
+	ld   a, [$C165]
+	or   a
+	jp   z, L1E62D9
+L1E62D1: db $3E;X
+L1E62D2: db $01;X
+L1E62D3: db $EA;X
+L1E62D4: db $B1;X
+L1E62D5: db $C1;X
+L1E62D6: db $C3;X
+L1E62D7: db $EF;X
+L1E62D8: db $62;X
+L1E62D9:;J
+	ld   a, $01
+	ld   [$C1B2], a
+	jp   L1E62EF
+L1E62E1: db $CD;X
+L1E62E2: db $B4;X
+L1E62E3: db $4E;X
+L1E62E4: db $D2;X
+L1E62E5: db $EF;X
+L1E62E6: db $62;X
+L1E62E7: db $3E;X
+L1E62E8: db $01;X
+L1E62E9: db $EA;X
+L1E62EA: db $B1;X
+L1E62EB: db $C1;X
+L1E62EC: db $EA;X
+L1E62ED: db $B2;X
+L1E62EE: db $C1;X
+L1E62EF:;J
+	ld   de, $0004
+	call L0013D3
+	call L000D96
+	call L000D9E
+	xor  a
+	ldh  [$FFE4], a
+	ldh  [$FFE2], a
+	ld   [wFieldScrollX], a
+	ld   [wFieldScrollY], a
+	ld   hl, $7BB7
+	ld   de, $C1EA
+	call DecompressGFX
+	ld   hl, $C1EA
+	ld   de, Tiles_Begin
+	ld   b, $1C
+	call CopyTiles
+	ld   hl, $6998
+	ld   de, $C1EA
+	call DecompressGFX
+	ld   hl, $C1EA
+	ld   de, $9000
+	ld   b, $5A
+	call CopyTiles
+	ld   hl, $6D22
+	ld   de, $C1EA
+	call DecompressGFX
+	ld   de, $C1EA
+	ld   hl, $9803
+	ld   b, $0E
+	ld   c, $09
+	call L000DE6
+	call L1E6937
+	ld   a, [$D92E]
+	ld   de, $8800
+	ld   c, a
+	call L1E68D2
+	ld   a, [$D92F]
+	cp   $FF
+	jr   z, L1E6361
+	ld   de, $8920
+	ld   c, a
+	call L1E68D2
+	jr   L1E636B
+L1E6361:;R
+	ld   a, $01
+	ld   [$C1D0], a
+	ld   a, $FF
+	ld   [$C1D1], a
+L1E636B:;R
+	ld   a, [$D930]
+	cp   $FF
+	jr   z, L1E637B
+	ld   de, $8A40
+	ld   c, a
+	call L1E68D2
+	jr   L1E6385
+L1E637B:;R
+	ld   a, $01
+	ld   [$C1D2], a
+	ld   a, $FF
+	ld   [$C1D3], a
+L1E6385:;R
+	ld   a, [$DA2E]
+	ld   de, $8B60
+	ld   c, a
+	call L1E68E5
+	ld   a, [$DA2F]
+	cp   $FF
+	jr   z, L1E639F
+	ld   de, $8C80
+	ld   c, a
+	call L1E68E5
+	jr   L1E63A9
+L1E639F:;R
+	ld   a, $01
+	ld   [$C1D6], a
+	ld   a, $FF
+	ld   [$C1D7], a
+L1E63A9:;R
+	ld   a, [$DA30]
+	cp   $FF
+	jr   z, L1E63B9
+	ld   de, $8DA0
+	ld   c, a
+	call L1E68E5
+	jr   L1E63C3
+L1E63B9:;R
+	ld   a, $01
+	ld   [$C1D8], a
+	ld   a, $FF
+	ld   [$C1D9], a
+L1E63C3:;R
+	ld   hl, $9920
+	call L1E6927
+	ld   a, [$C1D0]
+	cp   $00
+	jr   nz, L1E63D6
+	ld   hl, $9923
+	call L1E6933
+L1E63D6:;R
+	ld   a, [$C1D2]
+	cp   $00
+	jr   nz, L1E63E5
+	ld   hl, $9926
+	ld   a, $A4
+	call L1E6929
+L1E63E5:;R
+	ld   de, $695E
+	ld   hl, $9931
+	ld   a, $B6
+	call L1E692C
+	ld   a, [$C1D6]
+	cp   $00
+	jr   nz, L1E6402
+	ld   de, $695E
+	ld   hl, $992E
+	ld   a, $C8
+	call L1E692C
+L1E6402:;R
+	ld   a, [$C1D8]
+	cp   $00
+	jr   nz, L1E6414
+	ld   de, $695E
+	ld   hl, $992B
+	ld   a, $DA
+	call L1E692C
+L1E6414:;R
+	call L000D86
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
+	ld   de, $60E6
+	call L000D76
+	ld   hl, $D691
+	ld   [hl], $DB
+	inc  hl
+	ld   [hl], $7C
+	ld   a, $00
+	ld   [$D683], a
+	ld   a, $80
+	ld   [$D685], a
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
+	ld   de, $60E6
+	call L000D76
+	ld   hl, $D6D1
+	ld   [hl], $DB
+	inc  hl
+	ld   [hl], $7C
+	ld   a, $88
+	ld   [$D6C3], a
+	ld   a, $80
+	ld   [$D6C5], a
+	ld   hl, wOBJInfo2+iOBJInfo_Status
+	ld   de, $60E6
+	call L000D76
+	ld   hl, $D701
+	ld   [hl], $90
+	ld   hl, $D711
+	ld   [hl], $D5
+	inc  hl
+	ld   [hl], $7C
+	ld   a, $32
+	ld   [$D703], a
+	ld   a, $58
+	ld   [$D705], a
+	call L001776
+	call L0014F9
+	ld   a, $C7
+	rst  $18
+	ei
+	call L000408
+	call L000408
+	ld   a, $1E
+	ldh  [rOBP0], a
+	ld   a, $3E
+	ldh  [rOBP1], a
+	ld   a, $2D
+	ldh  [rBGP], a
+	ld   a, $81
+	call HomeCall_Sound_ReqPlayExId_Stub
+	call L000418
+L1E6491:;J
+	call L1E6940
+	call L00112E
+	ld   a, $00
+	ld   [$C1B6], a
+	call L1E6503
+	ld   a, [$C1B4]
+	cp   $03
+	jp   nz, L1E64AC
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
+	res  7, [hl]
+L1E64AC:;J
+	ld   a, $01
+	ld   [$C1B6], a
+	call L1E6503
+	ld   a, [$C1B5]
+	cp   $03
+	jp   nz, L1E64C1
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
+	res  7, [hl]
+L1E64C1:;J
+	ld   a, [$C1B4]
+	ld   hl, $C1B5
+	cp   a, [hl]
+	jp   nz, L1E64D3
+	cp   $03
+	jp   nz, L1E64D3
+	jp   L1E64D9
+L1E64D3:;J
+	call L000408
+	jp   L1E6491
+L1E64D9:;J
+	ld   a, [$C1CF]
+	ld   [$D92E], a
+	ld   a, [$C1D1]
+	ld   [$D92F], a
+	ld   a, [$C1D3]
+	ld   [$D930], a
+	ld   a, [$C1D5]
+	ld   [$DA2E], a
+	ld   a, [$C1D7]
+	ld   [$DA2F], a
+	ld   a, [$C1D9]
+	ld   [$DA30], a
+	call L00041C
+	jp   L00179D
+L1E6503:;C
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E6522
+	ld   a, [$C1B4]
+	cp   $02
+	jr   z, L1E6559
+	ld   a, [$C1B1]
+	and  a, a
+	jp   z, L1E653A
+L1E6518: db $FE;X
+L1E6519: db $01;X
+L1E651A: db $CA;X
+L1E651B: db $4D;X
+L1E651C: db $65;X
+L1E651D: db $3D;X
+L1E651E: db $EA;X
+L1E651F: db $B1;X
+L1E6520: db $C1;X
+L1E6521: db $C9;X
+L1E6522:;J
+	ld   a, [$C1B5]
+	cp   $02
+	jr   z, L1E6559
+	ld   a, [$C1B2]
+	and  a, a
+	jp   z, L1E653A
+	cp   $01
+	jp   z, L1E6554
+	dec  a
+	ld   [$C1B2], a
+	ret
+L1E653A:;J
+	call L1E4B10
+	bit  4, a
+	jp   nz, L1E6559
+	bit  1, b
+	jp   nz, L1E6792
+	bit  0, b
+	jp   nz, L1E6832
+	ret
+L1E654D: db $3E;X
+L1E654E: db $3C;X
+L1E654F: db $EA;X
+L1E6550: db $B1;X
+L1E6551: db $C1;X
+L1E6552: db $18;X
+L1E6553: db $05;X
+L1E6554:;J
+	ld   a, $3C
+	ld   [$C1B2], a
+L1E6559:;JR
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E6679
+	ld   a, [$C1B4]
+	cp   $03
+	ret  z
+	ld   a, [$C1CA]
+	ld   b, a
+	ld   a, [$D92F]
+	ld   hl, $C1D0
+	dec  b
+	jr   z, L1E65AD
+	ld   a, [$D930]
+	ld   hl, $C1D2
+	dec  b
+	jr   z, L1E65D9
+	ld   a, [$D92E]
+	ld   hl, $C1CE
+	push af
+	ld   a, [$D683]
+	add  a, $18
+	ld   [$D683], a
+	ld   a, [$C1CA]
+	ld   [$C1DA], a
+	inc  a
+	ld   [$C1CA], a
+	ld   a, [$C1D0]
+	and  a, a
+	jr   z, L1E65AA
+	ld   a, [$D683]
+	add  a, $18
+	ld   [$D683], a
+	ld   a, [$C1CA]
+	inc  a
+	ld   [$C1CA], a
+L1E65AA:;R
+	pop  af
+	jr   L1E6602
+L1E65AD:;R
+	push af
+	ld   a, [$D683]
+	add  a, $18
+	ld   [$D683], a
+	ld   a, [$C1CA]
+	ld   [$C1DA], a
+	inc  a
+	ld   [$C1CA], a
+	ld   a, [$C1D2]
+	and  a, a
+	jr   z, L1E65D6
+	ld   a, [$D683]
+	sub  a, $30
+	ld   [$D683], a
+	ld   a, [$C1CA]
+	dec  a
+	dec  a
+	ld   [$C1CA], a
+L1E65D6:;R
+	pop  af
+	jr   L1E6602
+L1E65D9:;R
+	push af
+	ld   a, [$D683]
+	sub  a, $18
+	ld   [$D683], a
+	ld   a, [$C1CA]
+	ld   [$C1DA], a
+	dec  a
+	ld   [$C1CA], a
+	ld   a, [$C1D0]
+	and  a, a
+	jr   z, L1E6601
+	ld   a, [$D683]
+	sub  a, $18
+	ld   [$D683], a
+	ld   a, [$C1CA]
+	dec  a
+	ld   [$C1CA], a
+L1E6601:;R
+	pop  af
+L1E6602:;R
+	ld   [hl], $01
+	ld   [$C1CC], a
+	ld   a, [$C1B4]
+	inc  a
+	ld   [$C1B4], a
+	ld   a, [$C1DA]
+	ld   hl, $99E3
+	dec  a
+	jr   z, L1E6620
+	ld   hl, $99E6
+	dec  a
+	jr   z, L1E6620
+	ld   hl, $99E0
+L1E6620:;R
+	ld   a, [$C1B4]
+	dec  a
+	jr   z, L1E662D
+	dec  a
+	jr   z, L1E6651
+	dec  a
+	jr   z, L1E6669
+L1E662C: db $C9;X
+L1E662D:;R
+	ld   a, [$C1CC]
+	ld   [$C1CF], a
+	ld   de, $6D8A
+	ld   b, $03
+	ld   c, $03
+	call L000DE6
+	ld   a, [$D92F]
+	cp   $FF
+	ret  nz
+L1E6643:;R
+	ld   a, [$D683]
+	sub  a, $10
+	ld   [$D683], a
+	ld   a, $03
+	ld   [$C1B4], a
+	ret
+L1E6651:;R
+	ld   a, [$C1CC]
+	ld   [$C1D1], a
+	ld   de, $6D93
+	ld   b, $03
+	ld   c, $03
+	call L000DE6
+	ld   a, [$D930]
+	cp   $FF
+	ret  nz
+	jr   L1E6643
+L1E6669:;R
+	ld   a, [$C1CC]
+	ld   [$C1D3], a
+	ld   de, $6D9C
+	ld   b, $03
+	ld   c, $03
+	jp   L000DE6
+L1E6679:;J
+	ld   a, [$C1B5]
+	cp   $03
+	ret  z
+	ld   a, [$C1CB]
+	ld   b, a
+	ld   a, [$DA2F]
+	ld   hl, $C1D6
+	dec  b
+	jr   z, L1E66C6
+	ld   a, [$DA30]
+	ld   hl, $C1D8
+	dec  b
+	jr   z, L1E66F2
+	ld   a, [$DA2E]
+	ld   hl, $C1D4
+	push af
+	ld   a, [$D6C3]
+	sub  a, $18
+	ld   [$D6C3], a
+	ld   a, [$C1CB]
+	ld   [$C1DB], a
+	inc  a
+	ld   [$C1CB], a
+	ld   a, [$C1D6]
+	and  a, a
+	jr   z, L1E66C3
+	ld   a, [$D6C3]
+	sub  a, $18
+	ld   [$D6C3], a
+	ld   a, [$C1CB]
+	inc  a
+	ld   [$C1CB], a
+L1E66C3:;R
+	pop  af
+	jr   L1E671B
+L1E66C6:;R
+	push af
+	ld   a, [$D6C3]
+	add  a, $18
+	ld   [$D6C3], a
+	ld   a, [$C1CB]
+	ld   [$C1DB], a
+	dec  a
+	ld   [$C1CB], a
+	ld   a, [$C1D4]
+	and  a, a
+	jr   z, L1E66EF
+	ld   a, [$D6C3]
+	sub  a, $30
+	ld   [$D6C3], a
+	ld   a, [$C1CB]
+	inc  a
+	inc  a
+	ld   [$C1CB], a
+L1E66EF:
+	pop  af
+	jr   L1E671B
+L1E66F2:;R
+	push af
+	ld   a, [$D6C3]
+	add  a, $18
+	ld   [$D6C3], a
+	ld   a, [$C1CB]
+	ld   [$C1DB], a
+	dec  a
+	ld   [$C1CB], a
+	ld   a, [$C1D6]
+	and  a, a
+	jr   z, L1E671A
+	ld   a, [$D6C3]
+	add  a, $18
+	ld   [$D6C3], a
+	ld   a, [$C1CB]
+	dec  a
+	ld   [$C1CB], a
+L1E671A:
+	pop  af
+L1E671B:;R
+	ld   [hl], $01
+	ld   [$C1CD], a
+	ld   a, [$C1B5]
+	inc  a
+	ld   [$C1B5], a
+	ld   a, [$C1DB]
+	ld   hl, $99EE
+	dec  a
+	jr   z, L1E6739
+	ld   hl, $99EB
+	dec  a
+	jr   z, L1E6739
+	ld   hl, $99F1
+L1E6739:;R
+	ld   a, [$C1B5]
+	dec  a
+	jr   z, L1E6746
+	dec  a
+	jr   z, L1E676A
+	dec  a
+	jr   z, L1E6782
+L1E6745: db $C9;X
+L1E6746:;R
+	ld   a, [$C1CD]
+	ld   [$C1D5], a
+	ld   de, $6D8A
+	ld   b, $03
+	ld   c, $03
+	call L000DE6
+	ld   a, [$DA2F]
+	cp   $FF
+	ret  nz
+L1E675C:;R
+	ld   a, [$D6C3]
+	sub  a, $10
+	ld   [$D6C3], a
+	ld   a, $03
+	ld   [$C1B5], a
+	ret
+L1E676A:;R
+	ld   a, [$C1CD]
+	ld   [$C1D7], a
+	ld   de, $6D93
+	ld   b, $03
+	ld   c, $03
+	call L000DE6
+	ld   a, [$DA30]
+	cp   $FF
+	ret  nz
+	jr   L1E675C
+L1E6782:;R
+	ld   a, [$C1CD]
+	ld   [$C1D9], a
+	ld   de, $6D9C
+	ld   b, $03
+	ld   c, $03
+	jp   L000DE6
+L1E6792:;J
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E67E4
+	ld   a, [$C1B4]
+	cp   $03
+	ret  z
+	ld   a, [$C1CA]
+	and  a, a
+	ret  z
+	dec  a
+	ld   [$C1CA], a
+	jr   nz, L1E67B8
+	ld   a, [$C1CE]
+	and  a, a
+	jr   z, L1E67DB
+	ld   a, [$C1CA]
+	inc  a
+	ld   [$C1CA], a
+	ret
+L1E67B8:;R
+	ld   a, [$C1D0]
+	and  a, a
+	jr   z, L1E67DB
+	ld   a, [$C1CE]
+	and  a, a
+	jr   z, L1E67CC
+L1E67C4: db $FA;X
+L1E67C5: db $CA;X
+L1E67C6: db $C1;X
+L1E67C7: db $3C;X
+L1E67C8: db $EA;X
+L1E67C9: db $CA;X
+L1E67CA: db $C1;X
+L1E67CB: db $C9;X
+L1E67CC:;R
+	ld   a, [$C1CA]
+	dec  a
+	ld   [$C1CA], a
+	ld   a, [$D683]
+	sub  a, $18
+	ld   [$D683], a
+L1E67DB:;R
+	ld   a, [$D683]
+	sub  a, $18
+	ld   [$D683], a
+	ret
+L1E67E4: db $FA;X
+L1E67E5: db $B5;X
+L1E67E6: db $C1;X
+L1E67E7: db $FE;X
+L1E67E8: db $03;X
+L1E67E9: db $C8;X
+L1E67EA: db $FA;X
+L1E67EB: db $CB;X
+L1E67EC: db $C1;X
+L1E67ED: db $FE;X
+L1E67EE: db $02;X
+L1E67EF: db $C8;X
+L1E67F0: db $3C;X
+L1E67F1: db $EA;X
+L1E67F2: db $CB;X
+L1E67F3: db $C1;X
+L1E67F4: db $FE;X
+L1E67F5: db $02;X
+L1E67F6: db $20;X
+L1E67F7: db $0E;X
+L1E67F8: db $FA;X
+L1E67F9: db $D8;X
+L1E67FA: db $C1;X
+L1E67FB: db $A7;X
+L1E67FC: db $28;X
+L1E67FD: db $2B;X
+L1E67FE: db $FA;X
+L1E67FF: db $CB;X
+L1E6800: db $C1;X
+L1E6801: db $3D;X
+L1E6802: db $EA;X
+L1E6803: db $CB;X
+L1E6804: db $C1;X
+L1E6805: db $C9;X
+L1E6806: db $FA;X
+L1E6807: db $D6;X
+L1E6808: db $C1;X
+L1E6809: db $A7;X
+L1E680A: db $28;X
+L1E680B: db $1D;X
+L1E680C: db $FA;X
+L1E680D: db $D8;X
+L1E680E: db $C1;X
+L1E680F: db $A7;X
+L1E6810: db $28;X
+L1E6811: db $08;X
+L1E6812: db $FA;X
+L1E6813: db $CB;X
+L1E6814: db $C1;X
+L1E6815: db $3D;X
+L1E6816: db $EA;X
+L1E6817: db $CB;X
+L1E6818: db $C1;X
+L1E6819: db $C9;X
+L1E681A: db $FA;X
+L1E681B: db $CB;X
+L1E681C: db $C1;X
+L1E681D: db $3C;X
+L1E681E: db $EA;X
+L1E681F: db $CB;X
+L1E6820: db $C1;X
+L1E6821: db $FA;X
+L1E6822: db $C3;X
+L1E6823: db $D6;X
+L1E6824: db $D6;X
+L1E6825: db $18;X
+L1E6826: db $EA;X
+L1E6827: db $C3;X
+L1E6828: db $D6;X
+L1E6829: db $FA;X
+L1E682A: db $C3;X
+L1E682B: db $D6;X
+L1E682C: db $D6;X
+L1E682D: db $18;X
+L1E682E: db $EA;X
+L1E682F: db $C3;X
+L1E6830: db $D6;X
+L1E6831: db $C9;X
+L1E6832:;J
+	ld   a, [$C1B6]
+	or   a
+	jp   nz, L1E6887
+	ld   a, [$C1B4]
+	cp   $03
+	ret  z
+	ld   a, [$C1CA]
+	cp   $02
+	ret  z
+	inc  a
+	ld   [$C1CA], a
+	cp   $02
+	jr   nz, L1E685B
+	ld   a, [$C1D2]
+	and  a, a
+	jr   z, L1E687E
+	ld   a, [$C1CA]
+	dec  a
+	ld   [$C1CA], a
+	ret
+L1E685B:;R
+	ld   a, [$C1D0]
+	and  a, a
+	jr   z, L1E687E
+	ld   a, [$C1D2]
+	and  a, a
+	jr   z, L1E686F
+L1E6867: db $FA;X
+L1E6868: db $CA;X
+L1E6869: db $C1;X
+L1E686A: db $3D;X
+L1E686B: db $EA;X
+L1E686C: db $CA;X
+L1E686D: db $C1;X
+L1E686E: db $C9;X
+L1E686F:;R
+	ld   a, [$C1CA]
+	inc  a
+	ld   [$C1CA], a
+	ld   a, [$D683]
+	add  a, $18
+	ld   [$D683], a
+L1E687E:;R
+	ld   a, [$D683]
+	add  a, $18
+	ld   [$D683], a
+	ret
+L1E6887: db $FA;X
+L1E6888: db $B5;X
+L1E6889: db $C1;X
+L1E688A: db $FE;X
+L1E688B: db $03;X
+L1E688C: db $C8;X
+L1E688D: db $FA;X
+L1E688E: db $CB;X
+L1E688F: db $C1;X
+L1E6890: db $A7;X
+L1E6891: db $C8;X
+L1E6892: db $3D;X
+L1E6893: db $EA;X
+L1E6894: db $CB;X
+L1E6895: db $C1;X
+L1E6896: db $20;X
+L1E6897: db $0E;X
+L1E6898: db $FA;X
+L1E6899: db $D4;X
+L1E689A: db $C1;X
+L1E689B: db $A7;X
+L1E689C: db $28;X
+L1E689D: db $2B;X
+L1E689E: db $FA;X
+L1E689F: db $CB;X
+L1E68A0: db $C1;X
+L1E68A1: db $3C;X
+L1E68A2: db $EA;X
+L1E68A3: db $CB;X
+L1E68A4: db $C1;X
+L1E68A5: db $C9;X
+L1E68A6: db $FA;X
+L1E68A7: db $D6;X
+L1E68A8: db $C1;X
+L1E68A9: db $A7;X
+L1E68AA: db $28;X
+L1E68AB: db $1D;X
+L1E68AC: db $FA;X
+L1E68AD: db $D4;X
+L1E68AE: db $C1;X
+L1E68AF: db $A7;X
+L1E68B0: db $28;X
+L1E68B1: db $08;X
+L1E68B2: db $FA;X
+L1E68B3: db $CB;X
+L1E68B4: db $C1;X
+L1E68B5: db $3C;X
+L1E68B6: db $EA;X
+L1E68B7: db $CB;X
+L1E68B8: db $C1;X
+L1E68B9: db $C9;X
+L1E68BA: db $FA;X
+L1E68BB: db $CB;X
+L1E68BC: db $C1;X
+L1E68BD: db $3D;X
+L1E68BE: db $EA;X
+L1E68BF: db $CB;X
+L1E68C0: db $C1;X
+L1E68C1: db $FA;X
+L1E68C2: db $C3;X
+L1E68C3: db $D6;X
+L1E68C4: db $C6;X
+L1E68C5: db $18;X
+L1E68C6: db $EA;X
+L1E68C7: db $C3;X
+L1E68C8: db $D6;X
+L1E68C9: db $FA;X
+L1E68CA: db $C3;X
+L1E68CB: db $D6;X
+L1E68CC: db $C6;X
+L1E68CD: db $18;X
+L1E68CE: db $EA;X
+L1E68CF: db $C3;X
+L1E68D0: db $D6;X
+L1E68D1: db $C9;X
+L1E68D2:;CI
+	call L1E68F8
+L1E68D5:;J
+	push bc
+	push hl
+	call L1E690A
+	call L000ECF
+	pop  hl
+	inc  hl
+	pop  bc
+	dec  b
+	jp   nz, L1E68D5
+	ret
+L1E68E5:;CI
+	call L1E68F8
+L1E68E8:;J
+	push bc
+	push hl
+	call L1E690A
+	call CopyTiles
+	pop  hl
+	inc  hl
+	pop  bc
+	dec  b
+	jp   nz, L1E68E8
+	ret
+L1E68F8:;C
+	ld   a, c
+	push de
+	ld   l, a
+	ld   h, $00
+	ld   de, $6970
+	add  hl, de
+	ld   e, [hl]
+	inc  hl
+	ld   d, [hl]
+	push de
+	pop  hl
+	ld   b, $12
+	pop  de
+	ret
+L1E690A:;C
+	ld   a, [hl]
+	ld   l, a
+	ld   h, $00
+	sla  l
+	rl   h
+	sla  l
+	rl   h
+	sla  l
+	rl   h
+	sla  l
+	rl   h
+	push de
+	ld   de, $C1EA
+	add  hl, de
+	pop  de
+	ld   b, $01
+	ret
+L1E6927:;C
+	ld   a, $80
+L1E6929:;CR
+	ld   de, $694C
+L1E692C:;JC
+	ld   b, $03
+	ld   c, $06
+	jp   L000DC2
+L1E6933:;C
+	ld   a, $92
+	jr   L1E6929
+L1E6937:;CI
+	ld   hl, $6DA5
+	ld   de, $C1EA
+	jp   DecompressGFX
+L1E6940:;C
+	ld   a, [wTimer]
+	and  a, $01
+	ret  nz
+	ldh  a, [rOBP0]
+	rlca
+	ldh  [rOBP0], a
+	ret
+L1E694C: db $02
+L1E694D: db $01
+L1E694E: db $00
+L1E694F: db $05
+L1E6950: db $04
+L1E6951: db $03
+L1E6952: db $08
+L1E6953: db $07
+L1E6954: db $06
+L1E6955: db $0B
+L1E6956: db $0A
+L1E6957: db $09
+L1E6958: db $0E
+L1E6959: db $0D
+L1E695A: db $0C
+L1E695B: db $11
+L1E695C: db $10
+L1E695D: db $0F
+L1E695E: db $00
+L1E695F: db $01
+L1E6960: db $02
+L1E6961: db $03
+L1E6962: db $04
+L1E6963: db $05
+L1E6964: db $06
+L1E6965: db $07
+L1E6966: db $08
+L1E6967: db $09
+L1E6968: db $0A
+L1E6969: db $0B
+L1E696A: db $0C
+L1E696B: db $0D
+L1E696C: db $0E
+L1E696D: db $0F
+L1E696E: db $10
+L1E696F: db $11
+L1E6970: db $4F
+L1E6971: db $7A
+L1E6972: db $61
+L1E6973: db $7A
+L1E6974: db $73
+L1E6975: db $7A
+L1E6976: db $85
+L1E6977: db $7A
+L1E6978: db $97
+L1E6979: db $7A
+L1E697A: db $A9
+L1E697B: db $7A
+L1E697C: db $BB
+L1E697D: db $7A
+L1E697E: db $CD
+L1E697F: db $7A
+L1E6980: db $DF
+L1E6981: db $7A
+L1E6982: db $F1
+L1E6983: db $7A
+L1E6984: db $03
+L1E6985: db $7B
+L1E6986: db $15
+L1E6987: db $7B
+L1E6988: db $27
+L1E6989: db $7B
+L1E698A: db $39
+L1E698B: db $7B
+L1E698C: db $4B
+L1E698D: db $7B
+L1E698E: db $5D
+L1E698F: db $7B
+L1E6990: db $6F
+L1E6991: db $7B
+L1E6992: db $81
+L1E6993: db $7B
+L1E6994: db $93
+L1E6995: db $7B
+L1E6996: db $A5
+L1E6997: db $7B
+L1E6998: db $64
+L1E6999: db $40
+L1E699A: db $7E
+L1E699B: db $00
+L1E699C: db $07
+L1E699D: db $07
+L1E699E: db $07
+L1E699F: db $07
+L1E69A0: db $07
+L1E69A1: db $00
+L1E69A2: db $0C
+L1E69A3: db $AE
+L1E69A4: db $00
+L1E69A5: db $0B
+L1E69A6: db $00
+L1E69A7: db $04
+L1E69A8: db $00
+L1E69A9: db $6F
+L1E69AA: db $05
+L1E69AB: db $C0
+L1E69AC: db $B3
+L1E69AD: db $00
+L1E69AE: db $03
+L1E69AF: db $18
+L1E69B0: db $08
+L1E69B1: db $01
+L1E69B2: db $07
+L1E69B3: db $10
+L1E69B4: db $09
+L1E69B5: db $D4
+L1E69B6: db $C0
+L1E69B7: db $1C
+L1E69B8: db $06
+L1E69B9: db $58
+L1E69BA: db $F7
+L1E69BB: db $78
+L1E69BC: db $FF
+L1E69BD: db $E3
+L1E69BE: db $AA
+L1E69BF: db $08
+L1E69C0: db $33
+L1E69C1: db $09
+L1E69C2: db $CC
+L1E69C3: db $1C
+L1E69C4: db $1C
+L1E69C5: db $58
+L1E69C6: db $3F
+L1E69C7: db $9C
+L1E69C8: db $78
+L1E69C9: db $7F
+L1E69CA: db $1E
+L1E69CB: db $08
+L1E69CC: db $38
+L1E69CD: db $08
+L1E69CE: db $30
+L1E69CF: db $61
+L1E69D0: db $DF
+L1E69D1: db $29
+L1E69D2: db $E8
+L1E69D3: db $4C
+L1E69D4: db $38
+L1E69D5: db $29
+L1E69D6: db $A8
+L1E69D7: db $F9
+L1E69D8: db $90
+L1E69D9: db $E5
+L1E69DA: db $08
+L1E69DB: db $68
+L1E69DC: db $09
+L1E69DD: db $C1
+L1E69DE: db $3E
+L1E69DF: db $19
+L1E69E0: db $CF
+L1E69E1: db $08
+L1E69E2: db $57
+L1E69E3: db $C0
+L1E69E4: db $58
+L1E69E5: db $F7
+L1E69E6: db $79
+L1E69E7: db $E3
+L1E69E8: db $08
+L1E69E9: db $B8
+L1E69EA: db $09
+L1E69EB: db $4E
+L1E69EC: db $1C
+L1E69ED: db $29
+L1E69EE: db $63
+L1E69EF: db $CC
+L1E69F0: db $28
+L1E69F1: db $09
+L1E69F2: db $F9
+L1E69F3: db $F8
+L1E69F4: db $D7
+L1E69F5: db $A8
+L1E69F6: db $09
+L1E69F7: db $78
+L1E69F8: db $08
+L1E69F9: db $48
+L1E69FA: db $1A
+L1E69FB: db $FB
+L1E69FC: db $79
+L1E69FD: db $79
+L1E69FE: db $7F
+L1E69FF: db $18
+L1E6A00: db $08
+L1E6A01: db $38
+L1E6A02: db $09
+L1E6A03: db $41
+L1E6A04: db $3E
+L1E6A05: db $19
+L1E6A06: db $D2
+L1E6A07: db $7D
+L1E6A08: db $08
+L1E6A09: db $F3
+L1E6A0A: db $08
+L1E6A0B: db $03
+L1E6A0C: db $F7
+L1E6A0D: db $08
+L1E6A0E: db $14
+L1E6A0F: db $55
+L1E6A10: db $E3
+L1E6A11: db $19
+L1E6A12: db $FC
+L1E6A13: db $08
+L1E6A14: db $0C
+L1E6A15: db $58
+L1E6A16: db $F0
+L1E6A17: db $78
+L1E6A18: db $3A
+L1E6A19: db $F8
+L1E6A1A: db $E0
+L1E6A1B: db $08
+L1E6A1C: db $B8
+L1E6A1D: db $09
+L1E6A1E: db $18
+L1E6A1F: db $29
+L1E6A20: db $60
+L1E6A21: db $74
+L1E6A22: db $C8
+L1E6A23: db $28
+L1E6A24: db $09
+L1E6A25: db $FA
+L1E6A26: db $1E
+L1E6A27: db $08
+L1E6A28: db $33
+L1E6A29: db $7F
+L1E6A2A: db $B5
+L1E6A2B: db $38
+L1E6A2C: db $48
+L1E6A2D: db $08
+L1E6A2E: db $19
+L1E6A2F: db $CC
+L1E6A30: db $38
+L1E6A31: db $E1
+L1E6A32: db $59
+L1E6A33: db $A5
+L1E6A34: db $79
+L1E6A35: db $3F
+L1E6A36: db $08
+L1E6A37: db $0C
+L1E6A38: db $9E
+L1E6A39: db $08
+L1E6A3A: db $12
+L1E6A3B: db $1A
+L1E6A3C: db $5F
+L1E6A3D: db $92
+L1E6A3E: db $0A
+L1E6A3F: db $80
+L1E6A40: db $78
+L1E6A41: db $09
+L1E6A42: db $07
+L1E6A43: db $07
+L1E6A44: db $07
+L1E6A45: db $7D
+L1E6A46: db $03
+L1E6A47: db $00
+L1E6A48: db $F0
+L1E6A49: db $00
+L1E6A4A: db $5F
+L1E6A4B: db $01
+L1E6A4C: db $C0
+L1E6A4D: db $00
+L1E6A4E: db $55
+L1E6A4F: db $40
+L1E6A50: db $00
+L1E6A51: db $80
+L1E6A52: db $00
+L1E6A53: db $04
+L1E6A54: db $00
+L1E6A55: db $02
+L1E6A56: db $00
+L1E6A57: db $6A
+L1E6A58: db $01
+L1E6A59: db $02
+L1E6A5A: db $AF
+L1E6A5B: db $30
+L1E6A5C: db $00
+L1E6A5D: db $0C
+L1E6A5E: db $00
+L1E6A5F: db $03
+L1E6A60: db $F5
+L1E6A61: db $00
+L1E6A62: db $39
+L1E6A63: db $C9
+L1E6A64: db $E9
+L1E6A65: db $20
+L1E6A66: db $00
+L1E6A67: db $10
+L1E6A68: db $00
+L1E6A69: db $55
+L1E6A6A: db $08
+L1E6A6B: db $00
+L1E6A6C: db $0E
+L1E6A6D: db $00
+L1E6A6E: db $05
+L1E6A6F: db $00
+L1E6A70: db $04
+L1E6A71: db $00
+L1E6A72: db $5D
+L1E6A73: db $02
+L1E6A74: db $00
+L1E6A75: db $01
+L1E6A76: db $02
+L1E6A77: db $B9
+L1E6A78: db $05
+L1E6A79: db $E0
+L1E6A7A: db $00
+L1E6A7B: db $5D
+L1E6A7C: db $18
+L1E6A7D: db $00
+L1E6A7E: db $06
+L1E6A7F: db $00
+L1E6A80: db $7F
+L1E6A81: db $07
+L1E6A82: db $C0
+L1E6A83: db $00
+L1E6A84: db $6A
+L1E6A85: db $30
+L1E6A86: db $00
+L1E6A87: db $3B
+L1E6A88: db $80
+L1E6A89: db $00
+L1E6A8A: db $60
+L1E6A8B: db $00
+L1E6A8C: db $1C
+L1E6A8D: db $B5
+L1E6A8E: db $00
+L1E6A8F: db $03
+L1E6A90: db $00
+L1E6A91: db $4B
+L1E6A92: db $0E
+L1E6A93: db $00
+L1E6A94: db $01
+L1E6A95: db $00
+L1E6A96: db $AB
+L1E6A97: db $FF
+L1E6A98: db $F0
+L1E6A99: db $00
+L1E6A9A: db $0F
+L1E6A9B: db $00
+L1E6A9C: db $3F
+L1E6A9D: db $67
+L1E6A9E: db $06
+L1E6A9F: db $75
+L1E6AA0: db $7F
+L1E6AA1: db $47
+L1E6AA2: db $07
+L1E6AA3: db $00
+L1E6AA4: db $80
+L1E6AA5: db $00
+L1E6AA6: db $60
+L1E6AA7: db $00
+L1E6AA8: db $57
+L1E6AA9: db $18
+L1E6AAA: db $00
+L1E6AAB: db $06
+L1E6AAC: db $00
+L1E6AAD: db $01
+L1E6AAE: db $00
+L1E6AAF: db $8F
+L1E6AB0: db $BF
+L1E6AB1: db $B6
+L1E6AB2: db $BB
+L1E6AB3: db $FF
+L1E6AB4: db $77
+L1E6AB5: db $06
+L1E6AB6: db $BF
+L1E6AB7: db $47
+L1E6AB8: db $06
+L1E6AB9: db $1E
+L1E6ABA: db $EA
+L1E6ABB: db $47
+L1E6ABC: db $07
+L1E6ABD: db $06
+L1E6ABE: db $01
+L1E6ABF: db $00
+L1E6AC0: db $06
+L1E6AC1: db $00
+L1E6AC2: db $18
+L1E6AC3: db $B6
+L1E6AC4: db $00
+L1E6AC5: db $60
+L1E6AC6: db $00
+L1E6AC7: db $3F
+L1E6AC8: db $80
+L1E6AC9: db $00
+L1E6ACA: db $AB
+L1E6ACB: db $03
+L1E6ACC: db $EB
+L1E6ACD: db $00
+L1E6ACE: db $FF
+L1E6ACF: db $5B
+L1E6AD0: db $0C
+L1E6AD1: db $00
+L1E6AD2: db $30
+L1E6AD3: db $00
+L1E6AD4: db $4D
+L1E6AD5: db $56
+L1E6AD6: db $1C
+L1E6AD7: db $00
+L1E6AD8: db $60
+L1E6AD9: db $00
+L1E6ADA: db $80
+L1E6ADB: db $00
+L1E6ADC: db $5B
+L1E6ADD: db $C0
+L1E6ADE: db $EB
+L1E6ADF: db $00
+L1E6AE0: db $FF
+L1E6AE1: db $A9
+L1E6AE2: db $7C
+L1E6AE3: db $00
+L1E6AE4: db $88
+L1E6AE5: db $00
+L1E6AE6: db $39
+L1E6AE7: db $55
+L1E6AE8: db $01
+L1E6AE9: db $00
+L1E6AEA: db $06
+L1E6AEB: db $00
+L1E6AEC: db $18
+L1E6AED: db $00
+L1E6AEE: db $E1
+L1E6AEF: db $00
+L1E6AF0: db $55
+L1E6AF1: db $02
+L1E6AF2: db $02
+L1E6AF3: db $04
+L1E6AF4: db $00
+L1E6AF5: db $30
+L1E6AF6: db $00
+L1E6AF7: db $C1
+L1E6AF8: db $00
+L1E6AF9: db $AA
+L1E6AFA: db $4D
+L1E6AFB: db $08
+L1E6AFC: db $00
+L1E6AFD: db $10
+L1E6AFE: db $00
+L1E6AFF: db $20
+L1E6B00: db $00
+L1E6B01: db $80
+L1E6B02: db $B5
+L1E6B03: db $00
+L1E6B04: db $00
+L1E6B05: db $07
+L1E6B06: db $04
+L1E6B07: db $40
+L1E6B08: db $00
+L1E6B09: db $C0
+L1E6B0A: db $00
+L1E6B0B: db $EA
+L1E6B0C: db $99
+L1E6B0D: db $AF
+L1E6B0E: db $7B
+L1E6B0F: db $30
+L1E6B10: db $00
+L1E6B11: db $0C
+L1E6B12: db $00
+L1E6B13: db $03
+L1E6B14: db $AD
+L1E6B15: db $00
+L1E6B16: db $02
+L1E6B17: db $00
+L1E6B18: db $01
+L1E6B19: db $02
+L1E6B1A: db $79
+L1E6B1B: db $08
+L1E6B1C: db $00
+L1E6B1D: db $6A
+L1E6B1E: db $04
+L1E6B1F: db $00
+L1E6B20: db $59
+L1E6B21: db $81
+L1E6B22: db $00
+L1E6B23: db $70
+L1E6B24: db $00
+L1E6B25: db $0F
+L1E6B26: db $DA
+L1E6B27: db $00
+L1E6B28: db $69
+L1E6B29: db $80
+L1E6B2A: db $00
+L1E6B2B: db $F9
+L1E6B2C: db $20
+L1E6B2D: db $00
+L1E6B2E: db $18
+L1E6B2F: db $AE
+L1E6B30: db $00
+L1E6B31: db $0E
+L1E6B32: db $00
+L1E6B33: db $05
+L1E6B34: db $00
+L1E6B35: db $A9
+L1E6B36: db $01
+L1E6B37: db $01
+L1E6B38: db $B5
+L1E6B39: db $00
+L1E6B3A: db $F0
+L1E6B3B: db $00
+L1E6B3C: db $59
+L1E6B3D: db $71
+L1E6B3E: db $00
+L1E6B3F: db $3E
+L1E6B40: db $00
+L1E6B41: db $55
+L1E6B42: db $9F
+L1E6B43: db $00
+L1E6B44: db $4F
+L1E6B45: db $00
+L1E6B46: db $CF
+L1E6B47: db $00
+L1E6B48: db $27
+L1E6B49: db $00
+L1E6B4A: db $6A
+L1E6B4B: db $04
+L1E6B4C: db $00
+L1E6B4D: db $A9
+L1E6B4E: db $C1
+L1E6B4F: db $00
+L1E6B50: db $3C
+L1E6B51: db $00
+L1E6B52: db $83
+L1E6B53: db $AA
+L1E6B54: db $00
+L1E6B55: db $80
+L1E6B56: db $00
+L1E6B57: db $C0
+L1E6B58: db $02
+L1E6B59: db $17
+L1E6B5A: db $00
+L1E6B5B: db $13
+L1E6B5C: db $AB
+L1E6B5D: db $00
+L1E6B5E: db $0B
+L1E6B5F: db $00
+L1E6B60: db $09
+L1E6B61: db $00
+L1E6B62: db $C5
+L1E6B63: db $00
+L1E6B64: db $99
+L1E6B65: db $D5
+L1E6B66: db $C9
+L1E6B67: db $01
+L1E6B68: db $E0
+L1E6B69: db $00
+L1E6B6A: db $E1
+L1E6B6B: db $00
+L1E6B6C: db $F3
+L1E6B6D: db $00
+L1E6B6E: db $55
+L1E6B6F: db $F7
+L1E6B70: db $00
+L1E6B71: db $FF
+L1E6B72: db $04
+L1E6B73: db $7F
+L1E6B74: db $00
+L1E6B75: db $00
+L1E6B76: db $04
+L1E6B77: db $56
+L1E6B78: db $80
+L1E6B79: db $00
+L1E6B7A: db $F0
+L1E6B7B: db $00
+L1E6B7C: db $0F
+L1E6B7D: db $00
+L1E6B7E: db $39
+L1E6B7F: db $7E
+L1E6B80: db $D5
+L1E6B81: db $00
+L1E6B82: db $19
+L1E6B83: db $01
+L1E6B84: db $00
+L1E6B85: db $02
+L1E6B86: db $00
+L1E6B87: db $04
+L1E6B88: db $00
+L1E6B89: db $5A
+L1E6B8A: db $3F
+L1E6B8B: db $00
+L1E6B8C: db $C0
+L1E6B8D: db $00
+L1E6B8E: db $89
+L1E6B8F: db $FF
+L1E6B90: db $00
+L1E6B91: db $FE
+L1E6B92: db $B6
+L1E6B93: db $00
+L1E6B94: db $F8
+L1E6B95: db $00
+L1E6B96: db $D9
+L1E6B97: db $E0
+L1E6B98: db $00
+L1E6B99: db $69
+L1E6B9A: db $80
+L1E6B9B: db $F7
+L1E6B9C: db $00
+L1E6B9D: db $19
+L1E6B9E: db $39
+L1E6B9F: db $B9
+L1E6BA0: db $1F
+L1E6BA1: db $07
+L1E6BA2: db $04
+L1E6BA3: db $A9
+L1E6BA4: db $55
+L1E6BA5: db $00
+L1E6BA6: db $00
+L1E6BA7: db $07
+L1E6BA8: db $00
+L1E6BA9: db $78
+L1E6BAA: db $00
+L1E6BAB: db $87
+L1E6BAC: db $00
+L1E6BAD: db $55
+L1E6BAE: db $7F
+L1E6BAF: db $00
+L1E6BB0: db $FF
+L1E6BB1: db $02
+L1E6BB2: db $1C
+L1E6BB3: db $00
+L1E6BB4: db $E3
+L1E6BB5: db $00
+L1E6BB6: db $55
+L1E6BB7: db $1E
+L1E6BB8: db $00
+L1E6BB9: db $FC
+L1E6BBA: db $00
+L1E6BBB: db $F9
+L1E6BBC: db $00
+L1E6BBD: db $F2
+L1E6BBE: db $00
+L1E6BBF: db $5A
+L1E6BC0: db $F7
+L1E6BC1: db $00
+L1E6BC2: db $E4
+L1E6BC3: db $00
+L1E6BC4: db $89
+L1E6BC5: db $F1
+L1E6BC6: db $00
+L1E6BC7: db $01
+L1E6BC8: db $EA
+L1E6BC9: db $02
+L1E6BCA: db $79
+L1E6BCB: db $39
+L1E6BCC: db $F0
+L1E6BCD: db $00
+L1E6BCE: db $F4
+L1E6BCF: db $00
+L1E6BD0: db $C8
+L1E6BD1: db $AA
+L1E6BD2: db $00
+L1E6BD3: db $D0
+L1E6BD4: db $00
+L1E6BD5: db $90
+L1E6BD6: db $00
+L1E6BD7: db $A1
+L1E6BD8: db $00
+L1E6BD9: db $2E
+L1E6BDA: db $AA
+L1E6BDB: db $00
+L1E6BDC: db $71
+L1E6BDD: db $00
+L1E6BDE: db $41
+L1E6BDF: db $00
+L1E6BE0: db $82
+L1E6BE1: db $00
+L1E6BE2: db $10
+L1E6BE3: db $AA
+L1E6BE4: db $00
+L1E6BE5: db $20
+L1E6BE6: db $00
+L1E6BE7: db $40
+L1E6BE8: db $00
+L1E6BE9: db $87
+L1E6BEA: db $00
+L1E6BEB: db $39
+L1E6BEC: db $AA
+L1E6BED: db $00
+L1E6BEE: db $C2
+L1E6BEF: db $00
+L1E6BF0: db $02
+L1E6BF1: db $00
+L1E6BF2: db $04
+L1E6BF3: db $00
+L1E6BF4: db $08
+L1E6BF5: db $AB
+L1E6BF6: db $00
+L1E6BF7: db $30
+L1E6BF8: db $00
+L1E6BF9: db $C0
+L1E6BFA: db $00
+L1E6BFB: db $00
+L1E6BFC: db $07
+L1E6BFD: db $00
+L1E6BFE: db $AD
+L1E6BFF: db $79
+L1E6C00: db $10
+L1E6C01: db $00
+L1E6C02: db $20
+L1E6C03: db $00
+L1E6C04: db $89
+L1E6C05: db $80
+L1E6C06: db $00
+L1E6C07: db $AD
+L1E6C08: db $7D
+L1E6C09: db $81
+L1E6C0A: db $00
+L1E6C0B: db $41
+L1E6C0C: db $00
+L1E6C0D: db $79
+L1E6C0E: db $18
+L1E6C0F: db $00
+L1E6C10: db $55
+L1E6C11: db $07
+L1E6C12: db $00
+L1E6C13: db $01
+L1E6C14: db $04
+L1E6C15: db $79
+L1E6C16: db $00
+L1E6C17: db $3C
+L1E6C18: db $00
+L1E6C19: db $56
+L1E6C1A: db $BC
+L1E6C1B: db $00
+L1E6C1C: db $9E
+L1E6C1D: db $00
+L1E6C1E: db $3F
+L1E6C1F: db $02
+L1E6C20: db $E9
+L1E6C21: db $FF
+L1E6C22: db $B6
+L1E6C23: db $00
+L1E6C24: db $05
+L1E6C25: db $07
+L1E6C26: db $00
+L1E6C27: db $02
+L1E6C28: db $02
+L1E6C29: db $F9
+L1E6C2A: db $F7
+L1E6C2B: db $AA
+L1E6C2C: db $00
+L1E6C2D: db $FB
+L1E6C2E: db $00
+L1E6C2F: db $7D
+L1E6C30: db $00
+L1E6C31: db $3E
+L1E6C32: db $00
+L1E6C33: db $1F
+L1E6C34: db $B5
+L1E6C35: db $00
+L1E6C36: db $BF
+L1E6C37: db $00
+L1E6C38: db $F9
+L1E6C39: db $F0
+L1E6C3A: db $00
+L1E6C3B: db $E7
+L1E6C3C: db $00
+L1E6C3D: db $55
+L1E6C3E: db $F8
+L1E6C3F: db $00
+L1E6C40: db $FD
+L1E6C41: db $00
+L1E6C42: db $FE
+L1E6C43: db $00
+L1E6C44: db $7F
+L1E6C45: db $00
+L1E6C46: db $57
+L1E6C47: db $9F
+L1E6C48: db $00
+L1E6C49: db $0F
+L1E6C4A: db $02
+L1E6C4B: db $E0
+L1E6C4C: db $04
+L1E6C4D: db $B9
+L1E6C4E: db $01
+L1E6C4F: db $5B
+L1E6C50: db $FC
+L1E6C51: db $00
+L1E6C52: db $FF
+L1E6C53: db $00
+L1E6C54: db $A9
+L1E6C55: db $07
+L1E6C56: db $04
+L1E6C57: db $CB
+L1E6C58: db $6A
+L1E6C59: db $3F
+L1E6C5A: db $00
+L1E6C5B: db $79
+L1E6C5C: db $FE
+L1E6C5D: db $00
+L1E6C5E: db $05
+L1E6C5F: db $00
+L1E6C60: db $3D
+L1E6C61: db $AA
+L1E6C62: db $00
+L1E6C63: db $C6
+L1E6C64: db $00
+L1E6C65: db $84
+L1E6C66: db $00
+L1E6C67: db $41
+L1E6C68: db $00
+L1E6C69: db $46
+L1E6C6A: db $AD
+L1E6C6B: db $00
+L1E6C6C: db $B8
+L1E6C6D: db $00
+L1E6C6E: db $A0
+L1E6C6F: db $00
+L1E6C70: db $49
+L1E6C71: db $08
+L1E6C72: db $00
+L1E6C73: db $55
+L1E6C74: db $10
+L1E6C75: db $00
+L1E6C76: db $60
+L1E6C77: db $00
+L1E6C78: db $80
+L1E6C79: db $00
+L1E6C7A: db $00
+L1E6C7B: db $04
+L1E6C7C: db $DA
+L1E6C7D: db $89
+L1E6C7E: db $07
+L1E6C7F: db $40
+L1E6C80: db $02
+L1E6C81: db $A9
+L1E6C82: db $BF
+L1E6C83: db $00
+L1E6C84: db $4F
+L1E6C85: db $AE
+L1E6C86: db $00
+L1E6C87: db $30
+L1E6C88: db $00
+L1E6C89: db $0F
+L1E6C8A: db $00
+L1E6C8B: db $ED
+L1E6C8C: db $01
+L1E6C8D: db $FD
+L1E6C8E: db $AB
+L1E6C8F: db $00
+L1E6C90: db $F2
+L1E6C91: db $00
+L1E6C92: db $0C
+L1E6C93: db $00
+L1E6C94: db $F0
+L1E6C95: db $00
+L1E6C96: db $7F
+L1E6C97: db $D8
+L1E6C98: db $07
+L1E6C99: db $02
+L1E6C9A: db $01
+L1E6C9B: db $0C
+L1E6C9C: db $03
+L1E6C9D: db $3E
+L1E6C9E: db $3C
+L1E6C9F: db $7E
+L1E6CA0: db $17
+L1E6CA1: db $7C
+L1E6CA2: db $FE
+L1E6CA3: db $FC
+L1E6CA4: db $0A
+L1E6CA5: db $1C
+L1E6CA6: db $09
+L1E6CA7: db $58
+L1E6CA8: db $0F
+L1E6CA9: db $DD
+L1E6CAA: db $0F
+L1E6CAB: db $0D
+L1E6CAC: db $00
+L1E6CAD: db $09
+L1E6CAE: db $07
+L1E6CAF: db $03
+L1E6CB0: db $01
+L1E6CB1: db $00
+L1E6CB2: db $6A
+L1E6CB3: db $03
+L1E6CB4: db $0D
+L1E6CB5: db $6C
+L1E6CB6: db $FF
+L1E6CB7: db $05
+L1E6CB8: db $C3
+L1E6CB9: db $09
+L1E6CBA: db $E7
+L1E6CBB: db $EE
+L1E6CBC: db $58
+L1E6CBD: db $8D
+L1E6CBE: db $07
+L1E6CBF: db $01
+L1E6CC0: db $70
+L1E6CC1: db $88
+L1E6CC2: db $08
+L1E6CC3: db $07
+L1E6CC4: db $A0
+L1E6CC5: db $00
+L1E6CC6: db $0F
+L1E6CC7: db $00
+L1E6CC8: db $1F
+L1E6CC9: db $1E
+L1E6CCA: db $3F
+L1E6CCB: db $3C
+L1E6CCC: db $7E
+L1E6CCD: db $0A
+L1E6CCE: db $78
+L1E6CCF: db $FC
+L1E6CD0: db $F0
+L1E6CD1: db $F8
+L1E6CD2: db $BE
+L1E6CD3: db $80
+L1E6CD4: db $00
+L1E6CD5: db $C0
+L1E6CD6: db $F9
+L1E6CD7: db $0F
+L1E6CD8: db $0B
+L1E6CD9: db $79
+L1E6CDA: db $BE
+L1E6CDB: db $00
+L1E6CDC: db $01
+L1E6CDD: db $03
+L1E6CDE: db $0D
+L1E6CDF: db $E7
+L1E6CE0: db $40
+L1E6CE1: db $09
+L1E6CE2: db $04
+L1E6CE3: db $E0
+L1E6CE4: db $FF
+L1E6CE5: db $05
+L1E6CE6: db $40
+L1E6CE7: db $09
+L1E6CE8: db $9D
+L1E6CE9: db $05
+L1E6CEA: db $C0
+L1E6CEB: db $80
+L1E6CEC: db $0C
+L1E6CED: db $39
+L1E6CEE: db $7E
+L1E6CEF: db $03
+L1E6CF0: db $3E
+L1E6CF1: db $D4
+L1E6CF2: db $6E
+L1E6CF3: db $00
+L1E6CF4: db $E7
+L1E6CF5: db $08
+L1E6CF6: db $07
+L1E6CF7: db $00
+L1E6CF8: db $FF
+L1E6CF9: db $7F
+L1E6CFA: db $F3
+L1E6CFB: db $0A
+L1E6CFC: db $29
+L1E6CFD: db $49
+L1E6CFE: db $69
+L1E6CFF: db $80
+L1E6D00: db $C0
+L1E6D01: db $0B
+L1E6D02: db $B8
+L1E6D03: db $EF
+L1E6D04: db $10
+L1E6D05: db $09
+L1E6D06: db $4D
+L1E6D07: db $01
+L1E6D08: db $90
+L1E6D09: db $0D
+L1E6D0A: db $78
+L1E6D0B: db $10
+L1E6D0C: db $CB
+L1E6D0D: db $08
+L1E6D0E: db $04
+L1E6D0F: db $C3
+L1E6D10: db $E7
+L1E6D11: db $08
+L1E6D12: db $FF
+L1E6D13: db $05
+L1E6D14: db $50
+L1E6D15: db $CF
+L1E6D16: db $09
+L1E6D17: db $02
+L1E6D18: db $80
+L1E6D19: db $C0
+L1E6D1A: db $0D
+L1E6D1B: db $41
+L1E6D1C: db $FD
+L1E6D1D: db $07
+L1E6D1E: db $E0
+L1E6D1F: db $07
+L1E6D20: db $07
+L1E6D21: db $07
+L1E6D22: db $0B
+L1E6D23: db $40
+L1E6D24: db $44
+L1E6D25: db $01
+L1E6D26: db $02
+L1E6D27: db $04
+L1E6D28: db $05
+L1E6D29: db $08
+L1E6D2A: db $08
+L1E6D2B: db $0B
+L1E6D2C: db $0C
+L1E6D2D: db $90
+L1E6D2E: db $4B
+L1E6D2F: db $02
+L1E6D30: db $03
+L1E6D31: db $19
+L1E6D32: db $06
+L1E6D33: db $07
+L1E6D34: db $09
+L1E6D35: db $0A
+L1E6D36: db $10
+L1E6D37: db $0D
+L1E6D38: db $0E
+L1E6D39: db $0F
+L1E6D3A: db $38
+L1E6D3B: db $10
+L1E6D3C: db $11
+L1E6D3D: db $12
+L1E6D3E: db $13
+L1E6D3F: db $04
+L1E6D40: db $15
+L1E6D41: db $16
+L1E6D42: db $19
+L1E6D43: db $1A
+L1E6D44: db $1D
+L1E6D45: db $00
+L1E6D46: db $1E
+L1E6D47: db $1F
+L1E6D48: db $08
+L1E6D49: db $22
+L1E6D4A: db $23
+L1E6D4B: db $26
+L1E6D4C: db $27
+L1E6D4D: db $80
+L1E6D4E: db $14
+L1E6D4F: db $17
+L1E6D50: db $18
+L1E6D51: db $20
+L1E6D52: db $1B
+L1E6D53: db $1C
+L1E6D54: db $F9
+L1E6D55: db $20
+L1E6D56: db $21
+L1E6D57: db $24
+L1E6D58: db $25
+L1E6D59: db $28
+L1E6D5A: db $C0
+L1E6D5B: db $31
+L1E6D5C: db $00
+L1E6D5D: db $29
+L1E6D5E: db $2A
+L1E6D5F: db $2C
+L1E6D60: db $2D
+L1E6D61: db $30
+L1E6D62: db $31
+L1E6D63: db $0C
+L1E6D64: db $34
+L1E6D65: db $35
+L1E6D66: db $38
+L1E6D67: db $39
+L1E6D68: db $62
+L1E6D69: db $01
+L1E6D6A: db $2B
+L1E6D6B: db $2E
+L1E6D6C: db $03
+L1E6D6D: db $2F
+L1E6D6E: db $32
+L1E6D6F: db $33
+L1E6D70: db $36
+L1E6D71: db $37
+L1E6D72: db $3A
+L1E6D73: db $64
+L1E6D74: db $01
+L1E6D75: db $03
+L1E6D76: db $3B
+L1E6D77: db $3C
+L1E6D78: db $3E
+L1E6D79: db $3F
+L1E6D7A: db $42
+L1E6D7B: db $43
+L1E6D7C: db $66
+L1E6D7D: db $01
+L1E6D7E: db $0C
+L1E6D7F: db $3D
+L1E6D80: db $40
+L1E6D81: db $41
+L1E6D82: db $44
+L1E6D83: db $5F
+L1E6D84: db $02
+L1E6D85: db $45
+L1E6D86: db $46
+L1E6D87: db $80
+L1E6D88: db $3D
+L1E6D89: db $00
+L1E6D8A: db $47
+L1E6D8B: db $48
+L1E6D8C: db $01
+L1E6D8D: db $01
+L1E6D8E: db $49
+L1E6D8F: db $01
+L1E6D90: db $01
+L1E6D91: db $4A
+L1E6D92: db $01
+L1E6D93: db $4B
+L1E6D94: db $4C
+L1E6D95: db $4F
+L1E6D96: db $4D
+L1E6D97: db $4E
+L1E6D98: db $50
+L1E6D99: db $51
+L1E6D9A: db $52
+L1E6D9B: db $53
+L1E6D9C: db $4B
+L1E6D9D: db $4C
+L1E6D9E: db $4F
+L1E6D9F: db $54
+L1E6DA0: db $55
+L1E6DA1: db $56
+L1E6DA2: db $57
+L1E6DA3: db $58
+L1E6DA4: db $59
+L1E6DA5: db $67
+L1E6DA6: db $41
+L1E6DA7: db $7A
+L1E6DA8: db $00
+L1E6DA9: db $07
+L1E6DAA: db $07
+L1E6DAB: db $07
+L1E6DAC: db $02
+L1E6DAD: db $01
+L1E6DAE: db $08
+L1E6DAF: db $07
+L1E6DB0: db $D5
+L1E6DB1: db $57
+L1E6DB2: db $04
+L1E6DB3: db $1E
+L1E6DB4: db $08
+L1E6DB5: db $7F
+L1E6DB6: db $08
+L1E6DB7: db $FF
+L1E6DB8: db $08
+L1E6DB9: db $35
+L1E6DBA: db $F3
+L1E6DBB: db $7E
+L1E6DBC: db $19
+L1E6DBD: db $08
+L1E6DBE: db $0C
+L1E6DBF: db $08
+L1E6DC0: db $60
+L1E6DC1: db $08
+L1E6DC2: db $56
+L1E6DC3: db $3A
+L1E6DC4: db $08
+L1E6DC5: db $B0
+L1E6DC6: db $08
+L1E6DC7: db $DC
+L1E6DC8: db $DF
+L1E6DC9: db $03
+L1E6DCA: db $80
+L1E6DCB: db $BA
+L1E6DCC: db $08
+L1E6DCD: db $F0
+L1E6DCE: db $11
+L1E6DCF: db $07
+L1E6DD0: db $00
+L1E6DD1: db $0C
+L1E6DD2: db $08
+L1E6DD3: db $72
+L1E6DD4: db $95
+L1E6DD5: db $10
+L1E6DD6: db $A5
+L1E6DD7: db $5A
+L1E6DD8: db $39
+L1E6DD9: db $01
+L1E6DDA: db $08
+L1E6DDB: db $07
+L1E6DDC: db $10
+L1E6DDD: db $95
+L1E6DDE: db $08
+L1E6DDF: db $02
+L1E6DE0: db $03
+L1E6DE1: db $18
+L1E6DE2: db $05
+L1E6DE3: db $18
+L1E6DE4: db $04
+L1E6DE5: db $20
+L1E6DE6: db $E8
+L1E6DE7: db $09
+L1E6DE8: db $EF
+L1E6DE9: db $03
+L1E6DEA: db $30
+L1E6DEB: db $08
+L1E6DEC: db $70
+L1E6DED: db $20
+L1E6DEE: db $E0
+L1E6DEF: db $C8
+L1E6DF0: db $18
+L1E6DF1: db $08
+L1E6DF2: db $C0
+L1E6DF3: db $F0
+L1E6DF4: db $10
+L1E6DF5: db $E3
+L1E6DF6: db $40
+L1E6DF7: db $CC
+L1E6DF8: db $01
+L1E6DF9: db $83
+L1E6DFA: db $D0
+L1E6DFB: db $8F
+L1E6DFC: db $A0
+L1E6DFD: db $1F
+L1E6DFE: db $A2
+L1E6DFF: db $1D
+L1E6E00: db $CD
+L1E6E01: db $7D
+L1E6E02: db $80
+L1E6E03: db $08
+L1E6E04: db $80
+L1E6E05: db $10
+L1E6E06: db $D0
+L1E6E07: db $B8
+L1E6E08: db $60
+L1E6E09: db $18
+L1E6E0A: db $E9
+L1E6E0B: db $C0
+L1E6E0C: db $30
+L1E6E0D: db $59
+L1E6E0E: db $1E
+L1E6E0F: db $08
+L1E6E10: db $31
+L1E6E11: db $0E
+L1E6E12: db $30
+L1E6E13: db $42
+L1E6E14: db $3F
+L1E6E15: db $09
+L1E6E16: db $42
+L1E6E17: db $3D
+L1E6E18: db $47
+L1E6E19: db $3A
+L1E6E1A: db $20
+L1E6E1B: db $02
+L1E6E1C: db $ED
+L1E6E1D: db $FF
+L1E6E1E: db $F9
+L1E6E1F: db $0B
+L1E6E20: db $C0
+L1E6E21: db $75
+L1E6E22: db $02
+L1E6E23: db $01
+L1E6E24: db $08
+L1E6E25: db $74
+L1E6E26: db $03
+L1E6E27: db $10
+L1E6E28: db $0B
+L1E6E29: db $5B
+L1E6E2A: db $78
+L1E6E2B: db $08
+L1E6E2C: db $FC
+L1E6E2D: db $18
+L1E6E2E: db $2C
+L1E6E2F: db $FE
+L1E6E30: db $B8
+L1E6E31: db $08
+L1E6E32: db $E0
+L1E6E33: db $08
+L1E6E34: db $F8
+L1E6E35: db $BE
+L1E6E36: db $58
+L1E6E37: db $9E
+L1E6E38: db $DF
+L1E6E39: db $07
+L1E6E3A: db $02
+L1E6E3B: db $08
+L1E6E3C: db $28
+L1E6E3D: db $08
+L1E6E3E: db $30
+L1E6E3F: db $6F
+L1E6E40: db $F5
+L1E6E41: db $08
+L1E6E42: db $7B
+L1E6E43: db $C0
+L1E6E44: db $08
+L1E6E45: db $F0
+L1E6E46: db $10
+L1E6E47: db $F8
+L1E6E48: db $18
+L1E6E49: db $AB
+L1E6E4A: db $08
+L1E6E4B: db $40
+L1E6E4C: db $08
+L1E6E4D: db $B0
+L1E6E4E: db $08
+L1E6E4F: db $10
+L1E6E50: db $7B
+L1E6E51: db $07
+L1E6E52: db $B4
+L1E6E53: db $01
+L1E6E54: db $3C
+L1E6E55: db $47
+L1E6E56: db $6E
+L1E6E57: db $C2
+L1E6E58: db $10
+L1E6E59: db $0F
+L1E6E5A: db $07
+L1E6E5B: db $22
+L1E6E5C: db $1F
+L1E6E5D: db $0C
+L1E6E5E: db $08
+L1E6E5F: db $0B
+L1E6E60: db $3F
+L1E6E61: db $13
+L1E6E62: db $08
+L1E6E63: db $1B
+L1E6E64: db $09
+L1E6E65: db $3B
+L1E6E66: db $15
+L1E6E67: db $71
+L1E6E68: db $2E
+L1E6E69: db $08
+L1E6E6A: db $1E
+L1E6E6B: db $7B
+L1E6E6C: db $88
+L1E6E6D: db $4D
+L1E6E6E: db $7E
+L1E6E6F: db $08
+L1E6E70: db $7C
+L1E6E71: db $38
+L1E6E72: db $00
+L1E6E73: db $EA
+L1E6E74: db $01
+L1E6E75: db $0C
+L1E6E76: db $35
+L1E6E77: db $FF
+L1E6E78: db $61
+L1E6E79: db $08
+L1E6E7A: db $19
+L1E6E7B: db $BB
+L1E6E7C: db $08
+L1E6E7D: db $DD
+L1E6E7E: db $0A
+L1E6E7F: db $58
+L1E6E80: db $B0
+L1E6E81: db $08
+L1E6E82: db $0F
+L1E6E83: db $08
+L1E6E84: db $00
+L1E6E85: db $F8
+L1E6E86: db $D0
+L1E6E87: db $FC
+L1E6E88: db $D6
+L1E6E89: db $E0
+L1E6E8A: db $08
+L1E6E8B: db $D8
+L1E6E8C: db $08
+L1E6E8D: db $C8
+L1E6E8E: db $08
+L1E6E8F: db $38
+L1E6E90: db $FE
+L1E6E91: db $56
+L1E6E92: db $3C
+L1E6E93: db $08
+L1E6E94: db $BC
+L1E6E95: db $08
+L1E6E96: db $1C
+L1E6E97: db $89
+L1E6E98: db $00
+L1E6E99: db $5F
+L1E6E9A: db $A1
+L1E6E9B: db $0A
+L1E6E9C: db $00
+L1E6E9D: db $09
+L1E6E9E: db $0E
+L1E6E9F: db $F1
+L1E6EA0: db $1B
+L1E6EA1: db $E4
+L1E6EA2: db $09
+L1E6EA3: db $AA
+L1E6EA4: db $88
+L1E6EA5: db $88
+L1E6EA6: db $48
+L1E6EA7: db $9E
+L1E6EA8: db $09
+L1E6EA9: db $C6
+L1E6EAA: db $D8
+L1E6EAB: db $C4
+L1E6EAC: db $41
+L1E6EAD: db $38
+L1E6EAE: db $09
+L1E6EAF: db $E8
+L1E6EB0: db $D0
+L1E6EB1: db $F0
+L1E6EB2: db $E0
+L1E6EB3: db $01
+L1E6EB4: db $B8
+L1E6EB5: db $D4
+L1E6EB6: db $0B
+L1E6EB7: db $05
+L1E6EB8: db $03
+L1E6EB9: db $08
+L1E6EBA: db $04
+L1E6EBB: db $10
+L1E6EBC: db $4B
+L1E6EBD: db $B4
+L1E6EBE: db $00
+L1E6EBF: db $5E
+L1E6EC0: db $B3
+L1E6EC1: db $3F
+L1E6EC2: db $E2
+L1E6EC3: db $FF
+L1E6EC4: db $1E
+L1E6EC5: db $7F
+L1E6EC6: db $35
+L1E6EC7: db $8A
+L1E6EC8: db $08
+L1E6EC9: db $1D
+L1E6ECA: db $BF
+L1E6ECB: db $4A
+L1E6ECC: db $18
+L1E6ECD: db $A6
+L1E6ECE: db $99
+L1E6ECF: db $07
+L1E6ED0: db $AE
+L1E6ED1: db $F0
+L1E6ED2: db $0F
+L1E6ED3: db $09
+L1E6ED4: db $05
+L1E6ED5: db $08
+L1E6ED6: db $D0
+L1E6ED7: db $08
+L1E6ED8: db $02
+L1E6ED9: db $F5
+L1E6EDA: db $48
+L1E6EDB: db $58
+L1E6EDC: db $01
+L1E6EDD: db $C8
+L1E6EDE: db $38
+L1E6EDF: db $08
+L1E6EE0: db $87
+L1E6EE1: db $0A
+L1E6EE2: db $83
+L1E6EE3: db $B0
+L1E6EE4: db $3B
+L1E6EE5: db $C4
+L1E6EE6: db $10
+L1E6EE7: db $EF
+L1E6EE8: db $80
+L1E6EE9: db $F0
+L1E6EEA: db $38
+L1E6EEB: db $F4
+L1E6EEC: db $8A
+L1E6EED: db $28
+L1E6EEE: db $0A
+L1E6EEF: db $01
+L1E6EF0: db $C0
+L1E6EF1: db $08
+L1E6EF2: db $B8
+L1E6EF3: db $40
+L1E6EF4: db $00
+L1E6EF5: db $0C
+L1E6EF6: db $F0
+L1E6EF7: db $3E
+L1E6EF8: db $CC
+L1E6EF9: db $1E
+L1E6EFA: db $E8
+L1E6EFB: db $BE
+L1E6EFC: db $5C
+L1E6EFD: db $AE
+L1E6EFE: db $A8
+L1E6EFF: db $02
+L1E6F00: db $08
+L1E6F01: db $3A
+L1E6F02: db $08
+L1E6F03: db $50
+L1E6F04: db $E0
+L1E6F05: db $9C
+L1E6F06: db $49
+L1E6F07: db $DE
+L1E6F08: db $CA
+L1E6F09: db $08
+L1E6F0A: db $07
+L1E6F0B: db $0B
+L1E6F0C: db $04
+L1E6F0D: db $03
+L1E6F0E: db $90
+L1E6F0F: db $71
+L1E6F10: db $01
+L1E6F11: db $00
+L1E6F12: db $58
+L1E6F13: db $03
+L1E6F14: db $51
+L1E6F15: db $8E
+L1E6F16: db $FB
+L1E6F17: db $60
+L1E6F18: db $08
+L1E6F19: db $6F
+L1E6F1A: db $93
+L1E6F1B: db $A7
+L1E6F1C: db $59
+L1E6F1D: db $90
+L1E6F1E: db $FA
+L1E6F1F: db $0F
+L1E6F20: db $F6
+L1E6F21: db $20
+L1E6F22: db $9F
+L1E6F23: db $64
+L1E6F24: db $00
+L1E6F25: db $1B
+L1E6F26: db $F0
+L1E6F27: db $20
+L1E6F28: db $70
+L1E6F29: db $C0
+L1E6F2A: db $D2
+L1E6F2B: db $18
+L1E6F2C: db $08
+L1E6F2D: db $F8
+L1E6F2E: db $08
+L1E6F2F: db $FC
+L1E6F30: db $90
+L1E6F31: db $80
+L1E6F32: db $54
+L1E6F33: db $29
+L1E6F34: db $FD
+L1E6F35: db $EA
+L1E6F36: db $08
+L1E6F37: db $6A
+L1E6F38: db $70
+L1E6F39: db $1F
+L1E6F3A: db $10
+L1E6F3B: db $C0
+L1E6F3C: db $4A
+L1E6F3D: db $08
+L1E6F3E: db $E0
+L1E6F3F: db $0E
+L1E6F40: db $01
+L1E6F41: db $20
+L1E6F42: db $06
+L1E6F43: db $08
+L1E6F44: db $02
+L1E6F45: db $B0
+L1E6F46: db $50
+L1E6F47: db $0C
+L1E6F48: db $08
+L1E6F49: db $40
+L1E6F4A: db $79
+L1E6F4B: db $86
+L1E6F4C: db $0A
+L1E6F4D: db $F4
+L1E6F4E: db $1A
+L1E6F4F: db $1C
+L1E6F50: db $E0
+L1E6F51: db $38
+L1E6F52: db $F8
+L1E6F53: db $20
+L1E6F54: db $28
+L1E6F55: db $08
+L1E6F56: db $A8
+L1E6F57: db $07
+L1E6F58: db $FA
+L1E6F59: db $64
+L1E6F5A: db $FF
+L1E6F5B: db $D6
+L1E6F5C: db $00
+L1E6F5D: db $00
+L1E6F5E: db $E0
+L1E6F5F: db $08
+L1E6F60: db $A9
+L1E6F61: db $B0
+L1E6F62: db $03
+L1E6F63: db $98
+L1E6F64: db $05
+L1E6F65: db $09
+L1E6F66: db $09
+L1E6F67: db $06
+L1E6F68: db $09
+L1E6F69: db $6B
+L1E6F6A: db $08
+L1E6F6B: db $60
+L1E6F6C: db $88
+L1E6F6D: db $3C
+L1E6F6E: db $00
+L1E6F6F: db $C3
+L1E6F70: db $E8
+L1E6F71: db $20
+L1E6F72: db $58
+L1E6F73: db $44
+L1E6F74: db $08
+L1E6F75: db $40
+L1E6F76: db $1A
+L1E6F77: db $39
+L1E6F78: db $80
+L1E6F79: db $7F
+L1E6F7A: db $04
+L1E6F7B: db $CB
+L1E6F7C: db $D8
+L1E6F7D: db $09
+L1E6F7E: db $02
+L1E6F7F: db $01
+L1E6F80: db $00
+L1E6F81: db $00
+L1E6F82: db $03
+L1E6F83: db $29
+L1E6F84: db $EA
+L1E6F85: db $09
+L1E6F86: db $90
+L1E6F87: db $09
+L1E6F88: db $5E
+L1E6F89: db $A0
+L1E6F8A: db $A7
+L1E6F8B: db $08
+L1E6F8C: db $BE
+L1E6F8D: db $AA
+L1E6F8E: db $28
+L1E6F8F: db $7D
+L1E6F90: db $08
+L1E6F91: db $67
+L1E6F92: db $08
+L1E6F93: db $9D
+L1E6F94: db $08
+L1E6F95: db $E3
+L1E6F96: db $54
+L1E6F97: db $80
+L1E6F98: db $78
+L1E6F99: db $60
+L1E6F9A: db $10
+L1E6F9B: db $98
+L1E6F9C: db $10
+L1E6F9D: db $C8
+L1E6F9E: db $30
+L1E6F9F: db $32
+L1E6FA0: db $88
+L1E6FA1: db $70
+L1E6FA2: db $09
+L1E6FA3: db $39
+L1E6FA4: db $B8
+L1E6FA5: db $40
+L1E6FA6: db $3B
+L1E6FA7: db $90
+L1E6FA8: db $8B
+L1E6FA9: db $38
+L1E6FAA: db $D0
+L1E6FAB: db $20
+L1E6FAC: db $E0
+L1E6FAD: db $A8
+L1E6FAE: db $C0
+L1E6FAF: db $C8
+L1E6FB0: db $08
+L1E6FB1: db $AA
+L1E6FB2: db $1A
+L1E6FB3: db $01
+L1E6FB4: db $08
+L1E6FB5: db $03
+L1E6FB6: db $08
+L1E6FB7: db $0F
+L1E6FB8: db $09
+L1E6FB9: db $02
+L1E6FBA: db $4D
+L1E6FBB: db $1E
+L1E6FBC: db $30
+L1E6FBD: db $1F
+L1E6FBE: db $05
+L1E6FBF: db $18
+L1E6FC0: db $60
+L1E6FC1: db $1C
+L1E6FC2: db $29
+L1E6FC3: db $A1
+L1E6FC4: db $58
+L1E6FC5: db $0A
+L1E6FC6: db $38
+L1E6FC7: db $09
+L1E6FC8: db $06
+L1E6FC9: db $0B
+L1E6FCA: db $04
+L1E6FCB: db $19
+L1E6FCC: db $E4
+L1E6FCD: db $09
+L1E6FCE: db $49
+L1E6FCF: db $09
+L1E6FD0: db $FF
+L1E6FD1: db $F0
+L1E6FD2: db $08
+L1E6FD3: db $10
+L1E6FD4: db $F7
+L1E6FD5: db $05
+L1E6FD6: db $68
+L1E6FD7: db $EF
+L1E6FD8: db $12
+L1E6FD9: db $47
+L1E6FDA: db $FA
+L1E6FDB: db $08
+L1E6FDC: db $FD
+L1E6FDD: db $48
+L1E6FDE: db $1A
+L1E6FDF: db $F9
+L1E6FE0: db $43
+L1E6FE1: db $FC
+L1E6FE2: db $F0
+L1E6FE3: db $00
+L1E6FE4: db $80
+L1E6FE5: db $08
+L1E6FE6: db $E0
+L1E6FE7: db $E8
+L1E6FE8: db $08
+L1E6FE9: db $A0
+L1E6FEA: db $0C
+L1E6FEB: db $F8
+L1E6FEC: db $0A
+L1E6FED: db $7B
+L1E6FEE: db $84
+L1E6FEF: db $23
+L1E6FF0: db $C5
+L1E6FF1: db $98
+L1E6FF2: db $09
+L1E6FF3: db $9E
+L1E6FF4: db $60
+L1E6FF5: db $9C
+L1E6FF6: db $08
+L1E6FF7: db $22
+L1E6FF8: db $28
+L1E6FF9: db $96
+L1E6FFA: db $09
+L1E6FFB: db $71
+L1E6FFC: db $DE
+L1E6FFD: db $89
+L1E6FFE: db $10
+L1E6FFF: db $F0
+L1E7000: db $09
+L1E7001: db $D0
+L1E7002: db $32
+L1E7003: db $20
+L1E7004: db $90
+L1E7005: db $78
+L1E7006: db $0D
+L1E7007: db $7F
+L1E7008: db $08
+L1E7009: db $08
+L1E700A: db $04
+L1E700B: db $00
+L1E700C: db $BF
+L1E700D: db $42
+L1E700E: db $9F
+L1E700F: db $61
+L1E7010: db $8F
+L1E7011: db $70
+L1E7012: db $87
+L1E7013: db $78
+L1E7014: db $C1
+L1E7015: db $18
+L1E7016: db $F0
+L1E7017: db $57
+L1E7018: db $2D
+L1E7019: db $FC
+L1E701A: db $40
+L1E701B: db $FF
+L1E701C: db $88
+L1E701D: db $EA
+L1E701E: db $08
+L1E701F: db $88
+L1E7020: db $08
+L1E7021: db $72
+L1E7022: db $08
+L1E7023: db $92
+L1E7024: db $08
+L1E7025: db $25
+L1E7026: db $A0
+L1E7027: db $08
+L1E7028: db $BD
+L1E7029: db $08
+L1E702A: db $DD
+L1E702B: db $47
+L1E702C: db $3D
+L1E702D: db $27
+L1E702E: db $1E
+L1E702F: db $01
+L1E7030: db $23
+L1E7031: db $1F
+L1E7032: db $13
+L1E7033: db $0C
+L1E7034: db $0F
+L1E7035: db $01
+L1E7036: db $02
+L1E7037: db $0A
+L1E7038: db $98
+L1E7039: db $C0
+L1E703A: db $03
+L1E703B: db $FE
+L1E703C: db $88
+L1E703D: db $08
+L1E703E: db $9D
+L1E703F: db $BE
+L1E7040: db $5D
+L1E7041: db $2E
+L1E7042: db $3E
+L1E7043: db $D5
+L1E7044: db $18
+L1E7045: db $C9
+L1E7046: db $08
+L1E7047: db $48
+L1E7048: db $0B
+L1E7049: db $00
+L1E704A: db $A8
+L1E704B: db $02
+L1E704C: db $C0
+L1E704D: db $08
+L1E704E: db $F8
+L1E704F: db $08
+L1E7050: db $FC
+L1E7051: db $18
+L1E7052: db $7E
+L1E7053: db $44
+L1E7054: db $BC
+L1E7055: db $08
+L1E7056: db $98
+L1E7057: db $BF
+L1E7058: db $60
+L1E7059: db $08
+L1E705A: db $78
+L1E705B: db $88
+L1E705C: db $2D
+L1E705D: db $70
+L1E705E: db $F0
+L1E705F: db $68
+L1E7060: db $80
+L1E7061: db $0F
+L1E7062: db $EA
+L1E7063: db $0F
+L1E7064: db $08
+L1E7065: db $48
+L1E7066: db $1E
+L1E7067: db $10
+L1E7068: db $1F
+L1E7069: db $0E
+L1E706A: db $10
+L1E706B: db $01
+L1E706C: db $07
+L1E706D: db $02
+L1E706E: db $F5
+L1E706F: db $00
+L1E7070: db $18
+L1E7071: db $00
+L1E7072: db $58
+L1E7073: db $3F
+L1E7074: db $08
+L1E7075: db $E3
+L1E7076: db $60
+L1E7077: db $C0
+L1E7078: db $18
+L1E7079: db $10
+L1E707A: db $BF
+L1E707B: db $68
+L1E707C: db $FF
+L1E707D: db $58
+L1E707E: db $7F
+L1E707F: db $8D
+L1E7080: db $BA
+L1E7081: db $18
+L1E7082: db $DE
+L1E7083: db $08
+L1E7084: db $18
+L1E7085: db $F9
+L1E7086: db $80
+L1E7087: db $08
+L1E7088: db $C0
+L1E7089: db $A0
+L1E708A: db $0A
+L1E708B: db $E0
+L1E708C: db $0E
+L1E708D: db $DF
+L1E708E: db $32
+L1E708F: db $9D
+L1E7090: db $7E
+L1E7091: db $81
+L1E7092: db $84
+L1E7093: db $08
+L1E7094: db $40
+L1E7095: db $3F
+L1E7096: db $21
+L1E7097: db $1E
+L1E7098: db $10
+L1E7099: db $1D
+L1E709A: db $47
+L1E709B: db $4A
+L1E709C: db $3C
+L1E709D: db $08
+L1E709E: db $3E
+L1E709F: db $F0
+L1E70A0: db $90
+L1E70A1: db $D0
+L1E70A2: db $08
+L1E70A3: db $B8
+L1E70A4: db $86
+L1E70A5: db $10
+L1E70A6: db $FC
+L1E70A7: db $38
+L1E70A8: db $FE
+L1E70A9: db $0C
+L1E70AA: db $80
+L1E70AB: db $20
+L1E70AC: db $9C
+L1E70AD: db $D4
+L1E70AE: db $48
+L1E70AF: db $F9
+L1E70B0: db $03
+L1E70B1: db $08
+L1E70B2: db $04
+L1E70B3: db $10
+L1E70B4: db $05
+L1E70B5: db $02
+L1E70B6: db $E6
+L1E70B7: db $08
+L1E70B8: db $18
+L1E70B9: db $00
+L1E70BA: db $01
+L1E70BB: db $07
+L1E70BC: db $28
+L1E70BD: db $09
+L1E70BE: db $0F
+L1E70BF: db $81
+L1E70C0: db $28
+L1E70C1: db $59
+L1E70C2: db $A6
+L1E70C3: db $3D
+L1E70C4: db $C2
+L1E70C5: db $FD
+L1E70C6: db $32
+L1E70C7: db $08
+L1E70C8: db $40
+L1E70C9: db $1A
+L1E70CA: db $08
+L1E70CB: db $A2
+L1E70CC: db $FA
+L1E70CD: db $F4
+L1E70CE: db $FC
+L1E70CF: db $70
+L1E70D0: db $F0
+L1E70D1: db $2B
+L1E70D2: db $A0
+L1E70D3: db $1F
+L1E70D4: db $F8
+L1E70D5: db $1D
+L1E70D6: db $A8
+L1E70D7: db $1E
+L1E70D8: db $A8
+L1E70D9: db $29
+L1E70DA: db $F7
+L1E70DB: db $C8
+L1E70DC: db $08
+L1E70DD: db $E8
+L1E70DE: db $08
+L1E70DF: db $03
+L1E70E0: db $08
+L1E70E1: db $40
+L1E70E2: db $08
+L1E70E3: db $C0
+L1E70E4: db $88
+L1E70E5: db $08
+L1E70E6: db $D8
+L1E70E7: db $20
+L1E70E8: db $EC
+L1E70E9: db $10
+L1E70EA: db $E6
+L1E70EB: db $18
+L1E70EC: db $91
+L1E70ED: db $09
+L1E70EE: db $FE
+L1E70EF: db $C0
+L1E70F0: db $08
+L1E70F1: db $60
+L1E70F2: db $7C
+L1E70F3: db $80
+L1E70F4: db $E0
+L1E70F5: db $D9
+L1E70F6: db $90
+L1E70F7: db $0B
+L1E70F8: db $04
+L1E70F9: db $D0
+L1E70FA: db $09
+L1E70FB: db $08
+L1E70FC: db $07
+L1E70FD: db $0B
+L1E70FE: db $AA
+L1E70FF: db $D0
+L1E7100: db $0F
+L1E7101: db $09
+L1E7102: db $1C
+L1E7103: db $58
+L1E7104: db $3F
+L1E7105: db $10
+L1E7106: db $7E
+L1E7107: db $54
+L1E7108: db $2C
+L1E7109: db $E8
+L1E710A: db $00
+L1E710B: db $09
+L1E710C: db $6C
+L1E710D: db $08
+L1E710E: db $1B
+L1E710F: db $E4
+L1E7110: db $00
+L1E7111: db $1F
+L1E7112: db $E0
+L1E7113: db $0C
+L1E7114: db $F3
+L1E7115: db $4A
+L1E7116: db $B1
+L1E7117: db $52
+L1E7118: db $A1
+L1E7119: db $83
+L1E711A: db $09
+L1E711B: db $62
+L1E711C: db $81
+L1E711D: db $41
+L1E711E: db $80
+L1E711F: db $F0
+L1E7120: db $68
+L1E7121: db $08
+L1E7122: db $0D
+L1E7123: db $40
+L1E7124: db $D0
+L1E7125: db $20
+L1E7126: db $10
+L1E7127: db $28
+L1E7128: db $09
+L1E7129: db $08
+L1E712A: db $40
+L1E712B: db $3B
+L1E712C: db $88
+L1E712D: db $70
+L1E712E: db $19
+L1E712F: db $89
+L1E7130: db $A0
+L1E7131: db $00
+L1E7132: db $09
+L1E7133: db $20
+L1E7134: db $F4
+L1E7135: db $08
+L1E7136: db $07
+L1E7137: db $89
+L1E7138: db $09
+L1E7139: db $F8
+L1E713A: db $28
+L1E713B: db $7C
+L1E713C: db $38
+L1E713D: db $1A
+L1E713E: db $7E
+L1E713F: db $34
+L1E7140: db $7F
+L1E7141: db $28
+L1E7142: db $09
+L1E7143: db $36
+L1E7144: db $8A
+L1E7145: db $01
+L1E7146: db $C8
+L1E7147: db $0E
+L1E7148: db $05
+L1E7149: db $B0
+L1E714A: db $4F
+L1E714B: db $D0
+L1E714C: db $C7
+L1E714D: db $6C
+L1E714E: db $93
+L1E714F: db $80
+L1E7150: db $09
+L1E7151: db $0C
+L1E7152: db $F3
+L1E7153: db $8D
+L1E7154: db $72
+L1E7155: db $8E
+L1E7156: db $71
+L1E7157: db $96
+L1E7158: db $68
+L1E7159: db $69
+L1E715A: db $B6
+L1E715B: db $04
+L1E715C: db $01
+L1E715D: db $0A
+L1E715E: db $85
+L1E715F: db $78
+L1E7160: db $45
+L1E7161: db $29
+L1E7162: db $38
+L1E7163: db $44
+L1E7164: db $0A
+L1E7165: db $7C
+L1E7166: db $48
+L1E7167: db $F8
+L1E7168: db $70
+L1E7169: db $08
+L1E716A: db $6B
+L1E716B: db $F0
+L1E716C: db $08
+L1E716D: db $28
+L1E716E: db $80
+L1E716F: db $08
+L1E7170: db $40
+L1E7171: db $10
+L1E7172: db $09
+L1E7173: db $21
+L1E7174: db $20
+L1E7175: db $C0
+L1E7176: db $09
+L1E7177: db $10
+L1E7178: db $E0
+L1E7179: db $90
+L1E717A: db $60
+L1E717B: db $90
+L1E717C: db $A8
+L1E717D: db $48
+L1E717E: db $18
+L1E717F: db $28
+L1E7180: db $08
+L1E7181: db $A8
+L1E7182: db $A4
+L1E7183: db $58
+L1E7184: db $9C
+L1E7185: db $D3
+L1E7186: db $48
+L1E7187: db $F9
+L1E7188: db $3E
+L1E7189: db $50
+L1E718A: db $3F
+L1E718B: db $1E
+L1E718C: db $08
+L1E718D: db $28
+L1E718E: db $55
+L1E718F: db $01
+L1E7190: db $0C
+L1E7191: db $02
+L1E7192: db $10
+L1E7193: db $03
+L1E7194: db $18
+L1E7195: db $07
+L1E7196: db $08
+L1E7197: db $3A
+L1E7198: db $0F
+L1E7199: db $04
+L1E719A: db $08
+L1E719B: db $18
+L1E719C: db $88
+L1E719D: db $1A
+L1E719E: db $08
+L1E719F: db $0D
+L1E71A0: db $01
+L1E71A1: db $2F
+L1E71A2: db $14
+L1E71A3: db $4F
+L1E71A4: db $34
+L1E71A5: db $46
+L1E71A6: db $38
+L1E71A7: db $E4
+L1E71A8: db $F8
+L1E71A9: db $40
+L1E71AA: db $F8
+L1E71AB: db $68
+L1E71AC: db $B9
+L1E71AD: db $40
+L1E71AE: db $FF
+L1E71AF: db $A0
+L1E71B0: db $E8
+L1E71B1: db $D0
+L1E71B2: db $86
+L1E71B3: db $09
+L1E71B4: db $C8
+L1E71B5: db $B0
+L1E71B6: db $88
+L1E71B7: db $70
+L1E71B8: db $09
+L1E71B9: db $79
+L1E71BA: db $FC
+L1E71BB: db $84
+L1E71BC: db $08
+L1E71BD: db $09
+L1E71BE: db $F0
+L1E71BF: db $11
+L1E71C0: db $E0
+L1E71C1: db $09
+L1E71C2: db $32
+L1E71C3: db $C0
+L1E71C4: db $BD
+L1E71C5: db $09
+L1E71C6: db $CC
+L1E71C7: db $58
+L1E71C8: db $10
+L1E71C9: db $08
+L1E71CA: db $01
+L1E71CB: db $14
+L1E71CC: db $58
+L1E71CD: db $A4
+L1E71CE: db $09
+L1E71CF: db $10
+L1E71D0: db $08
+L1E71D1: db $90
+L1E71D2: db $60
+L1E71D3: db $09
+L1E71D4: db $B0
+L1E71D5: db $40
+L1E71D6: db $B5
+L1E71D7: db $F8
+L1E71D8: db $30
+L1E71D9: db $08
+L1E71DA: db $78
+L1E71DB: db $01
+L1E71DC: db $0C
+L1E71DD: db $02
+L1E71DE: db $10
+L1E71DF: db $B4
+L1E71E0: db $09
+L1E71E1: db $03
+L1E71E2: db $28
+L1E71E3: db $09
+L1E71E4: db $04
+L1E71E5: db $10
+L1E71E6: db $FF
+L1E71E7: db $7E
+L1E71E8: db $81
+L1E71E9: db $00
+L1E71EA: db $BD
+L1E71EB: db $3C
+L1E71EC: db $C3
+L1E71ED: db $18
+L1E71EE: db $E7
+L1E71EF: db $24
+L1E71F0: db $18
+L1E71F1: db $E6
+L1E71F2: db $10
+L1E71F3: db $68
+L1E71F4: db $09
+L1E71F5: db $44
+L1E71F6: db $83
+L1E71F7: db $89
+L1E71F8: db $09
+L1E71F9: db $08
+L1E71FA: db $5E
+L1E71FB: db $07
+L1E71FC: db $0B
+L1E71FD: db $0F
+L1E71FE: db $68
+L1E71FF: db $0B
+L1E7200: db $89
+L1E7201: db $09
+L1E7202: db $A3
+L1E7203: db $8F
+L1E7204: db $28
+L1E7205: db $A6
+L1E7206: db $01
+L1E7207: db $9A
+L1E7208: db $08
+L1E7209: db $B0
+L1E720A: db $28
+L1E720B: db $10
+L1E720C: db $96
+L1E720D: db $0A
+L1E720E: db $40
+L1E720F: db $80
+L1E7210: db $0F
+L1E7211: db $C0
+L1E7212: db $58
+L1E7213: db $09
+L1E7214: db $60
+L1E7215: db $AE
+L1E7216: db $28
+L1E7217: db $50
+L1E7218: db $08
+L1E7219: db $D0
+L1E721A: db $28
+L1E721B: db $19
+L1E721C: db $7B
+L1E721D: db $E0
+L1E721E: db $A1
+L1E721F: db $38
+L1E7220: db $F0
+L1E7221: db $0A
+L1E7222: db $0E
+L1E7223: db $01
+L1E7224: db $0A
+L1E7225: db $05
+L1E7226: db $09
+L1E7227: db $57
+L1E7228: db $06
+L1E7229: db $28
+L1E722A: db $02
+L1E722B: db $0E
+L1E722C: db $03
+L1E722D: db $09
+L1E722E: db $98
+L1E722F: db $10
+L1E7230: db $F3
+L1E7231: db $08
+L1E7232: db $05
+L1E7233: db $39
+L1E7234: db $59
+L1E7235: db $71
+L1E7236: db $DE
+L1E7237: db $0F
+L1E7238: db $0D
+L1E7239: db $4E
+L1E723A: db $F0
+L1E723B: db $88
+L1E723C: db $98
+L1E723D: db $70
+L1E723E: db $09
+L1E723F: db $29
+L1E7240: db $07
+L1E7241: db $FF
+L1E7242: db $E3
+L1E7243: db $88
+L1E7244: db $08
+L1E7245: db $18
+L1E7246: db $22
+L1E7247: db $DC
+L1E7248: db $FC
+L1E7249: db $18
+L1E724A: db $0B
+L1E724B: db $48
+L1E724C: db $FE
+L1E724D: db $0A
+L1E724E: db $04
+L1E724F: db $03
+L1E7250: db $0B
+L1E7251: db $08
+L1E7252: db $07
+L1E7253: db $0C
+L1E7254: db $BA
+L1E7255: db $18
+L1E7256: db $0F
+L1E7257: db $30
+L1E7258: db $08
+L1E7259: db $28
+L1E725A: db $1F
+L1E725B: db $10
+L1E725C: db $BE
+L1E725D: db $4A
+L1E725E: db $D5
+L1E725F: db $0A
+L1E7260: db $CD
+L1E7261: db $3E
+L1E7262: db $09
+L1E7263: db $DD
+L1E7264: db $09
+L1E7265: db $FF
+L1E7266: db $58
+L1E7267: db $1C
+L1E7268: db $F8
+L1E7269: db $BC
+L1E726A: db $89
+L1E726B: db $08
+L1E726C: db $0E
+L1E726D: db $3F
+L1E726E: db $16
+L1E726F: db $80
+L1E7270: db $58
+L1E7271: db $18
+L1E7272: db $7E
+L1E7273: db $0C
+L1E7274: db $4C
+L1E7275: db $30
+L1E7276: db $8C
+L1E7277: db $70
+L1E7278: db $03
+L1E7279: db $F8
+L1E727A: db $00
+L1E727B: db $FC
+L1E727C: db $38
+L1E727D: db $7C
+L1E727E: db $28
+L1E727F: db $08
+L1E7280: db $68
+L1E7281: db $F0
+L1E7282: db $08
+L1E7283: db $58
+L1E7284: db $08
+L1E7285: db $38
+L1E7286: db $7A
+L1E7287: db $24
+L1E7288: db $61
+L1E7289: db $1E
+L1E728A: db $5E
+L1E728B: db $7F
+L1E728C: db $78
+L1E728D: db $80
+L1E728E: db $0F
+L1E728F: db $0A
+L1E7290: db $07
+L1E7291: db $03
+L1E7292: db $01
+L1E7293: db $A2
+L1E7294: db $08
+L1E7295: db $02
+L1E7296: db $10
+L1E7297: db $04
+L1E7298: db $03
+L1E7299: db $07
+L1E729A: db $A9
+L1E729B: db $7F
+L1E729C: db $0A
+L1E729D: db $C1
+L1E729E: db $3E
+L1E729F: db $FF
+L1E72A0: db $41
+L1E72A1: db $08
+L1E72A2: db $77
+L1E72A3: db $0A
+L1E72A4: db $73
+L1E72A5: db $0E
+L1E72A6: db $F7
+L1E72A7: db $63
+L1E72A8: db $F3
+L1E72A9: db $61
+L1E72AA: db $78
+L1E72AB: db $89
+L1E72AC: db $0C
+L1E72AD: db $C0
+L1E72AE: db $C9
+L1E72AF: db $10
+L1E72B0: db $0D
+L1E72B1: db $F1
+L1E72B2: db $40
+L1E72B3: db $08
+L1E72B4: db $60
+L1E72B5: db $F0
+L1E72B6: db $08
+L1E72B7: db $5B
+L1E72B8: db $A0
+L1E72B9: db $28
+L1E72BA: db $20
+L1E72BB: db $50
+L1E72BC: db $09
+L1E72BD: db $E0
+L1E72BE: db $A8
+L1E72BF: db $40
+L1E72C0: db $FD
+L1E72C1: db $08
+L1E72C2: db $18
+L1E72C3: db $48
+L1E72C4: db $68
+L1E72C5: db $10
+L1E72C6: db $79
+L1E72C7: db $90
+L1E72C8: db $08
+L1E72C9: db $01
+L1E72CA: db $48
+L1E72CB: db $30
+L1E72CC: db $28
+L1E72CD: db $10
+L1E72CE: db $24
+L1E72CF: db $18
+L1E72D0: db $3C
+L1E72D1: db $78
+L1E72D2: db $2E
+L1E72D3: db $02
+L1E72D4: db $01
+L1E72D5: db $09
+L1E72D6: db $03
+L1E72D7: db $28
+L1E72D8: db $08
+L1E72D9: db $18
+L1E72DA: db $07
+L1E72DB: db $E8
+L1E72DC: db $10
+L1E72DD: db $0D
+L1E72DE: db $A8
+L1E72DF: db $D0
+L1E72E0: db $09
+L1E72E1: db $78
+L1E72E2: db $A0
+L1E72E3: db $F8
+L1E72E4: db $66
+L1E72E5: db $50
+L1E72E6: db $08
+L1E72E7: db $19
+L1E72E8: db $70
+L1E72E9: db $FC
+L1E72EA: db $40
+L1E72EB: db $08
+L1E72EC: db $38
+L1E72ED: db $94
+L1E72EE: db $AD
+L1E72EF: db $0F
+L1E72F0: db $05
+L1E72F1: db $09
+L1E72F2: db $0B
+L1E72F3: db $08
+L1E72F4: db $0E
+L1E72F5: db $01
+L1E72F6: db $8B
+L1E72F7: db $40
+L1E72F8: db $00
+L1E72F9: db $FE
+L1E72FA: db $1C
+L1E72FB: db $08
+L1E72FC: db $04
+L1E72FD: db $A9
+L1E72FE: db $D8
+L1E72FF: db $5B
+L1E7300: db $30
+L1E7301: db $08
+L1E7302: db $60
+L1E7303: db $08
+L1E7304: db $58
+L1E7305: db $F0
+L1E7306: db $08
+L1E7307: db $19
+L1E7308: db $DA
+L1E7309: db $07
+L1E730A: db $05
+L1E730B: db $78
+L1E730C: db $47
+L1E730D: db $02
+L1E730E: db $07
+L1E730F: db $08
+L1E7310: db $0F
+L1E7311: db $AA
+L1E7312: db $08
+L1E7313: db $03
+L1E7314: db $2C
+L1E7315: db $1F
+L1E7316: db $2E
+L1E7317: db $13
+L1E7318: db $08
+L1E7319: db $06
+L1E731A: db $6A
+L1E731B: db $01
+L1E731C: db $EF
+L1E731D: db $01
+L1E731E: db $80
+L1E731F: db $08
+L1E7320: db $D0
+L1E7321: db $08
+L1E7322: db $F8
+L1E7323: db $AA
+L1E7324: db $0A
+L1E7325: db $FC
+L1E7326: db $08
+L1E7327: db $FE
+L1E7328: db $08
+L1E7329: db $FF
+L1E732A: db $09
+L1E732B: db $04
+L1E732C: db $82
+L1E732D: db $08
+L1E732E: db $0C
+L1E732F: db $9E
+L1E7330: db $60
+L1E7331: db $E5
+L1E7332: db $1A
+L1E7333: db $EF
+L1E7334: db $01
+L1E7335: db $AD
+L1E7336: db $08
+L1E7337: db $07
+L1E7338: db $08
+L1E7339: db $03
+L1E733A: db $1A
+L1E733B: db $03
+L1E733C: db $80
+L1E733D: db $08
+L1E733E: db $55
+L1E733F: db $70
+L1E7340: db $08
+L1E7341: db $F8
+L1E7342: db $08
+L1E7343: db $FC
+L1E7344: db $1C
+L1E7345: db $0F
+L1E7346: db $AC
+L1E7347: db $A5
+L1E7348: db $0B
+L1E7349: db $05
+L1E734A: db $4A
+L1E734B: db $06
+L1E734C: db $01
+L1E734D: db $89
+L1E734E: db $FE
+L1E734F: db $0B
+L1E7350: db $56
+L1E7351: db $60
+L1E7352: db $08
+L1E7353: db $88
+L1E7354: db $48
+L1E7355: db $F0
+L1E7356: db $08
+L1E7357: db $28
+L1E7358: db $7A
+L1E7359: db $7D
+L1E735A: db $84
+L1E735B: db $50
+L1E735C: db $07
+L1E735D: db $00
+L1E735E: db $D0
+L1E735F: db $0A
+L1E7360: db $0F
+L1E7361: db $08
+L1E7362: db $42
+L1E7363: db $7E
+L1E7364: db $08
+L1E7365: db $7F
+L1E7366: db $02
+L1E7367: db $FF
+L1E7368: db $04
+L1E7369: db $08
+L1E736A: db $0A
+L1E736B: db $DF
+L1E736C: db $08
+L1E736D: db $28
+L1E736E: db $FE
+L1E736F: db $28
+L1E7370: db $08
+L1E7371: db $58
+L1E7372: db $49
+L1E7373: db $EF
+L1E7374: db $AA
+L1E7375: db $05
+L1E7376: db $C0
+L1E7377: db $1A
+L1E7378: db $01
+L1E7379: db $08
+L1E737A: db $03
+L1E737B: db $08
+L1E737C: db $05
+L1E737D: db $E9
+L1E737E: db $0A
+L1E737F: db $03
+L1E7380: db $49
+L1E7381: db $FC
+L1E7382: db $08
+L1E7383: db $FE
+L1E7384: db $F0
+L1E7385: db $08
+L1E7386: db $35
+L1E7387: db $08
+L1E7388: db $FF
+L1E7389: db $C0
+L1E738A: db $08
+L1E738B: db $94
+L1E738C: db $08
+L1E738D: db $50
+L1E738E: db $08
+L1E738F: db $5B
+L1E7390: db $74
+L1E7391: db $08
+L1E7392: db $2E
+L1E7393: db $B4
+L1E7394: db $04
+L1E7395: db $80
+L1E7396: db $0A
+L1E7397: db $B0
+L1E7398: db $A8
+L1E7399: db $08
+L1E739A: db $01
+L1E739B: db $08
+L1E739C: db $07
+L1E739D: db $10
+L1E739E: db $0F
+L1E739F: db $06
+L1E73A0: db $1F
+L1E73A1: db $55
+L1E73A2: db $0D
+L1E73A3: db $08
+L1E73A4: db $0B
+L1E73A5: db $08
+L1E73A6: db $09
+L1E73A7: db $38
+L1E73A8: db $04
+L1E73A9: db $49
+L1E73AA: db $A1
+L1E73AB: db $DD
+L1E73AC: db $38
+L1E73AD: db $08
+L1E73AE: db $7C
+L1E73AF: db $28
+L1E73B0: db $FE
+L1E73B1: db $5C
+L1E73B2: db $08
+L1E73B3: db $4D
+L1E73B4: db $58
+L1E73B5: db $08
+L1E73B6: db $14
+L1E73B7: db $FF
+L1E73B8: db $28
+L1E73B9: db $08
+L1E73BA: db $39
+L1E73BB: db $08
+L1E73BC: db $D0
+L1E73BD: db $68
+L1E73BE: db $08
+L1E73BF: db $AD
+L1E73C0: db $08
+L1E73C1: db $DB
+L1E73C2: db $D9
+L1E73C3: db $A7
+L1E73C4: db $8C
+L1E73C5: db $2A
+L1E73C6: db $73
+L1E73C7: db $8B
+L1E73C8: db $B0
+L1E73C9: db $80
+L1E73CA: db $58
+L1E73CB: db $E0
+L1E73CC: db $10
+L1E73CD: db $F0
+L1E73CE: db $17
+L1E73CF: db $60
+L1E73D0: db $F8
+L1E73D1: db $70
+L1E73D2: db $08
+L1E73D3: db $B0
+L1E73D4: db $09
+L1E73D5: db $39
+L1E73D6: db $08
+L1E73D7: db $E5
+L1E73D8: db $60
+L1E73D9: db $70
+L1E73DA: db $00
+L1E73DB: db $01
+L1E73DC: db $02
+L1E73DD: db $08
+L1E73DE: db $04
+L1E73DF: db $0A
+L1E73E0: db $D4
+L1E73E1: db $41
+L1E73E2: db $00
+L1E73E3: db $03
+L1E73E4: db $08
+L1E73E5: db $07
+L1E73E6: db $10
+L1E73E7: db $C6
+L1E73E8: db $38
+L1E73E9: db $02
+L1E73EA: db $4A
+L1E73EB: db $B4
+L1E73EC: db $BD
+L1E73ED: db $52
+L1E73EE: db $FE
+L1E73EF: db $B5
+L1E73F0: db $08
+L1E73F1: db $ED
+L1E73F2: db $29
+L1E73F3: db $FF
+L1E73F4: db $48
+L1E73F5: db $08
+L1E73F6: db $79
+L1E73F7: db $08
+L1E73F8: db $0B
+L1E73F9: db $0F
+L1E73FA: db $90
+L1E73FB: db $CD
+L1E73FC: db $0A
+L1E73FD: db $A8
+L1E73FE: db $1F
+L1E73FF: db $0E
+L1E7400: db $18
+L1E7401: db $D8
+L1E7402: db $08
+L1E7403: db $38
+L1E7404: db $35
+L1E7405: db $09
+L1E7406: db $06
+L1E7407: db $09
+L1E7408: db $88
+L1E7409: db $32
+L1E740A: db $08
+L1E740B: db $0A
+L1E740C: db $08
+L1E740D: db $58
+L1E740E: db $5B
+L1E740F: db $08
+L1E7410: db $5D
+L1E7411: db $08
+L1E7412: db $88
+L1E7413: db $BF
+L1E7414: db $70
+L1E7415: db $3F
+L1E7416: db $1A
+L1E7417: db $FC
+L1E7418: db $7F
+L1E7419: db $8A
+L1E741A: db $B0
+L1E741B: db $04
+L1E741C: db $80
+L1E741D: db $08
+L1E741E: db $40
+L1E741F: db $A3
+L1E7420: db $10
+L1E7421: db $E0
+L1E7422: db $18
+L1E7423: db $F0
+L1E7424: db $C0
+L1E7425: db $F8
+L1E7426: db $98
+L1E7427: db $08
+L1E7428: db $F6
+L1E7429: db $20
+L1E742A: db $A0
+L1E742B: db $10
+L1E742C: db $08
+L1E742D: db $10
+L1E742E: db $1A
+L1E742F: db $68
+L1E7430: db $08
+L1E7431: db $83
+L1E7432: db $48
+L1E7433: db $C8
+L1E7434: db $30
+L1E7435: db $28
+L1E7436: db $D0
+L1E7437: db $01
+L1E7438: db $38
+L1E7439: db $0D
+L1E743A: db $53
+L1E743B: db $03
+L1E743C: db $08
+L1E743D: db $07
+L1E743E: db $08
+L1E743F: db $0B
+L1E7440: db $04
+L1E7441: db $09
+L1E7442: db $20
+L1E7443: db $D6
+L1E7444: db $07
+L1E7445: db $02
+L1E7446: db $78
+L1E7447: db $08
+L1E7448: db $FE
+L1E7449: db $57
+L1E744A: db $06
+L1E744B: db $38
+L1E744C: db $AA
+L1E744D: db $08
+L1E744E: db $FF
+L1E744F: db $09
+L1E7450: db $0C
+L1E7451: db $08
+L1E7452: db $12
+L1E7453: db $08
+L1E7454: db $08
+L1E7455: db $E0
+L1E7456: db $C8
+L1E7457: db $29
+L1E7458: db $48
+L1E7459: db $81
+L1E745A: db $7E
+L1E745B: db $80
+L1E745C: db $7F
+L1E745D: db $78
+L1E745E: db $31
+L1E745F: db $30
+L1E7460: db $FC
+L1E7461: db $A0
+L1E7462: db $08
+L1E7463: db $60
+L1E7464: db $7A
+L1E7465: db $04
+L1E7466: db $90
+L1E7467: db $81
+L1E7468: db $78
+L1E7469: db $F1
+L1E746A: db $0E
+L1E746B: db $31
+L1E746C: db $CE
+L1E746D: db $29
+L1E746E: db $D6
+L1E746F: db $A0
+L1E7470: db $AC
+L1E7471: db $04
+L1E7472: db $07
+L1E7473: db $08
+L1E7474: db $0F
+L1E7475: db $0A
+L1E7476: db $28
+L1E7477: db $06
+L1E7478: db $1F
+L1E7479: db $7A
+L1E747A: db $01
+L1E747B: db $6B
+L1E747C: db $21
+L1E747D: db $0B
+L1E747E: db $01
+L1E747F: db $04
+L1E7480: db $08
+L1E7481: db $0E
+L1E7482: db $AA
+L1E7483: db $10
+L1E7484: db $7F
+L1E7485: db $18
+L1E7486: db $FF
+L1E7487: db $0B
+L1E7488: db $10
+L1E7489: db $08
+L1E748A: db $38
+L1E748B: db $0B
+L1E748C: db $BF
+L1E748D: db $11
+L1E748E: db $3F
+L1E748F: db $1E
+L1E7490: db $F8
+L1E7491: db $0C
+L1E7492: db $FB
+L1E7493: db $03
+L1E7494: db $56
+L1E7495: db $80
+L1E7496: db $08
+L1E7497: db $C0
+L1E7498: db $0E
+L1E7499: db $F8
+L1E749A: db $01
+L1E749B: db $D8
+L1E749C: db $E8
+L1E749D: db $38
+L1E749E: db $28
+L1E749F: db $E0
+L1E74A0: db $4A
+L1E74A1: db $99
+L1E74A2: db $09
+L1E74A3: db $04
+L1E74A4: db $03
+L1E74A5: db $0A
+L1E74A6: db $0F
+L1E74A7: db $05
+L1E74A8: db $0E
+L1E74A9: db $01
+L1E74AA: db $0F
+L1E74AB: db $30
+L1E74AC: db $09
+L1E74AD: db $28
+L1E74AE: db $08
+L1E74AF: db $7B
+L1E74B0: db $0C
+L1E74B1: db $68
+L1E74B2: db $0B
+L1E74B3: db $38
+L1E74B4: db $1A
+L1E74B5: db $06
+L1E74B6: db $08
+L1E74B7: db $07
+L1E74B8: db $18
+L1E74B9: db $85
+L1E74BA: db $7B
+L1E74BB: db $84
+L1E74BC: db $08
+L1E74BD: db $18
+L1E74BE: db $7A
+L1E74BF: db $43
+L1E74C0: db $BD
+L1E74C1: db $48
+L1E74C2: db $FD
+L1E74C3: db $48
+L1E74C4: db $7D
+L1E74C5: db $38
+L1E74C6: db $30
+L1E74C7: db $04
+L1E74C8: db $A1
+L1E74C9: db $5E
+L1E74CA: db $6D
+L1E74CB: db $80
+L1E74CC: db $38
+L1E74CD: db $0B
+L1E74CE: db $C0
+L1E74CF: db $10
+L1E74D0: db $09
+L1E74D1: db $E0
+L1E74D2: db $10
+L1E74D3: db $9D
+L1E74D4: db $08
+L1E74D5: db $40
+L1E74D6: db $70
+L1E74D7: db $48
+L1E74D8: db $89
+L1E74D9: db $09
+L1E74DA: db $FF
+L1E74DB: db $28
+L1E74DC: db $82
+L1E74DD: db $08
+L1E74DE: db $6E
+L1E74DF: db $7F
+L1E74E0: db $2E
+L1E74E1: db $7E
+L1E74E2: db $2C
+L1E74E3: db $09
+L1E74E4: db $FC
+L1E74E5: db $56
+L1E74E6: db $58
+L1E74E7: db $89
+L1E74E8: db $30
+L1E74E9: db $0A
+L1E74EA: db $60
+L1E74EB: db $08
+L1E74EC: db $07
+L1E74ED: db $09
+L1E74EE: db $37
+L1E74EF: db $06
+L1E74F0: db $0D
+L1E74F1: db $08
+L1E74F2: db $19
+L1E74F3: db $0F
+L1E74F4: db $38
+L1E74F5: db $08
+L1E74F6: db $18
+L1E74F7: db $00
+L1E74F8: db $0E
+L1E74F9: db $04
+L1E74FA: db $1E
+L1E74FB: db $0C
+L1E74FC: db $1D
+L1E74FD: db $08
+L1E74FE: db $15
+L1E74FF: db $FA
+L1E7500: db $00
+L1E7501: db $0A
+L1E7502: db $FD
+L1E7503: db $1B
+L1E7504: db $FC
+L1E7505: db $83
+L1E7506: db $7C
+L1E7507: db $FF
+L1E7508: db $01
+L1E7509: db $33
+L1E750A: db $7F
+L1E750B: db $38
+L1E750C: db $18
+L1E750D: db $A8
+L1E750E: db $07
+L1E750F: db $F8
+L1E7510: db $88
+L1E7511: db $18
+L1E7512: db $B7
+L1E7513: db $09
+L1E7514: db $1F
+L1E7515: db $E9
+L1E7516: db $08
+L1E7517: db $05
+L1E7518: db $08
+L1E7519: db $80
+L1E751A: db $0C
+L1E751B: db $41
+L1E751C: db $02
+L1E751D: db $D8
+L1E751E: db $2A
+L1E751F: db $D4
+L1E7520: db $1A
+L1E7521: db $E4
+L1E7522: db $FE
+L1E7523: db $38
+L1E7524: db $D5
+L1E7525: db $08
+L1E7526: db $19
+L1E7527: db $EC
+L1E7528: db $08
+L1E7529: db $DC
+L1E752A: db $60
+L1E752B: db $C8
+L1E752C: db $40
+L1E752D: db $AB
+L1E752E: db $00
+L1E752F: db $80
+L1E7530: db $08
+L1E7531: db $C0
+L1E7532: db $10
+L1E7533: db $E0
+L1E7534: db $10
+L1E7535: db $19
+L1E7536: db $C3
+L1E7537: db $39
+L1E7538: db $03
+L1E7539: db $0F
+L1E753A: db $06
+L1E753B: db $07
+L1E753C: db $02
+L1E753D: db $0D
+L1E753E: db $49
+L1E753F: db $EA
+L1E7540: db $08
+L1E7541: db $20
+L1E7542: db $09
+L1E7543: db $17
+L1E7544: db $10
+L1E7545: db $19
+L1E7546: db $08
+L1E7547: db $1E
+L1E7548: db $DD
+L1E7549: db $28
+L1E754A: db $00
+L1E754B: db $01
+L1E754C: db $00
+L1E754D: db $EC
+L1E754E: db $01
+L1E754F: db $FF
+L1E7550: db $50
+L1E7551: db $A7
+L1E7552: db $08
+L1E7553: db $05
+L1E7554: db $0C
+L1E7555: db $03
+L1E7556: db $FB
+L1E7557: db $48
+L1E7558: db $09
+L1E7559: db $28
+L1E755A: db $1F
+L1E755B: db $BD
+L1E755C: db $C0
+L1E755D: db $80
+L1E755E: db $00
+L1E755F: db $98
+L1E7560: db $09
+L1E7561: db $29
+L1E7562: db $0B
+L1E7563: db $74
+L1E7564: db $E0
+L1E7565: db $10
+L1E7566: db $09
+L1E7567: db $88
+L1E7568: db $6D
+L1E7569: db $09
+L1E756A: db $7E
+L1E756B: db $A9
+L1E756C: db $BD
+L1E756D: db $18
+L1E756E: db $81
+L1E756F: db $08
+L1E7570: db $98
+L1E7571: db $28
+L1E7572: db $0A
+L1E7573: db $3C
+L1E7574: db $08
+L1E7575: db $57
+L1E7576: db $D0
+L1E7577: db $90
+L1E7578: db $30
+L1E7579: db $08
+L1E757A: db $F0
+L1E757B: db $A8
+L1E757C: db $00
+L1E757D: db $38
+L1E757E: db $E6
+L1E757F: db $E0
+L1E7580: db $08
+L1E7581: db $05
+L1E7582: db $03
+L1E7583: db $01
+L1E7584: db $08
+L1E7585: db $18
+L1E7586: db $07
+L1E7587: db $6D
+L1E7588: db $02
+L1E7589: db $0A
+L1E758A: db $30
+L1E758B: db $0F
+L1E758C: db $10
+L1E758D: db $08
+L1E758E: db $04
+L1E758F: db $08
+L1E7590: db $81
+L1E7591: db $38
+L1E7592: db $FF
+L1E7593: db $42
+L1E7594: db $DF
+L1E7595: db $FA
+L1E7596: db $BF
+L1E7597: db $F8
+L1E7598: db $08
+L1E7599: db $0B
+L1E759A: db $F3
+L1E759B: db $DC
+L1E759C: db $6F
+L1E759D: db $93
+L1E759E: db $08
+L1E759F: db $9F
+L1E75A0: db $08
+L1E75A1: db $68
+L1E75A2: db $6E
+L1E75A3: db $EF
+L1E75A4: db $C9
+L1E75A5: db $F9
+L1E75A6: db $01
+L1E75A7: db $0C
+L1E75A8: db $05
+L1E75A9: db $88
+L1E75AA: db $AE
+L1E75AB: db $37
+L1E75AC: db $FE
+L1E75AD: db $B0
+L1E75AE: db $F0
+L1E75AF: db $09
+L1E75B0: db $A0
+L1E75B1: db $08
+L1E75B2: db $48
+L1E75B3: db $0B
+L1E75B4: db $4F
+L1E75B5: db $78
+L1E75B6: db $08
+L1E75B7: db $C0
+L1E75B8: db $80
+L1E75B9: db $00
+L1E75BA: db $18
+L1E75BB: db $0F
+L1E75BC: db $0B
+L1E75BD: db $27
+L1E75BE: db $07
+L1E75BF: db $02
+L1E75C0: db $08
+L1E75C1: db $01
+L1E75C2: db $03
+L1E75C3: db $08
+L1E75C4: db $00
+L1E75C5: db $38
+L1E75C6: db $FD
+L1E75C7: db $01
+L1E75C8: db $19
+L1E75C9: db $0B
+L1E75CA: db $70
+L1E75CB: db $10
+L1E75CC: db $09
+L1E75CD: db $04
+L1E75CE: db $80
+L1E75CF: db $B0
+L1E75D0: db $0B
+L1E75D1: db $08
+L1E75D2: db $C0
+L1E75D3: db $0B
+L1E75D4: db $D3
+L1E75D5: db $BE
+L1E75D6: db $E7
+L1E75D7: db $DF
+L1E75D8: db $2C
+L1E75D9: db $FF
+L1E75DA: db $C7
+L1E75DB: db $00
+L1E75DC: db $38
+L1E75DD: db $18
+L1E75DE: db $C8
+L1E75DF: db $1C
+L1E75E0: db $E3
+L1E75E1: db $02
+L1E75E2: db $36
+L1E75E3: db $C9
+L1E75E4: db $32
+L1E75E5: db $CD
+L1E75E6: db $E0
+L1E75E7: db $C0
+L1E75E8: db $08
+L1E75E9: db $40
+L1E75EA: db $E8
+L1E75EB: db $10
+L1E75EC: db $58
+L1E75ED: db $03
+L1E75EE: db $80
+L1E75EF: db $0C
+L1E75F0: db $63
+L1E75F1: db $9C
+L1E75F2: db $6B
+L1E75F3: db $00
+L1E75F4: db $94
+L1E75F5: db $08
+L1E75F6: db $F7
+L1E75F7: db $48
+L1E75F8: db $B7
+L1E75F9: db $5C
+L1E75FA: db $A3
+L1E75FB: db $1D
+L1E75FC: db $07
+L1E75FD: db $E2
+L1E75FE: db $9D
+L1E75FF: db $62
+L1E7600: db $BE
+L1E7601: db $41
+L1E7602: db $E0
+L1E7603: db $90
+L1E7604: db $09
+L1E7605: db $24
+L1E7606: db $20
+L1E7607: db $C0
+L1E7608: db $0B
+L1E7609: db $10
+L1E760A: db $E0
+L1E760B: db $09
+L1E760C: db $88
+L1E760D: db $70
+L1E760E: db $24
+L1E760F: db $09
+L1E7610: db $06
+L1E7611: db $0B
+L1E7612: db $05
+L1E7613: db $02
+L1E7614: db $0F
+L1E7615: db $EF
+L1E7616: db $F7
+L1E7617: db $04
+L1E7618: db $FB
+L1E7619: db $C7
+L1E761A: db $FF
+L1E761B: db $38
+L1E761C: db $F9
+L1E761D: db $88
+L1E761E: db $80
+L1E761F: db $7F
+L1E7620: db $24
+L1E7621: db $90
+L1E7622: db $6F
+L1E7623: db $09
+L1E7624: db $C8
+L1E7625: db $37
+L1E7626: db $89
+L1E7627: db $07
+L1E7628: db $00
+L1E7629: db $A4
+L1E762A: db $08
+L1E762B: db $01
+L1E762C: db $EF
+L1E762D: db $0B
+L1E762E: db $04
+L1E762F: db $89
+L1E7630: db $CB
+L1E7631: db $34
+L1E7632: db $02
+L1E7633: db $E7
+L1E7634: db $99
+L1E7635: db $F7
+L1E7636: db $EB
+L1E7637: db $FF
+L1E7638: db $E3
+L1E7639: db $08
+L1E763A: db $63
+L1E763B: db $62
+L1E763C: db $FB
+L1E763D: db $68
+L1E763E: db $08
+L1E763F: db $75
+L1E7640: db $88
+L1E7641: db $70
+L1E7642: db $0B
+L1E7643: db $94
+L1E7644: db $04
+L1E7645: db $68
+L1E7646: db $84
+L1E7647: db $78
+L1E7648: db $C4
+L1E7649: db $38
+L1E764A: db $09
+L1E764B: db $44
+L1E764C: db $B8
+L1E764D: db $F0
+L1E764E: db $09
+L1E764F: db $3A
+L1E7650: db $19
+L1E7651: db $0C
+L1E7652: db $E4
+L1E7653: db $18
+L1E7654: db $E2
+L1E7655: db $DC
+L1E7656: db $02
+L1E7657: db $11
+L1E7658: db $0E
+L1E7659: db $12
+L1E765A: db $0D
+L1E765B: db $22
+L1E765C: db $1D
+L1E765D: db $09
+L1E765E: db $2E
+L1E765F: db $90
+L1E7660: db $40
+L1E7661: db $26
+L1E7662: db $19
+L1E7663: db $59
+L1E7664: db $09
+L1E7665: db $06
+L1E7666: db $07
+L1E7667: db $00
+L1E7668: db $60
+L1E7669: db $01
+L1E766A: db $0F
+L1E766B: db $0C
+L1E766C: db $C4
+L1E766D: db $3B
+L1E766E: db $C6
+L1E766F: db $39
+L1E7670: db $C3
+L1E7671: db $10
+L1E7672: db $3C
+L1E7673: db $45
+L1E7674: db $BA
+L1E7675: db $48
+L1E7676: db $FE
+L1E7677: db $42
+L1E7678: db $BC
+L1E7679: db $62
+L1E767A: db $61
+L1E767B: db $9C
+L1E767C: db $20
+L1E767D: db $78
+L1E767E: db $02
+L1E767F: db $FC
+L1E7680: db $0C
+L1E7681: db $F0
+L1E7682: db $00
+L1E7683: db $F9
+L1E7684: db $28
+L1E7685: db $07
+L1E7686: db $01
+L1E7687: db $88
+L1E7688: db $78
+L1E7689: db $FF
+L1E768A: db $DE
+L1E768B: db $08
+L1E768C: db $55
+L1E768D: db $DA
+L1E768E: db $08
+L1E768F: db $87
+L1E7690: db $08
+L1E7691: db $ED
+L1E7692: db $08
+L1E7693: db $E6
+L1E7694: db $08
+L1E7695: db $15
+L1E7696: db $E7
+L1E7697: db $F7
+L1E7698: db $A3
+L1E7699: db $AD
+L1E769A: db $80
+L1E769B: db $0C
+L1E769C: db $C0
+L1E769D: db $10
+L1E769E: db $86
+L1E769F: db $09
+L1E76A0: db $1E
+L1E76A1: db $0C
+L1E76A2: db $1F
+L1E76A3: db $0E
+L1E76A4: db $0B
+L1E76A5: db $00
+L1E76A6: db $05
+L1E76A7: db $4A
+L1E76A8: db $07
+L1E76A9: db $78
+L1E76AA: db $04
+L1E76AB: db $03
+L1E76AC: db $09
+L1E76AD: db $7F
+L1E76AE: db $08
+L1E76AF: db $BF
+L1E76B0: db $00
+L1E76B1: db $57
+L1E76B2: db $9F
+L1E76B3: db $66
+L1E76B4: db $47
+L1E76B5: db $B8
+L1E76B6: db $32
+L1E76B7: db $CD
+L1E76B8: db $FC
+L1E76B9: db $86
+L1E76BA: db $48
+L1E76BB: db $A1
+L1E76BC: db $FF
+L1E76BD: db $EA
+L1E76BE: db $F5
+L1E76BF: db $B0
+L1E76C0: db $28
+L1E76C1: db $06
+L1E76C2: db $FE
+L1E76C3: db $08
+L1E76C4: db $C8
+L1E76C5: db $BA
+L1E76C6: db $39
+L1E76C7: db $00
+L1E76C8: db $F8
+L1E76C9: db $03
+L1E76CA: db $CE
+L1E76CB: db $20
+L1E76CC: db $F3
+L1E76CD: db $8D
+L1E76CE: db $08
+L1E76CF: db $D7
+L1E76D0: db $F8
+L1E76D1: db $AF
+L1E76D2: db $FB
+L1E76D3: db $86
+L1E76D4: db $C9
+L1E76D5: db $08
+L1E76D6: db $F9
+L1E76D7: db $F4
+L1E76D8: db $4F
+L1E76D9: db $18
+L1E76DA: db $43
+L1E76DB: db $C0
+L1E76DC: db $88
+L1E76DD: db $29
+L1E76DE: db $A0
+L1E76DF: db $40
+L1E76E0: db $09
+L1E76E1: db $50
+L1E76E2: db $10
+L1E76E3: db $10
+L1E76E4: db $E0
+L1E76E5: db $09
+L1E76E6: db $53
+L1E76E7: db $70
+L1E76E8: db $08
+L1E76E9: db $D0
+L1E76EA: db $38
+L1E76EB: db $60
+L1E76EC: db $80
+L1E76ED: db $00
+L1E76EE: db $88
+L1E76EF: db $F8
+L1E76F0: db $01
+L1E76F1: db $19
+L1E76F2: db $0D
+L1E76F3: db $E8
+L1E76F4: db $10
+L1E76F5: db $FC
+L1E76F6: db $58
+L1E76F7: db $7C
+L1E76F8: db $3D
+L1E76F9: db $18
+L1E76FA: db $78
+L1E76FB: db $38
+L1E76FC: db $09
+L1E76FD: db $28
+L1E76FE: db $08
+L1E76FF: db $A6
+L1E7700: db $48
+L1E7701: db $13
+L1E7702: db $A3
+L1E7703: db $5E
+L1E7704: db $FF
+L1E7705: db $28
+L1E7706: db $03
+L1E7707: db $01
+L1E7708: db $0A
+L1E7709: db $29
+L1E770A: db $AB
+L1E770B: db $08
+L1E770C: db $02
+L1E770D: db $28
+L1E770E: db $04
+L1E770F: db $20
+L1E7710: db $07
+L1E7711: db $09
+L1E7712: db $38
+L1E7713: db $AC
+L1E7714: db $F8
+L1E7715: db $98
+L1E7716: db $09
+L1E7717: db $9C
+L1E7718: db $28
+L1E7719: db $09
+L1E771A: db $94
+L1E771B: db $08
+L1E771C: db $05
+L1E771D: db $92
+L1E771E: db $0C
+L1E771F: db $93
+L1E7720: db $0E
+L1E7721: db $9F
+L1E7722: db $38
+L1E7723: db $3C
+L1E7724: db $08
+L1E7725: db $57
+L1E7726: db $7C
+L1E7727: db $08
+L1E7728: db $78
+L1E7729: db $0A
+L1E772A: db $70
+L1E772B: db $1A
+L1E772C: db $48
+L1E772D: db $98
+L1E772E: db $75
+L1E772F: db $6E
+L1E7730: db $6A
+L1E7731: db $09
+L1E7732: db $99
+L1E7733: db $3E
+L1E7734: db $09
+L1E7735: db $04
+L1E7736: db $08
+L1E7737: db $08
+L1E7738: db $14
+L1E7739: db $7E
+L1E773A: db $20
+L1E773B: db $EE
+L1E773C: db $38
+L1E773D: db $10
+L1E773E: db $0F
+L1E773F: db $11
+L1E7740: db $02
+L1E7741: db $0E
+L1E7742: db $21
+L1E7743: db $1E
+L1E7744: db $23
+L1E7745: db $1C
+L1E7746: db $63
+L1E7747: db $08
+L1E7748: db $76
+L1E7749: db $08
+L1E774A: db $29
+L1E774B: db $FF
+L1E774C: db $70
+L1E774D: db $F8
+L1E774E: db $78
+L1E774F: db $B6
+L1E7750: db $41
+L1E7751: db $36
+L1E7752: db $16
+L1E7753: db $C1
+L1E7754: db $77
+L1E7755: db $80
+L1E7756: db $0D
+L1E7757: db $E3
+L1E7758: db $68
+L1E7759: db $01
+L1E775A: db $88
+L1E775B: db $C8
+L1E775C: db $98
+L1E775D: db $09
+L1E775E: db $44
+L1E775F: db $B8
+L1E7760: db $09
+L1E7761: db $66
+L1E7762: db $98
+L1E7763: db $EE
+L1E7764: db $49
+L1E7765: db $14
+L1E7766: db $F8
+L1E7767: db $0E
+L1E7768: db $1F
+L1E7769: db $78
+L1E776A: db $0B
+L1E776B: db $04
+L1E776C: db $0F
+L1E776D: db $C9
+L1E776E: db $09
+L1E776F: db $70
+L1E7770: db $01
+L1E7771: db $03
+L1E7772: db $78
+L1E7773: db $FB
+L1E7774: db $34
+L1E7775: db $A8
+L1E7776: db $75
+L1E7777: db $30
+L1E7778: db $08
+L1E7779: db $28
+L1E777A: db $1A
+L1E777B: db $78
+L1E777C: db $08
+L1E777D: db $E0
+L1E777E: db $80
+L1E777F: db $25
+L1E7780: db $F8
+L1E7781: db $FC
+L1E7782: db $48
+L1E7783: db $E2
+L1E7784: db $DC
+L1E7785: db $0A
+L1E7786: db $1C
+L1E7787: db $08
+L1E7788: db $00
+L1E7789: db $5C
+L1E778A: db $EE
+L1E778B: db $50
+L1E778C: db $F4
+L1E778D: db $08
+L1E778E: db $44
+L1E778F: db $38
+L1E7790: db $7C
+L1E7791: db $B4
+L1E7792: db $78
+L1E7793: db $01
+L1E7794: db $0F
+L1E7795: db $0A
+L1E7796: db $03
+L1E7797: db $0A
+L1E7798: db $F7
+L1E7799: db $C3
+L1E779A: db $0A
+L1E779B: db $F3
+L1E779C: db $E1
+L1E779D: db $E3
+L1E779E: db $41
+L1E779F: db $10
+L1E77A0: db $80
+L1E77A1: db $08
+L1E77A2: db $C0
+L1E77A3: db $7E
+L1E77A4: db $E0
+L1E77A5: db $09
+L1E77A6: db $68
+L1E77A7: db $10
+L1E77A8: db $09
+L1E77A9: db $48
+L1E77AA: db $28
+L1E77AB: db $40
+L1E77AC: db $EA
+L1E77AD: db $08
+L1E77AE: db $19
+L1E77AF: db $30
+L1E77B0: db $F0
+L1E77B1: db $10
+L1E77B2: db $F8
+L1E77B3: db $38
+L1E77B4: db $FC
+L1E77B5: db $2A
+L1E77B6: db $08
+L1E77B7: db $7C
+L1E77B8: db $78
+L1E77B9: db $01
+L1E77BA: db $0C
+L1E77BB: db $03
+L1E77BC: db $10
+L1E77BD: db $02
+L1E77BE: db $B2
+L1E77BF: db $08
+L1E77C0: db $05
+L1E77C1: db $20
+L1E77C2: db $70
+L1E77C3: db $07
+L1E77C4: db $0F
+L1E77C5: db $48
+L1E77C6: db $B3
+L1E77C7: db $01
+L1E77C8: db $CC
+L1E77C9: db $B8
+L1E77CA: db $C7
+L1E77CB: db $36
+L1E77CC: db $C9
+L1E77CD: db $AB
+L1E77CE: db $D6
+L1E77CF: db $C8
+L1E77D0: db $96
+L1E77D1: db $10
+L1E77D2: db $FF
+L1E77D3: db $94
+L1E77D4: db $00
+L1E77D5: db $6B
+L1E77D6: db $18
+L1E77D7: db $78
+L1E77D8: db $C0
+L1E77D9: db $6C
+L1E77DA: db $80
+L1E77DB: db $08
+L1E77DC: db $18
+L1E77DD: db $E0
+L1E77DE: db $10
+L1E77DF: db $08
+L1E77E0: db $40
+L1E77E1: db $60
+L1E77E2: db $A7
+L1E77E3: db $38
+L1E77E4: db $70
+L1E77E5: db $20
+L1E77E6: db $F8
+L1E77E7: db $30
+L1E77E8: db $08
+L1E77E9: db $58
+L1E77EA: db $07
+L1E77EB: db $A9
+L1E77EC: db $01
+L1E77ED: db $1C
+L1E77EE: db $08
+L1E77EF: db $62
+L1E77F0: db $10
+L1E77F1: db $81
+L1E77F2: db $7E
+L1E77F3: db $6F
+L1E77F4: db $B5
+L1E77F5: db $05
+L1E77F6: db $03
+L1E77F7: db $47
+L1E77F8: db $04
+L1E77F9: db $C0
+L1E77FA: db $08
+L1E77FB: db $F0
+L1E77FC: db $57
+L1E77FD: db $AA
+L1E77FE: db $04
+L1E77FF: db $01
+L1E7800: db $FC
+L1E7801: db $08
+L1E7802: db $08
+L1E7803: db $0C
+L1E7804: db $08
+L1E7805: db $FE
+L1E7806: db $00
+L1E7807: db $04
+L1E7808: db $7E
+L1E7809: db $34
+L1E780A: db $FF
+L1E780B: db $1A
+L1E780C: db $F7
+L1E780D: db $EA
+L1E780E: db $E3
+L1E780F: db $D6
+L1E7810: db $30
+L1E7811: db $DF
+L1E7812: db $80
+L1E7813: db $0A
+L1E7814: db $C0
+L1E7815: db $10
+L1E7816: db $09
+L1E7817: db $01
+L1E7818: db $D4
+L1E7819: db $28
+L1E781A: db $09
+L1E781B: db $05
+L1E781C: db $08
+L1E781D: db $0E
+L1E781E: db $10
+L1E781F: db $1F
+L1E7820: db $06
+L1E7821: db $BE
+L1E7822: db $08
+L1E7823: db $08
+L1E7824: db $08
+L1E7825: db $38
+L1E7826: db $08
+L1E7827: db $60
+L1E7828: db $0A
+L1E7829: db $0D
+L1E782A: db $23
+L1E782B: db $3F
+L1E782C: db $1D
+L1E782D: db $08
+L1E782E: db $1E
+L1E782F: db $3E
+L1E7830: db $1C
+L1E7831: db $00
+L1E7832: db $68
+L1E7833: db $81
+L1E7834: db $03
+L1E7835: db $C1
+L1E7836: db $FE
+L1E7837: db $C7
+L1E7838: db $F8
+L1E7839: db $FF
+L1E783A: db $07
+L1E783B: db $98
+L1E783C: db $40
+L1E783D: db $EA
+L1E783E: db $78
+L1E783F: db $D9
+L1E7840: db $FC
+L1E7841: db $3B
+L1E7842: db $B9
+L1E7843: db $D6
+L1E7844: db $BB
+L1E7845: db $55
+L1E7846: db $45
+L1E7847: db $9B
+L1E7848: db $80
+L1E7849: db $08
+L1E784A: db $C0
+L1E784B: db $08
+L1E784C: db $20
+L1E784D: db $10
+L1E784E: db $58
+L1E784F: db $E0
+L1E7850: db $18
+L1E7851: db $F0
+L1E7852: db $10
+L1E7853: db $09
+L1E7854: db $7B
+L1E7855: db $B5
+L1E7856: db $73
+L1E7857: db $04
+L1E7858: db $AD
+L1E7859: db $F1
+L1E785A: db $6E
+L1E785B: db $F3
+L1E785C: db $6C
+L1E785D: db $19
+L1E785E: db $FF
+L1E785F: db $01
+L1E7860: db $3B
+L1E7861: db $BF
+L1E7862: db $50
+L1E7863: db $09
+L1E7864: db $9A
+L1E7865: db $C8
+L1E7866: db $F8
+L1E7867: db $10
+L1E7868: db $08
+L1E7869: db $7C
+L1E786A: db $30
+L1E786B: db $08
+L1E786C: db $38
+L1E786D: db $29
+L1E786E: db $49
+L1E786F: db $00
+L1E7870: db $00
+L1E7871: db $07
+L1E7872: db $9A
+L1E7873: db $0A
+L1E7874: db $0F
+L1E7875: db $02
+L1E7876: db $08
+L1E7877: db $1A
+L1E7878: db $1F
+L1E7879: db $F8
+L1E787A: db $67
+L1E787B: db $1F
+L1E787C: db $19
+L1E787D: db $97
+L1E787E: db $6A
+L1E787F: db $40
+L1E7880: db $00
+L1E7881: db $30
+L1E7882: db $0F
+L1E7883: db $0A
+L1E7884: db $40
+L1E7885: db $03
+L1E7886: db $10
+L1E7887: db $83
+L1E7888: db $7D
+L1E7889: db $13
+L1E788A: db $ED
+L1E788B: db $F3
+L1E788C: db $0D
+L1E788D: db $B8
+L1E788E: db $08
+L1E788F: db $EC
+L1E7890: db $1A
+L1E7891: db $39
+L1E7892: db $08
+L1E7893: db $EF
+L1E7894: db $C0
+L1E7895: db $FC
+L1E7896: db $C5
+L1E7897: db $98
+L1E7898: db $08
+L1E7899: db $20
+L1E789A: db $FE
+L1E789B: db $70
+L1E789C: db $0A
+L1E789D: db $30
+L1E789E: db $08
+L1E789F: db $01
+L1E78A0: db $40
+L1E78A1: db $F2
+L1E78A2: db $E0
+L1E78A3: db $E8
+L1E78A4: db $D0
+L1E78A5: db $E4
+L1E78A6: db $18
+L1E78A7: db $08
+L1E78A8: db $75
+L1E78A9: db $D8
+L1E78AA: db $09
+L1E78AB: db $39
+L1E78AC: db $08
+L1E78AD: db $50
+L1E78AE: db $19
+L1E78AF: db $F0
+L1E78B0: db $E8
+L1E78B1: db $EA
+L1E78B2: db $08
+L1E78B3: db $E8
+L1E78B4: db $07
+L1E78B5: db $01
+L1E78B6: db $0A
+L1E78B7: db $03
+L1E78B8: db $10
+L1E78B9: db $07
+L1E78BA: db $E8
+L1E78BB: db $10
+L1E78BC: db $09
+L1E78BD: db $2B
+L1E78BE: db $37
+L1E78BF: db $18
+L1E78C0: db $7D
+L1E78C1: db $26
+L1E78C2: db $7A
+L1E78C3: db $D0
+L1E78C4: db $20
+L1E78C5: db $09
+L1E78C6: db $3F
+L1E78C7: db $98
+L1E78C8: db $7E
+L1E78C9: db $3C
+L1E78CA: db $7F
+L1E78CB: db $1A
+L1E78CC: db $2A
+L1E78CD: db $FF
+L1E78CE: db $42
+L1E78CF: db $08
+L1E78D0: db $3E
+L1E78D1: db $08
+L1E78D2: db $9D
+L1E78D3: db $08
+L1E78D4: db $28
+L1E78D5: db $AD
+L1E78D6: db $08
+L1E78D7: db $3D
+L1E78D8: db $08
+L1E78D9: db $59
+L1E78DA: db $80
+L1E78DB: db $06
+L1E78DC: db $80
+L1E78DD: db $08
+L1E78DE: db $42
+L1E78DF: db $C0
+L1E78E0: db $08
+L1E78E1: db $E0
+L1E78E2: db $40
+L1E78E3: db $F0
+L1E78E4: db $60
+L1E78E5: db $88
+L1E78E6: db $41
+L1E78E7: db $AB
+L1E78E8: db $08
+L1E78E9: db $63
+L1E78EA: db $08
+L1E78EB: db $B6
+L1E78EC: db $08
+L1E78ED: db $BE
+L1E78EE: db $0A
+L1E78EF: db $78
+L1E78F0: db $1E
+L1E78F1: db $DD
+L1E78F2: db $3E
+L1E78F3: db $5D
+L1E78F4: db $08
+L1E78F5: db $89
+L1E78F6: db $AA
+L1E78F7: db $10
+L1E78F8: db $F6
+L1E78F9: db $85
+L1E78FA: db $E0
+L1E78FB: db $DF
+L1E78FC: db $B2
+L1E78FD: db $AF
+L1E78FE: db $76
+L1E78FF: db $09
+L1E7900: db $7E
+L1E7901: db $98
+L1E7902: db $AA
+L1E7903: db $01
+L1E7904: db $01
+L1E7905: db $08
+L1E7906: db $1E
+L1E7907: db $10
+L1E7908: db $0E
+L1E7909: db $08
+L1E790A: db $1F
+L1E790B: db $18
+L1E790C: db $06
+L1E790D: db $3F
+L1E790E: db $0F
+L1E790F: db $18
+L1E7910: db $0A
+L1E7911: db $68
+L1E7912: db $17
+L1E7913: db $EC
+L1E7914: db $0B
+L1E7915: db $53
+L1E7916: db $2F
+L1E7917: db $D0
+L1E7918: db $20
+L1E7919: db $F0
+L1E791A: db $97
+L1E791B: db $40
+L1E791C: db $08
+L1E791D: db $1D
+L1E791E: db $6C
+L1E791F: db $CE
+L1E7920: db $B5
+L1E7921: db $30
+L1E7922: db $40
+L1E7923: db $80
+L1E7924: db $07
+L1E7925: db $08
+L1E7926: db $DD
+L1E7927: db $D8
+L1E7928: db $10
+L1E7929: db $03
+L1E792A: db $00
+L1E792B: db $18
+L1E792C: db $00
+L1E792D: db $00
+L1E792E: db $05
+L1E792F: db $6A
+L1E7930: db $FF
+L1E7931: db $D8
+L1E7932: db $08
+L1E7933: db $81
+L1E7934: db $08
+L1E7935: db $F1
+L1E7936: db $08
+L1E7937: db $F9
+L1E7938: db $A0
+L1E7939: db $00
+L1E793A: db $F6
+L1E793B: db $18
+L1E793C: db $60
+L1E793D: db $EE
+L1E793E: db $11
+L1E793F: db $8A
+L1E7940: db $75
+L1E7941: db $69
+L1E7942: db $80
+L1E7943: db $88
+L1E7944: db $0B
+L1E7945: db $E0
+L1E7946: db $08
+L1E7947: db $20
+L1E7948: db $C0
+L1E7949: db $19
+L1E794A: db $27
+L1E794B: db $70
+L1E794C: db $A0
+L1E794D: db $09
+L1E794E: db $F8
+L1E794F: db $10
+L1E7950: db $08
+L1E7951: db $40
+L1E7952: db $08
+L1E7953: db $78
+L1E7954: db $F0
+L1E7955: db $0A
+L1E7956: db $50
+L1E7957: db $10
+L1E7958: db $CC
+L1E7959: db $9F
+L1E795A: db $68
+L1E795B: db $9A
+L1E795C: db $00
+L1E795D: db $64
+L1E795E: db $82
+L1E795F: db $7C
+L1E7960: db $C2
+L1E7961: db $3C
+L1E7962: db $CA
+L1E7963: db $34
+L1E7964: db $C6
+L1E7965: db $14
+L1E7966: db $38
+L1E7967: db $E1
+L1E7968: db $1E
+L1E7969: db $09
+L1E796A: db $61
+L1E796B: db $0A
+L1E796C: db $71
+L1E796D: db $0E
+L1E796E: db $24
+L1E796F: db $73
+L1E7970: db $0C
+L1E7971: db $F0
+L1E7972: db $0F
+L1E7973: db $FF
+L1E7974: db $D8
+L1E7975: db $DE
+L1E7976: db $EF
+L1E7977: db $D3
+L1E7978: db $19
+L1E7979: db $07
+L1E797A: db $80
+L1E797B: db $0E
+L1E797C: db $03
+L1E797D: db $01
+L1E797E: db $0A
+L1E797F: db $29
+L1E7980: db $E0
+L1E7981: db $0C
+L1E7982: db $40
+L1E7983: db $BA
+L1E7984: db $E4
+L1E7985: db $C3
+L1E7986: db $C4
+L1E7987: db $83
+L1E7988: db $C9
+L1E7989: db $24
+L1E798A: db $06
+L1E798B: db $CC
+L1E798C: db $60
+L1E798D: db $D0
+L1E798E: db $0F
+L1E798F: db $08
+L1E7990: db $8F
+L1E7991: db $A0
+L1E7992: db $1F
+L1E7993: db $1F
+L1E7994: db $21
+L1E7995: db $1E
+L1E7996: db $92
+L1E7997: db $04
+L1E7998: db $D9
+L1E7999: db $90
+L1E799A: db $10
+L1E799B: db $70
+L1E799C: db $07
+L1E799D: db $10
+L1E799E: db $08
+L1E799F: db $28
+L1E79A0: db $4E
+L1E79A1: db $30
+L1E79A2: db $44
+L1E79A3: db $38
+L1E79A4: db $00
+L1E79A5: db $8C
+L1E79A6: db $70
+L1E79A7: db $B8
+L1E79A8: db $40
+L1E79A9: db $90
+L1E79AA: db $60
+L1E79AB: db $F0
+L1E79AC: db $80
+L1E79AD: db $32
+L1E79AE: db $E0
+L1E79AF: db $C0
+L1E79B0: db $00
+L1E79B1: db $78
+L1E79B2: db $48
+L1E79B3: db $B0
+L1E79B4: db $09
+L1E79B5: db $58
+L1E79B6: db $16
+L1E79B7: db $A0
+L1E79B8: db $E8
+L1E79B9: db $10
+L1E79BA: db $29
+L1E79BB: db $88
+L1E79BC: db $A8
+L1E79BD: db $0B
+L1E79BE: db $C8
+L1E79BF: db $F8
+L1E79C0: db $F8
+L1E79C1: db $59
+L1E79C2: db $3B
+L1E79C3: db $78
+L1E79C4: db $38
+L1E79C5: db $5C
+L1E79C6: db $28
+L1E79C7: db $7E
+L1E79C8: db $7B
+L1E79C9: db $1C
+L1E79CA: db $08
+L1E79CB: db $F8
+L1E79CC: db $07
+L1E79CD: db $01
+L1E79CE: db $01
+L1E79CF: db $0C
+L1E79D0: db $3F
+L1E79D1: db $AA
+L1E79D2: db $09
+L1E79D3: db $03
+L1E79D4: db $08
+L1E79D5: db $04
+L1E79D6: db $10
+L1E79D7: db $07
+L1E79D8: db $18
+L1E79D9: db $5D
+L1E79DA: db $09
+L1E79DB: db $3E
+L1E79DC: db $DD
+L1E79DD: db $7F
+L1E79DE: db $C1
+L1E79DF: db $08
+L1E79E0: db $FF
+L1E79E1: db $77
+L1E79E2: db $0A
+L1E79E3: db $5A
+L1E79E4: db $36
+L1E79E5: db $00
+L1E79E6: db $E3
+L1E79E7: db $09
+L1E79E8: db $F9
+L1E79E9: db $80
+L1E79EA: db $0E
+L1E79EB: db $C0
+L1E79EC: db $B5
+L1E79ED: db $08
+L1E79EE: db $40
+L1E79EF: db $20
+L1E79F0: db $09
+L1E79F1: db $F7
+L1E79F2: db $28
+L1E79F3: db $14
+L1E79F4: db $98
+L1E79F5: db $3B
+L1E79F6: db $22
+L1E79F7: db $C1
+L1E79F8: db $0B
+L1E79F9: db $00
+L1E79FA: db $48
+L1E79FB: db $41
+L1E79FC: db $68
+L1E79FD: db $19
+L1E79FE: db $EA
+L1E79FF: db $B9
+L1E7A00: db $AB
+L1E7A01: db $0B
+L1E7A02: db $E0
+L1E7A03: db $48
+L1E7A04: db $10
+L1E7A05: db $10
+L1E7A06: db $F0
+L1E7A07: db $D6
+L1E7A08: db $18
+L1E7A09: db $01
+L1E7A0A: db $01
+L1E7A0B: db $0C
+L1E7A0C: db $02
+L1E7A0D: db $10
+L1E7A0E: db $0D
+L1E7A0F: db $96
+L1E7A10: db $12
+L1E7A11: db $69
+L1E7A12: db $16
+L1E7A13: db $E9
+L1E7A14: db $09
+L1E7A15: db $0C
+L1E7A16: db $F3
+L1E7A17: db $0B
+L1E7A18: db $1C
+L1E7A19: db $12
+L1E7A1A: db $E3
+L1E7A1B: db $3E
+L1E7A1C: db $C1
+L1E7A1D: db $89
+L1E7A1E: db $04
+L1E7A1F: db $03
+L1E7A20: db $09
+L1E7A21: db $05
+L1E7A22: db $93
+L1E7A23: db $30
+L1E7A24: db $0F
+L1E7A25: db $00
+L1E7A26: db $08
+L1E7A27: db $07
+L1E7A28: db $1F
+L1E7A29: db $10
+L1E7A2A: db $08
+L1E7A2B: db $84
+L1E7A2C: db $28
+L1E7A2D: db $19
+L1E7A2E: db $E6
+L1E7A2F: db $28
+L1E7A30: db $C7
+L1E7A31: db $09
+L1E7A32: db $45
+L1E7A33: db $82
+L1E7A34: db $35
+L1E7A35: db $47
+L1E7A36: db $81
+L1E7A37: db $20
+L1E7A38: db $A8
+L1E7A39: db $87
+L1E7A3A: db $08
+L1E7A3B: db $83
+L1E7A3C: db $78
+L1E7A3D: db $5E
+L1E7A3E: db $80
+L1E7A3F: db $08
+L1E7A40: db $40
+L1E7A41: db $10
+L1E7A42: db $0F
+L1E7A43: db $0F
+L1E7A44: db $0B
+L1E7A45: db $C0
+L1E7A46: db $AE
+L1E7A47: db $B8
+L1E7A48: db $E0
+L1E7A49: db $10
+L1E7A4A: db $F0
+L1E7A4B: db $10
+L1E7A4C: db $08
+L1E7A4D: db $28
+L1E7A4E: db $00
+L1E7A4F: db $00
+L1E7A50: db $00
+L1E7A51: db $00
+L1E7A52: db $00
+L1E7A53: db $CB
+L1E7A54: db $CC
+L1E7A55: db $00
+L1E7A56: db $D6
+L1E7A57: db $D9
+L1E7A58: db $D7
+L1E7A59: db $D8
+L1E7A5A: db $DA
+L1E7A5B: db $EA
+L1E7A5C: db $EB
+L1E7A5D: db $EE
+L1E7A5E: db $EC
+L1E7A5F: db $ED
+L1E7A60: db $EF
+L1E7A61: db $00
+L1E7A62: db $02
+L1E7A63: db $00
+L1E7A64: db $01
+L1E7A65: db $03
+L1E7A66: db $04
+L1E7A67: db $12
+L1E7A68: db $14
+L1E7A69: db $15
+L1E7A6A: db $13
+L1E7A6B: db $16
+L1E7A6C: db $17
+L1E7A6D: db $3E
+L1E7A6E: db $40
+L1E7A6F: db $41
+L1E7A70: db $3F
+L1E7A71: db $42
+L1E7A72: db $43
+L1E7A73: db $00
+L1E7A74: db $00
+L1E7A75: db $00
+L1E7A76: db $00
+L1E7A77: db $CA
+L1E7A78: db $00
+L1E7A79: db $D0
+L1E7A7A: db $D2
+L1E7A7B: db $D3
+L1E7A7C: db $D1
+L1E7A7D: db $D4
+L1E7A7E: db $D5
+L1E7A7F: db $00
+L1E7A80: db $E7
+L1E7A81: db $00
+L1E7A82: db $46
+L1E7A83: db $E8
+L1E7A84: db $E9
+L1E7A85: db $00
+L1E7A86: db $00
+L1E7A87: db $00
+L1E7A88: db $00
+L1E7A89: db $10
+L1E7A8A: db $00
+L1E7A8B: db $DB
+L1E7A8C: db $DD
+L1E7A8D: db $DE
+L1E7A8E: db $DC
+L1E7A8F: db $DF
+L1E7A90: db $E0
+L1E7A91: db $F0
+L1E7A92: db $F2
+L1E7A93: db $F3
+L1E7A94: db $F1
+L1E7A95: db $F4
+L1E7A96: db $F5
+L1E7A97: db $00
+L1E7A98: db $00
+L1E7A99: db $00
+L1E7A9A: db $00
+L1E7A9B: db $05
+L1E7A9C: db $00
+L1E7A9D: db $18
+L1E7A9E: db $19
+L1E7A9F: db $1C
+L1E7AA0: db $1A
+L1E7AA1: db $1B
+L1E7AA2: db $1D
+L1E7AA3: db $44
+L1E7AA4: db $45
+L1E7AA5: db $48
+L1E7AA6: db $46
+L1E7AA7: db $47
+L1E7AA8: db $49
+L1E7AA9: db $00
+L1E7AAA: db $00
+L1E7AAB: db $00
+L1E7AAC: db $00
+L1E7AAD: db $82
+L1E7AAE: db $83
+L1E7AAF: db $81
+L1E7AB0: db $84
+L1E7AB1: db $85
+L1E7AB2: db $AD
+L1E7AB3: db $AF
+L1E7AB4: db $B0
+L1E7AB5: db $AE
+L1E7AB6: db $B1
+L1E7AB7: db $B2
+L1E7AB8: db $C4
+L1E7AB9: db $C5
+L1E7ABA: db $C6
+L1E7ABB: db $00
+L1E7ABC: db $00
+L1E7ABD: db $00
+L1E7ABE: db $00
+L1E7ABF: db $10
+L1E7AC0: db $00
+L1E7AC1: db $35
+L1E7AC2: db $36
+L1E7AC3: db $37
+L1E7AC4: db $00
+L1E7AC5: db $38
+L1E7AC6: db $39
+L1E7AC7: db $00
+L1E7AC8: db $60
+L1E7AC9: db $61
+L1E7ACA: db $5F
+L1E7ACB: db $62
+L1E7ACC: db $63
+L1E7ACD: db $00
+L1E7ACE: db $00
+L1E7ACF: db $00
+L1E7AD0: db $00
+L1E7AD1: db $86
+L1E7AD2: db $89
+L1E7AD3: db $87
+L1E7AD4: db $88
+L1E7AD5: db $8A
+L1E7AD6: db $B3
+L1E7AD7: db $B4
+L1E7AD8: db $B7
+L1E7AD9: db $B5
+L1E7ADA: db $B6
+L1E7ADB: db $B8
+L1E7ADC: db $C7
+L1E7ADD: db $C8
+L1E7ADE: db $C9
+L1E7ADF: db $00
+L1E7AE0: db $00
+L1E7AE1: db $00
+L1E7AE2: db $6D
+L1E7AE3: db $6E
+L1E7AE4: db $00
+L1E7AE5: db $6F
+L1E7AE6: db $70
+L1E7AE7: db $00
+L1E7AE8: db $91
+L1E7AE9: db $92
+L1E7AEA: db $95
+L1E7AEB: db $93
+L1E7AEC: db $94
+L1E7AED: db $00
+L1E7AEE: db $BA
+L1E7AEF: db $BB
+L1E7AF0: db $00
+L1E7AF1: db $00
+L1E7AF2: db $00
+L1E7AF3: db $00
+L1E7AF4: db $00
+L1E7AF5: db $78
+L1E7AF6: db $00
+L1E7AF7: db $77
+L1E7AF8: db $79
+L1E7AF9: db $7A
+L1E7AFA: db $A1
+L1E7AFB: db $A3
+L1E7AFC: db $A4
+L1E7AFD: db $A2
+L1E7AFE: db $A5
+L1E7AFF: db $A6
+L1E7B00: db $BE
+L1E7B01: db $BF
+L1E7B02: db $C0
+L1E7B03: db $00
+L1E7B04: db $68
+L1E7B05: db $00
+L1E7B06: db $7B
+L1E7B07: db $7C
+L1E7B08: db $7F
+L1E7B09: db $7D
+L1E7B0A: db $7E
+L1E7B0B: db $80
+L1E7B0C: db $A7
+L1E7B0D: db $A8
+L1E7B0E: db $AB
+L1E7B0F: db $A9
+L1E7B10: db $AA
+L1E7B11: db $AC
+L1E7B12: db $C1
+L1E7B13: db $C2
+L1E7B14: db $C3
+L1E7B15: db $00
+L1E7B16: db $00
+L1E7B17: db $00
+L1E7B18: db $0E
+L1E7B19: db $0F
+L1E7B1A: db $00
+L1E7B1B: db $2F
+L1E7B1C: db $30
+L1E7B1D: db $33
+L1E7B1E: db $31
+L1E7B1F: db $32
+L1E7B20: db $34
+L1E7B21: db $5A
+L1E7B22: db $5B
+L1E7B23: db $5E
+L1E7B24: db $5C
+L1E7B25: db $5D
+L1E7B26: db $00
+L1E7B27: db $00
+L1E7B28: db $00
+L1E7B29: db $00
+L1E7B2A: db $00
+L1E7B2B: db $0A
+L1E7B2C: db $0B
+L1E7B2D: db $23
+L1E7B2E: db $24
+L1E7B2F: db $27
+L1E7B30: db $25
+L1E7B31: db $26
+L1E7B32: db $28
+L1E7B33: db $4F
+L1E7B34: db $50
+L1E7B35: db $53
+L1E7B36: db $51
+L1E7B37: db $52
+L1E7B38: db $54
+L1E7B39: db $00
+L1E7B3A: db $00
+L1E7B3B: db $00
+L1E7B3C: db $00
+L1E7B3D: db $11
+L1E7B3E: db $00
+L1E7B3F: db $3A
+L1E7B40: db $3B
+L1E7B41: db $00
+L1E7B42: db $3C
+L1E7B43: db $3D
+L1E7B44: db $00
+L1E7B45: db $64
+L1E7B46: db $65
+L1E7B47: db $00
+L1E7B48: db $66
+L1E7B49: db $67
+L1E7B4A: db $00
+L1E7B4B: db $00
+L1E7B4C: db $00
+L1E7B4D: db $00
+L1E7B4E: db $00
+L1E7B4F: db $68
+L1E7B50: db $00
+L1E7B51: db $74
+L1E7B52: db $75
+L1E7B53: db $76
+L1E7B54: db $9C
+L1E7B55: db $9D
+L1E7B56: db $A0
+L1E7B57: db $9E
+L1E7B58: db $9F
+L1E7B59: db $00
+L1E7B5A: db $00
+L1E7B5B: db $BD
+L1E7B5C: db $00
+L1E7B5D: db $00
+L1E7B5E: db $00
+L1E7B5F: db $00
+L1E7B60: db $0C
+L1E7B61: db $0D
+L1E7B62: db $00
+L1E7B63: db $29
+L1E7B64: db $2B
+L1E7B65: db $2C
+L1E7B66: db $2A
+L1E7B67: db $2D
+L1E7B68: db $2E
+L1E7B69: db $55
+L1E7B6A: db $57
+L1E7B6B: db $58
+L1E7B6C: db $56
+L1E7B6D: db $59
+L1E7B6E: db $00
+L1E7B6F: db $00
+L1E7B70: db $00
+L1E7B71: db $00
+L1E7B72: db $CD
+L1E7B73: db $CE
+L1E7B74: db $CF
+L1E7B75: db $E1
+L1E7B76: db $E2
+L1E7B77: db $E5
+L1E7B78: db $E3
+L1E7B79: db $E4
+L1E7B7A: db $E6
+L1E7B7B: db $F6
+L1E7B7C: db $F7
+L1E7B7D: db $FA
+L1E7B7E: db $F8
+L1E7B7F: db $F9
+L1E7B80: db $FB
+L1E7B81: db $00
+L1E7B82: db $07
+L1E7B83: db $00
+L1E7B84: db $06
+L1E7B85: db $08
+L1E7B86: db $09
+L1E7B87: db $1E
+L1E7B88: db $1F
+L1E7B89: db $20
+L1E7B8A: db $00
+L1E7B8B: db $21
+L1E7B8C: db $22
+L1E7B8D: db $00
+L1E7B8E: db $4B
+L1E7B8F: db $4C
+L1E7B90: db $4A
+L1E7B91: db $4D
+L1E7B92: db $4E
+L1E7B93: db $00
+L1E7B94: db $00
+L1E7B95: db $00
+L1E7B96: db $69
+L1E7B97: db $6B
+L1E7B98: db $00
+L1E7B99: db $6A
+L1E7B9A: db $6C
+L1E7B9B: db $00
+L1E7B9C: db $8B
+L1E7B9D: db $8D
+L1E7B9E: db $8E
+L1E7B9F: db $8C
+L1E7BA0: db $8F
+L1E7BA1: db $90
+L1E7BA2: db $00
+L1E7BA3: db $B9
+L1E7BA4: db $00
+L1E7BA5: db $00
+L1E7BA6: db $00
+L1E7BA7: db $00
+L1E7BA8: db $00
+L1E7BA9: db $10
+L1E7BAA: db $00
+L1E7BAB: db $71
+L1E7BAC: db $72
+L1E7BAD: db $73
+L1E7BAE: db $96
+L1E7BAF: db $98
+L1E7BB0: db $99
+L1E7BB1: db $97
+L1E7BB2: db $9A
+L1E7BB3: db $9B
+L1E7BB4: db $00
+L1E7BB5: db $BC
+L1E7BB6: db $00
+L1E7BB7: db $1F
+L1E7BB8: db $00
+L1E7BB9: db $6A
+L1E7BBA: db $00
+L1E7BBB: db $0F
+L1E7BBC: db $00
+L1E7BBD: db $07
+L1E7BBE: db $00
+L1E7BBF: db $04
+L1E7BC0: db $12
+L1E7BC1: db $06
+L1E7BC2: db $BA
+L1E7BC3: db $10
+L1E7BC4: db $03
+L1E7BC5: db $00
+L1E7BC6: db $F5
+L1E7BC7: db $0F
+L1E7BC8: db $FF
+L1E7BC9: db $00
+L1E7BCA: db $01
+L1E7BCB: db $A2
+L1E7BCC: db $12
+L1E7BCD: db $03
+L1E7BCE: db $10
+L1E7BCF: db $86
+L1E7BD0: db $FE
+L1E7BD1: db $C2
+L1E7BD2: db $10
+L1E7BD3: db $43
+L1E7BD4: db $6A
+L1E7BD5: db $7F
+L1E7BD6: db $F1
+L1E7BD7: db $0F
+L1E7BD8: db $07
+L1E7BD9: db $00
+L1E7BDA: db $04
+L1E7BDB: db $12
+L1E7BDC: db $06
+L1E7BDD: db $AF
+L1E7BDE: db $10
+L1E7BDF: db $03
+L1E7BE0: db $00
+L1E7BE1: db $02
+L1E7BE2: db $10
+L1E7BE3: db $51
+L1E7BE4: db $F1
+L1E7BE5: db $0F
+L1E7BE6: db $55
+L1E7BE7: db $FF
+L1E7BE8: db $00
+L1E7BE9: db $01
+L1E7BEA: db $12
+L1E7BEB: db $03
+L1E7BEC: db $10
+L1E7BED: db $0F
+L1E7BEE: db $10
+L1E7BEF: db $0D
+L1E7BF0: db $1A
+L1E7BF1: db $FB
+L1E7BF2: db $12
+L1E7BF3: db $F3
+L1E7BF4: db $F1
+L1E7BF5: db $0F
+L1E7BF6: db $3F
+L1E7BF7: db $00
+L1E7BF8: db $1D
+L1E7BF9: db $E0
+L1E7BFA: db $FF
+L1E7BFB: db $80
+L1E7BFC: db $10
+L1E7BFD: db $60
+L1E7BFE: db $10
+L1E7BFF: db $0F
+L1E7C00: db $10
+L1E7C01: db $3A
+L1E7C02: db $18
+L1E7C03: db $F8
+L1E7C04: db $11
+L1E7C05: db $F1
+L1E7C06: db $0F
+L1E7C07: db $FF
+L1E7C08: db $00
+L1E7C09: db $31
+L1E7C0A: db $AA
+L1E7C0B: db $10
+L1E7C0C: db $01
+L1E7C0D: db $12
+L1E7C0E: db $81
+L1E7C0F: db $10
+L1E7C10: db $E1
+L1E7C11: db $91
+L1E7C12: db $3F
+L1E7C13: db $14
+L1E7C14: db $61
+L1E7C15: db $7F
+L1E7C16: db $21
+L1E7C17: db $30
+L1E7C18: db $30
+L1E7C19: db $10
+L1E7C1A: db $10
+L1E7C1B: db $1F
+L1E7C1C: db $44
+L1E7C1D: db $18
+L1E7C1E: db $10
+L1E7C1F: db $08
+L1E7C20: db $0F
+L1E7C21: db $0C
+L1E7C22: db $10
+L1E7C23: db $04
+L1E7C24: db $07
+L1E7C25: db $4A
+L1E7C26: db $06
+L1E7C27: db $10
+L1E7C28: db $02
+L1E7C29: db $03
+L1E7C2A: db $01
+L1E7C2B: db $01
+L1E7C2C: db $02
+L1E7C2D: db $00
+L1E7C2E: db $A2
+L1E7C2F: db $04
+L1E7C30: db $04
+L1E7C31: db $F0
+L1E7C32: db $8C
+L1E7C33: db $8F
+L1E7C34: db $88
+L1E7C35: db $10
+L1E7C36: db $D8
+L1E7C37: db $22
+L1E7C38: db $DF
+L1E7C39: db $50
+L1E7C3A: db $10
+L1E7C3B: db $70
+L1E7C3C: db $FF
+L1E7C3D: db $21
+L1E7C3E: db $12
+L1E7C3F: db $03
+L1E7C40: db $88
+L1E7C41: db $10
+L1E7C42: db $02
+L1E7C43: db $FE
+L1E7C44: db $06
+L1E7C45: db $10
+L1E7C46: db $04
+L1E7C47: db $FC
+L1E7C48: db $8C
+L1E7C49: db $8A
+L1E7C4A: db $10
+L1E7C4B: db $88
+L1E7C4C: db $F8
+L1E7C4D: db $D8
+L1E7C4E: db $10
+L1E7C4F: db $70
+L1E7C50: db $00
+L1E7C51: db $32
+L1E7C52: db $00
+L1E7C53: db $F3
+L1E7C54: db $23
+L1E7C55: db $E3
+L1E7C56: db $61
+L1E7C57: db $E1
+L1E7C58: db $41
+L1E7C59: db $C1
+L1E7C5A: db $C0
+L1E7C5B: db $A9
+L1E7C5C: db $00
+L1E7C5D: db $80
+L1E7C5E: db $00
+L1E7C5F: db $83
+L1E7C60: db $00
+L1E7C61: db $02
+L1E7C62: db $03
+L1E7C63: db $1D
+L1E7C64: db $92
+L1E7C65: db $01
+L1E7C66: db $0E
+L1E7C67: db $FE
+L1E7C68: db $20
+L1E7C69: db $FF
+L1E7C6A: db $00
+L1E7C6B: db $10
+L1E7C6C: db $80
+L1E7C6D: db $A2
+L1E7C6E: db $10
+L1E7C6F: db $C0
+L1E7C70: db $10
+L1E7C71: db $70
+L1E7C72: db $7F
+L1E7C73: db $FC
+L1E7C74: db $30
+L1E7C75: db $27
+L1E7C76: db $02
+L1E7C77: db $E7
+L1E7C78: db $31
+L1E7C79: db $F1
+L1E7C7A: db $10
+L1E7C7B: db $F0
+L1E7C7C: db $1C
+L1E7C7D: db $80
+L1E7C7E: db $07
+L1E7C7F: db $AC
+L1E7C80: db $90
+L1E7C81: db $00
+L1E7C82: db $12
+L1E7C83: db $30
+L1E7C84: db $10
+L1E7C85: db $01
+L1E7C86: db $11
+L1E7C87: db $1F
+L1E7C88: db $50
+L1E7C89: db $9F
+L1E7C8A: db $00
+L1E7C8B: db $E0
+L1E7C8C: db $00
+L1E7C8D: db $38
+L1E7C8E: db $F8
+L1E7C8F: db $0C
+L1E7C90: db $FC
+L1E7C91: db $15
+L1E7C92: db $06
+L1E7C93: db $FE
+L1E7C94: db $02
+L1E7C95: db $10
+L1E7C96: db $03
+L1E7C97: db $F0
+L1E7C98: db $C1
+L1E7C99: db $10
+L1E7C9A: db $2E
+L1E7C9B: db $61
+L1E7C9C: db $7F
+L1E7C9D: db $11
+L1E7C9E: db $C3
+L1E7C9F: db $50
+L1E7CA0: db $B1
+L1E7CA1: db $F1
+L1E7CA2: db $1C
+L1E7CA3: db $28
+L1E7CA4: db $FC
+L1E7CA5: db $F0
+L1E7CA6: db $00
+L1E7CA7: db $18
+L1E7CA8: db $00
+L1E7CA9: db $24
+L1E7CAA: db $3C
+L1E7CAB: db $42
+L1E7CAC: db $1F
+L1E7CAD: db $66
+L1E7CAE: db $99
+L1E7CAF: db $C3
+L1E7CB0: db $40
+L1E7CB1: db $20
+L1E7CB2: db $40
+L1E7CB3: db $20
+L1E7CB4: db $40
+L1E7CB5: db $B4
+L1E7CB6: db $74
+L1E7CB7: db $00
+L1E7CB8: db $0F
+L1E7CB9: db $04
+L1E7CBA: db $01
+L1E7CBB: db $00
+L1E7CBC: db $02
+L1E7CBD: db $03
+L1E7CBE: db $03
+L1E7CBF: db $04
+L1E7CC0: db $06
+L1E7CC1: db $09
+L1E7CC2: db $0C
+L1E7CC3: db $13
+L1E7CC4: db $19
+L1E7CC5: db $F5
+L1E7CC6: db $0F
+L1E7CC7: db $40
+L1E7CC8: db $80
+L1E7CC9: db $00
+L1E7CCA: db $40
+L1E7CCB: db $C0
+L1E7CCC: db $20
+L1E7CCD: db $60
+L1E7CCE: db $90
+L1E7CCF: db $30
+L1E7CD0: db $30
+L1E7CD1: db $C8
+L1E7CD2: db $98
+L1E7CD3: db $F5
+L1E7CD4: db $07
+L1E7CD5: db $E1
+L1E7CD6: db $7C
+L1E7CD7: db $FF
+L1E7CD8: db $FF
+L1E7CD9: db $FF;X
+L1E7CDA: db $FF;X
+L1E7CDB: db $0D
+L1E7CDC: db $7D
+L1E7CDD: db $FF
+L1E7CDE: db $FF
+L1E7CDF: db $FF;X
+L1E7CE0: db $FF;X
+L1E7CE1: db $80
+L1E7CE2: db $00
+L1E7CE3: db $00
+L1E7CE4: db $FF;X
+L1E7CE5: db $FF;X
+L1E7CE6: db $FF;X
+L1E7CE7: db $EB
+L1E7CE8: db $7C
+L1E7CE9: db $00
+L1E7CEA: db $00
+L1E7CEB: db $0B
+L1E7CEC: db $07
+L1E7CED: db $03
+L1E7CEE: db $00
+L1E7CEF: db $07
+L1E7CF0: db $0B
+L1E7CF1: db $02
+L1E7CF2: db $07
+L1E7CF3: db $13
+L1E7CF4: db $04
+L1E7CF5: db $07
+L1E7CF6: db $1B
+L1E7CF7: db $06
+L1E7CF8: db $07
+L1E7CF9: db $23
+L1E7CFA: db $08
+L1E7CFB: db $07
+L1E7CFC: db $2B
+L1E7CFD: db $0A
+L1E7CFE: db $17
+L1E7CFF: db $0B
+L1E7D00: db $0C
+L1E7D01: db $17
+L1E7D02: db $13
+L1E7D03: db $0E
+L1E7D04: db $17
+L1E7D05: db $1B
+L1E7D06: db $10
+L1E7D07: db $17
+L1E7D08: db $23
+L1E7D09: db $12
+L1E7D0A: db $17
+L1E7D0B: db $2B
+L1E7D0C: db $14
+L1E7D0D: db $80
+L1E7D0E: db $00
+L1E7D0F: db $00
+L1E7D10: db $FF;X
+L1E7D11: db $FF;X
+L1E7D12: db $FF;X
+L1E7D13: db $17
+L1E7D14: db $7D
+L1E7D15: db $00
+L1E7D16: db $00
+L1E7D17: db $03
+L1E7D18: db $0C
+L1E7D19: db $08
+L1E7D1A: db $16
+L1E7D1B: db $0C
+L1E7D1C: db $00
+L1E7D1D: db $18
+L1E7D1E: db $0C
+L1E7D1F: db $10
+L1E7D20: db $1A
+L1E7D21:;I
+	rst  $10
+	xor  a
+	ld   [$D8C5], a
+	ld   [$D8C9], a
+	ld   [$D8E5], a
+	ld   [$D8E9], a
+	ld   a, $FF
+	ldh  [rBGP], a
+	ldh  [rOBP0], a
+	ldh  [rOBP1], a
+	ld   de, $0005
+	call L0013D3
+	call L000D96
+	ld   a, $18
+	ld   b, $5A
+	call L00046C
+	ld   hl, $6DA5
+	ld   de, $C1EA
+	call DecompressGFX
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
+	ld   de, $241A
+	call L000D76
+	call L1E7DEE
+	ld   a, $60
+	ldh  [rWY], a
+	ld   a, $0F
+	ldh  [rWX], a
+	ld   a, $E7
+	rst  $18
+	ldh  a, [rSTAT]
+	or   a, $40
+	ldh  [rSTAT], a
+	ei
+	call L000414
+	ld   a, $8C
+	ldh  [rOBP0], a
+	ld   a, $2D
+	ldh  [rBGP], a
+	ldh  [$FFF1], a
+	ld   a, $13
+	ldh  [$FFF0], a
+	ldh  [$FFF2], a
+	ld   a, $82
+	call HomeCall_Sound_ReqPlayExId_Stub
+	ld   a, $1E
+	ld   [$C152], a
+	ld   hl, $C153
+	ld   [hl], $E8
+	inc  hl
+	ld   [hl], $7D
+	ld   a, [$C1B3]
+	ld   c, a
+	ld   a, [$C1B4]
+	ld   b, a
+	ld   hl, $002C
+	add  hl, bc
+	ld   d, $00
+	ld   e, [hl]
+	ld   hl, $7F3A
+	add  hl, de
+	ld   e, [hl]
+	inc  hl
+	ld   d, [hl]
+	push de
+	pop  hl
+	ld   de, WINDOWMap_Begin
+	ld   b, $1C
+	ld   c, $04
+	ld   a, $03
+	call L0012D6
+	call L1E7EC9
+	ld   a, $FF
+	ldh  [rBGP], a
+	ldh  [rOBP0], a
+	ldh  [rOBP1], a
+	ldh  [$FFF1], a
+	call L000D96
+	ld   hl, wMisc_C028
+	res  0, [hl]
+	xor  a
+	ldh  [rSTAT], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_Status], a
+	ld   [$D683], a
+	ld   [$D685], a
+	xor  a
+	ld   [$D8C5], a
+	ld   [$D8C9], a
+	ld   [$D8E5], a
+	ld   [$D8E9], a
+	jp   L000408
+L1E7DE8:;I
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
+	jp   L000BBD
+L1E7DEE:;C
+	ld   a, [$C1B3]
+	ld   c, a
+	ld   a, [$C1B4]
+	ld   b, a
+	push bc
+	ld   hl, $002C
+	add  hl, bc
+	ld   d, $00
+	ld   e, [hl]
+	sla  e
+	rl   d
+	ld   hl, $7EEA
+	add  hl, de
+	push hl
+	pop  bc
+	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
+	ld   a, [de]
+	and  a, $EF
+	or   a, $80
+	ld   [de], a
+	ld   hl, $0010
+	add  hl, de
+	ld   a, [bc]
+	ldi  [hl], a
+	inc  bc
+	ld   a, [bc]
+	ldi  [hl], a
+	inc  bc
+	ld   a, [bc]
+	ldi  [hl], a
+	inc  bc
+	xor  a
+	ld   [hl], a
+	ld   hl, $0003
+	add  hl, de
+	ld   a, $50
+	ldi  [hl], a
+	inc  hl
+	ld   [hl], $20
+	ld   hl, $001B
+	add  hl, de
+	ld   a, [bc]
+	ldi  [hl], a
+	ld   [hl], a
+	push de
+	pop  hl
+	call L000B9E
+	pop  bc
+	ld   hl, $002D
+	add  hl, bc
+	ld   a, [hl]
+	cp   $01
+	jr   z, L1E7E6B
+	cp   $02
+	jr   z, L1E7E92
+	ld   hl, $002F
+	add  hl, bc
+	ld   a, [hl]
+	cp   $FF
+	jr   z, L1E7E59
+	ld   de, $8800
+	push bc
+	ld   c, a
+	call L1E68D2
+	call L1E7EC2
+	pop  bc
+L1E7E59:;R
+	ld   hl, $0030
+	add  hl, bc
+	ld   a, [hl]
+	cp   $FF
+	jr   z, L1E7EC8
+	ld   de, $8920
+	ld   c, a
+	call L1E68E5
+	jr   L1E7EB7
+L1E7E6B:;R
+	ld   hl, $002E
+	add  hl, bc
+	ld   a, [hl]
+	cp   $FF
+	jr   z, L1E7E80
+	ld   de, $8800
+	push bc
+	ld   c, a
+	call L1E68D2
+	call L1E7EC2
+	pop  bc
+L1E7E80:
+	ld   hl, $0030
+	add  hl, bc
+	ld   a, [hl]
+	cp   $FF
+	jr   z, L1E7EC8
+	ld   de, $8920
+	ld   c, a
+	call L1E68E5
+	jr   L1E7EB7
+L1E7E92:;R
+	ld   hl, $002E
+	add  hl, bc
+	ld   a, [hl]
+	cp   $FF
+	jr   z, L1E7EA7
+	ld   de, $8800
+	push bc
+	ld   c, a
+	call L1E68D2
+	call L1E7EC2
+	pop  bc
+L1E7EA7:
+	ld   hl, $002F
+	add  hl, bc
+	ld   a, [hl]
+	cp   $FF
+	jr   z, L1E7EC8
+	ld   de, $8920
+	ld   c, a
+	call L1E68E5
+L1E7EB7:;R
+	ld   hl, $988E
+	ld   de, $695E
+	ld   a, $92
+	jp   L1E692C
+L1E7EC2:;C
+	ld   hl, $9883
+	call L1E6927
+L1E7EC8:;R
+	ret
+L1E7EC9:;C
+	ld   b, $F0
+L1E7ECB:;J
+	ldh  a, [$FF99]
+	bit  7, a
+	jp   nz, L1E7EE8
+	ldh  a, [$FFAC]
+	bit  7, a
+	jp   nz, L1E7EE8
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
+	call L000BBD
+	call L000408
+	dec  b
+	jp   nz, L1E7ECB
+	xor  a
+	ret
+L1E7EE8:;J
+	scf
+	ret
+L1E7EEA: db $07
+L1E7EEB: db $58
+L1E7EEC: db $41
+L1E7EED: db $08
+L1E7EEE: db $09
+L1E7EEF: db $C2
+L1E7EF0: db $40
+L1E7EF1: db $08
+L1E7EF2: db $09
+L1E7EF3: db $AE
+L1E7EF4: db $4E
+L1E7EF5: db $08
+L1E7EF6: db $08
+L1E7EF7: db $BE
+L1E7EF8: db $41
+L1E7EF9: db $08
+L1E7EFA: db $0A
+L1E7EFB: db $40
+L1E7EFC: db $41
+L1E7EFD: db $08
+L1E7EFE: db $07
+L1E7EFF: db $EB
+L1E7F00: db $53
+L1E7F01: db $08
+L1E7F02: db $08
+L1E7F03: db $8F
+L1E7F04: db $52
+L1E7F05: db $08
+L1E7F06: db $08
+L1E7F07: db $FE
+L1E7F08: db $60
+L1E7F09: db $08
+L1E7F0A: db $0A
+L1E7F0B: db $AB
+L1E7F0C: db $5D
+L1E7F0D: db $08
+L1E7F0E: db $07
+L1E7F0F: db $4A
+L1E7F10: db $62
+L1E7F11: db $08
+L1E7F12: db $09
+L1E7F13: db $53
+L1E7F14: db $5B
+L1E7F15: db $08
+L1E7F16: db $07
+L1E7F17: db $C1
+L1E7F18: db $70
+L1E7F19: db $08
+L1E7F1A: db $05
+L1E7F1B: db $5C
+L1E7F1C: db $41
+L1E7F1D: db $08
+L1E7F1E: db $09
+L1E7F1F: db $91
+L1E7F20: db $68
+L1E7F21: db $08
+L1E7F22: db $05
+L1E7F23: db $93
+L1E7F24: db $55
+L1E7F25: db $08
+L1E7F26: db $08
+L1E7F27: db $FC
+L1E7F28: db $6F
+L1E7F29: db $08
+L1E7F2A: db $0A
+L1E7F2B: db $22
+L1E7F2C: db $46
+L1E7F2D: db $08
+L1E7F2E: db $05
+L1E7F2F: db $72
+L1E7F30: db $41
+L1E7F31: db $08
+L1E7F32: db $0A
+L1E7F33: db $BD
+L1E7F34: db $5D
+L1E7F35: db $08
+L1E7F36: db $05
+L1E7F37: db $9D
+L1E7F38: db $55
+L1E7F39: db $08
+L1E7F3A: db $1A
+L1E7F3B: db $75
+L1E7F3C: db $46
+L1E7F3D: db $75
+L1E7F3E: db $71
+L1E7F3F: db $75
+L1E7F40: db $9A
+L1E7F41: db $75
+L1E7F42: db $BB
+L1E7F43: db $75
+L1E7F44: db $F4
+L1E7F45: db $75
+L1E7F46: db $1F
+L1E7F47: db $76
+L1E7F48: db $45
+L1E7F49: db $76
+L1E7F4A: db $7C
+L1E7F4B: db $76
+L1E7F4C: db $9B
+L1E7F4D: db $76
+L1E7F4E: db $CC
+L1E7F4F: db $76
+L1E7F50: db $00
+L1E7F51: db $77
+L1E7F52: db $27
+L1E7F53: db $77
+L1E7F54: db $56
+L1E7F55: db $77
+L1E7F56: db $86
+L1E7F57: db $77
+L1E7F58: db $B7
+L1E7F59: db $77
+L1E7F5A: db $EA
+L1E7F5B: db $77
+L1E7F5C: db $0F
+L1E7F5D: db $78
+L1E7F5E: db $1C
+L1E7F5F: db $78
+L1E7F60: db $28
+L1E7F61: db $78
+L1E7F62: db $76;X
+L1E7F63: db $00;X
+L1E7F64: db $77;X
+L1E7F65: db $27;X
+L1E7F66: db $77;X
+L1E7F67: db $56;X
+L1E7F68: db $77;X
+L1E7F69: db $86;X
+L1E7F6A: db $77;X
+L1E7F6B: db $B7;X
+L1E7F6C: db $77;X
+L1E7F6D: db $EA;X
+L1E7F6E: db $77;X
+L1E7F6F: db $0F;X
+L1E7F70: db $78;X
+L1E7F71: db $1C;X
+L1E7F72: db $78;X
+L1E7F73: db $28;X
+L1E7F74: db $78;X
+L1E7F75: db $3E;X
+L1E7F76: db $82;X
+L1E7F77: db $CD;X
+L1E7F78: db $31;X
+L1E7F79: db $11;X
+L1E7F7A: db $CD;X
+L1E7F7B: db $55;X
+L1E7F7C: db $81;X
+L1E7F7D: db $DA;X
+L1E7F7E: db $86;X
+L1E7F7F: db $7F;X
+L1E7F80: db $CD;X
+L1E7F81: db $08;X
+L1E7F82: db $04;X
+L1E7F83: db $C3;X
+L1E7F84: db $7A;X
+L1E7F85: db $7F;X
+L1E7F86: db $CD;X
+L1E7F87: db $08;X
+L1E7F88: db $04;X
+L1E7F89: db $C9;X
+L1E7F8A: db $01;X
+L1E7F8B: db $00;X
+L1E7F8C: db $D9;X
+L1E7F8D: db $FA;X
+L1E7F8E: db $5E;X
+L1E7F8F: db $C1;X
+L1E7F90: db $B7;X
+L1E7F91: db $CA;X
+L1E7F92: db $97;X
+L1E7F93: db $7F;X
+L1E7F94: db $01;X
+L1E7F95: db $00;X
+L1E7F96: db $DA;X
+L1E7F97: db $C5;X
+L1E7F98: db $21;X
+L1E7F99: db $2C;X
+L1E7F9A: db $00;X
+L1E7F9B: db $09;X
+L1E7F9C: db $7E;X
+L1E7F9D: db $11;X
+L1E7F9E: db $40;X
+L1E7F9F: db $8A;X
+L1E7FA0: db $06;X
+L1E7FA1: db $01;X
+L1E7FA2: db $CD;X
+L1E7FA3: db $37;X
+L1E7FA4: db $80;X
+L1E7FA5: db $21;X
+L1E7FA6: db $67;X
+L1E7FA7: db $98;X
+L1E7FA8: db $11;X
+L1E7FA9: db $FC;X
+L1E7FAA: db $81;X
+L1E7FAB: db $3E;X
+L1E7FAC: db $A4;X
+L1E7FAD: db $06;X
+L1E7FAE: db $06;X
+L1E7FAF: db $0E;X
+L1E7FB0: db $06;X
+L1E7FB1: db $CD;X
+L1E7FB2: db $BC;X
+L1E7FB3: db $0D;X
+L1E7FB4: db $C1;X
+L1E7FB5: db $FA;X
+L1E7FB6: db $29;X
+L1E7FB7: db $C0;X
+L1E7FB8: db $FE;X
+L1E7FB9: db $03;X
+L1E7FBA: db $C2;X
+L1E7FBB: db $CF;X
+L1E7FBC: db $7F;X
+L1E7FBD: db $FA;X
+L1E7FBE: db $74;X
+L1E7FBF: db $C1;X
+L1E7FC0: db $FE;X
+L1E7FC1: db $0F;X
+L1E7FC2: db $CA;X
+L1E7FC3: db $36;X
+L1E7FC4: db $80;X
+L1E7FC5: db $FE;X
+L1E7FC6: db $10;X
+L1E7FC7: db $CA;X
+L1E7FC8: db $36;X
+L1E7FC9: db $80;X
+L1E7FCA: db $FE;X
+L1E7FCB: db $11;X
+L1E7FCC: db $CA;X
+L1E7FCD: db $36;X
+L1E7FCE: db $80;X
+L1E7FCF: db $FA;X
+L1E7FD0: db $5D;X
+L1E7FD1: db $C1;X
+L1E7FD2: db $CB;X
+L1E7FD3: db $47;X
+L1E7FD4: db $CA;X
+L1E7FD5: db $36;X
+L1E7FD6: db $80;X
+L1E7FD7: db $FA;X
+L1E7FD8: db $49;X
+L1E7FD9: db $D9;X
+L1E7FDA: db $21;X
+L1E7FDB: db $49;X
+L1E7FDC: db $DA;X
+L1E7FDD: db $BE;X
+L1E7FDE: db $C2;X
+L1E7FDF: db $E6;X
+L1E7FE0: db $7F;X
+L1E7FE1: db $21;X
+L1E7FE2: db $67;X
+L1E7FE3: db $00;X
+L1E7FE4: db $09;X
+L1E7FE5: db $35;X
+L1E7FE6: db $C5;X
+L1E7FE7: db $21;X
+L1E7FE8: db $67;X
+L1E7FE9: db $00;X
+L1E7FEA: db $09;X
+L1E7FEB: db $2A;X
+L1E7FEC: db $FE;X
+L1E7FED: db $00;X
+L1E7FEE: db $C2;X
+L1E7FEF: db $F2;X
+L1E7FF0: db $7F;X
+L1E7FF1: db $23;X
+L1E7FF2: db $7E;X
+L1E7FF3: db $11;X
+L1E7FF4: db $00;X
+L1E7FF5: db $88;X
+L1E7FF6: db $06;X
+L1E7FF7: db $00;X
+L1E7FF8: db $CD;X
+L1E7FF9: db $37;X
+L1E7FFA: db $80;X
+L1E7FFB: db $21;X
+L1E7FFC: db $61;X
+L1E7FFD: db $98;X
+L1E7FFE: db $11;X
+L1E7FFF: db $FC;X
