@@ -160,7 +160,6 @@ Sound_ChkNewSnd:
 	; A few special commands are also here, like the Pause/Unpause one.
 	; Unused entries in the all table point to the dummy Sound_StartNothing.
 Sound_SndStartActionPtrTable:
-
 	dw Sound_StartNothing;X		; $00
 	dw Sound_StartNewBGM
 	dw Sound_StartNewBGM
@@ -261,6 +260,7 @@ Sound_PauseChPlayback:
 	ld   hl, wSFXCh4Info
 	set  SISB_PAUSE, [hl]
 	ret
+	
 ; =============== Sound_UnpauseChPlayback ===============
 Sound_UnpauseChPlayback:
 	; [BUG] 'A' value is undefined garbage ($15), and this gets overwritten later on anyway.
@@ -914,8 +914,6 @@ Sound_DoChSndInfo_End:
 	
 ; =============== Sound_DoCommandId ===============
 ; Handles the specified command ID, which mostly involves different ways of writing out data to the SndInfo.
-; This is also how pausing/unpausing is treated is the same way as BGM/SFX. Their music data simply contains
-; a pause or unpause command. ???????
 ; IN
 ; - A: Command ID (+ $E0)
 ; - DE: SndInfo base ptr
@@ -2075,56 +2073,56 @@ Sound_ChRegAddrTable:
 ;
 ; Unused entries in the table mostly point to code, which is in no way a valid header.
 Sound_SndHeaderPtrTable:	
-	dw SndHeader_01;X
-	dw SndHeader_01
-	dw SndHeader_02
-	dw SndHeader_03
-	dw SndHeader_04
-	dw SndHeader_05
-	dw SndHeader_06
-	dw SndHeader_07
-	dw SndHeader_08
-	dw SndHeader_09
-	dw SndHeader_0A
-	dw SndHeader_0B
+	dw SndHeader_BGM_Roulette;X
+	dw SndHeader_BGM_Roulette
+	dw SndHeader_BGM_StageClear
+	dw SndHeader_BGM_BigShot
+	dw SndHeader_BGM_Esaka
+	dw SndHeader_BGM_RisingRed
+	dw SndHeader_BGM_Geese
+	dw SndHeader_BGM_Arashi
+	dw SndHeader_BGM_Fairy
+	dw SndHeader_BGM_TrashHead
+	dw SndHeader_BGM_Wind
+	dw SndHeader_BGM_ToTheSky
 	dw SndHeader_Pause
 	dw SndHeader_Unpause
-	dw SndHeader_0E
-	dw SndHeader_0F
-	dw SndHeader_10
-	dw SndHeader_11
-	dw SndHeader_12
-	dw SndHeader_13
-	dw SndHeader_14
-	dw SndHeader_15
-	dw SndHeader_16
-	dw SndHeader_17
-	dw SndHeader_18
-	dw SndHeader_19
-	dw SndHeader_1A
-	dw SndHeader_1B
-	dw SndHeader_1C
-	dw SndHeader_1D
-	dw SndHeader_1E
-	dw SndHeader_1F
+	dw SndHeader_SFX_CharCursorMove
+	dw SndHeader_SFX_CharSelected
+	dw SndHeader_SFX_MeterCharge
+	dw SndHeader_SFX_SuperMove
+	dw SndHeader_SFX_Light
+	dw SndHeader_SFX_Heavy
+	dw SndHeader_SFX_Unknown_Block
+	dw SndHeader_SFX_Taunt
+	dw SndHeader_SFX_Hit
+	dw SndHeader_SFX_Unknown_Hit1
+	dw SndHeader_BGM_Protector
+	dw SndHeader_BGM_MrKarate
+	dw SndHeader_SFX_Unknown_SuperFireHit
+	dw SndHeader_SFX_Drop
+	dw SndHeader_SFX_SuperJump
+	dw SndHeader_SFX_Step
+	dw SndHeader_BGM_In1996
+	dw SndHeader_BGM_MrKarateCutscene
 	dw Sound_StartNothing;X
 	dw Sound_StartNothing;X
 	dw Sound_StartNothing;X
 	dw Sound_StartNothing;X
 	dw Sound_StartNothing;X
 	dw Sound_StartNothing;X
-	dw SndHeader_26
-	dw SndHeader_27
-	dw SndHeader_28
-	dw SndHeader_29
-	dw SndHeader_2A
-	dw SndHeader_2B
-	dw SndHeader_2C
-	dw SndHeader_2D
-	dw SndHeader_2E
-	dw SndHeader_2F
-	dw SndHeader_30
-	dw SndHeader_31
+	dw SndHeader_SFX_Unknown_Hit2
+	dw SndHeader_SFX_GrabStart
+	dw SndHeader_SFX_Unknown_Fire2
+	dw SndHeader_SFX_FireSmall
+	dw SndHeader_SFX_Unknown_Fire4
+	dw SndHeader_SFX_FireLarge
+	dw SndHeader_SFX_Unknown_Fire3
+	dw SndHeader_SFX_Unknown_Wind
+	dw SndHeader_SFX_Unknown_Alarm
+	dw SndHeader_SFX_Unknown_Null
+	dw SndHeader_SFX_Unknown_SpecialMove
+	dw SndHeader_SFX_GameOver
 	dw Sound_StartNothing;X
 	dw Sound_StartNothing;X
 
@@ -2235,15 +2233,15 @@ Sound_WaveSet_Unused_7: db $87,$76,$65,$54,$43,$32,$21,$10,$0F,$FE,$ED,$DC,$CB,$
 Sound_WaveSet_Unused_8: db $18,$F2,$68,$4E,$18,$76,$1A,$4C,$85,$43,$2E,$DC,$FF,$12,$84,$48
 Sound_WaveSet_Unused_9: db $CC,$6B,$93,$77,$28,$BA,$6E,$35,$51,$C3,$9C,$ED,$B8,$2B,$29,$E2
 
-SndHeader_0E:
+SndHeader_SFX_CharCursorMove:
 	db $01 ; Number of channels
 .ch2:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_0E_Ch2 ; Data ptr
+	dw SndData_SFX_CharCursorMove_Ch2 ; Data ptr
 	db $0C ; Base freq/note id
 	db $81 ; Unused
-SndData_0E_Ch2:
+SndData_SFX_CharCursorMove_Ch2:
 	sndenv 12, SNDENV_DEC, 3
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 3, 0
@@ -2268,15 +2266,15 @@ SndData_0E_Ch2:
 	sndnote $29
 	sndnote $2C
 	sndendch
-SndHeader_0F:
+SndHeader_SFX_CharSelected:
 	db $01 ; Number of channels
 .ch2:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_0F_Ch2 ; Data ptr
+	dw SndData_SFX_CharSelected_Ch2 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_0F_Ch2:
+SndData_SFX_CharSelected_Ch2:
 	sndenv 15, SNDENV_DEC, 2
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 3, 0
@@ -2320,15 +2318,15 @@ SndData_0F_Ch2:
 	sndnote $29
 	sndnote $31
 	sndendch
-SndHeader_10:
+SndHeader_SFX_MeterCharge:
 	db $01 ; Number of channels
 .ch2:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_10_Ch2 ; Data ptr
+	dw SndData_SFX_MeterCharge_Ch2 ; Data ptr
 	db $0C ; Base freq/note id
 	db $81 ; Unused
-SndData_10_Ch2:
+SndData_SFX_MeterCharge_Ch2:
 	sndenv 6, SNDENV_INC, 2
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 0, 0
@@ -2366,27 +2364,27 @@ SndData_10_Ch2:
 	sndnote $26
 	sndloopcnt $00, 2, .playSet
 	sndret
-SndHeader_11:
+SndHeader_SFX_SuperMove:
 	db $03 ; Number of channels
 .ch2:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_11_Ch2 ; Data ptr
+	dw SndData_SFX_SuperMove_Ch2 ; Data ptr
 	db $0C ; Base freq/note id
 	db $81 ; Unused
 .ch3:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
-	dw SndData_11_Ch3 ; Data ptr
+	dw SndData_SFX_SuperMove_Ch3 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_11_Ch4 ; Data ptr
+	dw SndData_SFX_SuperMove_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_11_Ch2:
+SndData_SFX_SuperMove_Ch2:
 	sndenv 9, SNDENV_DEC, 4
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 1, 0
@@ -2417,24 +2415,24 @@ SndData_11_Ch2:
 	sndnote $2E
 	sndlen 29
 	sndendch
-SndData_11_Ch3:
+SndData_SFX_SuperMove_Ch3:
 	sndenvch3 2
 	sndendch
-SndData_11_Ch4:
+SndData_SFX_SuperMove_Ch4:
 	sndenv 15, SNDENV_DEC, 2
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndch4 7, 0, 1
 	sndlen 6
 	sndendch
-SndHeader_12:
+SndHeader_SFX_Light:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_12_Ch4 ; Data ptr
+	dw SndData_SFX_Light_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_12_Ch4:
+SndData_SFX_Light_Ch4:
 	sndenv 7, SNDENV_INC, 1
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndch4 3, 0, 7
@@ -2456,15 +2454,15 @@ SndData_12_Ch4:
 	sndlen 1
 	sndclrskip
 	sndendch
-SndHeader_13:
+SndHeader_SFX_Heavy:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_13_Ch4 ; Data ptr
+	dw SndData_SFX_Heavy_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_13_Ch4:
+SndData_SFX_Heavy_Ch4:
 	sndenv 3, SNDENV_INC, 1
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndch4 4, 0, 7
@@ -2486,15 +2484,15 @@ SndData_13_Ch4:
 	sndlen 2
 	sndclrskip
 	sndendch
-SndHeader_14:
+SndHeader_SFX_Unknown_Block:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_14_Ch4 ; Data ptr
+	dw SndData_SFX_Unknown_Block_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_14_Ch4:
+SndData_SFX_Unknown_Block_Ch4:
 	sndenv 15, SNDENV_DEC, 7
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndch4 3, 0, 7
@@ -2509,15 +2507,15 @@ SndData_14_Ch4:
 	sndch4 5, 0, 5
 	sndlen 1
 	sndendch
-SndHeader_15:
+SndHeader_SFX_Taunt:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_15_Ch4 ; Data ptr
+	dw SndData_SFX_Taunt_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_15_Ch4:
+SndData_SFX_Taunt_Ch4:
 	sndenv 11, SNDENV_DEC, 7
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndch4 2, 0, 7
@@ -2533,15 +2531,15 @@ SndData_15_Ch4:
 	sndlen 2
 	sndclrskip
 	sndendch
-SndHeader_16:
+SndHeader_SFX_Hit:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_16_Ch4 ; Data ptr
+	dw SndData_SFX_Hit_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_16_Ch4:
+SndData_SFX_Hit_Ch4:
 	sndenv 15, SNDENV_DEC, 2
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndch4 7, 0, 1
@@ -2551,15 +2549,15 @@ SndData_16_Ch4:
 	sndch4 3, 0, 5
 	sndlen 6
 	sndendch
-SndHeader_17:
+SndHeader_SFX_Unknown_Hit1:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_17_Ch4 ; Data ptr
+	dw SndData_SFX_Unknown_Hit1_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_17_Ch4:
+SndData_SFX_Unknown_Hit1_Ch4:
 	sndenv 15, SNDENV_DEC, 2
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndch4 4, 0, 0
@@ -2593,15 +2591,15 @@ SndData_17_Ch4:
 	sndlen 1
 	sndch4 3, 0, 0
 	sndendch
-SndHeader_1A:
+SndHeader_SFX_Unknown_SuperFireHit:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_1A_Ch4 ; Data ptr
+	dw SndData_SFX_Unknown_SuperFireHit_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_1A_Ch4:
+SndData_SFX_Unknown_SuperFireHit_Ch4:
 	sndenv 15, SNDENV_DEC, 7
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndch4 4, 0, 5
@@ -2625,15 +2623,15 @@ SndData_1A_Ch4:
 	sndch4 7, 0, 1
 	sndlen 100
 	sndendch
-SndHeader_1B:
+SndHeader_SFX_Drop:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_1B_Ch4 ; Data ptr
+	dw SndData_SFX_Drop_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_1B_Ch4:
+SndData_SFX_Drop_Ch4:
 	sndenv 15, SNDENV_DEC, 3
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndch4 3, 0, 6
@@ -2645,15 +2643,15 @@ SndData_1B_Ch4:
 	sndch4 5, 0, 7
 	sndlen 10
 	sndendch
-SndHeader_1C:
+SndHeader_SFX_SuperJump:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_1C_Ch4 ; Data ptr
+	dw SndData_SFX_SuperJump_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_1C_Ch4:
+SndData_SFX_SuperJump_Ch4:
 	sndenv 2, SNDENV_INC, 1
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndch4 3, 0, 0
@@ -2688,15 +2686,15 @@ SndData_1C_Ch4:
 	sndch4 3, 0, 0
 	sndlen 2
 	sndendch
-SndHeader_1D:
+SndHeader_SFX_Step:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_1D_Ch4 ; Data ptr
+	dw SndData_SFX_Step_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_1D_Ch4:
+SndData_SFX_Step_Ch4:
 	sndenv 15, SNDENV_DEC, 7
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndch4 4, 0, 7
@@ -2713,15 +2711,15 @@ SndData_1D_Ch4:
 	sndch4 5, 0, 5
 	sndlen 1
 	sndendch
-SndHeader_26:
+SndHeader_SFX_Unknown_Hit2:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_26_Ch4 ; Data ptr
+	dw SndData_SFX_Unknown_Hit2_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_26_Ch4:
+SndData_SFX_Unknown_Hit2_Ch4:
 	sndenv 10, SNDENV_DEC, 1
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndch4 5, 0, 1
@@ -2739,15 +2737,15 @@ SndData_26_Ch4:
 	sndch4 0, 0, 0
 	sndlen 1
 	sndendch
-SndHeader_27:
+SndHeader_SFX_GrabStart:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_27_Ch4 ; Data ptr
+	dw SndData_SFX_GrabStart_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_27_Ch4:
+SndData_SFX_GrabStart_Ch4:
 	sndenv 15, SNDENV_DEC, 2
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndch4 6, 0, 1
@@ -2757,15 +2755,15 @@ SndData_27_Ch4:
 	sndch4 2, 0, 5
 	sndlen 4
 	sndendch
-SndHeader_28:
+SndHeader_SFX_Unknown_Fire2:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_28_Ch4 ; Data ptr
+	dw SndData_SFX_Unknown_Fire2_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_28_Ch4:
+SndData_SFX_Unknown_Fire2_Ch4:
 	sndenv 15, SNDENV_DEC, 7
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndch4 4, 0, 5
@@ -2794,29 +2792,29 @@ SndData_28_Ch4:
 	sndch4 3, 0, 2
 	sndlen 30
 	sndendch
-SndHeader_29:
+SndHeader_SFX_FireSmall:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_29_Ch4 ; Data ptr
+	dw SndData_SFX_FireSmall_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_29_Ch4:
+SndData_SFX_FireSmall_Ch4:
 	sndenv 3, SNDENV_INC, 3
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndch4 5, 0, 5
 	sndlen 70
 	sndendch
-SndHeader_2A:
+SndHeader_SFX_Unknown_Fire4:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_2A_Ch4 ; Data ptr
+	dw SndData_SFX_Unknown_Fire4_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_2A_Ch4:
+SndData_SFX_Unknown_Fire4_Ch4:
 	sndenv 10, SNDENV_INC, 1
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndch4 3, 0, 1
@@ -2846,15 +2844,15 @@ SndData_2A_Ch4:
 	sndlen 3
 	sndclrskip
 	sndendch
-SndHeader_2B:
+SndHeader_SFX_FireLarge:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_2B_Ch4 ; Data ptr
+	dw SndData_SFX_FireLarge_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_2B_Ch4:
+SndData_SFX_FireLarge_Ch4:
 	sndenv 10, SNDENV_INC, 1
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndch4 5, 0, 7
@@ -2929,15 +2927,15 @@ SndData_2B_Ch4:
 	sndch4 3, 0, 7
 	sndlen 1
 	sndendch
-SndHeader_2C:
+SndHeader_SFX_Unknown_Fire3:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_2C_Ch4 ; Data ptr
+	dw SndData_SFX_Unknown_Fire3_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_2C_Ch4:
+SndData_SFX_Unknown_Fire3_Ch4:
 	sndenv 15, SNDENV_DEC, 3
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndch4 7, 0, 1
@@ -2953,15 +2951,15 @@ SndData_2C_Ch4:
 	sndch4 7, 0, 1
 	sndlen 30
 	sndendch
-SndHeader_2D:
+SndHeader_SFX_Unknown_Wind:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_2D_Ch4 ; Data ptr
+	dw SndData_SFX_Unknown_Wind_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_2D_Ch4:
+SndData_SFX_Unknown_Wind_Ch4:
 	sndenv 10, SNDENV_DEC, 7
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndch4 4, 0, 1
@@ -3000,17 +2998,17 @@ SndData_2D_Ch4:
 	sndch4 3, 0, 5
 	sndlen 1
 	sndclrskip
-	sndloopcnt $00, 3, SndData_2D_Ch4
+	sndloopcnt $00, 3, SndData_SFX_Unknown_Wind_Ch4
 	sndendch
-SndHeader_2E:
+SndHeader_SFX_Unknown_Alarm:
 	db $01 ; Number of channels
 .ch2:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_2E_Ch2 ; Data ptr
+	dw SndData_SFX_Unknown_Alarm_Ch2 ; Data ptr
 	db $06 ; Base freq/note id
 	db $81 ; Unused
-SndData_2E_Ch2:
+SndData_SFX_Unknown_Alarm_Ch2:
 	sndenv 0, SNDENV_INC, 7
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 3, 0
@@ -3031,26 +3029,26 @@ SndData_2E_Ch2:
 	sndnote $24
 	sndnote $25
 	sndnote $27
-	sndloop SndData_2E_Ch2
-SndHeader_2F:
+	sndloop SndData_SFX_Unknown_Alarm_Ch2
+SndHeader_SFX_Unknown_Null:
 	db $01 ; Number of channels
 .ch2:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_2F_Ch2 ; Data ptr
+	dw SndData_SFX_Unknown_Null_Ch2 ; Data ptr
 	db $06 ; Base freq/note id
 	db $81 ; Unused
-SndData_2F_Ch2:
+SndData_SFX_Unknown_Null_Ch2:
 	sndendch
-SndHeader_30:
+SndHeader_SFX_Unknown_SpecialMove:
 	db $01 ; Number of channels
 .ch2:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_30_Ch2 ; Data ptr
+	dw SndData_SFX_Unknown_SpecialMove_Ch2 ; Data ptr
 	db $0C ; Base freq/note id
 	db $81 ; Unused
-SndData_30_Ch2:
+SndData_SFX_Unknown_SpecialMove_Ch2:
 	sndenv 1, SNDENV_INC, 4
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 3, 0
@@ -3058,17 +3056,17 @@ SndData_30_Ch2:
 	sndlen 1
 	sndsetskip
 	sndnote $2F
-	sndloopcnt $00, 30, SndData_30_Ch2
+	sndloopcnt $00, 30, SndData_SFX_Unknown_SpecialMove_Ch2
 	sndendch
-SndHeader_31:
+SndHeader_SFX_GameOver:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_31_Ch4 ; Data ptr
+	dw SndData_SFX_GameOver_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_31_Ch4:
+SndData_SFX_GameOver_Ch4:
 	sndenv 1, SNDENV_INC, 3
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndch4 2, 0, 7
@@ -3140,33 +3138,33 @@ SndData_PauseUnpause_Ch3:
 	sndenach SNDOUT_CH3R|SNDOUT_CH3L
 	sndenvch3 0
 	sndendch
-SndHeader_06:
+SndHeader_BGM_Geese:
 	db $04 ; Number of channels
 .ch1:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
-	dw SndData_06_Ch1 ; Data ptr
+	dw SndData_BGM_Geese_Ch1 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_06_Ch2 ; Data ptr
+	dw SndData_BGM_Geese_Ch2 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
-	dw SndData_06_Ch3 ; Data ptr
+	dw SndData_BGM_Geese_Ch3 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch4:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_06_Ch4 ; Data ptr
+	dw SndData_BGM_Geese_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_06_Ch1:
+SndData_BGM_Geese_Ch1:
 	sndenv 7, SNDENV_DEC, 7
 	sndenach SNDOUT_CH1R|SNDOUT_CH1L
 	sndnr11 3, 0
@@ -3403,14 +3401,14 @@ SndData_06_Ch1:
 	sndlen 80
 	sndlenpre $50
 	sndret
-SndData_06_Ch2:
+SndData_BGM_Geese_Ch2:
 	sndenv 7, SNDENV_DEC, 7
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 1, 0
 	sndcall .call0
 	sndcall .call1
 	sndcall .call2
-	sndloop SndData_06_Ch2
+	sndloop SndData_BGM_Geese_Ch2
 .call0:
 	sndnote $0D
 	sndlen 20
@@ -3527,7 +3525,7 @@ SndData_06_Ch2:
 	sndnote $2A
 	sndlen 13
 	sndret
-SndData_06_Ch3:
+SndData_BGM_Geese_Ch3:
 	sndenvch3 2
 	sndenach SNDOUT_CH3R|SNDOUT_CH3L
 	sndwave $02
@@ -3546,7 +3544,7 @@ SndData_06_Ch3:
 	sndcall .call4
 	sndnotebase $04
 	sndcall .call5
-	sndloop SndData_06_Ch3
+	sndloop SndData_BGM_Geese_Ch3
 .call0:
 	sndnote $0D
 	sndlen 10
@@ -3700,7 +3698,7 @@ SndData_06_Ch3:
 	sndnote $12
 	sndlen 13
 	sndret
-SndData_06_Ch4:
+SndData_BGM_Geese_Ch4:
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndcall .call0
 	sndcall .call1
@@ -3718,7 +3716,7 @@ SndData_06_Ch4:
 	sndcall .call5
 	sndcall .call3
 	sndcall .call6
-	sndloop SndData_06_Ch4
+	sndloop SndData_BGM_Geese_Ch4
 .call0:
 	sndenv 6, SNDENV_DEC, 1
 	sndch4 3, 0, 6
@@ -3922,33 +3920,33 @@ SndData_06_Ch4:
 	sndch4 2, 0, 4
 	sndlen 10
 	sndret
-SndHeader_08:
+SndHeader_BGM_Fairy:
 	db $04 ; Number of channels
 .ch1:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
-	dw SndData_08_Ch1 ; Data ptr
+	dw SndData_BGM_Fairy_Ch1 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_08_Ch2 ; Data ptr
+	dw SndData_BGM_Fairy_Ch2 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
-	dw SndData_08_Ch3 ; Data ptr
+	dw SndData_BGM_Fairy_Ch3 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch4:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_08_Ch4 ; Data ptr
+	dw SndData_BGM_Fairy_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_08_Ch1:
+SndData_BGM_Fairy_Ch1:
 	sndenv 7, SNDENV_DEC, 7
 	sndenach SNDOUT_CH1R|SNDOUT_CH1L
 	sndnr11 3, 0
@@ -3958,7 +3956,7 @@ SndData_08_Ch1:
 	sndcall .call3
 	sndcall .call4
 	sndcall .call5
-	sndloop SndData_08_Ch1
+	sndloop SndData_BGM_Fairy_Ch1
 .call0:
 	sndenv 1, SNDENV_DEC, 1
 	sndnote $05
@@ -4272,7 +4270,7 @@ SndData_08_Ch1:
 	sndlen 80
 	sndnote $20
 	sndret
-SndData_08_Ch2:
+SndData_BGM_Fairy_Ch2:
 	sndenv 7, SNDENV_DEC, 7
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 3, 0
@@ -4289,7 +4287,7 @@ SndData_08_Ch2:
 	sndcall .call6
 	sndcall .call7
 	sndcall .call8
-	sndloop SndData_08_Ch2
+	sndloop SndData_BGM_Fairy_Ch2
 .call0:
 	sndnote $16
 	sndlen 5
@@ -4736,7 +4734,7 @@ SndData_08_Ch2:
 	sndnote $29
 	sndlen 10
 	sndret
-SndData_08_Ch3:
+SndData_BGM_Fairy_Ch3:
 	sndenvch3 2
 	sndenach SNDOUT_CH3R|SNDOUT_CH3L
 	sndwave $04
@@ -4750,7 +4748,7 @@ SndData_08_Ch3:
 	sndcall .call5
 	sndcall .call6
 	sndcall .call7
-	sndloop SndData_08_Ch3
+	sndloop SndData_BGM_Fairy_Ch3
 .call0:
 	sndnote $14
 	sndlen 5
@@ -5131,7 +5129,7 @@ SndData_08_Ch3:
 	sndlen 20
 	sndch3len $1E
 	sndret
-SndData_08_Ch4:
+SndData_BGM_Fairy_Ch4:
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndcall .call0
 	sndcall .call1
@@ -5155,7 +5153,7 @@ SndData_08_Ch4:
 	sndcall .call2
 	sndcall .call9
 	sndcall .call10
-	sndloop SndData_08_Ch4
+	sndloop SndData_BGM_Fairy_Ch4
 .call0:
 	sndenv 6, SNDENV_DEC, 1
 	sndch4 3, 0, 6
@@ -5509,33 +5507,33 @@ SndData_08_Ch4:
 	sndch4 2, 0, 6
 	sndlen 20
 	sndret
-SndHeader_04:
+SndHeader_BGM_Esaka:
 	db $04 ; Number of channels
 .ch1:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
-	dw SndData_04_Ch1 ; Data ptr
+	dw SndData_BGM_Esaka_Ch1 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_04_Ch2 ; Data ptr
+	dw SndData_BGM_Esaka_Ch2 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
-	dw SndData_04_Ch3 ; Data ptr
+	dw SndData_BGM_Esaka_Ch3 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch4:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_04_Ch4 ; Data ptr
+	dw SndData_BGM_Esaka_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_04_Ch1:
+SndData_BGM_Esaka_Ch1:
 	sndenv 7, SNDENV_DEC, 7
 	sndenach SNDOUT_CH1R|SNDOUT_CH1L
 	sndnr11 3, 0
@@ -5854,7 +5852,7 @@ SndData_04_Ch1:
 	sndnote $33
 	sndlen 80
 	sndret
-SndData_04_Ch2:
+SndData_BGM_Esaka_Ch2:
 	sndenv 6, SNDENV_DEC, 2
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 2, 0
@@ -6174,7 +6172,7 @@ SndData_04_Ch2:
 	sndnote $19
 	sndlen 10
 	sndret
-SndData_04_Ch3:
+SndData_BGM_Esaka_Ch3:
 	sndenvch3 2
 	sndenach SNDOUT_CH3R|SNDOUT_CH3L
 	sndwave $04
@@ -6450,7 +6448,7 @@ SndData_04_Ch3:
 	sndlen 10
 	sndch3len $19
 	sndret
-SndData_04_Ch4:
+SndData_BGM_Esaka_Ch4:
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 .main:
 	sndcall .call0
@@ -6912,38 +6910,38 @@ SndData_04_Ch4:
 	sndch4 2, 0, 4
 	sndlen 10
 	sndret
-SndHeader_1F:
+SndHeader_BGM_MrKarateCutscene:
 	db $04 ; Number of channels
 .ch1:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
-	dw SndData_1F_Ch1 ; Data ptr
+	dw SndData_BGM_MrKarateCutscene_Ch1 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_1F_Ch2 ; Data ptr
+	dw SndData_BGM_MrKarateCutscene_Ch2 ; Data ptr
 	db $F9 ; Base freq/note id
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
-	dw SndData_1F_Ch3 ; Data ptr
+	dw SndData_BGM_MrKarateCutscene_Ch3 ; Data ptr
 	db $0C ; Base freq/note id
 	db $81 ; Unused
 .ch4:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_1F_Ch4 ; Data ptr
+	dw SndData_BGM_MrKarateCutscene_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_1F_Ch1:
+SndData_BGM_MrKarateCutscene_Ch1:
 	sndenv 7, SNDENV_DEC, 7
 	sndenach SNDOUT_CH1R|SNDOUT_CH1L
 	sndnr11 3, 0
 	sndcall .call0
-	sndloop SndData_1F_Ch1
+	sndloop SndData_BGM_MrKarateCutscene_Ch1
 .call0:
 	sndnote $22
 	sndlen 12
@@ -7030,13 +7028,13 @@ SndData_1F_Ch1:
 	sndnote $1C
 	sndlen 24
 	sndret
-SndData_1F_Ch2:
+SndData_BGM_MrKarateCutscene_Ch2:
 	sndenv 7, SNDENV_DEC, 7
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 1, 0
-	sndcall SndData_1F_Ch1.call0
-	sndloop SndData_1F_Ch2
-SndData_1F_Ch3:
+	sndcall SndData_BGM_MrKarateCutscene_Ch1.call0
+	sndloop SndData_BGM_MrKarateCutscene_Ch2
+SndData_BGM_MrKarateCutscene_Ch3:
 	sndenvch3 2
 	sndenach SNDOUT_CH3R|SNDOUT_CH3L
 	sndwave $02
@@ -7081,7 +7079,7 @@ SndData_1F_Ch3:
 	sndlen 12
 	sndnote $10
 	sndlen 24
-	sndloopcnt $00, 2, SndData_1F_Ch3
+	sndloopcnt $00, 2, SndData_BGM_MrKarateCutscene_Ch3
 	sndnote $0F
 	sndlen 12
 	sndnote $0E
@@ -7090,8 +7088,8 @@ SndData_1F_Ch3:
 	sndnote $0D
 	sndnote $0C
 	sndlen 36
-	sndloop SndData_1F_Ch3
-SndData_1F_Ch4:
+	sndloop SndData_BGM_MrKarateCutscene_Ch3
+SndData_BGM_MrKarateCutscene_Ch4:
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndcall .call0
 	sndcall .call0
@@ -7118,7 +7116,7 @@ SndData_1F_Ch4:
 	sndenv 6, SNDENV_DEC, 1
 	sndch4 3, 0, 6
 	sndlen 24
-	sndloop SndData_1F_Ch4
+	sndloop SndData_BGM_MrKarateCutscene_Ch4
 .call0:
 	sndenv 6, SNDENV_DEC, 1
 	sndch4 3, 0, 6
@@ -7159,33 +7157,33 @@ SndData_1F_Ch4:
 	sndch4 3, 0, 6
 	sndlen 12
 	sndret
-SndHeader_1E:
+SndHeader_BGM_In1996:
 	db $04 ; Number of channels
 .ch1:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
-	dw SndData_1E_Ch1 ; Data ptr
+	dw SndData_BGM_In1996_Ch1 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_1E_Ch2 ; Data ptr
+	dw SndData_BGM_In1996_Ch2 ; Data ptr
 	db $18 ; Base freq/note id
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
-	dw SndData_1E_Ch3 ; Data ptr
+	dw SndData_BGM_In1996_Ch3 ; Data ptr
 	db $0C ; Base freq/note id
 	db $81 ; Unused
 .ch4:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_1E_Ch4 ; Data ptr
+	dw SndData_BGM_In1996_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_1E_Ch1:
+SndData_BGM_In1996_Ch1:
 	sndenv 7, SNDENV_DEC, 1
 	sndenach SNDOUT_CH1R|SNDOUT_CH1L
 	sndnr11 2, 0
@@ -7288,7 +7286,7 @@ SndData_1E_Ch1:
 	sndnote $00
 	sndlen 7
 	sndendch
-SndData_1E_Ch2:
+SndData_BGM_In1996_Ch2:
 	sndenv 6, SNDENV_INC, 0
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 1, 0
@@ -7446,7 +7444,7 @@ SndData_1E_Ch2:
 	sndlen 7
 	sndnotebase $0C
 	sndendch
-SndData_1E_Ch3:
+SndData_BGM_In1996_Ch3:
 	sndenvch3 2
 	sndenach SNDOUT_CH3R|SNDOUT_CH3L
 	sndwave $03
@@ -7610,7 +7608,7 @@ SndData_1E_Ch3:
 	sndnote $05
 	sndlen 35
 	sndendch
-SndData_1E_Ch4:
+SndData_BGM_In1996_Ch4:
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndcall .call0
 	sndcall .call1
@@ -7841,33 +7839,33 @@ SndData_1E_Ch4:
 	sndch4 2, 0, 4
 	sndlen 35
 	sndret
-SndHeader_19:
+SndHeader_BGM_MrKarate:
 	db $04 ; Number of channels
 .ch1:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
-	dw SndData_19_Ch1 ; Data ptr
+	dw SndData_BGM_MrKarate_Ch1 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_19_Ch2 ; Data ptr
+	dw SndData_BGM_MrKarate_Ch2 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
-	dw SndData_19_Ch3 ; Data ptr
+	dw SndData_BGM_MrKarate_Ch3 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch4:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_19_Ch4 ; Data ptr
+	dw SndData_BGM_MrKarate_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_19_Ch1:
+SndData_BGM_MrKarate_Ch1:
 	sndenv 7, SNDENV_DEC, 7
 	sndenach SNDOUT_CH1R|SNDOUT_CH1L
 	sndnr11 3, 0
@@ -8055,7 +8053,7 @@ SndData_19_Ch1:
 	sndlenpre $0A
 	sndloopcnt $00, 2, .call3
 	sndret
-SndData_19_Ch2:
+SndData_BGM_MrKarate_Ch2:
 	sndenv 6, SNDENV_DEC, 7
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 1, 0
@@ -8180,7 +8178,7 @@ SndData_19_Ch2:
 	sndnote $23
 	sndnote $24
 	sndret
-SndData_19_Ch3:
+SndData_BGM_MrKarate_Ch3:
 	sndenvch3 2
 	sndenach SNDOUT_CH3R|SNDOUT_CH3L
 	sndwave $04
@@ -8352,7 +8350,7 @@ SndData_19_Ch3:
 	sndnote $0D
 	sndloopcnt $00, 2, .call4
 	sndret
-SndData_19_Ch4:
+SndData_BGM_MrKarate_Ch4:
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndcall .call0
 .main:
@@ -8681,33 +8679,33 @@ SndData_19_Ch4:
 	sndch4 3, 0, 6
 	sndlen 5
 	sndret
-SndHeader_03:
+SndHeader_BGM_BigShot:
 	db $04 ; Number of channels
 .ch1:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
-	dw SndData_03_Ch1 ; Data ptr
+	dw SndData_BGM_BigShot_Ch1 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_03_Ch2 ; Data ptr
+	dw SndData_BGM_BigShot_Ch2 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
-	dw SndData_03_Ch3 ; Data ptr
+	dw SndData_BGM_BigShot_Ch3 ; Data ptr
 	db $0C ; Base freq/note id
 	db $81 ; Unused
 .ch4:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_03_Ch4 ; Data ptr
+	dw SndData_BGM_BigShot_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_03_Ch1:
+SndData_BGM_BigShot_Ch1:
 	sndenv 7, SNDENV_DEC, 7
 	sndenach SNDOUT_CH1R|SNDOUT_CH1L
 	sndnr11 2, 0
@@ -8912,7 +8910,7 @@ SndData_03_Ch1:
 	sndlenpre $30
 	sndlenpre $08
 	sndret
-SndData_03_Ch2:
+SndData_BGM_BigShot_Ch2:
 	sndenv 1, SNDENV_DEC, 1
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 2, 0
@@ -9110,7 +9108,7 @@ SndData_03_Ch2:
 	sndlenpre $48
 	sndlenpre $08
 	sndret
-SndData_03_Ch3:
+SndData_BGM_BigShot_Ch3:
 	sndenvch3 0
 	sndenach SNDOUT_CH3R|SNDOUT_CH3L
 	sndwave $02
@@ -9334,7 +9332,7 @@ SndData_03_Ch3:
 	sndlenpre $08
 	sndnote $0D
 	sndret
-SndData_03_Ch4:
+SndData_BGM_BigShot_Ch4:
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndenv 3, SNDENV_DEC, 1
 	sndch4 2, 0, 1
@@ -9685,39 +9683,39 @@ SndData_03_Ch4:
 	sndch4 2, 0, 4
 	sndlen 8
 	sndret
-SndHeader_18:
+SndHeader_BGM_Protector:
 	db $04 ; Number of channels
 .ch1:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
-	dw SndData_18_Ch1 ; Data ptr
+	dw SndData_BGM_Protector_Ch1 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_18_Ch2 ; Data ptr
+	dw SndData_BGM_Protector_Ch2 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
-	dw SndData_18_Ch3 ; Data ptr
+	dw SndData_BGM_Protector_Ch3 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch4:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_18_Ch4 ; Data ptr
+	dw SndData_BGM_Protector_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_18_Ch1:
+SndData_BGM_Protector_Ch1:
 	sndenv 7, SNDENV_DEC, 7
 	sndenach SNDOUT_CH1R|SNDOUT_CH1L
 	sndnr11 2, 0
 	sndcall .call0
 	sndcall .call1
-	sndloop SndData_18_Ch1
+	sndloop SndData_BGM_Protector_Ch1
 .call0:
 	sndenv 8, SNDENV_DEC, 4
 	sndnote $1E
@@ -9841,7 +9839,7 @@ SndData_18_Ch1:
 	sndnote $39
 	sndlen 20
 	sndret
-SndData_18_Ch2:
+SndData_BGM_Protector_Ch2:
 	sndenv 3, SNDENV_DEC, 4
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 2, 0
@@ -9974,14 +9972,14 @@ SndData_18_Ch2:
 	sndnote $39
 	sndlen 20
 	sndret
-SndData_18_Ch3:
+SndData_BGM_Protector_Ch3:
 	sndenvch3 2
 	sndenach SNDOUT_CH3R|SNDOUT_CH3L
 	sndwave $02
 	sndch3len $00
 	sndcall .call0
 	sndcall .call1
-	sndloop SndData_18_Ch3
+	sndloop SndData_BGM_Protector_Ch3
 .call0:
 	sndnote $12
 	sndlen 80
@@ -10028,12 +10026,12 @@ SndData_18_Ch3:
 	sndnote $15
 	sndlen 80
 	sndret
-SndData_18_Ch4:
+SndData_BGM_Protector_Ch4:
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndcall .call0
 	sndcall .call1
 	sndcall .call2
-	sndloop SndData_18_Ch4
+	sndloop SndData_BGM_Protector_Ch4
 .call0:
 	sndenv 6, SNDENV_DEC, 1
 	sndch4 3, 0, 6
@@ -10147,33 +10145,33 @@ SndData_18_Ch4:
 	sndlen 20
 	sndloopcnt $00, 4, .call2b
 	sndret
-SndHeader_0B:
+SndHeader_BGM_ToTheSky:
 	db $04 ; Number of channels
 .ch1:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
-	dw SndData_0B_Ch1 ; Data ptr
+	dw SndData_BGM_ToTheSky_Ch1 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_0B_Ch2 ; Data ptr
+	dw SndData_BGM_ToTheSky_Ch2 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
-	dw SndData_0B_Ch3 ; Data ptr
+	dw SndData_BGM_ToTheSky_Ch3 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch4:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_0B_Ch4 ; Data ptr
+	dw SndData_BGM_ToTheSky_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_0B_Ch1:
+SndData_BGM_ToTheSky_Ch1:
 	sndenv 7, SNDENV_INC, 0
 	sndenach SNDOUT_CH1R|SNDOUT_CH1L
 	sndnr11 3, 0
@@ -10236,8 +10234,8 @@ SndData_0B_Ch1:
 	sndnote $00
 	sndnote $11
 	sndnote $11
-	sndloop SndData_0B_Ch1
-SndData_0B_Ch2:
+	sndloop SndData_BGM_ToTheSky_Ch1
+SndData_BGM_ToTheSky_Ch2:
 	sndenv 5, SNDENV_INC, 0
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 2, 0
@@ -10307,8 +10305,8 @@ SndData_0B_Ch2:
 	sndnote $16
 	sndnote $11
 	sndnote $12
-	sndloop SndData_0B_Ch2
-SndData_0B_Ch3:
+	sndloop SndData_BGM_ToTheSky_Ch2
+SndData_BGM_ToTheSky_Ch3:
 	sndenvch3 2
 	sndenach SNDOUT_CH3R|SNDOUT_CH3L
 	sndwave $02
@@ -10317,7 +10315,7 @@ SndData_0B_Ch3:
 	sndcall .call1
 	sndcall .call0
 	sndcall .call2
-	sndloop SndData_0B_Ch3
+	sndloop SndData_BGM_ToTheSky_Ch3
 .call0:
 	sndnote $1B
 	sndlen 8
@@ -10418,10 +10416,10 @@ SndData_0B_Ch3:
 	sndlen 64
 	sndlenpre $40
 	sndret
-SndData_0B_Ch4:
+SndData_BGM_ToTheSky_Ch4:
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndcall .call0
-	sndloop SndData_0B_Ch4
+	sndloop SndData_BGM_ToTheSky_Ch4
 .call0:
 	sndenv 6, SNDENV_DEC, 1
 	sndch4 3, 0, 6
@@ -10487,33 +10485,33 @@ SndData_0B_Ch4:
 	sndch4 3, 0, 6
 	sndlen 16
 	sndret
-SndHeader_0A:
+SndHeader_BGM_Wind:
 	db $04 ; Number of channels
 .ch1:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
-	dw SndData_0A_Ch1 ; Data ptr
+	dw SndData_BGM_Wind_Ch1 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_0A_Ch2 ; Data ptr
+	dw SndData_BGM_Wind_Ch2 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
-	dw SndData_0A_Ch3 ; Data ptr
+	dw SndData_BGM_Wind_Ch3 ; Data ptr
 	db $0C ; Base freq/note id
 	db $81 ; Unused
 .ch4:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_0A_Ch4 ; Data ptr
+	dw SndData_BGM_Wind_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_0A_Ch1:
+SndData_BGM_Wind_Ch1:
 	sndenv 7, SNDENV_INC, 0
 	sndenach SNDOUT_CH1R|SNDOUT_CH1L
 	sndnr11 2, 0
@@ -10545,7 +10543,7 @@ SndData_0A_Ch1:
 	sndlen 12
 	sndnote $00
 	sndloop .main
-SndData_0A_Ch2:
+SndData_BGM_Wind_Ch2:
 	sndenv 1, SNDENV_DEC, 1
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 3, 0
@@ -10590,7 +10588,7 @@ SndData_0A_Ch2:
 	sndlen 12
 	sndnote $00
 	sndloop .main
-SndData_0A_Ch3:
+SndData_BGM_Wind_Ch3:
 	sndenvch3 2
 	sndenach SNDOUT_CH3R|SNDOUT_CH3L
 	sndwave $02
@@ -10614,7 +10612,7 @@ SndData_0A_Ch3:
 	sndnote $01
 	sndlen 24
 	sndloop .main
-SndData_0A_Ch4:
+SndData_BGM_Wind_Ch4:
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndenv 6, SNDENV_DEC, 1
 	sndch4 3, 0, 6
@@ -10716,33 +10714,33 @@ SndData_0A_Ch4:
 	sndch4 2, 0, 6
 	sndlen 12
 	sndret
-SndHeader_09:
+SndHeader_BGM_TrashHead:
 	db $04 ; Number of channels
 .ch1:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
-	dw SndData_09_Ch1 ; Data ptr
+	dw SndData_BGM_TrashHead_Ch1 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_09_Ch2 ; Data ptr
+	dw SndData_BGM_TrashHead_Ch2 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
-	dw SndData_09_Ch3 ; Data ptr
+	dw SndData_BGM_TrashHead_Ch3 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch4:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_09_Ch4 ; Data ptr
+	dw SndData_BGM_TrashHead_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_09_Ch1:
+SndData_BGM_TrashHead_Ch1:
 	sndenv 1, SNDENV_DEC, 1
 	sndenach SNDOUT_CH1R|SNDOUT_CH1L
 	sndnr11 2, 0
@@ -10885,7 +10883,7 @@ SndData_09_Ch1:
 	sndnote $00
 	sndlen 14
 	sndret
-SndData_09_Ch2:
+SndData_BGM_TrashHead_Ch2:
 	sndenv 7, SNDENV_INC, 0
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 3, 0
@@ -10899,7 +10897,7 @@ SndData_09_Ch2:
 	sndnr21 2, 0
 	sndnote $00
 	sndlen 10
-	sndcall SndData_09_Ch1.call1
+	sndcall SndData_BGM_TrashHead_Ch1.call1
 	sndcall .call2
 	sndcall .call3
 	sndloop .main
@@ -11054,7 +11052,7 @@ SndData_09_Ch2:
 	sndnote $20
 	sndloopcnt $00, 2, .call3
 	sndret
-SndData_09_Ch3:
+SndData_BGM_TrashHead_Ch3:
 	sndenvch3 2
 	sndenach SNDOUT_CH3R|SNDOUT_CH3L
 	sndwave $04
@@ -11177,7 +11175,7 @@ SndData_09_Ch3:
 	sndnote $16
 	sndloopcnt $00, 4, .call2d
 	sndret
-SndData_09_Ch4:
+SndData_BGM_TrashHead_Ch4:
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndenv 5, SNDENV_DEC, 4
 	sndch4 2, 0, 6
@@ -11410,33 +11408,33 @@ SndData_09_Ch4:
 	sndlen 14
 	sndloopcnt $00, 8, .call5
 	sndret
-SndHeader_07:
+SndHeader_BGM_Arashi:
 	db $04 ; Number of channels
 .ch1:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
-	dw SndData_07_Ch1 ; Data ptr
+	dw SndData_BGM_Arashi_Ch1 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_07_Ch2 ; Data ptr
+	dw SndData_BGM_Arashi_Ch2 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
-	dw SndData_07_Ch3 ; Data ptr
+	dw SndData_BGM_Arashi_Ch3 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch4:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_07_Ch4 ; Data ptr
+	dw SndData_BGM_Arashi_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_07_Ch1:
+SndData_BGM_Arashi_Ch1:
 	sndenv 7, SNDENV_DEC, 2
 	sndenach SNDOUT_CH1R|SNDOUT_CH1L
 	sndnr11 2, 0
@@ -11450,7 +11448,7 @@ SndData_07_Ch1:
 	sndcall .call6
 	sndcall .call7
 	sndcall .call8
-	sndloop SndData_07_Ch1
+	sndloop SndData_BGM_Arashi_Ch1
 .call0:
 	sndnote $1A
 	sndlen 7
@@ -11794,7 +11792,7 @@ SndData_07_Ch1:
 	sndnote $1E
 	sndlen 21
 	sndret
-SndData_07_Ch2:
+SndData_BGM_Arashi_Ch2:
 	sndenv 6, SNDENV_DEC, 2
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 2, 0
@@ -11811,7 +11809,7 @@ SndData_07_Ch2:
 	sndcall .call8
 	sndcall .call9
 	sndcall .call10
-	sndloop SndData_07_Ch2
+	sndloop SndData_BGM_Arashi_Ch2
 .call0:
 	sndnote $1D
 	sndlen 7
@@ -12106,7 +12104,7 @@ SndData_07_Ch2:
 	sndnote $25
 	sndnote $1E
 	sndret
-SndData_07_Ch3:
+SndData_BGM_Arashi_Ch3:
 	sndenvch3 2
 	sndenach SNDOUT_CH3R|SNDOUT_CH3L
 	sndwave $04
@@ -12125,7 +12123,7 @@ SndData_07_Ch3:
 	sndcall .call9
 	sndcall .call8
 	sndcall .call10
-	sndloop SndData_07_Ch3
+	sndloop SndData_BGM_Arashi_Ch3
 .call0:
 	sndnote $14
 	sndlen 7
@@ -12491,7 +12489,7 @@ SndData_07_Ch3:
 	sndlen 7
 	sndch3len $32
 	sndret
-SndData_07_Ch4:
+SndData_BGM_Arashi_Ch4:
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndcall .call0
 	sndcall .call1
@@ -12500,7 +12498,7 @@ SndData_07_Ch4:
 	sndcall .call4
 	sndcall .call5
 	sndcall .call5
-	sndloop SndData_07_Ch4
+	sndloop SndData_BGM_Arashi_Ch4
 .call0:
 	sndenv 6, SNDENV_DEC, 1
 	sndch4 3, 0, 6
@@ -12734,33 +12732,33 @@ SndData_07_Ch4:
 	sndch4 2, 0, 6
 	sndlen 7
 	sndret
-SndHeader_05:
+SndHeader_BGM_RisingRed:
 	db $04 ; Number of channels
 .ch1:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
-	dw SndData_05_Ch1 ; Data ptr
+	dw SndData_BGM_RisingRed_Ch1 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_05_Ch2 ; Data ptr
+	dw SndData_BGM_RisingRed_Ch2 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
-	dw SndData_05_Ch3 ; Data ptr
+	dw SndData_BGM_RisingRed_Ch3 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch4:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_05_Ch4 ; Data ptr
+	dw SndData_BGM_RisingRed_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_05_Ch1:
+SndData_BGM_RisingRed_Ch1:
 	sndenv 7, SNDENV_DEC, 7
 	sndenach SNDOUT_CH1R|SNDOUT_CH1L
 	sndnr11 2, 0
@@ -12909,7 +12907,7 @@ SndData_05_Ch1:
 	sndlenpre $50
 	sndlenpre $50
 	sndret
-SndData_05_Ch2:
+SndData_BGM_RisingRed_Ch2:
 	sndenv 1, SNDENV_DEC, 1
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 2, 0
@@ -12918,9 +12916,9 @@ SndData_05_Ch2:
 	sndlenpre $05
 	sndenv 3, SNDENV_DEC, 7
 .main:
-	sndcall SndData_05_Ch1.call0
+	sndcall SndData_BGM_RisingRed_Ch1.call0
 	sndloop .main
-SndData_05_Ch3:
+SndData_BGM_RisingRed_Ch3:
 	sndenvch3 2
 	sndenach SNDOUT_CH3R|SNDOUT_CH3L
 	sndwave $01
@@ -12963,7 +12961,7 @@ SndData_05_Ch3:
 	sndcall .call4
 	sndcall .call2
 	sndcall .call3
-	sndloop SndData_05_Ch3
+	sndloop SndData_BGM_RisingRed_Ch3
 .call0:
 	sndnote $19
 	sndlen 20
@@ -13053,7 +13051,7 @@ SndData_05_Ch3:
 	sndnote $22
 	sndnote $25
 	sndret
-SndData_05_Ch4:
+SndData_BGM_RisingRed_Ch4:
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndcall .call0
 .main:
@@ -13107,33 +13105,33 @@ SndData_05_Ch4:
 	sndch4 1, 0, 1
 	sndlen 40
 	sndret
-SndHeader_02:
+SndHeader_BGM_StageClear:
 	db $04 ; Number of channels
 .ch1:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
-	dw SndData_02_Ch1 ; Data ptr
+	dw SndData_BGM_StageClear_Ch1 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_02_Ch2 ; Data ptr
+	dw SndData_BGM_StageClear_Ch2 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
-	dw SndData_02_Ch3 ; Data ptr
+	dw SndData_BGM_StageClear_Ch3 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch4:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_02_Ch4 ; Data ptr
+	dw SndData_BGM_StageClear_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_02_Ch1:
+SndData_BGM_StageClear_Ch1:
 	sndenv 7, SNDENV_DEC, 7
 	sndenach SNDOUT_CH1R|SNDOUT_CH1L
 	sndnr11 3, 0
@@ -13183,7 +13181,7 @@ SndData_02_Ch1:
 	sndlen 14
 	sndnote $0F
 	sndendch
-SndData_02_Ch2:
+SndData_BGM_StageClear_Ch2:
 	sndenv 6, SNDENV_DEC, 7
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 1, 0
@@ -13231,7 +13229,7 @@ SndData_02_Ch2:
 	sndnote $12
 	sndnote $14
 	sndendch
-SndData_02_Ch3:
+SndData_BGM_StageClear_Ch3:
 	sndenvch3 2
 	sndenach SNDOUT_CH3R|SNDOUT_CH3L
 	sndwave $04
@@ -13272,7 +13270,7 @@ SndData_02_Ch3:
 	sndnote $14
 	sndnote $14
 	sndendch
-SndData_02_Ch4:
+SndData_BGM_StageClear_Ch4:
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndenv 3, SNDENV_DEC, 4
 	sndch4 2, 0, 6
@@ -13377,33 +13375,33 @@ SndData_02_Ch4:
 	sndlen 14
 	sndendch
 
-SndHeader_01:
+SndHeader_BGM_Roulette:
 	db $04 ; Number of channels
 .ch1:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
-	dw SndData_01_Ch1 ; Data ptr
+	dw SndData_BGM_Roulette_Ch1 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR; Sound channel ptr
-	dw SndData_01_Ch2 ; Data ptr
+	dw SndData_BGM_Roulette_Ch2 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
-	dw SndData_01_Ch3 ; Data ptr
+	dw SndData_BGM_Roulette_Ch3 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch4:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR; Sound channel ptr
-	dw SndData_01_Ch4 ; Data ptr
+	dw SndData_BGM_Roulette_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_01_Ch1:
+SndData_BGM_Roulette_Ch1:
 	sndenv 1, SNDENV_DEC, 1
 	sndenach SNDOUT_CH1R|SNDOUT_CH1L
 	sndnr11 3, 0
@@ -13452,7 +13450,7 @@ SndData_01_Ch1:
 	sndnote $0F
 	sndlen 12
 	sndret
-SndData_01_Ch2:
+SndData_BGM_Roulette_Ch2:
 	sndenv 1, SNDENV_DEC, 1
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 2, 0
@@ -13488,7 +13486,7 @@ SndData_01_Ch2:
 	sndnote $31
 	sndnote $33
 	sndret
-SndData_01_Ch3:
+SndData_BGM_Roulette_Ch3:
 	sndenvch3 0
 	sndenach SNDOUT_CH3R|SNDOUT_CH3L
 	sndwave $04
@@ -13565,7 +13563,7 @@ SndData_01_Ch3:
 	sndnote $0F
 	sndlen 12
 	sndret
-SndData_01_Ch4:
+SndData_BGM_Roulette_Ch4:
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndenv 6, SNDENV_DEC, 1
 	sndch4 3, 0, 6
@@ -13762,17 +13760,17 @@ ENDC
 ; - 1: SGB Sound ID (Set A)
 ; - 2: SGB Sound Attributes (Set A)
 Sound_ActTbl: 
-.act00: db SND_ID_1B, SGB_SND_A_LASER_SM, $00
-.act01: db SND_ID_15, SGB_SND_A_FASTJUMP, $00
-.act02: db SND_ID_15, SGB_SND_A_FASTJUMP, $01
-.act03: db SND_ID_15, SGB_SND_A_FASTJUMP, $02
-.act04: db SND_ID_15, SGB_SND_A_FASTJUMP, $03
-.act05: db SND_ID_10, SGB_SND_A_FADEIN, $03
-.act06: db SND_ID_0F, SGB_SND_A_GLASSBREAK, $03
-.act07: db SND_ID_12, SGB_SND_A_ATTACK_B, $03
-.act08: db SND_ID_13, SGB_SND_A_ATTACK_B, $02
+.act00: db SFX_DROP, SGB_SND_A_LASER_SM, $00
+.act01: db SFX_TAUNT, SGB_SND_A_FASTJUMP, $00
+.act02: db SFX_TAUNT, SGB_SND_A_FASTJUMP, $01
+.act03: db SFX_TAUNT, SGB_SND_A_FASTJUMP, $02
+.act04: db SFX_TAUNT, SGB_SND_A_FASTJUMP, $03
+.act05: db SFX_METERCHARGE, SGB_SND_A_FADEIN, $03
+.act06: db SFX_CHARSELECTED, SGB_SND_A_GLASSBREAK, $03
+.act07: db SFX_LIGHT, SGB_SND_A_ATTACK_B, $03
+.act08: db SFX_HEAVY, SGB_SND_A_ATTACK_B, $02
 .act09: db SND_ID_14, SGB_SND_A_GATE, $03
-.act0A: db SND_ID_16, SGB_SND_A_PUNCH_A, $03
+.act0A: db SFX_HIT, SGB_SND_A_PUNCH_A, $03
 .act0B: db SND_ID_17, SGB_SND_A_ATTACK_A, $03
 .act0C: db SND_ID_14, SGB_SND_A_WINOPEN, $03
 .act0D: db SND_ID_1A, SGB_SND_A_PUNCH_B, $01
@@ -13784,15 +13782,15 @@ Sound_ActTbl:
 .act13: db SND_ID_29, SGB_SND_A_PUNCH_A, $00
 .act14: db SND_ID_29, SGB_SND_A_FIRE, $02
 .act15: db SND_ID_29, SGB_SND_A_FIRE, ($01 << 2)|$03
-.act16: db SND_ID_13, SGB_SND_A_SWORDSWING, $02 ; [TCRF] Unused?
+.act16: db SFX_HEAVY, SGB_SND_A_SWORDSWING, $02 ; [TCRF] Unused?
 .act17: db SND_ID_2B, SGB_SND_A_JETSTART, $01
 .act18: db SND_ID_2B, SGB_SND_A_PICTFLOAT, $03
 .act19: db SND_ID_2D, SGB_SND_A_JETPROJ_B, $03
-.act1A: db SND_ID_27, SGB_SND_A_SELECT_B, $03
-.act1B: db SND_ID_15, SGB_SND_A_PUNCH_B, $03
+.act1A: db SFX_GRABSTART, SGB_SND_A_SELECT_B, $03
+.act1B: db SFX_TAUNT, SGB_SND_A_PUNCH_B, $03
 .act1C: db SND_ID_30, SGB_SND_A_SELECT_C, $03
 
-; =============== END OF BANK? ===============
+; =============== TEXT SEEMINGLY BELOW ===============
 L1F7DDC: db $00
 L1F7DDD: db $80
 L1F7DDE: db $40
