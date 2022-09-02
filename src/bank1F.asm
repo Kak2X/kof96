@@ -13717,14 +13717,15 @@ Sound_ReqPlayExId:
 	ld   e, a
 	add  hl, de				; HL = Start of table entry
 	
-IF NO_SGB_SOUND	
-	; Space intentionally left blank
-ELSE
+
 	; Determine which of the 3 bytes to pick and what to do with it
 	ld   a, [wMisc_C025]
 	bit  MISCB_IS_SGB, a	; SGB hardware?
+IF NO_SGB_SOUND	
+	jp   .dmg
+ELSE
 	jp   z, .dmg			; If not, jump
-
+ENDC
 .sgb:
 	; On the SGB side use bytes 1-2 as a 16bit word
 	ld   a, b				; A = Action ID
@@ -13745,8 +13746,7 @@ ELSE
 	ld   l, a
 .sgbPlay:
 	call SGB_PrepareSoundPacket
-	ret 
-ENDC	
+	ret 	
 .dmg:
 	; On the DMG side use byte0 as sound ID
 	ld   a, [hl]			; A = DMG sound ID

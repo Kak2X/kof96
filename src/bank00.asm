@@ -441,11 +441,11 @@ EntryPoint:
 	ldh  [hROMBank], a
 	
 	; Have this as the first task
-	ld   a, $01				; Task ID
+	ld   a, $01						; Task ID
 	ld   bc, Module_TakaraLogo		; HL
-	call Task_SetTaskJP
+	call Task_CreateAt
 	
-	jp   Task_ExecFirst
+	jp   Task_DoCycle
 	
 ; =============== SGB_LoadBorder ===============
 ; Loads the SGB border for the game.
@@ -521,13 +521,13 @@ SGB_LoadBorder:
 		ld   hl, $4351
 		
 		rst  $08
-			call L000D96
+			call ClearBGMap
 			xor  a
 			ldh  [rBGP], a
 			ld   a, $C1
 		rst  $18
 		
-		call Task_NoExecCommon
+		call Task_SkipAllAndWaitVBlank
 		ld   bc, $0078
 		call SGB_DelayAfterPacketSendCustom
 		ld   hl, L044010
@@ -725,89 +725,95 @@ DefaultSettings:
 	db $90 ; Timer: 90 secs
 .end:
 
-; =============== Task_ExecFirst ===============
-; Executes the first enabled task.
+; =============== START OF TASK MANAGER ===============
+
+; =============== Task_DoCycle ===============
+; Executes the main task cycle.
+; See also: Task_ExecRun for the routine calling this.
 L00036F:
-Task_ExecFirst:
-	ld   sp, $DC00			; Set the standard stack pointer
+Task_DoCycle:
+	ld   sp, $DC00					; Set the standard stack pointer for taskman
 .reloop:
-	ld   hl, hTaskTbl		; HL = Ptr to start ot task table
-	ld   de, TASK_SIZE		; DE = Size of a task struct
-	ld   bc, $0301			; B = Number of tasks; C = Current Task ID
+	; Always search for tasks starting from the first one.
+	; Since they get marked after execution, this won't cause double exec.
+	ld   hl, hTaskTbl				; HL = Ptr to start ot task table
+	ld   de, TASK_SIZE				; DE = Size of a task struct
+	ld   bc, $0301					; B = Number of tasks; C = Current Task ID
 .nextTask:
-	
 	ld   a, [wMisc_C026]			; Mark that the task exec loop was called
 	set  MISCB_TASK_CTRL_CALLED, a
 	ld   [wMisc_C026], a
 	
 	ld   a, [wMisc_C025]			
-	bit  MISCB_PAUSE_TASKS, a	; Are tasks globally disabled?
-	jp   nz, .execCommon		; If so, skip this whole loop
+	bit  MISCB_PAUSE_TASKS, a		; Are tasks globally disabled?
+	jp   nz, .execCommon			; If so, skip directly to the common code
 	
-	; NB: Task status will be $00 for blank entries, and $02 for already executed entries
+	; If we can execute the task (marked as TASK_EXEC_TODO or TASK_EXEC_NEW), then do it
 	ld   a, [hl]
-	cp   $04				; Is the task enabled? (byte0 >= $04)
-	jp   nc, .exec			; If so, execute it
+	cp   TASK_EXEC_TODO				; taskType >= $04?
+	jp   nc, .exec					; If so, execute it
 	
 	; Seek to the next task struct
-	add  hl, de				; TaskPtr += sizeof(Task)
-	inc  c					; TaskID++
-	dec  b					; TasksLeft--; Any tasks left?
-	jp   nz, .nextTask		; If so, loop.
+	add  hl, de						; TaskPtr += sizeof(Task)
+	inc  c							; TaskID++
+	dec  b							; TasksLeft--; Any tasks left?
+	jp   nz, .nextTask				; If so, loop.
 .execCommon:
+	; After all task are executed, run the common code and re-enable tasks
 	call Task_ExecCommon
+	; Recycle through them all
 	jp   .reloop
-.exec:
-	; Save the current task ID
-	ld   a, c				
-	ldh  [hCurTaskId], a
 	
-	; Read the task type
-	ld   a, [hl]
+.exec:
+	ld   a, c						; Save the current task ID for later comparison
+	ldh  [hCurTaskId], a			; Mark it as current task. This has an effect when the code we're executing calls the taskman back.
+	
+	ld   a, [hl]					; Read the task type
 
-	; Mark the task as executing ($02, so no second .exec)	
-	ld   [hl], TASK_EXEC_CUR
+	ld   [hl], TASK_EXEC_CUR 		; Mark the task as executing
 	inc  hl
 	ld   [hl], $00
 	inc  hl
 	
-	; Read out the task ptr
-	ld   e, [hl]
+	ld   e, [hl]					; Read out the task/stack ptr
 	inc  hl
 	ld   d, [hl]
 	
-	; HL = DE
-	push de
+	push de							; HL = DE
 	pop  hl
 	
-	; The "stack pointer" task type is in practice used to restore the previous stack pointer before returning.
-	; This works because before right before executing Task_ExecFirst, a task is added (to ID $01) with the original stack pointer.
-	cp   TASK_EXEC_JP		; Is this a jump-type task?
-	jp   nz, .end			; If not, we're done
-.execJpTask:
-	jp   hl					; Jump to the task
-.end:
-	ld   sp, hl				; Set the original stack pointer before return
+	cp   TASK_EXEC_NEW				; Is this a new task?
+	jp   nz, .oldTask				; If not, jump
+.newTask:
+	jp   hl							; Otherwise jump to (presumably) the task's init code
+.oldTask:
+
+	; Restore the state from when this task was created.
+	ld   sp, hl						; Restore the stack pointer
+	
+	; The stack ptr was saved after pushing all regs into the stack in Task_ExecRun.
+	; Pop them all out to restore the original state and return safely.
 	pop  af
 	pop  bc
 	pop  de
 	pop  hl
+	
 	ret
 
-; =============== Task_SetTaskJP ===============
+; =============== Task_CreateAt ===============
 ; Writes a new task at the specified ID.
 ; IN
-; - A = Task ID
-; - BC = Location for the task (code to execute)
+; - A = Task ID ($01 - $03)
+; - BC = Ptr to init code of the task / module entry point
 L0003B8:
-Task_SetTaskJP:
+Task_CreateAt:
 	di
 	push af
 	push bc
 	push de
 	push hl
 	call Task_IndexTask
-	ld   [hl], TASK_EXEC_JP
+	ld   [hl], TASK_EXEC_NEW
 	inc  hl
 	ld   [hl], $00
 	inc  hl
@@ -820,12 +826,12 @@ Task_SetTaskJP:
 	pop  af
 	ei
 	ret
-; =============== Task_ClearTask ===============
-; Clears the execution status for the task by marking it as TASK_EXEC_NONE, which prevents it from being executed.
+; =============== Task_RemoveAt ===============
+; Removes the task at the specified ID.
 ; IN
 ; - A = Task ID
 L0003CF:
-Task_ClearTask:
+Task_RemoveAt:
 	di
 	push af
 	push bc
@@ -841,85 +847,135 @@ Task_ClearTask:
 	pop  af
 	ei
 	ret
-; =============== Task_Unknown_ReplaceCurWithSp2AndExec ===============
-; Replaces the current task with a disabled(?) entry pointing to SP+2, then executes the first enabled one.
+; =============== Task_ExecRun ===============
+; Pauses the current task and gives back control to the task system.
+;
+; HOW IT WORKS
+;
+; The task system is used to execute custom subroutines/multiple main loops with separate stacks in a cycle, as well
+; as shared code which must always run on any main loop, like the sound engine and OBJLst writer.
+;
+; There are four task slots and two different ways to execute subroutines:
+; TASK_EXEC_NEW -> Used for init code, when a task code pointer should change.
+; TASK_EXEC_TODO -> Used for loop code, which typically doesn't change across loops.
+;
+; *ANY* time the task system is run through Task_ExecRun, current slot is overwritten with an entry used
+; to restore the original registers/SP, and is set to execute after all of the next slots + the common code is executed.
+; This is important to allow cycling the same subroutine pointers if they aren't explicitly changed.
+;
+; Then the task table is iterated from the beginning until it finds an entry which can be executed.
+; If one is found, the task is marked as being executed, the current slot is set to that, and the code is run. 
+; This prevents the task from being executed again.
+;
+; To continue the cycle, the code which is called must manually call this subroutine again (or one of its stubs).
+; 
+; The same thing is done as before, until the entire task table is iterated. The common code which also waits for VBLANK
+; is executed when that happens.
+;
+; The VBLANK handler also re-enables every task (??? marked as TASK_EXEC_DONE) as a TASK_EXEC_TODO, and the task table is iterated again.
+; This WILL lead to the first task being executed again, which returns to the original state from before the task handler was
+; called for the first time, and so on.
+;
 ; IN
 ; - A = Set as byte1 of the task struct ???
 L0003E2:
-Task_Unknown_ReplaceCurWithSp2AndExec:;R
+Task_ExecRun:
+
+	; By calling this subroutine, we have to set the current stack location as a task, which
+	; will replace the current one. Most of the time it does nothing but mark the task as executed,
+	; but this also does replace the init task (TASK_EXEC_NEW) with the one for the main loop.
+
+	
+	;
+	; Save all the status of all registers to the stack.
+	;
 	push hl
 	push de
 	push bc
 	push af
 	
+	;
+	; Replace current task with a new one (for the main loop) marked as executed.
+	;
 	push af
-		call Task_IndexTaskAuto	; Index current task
-		ld   [hl], TASK_EXEC_01	; Set it as type $01, which is the same as TASK_EXEC_NONE??
+		call Task_IndexTaskAuto		; Get ptr for current task
+		ld   [hl], TASK_EXEC_DONE	; Set it as type $01
 		inc  hl
 	pop  af
 	
-	ldi  [hl], a		; Set the unknown value at byte1
+	ldi  [hl], a		; ???? Set the unknown value at byte1
 	
-	; DE = SP+2
+	;
+	; Copy SP to DE, then write it to the iTaskCodePtr fields.
+	;
 	push hl
-		ld   hl, sp+$02
+		ld   hl, sp+$02	; +$02 since we just pushed hl, which moved the stack down by $02
 		push hl
 		pop  de
 	pop  hl
-	
-	; Set that as code pointer
-	ld   [hl], e
+	ld   [hl], e	; Write it out
 	inc  hl
 	ld   [hl], d
 	
-	; Execute the first enabled task
-	jp   Task_ExecFirst
-	
-L0003FB:;C
-	ldh  a, [hROMBank]
+	; The task has been set, now execute the next ones with IDs higher than the current one
+	jp   Task_DoCycle
+
+; =============== Task_ExecRunFar_B01 ===============
+; Wrapper for Task_ExecRun_B01 which also saves the current bank number.
+; Use when executing tasks across different banks.
+Task_ExecRunFar_B01:
+	ldh  a, [hROMBank]		; Save bank for when we're returning
 	push af
-	call L000408
-	pop  af
-	ld   [MBC1RomBank], a
+	call Task_ExecRun_B01
+	pop  af					; Restore bank
+	ld   [MBC1RomBank], a	
 	ldh  [hROMBank], a
 	ret
-L000408:;JC
+	
+; =============== Task_ExecRun_* ===============
+; Sets of wrappers to Task_ExecRun which set a different byte1.
+Task_ExecRun_B01:
 	ld   a, $01
-	jr   Task_Unknown_ReplaceCurWithSp2AndExec
-L00040C: db $3E;X
-L00040D: db $02;X
-L00040E: db $18;X
-L00040F: db $D2;X
-L000410:;C
+	jr   Task_ExecRun
+; [TCRF] Unused.
+Task_Unused_ExecRun_B02: 
+	ld   a, $02
+	jr   Task_ExecRun
+Task_ExecRun_B05:
 	ld   a, $05
-	jr   Task_Unknown_ReplaceCurWithSp2AndExec
-L000414:;C
+	jr   Task_ExecRun
+Task_ExecRun_B0A:
 	ld   a, $0A
-	jr   Task_Unknown_ReplaceCurWithSp2AndExec
-L000418:;C
+	jr   Task_ExecRun
+Task_ExecRun_B1E:
 	ld   a, $1E
-	jr   Task_Unknown_ReplaceCurWithSp2AndExec
-L00041C:;JC
+	jr   Task_ExecRun
+Task_ExecRun_B3C:;
 	ld   a, $3C
-	jr   Task_Unknown_ReplaceCurWithSp2AndExec
-L000420:;C
-	di
-	call Task_IndexTaskAuto
-	ld   [hl], $00
-	jp   Task_ExecFirst
+	jr   Task_ExecRun
+	
+; =============== Task_RemoveCurAndExecRun ===============	
+; Similar to Task_ExecRun, except the current task is removed instead of marked as executed.
+; As a result, the subroutine is much shorter.
+; Only used in ???????
+Task_RemoveCurAndExecRun:
+	di							; TODO: ?????
+	call Task_IndexTaskAuto		; Index current task
+	ld   [hl], TASK_EXEC_NONE	; Disable it
+	jp   Task_DoCycle
 	
 ; =============== Task_IndexTaskAuto ===============
 ; Indexes the task struct of the currently executing (???) task.
 L000429:
 Task_IndexTaskAuto:
 	ldh  a, [hCurTaskId]	; A = Index to current task ???
+	
 ; =============== Task_IndexTask ===============
 ; Indexes the specified task struct by ID.
 ; IN
 ; - A: Index to task ID (must be between $01 and ???)
 ; OUT
 ; - HL: Ptr to task struct
-L00042B:
 Task_IndexTask:
 	; -$08 is due to the side effect of the first task ID starting at $01, and not $00.
 	; ie: The task with ID $01 should point to the first entry of hTaskTbl, not at the second entry (and so on).
@@ -932,17 +988,18 @@ Task_IndexTask:
 	add  hl, de		; Seek to the entry
 	ret
 	
-; =============== Task_NoExecCommon ===============
-; Marks the frame as executed, while not executing the common tasks.
+; =============== Task_SkipAllAndWaitVBlank ===============
+; Waits for VBlank without executing any of the tasks or common code.
 L000436:
-Task_NoExecCommon:;C
+Task_SkipAllAndWaitVBlank:
 	ld   a, $01
 	ld   [wVBlankNotDone], a
 	jp   Task_EndOfFrame
 	
-; =============== L00043E ===============
-; Unused? copy of the above.
-L00043E:;X
+; =============== Task_Unused_SkipAllAndWaitVBlank_Copy ===============
+; [TCRF] Unused? copy of the above.
+L00043E:
+Task_Unused_SkipAllAndWaitVBlank_Copy:
 	ld   a, $01
 	ld   [wVBlankNotDone], a
 	jp   Task_EndOfFrame
@@ -977,6 +1034,7 @@ Task_EndOfFrame:
 	pop  hl
 	
 	; Wait in a loop until the VBlank handler triggers, which clears the flag
+	; and marks all tasks for execution
 	ei
 .waitVBlank:
 	ld   a, [wVBlankNotDone]
@@ -984,6 +1042,7 @@ Task_EndOfFrame:
 	jp   nz, .waitVBlank		; If not, loop
 	ret
 	
+
 L00046C:;C
 	ld   [$C15A], a
 	ld   a, b
@@ -1515,9 +1574,9 @@ L0007FB:;J
 L0007FF:;J
 	call $FF80
 L000802:;J
-	ldh  a, [$FFE2]
+	ldh  a, [hScrollY]
 	ldh  [rSCY], a
-	ldh  a, [$FFE4]
+	ldh  a, [hScrollX]
 	ldh  [rSCX], a
 	ld   a, [wMisc_C026]
 	bit  3, a
@@ -2843,44 +2902,71 @@ L000D81:;R
 	dec  b
 	jr   nz, L000D81
 	ret
-L000D86:;C
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   de, $0240
-	ld   b, $00
-L000D8E:;R
-	ld   a, b
+	
+; =============== ClearOBJInfo ===============
+; Zeroes out all of the nine wOBJInfo structures.
+ClearOBJInfo:
+	ld   hl, wOBJInfo0			; HL = Initial addr
+	ld   de, OBJINFO_SIZE * 9	; DE = Bytes to clear
+	ld   b, $00					; B = Overwrite with
+.loop:
+	ld   a, b					; Write $00
 	ldi  [hl], a
-	dec  de
+	dec  de						; BytesLeft--
 	ld   a, d
-	or   a, e
-	jr   nz, L000D8E
+	or   a, e					; BytesLeft == 0?
+	jr   nz, .loop				; If not, loop
 	ret
-L000D96:;JC
-	ld   hl, BGMap_Begin
-	ld   d, $00
-	jp   L000DAF
-L000D9E:;C
-	ld   hl, WINDOWMap_Begin
-	ld   d, $00
-	jp   L000DAF
-L000DA6:;C
-	ld   hl, BGMap_Begin
-	jp   L000DAF
-L000DAC:;C
-	ld   hl, WINDOWMap_Begin
-L000DAF:;J
-	ld   bc, $0400
-L000DB2:;J
-	ldh  a, [rSTAT]
-	and  a, $03
-	jp   nz, L000DB2
-	ld   a, d
-	ldi  [hl], a
-	dec  bc
-	ld   a, b
+
+; =============== Clear*Map ===============
+; Sets of subroutines for clearing tilemaps.
+
+; =============== ClearBGMap ===============
+ClearBGMap:
+	ld   hl, BGMap_Begin			; HL = Tilemap Ptr
+	ld   d, $00						; D  = Write $00
+	jp   ClearTilemapCustom
+; =============== ClearWINDOWMap ===============
+ClearWINDOWMap:
+	ld   hl, WINDOWMap_Begin		; HL = Tilemap Ptr
+	ld   d, $00						; D  = Write $00
+	jp   ClearTilemapCustom
+; =============== ClearBGMapCustom ===============	
+; IN
+; - D: Value to set
+ClearBGMapCustom:
+	ld   hl, BGMap_Begin			; HL = Tilemap Ptr
+	jp   ClearTilemapCustom
+; =============== ClearWINDOWMapCustom ===============
+; IN
+; - D: Value to set
+ClearWINDOWMapCustom:
+	ld   hl, WINDOWMap_Begin		; HL = Tilemap Ptr
+
+; =============== ClearWINDOWMapCustom ===============
+; IN
+; - HL: Tilemap ptr
+; -  D: Value to set	
+ClearTilemapCustom:
+	ld   bc, $0400					; BC = Bytes to clear
+	
+; =============== MemSetOnHBlank ===============
+; Fills a memory range during HBlank.
+; Use for clearing VRAM.
+; IN
+; - HL: Starting address
+; - BC: Bytes to overwrite
+; -  D: Value to be set
+MemSetOnHBlank:
+	mWaitForHBlank		
+	ld   a, d			; Write D to HL 
+	ldi  [hl], a		; HL++
+	dec  bc				; BytesLeft--
+	ld   a, b			; BC == 0?
 	or   a, c
-	jp   nz, L000DB2
+	jp   nz, MemSetOnHBlank	; If not, loop
 	ret
+	
 L000DC2:;JCR
 	push bc
 	push hl
@@ -2895,9 +2981,7 @@ L000DC4:;J
 	inc  de
 	push af
 L000DCD:;J
-	ldh  a, [rSTAT]
-	and  a, $03
-	jp   nz, L000DCD
+	mWaitForHBlank
 	pop  af
 	ldi  [hl], a
 	pop  af
@@ -2911,24 +2995,30 @@ L000DCD:;J
 	dec  c
 	jr   nz, L000DC2
 	ret
-L000DE6:;JCR
-	push bc
-	push hl
-L000DE8:;J
-	ldh  a, [rSTAT]
-	and  a, $03
-	jp   nz, L000DE8
-	ld   a, [de]
-	ldi  [hl], a
-	inc  de
-	dec  b
-	jp   nz, L000DE8
-	pop  hl
-	ld   bc, $0020
-	add  hl, bc
-	pop  bc
-	dec  c
-	jr   nz, L000DE6
+; =============== CopyBGToRect ===============
+; Copies a partial tilemap to a location in VRAM.
+; IN
+; - DE: Ptr to uncompressed tilemap
+; - HL: Destination Ptr in VRAM
+; - B: Rect Width
+; - C: Rect Height
+CopyBGToRect:
+	push bc						; Save rect dimensions
+		push hl					; Save main destination ptr since we're moving down later
+.loop:	
+			mWaitForHBlank		; Since we're copying to VRAM
+			
+			ld   a, [de]		; Copy the tile over
+			ldi  [hl], a		
+			inc  de				; Dest++, Src++
+			dec  b				; Copied the entire row?
+			jp   nz, .loop		; If not, jump
+		pop  hl					; Restore dest ptr
+		ld   bc, BG_TILECOUNT_H	; Move down 1 tile
+		add  hl, bc
+	pop  bc						; Restore rect dimensions
+	dec  c						; HeightLeft--
+	jr   nz, CopyBGToRect		; Copied all rows? If not, jump
 	ret
 L000E00:;C
 	ld   a, d
@@ -2938,9 +3028,7 @@ L000E01:;R
 L000E03:;J
 	push af
 L000E04:;J
-	ldh  a, [rSTAT]
-	and  a, $03
-	jp   nz, L000E04
+	mWaitForHBlank
 	pop  af
 	ldi  [hl], a
 	dec  b
@@ -2956,16 +3044,12 @@ L000E1B:;JC
 	push bc
 	ld   b, $08
 L000E1E:;J
-	ldh  a, [rSTAT]
-	and  a, $03
-	jp   nz, L000E1E
+	mWaitForHBlank
 	ld   a, h
 	ld   [de], a
 	inc  de
 L000E28:;J
-	ldh  a, [rSTAT]
-	and  a, $03
-	jp   nz, L000E28
+	mWaitForHBlank
 	ld   a, l
 	ld   [de], a
 	inc  de
@@ -3024,9 +3108,7 @@ L000E7D:;JC
 	push bc
 	ld   b, $10
 L000E80:;J
-	ldh  a, [rSTAT]
-	and  a, $03
-	jp   nz, L000E80
+	mWaitForHBlank
 	ldi  a, [hl]
 	ld   [de], a
 	inc  de
@@ -3103,9 +3185,7 @@ L000ED2:;J
 	ld   a, b
 	push af
 L000EDC:;J
-	ldh  a, [rSTAT]
-	and  a, $03
-	jp   nz, L000EDC
+	mWaitForHBlank
 	pop  af
 	ld   [de], a
 	inc  de
@@ -3450,7 +3530,7 @@ HomeCall_Sound_ReqPlayId:
 	
 ; =============== HomeCall_Sound_ReqPlayExId_Stub ===============
 ; IN
-; - A: ???
+; - A: Action ID or DMG Sound ID
 HomeCall_Sound_ReqPlayExId_Stub:
 	jp   HomeCall_Sound_ReqPlayExId
 
@@ -3574,7 +3654,7 @@ L001015:;J
 	ret
 ; =============== HomeCall_Sound_ReqPlayExId ===============
 ; IN
-; - A: ???
+; - A: Action ID or DMG Sound ID
 HomeCall_Sound_ReqPlayExId:
 	push hl
 	push de
@@ -4163,11 +4243,11 @@ L00131B:;R
 	and  a, $E0
 	ld   e, a
 	call L0013A8
-	call L000408
+	call Task_ExecRun_B01
 	ld   b, $05
 L00132E:;R
 	call L0013A8
-	call L000408
+	call Task_ExecRun_B01
 	dec  b
 	jr   nz, L00132E
 L001337:;R
@@ -4230,7 +4310,7 @@ L00138B:;R
 L00138C:;R
 	push af
 	call L0013A8
-	call L000408
+	call Task_ExecRun_B01
 	pop  af
 	dec  a
 	jr   nz, L00133F
@@ -4277,30 +4357,23 @@ L0013C7:;J
 	ret
 L0013D2:;C
 	jp   hl
-L0013D3:;C
+	
+; =============== HomeCall_SGB_ApplyScreenPalSet ===============
+HomeCall_SGB_ApplyScreenPalSet:
 	ld   hl, wMisc_C025
-	bit  7, [hl]
-	ret  z
-L0013D9: db $F0;X
-L0013DA: db $E0;X
-L0013DB: db $F5;X
-L0013DC: db $3E;X
-L0013DD: db $04;X
-L0013DE: db $EA;X
-L0013DF: db $00;X
-L0013E0: db $20;X
-L0013E1: db $E0;X
-L0013E2: db $E0;X
-L0013E3: db $CD;X
-L0013E4: db $D0;X
-L0013E5: db $40;X
-L0013E6: db $F1;X
-L0013E7: db $EA;X
-L0013E8: db $00;X
-L0013E9: db $20;X
-L0013EA: db $E0;X
-L0013EB: db $E0;X
-L0013EC: db $C9;X
+	bit  MISCB_IS_SGB, [hl]		; Running under SGB?
+	ret  z						; If not, return
+	ldh  a, [hROMBank]
+	push af
+	ld   a, BANK(SGB_ApplyScreenPalSet)
+	ld   [MBC1RomBank], a
+	ldh  [hROMBank], a
+	call SGB_ApplyScreenPalSet
+	pop  af
+	ld   [MBC1RomBank], a
+	ldh  [hROMBank], a
+	ret  
+	
 L0013ED:;C
 	ldh  a, [hROMBank]
 	push af
@@ -4362,9 +4435,9 @@ L001445:;J
 	push hl
 	push bc
 	pop  hl
-	ld   de, $C1CA
+	ld   de, wLZSS_Buffer
 	call DecompressGFX
-	ld   hl, $C1CA
+	ld   hl, wLZSS_Buffer
 	ld   de, $9000
 	call CopyTiles
 	pop  hl
@@ -4375,13 +4448,13 @@ L001445:;J
 	push hl
 	push de
 	pop  hl
-	ld   de, $C1CA
+	ld   de, wLZSS_Buffer
 	call DecompressGFX
-	ld   de, $C1CA
+	ld   de, wLZSS_Buffer
 	ld   hl, $9880
 	ld   b, $20
 	ld   c, $0C
-	call L000DE6
+	call CopyBGToRect
 	ld   hl, $9840
 	ld   b, $20
 	ld   c, $02
@@ -4392,7 +4465,7 @@ L001445:;J
 	ld   e, [hl]
 	inc  hl
 	push hl
-	call L0013D3
+	call HomeCall_SGB_ApplyScreenPalSet
 	pop  hl
 	ld   a, [hl]
 	call HomeCall_Sound_ReqPlayExId_Stub
@@ -5135,14 +5208,14 @@ L00179D:;J
 	ld   a, [$C167]
 	cp   $FF
 	jp   nz, L0017E0
-	call L000D96
-	call L000D9E
+	call ClearBGMap
+	call ClearWINDOWMap
 L0017E0:;J
 	ld   a, $30
-	ldh  [$FFE4], a
+	ldh  [hScrollX], a
 	ld   [wFieldScrollX], a
 	xor  a
-	ldh  [$FFE2], a
+	ldh  [hScrollY], a
 	ld   a, $40
 	ld   [wFieldScrollY], a
 	ld   hl, $D8C0
@@ -5152,7 +5225,7 @@ L0017F5:;J
 	ldi  [hl], a
 	dec  b
 	jp   nz, L0017F5
-	call L000D86
+	call ClearOBJInfo
 	call L002264
 	call L001CEB
 	call L0018C4
@@ -5166,7 +5239,7 @@ L0017F5:;J
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ld   hl, $4AF8
-	ld   de, $C1CA
+	ld   de, wLZSS_Buffer
 	call DecompressGFX
 	pop  af
 	ld   [MBC1RomBank], a
@@ -5188,14 +5261,14 @@ L0017F5:;J
 	ldh  [rIE], a
 	ld   a, $02
 	ld   bc, $2458
-	call Task_SetTaskJP
+	call Task_CreateAt
 	ld   a, $03
 	ld   bc, $2464
-	call Task_SetTaskJP
+	call Task_CreateAt
 	call L00231E
 	ei
-	call L0003FB
-	call L0003FB
+	call Task_ExecRunFar_B01
+	call Task_ExecRunFar_B01
 	ld   a, [$C17F]
 	cp   $0F
 	jp   z, L00187C
@@ -5223,7 +5296,7 @@ L001890:;R
 L001893:;J
 	ld   b, $0A
 L001895:;J
-	call L0003FB
+	call Task_ExecRunFar_B01
 	dec  b
 	jp   nz, L001895
 	ld   a, $8C
@@ -5758,7 +5831,7 @@ L001BC2: db $F9
 L001BC3: db $60
 L001BC4: db $00
 L001BC5:;C
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ldh  a, [hROMBank]
 	push af
 	ld   a, $01
@@ -5767,41 +5840,41 @@ L001BC5:;C
 	ld   a, [$D92C]
 	ld   de, $8800
 	call L001C45
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   a, [$DA2C]
 	ld   de, $8A60
 	call L001C45
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   hl, $57E4
 	ld   de, $8CC0
 	ld   a, $04
 	call L001C7E
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   a, $01
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ld   hl, wOBJInfo2+iOBJInfo_Status
 	ld   de, $636A
 	call L000D76
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   hl, wOBJInfo3+iOBJInfo_Status
 	ld   de, $636A
 	call L000D76
 	ld   hl, $D74D
 	ld   [hl], $A6
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   hl, wOBJInfo4+iOBJInfo_Status
 	ld   de, $636A
 	call L000D76
 	ld   hl, $D78D
 	ld   [hl], $CC
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   hl, wOBJInfo5+iOBJInfo_Status
 	ld   de, $636A
 	call L000D76
 	ld   hl, $D7CD
 	ld   [hl], $CC
-	call L0003FB
+	call Task_ExecRunFar_B01
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
@@ -5825,7 +5898,7 @@ L001C4D:;J
 	ld   hl, $0000
 	ld   b, $02
 	call L000E1B
-	call L0003FB
+	call Task_ExecRunFar_B01
 	pop  hl
 	ldi  a, [hl]
 L001C66:;J
@@ -5836,14 +5909,14 @@ L001C66:;J
 	inc  hl
 	ldi  a, [hl]
 	push hl
-	ld   hl, $C1CA
+	ld   hl, wLZSS_Buffer
 	add  hl, bc
 	call L001C7E
 	pop  hl
 	pop  af
 	dec  a
 	jp   nz, L001C66
-	call L0003FB
+	call Task_ExecRunFar_B01
 L001C7D:;J
 	ret
 L001C7E:;C
@@ -5890,11 +5963,11 @@ L001CA8:;J
 	inc  de
 	dec  b
 	jp   nz, L001C83
-	call L0003FB
+	call Task_ExecRunFar_B01
 	pop  af
 	dec  a
 	jp   nz, L001C80
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ret
 L001CC3: db $00
 L001CC4: db $00
@@ -5943,9 +6016,9 @@ L001CEB:;C
 	or   a
 	jp   nz, L001D0C
 	ld   hl, $4A52
-	ld   de, $C1CA
+	ld   de, wLZSS_Buffer
 	call DecompressGFX
-	ld   hl, $C1CA
+	ld   hl, wLZSS_Buffer
 	ld   de, $8D00
 	ld   b, $2C
 	call CopyTiles
@@ -5968,37 +6041,37 @@ L001D2C:;J
 	ld   hl, $9C09
 	ld   b, $02
 	ld   c, $01
-	call L000DE6
+	call CopyBGToRect
 	ld   de, $4BE0
 	ld   hl, $9C80
 	ld   b, $01
 	ld   c, $01
-	call L000DE6
+	call CopyBGToRect
 	ld   de, $4BE1
 	ld   hl, $9C88
 	ld   b, $01
 	ld   c, $01
-	call L000DE6
+	call CopyBGToRect
 	ld   de, $4BE0
 	ld   hl, $9C8B
 	ld   b, $01
 	ld   c, $01
-	call L000DE6
+	call CopyBGToRect
 	ld   de, $4BE1
 	ld   hl, $9C93
 	ld   b, $01
 	ld   c, $01
-	call L000DE6
+	call CopyBGToRect
 	ld   de, $4BF6
 	ld   hl, WINDOWMap_Begin
 	ld   b, $02
 	ld   c, $01
-	call L000DE6
+	call CopyBGToRect
 	ld   de, $4BF8
 	ld   hl, $9C12
 	ld   b, $02
 	ld   c, $01
-	call L000DE6
+	call CopyBGToRect
 	ld   a, [$D920]
 	bit  7, a
 	jp   nz, L001D9B
@@ -6134,7 +6207,7 @@ L001E70:;J
 	jp   L001ED4
 L001E8D:;J
 	ld   a, [$D930]
-	ld   de, $C1CA
+	ld   de, wLZSS_Buffer
 	call L002087
 	ld   a, [$D92F]
 	ld   de, $C20A
@@ -6145,7 +6218,7 @@ L001EA2:;J
 	cp   $FF
 	jp   z, L001EBF
 	ld   a, [$D92E]
-	ld   de, $C1CA
+	ld   de, wLZSS_Buffer
 	call L002022
 	ld   a, [$D930]
 	ld   de, $C20A
@@ -6174,7 +6247,7 @@ L001ED2: db $E6;X
 L001ED3: db $1E;X
 L001ED4:;J
 	ld   a, [$D92F]
-	ld   de, $C1CA
+	ld   de, wLZSS_Buffer
 	call L002022
 	ld   a, [$D92E]
 	ld   de, $C20A
@@ -6208,7 +6281,7 @@ L001F03:;J
 	jp   L001F67
 L001F20:;J
 	ld   a, [$DA30]
-	ld   de, $C1CA
+	ld   de, wLZSS_Buffer
 	call L002087
 	ld   a, [$DA2F]
 	ld   de, $C20A
@@ -6219,7 +6292,7 @@ L001F35:;J
 	cp   $FF
 	jp   z, L001F52
 	ld   a, [$DA2E]
-	ld   de, $C1CA
+	ld   de, wLZSS_Buffer
 	call L002066
 	ld   a, [$DA30]
 	ld   de, $C20A
@@ -6230,12 +6303,12 @@ L001F52:;J
 	ld   de, $C20A
 	call L002066
 	ld   a, [$DA30]
-	ld   de, $C1CA
+	ld   de, wLZSS_Buffer
 	call L002087
 	jp   L001F79
 L001F67:;J
 	ld   a, [$DA2F]
-	ld   de, $C1CA
+	ld   de, wLZSS_Buffer
 	call L002066
 	ld   a, [$DA2E]
 	ld   de, $C20A
@@ -6438,7 +6511,7 @@ L0020C1:;J
 L0020D1:;C
 	call L0020F9
 	push hl
-	ld   hl, $C1CA
+	ld   hl, wLZSS_Buffer
 	ld   b, $06
 	call L000ECF
 	pop  hl
@@ -6449,7 +6522,7 @@ L0020D1:;C
 L0020E5:;C
 	call L0020F9
 	push hl
-	ld   hl, $C1CA
+	ld   hl, wLZSS_Buffer
 	ld   b, $06
 	call L000E7D
 	pop  hl
@@ -6530,7 +6603,7 @@ L002152:;C
 	ld   de, $9660
 	call L000E1B
 	ld   hl, $4084
-	ld   de, $C1CA
+	ld   de, wLZSS_Buffer
 	call DecompressGFX
 	ld   a, [$D92C]
 	call L00217E
@@ -6568,7 +6641,7 @@ L00217E:;C
 	ld   hl, $9C02
 	ld   b, $06
 	ld   c, $01
-	call L000DE6
+	call CopyBGToRect
 	ret
 L0021B3:;C
 	ld   b, $00
@@ -6588,7 +6661,7 @@ L0021B3:;C
 	ld   hl, $9C0C
 	ld   b, $06
 	ld   c, $01
-	call L000DE6
+	call CopyBGToRect
 	ret
 L0021D5:;JC
 	push bc
@@ -6604,7 +6677,7 @@ L0021D5:;JC
 	sla  c
 	rl   b
 	push hl
-	ld   hl, $C1CA
+	ld   hl, wLZSS_Buffer
 	add  hl, bc
 	ld   b, $01
 	call CopyTiles
@@ -6674,17 +6747,17 @@ L002233:;C
 	ld   hl, $9C20
 	ld   b, $09
 	ld   c, $01
-	call L000DE6
+	call CopyBGToRect
 	ld   de, $225B
 	ld   hl, $9C2B
 	ld   b, $09
 	ld   c, $01
-	call L000DE6
+	call CopyBGToRect
 	ld   de, $4BE2
 	ld   hl, $9C80
 	ld   b, $14
 	ld   c, $01
-	call L000DE6
+	call CopyBGToRect
 	ret
 L00225B: db $E0
 L00225C: db $E0
@@ -6705,9 +6778,9 @@ L002264:;C
 	inc  a
 	ld   [$C167], a
 	ld   hl, $4000
-	ld   de, $C1CA
+	ld   de, wLZSS_Buffer
 	call DecompressGFX
-	ld   hl, $C1CA
+	ld   hl, wLZSS_Buffer
 	ld   de, $8800
 	ld   b, $44
 	call CopyTiles
@@ -6763,7 +6836,7 @@ L0022D5:;J
 	call L0022FC
 	ld   hl, wOBJInfo3+iOBJInfo_Status
 	ld   [hl], $00
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ret
 L0022FC:;C
 	push hl
@@ -6779,7 +6852,7 @@ L0022FD:;J
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	call L0023EC
-	call L0003FB
+	call Task_ExecRunFar_B01
 	pop  bc
 	dec  b
 	jp   nz, L0022FD
@@ -6998,7 +7071,7 @@ L002475:;J
 	call L002482
 	pop  de
 	pop  bc
-	call L0003FB
+	call Task_ExecRunFar_B01
 	jp   L002475
 L002482:;C
 	call L002D75
@@ -9365,7 +9438,7 @@ L00339A:;J
 	set  7, [hl]
 	ld   a, $6C
 	call L00341B
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   a, $03
 	ld   [$C173], a
 	call L00386A
@@ -9375,7 +9448,7 @@ L0033BC:;J
 	jp   z, L0033CF
 	cp   $03
 	jp   nz, L0033D7
-	call L0003FB
+	call Task_ExecRunFar_B01
 	jp   L0033BC
 L0033CF:;J
 	ld   a, $03
@@ -10480,12 +10553,12 @@ L0039AE:;J
 	ld   a, [hl]
 	push af
 	push hl
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   hl, $001A
 	add  hl, de
 	xor  a
 	ld   [hl], a
-	call L0003FB
+	call Task_ExecRunFar_B01
 	pop  hl
 	pop  af
 	ldd  [hl], a
@@ -10581,12 +10654,12 @@ L003A59:;J
 	ld   a, [hl]
 	push af
 	push hl
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   hl, $001A
 	add  hl, de
 	xor  a
 	ld   [hl], a
-	call L0003FB
+	call Task_ExecRunFar_B01
 	pop  hl
 	pop  af
 	ldd  [hl], a
@@ -10626,7 +10699,7 @@ L003AB5:;J
 	jp   c, L003AD3
 	call L003CE7
 	jp   c, L003AD3
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   a, [$C172]
 	or   a
 	jp   nz, L003AB5
@@ -10685,17 +10758,17 @@ L003B15:;C
 	jp   z, L003B34
 L003B25:;J
 	dec  [hl]
-	call L0003FB
+	call Task_ExecRunFar_B01
 	inc  [hl]
-	call L0003FB
+	call Task_ExecRunFar_B01
 	dec  b
 	jp   nz, L003B25
 	jp   L003B40
 L003B34:;J
 	inc  [hl]
-	call L0003FB
+	call Task_ExecRunFar_B01
 	dec  [hl]
-	call L0003FB
+	call Task_ExecRunFar_B01
 	dec  b
 	jp   nz, L003B34
 L003B40:;J
@@ -10786,7 +10859,7 @@ L003BCF:;J
 	push af
 	inc  [hl]
 	inc  [hl]
-	call L0003FB
+	call Task_ExecRunFar_B01
 	push hl
 	call L002D75
 	call L003C18
@@ -10796,7 +10869,7 @@ L003BCF:;J
 	pop  hl
 	dec  [hl]
 	dec  [hl]
-	call L0003FB
+	call Task_ExecRunFar_B01
 	push hl
 	call L002D75
 	call L003C18

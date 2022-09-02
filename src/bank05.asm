@@ -8282,7 +8282,7 @@ L0560D4:;J
 	call L002D53
 	call L003A3E
 	jp   nc, L056140
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   a, $03
 	ld   [$C173], a
 	call L00376A
@@ -9812,7 +9812,7 @@ L056D6A:;C
 	jp   nz, L056D9D
 	call L003A28
 	jp   nc, L056D9D
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   a, $03
 	ld   [$C173], a
 	ld   a, $0C
@@ -11267,7 +11267,7 @@ L057960:;J
 	call L002D53
 	call L003A3E
 	jp   nc, L0579B5
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   a, $03
 	ld   [$C173], a
 	call L00376A
@@ -11286,7 +11286,7 @@ L057989:;J
 	call L002D53
 	call L003A3E
 	jp   nc, L0579B5
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   a, $03
 	ld   [$C173], a
 	call L003790
@@ -11477,7 +11477,7 @@ L057AFC:;J
 	jp   nz, L057B44
 	call L003A28
 	jp   nc, L057BDC
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   a, $03
 	ld   [$C173], a
 	ld   hl, $0021
@@ -11630,7 +11630,7 @@ L057C6E:;J
 	jp   nc, L057CD8
 	call L003A28
 	jp   nc, L057CDB
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   a, $03
 	ld   [$C173], a
 	jp   L057CD8
@@ -11811,7 +11811,7 @@ L057E05:;J
 	jp   nc, L057ECE
 	call L003A28
 	jp   nc, L057ED1
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   a, $03
 	ld   [$C173], a
 	jp   L057DD1
@@ -11820,7 +11820,7 @@ L057E1C:;J
 	jp   nc, L057ECE
 	call L003A28
 	jp   nc, L057ED1
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   a, $03
 	ld   [$C173], a
 	jp   L057DDA

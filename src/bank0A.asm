@@ -12098,7 +12098,7 @@ L0A6F40: db $09
 L0A6F41: db $04
 
 ; =============== Module_TakaraLogo ===============
-; Called by task handler.
+; EntryPoint for TakaraLogo. Called by task handler.
 L0A6F42:
 Module_TakaraLogo:
 	ld   sp, $DD00
@@ -12120,54 +12120,83 @@ Module_TakaraLogo:
 	rst  $00
 	
 ; =============== TakaraLogo_Do ===============
-TakaraLogo_Do:;C
+; Main code.
+TakaraLogo_Do:
+
 	di
-	ld   a, $0A
+	; Set base bank (self)
+	ld   a, BANK(Module_TakaraLogo) 
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	rst  $10
+	;-----------------------------------
+	rst  $10				; Stop LCD
+	
+	; Reset DMG Pal
 	xor  a
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
+	
+	; Use screen continuously
 	ld   hl, wMisc_C028
 	ld   [hl], $00
-	ld   de, $0001
-	call L0013D3
-	call L000D96
-	call L000D9E
+	
+	ld   de, SCRPAL_TAKARALOGO
+	call HomeCall_SGB_ApplyScreenPalSet
+	
+	call ClearBGMap
+	call ClearWINDOWMap
+	
+	; Reset coords
 	xor  a
-	ldh  [$FFE4], a
-	ldh  [$FFE2], a
-	ld   hl, $708D
-	ld   de, $C1CA
+	ldh  [hScrollX], a 
+	ldh  [hScrollY], a 
+	
+	; Copy logo GFX
+	ld   hl, GFXLZ_TakaraLogo
+	ld   de, wLZSS_Buffer
 	call DecompressGFX
-	ld   hl, $C1CA
+	ld   hl, wLZSS_Buffer
 	ld   de, $9000
 	call CopyTiles
-	ld   de, $7323
+	
+	; Copy logo tilemap
+	ld   de, BG_TakaraLogo
 	ld   hl, $98C2
 	ld   b, $10
 	ld   c, $05
-	call L000DE6
-	call L000D86
+	call CopyBGToRect
+	
+	; Wipe sprites
+	call ClearOBJInfo
+	
+	; Disable window 
 	xor  a
 	ldh  [rWY], a
 	ldh  [rWX], a
 	ldh  [rSTAT], a
-	ld   a, $C3
-	rst  $18
+	
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
 	ei
-	call L000408
+	; (VBlank will hit now)
+	call Task_ExecRun_B01
+	
+	; Set DMG palette
 	ld   a, $E4
 	ldh  [rOBP0], a
 	ld   a, $FF
 	ldh  [rOBP1], a
 	ld   a, $93
 	ldh  [rBGP], a
-	ld   a, $00
+	
+	; Mute sound
+	ld   a, SND_MUTE
 	call HomeCall_Sound_ReqPlayExId_Stub
-	ld   hl, $C1CA
+	
+	; Wuh
+	ld   hl, wLZSS_Buffer
 	ld   a, $03
 	ldi  [hl], a
 	ld   a, $14
@@ -12177,20 +12206,20 @@ TakaraLogo_Do:;C
 	ld   a, $1E
 	ldi  [hl], a
 	ld   bc, $0168
-L0A6FD5:;J
+.mainLoop:
 	call L0A6FED
 	ldh  a, [$FF99]
 	ld   d, a
 	ldh  a, [$FFAC]
 	or   a, d
 	bit  7, a
-	jp   nz, L0A6FEC
-	call L000408
+	jp   nz, .end
+	call Task_ExecRun_B01
 	dec  bc
 	ld   a, b
 	or   a, c
-	jp   nz, L0A6FD5
-L0A6FEC:;J
+	jp   nz, .mainLoop
+.end:;J
 	ret
 L0A6FED:;C
 	ld   hl, $FF98
@@ -12219,9 +12248,9 @@ L0A7019:;J
 	jp   z, L0A703C
 	bit  6, [hl]
 	jp   nz, L0A703C
-	ld   a, [$C1CA]
+	ld   a, [wLZSS_Buffer]
 	dec  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	jp   nz, L0A703C
 	set  6, [hl]
 	push hl
@@ -12269,748 +12298,9 @@ L0A705F:;J
 	pop  hl
 L0A708C:;J
 	ret
-L0A708D: db $49
-L0A708E: db $80
-L0A708F: db $7F
-L0A7090: db $00
-L0A7091: db $03
-L0A7092: db $03
-L0A7093: db $03
-L0A7094: db $03
-L0A7095: db $03
-L0A7096: db $03
-L0A7097: db $03
-L0A7098: db $11
-L0A7099: db $01
-L0A709A: db $07
-L0A709B: db $08
-L0A709C: db $17
-L0A709D: db $03
-L0A709E: db $04
-L0A709F: db $0E
-L0A70A0: db $0C
-L0A70A1: db $40
-L0A70A2: db $1B
-L0A70A3: db $28
-L0A70A4: db $3F
-L0A70A5: db $0F
-L0A70A6: db $7C
-L0A70A7: db $1C
-L0A70A8: db $50
-L0A70A9: db $30
-L0A70AA: db $9D
-L0A70AB: db $14
-L0A70AC: db $40
-L0A70AD: db $FF
-L0A70AE: db $24
-L0A70AF: db $04
-L0A70B0: db $10
-L0A70B1: db $F8
-L0A70B2: db $00
-L0A70B3: db $7E
-L0A70B4: db $C0
-L0A70B5: db $00
-L0A70B6: db $83
-L0A70B7: db $03
-L0A70B8: db $03
-L0A70B9: db $02
-L0A70BA: db $90
-L0A70BB: db $1F
-L0A70BC: db $7E
-L0A70BD: db $20
-L0A70BE: db $5C
-L0A70BF: db $10
-L0A70C0: db $6D
-L0A70C1: db $2B
-L0A70C2: db $01
-L0A70C3: db $18
-L0A70C4: db $18
-L0A70C5: db $FA
-L0A70C6: db $2E
-L0A70C7: db $05
-L0A70C8: db $9C
-L0A70C9: db $04
-L0A70CA: db $01
-L0A70CB: db $7F
-L0A70CC: db $AD
-L0A70CD: db $80
-L0A70CE: db $F4
-L0A70CF: db $00
-L0A70D0: db $45
-L0A70D1: db $28
-L0A70D2: db $05
-L0A70D3: db $0E
-L0A70D4: db $04
-L0A70D5: db $1E
-L0A70D6: db $39
-L0A70D7: db $6E
-L0A70D8: db $38
-L0A70D9: db $DF
-L0A70DA: db $03
-L0A70DB: db $FE
-L0A70DC: db $75
-L0A70DD: db $30
-L0A70DE: db $04
-L0A70DF: db $3D
-L0A70E0: db $27
-L0A70E1: db $E3
-L0A70E2: db $23
-L0A70E3: db $2F
-L0A70E4: db $0F
-L0A70E5: db $30
-L0A70E6: db $B7
-L0A70E7: db $A5
-L0A70E8: db $B1
-L0A70E9: db $9F
-L0A70EA: db $A7
-L0A70EB: db $1F
-L0A70EC: db $60
-L0A70ED: db $37
-L0A70EE: db $EF
-L0A70EF: db $AF
-L0A70F0: db $03
-L0A70F1: db $03
-L0A70F2: db $47
-L0A70F3: db $07
-L0A70F4: db $07
-L0A70F5: db $08
-L0A70F6: db $0D
-L0A70F7: db $06
-L0A70F8: db $2F
-L0A70F9: db $03
-L0A70FA: db $01
-L0A70FB: db $DF
-L0A70FC: db $AE
-L0A70FD: db $BB
-L0A70FE: db $03
-L0A70FF: db $B7
-L0A7100: db $06
-L0A7101: db $02
-L0A7102: db $57
-L0A7103: db $2F
-L0A7104: db $FA
-L0A7105: db $37
-L0A7106: db $37
-L0A7107: db $03
-L0A7108: db $03
-L0A7109: db $03
-L0A710A: db $FE
-L0A710B: db $05
-L0A710C: db $C6
-L0A710D: db $0D
-L0A710E: db $7F
-L0A710F: db $47
-L0A7110: db $3C
-L0A7111: db $04
-L0A7112: db $2F
-L0A7113: db $03
-L0A7114: db $FC
-L0A7115: db $3D
-L0A7116: db $05
-L0A7117: db $CE
-L0A7118: db $7C
-L0A7119: db $1C
-L0A711A: db $F8
-L0A711B: db $38
-L0A711C: db $18
-L0A711D: db $C0
-L0A711E: db $BF
-L0A711F: db $FA
-L0A7120: db $C7
-L0A7121: db $C7
-L0A7122: db $03
-L0A7123: db $03
-L0A7124: db $01
-L0A7125: db $07
-L0A7126: db $07
-L0A7127: db $08
-L0A7128: db $7B
-L0A7129: db $0F
-L0A712A: db $BF
-L0A712B: db $03
-L0A712C: db $03
-L0A712D: db $01
-L0A712E: db $80
-L0A712F: db $00
-L0A7130: db $12
-L0A7131: db $B5
-L0A7132: db $CC
-L0A7133: db $06
-L0A7134: db $BF
-L0A7135: db $04
-L0A7136: db $FC
-L0A7137: db $BD
-L0A7138: db $03
-L0A7139: db $00
-L0A713A: db $CD
-L0A713B: db $53
-L0A713C: db $01
-L0A713D: db $F0
-L0A713E: db $0C
-L0A713F: db $47
-L0A7140: db $04
-L0A7141: db $FE
-L0A7142: db $45
-L0A7143: db $78
-L0A7144: db $01
-L0A7145: db $00
-L0A7146: db $3F
-L0A7147: db $03
-L0A7148: db $3E
-L0A7149: db $C7
-L0A714A: db $7F
-L0A714B: db $47
-L0A714C: db $73
-L0A714D: db $3C
-L0A714E: db $FF
-L0A714F: db $03
-L0A7150: db $00
-L0A7151: db $C0
-L0A7152: db $20
-L0A7153: db $94
-L0A7154: db $F0
-L0A7155: db $B3
-L0A7156: db $04
-L0A7157: db $C8
-L0A7158: db $3F
-L0A7159: db $03
-L0A715A: db $E0
-L0A715B: db $18
-L0A715C: db $C7
-L0A715D: db $04
-L0A715E: db $7B
-L0A715F: db $FC
-L0A7160: db $C5
-L0A7161: db $37
-L0A7162: db $03
-L0A7163: db $81
-L0A7164: db $F8
-L0A7165: db $6C
-L0A7166: db $46
-L0A7167: db $BA
-L0A7168: db $60
-L0A7169: db $03
-L0A716A: db $00
-L0A716B: db $33
-L0A716C: db $01
-L0A716D: db $07
-L0A716E: db $07
-L0A716F: db $08
-L0A7170: db $4B
-L0A7171: db $0F
-L0A7172: db $4D
-L0A7173: db $FE
-L0A7174: db $1F
-L0A7175: db $00
-L0A7176: db $01
-L0A7177: db $00
-L0A7178: db $47
-L0A7179: db $FF
-L0A717A: db $F8
-L0A717B: db $00
-L0A717C: db $0B
-L0A717D: db $03
-L0A717E: db $03
-L0A717F: db $03
-L0A7180: db $3D
-L0A7181: db $B8
-L0A7182: db $1F
-L0A7183: db $10
-L0A7184: db $FC
-L0A7185: db $02
-L0A7186: db $CD
-L0A7187: db $04
-L0A7188: db $10
-L0A7189: db $8D
-L0A718A: db $DF
-L0A718B: db $C5
-L0A718C: db $03
-L0A718D: db $57
-L0A718E: db $C0
-L0A718F: db $20
-L0A7190: db $70
-L0A7191: db $0C
-L0A7192: db $D8
-L0A7193: db $54
-L0A7194: db $83
-L0A7195: db $50
-L0A7196: db $F0
-L0A7197: db $3E
-L0A7198: db $38
-L0A7199: db $0A
-L0A719A: db $0C
-L0A719B: db $18
-L0A719C: db $2C
-L0A719D: db $2F
-L0A719E: db $A0
-L0A719F: db $60
-L0A71A0: db $30
-L0A71A1: db $40
-L0A71A2: db $07
-L0A71A3: db $54
-L0A71A4: db $60
-L0A71A5: db $04
-L0A71A6: db $D0
-L0A71A7: db $28
-L0A71A8: db $34
-L0A71A9: db $90
-L0A71AA: db $64
-L0A71AB: db $48
-L0A71AC: db $7C
-L0A71AD: db $62
-L0A71AE: db $3F
-L0A71AF: db $4F
-L0A71B0: db $30
-L0A71B1: db $B8
-L0A71B2: db $1C
-L0A71B3: db $0F
-L0A71B4: db $00
-L0A71B5: db $C7
-L0A71B6: db $03
-L0A71B7: db $C7
-L0A71B8: db $C7
-L0A71B9: db $64
-L0A71BA: db $44
-L0A71BB: db $F8
-L0A71BC: db $06
-L0A71BD: db $FF
-L0A71BE: db $10
-L0A71BF: db $04
-L0A71C0: db $10
-L0A71C1: db $C7
-L0A71C2: db $64
-L0A71C3: db $00
-L0A71C4: db $11
-L0A71C5: db $10
-L0A71C6: db $01
-L0A71C7: db $38
-L0A71C8: db $07
-L0A71C9: db $07
-L0A71CA: db $97
-L0A71CB: db $07
-L0A71CC: db $E1
-L0A71CD: db $21
-L0A71CE: db $CC
-L0A71CF: db $20
-L0A71D0: db $07
-L0A71D1: db $07
-L0A71D2: db $07
-L0A71D3: db $7D
-L0A71D4: db $07
-L0A71D5: db $44
-L0A71D6: db $04
-L0A71D7: db $00
-L0A71D8: db $E7
-L0A71D9: db $D2
-L0A71DA: db $60
-L0A71DB: db $CE
-L0A71DC: db $BF
-L0A71DD: db $14
-L0A71DE: db $F0
-L0A71DF: db $05
-L0A71E0: db $00
-L0A71E1: db $1C
-L0A71E2: db $00
-L0A71E3: db $3F
-L0A71E4: db $03
-L0A71E5: db $11
-L0A71E6: db $C0
-L0A71E7: db $30
-L0A71E8: db $0F
-L0A71E9: db $4C
-L0A71EA: db $0D
-L0A71EB: db $14
-L0A71EC: db $1C
-L0A71ED: db $08
-L0A71EE: db $57
-L0A71EF: db $1D
-L0A71F0: db $04
-L0A71F1: db $1F
-L0A71F2: db $A4
-L0A71F3: db $3F
-L0A71F4: db $08
-L0A71F5: db $05
-L0A71F6: db $38
-L0A71F7: db $5F
-L0A71F8: db $50
-L0A71F9: db $44
-L0A71FA: db $40
-L0A71FB: db $9C
-L0A71FC: db $04
-L0A71FD: db $0C
-L0A71FE: db $5C
-L0A71FF: db $DD
-L0A7200: db $EB
-L0A7201: db $0C
-L0A7202: db $ED
-L0A7203: db $A5
-L0A7204: db $90
-L0A7205: db $C8
-L0A7206: db $10
-L0A7207: db $A9
-L0A7208: db $B5
-L0A7209: db $7B
-L0A720A: db $7C
-L0A720B: db $00
-L0A720C: db $AF
-L0A720D: db $03
-L0A720E: db $01
-L0A720F: db $FC
-L0A7210: db $05
-L0A7211: db $00
-L0A7212: db $79
-L0A7213: db $7E
-L0A7214: db $00
-L0A7215: db $27
-L0A7216: db $03
-L0A7217: db $01
-L0A7218: db $3D
-L0A7219: db $04
-L0A721A: db $D4
-L0A721B: db $CA
-L0A721C: db $05
-L0A721D: db $14
-L0A721E: db $3E
-L0A721F: db $03
-L0A7220: db $0C
-L0A7221: db $07
-L0A7222: db $0C
-L0A7223: db $06
-L0A7224: db $76
-L0A7225: db $3C
-L0A7226: db $24
-L0A7227: db $05
-L0A7228: db $CC
-L0A7229: db $70
-L0A722A: db $DC
-L0A722B: db $D0
-L0A722C: db $80
-L0A722D: db $7E
-L0A722E: db $40
-L0A722F: db $F4
-L0A7230: db $44
-L0A7231: db $FD
-L0A7232: db $19
-L0A7233: db $24
-L0A7234: db $FC
-L0A7235: db $30
-L0A7236: db $BB
-L0A7237: db $24
-L0A7238: db $FE
-L0A7239: db $24
-L0A723A: db $04
-L0A723B: db $00
-L0A723C: db $7F
-L0A723D: db $00
-L0A723E: db $A7
-L0A723F: db $D0
-L0A7240: db $03
-L0A7241: db $01
-L0A7242: db $0F
-L0A7243: db $94
-L0A7244: db $0D
-L0A7245: db $14
-L0A7246: db $1D
-L0A7247: db $0C
-L0A7248: db $DF
-L0A7249: db $04
-L0A724A: db $10
-L0A724B: db $1F
-L0A724C: db $7C
-L0A724D: db $C4
-L0A724E: db $08
-L0A724F: db $05
-L0A7250: db $7C
-L0A7251: db $7E
-L0A7252: db $50
-L0A7253: db $CF
-L0A7254: db $FD
-L0A7255: db $06
-L0A7256: db $FC
-L0A7257: db $05
-L0A7258: db $2F
-L0A7259: db $34
-L0A725A: db $A0
-L0A725B: db $6C
-L0A725C: db $7C
-L0A725D: db $04
-L0A725E: db $FC
-L0A725F: db $1C
-L0A7260: db $F8
-L0A7261: db $38
-L0A7262: db $F0
-L0A7263: db $5F
-L0A7264: db $10
-L0A7265: db $F7
-L0A7266: db $78
-L0A7267: db $04
-L0A7268: db $34
-L0A7269: db $04
-L0A726A: db $4C
-L0A726B: db $00
-L0A726C: db $7F
-L0A726D: db $1E
-L0A726E: db $00
-L0A726F: db $E7
-L0A7270: db $03
-L0A7271: db $01
-L0A7272: db $64
-L0A7273: db $05
-L0A7274: db $00
-L0A7275: db $F7
-L0A7276: db $4C
-L0A7277: db $00
-L0A7278: db $27
-L0A7279: db $03
-L0A727A: db $03
-L0A727B: db $AD
-L0A727C: db $0C
-L0A727D: db $04
-L0A727E: db $B0
-L0A727F: db $00
-L0A7280: db $7E
-L0A7281: db $00
-L0A7282: db $2F
-L0A7283: db $01
-L0A7284: db $06
-L0A7285: db $1F
-L0A7286: db $60
-L0A7287: db $46
-L0A7288: db $FF
-L0A7289: db $14
-L0A728A: db $07
-L0A728B: db $04
-L0A728C: db $05
-L0A728D: db $1C
-L0A728E: db $24
-L0A728F: db $02
-L0A7290: db $FB
-L0A7291: db $07
-L0A7292: db $6C
-L0A7293: db $75
-L0A7294: db $28
-L0A7295: db $34
-L0A7296: db $09
-L0A7297: db $67
-L0A7298: db $69
-L0A7299: db $FC
-L0A729A: db $9D
-L0A729B: db $6E
-L0A729C: db $10
-L0A729D: db $04
-L0A729E: db $10
-L0A729F: db $AD
-L0A72A0: db $0E
-L0A72A1: db $12
-L0A72A2: db $31
-L0A72A3: db $3E
-L0A72A4: db $46
-L0A72A5: db $10
-L0A72A6: db $34
-L0A72A7: db $F8
-L0A72A8: db $38
-L0A72A9: db $F0
-L0A72AA: db $00
-L0A72AB: db $6F
-L0A72AC: db $C0
-L0A72AD: db $00
-L0A72AE: db $61
-L0A72AF: db $78
-L0A72B0: db $BD
-L0A72B1: db $00
-L0A72B2: db $83
-L0A72B3: db $03
-L0A72B4: db $EF
-L0A72B5: db $03
-L0A72B6: db $01
-L0A72B7: db $8C
-L0A72B8: db $E0
-L0A72B9: db $04
-L0A72BA: db $99
-L0A72BB: db $00
-L0A72BC: db $27
-L0A72BD: db $FE
-L0A72BE: db $03
-L0A72BF: db $3E
-L0A72C0: db $07
-L0A72C1: db $B8
-L0A72C2: db $4D
-L0A72C3: db $9F
-L0A72C4: db $03
-L0A72C5: db $80
-L0A72C6: db $7B
-L0A72C7: db $60
-L0A72C8: db $47
-L0A72C9: db $04
-L0A72CA: db $F4
-L0A72CB: db $45
-L0A72CC: db $0F
-L0A72CD: db $00
-L0A72CE: db $3F
-L0A72CF: db $9F
-L0A72D0: db $01
-L0A72D1: db $C0
-L0A72D2: db $30
-L0A72D3: db $47
-L0A72D4: db $DF
-L0A72D5: db $DF
-L0A72D6: db $03
-L0A72D7: db $3F
-L0A72D8: db $FE
-L0A72D9: db $06
-L0A72DA: db $02
-L0A72DB: db $37
-L0A72DC: db $03
-L0A72DD: db $3F
-L0A72DE: db $47
-L0A72DF: db $47
-L0A72E0: db $03
-L0A72E1: db $6B
-L0A72E2: db $0C
-L0A72E3: db $2F
-L0A72E4: db $04
-L0A72E5: db $07
-L0A72E6: db $2D
-L0A72E7: db $F8
-L0A72E8: db $00
-L0A72E9: db $35
-L0A72EA: db $35
-L0A72EB: db $01
-L0A72EC: db $06
-L0A72ED: db $37
-L0A72EE: db $04
-L0A72EF: db $0F
-L0A72F0: db $35
-L0A72F1: db $F0
-L0A72F2: db $00
-L0A72F3: db $EB
-L0A72F4: db $A7
-L0A72F5: db $37
-L0A72F6: db $04
-L0A72F7: db $1F
-L0A72F8: db $35
-L0A72F9: db $E0
-L0A72FA: db $00
-L0A72FB: db $37
-L0A72FC: db $FF
-L0A72FD: db $3E
-L0A72FE: db $9F
-L0A72FF: db $9E
-L0A7300: db $03
-L0A7301: db $03
-L0A7302: db $5D
-L0A7303: db $C4
-L0A7304: db $CD
-L0A7305: db $E1
-L0A7306: db $07
-L0A7307: db $33
-L0A7308: db $02
-L0A7309: db $BE
-L0A730A: db $3A
-L0A730B: db $7F
-L0A730C: db $05
-L0A730D: db $80
-L0A730E: db $50
-L0A730F: db $B5
-L0A7310: db $04
-L0A7311: db $8D
-L0A7312: db $0E
-L0A7313: db $7B
-L0A7314: db $FE
-L0A7315: db $86
-L0A7316: db $7C
-L0A7317: db $FF
-L0A7318: db $00
-L0A7319: db $4F
-L0A731A: db $03
-L0A731B: db $03
-L0A731C: db $03
-L0A731D: db $03
-L0A731E: db $03
-L0A731F: db $03
-L0A7320: db $80
-L0A7321: db $03
-L0A7322: db $00
-L0A7323: db $00
-L0A7324: db $01
-L0A7325: db $04
-L0A7326: db $05
-L0A7327: db $08
-L0A7328: db $09
-L0A7329: db $0C
-L0A732A: db $0D
-L0A732B: db $0D
-L0A732C: db $10
-L0A732D: db $13
-L0A732E: db $14
-L0A732F: db $17
-L0A7330: db $18
-L0A7331: db $1B
-L0A7332: db $00
-L0A7333: db $02
-L0A7334: db $03
-L0A7335: db $06
-L0A7336: db $07
-L0A7337: db $0A
-L0A7338: db $0B
-L0A7339: db $0E
-L0A733A: db $0F
-L0A733B: db $11
-L0A733C: db $12
-L0A733D: db $15
-L0A733E: db $16
-L0A733F: db $19
-L0A7340: db $1A
-L0A7341: db $1C
-L0A7342: db $1D
-L0A7343: db $1E
-L0A7344: db $00
-L0A7345: db $21
-L0A7346: db $22
-L0A7347: db $25
-L0A7348: db $26
-L0A7349: db $29
-L0A734A: db $2A
-L0A734B: db $2C
-L0A734C: db $26
-L0A734D: db $2D
-L0A734E: db $2E
-L0A734F: db $2C
-L0A7350: db $26
-L0A7351: db $00
-L0A7352: db $32
-L0A7353: db $1F
-L0A7354: db $20
-L0A7355: db $23
-L0A7356: db $24
-L0A7357: db $27
-L0A7358: db $28
-L0A7359: db $2B
-L0A735A: db $28
-L0A735B: db $27
-L0A735C: db $28
-L0A735D: db $2B
-L0A735E: db $2F
-L0A735F: db $30
-L0A7360: db $31
-L0A7361: db $33
-L0A7362: db $34
-L0A7363: db $00
-L0A7364: db $35
-L0A7365: db $36
-L0A7366: db $37
-L0A7367: db $38
-L0A7368: db $39
-L0A7369: db $3A
-L0A736A: db $3B
-L0A736B: db $3B
-L0A736C: db $3A
-L0A736D: db $3C
-L0A736E: db $3D
-L0A736F: db $3E
-L0A7370: db $3F
-L0A7371: db $40
-L0A7372: db $41
+	
+GFXLZ_TakaraLogo: INCBIN "data/gfx/takaralogo.lzc"
+BG_TakaraLogo: INCBIN "data/bg/takaralogo.bin"
 L0A7373:;I
 	call L0036CB
 	jp   c, L0A74E8
@@ -13143,7 +12433,7 @@ L0A7484:;J
 	call L002D53
 	call L003A3E
 	jp   nc, L0A74E8
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   a, $03
 	ld   [$C173], a
 	call L00376A
@@ -13840,7 +13130,7 @@ L0A7A36:;J
 	jp   nc, L0A7A92
 	call L003A28
 	jp   nc, L0A7A95
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   a, $03
 	ld   [$C173], a
 	ld   hl, $0021

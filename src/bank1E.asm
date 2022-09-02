@@ -8,13 +8,13 @@ L1E4000:;I
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
-	ld   de, $0003
-	call L0013D3
-	call L000D96
-	call L000D9E
+	ld   de, SCRPAL_CHARSELECT
+	call HomeCall_SGB_ApplyScreenPalSet
+	call ClearBGMap
+	call ClearWINDOWMap
 	xor  a
-	ldh  [$FFE4], a
-	ldh  [$FFE2], a
+	ldh  [hScrollX], a
+	ldh  [hScrollY], a
 	ld   [wFieldScrollX], a
 	ld   [wFieldScrollY], a
 	call L00119E
@@ -23,16 +23,16 @@ L1E4000:;I
 	ld   b, $51
 	call CopyTiles
 	ld   hl, $5481
-	ld   de, $C1CA
+	ld   de, wLZSS_Buffer
 	call DecompressGFX
-	ld   hl, $C1CA
+	ld   hl, wLZSS_Buffer
 	ld   de, $8800
 	ld   b, $78
 	call CopyTiles
 	ld   hl, $5B87
-	ld   de, $C1CA
+	ld   de, wLZSS_Buffer
 	call DecompressGFX
-	ld   hl, $C1CA
+	ld   hl, wLZSS_Buffer
 	ld   de, Tiles_Begin
 	ld   b, $62
 	call CopyTiles
@@ -296,7 +296,7 @@ L1E422F:;J
 	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
 	call L1E4BFD
 L1E427A:;J
-	call L000D86
+	call ClearOBJInfo
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	ld   de, $60E6
 	call L000D76
@@ -416,8 +416,8 @@ L1E436D:;J
 	ld   a, $C7
 	rst  $18
 	ei
-	call L000408
-	call L000408
+	call Task_ExecRun_B01
+	call Task_ExecRun_B01
 	ld   a, $74
 	ldh  [rOBP0], a
 	ld   a, $74
@@ -426,7 +426,7 @@ L1E436D:;J
 	ldh  [rBGP], a
 	ld   a, $81
 	call HomeCall_Sound_ReqPlayExId_Stub
-	call L000408
+	call Task_ExecRun_B01
 L1E438B:;J
 	call L00112E
 	call L1E43C2
@@ -439,12 +439,12 @@ L1E438B:;J
 	jp   nz, L1E43A7
 	jp   L1E43AD
 L1E43A7:;J
-	call L000408
+	call Task_ExecRun_B01
 	jp   L1E438B
 L1E43AD:;J
 	ld   b, $3C
 L1E43AF:;J
-	call L000408
+	call Task_ExecRun_B01
 	dec  b
 	jp   nz, L1E43AF
 	call L001F85
@@ -7349,7 +7349,7 @@ L1E626E:;I
 	ld   [$C1B6], a
 	ld   [$C1B1], a
 	ld   [$C1B2], a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ld   [$C1CC], a
 	ld   [$C1CD], a
@@ -7400,13 +7400,13 @@ L1E62EC: db $EA;X
 L1E62ED: db $B2;X
 L1E62EE: db $C1;X
 L1E62EF:;J
-	ld   de, $0004
-	call L0013D3
-	call L000D96
-	call L000D9E
+	ld   de, SCRPAL_ORDERSELECT
+	call HomeCall_SGB_ApplyScreenPalSet
+	call ClearBGMap
+	call ClearWINDOWMap
 	xor  a
-	ldh  [$FFE4], a
-	ldh  [$FFE2], a
+	ldh  [hScrollX], a
+	ldh  [hScrollY], a
 	ld   [wFieldScrollX], a
 	ld   [wFieldScrollY], a
 	ld   hl, $7BB7
@@ -7430,7 +7430,7 @@ L1E62EF:;J
 	ld   hl, $9803
 	ld   b, $0E
 	ld   c, $09
-	call L000DE6
+	call CopyBGToRect
 	call L1E6937
 	ld   a, [$D92E]
 	ld   de, $8800
@@ -7527,7 +7527,7 @@ L1E6402:;R
 	ld   a, $DA
 	call L1E692C
 L1E6414:;R
-	call L000D86
+	call ClearOBJInfo
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	ld   de, $60E6
 	call L000D76
@@ -7568,8 +7568,8 @@ L1E6414:;R
 	ld   a, $C7
 	rst  $18
 	ei
-	call L000408
-	call L000408
+	call Task_ExecRun_B01
+	call Task_ExecRun_B01
 	ld   a, $1E
 	ldh  [rOBP0], a
 	ld   a, $3E
@@ -7578,7 +7578,7 @@ L1E6414:;R
 	ldh  [rBGP], a
 	ld   a, $81
 	call HomeCall_Sound_ReqPlayExId_Stub
-	call L000418
+	call Task_ExecRun_B1E
 L1E6491:;J
 	call L1E6940
 	call L00112E
@@ -7608,7 +7608,7 @@ L1E64C1:;J
 	jp   nz, L1E64D3
 	jp   L1E64D9
 L1E64D3:;J
-	call L000408
+	call Task_ExecRun_B01
 	jp   L1E6491
 L1E64D9:;J
 	ld   a, [$C1CF]
@@ -7623,7 +7623,7 @@ L1E64D9:;J
 	ld   [$DA2F], a
 	ld   a, [$C1D9]
 	ld   [$DA30], a
-	call L00041C
+	call Task_ExecRun_B3C
 	jp   L00179D
 L1E6503:;C
 	ld   a, [$C1B6]
@@ -7683,7 +7683,7 @@ L1E6559:;JR
 	ld   a, [$C1B4]
 	cp   $03
 	ret  z
-	ld   a, [$C1CA]
+	ld   a, [wLZSS_Buffer]
 	ld   b, a
 	ld   a, [$D92F]
 	ld   hl, $C1D0
@@ -7699,19 +7699,19 @@ L1E6559:;JR
 	ld   a, [$D683]
 	add  a, $18
 	ld   [$D683], a
-	ld   a, [$C1CA]
+	ld   a, [wLZSS_Buffer]
 	ld   [$C1DA], a
 	inc  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   a, [$C1D0]
 	and  a, a
 	jr   z, L1E65AA
 	ld   a, [$D683]
 	add  a, $18
 	ld   [$D683], a
-	ld   a, [$C1CA]
+	ld   a, [wLZSS_Buffer]
 	inc  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 L1E65AA:;R
 	pop  af
 	jr   L1E6602
@@ -7720,20 +7720,20 @@ L1E65AD:;R
 	ld   a, [$D683]
 	add  a, $18
 	ld   [$D683], a
-	ld   a, [$C1CA]
+	ld   a, [wLZSS_Buffer]
 	ld   [$C1DA], a
 	inc  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   a, [$C1D2]
 	and  a, a
 	jr   z, L1E65D6
 	ld   a, [$D683]
 	sub  a, $30
 	ld   [$D683], a
-	ld   a, [$C1CA]
+	ld   a, [wLZSS_Buffer]
 	dec  a
 	dec  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 L1E65D6:;R
 	pop  af
 	jr   L1E6602
@@ -7742,19 +7742,19 @@ L1E65D9:;R
 	ld   a, [$D683]
 	sub  a, $18
 	ld   [$D683], a
-	ld   a, [$C1CA]
+	ld   a, [wLZSS_Buffer]
 	ld   [$C1DA], a
 	dec  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   a, [$C1D0]
 	and  a, a
 	jr   z, L1E6601
 	ld   a, [$D683]
 	sub  a, $18
 	ld   [$D683], a
-	ld   a, [$C1CA]
+	ld   a, [wLZSS_Buffer]
 	dec  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 L1E6601:;R
 	pop  af
 L1E6602:;R
@@ -7786,7 +7786,7 @@ L1E662D:;R
 	ld   de, $6D8A
 	ld   b, $03
 	ld   c, $03
-	call L000DE6
+	call CopyBGToRect
 	ld   a, [$D92F]
 	cp   $FF
 	ret  nz
@@ -7803,7 +7803,7 @@ L1E6651:;R
 	ld   de, $6D93
 	ld   b, $03
 	ld   c, $03
-	call L000DE6
+	call CopyBGToRect
 	ld   a, [$D930]
 	cp   $FF
 	ret  nz
@@ -7814,7 +7814,7 @@ L1E6669:;R
 	ld   de, $6D9C
 	ld   b, $03
 	ld   c, $03
-	jp   L000DE6
+	jp   CopyBGToRect
 L1E6679:;J
 	ld   a, [$C1B5]
 	cp   $03
@@ -7922,7 +7922,7 @@ L1E6746:;R
 	ld   de, $6D8A
 	ld   b, $03
 	ld   c, $03
-	call L000DE6
+	call CopyBGToRect
 	ld   a, [$DA2F]
 	cp   $FF
 	ret  nz
@@ -7939,7 +7939,7 @@ L1E676A:;R
 	ld   de, $6D93
 	ld   b, $03
 	ld   c, $03
-	call L000DE6
+	call CopyBGToRect
 	ld   a, [$DA30]
 	cp   $FF
 	ret  nz
@@ -7950,7 +7950,7 @@ L1E6782:;R
 	ld   de, $6D9C
 	ld   b, $03
 	ld   c, $03
-	jp   L000DE6
+	jp   CopyBGToRect
 L1E6792:;J
 	ld   a, [$C1B6]
 	or   a
@@ -7958,18 +7958,18 @@ L1E6792:;J
 	ld   a, [$C1B4]
 	cp   $03
 	ret  z
-	ld   a, [$C1CA]
+	ld   a, [wLZSS_Buffer]
 	and  a, a
 	ret  z
 	dec  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	jr   nz, L1E67B8
 	ld   a, [$C1CE]
 	and  a, a
 	jr   z, L1E67DB
-	ld   a, [$C1CA]
+	ld   a, [wLZSS_Buffer]
 	inc  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ret
 L1E67B8:;R
 	ld   a, [$C1D0]
@@ -7987,9 +7987,9 @@ L1E67C9: db $CA;X
 L1E67CA: db $C1;X
 L1E67CB: db $C9;X
 L1E67CC:;R
-	ld   a, [$C1CA]
+	ld   a, [wLZSS_Buffer]
 	dec  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   a, [$D683]
 	sub  a, $18
 	ld   [$D683], a
@@ -8083,19 +8083,19 @@ L1E6832:;J
 	ld   a, [$C1B4]
 	cp   $03
 	ret  z
-	ld   a, [$C1CA]
+	ld   a, [wLZSS_Buffer]
 	cp   $02
 	ret  z
 	inc  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	cp   $02
 	jr   nz, L1E685B
 	ld   a, [$C1D2]
 	and  a, a
 	jr   z, L1E687E
-	ld   a, [$C1CA]
+	ld   a, [wLZSS_Buffer]
 	dec  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ret
 L1E685B:;R
 	ld   a, [$C1D0]
@@ -8113,9 +8113,9 @@ L1E686C: db $CA;X
 L1E686D: db $C1;X
 L1E686E: db $C9;X
 L1E686F:;R
-	ld   a, [$C1CA]
+	ld   a, [wLZSS_Buffer]
 	inc  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   a, [$D683]
 	add  a, $18
 	ld   [$D683], a
@@ -13369,9 +13369,9 @@ L1E7D21:;I
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
-	ld   de, $0005
-	call L0013D3
-	call L000D96
+	ld   de, SCRPAL_STAGECLEAR
+	call HomeCall_SGB_ApplyScreenPalSet
+	call ClearBGMap
 	ld   a, $18
 	ld   b, $5A
 	call L00046C
@@ -13392,7 +13392,7 @@ L1E7D21:;I
 	or   a, $40
 	ldh  [rSTAT], a
 	ei
-	call L000414
+	call Task_ExecRun_B0A
 	ld   a, $8C
 	ldh  [rOBP0], a
 	ld   a, $2D
@@ -13435,7 +13435,7 @@ L1E7D21:;I
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
 	ldh  [$FFF1], a
-	call L000D96
+	call ClearBGMap
 	ld   hl, wMisc_C028
 	res  0, [hl]
 	xor  a
@@ -13448,7 +13448,7 @@ L1E7D21:;I
 	ld   [$D8C9], a
 	ld   [$D8E5], a
 	ld   [$D8E9], a
-	jp   L000408
+	jp   Task_ExecRun_B01
 L1E7DE8:;I
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	jp   L000BBD
@@ -13593,7 +13593,7 @@ L1E7ECB:;J
 	jp   nz, L1E7EE8
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	call L000BBD
-	call L000408
+	call Task_ExecRun_B01
 	dec  b
 	jp   nz, L1E7ECB
 	xor  a

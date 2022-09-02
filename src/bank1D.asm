@@ -4263,15 +4263,15 @@ L1D509F:;I
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
-	call L000D96
-	call L000D9E
+	call ClearBGMap
+	call ClearWINDOWMap
 	xor  a
-	ldh  [$FFE4], a
-	ldh  [$FFE2], a
+	ldh  [hScrollX], a
+	ldh  [hScrollY], a
 	ld   [wFieldScrollX], a
 	ld   [wFieldScrollY], a
 	call L00119E
-	call L000D86
+	call ClearOBJInfo
 	call L0014F9
 	ld   a, [$C161]
 	or   a
@@ -4979,11 +4979,11 @@ L1D5504:;J
 	ld   a, $FF
 	ldh  [rBGP], a
 	ld   a, $80
-	ldh  [$FFE2], a
+	ldh  [hScrollY], a
 	call L00119E
-	call L000D96
-	ld   de, $0000
-	call L0013D3
+	call ClearBGMap
+	ld   de, SCRPAL_INTRO
+	call HomeCall_SGB_ApplyScreenPalSet
 	ld   hl, $56DD
 	call L001265
 	ld   a, $09
@@ -5000,7 +5000,7 @@ L1D553E:;J
 	call HomeCall_Sound_ReqPlayExId_Stub
 	ld   a, $C7
 	rst  $18
-	call L000408
+	call Task_ExecRun_B01
 	ld   a, $1B
 	ldh  [rBGP], a
 	call L1D5669
@@ -5019,11 +5019,11 @@ L1D5559:;J
 	ld   a, $FF
 	ldh  [rBGP], a
 	ld   a, $80
-	ldh  [$FFE2], a
+	ldh  [hScrollY], a
 	call L00119E
-	call L000D96
-	ld   de, $0000
-	call L0013D3
+	call ClearBGMap
+	ld   de, SCRPAL_INTRO
+	call HomeCall_SGB_ApplyScreenPalSet
 	ld   hl, $56DD
 	call L001265
 	ld   a, $09
@@ -5107,7 +5107,7 @@ L1D55D4: db $B0;X
 L1D55D5: db $C1;X
 L1D55D6: db $C9;X
 L1D55D7:;J
-	call L000408
+	call Task_ExecRun_B01
 L1D55DA:;J
 	call L1D5685
 	jp   c, L1D5629
@@ -5116,7 +5116,7 @@ L1D55DA:;J
 	jp   z, L1D55F1
 	dec  a
 	ld   [$C1B4], a
-	call L000408
+	call Task_ExecRun_B01
 	jp   L1D55DA
 L1D55F1:;J
 	ld   a, $3C
@@ -5133,7 +5133,7 @@ L1D55F1:;J
 	call L00129A
 	ld   hl, $56EA
 	call L001265
-	call L000408
+	call Task_ExecRun_B01
 	jp   L1D55DA
 L1D561B:;J
 	ld   a, $B1
@@ -5201,7 +5201,7 @@ L1D566C:;J
 	ldh  a, [$FFAC]
 	bit  7, a
 	jp   nz, L1D5683
-	call L000408
+	call Task_ExecRun_B01
 	dec  bc
 	ld   a, b
 	or   a, c
@@ -9591,10 +9591,10 @@ L1D67BD:;I
 	call L00046C
 	call L1D684D
 	xor  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call L000408
+	call Task_ExecRun_B01
 	ld   a, $6C
 	ldh  [rOBP0], a
 	xor  a
@@ -9619,7 +9619,7 @@ L1D67BD:;I
 	ld   hl, $78E8
 	call L1D6857
 L1D6811:;J
-	call L000D96
+	call ClearBGMap
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	res  7, [hl]
 	ld   hl, wMisc_C028
@@ -9669,19 +9669,19 @@ L1D686B:;C
 L1D6875:;C
 	push bc
 	push hl
-	call L000408
+	call Task_ExecRun_B01
 	ld   hl, WINDOWMap_Begin
 	ld   b, $14
 	ld   c, $03
 	ld   d, $00
 	call L000E00
-	call L000408
+	call Task_ExecRun_B01
 	ld   hl, $9C60
 	ld   b, $14
 	ld   c, $03
 	ld   d, $00
 	call L000E00
-	call L000408
+	call Task_ExecRun_B01
 	pop  hl
 	pop  bc
 	ld   de, $9C20
@@ -9691,19 +9691,19 @@ L1D6875:;C
 L1D68A4:;C
 	push bc
 	push hl
-	call L000408
+	call Task_ExecRun_B01
 	ld   hl, WINDOWMap_Begin
 	ld   b, $14
 	ld   c, $03
 	ld   d, $00
 	call L000E00
-	call L000408
+	call Task_ExecRun_B01
 	ld   hl, $9C60
 	ld   b, $14
 	ld   c, $03
 	ld   d, $00
 	call L000E00
-	call L000408
+	call Task_ExecRun_B01
 	pop  hl
 	pop  bc
 	ld   de, $9C20
@@ -9830,10 +9830,10 @@ L1D6934:;I
 	call L000DC2
 	call L1D684D
 	xor  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call L000408
+	call Task_ExecRun_B01
 	ld   a, $1B
 	ldh  [rBGP], a
 	ldh  [$FFF1], a
@@ -9875,7 +9875,7 @@ L1D6934:;I
 	ldh  [rBGP], a
 	ldh  [$FFF1], a
 	ld   a, $80
-	ldh  [$FFE2], a
+	ldh  [hScrollY], a
 	ld   a, $01
 	ld   [$C1CB], a
 	ld   a, $1D
@@ -9890,7 +9890,7 @@ L1D6934:;I
 	call L1D6857
 	di
 	rst  $10
-	call L000D96
+	call ClearBGMap
 	call L1D6A97
 	ei
 	ld   a, $E7
@@ -9899,9 +9899,9 @@ L1D6934:;I
 	call HomeCall_Sound_ReqPlayExId_Stub
 	xor  a
 	ld   [$C1CB], a
-	call L000410
+	call Task_ExecRun_B05
 	ld   a, $FB
-	ldh  [$FFE2], a
+	ldh  [hScrollY], a
 	ld   a, $6C
 	ldh  [rBGP], a
 	ldh  [$FFF1], a
@@ -9927,12 +9927,12 @@ L1D6934:;I
 	ldh  [$FFF1], a
 	di
 	rst  $10
-	call L000D96
+	call ClearBGMap
 	call L1D6FD7
 	ei
 	ld   a, $E7
 	rst  $18
-	call L000410
+	call Task_ExecRun_B05
 	call L1D7159
 	ld   hl, $7B2F
 	call L1D6857
@@ -9988,13 +9988,13 @@ L1D6AD2:;J
 	ldh  [$FFF1], a
 	di
 	rst  $10
-	call L000D96
+	call ClearBGMap
 	ei
 	ld   a, $E7
 	rst  $18
 	ld   a, $8A
 	call HomeCall_Sound_ReqPlayExId_Stub
-	call L000410
+	call Task_ExecRun_B05
 	ld   a, $6C
 	ldh  [rBGP], a
 	ldh  [$FFF1], a
@@ -10016,18 +10016,18 @@ L1D6B08:;I
 	call L1D6A97
 	call L1D6AC3
 	ld   a, $40
-	ldh  [$FFE4], a
+	ldh  [hScrollX], a
 	call L1D682A
 	ld   a, $80
 	ld   [$D683], a
 	call L1D684D
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	xor  a
 	ld   [$C1CB], a
 	ei
-	call L000408
+	call Task_ExecRun_B01
 	ld   a, $FB
-	ldh  [$FFE2], a
+	ldh  [hScrollY], a
 	ld   a, $6C
 	ldh  [rOBP0], a
 	ld   a, $6C
@@ -10059,7 +10059,7 @@ L1D6B08:;I
 	call L1D6BB3
 	di
 	rst  $10
-	call L000D96
+	call ClearBGMap
 	ld   a, $80
 	ld   [wOBJInfo_Pl1+iOBJInfo_Status], a
 	ld   a, $28
@@ -10067,9 +10067,9 @@ L1D6B08:;I
 	ei
 	ld   a, $E7
 	rst  $18
-	call L000408
+	call Task_ExecRun_B01
 	xor  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   a, $FF
 	ld   [$C152], a
 	ld   hl, $7C5C
@@ -10082,13 +10082,13 @@ L1D6B08:;I
 L1D6BB3:;C
 	di
 	rst  $10
-	call L000D96
+	call ClearBGMap
 	xor  a
 	ld   [wOBJInfo_Pl1+iOBJInfo_Status], a
 	ld   a, $F0
-	ldh  [$FFE4], a
+	ldh  [hScrollX], a
 	ld   a, $20
-	ldh  [$FFE2], a
+	ldh  [hScrollY], a
 	ld   a, $18
 	ld   b, $5C
 	call L00046C
@@ -10119,8 +10119,8 @@ L1D6BB3:;C
 	ld   a, $03
 	ldh  [$FFF2], a
 	xor  a
-	ld   [$C1CA], a
-	call L000410
+	ld   [wLZSS_Buffer], a
+	call Task_ExecRun_B05
 	ld   a, $FF
 	ld   [$C152], a
 	ld   hl, $7BEA
@@ -10138,44 +10138,44 @@ L1D6BB3:;C
 	ld   b, $1C
 	call L1D6875
 L1D6C38:;R
-	call L000408
+	call Task_ExecRun_B01
 	call L1D6CEC
-	ldh  a, [$FFE2]
+	ldh  a, [hScrollY]
 	cp   $E0
 	jr   nz, L1D6C38
-	call L00041C
+	call Task_ExecRun_B3C
 	ld   a, $80
-	ldh  [$FFE4], a
-	ldh  [$FFE2], a
+	ldh  [hScrollX], a
+	ldh  [hScrollY], a
 	ld   [$C1CC], a
-	call L000408
+	call Task_ExecRun_B01
 	ld   b, $20
 L1D6C55:;R
 	call L1D6C86
-	call L000408
+	call Task_ExecRun_B01
 	dec  b
 	jr   nz, L1D6C55
 	ld   b, $20
 L1D6C60:;R
 	call L1D6C9B
-	call L000408
+	call Task_ExecRun_B01
 	dec  b
 	jr   nz, L1D6C60
 	ld   b, $20
 L1D6C6B:;R
 	call L1D6CA8
-	call L000408
+	call Task_ExecRun_B01
 	dec  b
 	jr   nz, L1D6C6B
 	ld   b, $20
 L1D6C76:;R
 	call L1D6CB5
-	call L000408
+	call Task_ExecRun_B01
 	dec  b
 	jr   nz, L1D6C76
 	ld   a, $6C
 	ldh  [$FFF1], a
-	jp   L00041C
+	jp   Task_ExecRun_B3C
 L1D6C86:;C
 	ld   a, [$C1CC]
 	inc  a
@@ -10212,7 +10212,7 @@ L1D6CB5:;C
 	jr   z, L1D6C96
 	jr   L1D6C91
 L1D6CC2:;CI
-	ld   a, [$C1CA]
+	ld   a, [wLZSS_Buffer]
 	and  a, a
 	ret  z
 	ld   a, [$D683]
@@ -10227,19 +10227,19 @@ L1D6CC2:;CI
 	ld   [$D683], a
 	ld   a, l
 	ld   [$D684], a
-	ldh  a, [$FFE4]
+	ldh  a, [hScrollX]
 	ld   h, a
 	ldh  a, [$FFE5]
 	ld   l, a
 	add  hl, de
 	ld   a, h
-	ldh  [$FFE4], a
+	ldh  [hScrollX], a
 	ld   a, l
 	ldh  [$FFE5], a
 	ret
 L1D6CEC:;CI
 	ld   de, hTaskStats
-	ldh  a, [$FFE2]
+	ldh  a, [hScrollY]
 	cp   $E0
 	ret  z
 	ld   h, a
@@ -10247,7 +10247,7 @@ L1D6CEC:;CI
 	ld   l, a
 	add  hl, de
 	ld   a, h
-	ldh  [$FFE2], a
+	ldh  [hScrollY], a
 	ld   a, l
 	ldh  [$FFE3], a
 	ret
@@ -10259,13 +10259,13 @@ L1D6D00:;I
 	call L1D6A97
 	call L1D6AC3
 	ld   a, $FB
-	ldh  [$FFE2], a
+	ldh  [hScrollY], a
 	call L1D684D
 	xor  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call L000414
+	call Task_ExecRun_B0A
 	ld   a, $6C
 	ldh  [rBGP], a
 	ldh  [$FFF1], a
@@ -10286,7 +10286,7 @@ L1D6D00:;I
 	ldh  [rBGP], a
 	ldh  [$FFF1], a
 	ld   a, $80
-	ldh  [$FFE2], a
+	ldh  [hScrollY], a
 	ld   a, $01
 	ld   [$C1CB], a
 	ld   a, $1D
@@ -10299,23 +10299,23 @@ L1D6D00:;I
 	call L1D6861
 	xor  a
 	ld   [$C1CB], a
-	call L000408
+	call Task_ExecRun_B01
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [$FFF1], a
 	ldh  [rOBP0], a
-	call L000408
+	call Task_ExecRun_B01
 	di
 	rst  $10
 	xor  a
-	ldh  [$FFE4], a
-	ldh  [$FFE2], a
-	call L000D96
+	ldh  [hScrollX], a
+	ldh  [hScrollY], a
+	call ClearBGMap
 	call L1D6FD7
 	ei
 	ld   a, $E7
 	rst  $18
-	call L000414
+	call Task_ExecRun_B0A
 	call L1D7159
 	ld   a, $FF
 	ld   [$C152], a
@@ -10352,13 +10352,13 @@ L1D6DE4:;I
 	call L1D6A97
 	call L1D6AC3
 	ld   a, $FB
-	ldh  [$FFE2], a
+	ldh  [hScrollY], a
 	call L1D684D
 	xor  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call L000414
+	call Task_ExecRun_B0A
 	ld   a, $6C
 	ldh  [rBGP], a
 	ldh  [$FFF1], a
@@ -10387,25 +10387,25 @@ L1D6DE4:;I
 	ld   hl, $7BE2
 	call L1D6857
 	call L1D6BB3
-	call L000408
+	call Task_ExecRun_B01
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [$FFF0], a
 	ldh  [$FFF1], a
 	ldh  [$FFF2], a
 	ldh  [rOBP0], a
-	call L000408
+	call Task_ExecRun_B01
 	di
 	rst  $10
-	call L000D96
+	call ClearBGMap
 	xor  a
-	ldh  [$FFE4], a
-	ldh  [$FFE2], a
+	ldh  [hScrollX], a
+	ldh  [hScrollY], a
 	call L1D6FD7
 	ei
 	ld   a, $E7
 	rst  $18
-	call L000410
+	call Task_ExecRun_B05
 	call L1D7159
 	xor  a
 	ld   [$C1CB], a
@@ -10424,10 +10424,10 @@ L1D6E92:;I
 	call L1D6FD7
 	call L1D684D
 	xor  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call L000414
+	call Task_ExecRun_B0A
 	call L1D7159
 	ld   a, $FF
 	ld   [$C152], a
@@ -10444,10 +10444,10 @@ L1D6EC4:;I
 	call L1D6FD7
 	call L1D684D
 	xor  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call L000414
+	call Task_ExecRun_B0A
 	call L1D7159
 	ld   a, $FF
 	ld   [$C152], a
@@ -10464,10 +10464,10 @@ L1D6EF6:;I
 	call L1D6FD7
 	call L1D684D
 	xor  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call L000414
+	call Task_ExecRun_B0A
 	call L1D7159
 	ld   a, $FF
 	ld   [$C152], a
@@ -10482,10 +10482,10 @@ L1D6F22:;I
 	call L1D6FD7
 	call L1D684D
 	xor  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call L000414
+	call Task_ExecRun_B0A
 	call L1D7159
 	ld   a, $FF
 	ld   [$C152], a
@@ -10509,10 +10509,10 @@ L1D6F6C:;I
 	ld   a, $E7
 	rst  $18
 	xor  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call L000408
+	call Task_ExecRun_B01
 	ld   a, $03
 	ldh  [rBGP], a
 	ld   a, $FF
@@ -10532,10 +10532,10 @@ L1D6F93:;I
 	call L1D70A8
 	call L1D684D
 	xor  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call L000414
+	call Task_ExecRun_B0A
 	call L1D7159
 	ld   a, $FF
 	ld   [$C152], a
@@ -10854,7 +10854,7 @@ L1D7159:;C
 	ld   [$D685], a
 	ld   a, $9F
 	call HomeCall_Sound_ReqPlayExId_Stub
-	jp   L000408
+	jp   Task_ExecRun_B01
 L1D7176:;I
 	call L1D71DE
 	ld   a, $18
@@ -10867,10 +10867,10 @@ L1D7176:;I
 	call L1D70A8
 	call L1D684D
 	xor  a
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call L000414
+	call Task_ExecRun_B0A
 	call L1D7159
 	ld   a, $FF
 	ld   [$C152], a
@@ -10904,22 +10904,22 @@ L1D71DE:;C
 	ldh  [$FFF0], a
 	ldh  [$FFF1], a
 	ldh  [$FFF2], a
-	call L000408
+	call Task_ExecRun_B01
 	di
 	rst  $10
 	ld   hl, wMisc_C028
 	res  1, [hl]
-	ld   de, $0000
-	call L0013D3
-	call L000D96
-	call L000D9E
+	ld   de, SCRPAL_INTRO
+	call HomeCall_SGB_ApplyScreenPalSet
+	call ClearBGMap
+	call ClearWINDOWMap
 	xor  a
-	ldh  [$FFE4], a
-	ldh  [$FFE2], a
+	ldh  [hScrollX], a
+	ldh  [hScrollY], a
 	ld   [wFieldScrollX], a
 	ld   [wFieldScrollY], a
 	call L00119E
-	call L000D86
+	call ClearOBJInfo
 	ld   a, $5C
 	ldh  [rWY], a
 	ld   a, $0F
@@ -10934,21 +10934,21 @@ L1D7220:;I
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
-	ld   de, $0000
-	call L0013D3
-	call L000D96
-	call L000D9E
+	ld   de, SCRPAL_INTRO
+	call HomeCall_SGB_ApplyScreenPalSet
+	call ClearBGMap
+	call ClearWINDOWMap
 	xor  a
-	ldh  [$FFE4], a
-	ldh  [$FFE2], a
+	ldh  [hScrollX], a
+	ldh  [hScrollY], a
 	ld   [wFieldScrollX], a
 	ld   [wFieldScrollY], a
 	call L00119E
-	call L000D86
+	call ClearOBJInfo
 	ld   a, $C7
 	rst  $18
 	ei
-	call L000408
+	call Task_ExecRun_B01
 	ld   a, $3F
 	ldh  [rOBP0], a
 	ld   a, $00
@@ -11089,19 +11089,19 @@ L1D73C5:;I
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
-	call L000D96
-	call L000D9E
+	call ClearBGMap
+	call ClearWINDOWMap
 	xor  a
-	ldh  [$FFE4], a
-	ldh  [$FFE2], a
+	ldh  [hScrollX], a
+	ldh  [hScrollY], a
 	ld   [wFieldScrollX], a
 	ld   [wFieldScrollY], a
 	call L00119E
-	call L000D86
+	call ClearOBJInfo
 	ld   a, $C7
 	rst  $18
 	ei
-	call L000408
+	call Task_ExecRun_B01
 	ld   a, $3F
 	ldh  [rOBP0], a
 	ld   a, $00
@@ -11114,19 +11114,19 @@ L1D73C5:;I
 	call HomeCall_Sound_ReqPlayExId_Stub
 	ld   b, $0A
 L1D740A:;J
-	call L00041C
+	call Task_ExecRun_B3C
 	dec  b
 	jp   nz, L1D740A
-	jp   L000D96
+	jp   ClearBGMap
 L1D7414:;J
 	call L1D6CC2
 	call L1D6A77
 	call L1D7439
 	jr   nc, L1D7423
-	call L000408
+	call Task_ExecRun_B01
 	ret
 L1D7423:;R
-	call L000408
+	call Task_ExecRun_B01
 	dec  b
 	jp   nz, L1D7414
 	xor  a
@@ -11134,10 +11134,10 @@ L1D7423:;R
 L1D742C:;C
 	ld   b, $08
 L1D742E:;J
-	call L00041C
+	call Task_ExecRun_B3C
 	dec  b
 	jp   nz, L1D742E
-	call L000D96
+	call ClearBGMap
 	ret
 L1D7439:;C
 	ldh  a, [$FF99]

@@ -1,4 +1,48 @@
 
+; =============== mWaitHBlankEnd ===============
+; Waits for the current HBlank to finish, if we're in one.
+mWaitForHBlankEnd: MACRO
+.waitHBlankEnd_\@:
+	ldh  a, [rSTAT]
+	and  a, $03
+	jp   z, .waitHBlankEnd_\@
+ENDM
+; =============== mWaitHBlank ===============
+; Waits for the HBlank period.
+mWaitForHBlank: MACRO
+.waitHBlank_\@:
+	ldh  a, [rSTAT]
+	and  a, $03
+	jp   nz, .waitHBlank_\@
+ENDM
+; =============== mWaitForNewHBlank ===============
+; Waits for the start of a new HBlank period.
+mWaitForNewHBlank: MACRO
+	; If we're in HBlank already, wait for it to finish
+	mWaitForHBlankEnd
+	; Then wait for the HBlank proper
+	mWaitForHBlank
+ENDM
+
+
+; =============== pkg ===============
+; Shorthand for the header of a (set of) SGB Packets
+; IN
+; - 1: Packet ID
+; - 2: Number of packets
+pkg: MACRO
+	db (\1 * 8) | \2
+ENDM
+
+; =============== ads ===============
+; Data set byte 2 for a SGB_PACKET_ATTR_BLK command.
+; IN
+; - 1: Palette ID (inside)
+; - 2: Palette ID (border)
+; - 3: Palette ID (outside)
+ads: MACRO
+	db (\1)|(\1 << 2)|(\1 << 4)
+ENDM
 
 ; =============== Sound driver macros ===============
 ; For command IDs, their code will be specified in a comment.

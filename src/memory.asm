@@ -31,7 +31,7 @@ wOBJLstCurYOffset EQU $C01C ; Offset added to wOBJLstCurRelX, and the result goe
 
 wMisc_C025 EQU $C025 ; bitmask with multiple different purposes
 wMisc_C026 EQU $C026
-wMisc_C028 EQU $C028
+wMisc_C028 EQU $C028 ; appears to select a parallax type (how to divide the screen sections)
 
 wSGBSendPacketAtFrameEnd EQU $C02B ; If set, there are SGB packets to send after all tasks are processed
 wSGBSoundPacket EQU $C02C ; Data for the sound effect packet to be sent at the end of the frame.
@@ -49,6 +49,8 @@ wTitleResetTimer_Low EQU $C1C2
 wLZSS_CurCmdMask EQU $C1C7
 wLZSS_SplitNum EQU $C1C8
 wLZSS_SplitMask EQU $C1C9
+wLZSS_Buffer EQU $C1CA
+
 
 wSnd_Unk_Unused_D480 EQU $D480 ; $80 is always written here, but never read back
 wSnd_Unused_ChUsed EQU $D481 ; Appears to be a bitmask intended to mark the used sound channels, but it is only set properly in unreachable code.
@@ -102,6 +104,8 @@ hTaskTbl EQU $FFC8 ; Task struct list
 
 hROMBank EQU $FFE0 ; Currently loaded ROM bank
 
+hScrollY EQU $FFE2 ; Y screen position
+hScrollX EQU $FFE4 ; X screen position
 hSndInfoCurPtr_Low EQU $FFF8 ; Ptr to Currently processed SNDInfo structure
 hSndInfoCurPtr_High EQU $FFF9 ; Ptr to Currently processed SNDInfo structure
 
@@ -117,8 +121,8 @@ hSndInfoCurDataPtr_High EQU $FFFD ; Ptr to current sound channel data (initially
 ; Elements in hTaskTbl entry struct
 iTaskType EQU $00 ; Task type (TASK_EXEC_*)
 iTaskUnknown EQU $01 ; ???
-iTaskCodePtr_Low EQU $02
-iTaskCodePtr_High EQU $03
+iTaskPtr_Low EQU $02 ; Code or stack pointer
+iTaskPtr_High EQU $03
 
 ; Elements in the wOBJInfo struct
 iOBJInfo_Status EQU $00 ; Generic flags

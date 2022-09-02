@@ -9110,7 +9110,7 @@ L016392:;J
 	call L017EB1
 	call L0175E7
 	call L002BFC
-	call L0003FB
+	call Task_ExecRunFar_B01
 	jp   L016392
 L0163B3:;C
 	ld   hl, $C008
@@ -9337,7 +9337,7 @@ L0164ED:;J
 	jp   nz, L016505
 	bit  6, a
 	jp   nz, L0164FF
-	call Task_NoExecCommon
+	call Task_SkipAllAndWaitVBlank
 	jp   L0164ED
 L0164FF:;J
 	call L01659F
@@ -9423,7 +9423,7 @@ L016560:;J
 	inc  a
 	dec  b
 	jp   nz, L01655E
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ret
 L016573:;C
 	xor  a
@@ -9466,7 +9466,7 @@ L01659F:;C
 	call L017EB1
 	call L0175E7
 	call L002BFC
-	call L0003FB
+	call Task_ExecRunFar_B01
 	pop  af
 	ld   [$C17D], a
 	ld   a, $01
@@ -10151,7 +10151,7 @@ L016B12:;C
 	ld   a, [$D685]
 	ld   c, a
 	ld   a, [$D682]
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   a, [$D6D8]
 	or   a
 	jr   z, L016B80
@@ -10193,7 +10193,7 @@ L016B94:;R
 	ld   a, [$D685]
 	ld   c, a
 	ld   a, [$D682]
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   a, [$D6D8]
 	or   a
 	jr   z, L016BD5
@@ -10231,7 +10231,7 @@ L016BE9:;R
 	ld   a, [$D6C5]
 	ld   c, a
 	ld   a, [$D6C2]
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   a, [$D698]
 	or   a
 	jr   z, L016C2A
@@ -10271,7 +10271,7 @@ L016C2A:;JR
 	ld   a, [$D705]
 	ld   c, a
 	ld   a, [$D701]
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   a, [$D6D8]
 	or   a
 	jr   z, L016C8F
@@ -10313,7 +10313,7 @@ L016C8F:;JR
 	ld   a, [$D745]
 	ld   c, a
 	ld   a, [$D741]
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   a, [$D698]
 	or   a
 	jr   z, L016CF4
@@ -10352,7 +10352,7 @@ L016CF4:;JR
 	ld   a, [$D705]
 	ld   c, a
 	ld   a, [$D701]
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   a, [$D6D9]
 	or   a
 	jr   z, L016D70
@@ -10433,7 +10433,7 @@ L016D70:;JR
 	ld   a, [$D745]
 	ld   c, a
 	ld   a, [$D741]
-	ld   [$C1CA], a
+	ld   [wLZSS_Buffer], a
 	ld   a, [$D699]
 	or   a
 	jr   z, L016DEB
@@ -10603,7 +10603,7 @@ L016E65:;C
 	ld   [de], a
 	ret
 L016E7C:;C
-	ld   a, [$C1CA]
+	ld   a, [wLZSS_Buffer]
 	ld   h, a
 	ld   a, [$C1D4]
 	bit  5, h
@@ -11150,7 +11150,7 @@ L0170C6:;J
 	call L0176A7
 	call L0165CD
 	call L017EB1
-	call Task_NoExecCommon
+	call Task_SkipAllAndWaitVBlank
 	xor  a
 	ld   [$C00E], a
 	pop  af
@@ -11164,7 +11164,7 @@ L0170E8:;J
 	call L017EB1
 	call L0175E7
 	call L002BFC
-	call L0003FB
+	call Task_ExecRunFar_B01
 	jp   L0170B8
 L017103:;J
 	ld   a, [$D94E]
@@ -11327,7 +11327,7 @@ L017240:;J
 L01724A:;J
 	ld   hl, Tiles_Begin
 	call L000FEF
-	call L0003FB
+	call Task_ExecRunFar_B01
 	call L0172C1
 	ld   b, $1D
 	ld   hl, $509F
@@ -11411,7 +11411,7 @@ L0172C1:;C
 	ld   [$D8C9], a
 	ld   [$D8E5], a
 	ld   [$D8E9], a
-	call L0003FB
+	call Task_ExecRunFar_B01
 	xor  a
 	ldh  [rWY], a
 	ldh  [rWX], a
@@ -11420,15 +11420,15 @@ L0172C1:;C
 	res  1, [hl]
 	call L00047C
 	ld   a, $02
-	call Task_ClearTask
+	call Task_RemoveAt
 	ld   a, $03
-	call Task_ClearTask
+	call Task_RemoveAt
 	xor  a
 	ld   [$D8C5], a
 	ld   [$D8C9], a
 	ld   [$D8E5], a
 	ld   [$D8E9], a
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ret
 L017309:;CR
 	ld   b, $01
@@ -11460,13 +11460,13 @@ L017324:;R
 	call L01756D
 	ld   a, $01
 	ld   [$C00E], a
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   hl, $4458
 	ld   de, $C1E8
 	call DecompressGFX
 	ld   a, $00
 	ld   [$C00E], a
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   b, $01
 	call L01756D
 	ld   hl, $C1E8
@@ -11529,7 +11529,7 @@ L0173C7:;J
 	ld   hl, wOBJInfo3+iOBJInfo_Status
 	set  7, [hl]
 	call L0175DE
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   b, $78
 	call L01758C
 	ld   hl, wOBJInfo3+iOBJInfo_Status
@@ -11714,7 +11714,7 @@ L0174F8:;C
 	ld   [hl], $80
 	ld   [$D753], a
 	call L0175DE
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   b, $3C
 	call L01758C
 	ret
@@ -11757,7 +11757,7 @@ L017554:;J
 	jp   L017561
 L017561:;J
 	ld   [$D753], a
-	call L0003FB
+	call Task_ExecRunFar_B01
 	ld   b, $3C
 	call L01758C
 	ret
@@ -11770,7 +11770,7 @@ L01756D:;JC
 	call L017EB1
 	call L0175E7
 	call L002BFC
-	call L0003FB
+	call Task_ExecRunFar_B01
 	pop  bc
 	dec  b
 	jp   nz, L01756D
@@ -11790,7 +11790,7 @@ L01758C:;JC
 	call L017EB1
 	call L0175E7
 	call L002BFC
-	call L0003FB
+	call Task_ExecRunFar_B01
 	pop  bc
 	dec  b
 	jp   nz, L01758C
@@ -11890,7 +11890,7 @@ L01765B:;J
 	jp   L017624
 L017661:;J
 	ld   a, [wFieldScrollX]
-	ldh  [$FFE4], a
+	ldh  [hScrollX], a
 	ld   a, [$D685]
 	ld   b, a
 	ld   a, $88
@@ -11911,14 +11911,14 @@ L017661:;J
 L017685:;J
 	cpl
 	inc  a
-	ldh  [$FFE2], a
+	ldh  [hScrollY], a
 	add  a, $40
 	ld   [wFieldScrollY], a
 	ld   a, [$C159]
 	or   a
 	jp   z, L0176A6
 	ld   b, a
-	ldh  a, [$FFE2]
+	ldh  a, [hScrollY]
 	cpl
 	inc  a
 	add  b
@@ -11928,7 +11928,7 @@ L017685:;J
 L0176A2:;J
 	cpl
 	inc  a
-	ldh  [$FFE2], a
+	ldh  [hScrollY], a
 L0176A6:;J
 	ret
 L0176A7:;C

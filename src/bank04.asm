@@ -33,7 +33,7 @@ L04401F: db $00;X
 
 L044020:
 SGBPacket_DisableMultiJoy: 
-	db (SGB_PACKET_MLT_REG * 8) | $01	; Packet ID $11, 1 Packet
+	pkg SGB_PACKET_MLT_REG, $01
 	db $00 ; No multicontroller
 	db $00
 	db $00
@@ -52,7 +52,7 @@ SGBPacket_DisableMultiJoy:
 
 L044030:
 SGBPacket_EnableMultiJoy_1Pl: 
-	db (SGB_PACKET_MLT_REG * 8) | $01	; Packet ID $11, 1 Packet
+	pkg SGB_PACKET_MLT_REG, $01
 	db $01 ; Enable multicontroller, one player
 	db $00
 	db $00
@@ -213,471 +213,344 @@ L0440CC: db $EA;X
 L0440CD: db $60;X
 L0440CE: db $EA;X
 L0440CF: db $EA;X
-L0440D0: db $F0;X
-L0440D1: db $FF;X
-L0440D2: db $F5;X
-L0440D3: db $AF;X
-L0440D4: db $E0;X
-L0440D5: db $FF;X
-L0440D6: db $D5;X
-L0440D7: db $3E;X
-L0440D8: db $FF;X
-L0440D9: db $E0;X
-L0440DA: db $47;X
-L0440DB: db $E0;X
-L0440DC: db $48;X
-L0440DD: db $E0;X
-L0440DE: db $49;X
-L0440DF: db $F0;X
-L0440E0: db $40;X
-L0440E1: db $F6;X
-L0440E2: db $80;X
-L0440E3: db $E0;X
-L0440E4: db $40;X
-L0440E5: db $01;X
-L0440E6: db $04;X
-L0440E7: db $00;X
-L0440E8: db $CD;X
-L0440E9: db $4A;X
-L0440EA: db $03;X
-L0440EB: db $D7;X
-L0440EC: db $D1;X
-L0440ED: db $21;X
-L0440EE: db $39;X
-L0440EF: db $41;X
-L0440F0: db $CB;X
-L0440F1: db $23;X
-L0440F2: db $CB;X
-L0440F3: db $12;X
-L0440F4: db $CB;X
-L0440F5: db $23;X
-L0440F6: db $CB;X
-L0440F7: db $12;X
-L0440F8: db $CB;X
-L0440F9: db $23;X
-L0440FA: db $CB;X
-L0440FB: db $12;X
-L0440FC: db $19;X
-L0440FD: db $5E;X
-L0440FE: db $23;X
-L0440FF: db $56;X
-L044100: db $23;X
-L044101: db $E5;X
-L044102: db $D5;X
-L044103: db $E1;X
-L044104: db $CD;X
-L044105: db $B3;X
-L044106: db $02;X
-L044107: db $01;X
-L044108: db $04;X
-L044109: db $00;X
-L04410A: db $CD;X
-L04410B: db $4A;X
-L04410C: db $03;X
-L04410D: db $E1;X
-L04410E: db $5E;X
-L04410F: db $23;X
-L044110: db $56;X
-L044111: db $23;X
-L044112: db $7A;X
-L044113: db $B3;X
-L044114: db $CA;X
-L044115: db $24;X
-L044116: db $41;X
-L044117: db $E5;X
-L044118: db $D5;X
-L044119: db $E1;X
-L04411A: db $CD;X
-L04411B: db $B3;X
-L04411C: db $02;X
-L04411D: db $01;X
-L04411E: db $04;X
-L04411F: db $00;X
-L044120: db $CD;X
-L044121: db $4A;X
-L044122: db $03;X
-L044123: db $E1;X
-L044124: db $5E;X
-L044125: db $23;X
-L044126: db $56;X
-L044127: db $23;X
-L044128: db $E5;X
-L044129: db $D5;X
-L04412A: db $E1;X
-L04412B: db $CD;X
-L04412C: db $B3;X
-L04412D: db $02;X
-L04412E: db $01;X
-L04412F: db $04;X
-L044130: db $00;X
-L044131: db $CD;X
-L044132: db $4A;X
-L044133: db $03;X
-L044134: db $E1;X
-L044135: db $F1;X
-L044136: db $E0;X
-L044137: db $FF;X
-L044138: db $C9;X
-L044139: db $91;X
-L04413A: db $41;X
-L04413B: db $00;X
-L04413C: db $00;X
-L04413D: db $71;X
-L04413E: db $42;X
-L04413F: db $00;X
-L044140: db $00;X
-L044141: db $A1;X
-L044142: db $41;X
-L044143: db $00;X
-L044144: db $00;X
-L044145: db $71;X
-L044146: db $42;X
-L044147: db $00;X
-L044148: db $00;X
-L044149: db $B1;X
-L04414A: db $41;X
-L04414B: db $C1;X
-L04414C: db $41;X
-L04414D: db $A9;X
-L04414E: db $42;X
-L04414F: db $00;X
-L044150: db $00;X
-L044151: db $D1;X
-L044152: db $41;X
-L044153: db $E1;X
-L044154: db $41;X
-L044155: db $81;X
-L044156: db $42;X
-L044157: db $00;X
-L044158: db $00;X
-L044159: db $F1;X
-L04415A: db $41;X
-L04415B: db $00;X
-L04415C: db $00;X
-L04415D: db $71;X
-L04415E: db $42;X
-L04415F: db $00;X
-L044160: db $00;X
-L044161: db $01;X
-L044162: db $42;X
-L044163: db $00;X
-L044164: db $00;X
-L044165: db $71;X
-L044166: db $42;X
-L044167: db $00;X
-L044168: db $00;X
-L044169: db $21;X
-L04416A: db $42;X
-L04416B: db $11;X
-L04416C: db $42;X
-L04416D: db $EF;X
-L04416E: db $42;X
-L04416F: db $00;X
-L044170: db $00;X
-L044171: db $31;X
-L044172: db $42;X
-L044173: db $11;X
-L044174: db $42;X
-L044175: db $EF;X
-L044176: db $42;X
-L044177: db $00;X
-L044178: db $00;X
-L044179: db $41;X
-L04417A: db $42;X
-L04417B: db $11;X
-L04417C: db $42;X
-L04417D: db $EF;X
-L04417E: db $42;X
-L04417F: db $00;X
-L044180: db $00;X
-L044181: db $51;X
-L044182: db $42;X
-L044183: db $11;X
-L044184: db $42;X
-L044185: db $EF;X
-L044186: db $42;X
-L044187: db $00;X
-L044188: db $00;X
-L044189: db $61;X
-L04418A: db $42;X
-L04418B: db $11;X
-L04418C: db $42;X
-L04418D: db $EF;X
-L04418E: db $42;X
-L04418F: db $00;X
-L044190: db $00;X
-L044191: db $01;X
-L044192: db $FF;X
-L044193: db $7F;X
-L044194: db $1C;X
-L044195: db $02;X
-L044196: db $9C;X
-L044197: db $10;X
-L044198: db $00;X
-L044199: db $00;X
-L04419A: db $00;X
-L04419B: db $00;X
-L04419C: db $00;X
-L04419D: db $00;X
-L04419E: db $00;X
-L04419F: db $00;X
-L0441A0: db $00;X
-L0441A1: db $01;X
-L0441A2: db $FF;X
-L0441A3: db $7F;X
-L0441A4: db $10;X
-L0441A5: db $42;X
-L0441A6: db $08;X
-L0441A7: db $21;X
-L0441A8: db $00;X
-L0441A9: db $00;X
-L0441AA: db $00;X
-L0441AB: db $00;X
-L0441AC: db $00;X
-L0441AD: db $00;X
-L0441AE: db $00;X
-L0441AF: db $00;X
-L0441B0: db $00;X
-L0441B1: db $01;X
-L0441B2: db $DE;X
-L0441B3: db $7B;X
-L0441B4: db $FC;X
-L0441B5: db $02;X
-L0441B6: db $98;X
-L0441B7: db $00;X
-L0441B8: db $07;X
-L0441B9: db $18;X
-L0441BA: db $00;X
-L0441BB: db $73;X
-L0441BC: db $80;X
-L0441BD: db $61;X
-L0441BE: db $07;X
-L0441BF: db $18;X
-L0441C0: db $00;X
-L0441C1: db $09;X
-L0441C2: db $DE;X
-L0441C3: db $7B;X
-L0441C4: db $9C;X
-L0441C5: db $02;X
-L0441C6: db $80;X
-L0441C7: db $61;X
-L0441C8: db $07;X
-L0441C9: db $18;X
-L0441CA: db $98;X
-L0441CB: db $01;X
-L0441CC: db $10;X
-L0441CD: db $00;X
-L0441CE: db $07;X
-L0441CF: db $18;X
-L0441D0: db $00;X
-L0441D1: db $01;X
-L0441D2: db $9C;X
-L0441D3: db $73;X
-L0441D4: db $9C;X
-L0441D5: db $12;X
-L0441D6: db $9C;X
-L0441D7: db $10;X
-L0441D8: db $00;X
-L0441D9: db $10;X
-L0441DA: db $9C;X
-L0441DB: db $12;X
-L0441DC: db $80;X
-L0441DD: db $70;X
-L0441DE: db $00;X
-L0441DF: db $10;X
-L0441E0: db $00;X
-L0441E1: db $09;X
-L0441E2: db $9C;X
-L0441E3: db $73;X
-L0441E4: db $9C;X
-L0441E5: db $12;X
-L0441E6: db $80;X
-L0441E7: db $71;X
-L0441E8: db $00;X
-L0441E9: db $10;X
-L0441EA: db $9C;X
-L0441EB: db $12;X
-L0441EC: db $14;X
-L0441ED: db $50;X
-L0441EE: db $00;X
-L0441EF: db $10;X
-L0441F0: db $00;X
-L0441F1: db $01;X
-L0441F2: db $FF;X
-L0441F3: db $7F;X
-L0441F4: db $10;X
-L0441F5: db $18;X
-L0441F6: db $1C;X
-L0441F7: db $02;X
-L0441F8: db $00;X
-L0441F9: db $00;X
-L0441FA: db $00;X
-L0441FB: db $00;X
-L0441FC: db $00;X
-L0441FD: db $00;X
-L0441FE: db $00;X
-L0441FF: db $00;X
-L044200: db $00;X
-L044201: db $01;X
-L044202: db $9C;X
-L044203: db $73;X
-L044204: db $00;X
-L044205: db $32;X
-L044206: db $80;X
-L044207: db $21;X
-L044208: db $00;X
-L044209: db $00;X
-L04420A: db $00;X
-L04420B: db $00;X
-L04420C: db $00;X
-L04420D: db $00;X
-L04420E: db $00;X
-L04420F: db $00;X
-L044210: db $00;X
-L044211: db $09;X
-L044212: db $9E;X
-L044213: db $6B;X
-L044214: db $00;X
-L044215: db $7E;X
-L044216: db $00;X
-L044217: db $3C;X
-L044218: db $00;X
-L044219: db $00;X
-L04421A: db $FF;X
-L04421B: db $03;X
-L04421C: db $EF;X
-L04421D: db $01;X
-L04421E: db $00;X
-L04421F: db $00;X
-L044220: db $00;X
-L044221: db $01;X
-L044222: db $9E;X
-L044223: db $6B;X
-L044224: db $FF;X
-L044225: db $02;X
-L044226: db $9C;X
-L044227: db $10;X
-L044228: db $00;X
-L044229: db $00;X
-L04422A: db $80;X
-L04422B: db $22;X
-L04422C: db $00;X
-L04422D: db $51;X
-L04422E: db $00;X
-L04422F: db $00;X
-L044230: db $00;X
-L044231: db $01;X
-L044232: db $9C;X
-L044233: db $73;X
-L044234: db $FF;X
-L044235: db $02;X
-L044236: db $9C;X
-L044237: db $10;X
-L044238: db $00;X
-L044239: db $00;X
-L04423A: db $9C;X
-L04423B: db $22;X
-L04423C: db $14;X
-L04423D: db $50;X
-L04423E: db $00;X
-L04423F: db $00;X
-L044240: db $00;X
-L044241: db $01;X
-L044242: db $9C;X
-L044243: db $73;X
-L044244: db $FF;X
-L044245: db $02;X
-L044246: db $9C;X
-L044247: db $10;X
-L044248: db $00;X
-L044249: db $00;X
-L04424A: db $84;X
-L04424B: db $42;X
-L04424C: db $00;X
-L04424D: db $50;X
-L04424E: db $00;X
-L04424F: db $00;X
-L044250: db $00;X
-L044251: db $01;X
-L044252: db $5C;X
-L044253: db $63;X
-L044254: db $FF;X
-L044255: db $02;X
-L044256: db $9C;X
-L044257: db $10;X
-L044258: db $00;X
-L044259: db $00;X
-L04425A: db $44;X
-L04425B: db $4E;X
-L04425C: db $63;X
-L04425D: db $4C;X
-L04425E: db $00;X
-L04425F: db $00;X
-L044260: db $00;X
-L044261: db $01;X
-L044262: db $DE;X
-L044263: db $7B;X
-L044264: db $FF;X
-L044265: db $02;X
-L044266: db $9C;X
-L044267: db $10;X
-L044268: db $00;X
-L044269: db $00;X
-L04426A: db $9C;X
-L04426B: db $02;X
-L04426C: db $00;X
-L04426D: db $12;X
-L04426E: db $00;X
-L04426F: db $00;X
-L044270: db $00;X
-L044271: db $21;X
-L044272: db $01;X
-L044273: db $03;X
-L044274: db $00;X
-L044275: db $00;X
-L044276: db $00;X
-L044277: db $13;X
-L044278: db $11;X
-L044279: db $00;X
-L04427A: db $00;X
-L04427B: db $00;X
-L04427C: db $00;X
-L04427D: db $00;X
-L04427E: db $00;X
-L04427F: db $00;X
-L044280: db $00;X
-L044281: db $22;X
-L044282: db $04;X
-L044283: db $03;X
-L044284: db $00;X
-L044285: db $00;X
-L044286: db $00;X
-L044287: db $13;X
-L044288: db $11;X
-L044289: db $03;X
-L04428A: db $15;X
-L04428B: db $0D;X
-L04428C: db $03;X
-L04428D: db $0F;X
-L04428E: db $0B;X
-L04428F: db $03;X
-L044290: db $2A;X
-L044291: db $10;X
-L044292: db $09;X
-L044293: db $12;X
-L044294: db $0B;X
-L044295: db $03;X
-L044296: db $3F;X
-L044297: db $0D;X
-L044298: db $06;X
-L044299: db $0F;X
-L04429A: db $08;X
-L04429B: db $00;X
-L04429C: db $00;X
-L04429D: db $00;X
-L04429E: db $00;X
-L04429F: db $00;X
-L0442A0: db $00;X
+
+; =============== SGB_ApplyScreenPalSet ===============
+; Applies the SGB palette and color attributes for screens.
+; IN
+; - DE: Screen Palette ID
+SGB_ApplyScreenPalSet:
+	;
+	; ??? Prepare the display for SGB packet transfer.
+	;
+	ldh  a, [rIE]				; Save interrupt value
+	push af
+		xor  a					; Disable all interrupts
+		ldh  [rIE], a
+		push de
+			; Black out screen
+			ld   a, $FF			
+			ldh  [rBGP], a
+			ldh  [rOBP0], a
+			ldh  [rOBP1], a
+			; Wait for VBLANK
+			; Enable LCD otherwise the LCD stop function will not wait for VBlank
+			ldh  a, [rLCDC]		
+			or   a, LCDC_ENABLE
+			ldh  [rLCDC], a
+			; Wait 4 ticks
+			ld   bc, $0004
+			call SGB_DelayAfterPacketSendCustom
+			; Stop LCD + wait VBlanl
+			rst  $10
+		pop  de
+		
+		;
+		; Index the packet ptr table with DE
+		;
+		ld   hl, .setTbl	; HL = Ptr to table start
+		sla  e				; DE * 8 = Offset
+		rl   d
+		sla  e
+		rl   d
+		sla  e
+		rl   d
+		add  hl, de			; Seek to table entry
+		
+		;
+		; Send out packet #1 (bytes 0-1)
+		; Packet #1 is always present, and sets SGB palette entries 0 and 1.
+		;
+		ld   e, [hl]		; DE = Ptr to packet
+		inc  hl
+		ld   d, [hl]
+		inc  hl
+		push hl				
+			push de			; HL = DE
+			pop  hl
+			call SGB_SendPackets
+			ld   bc, $0004
+			call SGB_DelayAfterPacketSendCustom
+		pop  hl
+		
+		;
+		; Send out packet #2 (bytes 2-3)
+		;
+		; Packet #2 is optional, and sets SGB palette entries 2 and 3.
+		; If the ptr is null, skip it.
+		ld   e, [hl]		; DE = Ptr to packet
+		inc  hl
+		ld   d, [hl]
+		inc  hl
+		ld   a, d			; DE == 0?
+		or   e
+		jp   z, .sendPak3	; If so, skip
+		push hl
+			push de			; HL = DE
+			pop  hl
+			call SGB_SendPackets
+			ld   bc, $0004
+			call SGB_DelayAfterPacketSendCustom
+		pop  hl
+		
+	.sendPak3:
+		;
+		; Send out packet #3 (bytes 4-5)
+		;
+		; Packet #3 is always present, and sets color palette attributes.
+		ld   e, [hl]
+		inc  hl
+		ld   d, [hl]
+		inc  hl
+		push hl
+			push de
+			pop  hl
+			call SGB_SendPackets
+			ld   bc, $0004
+			call SGB_DelayAfterPacketSendCustom
+		pop  hl
+		
+		
+	pop  af
+	ldh  [rIE], a
+	ret 
+
+; =============== .setTbl ===============
+; Defines the screen palette sets
+.setTbl:
+	;; PAL01                            PAL23                       ATTR                      END
+	dw SGBPacket_Intro_Pal01,           $0000,                      SGBPacket_Pat_AllPal0,    $0000
+	dw SGBPacket_TakaraLogo_Pal01,      $0000,                      SGBPacket_Pat_AllPal0,    $0000
+	dw SGBPacket_Title_Pal01,           SGBPacket_Title_Pal23,      SGBPacket_Title_Pat,      $0000
+	dw SGBPacket_CharSelect_Pal01,      SGBPacket_CharSelect_Pal23, SGBPacket_CharSelect_Pat, $0000
+	dw SGBPacket_OrderSelect_Pal01,     $0000,                      SGBPacket_Pat_AllPal0,    $0000
+	dw SGBPacket_StageClear_Pal01,      $0000,                      SGBPacket_Pat_AllPal0,    $0000
+	dw SGBPacket_Stage_Hero_Pal01,      SGBPacket_StageMeter_Pal23, SGBPacket_Stage_Pat,      $0000
+	dw SGBPacket_Stage_FatalFury_Pal01, SGBPacket_StageMeter_Pal23, SGBPacket_Stage_Pat,      $0000
+	dw SGBPacket_Stage_Yagami_Pal01,    SGBPacket_StageMeter_Pal23, SGBPacket_Stage_Pat,      $0000
+	dw SGBPacket_Stage_Boss_Pal01,      SGBPacket_StageMeter_Pal23, SGBPacket_Stage_Pat,      $0000
+	dw SGBPacket_Stage_Stadium_Pal01,   SGBPacket_StageMeter_Pal23, SGBPacket_Stage_Pat,      $0000
+	
+SGBPacket_Intro_Pal01: 
+	pkg SGB_PACKET_PAL01, $01
+	dw $7FFF ; 0-0
+	dw $021C ; 0-1
+	dw $109C ; 0-2
+	dw $0000 ; 0-3
+	dw $0000 ; 1-1
+	dw $0000 ; 1-2
+	dw $0000 ; 1-3
+	db $00
+
+SGBPacket_TakaraLogo_Pal01:
+	pkg SGB_PACKET_PAL01, $01
+	dw $7FFF ; 0-0
+	dw $4210 ; 0-1
+	dw $2108 ; 0-2
+	dw $0000 ; 0-3
+	dw $0000 ; 1-1
+	dw $0000 ; 1-2
+	dw $0000 ; 1-3
+	db $00
+
+SGBPacket_Title_Pal01:
+	pkg SGB_PACKET_PAL01, $01
+	dw $7BDE ; 0-0
+	dw $02FC ; 0-1
+	dw $0098 ; 0-2
+	dw $1807 ; 0-3
+	dw $7300 ; 1-1
+	dw $6180 ; 1-2
+	dw $1807 ; 1-3
+	db $00
+SGBPacket_Title_Pal23:
+	pkg SGB_PACKET_PAL23, $01
+	dw $7BDE ; 0-0
+	dw $029C ; 2-1
+	dw $6180 ; 2-2
+	dw $1807 ; 2-3
+	dw $0198 ; 3-1
+	dw $0010 ; 3-2
+	dw $1807 ; 3-3
+	db $00
+	
+SGBPacket_CharSelect_Pal01:
+	pkg SGB_PACKET_PAL01, $01
+	dw $739C ; 0-0
+	dw $129C ; 0-1
+	dw $109C ; 0-2
+	dw $1000 ; 0-3
+	dw $129C ; 1-1
+	dw $7080 ; 1-2
+	dw $1000 ; 1-3
+	db $00
+SGBPacket_CharSelect_Pal23: 
+	pkg SGB_PACKET_PAL23, $01
+	dw $739C ; 0-0
+	dw $129C ; 2-1
+	dw $7180 ; 2-2
+	dw $1000 ; 2-3
+	dw $129C ; 3-1
+	dw $5014 ; 3-2
+	dw $1000 ; 3-3
+	db $00
+
+SGBPacket_OrderSelect_Pal01: 
+	pkg SGB_PACKET_PAL01, $01
+	dw $7FFF ; 0-0
+	dw $1810 ; 0-1
+	dw $021C ; 0-2
+	dw $0000 ; 0-3
+	dw $0000 ; 1-1
+	dw $0000 ; 1-2
+	dw $0000 ; 1-3
+	db $00
+	
+SGBPacket_StageClear_Pal01: 
+	pkg SGB_PACKET_PAL01, $01
+	dw $739C ; 0-0
+	dw $3200 ; 0-1
+	dw $2180 ; 0-2
+	dw $0000 ; 0-3
+	dw $0000 ; 1-1
+	dw $0000 ; 1-2
+	dw $0000 ; 1-3
+	db $00
+
+; Stage palettes 2-3, shared on every stage, used for the super meter
+SGBPacket_StageMeter_Pal23:
+	pkg SGB_PACKET_PAL23, $01
+	dw $6B9E ; 0-0
+	dw $7E00 ; 2-1
+	dw $3C00 ; 2-2
+	dw $0000 ; 2-3
+	dw $03FF ; 3-1
+	dw $01EF ; 3-2
+	dw $0000 ; 3-3
+	db $00
+	
+; Stage-specific palettes 0-1
+; [TCRF]/[BUG] SGBPacket_StageMeter_Pal23 is applied later than these, and overwrites the stage-specific color 0-0 to be always $6B9E.
+;              This renders unused the other 0-0 colors, though they are all similar to each other.
+;              To fix this, apply SGBPacket_StageMeter_Pal23 before these.
+SGBPacket_Stage_Hero_Pal01: 
+	pkg SGB_PACKET_PAL01, $01
+	dw $6B9E ; 0-0
+	dw $02FF ; 0-1
+	dw $109C ; 0-2
+	dw $0000 ; 0-3
+	dw $2280 ; 1-1
+	dw $5100 ; 1-2
+	dw $0000 ; 1-3
+	db $00
+	
+SGBPacket_Stage_FatalFury_Pal01: 
+	pkg SGB_PACKET_PAL01, $01
+	dw $739C ; 0-0
+	dw $02FF ; 0-1
+	dw $109C ; 0-2
+	dw $0000 ; 0-3
+	dw $229C ; 1-1
+	dw $5014 ; 1-2
+	dw $0000 ; 1-3
+	db $00
+	
+SGBPacket_Stage_Yagami_Pal01: 
+	pkg SGB_PACKET_PAL01, $01
+	dw $739C ; 0-0
+	dw $02FF ; 0-1
+	dw $109C ; 0-2
+	dw $0000 ; 0-3
+	dw $4284 ; 1-1
+	dw $5000 ; 1-2
+	dw $0000 ; 1-3
+	db $00
+	
+SGBPacket_Stage_Boss_Pal01: 
+	pkg SGB_PACKET_PAL01, $01
+	dw $635C ; 0-0
+	dw $02FF ; 0-1
+	dw $109C ; 0-2
+	dw $0000 ; 0-3
+	dw $4E44 ; 1-1
+	dw $4C63 ; 1-2
+	dw $0000 ; 1-3
+	db $00
+	
+SGBPacket_Stage_Stadium_Pal01: 
+	pkg SGB_PACKET_PAL01, $01
+	dw $7BDE ; 0-0
+	dw $02FF ; 0-1
+	dw $109C ; 0-2
+	dw $0000 ; 0-3
+	dw $029C ; 1-1
+	dw $1200 ; 1-2
+	dw $0000 ; 1-3
+	db $00
+
+; Palette map which sets Pal01 to the entire screen
+SGBPacket_Pat_AllPal0: 
+	pkg SGB_PACKET_ATTR_BLK, $01
+	db $01	; 1 Set
+	;--
+	db %00000011 ; Change inside/box border
+	ads 0,0,0 ; Pals
+	db $00 ; X1
+	db $00 ; Y1
+	db $13 ; X2
+	db $11 ; Y2
+	;--
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	
+SGBPacket_CharSelect_Pat:
+	pkg SGB_PACKET_ATTR_BLK, $02
+	db $04	; 4 Sets
+	;--
+	; Base red palette
+	db %00000011 ; Change inside/box border
+	ads 0,0,0 ; Pals
+	db $00 ; X1
+	db $00 ; Y1
+	db $13 ; X2
+	db $11 ; Y2
+	;--
+	; Color Robert + Goenitz dark blue
+	db %00000011 ; Change inside/box border
+	ads 1,1,1 ; Pals
+	db $0D ; X1
+	db $03 ; Y1
+	db $0F ; X2
+	db $0B ; Y2
+	;--
+	; Color Leona blue
+	db %00000011 ; Change inside/box border
+	ads 2,2,2 ; Pals
+	db $10 ; X1
+	db $09 ; Y1
+	db $12 ; X2
+	db $0B ; Y2
+	;--
+	; Color Krauser purple
+	db %00000011 ; Change inside/box border
+	ads 3,3,3 ; Pals
+	db $0D ; X1
+	db $06 ; Y1
+	db $0F ; X2
+	db $08 ; Y2
+	;--
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+; =============== START OF JUNK ===============
 L0442A1: db $00;X
 L0442A2: db $00;X
 L0442A3: db $00;X
@@ -686,124 +559,156 @@ L0442A5: db $00;X
 L0442A6: db $00;X
 L0442A7: db $00;X
 L0442A8: db $00;X
-L0442A9: db $24;X
-L0442AA: db $09;X
-L0442AB: db $03;X
-L0442AC: db $00;X
-L0442AD: db $00;X
-L0442AE: db $00;X
-L0442AF: db $13;X
-L0442B0: db $11;X
-L0442B1: db $03;X
-L0442B2: db $3F;X
-L0442B3: db $00;X
-L0442B4: db $0E;X
-L0442B5: db $13;X
-L0442B6: db $11;X
-L0442B7: db $03;X
-L0442B8: db $15;X
-L0442B9: db $10;X
-L0442BA: db $06;X
-L0442BB: db $13;X
-L0442BC: db $0C;X
-L0442BD: db $02;X
-L0442BE: db $15;X
-L0442BF: db $0E;X
-L0442C0: db $04;X
-L0442C1: db $11;X
-L0442C2: db $05;X
-L0442C3: db $02;X
-L0442C4: db $15;X
-L0442C5: db $0F;X
-L0442C6: db $07;X
-L0442C7: db $0F;X
-L0442C8: db $0C;X
-L0442C9: db $02;X
-L0442CA: db $15;X
-L0442CB: db $0E;X
-L0442CC: db $07;X
-L0442CD: db $0E;X
-L0442CE: db $0A;X
-L0442CF: db $02;X
-L0442D0: db $15;X
-L0442D1: db $0C;X
-L0442D2: db $09;X
-L0442D3: db $0D;X
-L0442D4: db $0A;X
-L0442D5: db $02;X
-L0442D6: db $15;X
-L0442D7: db $0A;X
-L0442D8: db $0A;X
-L0442D9: db $0B;X
-L0442DA: db $0A;X
-L0442DB: db $02;X
-L0442DC: db $2A;X
-L0442DD: db $11;X
-L0442DE: db $06;X
-L0442DF: db $11;X
-L0442E0: db $06;X
-L0442E1: db $00;X
-L0442E2: db $00;X
-L0442E3: db $00;X
-L0442E4: db $00;X
-L0442E5: db $00;X
-L0442E6: db $00;X
-L0442E7: db $00;X
-L0442E8: db $00;X
+; =============== END OF JUNK ===============
+SGBPacket_Title_Pat: 
+	pkg SGB_PACKET_ATTR_BLK, $04
+	db $09 ; 9 sets
+	;--
+	; Fill with red palette
+	db %00000011 ; Change inside/box border
+	ads 0,0,0 ; Pals
+	db $00 ; X1
+	db $00 ; Y1
+	db $13 ; X2
+	db $11 ; Y2
+	;--
+	; Brown clouds at the bottom
+	db %00000011 ; Change inside/box border
+	ads 3,3,0 ; Pals
+	db $00 ; X1
+	db $0E ; Y1
+	db $13 ; X2
+	db $11 ; Y2
+	;--
+	; Color blue the lower right section of 96
+	db %00000011 ; Change inside/box border
+	ads 1,1,1 ; Pals
+	db $10 ; X1
+	db $06 ; Y1
+	db $13 ; X2
+	db $0C ; Y2
+	;--
+	; Color blue the top section of 96
+	db %00000010 ; Change box border
+	ads 1,1,1 ; Pals
+	db $0E ; X1
+	db $04 ; Y1
+	db $11 ; X2
+	db $05 ; Y2
+	;--
+	; Color blue the middle of 96
+	db %00000010 ; Change box border
+	ads 1,1,1 ; Pals
+	db $0F ; X1
+	db $07 ; Y1
+	db $0F ; X2
+	db $0C ; Y2
+	;--
+	; Color blue the middle of 96
+	db %00000010 ; Change box border
+	ads 1,1,1 ; Pals
+	db $0E ; X1
+	db $07 ; Y1
+	db $0E ; X2
+	db $0A ; Y2
+	;--
+	; Color blue the lower left of 96
+	db %00000010 ; Change box border
+	ads 1,1,1 ; Pals
+	db $0C ; X1
+	db $09 ; Y1
+	db $0D ; X2
+	db $0A ; Y2
+	;--
+	; Color blue the lower left edge of 96
+	db %00000010 ; Change box border
+	ads 1,1,1 ; Pals
+	db $0A ; X1
+	db $0A ; Y1
+	db $0B ; X2
+	db $0A ; Y2
+	;--
+	; Set a special mixed palette to a single tile to get around palette limitations
+	db %00000010 ; Change box border
+	ads 2,2,2 ; Pals
+	db $11 ; X1
+	db $06 ; Y1
+	db $11 ; X2
+	db $06 ; Y2
+	;--
+	db $00;X
+	db $00;X
+	db $00;X
+	db $00;X
+	db $00;X
+	db $00;X
+	db $00;X
+	db $00;X
+; =============== START OF JUNK ===============
 L0442E9: db $00;X
 L0442EA: db $00;X
 L0442EB: db $00;X
 L0442EC: db $00;X
 L0442ED: db $00;X
 L0442EE: db $00;X
-L0442EF: db $23;X
-L0442F0: db $06;X
-L0442F1: db $02;X
-L0442F2: db $00;X
-L0442F3: db $00;X
-L0442F4: db $00;X
-L0442F5: db $13;X
-L0442F6: db $00;X
-L0442F7: db $03;X
-L0442F8: db $00;X
-L0442F9: db $00;X
-L0442FA: db $01;X
-L0442FB: db $13;X
-L0442FC: db $03;X
-L0442FD: db $02;X
-L0442FE: db $2A;X
-L0442FF: db $05;X
-L044300: db $03;X
-L044301: db $0E;X
-L044302: db $03;X
-L044303: db $03;X
-L044304: db $15;X
-L044305: db $00;X
-L044306: db $04;X
-L044307: db $13;X
-L044308: db $0F;X
-L044309: db $02;X
-L04430A: db $3F;X
-L04430B: db $00;X
-L04430C: db $10;X
-L04430D: db $13;X
-L04430E: db $10;X
-L04430F: db $02;X
-L044310: db $2A;X
-L044311: db $00;X
-L044312: db $11;X
-L044313: db $13;X
-L044314: db $11;X
-L044315: db $00;X
-L044316: db $00;X
-L044317: db $00;X
-L044318: db $00;X
-L044319: db $00;X
-L04431A: db $00;X
-L04431B: db $00;X
-L04431C: db $00;X
-L04431D: db $00;X
-L04431E: db $00;X
+; =============== END OF JUNK ===============
+SGBPacket_Stage_Pat:
+	pkg SGB_PACKET_ATTR_BLK, $03
+	db $06 ; 6 sets
+	;--
+	db %00000010 ; Change box border
+	ads 0,0,0 ; Pals
+	db $00 ; X1
+	db $00 ; Y1
+	db $13 ; X2
+	db $00 ; Y2
+	;--
+	db %00000011 ; Change inside/box border
+	ads 0,0,0 ; Pals
+	db $00 ; X1
+	db $01 ; Y1
+	db $13 ; X2
+	db $03 ; Y2
+	;--
+	db %00000010 ; Change box border
+	ads 2,2,2 ; Pals
+	db $05 ; X1
+	db $03 ; Y1
+	db $0E ; X2
+	db $03 ; Y2
+	;--
+	db %00000011 ; Change inside/box border
+	ads 1,1,1 ; Pals
+	db $00 ; X1
+	db $04 ; Y1
+	db $13 ; X2
+	db $0F ; Y2
+	;--
+	db %00000010 ; Change box border
+	ads 3,3,3 ; Pals
+	db $00 ; X1
+	db $10 ; Y1
+	db $13 ; X2
+	db $10 ; Y2
+	;--
+	db %00000010 ; Change box border
+	ads 2,2,2 ; Pals
+	db $00 ; X1
+	db $11 ; Y1
+	db $13 ; X2
+	db $11 ; Y2
+	;--
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+
 L04431F: db $00;X
 L044320: db $00;X
 L044321: db $21;X

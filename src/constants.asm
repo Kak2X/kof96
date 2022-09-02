@@ -32,9 +32,15 @@ MISCB_IS_SGB EQU 7	; Enables SGB features
 ; $C026
 MISCB_TASK_CTRL_CALLED EQU 3 ; If set, the task exec loop was entered
 ; $C028
+; TODO: This could be a side effect of the primary purpose of $C028 (screen section divider)
 MISCB_PL_RANGE_CHECK EQU 1 ; Enables the player range enforcement, which is part of the sprite drawing routine.
                            ; Should only be used during gameplay, otherwise it could get in the way.
 
+
+;--
+
+
+OBJINFO_SIZE EQU $40 ; wOBJInfo size
 
 ; iOBJInfo_Status bits
 OSTB_ALTSET  EQU 0 ; If set, uses an alternate set of values for user flags and sprite mapping pointer
@@ -53,17 +59,14 @@ OLF_USETILEFLAGS EQU 1 << OLFB_USETILEFLAGS ; $10
 OLF_XFLIP        EQU 1 << OLFB_XFLIP ; $20
 OLF_YFLIP        EQU 1 << OLFB_YFLIP ; $40
 
-
-
 TASK_SIZE EQU $08
 
-TASK_EXEC_NONE EQU $00 ; Task is skipped
-TASK_EXEC_01 EQU $01 ; Disabled?
-TASK_EXEC_CUR EQU $02 ; Task is being executed
-; (no constant applicable? as long as != $08 and >= $04 to allow exec)
-;TASK_EXEC_SP EQU  ; Task is executed by replacing the stack pointer to that code (so on 'ret' it gets executed)
-TASK_EXEC_JP EQU $08 ; Task is executed by jumping to the specified code
-
+; Task types
+TASK_EXEC_NONE EQU $00 ; No task here
+TASK_EXEC_DONE EQU $01 ; Already executed this frame
+TASK_EXEC_CUR  EQU $02 ; Currently executing
+TASK_EXEC_TODO EQU $04 ; Not executed yet, but was executed previously already. Stack pointer type.
+TASK_EXEC_NEW  EQU $08 ; Never executed before. Likely init code which will set a new task. Jump HL type.
 
 SNDIDREQ_SIZE      EQU $08
 SNDINFO_SIZE       EQU $20 ; Size of iSndInfo struct
@@ -91,7 +94,10 @@ SIS_ENABLED        EQU 1 << SISB_ENABLED
 SNDCMD_BASE           EQU $E0
 SNDNOTE_BASE          EQU $80
 
+;--------------
+
 ; DMG Sound List
+SND_MUTE              EQU $00
 SND_BASE              EQU $80
 SND_NONE              EQU SND_BASE+$00
 BGM_ROULETTE          EQU SND_BASE+$01
@@ -168,3 +174,16 @@ SCT_10                EQU $11
 SCT_11                EQU $12
 SCT_12                EQU $13
 SCT_13                EQU $14
+
+; Screen Palette IDs, passed to SGB_ApplyScreenPalSet 
+SCRPAL_INTRO EQU $00
+SCRPAL_TAKARALOGO EQU $01
+SCRPAL_TITLE EQU $02
+SCRPAL_CHARSELECT EQU $03
+SCRPAL_ORDERSELECT EQU $04
+SCRPAL_STAGECLEAR EQU $05
+SCRPAL_STAGE_HERO EQU $06
+SCRPAL_STAGE_FATALFURY EQU $07
+SCRPAL_STAGE_YAGAMI EQU $08
+SCRPAL_STAGE_BOSS EQU $09
+SCRPAL_STAGE_STADIUM EQU $0A
