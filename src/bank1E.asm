@@ -300,7 +300,7 @@ L1E427A:;J
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	ld   de, $60E6
 	call L000D76
-	ld   hl, $D693
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset0
 	ld   de, $D6A7
 	ld   a, [$D920]
 	bit  7, a
@@ -326,9 +326,9 @@ L1E42A7:;J
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
 	ld   de, $60E6
 	call L000D76
-	ld   hl, $D6C1
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_UserFlags0
 	ld   [hl], $10
-	ld   hl, $D6D3
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffset0
 	ld   de, $D6E7
 	ld   a, [$DA20]
 	bit  7, a
@@ -416,8 +416,8 @@ L1E436D:;J
 	ld   a, $C7
 	rst  $18
 	ei
-	call Task_ExecRun_B01
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
+	call Task_ExecRun_NoDelay
 	ld   a, $74
 	ldh  [rOBP0], a
 	ld   a, $74
@@ -426,7 +426,7 @@ L1E436D:;J
 	ldh  [rBGP], a
 	ld   a, $81
 	call HomeCall_Sound_ReqPlayExId_Stub
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 L1E438B:;J
 	call L00112E
 	call L1E43C2
@@ -439,12 +439,12 @@ L1E438B:;J
 	jp   nz, L1E43A7
 	jp   L1E43AD
 L1E43A7:;J
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	jp   L1E438B
 L1E43AD:;J
 	ld   b, $3C
 L1E43AF:;J
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	dec  b
 	jp   nz, L1E43AF
 	call L001F85
@@ -1615,7 +1615,7 @@ L1E4B10:;C
 	ld   a, [$C1B6]
 	cp   $00
 	jp   nz, L1E4B1E
-	ld   hl, $FF98
+	ld   hl, hJoyKeys
 	jp   L1E4B21
 L1E4B1E: db $21;X
 L1E4B1F: db $AB;X
@@ -7531,7 +7531,7 @@ L1E6414:;R
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	ld   de, $60E6
 	call L000D76
-	ld   hl, $D691
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTbl_Low0
 	ld   [hl], $DB
 	inc  hl
 	ld   [hl], $7C
@@ -7542,7 +7542,7 @@ L1E6414:;R
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
 	ld   de, $60E6
 	call L000D76
-	ld   hl, $D6D1
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTbl_Low0
 	ld   [hl], $DB
 	inc  hl
 	ld   [hl], $7C
@@ -7568,8 +7568,8 @@ L1E6414:;R
 	ld   a, $C7
 	rst  $18
 	ei
-	call Task_ExecRun_B01
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
+	call Task_ExecRun_NoDelay
 	ld   a, $1E
 	ldh  [rOBP0], a
 	ld   a, $3E
@@ -7578,7 +7578,7 @@ L1E6414:;R
 	ldh  [rBGP], a
 	ld   a, $81
 	call HomeCall_Sound_ReqPlayExId_Stub
-	call Task_ExecRun_B1E
+	call Task_ExecRun_Delay1D
 L1E6491:;J
 	call L1E6940
 	call L00112E
@@ -7608,7 +7608,7 @@ L1E64C1:;J
 	jp   nz, L1E64D3
 	jp   L1E64D9
 L1E64D3:;J
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	jp   L1E6491
 L1E64D9:;J
 	ld   a, [$C1CF]
@@ -7623,7 +7623,7 @@ L1E64D9:;J
 	ld   [$DA2F], a
 	ld   a, [$C1D9]
 	ld   [$DA30], a
-	call Task_ExecRun_B3C
+	call Task_ExecRun_Delay3B
 	jp   L00179D
 L1E6503:;C
 	ld   a, [$C1B6]
@@ -13361,10 +13361,10 @@ L1E7D20: db $1A
 L1E7D21:;I
 	rst  $10
 	xor  a
-	ld   [$D8C5], a
-	ld   [$D8C9], a
-	ld   [$D8E5], a
-	ld   [$D8E9], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft0], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft1], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft0], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft1], a
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
@@ -13374,7 +13374,7 @@ L1E7D21:;I
 	call ClearBGMap
 	ld   a, $18
 	ld   b, $5A
-	call L00046C
+	call SetSectLYC
 	ld   hl, $6DA5
 	ld   de, $C1EA
 	call DecompressGFX
@@ -13392,15 +13392,15 @@ L1E7D21:;I
 	or   a, $40
 	ldh  [rSTAT], a
 	ei
-	call Task_ExecRun_B0A
+	call Task_ExecRun_Delay09
 	ld   a, $8C
 	ldh  [rOBP0], a
 	ld   a, $2D
 	ldh  [rBGP], a
-	ldh  [$FFF1], a
+	ldh  [hScreenSect1BGP], a
 	ld   a, $13
-	ldh  [$FFF0], a
-	ldh  [$FFF2], a
+	ldh  [hScreenSect0BGP], a
+	ldh  [hScreenSect2BGP], a
 	ld   a, $82
 	call HomeCall_Sound_ReqPlayExId_Stub
 	ld   a, $1E
@@ -13434,7 +13434,7 @@ L1E7D21:;I
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
-	ldh  [$FFF1], a
+	ldh  [hScreenSect1BGP], a
 	call ClearBGMap
 	ld   hl, wMisc_C028
 	res  0, [hl]
@@ -13444,11 +13444,11 @@ L1E7D21:;I
 	ld   [$D683], a
 	ld   [$D685], a
 	xor  a
-	ld   [$D8C5], a
-	ld   [$D8C9], a
-	ld   [$D8E5], a
-	ld   [$D8E9], a
-	jp   Task_ExecRun_B01
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft0], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft1], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft0], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft1], a
+	jp   Task_ExecRun_NoDelay
 L1E7DE8:;I
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	jp   L000BBD
@@ -13585,15 +13585,15 @@ L1E7EC8:;R
 L1E7EC9:;C
 	ld   b, $F0
 L1E7ECB:;J
-	ldh  a, [$FF99]
+	ldh  a, [hJoyNewKeys]
 	bit  7, a
 	jp   nz, L1E7EE8
-	ldh  a, [$FFAC]
+	ldh  a, [hJoyNewKeys2]
 	bit  7, a
 	jp   nz, L1E7EE8
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	call L000BBD
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	dec  b
 	jp   nz, L1E7ECB
 	xor  a

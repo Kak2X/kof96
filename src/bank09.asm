@@ -13660,7 +13660,7 @@ L0975DB:;J
 	jp   L097623
 L0975E1:;J
 	call L002D53
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ld   a, $03
 	ld   [$C173], a
 	call L00376A

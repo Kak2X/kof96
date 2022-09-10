@@ -83,7 +83,7 @@ L00003D: db $01;X
 L00003E: db $CD;X
 L00003F: db $7A;X
 ; =============== VBLANK INTERRUPT ===============
-	jp   L000542
+	jp   VBlankHandler
 L000043: db $00;X
 L000044: db $CD;X
 L000045: db $66;X
@@ -91,7 +91,7 @@ L000046: db $2B;X
 L000047: db $D2;X
 
 ; =============== LCDC/STAT INTERRUPT ===============
-	jp   L000484
+	jp   LCDCHandler
 L00004B: db $0C;X
 L00004C: db $06;X
 L00004D: db $3E;X
@@ -108,7 +108,7 @@ L000055: db $CD;X
 L000056: db $66;X
 L000057: db $2B;X
 ; =============== SERIAL INTERRUPT ===============
-	jp   L0016DB
+	jp   SerialHandler
 L00005B: db $D9;X
 L00005C: db $2F;X
 L00005D: db $2C;X
@@ -350,7 +350,7 @@ EntryPoint:
 	;
 	; Clear HRAM ($FF80-$FFFE)
 	;
-	ld   hl, $FF80
+	ld   hl, hOAMDMA
 	ld   de, $007E
 	ld   b, $00
 .clMem3:
@@ -377,7 +377,7 @@ EntryPoint:
 	;
 	; Misc init
 	;
-	call L0016BE
+	call Serial_Init
 	
 	;
 	; Copy over the default settings
@@ -730,7 +730,6 @@ DefaultSettings:
 ; =============== Task_DoCycle ===============
 ; Executes the main task cycle.
 ; See also: Task_ExecRun for the routine calling this.
-L00036F:
 Task_DoCycle:
 	ld   sp, $DC00					; Set the standard stack pointer for taskman
 .reloop:
@@ -740,13 +739,13 @@ Task_DoCycle:
 	ld   de, TASK_SIZE				; DE = Size of a task struct
 	ld   bc, $0301					; B = Number of tasks; C = Current Task ID
 .nextTask:
-	ld   a, [wMisc_C026]			; Mark that the task exec loop was called
-	set  MISCB_TASK_CTRL_CALLED, a
+	ld   a, [wMisc_C026]			; Mark this since we should unset this later
+	set  MISCB_LAG_FRAME, a
 	ld   [wMisc_C026], a
 	
 	ld   a, [wMisc_C025]			
-	bit  MISCB_PAUSE_TASKS, a		; Are tasks globally disabled?
-	jp   nz, .execCommon			; If so, skip directly to the common code
+	bit  MISCB_FREEZE, a			; Is everything frozen?
+	jp   nz, .execCommon			; If so, skip executing all tasks
 	
 	; If we can execute the task (marked as TASK_EXEC_TODO or TASK_EXEC_NEW), then do it
 	ld   a, [hl]
@@ -805,7 +804,6 @@ Task_DoCycle:
 ; IN
 ; - A = Task ID ($01 - $03)
 ; - BC = Ptr to init code of the task / module entry point
-L0003B8:
 Task_CreateAt:
 	di
 	push af
@@ -830,7 +828,6 @@ Task_CreateAt:
 ; Removes the task at the specified ID.
 ; IN
 ; - A = Task ID
-L0003CF:
 Task_RemoveAt:
 	di
 	push af
@@ -847,7 +844,7 @@ Task_RemoveAt:
 	pop  af
 	ei
 	ret
-; =============== Task_ExecRun ===============
+; =============== Task_ExecRunCustom ===============
 ; Pauses the current task and gives back control to the task system.
 ;
 ; HOW IT WORKS
@@ -877,9 +874,8 @@ Task_RemoveAt:
 ; called for the first time, and so on.
 ;
 ; IN
-; - A = Set as byte1 of the task struct ???
-L0003E2:
-Task_ExecRun:
+; - A: How many frames to pause the task after it's executed. If $01, it won't be paused.
+Task_ExecRunCustom:
 
 	; By calling this subroutine, we have to set the current stack location as a task, which
 	; will replace the current one. Most of the time it does nothing but mark the task as executed,
@@ -903,7 +899,7 @@ Task_ExecRun:
 		inc  hl
 	pop  af
 	
-	ldi  [hl], a		; ???? Set the unknown value at byte1
+	ldi  [hl], a		; Set pause timer
 	
 	;
 	; Copy SP to DE, then write it to the iTaskCodePtr fields.
@@ -920,39 +916,39 @@ Task_ExecRun:
 	; The task has been set, now execute the next ones with IDs higher than the current one
 	jp   Task_DoCycle
 
-; =============== Task_ExecRunFar_B01 ===============
-; Wrapper for Task_ExecRun_B01 which also saves the current bank number.
+; =============== Task_ExecRunFar ===============
+; Wrapper for Task_ExecRun_NoDelay which also saves the current bank number.
 ; Use when executing tasks across different banks.
-Task_ExecRunFar_B01:
+Task_ExecRunFar:
 	ldh  a, [hROMBank]		; Save bank for when we're returning
 	push af
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	pop  af					; Restore bank
 	ld   [MBC1RomBank], a	
 	ldh  [hROMBank], a
 	ret
 	
 ; =============== Task_ExecRun_* ===============
-; Sets of wrappers to Task_ExecRun which set a different byte1.
-Task_ExecRun_B01:
-	ld   a, $01
-	jr   Task_ExecRun
+; Sets of wrappers to Task_ExecRun with different pause timers.
+Task_ExecRun_NoDelay:
+	ld   a, $01				; Delay for $01-1 frames before next exec
+	jr   Task_ExecRunCustom
 ; [TCRF] Unused.
-Task_Unused_ExecRun_B02: 
-	ld   a, $02
-	jr   Task_ExecRun
-Task_ExecRun_B05:
-	ld   a, $05
-	jr   Task_ExecRun
-Task_ExecRun_B0A:
+Task_Unused_ExecRun_Delay01: 
+	ld   a, $02				; Delay for $02-1 frames before next exec
+	jr   Task_ExecRunCustom
+Task_ExecRun_Delay04:
+	ld   a, $05				; ...
+	jr   Task_ExecRunCustom
+Task_ExecRun_Delay09:
 	ld   a, $0A
-	jr   Task_ExecRun
-Task_ExecRun_B1E:
+	jr   Task_ExecRunCustom
+Task_ExecRun_Delay1D:
 	ld   a, $1E
-	jr   Task_ExecRun
-Task_ExecRun_B3C:;
+	jr   Task_ExecRunCustom
+Task_ExecRun_Delay3B:
 	ld   a, $3C
-	jr   Task_ExecRun
+	jr   Task_ExecRunCustom
 	
 ; =============== Task_RemoveCurAndExecRun ===============	
 ; Similar to Task_ExecRun, except the current task is removed instead of marked as executed.
@@ -966,7 +962,6 @@ Task_RemoveCurAndExecRun:
 	
 ; =============== Task_IndexTaskAuto ===============
 ; Indexes the task struct of the currently executing (???) task.
-L000429:
 Task_IndexTaskAuto:
 	ldh  a, [hCurTaskId]	; A = Index to current task ???
 	
@@ -990,7 +985,6 @@ Task_IndexTask:
 	
 ; =============== Task_SkipAllAndWaitVBlank ===============
 ; Waits for VBlank without executing any of the tasks or common code.
-L000436:
 Task_SkipAllAndWaitVBlank:
 	ld   a, $01
 	ld   [wVBlankNotDone], a
@@ -998,7 +992,6 @@ Task_SkipAllAndWaitVBlank:
 	
 ; =============== Task_Unused_SkipAllAndWaitVBlank_Copy ===============
 ; [TCRF] Unused? copy of the above.
-L00043E:
 Task_Unused_SkipAllAndWaitVBlank_Copy:
 	ld   a, $01
 	ld   [wVBlankNotDone], a
@@ -1006,16 +999,15 @@ Task_Unused_SkipAllAndWaitVBlank_Copy:
 
 ; =============== Task_ExecCommon ===============
 ; Executes the common tasks before waiting for VBLANK.
-L000446:
 Task_ExecCommon:
 
 	; Mark frame as executed -- wait for the VBlank handler below
 	ld   a, $01
 	ld   [wVBlankNotDone], a
 	
-	; If tasks are disabled, skip over these ones too
+	; If game is frozen, skip over these ones too
 	ld   a, [wMisc_C025]
-	bit  MISCB_PAUSE_TASKS, a		; Tasks disabled?
+	bit  MISCB_FREEZE, a			; Is it set?
 	jp   nz, Task_EndOfFrame		; If so, skip
 	
 	call OBJLstS_WriteAll
@@ -1024,17 +1016,18 @@ Task_ExecCommon:
 	; Fall-through
 	
 ; =============== Task_EndOfFrame ===============
-L00045C:
 Task_EndOfFrame:
 
-	; Clear the "Task exec loop executed" marker
+	; Clear the lag frame marker since we made it in time.
 	push hl
 	ld   hl, wMisc_C026
-	res  MISCB_TASK_CTRL_CALLED, [hl]
+	res  MISCB_LAG_FRAME, [hl]
 	pop  hl
 	
 	; Wait in a loop until the VBlank handler triggers, which clears the flag
-	; and marks all tasks for execution
+	; and marks all tasks for execution.
+	; If we get here too late, the flag ends up not being cleared and we wait
+	; for an extra frame.
 	ei
 .waitVBlank:
 	ld   a, [wVBlankNotDone]
@@ -1043,12 +1036,19 @@ Task_EndOfFrame:
 	ret
 	
 
-L00046C:;C
-	ld   [$C15A], a
+; =============== SetSectLYC ===============
+; Sets the scanline numbers for two of the three default screen sections.
+; The first section always starts at $00 and is set during VBLANK,
+; using hScrollY and hScrollX directly as its X/Y positions.
+; IN
+; - A: Scanline number the second section starts
+; - B: Scanline number the third section starts
+SetSectLYC:
+	ld   [wScreenSect1LYC], a
 	ld   a, b
-	ld   [$C15B], a
+	ld   [wScreenSect2LYC], a
 	ld   a, [wMisc_C028]
-	or   a, $01
+	or   a, $01				
 	ld   [wMisc_C028], a
 	ret
 L00047C:;C
@@ -1057,7 +1057,7 @@ L00047C:;C
 	res  0, [hl]
 	pop  hl
 	ret
-L000484:;J
+LCDCHandler:;J
 	push af
 	ld   a, [wMisc_C028]
 	bit  0, a
@@ -1067,19 +1067,19 @@ L000484:;J
 	pop  af
 	reti
 L000494:;J
-	ld   a, [$C006]
+	ld   a, [w_Unknown_SomethingLCDC]
 	or   a
 	jp   nz, L0004B3
 	ld   a, $28
 L00049D:;J
 	dec  a
 	jp   nz, L00049D
-	ldh  a, [$FFF1]
+	ldh  a, [hScreenSect1BGP]
 	ldh  [rBGP], a
 	ld   a, $C7
 	ldh  [rLCDC], a
-	ld   [$C006], a
-	ld   a, [$C15B]
+	ld   [w_Unknown_SomethingLCDC], a
+	ld   a, [wScreenSect2LYC]
 	ldh  [rLYC], a
 	pop  af
 	reti
@@ -1088,14 +1088,14 @@ L0004B3:;J
 L0004B5:;J
 	dec  a
 	jp   nz, L0004B5
-	ldh  a, [$FFF2]
+	ldh  a, [hScreenSect2BGP]
 	ldh  [rBGP], a
 	ld   a, $E7
 	ldh  [rLCDC], a
 	pop  af
 	reti
 L0004C3:;J
-	ld   a, [$C006]
+	ld   a, [w_Unknown_SomethingLCDC]
 	or   a
 	jp   z, L0004E1
 	dec  a
@@ -1113,40 +1113,40 @@ L0004E1:;J
 	ld   a, $C7
 	ldh  [rLCDC], a
 	ld   a, $01
-	ld   [$C006], a
+	ld   [w_Unknown_SomethingLCDC], a
 	ld   a, $73
 	jp   L000532
 L0004EF:;J
 	ld   a, $02
-	ld   [$C006], a
+	ld   [w_Unknown_SomethingLCDC], a
 	ldh  a, [$FFE6]
 	ldh  [rSCX], a
 	ld   a, $77
 	jp   L000532
 L0004FD:;J
 	ld   a, $03
-	ld   [$C006], a
+	ld   [w_Unknown_SomethingLCDC], a
 	ldh  a, [$FFE8]
 	ldh  [rSCX], a
 	ld   a, $7B
 	jp   L000532
 L00050B:;J
 	ld   a, $04
-	ld   [$C006], a
+	ld   [w_Unknown_SomethingLCDC], a
 	ldh  a, [$FFEA]
 	ldh  [rSCX], a
 	ld   a, $7F
 	jp   L000532
 L000519:;J
 	ld   a, $05
-	ld   [$C006], a
+	ld   [w_Unknown_SomethingLCDC], a
 	ldh  a, [$FFEC]
 	ldh  [rSCX], a
 	ld   a, $83
 	jp   L000532
 L000527:;J
 	ld   a, $06
-	ld   [$C006], a
+	ld   [w_Unknown_SomethingLCDC], a
 	ldh  a, [$FFEE]
 	ldh  [rSCX], a
 	ld   a, $87
@@ -1163,331 +1163,381 @@ L000538:;J
 	ldh  [rLCDC], a
 	pop  af
 	reti
-L000542:;J
-	di
+; =============== VBlankHandler ===============
+; Long VBLANK handler.
+VBlankHandler:
+	di	
+	
 	push af
 	push bc
 	push de
 	push hl
+	
 	ldh  a, [hROMBank]
 	push af
+	;--
+	
 	ld   hl, wMisc_C025
-	bit  6, [hl]
-	jp   z, L000587
-	res  3, [hl]
-	ld   a, [$C14B]
-	or   a
-	jp   z, L000583
-L00055B: db $CB;X
-L00055C: db $6E;X
-L00055D: db $C2;X
-L00055E: db $63;X
-L00055F: db $05;X
-L000560: db $C3;X
-L000561: db $87;X
-L000562: db $05;X
-L000563: db $FA;X
-L000564: db $42;X
-L000565: db $C1;X
-L000566: db $B7;X
-L000567: db $C2;X
-L000568: db $83;X
-L000569: db $05;X
-L00056A: db $21;X
-L00056B: db $25;X
-L00056C: db $C0;X
-L00056D: db $CB;X
-L00056E: db $DE;X
-L00056F: db $3E;X
-L000570: db $80;X
-L000571: db $E0;X
-L000572: db $02;X
-L000573: db $21;X
-L000574: db $C5;X
-L000575: db $C1;X
-L000576: db $34;X
-L000577: db $21;X
-L000578: db $49;X
-L000579: db $C1;X
-L00057A: db $CD;X
-L00057B: db $78;X
-L00057C: db $10;X
-L00057D: db $CD;X
-L00057E: db $71;X
-L00057F: db $16;X
-L000580: db $C3;X
-L000581: db $87;X
-L000582: db $05;X
-L000583:;J
-	xor  a
-	ld   [$C146], a
-L000587:;J
+	bit  MISCB_SERIAL_MODE, [hl]	; Is VS Mode Serial enabled?
+	jp   z, VBlank_ChkCopyPlTiles	; If not, skip
+.serialVS:
+	res  MISCB_FREEZE, [hl]			; Unfreeze game
+	ld   a, [wSerialInputEnabled]
+	or   a							; Is serial input enabled?
+	jp   z, .unmarkSerialDone		; If not, skip
+	bit  MISCB_SERIAL_PL2_SLAVE, [hl]		; Playing as PL2 (slave)?
+	jp   nz, .serialPl2				; If so, jump
+	jp   VBlank_ChkCopyPlTiles		; Otherwise skip
+.serialPl2:
+	; The slave gets to do this, but only when ???
+	; Reconnection attempt?
+	ld   a, [wSerial_Unknown_SlaveRetransfer]
+	or   a							; ???
+	jp   nz, .unmarkSerialDone
+	
+	ld   hl, wMisc_C025							; Freeze game while waiting for serial ???
+	set  MISCB_FREEZE, [hl]	
+	ld   a, START_TRANSFER_EXTERNAL_CLOCK		; Start transfer with clock on other GB
+	ldh  [rSC], a					
+	ld   hl, wSerial_Unknown_PausedFrameTimer	; PauseTimer++
+	inc  [hl]
+	ld   hl, wSerialJoyLastKeys2				; Get joypad input for current player (P2)
+	call JoyKeys_Get_Standard
+	call JoyKeys_Serial_WriteNewValueToSendBuffer
+	jp   VBlank_ChkCopyPlTiles
+;--
+.unmarkSerialDone:
+	xor  a								; ???
+	ld   [wSerial_Unknown_Done], a
+	
+; =============== VBlank_ChkCopyPlTiles ===============
+; Determines if the player graphics should be copied to VRAM,
+; which also increase the animation.
+VBlank_ChkCopyPlTiles:
 	ld   a, [wMisc_C026]
-	bit  3, a
-	jp   nz, L0007AA
+	bit  MISCB_LAG_FRAME, a			; Is this a lag frame?
+	jp   nz, VBlank_SetInitialSect	; If so, don't update player gfx
 	ld   a, [wMisc_C025]
-	bit  3, a
-	jp   nz, L0007AA
-	ld   a, [$C00E]
+	bit  MISCB_FREEZE, a			; Is everything frozen?
+	jp   nz, VBlank_SetInitialSect	; If so, also skip copying GFX
+	ld   a, [wPaused]
+	or   a							; Game is paused?
+	jp   nz, VBlank_SetInitialSect	; If so, skip
+	jp   VBlank_CopyPl1Tiles						
+
+;--
+; [TCRF] Unreferenced code.
+L0005A1:
+	ld   a, [$D921]
+	bit  4, a
+	jp   nz, VBlank_CopyPl1Tiles
+	ld   a, [$D922]
+	bit  2, a
+	jp   nz, VBlank_CopyPl1Tiles
+	ld   a, [$C172]
 	or   a
-	jp   nz, L0007AA
-	jp   L0005B8
-L0005A1: db $FA;X
-L0005A2: db $21;X
-L0005A3: db $D9;X
-L0005A4: db $CB;X
-L0005A5: db $67;X
-L0005A6: db $C2;X
-L0005A7: db $B8;X
-L0005A8: db $05;X
-L0005A9: db $FA;X
-L0005AA: db $22;X
-L0005AB: db $D9;X
-L0005AC: db $CB;X
-L0005AD: db $57;X
-L0005AE: db $C2;X
-L0005AF: db $B8;X
-L0005B0: db $05;X
-L0005B1: db $FA;X
-L0005B2: db $72;X
-L0005B3: db $C1;X
-L0005B4: db $B7;X
-L0005B5: db $C2;X
-L0005B6: db $A4;X
-L0005B7: db $06;X
-L0005B8:;J
-	ld   a, [$D8C5]
-	or   a
-	jp   nz, L0005C9
-	ld   a, [$D8C9]
-	or   a
-	jp   nz, L000602
-	jp   L0006A4
-L0005C9:;J
-	ld   b, $03
-	cp   a, b
-	jp   nc, L0005D0
-	ld   b, a
-L0005D0:;J
-	sub  a, b
-	ld   [$D8C5], a
-	ld   a, [$D8C0]
+	jp   nz, VBlank_CopyPl1Tiles.end
+;--
+
+; =============== VBlank_CopyPl*Tiles ===============
+; Set of subroutines for copying the player graphics across multiple frames during VBLANK.
+;
+; Each frame, at most 3 tiles get copied for each character.
+; The player graphics are double buffered at two different VRAM slots.
+;
+; Note that the game always waits for a buffer to be filled before switching buffers
+; and before continuing with the player animation/move. This also has the side effect
+; that the amount of frames it takes to copy the graphics directly determines the anim speed.
+;
+; If the tiles were not being copied, the player would be stuck.
+
+MAX_TILE_BUFFER_COPY EQU $03
+
+; =============== mVBlank_CopyPlTiles ===============
+; IN
+; - 1: Ptr to wGFXBufInfo structure
+mVBlank_CopyPlTiles: MACRO
+	; TODO
+ENDM
+
+; =============== VBlank_CopyPl1Tiles ===============
+; Copies the player 1 graphics to VRAM.
+VBlank_CopyPl1Tiles:
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft0]
+	or   a					; Any tiles left to transfer to buffer 0?
+	jp   nz, .copyTo0		; If so, jump
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft1]
+	or   a					; Any tiles left to transfer to buffer 1?
+	jp   nz, .copyTo1		; If so, jump
+	jp   .end				; If there's nothing, we're done
+		
+.copyTo0:
+	;
+	; Prepare the call to CopyTiles
+	;
+
+	; B = How many tiles to copy (+ update stat)
+	ld   b, MAX_TILE_BUFFER_COPY	; B = MaxTiles
+	cp   a, b						; TilesLeft >= MaxTiles?
+	jp   nc, .notLast0				; If so, jump
+	ld   b, a						; Otherwise, B = TilesLeft
+									; Reaching this means this is the last set of tiles
+.notLast0:
+	sub  a, b							; TilesLeft -= TilesToCopy
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft0], a		; Update stat
+	
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_Low]		; DE = Destination Ptr
 	ld   e, a
-	ld   a, [$D8C1]
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_High]
 	ld   d, a
-	ld   a, [$D8C2]
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtr0_Low]		; HL = Source unc. gfx ptr
 	ld   l, a
-	ld   a, [$D8C3]
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtr0_High]
 	ld   h, a
-	ld   a, [$D8C4]
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_Bank0]				; A = Bank number the graphics are in
+	ld   [MBC1RomBank], a
+	ldh  [hROMBank], a
+	call CopyTiles
+	; Save the updated stats back, to resume next time
+	ld   a, e
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_Low], a
+	ld   a, d
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_High], a
+	ld   a, l
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtr0_Low], a
+	ld   a, h
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtr0_High], a
+	jp   .chkCopyEnd
+	
+.copyTo1:
+	; Same thing as before, but with the other buffer
+	ld   b, MAX_TILE_BUFFER_COPY
+	cp   a, b
+	jp   nc, .notLast1
+	ld   b, a
+.notLast1:
+	sub  a, b
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft1], a
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_Low]
+	ld   e, a
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_High]
+	ld   d, a
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtr1_Low]
+	ld   l, a
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtr1_High]
+	ld   h, a
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_Bank1]
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	call CopyTiles
 	ld   a, e
-	ld   [$D8C0], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_Low], a
 	ld   a, d
-	ld   [$D8C1], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_High], a
 	ld   a, l
-	ld   [$D8C2], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtr1_Low], a
 	ld   a, h
-	ld   [$D8C3], a
-	jp   L000638
-L000602:;J
-	ld   b, $03
-	cp   a, b
-	jp   nc, L000609
-	ld   b, a
-L000609:;J
-	sub  a, b
-	ld   [$D8C9], a
-	ld   a, [$D8C0]
-	ld   e, a
-	ld   a, [$D8C1]
-	ld   d, a
-	ld   a, [$D8C6]
-	ld   l, a
-	ld   a, [$D8C7]
-	ld   h, a
-	ld   a, [$D8C8]
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	call CopyTiles
-	ld   a, e
-	ld   [$D8C0], a
-	ld   a, d
-	ld   [$D8C1], a
-	ld   a, l
-	ld   [$D8C6], a
-	ld   a, h
-	ld   [$D8C7], a
-L000638:;J
-	ld   a, [$D8C5]
-	or   a
-	jp   nz, L0006A4
-	ld   a, [$D8C9]
-	or   a
-	jp   nz, L0006A4
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtr1_High], a
+	
+.chkCopyEnd:
+
+	; If there aren't any tiles left to copy in the buffer,
+	; flag the copy as done so the game can continue the animation. ?????
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft0]
+	or   a								; TilesLeft != 0?
+	jp   nz, .end						; If so, skip
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft1]
+	or   a								; TilesLeft != 0?
+	jp   nz, .end						; If so, skip
+	
+.flagEnd:
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	res  0, [hl]
-	set  3, [hl]
+	res  OSTB_ALTSET, [hl]
+	set  OSTB_BIT3, [hl]
 	ld   hl, $D922
-	bit  0, [hl]
-	jp   nz, L00066F
-	ld   hl, $D93D
-	ld   de, $D93A
+	bit  0, [hl]		; $D922 bit 0 set?
+	jp   nz, .move1		; If so, skip
+	
+	; Copy $D93D-$D93F to $D93A-$D93C and clear the former range
+	; as long as they aren't 0 already.
+	ld   hl, $D93D		; HL = Source
+	ld   de, $D93A		; DE = Destination
 	ld   a, [hl]
-	or   a
-	jp   z, L00066F
+	or   a				; $D93D == 0?
+	jp   z, .move1		; If so, skip
+	
+.move0:
+	ld   [de], a		
+	ld   [hl], $00		
+	inc  de
+	inc  hl
+	
+	ld   a, [hl]
 	ld   [de], a
 	ld   [hl], $00
 	inc  de
 	inc  hl
+	
 	ld   a, [hl]
 	ld   [de], a
 	ld   [hl], $00
+	
+.move1:
+
+	; This seems to be part of a sequence to check if there are tiles left to copy.
+	;
+	; As long as there are tiles which still need to get copied to the buffer, 
+	; the first set gets copied to the second set.
+	;
+	; Elsewhere, the second set is checked against the main buffer copy info.
+	; If it matches, a new buffer copy info is copied over from ROM.
+	;
+	; Only after that check, the buffer info is copied to the first set.
+	;
+	; This way, the baseInfo-set2 comparison always fails until there aren't any tiles to copy.
+	; ?????????
+	
+
+	; baseinfo clear
+	; ROM -> Baseinfo
+	; Initial baseinfo -> set0
+	; baseinfo updates as copybytes is done
+	; after a while set0 (still orig) copied ti set1 (here)
+	; check for set1-baseinfo match
+	; baseinfo -> set0
+	; set0 -> set1
+	; check for set1-baseinfo match
+	; baseinfo -> set0
+	
+	; Copy iGFXBufInfo_LastInfo to iGFXBufInfo_CompInfo
+	; This data is essentially an old copy of the buffer info ???
+	ld   hl, wGFXBufInfo_Pl1+iGFXBufInfo_LastInfo ; HL = Source
+	ld   de, wGFXBufInfo_Pl1+iGFXBufInfo_CompInfo ; DE = Destination
+	
+	; 6 total
+REPT 5
+	ldi  a, [hl]
+	ld   [de], a
 	inc  de
-	inc  hl
+ENDR
 	ld   a, [hl]
 	ld   [de], a
-	ld   [hl], $00
-L00066F:;J
-	ld   hl, $D8CA
-	ld   de, $D8D0
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ld   a, [hl]
-	ld   [de], a
-	ld   a, [$D681]
-	ld   [$D682], a
-	ld   a, [$D690]
-	ld   [$D694], a
-	ld   a, [$D691]
-	ld   [$D695], a
-	ld   a, [$D692]
-	ld   [$D696], a
-	ld   a, [$D693]
-	ld   [$D697], a
-L0006A4:;J
-	jp   L0006BE
-L0006A7: db $FA;X
-L0006A8: db $21;X
-L0006A9: db $DA;X
-L0006AA: db $CB;X
-L0006AB: db $67;X
-L0006AC: db $C2;X
-L0006AD: db $BE;X
-L0006AE: db $06;X
-L0006AF: db $FA;X
-L0006B0: db $22;X
-L0006B1: db $DA;X
-L0006B2: db $CB;X
-L0006B3: db $57;X
-L0006B4: db $C2;X
-L0006B5: db $BE;X
-L0006B6: db $06;X
-L0006B7: db $FA;X
-L0006B8: db $72;X
-L0006B9: db $C1;X
-L0006BA: db $B7;X
-L0006BB: db $C2;X
-L0006BC: db $AA;X
-L0006BD: db $07;X
-L0006BE:;J
-	ld   a, [$D8E5]
+	
+	; Copy set0 info to set1
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_UserFlags0]
+	ld   [wOBJInfo_Pl1+iOBJInfo_UserFlags1], a
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_BankNum0]
+	ld   [wOBJInfo_Pl1+iOBJInfo_BankNum1], a
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTbl_Low0]
+	ld   [wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTbl_Low1], a
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTbl_High0]
+	ld   [wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTbl_High1], a
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset0]
+	ld   [wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset1], a
+.end:
+	jp   VBlank_CopyPl2Tiles
+	
+;--
+; [TCRF] Unreferenced code
+L0006A7:
+	ld   a, [$DA21]
+	bit  4, a
+	jp   nz, VBlank_CopyPl2Tiles
+	ld   a, [$DA22]
+	bit  2, a
+	jp   nz, VBlank_CopyPl2Tiles
+	ld   a, [$C172]
 	or   a
-	jp   nz, L0006CF
-	ld   a, [$D8E9]
+	jp   nz, VBlank_CopyPl2Tiles.end
+;--
+; =============== VBlank_CopyPl2Tiles ===============
+; Copies the player 2 graphics to VRAM.
+VBlank_CopyPl2Tiles:
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft0]
 	or   a
-	jp   nz, L000708
-	jp   L0007AA
-L0006CF:;J
-	ld   b, $03
+	jp   nz, .copyTo0
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft1]
+	or   a
+	jp   nz, .copyTo1
+	jp   .end
+.copyTo0:
+	ld   b, MAX_TILE_BUFFER_COPY
 	cp   a, b
-	jp   nc, L0006D6
+	jp   nc, .notLast0
 	ld   b, a
-L0006D6:;J
+.notLast0:
 	sub  a, b
-	ld   [$D8E5], a
-	ld   a, [$D8E0]
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft0], a
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_Low]
 	ld   e, a
-	ld   a, [$D8E1]
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_High]
 	ld   d, a
-	ld   a, [$D8E2]
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtr0_Low]
 	ld   l, a
-	ld   a, [$D8E3]
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtr0_High]
 	ld   h, a
-	ld   a, [$D8E4]
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_Bank0]
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	call CopyTiles
 	ld   a, e
-	ld   [$D8E0], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_Low], a
 	ld   a, d
-	ld   [$D8E1], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_High], a
 	ld   a, l
-	ld   [$D8E2], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtr0_Low], a
 	ld   a, h
-	ld   [$D8E3], a
-	jp   L00073E
-L000708:;J
-	ld   b, $03
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtr0_High], a
+	jp   .chkCopyEnd
+.copyTo1:
+	ld   b, MAX_TILE_BUFFER_COPY
 	cp   a, b
-	jp   nc, L00070F
+	jp   nc, .notLast1
 	ld   b, a
-L00070F:;J
+.notLast1:
 	sub  a, b
-	ld   [$D8E9], a
-	ld   a, [$D8E0]
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft1], a
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_Low]
 	ld   e, a
-	ld   a, [$D8E1]
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_High]
 	ld   d, a
-	ld   a, [$D8E6]
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtr1_Low]
 	ld   l, a
-	ld   a, [$D8E7]
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtr1_High]
 	ld   h, a
-	ld   a, [$D8E8]
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_Bank1]
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	call CopyTiles
 	ld   a, e
-	ld   [$D8E0], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_Low], a
 	ld   a, d
-	ld   [$D8E1], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_High], a
 	ld   a, l
-	ld   [$D8E6], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtr1_Low], a
 	ld   a, h
-	ld   [$D8E7], a
-L00073E:;J
-	ld   a, [$D8E5]
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtr1_High], a
+.chkCopyEnd:
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft0]
 	or   a
-	jp   nz, L0007AA
-	ld   a, [$D8E9]
+	jp   nz, .end
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft1]
 	or   a
-	jp   nz, L0007AA
+	jp   nz, .end
+.flagEnd:
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	res  0, [hl]
-	set  3, [hl]
+	res  OSTB_ALTSET, [hl]
+	set  OSTB_BIT3, [hl]
 	ld   hl, $DA22
 	bit  0, [hl]
-	jp   nz, L000775
+	jp   nz, .move1
+	
 	ld   hl, $DA3D
 	ld   de, $DA3A
 	ld   a, [hl]
 	or   a
-	jp   z, L000775
+	jp   z, .move1
+.move0:
 	ld   [de], a
 	ld   [hl], $00
 	inc  de
@@ -1500,9 +1550,10 @@ L00073E:;J
 	ld   a, [hl]
 	ld   [de], a
 	ld   [hl], $00
-L000775:;J
-	ld   hl, $D8EA
-	ld   de, $D8F0
+.move1:
+
+	ld   hl, wGFXBufInfo_Pl2+iGFXBufInfo_LastInfo
+	ld   de, wGFXBufInfo_Pl2+iGFXBufInfo_CompInfo
 	ldi  a, [hl]
 	ld   [de], a
 	inc  de
@@ -1520,104 +1571,148 @@ L000775:;J
 	inc  de
 	ld   a, [hl]
 	ld   [de], a
-	ld   a, [$D6C1]
-	ld   [$D6C2], a
-	ld   a, [$D6D0]
-	ld   [$D6D4], a
-	ld   a, [$D6D1]
-	ld   [$D6D5], a
-	ld   a, [$D6D2]
-	ld   [$D6D6], a
-	ld   a, [$D6D3]
-	ld   [$D6D7], a
-L0007AA:;J
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_UserFlags0]
+	ld   [wOBJInfo_Pl2+iOBJInfo_UserFlags1], a
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_BankNum0]
+	ld   [wOBJInfo_Pl2+iOBJInfo_BankNum1], a
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTbl_Low0]
+	ld   [wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTbl_Low1], a
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTbl_High0]
+	ld   [wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTbl_High1], a
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffset0]
+	ld   [wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffset1], a
+.end:
+
+; =============== VBlank_SetInitialSect ===============
+; Initializes the topmost screen section (which starts at LY $00), which may
+; or may not be the only one depending if sections are enabled.
+VBlank_SetInitialSect:
 	ld   a, [wMisc_C028]
-	bit  0, a
-	jp   nz, L0007BA
-	bit  2, a
-	jp   nz, L0007E8
-	jp   L0007FF
-L0007BA:;J
+	bit  MISCB_USE_SECT, a		; Using screen sections?
+	jp   nz, .stdSect			; If so, jump
+	bit  MISCB_TITLE_SECT, a	; In the title screen?
+	jp   nz, .titleSect			; If so, jump
+	jp   .singleSect			; Otherwise, we don't do anything special. Skip ahead.
+	
+.stdSect:
+	;
+	; Standard 3-section mode.
+	;
 	ldh  a, [rSTAT]
-	and  a, $40
-	jp   z, L0007FB
-	ld   a, $E7
+	and  a, STAT_LYC		; LYC enabled?
+	jp   z, .noScanlineInt	; If not, ignore this
+	
+	; Enable all
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
 	ldh  [rLCDC], a
-	ld   a, [$C15A]
+	
+	ld   a, [wScreenSect1LYC]			; Set starting point for second section 
 	ldh  [rLYC], a
-	xor  a
-	ld   [$C006], a
-	ldh  a, [$FFF0]
+	xor  a								; Reset w_Unknown_SomethingLCDC
+	ld   [w_Unknown_SomethingLCDC], a
+	ldh  a, [hScreenSect0BGP]			; Set palette for first section
 	ldh  [rBGP], a
+	
+	; If we have a lag frame or game is frozen, don't update sprites.
+	; Otherwise (for the former, at least) we may risk copying over an incomplete OAM mirror.
 	ld   a, [wMisc_C026]
-	bit  3, a
-	jp   nz, L0007E5
+	bit  MISCB_LAG_FRAME, a				
+	jp   nz, .stdSect_noDMA
 	ld   a, [wMisc_C025]
-	bit  3, a
-	jp   nz, L0007E5
-	call $FF80
-L0007E5:;J
-	jp   L000802
-L0007E8:;J
+	bit  MISCB_FREEZE, a
+	jp   nz, .stdSect_noDMA
+	call hOAMDMA
+.stdSect_noDMA:
+	jp   .setFirstSect			; Skip ahead
+	
+.titleSect:
+	;
+	; Title screen mode.
+	; Like the single section mode, except there's a LYC trigger.
+	;
 	ldh  a, [rSTAT]
-	and  a, $40
-	jp   z, L0007FB
-	ld   a, $E7
+	and  a, STAT_LYC		; LYC enabled?
+	jp   z, .noScanlineInt	; If not, ignore this
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
 	ldh  [rLCDC], a
-	ld   a, $6F
+	ld   a, $6F				; Line where the parallax effect starts
 	ldh  [rLYC], a
 	ld   a, $1B
 	ldh  [rBGP], a
-L0007FB:;J
+.noScanlineInt:
+	;
+	; LYC was disabled
+	;
 	xor  a
-	ld   [$C006], a
-L0007FF:;J
-	call $FF80
-L000802:;J
-	ldh  a, [hScrollY]
+	ld   [w_Unknown_SomethingLCDC], a
+.singleSect:
+	;
+	; No sections
+	;
+	call hOAMDMA
+	
+.setFirstSect:
+	;
+	; Shared code for setting up the first section
+	;
+	ldh  a, [hScrollY]			; Set X and Y pos
 	ldh  [rSCY], a
 	ldh  a, [hScrollX]
 	ldh  [rSCX], a
+	
+; =============== VBlank_LastPart ===============
+VBlank_LastPart:
+	
+	; If we're lagging or everything is paused, skip directly to the end.
+	; This prevents unsetting wVBlankNotDone, forcing to wait an extra frame
+	; for the former or essentially freezing the game for the latter.
 	ld   a, [wMisc_C026]
-	bit  3, a
-	jp   nz, L000845
+	bit  MISCB_LAG_FRAME, a
+	jp   nz, .end
 	ld   a, [wMisc_C025]
-	bit  3, a
-	jp   nz, L000845
-	call L001067
-	ld   hl, wTimer
+	bit  MISCB_FREEZE, a
+	jp   nz, .end
+	
+	call JoyKeys_Get			; Get player input
+	ld   hl, wTimer				; GlobalTimer++
 	inc  [hl]
 	
-	; If the "VBlank finished" flag is already $00, it means the code took too long to execute
-	; and didn't set in time wVBlankNotDone to $01.
-	; If the code later sets wVBlankNotDone to $01 it will have to wait an extra lag frame.
+	; Clear wVBlankNotDone. 
 	; (why is this check even here -- it could be using "xor a" directly)
 	ld   a, [wVBlankNotDone]
 	or   a						; Status == 0?
-	jr   z, L00082B				; If so, jump
+	jr   z, .resetTasks			; If so, jump
 	dec  a
 	ld   [wVBlankNotDone], a
-L00082B:
+	
+.resetTasks:
 
-	ld   hl, hTaskTbl
-	ld   de, TASK_SIZE
-	ld   b, $03
-L000833:;J
-	bit  0, [hl]
-	jp   z, L000840
-	inc  hl
-	dec  [hl]
-	dec  hl
-	jp   nz, L000840
-	ld   [hl], $04
-L000840:;J
-	add  hl, de
-	dec  b
-	jp   nz, L000833
-L000845:;J
+	;
+	; Mark for execution all of the previously executed tasks with no pause timer
+	;
+	ld   hl, hTaskTbl		; HL = Start of task table
+	ld   de, TASK_SIZE		; DE = Task size
+	ld   b, $03				; B = Tasks left
+.loop:
+	bit  0, [hl]			; Type == TASK_EXEC_DONE?
+	jp   z, .nextTask		; If not, skip
+	
+	inc  hl					; Seek to iTaskPauseTimer
+	dec  [hl]				; PauseTimer--
+	dec  hl					; Seek back
+	
+	jp   nz, .nextTask		; Is the PauseTimer != 0? If so, skip
+	ld   [hl], TASK_EXEC_TODO	; Otherwise, mark it for execution
+.nextTask:
+	add  hl, de				; HL += TASK_SIZE
+	dec  b					; All tasks checked?
+	jp   nz, .loop			; If not, loop
+.end:
+	
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
+	
 	pop  hl
 	pop  de
 	pop  bc
@@ -2034,7 +2129,7 @@ OBJLstS_DoOBJInfoSlot:
 .chkDrawSecOBJ:
 	;
 	; Try to draw the secondary sprite mapping, if it's defined.
-	; If it isn't defined, its pointer in the animation table will be set to $FFFF.
+	; If it isn't defined, its pointer in the animation table will be set to rIE.
 	;
 	
 	; Seek to the next sprite mapping pointer.
@@ -2045,7 +2140,7 @@ OBJLstS_DoOBJInfoSlot:
 	inc  hl
 	ld   a, [hl]
 	
-	cp   HIGH(OBJLSTPTR_NONE) ; Is the high byte $FF? ($FFFF)
+	cp   HIGH(OBJLSTPTR_NONE) ; Is the high byte $FF? (rIE)
 	ret  z                    ; If so, there's nothing else to draw
 	ld   d, a
 	
@@ -3714,181 +3809,210 @@ HomeCall_Sound_Do:
 	pop  af
 	ret
 	
-L001067:;C
+; =============== JoyKeys_Get ===============
+; Gets the joypad input for the player.
+JoyKeys_Get:
 	ld   a, [wMisc_C025]
-	bit  7, a
-	jp   nz, L0010E8
-	ld   hl, $FF98
-	ld   a, [$C145]
-	and  a, a
-	jr   nz, L0010A8
-	ld   a, [hl]
-	cpl
-	ld   d, a
-	ld   a, $20
+	bit  MISCB_IS_SGB, a			; Running in SGB mode?
+	jp   nz, JoyKeys_Get_SGB		; If so, grab inputs for both players
+	ld   hl, hJoyKeys				; For later
+	ld   a, [wSerialPlId]
+	and  a							; Serial mode set? (seemingly set to 02 if so)
+	jr   nz, JoyKeys_Get_Serial		; If so, jump
+	
+; =============== JoyKeys_Get_Standard ===============
+; Gets the DMG joypad input for a player.
+; IN
+; - HL: Ptr to existing joypad input
+JoyKeys_Get_Standard:
+	; D = Keys not held
+	ld   a, [hl]			
+	cpl						
+	ld   d, a					
+	
+	; Get the directional key status
+	ld   a, HKEY_SEL_DPAD
 	ldh  [rJOYP], a
+	ldh  a, [rJOYP]			; Stabilize the inputs
 	ldh  a, [rJOYP]
-	ldh  a, [rJOYP]
-	and  a, $0F
-	ld   c, a
-	ld   a, $30
+	and  a, $0F				; ----DULR | Only use the actual keypress values (stored in the lower nybble)
+	ld   c, a				; Save to C
+	
+	; Reset (Not necessary?)
+	ld   a, HKEY_SEL_BTN|HKEY_SEL_DPAD 
 	ldh  [rJOYP], a
-	ld   a, $10
+	
+	; Get the button status
+	ld   a, HKEY_SEL_BTN
 	ldh  [rJOYP], a
+	ldh  a, [rJOYP]		; Stabilize the inputs
 	ldh  a, [rJOYP]
 	ldh  a, [rJOYP]
 	ldh  a, [rJOYP]
 	ldh  a, [rJOYP]
 	ldh  a, [rJOYP]
-	ldh  a, [rJOYP]
-	and  a, $0F
-	swap a
-	or   a, c
-	cpl
-	ldi  [hl], a
-	and  a, d
-	ld   [hl], a
-	ld   a, $30
+	and  a, $0F			; ----SCBA
+	
+	; Merge the nybbles and mungle them
+	swap a				; Move to upper nybble
+	or   a, c			; Merge with other: 
+						; This creates this bitmask: SCBADULR
+	cpl					; Reverse the bits as the hardware marks pressed keys as '0'. We need the opposite.
+	
+	; Save the result
+	ldi  [hl], a		; Write it to hJoyKeys
+	and  d				; hJoyNewKeys = hJoyKeys & D
+	ld   [hl], a		; Write it to hJoyNewKeys
+	; Reset
+	ld   a, HKEY_SEL_BTN|HKEY_SEL_DPAD
 	ldh  [rJOYP], a
 	ret
-L0010A8: db $4F;X
-L0010A9: db $FA;X
-L0010AA: db $4B;X
-L0010AB: db $C1;X
-L0010AC: db $A7;X
-L0010AD: db $C8;X
-L0010AE: db $79;X
-L0010AF: db $11;X
-L0010B0: db $98;X
-L0010B1: db $FF;X
-L0010B2: db $21;X
-L0010B3: db $47;X
-L0010B4: db $C1;X
-L0010B5: db $FE;X
-L0010B6: db $02;X
-L0010B7: db $28;X
-L0010B8: db $06;X
-L0010B9: db $21;X
-L0010BA: db $49;X
-L0010BB: db $C1;X
-L0010BC: db $11;X
-L0010BD: db $AB;X
-L0010BE: db $FF;X
-L0010BF: db $1A;X
-L0010C0: db $2F;X
-L0010C1: db $4F;X
-L0010C2: db $D5;X
-L0010C3: db $E5;X
-L0010C4: db $FA;X
-L0010C5: db $41;X
-L0010C6: db $C1;X
-L0010C7: db $5F;X
-L0010C8: db $3C;X
-L0010C9: db $E6;X
-L0010CA: db $7F;X
-L0010CB: db $EA;X
-L0010CC: db $41;X
-L0010CD: db $C1;X
-L0010CE: db $AF;X
-L0010CF: db $57;X
-L0010D0: db $21;X
-L0010D1: db $BE;X
-L0010D2: db $C0;X
-L0010D3: db $19;X
-L0010D4: db $7E;X
-L0010D5: db $36;X
-L0010D6: db $00;X
-L0010D7: db $21;X
-L0010D8: db $43;X
-L0010D9: db $C1;X
-L0010DA: db $35;X
-L0010DB: db $E1;X
-L0010DC: db $D1;X
-L0010DD: db $12;X
-L0010DE: db $13;X
-L0010DF: db $A1;X
-L0010E0: db $12;X
-L0010E1: db $CD;X
-L0010E2: db $78;X
-L0010E3: db $10;X
-L0010E4: db $CD;X
-L0010E5: db $3C;X
-L0010E6: db $16;X
-L0010E7: db $C9;X
-L0010E8: db $3E;X
-L0010E9: db $30;X
-L0010EA: db $E0;X
-L0010EB: db $00;X
-L0010EC: db $06;X
-L0010ED: db $02;X
-L0010EE: db $21;X
-L0010EF: db $98;X
-L0010F0: db $FF;X
-L0010F1: db $F0;X
-L0010F2: db $00;X
-L0010F3: db $E6;X
-L0010F4: db $01;X
-L0010F5: db $20;X
-L0010F6: db $03;X
-L0010F7: db $21;X
-L0010F8: db $AB;X
-L0010F9: db $FF;X
-L0010FA: db $7E;X
-L0010FB: db $2F;X
-L0010FC: db $57;X
-L0010FD: db $3E;X
-L0010FE: db $20;X
-L0010FF: db $E0;X
-L001100: db $00;X
-L001101: db $F0;X
-L001102: db $00;X
-L001103: db $F0;X
-L001104: db $00;X
-L001105: db $E6;X
-L001106: db $0F;X
-L001107: db $4F;X
-L001108: db $3E;X
-L001109: db $30;X
-L00110A: db $E0;X
-L00110B: db $00;X
-L00110C: db $3E;X
-L00110D: db $10;X
-L00110E: db $E0;X
-L00110F: db $00;X
-L001110: db $F0;X
-L001111: db $00;X
-L001112: db $F0;X
-L001113: db $00;X
-L001114: db $F0;X
-L001115: db $00;X
-L001116: db $F0;X
-L001117: db $00;X
-L001118: db $F0;X
-L001119: db $00;X
-L00111A: db $F0;X
-L00111B: db $00;X
-L00111C: db $E6;X
-L00111D: db $0F;X
-L00111E: db $CB;X
-L00111F: db $37;X
-L001120: db $B1;X
-L001121: db $2F;X
-L001122: db $22;X
-L001123: db $A2;X
-L001124: db $77;X
-L001125: db $3E;X
-L001126: db $30;X
-L001127: db $E0;X
-L001128: db $00;X
-L001129: db $05;X
-L00112A: db $C2;X
-L00112B: db $EE;X
-L00112C: db $10;X
-L00112D: db $C9;X
+	
+; =============== JoyKeys_Get_Serial ===============
+; Gets the DMG joypad input for player 1 + Player 2 input from serial.
+; IN
+; - A: Player ID
+JoyKeys_Get_Serial:
+	ld   c, a
+		ld   a, [wSerialInputEnabled]
+		and  a							; Do we allow input?
+		ret  z							; If not, return
+	ld   a, c
+	
+	; Depending on the player side, pick the correct current/remote addresses
+	ld   de, hJoyKeys		; P1 Side - Current GB
+	ld   hl, wSerialJoyLastKeys 			; P1 Side - Other GB
+	cp   a, SERIAL_PL1_ID	; Are we playing on the 1P side?
+	jr   z, .go				; If so, jump
+	ld   hl, wSerialJoyLastKeys2			; P2 Side - Other GB
+	ld   de, hJoyKeys2		; P2 Side - Current GB
+.go:
+
+	; C = Keys not held in current GB
+	ld   a, [de]			
+	cpl						
+	ld   c, a	
+	
+	;
+	; Obtain the held input of the current GB from the buffer of sent inputs.
+	; The reason we're doing this is to account for the delay of sending input to the other player
+	; through the serial cable.
+	;
+	; After getting the entry, clear it and increase the tail index.
+	;
+	push de
+	push hl
+		
+		
+		; Get index to the last byte (tracked by wSerialDataSendBufferIndex_Tail)
+		ld   a, [wSerialDataSendBufferIndex_Tail]
+		ld   e, a									
+		; Save back an incremented copy
+		inc  a										; Index++
+		and  a, $7F									; Size of buffer, cyles back
+		ld   [wSerialDataSendBufferIndex_Tail], a	; Save the updated index
+		
+		; Offset the value to clear
+		xor  a
+		ld   d, a
+		ld   hl, wSerialDataSendBuffer		; HL = Table
+		add  hl, de							; Offset it
+		
+		; A = Pressed keys on current GB
+		ld   a, [hl]						; Read entry out
+		
+		; Blank the entry. This only happens with the send buffer.
+		ld   [hl], $00						; Blank it
+		
+		; ??? Mark that a byte was processed from the buffer by decrementing this
+		ld   hl, wSerial_Unknown_0_IncDecMarker
+		dec  [hl]			
+	pop  hl
+	pop  de
+	ld   [de], a			; Write entry to hJoyKeys
+	inc  de					; Seek to hJoyNewKeys
+	and  c					; hJoyNewKeys = hJoyKeys & C
+	ld   [de], a			; Write entry to hJoyNewKeys
+	
+	; Handle the other player keys
+	call JoyKeys_Get_Standard
+	; Handle the next buffer values (tail from receive + head for send)
+	call JoyKeys_Serial_GetFromReceiveAndSetToSendBuffer
+	ret  
+	
+; =============== JoyKeys_Get_SGB ===============
+; Gets input for both players through the SGB (through the joypad registers, that is).
+; This is almost the same as JoyKeys_Get_Standard.
+JoyKeys_Get_SGB:
+
+	; Cycle to first controller, prepare for controller ID read
+	ld   a, HKEY_SEL_BTN|HKEY_SEL_DPAD 
+	ldh  [rJOYP], a
+	
+	ld   b, $02			; B = Joy count
+.loop:
+	; Pick the target address for storing the joypad info, depending on the controller ID.
+	; On the first run, write PL1 info from hJoyKeys.
+	; On the the second, write PL2 info from hJoyKeys2.
+	
+	ld   hl, hJoyKeys		
+	ldh  a, [rJOYP]			; Read controller ID
+	and  a, $01				; ID % 2 != 0? (will match != $*E)
+	jr   nz, .go			; If so, jump (this is pad 1)
+	ld   hl, hJoyKeys2		; Otherwise, this is pad 2
+.go:
+
+	; D = Keys not held
+	ld   a, [hl]			
+	cpl						
+	ld   d, a					
+	
+	; Get the directional key status
+	ld   a, HKEY_SEL_DPAD
+	ldh  [rJOYP], a
+	ldh  a, [rJOYP]			; Stabilize the inputs
+	ldh  a, [rJOYP]
+	and  a, $0F				; ----DULR | Only use the actual keypress values (stored in the lower nybble)
+	ld   c, a				; Save to C
+	
+	; Reset (Not necessary?)
+	ld   a, HKEY_SEL_BTN|HKEY_SEL_DPAD 
+	ldh  [rJOYP], a
+	
+	; Get the button status
+	ld   a, HKEY_SEL_BTN
+	ldh  [rJOYP], a
+	ldh  a, [rJOYP]		; Stabilize the inputs
+	ldh  a, [rJOYP]
+	ldh  a, [rJOYP]
+	ldh  a, [rJOYP]
+	ldh  a, [rJOYP]
+	ldh  a, [rJOYP]
+	and  a, $0F			; ----SCBA
+	
+	; Merge the nybbles and mungle them
+	swap a				; Move to upper nybble
+	or   a, c			; Merge with other: 
+						; This creates this bitmask: SCBADULR
+	cpl					; Reverse the bits as the hardware marks pressed keys as '0'. We need the opposite.
+	
+	; Save the result
+	ldi  [hl], a		; Write it to hJoyKeys
+	and  d				; hJoyNewKeys = hJoyKeys & D
+	ld   [hl], a		; Write it to hJoyNewKeys
+	
+	; Reset + Cycle to next controller
+	ld   a, HKEY_SEL_BTN|HKEY_SEL_DPAD
+	ldh  [rJOYP], a
+	
+	dec  b				; JoyLeft--
+	jp   nz, .loop	; All pads red? If not, loop
+	ret
+	
 L00112E:;C
-	ld   hl, $FF98
+	ld   hl, hJoyKeys
 	call L00113B
-	ld   hl, $FFAB
+	ld   hl, hJoyKeys2
 	call L00113B
 	ret
 L00113B:;C
@@ -4243,11 +4367,11 @@ L00131B:;R
 	and  a, $E0
 	ld   e, a
 	call L0013A8
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	ld   b, $05
 L00132E:;R
 	call L0013A8
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	dec  b
 	jr   nz, L00132E
 L001337:;R
@@ -4264,24 +4388,24 @@ L00133F:;R
 	jr   nz, L001365
 	bit  1, a
 	jr   z, L00138B
-	ldh  a, [$FF99]
+	ldh  a, [hJoyNewKeys]
 	bit  7, a
 	jr   nz, L001380
-	ldh  a, [$FF98]
+	ldh  a, [hJoyKeys]
 	bit  4, a
 	jr   nz, L001386
-	ldh  a, [$FFAC]
+	ldh  a, [hJoyNewKeys2]
 	bit  7, a
 	jr   nz, L001380
-	ldh  a, [$FFAB]
+	ldh  a, [hJoyKeys2]
 	bit  4, a
 	jr   nz, L001386
 	jr   L00138B
 L001365:;R
-	ldh  a, [$FF99]
+	ldh  a, [hJoyNewKeys]
 	bit  7, a
 	jr   nz, L001373
-	ldh  a, [$FFAC]
+	ldh  a, [hJoyNewKeys2]
 	bit  7, a
 	jr   nz, L001373
 	jr   L00138B
@@ -4310,7 +4434,7 @@ L00138B:;R
 L00138C:;R
 	push af
 	call L0013A8
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	pop  af
 	dec  a
 	jr   nz, L00133F
@@ -4552,616 +4676,423 @@ L0014F7: db $06
 L0014F8: db $04
 L0014F9:;C
 	ld   hl, wMisc_C025
-	bit  6, [hl]
-	ret  z
-L0014FF: db $F3;X
-L001500: db $3E;X
-L001501: db $08;X
-L001502: db $EA;X
-L001503: db $3C;X
-L001504: db $C0;X
-L001505: db $3E;X
-L001506: db $17;X
-L001507: db $EA;X
-L001508: db $3D;X
-L001509: db $C0;X
-L00150A: db $AF;X
-L00150B: db $E0;X
-L00150C: db $01;X
-L00150D: db $EA;X
-L00150E: db $4B;X
-L00150F: db $C1;X
-L001510: db $F0;X
-L001511: db $FF;X
-L001512: db $F5;X
-L001513: db $AF;X
-L001514: db $E0;X
-L001515: db $0F;X
-L001516: db $3E;X
-L001517: db $08;X
-L001518: db $E0;X
-L001519: db $FF;X
-L00151A: db $FB;X
-L00151B: db $AF;X
-L00151C: db $EA;X
-L00151D: db $46;X
-L00151E: db $C1;X
-L00151F: db $21;X
-L001520: db $25;X
-L001521: db $C0;X
-L001522: db $CB;X
-L001523: db $6E;X
-L001524: db $C2;X
-L001525: db $5C;X
-L001526: db $15;X
-L001527: db $01;X
-L001528: db $10;X
-L001529: db $00;X
-L00152A: db $CD;X
-L00152B: db $4A;X
-L00152C: db $03;X
-L00152D: db $AF;X
-L00152E: db $EA;X
-L00152F: db $46;X
-L001530: db $C1;X
-L001531: db $F3;X
-L001532: db $3E;X
-L001533: db $43;X
-L001534: db $EA;X
-L001535: db $BE;X
-L001536: db $C0;X
-L001537: db $3E;X
-L001538: db $81;X
-L001539: db $E0;X
-L00153A: db $02;X
-L00153B: db $FB;X
-L00153C: db $01;X
-L00153D: db $00;X
-L00153E: db $06;X
-L00153F: db $FA;X
-L001540: db $46;X
-L001541: db $C1;X
-L001542: db $B7;X
-L001543: db $20;X
-L001544: db $09;X
-L001545: db $0B;X
-L001546: db $78;X
-L001547: db $B1;X
-L001548: db $C2;X
-L001549: db $3F;X
-L00154A: db $15;X
-L00154B: db $C3;X
-L00154C: db $31;X
-L00154D: db $15;X
-L00154E: db $AF;X
-L00154F: db $EA;X
-L001550: db $46;X
-L001551: db $C1;X
-L001552: db $FA;X
-L001553: db $3E;X
-L001554: db $C0;X
-L001555: db $FE;X
-L001556: db $4C;X
-L001557: db $20;X
-L001558: db $D8;X
-L001559: db $C3;X
-L00155A: db $82;X
-L00155B: db $15;X
-L00155C: db $3E;X
-L00155D: db $4C;X
-L00155E: db $EA;X
-L00155F: db $BE;X
-L001560: db $C0;X
-L001561: db $3E;X
-L001562: db $80;X
-L001563: db $E0;X
-L001564: db $02;X
-L001565: db $01;X
-L001566: db $00;X
-L001567: db $06;X
-L001568: db $FA;X
-L001569: db $46;X
-L00156A: db $C1;X
-L00156B: db $B7;X
-L00156C: db $20;X
-L00156D: db $09;X
-L00156E: db $0B;X
-L00156F: db $78;X
-L001570: db $B1;X
-L001571: db $C2;X
-L001572: db $68;X
-L001573: db $15;X
-L001574: db $C3;X
-L001575: db $5C;X
-L001576: db $15;X
-L001577: db $AF;X
-L001578: db $EA;X
-L001579: db $46;X
-L00157A: db $C1;X
-L00157B: db $FA;X
-L00157C: db $3E;X
-L00157D: db $C0;X
-L00157E: db $FE;X
-L00157F: db $43;X
-L001580: db $20;X
-L001581: db $DA;X
-L001582: db $F3;X
-L001583: db $AF;X
-L001584: db $06;X
-L001585: db $80;X
-L001586: db $21;X
-L001587: db $3E;X
-L001588: db $C0;X
-L001589: db $22;X
-L00158A: db $05;X
-L00158B: db $C2;X
-L00158C: db $89;X
-L00158D: db $15;X
-L00158E: db $06;X
-L00158F: db $80;X
-L001590: db $21;X
-L001591: db $BE;X
-L001592: db $C0;X
-L001593: db $22;X
-L001594: db $05;X
-L001595: db $C2;X
-L001596: db $93;X
-L001597: db $15;X
-L001598: db $EA;X
-L001599: db $05;X
-L00159A: db $C0;X
-L00159B: db $E0;X
-L00159C: db $01;X
-L00159D: db $E0;X
-L00159E: db $98;X
-L00159F: db $E0;X
-L0015A0: db $AB;X
-L0015A1: db $E0;X
-L0015A2: db $99;X
-L0015A3: db $E0;X
-L0015A4: db $AC;X
-L0015A5: db $EA;X
-L0015A6: db $47;X
-L0015A7: db $C1;X
-L0015A8: db $EA;X
-L0015A9: db $49;X
-L0015AA: db $C1;X
-L0015AB: db $EA;X
-L0015AC: db $48;X
-L0015AD: db $C1;X
-L0015AE: db $EA;X
-L0015AF: db $4A;X
-L0015B0: db $C1;X
-L0015B1: db $EA;X
-L0015B2: db $42;X
-L0015B3: db $C1;X
-L0015B4: db $EA;X
-L0015B5: db $43;X
-L0015B6: db $C1;X
-L0015B7: db $EA;X
-L0015B8: db $44;X
-L0015B9: db $C1;X
-L0015BA: db $EA;X
-L0015BB: db $C5;X
-L0015BC: db $C1;X
-L0015BD: db $EA;X
-L0015BE: db $C6;X
-L0015BF: db $C1;X
-L0015C0: db $3E;X
-L0015C1: db $80;X
-L0015C2: db $E0;X
-L0015C3: db $02;X
-L0015C4: db $3E;X
-L0015C5: db $01;X
-L0015C6: db $EA;X
-L0015C7: db $4B;X
-L0015C8: db $C1;X
-L0015C9: db $21;X
-L0015CA: db $25;X
-L0015CB: db $C0;X
-L0015CC: db $CB;X
-L0015CD: db $6E;X
-L0015CE: db $C2;X
-L0015CF: db $F2;X
-L0015D0: db $15;X
-L0015D1: db $3E;X
-L0015D2: db $22;X
-L0015D3: db $EA;X
-L0015D4: db $3C;X
-L0015D5: db $C0;X
-L0015D6: db $3E;X
-L0015D7: db $17;X
-L0015D8: db $EA;X
-L0015D9: db $3D;X
-L0015DA: db $C0;X
-L0015DB: db $3E;X
-L0015DC: db $01;X
-L0015DD: db $EA;X
-L0015DE: db $3E;X
-L0015DF: db $C1;X
-L0015E0: db $3E;X
-L0015E1: db $00;X
-L0015E2: db $EA;X
-L0015E3: db $3F;X
-L0015E4: db $C1;X
-L0015E5: db $3E;X
-L0015E6: db $02;X
-L0015E7: db $EA;X
-L0015E8: db $40;X
-L0015E9: db $C1;X
-L0015EA: db $3E;X
-L0015EB: db $00;X
-L0015EC: db $EA;X
-L0015ED: db $41;X
-L0015EE: db $C1;X
-L0015EF: db $C3;X
-L0015F0: db $13;X
-L0015F1: db $16;X
-L0015F2: db $3E;X
-L0015F3: db $2B;X
-L0015F4: db $EA;X
-L0015F5: db $3C;X
-L0015F6: db $C0;X
-L0015F7: db $3E;X
-L0015F8: db $17;X
-L0015F9: db $EA;X
-L0015FA: db $3D;X
-L0015FB: db $C0;X
-L0015FC: db $3E;X
-L0015FD: db $01;X
-L0015FE: db $EA;X
-L0015FF: db $3E;X
-L001600: db $C1;X
-L001601: db $3E;X
-L001602: db $00;X
-L001603: db $EA;X
-L001604: db $3F;X
-L001605: db $C1;X
-L001606: db $3E;X
-L001607: db $02;X
-L001608: db $EA;X
-L001609: db $40;X
-L00160A: db $C1;X
-L00160B: db $3E;X
-L00160C: db $00;X
-L00160D: db $EA;X
-L00160E: db $41;X
-L00160F: db $C1;X
-L001610: db $CD;X
-L001611: db $67;X
-L001612: db $17;X
-L001613: db $AF;X
-L001614: db $E0;X
-L001615: db $0F;X
-L001616: db $F1;X
-L001617: db $E0;X
-L001618: db $FF;X
-L001619: db $C9;X
-L00161A: db $AF;X
-L00161B: db $EA;X
-L00161C: db $46;X
-L00161D: db $C1;X
-L00161E: db $3E;X
-L00161F: db $10;X
-L001620: db $F5;X
-L001621: db $F3;X
-L001622: db $AF;X
-L001623: db $EA;X
-L001624: db $BE;X
-L001625: db $C0;X
-L001626: db $E0;X
-L001627: db $01;X
-L001628: db $3E;X
-L001629: db $81;X
-L00162A: db $E0;X
-L00162B: db $02;X
-L00162C: db $FB;X
-L00162D: db $CD;X
-L00162E: db $67;X
-L00162F: db $17;X
-L001630: db $FA;X
-L001631: db $46;X
-L001632: db $C1;X
-L001633: db $B7;X
-L001634: db $20;X
-L001635: db $00;X
-L001636: db $F1;X
-L001637: db $3D;X
-L001638: db $C2;X
-L001639: db $20;X
-L00163A: db $16;X
-L00163B: db $C9;X
-L00163C: db $FA;X
-L00163D: db $4B;X
-L00163E: db $C1;X
-L00163F: db $A7;X
-L001640: db $C8;X
-L001641: db $FA;X
-L001642: db $45;X
-L001643: db $C1;X
-L001644: db $A7;X
-L001645: db $C8;X
-L001646: db $21;X
-L001647: db $98;X
-L001648: db $FF;X
-L001649: db $FE;X
-L00164A: db $02;X
-L00164B: db $20;X
-L00164C: db $03;X
-L00164D: db $21;X
-L00164E: db $AB;X
-L00164F: db $FF;X
-L001650: db $7E;X
-L001651: db $2F;X
-L001652: db $4F;X
-L001653: db $E5;X
-L001654: db $FA;X
-L001655: db $3F;X
-L001656: db $C1;X
-L001657: db $5F;X
-L001658: db $3C;X
-L001659: db $E6;X
-L00165A: db $7F;X
-L00165B: db $EA;X
-L00165C: db $3F;X
-L00165D: db $C1;X
-L00165E: db $AF;X
-L00165F: db $57;X
-L001660: db $21;X
-L001661: db $3E;X
-L001662: db $C0;X
-L001663: db $19;X
-L001664: db $7E;X
-L001665: db $21;X
-L001666: db $42;X
-L001667: db $C1;X
-L001668: db $35;X
-L001669: db $E1;X
-L00166A: db $22;X
-L00166B: db $A1;X
-L00166C: db $77;X
-L00166D: db $CD;X
-L00166E: db $71;X
-L00166F: db $16;X
-L001670: db $C9;X
-L001671: db $FA;X
-L001672: db $45;X
-L001673: db $C1;X
-L001674: db $FE;X
-L001675: db $02;X
-L001676: db $20;X
-L001677: db $1A;X
-L001678: db $FA;X
-L001679: db $40;X
-L00167A: db $C1;X
-L00167B: db $5F;X
-L00167C: db $16;X
-L00167D: db $00;X
-L00167E: db $21;X
-L00167F: db $BE;X
-L001680: db $C0;X
-L001681: db $19;X
-L001682: db $FA;X
-L001683: db $47;X
-L001684: db $C1;X
-L001685: db $CD;X
-L001686: db $A8;X
-L001687: db $16;X
-L001688: db $77;X
-L001689: db $AF;X
-L00168A: db $EA;X
-L00168B: db $47;X
-L00168C: db $C1;X
-L00168D: db $3E;X
-L00168E: db $81;X
-L00168F: db $E0;X
-L001690: db $02;X
-L001691: db $C9;X
-L001692: db $FA;X
-L001693: db $40;X
-L001694: db $C1;X
-L001695: db $5F;X
-L001696: db $16;X
-L001697: db $00;X
-L001698: db $21;X
-L001699: db $BE;X
-L00169A: db $C0;X
-L00169B: db $19;X
-L00169C: db $FA;X
-L00169D: db $49;X
-L00169E: db $C1;X
-L00169F: db $CD;X
-L0016A0: db $A8;X
-L0016A1: db $16;X
-L0016A2: db $77;X
-L0016A3: db $AF;X
-L0016A4: db $EA;X
-L0016A5: db $49;X
-L0016A6: db $C1;X
-L0016A7: db $C9;X
-L0016A8: db $47;X
-L0016A9: db $E6;X
-L0016AA: db $03;X
-L0016AB: db $FE;X
-L0016AC: db $03;X
-L0016AD: db $C2;X
-L0016AE: db $B2;X
-L0016AF: db $16;X
-L0016B0: db $CB;X
-L0016B1: db $80;X
-L0016B2: db $78;X
-L0016B3: db $E6;X
-L0016B4: db $0C;X
-L0016B5: db $FE;X
-L0016B6: db $0C;X
-L0016B7: db $C2;X
-L0016B8: db $BC;X
-L0016B9: db $16;X
-L0016BA: db $CB;X
-L0016BB: db $90;X
-L0016BC: db $78;X
-L0016BD: db $C9;X
-
-; =============== L0016BE ===============
-; Initialize serial?
-L0016BE:
+	bit  MISCB_SERIAL_MODE, [hl]	; Are we in VS mode serial?
+	ret  z							; If not, return
+	di   
+	ld   a, LOW(L001708)
+	ld   [wSerialIntPtr_Low], a
+	ld   a, HIGH(L001708)
+	ld   [wSerialIntPtr_High], a
 	xor  a
 	ldh  [rSB], a
-	ld   [$C14B], a
-	ld   [$C03E], a
-	ld   [$C145], a
-	ld   [$C146], a
-	ld   [$C0BE], a
-	ld   a, $EF
-	ld   [$C03C], a
-	ld   a, $16
-	ld   [$C03D], a
+	ld   [wSerialInputEnabled], a
+	ldh  a, [rIE]
+	push af
+	xor  a
+	ldh  [rIF], a
+	ld   a, $08
+	ldh  [rIE], a
+	ei   
+	xor  a
+	ld   [wSerial_Unknown_Done], a
+	ld   hl, wMisc_C025
+	bit  MISCB_SERIAL_PL2_SLAVE, [hl]
+	jp   nz, L00155C
+	ld   bc, Rst_StopLCDOperation
+	call SGB_DelayAfterPacketSendCustom
+	xor  a
+	ld   [wSerial_Unknown_Done], a
+L001531:
+	di   
+	ld   a, $43
+	ld   [wSerialDataSendBuffer], a
+	ld   a, $81
+	ldh  [rSC], a
+	ei   
+	ld   bc, $0600
+L00153F:
+	ld   a, [wSerial_Unknown_Done]
+	or   a
+	jr   nz, L00154E
+	dec  bc
+	ld   a, b
+	or   c
+	jp   nz, L00153F
+	jp   L001531
+L00154E:
+	xor  a
+	ld   [wSerial_Unknown_Done], a
+	ld   a, [wSerialDataReceiveBuffer]
+	cp   a, $4C
+	jr   nz, L001531
+	jp   L001582
+L00155C:
+	ld   a, $4C
+	ld   [wSerialDataSendBuffer], a
+	ld   a, $80
+	ldh  [rSC], a
+	ld   bc, $0600
+L001568:
+	ld   a, [wSerial_Unknown_Done]
+	or   a
+	jr   nz, L001577
+	dec  bc
+	ld   a, b
+	or   c
+	jp   nz, L001568
+	jp   L00155C
+L001577:
+	xor  a
+	ld   [wSerial_Unknown_Done], a
+	ld   a, [wSerialDataReceiveBuffer]
+	cp   a, $43
+	jr   nz, L00155C
+L001582:
+	di   
+	xor  a
+	ld   b, $80
+	ld   hl, wSerialDataReceiveBuffer
+L001589:
+	ldi  [hl], a
+	dec  b
+	jp   nz, L001589
+	ld   b, $80
+	ld   hl, wSerialDataSendBuffer
+L001593:
+	ldi  [hl], a
+	dec  b
+	jp   nz, L001593
+	ld   [wTimer], a
+	ldh  [rSB], a
+	ldh  [hJoyKeys], a
+	ldh  [hJoyKeys2], a
+	ldh  [hJoyNewKeys], a
+	ldh  [hJoyNewKeys2], a
+	ld   [wSerialJoyLastKeys], a
+	ld   [wSerialJoyLastKeys2], a
+	ld   [wSerialJoyKeys], a
+	ld   [wSerialJoyKeys2], a
+	ld   [wSerial_Unknown_SlaveRetransfer], a
+	ld   [wSerial_Unknown_0_IncDecMarker], a
+	ld   [wSerial_Unknown_1_IncDecMarker], a
+	ld   [wSerial_Unknown_PausedFrameTimer], a
+	ld   [$C1C6], a
+	ld   a, $80
+	ldh  [rSC], a
+	ld   a, $01
+	ld   [wSerialInputEnabled], a
+	ld   hl, wMisc_C025
+	bit  MISCB_SERIAL_PL2_SLAVE, [hl]
+	jp   nz, L0015F2
+	ld   a, LOW(L001722)
+	ld   [wSerialIntPtr_Low], a
+	ld   a, HIGH(L001722)
+	ld   [wSerialIntPtr_High], a
+	ld   a, $01
+	ld   [wSerialDataReceiveBufferIndex_Head], a
+	ld   a, $00
+	ld   [wSerialDataReceiveBufferIndex_Tail], a
+	ld   a, $02
+	ld   [wSerialDataSendBufferIndex_Head], a
+	ld   a, $00
+	ld   [wSerialDataSendBufferIndex_Tail], a
+	jp   L001613
+L0015F2:
+	ld   a, LOW(L00172B)
+	ld   [wSerialIntPtr_Low], a
+	ld   a, HIGH(L00172B)
+	ld   [wSerialIntPtr_High], a
+	ld   a, $01
+	ld   [wSerialDataReceiveBufferIndex_Head], a
+	ld   a, $00
+	ld   [wSerialDataReceiveBufferIndex_Tail], a
+	ld   a, $02
+	ld   [wSerialDataSendBufferIndex_Head], a
+	ld   a, $00
+	ld   [wSerialDataSendBufferIndex_Tail], a
+	call L001767
+L001613:
+	xor  a
+	ldh  [rIF], a
+	pop  af
+	ldh  [rIE], a
+	ret  
+	xor  a
+	ld   [wSerial_Unknown_Done], a
+	ld   a, $10
+L001620:
+	push af
+	di   
+	xor  a
+	ld   [wSerialDataSendBuffer], a
+	ldh  [rSB], a
+	ld   a, $81
+	ldh  [rSC], a
+	ei   
+	call L001767
+	ld   a, [wSerial_Unknown_Done]
+	or   a
+	jr   nz, L001636
+L001636:
+	pop  af
+	dec  a
+	jp   nz, L001620
+	ret  
+	
+; =============== JoyKeys_Serial_GetFromReceiveAndSetToSendBuffer ===============
+; Obtains the joypad keys value from the tail of the buffer for received serial data.
+JoyKeys_Serial_GetFromReceiveAndSetToSendBuffer:
+	; Only do this if we're accepting serial inputs
+	ld   a, [wSerialInputEnabled]
+	and  a
+	ret  z
+	ld   a, [wSerialPlId]
+	and  a
+	ret  z
+	
+	ld   hl, hJoyKeys		; HL = Joypad input
+	cp   a, SERIAL_PL1_ID	; Playing as PL1?
+	jr   nz, .go			; If not, jump
+	ld   hl, hJoyKeys2
+.go:
+	; C = Keys not held
+	ld   a, [hl]			
+	cpl  
+	ld   c, a
+	
+	;
+	; Obtain the held input of the other GB from the buffer of received inputs.
+	;
+	; After getting the entry, increase the tail index but *DON'T* clear it.
+	;
+	push hl
+	
+		; Get index to the last byte (tracked by wSerialDataReceiveBufferIndex_Tail)
+		ld   a, [wSerialDataReceiveBufferIndex_Tail]
+		ld   e, a
+		; Save back an incremented copy
+		inc  a											; Index++
+		and  a, $7F										; Size of buffer, cyles back
+		ld   [wSerialDataReceiveBufferIndex_Tail], a	; Save the updated index
+		
+		; Offset the value to clear
+		xor  a
+		ld   d, a
+		ld   hl, wSerialDataReceiveBuffer
+		add  hl, de
+		
+		; A = Pressed keys on current GB
+		ld   a, [hl]
+		
+		; ??? Mark that a byte was processed from the buffer by decrementing this
+		ld   hl, wSerial_Unknown_SlaveRetransfer
+		dec  [hl]
+	pop  hl
+	
+	ldi  [hl], a		; Write entry to hJoyKeys
+	and  c				; hJoyNewKeys = hJoyKeys & C
+	ld   [hl], a		; Write entry to hJoyNewKeys
+	
+	;
+	call JoyKeys_Serial_WriteNewValueToSendBuffer
 	ret
 	
-L0016DB:;J
+; =============== JoyKeys_Serial_WriteNewValueToSendBuffer ===============
+; Writes the last pressed keys value to the top of the serial output buffer.
+JoyKeys_Serial_WriteNewValueToSendBuffer: 
+	ld   a, [wSerialPlId]
+	cp   a, SERIAL_PL1_ID		; Playing as P1?
+	jr   nz, .pl2				; If not, jump
+.pl1:
+	;
+	; Write wSerialJoyLastKeys to latest send buffer entry
+	;
+	ld   a, [wSerialDataSendBufferIndex_Head]	; DE = IndexTop for send buffer
+	ld   e, a
+	ld   d, $00
+	ld   hl, wSerialDataSendBuffer				; HL = SendBuffer
+	add  hl, de									; Index it
+	
+	ld   a, [wSerialJoyLastKeys]				; A = Newly pressed keys	
+	call JoyKeys_FixInvalidCombinations			; Fix it
+	ld   [hl], a								; Write it out
+	
+	xor  a										; Reset key status
+	ld   [wSerialJoyLastKeys], a
+	
+	; Player 1 (master) sends stuff with its clock
+	ld   a, START_TRANSFER_INTERNAL_CLOCK
+	ldh  [rSC], a
+	ret  
+.pl2:
+	;
+	; Write wSerialJoyLastKeys2 to latest send buffer entry
+	;
+	ld   a, [wSerialDataSendBufferIndex_Head]	; DE = IndexTop for send buffer
+	ld   e, a
+	ld   d, $00
+	ld   hl, wSerialDataSendBuffer				; HL = SendBuffer
+	add  hl, de									; Index it
+	
+	ld   a, [wSerialJoyLastKeys2]				; A = Newly pressed keys		
+	call JoyKeys_FixInvalidCombinations			; Fix it
+	ld   [hl], a								; Write it out
+	
+	xor  a										; Reset key status
+	ld   [wSerialJoyLastKeys2], a
+	ret  
+	
+; =============== JoyKeys_FixInvalidCombinations ===============
+; Removes keypresses for impossible button combinations.
+; IN
+; -  A: JoyNewKeys bitmask
+JoyKeys_FixInvalidCombinations:
+
+	; If we're holding L and R at the same time, remove R
+	ld   b, a
+	and  a, KEY_RIGHT|KEY_LEFT
+	cp   a, KEY_RIGHT|KEY_LEFT
+	jp   nz, .next
+	res  KEYB_RIGHT, b
+.next:
+	; If we're holding U and D at the same time, remove U
+	ld   a, b
+	and  a, KEY_UP|KEY_DOWN
+	cp   a, KEY_UP|KEY_DOWN
+	jp   nz, .end
+	res  KEYB_UP, b
+.end:
+	ld   a, b
+	ret  
+
+; =============== Serial_Init ===============
+; Initializes serial.
+Serial_Init:
+	xor  a
+	ldh  [rSB], a
+	ld   [wSerialInputEnabled], a
+	ld   [wSerialDataReceiveBuffer], a
+	ld   [wSerialPlId], a
+	ld   [wSerial_Unknown_Done], a
+	ld   [wSerialDataSendBuffer], a
+	; Set the initial serial code.
+	ld   a, LOW(Serial_Mode_WaitVSMenuSelect)
+	ld   [wSerialIntPtr_Low], a
+	ld   a, HIGH(Serial_Mode_WaitVSMenuSelect)
+	ld   [wSerialIntPtr_High], a
+	ret
+	
+; =============== SerialHandler ===============	
+; By default this isn't called.
+SerialHandler:
 	push af
 	push bc
 	push de
 	push hl
-	call L0016E7
+	call .main
 	pop  hl
 	pop  de
 	pop  bc
 	pop  af
 	reti
-L0016E7:;C
-	ld   hl, $C03C
+.main:
+	; Read out the code ptr
+	ld   hl, wSerialIntPtr_Low
 	ldi  a, [hl]
 	ld   e, a
 	ld   h, [hl]
 	ld   l, e
+	; Jump there
 	jp   hl
-L0016EF:;I
+	
+; =============== Serial_Mode_WaitVSMenuSelect ===============
+Serial_Mode_WaitVSMenuSelect:
+	; TODO
+	
+	; The Game Boy which selects the VS option sends out VS_SELECTED_OTHER
+	; to the other Game Boy.
+	; The other Game Boy sends out VS_SELECTED_THIS in return.
+	
+	; What matters here is the received data.
+	
+	ldh  a, [rSB]						; Copy current serial data
+	ld   [wSerialDataReceiveBuffer], a
+	cp   VS_SELECTED_THIS				; Did this GB select a VS option?
+	jr   z, .selectedThis				; If so, jump
+.selectedOther:
+	ld   a, START_TRANSFER_EXTERNAL_CLOCK	; Otherwise, try to start a transfer back to master
+	ldh  [rSC], a
+	ld   a, $01
+	ld   [wSerial_Unknown_Done], a
+	ret
+.selectedThis:
+	; Nothing to do
+	ld   a, $01							
+	ld   [wSerial_Unknown_Done], a
+	ret  
+	
+L001708:
 	ldh  a, [rSB]
-	ld   [$C03E], a
-	cp   $02
-	jr   z, L001702
+	ld   [wSerialDataReceiveBuffer], a
+	ld   a, [wSerialDataSendBuffer]
+	ldh  [rSB], a
+	ld   a, $01
+	ld   [wSerial_Unknown_Done], a
+	ld   a, [$C025]
+	bit  5, a
+	ret  z
+	ld   a, $80
+	ldh  [rSC], a
+	ret 
+L001722:
+	call L001738
+	ld   a, $01
+	ld   [wSerial_Unknown_Done], a
+	ret  
+L00172B:
+	call L001738
 	ld   a, $80
 	ldh  [rSC], a
 	ld   a, $01
-	ld   [$C146], a
-	ret
-L001702: db $3E;X
-L001703: db $01;X
-L001704: db $EA;X
-L001705: db $46;X
-L001706: db $C1;X
-L001707: db $C9;X
-L001708: db $F0;X
-L001709: db $01;X
-L00170A: db $EA;X
-L00170B: db $3E;X
-L00170C: db $C0;X
-L00170D: db $FA;X
-L00170E: db $BE;X
-L00170F: db $C0;X
-L001710: db $E0;X
-L001711: db $01;X
-L001712: db $3E;X
-L001713: db $01;X
-L001714: db $EA;X
-L001715: db $46;X
-L001716: db $C1;X
-L001717: db $FA;X
-L001718: db $25;X
-L001719: db $C0;X
-L00171A: db $CB;X
-L00171B: db $6F;X
-L00171C: db $C8;X
-L00171D: db $3E;X
-L00171E: db $80;X
-L00171F: db $E0;X
-L001720: db $02;X
-L001721: db $C9;X
-L001722: db $CD;X
-L001723: db $38;X
-L001724: db $17;X
-L001725: db $3E;X
-L001726: db $01;X
-L001727: db $EA;X
-L001728: db $46;X
-L001729: db $C1;X
-L00172A: db $C9;X
-L00172B: db $CD;X
-L00172C: db $38;X
-L00172D: db $17;X
-L00172E: db $3E;X
-L00172F: db $80;X
-L001730: db $E0;X
-L001731: db $02;X
-L001732: db $3E;X
-L001733: db $01;X
-L001734: db $EA;X
-L001735: db $46;X
-L001736: db $C1;X
-L001737: db $C9;X
-L001738: db $FA;X
-L001739: db $3E;X
-L00173A: db $C1;X
-L00173B: db $5F;X
-L00173C: db $3C;X
-L00173D: db $E6;X
-L00173E: db $7F;X
-L00173F: db $EA;X
-L001740: db $3E;X
-L001741: db $C1;X
-L001742: db $16;X
-L001743: db $00;X
-L001744: db $21;X
-L001745: db $3E;X
-L001746: db $C0;X
-L001747: db $19;X
-L001748: db $F0;X
-L001749: db $01;X
-L00174A: db $77;X
-L00174B: db $21;X
-L00174C: db $42;X
-L00174D: db $C1;X
-L00174E: db $34;X
-L00174F: db $FA;X
-L001750: db $40;X
-L001751: db $C1;X
-L001752: db $5F;X
-L001753: db $3C;X
-L001754: db $E6;X
-L001755: db $7F;X
-L001756: db $EA;X
-L001757: db $40;X
-L001758: db $C1;X
-L001759: db $16;X
-L00175A: db $00;X
-L00175B: db $21;X
-L00175C: db $BE;X
-L00175D: db $C0;X
-L00175E: db $19;X
-L00175F: db $7E;X
-L001760: db $E0;X
-L001761: db $01;X
-L001762: db $21;X
-L001763: db $43;X
-L001764: db $C1;X
-L001765: db $34;X
-L001766: db $C9;X
-L001767: db $01;X
-L001768: db $00;X
-L001769: db $06;X
-L00176A: db $00;X
-L00176B: db $00;X
-L00176C: db $0B;X
-L00176D: db $78;X
-L00176E: db $B1;X
-L00176F: db $C2;X
-L001770: db $6A;X
-L001771: db $17;X
-L001772: db $C9;X
-L001773: db $C3;X
-L001774: db $80;X
-L001775: db $43;X
+	ld   [wSerial_Unknown_Done], a
+	ret  
+L001738:
+	ld   a, [wSerialDataReceiveBufferIndex_Head]
+	ld   e, a
+	inc  a
+	and  a, $7F
+	ld   [wSerialDataReceiveBufferIndex_Head], a
+	ld   d, $00
+	ld   hl, wSerialDataReceiveBuffer
+	add  hl, de
+	ldh  a, [rSB]
+	ld   [hl], a
+	ld   hl, wSerial_Unknown_SlaveRetransfer
+	inc  [hl]
+	ld   a, [wSerialDataSendBufferIndex_Head]
+	ld   e, a
+	inc  a
+	and  a, $7F
+	ld   [wSerialDataSendBufferIndex_Head], a
+	ld   d, $00
+	ld   hl, wSerialDataSendBuffer
+	add  hl, de
+	ld   a, [hl]
+	ldh  [rSB], a
+	ld   hl, wSerial_Unknown_0_IncDecMarker
+	inc  [hl]
+	ret  
+L001767:
+	ld   bc, $0600
+L00176A:
+	nop  ; [POI] What was here?
+	nop  
+	dec  bc
+	ld   a, b
+	or   c
+	jp   nz, L00176A
+	ret  
+	jp   $4380
 L001776:;C
 	ld   a, $FF
 	ld   [$C167], a
@@ -5191,7 +5122,7 @@ L00179D:;J
 	set  1, [hl]
 	ld   a, $1E
 	ld   b, $7F
-	call L00046C
+	call SetSectLYC
 	ld   a, $FF
 	ld   [$C008], a
 	ld   hl, $C164
@@ -5200,9 +5131,9 @@ L00179D:;J
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
-	ldh  [$FFF0], a
-	ldh  [$FFF1], a
-	ldh  [$FFF2], a
+	ldh  [hScreenSect0BGP], a
+	ldh  [hScreenSect1BGP], a
+	ldh  [hScreenSect2BGP], a
 	xor  a
 	ldh  [rSTAT], a
 	ld   a, [$C167]
@@ -5218,7 +5149,7 @@ L0017E0:;J
 	ldh  [hScrollY], a
 	ld   a, $40
 	ld   [wFieldScrollY], a
-	ld   hl, $D8C0
+	ld   hl, wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_Low
 	ld   b, $40
 	xor  a
 L0017F5:;J
@@ -5267,8 +5198,8 @@ L0017F5:;J
 	call Task_CreateAt
 	call L00231E
 	ei
-	call Task_ExecRunFar_B01
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
+	call Task_ExecRunFar
 	ld   a, [$C17F]
 	cp   $0F
 	jp   z, L00187C
@@ -5296,7 +5227,7 @@ L001890:;R
 L001893:;J
 	ld   b, $0A
 L001895:;J
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	dec  b
 	jp   nz, L001895
 	ld   a, $8C
@@ -5306,9 +5237,9 @@ L001895:;J
 	ld   a, $1B
 	ld   [$C17C], a
 	ldh  [rBGP], a
-	ldh  [$FFF0], a
-	ldh  [$FFF1], a
-	ldh  [$FFF2], a
+	ldh  [hScreenSect0BGP], a
+	ldh  [hScreenSect1BGP], a
+	ldh  [hScreenSect2BGP], a
 	call L0023A3
 	call L0022C1
 	call L001BC5
@@ -5831,7 +5762,7 @@ L001BC2: db $F9
 L001BC3: db $60
 L001BC4: db $00
 L001BC5:;C
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ldh  a, [hROMBank]
 	push af
 	ld   a, $01
@@ -5840,41 +5771,41 @@ L001BC5:;C
 	ld   a, [$D92C]
 	ld   de, $8800
 	call L001C45
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ld   a, [$DA2C]
 	ld   de, $8A60
 	call L001C45
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ld   hl, $57E4
 	ld   de, $8CC0
 	ld   a, $04
 	call L001C7E
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ld   a, $01
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ld   hl, wOBJInfo2+iOBJInfo_Status
 	ld   de, $636A
 	call L000D76
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ld   hl, wOBJInfo3+iOBJInfo_Status
 	ld   de, $636A
 	call L000D76
 	ld   hl, $D74D
 	ld   [hl], $A6
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ld   hl, wOBJInfo4+iOBJInfo_Status
 	ld   de, $636A
 	call L000D76
 	ld   hl, $D78D
 	ld   [hl], $CC
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ld   hl, wOBJInfo5+iOBJInfo_Status
 	ld   de, $636A
 	call L000D76
 	ld   hl, $D7CD
 	ld   [hl], $CC
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
@@ -5898,7 +5829,7 @@ L001C4D:;J
 	ld   hl, $0000
 	ld   b, $02
 	call L000E1B
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	pop  hl
 	ldi  a, [hl]
 L001C66:;J
@@ -5916,7 +5847,7 @@ L001C66:;J
 	pop  af
 	dec  a
 	jp   nz, L001C66
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 L001C7D:;J
 	ret
 L001C7E:;C
@@ -5963,11 +5894,11 @@ L001CA8:;J
 	inc  de
 	dec  b
 	jp   nz, L001C83
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	pop  af
 	dec  a
 	jp   nz, L001C80
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ret
 L001CC3: db $00
 L001CC4: db $00
@@ -6836,7 +6767,7 @@ L0022D5:;J
 	call L0022FC
 	ld   hl, wOBJInfo3+iOBJInfo_Status
 	ld   [hl], $00
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ret
 L0022FC:;C
 	push hl
@@ -6852,7 +6783,7 @@ L0022FD:;J
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	call L0023EC
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	pop  bc
 	dec  b
 	jp   nz, L0022FD
@@ -7071,7 +7002,7 @@ L002475:;J
 	call L002482
 	pop  de
 	pop  bc
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	jp   L002475
 L002482:;C
 	call L002D75
@@ -7631,10 +7562,10 @@ L002827:;C
 	ld   a, [hl]
 	or   a
 	jp   nz, L00283F
-	ld   hl, $D6C1
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_UserFlags0
 	jp   L002842
 L00283F:;J
-	ld   hl, $D681
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_UserFlags0
 L002842:;J
 	ld   a, [hl]
 	and  a, $DF
@@ -9438,7 +9369,7 @@ L00339A:;J
 	set  7, [hl]
 	ld   a, $6C
 	call L00341B
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ld   a, $03
 	ld   [$C173], a
 	call L00386A
@@ -9448,7 +9379,7 @@ L0033BC:;J
 	jp   z, L0033CF
 	cp   $03
 	jp   nz, L0033D7
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	jp   L0033BC
 L0033CF:;J
 	ld   a, $03
@@ -10553,12 +10484,12 @@ L0039AE:;J
 	ld   a, [hl]
 	push af
 	push hl
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ld   hl, $001A
 	add  hl, de
 	xor  a
 	ld   [hl], a
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	pop  hl
 	pop  af
 	ldd  [hl], a
@@ -10654,12 +10585,12 @@ L003A59:;J
 	ld   a, [hl]
 	push af
 	push hl
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ld   hl, $001A
 	add  hl, de
 	xor  a
 	ld   [hl], a
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	pop  hl
 	pop  af
 	ldd  [hl], a
@@ -10699,7 +10630,7 @@ L003AB5:;J
 	jp   c, L003AD3
 	call L003CE7
 	jp   c, L003AD3
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ld   a, [$C172]
 	or   a
 	jp   nz, L003AB5
@@ -10758,17 +10689,17 @@ L003B15:;C
 	jp   z, L003B34
 L003B25:;J
 	dec  [hl]
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	inc  [hl]
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	dec  b
 	jp   nz, L003B25
 	jp   L003B40
 L003B34:;J
 	inc  [hl]
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	dec  [hl]
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	dec  b
 	jp   nz, L003B34
 L003B40:;J
@@ -10859,7 +10790,7 @@ L003BCF:;J
 	push af
 	inc  [hl]
 	inc  [hl]
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	push hl
 	call L002D75
 	call L003C18
@@ -10869,7 +10800,7 @@ L003BCF:;J
 	pop  hl
 	dec  [hl]
 	dec  [hl]
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	push hl
 	call L002D75
 	call L003C18

@@ -5000,7 +5000,7 @@ L1D553E:;J
 	call HomeCall_Sound_ReqPlayExId_Stub
 	ld   a, $C7
 	rst  $18
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	ld   a, $1B
 	ldh  [rBGP], a
 	call L1D5669
@@ -5107,7 +5107,7 @@ L1D55D4: db $B0;X
 L1D55D5: db $C1;X
 L1D55D6: db $C9;X
 L1D55D7:;J
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 L1D55DA:;J
 	call L1D5685
 	jp   c, L1D5629
@@ -5116,7 +5116,7 @@ L1D55DA:;J
 	jp   z, L1D55F1
 	dec  a
 	ld   [$C1B4], a
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	jp   L1D55DA
 L1D55F1:;J
 	ld   a, $3C
@@ -5133,7 +5133,7 @@ L1D55F1:;J
 	call L00129A
 	ld   hl, $56EA
 	call L001265
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	jp   L1D55DA
 L1D561B:;J
 	ld   a, $B1
@@ -5195,13 +5195,13 @@ L1D5668: db $C9;X
 L1D5669:;C
 	ld   bc, $01E0
 L1D566C:;J
-	ldh  a, [$FF99]
+	ldh  a, [hJoyNewKeys]
 	bit  7, a
 	jp   nz, L1D5683
-	ldh  a, [$FFAC]
+	ldh  a, [hJoyNewKeys2]
 	bit  7, a
 	jp   nz, L1D5683
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	dec  bc
 	ld   a, b
 	or   a, c
@@ -5210,10 +5210,10 @@ L1D5683:;J
 	scf
 	ret
 L1D5685:;C
-	ldh  a, [$FF99]
+	ldh  a, [hJoyNewKeys]
 	bit  7, a
 	jp   nz, L1D5695
-	ldh  a, [$FFAC]
+	ldh  a, [hJoyNewKeys2]
 	bit  7, a
 	jp   nz, L1D5695
 	xor  a
@@ -9588,22 +9588,22 @@ L1D67BD:;I
 	call L1D682A
 	ld   a, $18
 	ld   b, $5C
-	call L00046C
+	call SetSectLYC
 	call L1D684D
 	xor  a
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	ld   a, $6C
 	ldh  [rOBP0], a
 	xor  a
 	ldh  [rBGP], a
 	ldh  [rOBP1], a
-	ldh  [$FFF1], a
+	ldh  [hScreenSect1BGP], a
 	ld   a, $13
-	ldh  [$FFF0], a
-	ldh  [$FFF2], a
+	ldh  [hScreenSect0BGP], a
+	ldh  [hScreenSect2BGP], a
 	ld   a, $98
 	call HomeCall_Sound_ReqPlayExId_Stub
 	ld   a, $FF
@@ -9669,19 +9669,19 @@ L1D686B:;C
 L1D6875:;C
 	push bc
 	push hl
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	ld   hl, WINDOWMap_Begin
 	ld   b, $14
 	ld   c, $03
 	ld   d, $00
 	call L000E00
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	ld   hl, $9C60
 	ld   b, $14
 	ld   c, $03
 	ld   d, $00
 	call L000E00
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	pop  hl
 	pop  bc
 	ld   de, $9C20
@@ -9691,19 +9691,19 @@ L1D6875:;C
 L1D68A4:;C
 	push bc
 	push hl
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	ld   hl, WINDOWMap_Begin
 	ld   b, $14
 	ld   c, $03
 	ld   d, $00
 	call L000E00
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	ld   hl, $9C60
 	ld   b, $14
 	ld   c, $03
 	ld   d, $00
 	call L000E00
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	pop  hl
 	pop  bc
 	ld   de, $9C20
@@ -9811,7 +9811,7 @@ L1D6934:;I
 	call L1D71DE
 	ld   a, $00
 	ld   b, $5C
-	call L00046C
+	call SetSectLYC
 	ld   hl, $56FB
 	ld   de, $C1DA
 	call DecompressGFX
@@ -9833,13 +9833,13 @@ L1D6934:;I
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	ld   a, $1B
 	ldh  [rBGP], a
-	ldh  [$FFF1], a
+	ldh  [hScreenSect1BGP], a
 	ld   a, $13
-	ldh  [$FFF0], a
-	ldh  [$FFF2], a
+	ldh  [hScreenSect0BGP], a
+	ldh  [hScreenSect2BGP], a
 	ld   a, $98
 	call HomeCall_Sound_ReqPlayExId_Stub
 	ld   a, $FF
@@ -9873,7 +9873,7 @@ L1D6934:;I
 	jp   z, L1D6AD2
 	xor  a
 	ldh  [rBGP], a
-	ldh  [$FFF1], a
+	ldh  [hScreenSect1BGP], a
 	ld   a, $80
 	ldh  [hScrollY], a
 	ld   a, $01
@@ -9899,15 +9899,15 @@ L1D6934:;I
 	call HomeCall_Sound_ReqPlayExId_Stub
 	xor  a
 	ld   [$C1CB], a
-	call Task_ExecRun_B05
+	call Task_ExecRun_Delay04
 	ld   a, $FB
 	ldh  [hScrollY], a
 	ld   a, $6C
 	ldh  [rBGP], a
-	ldh  [$FFF1], a
+	ldh  [hScreenSect1BGP], a
 	ld   a, $13
-	ldh  [$FFF0], a
-	ldh  [$FFF2], a
+	ldh  [hScreenSect0BGP], a
+	ldh  [hScreenSect2BGP], a
 	ld   a, $FF
 	ld   [$C152], a
 	ld   hl, $7A7D
@@ -9924,7 +9924,7 @@ L1D6934:;I
 	call L1D6857
 	ld   a, $FF
 	ldh  [rBGP], a
-	ldh  [$FFF1], a
+	ldh  [hScreenSect1BGP], a
 	di
 	rst  $10
 	call ClearBGMap
@@ -9932,7 +9932,7 @@ L1D6934:;I
 	ei
 	ld   a, $E7
 	rst  $18
-	call Task_ExecRun_B05
+	call Task_ExecRun_Delay04
 	call L1D7159
 	ld   hl, $7B2F
 	call L1D6857
@@ -9951,12 +9951,12 @@ L1D6A82:;R
 	jr   z, L1D6A90
 	ld   a, $FF
 	ldh  [rBGP], a
-	ldh  [$FFF1], a
+	ldh  [hScreenSect1BGP], a
 	ret
 L1D6A90:;R
 	ld   a, $6C
 	ldh  [rBGP], a
-	ldh  [$FFF1], a
+	ldh  [hScreenSect1BGP], a
 	ret
 L1D6A97:;C
 	ld   hl, $5CD9
@@ -9985,7 +9985,7 @@ L1D6AC3:;C
 L1D6AD2:;J
 	ld   a, $FF
 	ldh  [rBGP], a
-	ldh  [$FFF1], a
+	ldh  [hScreenSect1BGP], a
 	di
 	rst  $10
 	call ClearBGMap
@@ -9994,13 +9994,13 @@ L1D6AD2:;J
 	rst  $18
 	ld   a, $8A
 	call HomeCall_Sound_ReqPlayExId_Stub
-	call Task_ExecRun_B05
+	call Task_ExecRun_Delay04
 	ld   a, $6C
 	ldh  [rBGP], a
-	ldh  [$FFF1], a
+	ldh  [hScreenSect1BGP], a
 	ld   a, $13
-	ldh  [$FFF0], a
-	ldh  [$FFF2], a
+	ldh  [hScreenSect0BGP], a
+	ldh  [hScreenSect2BGP], a
 	ld   a, $8C
 	ldh  [rOBP0], a
 	ld   hl, $7C02
@@ -10012,7 +10012,7 @@ L1D6B08:;I
 	call L1D71DE
 	ld   a, $00
 	ld   b, $5C
-	call L00046C
+	call SetSectLYC
 	call L1D6A97
 	call L1D6AC3
 	ld   a, $40
@@ -10025,17 +10025,17 @@ L1D6B08:;I
 	xor  a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	ld   a, $FB
 	ldh  [hScrollY], a
 	ld   a, $6C
 	ldh  [rOBP0], a
 	ld   a, $6C
 	ldh  [rBGP], a
-	ldh  [$FFF1], a
+	ldh  [hScreenSect1BGP], a
 	ld   a, $03
-	ldh  [$FFF0], a
-	ldh  [$FFF2], a
+	ldh  [hScreenSect0BGP], a
+	ldh  [hScreenSect2BGP], a
 	ld   a, $8B
 	call HomeCall_Sound_ReqPlayExId_Stub
 	ld   a, $1D
@@ -10067,7 +10067,7 @@ L1D6B08:;I
 	ei
 	ld   a, $E7
 	rst  $18
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	xor  a
 	ld   [wLZSS_Buffer], a
 	ld   a, $FF
@@ -10091,7 +10091,7 @@ L1D6BB3:;C
 	ldh  [hScrollY], a
 	ld   a, $18
 	ld   b, $5C
-	call L00046C
+	call SetSectLYC
 	ld   hl, $613D
 	ld   de, $C1DA
 	call DecompressGFX
@@ -10112,15 +10112,15 @@ L1D6BB3:;C
 	ld   a, $E7
 	rst  $18
 	ld   a, $FF
-	ldh  [$FFF0], a
+	ldh  [hScreenSect0BGP], a
 	ld   a, $6C
 	ldh  [rBGP], a
-	ldh  [$FFF1], a
+	ldh  [hScreenSect1BGP], a
 	ld   a, $03
-	ldh  [$FFF2], a
+	ldh  [hScreenSect2BGP], a
 	xor  a
 	ld   [wLZSS_Buffer], a
-	call Task_ExecRun_B05
+	call Task_ExecRun_Delay04
 	ld   a, $FF
 	ld   [$C152], a
 	ld   hl, $7BEA
@@ -10138,44 +10138,44 @@ L1D6BB3:;C
 	ld   b, $1C
 	call L1D6875
 L1D6C38:;R
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	call L1D6CEC
 	ldh  a, [hScrollY]
 	cp   $E0
 	jr   nz, L1D6C38
-	call Task_ExecRun_B3C
+	call Task_ExecRun_Delay3B
 	ld   a, $80
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
 	ld   [$C1CC], a
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	ld   b, $20
 L1D6C55:;R
 	call L1D6C86
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	dec  b
 	jr   nz, L1D6C55
 	ld   b, $20
 L1D6C60:;R
 	call L1D6C9B
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	dec  b
 	jr   nz, L1D6C60
 	ld   b, $20
 L1D6C6B:;R
 	call L1D6CA8
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	dec  b
 	jr   nz, L1D6C6B
 	ld   b, $20
 L1D6C76:;R
 	call L1D6CB5
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	dec  b
 	jr   nz, L1D6C76
 	ld   a, $6C
-	ldh  [$FFF1], a
-	jp   Task_ExecRun_B3C
+	ldh  [hScreenSect1BGP], a
+	jp   Task_ExecRun_Delay3B
 L1D6C86:;C
 	ld   a, [$C1CC]
 	inc  a
@@ -10184,11 +10184,11 @@ L1D6C86:;C
 	jr   z, L1D6C96
 L1D6C91:;R
 	ld   a, $FF
-	ldh  [$FFF1], a
+	ldh  [hScreenSect1BGP], a
 	ret
 L1D6C96:;R
 	ld   a, $6C
-	ldh  [$FFF1], a
+	ldh  [hScreenSect1BGP], a
 	ret
 L1D6C9B:;C
 	ld   a, [$C1CC]
@@ -10221,7 +10221,7 @@ L1D6CC2:;CI
 	ld   h, a
 	ld   a, [$D684]
 	ld   l, a
-	ld   de, $FFF0
+	ld   de, hScreenSect0BGP
 	add  hl, de
 	ld   a, h
 	ld   [$D683], a
@@ -10255,7 +10255,7 @@ L1D6D00:;I
 	call L1D71DE
 	ld   a, $00
 	ld   b, $5C
-	call L00046C
+	call SetSectLYC
 	call L1D6A97
 	call L1D6AC3
 	ld   a, $FB
@@ -10265,13 +10265,13 @@ L1D6D00:;I
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_B0A
+	call Task_ExecRun_Delay09
 	ld   a, $6C
 	ldh  [rBGP], a
-	ldh  [$FFF1], a
+	ldh  [hScreenSect1BGP], a
 	ld   a, $13
-	ldh  [$FFF0], a
-	ldh  [$FFF2], a
+	ldh  [hScreenSect0BGP], a
+	ldh  [hScreenSect2BGP], a
 	ld   a, $8B
 	call HomeCall_Sound_ReqPlayExId_Stub
 	ld   a, $FF
@@ -10284,7 +10284,7 @@ L1D6D00:;I
 	call L1D6861
 	xor  a
 	ldh  [rBGP], a
-	ldh  [$FFF1], a
+	ldh  [hScreenSect1BGP], a
 	ld   a, $80
 	ldh  [hScrollY], a
 	ld   a, $01
@@ -10299,12 +10299,12 @@ L1D6D00:;I
 	call L1D6861
 	xor  a
 	ld   [$C1CB], a
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	ld   a, $FF
 	ldh  [rBGP], a
-	ldh  [$FFF1], a
+	ldh  [hScreenSect1BGP], a
 	ldh  [rOBP0], a
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	di
 	rst  $10
 	xor  a
@@ -10315,7 +10315,7 @@ L1D6D00:;I
 	ei
 	ld   a, $E7
 	rst  $18
-	call Task_ExecRun_B0A
+	call Task_ExecRun_Delay09
 	call L1D7159
 	ld   a, $FF
 	ld   [$C152], a
@@ -10348,7 +10348,7 @@ L1D6DE4:;I
 	call L1D71DE
 	ld   a, $00
 	ld   b, $5C
-	call L00046C
+	call SetSectLYC
 	call L1D6A97
 	call L1D6AC3
 	ld   a, $FB
@@ -10358,14 +10358,14 @@ L1D6DE4:;I
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_B0A
+	call Task_ExecRun_Delay09
 	ld   a, $6C
 	ldh  [rBGP], a
-	ldh  [$FFF1], a
+	ldh  [hScreenSect1BGP], a
 	ldh  [rOBP0], a
 	ld   a, $13
-	ldh  [$FFF0], a
-	ldh  [$FFF2], a
+	ldh  [hScreenSect0BGP], a
+	ldh  [hScreenSect2BGP], a
 	ld   a, $8B
 	call HomeCall_Sound_ReqPlayExId_Stub
 	ld   a, $FF
@@ -10387,14 +10387,14 @@ L1D6DE4:;I
 	ld   hl, $7BE2
 	call L1D6857
 	call L1D6BB3
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	ld   a, $FF
 	ldh  [rBGP], a
-	ldh  [$FFF0], a
-	ldh  [$FFF1], a
-	ldh  [$FFF2], a
+	ldh  [hScreenSect0BGP], a
+	ldh  [hScreenSect1BGP], a
+	ldh  [hScreenSect2BGP], a
 	ldh  [rOBP0], a
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	di
 	rst  $10
 	call ClearBGMap
@@ -10405,7 +10405,7 @@ L1D6DE4:;I
 	ei
 	ld   a, $E7
 	rst  $18
-	call Task_ExecRun_B05
+	call Task_ExecRun_Delay04
 	call L1D7159
 	xor  a
 	ld   [$C1CB], a
@@ -10420,14 +10420,14 @@ L1D6E92:;I
 	call L1D71DE
 	ld   a, $00
 	ld   b, $5C
-	call L00046C
+	call SetSectLYC
 	call L1D6FD7
 	call L1D684D
 	xor  a
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_B0A
+	call Task_ExecRun_Delay09
 	call L1D7159
 	ld   a, $FF
 	ld   [$C152], a
@@ -10440,14 +10440,14 @@ L1D6EC4:;I
 	call L1D71DE
 	ld   a, $00
 	ld   b, $5C
-	call L00046C
+	call SetSectLYC
 	call L1D6FD7
 	call L1D684D
 	xor  a
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_B0A
+	call Task_ExecRun_Delay09
 	call L1D7159
 	ld   a, $FF
 	ld   [$C152], a
@@ -10460,14 +10460,14 @@ L1D6EF6:;I
 	call L1D71DE
 	ld   a, $00
 	ld   b, $5C
-	call L00046C
+	call SetSectLYC
 	call L1D6FD7
 	call L1D684D
 	xor  a
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_B0A
+	call Task_ExecRun_Delay09
 	call L1D7159
 	ld   a, $FF
 	ld   [$C152], a
@@ -10478,14 +10478,14 @@ L1D6F22:;I
 	call L1D71DE
 	ld   a, $00
 	ld   b, $5C
-	call L00046C
+	call SetSectLYC
 	call L1D6FD7
 	call L1D684D
 	xor  a
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_B0A
+	call Task_ExecRun_Delay09
 	call L1D7159
 	ld   a, $FF
 	ld   [$C152], a
@@ -10512,7 +10512,7 @@ L1D6F6C:;I
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	ld   a, $03
 	ldh  [rBGP], a
 	ld   a, $FF
@@ -10524,7 +10524,7 @@ L1D6F93:;I
 	call L1D71DE
 	ld   a, $18
 	ld   b, $5C
-	call L00046C
+	call SetSectLYC
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	ld   de, $241A
 	call L000D76
@@ -10535,7 +10535,7 @@ L1D6F93:;I
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_B0A
+	call Task_ExecRun_Delay09
 	call L1D7159
 	ld   a, $FF
 	ld   [$C152], a
@@ -10846,20 +10846,20 @@ L1D7159:;C
 	ldh  [rOBP0], a
 	ld   a, $2D
 	ldh  [rBGP], a
-	ldh  [$FFF1], a
+	ldh  [hScreenSect1BGP], a
 	ld   a, $13
-	ldh  [$FFF0], a
-	ldh  [$FFF2], a
+	ldh  [hScreenSect0BGP], a
+	ldh  [hScreenSect2BGP], a
 	ld   a, $20
 	ld   [$D685], a
 	ld   a, $9F
 	call HomeCall_Sound_ReqPlayExId_Stub
-	jp   Task_ExecRun_B01
+	jp   Task_ExecRun_NoDelay
 L1D7176:;I
 	call L1D71DE
 	ld   a, $18
 	ld   b, $5C
-	call L00046C
+	call SetSectLYC
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	ld   de, $241A
 	call L000D76
@@ -10870,7 +10870,7 @@ L1D7176:;I
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_B0A
+	call Task_ExecRun_Delay09
 	call L1D7159
 	ld   a, $FF
 	ld   [$C152], a
@@ -10901,10 +10901,10 @@ L1D71DE:;C
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
-	ldh  [$FFF0], a
-	ldh  [$FFF1], a
-	ldh  [$FFF2], a
-	call Task_ExecRun_B01
+	ldh  [hScreenSect0BGP], a
+	ldh  [hScreenSect1BGP], a
+	ldh  [hScreenSect2BGP], a
+	call Task_ExecRun_NoDelay
 	di
 	rst  $10
 	ld   hl, wMisc_C028
@@ -10948,7 +10948,7 @@ L1D7220:;I
 	ld   a, $C7
 	rst  $18
 	ei
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	ld   a, $3F
 	ldh  [rOBP0], a
 	ld   a, $00
@@ -11101,7 +11101,7 @@ L1D73C5:;I
 	ld   a, $C7
 	rst  $18
 	ei
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	ld   a, $3F
 	ldh  [rOBP0], a
 	ld   a, $00
@@ -11114,7 +11114,7 @@ L1D73C5:;I
 	call HomeCall_Sound_ReqPlayExId_Stub
 	ld   b, $0A
 L1D740A:;J
-	call Task_ExecRun_B3C
+	call Task_ExecRun_Delay3B
 	dec  b
 	jp   nz, L1D740A
 	jp   ClearBGMap
@@ -11123,10 +11123,10 @@ L1D7414:;J
 	call L1D6A77
 	call L1D7439
 	jr   nc, L1D7423
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	ret
 L1D7423:;R
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	dec  b
 	jp   nz, L1D7414
 	xor  a
@@ -11134,16 +11134,16 @@ L1D7423:;R
 L1D742C:;C
 	ld   b, $08
 L1D742E:;J
-	call Task_ExecRun_B3C
+	call Task_ExecRun_Delay3B
 	dec  b
 	jp   nz, L1D742E
 	call ClearBGMap
 	ret
 L1D7439:;C
-	ldh  a, [$FF99]
+	ldh  a, [hJoyNewKeys]
 	bit  7, a
 	jp   nz, L1D7449
-	ldh  a, [$FFAC]
+	ldh  a, [hJoyNewKeys2]
 	bit  7, a
 	jp   nz, L1D7449
 	xor  a

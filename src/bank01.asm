@@ -9110,7 +9110,7 @@ L016392:;J
 	call L017EB1
 	call L0175E7
 	call L002BFC
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	jp   L016392
 L0163B3:;C
 	ld   hl, $C008
@@ -9118,20 +9118,20 @@ L0163B3:;C
 	ld   hl, $D920
 	bit  7, [hl]
 	jp   nz, L016441
-	ldh  a, [$FF98]
+	ldh  a, [hJoyKeys]
 	ld   [$D945], a
-	ldh  a, [$FF99]
+	ldh  a, [hJoyNewKeys]
 	ld   [$D944], a
 	and  a, $0F
 	ld   [$D946], a
 	ld   a, [$D94A]
 	or   a
 	jp   nz, L0163DC
-	ldh  a, [$FF99]
+	ldh  a, [hJoyNewKeys]
 	bit  4, a
 	jp   z, L016406
 L0163DC:;J
-	ldh  a, [$FF98]
+	ldh  a, [hJoyKeys]
 	bit  4, a
 	jp   z, L0163FB
 	ld   hl, $D94A
@@ -9155,11 +9155,11 @@ L016406:;J
 	ld   a, [$D94B]
 	or   a
 	jp   nz, L016414
-	ldh  a, [$FF99]
+	ldh  a, [hJoyNewKeys]
 	bit  5, a
 	jp   z, L01643E
 L016414:;J
-	ldh  a, [$FF98]
+	ldh  a, [hJoyKeys]
 	bit  5, a
 	jp   z, L016433
 	ld   hl, $D94B
@@ -9325,14 +9325,14 @@ L0164D4:;J
 	call L0024E4
 	ret
 L0164DE:;C
-	ldh  a, [$FF99]
+	ldh  a, [hJoyNewKeys]
 	and  a, $80
 	jp   z, L01650E
 	ld   hl, $C17D
 	set  0, [hl]
 	call L01653F
 L0164ED:;J
-	ldh  a, [$FF99]
+	ldh  a, [hJoyNewKeys]
 	bit  7, a
 	jp   nz, L016505
 	bit  6, a
@@ -9348,7 +9348,7 @@ L016505:;J
 	res  0, [hl]
 	ret
 L01650E:;J
-	ldh  a, [$FFAC]
+	ldh  a, [hJoyNewKeys2]
 	and  a, $80
 	jp   z, L01653E
 L016515: db $21;X
@@ -9396,8 +9396,8 @@ L01653E:;J
 	ret
 L01653F:;C
 	ld   a, $01
-	ld   [$C00E], a
-	ld   a, $8C
+	ld   [wPaused], a
+	ld   a, SNC_PAUSE
 	call HomeCall_Sound_ReqPlayExId
 	ld   a, [$C17D]
 	bit  0, a
@@ -9423,11 +9423,11 @@ L016560:;J
 	inc  a
 	dec  b
 	jp   nz, L01655E
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ret
 L016573:;C
 	xor  a
-	ld   [$C00E], a
+	ld   [wPaused], a
 	ld   a, $8D
 	call HomeCall_Sound_ReqPlayExId
 	ld   a, [$C17D]
@@ -9454,7 +9454,7 @@ L016590:
 	ret
 L01659F:;C
 	xor  a
-	ld   [$C00E], a
+	ld   [wPaused], a
 	ld   a, [$C17D]
 	push af
 	xor  a
@@ -9466,11 +9466,11 @@ L01659F:;C
 	call L017EB1
 	call L0175E7
 	call L002BFC
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	pop  af
 	ld   [$C17D], a
 	ld   a, $01
-	ld   [$C00E], a
+	ld   [wPaused], a
 	ret
 L0165CD:;C
 	ld   a, [$C17C]
@@ -9487,7 +9487,7 @@ L0165E2:;J
 L0165E7:;J
 	ld   a, $1B
 L0165E9:;J
-	ldh  [$FFF1], a
+	ldh  [hScreenSect1BGP], a
 	ld   a, [$D923]
 	bit  1, a
 	jp   nz, L016631
@@ -9728,9 +9728,9 @@ L01679A:;R
 	ld   [$D96F], a
 	ld   a, [$DA23]
 	ld   [$D970], a
-	ld   a, [$D681]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_UserFlags0]
 	ld   [$DA7F], a
-	ld   a, [$D6C1]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_UserFlags0]
 	ld   [$D97F], a
 	ld   a, [$D683]
 	ld   [$DA80], a
@@ -10014,7 +10014,7 @@ L016A24:;C
 	jp   z, L016ABF
 	jp   nc, L016A77
 	push af
-	ld   hl, $D681
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_UserFlags0
 	set  3, [hl]
 	ld   a, [$D921]
 	bit  1, a
@@ -10029,7 +10029,7 @@ L016A24:;C
 	ldi  a, [hl]
 	ld   [hl], a
 L016A53:;J
-	ld   hl, $D6C1
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_UserFlags0
 	res  3, [hl]
 	ld   a, [$DA21]
 	bit  1, a
@@ -10050,7 +10050,7 @@ L016A72:;JR
 	jr   L016ABF
 L016A77:;J
 	push af
-	ld   hl, $D681
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_UserFlags0
 	res  3, [hl]
 	ld   a, [$D921]
 	bit  1, a
@@ -10067,7 +10067,7 @@ L016A77:;J
 	ldi  a, [hl]
 	ld   [hl], a
 L016A9B:;JR
-	ld   hl, $D6C1
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_UserFlags0
 	set  3, [hl]
 	ld   a, [$DA21]
 	bit  1, a
@@ -10096,7 +10096,7 @@ L016ABF:;JR
 	ld   a, [$D6C3]
 	ld   b, a
 L016AD5:;J
-	ld   hl, $D681
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_UserFlags0
 	res  2, [hl]
 	ld   a, [$D683]
 	sub  a, b
@@ -10115,7 +10115,7 @@ L016AE8:;J
 	ld   a, [$D683]
 	ld   b, a
 L016AFB:;J
-	ld   hl, $D6C1
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_UserFlags0
 	res  2, [hl]
 	ld   a, [$D6C3]
 	sub  a, b
@@ -10150,7 +10150,7 @@ L016B12:;C
 	ld   b, a
 	ld   a, [$D685]
 	ld   c, a
-	ld   a, [$D682]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_UserFlags1]
 	ld   [wLZSS_Buffer], a
 	ld   a, [$D6D8]
 	or   a
@@ -10161,7 +10161,7 @@ L016B12:;C
 	ld   d, a
 	ld   a, [$D6C5]
 	ld   e, a
-	ld   a, [$D6C2]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_UserFlags1]
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016B80
@@ -10192,7 +10192,7 @@ L016B94:;R
 	ld   b, a
 	ld   a, [$D685]
 	ld   c, a
-	ld   a, [$D682]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_UserFlags1]
 	ld   [wLZSS_Buffer], a
 	ld   a, [$D6D8]
 	or   a
@@ -10203,7 +10203,7 @@ L016B94:;R
 	ld   d, a
 	ld   a, [$D6C5]
 	ld   e, a
-	ld   a, [$D6C2]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_UserFlags1]
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016BD5
@@ -10230,7 +10230,7 @@ L016BE9:;R
 	ld   b, a
 	ld   a, [$D6C5]
 	ld   c, a
-	ld   a, [$D6C2]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_UserFlags1]
 	ld   [wLZSS_Buffer], a
 	ld   a, [$D698]
 	or   a
@@ -10241,7 +10241,7 @@ L016BE9:;R
 	ld   d, a
 	ld   a, [$D685]
 	ld   e, a
-	ld   a, [$D682]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_UserFlags1]
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016C2A
@@ -10281,7 +10281,7 @@ L016C2A:;JR
 	ld   d, a
 	ld   a, [$D6C5]
 	ld   e, a
-	ld   a, [$D6C2]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_UserFlags1]
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016C8F
@@ -10323,7 +10323,7 @@ L016C8F:;JR
 	ld   d, a
 	ld   a, [$D685]
 	ld   e, a
-	ld   a, [$D682]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_UserFlags1]
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016CF4
@@ -10362,7 +10362,7 @@ L016CF4:;JR
 	ld   d, a
 	ld   a, [$D6C5]
 	ld   e, a
-	ld   a, [$D6C2]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_UserFlags1]
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016D70
@@ -10443,7 +10443,7 @@ L016D70:;JR
 	ld   d, a
 	ld   a, [$D685]
 	ld   e, a
-	ld   a, [$D682]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_UserFlags1]
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016DEB
@@ -11145,14 +11145,14 @@ L0170C6:;J
 	jp   z, L0170E8
 	push af
 	ld   a, $01
-	ld   [$C00E], a
+	ld   [wPaused], a
 	call L0163B3
 	call L0176A7
 	call L0165CD
 	call L017EB1
 	call Task_SkipAllAndWaitVBlank
 	xor  a
-	ld   [$C00E], a
+	ld   [wPaused], a
 	pop  af
 	dec  a
 	jp   L0170C6
@@ -11164,7 +11164,7 @@ L0170E8:;J
 	call L017EB1
 	call L0175E7
 	call L002BFC
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	jp   L0170B8
 L017103:;J
 	ld   a, [$D94E]
@@ -11327,7 +11327,7 @@ L017240:;J
 L01724A:;J
 	ld   hl, Tiles_Begin
 	call L000FEF
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	call L0172C1
 	ld   b, $1D
 	ld   hl, $509F
@@ -11403,15 +11403,15 @@ L0172C1:;C
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
-	ldh  [$FFF0], a
-	ldh  [$FFF1], a
-	ldh  [$FFF2], a
+	ldh  [hScreenSect0BGP], a
+	ldh  [hScreenSect1BGP], a
+	ldh  [hScreenSect2BGP], a
 	xor  a
-	ld   [$D8C5], a
-	ld   [$D8C9], a
-	ld   [$D8E5], a
-	ld   [$D8E9], a
-	call Task_ExecRunFar_B01
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft0], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft1], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft0], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft1], a
+	call Task_ExecRunFar
 	xor  a
 	ldh  [rWY], a
 	ldh  [rWX], a
@@ -11424,11 +11424,11 @@ L0172C1:;C
 	ld   a, $03
 	call Task_RemoveAt
 	xor  a
-	ld   [$D8C5], a
-	ld   [$D8C9], a
-	ld   [$D8E5], a
-	ld   [$D8E9], a
-	call Task_ExecRunFar_B01
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft0], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft1], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft0], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft1], a
+	call Task_ExecRunFar
 	ret
 L017309:;CR
 	ld   b, $01
@@ -11459,14 +11459,14 @@ L017324:;R
 	ld   b, $02
 	call L01756D
 	ld   a, $01
-	ld   [$C00E], a
-	call Task_ExecRunFar_B01
+	ld   [wPaused], a
+	call Task_ExecRunFar
 	ld   hl, $4458
 	ld   de, $C1E8
 	call DecompressGFX
 	ld   a, $00
-	ld   [$C00E], a
-	call Task_ExecRunFar_B01
+	ld   [wPaused], a
+	call Task_ExecRunFar
 	ld   b, $01
 	call L01756D
 	ld   hl, $C1E8
@@ -11529,7 +11529,7 @@ L0173C7:;J
 	ld   hl, wOBJInfo3+iOBJInfo_Status
 	set  7, [hl]
 	call L0175DE
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ld   b, $78
 	call L01758C
 	ld   hl, wOBJInfo3+iOBJInfo_Status
@@ -11714,7 +11714,7 @@ L0174F8:;C
 	ld   [hl], $80
 	ld   [$D753], a
 	call L0175DE
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ld   b, $3C
 	call L01758C
 	ret
@@ -11757,7 +11757,7 @@ L017554:;J
 	jp   L017561
 L017561:;J
 	ld   [$D753], a
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ld   b, $3C
 	call L01758C
 	ret
@@ -11770,15 +11770,15 @@ L01756D:;JC
 	call L017EB1
 	call L0175E7
 	call L002BFC
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	pop  bc
 	dec  b
 	jp   nz, L01756D
 	ret
 L01758C:;JC
 	push bc
-	ldh  a, [$FF99]
-	ld   hl, $FFAC
+	ldh  a, [hJoyNewKeys]
+	ld   hl, hJoyNewKeys2
 	or   a, [hl]
 	and  a, $F0
 	jp   nz, L0175B9
@@ -11790,7 +11790,7 @@ L01758C:;JC
 	call L017EB1
 	call L0175E7
 	call L002BFC
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	pop  bc
 	dec  b
 	jp   nz, L01758C
@@ -13270,7 +13270,7 @@ L017ECC:;C
 	ld   e, a
 	ld   a, [$D945]
 	and  a, $0F
-	ld   hl, $D681
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_UserFlags0
 	bit  3, [hl]
 	jr   z, L017EE9
 	ld   b, a

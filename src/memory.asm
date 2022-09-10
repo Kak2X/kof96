@@ -5,10 +5,10 @@ wMatchStartTime EQU $C002
 
 
 wTimer EQU $C005 ; Global timer
-
+w_Unknown_SomethingLCDC EQU $C006 ; Some marker for LCDC things
 wVBlankNotDone EQU $C007 ; If != 0, the VBlank handler hasn't finished
 
-
+wPaused EQU $C00E ; Game is paused
 wOBJLstHeaderFlags EQU $C00F ; Raw flags value from the OBJLst header
 
 wWorkOAMCurPtr_Low EQU $C010 ; Next OBJ will be written at this location
@@ -36,15 +36,40 @@ wMisc_C028 EQU $C028 ; appears to select a parallax type (how to divide the scre
 wSGBSendPacketAtFrameEnd EQU $C02B ; If set, there are SGB packets to send after all tasks are processed
 wSGBSoundPacket EQU $C02C ; Data for the sound effect packet to be sent at the end of the frame.
 
+wSerialIntPtr_Low EQU $C03C
+wSerialIntPtr_High EQU $C03D
+wSerialDataReceiveBuffer EQU $C03E
+wSerialDataReceiveBuffer_End EQU $C0BE
+wSerialDataSendBuffer EQU $C0BE
+wSerialDataSendBuffer_End EQU $C13E
+;????
+; Two separate indexes, with Tail pointing at Head - 1
+wSerialDataReceiveBufferIndex_Head EQU $C13E
+wSerialDataReceiveBufferIndex_Tail EQU $C13F
+wSerialDataSendBufferIndex_Head EQU $C140 ; Index of most recent buffer entry
+wSerialDataSendBufferIndex_Tail EQU $C141 ; Index of last buffer entry - used for current player input in VS serial
+wSerial_Unknown_SlaveRetransfer EQU $C142
+wSerial_Unknown_0_IncDecMarker EQU $C143
+wSerial_Unknown_1_IncDecMarker EQU $C144
+wSerialPlId EQU $C145 ; $02 -> Player 1; $03 -> Player 2
+wSerial_Unknown_Done EQU $C146 ; Marks if the serial handler was executed for the frame? otherwise waits
+wSerialJoyLastKeys EQU $C147 ; Player 1 - Most recent New Joypad Input (when controlling P1)
+wSerialJoyKeys EQU $C148 ; Player 1 - Joypad Input (when controlling P1)
+wSerialJoyLastKeys2 EQU $C149 ; Player 2 - Most recent Joypad Input (when controlling P1)
+wSerialJoyKeys2 EQU $C14A ; Player 2 - Joypad Input (when controlling P1)
+wSerialInputEnabled EQU $C14B ; If set, controls are enabled during serial mode
 wSGBBorderType EQU $C14C ; Current border type loaded 
 wFieldScrollX EQU $C155 ; X Scroll coordinate of the viewport during gameplay 
 wFieldScrollY EQU $C157 ; Y Scroll coordinate of the viewport during gameplay 
 
+; a supposed wScreenSect0LYC for the first section is fixed, and always starts at $00
+wScreenSect1LYC EQU $C15A ; Scanline number the second screen section starts. During gameplay, it's the playfield.
+wScreenSect2LYC EQU $C15B ; Scanline number the third screen section starts. During gameplay, it's the meter HUD
 
 
 wTitleResetTimer_High EQU $C1C1
 wTitleResetTimer_Low EQU $C1C2
-
+wSerial_Unknown_PausedFrameTimer EQU $C1C5 ; Amount of frames the game is paused, waiting for serial connection ???
 
 wLZSS_CurCmdMask EQU $C1C7
 wLZSS_SplitNum EQU $C1C8
@@ -87,7 +112,8 @@ wOBJInfo6 EQU $D800
 wOBJInfo7 EQU $D840
 wOBJInfo8 EQU $D880
 
-
+wGFXBufInfo_Pl1 EQU $D8C0
+wGFXBufInfo_Pl2 EQU $D8E0
 
 
 wWorkOAM EQU $DF00
@@ -95,7 +121,11 @@ wWorkOAM_End EQU $DFA0
 
 
 
-hOAMDMA EQU $FF80 
+hOAMDMA EQU $FF80 ; OAMDMA routine
+hJoyKeys EQU $FF98 ; Player 1 - Joypad keys
+hJoyNewKeys EQU $FF99 ; Player 1 - Newly pressed keys
+hJoyKeys2 EQU $FFAB ; Player 2 - Joypad keys
+hJoyNewKeys2 EQU $FFAC ; Player 2 - Newly pressed keys
 
 hTaskStats EQU $FFC0 ; Global task system info
 hCurTaskId EQU $FFC1 ; $01-$03 ?
@@ -104,8 +134,14 @@ hTaskTbl EQU $FFC8 ; Task struct list
 
 hROMBank EQU $FFE0 ; Currently loaded ROM bank
 
+
+
 hScrollY EQU $FFE2 ; Y screen position
 hScrollX EQU $FFE4 ; X screen position
+
+hScreenSect0BGP EQU $FFF0 ; BG Palette for the first screen section
+hScreenSect1BGP EQU $FFF1 ; ...
+hScreenSect2BGP EQU $FFF2
 hSndInfoCurPtr_Low EQU $FFF8 ; Ptr to Currently processed SNDInfo structure
 hSndInfoCurPtr_High EQU $FFF9 ; Ptr to Currently processed SNDInfo structure
 
@@ -120,9 +156,23 @@ hSndInfoCurDataPtr_High EQU $FFFD ; Ptr to current sound channel data (initially
 
 ; Elements in hTaskTbl entry struct
 iTaskType EQU $00 ; Task type (TASK_EXEC_*)
-iTaskUnknown EQU $01 ; ???
+iTaskPauseTimer EQU $01 ; Decrements every frame. If != 0, the task isn't marked in its TODO state.
 iTaskPtr_Low EQU $02 ; Code or stack pointer
 iTaskPtr_High EQU $03
+
+; Elements in wGFXBufInfo struct
+iGFXBufInfo_DestPtr_Low EQU $00		; Shared across buffers
+iGFXBufInfo_DestPtr_High EQU $01
+iGFXBufInfo_SrcPtr0_Low EQU $02
+iGFXBufInfo_SrcPtr0_High EQU $03
+iGFXBufInfo_Bank0 EQU $04
+iGFXBufInfo_TilesLeft0 EQU $05
+iGFXBufInfo_SrcPtr1_Low EQU $06
+iGFXBufInfo_SrcPtr1_High EQU $07
+iGFXBufInfo_Bank1 EQU $08
+iGFXBufInfo_TilesLeft1 EQU $09
+iGFXBufInfo_LastInfo EQU $0A ;
+iGFXBufInfo_CompInfo EQU $10
 
 ; Elements in the wOBJInfo struct
 iOBJInfo_Status EQU $00 ; Generic flags

@@ -1,3 +1,24 @@
+; Keys (as bit numbers)
+KEYB_RIGHT       EQU 0
+KEYB_LEFT        EQU 1
+KEYB_UP          EQU 2
+KEYB_DOWN        EQU 3
+KEYB_A           EQU 4
+KEYB_B           EQU 5
+KEYB_SELECT      EQU 6
+KEYB_START       EQU 7
+
+; Keys (values)
+KEY_NONE         EQU 0
+KEY_RIGHT        EQU 1 << KEYB_RIGHT
+KEY_LEFT         EQU 1 << KEYB_LEFT
+KEY_UP           EQU 1 << KEYB_UP
+KEY_DOWN         EQU 1 << KEYB_DOWN
+KEY_A            EQU 1 << KEYB_A
+KEY_B            EQU 1 << KEYB_B
+KEY_SELECT       EQU 1 << KEYB_SELECT
+KEY_START        EQU 1 << KEYB_START
+
 DIPB_0 EQU 0
 DIPB_1 EQU 1
 DIPB_2 EQU 2
@@ -22,19 +43,29 @@ BORDER_ALTERNATE 	EQU $02
 
 TIMER_INFINITE		EQU $FF
 
+; Are these the same?
+VS_SELECTED_THIS  EQU $02
+VS_SELECTED_OTHER EQU $03
+SERIAL_PL1_ID EQU $02
+SERIAL_PL2_ID EQU $03
+
+
 
 OBJ_OFFSET_X        EQU $08 ; Standard offset used when sprite positions are compared to the screen/scroll
 OBJLSTPTR_NONE      EQU $FFFF ; Placeholder pointer that marks the lack of a secondary sprite mapping
 
 ; $C025
-MISCB_PAUSE_TASKS EQU 3 ; Prevents tasks from executing
+MISCB_FREEZE EQU 3 ; Prevents tasks and almost everything from executing, effectively freezing the game until it's unset. May be used to force sync in serial VS???
+MISCB_SERIAL_PL2_SLAVE EQU 5 ; If set, the GB is the slave (matches PL2), otherwise it's the master (PL1)
+MISCB_SERIAL_MODE EQU 6 ; Marks a VS battle through serial cable. Not in SGB mode.
 MISCB_IS_SGB EQU 7	; Enables SGB features
 ; $C026
-MISCB_TASK_CTRL_CALLED EQU 3 ; If set, the task exec loop was entered
+MISCB_LAG_FRAME EQU 3 ; Is set when the task cycler is called, and unset right before the VBlank wait loop.
 ; $C028
-; TODO: This could be a side effect of the primary purpose of $C028 (screen section divider)
+MISCB_USE_SECT EQU 0 ; If set, the screen uses the three-section mode (SetSectLYC was called). Otherwise there's a single section governed by hScrollX and hScrollY.
 MISCB_PL_RANGE_CHECK EQU 1 ; Enables the player range enforcement, which is part of the sprite drawing routine.
                            ; Should only be used during gameplay, otherwise it could get in the way.
+MISCB_TITLE_SECT EQU 2 ; Allows parallax for the title screen
 
 
 ;--
@@ -44,6 +75,7 @@ OBJINFO_SIZE EQU $40 ; wOBJInfo size
 
 ; iOBJInfo_Status bits
 OSTB_ALTSET  EQU 0 ; If set, uses an alternate set of values for user flags and sprite mapping pointer
+OSTB_BIT3    EQU 3 ; OSTB_GFXCOPIED?
 OSTB_VISIBLE EQU 7 ; If not set, the sprite mapping is hidden
 
 

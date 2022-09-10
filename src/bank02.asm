@@ -1555,7 +1555,7 @@ L024AD4:;I
 	ld   a, $02
 	ld   [$C173], a
 L024AF4:;J
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ld   a, [$C173]
 	cp   $00
 	jp   z, L024B37
@@ -5522,7 +5522,7 @@ L026937:;J
 	call L002D53
 	call L003A3E
 	jp   nc, L02698E
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ld   a, $03
 	ld   [$C173], a
 	call L00376A

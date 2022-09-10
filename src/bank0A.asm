@@ -12181,7 +12181,7 @@ TakaraLogo_Do:
 	;-----------------------------------
 	ei
 	; (VBlank will hit now)
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	
 	; Set DMG palette
 	ld   a, $E4
@@ -12208,13 +12208,13 @@ TakaraLogo_Do:
 	ld   bc, $0168
 .mainLoop:
 	call L0A6FED
-	ldh  a, [$FF99]
+	ldh  a, [hJoyNewKeys]
 	ld   d, a
-	ldh  a, [$FFAC]
+	ldh  a, [hJoyNewKeys2]
 	or   a, d
 	bit  7, a
 	jp   nz, .end
-	call Task_ExecRun_B01
+	call Task_ExecRun_NoDelay
 	dec  bc
 	ld   a, b
 	or   a, c
@@ -12222,7 +12222,7 @@ TakaraLogo_Do:
 .end:;J
 	ret
 L0A6FED:;C
-	ld   hl, $FF98
+	ld   hl, hJoyKeys
 	ld   d, [hl]
 	inc  hl
 	ld   e, [hl]
@@ -12433,7 +12433,7 @@ L0A7484:;J
 	call L002D53
 	call L003A3E
 	jp   nc, L0A74E8
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ld   a, $03
 	ld   [$C173], a
 	call L00376A
@@ -13130,7 +13130,7 @@ L0A7A36:;J
 	jp   nc, L0A7A92
 	call L003A28
 	jp   nc, L0A7A95
-	call Task_ExecRunFar_B01
+	call Task_ExecRunFar
 	ld   a, $03
 	ld   [$C173], a
 	ld   hl, $0021
