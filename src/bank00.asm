@@ -433,7 +433,7 @@ EntryPoint:
 .switchToTakaraLogo:
 	ei
 	
-	; Set the system task, which will point to the custom module code.
+	; Set the main task, which will point to the custom module code.
 	
 	; Switch to the bank with the TAKARA logo display
 	ld   a, BANK(Module_TakaraLogo)	; BANK $0A

@@ -33,6 +33,10 @@ DIFFICULTY_NORMAL	EQU $01
 DIFFICULTY_HARD		EQU $02
 
 
+DIPB_EASY_MOVES       EQU 2 ; SELECT + A/B for easy super moves
+DIPB_INFINITE_METER   EQU 3 ; Unlimited super moves + Meter always grows
+DIPB_SGB_SOUND_TEST   EQU 4 ; Adds SGB S.E TEST to the options menu
+DIPB_TEAM_DUPL        EQU 5 ; Allow duplicate characters in a team
 DIPB_UNLOCK_GOENITZ   EQU 6 ; Unlock Goenitz
 DIPB_UNLOCK_OTHER     EQU 7 ; Unlock everyone else (Mr Karate, Boss Kagura, Orochi Iori and Orochi Leona)
 

@@ -75,6 +75,12 @@ wLZSS_CurCmdMask EQU $C1C7
 wLZSS_SplitNum EQU $C1C8
 wLZSS_SplitMask EQU $C1C9
 wLZSS_Buffer EQU $C1CA
+; Variables sitting on top of the buffer
+wCheatGoenitzKeysLeft   EQU $C1CA ; Amount of times to press the button before cheat activates
+wCheatAllCharKeysLeft   EQU $C1CB ; each for the 4 cheats
+wCheat_Unused_KeysLeft  EQU $C1CC
+wCheatEasyMovesKeysLeft EQU $C1CD
+
 
 
 wSnd_Unk_Unused_D480 EQU $D480 ; $80 is always written here, but never read back

@@ -12097,6 +12097,9 @@ L0A6F3F: db $18
 L0A6F40: db $09
 L0A6F41: db $04
 
+; 
+; =============== START OF MODULE TakaraLogo ===============
+;
 ; =============== Module_TakaraLogo ===============
 ; EntryPoint for TakaraLogo. Called by task handler.
 L0A6F42:
@@ -12114,7 +12117,7 @@ Module_TakaraLogo:
 .loadBorder:
 	call SGB_LoadBorder
 	
-	; Change module
+	; Switch module
 	ld   b, BANK(L1C5FD2)
 	ld   hl, L1C5FD2
 	rst  $00
@@ -12195,112 +12198,159 @@ TakaraLogo_Do:
 	ld   a, SND_MUTE
 	call HomeCall_Sound_ReqPlayExId_Stub
 	
-	; Wuh
-	ld   hl, wLZSS_Buffer
-	ld   a, $03
+	; Initialize variables for cheat count (on top of the LZSS buffer)
+	ld   hl, wCheatGoenitzKeysLeft
+	ld   a, 3		; wCheatGoenitzKeysLeft
 	ldi  [hl], a
-	ld   a, $14
+	ld   a, 20		; wCheatAllCharKeysLeft
 	ldi  [hl], a
-	ld   a, $19
+	ld   a, 25		; wCheat_Unused_KeysLeft [TCRF] Not used, may have been for DIPB_TEAM_DUPL and DIPB_INFINITE_METER
 	ldi  [hl], a
-	ld   a, $1E
+	ld   a, 30		; wCheatEasyMovesKeysLeft
 	ldi  [hl], a
-	ld   bc, $0168
+	
+	; Show this screen for 360 frames (+ whatever it takes for the SGB features to load)
+	ld   bc, $0168				
+	
 .mainLoop:
-	call L0A6FED
+	call TakaraLogo_CheckCheat
+	
+	; When pressing START from either controller, skip the delay
 	ldh  a, [hJoyNewKeys]
 	ld   d, a
 	ldh  a, [hJoyNewKeys2]
 	or   a, d
-	bit  7, a
-	jp   nz, .end
-	call Task_ExecRun_NoDelay
-	dec  bc
-	ld   a, b
-	or   a, c
-	jp   nz, .mainLoop
-.end:;J
-	ret
-L0A6FED:;C
-	ld   hl, hJoyKeys
-	ld   d, [hl]
-	inc  hl
-	ld   e, [hl]
-	ld   hl, wDipSwitch
-	bit  6, e
-	jp   z, L0A7019
-	bit  5, [hl]
-	jp   nz, L0A7019
-	ld   a, d
-	and  a, $70
-	cp   $70
-	jp   nz, L0A7019
-	set  5, [hl]
-	set  3, [hl]
-	push hl
-	ld   hl, $1B01
-	call SGB_PrepareSoundPacket
-	ld   a, $8E
-	call HomeCall_Sound_ReqPlayExId
-	pop  hl
-L0A7019:;J
-	bit  6, e
-	jp   z, L0A703C
-	bit  6, [hl]
-	jp   nz, L0A703C
-	ld   a, [wLZSS_Buffer]
-	dec  a
-	ld   [wLZSS_Buffer], a
-	jp   nz, L0A703C
-	set  6, [hl]
-	push hl
-	ld   hl, $1600
-	call SGB_PrepareSoundPacket
-	ld   a, $8F
-	call HomeCall_Sound_ReqPlayExId
-	pop  hl
-L0A703C:;J
-	bit  6, e
-	jp   z, L0A705F
-	bit  7, [hl]
-	jp   nz, L0A705F
-	ld   a, [$C1CB]
-	dec  a
-	ld   [$C1CB], a
-	jp   nz, L0A705F
-	set  7, [hl]
-	push hl
-	ld   hl, $1601
-	call SGB_PrepareSoundPacket
-	ld   a, $91
-	call HomeCall_Sound_ReqPlayExId
-	pop  hl
-L0A705F:;J
-	bit  6, e
-	jp   z, L0A708C
-	ld   a, d
-	and  a, $72
-	cp   $72
-	jp   nz, L0A708C
-	bit  2, [hl]
-	jp   nz, L0A708C
-	ld   a, [$C1CD]
-	dec  a
-	ld   [$C1CD], a
-	jp   nz, L0A708C
-	set  2, [hl]
-	set  4, [hl]
-	push hl
-	ld   hl, $1101
-	call SGB_PrepareSoundPacket
-	ld   a, $A9
-	call HomeCall_Sound_ReqPlayExId
-	pop  hl
-L0A708C:;J
-	ret
+	bit  KEYB_START, a			; Start pressed?
+	jp   nz, .end				; If so, jump
 	
+.chkWait:	
+	call Task_ExecRun_NoDelay	; Pass control
+	dec  bc						; FramesLeft--
+	ld   a, b
+	or   a, c					; FramesLeft == 0?
+	jp   nz, .mainLoop			; If not, loop
+.end:
+	ret							; Otherwise we're done
+	
+; =============== TakaraLogo_CheckCheat ===============
+; Activates dip switches when certain button combinations are pressed X times.
+TakaraLogo_CheckCheat:
+
+	ld   hl, hJoyKeys
+	ld   d, [hl]			; D = Held keys
+	inc  hl
+	ld   e, [hl]			; E = Newly pressed keys
+	ld   hl, wDipSwitch		; HL = Dip switches
+	
+.chkTeamDupeInfMeter:
+	;
+	; Duplicate chars in team + Infinite Meter
+	; Hold A + B + SELECT
+	;
+	bit  KEYB_SELECT, e					; Pressed SELECT?
+	jp   z, .chkGoenitz					; If not, skip
+	bit  DIPB_TEAM_DUPL, [hl]			; Already unlocked?
+	jp   nz, .chkGoenitz				; If so, skip
+	ld   a, d
+	and  a, KEY_A|KEY_B|KEY_SELECT		; Holding the button combination?
+	cp   KEY_A|KEY_B|KEY_SELECT
+	jp   nz, .chkGoenitz				; If not, skip
+	; Set cheats
+	set  DIPB_TEAM_DUPL, [hl]
+	set  DIPB_INFINITE_METER, [hl]
+	; Play SGB sound
+	push hl
+		ld   hl, (SGB_SND_A_CUPBREAK << 8)|$01
+		call SGB_PrepareSoundPacket
+		ld   a, SFX_CHARCURSORMOVE
+		call HomeCall_Sound_ReqPlayExId
+	pop  hl
+	
+.chkGoenitz:
+	;
+	; Unlock Goenitz
+	; Press SELECT 3 times.
+	;
+	bit  KEYB_SELECT, e					; Pressed SELECT?
+	jp   z, .chkAllChar					; If not, skip
+	bit  DIPB_UNLOCK_GOENITZ, [hl]		; Already unlocked?
+	jp   nz, .chkAllChar				; If so, skip
+	
+	; Decrement key counter. If 0, enable the cheat
+	ld   a, [wCheatGoenitzKeysLeft]
+	dec  a								
+	ld   [wCheatGoenitzKeysLeft], a		
+	jp   nz, .chkAllChar				
+	set  DIPB_UNLOCK_GOENITZ, [hl]
+	push hl
+		ld   hl, (SGB_SND_A_ESCBUBL << 8)|$00
+		call SGB_PrepareSoundPacket
+		ld   a, SFX_CHARSELECTED
+		call HomeCall_Sound_ReqPlayExId
+	pop  hl
+	
+.chkAllChar:
+	;
+	; Unlock other characters
+	; Press SELECT 20 times.
+	;
+	bit  KEYB_SELECT, e				; Pressed SELECT?
+	jp   z, .chkEasyMovesSGB					; If not, skip
+	bit  DIPB_UNLOCK_OTHER, [hl]	; Already unlocked?
+	jp   nz, .chkEasyMovesSGB				; If so, skip
+	
+	; Decrement key counter. If 0, enable the cheat
+	; This is decremented simultaneously with the Goenitz counter.
+	ld   a, [wCheatAllCharKeysLeft]
+	dec  a
+	ld   [wCheatAllCharKeysLeft], a
+	jp   nz, .chkEasyMovesSGB
+	
+	set  DIPB_UNLOCK_OTHER, [hl]
+	push hl
+		ld   hl, (SGB_SND_A_ESCBUBL << 8)|$01
+		call SGB_PrepareSoundPacket
+		ld   a, SFX_SUPERMOVE
+		call HomeCall_Sound_ReqPlayExId
+	pop  hl
+	
+.chkEasyMovesSGB:
+	;
+	; Easy Moves + SGB Sound Test
+	; Press LEFT + A + B + SELECT 30 times.
+	; (can be done by holding LEFT + A + B and tapping SELECT 30 times)
+	;
+	bit  KEYB_SELECT, e				; Pressed SELECT?
+	jp   z, .end					; If not, skip
+	ld   a, d
+	and  a, KEY_LEFT|KEY_A|KEY_B|KEY_SELECT	; Holding the button combination?
+	cp   KEY_LEFT|KEY_A|KEY_B|KEY_SELECT
+	jp   nz, .end					; If not, skip
+	bit  DIPB_EASY_MOVES, [hl]		; Already unlocked?
+	jp   nz, .end					; If so, skip
+	
+	; Decrement key counter. If 0, enable the cheat
+	ld   a, [wCheatEasyMovesKeysLeft]
+	dec  a
+	ld   [wCheatEasyMovesKeysLeft], a
+	jp   nz, .end
+	
+	set  DIPB_EASY_MOVES, [hl]
+	set  DIPB_SGB_SOUND_TEST, [hl]
+	push hl
+		ld   hl, (SGB_SND_A_PUNCH_A << 8)|$01
+		call SGB_PrepareSoundPacket
+		ld   a, SND_ID_29
+		call HomeCall_Sound_ReqPlayExId
+	pop  hl
+.end:
+	ret
 GFXLZ_TakaraLogo: INCBIN "data/gfx/takaralogo.lzc"
 BG_TakaraLogo: INCBIN "data/bg/takaralogo.bin"
+; 
+; =============== END OF MODULE TakaraLogo ===============
+;
+
 L0A7373:;I
 	call L0036CB
 	jp   c, L0A74E8
