@@ -906,7 +906,7 @@ L1C4380:;I
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
-	ld   [$C029], a
+	ld   [wIntroScene], a
 	ld   [$C165], a
 	ld   [$C1B4], a
 	ld   [$C1B5], a
@@ -957,32 +957,32 @@ L1C43DB:;J
 	ld   hl, $5105
 	rst  $08
 	ld   hl, $4F67
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $4F75
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $4F83
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $4F8F
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $4F9B
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $4FA5
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $4FAE
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $4FBD
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $4FCC
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $4FDB
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $4FF9
-	call L001265
+	call TextPrinter_Instant
 	ld   a, [wDipSwitch]
 	or   a
 	jp   z, L1C445C
 	ld   hl, $5000
-	call L001265
+	call TextPrinter_Instant
 L1C445C:;J
 	ld   a, [wMisc_C025]
 	bit  7, a
@@ -1070,7 +1070,7 @@ L1C447E:;J
 	or   a, $03
 	ldh  [rIE], a
 	ei
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	ld   a, $3F
 	ldh  [rOBP0], a
 	ld   a, $00
@@ -1083,12 +1083,12 @@ L1C447E:;J
 L1C451D:;J
 	call L00112E
 	call L1C4529
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	jp   L1C451D
 L1C4529:;C
 	ld   hl, $4539
 	ld   d, $00
-	ld   a, [$C029]
+	ld   a, [wIntroScene]
 	ld   e, a
 	add  hl, de
 	ld   e, [hl]
@@ -1114,7 +1114,7 @@ L1C4541:;I
 	ret
 L1C4551:;J
 	ld   a, $02
-	ld   [$C029], a
+	ld   [wIntroScene], a
 	ld   a, $00
 	ld   [$C1B4], a
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
@@ -1157,7 +1157,7 @@ L1C458E:;I
 L1C45A7: db $C9;X
 L1C45A8:;J
 	ld   a, $00
-	ld   [$C029], a
+	ld   [wIntroScene], a
 	ld   a, $1E
 	ld   [wTitleResetTimer_High], a
 	ld   a, $3C
@@ -1176,7 +1176,7 @@ L1C45C2:;J
 	ld   a, $00
 	ld   [$C1B7], a
 	ld   a, $04
-	ld   [$C029], a
+	ld   [wIntroScene], a
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [$FFE6], a
@@ -1205,7 +1205,7 @@ L1C45FC:;J
 	ld   [$C1B9], a
 	ld   [$C1BA], a
 	ld   a, $06
-	ld   [$C029], a
+	ld   [wIntroScene], a
 	ld   a, $80
 	ldh  [hScrollX], a
 	ld   a, $20
@@ -1237,10 +1237,10 @@ L1C4645:;J
 	res  2, [hl]
 	xor  a
 	ldh  [rSTAT], a
-	call L00119E
+	call LoadGFX_1bppFont_Default
 	ld   a, $C7
 	rst  $18
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	ld   a, $3F
 	ldh  [rOBP0], a
 	ld   a, $00
@@ -1454,7 +1454,7 @@ L1C47B8:;J
 	set  7, [hl]
 	ld   b, $3C
 L1C47E8:;J
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	dec  b
 	jp   nz, L1C47E8
 	ld   hl, wMisc_C028
@@ -1587,13 +1587,13 @@ L1C48CB:;C
 	jp   z, L1C48E2
 	ld   de, $98FE
 	ld   c, $00
-	call L00129A
+	call NumberPrinter_Instant
 	ld   hl, $5011
-	call L001265
+	call TextPrinter_Instant
 	ret
 L1C48E2:;J
 	ld   hl, $500B
-	call L001265
+	call TextPrinter_Instant
 	ret
 L1C48E9:;I
 	call L1C4DC2
@@ -1631,15 +1631,15 @@ L1C491C:;C
 	jp   z, L1C493C
 L1C492E:;J
 	ld   hl, $5015
-	call L001265
+	call TextPrinter_Instant
 	ret
 L1C4935:;J
 	ld   hl, $501E
-	call L001265
+	call TextPrinter_Instant
 	ret
 L1C493C:;J
 	ld   hl, $5027
-	call L001265
+	call TextPrinter_Instant
 	ret
 L1C4943:;I
 	call L1C4DC2
@@ -1704,7 +1704,7 @@ L1C49A3:;C
 	inc  a
 	ld   de, $997E
 	ld   c, $00
-	call L00129A
+	call NumberPrinter_Instant
 	ret
 L1C49B0:;I
 	call L1C4DC2
@@ -1780,7 +1780,7 @@ L1C4A1B:;C
 	inc  a
 	ld   de, $99BE
 	ld   c, $00
-	call L00129A
+	call NumberPrinter_Instant
 	ret
 L1C4A28: db $21;X
 L1C4A29: db $38;X
@@ -2118,7 +2118,7 @@ L1C4B75:;C
 	jp   z, L1C4B84
 	ld   de, $9ABE
 	ld   c, $00
-	call L00129A
+	call NumberPrinter_Instant
 L1C4B84:;J
 	ret
 L1C4B85:;C
@@ -2381,7 +2381,7 @@ L1C4CC2:;J
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
 	ld   a, $02
-	ld   [$C029], a
+	ld   [wIntroScene], a
 	ld   b, $1C
 	ld   hl, $51B5
 	rst  $08
@@ -2417,7 +2417,7 @@ L1C4CC2:;J
 	ldh  [rIE], a
 	ld   a, $00
 	call HomeCall_Sound_ReqPlayExId_Stub
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	ld   a, $3F
 	ldh  [rOBP0], a
 	ld   a, $00
@@ -6904,69 +6904,120 @@ L1C5FCE: db $00
 L1C5FCF: db $00
 L1C5FD0: db $00
 L1C5FD1: db $00
-L1C5FD2:;I
+
+; 
+; =============== START OF MODULE Intro ===============
+;
+; =============== Module_Intro ===============
+; EntryPoint for Intro. Called by rst $00 jump from Module_TakaraLogo.
+L1C5FD2:
+Module_Intro:
 	ld   sp, $DD00
 	di
-	rst  $10
+	;-----------------------------------
+	rst  $10				; Stop LCD
+	
 	ld   hl, wMisc_C028
-	res  1, [hl]
+	res  MISCB_PL_RANGE_CHECK, [hl]
+	
+	; Reset DMG Pal & vars
 	xor  a
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
-	ld   [$C029], a
-	ld   a, $FF
-	ld   [$C152], a
+	ld   [wIntroScene], a
+	
+	; Don't execute special code
+	ld   a, TXB_NONE
+	ld   [wTextPrintFrameCodeBank], a
+	
 	ld   de, SCRPAL_INTRO
 	call HomeCall_SGB_ApplyScreenPalSet
+	
+	; Reset screen & coords
 	call ClearBGMap
 	call ClearWINDOWMap
+	
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
 	ld   [wFieldScrollX], a
 	ld   [wFieldScrollY], a
-	call L00119E
+	
+	call LoadGFX_1bppFont_Default
 	call ClearOBJInfo
+	
+	; Hide WINDOW
 	ld   a, $90
 	ldh  [rWY], a
 	ld   a, $07
 	ldh  [rWX], a
-	ld   a, $E7
-	rst  $18
+	
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
 	ei
+	
+	; Wait $3C frames
 	ld   b, $3C
-L1C6016:;J
-	call Task_ExecRun_NoDelay
+.wait0:
+	call Task_PassControl_NoDelay
 	dec  b
-	jp   nz, L1C6016
-	ld   a, $3F
+	jp   nz, .wait0
+	
+	
+	ld   a, $3F			; [POI] Overwritten
+	
+	; Set DMG pal
 	ld   a, $18
 	ldh  [rOBP0], a
 	ld   a, $00
 	ldh  [rOBP1], a
 	ld   a, $1B
 	ldh  [rBGP], a
-L1C602B:;J
-	call L1C6862
-	jp   c, L1C604D
-	ld   a, [$C029]
-	ld   hl, $606A
-	call L1C6043
-	jp   c, L1C604D
-	call Task_ExecRun_NoDelay
-	jp   L1C602B
-L1C6043:;C
-	ld   d, $00
+	
+.mainLoop:
+	;
+	; Main loop of the intro.
+	; Each intro scene is its own submodule which take over control.
+	; Only when they are done, they return to this loop.
+	;
+	
+	;--
+	; [POI] This is practically impossible to trigger here.
+	call Intro_Base_IsStartPressed	; Did we abort prematurely?
+	jp   c, Intro_End				; If so, end the intro.
+	;--
+	
+	; Execute the scene
+	ld   a, [wIntroScene]
+	ld   hl, Intro_ScenePtrTable
+	call Intro_ExecScene
+	; If that was the last scene or we ended prematurely (C flag set), end the intro
+	jp   c, Intro_End
+	call Task_PassControl_NoDelay
+	jp   .mainLoop
+	
+; =============== Intro_ExecScene ===============
+; DynJump using the specified jump table and offset.
+; Used for jumping to init code of a specific scene or subscene.
+; IN
+; - A: Scene or subscene "ID" (offset to ptr table)
+; - HL: Ptr to Scene Ptr Table
+Intro_ExecScene:
+	ld   d, $00		; DE = A
 	ld   e, a
-	add  hl, de
-	ld   e, [hl]
+	add  hl, de		; Offset it
+	ld   e, [hl]	; Read out ptr to DE
 	inc  hl
 	ld   d, [hl]
-	push de
+	push de			; Move it to HL and jump there
 	pop  hl
 	jp   hl
-L1C604D:;J
+; =============== Intro_End ===============	
+; Switches to the title screen mode.
+Intro_End:
+	;
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
@@ -6977,69 +7028,84 @@ L1C604D:;J
 	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft1], a
 	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft0], a
 	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft1], a
-	ld   b, $1C
-	ld   hl, $4380
+	ld   b, BANK(L1C4380)
+	ld   hl, L1C4380
 	rst  $00
-L1C606A: db $72
-L1C606B: db $60
-L1C606C: db $AF
-L1C606D: db $60
-L1C606E: db $87
-L1C606F: db $64
-L1C6070: db $15
-L1C6071: db $65
-L1C6072:;I
-	ld   hl, $6874
-	ld   b, [hl]
-	inc  hl
-L1C6077:;R
+Intro_ScenePtrTable:
+	dw IntroScene_TextPrint ; Text print
+	dw IntroScene_Chars ; Char sprites animating (including the scene after Iori rises)
+	dw IntroScene_IoriRise ; Iori rising
+	dw IntroScene_IoriKyo ; Iori / Kyo scene
+	
+; =============== IntroScene_TextPrint ===============
+; Prints the intro text to the screen.
+; OUT
+; - C flag: If set, end the intro prematurely
+IntroScene_TextPrint:
+	ld   hl, IntroTextPtrTable
+	ld   b, [hl]			; B = Number of string/TextDef pointers
+	inc  hl					
+.loop:
 	push bc
-	push hl
-	ld   e, [hl]
-	inc  hl
-	ld   d, [hl]
-	push de
-	pop  hl
-	ld   b, $1C
-	ld   c, $04
-	ld   a, $05
-	call L0012C0
-	jr   c, L1C60AB
-	ld   a, $14
-	call L1C6852
-	call ClearBGMap
-	pop  hl
-	inc  hl
-	inc  hl
+		push hl
+			
+			; HL = Ptr to TextDef structure
+			ld   e, [hl]		
+			inc  hl
+			ld   d, [hl]
+			push de
+			pop  hl
+			
+			; Print the string from the intro
+			ld   b, BANK(IntroTextPtrTable) ; Bank with strings
+			ld   c, $04 ; 4 frame delay between letters
+			ld   a, TXT_PLAYSFX|TXT_ALLOWSKIP 	; Flags
+			call TextPrinter_MultiFrameFar		; Do it
+			jr   c, .abort						; Did we abort the printing? If so, jump
+			
+			; Wait $14 frames before clearing the screen, while that happens
+			; still listen to abort requests
+			ld   a, $14
+			call Intro_ChkStartPressed_MultiFrame
+			call ClearBGMap
+		pop  hl
+		inc  hl		; Next TextDef ptr
+		inc  hl
 	pop  bc
-	dec  b
-	jr   nz, L1C6077
+	dec  b				; Processed all strings?
+	jr   nz, .loop		; If not, loop
+.done:
+	; Wait $3C frames on the black screen
 	ld   a, $3C
-	call L1C6852
-	ld   a, $9E
+	call Intro_ChkStartPressed_MultiFrame
+	
+	; Prepare next scene
+	ld   a, BGM_IN1996
 	call HomeCall_Sound_ReqPlayExId_Stub
-	call L1C6679
-	ld   a, $02
-	ld   [$C029], a
+	call Intro_Chars_LoadVRAM
+	ld   a, ISC_CHAR
+	ld   [wIntroScene], a
 	ret
-L1C60AB:;R
+.abort:
+	; Set C flag to end the intro
 	pop  hl
 	pop  bc
 	scf
 	ret
-L1C60AF:;RI
-	ld   a, [$C02A]
+	
+IntroScene_Chars:;RI
+	ld   a, [wIntroCharScene]
 	cp   $1C
 	jr   z, L1C60C2
 	cp   $26
 	jr   z, L1C60CC
 	ld   hl, $60E0
-	call L1C6043
-	jr   L1C60AF
+	call Intro_ExecScene
+	jr   IntroScene_Chars
 L1C60C2:;R
 	call L1C6729
 	ld   a, $04
-	ld   [$C029], a
+	ld   [wIntroScene], a
 	xor  a
 	ret
 L1C60CC:;R
@@ -7049,7 +7115,7 @@ L1C60CC:;R
 	res  7, [hl]
 	call L1C67BF
 	ld   a, $06
-	ld   [$C029], a
+	ld   [wIntroScene], a
 	xor  a
 	ret
 L1C60E0: db $06
@@ -7111,11 +7177,11 @@ L1C6106:;I
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
-	ld   a, [$C02A]
+	ld   a, [wIntroCharScene]
 	add  a, $02
-	ld   [$C02A], a
+	ld   [wIntroCharScene], a
 	ld   a, $01
-	call L1C6852
+	call Intro_ChkStartPressed_MultiFrame
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	set  7, [hl]
 	ld   a, $F0
@@ -7403,13 +7469,13 @@ L1C6395:;R
 	call L1C6629
 	jp   L1C63CC
 L1C63CC:;J
-	ld   a, [$C02A]
+	ld   a, [wIntroCharScene]
 	add  a, $02
-	ld   [$C02A], a
+	ld   [wIntroCharScene], a
 	ret
 L1C63D5:;C
 	ld   hl, $6427
-	ld   a, [$C02A]
+	ld   a, [wIntroCharScene]
 	srl  a
 	sub  a, $02
 	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
@@ -7559,7 +7625,7 @@ L1C6483: db $44
 L1C6484: db $1C
 L1C6485: db $40
 L1C6486: db $0F
-L1C6487:;I
+IntroScene_IoriRise:;I
 	ld   bc, $012C
 L1C648A:;R
 	push bc
@@ -7579,7 +7645,7 @@ L1C648A:;R
 	res  7, [hl]
 L1C64B2:;R
 	ld   a, $01
-	call L1C6852
+	call Intro_ChkStartPressed_MultiFrame
 	pop  bc
 	dec  bc
 	ld   a, b
@@ -7615,9 +7681,9 @@ L1C64B2:;R
 	ld   [$C1B3], a
 	call L1C63D5
 	ld   a, $1E
-	ld   [$C02A], a
+	ld   [wIntroCharScene], a
 	ld   a, $02
-	ld   [$C029], a
+	ld   [wIntroScene], a
 	xor  a
 	ret
 L1C6507:;C
@@ -7635,7 +7701,7 @@ L1C6507:;C
 	inc  hl
 	ld   [hl], e
 	ret
-L1C6515:;I
+IntroScene_IoriKyo:;I
 	ld   a, $0F
 L1C6517:;R
 	push af
@@ -7647,12 +7713,12 @@ L1C6517:;R
 	sub  a, b
 	ldh  [rWX], a
 	ld   a, $01
-	call L1C6852
+	call Intro_ChkStartPressed_MultiFrame
 	pop  af
 	dec  a
 	jr   nz, L1C6517
 	ld   a, $78
-	call L1C6852
+	call Intro_ChkStartPressed_MultiFrame
 	scf
 	ret
 L1C6533:;CR
@@ -7847,7 +7913,7 @@ L1C6632:;R
 	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
 	call L0035B9
 	ld   a, $01
-	call L1C6852
+	call Intro_ChkStartPressed_MultiFrame
 	pop  af
 	dec  a
 	jr   nz, L1C6632
@@ -7865,12 +7931,14 @@ L1C6656:;R
 	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
 	call L0035B9
 	ld   a, $01
-	call L1C6852
+	call Intro_ChkStartPressed_MultiFrame
 	pop  af
 	dec  a
 	jr   nz, L1C6656
 	ret
-L1C6679:;C
+	
+; =============== Intro_Chars_LoadVRAM ===============
+Intro_Chars_LoadVRAM:
 	di
 	rst  $10
 	ld   a, $FF
@@ -7878,8 +7946,8 @@ L1C6679:;C
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
 	xor  a
-	ld   [$C029], a
-	ld   [$C02A], a
+	ld   [wIntroScene], a
+	ld   [wIntroCharScene], a
 	ld   [$C1B3], a
 	call ClearBGMap
 	call ClearWINDOWMap
@@ -7937,7 +8005,7 @@ L1C6679:;C
 	rst  $18
 	ei
 	ld   a, $14
-	call L1C6852
+	call Intro_ChkStartPressed_MultiFrame
 	ld   a, $8C
 	ldh  [rOBP0], a
 	ld   a, $4C
@@ -7956,7 +8024,7 @@ L1C6729:;C
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
 	xor  a
-	ld   [$C029], a
+	ld   [wIntroScene], a
 	call ClearBGMap
 	ld   d, $01
 	call ClearWINDOWMapCustom
@@ -8001,8 +8069,8 @@ L1C6729:;C
 	or   a, $03
 	ldh  [rIE], a
 	ei
-	call Task_ExecRun_NoDelay
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
+	call Task_PassControl_NoDelay
 	ld   a, $8C
 	ldh  [rOBP0], a
 	ld   a, $00
@@ -8020,7 +8088,7 @@ L1C67BF:;C
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
-	ld   [$C029], a
+	ld   [wIntroScene], a
 	call ClearBGMap
 	call ClearWINDOWMap
 	xor  a
@@ -8069,8 +8137,8 @@ L1C67BF:;C
 	ld   a, $E7
 	rst  $18
 	ei
-	call Task_ExecRun_NoDelay
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
+	call Task_PassControl_NoDelay
 	ld   a, $18
 	ldh  [rOBP0], a
 	ld   a, $00
@@ -8078,219 +8146,62 @@ L1C67BF:;C
 	ld   a, $1B
 	ldh  [rBGP], a
 	ret
-L1C6852:;JC
+	
+; =============== Intro_ChkStartPressed_MultiFrame ===============
+; Checks if the START button is pressed for the specified amount of frames.
+; While this happens the task is essentially paused.
+; IN
+; - A: Frames to check
+Intro_ChkStartPressed_MultiFrame:
 	push af
-	call L1C6862
-	jp   c, L1C604D
-	call Task_ExecRun_NoDelay
+		call Intro_Base_IsStartPressed			; Pressed START?
+		jp   c, Intro_End						; If so, end the intro
+		call Task_PassControl_NoDelay
 	pop  af
-	dec  a
-	jp   nz, L1C6852
+	dec  a										; Waited all frames?
+	jp   nz, Intro_ChkStartPressed_MultiFrame	; If not, loop
 	ret
-L1C6862:;C
+	
+; =============== Intro_Base_IsStartPressed ===============
+; Checks if START is pressed on any controller.
+; OUT
+; - C flag: If set, START is pressed on any controller.
+Intro_Base_IsStartPressed:
 	ldh  a, [hJoyNewKeys]
-	bit  7, a
-	jp   nz, L1C6872
+	bit  KEYB_START, a		; Pressed START on controller 1?
+	jp   nz, .pressed		; If so, jump
 	ldh  a, [hJoyNewKeys2]
-	bit  7, a
-	jp   nz, L1C6872
-	xor  a
+	bit  KEYB_START, a		; Pressed START on controller 1?
+	jp   nz, .pressed		; If so, jump
+.not:
+	xor  a	; clear C flag
 	ret
-L1C6872:;J
-	scf
+.pressed:
+	scf		; set C flag
 	ret
-L1C6874: db $04
-L1C6875: db $7D
-L1C6876: db $68
-L1C6877: db $A4
-L1C6878: db $68
-L1C6879: db $D5
-L1C687A: db $68
-L1C687B: db $1D
-L1C687C: db $69
-L1C687D: db $00
-L1C687E: db $99
-L1C687F: db $24
-L1C6880: db $20
-L1C6881: db $56
-L1C6882: db $49
-L1C6883: db $4F
-L1C6884: db $4C
-L1C6885: db $45
-L1C6886: db $4E
-L1C6887: db $54
-L1C6888: db $20
-L1C6889: db $46
-L1C688A: db $49
-L1C688B: db $47
-L1C688C: db $48
-L1C688D: db $54
-L1C688E: db $49
-L1C688F: db $4E
-L1C6890: db $47
-L1C6891: db $FF
-L1C6892: db $FF
-L1C6893: db $20
-L1C6894: db $20
-L1C6895: db $54
-L1C6896: db $4F
-L1C6897: db $20
-L1C6898: db $43
-L1C6899: db $4F
-L1C689A: db $4D
-L1C689B: db $45
-L1C689C: db $20
-L1C689D: db $41
-L1C689E: db $47
-L1C689F: db $41
-L1C68A0: db $49
-L1C68A1: db $4E
-L1C68A2: db $21
-L1C68A3: db $FF
-L1C68A4: db $E0
-L1C68A5: db $98
-L1C68A6: db $2E
-L1C68A7: db $20
-L1C68A8: db $41
-L1C68A9: db $53
-L1C68AA: db $20
-L1C68AB: db $41
-L1C68AC: db $20
-L1C68AD: db $59
-L1C68AE: db $45
-L1C68AF: db $41
-L1C68B0: db $52
-L1C68B1: db $20
-L1C68B2: db $46
-L1C68B3: db $4C
-L1C68B4: db $45
-L1C68B5: db $57
-L1C68B6: db $2D
-L1C68B7: db $42
-L1C68B8: db $59
-L1C68B9: db $FF
-L1C68BA: db $FF
-L1C68BB: db $20
-L1C68BC: db $20
-L1C68BD: db $46
-L1C68BE: db $52
-L1C68BF: db $4F
-L1C68C0: db $4D
-L1C68C1: db $FF
-L1C68C2: db $FF
-L1C68C3: db $20
-L1C68C4: db $20
-L1C68C5: db $54
-L1C68C6: db $48
-L1C68C7: db $45
-L1C68C8: db $20
-L1C68C9: db $45
-L1C68CA: db $58
-L1C68CB: db $43
-L1C68CC: db $49
-L1C68CD: db $54
-L1C68CE: db $45
-L1C68CF: db $4D
-L1C68D0: db $45
-L1C68D1: db $4E
-L1C68D2: db $54
-L1C68D3: db $2C
-L1C68D4: db $FF
-L1C68D5: db $C0
-L1C68D6: db $98
-L1C68D7: db $45
-L1C68D8: db $20
-L1C68D9: db $57
-L1C68DA: db $45
-L1C68DB: db $20
-L1C68DC: db $4E
-L1C68DD: db $4F
-L1C68DE: db $57
-L1C68DF: db $20
-L1C68E0: db $44
-L1C68E1: db $45
-L1C68E2: db $43
-L1C68E3: db $4C
-L1C68E4: db $41
-L1C68E5: db $52
-L1C68E6: db $45
-L1C68E7: db $20
-L1C68E8: db $54
-L1C68E9: db $48
-L1C68EA: db $45
-L1C68EB: db $FF
-L1C68EC: db $FF
-L1C68ED: db $20
-L1C68EE: db $20
-L1C68EF: db $4F
-L1C68F0: db $50
-L1C68F1: db $45
-L1C68F2: db $4E
-L1C68F3: db $49
-L1C68F4: db $4E
-L1C68F5: db $47
-L1C68F6: db $20
-L1C68F7: db $4F
-L1C68F8: db $46
-L1C68F9: db $20
-L1C68FA: db $4F
-L1C68FB: db $55
-L1C68FC: db $52
-L1C68FD: db $FF
-L1C68FE: db $FF
-L1C68FF: db $20
-L1C6900: db $20
-L1C6901: db $53
-L1C6902: db $50
-L1C6903: db $45
-L1C6904: db $43
-L1C6905: db $49
-L1C6906: db $41
-L1C6907: db $4C
-L1C6908: db $20
-L1C6909: db $54
-L1C690A: db $45
-L1C690B: db $41
-L1C690C: db $4D
-L1C690D: db $FF
-L1C690E: db $FF
-L1C690F: db $20
-L1C6910: db $20
-L1C6911: db $54
-L1C6912: db $4F
-L1C6913: db $55
-L1C6914: db $52
-L1C6915: db $4E
-L1C6916: db $41
-L1C6917: db $4D
-L1C6918: db $45
-L1C6919: db $4E
-L1C691A: db $54
-L1C691B: db $FF
-L1C691C: db $FF
-L1C691D: db $20
-L1C691E: db $99
-L1C691F: db $14
-L1C6920: db $20
-L1C6921: db $20
-L1C6922: db $20
-L1C6923: db $20
-L1C6924: db $20
-L1C6925: db $20
-L1C6926: db $20
-L1C6927: db $41
-L1C6928: db $47
-L1C6929: db $41
-L1C692A: db $49
-L1C692B: db $4E
-L1C692C: db $2E
-L1C692D: db $2E
-L1C692E: db $2E
-L1C692F: db $2E
-L1C6930: db $FF
-L1C6931: db $FF
-L1C6932: db $FF
-L1C6933: db $FF
+	
+IntroTextPtrTable:
+	db $04				; Number of strings to print
+	dw TextDef_Intro0
+	dw TextDef_Intro1
+	dw TextDef_Intro2
+	dw TextDef_Intro3
+TextDef_Intro0: 
+	dw $9900	; Tilemap ptr
+.c:	db $24		; String length
+.s:	db " VIOLENT FIGHTING",C_NL,C_NL,"  TO COME AGAIN!",C_NL
+TextDef_Intro1: 
+	dw $98E0
+.c:	db $2E
+.s: db " AS A YEAR FLEW-BY",C_NL,C_NL,"  FROM",C_NL,C_NL,"  THE EXCITEMENT,",C_NL
+TextDef_Intro2: 
+	dw $98C0
+.c:	db $45
+.s: db " WE NOW DECLARE THE",C_NL,C_NL,"  OPENING OF OUR",C_NL,C_NL,"  SPECIAL TEAM",C_NL,C_NL,"  TOURNAMENT",C_NL,C_NL
+TextDef_Intro3: 
+	dw $9920
+.c:	db $14
+.s: db "       AGAIN....",C_NL,C_NL,C_NL,C_NL
 L1C6934: db $80
 L1C6935: db $80
 L1C6936: db $00

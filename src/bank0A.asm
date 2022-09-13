@@ -12118,8 +12118,8 @@ Module_TakaraLogo:
 	call SGB_LoadBorder
 	
 	; Switch module
-	ld   b, BANK(L1C5FD2)
-	ld   hl, L1C5FD2
+	ld   b, BANK(Module_Intro)
+	ld   hl, Module_Intro
 	rst  $00
 	
 ; =============== TakaraLogo_Do ===============
@@ -12184,7 +12184,7 @@ TakaraLogo_Do:
 	;-----------------------------------
 	ei
 	; (VBlank will hit now)
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	
 	; Set DMG palette
 	ld   a, $E4
@@ -12224,7 +12224,7 @@ TakaraLogo_Do:
 	jp   nz, .end				; If so, jump
 	
 .chkWait:	
-	call Task_ExecRun_NoDelay	; Pass control
+	call Task_PassControl_NoDelay	; Pass control
 	dec  bc						; FramesLeft--
 	ld   a, b
 	or   a, c					; FramesLeft == 0?
@@ -12483,7 +12483,7 @@ L0A7484:;J
 	call L002D53
 	call L003A3E
 	jp   nc, L0A74E8
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ld   a, $03
 	ld   [$C173], a
 	call L00376A
@@ -13180,7 +13180,7 @@ L0A7A36:;J
 	jp   nc, L0A7A92
 	call L003A28
 	jp   nc, L0A7A95
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ld   a, $03
 	ld   [$C173], a
 	ld   hl, $0021

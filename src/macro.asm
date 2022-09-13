@@ -24,6 +24,23 @@ mWaitForNewHBlank: MACRO
 	mWaitForHBlank
 ENDM
 
+; =============== mWaitForVBlankOrHBlank ===============
+; Waits for the VBlank or HBlank period.
+mWaitForVBlankOrHBlank: MACRO
+.waitVBlankOrHBlank_\@:
+	ldh  a, [rSTAT]
+	bit  1, a
+	jp   nz, .waitVBlankOrHBlank_\@
+ENDM
+
+; =============== mWaitForVBlankOrHBlankFast ===============
+; Waits for the VBlank or HBlank period.
+mWaitForVBlankOrHBlankFast: MACRO
+.waitVBlankOrHBlank_\@:
+	ldh  a, [rSTAT]
+	bit  1, a
+	jr   nz, .waitVBlankOrHBlank_\@
+ENDM
 
 ; =============== pkg ===============
 ; Shorthand for the header of a (set of) SGB Packets

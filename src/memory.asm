@@ -33,6 +33,9 @@ wMisc_C025 EQU $C025 ; bitmask with multiple different purposes
 wMisc_C026 EQU $C026
 wMisc_C028 EQU $C028 ; appears to select a parallax type (how to divide the screen sections)
 
+wIntroScene EQU $C029 ; Offset to scene ID in scene pointer table (some scenes have different parts)
+wIntroCharScene EQU $C02A ; Offset to the subscene ID when animating player sprites
+
 wSGBSendPacketAtFrameEnd EQU $C02B ; If set, there are SGB packets to send after all tasks are processed
 wSGBSoundPacket EQU $C02C ; Data for the sound effect packet to be sent at the end of the frame.
 
@@ -59,6 +62,18 @@ wSerialJoyLastKeys2 EQU $C149 ; Player 2 - Most recent Joypad Input (when contro
 wSerialJoyKeys2 EQU $C14A ; Player 2 - Joypad Input (when controlling P1)
 wSerialInputEnabled EQU $C14B ; If set, controls are enabled during serial mode
 wSGBBorderType EQU $C14C ; Current border type loaded 
+wFontLoadBit1Col EQU $C14D ; 2pp color mapped to bit1 on 1bpp graphics
+wFontLoadBit0Col EQU $C14E ; 2pp color mapped to bit0 on 1bpp graphics
+wFontLoadTmpGFX EQU $C14F ; 2 bytes (size of a line)
+
+wTextPrintFlags EQU $C151
+
+
+wTextPrintFrameCodeBank EQU $C152 ; Bank number of the custom code
+wTextPrintFrameCodePtr_Low EQU $C153 ; Ptr to the code itself
+wTextPrintFrameCodePtr_High EQU $C154
+
+
 wFieldScrollX EQU $C155 ; X Scroll coordinate of the viewport during gameplay 
 wFieldScrollY EQU $C157 ; Y Scroll coordinate of the viewport during gameplay 
 

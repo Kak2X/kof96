@@ -13790,7 +13790,7 @@ Sound_ActTbl:
 .act1B: db SFX_TAUNT, SGB_SND_A_PUNCH_B, $03
 .act1C: db SND_ID_30, SGB_SND_A_SELECT_C, $03
 
-; =============== TEXT SEEMINGLY BELOW ===============
+
 L1F7DDC: db $00
 L1F7DDD: db $80
 L1F7DDE: db $40
@@ -14047,7 +14047,10 @@ L1F7ED8: db $3F
 L1F7ED9: db $BF
 L1F7EDA: db $7F
 L1F7EDB: db $FF
-L1F7EDC: db $30;X
+; =============== TextPrinter_CharsetToTileTbl ===============
+; Maps the character set used for strings in the ROM (based on ASCII) to tile IDs. 
+; The tile IDs correspond to the standard 1bpp font (FontDef_Default). 
+TextPrinter_CharsetToTileTbl: db $30;X
 L1F7EDD: db $31;X
 L1F7EDE: db $32;X
 L1F7EDF: db $33;X
@@ -14303,7 +14306,10 @@ L1F7FD8: db $00;X
 L1F7FD9: db $00;X
 L1F7FDA: db $00;X
 L1F7FDB: db $00;X
-L1F7FDC: db $1F
+; =============== TextPrinter_DigitToTileTbl ===============
+; Maps the number digits to tile IDs.
+; The tile IDs correspond to the standard 1bpp font (FontDef_Default). 
+TextPrinter_DigitToTileTbl: db $1F
 L1F7FDD: db $20
 L1F7FDE: db $21
 L1F7FDF: db $22

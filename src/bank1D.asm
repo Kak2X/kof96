@@ -3224,1035 +3224,18 @@ L1D4C96: db $C3
 L1D4C97: db $C3
 L1D4C98: db $E1
 L1D4C99: db $E1
-L1D4C9A: db $00
-L1D4C9B: db $90
-L1D4C9C: db $80
-L1D4C9D: db $00
-L1D4C9E: db $03
-L1D4C9F: db $00
-L1D4CA0: db $00
-L1D4CA1: db $00
-L1D4CA2: db $00
-L1D4CA3: db $00
-L1D4CA4: db $00
-L1D4CA5: db $00
-L1D4CA6: db $00
-L1D4CA7: db $FF
-L1D4CA8: db $FF
-L1D4CA9: db $FF
-L1D4CAA: db $FF
-L1D4CAB: db $FF
-L1D4CAC: db $FF
-L1D4CAD: db $FF
-L1D4CAE: db $FF
-L1D4CAF: db $3C
-L1D4CB0: db $66
-L1D4CB1: db $66
-L1D4CB2: db $66
-L1D4CB3: db $7E
-L1D4CB4: db $66
-L1D4CB5: db $66
-L1D4CB6: db $00
-L1D4CB7: db $7C
-L1D4CB8: db $66
-L1D4CB9: db $66
-L1D4CBA: db $7C
-L1D4CBB: db $66
-L1D4CBC: db $66
-L1D4CBD: db $7C
-L1D4CBE: db $00
-L1D4CBF: db $3C
-L1D4CC0: db $66
-L1D4CC1: db $60
-L1D4CC2: db $60
-L1D4CC3: db $60
-L1D4CC4: db $66
-L1D4CC5: db $3C
-L1D4CC6: db $00
-L1D4CC7: db $7C
-L1D4CC8: db $66
-L1D4CC9: db $66
-L1D4CCA: db $66
-L1D4CCB: db $66
-L1D4CCC: db $66
-L1D4CCD: db $7C
-L1D4CCE: db $00
-L1D4CCF: db $7E
-L1D4CD0: db $60
-L1D4CD1: db $60
-L1D4CD2: db $7C
-L1D4CD3: db $60
-L1D4CD4: db $60
-L1D4CD5: db $7E
-L1D4CD6: db $00
-L1D4CD7: db $7E
-L1D4CD8: db $60
-L1D4CD9: db $60
-L1D4CDA: db $7C
-L1D4CDB: db $60
-L1D4CDC: db $60
-L1D4CDD: db $60
-L1D4CDE: db $00
-L1D4CDF: db $3C
-L1D4CE0: db $66
-L1D4CE1: db $60
-L1D4CE2: db $6E
-L1D4CE3: db $66
-L1D4CE4: db $66
-L1D4CE5: db $3C
-L1D4CE6: db $00
-L1D4CE7: db $66
-L1D4CE8: db $66
-L1D4CE9: db $66
-L1D4CEA: db $7E
-L1D4CEB: db $66
-L1D4CEC: db $66
-L1D4CED: db $66
-L1D4CEE: db $00
-L1D4CEF: db $18
-L1D4CF0: db $18
-L1D4CF1: db $18
-L1D4CF2: db $18
-L1D4CF3: db $18
-L1D4CF4: db $18
-L1D4CF5: db $18
-L1D4CF6: db $00
-L1D4CF7: db $06
-L1D4CF8: db $06
-L1D4CF9: db $06
-L1D4CFA: db $06
-L1D4CFB: db $66
-L1D4CFC: db $66
-L1D4CFD: db $3C
-L1D4CFE: db $00
-L1D4CFF: db $66
-L1D4D00: db $66
-L1D4D01: db $6C
-L1D4D02: db $78
-L1D4D03: db $6C
-L1D4D04: db $66
-L1D4D05: db $66
-L1D4D06: db $00
-L1D4D07: db $60
-L1D4D08: db $60
-L1D4D09: db $60
-L1D4D0A: db $60
-L1D4D0B: db $60
-L1D4D0C: db $60
-L1D4D0D: db $7E
-L1D4D0E: db $00
-L1D4D0F: db $63
-L1D4D10: db $77
-L1D4D11: db $7F
-L1D4D12: db $7F
-L1D4D13: db $6B
-L1D4D14: db $63
-L1D4D15: db $63
-L1D4D16: db $00
-L1D4D17: db $63
-L1D4D18: db $73
-L1D4D19: db $7B
-L1D4D1A: db $6F
-L1D4D1B: db $67
-L1D4D1C: db $63
-L1D4D1D: db $63
-L1D4D1E: db $00
-L1D4D1F: db $3E
-L1D4D20: db $63
-L1D4D21: db $63
-L1D4D22: db $63
-L1D4D23: db $63
-L1D4D24: db $63
-L1D4D25: db $3E
-L1D4D26: db $00
-L1D4D27: db $7C
-L1D4D28: db $66
-L1D4D29: db $66
-L1D4D2A: db $66
-L1D4D2B: db $7C
-L1D4D2C: db $60
-L1D4D2D: db $60
-L1D4D2E: db $00
-L1D4D2F: db $3C
-L1D4D30: db $66
-L1D4D31: db $66
-L1D4D32: db $66
-L1D4D33: db $7E
-L1D4D34: db $67
-L1D4D35: db $3C
-L1D4D36: db $00
-L1D4D37: db $7C
-L1D4D38: db $66
-L1D4D39: db $66
-L1D4D3A: db $66
-L1D4D3B: db $7C
-L1D4D3C: db $66
-L1D4D3D: db $66
-L1D4D3E: db $00
-L1D4D3F: db $3C
-L1D4D40: db $66
-L1D4D41: db $60
-L1D4D42: db $3C
-L1D4D43: db $06
-L1D4D44: db $66
-L1D4D45: db $3C
-L1D4D46: db $00
-L1D4D47: db $7E
-L1D4D48: db $18
-L1D4D49: db $18
-L1D4D4A: db $18
-L1D4D4B: db $18
-L1D4D4C: db $18
-L1D4D4D: db $18
-L1D4D4E: db $00
-L1D4D4F: db $66
-L1D4D50: db $66
-L1D4D51: db $66
-L1D4D52: db $66
-L1D4D53: db $66
-L1D4D54: db $66
-L1D4D55: db $3C
-L1D4D56: db $00
-L1D4D57: db $66
-L1D4D58: db $66
-L1D4D59: db $66
-L1D4D5A: db $24
-L1D4D5B: db $3C
-L1D4D5C: db $18
-L1D4D5D: db $18
-L1D4D5E: db $00
-L1D4D5F: db $63
-L1D4D60: db $63
-L1D4D61: db $63
-L1D4D62: db $6B
-L1D4D63: db $7F
-L1D4D64: db $77
-L1D4D65: db $63
-L1D4D66: db $00
-L1D4D67: db $66
-L1D4D68: db $66
-L1D4D69: db $3C
-L1D4D6A: db $18
-L1D4D6B: db $3C
-L1D4D6C: db $66
-L1D4D6D: db $66
-L1D4D6E: db $00
-L1D4D6F: db $66
-L1D4D70: db $66
-L1D4D71: db $24
-L1D4D72: db $18
-L1D4D73: db $18
-L1D4D74: db $18
-L1D4D75: db $18
-L1D4D76: db $00
-L1D4D77: db $7E
-L1D4D78: db $0C
-L1D4D79: db $1C
-L1D4D7A: db $18
-L1D4D7B: db $38
-L1D4D7C: db $30
-L1D4D7D: db $7E
-L1D4D7E: db $00
-L1D4D7F: db $00
-L1D4D80: db $00
-L1D4D81: db $5C
-L1D4D82: db $62
-L1D4D83: db $60
-L1D4D84: db $60
-L1D4D85: db $63
-L1D4D86: db $03
-L1D4D87: db $00
-L1D4D88: db $00
-L1D4D89: db $00
-L1D4D8A: db $00
-L1D4D8B: db $00
-L1D4D8C: db $60
-L1D4D8D: db $60
-L1D4D8E: db $00
-L1D4D8F: db $30
-L1D4D90: db $30
-L1D4D91: db $10
-L1D4D92: db $20
-L1D4D93: db $00
-L1D4D94: db $00
-L1D4D95: db $00
-L1D4D96: db $00
-L1D4D97: db $3C
-L1D4D98: db $66
-L1D4D99: db $6E
-L1D4D9A: db $7E
-L1D4D9B: db $76
-L1D4D9C: db $66
-L1D4D9D: db $3C
-L1D4D9E: db $00
-L1D4D9F: db $18
-L1D4DA0: db $78
-L1D4DA1: db $18
-L1D4DA2: db $18
-L1D4DA3: db $18
-L1D4DA4: db $18
-L1D4DA5: db $18
-L1D4DA6: db $00
-L1D4DA7: db $3C
-L1D4DA8: db $66
-L1D4DA9: db $66
-L1D4DAA: db $0C
-L1D4DAB: db $30
-L1D4DAC: db $60
-L1D4DAD: db $7E
-L1D4DAE: db $00
-L1D4DAF: db $3C
-L1D4DB0: db $66
-L1D4DB1: db $06
-L1D4DB2: db $0C
-L1D4DB3: db $66
-L1D4DB4: db $66
-L1D4DB5: db $3C
-L1D4DB6: db $00
-L1D4DB7: db $0C
-L1D4DB8: db $1C
-L1D4DB9: db $1C
-L1D4DBA: db $2C
-L1D4DBB: db $6C
-L1D4DBC: db $7E
-L1D4DBD: db $0C
-L1D4DBE: db $00
-L1D4DBF: db $7C
-L1D4DC0: db $60
-L1D4DC1: db $60
-L1D4DC2: db $7C
-L1D4DC3: db $06
-L1D4DC4: db $66
-L1D4DC5: db $3C
-L1D4DC6: db $00
-L1D4DC7: db $3C
-L1D4DC8: db $66
-L1D4DC9: db $60
-L1D4DCA: db $7C
-L1D4DCB: db $66
-L1D4DCC: db $66
-L1D4DCD: db $3C
-L1D4DCE: db $00
-L1D4DCF: db $7E
-L1D4DD0: db $06
-L1D4DD1: db $0C
-L1D4DD2: db $0C
-L1D4DD3: db $18
-L1D4DD4: db $18
-L1D4DD5: db $18
-L1D4DD6: db $00
-L1D4DD7: db $3C
-L1D4DD8: db $66
-L1D4DD9: db $66
-L1D4DDA: db $3C
-L1D4DDB: db $66
-L1D4DDC: db $66
-L1D4DDD: db $3C
-L1D4DDE: db $00
-L1D4DDF: db $3C
-L1D4DE0: db $66
-L1D4DE1: db $66
-L1D4DE2: db $3E
-L1D4DE3: db $06
-L1D4DE4: db $66
-L1D4DE5: db $3C
-L1D4DE6: db $00
-L1D4DE7: db $00
-L1D4DE8: db $00
-L1D4DE9: db $00
-L1D4DEA: db $00
-L1D4DEB: db $7E
-L1D4DEC: db $00
-L1D4DED: db $00
-L1D4DEE: db $00
-L1D4DEF: db $00
-L1D4DF0: db $18
-L1D4DF1: db $18
-L1D4DF2: db $00
-L1D4DF3: db $00
-L1D4DF4: db $18
-L1D4DF5: db $18
-L1D4DF6: db $00
-L1D4DF7: db $18
-L1D4DF8: db $18
-L1D4DF9: db $18
-L1D4DFA: db $18
-L1D4DFB: db $08
-L1D4DFC: db $00
-L1D4DFD: db $18
-L1D4DFE: db $00
-L1D4DFF: db $3E
-L1D4E00: db $63
-L1D4E01: db $03
-L1D4E02: db $06
-L1D4E03: db $08
-L1D4E04: db $00
-L1D4E05: db $08
-L1D4E06: db $00
-L1D4E07: db $00
-L1D4E08: db $00
-L1D4E09: db $00
-L1D4E0A: db $00
-L1D4E0B: db $00
-L1D4E0C: db $60
-L1D4E0D: db $60
-L1D4E0E: db $80
-L1D4E0F: db $6C
-L1D4E10: db $6C
-L1D4E11: db $24
-L1D4E12: db $48
-L1D4E13: db $00
-L1D4E14: db $00
-L1D4E15: db $00
-L1D4E16: db $00
-L1D4E17: db $00
-L1D4E18: db $08
-L1D4E19: db $08
-L1D4E1A: db $3E
-L1D4E1B: db $08
-L1D4E1C: db $08
-L1D4E1D: db $00
-L1D4E1E: db $00
-L1D4E1F: db $08
-L1D4E20: db $1C
-L1D4E21: db $2A
-L1D4E22: db $08
-L1D4E23: db $08
-L1D4E24: db $08
-L1D4E25: db $08
-L1D4E26: db $00
-L1D4E27: db $00
-L1D4E28: db $04
-L1D4E29: db $02
-L1D4E2A: db $7F
-L1D4E2B: db $02
-L1D4E2C: db $04
-L1D4E2D: db $00
-L1D4E2E: db $00
-L1D4E2F: db $08
-L1D4E30: db $08
-L1D4E31: db $08
-L1D4E32: db $08
-L1D4E33: db $2A
-L1D4E34: db $1C
-L1D4E35: db $08
-L1D4E36: db $00
-L1D4E37: db $00
-L1D4E38: db $10
-L1D4E39: db $20
-L1D4E3A: db $7F
-L1D4E3B: db $20
-L1D4E3C: db $10
-L1D4E3D: db $00
-L1D4E3E: db $00
-L1D4E3F: db $00
-L1D4E40: db $00
-L1D4E41: db $00
-L1D4E42: db $54
-L1D4E43: db $54
-L1D4E44: db $04
-L1D4E45: db $08
-L1D4E46: db $30
-L1D4E47: db $00
-L1D4E48: db $FE
-L1D4E49: db $02
-L1D4E4A: db $14
-L1D4E4B: db $18
-L1D4E4C: db $10
-L1D4E4D: db $10
-L1D4E4E: db $20
-L1D4E4F: db $04
-L1D4E50: db $04
-L1D4E51: db $7F
-L1D4E52: db $0C
-L1D4E53: db $14
-L1D4E54: db $24
-L1D4E55: db $44
-L1D4E56: db $0C
-L1D4E57: db $10
-L1D4E58: db $10
-L1D4E59: db $7E
-L1D4E5A: db $12
-L1D4E5B: db $12
-L1D4E5C: db $22
-L1D4E5D: db $22
-L1D4E5E: db $4C
-L1D4E5F: db $00
-L1D4E60: db $7E
-L1D4E61: db $02
-L1D4E62: db $02
-L1D4E63: db $02
-L1D4E64: db $02
-L1D4E65: db $02
-L1D4E66: db $7E
-L1D4E67: db $00
-L1D4E68: db $60
-L1D4E69: db $10
-L1D4E6A: db $C2
-L1D4E6B: db $22
-L1D4E6C: db $04
-L1D4E6D: db $18
-L1D4E6E: db $60
-L1D4E6F: db $06
-L1D4E70: db $78
-L1D4E71: db $08
-L1D4E72: db $FF
-L1D4E73: db $08
-L1D4E74: db $08
-L1D4E75: db $10
-L1D4E76: db $20
-L1D4E77: db $00
-L1D4E78: db $7E
-L1D4E79: db $00
-L1D4E7A: db $FF
-L1D4E7B: db $08
-L1D4E7C: db $08
-L1D4E7D: db $10
-L1D4E7E: db $20
-L1D4E7F: db $10
-L1D4E80: db $10
-L1D4E81: db $10
-L1D4E82: db $1C
-L1D4E83: db $12
-L1D4E84: db $10
-L1D4E85: db $10
-L1D4E86: db $10
-L1D4E87: db $10
-L1D4E88: db $10
-L1D4E89: db $FE
-L1D4E8A: db $10
-L1D4E8B: db $10
-L1D4E8C: db $10
-L1D4E8D: db $20
-L1D4E8E: db $40
-L1D4E8F: db $00
-L1D4E90: db $24
-L1D4E91: db $22
-L1D4E92: db $22
-L1D4E93: db $41
-L1D4E94: db $41
-L1D4E95: db $80
-L1D4E96: db $00
-L1D4E97: db $00
-L1D4E98: db $40
-L1D4E99: db $40
-L1D4E9A: db $7E
-L1D4E9B: db $40
-L1D4E9C: db $40
-L1D4E9D: db $40
-L1D4E9E: db $3F
-L1D4E9F: db $00
-L1D4EA0: db $7E
-L1D4EA1: db $02
-L1D4EA2: db $02
-L1D4EA3: db $02
-L1D4EA4: db $04
-L1D4EA5: db $08
-L1D4EA6: db $30
-L1D4EA7: db $00
-L1D4EA8: db $02
-L1D4EA9: db $22
-L1D4EAA: db $14
-L1D4EAB: db $08
-L1D4EAC: db $14
-L1D4EAD: db $22
-L1D4EAE: db $C0
-L1D4EAF: db $00
-L1D4EB0: db $7E
-L1D4EB1: db $42
-L1D4EB2: db $42
-L1D4EB3: db $42
-L1D4EB4: db $42
-L1D4EB5: db $42
-L1D4EB6: db $7E
-L1D4EB7: db $00
-L1D4EB8: db $7E
-L1D4EB9: db $42
-L1D4EBA: db $42
-L1D4EBB: db $02
-L1D4EBC: db $04
-L1D4EBD: db $08
-L1D4EBE: db $30
-L1D4EBF: db $00
-L1D4EC0: db $C0
-L1D4EC1: db $20
-L1D4EC2: db $02
-L1D4EC3: db $02
-L1D4EC4: db $04
-L1D4EC5: db $18
-L1D4EC6: db $60
-L1D4EC7: db $10
-L1D4EC8: db $10
-L1D4EC9: db $FE
-L1D4ECA: db $10
-L1D4ECB: db $54
-L1D4ECC: db $92
-L1D4ECD: db $92
-L1D4ECE: db $10
-L1D4ECF: db $10
-L1D4ED0: db $1E
-L1D4ED1: db $22
-L1D4ED2: db $64
-L1D4ED3: db $14
-L1D4ED4: db $08
-L1D4ED5: db $10
-L1D4ED6: db $60
-L1D4ED7: db $00
-L1D4ED8: db $00
-L1D4ED9: db $00
-L1D4EDA: db $00
-L1D4EDB: db $00
-L1D4EDC: db $20
-L1D4EDD: db $50
-L1D4EDE: db $20
-L1D4EDF: db $00
-L1D4EE0: db $00
-L1D4EE1: db $00
-L1D4EE2: db $00
-L1D4EE3: db $00
-L1D4EE4: db $00
-L1D4EE5: db $40
-L1D4EE6: db $20
-L1D4EE7: db $60
-L1D4EE8: db $90
-L1D4EE9: db $60
-L1D4EEA: db $00
-L1D4EEB: db $00
-L1D4EEC: db $00
-L1D4EED: db $00
-L1D4EEE: db $00
-L1D4EEF: db $20
-L1D4EF0: db $90
-L1D4EF1: db $40
-L1D4EF2: db $00
-L1D4EF3: db $00
-L1D4EF4: db $00
-L1D4EF5: db $00
-L1D4EF6: db $00
-L1D4EF7: db $00
-L1D4EF8: db $00
-L1D4EF9: db $00
-L1D4EFA: db $18
-L1D4EFB: db $18
-L1D4EFC: db $00
-L1D4EFD: db $00
-L1D4EFE: db $00
-L1D4EFF: db $20
-L1D4F00: db $20
-L1D4F01: db $F8
-L1D4F02: db $22
-L1D4F03: db $7C
-L1D4F04: db $24
-L1D4F05: db $40
-L1D4F06: db $3E
-L1D4F07: db $00
-L1D4F08: db $10
-L1D4F09: db $3C
-L1D4F0A: db $10
-L1D4F0B: db $3C
-L1D4F0C: db $5A
-L1D4F0D: db $72
-L1D4F0E: db $0C
-L1D4F0F: db $00
-L1D4F10: db $00
-L1D4F11: db $00
-L1D4F12: db $00
-L1D4F13: db $44
-L1D4F14: db $42
-L1D4F15: db $52
-L1D4F16: db $20
-L1D4F17: db $00
-L1D4F18: db $08
-L1D4F19: db $44
-L1D4F1A: db $3C
-L1D4F1B: db $E2
-L1D4F1C: db $24
-L1D4F1D: db $10
-L1D4F1E: db $10
-L1D4F1F: db $00
-L1D4F20: db $00
-L1D4F21: db $08
-L1D4F22: db $5C
-L1D4F23: db $6A
-L1D4F24: db $5C
-L1D4F25: db $08
-L1D4F26: db $10
-L1D4F27: db $00
-L1D4F28: db $08
-L1D4F29: db $08
-L1D4F2A: db $0E
-L1D4F2B: db $08
-L1D4F2C: db $38
-L1D4F2D: db $4C
-L1D4F2E: db $32
-L1D4F2F: db $00
-L1D4F30: db $00
-L1D4F31: db $00
-L1D4F32: db $00
-L1D4F33: db $78
-L1D4F34: db $04
-L1D4F35: db $04
-L1D4F36: db $18
-L1D4F37: db $10
-L1D4F38: db $7E
-L1D4F39: db $10
-L1D4F3A: db $3E
-L1D4F3B: db $55
-L1D4F3C: db $99
-L1D4F3D: db $E1
-L1D4F3E: db $06
-L1D4F3F: db $00
-L1D4F40: db $84
-L1D4F41: db $82
-L1D4F42: db $82
-L1D4F43: db $81
-L1D4F44: db $81
-L1D4F45: db $50
-L1D4F46: db $20
-L1D4F47: db $20
-L1D4F48: db $1C
-L1D4F49: db $00
-L1D4F4A: db $7C
-L1D4F4B: db $02
-L1D4F4C: db $02
-L1D4F4D: db $04
-L1D4F4E: db $38
-L1D4F4F: db $10
-L1D4F50: db $0C
-L1D4F51: db $00
-L1D4F52: db $7C
-L1D4F53: db $08
-L1D4F54: db $18
-L1D4F55: db $24
-L1D4F56: db $47
-L1D4F57: db $20
-L1D4F58: db $22
-L1D4F59: db $F9
-L1D4F5A: db $20
-L1D4F5B: db $3E
-L1D4F5C: db $61
-L1D4F5D: db $A1
-L1D4F5E: db $6E
-L1D4F5F: db $40
-L1D4F60: db $44
-L1D4F61: db $F2
-L1D4F62: db $4A
-L1D4F63: db $49
-L1D4F64: db $49
-L1D4F65: db $88
-L1D4F66: db $B0
-L1D4F67: db $10
-L1D4F68: db $7E
-L1D4F69: db $08
-L1D4F6A: db $7E
-L1D4F6B: db $04
-L1D4F6C: db $3E
-L1D4F6D: db $40
-L1D4F6E: db $3C
-L1D4F6F: db $08
-L1D4F70: db $08
-L1D4F71: db $10
-L1D4F72: db $20
-L1D4F73: db $40
-L1D4F74: db $30
-L1D4F75: db $08
-L1D4F76: db $04
-L1D4F77: db $04
-L1D4F78: db $84
-L1D4F79: db $BF
-L1D4F7A: db $84
-L1D4F7B: db $84
-L1D4F7C: db $84
-L1D4F7D: db $48
-L1D4F7E: db $10
-L1D4F7F: db $00
-L1D4F80: db $20
-L1D4F81: db $1C
-L1D4F82: db $00
-L1D4F83: db $00
-L1D4F84: db $40
-L1D4F85: db $42
-L1D4F86: db $3C
-L1D4F87: db $10
-L1D4F88: db $10
-L1D4F89: db $7E
-L1D4F8A: db $08
-L1D4F8B: db $3C
-L1D4F8C: db $42
-L1D4F8D: db $40
-L1D4F8E: db $3C
-L1D4F8F: db $20
-L1D4F90: db $20
-L1D4F91: db $20
-L1D4F92: db $20
-L1D4F93: db $20
-L1D4F94: db $21
-L1D4F95: db $22
-L1D4F96: db $1C
-L1D4F97: db $08
-L1D4F98: db $08
-L1D4F99: db $FE
-L1D4F9A: db $38
-L1D4F9B: db $48
-L1D4F9C: db $38
-L1D4F9D: db $08
-L1D4F9E: db $30
-L1D4F9F: db $00
-L1D4FA0: db $24
-L1D4FA1: db $24
-L1D4FA2: db $FF
-L1D4FA3: db $24
-L1D4FA4: db $2C
-L1D4FA5: db $20
-L1D4FA6: db $1E
-L1D4FA7: db $78
-L1D4FA8: db $08
-L1D4FA9: db $30
-L1D4FAA: db $FE
-L1D4FAB: db $10
-L1D4FAC: db $20
-L1D4FAD: db $20
-L1D4FAE: db $1C
-L1D4FAF: db $20
-L1D4FB0: db $20
-L1D4FB1: db $F0
-L1D4FB2: db $4E
-L1D4FB3: db $40
-L1D4FB4: db $40
-L1D4FB5: db $90
-L1D4FB6: db $8E
-L1D4FB7: db $20
-L1D4FB8: db $20
-L1D4FB9: db $FC
-L1D4FBA: db $20
-L1D4FBB: db $7C
-L1D4FBC: db $42
-L1D4FBD: db $02
-L1D4FBE: db $3C
-L1D4FBF: db $00
-L1D4FC0: db $00
-L1D4FC1: db $1C
-L1D4FC2: db $E2
-L1D4FC3: db $01
-L1D4FC4: db $01
-L1D4FC5: db $02
-L1D4FC6: db $1C
-L1D4FC7: db $00
-L1D4FC8: db $FE
-L1D4FC9: db $08
-L1D4FCA: db $10
-L1D4FCB: db $20
-L1D4FCC: db $20
-L1D4FCD: db $20
-L1D4FCE: db $1C
-L1D4FCF: db $20
-L1D4FD0: db $20
-L1D4FD1: db $16
-L1D4FD2: db $18
-L1D4FD3: db $20
-L1D4FD4: db $40
-L1D4FD5: db $40
-L1D4FD6: db $3E
-L1D4FD7: db $20
-L1D4FD8: db $26
-L1D4FD9: db $F1
-L1D4FDA: db $44
-L1D4FDB: db $44
-L1D4FDC: db $9C
-L1D4FDD: db $A6
-L1D4FDE: db $19
-L1D4FDF: db $00
-L1D4FE0: db $40
-L1D4FE1: db $4E
-L1D4FE2: db $80
-L1D4FE3: db $80
-L1D4FE4: db $90
-L1D4FE5: db $90
-L1D4FE6: db $4E
-L1D4FE7: db $08
-L1D4FE8: db $48
-L1D4FE9: db $5E
-L1D4FEA: db $69
-L1D4FEB: db $49
-L1D4FEC: db $B7
-L1D4FED: db $B9
-L1D4FEE: db $C6
-L1D4FEF: db $20
-L1D4FF0: db $20
-L1D4FF1: db $EE
-L1D4FF2: db $31
-L1D4FF3: db $21
-L1D4FF4: db $67
-L1D4FF5: db $A9
-L1D4FF6: db $26
-L1D4FF7: db $00
-L1D4FF8: db $3C
-L1D4FF9: db $4A
-L1D4FFA: db $89
-L1D4FFB: db $91
-L1D4FFC: db $91
-L1D4FFD: db $62
-L1D4FFE: db $0C
-L1D4FFF: db $44
-L1D5000: db $5F
-L1D5001: db $84
-L1D5002: db $84
-L1D5003: db $9C
-L1D5004: db $A6
-L1D5005: db $A5
-L1D5006: db $58
-L1D5007: db $20
-L1D5008: db $E4
-L1D5009: db $44
-L1D500A: db $46
-L1D500B: db $85
-L1D500C: db $88
-L1D500D: db $88
-L1D500E: db $70
-L1D500F: db $18
-L1D5010: db $00
-L1D5011: db $10
-L1D5012: db $10
-L1D5013: db $16
-L1D5014: db $A9
-L1D5015: db $C5
-L1D5016: db $18
-L1D5017: db $00
-L1D5018: db $00
-L1D5019: db $30
-L1D501A: db $48
-L1D501B: db $84
-L1D501C: db $02
-L1D501D: db $01
-L1D501E: db $00
-L1D501F: db $5F
-L1D5020: db $42
-L1D5021: db $9F
-L1D5022: db $82
-L1D5023: db $8E
-L1D5024: db $92
-L1D5025: db $53
-L1D5026: db $4C
-L1D5027: db $08
-L1D5028: db $7F
-L1D5029: db $08
-L1D502A: db $3E
-L1D502B: db $08
-L1D502C: db $3C
-L1D502D: db $4A
-L1D502E: db $39
-L1D502F: db $78
-L1D5030: db $0A
-L1D5031: db $12
-L1D5032: db $7A
-L1D5033: db $96
-L1D5034: db $A3
-L1D5035: db $44
-L1D5036: db $08
-L1D5037: db $20
-L1D5038: db $F2
-L1D5039: db $21
-L1D503A: db $60
-L1D503B: db $A0
-L1D503C: db $A2
-L1D503D: db $62
-L1D503E: db $3C
-L1D503F: db $48
-L1D5040: db $7C
-L1D5041: db $4A
-L1D5042: db $A9
-L1D5043: db $91
-L1D5044: db $B1
-L1D5045: db $42
-L1D5046: db $0C
-L1D5047: db $10
-L1D5048: db $10
-L1D5049: db $78
-L1D504A: db $10
-L1D504B: db $7A
-L1D504C: db $22
-L1D504D: db $22
-L1D504E: db $1C
-L1D504F: db $44
-L1D5050: db $22
-L1D5051: db $3E
-L1D5052: db $E1
-L1D5053: db $26
-L1D5054: db $10
-L1D5055: db $10
-L1D5056: db $10
-L1D5057: db $08
-L1D5058: db $44
-L1D5059: db $5E
-L1D505A: db $A5
-L1D505B: db $C5
-L1D505C: db $56
-L1D505D: db $08
-L1D505E: db $10
-L1D505F: db $08
-L1D5060: db $08
-L1D5061: db $0F
-L1D5062: db $08
-L1D5063: db $08
-L1D5064: db $78
-L1D5065: db $8E
-L1D5066: db $71
-L1D5067: db $38
-L1D5068: db $00
-L1D5069: db $40
-L1D506A: db $5C
-L1D506B: db $62
-L1D506C: db $42
-L1D506D: db $04
-L1D506E: db $18
-L1D506F: db $22
-L1D5070: db $22
-L1D5071: db $22
-L1D5072: db $22
-L1D5073: db $12
-L1D5074: db $02
-L1D5075: db $04
-L1D5076: db $18
-L1D5077: db $3C
-L1D5078: db $08
-L1D5079: db $10
-L1D507A: db $3C
-L1D507B: db $42
-L1D507C: db $1A
-L1D507D: db $26
-L1D507E: db $1C
-L1D507F: db $20
-L1D5080: db $24
-L1D5081: db $EA
-L1D5082: db $32
-L1D5083: db $22
-L1D5084: db $62
-L1D5085: db $A3
-L1D5086: db $22
-L1D5087: db $78
-L1D5088: db $10
-L1D5089: db $20
-L1D508A: db $7C
-L1D508B: db $82
-L1D508C: db $02
-L1D508D: db $04
-L1D508E: db $38
-L1D508F: db $20
-L1D5090: db $26
-L1D5091: db $E9
-L1D5092: db $31
-L1D5093: db $21
-L1D5094: db $61
-L1D5095: db $A2
-L1D5096: db $24
-L1D5097: db $08
-L1D5098: db $10
-L1D5099: db $20
-L1D509A: db $38
-L1D509B: db $49
-L1D509C: db $49
-L1D509D: db $89
-L1D509E: db $86
+
+; Note that the actual BGP palette used effectively inverts white/black
+FontDef_Default:
+	dw $9000 	; Destination ptr
+	db $80 		; Tiles to copy
+.col:
+	db COL_WHITE ; Bit0 color map (background)
+	db COL_BLACK ; Bit1 color map (foreground)
+	; 1bpp font gfx
+.gfx: 
+	INCBIN "data/gfx/font.bin"
+	
 L1D509F:;I
 	ld   sp, $DD00
 	di
@@ -4270,7 +3253,7 @@ L1D509F:;I
 	ldh  [hScrollY], a
 	ld   [wFieldScrollX], a
 	ld   [wFieldScrollY], a
-	call L00119E
+	call LoadGFX_1bppFont_Default
 	call ClearOBJInfo
 	call L0014F9
 	ld   a, [$C161]
@@ -4311,7 +3294,7 @@ L1D5119: db $35;X
 L1D511A: db $51;X
 L1D511B:;J
 	ld   hl, $56D6
-	call L001265
+	call TextPrinter_Instant
 	ld   a, [$C163]
 	bit  1, a
 	jp   nz, L1D512C
@@ -4980,12 +3963,12 @@ L1D5504:;J
 	ldh  [rBGP], a
 	ld   a, $80
 	ldh  [hScrollY], a
-	call L00119E
+	call LoadGFX_1bppFont_Default
 	call ClearBGMap
 	ld   de, SCRPAL_INTRO
 	call HomeCall_SGB_ApplyScreenPalSet
 	ld   hl, $56DD
-	call L001265
+	call TextPrinter_Instant
 	ld   a, $09
 	ld   [$C1B3], a
 	ld   a, $3C
@@ -5000,7 +3983,7 @@ L1D553E:;J
 	call HomeCall_Sound_ReqPlayExId_Stub
 	ld   a, $C7
 	rst  $18
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	ld   a, $1B
 	ldh  [rBGP], a
 	call L1D5669
@@ -5020,12 +4003,12 @@ L1D5559:;J
 	ldh  [rBGP], a
 	ld   a, $80
 	ldh  [hScrollY], a
-	call L00119E
+	call LoadGFX_1bppFont_Default
 	call ClearBGMap
 	ld   de, SCRPAL_INTRO
 	call HomeCall_SGB_ApplyScreenPalSet
 	ld   hl, $56DD
-	call L001265
+	call TextPrinter_Instant
 	ld   a, $09
 	ld   [$C1B3], a
 	ld   a, $3C
@@ -5107,7 +4090,7 @@ L1D55D4: db $B0;X
 L1D55D5: db $C1;X
 L1D55D6: db $C9;X
 L1D55D7:;J
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 L1D55DA:;J
 	call L1D5685
 	jp   c, L1D5629
@@ -5116,7 +4099,7 @@ L1D55DA:;J
 	jp   z, L1D55F1
 	dec  a
 	ld   [$C1B4], a
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	jp   L1D55DA
 L1D55F1:;J
 	ld   a, $3C
@@ -5130,16 +4113,16 @@ L1D55F1:;J
 	call HomeCall_Sound_ReqPlayExId
 	ld   a, [$C1B3]
 	ld   de, $9AED
-	call L00129A
+	call NumberPrinter_Instant
 	ld   hl, $56EA
-	call L001265
-	call Task_ExecRun_NoDelay
+	call TextPrinter_Instant
+	call Task_PassControl_NoDelay
 	jp   L1D55DA
 L1D561B:;J
 	ld   a, $B1
 	call HomeCall_Sound_ReqPlayExId
 	ld   hl, $56EE
-	call L001265
+	call TextPrinter_Instant
 	jp   L1D5631
 L1D5629:;J
 	ld   a, $01
@@ -5201,7 +4184,7 @@ L1D566C:;J
 	ldh  a, [hJoyNewKeys2]
 	bit  7, a
 	jp   nz, L1D5683
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	dec  bc
 	ld   a, b
 	or   a, c
@@ -9594,7 +8577,7 @@ L1D67BD:;I
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	ld   a, $6C
 	ldh  [rOBP0], a
 	xor  a
@@ -9606,8 +8589,8 @@ L1D67BD:;I
 	ldh  [hScreenSect2BGP], a
 	ld   a, $98
 	call HomeCall_Sound_ReqPlayExId_Stub
-	ld   a, $FF
-	ld   [$C152], a
+	ld   a, TXB_NONE
+	ld   [wTextPrintFrameCodeBank], a
 	ld   hl, $785D
 	call L1D6857
 	ld   hl, $787E
@@ -9669,47 +8652,47 @@ L1D686B:;C
 L1D6875:;C
 	push bc
 	push hl
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	ld   hl, WINDOWMap_Begin
 	ld   b, $14
 	ld   c, $03
 	ld   d, $00
 	call L000E00
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	ld   hl, $9C60
 	ld   b, $14
 	ld   c, $03
 	ld   d, $00
 	call L000E00
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	pop  hl
 	pop  bc
 	ld   de, $9C20
 	ld   c, $04
 	ld   a, $02
-	jp   L0012D6
+	jp   TextPrinter_MultiFrameFarCustomPos
 L1D68A4:;C
 	push bc
 	push hl
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	ld   hl, WINDOWMap_Begin
 	ld   b, $14
 	ld   c, $03
 	ld   d, $00
 	call L000E00
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	ld   hl, $9C60
 	ld   b, $14
 	ld   c, $03
 	ld   d, $00
 	call L000E00
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	pop  hl
 	pop  bc
 	ld   de, $9C20
 	ld   c, $04
 	ld   a, $03
-	jp   L0012D6
+	jp   TextPrinter_MultiFrameFarCustomPos
 L1D68D3: db $80
 L1D68D4: db $80
 L1D68D5: db $00
@@ -9833,7 +8816,7 @@ L1D6934:;I
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	ld   a, $1B
 	ldh  [rBGP], a
 	ldh  [hScreenSect1BGP], a
@@ -9842,8 +8825,8 @@ L1D6934:;I
 	ldh  [hScreenSect2BGP], a
 	ld   a, $98
 	call HomeCall_Sound_ReqPlayExId_Stub
-	ld   a, $FF
-	ld   [$C152], a
+	ld   a, TXB_NONE
+	ld   [wTextPrintFrameCodeBank], a
 	ld   hl, $7918
 	call L1D6857
 	ld   hl, $7928
@@ -9878,12 +8861,12 @@ L1D6934:;I
 	ldh  [hScrollY], a
 	ld   a, $01
 	ld   [$C1CB], a
-	ld   a, $1D
-	ld   [$C152], a
-	ld   hl, $C153
-	ld   [hl], $77
+	ld   a, BANK(L1D6A77)
+	ld   [wTextPrintFrameCodeBank], a
+	ld   hl, wTextPrintFrameCodePtr_Low
+	ld   [hl], LOW(L1D6A77)
 	inc  hl
-	ld   [hl], $6A
+	ld   [hl], HIGH(L1D6A77)
 	ld   hl, $7A65
 	call L1D6857
 	ld   hl, $7A76
@@ -9899,7 +8882,7 @@ L1D6934:;I
 	call HomeCall_Sound_ReqPlayExId_Stub
 	xor  a
 	ld   [$C1CB], a
-	call Task_ExecRun_Delay04
+	call Task_PassControl_Delay04
 	ld   a, $FB
 	ldh  [hScrollY], a
 	ld   a, $6C
@@ -9908,8 +8891,8 @@ L1D6934:;I
 	ld   a, $13
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect2BGP], a
-	ld   a, $FF
-	ld   [$C152], a
+	ld   a, TXB_NONE
+	ld   [wTextPrintFrameCodeBank], a
 	ld   hl, $7A7D
 	call L1D6857
 	ld   hl, $7AA5
@@ -9932,7 +8915,7 @@ L1D6934:;I
 	ei
 	ld   a, $E7
 	rst  $18
-	call Task_ExecRun_Delay04
+	call Task_PassControl_Delay04
 	call L1D7159
 	ld   hl, $7B2F
 	call L1D6857
@@ -9994,7 +8977,7 @@ L1D6AD2:;J
 	rst  $18
 	ld   a, $8A
 	call HomeCall_Sound_ReqPlayExId_Stub
-	call Task_ExecRun_Delay04
+	call Task_PassControl_Delay04
 	ld   a, $6C
 	ldh  [rBGP], a
 	ldh  [hScreenSect1BGP], a
@@ -10025,7 +9008,7 @@ L1D6B08:;I
 	xor  a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	ld   a, $FB
 	ldh  [hScrollY], a
 	ld   a, $6C
@@ -10038,12 +9021,12 @@ L1D6B08:;I
 	ldh  [hScreenSect2BGP], a
 	ld   a, $8B
 	call HomeCall_Sound_ReqPlayExId_Stub
-	ld   a, $1D
-	ld   [$C152], a
-	ld   hl, $C153
-	ld   [hl], $C2
+	ld   a, BANK(L1D6CC2)
+	ld   [wTextPrintFrameCodeBank], a
+	ld   hl, wTextPrintFrameCodePtr_Low
+	ld   [hl], LOW(L1D6CC2)
 	inc  hl
-	ld   [hl], $6C
+	ld   [hl], HIGH(L1D6CC2)
 	ld   hl, $7B46
 	call L1D6857
 	ld   hl, $7B5E
@@ -10067,11 +9050,11 @@ L1D6B08:;I
 	ei
 	ld   a, $E7
 	rst  $18
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	xor  a
 	ld   [wLZSS_Buffer], a
-	ld   a, $FF
-	ld   [$C152], a
+	ld   a, TXB_NONE
+	ld   [wTextPrintFrameCodeBank], a
 	ld   hl, $7C5C
 	call L1D6857
 	ld   hl, $7C84
@@ -10120,17 +9103,17 @@ L1D6BB3:;C
 	ldh  [hScreenSect2BGP], a
 	xor  a
 	ld   [wLZSS_Buffer], a
-	call Task_ExecRun_Delay04
-	ld   a, $FF
-	ld   [$C152], a
+	call Task_PassControl_Delay04
+	ld   a, TXB_NONE
+	ld   [wTextPrintFrameCodeBank], a
 	ld   hl, $7BEA
 	call L1D6857
-	ld   a, $1D
-	ld   [$C152], a
-	ld   hl, $C153
-	ld   [hl], $EC
+	ld   a, BANK(L1D6CEC)
+	ld   [wTextPrintFrameCodeBank], a
+	ld   hl, wTextPrintFrameCodePtr_Low
+	ld   [hl], LOW(L1D6CEC)
 	inc  hl
-	ld   [hl], $6C
+	ld   [hl], HIGH(L1D6CEC)
 	ld   hl, $7C46
 	ld   b, $1C
 	call L1D6875
@@ -10138,44 +9121,44 @@ L1D6BB3:;C
 	ld   b, $1C
 	call L1D6875
 L1D6C38:;R
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	call L1D6CEC
 	ldh  a, [hScrollY]
 	cp   $E0
 	jr   nz, L1D6C38
-	call Task_ExecRun_Delay3B
+	call Task_PassControl_Delay3B
 	ld   a, $80
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
 	ld   [$C1CC], a
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	ld   b, $20
 L1D6C55:;R
 	call L1D6C86
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	dec  b
 	jr   nz, L1D6C55
 	ld   b, $20
 L1D6C60:;R
 	call L1D6C9B
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	dec  b
 	jr   nz, L1D6C60
 	ld   b, $20
 L1D6C6B:;R
 	call L1D6CA8
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	dec  b
 	jr   nz, L1D6C6B
 	ld   b, $20
 L1D6C76:;R
 	call L1D6CB5
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	dec  b
 	jr   nz, L1D6C76
 	ld   a, $6C
 	ldh  [hScreenSect1BGP], a
-	jp   Task_ExecRun_Delay3B
+	jp   Task_PassControl_Delay3B
 L1D6C86:;C
 	ld   a, [$C1CC]
 	inc  a
@@ -10265,7 +9248,7 @@ L1D6D00:;I
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_Delay09
+	call Task_PassControl_Delay09
 	ld   a, $6C
 	ldh  [rBGP], a
 	ldh  [hScreenSect1BGP], a
@@ -10274,8 +9257,8 @@ L1D6D00:;I
 	ldh  [hScreenSect2BGP], a
 	ld   a, $8B
 	call HomeCall_Sound_ReqPlayExId_Stub
-	ld   a, $FF
-	ld   [$C152], a
+	ld   a, TXB_NONE
+	ld   [wTextPrintFrameCodeBank], a
 	ld   hl, $7730
 	call L1D6861
 	ld   hl, $7756
@@ -10289,22 +9272,22 @@ L1D6D00:;I
 	ldh  [hScrollY], a
 	ld   a, $01
 	ld   [$C1CB], a
-	ld   a, $1D
-	ld   [$C152], a
-	ld   hl, $C153
-	ld   [hl], $77
+	ld   a, BANK(L1D6A77)
+	ld   [wTextPrintFrameCodeBank], a
+	ld   hl, wTextPrintFrameCodePtr_Low
+	ld   [hl], LOW(L1D6A77)
 	inc  hl
-	ld   [hl], $6A
+	ld   [hl], HIGH(L1D6A77)
 	ld   hl, $776A
 	call L1D6861
 	xor  a
 	ld   [$C1CB], a
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [hScreenSect1BGP], a
 	ldh  [rOBP0], a
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	di
 	rst  $10
 	xor  a
@@ -10315,10 +9298,10 @@ L1D6D00:;I
 	ei
 	ld   a, $E7
 	rst  $18
-	call Task_ExecRun_Delay09
+	call Task_PassControl_Delay09
 	call L1D7159
-	ld   a, $FF
-	ld   [$C152], a
+	ld   a, TXB_NONE
+	ld   [wTextPrintFrameCodeBank], a
 	ld   hl, $7775
 	call L1D6861
 	ld   hl, $779D
@@ -10358,7 +9341,7 @@ L1D6DE4:;I
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_Delay09
+	call Task_PassControl_Delay09
 	ld   a, $6C
 	ldh  [rBGP], a
 	ldh  [hScreenSect1BGP], a
@@ -10368,8 +9351,8 @@ L1D6DE4:;I
 	ldh  [hScreenSect2BGP], a
 	ld   a, $8B
 	call HomeCall_Sound_ReqPlayExId_Stub
-	ld   a, $FF
-	ld   [$C152], a
+	ld   a, TXB_NONE
+	ld   [wTextPrintFrameCodeBank], a
 	ld   hl, $79BF
 	call L1D6861
 	ld   hl, $79F1
@@ -10387,14 +9370,14 @@ L1D6DE4:;I
 	ld   hl, $7BE2
 	call L1D6857
 	call L1D6BB3
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect1BGP], a
 	ldh  [hScreenSect2BGP], a
 	ldh  [rOBP0], a
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	di
 	rst  $10
 	call ClearBGMap
@@ -10405,12 +9388,12 @@ L1D6DE4:;I
 	ei
 	ld   a, $E7
 	rst  $18
-	call Task_ExecRun_Delay04
+	call Task_PassControl_Delay04
 	call L1D7159
 	xor  a
 	ld   [$C1CB], a
-	ld   a, $FF
-	ld   [$C152], a
+	ld   a, TXB_NONE
+	ld   [wTextPrintFrameCodeBank], a
 	ld   hl, $7AD2
 	call L1D6861
 	ld   hl, $7AE9
@@ -10427,10 +9410,10 @@ L1D6E92:;I
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_Delay09
+	call Task_PassControl_Delay09
 	call L1D7159
-	ld   a, $FF
-	ld   [$C152], a
+	ld   a, TXB_NONE
+	ld   [wTextPrintFrameCodeBank], a
 	ld   hl, $7CE0
 	call L1D6861
 	ld   hl, $7CF8
@@ -10447,10 +9430,10 @@ L1D6EC4:;I
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_Delay09
+	call Task_PassControl_Delay09
 	call L1D7159
-	ld   a, $FF
-	ld   [$C152], a
+	ld   a, TXB_NONE
+	ld   [wTextPrintFrameCodeBank], a
 	ld   hl, $7D14
 	call L1D6861
 	ld   hl, $7D31
@@ -10467,10 +9450,10 @@ L1D6EF6:;I
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_Delay09
+	call Task_PassControl_Delay09
 	call L1D7159
-	ld   a, $FF
-	ld   [$C152], a
+	ld   a, TXB_NONE
+	ld   [wTextPrintFrameCodeBank], a
 	ld   hl, $7D3D
 	call L1D6861
 	jp   L1D6811
@@ -10485,10 +9468,10 @@ L1D6F22:;I
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_Delay09
+	call Task_PassControl_Delay09
 	call L1D7159
-	ld   a, $FF
-	ld   [$C152], a
+	ld   a, TXB_NONE
+	ld   [wTextPrintFrameCodeBank], a
 	ld   hl, $7922
 	call L1D6861
 	ld   hl, $793A
@@ -10512,11 +9495,11 @@ L1D6F6C:;I
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	ld   a, $03
 	ldh  [rBGP], a
-	ld   a, $FF
-	ld   [$C152], a
+	ld   a, TXB_NONE
+	ld   [wTextPrintFrameCodeBank], a
 	ld   hl, $7CF2
 	call L1D686B
 	jp   L1D6811
@@ -10535,10 +9518,10 @@ L1D6F93:;I
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_Delay09
+	call Task_PassControl_Delay09
 	call L1D7159
-	ld   a, $FF
-	ld   [$C152], a
+	ld   a, TXB_NONE
+	ld   [wTextPrintFrameCodeBank], a
 	ld   hl, $7B09
 	call L1D6861
 	ld   hl, $7B31
@@ -10854,7 +9837,7 @@ L1D7159:;C
 	ld   [$D685], a
 	ld   a, $9F
 	call HomeCall_Sound_ReqPlayExId_Stub
-	jp   Task_ExecRun_NoDelay
+	jp   Task_PassControl_NoDelay
 L1D7176:;I
 	call L1D71DE
 	ld   a, $18
@@ -10870,10 +9853,10 @@ L1D7176:;I
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ei
-	call Task_ExecRun_Delay09
+	call Task_PassControl_Delay09
 	call L1D7159
-	ld   a, $FF
-	ld   [$C152], a
+	ld   a, TXB_NONE
+	ld   [wTextPrintFrameCodeBank], a
 	ld   hl, $7B97
 	call L1D6861
 	ld   hl, $7BC6
@@ -10904,7 +9887,7 @@ L1D71DE:;C
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect1BGP], a
 	ldh  [hScreenSect2BGP], a
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	di
 	rst  $10
 	ld   hl, wMisc_C028
@@ -10918,7 +9901,7 @@ L1D71DE:;C
 	ldh  [hScrollY], a
 	ld   [wFieldScrollX], a
 	ld   [wFieldScrollY], a
-	call L00119E
+	call LoadGFX_1bppFont_Default
 	call ClearOBJInfo
 	ld   a, $5C
 	ldh  [rWY], a
@@ -10943,12 +9926,12 @@ L1D7220:;I
 	ldh  [hScrollY], a
 	ld   [wFieldScrollX], a
 	ld   [wFieldScrollY], a
-	call L00119E
+	call LoadGFX_1bppFont_Default
 	call ClearOBJInfo
 	ld   a, $C7
 	rst  $18
 	ei
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	ld   a, $3F
 	ldh  [rOBP0], a
 	ld   a, $00
@@ -10958,125 +9941,125 @@ L1D7220:;I
 	ld   a, $85
 	call HomeCall_Sound_ReqPlayExId_Stub
 	ld   hl, $744B
-	call L001265
+	call TextPrinter_Instant
 	ld   b, $04
 	call L1D742C
 	ld   hl, $7455
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $746C
-	call L001265
+	call TextPrinter_Instant
 	ld   b, $08
 	call L1D742C
 	ld   hl, $747D
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $748A
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $749E
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $74B0
-	call L001265
+	call TextPrinter_Instant
 	ld   b, $08
 	call L1D742C
 	ld   hl, $74BC
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $74C9
-	call L001265
+	call TextPrinter_Instant
 	ld   b, $08
 	call L1D742C
 	ld   hl, $74DD
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $74ED
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $74F8
-	call L001265
+	call TextPrinter_Instant
 	ld   b, $08
 	call L1D742C
 	ld   hl, $7502
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $7511
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $751B
-	call L001265
+	call TextPrinter_Instant
 	ld   b, $08
 	call L1D742C
 	ld   hl, $7527
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $7534
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $753F
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $754A
-	call L001265
+	call TextPrinter_Instant
 	ld   b, $08
 	call L1D742C
 	ld   hl, $7554
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $755F
-	call L001265
+	call TextPrinter_Instant
 	ld   b, $08
 	call L1D742C
 	ld   hl, $75C0
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $75D3
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $75E3
-	call L001265
+	call TextPrinter_Instant
 	ld   b, $08
 	call L1D742C
 	ld   hl, $7573
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $7587
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $759B
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $75AD
-	call L001265
+	call TextPrinter_Instant
 	ld   b, $08
 	call L1D742C
 	ld   hl, $762F
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $7642
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $7651
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $7663
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $7675
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $7686
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $7697
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $76AB
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $76B1
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $76C3
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $76D4
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $76E5
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $76F5
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $7704
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $7712
-	call L001265
+	call TextPrinter_Instant
 	ld   b, $08
 	call L1D742C
 	ld   hl, $75F4
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $7605
-	call L001265
+	call TextPrinter_Instant
 	ld   b, $08
 	call L1D742C
 	ld   hl, $7615
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $7621
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $7626
-	call L001265
+	call TextPrinter_Instant
 	ld   b, $08
 	call L1D742C
 	ret
@@ -11096,12 +10079,12 @@ L1D73C5:;I
 	ldh  [hScrollY], a
 	ld   [wFieldScrollX], a
 	ld   [wFieldScrollY], a
-	call L00119E
+	call LoadGFX_1bppFont_Default
 	call ClearOBJInfo
 	ld   a, $C7
 	rst  $18
 	ei
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	ld   a, $3F
 	ldh  [rOBP0], a
 	ld   a, $00
@@ -11109,12 +10092,12 @@ L1D73C5:;I
 	ld   a, $1B
 	ldh  [rBGP], a
 	ld   hl, $7725
-	call L001265
+	call TextPrinter_Instant
 	ld   a, $00
 	call HomeCall_Sound_ReqPlayExId_Stub
 	ld   b, $0A
 L1D740A:;J
-	call Task_ExecRun_Delay3B
+	call Task_PassControl_Delay3B
 	dec  b
 	jp   nz, L1D740A
 	jp   ClearBGMap
@@ -11123,10 +10106,10 @@ L1D7414:;J
 	call L1D6A77
 	call L1D7439
 	jr   nc, L1D7423
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	ret
 L1D7423:;R
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	dec  b
 	jp   nz, L1D7414
 	xor  a
@@ -11134,7 +10117,7 @@ L1D7423:;R
 L1D742C:;C
 	ld   b, $08
 L1D742E:;J
-	call Task_ExecRun_Delay3B
+	call Task_PassControl_Delay3B
 	dec  b
 	jp   nz, L1D742E
 	call ClearBGMap

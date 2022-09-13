@@ -17,7 +17,7 @@ L1E4000:;I
 	ldh  [hScrollY], a
 	ld   [wFieldScrollX], a
 	ld   [wFieldScrollY], a
-	call L00119E
+	call LoadGFX_1bppFont_Default
 	ld   hl, $4F71
 	ld   de, $92F0
 	ld   b, $51
@@ -159,7 +159,7 @@ L1E4122:;J
 	call L001F85
 	jp   c, L1E4176
 	ld   hl, $4F51
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $99E1
 	ld   c, $EC
 	call L1E49DF
@@ -188,7 +188,7 @@ L1E415A:;J
 	jp   L1E427A
 L1E4176:;J
 	ld   hl, $4F62
-	call L001265
+	call TextPrinter_Instant
 	ld   hl, $99E1
 	ld   c, $EC
 	call L1E49DF
@@ -416,8 +416,8 @@ L1E436D:;J
 	ld   a, $C7
 	rst  $18
 	ei
-	call Task_ExecRun_NoDelay
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
+	call Task_PassControl_NoDelay
 	ld   a, $74
 	ldh  [rOBP0], a
 	ld   a, $74
@@ -426,7 +426,7 @@ L1E436D:;J
 	ldh  [rBGP], a
 	ld   a, $81
 	call HomeCall_Sound_ReqPlayExId_Stub
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 L1E438B:;J
 	call L00112E
 	call L1E43C2
@@ -439,12 +439,12 @@ L1E438B:;J
 	jp   nz, L1E43A7
 	jp   L1E43AD
 L1E43A7:;J
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	jp   L1E438B
 L1E43AD:;J
 	ld   b, $3C
 L1E43AF:;J
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	dec  b
 	jp   nz, L1E43AF
 	call L001F85
@@ -1806,7 +1806,7 @@ L1E4BFD:;C
 	push bc
 	ld   hl, $4C96
 	ld   de, $99A1
-	call L001269
+	call TextPrinter_Instant_CustomPos
 	pop  bc
 	ld   de, $99A1
 	jp   L1E4C31
@@ -1814,7 +1814,7 @@ L1E4C17:;J
 	push bc
 	ld   hl, $4C96
 	ld   de, $99AB
-	call L001269
+	call TextPrinter_Instant_CustomPos
 	pop  bc
 	push bc
 	ld   a, b
@@ -1839,7 +1839,7 @@ L1E4C31:;J
 	ld   b, [hl]
 	push bc
 	pop  hl
-	call L001269
+	call TextPrinter_Instant_CustomPos
 	pop  de
 	pop  af
 	ret
@@ -2121,7 +2121,7 @@ L1E4D79:;C
 L1E4D8A:;J
 	ld   de, $9A2E
 L1E4D8D:;J
-	call L001269
+	call TextPrinter_Instant_CustomPos
 	ret
 L1E4D91:;J
 	ld   hl, $4DA9
@@ -2133,7 +2133,7 @@ L1E4D91:;J
 L1E4DA2:;J
 	ld   de, $9A2E
 L1E4DA5:;J
-	call L001269
+	call TextPrinter_Instant_CustomPos
 	ret
 L1E4DA9: db $05
 L1E4DAA: db $53
@@ -7568,8 +7568,8 @@ L1E6414:;R
 	ld   a, $C7
 	rst  $18
 	ei
-	call Task_ExecRun_NoDelay
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
+	call Task_PassControl_NoDelay
 	ld   a, $1E
 	ldh  [rOBP0], a
 	ld   a, $3E
@@ -7578,7 +7578,7 @@ L1E6414:;R
 	ldh  [rBGP], a
 	ld   a, $81
 	call HomeCall_Sound_ReqPlayExId_Stub
-	call Task_ExecRun_Delay1D
+	call Task_PassControl_Delay1D
 L1E6491:;J
 	call L1E6940
 	call L00112E
@@ -7608,7 +7608,7 @@ L1E64C1:;J
 	jp   nz, L1E64D3
 	jp   L1E64D9
 L1E64D3:;J
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	jp   L1E6491
 L1E64D9:;J
 	ld   a, [$C1CF]
@@ -7623,7 +7623,7 @@ L1E64D9:;J
 	ld   [$DA2F], a
 	ld   a, [$C1D9]
 	ld   [$DA30], a
-	call Task_ExecRun_Delay3B
+	call Task_PassControl_Delay3B
 	jp   L00179D
 L1E6503:;C
 	ld   a, [$C1B6]
@@ -13392,7 +13392,7 @@ L1E7D21:;I
 	or   a, $40
 	ldh  [rSTAT], a
 	ei
-	call Task_ExecRun_Delay09
+	call Task_PassControl_Delay09
 	ld   a, $8C
 	ldh  [rOBP0], a
 	ld   a, $2D
@@ -13403,12 +13403,12 @@ L1E7D21:;I
 	ldh  [hScreenSect2BGP], a
 	ld   a, $82
 	call HomeCall_Sound_ReqPlayExId_Stub
-	ld   a, $1E
-	ld   [$C152], a
-	ld   hl, $C153
-	ld   [hl], $E8
+	ld   a, BANK(L1E7DE8)
+	ld   [wTextPrintFrameCodeBank], a
+	ld   hl, wTextPrintFrameCodePtr_Low
+	ld   [hl], LOW(L1E7DE8)
 	inc  hl
-	ld   [hl], $7D
+	ld   [hl], HIGH(L1E7DE8)
 	ld   a, [$C1B3]
 	ld   c, a
 	ld   a, [$C1B4]
@@ -13428,7 +13428,7 @@ L1E7D21:;I
 	ld   b, $1C
 	ld   c, $04
 	ld   a, $03
-	call L0012D6
+	call TextPrinter_MultiFrameFarCustomPos
 	call L1E7EC9
 	ld   a, $FF
 	ldh  [rBGP], a
@@ -13448,7 +13448,7 @@ L1E7D21:;I
 	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft1], a
 	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft0], a
 	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft1], a
-	jp   Task_ExecRun_NoDelay
+	jp   Task_PassControl_NoDelay
 L1E7DE8:;I
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	jp   L000BBD
@@ -13593,7 +13593,7 @@ L1E7ECB:;J
 	jp   nz, L1E7EE8
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	call L000BBD
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	dec  b
 	jp   nz, L1E7ECB
 	xor  a

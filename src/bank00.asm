@@ -445,7 +445,7 @@ EntryPoint:
 	ld   bc, Module_TakaraLogo		; HL
 	call Task_CreateAt
 	
-	jp   Task_DoCycle
+	jp   Task_GetNext
 	
 ; =============== SGB_LoadBorder ===============
 ; Loads the SGB border for the game.
@@ -727,10 +727,10 @@ DefaultSettings:
 
 ; =============== START OF TASK MANAGER ===============
 
-; =============== Task_DoCycle ===============
+; =============== Task_GetNext ===============
 ; Executes the main task cycle.
-; See also: Task_ExecRun for the routine calling this.
-Task_DoCycle:
+; See also: Task_PassControl for the routine calling this.
+Task_GetNext:
 	ld   sp, $DC00					; Set the standard stack pointer for taskman
 .reloop:
 	; Always search for tasks starting from the first one.
@@ -790,7 +790,7 @@ Task_DoCycle:
 	; Restore the state from when this task was created.
 	ld   sp, hl						; Restore the stack pointer
 	
-	; The stack ptr was saved after pushing all regs into the stack in Task_ExecRun.
+	; The stack ptr was saved after pushing all regs into the stack in Task_PassControl.
 	; Pop them all out to restore the original state and return safely.
 	pop  af
 	pop  bc
@@ -844,7 +844,7 @@ Task_RemoveAt:
 	pop  af
 	ei
 	ret
-; =============== Task_ExecRunCustom ===============
+; =============== Task_PassControlCustom ===============
 ; Pauses the current task and gives back control to the task system.
 ;
 ; HOW IT WORKS
@@ -852,11 +852,11 @@ Task_RemoveAt:
 ; The task system is used to execute custom subroutines/multiple main loops with separate stacks in a cycle, as well
 ; as shared code which must always run on any main loop, like the sound engine and OBJLst writer.
 ;
-; There are four task slots and two different ways to execute subroutines:
+; There are three task slots and two different ways to execute subroutines:
 ; TASK_EXEC_NEW -> Used for init code, when a task code pointer should change.
 ; TASK_EXEC_TODO -> Used for loop code, which typically doesn't change across loops.
 ;
-; *ANY* time the task system is run through Task_ExecRun, current slot is overwritten with an entry used
+; *ANY* time the task system is run through Task_PassControl, current slot is overwritten with an entry used
 ; to restore the original registers/SP, and is set to execute after all of the next slots + the common code is executed.
 ; This is important to allow cycling the same subroutine pointers if they aren't explicitly changed.
 ;
@@ -875,7 +875,7 @@ Task_RemoveAt:
 ;
 ; IN
 ; - A: How many frames to pause the task after it's executed. If $01, it won't be paused.
-Task_ExecRunCustom:
+Task_PassControlCustom:
 
 	; By calling this subroutine, we have to set the current stack location as a task, which
 	; will replace the current one. Most of the time it does nothing but mark the task as executed,
@@ -914,51 +914,50 @@ Task_ExecRunCustom:
 	ld   [hl], d
 	
 	; The task has been set, now execute the next ones with IDs higher than the current one
-	jp   Task_DoCycle
+	jp   Task_GetNext
 
-; =============== Task_ExecRunFar ===============
-; Wrapper for Task_ExecRun_NoDelay which also saves the current bank number.
+; =============== Task_PassControlFar ===============
+; Wrapper for Task_PassControl_NoDelay which also saves the current bank number.
 ; Use when executing tasks across different banks.
-Task_ExecRunFar:
+Task_PassControlFar:
 	ldh  a, [hROMBank]		; Save bank for when we're returning
 	push af
-	call Task_ExecRun_NoDelay
+	call Task_PassControl_NoDelay
 	pop  af					; Restore bank
 	ld   [MBC1RomBank], a	
 	ldh  [hROMBank], a
 	ret
 	
-; =============== Task_ExecRun_* ===============
-; Sets of wrappers to Task_ExecRun with different pause timers.
-Task_ExecRun_NoDelay:
+; =============== Task_PassControl_* ===============
+; Sets of wrappers to Task_PassControl with different pause timers.
+Task_PassControl_NoDelay:
 	ld   a, $01				; Delay for $01-1 frames before next exec
-	jr   Task_ExecRunCustom
+	jr   Task_PassControlCustom
 ; [TCRF] Unused.
-Task_Unused_ExecRun_Delay01: 
+Task_Unused_PassControl_Delay01: 
 	ld   a, $02				; Delay for $02-1 frames before next exec
-	jr   Task_ExecRunCustom
-Task_ExecRun_Delay04:
+	jr   Task_PassControlCustom
+Task_PassControl_Delay04:
 	ld   a, $05				; ...
-	jr   Task_ExecRunCustom
-Task_ExecRun_Delay09:
+	jr   Task_PassControlCustom
+Task_PassControl_Delay09:
 	ld   a, $0A
-	jr   Task_ExecRunCustom
-Task_ExecRun_Delay1D:
+	jr   Task_PassControlCustom
+Task_PassControl_Delay1D:
 	ld   a, $1E
-	jr   Task_ExecRunCustom
-Task_ExecRun_Delay3B:
+	jr   Task_PassControlCustom
+Task_PassControl_Delay3B:
 	ld   a, $3C
-	jr   Task_ExecRunCustom
+	jr   Task_PassControlCustom
 	
-; =============== Task_RemoveCurAndExecRun ===============	
-; Similar to Task_ExecRun, except the current task is removed instead of marked as executed.
-; As a result, the subroutine is much shorter.
+; =============== Task_RemoveCurAndPassControl ===============	
+; Like Task_PassControl, except the current task is removed before passing control.
 ; Only used in ???????
-Task_RemoveCurAndExecRun:
+Task_RemoveCurAndPassControl:
 	di							; TODO: ?????
 	call Task_IndexTaskAuto		; Index current task
 	ld   [hl], TASK_EXEC_NONE	; Disable it
-	jp   Task_DoCycle
+	jp   Task_GetNext
 	
 ; =============== Task_IndexTaskAuto ===============
 ; Indexes the task struct of the currently executing (???) task.
@@ -4082,404 +4081,619 @@ L001185:;C
 	ld   [$C00A], a
 	pop  bc
 	ret
-L00119E:;C
+; =============== LoadGFX_1bppFont_Default ===============
+; Loads the font GFX with default settings.
+LoadGFX_1bppFont_Default:
 	ldh  a, [hROMBank]
 	push af
-	ld   a, $1D
+	ld   a, BANK(FontDef_Default) ; BANK $1D
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	ld   hl, $4C9A
-	call L0011F3
+	ld   hl, FontDef_Default
+	call LoadGFX_1bppFont
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-L0011B5: db $F0;X
-L0011B6: db $E0;X
-L0011B7: db $F5;X
-L0011B8: db $3E;X
-L0011B9: db $1D;X
-L0011BA: db $EA;X
-L0011BB: db $00;X
-L0011BC: db $20;X
-L0011BD: db $E0;X
-L0011BE: db $E0;X
-L0011BF: db $21;X
-L0011C0: db $9A;X
-L0011C1: db $4C;X
-L0011C2: db $7A;X
-L0011C3: db $EA;X
-L0011C4: db $4E;X
-L0011C5: db $C1;X
-L0011C6: db $7B;X
-L0011C7: db $EA;X
-L0011C8: db $4D;X
-L0011C9: db $C1;X
-L0011CA: db $5E;X
-L0011CB: db $23;X
-L0011CC: db $56;X
-L0011CD: db $23;X
-L0011CE: db $46;X
-L0011CF: db $23;X
-L0011D0: db $23;X
-L0011D1: db $23;X
-L0011D2: db $CD;X
-L0011D3: db $01;X
-L0011D4: db $12;X
-L0011D5: db $F1;X
-L0011D6: db $EA;X
-L0011D7: db $00;X
-L0011D8: db $20;X
-L0011D9: db $E0;X
-L0011DA: db $E0;X
-L0011DB: db $C9;X
-L0011DC: db $F0;X
-L0011DD: db $E0;X
-L0011DE: db $F5;X
-L0011DF: db $3E;X
-L0011E0: db $1D;X
-L0011E1: db $EA;X
-L0011E2: db $00;X
-L0011E3: db $20;X
-L0011E4: db $E0;X
-L0011E5: db $E0;X
-L0011E6: db $21;X
-L0011E7: db $9D;X
-L0011E8: db $4C;X
-L0011E9: db $CD;X
-L0011EA: db $F9;X
-L0011EB: db $11;X
-L0011EC: db $F1;X
-L0011ED: db $EA;X
-L0011EE: db $00;X
-L0011EF: db $20;X
-L0011F0: db $E0;X
-L0011F1: db $E0;X
-L0011F2: db $C9;X
-L0011F3:;C
-	ld   e, [hl]
-	inc  hl
-	ld   d, [hl]
-	inc  hl
-	ld   b, [hl]
-	inc  hl
-	ldi  a, [hl]
-	ld   [$C14E], a
-	ldi  a, [hl]
-	ld   [$C14D], a
-L001201:;R
-	push bc
-	ld   b, $08
-L001204:;R
-	xor  a
-	ld   [$C14F], a
-	ld   [$C150], a
-	push bc
-	ldi  a, [hl]
-	ld   b, $08
-	ld   c, $01
-L001211:;R
-	rrca
-	jr   c, L00121E
-	push af
-	ld   a, [$C14E]
-	call L00124C
-	jp   L001225
-L00121E:;R
-	push af
-	ld   a, [$C14D]
-	call L00124C
-L001225:;J
-	pop  af
-	rlc  c
-	dec  b
-	jr   nz, L001211
-L00122B:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L00122B
-	ld   a, [$C14F]
-	ld   [de], a
-	inc  de
-L001237:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L001237
-	ld   a, [$C150]
-	ld   [de], a
-	inc  de
-	pop  bc
-	dec  b
-	jr   nz, L001204
-	pop  bc
-	dec  b
-	jr   nz, L001201
-	ret
-L00124C:;C
-	bit  0, a
-	jr   z, L001259
-	push af
-	ld   a, [$C14F]
-	or   a, c
-	ld   [$C14F], a
-	pop  af
-L001259:;R
-	bit  1, a
-	jr   z, L001264
-	ld   a, [$C150]
-	or   a, c
-	ld   [$C150], a
-L001264:;R
-	ret
-L001265:;C
-	ld   e, [hl]
-	inc  hl
-	ld   d, [hl]
-	inc  hl
-L001269:;C
-	ld   b, [hl]
-	inc  hl
-L00126B:;R
-	push bc
-	ldi  a, [hl]
-	push hl
-	ld   hl, $7EDC
-	ld   c, a
-	call L001285
-L001275:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L001275
-	ld   a, b
-	ld   [de], a
-	inc  de
-	pop  hl
-	pop  bc
-	dec  b
-	jr   nz, L00126B
-	ret
-L001285:;C
+; =============== LoadGFX_Unused_1bppFontCustomCol ===============	
+; Loads the font GFX with custom palette settings.
+; [TCRF] Unused ???
+; IN
+; - D: Color to map to bit0
+; - E: Color to map to bit1
+L0011B5:
 	ldh  a, [hROMBank]
 	push af
-	ld   a, $1F
+	ld   a, BANK(FontDef_Default) ; BANK $1D
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	ld   b, $00
-	add  hl, bc
-	ld   b, [hl]
-	pop  af
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	ret
-L00129A:;C
-	push af
-	swap a
-	and  a, $0F
-	call L0012A9
-	pop  af
-	and  a, $0F
-	call L0012A9
-	ret
-L0012A9:;C
-	push bc
-	ld   hl, $7FDC
-	ld   c, a
-	call L001285
-	ld   a, b
-	pop  bc
-	add  c
-	ld   b, a
-L0012B5:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L0012B5
-	ld   a, b
-	ld   [de], a
-	inc  de
-	ret
-L0012C0:;C
-	push af
-	push bc
-	push de
-	ld   [$C151], a
-	ldh  a, [hROMBank]
-	push af
-	ld   a, b
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	ld   e, [hl]
-	inc  hl
-	ld   d, [hl]
-	inc  hl
-	jp   L0012E5
-L0012D6:;JC
-	push af
-	push bc
-	push de
-	ld   [$C151], a
-	ldh  a, [hROMBank]
-	push af
-	ld   a, b
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-L0012E5:;J
-	ld   a, c
-	ld   b, [hl]
-	inc  hl
-L0012E8:;J
-	push af
-	push bc
-	ldi  a, [hl]
-	cp   $FF
-	jr   z, L00131B
-	push hl
-	ld   hl, $7EDC
-	ld   c, a
-	call L001285
-L0012F7:;R
-	ldh  a, [rSTAT]
-	bit  1, a
-	jr   nz, L0012F7
-	ld   a, b
-	ld   [de], a
-	inc  de
-	ld   a, [$C151]
-	bit  0, a
-	jr   z, L001319
-	ld   a, b
-	or   a
-	jr   nz, L001313
-	ld   hl, $0702
-	call SGB_PrepareSoundPacket
-	jr   L001319
-L001313:;R
-	ld   hl, $1207
-	call SGB_PrepareSoundPacket
-L001319:;R
-	jr   L001337
-L00131B:;R
-	push hl
-	ld   hl, $0020
-	add  hl, de
-	push hl
-	pop  de
+	ld   hl, FontDef_Default
+	
+	; Apply mapped colors
+	ld   a, d
+	ld   [wFontLoadBit0Col], a
 	ld   a, e
-	and  a, $E0
-	ld   e, a
-	call L0013A8
-	call Task_ExecRun_NoDelay
-	ld   b, $05
-L00132E:;R
-	call L0013A8
-	call Task_ExecRun_NoDelay
-	dec  b
-	jr   nz, L00132E
-L001337:;R
-	pop  hl
-	pop  bc
-	pop  af
-	bit  7, a
-	jr   nz, L001398
-	push af
-L00133F:;R
-	push af
-	ld   a, [$C151]
-	bit  2, a
-	jr   nz, L001365
-	bit  1, a
-	jr   z, L00138B
-	ldh  a, [hJoyNewKeys]
-	bit  7, a
-	jr   nz, L001380
-	ldh  a, [hJoyKeys]
-	bit  4, a
-	jr   nz, L001386
-	ldh  a, [hJoyNewKeys2]
-	bit  7, a
-	jr   nz, L001380
-	ldh  a, [hJoyKeys2]
-	bit  4, a
-	jr   nz, L001386
-	jr   L00138B
-L001365:;R
-	ldh  a, [hJoyNewKeys]
-	bit  7, a
-	jr   nz, L001373
-	ldh  a, [hJoyNewKeys2]
-	bit  7, a
-	jr   nz, L001373
-	jr   L00138B
-L001373:;R
-	pop  af
-	pop  af
+	ld   [wFontLoadBit1Col], a
+	
+	; Read the header out
+	
+	; DE = Destination ptr in VRAM
+	ld   e, [hl]
+	inc  hl
+	ld   d, [hl]
+	inc  hl
+	; B = Number of tiles to copy
+	ld   b, [hl]
+	inc  hl
+	; Skip color map entries
+	inc  hl
+	inc  hl
+	
+	; Continue normally
+	call LoadGFX_1bppFont.tileLoop
+	
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	pop  de
-	pop  bc
+	ret  
+	
+; =============== LoadGFX_Unused_1bppFontCustomAddr ===============
+; Loads the font GFX at a custom location.
+; [TCRF] Unused ???
+; IN
+; - DE: Destination ptr in VRAM
+; -  B: Number of tiles to copy
+L0011DC:
+	ldh  a, [hROMBank]
+	push af
+	ld   a, BANK(FontDef_Default.col) ; BANK $1D
+	ld   [MBC1RomBank], a
+	ldh  [hROMBank], a
+	ld   hl, FontDef_Default.col
+	call LoadGFX_1bppFont.fromColDef
 	pop  af
-	scf
+	ld   [MBC1RomBank], a
+	ldh  [hROMBank], a
+	ret 
+
+; =============== LoadGFX_1bppFont ===============
+; Loads the font graphics depending on the specified settings.
+;
+; IN
+; - HL: Ptr to font settings
+LoadGFX_1bppFont:
+
+	;
+	; Before the font data there's a header with a few settings.
+	; Some of the settings can be overridden by calling alternate wrappers to
+	; this function (which don't seem to be used anyway...)
+	;
+	
+	
+	; Read the header out
+
+	; DE = Destination ptr in VRAM
+	; In practice always $9000
+	ld   e, [hl]
+	inc  hl
+	ld   d, [hl]
+	inc  hl
+	; B = Number of tiles to copy
+	; In practice always $80, which fills the $9000-$9800 area
+	ld   b, [hl]
+	inc  hl
+.fromColDef:
+	; wFontLoadBit0Col = bit0 color map
+	ldi  a, [hl]		
+	ld   [wFontLoadBit0Col], a
+	; wFontLoadBit1Col = bit1 color map
+	ldi  a, [hl]
+	ld   [wFontLoadBit1Col], a
+	
+.tileLoop:
+	;
+	; The font graphics are stored in 1bbp inside the ROM.
+	; Convert them to 2bpp with the specified color values.
+	;
+	
+	push bc
+		ld   b, TILE_V		; B = Number of lines in a tile
+	.lineLoop:
+		; Clear 2 byte buffer for a line of pixels, which is the smallest size
+		; we can work with due to bit interleaving.
+		xor  a
+		ld   [wFontLoadTmpGFX], a
+		ld   [wFontLoadTmpGFX+1], a
+		push bc
+			ldi  a, [hl]		; Read 1bpp color entry
+			
+			; For each bit, apply a 2bpp color.
+			; Start from bit0 and move up by rotating the 1bpp entry right.
+			; The rotation guarantees that the current processed bit is always at bit0 of A.
+			;
+			; There also a mask at C which gets shifted left, and is used to apply bits to the 2bpp entries.
+			
+			ld   b, $08			; B = Bits left
+			ld   c, $01			; C = Mask to apply current bit
+		.bitLoop:
+		
+			; Map the 1bpp color to a 2bpp color.
+			; Depending on the lowest bit in the GFX byte, pick a different color value
+			rrca							; Get lowest bit + rotate others right
+			jr   c, .useCol1				; Was that bit set (C flag set)? If so, jump
+			;--
+		.useCol0:		
+			push af							
+				ld   a, [wFontLoadBit0Col]	; Map to wFontLoadBit0Col color
+				call .mapCol
+				jp   .colDone
+				
+		.useCol1:
+			push af
+				ld   a, [wFontLoadBit1Col]	; Map to wFontLoadBit1Col color
+				call .mapCol
+		.colDone:
+			pop  af							
+			;--
+			
+			rlc  c							; C << 1
+			dec  b							; All bits processed?
+			jr   nz, .bitLoop				; If not, loop
+			
+			; Write over the two temporary tiles
+			mWaitForVBlankOrHBlank
+			ld   a, [wFontLoadTmpGFX]
+			ld   [de], a
+			inc  de
+			mWaitForVBlankOrHBlank
+			ld   a, [wFontLoadTmpGFX+1]
+			ld   [de], a
+			inc  de
+			
+		pop  bc			
+		dec  b				; Processed all lines in the tile?
+		jr   nz, .lineLoop	; If not, loop
+	pop  bc				
+	dec  b					; Processed all tiles?
+	jr   nz, .tileLoop		; If not, loop
 	ret
-L001380:;R
-	pop  af
-	pop  af
-	set  7, a
-	jr   L001398
-L001386:;R
-	pop  af
-	ld   a, $01
-	jr   L00138C
-L00138B:;R
-	pop  af
-L00138C:;R
+	
+; =============== .mapCol ===============
+; Converts a 1bpp color value to a 2bpp color.
+; IN
+; - A: 2bpp COL_* value (0-3)
+; - C: Bitmask with current bit to process in both bytes, never $00
+.mapCol:
+	; The 2 bits of the color index are split across two bytes.
+	; Split them into those two bytes at the same bit number.
+	
+	; 0 | %00 | wFontLoadTmpGFX = 0, wFontLoadTmpGFX+1 = 0
+	; 1 | %01 | wFontLoadTmpGFX = 1, wFontLoadTmpGFX+1 = 0
+	; 2 | %10 | wFontLoadTmpGFX = 0, wFontLoadTmpGFX+1 = 1
+	; 3 | %11 | wFontLoadTmpGFX = 1, wFontLoadTmpGFX+1 = 1
+
+	; Put the low bit into the first byte.
+	bit  0, a					; Is the low bit set?
+	jr   z, .other				; If not, skip
 	push af
-	call L0013A8
-	call Task_ExecRun_NoDelay
+	ld   a, [wFontLoadTmpGFX]	; Otherwise, apply bit
+	or   a, c
+	ld   [wFontLoadTmpGFX], a
 	pop  af
-	dec  a
-	jr   nz, L00133F
+.other:
+	; Put the high bit into the second byte
+	bit  1, a					; Is the high bit set?
+	jr   z, .end				; If not, skip
+	ld   a, [wFontLoadTmpGFX+1]	; Otherwise, apply bit
+	or   a, c
+	ld   [wFontLoadTmpGFX+1], a
+.end:
+	ret
+	
+; =============== TextPrinter_Instant ===============
+; Instantly prints a string to the screen.
+; Note that newlines aren't supported for string printed this way.
+; IN
+; - HL: Ptr to TextDef structure
+TextPrinter_Instant:
+	; DE = Tilemap ptr
+	ld   e, [hl]
+	inc  hl
+	ld   d, [hl]
+	inc  hl
+; =============== TextPrinter_Instant_CustomPos ===============
+; IN
+; - HL: Ptr to string length field of TextDef structure
+; - DE: Tilemap ptr (Destination)
+TextPrinter_Instant_CustomPos:
+	; B = String length
+	ld   b, [hl]
+	inc  hl
+.loop:
+	push bc
+		ldi  a, [hl]			; A = Letter
+		push hl
+			; Convert letter to tile ID
+			ld   hl, TextPrinter_CharsetToTileTbl	
+			ld   c, a								; C = Letter
+			call TextPrinter_GetTileIdFromLetter	; B = Tile ID
+			
+			; Write it out to the tilemap
+			mWaitForVBlankOrHBlank
+			ld   a, b
+			ld   [de], a
+			inc  de			; Move right in tilemap
+		pop  hl
+	pop  bc
+	dec  b				; All letters printed?
+	jr   nz, .loop		; If not, loop
+	ret
+	
+; =============== TextPrinter_GetTileIdFromLetter ===============
+; Converts the character text to the correct tile ID.
+; Note that the latin alphabet are stored in their proper locations, though
+; there's also a subset of Japanese characters.
+; IN
+; - HL: Ptr to conversion table
+; - C: Letter from string
+; OUT
+; - B: Tile ID
+TextPrinter_GetTileIdFromLetter:
+	; B = TextPrinter_CharsetToTileTbl[C]
+	ldh  a, [hROMBank]
+	push af
+	ld   a, BANK(TextPrinter_CharsetToTileTbl) ; BANK $1F
+	ld   [MBC1RomBank], a
+	ldh  [hROMBank], a
+	ld   b, $00			; BC = C
+	add  hl, bc
+	ld   b, [hl]		; Read it out
 	pop  af
-L001398:;R
-	dec  b
-	jp   nz, L0012E8
+	ld   [MBC1RomBank], a
+	ldh  [hROMBank], a
+	ret
+	
+; =============== NumberPrinter_Instant ===============	
+; Instantly prints an hex number to the screen.
+; IN
+; - A: Number in hex format
+; - C: Tile ID offset ($00 for the standard font)
+; - DE: Tilemap ptr
+NumberPrinter_Instant:
+	; Digit in the upper nybble first
+	push af
+		swap a
+		and  a, $0F
+		call .writeDigit
+	pop  af
+	; Then the lower one
+	and  a, $0F
+	call .writeDigit
+	ret
+	
+; =============== .writeDigit ===============
+; *DE = TextPrinter_DigitToTileTbl[A] + C
+; IN
+; - A: Digit (0-F)
+; - C: Tile ID offset
+; - DE: Tilemap ptr
+.writeDigit:
+	; Convert letter to tile ID using an alternate charmap
+	push bc
+		ld   hl, TextPrinter_DigitToTileTbl
+		ld   c, a
+		call TextPrinter_GetTileIdFromLetter
+		ld   a, b
+	pop  bc
+	
+	; Offset the tile ID if necessary.
+	; ??? TODO VERIFY. This is necessary in case the normal 1bpp font isn't loaded,
+	; with the numbers having different tile IDs.	
+	add  c
+	
+	; Write it to the tilemap
+	ld   b, a
+	mWaitForVBlankOrHBlank
+	ld   a, b
+	ld   [de], a
+	inc  de
+	ret
+	
+; =============== TextPrinter_MultiFrameFar ===============
+; Wrapper for TextPrinter_MultiFrame for printing text stored in an arbitrary bank.
+; IN
+; - HL: Ptr to TextDef structure
+; - B: Bank number of TextDef structure
+; - C: Delay between letter printing
+; - A: Flags (TXTB_*)
+TextPrinter_MultiFrameFar:
+	push af						; Save all args
+	push bc
+	push de
+	
+	ld   [wTextPrintFlags], a	; Set flags
+	ldh  a, [hROMBank]			; Save cur bank
+	push af
+	ld   a, b					; Switch to bank with TextDef
+	ld   [MBC1RomBank], a
+	ldh  [hROMBank], a
+	
+	ld   e, [hl]				; DE = Tilemap ptr ptr
+	inc  hl
+	ld   d, [hl]
+	inc  hl
+	jp   TextPrinter_MultiFrame
+	
+; =============== TextPrinter_MultiFrameFarCustomPos ===============
+; Wrapper for TextPrinter_MultiFrame for printing text stored in an arbitrary bank
+; starting at a custom tilemap offset.
+; IN
+; - HL: Ptr to string length field of TextDef structure
+; - B: Bank number of TextDef structure
+; - C: Delay between letter printing
+; - wTextPrintFlags: Option flags
+TextPrinter_MultiFrameFarCustomPos:
+	push af						; Save all args
+	push bc
+	push de
+	ld   [wTextPrintFlags], a	; Set flags
+	ldh  a, [hROMBank]			; Save cur bank
+	push af
+	ld   a, b					; Switch to bank with TextDef
+	ld   [MBC1RomBank], a
+	ldh  [hROMBank], a
+; =============== TextPrinter_MultiFrame ===============
+; Prints a string across multiple frames, taking exclusive control of the current task until it finishes.
+;
+; 4 stack values must be popped out to preserve the registers before returning.
+;
+; IN
+; - HL: Ptr to string length field of TextDef structure
+; - DE: Ptr to tilemap (Destination)
+; - C: Delay between letter printing
+; - wTextPrintFlags: Option flags
+TextPrinter_MultiFrame:
+	ld   a, c			; A = Delay
+	ld   b, [hl]		; B = String length
+	inc  hl				; Next byte
+.loop:
+	; In this first part inside the "push af", write a letter to the screen.
+	; NOTE: Unless we're handling a newline, the printing should be done instantly,
+	;       as the waiting only happens later (to allow the speedup controls to work)
+	push af				; Save delay
+		push bc
+			ldi  a, [hl]		; Read letter from string
+			cp   C_NL			; Is it the newline character?
+			jr   z, .doNewline	; If so, jump
+			
+			push hl
+			
+				;
+				; Write the character to the screen
+				;
+			
+				; Convert letter to tile ID
+				ld   hl, TextPrinter_CharsetToTileTbl
+				ld   c, a
+				call TextPrinter_GetTileIdFromLetter ; B = Tile ID
+				
+				; Write it out to the tilemap
+				mWaitForVBlankOrHBlankFast	
+				ld   a, b					
+				ld   [de], a
+				inc  de						; Move tilemap pos right
+				
+				;
+				; Play the typewriter SGB sound if needed
+				;
+				ld   a, [wTextPrintFlags]
+				bit  TXTB_PLAYSFX, a			; Is the bit set?
+				jr   z, .sfxDone				; If not, skip
+				
+				; Use a different sound effect when printing the space character
+				ld   a, b
+				or   a							; TileID != 0?
+				jr   nz, .sfxSpace				; If so, jump
+			.sfxChar:
+				ld   hl, (SGB_SND_A_SELECT_B << 8)|$02
+				call SGB_PrepareSoundPacket
+				jr   .sfxDone
+			.sfxSpace:
+				ld   hl, (SGB_SND_A_PUNCH_B << 8)|$07
+				call SGB_PrepareSoundPacket
+			.sfxDone:
+				jr   .charPrinted
+			;------
+			;
+			; Newline handler
+			; Moves to the *start* of the next tilemap row.
+			; The side effect of this is strings starting with at least 1 empty space.
+			;
+		.doNewline:
+			push hl
+			
+				; DE += BG_TILECOUNT_H
+				ld   hl, BG_TILECOUNT_H		
+				add  hl, de
+				push hl
+				pop  de
+				; Align to $20 boundary
+				ld   a, e
+				and  a, $FF^(BG_TILECOUNT_H-1)
+				ld   e, a
+				
+				; Wait 6 frames before continuing
+				call TextPrinter_ExecuteCustomCodeOnWait
+				call Task_PassControl_NoDelay
+				ld   b, $05
+			.newlineWait:
+				call TextPrinter_ExecuteCustomCodeOnWait
+				call Task_PassControl_NoDelay
+				dec  b
+				jr   nz, .newlineWait
+			;-------
+		.charPrinted:
+			pop  hl
+		pop  bc
+	pop  af				; Restore delay
+	
+	;
+	; Handle speedup controls
+	;
+	
+	; If we enabled the line skipping mode in the delay counter, that's it.
+	; Instantly print text as fast as possible (but still delay for a bit when printing newlines).
+	bit  TXCB_INSTANT, a		; Instant print enabled?
+	jr   nz, .chkStringEnd		; If so, skip and immediately write the next char
+	push af	
+	
+	.delayLoop:
+		push af
+			; There are three different ways to handle controls.
+			
+			ld   a, [wTextPrintFlags]
+			bit  TXTB_ALLOWSKIP, a		; Is the flag set?
+			jr   nz, .chkCtrlWithSkip	; If so, jump
+			bit  TXTB_ALLOWFAST, a		; Is the flag set?
+			jr   z, .actNone			; If not, jump
+			
+			; TXTB_ALLOWFAST mode
+			; Pressing A in this mode will speed up the text printing.
+			; It's also possible to press START to enable instant text mode.
+		.chkCtrlFast:
+			ldh  a, [hJoyNewKeys]
+			bit  KEYB_START, a			; Pressed START?
+			jr   nz, .actInstant		; If so, jump
+			ldh  a, [hJoyKeys]
+			bit  KEYB_A, a				; Holding A?
+			jr   nz, .actSpeedup		; If so, jump
+			; Check the same for controller 2
+			ldh  a, [hJoyNewKeys2]
+			bit  KEYB_START, a			
+			jr   nz, .actInstant			
+			ldh  a, [hJoyKeys2]
+			bit  KEYB_A, a
+			jr   nz, .actSpeedup
+			jr   .actNone				; Otherwise, no action
+		.chkCtrlWithSkip:
+			; TXTB_ALLOWSKIP mode
+			; Pressing START in this mode will mark the text printing as finished,
+			; skipping the rest completely.
+			ldh  a, [hJoyNewKeys]
+			bit  KEYB_START, a			; Pressed START?
+			jr   nz, .actAbort			; If so, jump
+			; Check the same for controller 2
+			ldh  a, [hJoyNewKeys2]
+			bit  KEYB_START, a
+			jr   nz, .actAbort
+			jr   .actNone				; Otherwise, no action
+			
+		;
+		; Action: Abort
+		; Exit from here, marking the printing as finished
+		;
+		.actAbort:
+		pop  af
+	pop  af
+	
+	; Pull out the 4 stack values + restore bank
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	pop  de
 	pop  bc
 	pop  af
-	scf
+	scf			; C flag = 1, aborted
+	ret
+	;--
+		;
+		; Action: Instant text 
+		; Enable instant text mode permanently
+		;
+		.actInstant:
+		pop  af
+	pop  af					; Extra pop to apply the changes permanently
+	set  TXCB_INSTANT, a 	; here
+	jr   .chkStringEnd
+	;--
+		;
+		; Action: Speed up
+		; Sets the text printing delay to 1 frame temporarily
+		;
+		.actSpeedup:
+		pop  af
+		ld   a, $01			; A = Frames to wait (temp copy)
+		jr   .waitFrame
+	;--	
+		;
+		; Action: None
+		; ...well
+		;
+		.actNone:
+		pop  af				; Restore delay counter
+	;--	
+	; Common wait between text printing
+	.waitFrame:
+		push af
+			call TextPrinter_ExecuteCustomCodeOnWait
+			call Task_PassControl_NoDelay
+		pop  af				
+		dec  a				; Waited all frames?
+		jr   nz, .delayLoop	; If not, loop
+	pop  af					; Restore original text speed
+	
+.chkStringEnd:
+	dec  b					; Printed all letters?
+	jp   nz, .loop			; If not, loop
+	
+	; Exit from here
+	pop  af
+	ld   [MBC1RomBank], a
+	ldh  [hROMBank], a
+	pop  de
+	pop  bc
+	pop  af
+	scf				; C flag = 0, not aborted
 	ccf
 	ret
-L0013A8:;C
+	
+; =============== TextPrinter_ExecuteCustomCodeOnWait ===============
+; If enabled, executes custom code during the printing delay, before passing control to another task.
+TextPrinter_ExecuteCustomCodeOnWait:
 	push af
 	push bc
 	push de
 	push hl
+	;--
 	ldh  a, [hROMBank]
 	push af
-	ld   a, [$C152]
-	cp   $FF
-	jp   z, L0013C7
-	ld   [MBC1RomBank], a
+	; Don't execute the code if the "no code" bank number is set
+	ld   a, [wTextPrintFrameCodeBank]		; A = Bank num for code
+	cp   TXB_NONE							; Is it set to $FF?
+	jp   z, .noAction						; If so, jump
+	
+	; Jump there
+	ld   [MBC1RomBank], a					; Switch to the bank
 	ldh  [hROMBank], a
-	ld   hl, $C153
+	ld   hl, wTextPrintFrameCodePtr_Low		; Read ptr to DE
 	ld   e, [hl]
 	inc  hl
 	ld   d, [hl]
-	push de
+	push de									; Move it to HL
 	pop  hl
-	call L0013D2
-L0013C7:;J
+	call .jpHL								; Jump there
+	
+.noAction:
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
+	;--
 	pop  hl
 	pop  de
 	pop  bc
 	pop  af
 	ret
-L0013D2:;C
+.jpHL:
 	jp   hl
 	
 ; =============== HomeCall_SGB_ApplyScreenPalSet ===============
@@ -5198,8 +5412,8 @@ L0017F5:;J
 	call Task_CreateAt
 	call L00231E
 	ei
-	call Task_ExecRunFar
-	call Task_ExecRunFar
+	call Task_PassControlFar
+	call Task_PassControlFar
 	ld   a, [$C17F]
 	cp   $0F
 	jp   z, L00187C
@@ -5227,7 +5441,7 @@ L001890:;R
 L001893:;J
 	ld   b, $0A
 L001895:;J
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	dec  b
 	jp   nz, L001895
 	ld   a, $8C
@@ -5762,7 +5976,7 @@ L001BC2: db $F9
 L001BC3: db $60
 L001BC4: db $00
 L001BC5:;C
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ldh  a, [hROMBank]
 	push af
 	ld   a, $01
@@ -5771,41 +5985,41 @@ L001BC5:;C
 	ld   a, [$D92C]
 	ld   de, $8800
 	call L001C45
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ld   a, [$DA2C]
 	ld   de, $8A60
 	call L001C45
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ld   hl, $57E4
 	ld   de, $8CC0
 	ld   a, $04
 	call L001C7E
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ld   a, $01
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ld   hl, wOBJInfo2+iOBJInfo_Status
 	ld   de, $636A
 	call L000D76
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ld   hl, wOBJInfo3+iOBJInfo_Status
 	ld   de, $636A
 	call L000D76
 	ld   hl, $D74D
 	ld   [hl], $A6
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ld   hl, wOBJInfo4+iOBJInfo_Status
 	ld   de, $636A
 	call L000D76
 	ld   hl, $D78D
 	ld   [hl], $CC
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ld   hl, wOBJInfo5+iOBJInfo_Status
 	ld   de, $636A
 	call L000D76
 	ld   hl, $D7CD
 	ld   [hl], $CC
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
@@ -5829,7 +6043,7 @@ L001C4D:;J
 	ld   hl, $0000
 	ld   b, $02
 	call L000E1B
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	pop  hl
 	ldi  a, [hl]
 L001C66:;J
@@ -5847,7 +6061,7 @@ L001C66:;J
 	pop  af
 	dec  a
 	jp   nz, L001C66
-	call Task_ExecRunFar
+	call Task_PassControlFar
 L001C7D:;J
 	ret
 L001C7E:;C
@@ -5894,11 +6108,11 @@ L001CA8:;J
 	inc  de
 	dec  b
 	jp   nz, L001C83
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	pop  af
 	dec  a
 	jp   nz, L001C80
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ret
 L001CC3: db $00
 L001CC4: db $00
@@ -6767,7 +6981,7 @@ L0022D5:;J
 	call L0022FC
 	ld   hl, wOBJInfo3+iOBJInfo_Status
 	ld   [hl], $00
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ret
 L0022FC:;C
 	push hl
@@ -6783,7 +6997,7 @@ L0022FD:;J
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	call L0023EC
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	pop  bc
 	dec  b
 	jp   nz, L0022FD
@@ -7002,7 +7216,7 @@ L002475:;J
 	call L002482
 	pop  de
 	pop  bc
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	jp   L002475
 L002482:;C
 	call L002D75
@@ -9369,7 +9583,7 @@ L00339A:;J
 	set  7, [hl]
 	ld   a, $6C
 	call L00341B
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ld   a, $03
 	ld   [$C173], a
 	call L00386A
@@ -9379,7 +9593,7 @@ L0033BC:;J
 	jp   z, L0033CF
 	cp   $03
 	jp   nz, L0033D7
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	jp   L0033BC
 L0033CF:;J
 	ld   a, $03
@@ -10484,12 +10698,12 @@ L0039AE:;J
 	ld   a, [hl]
 	push af
 	push hl
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ld   hl, $001A
 	add  hl, de
 	xor  a
 	ld   [hl], a
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	pop  hl
 	pop  af
 	ldd  [hl], a
@@ -10585,12 +10799,12 @@ L003A59:;J
 	ld   a, [hl]
 	push af
 	push hl
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ld   hl, $001A
 	add  hl, de
 	xor  a
 	ld   [hl], a
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	pop  hl
 	pop  af
 	ldd  [hl], a
@@ -10630,7 +10844,7 @@ L003AB5:;J
 	jp   c, L003AD3
 	call L003CE7
 	jp   c, L003AD3
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ld   a, [$C172]
 	or   a
 	jp   nz, L003AB5
@@ -10689,17 +10903,17 @@ L003B15:;C
 	jp   z, L003B34
 L003B25:;J
 	dec  [hl]
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	inc  [hl]
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	dec  b
 	jp   nz, L003B25
 	jp   L003B40
 L003B34:;J
 	inc  [hl]
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	dec  [hl]
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	dec  b
 	jp   nz, L003B34
 L003B40:;J
@@ -10790,7 +11004,7 @@ L003BCF:;J
 	push af
 	inc  [hl]
 	inc  [hl]
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	push hl
 	call L002D75
 	call L003C18
@@ -10800,7 +11014,7 @@ L003BCF:;J
 	pop  hl
 	dec  [hl]
 	dec  [hl]
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	push hl
 	call L002D75
 	call L003C18

@@ -9110,7 +9110,7 @@ L016392:;J
 	call L017EB1
 	call L0175E7
 	call L002BFC
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	jp   L016392
 L0163B3:;C
 	ld   hl, $C008
@@ -9423,7 +9423,7 @@ L016560:;J
 	inc  a
 	dec  b
 	jp   nz, L01655E
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ret
 L016573:;C
 	xor  a
@@ -9466,7 +9466,7 @@ L01659F:;C
 	call L017EB1
 	call L0175E7
 	call L002BFC
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	pop  af
 	ld   [$C17D], a
 	ld   a, $01
@@ -11164,7 +11164,7 @@ L0170E8:;J
 	call L017EB1
 	call L0175E7
 	call L002BFC
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	jp   L0170B8
 L017103:;J
 	ld   a, [$D94E]
@@ -11327,7 +11327,7 @@ L017240:;J
 L01724A:;J
 	ld   hl, Tiles_Begin
 	call L000FEF
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	call L0172C1
 	ld   b, $1D
 	ld   hl, $509F
@@ -11411,7 +11411,7 @@ L0172C1:;C
 	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft1], a
 	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft0], a
 	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft1], a
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	xor  a
 	ldh  [rWY], a
 	ldh  [rWX], a
@@ -11428,7 +11428,7 @@ L0172C1:;C
 	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft1], a
 	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft0], a
 	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft1], a
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ret
 L017309:;CR
 	ld   b, $01
@@ -11460,13 +11460,13 @@ L017324:;R
 	call L01756D
 	ld   a, $01
 	ld   [wPaused], a
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ld   hl, $4458
 	ld   de, $C1E8
 	call DecompressGFX
 	ld   a, $00
 	ld   [wPaused], a
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ld   b, $01
 	call L01756D
 	ld   hl, $C1E8
@@ -11529,7 +11529,7 @@ L0173C7:;J
 	ld   hl, wOBJInfo3+iOBJInfo_Status
 	set  7, [hl]
 	call L0175DE
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ld   b, $78
 	call L01758C
 	ld   hl, wOBJInfo3+iOBJInfo_Status
@@ -11714,7 +11714,7 @@ L0174F8:;C
 	ld   [hl], $80
 	ld   [$D753], a
 	call L0175DE
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ld   b, $3C
 	call L01758C
 	ret
@@ -11757,7 +11757,7 @@ L017554:;J
 	jp   L017561
 L017561:;J
 	ld   [$D753], a
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ld   b, $3C
 	call L01758C
 	ret
@@ -11770,7 +11770,7 @@ L01756D:;JC
 	call L017EB1
 	call L0175E7
 	call L002BFC
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	pop  bc
 	dec  b
 	jp   nz, L01756D
@@ -11790,7 +11790,7 @@ L01758C:;JC
 	call L017EB1
 	call L0175E7
 	call L002BFC
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	pop  bc
 	dec  b
 	jp   nz, L01758C

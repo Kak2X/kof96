@@ -4068,12 +4068,12 @@ L06601B:;J
 	ld   [hl], $0E
 	inc  hl
 	ld   [hl], $00
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	call L06654D
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ld   a, $18
 	call HomeCall_Sound_ReqPlayExId
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	jp   L06628F
 L066041:;J
 	ld   hl, $0020
@@ -4200,7 +4200,7 @@ L0660E2:;J
 	call L00381A
 	jp   L066292
 L066104:;J
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	jp   L06624A
 L06610A:;J
 	call L002DD9
@@ -8118,7 +8118,7 @@ L067C02:;J
 L067C2F:;J
 	call L003A28
 	jp   nc, L067B71
-	call Task_ExecRunFar
+	call Task_PassControlFar
 	ld   a, $03
 	ld   [$C173], a
 	ld   hl, $0021

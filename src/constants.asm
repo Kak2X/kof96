@@ -53,7 +53,7 @@ VS_SELECTED_OTHER EQU $03
 SERIAL_PL1_ID EQU $02
 SERIAL_PL2_ID EQU $03
 
-
+C_NL EQU $FF ; Newline character in strings
 
 OBJ_OFFSET_X        EQU $08 ; Standard offset used when sprite positions are compared to the screen/scroll
 OBJLSTPTR_NONE      EQU $FFFF ; Placeholder pointer that marks the lack of a secondary sprite mapping
@@ -72,6 +72,21 @@ MISCB_PL_RANGE_CHECK EQU 1 ; Enables the player range enforcement, which is part
 MISCB_TITLE_SECT EQU 2 ; Allows parallax for the title screen
 
 
+;--
+
+
+; TextPrinter_MultiFrame options
+TXTB_PLAYSFX   EQU 0 ; Play SFX when printing a character
+TXTB_ALLOWFAST EQU 1 ; Allows pressing A to speedup text printing, or START to enable instant text printing (TXCB_INSTANT)
+TXTB_ALLOWSKIP EQU 2 ; Allows pressing START to end prematurely the text printing. Overrides TXTB_ALLOWFAST.
+
+TXT_PLAYSFX   EQU 1 << TXTB_PLAYSFX  
+TXT_ALLOWFAST EQU 1 << TXTB_ALLOWFAST
+TXT_ALLOWSKIP EQU 1 << TXTB_ALLOWSKIP
+
+
+TXCB_INSTANT EQU 7 ; If set, instant text printing was enabled
+TXB_NONE EQU $FF ; No custom code when waiting idle
 ;--
 
 
@@ -223,3 +238,9 @@ SCRPAL_STAGE_FATALFURY EQU $07
 SCRPAL_STAGE_YAGAMI EQU $08
 SCRPAL_STAGE_BOSS EQU $09
 SCRPAL_STAGE_STADIUM EQU $0A
+
+; Intro Scene IDs (Intro_ExecScene)
+ISC_TEXTPRINT EQU $00
+ISC_CHAR      EQU $02
+ISC_IORIRISE  EQU $04
+ISC_IORIKYO   EQU $06
