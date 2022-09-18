@@ -1056,112 +1056,171 @@ L00047C:;C
 	res  0, [hl]
 	pop  hl
 	ret
-LCDCHandler:;J
+	
+; =============== LCDCHandler ===============
+; Handles parallax effects and screen sections.
+LCDCHandler:
 	push af
-	ld   a, [wMisc_C028]
-	bit  0, a
-	jp   nz, L000494
-	bit  2, a
-	jp   nz, L0004C3
+		ld   a, [wMisc_C028]
+		bit  MISCB_USE_SECT, a			; Are sections enabled?
+		jp   nz, LCDCHandler_Sect		; If so, jump
+		bit  MISCB_TITLE_SECT, a		; Are we in the title screen?
+		jp   nz, LCDCHandler_Title		; If so, jump
 	pop  af
 	reti
-L000494:;J
-	ld   a, [w_Unknown_SomethingLCDC]
-	or   a
-	jp   nz, L0004B3
-	ld   a, $28
-L00049D:;J
-	dec  a
-	jp   nz, L00049D
-	ldh  a, [hScreenSect1BGP]
-	ldh  [rBGP], a
-	ld   a, $C7
-	ldh  [rLCDC], a
-	ld   [w_Unknown_SomethingLCDC], a
-	ld   a, [wScreenSect2LYC]
-	ldh  [rLYC], a
+; =============== LCDCHandler_Sect ===============
+; Standard 3-section mode.
+;
+; This is used to draw the HUD during gameplay by enabling and disabling the WINDOW
+; (alongside setting other things) at certain scanlines.
+LCDCHandler_Sect:
+		
+		; wLCDCSectId is either 0 (Section 1) or 1 (Section 2)
+		; Reminder that Section 0 is set at VBlank, not here.
+		
+		ld   a, [wLCDCSectId]
+		or   a						; SectId == 0?
+		jp   nz, .sect3				; If not, jump
+		
+		;
+		; Section 1 - Playfield
+		;
+	.sect2:
+		; Wait in a loop before continuing, probably because HBlank time is short.
+		; This should be using mWaitForNewHBlank to make it compatible with double speed mode.
+		ld   a, $28
+	.wait2:
+		dec  a
+		jp   nz, .wait2
+		
+		ldh  a, [hScreenSect1BGP]		; Set palette for section 1
+		ldh  [rBGP], a
+		; Disable the WINDOW
+		ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WTILEMAP|LCDC_ENABLE
+		ldh  [rLCDC], a					
+		; Set next section ID
+		ld   [wLCDCSectId], a			; It just needs to be != 0
+		; Set next trigger
+		ld   a, [wScreenSect2LYC]		; Set next trigger
+		ldh  [rLYC], a
 	pop  af
 	reti
-L0004B3:;J
-	ld   a, $0A
-L0004B5:;J
-	dec  a
-	jp   nz, L0004B5
-	ldh  a, [hScreenSect2BGP]
-	ldh  [rBGP], a
-	ld   a, $E7
-	ldh  [rLCDC], a
+	
+		;
+		; Section 2 - HUD
+		;
+	.sect3:
+		; Wait in a loop, shorter likely because there are less sprites here.
+		ld   a, $0A
+	.wait3:
+		dec  a
+		jp   nz, .wait3
+		
+		ldh  a, [hScreenSect2BGP]	; Set palette for section 2
+		ldh  [rBGP], a
+		; Enable the WINDOW
+		; Due to how the WINDOW works, this resumes drawing from the point in the tilemap
+		; we were when it got disabled. No need to touch the scroll registers.
+		ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
+		ldh  [rLCDC], a
 	pop  af
 	reti
-L0004C3:;J
-	ld   a, [w_Unknown_SomethingLCDC]
-	or   a
-	jp   z, L0004E1
-	dec  a
-	jp   z, L0004EF
-	dec  a
-	jp   z, L0004FD
-	dec  a
-	jp   z, L00050B
-	dec  a
-	jp   z, L000519
-	dec  a
-	jp   z, L000527
-	jp   L000536
-L0004E1:;J
-	ld   a, $C7
-	ldh  [rLCDC], a
-	ld   a, $01
-	ld   [w_Unknown_SomethingLCDC], a
-	ld   a, $73
-	jp   L000532
-L0004EF:;J
-	ld   a, $02
-	ld   [w_Unknown_SomethingLCDC], a
-	ldh  a, [$FFE6]
-	ldh  [rSCX], a
-	ld   a, $77
-	jp   L000532
-L0004FD:;J
-	ld   a, $03
-	ld   [w_Unknown_SomethingLCDC], a
-	ldh  a, [$FFE8]
-	ldh  [rSCX], a
-	ld   a, $7B
-	jp   L000532
-L00050B:;J
-	ld   a, $04
-	ld   [w_Unknown_SomethingLCDC], a
-	ldh  a, [$FFEA]
-	ldh  [rSCX], a
-	ld   a, $7F
-	jp   L000532
-L000519:;J
-	ld   a, $05
-	ld   [w_Unknown_SomethingLCDC], a
-	ldh  a, [$FFEC]
-	ldh  [rSCX], a
-	ld   a, $83
-	jp   L000532
-L000527:;J
-	ld   a, $06
-	ld   [w_Unknown_SomethingLCDC], a
-	ldh  a, [$FFEE]
-	ldh  [rSCX], a
-	ld   a, $87
-L000532:;J
-	ldh  [rLYC], a
+	
+; =============== LCDCHandler_Title ===============
+; Handles the scrolling clouds in the title screen.
+;
+; This is used at any point the title screen is displayed, even while the clouds are moving up.
+LCDCHandler_Title:
+		ld   a, [wLCDCSectId]
+		or   a					; wLCDCSectId == 0?
+		jp   z, .mode0			; If so, jump
+		dec  a					; ...
+		jp   z, .mode1
+		dec  a					
+		jp   z, .mode2
+		dec  a
+		jp   z, .mode3
+		dec  a
+		jp   z, .mode4
+		dec  a
+		jp   z, .mode5
+		jp   .mode6
+	
+	;
+	; Section 0: Prepare the parallax effect
+	;
+	.mode0:
+		; Disable the WINDOW, since the clouds are in the main layer
+		; (the WINDOW can't be used for this effect, so it's also the only way)
+		
+		; This continues using the hScrollX settings from VBlank
+		
+		ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WTILEMAP|LCDC_ENABLE
+		ldh  [rLCDC], a
+		ld   a, $01			; Next mode id
+		ld   [wLCDCSectId], a
+		ld   a, $73			; Next LYC trigger
+		jp   .end
+		
+	;
+	; Section 1-5: Parallax effect continued
+	;
+	.mode1:
+		ld   a, $02					; Next mode id
+		ld   [wLCDCSectId], a
+		ldh  a, [hTitleParallax1X]	; Set parallax X pos
+		ldh  [rSCX], a
+		ld   a, $77				; Next LYC trigger
+		jp   .end
+	.mode2:
+		ld   a, $03
+		ld   [wLCDCSectId], a
+		ldh  a, [hTitleParallax2X]
+		ldh  [rSCX], a
+		ld   a, $7B				; Next LYC trigger
+		jp   .end
+	.mode3:;J
+		ld   a, $04
+		ld   [wLCDCSectId], a
+		ldh  a, [hTitleParallax3X]
+		ldh  [rSCX], a
+		ld   a, $7F				; Next LYC trigger
+		jp   .end
+	.mode4:
+		ld   a, $05
+		ld   [wLCDCSectId], a
+		ldh  a, [hTitleParallax4X]
+		ldh  [rSCX], a
+		ld   a, $83				; Next LYC trigger
+		jp   .end
+	.mode5:
+		ld   a, $06
+		ld   [wLCDCSectId], a
+		ldh  a, [hTitleParallax5X]
+		ldh  [rSCX], a
+		ld   a, $87
+	.end:
+	
+		ldh  [rLYC], a
 	pop  af
 	reti
-L000536:;J
-	ld   a, $0A
-L000538:;J
-	dec  a
-	jp   nz, L000538
-	ld   a, $E7
-	ldh  [rLCDC], a
-	pop  af
-	reti
+	;
+	; Section 6: Restore the screen
+	;
+.mode6:
+
+		; Wait, maybe because of the sprites?
+		ld   a, $0A
+	.wait:
+		dec  a
+		jp   nz, .wait
+		
+		; Enable the WINDOW
+		ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
+		ldh  [rLCDC], a
+		pop  af
+		reti
+		
 ; =============== VBlankHandler ===============
 ; Long VBLANK handler.
 VBlankHandler:
@@ -1210,8 +1269,7 @@ VBlankHandler:
 	ld   [wSerial_Unknown_Done], a
 	
 ; =============== VBlank_ChkCopyPlTiles ===============
-; Determines if the player graphics should be copied to VRAM,
-; which also increase the animation.
+; Determines if the player graphics should be copied to VRAM.
 VBlank_ChkCopyPlTiles:
 	ld   a, [wMisc_C026]
 	bit  MISCB_LAG_FRAME, a			; Is this a lag frame?
@@ -1262,10 +1320,10 @@ ENDM
 ; =============== VBlank_CopyPl1Tiles ===============
 ; Copies the player 1 graphics to VRAM.
 VBlank_CopyPl1Tiles:
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft0]
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftA]
 	or   a					; Any tiles left to transfer to buffer 0?
 	jp   nz, .copyTo0		; If so, jump
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft1]
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftB]
 	or   a					; Any tiles left to transfer to buffer 1?
 	jp   nz, .copyTo1		; If so, jump
 	jp   .end				; If there's nothing, we're done
@@ -1283,17 +1341,17 @@ VBlank_CopyPl1Tiles:
 									; Reaching this means this is the last set of tiles
 .notLast0:
 	sub  a, b							; TilesLeft -= TilesToCopy
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft0], a		; Update stat
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftA], a		; Update stat
 	
 	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_Low]		; DE = Destination Ptr
 	ld   e, a
 	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_High]
 	ld   d, a
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtr0_Low]		; HL = Source unc. gfx ptr
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtrA_Low]		; HL = Source unc. gfx ptr
 	ld   l, a
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtr0_High]
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtrA_High]
 	ld   h, a
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_Bank0]				; A = Bank number the graphics are in
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_BankA]				; A = Bank number the graphics are in
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	call CopyTiles
@@ -1303,9 +1361,9 @@ VBlank_CopyPl1Tiles:
 	ld   a, d
 	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_High], a
 	ld   a, l
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtr0_Low], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtrA_Low], a
 	ld   a, h
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtr0_High], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtrA_High], a
 	jp   .chkCopyEnd
 	
 .copyTo1:
@@ -1316,16 +1374,16 @@ VBlank_CopyPl1Tiles:
 	ld   b, a
 .notLast1:
 	sub  a, b
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft1], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftB], a
 	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_Low]
 	ld   e, a
 	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_High]
 	ld   d, a
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtr1_Low]
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtrB_Low]
 	ld   l, a
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtr1_High]
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtrB_High]
 	ld   h, a
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_Bank1]
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_BankB]
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	call CopyTiles
@@ -1334,25 +1392,30 @@ VBlank_CopyPl1Tiles:
 	ld   a, d
 	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_High], a
 	ld   a, l
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtr1_Low], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtrB_Low], a
 	ld   a, h
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtr1_High], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtrB_High], a
 	
 .chkCopyEnd:
 
 	; If there aren't any tiles left to copy in the buffer,
 	; flag the copy as done so the game can continue the animation. ?????
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft0]
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftA]
 	or   a								; TilesLeft != 0?
 	jp   nz, .end						; If so, skip
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft1]
+	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftB]
 	or   a								; TilesLeft != 0?
 	jp   nz, .end						; If so, skip
 	
 .flagEnd:
+
+	; Mark that the buffer operation is complete
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	res  OSTB_ALTSET, [hl]
-	set  OSTB_BIT3, [hl]
+	res  OSTB_GFXLOAD, [hl]		; Buffer copied
+	set  OSTB_BIT3, [hl]		; ??? does this do anything
+	
+	
+	
 	ld   hl, $D922
 	bit  0, [hl]		; $D922 bit 0 set?
 	jp   nz, .move1		; If so, skip
@@ -1383,37 +1446,11 @@ VBlank_CopyPl1Tiles:
 	
 .move1:
 
-	; This seems to be part of a sequence to check if there are tiles left to copy.
-	;
-	; As long as there are tiles which still need to get copied to the buffer, 
-	; the first set gets copied to the second set.
-	;
-	; Elsewhere, the second set is checked against the main buffer copy info.
-	; If it matches, a new buffer copy info is copied over from ROM.
-	;
-	; Only after that check, the buffer info is copied to the first set.
-	;
-	; This way, the baseInfo-set2 comparison always fails until there aren't any tiles to copy.
-	; ?????????
+	; Copy over the unique identifier for the Set settings from iGFXBufInfo_SetKey to iGFXBufInfo_DoneSetKey.
+	; This tells the wGFXBufInfo init code which settings were the last to be completely applied.
+	ld   hl, wGFXBufInfo_Pl1+iGFXBufInfo_SetKey 		; HL = Source
+	ld   de, wGFXBufInfo_Pl1+iGFXBufInfo_DoneSetKey 	; DE = Destination
 	
-
-	; baseinfo clear
-	; ROM -> Baseinfo
-	; Initial baseinfo -> set0
-	; baseinfo updates as copybytes is done
-	; after a while set0 (still orig) copied ti set1 (here)
-	; check for set1-baseinfo match
-	; baseinfo -> set0
-	; set0 -> set1
-	; check for set1-baseinfo match
-	; baseinfo -> set0
-	
-	; Copy iGFXBufInfo_LastInfo to iGFXBufInfo_CompInfo
-	; This data is essentially an old copy of the buffer info ???
-	ld   hl, wGFXBufInfo_Pl1+iGFXBufInfo_LastInfo ; HL = Source
-	ld   de, wGFXBufInfo_Pl1+iGFXBufInfo_CompInfo ; DE = Destination
-	
-	; 6 total
 REPT 5
 	ldi  a, [hl]
 	ld   [de], a
@@ -1422,9 +1459,10 @@ ENDR
 	ld   a, [hl]
 	ld   [de], a
 	
-	; Copy set0 info to set1
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_UserFlags0]
-	ld   [wOBJInfo_Pl1+iOBJInfo_UserFlags1], a
+	; Additionally, copy over the set0 info to set1.
+	; The wGFXBufInfo init code will do the same for its own fields if it detects the same settings for the next frame.
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_Status0]
+	ld   [wOBJInfo_Pl1+iOBJInfo_Status1], a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_BankNum0]
 	ld   [wOBJInfo_Pl1+iOBJInfo_BankNum1], a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTbl_Low0]
@@ -1452,10 +1490,10 @@ L0006A7:
 ; =============== VBlank_CopyPl2Tiles ===============
 ; Copies the player 2 graphics to VRAM.
 VBlank_CopyPl2Tiles:
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft0]
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftA]
 	or   a
 	jp   nz, .copyTo0
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft1]
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftB]
 	or   a
 	jp   nz, .copyTo1
 	jp   .end
@@ -1466,16 +1504,16 @@ VBlank_CopyPl2Tiles:
 	ld   b, a
 .notLast0:
 	sub  a, b
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft0], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftA], a
 	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_Low]
 	ld   e, a
 	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_High]
 	ld   d, a
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtr0_Low]
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtrA_Low]
 	ld   l, a
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtr0_High]
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtrA_High]
 	ld   h, a
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_Bank0]
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_BankA]
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	call CopyTiles
@@ -1484,9 +1522,9 @@ VBlank_CopyPl2Tiles:
 	ld   a, d
 	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_High], a
 	ld   a, l
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtr0_Low], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtrA_Low], a
 	ld   a, h
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtr0_High], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtrA_High], a
 	jp   .chkCopyEnd
 .copyTo1:
 	ld   b, MAX_TILE_BUFFER_COPY
@@ -1495,16 +1533,16 @@ VBlank_CopyPl2Tiles:
 	ld   b, a
 .notLast1:
 	sub  a, b
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft1], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftB], a
 	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_Low]
 	ld   e, a
 	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_High]
 	ld   d, a
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtr1_Low]
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtrB_Low]
 	ld   l, a
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtr1_High]
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtrB_High]
 	ld   h, a
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_Bank1]
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_BankB]
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	call CopyTiles
@@ -1513,19 +1551,19 @@ VBlank_CopyPl2Tiles:
 	ld   a, d
 	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_High], a
 	ld   a, l
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtr1_Low], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtrB_Low], a
 	ld   a, h
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtr1_High], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtrB_High], a
 .chkCopyEnd:
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft0]
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftA]
 	or   a
 	jp   nz, .end
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft1]
+	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftB]
 	or   a
 	jp   nz, .end
 .flagEnd:
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	res  OSTB_ALTSET, [hl]
+	res  OSTB_GFXLOAD, [hl]
 	set  OSTB_BIT3, [hl]
 	ld   hl, $DA22
 	bit  0, [hl]
@@ -1551,8 +1589,8 @@ VBlank_CopyPl2Tiles:
 	ld   [hl], $00
 .move1:
 
-	ld   hl, wGFXBufInfo_Pl2+iGFXBufInfo_LastInfo
-	ld   de, wGFXBufInfo_Pl2+iGFXBufInfo_CompInfo
+	ld   hl, wGFXBufInfo_Pl2+iGFXBufInfo_SetKey
+	ld   de, wGFXBufInfo_Pl2+iGFXBufInfo_DoneSetKey
 	ldi  a, [hl]
 	ld   [de], a
 	inc  de
@@ -1570,8 +1608,8 @@ VBlank_CopyPl2Tiles:
 	inc  de
 	ld   a, [hl]
 	ld   [de], a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_UserFlags0]
-	ld   [wOBJInfo_Pl2+iOBJInfo_UserFlags1], a
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_Status0]
+	ld   [wOBJInfo_Pl2+iOBJInfo_Status1], a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_BankNum0]
 	ld   [wOBJInfo_Pl2+iOBJInfo_BankNum1], a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTbl_Low0]
@@ -1607,8 +1645,8 @@ VBlank_SetInitialSect:
 	
 	ld   a, [wScreenSect1LYC]			; Set starting point for second section 
 	ldh  [rLYC], a
-	xor  a								; Reset w_Unknown_SomethingLCDC
-	ld   [w_Unknown_SomethingLCDC], a
+	xor  a								; Reset wLCDCSectId
+	ld   [wLCDCSectId], a
 	ldh  a, [hScreenSect0BGP]			; Set palette for first section
 	ldh  [rBGP], a
 	
@@ -1643,7 +1681,7 @@ VBlank_SetInitialSect:
 	; LYC was disabled
 	;
 	xor  a
-	ld   [w_Unknown_SomethingLCDC], a
+	ld   [wLCDCSectId], a
 .singleSect:
 	;
 	; No sections
@@ -1915,7 +1953,7 @@ Pl1_KeepInScreenRange: mPL_KeepInScreenRange wOBJInfo_Pl1
 Pl2_KeepInScreenRange: mPL_KeepInScreenRange wOBJInfo_Pl2
 
 ; =============== OBJLstS_DoOBJInfoSlot ===============
-; Handles the values in the OBJInfo structure before writing the sprite mapping to the OAM mirror.
+; Handles the values in the OBJInfo structure before writing the sprite mappings to the OAM mirror.
 ; IN
 ; - HL: Ptr to a wOBJInfo structure.
 OBJLstS_DoOBJInfoSlot:
@@ -1925,30 +1963,48 @@ OBJLstS_DoOBJInfoSlot:
 	bit  OSTB_VISIBLE, a		; Visibility flag set?
 	ret  z						; If not, return
 	
-	; Copy over the user-controlled flags to the two user-controlled flags used by sprite mappings.
-	; These are or'd over.
+
+	
+	;
+	; ?????
+	; ????? Since each of these sets are mostly separate sprite mappings, they mostly get separate bookkeeping info.
+	; ????? Start by initializing both status variables with a copy of the shared OBJInfo flags.
+	;
+	
+	; Additionally, 
+
 	ld   b, a					; B = A
-	ld   [wOBJLstUserFlags], a		; Primary ptr
-	ld   [wOBJLstUserFlagsSec], a	; Secondary ptr
+	ld   [wOBJLstCurStatus0], a	; Primary ptr
+	ld   [wOBJLstCurStatus1], a	; Secondary ptr
 	
 	;--
 	;
-	; Depending on bit0 of iOBJInfo_Status, also use a *different* set of user-controlled flags over a different byte.
+	; Determine the sprite mapping which should be used to determine the sprite flip status.
+	;
+	; TODO: Double buffering related?
+	;
+	; This game uses double buffering, which is decided by OSTB_GFXBUF2.
+	; reaches up to having two different sets of sprite mapping info.
+	; Which copy to use is decided by the global status flag "OSTB_GFXLOAD", and depending on that,
+	; different wOBJInfo fields should be used.
+	
+	; Pick a different set of flags 
+	; Depending on bit0 of iOBJInfo_Status, also use a *different* set of flags over a different byte.
 	; Later on, this same bit is also used to pick an alternate sprite mappings/animation pointer.
 	;
 	; These are xor'd over.
-	bit  OSTB_ALTSET, a			; Is the bit set?
+	bit  OSTB_GFXLOAD, a			; Is the bit set?
 	jp   nz, .useUserSet1		; If so, jump
 	
 .useUserSet0:	
-	ldi  a, [hl]				; Read iOBJInfo_UserFlags0	
-	ld   [wOBJLstUserSetFlags], a
+	ldi  a, [hl]				; Read iOBJInfo_Status0	
+	ld   [wOBJLstOrigStatusSpec], a
 	inc  hl
 	jp   .calcRelX
 .useUserSet1:
 	inc  hl
-	ldi  a, [hl]				; Read iOBJInfo_UserFlags1
-	ld   [wOBJLstUserSetFlags], a
+	ldi  a, [hl]				; Read iOBJInfo_Status1
+	ld   [wOBJLstOrigStatusSpec], a
 
 .calcRelX:
 	;--
@@ -2022,33 +2078,36 @@ OBJLstS_DoOBJInfoSlot:
 	ld   c, [hl]			; Read iOBJInfo_TileIDBase
 	inc  hl
 	
-	; ??? There's some weird logic with the tile id base.
-	; If the tile ID base has bit1 set, $20 will be added to the tile ID.
-	; If OSTB_ALTSET is set, however, said bit1 is inverted first.
+	;
+	; Pick the additional tileID offset depending on the current GFX buffer.
+	; The two buffers are $20 tiles large, and if we're using the second one,
+	; add $20 to the tileID.
+	; 
+	; Additionally, OSTB_GFXLOAD will invert the buffer used.
+	; ??? but why
+	;
 	
-	; Note that OBJ graphics are copied in "chunks" that start at a $20 tile boundary.
-	
-	
-	; If OSTB_ALTSET is set, invert bit1
+	; If OSTB_GFXLOAD is set, invert bit1
 	ld   a, b				; Read back status
-	bit  OSTB_ALTSET, a		; bit0 set?
+	bit  OSTB_GFXLOAD, a		; Using alternate set? (??? second buffer *info*)
 	jr   z, .noInvTileBit	; If not, skip
-	xor  $02				; Invert bit1
+	xor  OST_GFXBUF2			; Invert bit1
 .noInvTileBit:
-	; If bit1 is set, add $20 tiles (two rows of GFX) to the base tileID
-	bit  1, a				; Is bit1 set?
-	jp   z, .noAdd20		; If so, skip
-	ld   a, $20				; C += $20
+
+	
+	bit  OSTB_GFXBUF2, a	; Are we using the second *GFX* buffer?
+	jp   z, .noAdd20		; If not, skip
+	ld   a, $20				; A = iOBJInfo_TileIDBase + $20
 	add  c
 	ld   c, a
-.noAdd20:;J
+.noAdd20:
 	inc  hl
 	inc  hl
 	
 	
 	;--
 	;
-	; Depending on Status->bit0, use a different set of sprite mappings.
+	; Depending on Status->bit0, use a different set of sprite mappings pairs.
 	;
 	
 	;
@@ -2058,77 +2117,89 @@ OBJLstS_DoOBJInfoSlot:
 ;----------
 	; $10 
 	push bc
-	bit  OSTB_ALTSET, b		; bit0 set?
-	jr   nz, .usePtrSet1	; If so, jump
-	
-.usePtrSet0:
-	ldi  a, [hl]			; Read iOBJInfo_BankNum0
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	; $11
-	ld   e, [hl]			; Read iOBJInfo_OBJLstPtrTbl_Low0
-	inc  hl
-	; $12
-	ld   d, [hl]			; Read iOBJInfo_OBJLstPtrTbl_High0
-	inc  hl
-	; $13
-	ld   c, [hl]			; Read iOBJInfo_OBJLstPtrTblOffset0
-	inc  hl
-	
-	; Skip to byte18
-	inc  hl
-	inc  hl
-	inc  hl
-	inc  hl
-	; $18
-	jr   .drawMainOBJ
-.usePtrSet1:
-	; Use the secondary set
-	
-	; Skip to byte14
-	inc  hl
-	inc  hl
-	inc  hl
-	inc  hl
-	; $14
-	ldi  a, [hl]			; Read iOBJInfo_BankNum1
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	; $15
-	ld   e, [hl]			; Read iOBJInfo_OBJLstPtrTbl_Low1
-	inc  hl
-	; $16
-	ld   d, [hl]			; Read iOBJInfo_OBJLstPtrTbl_High1
-	inc  hl
-	; $17
-	ld   c, [hl]			; Read iOBJInfo_OBJLstPtrTblOffset1
-	inc  hl
-	; $18
-	
-.drawMainOBJ:
+		bit  OSTB_GFXLOAD, b		; bit0 set?
+		jr   nz, .usePtrSet1	; If so, jump
+		
+	.usePtrSet0:
+		ldi  a, [hl]			; Read iOBJInfo_BankNum0
+		ld   [MBC1RomBank], a
+		ldh  [hROMBank], a
+		; $11
+		ld   e, [hl]			; Read iOBJInfo_OBJLstPtrTbl_Low0
+		inc  hl
+		; $12
+		ld   d, [hl]			; Read iOBJInfo_OBJLstPtrTbl_High0
+		inc  hl
+		; $13
+		ld   c, [hl]			; Read iOBJInfo_OBJLstPtrTblOffset0
+		inc  hl
+		
+		; Skip to byte18
+		inc  hl
+		inc  hl
+		inc  hl
+		inc  hl
+		; $18
+		jr   .drawMainOBJ
+	.usePtrSet1:
+		; Use the secondary set
+		
+		; Skip to byte14
+		inc  hl
+		inc  hl
+		inc  hl
+		inc  hl
+		; $14
+		ldi  a, [hl]			; Read iOBJInfo_BankNum1
+		ld   [MBC1RomBank], a
+		ldh  [hROMBank], a
+		; $15
+		ld   e, [hl]			; Read iOBJInfo_OBJLstPtrTbl_Low1
+		inc  hl
+		; $16
+		ld   d, [hl]			; Read iOBJInfo_OBJLstPtrTbl_High1
+		inc  hl
+		; $17
+		ld   c, [hl]			; Read iOBJInfo_OBJLstPtrTblOffset1
+		inc  hl
+		; $18
+		
+	.drawMainOBJ:
 
-	; Switch HL and DE
-	push de
-	push hl
-	pop  de
-	pop  hl
-	
-	; Index the sprite mapping table
-	
-	; HL = Start of OBJLstPtrTable (animation/sprite mappings table)
-	ld   b, $00		; BC = Index
-	add  hl, bc		; Offset it
+		; Switch HL and DE
+		push de
+		push hl
+		pop  de
+		pop  hl
+		
+		;
+		; Index the sprite mapping table
+		;
+		
+		; HL = Start of OBJLstPtrTable (animation/sprite mappings table)
+		ld   b, $00		; BC = Index
+		add  hl, bc		; Offset it
 	pop  bc
 ;----------
 
+
+	;
+	; To build the full sprite, *up to* two different OBJLst are copied (marked as parts A and B).
+	; The reasoning behind this is to save space by reusing half of the sprites for different frames,
+	; with B usually being used for the legs and A for the upper part.
+	;
+
+	; The first part is always defined ???, but
+
+
 	push hl	
-	call OBJLstS_DoOBJLstHeader
+	call OBJLstS_DoOBJLstHeaderA
 	pop  hl
 	
 .chkDrawSecOBJ:
 	;
 	; Try to draw the secondary sprite mapping, if it's defined.
-	; If it isn't defined, its pointer in the animation table will be set to rIE.
+	; If it isn't defined, its pointer in the animation table will be set to $FFFF.
 	;
 	
 	; Seek to the next sprite mapping pointer.
@@ -2139,7 +2210,7 @@ OBJLstS_DoOBJInfoSlot:
 	inc  hl
 	ld   a, [hl]
 	
-	cp   HIGH(OBJLSTPTR_NONE) ; Is the high byte $FF? (rIE)
+	cp   HIGH(OBJLSTPTR_NONE) ; Is the high byte $FF? ($FFFF)
 	ret  z                    ; If so, there's nothing else to draw
 	ld   d, a
 	
@@ -2147,31 +2218,30 @@ OBJLstS_DoOBJInfoSlot:
 	push de
 	pop  hl
 	
-	jp   OBJLstS_DoOBJLstHeaderSec
+	jp   OBJLstS_DoOBJLstHeaderB
 	
-; =============== OBJLstS_DoOBJLstHeader ===============
+; =============== OBJLstS_DoOBJLstHeaderA ===============
 ; Parses out the header for the primary sprite mapping before writing it to the OAM mirror.
 ; IN
 ; - HL: Ptr to OBJLstPtrTable entry
-; - DE: Ptr to actor struct byte18
+; - DE: Ptr to actor/wOBJInfo struct byte18
 ; - C : Tile ID base
-OBJLstS_DoOBJLstHeader:
+OBJLstS_DoOBJLstHeaderA:
 
 	;--
 	;
 	; Read out to HL the pointer off the animation table.
 	; This will point to the header of the actual sprite mapping (OBJLst).
 	;
-	push de			; Save DE
-	; Read ptr to DE
-	ld   e, [hl]	
-	inc  hl
-	ld   d, [hl]	
-	; HL = DE
-	push de			
-	pop  hl
-	
-	pop  de			; Restore DE
+	push de
+		; Read ptr to DE
+		ld   e, [hl]	
+		inc  hl
+		ld   d, [hl]	
+		; HL = DE
+		push de			
+		pop  hl
+	pop  de
 	;--
 	
 	; Now HL points to the start of a sprite mapping, at the header.
@@ -2181,15 +2251,15 @@ OBJLstS_DoOBJLstHeader:
 	;
 	
 	; Save the raw flags value
-	ldi  a, [hl]					; Read iOBJLstHdr_Flags
+	ldi  a, [hl]					; Read iOBJLstHdrA_Flags
 	ld   [wOBJLstHeaderFlags], a	; 
 	
 	; Add the X/Y flip flags on top of the existing ones
 	and  a, OLF_XFLIP|OLF_YFLIP		
 	ld   b, a
-	ld   a, [wOBJLstUserFlags]
+	ld   a, [wOBJLstCurStatus0]
 	or   b
-	ld   [wOBJLstUserFlags], a
+	ld   [wOBJLstCurStatus0], a
 	
 	
 	; Are these for the second sprite mapping???
@@ -2209,8 +2279,12 @@ OBJLstS_DoOBJLstHeader:
 	; Copy over item2 to byte19
 	ldi  a, [hl]		
 	ld   [de], a
+	
+	; $03
 	inc  hl
+	; $04
 	inc  hl
+	; $05
 	inc  hl
 	
 	;
@@ -2226,39 +2300,39 @@ OBJLstS_DoOBJLstHeader:
 	;
 	; BYTE 8 - X Offset
 	;
-	ldi  a, [hl]				; Read iOBJLstHdr_XOffset
+	ldi  a, [hl]				; Read iOBJLstHdrA_XOffset
 	ld   [wOBJLstCurXOffset], a
 	
 	;
 	; BYTE 9 - Y Offset
 	;
-	ld   a, [hl]				; Read iOBJLstHdr_YOffset
+	ld   a, [hl]				; Read iOBJLstHdrA_YOffset
 	ld   [wOBJLstCurYOffset], a
 	
 	jp   OBJLstS_WriteToWorkOAM
 	
-; =============== OBJLstS_DoOBJLstHeaderSec ===============
+; =============== OBJLstS_DoOBJLstHeaderB ===============
 ; Parses out the header for the secondary sprite mapping before writing it to the OAM mirror.
 ; Compared to the primary sprite mapping, this seems to use a different format for the header.
 ; IN
 ; - HL: Ptr to start of second OBJLst (at the header)
 ; - C : Tile ID base (always after the one from the primary header)
-OBJLstS_DoOBJLstHeaderSec:;J
+OBJLstS_DoOBJLstHeaderB:
 
 	;
 	; BYTE 0 - Flags
 	;
 	
 	; Save the raw flags value
-	ldi  a, [hl]					; Read iOBJLstHdrSec_Flags
+	ldi  a, [hl]					; Read iOBJLstHdrB_Flags
 	ld   [wOBJLstHeaderFlags], a	; 
 	
 	; Add the X/Y flip flags on top of the existing ones
 	and  a, OLF_XFLIP|OLF_YFLIP		
 	ld   b, a
-	ld   a, [wOBJLstUserFlagsSec]
+	ld   a, [wOBJLstCurStatus1]
 	or   b
-	ld   [wOBJLstUserFlags], a
+	ld   [wOBJLstCurStatus0], a
 	
 	; $01
 	inc  hl
@@ -2314,12 +2388,12 @@ OBJLstS_WriteToWorkOAM:
 	;
 	
 	; B = Default flip flags for the sprite mapping
-	ld   a, [wOBJLstUserFlags]		
+	ld   a, [wOBJLstCurStatus0]		
 	and  a, OLF_XFLIP|OLF_YFLIP
 	ld   b, a
 	
 	; A = High nybble of the user-controlled flags
-	ld   a, [wOBJLstUserSetFlags]		
+	ld   a, [wOBJLstOrigStatusSpec]		
 	and  a, $F0
 	
 	; Merge the flags over
@@ -2554,7 +2628,7 @@ OBJLstS_CalcDispCoords:
 	; Unlike with the Y location, here flipping the sprite horizontally inverts the X offset.
 	;
 	
-	ld   a, [wOBJLstUserSetFlags]
+	ld   a, [wOBJLstOrigStatusSpec]
 	and  a, OLF_XFLIP			; Is the X flip flag set?
 	jp   nz, .invXOff			; If so, jump
 .normXOff:
@@ -2630,371 +2704,613 @@ OBJLstS_Draw_WriteCommon:
 .end:
 	ret
 	
-L000B9E:;JC
+; =============== OBJLstS_DoAnimTiming_Initial ===============
+; Initializes the current animation frame.
+; Essentially sets up the arguments for OBJLstS_UpdateGFXBufInfo without doing anything else.
+; IN
+; - HL: Ptr to wOBJInfo struct
+OBJLstS_DoAnimTiming_Initial:
+	ldh  a, [hROMBank]					; Save current bank
+	push af
+		res  OSTB_BIT3, [hl]			; Reset OSTB_BIT3
+		push hl
+			; Switch to the bank number for set 0
+			ld   de, iOBJInfo_BankNum0
+			add  hl, de					; Seek to iOBJInfo_BankNum0
+			ldi  a, [hl]				; Get bank num
+			ld   [MBC1RomBank], a		; Go there
+			ldh  [hROMBank], a			
+			
+			; Get args
+			ld   e, [hl]				; DE = Ptr to OBJLstPtrTable
+			inc  hl
+			ld   d, [hl]
+			inc  hl
+			ld   c, [hl]				; BC = Offset
+			ld   b, $00
+			
+			; Switch DE and HL
+			push de
+			push hl
+			pop  de						; DE = iOBJInfo_OBJLstPtrTblOffset0
+			pop  hl						; HL = Ptr to OBJLstPtrTable
+			
+			add  hl, bc					; Index it
+										; HL = OBJLstPtrTable entry to OBJLstHdrA_*
+			jp   OBJLstS_UpdateGFXBufInfo
+
+; =============== OBJLstS_DoAnimTiming_NoLoop ===============
+; Handles the timing for the current animation for the specified OBJInfo and calls ????
+; When the animation ends, the last frame is repeated indefinitely.
+; IN
+; - HL: Ptr to wOBJInfo struct		
+OBJLstS_DoAnimTiming_NoLoop:
 	ldh  a, [hROMBank]
 	push af
-	res  3, [hl]
-	push hl
-	ld   de, $0010
-	add  hl, de
-	ldi  a, [hl]
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	ld   e, [hl]
-	inc  hl
-	ld   d, [hl]
-	inc  hl
-	ld   c, [hl]
-	ld   b, $00
-	push de
-	push hl
-	pop  de
-	pop  hl
-	add  hl, bc
-	jp   L000C5B
-L000BBD:;JC
+		res  OSTB_BIT3, [hl]			; Reset OSTB_BIT3
+			
+		;
+		; If the animation is marked as ended or GFX are still being copied to the other buffer,
+		; don't even decrement the frame counter.
+		;
+		ld   a, [hl]
+		and  a, OST_ANIMEND|OST_GFXLOAD		; Any of the two bits set?
+		jp   nz, OBJLstS_CommonAnim_End		; If so, return immediately
+		
+		;
+		; Continue showing the current animation frame until iOBJInfo_FrameLeft elapses.
+		;
+		push hl
+			ld   de, iOBJInfo_FrameLeft		; Seek to anim timer iOBJInfo_FrameLeft
+			add  hl, de
+			ld   a, [hl]
+			or   a							; Is it $00?
+			jp   z, .setNextFrame			; If so, jump
+			dec  a							; Otherwise, decrement the timer		
+			ld   [hl], a					; And save it back
+		pop  hl
+		jp   OBJLstS_CommonAnim_End			; We're done for now
+		
+		.setNextFrame:
+			;
+			; Set the anim timer to the animation speed value.
+			;
+			inc  hl							; Seek to iOBJInfo_FrameTotal
+			ldd  a, [hl]					; Read total frame length; seek back to iOBJInfo_FrameLeft
+			ld   [hl], a					; Set it to the anim timer
+		pop  hl
+		
+		;
+		; Set the next sprite mapping in the list, according to the current OBJLstPtrTbl in set 0
+		;
+		push hl
+			ld   de, iOBJInfo_BankNum0		; Seek to bank number
+			add  hl, de
+			
+			ldi  a, [hl]					; Read it
+			ld   [MBC1RomBank], a			; Switch banks there
+			ldh  [hROMBank], a
+			
+			; Gets args
+			ld   e, [hl]				; DE = Ptr to OBJLstPtrTable
+			inc  hl
+			ld   d, [hl]
+			inc  hl
+			
+			; Increase the offset by 4 bytes (OBJLstHdrA_* and OBJLstHdrB_* pointers)
+			; and use the updated value as table offset
+			ld   a, [hl]				; A = Offset + $04
+			add  a, $02*2
+			ld   [hl], a
+			ld   b, $00					; BC = New offset
+			ld   c, a
+			
+			; Switch DE and HL
+			push de
+			push hl
+			pop  de						; DE = iOBJInfo_OBJLstPtrTblOffset0
+			pop  hl						; HL = Ptr to OBJLstPtrTable
+			
+			;
+			; Determine if the OBJLstHdrA_* pointer is "null" ($FFFF).
+			; If it is, the animation has ended and should repeat the last frame indefinitely.
+			; Otherwise, continue normally with the updated iOBJInfo_OBJLstPtrTblOffset0.
+			;
+			push hl
+				add  hl, bc				; Seek to current OBJLst ptr
+				inc  hl					; Seek to high byte of ptr (since it can't happen to be $FF for valid pointers)
+				ld   a, [hl]			; Read high byte of ptr
+				cp   HIGH($FFFF)		; Is it $FF?
+				jp   nz, .nextOk		; If not, jump (this is a valid pointer)
+			.finished:
+				;------------------------
+				; Otherwise, move back the offset
+				ld   a, [de]			; iOBJInfo_OBJLstPtrTblOffset0 -= $04
+				sub  a, $02*2
+				ld   [de], a
+			pop  hl						
+		pop  hl							; Restore ptr to start of OBJInfo
+		
+		; Update the OBJInfo status to mark the end of the animation
+		ld   a, [hl]			
+		or   a, OST_ANIMEND
+		ld   [hl], a
+		
+		; We're done
+		jp   OBJLstS_CommonAnim_End
+		;------------------------
+			.nextOk:
+				dec  hl					; Seek back to the low byte of the OBJLst ptr		
+			pop  de						; Pull out useless value to sync
+			jp   OBJLstS_UpdateGFXBufInfo ; ...
+			
+; =============== OBJLstS_DoAnimTiming_Loop ===============
+; Handles the timing for the current animation for the specified OBJInfo and calls ????
+; When the animation ends, the animation loops back to the first frame.
+;
+; See also: OBJLstS_DoAnimTiming_NoLoop
+;           Essentially identical except the section of code in .finished is different.
+; IN
+; - HL: Ptr to wOBJInfo struct				
+OBJLstS_DoAnimTiming_Loop:
 	ldh  a, [hROMBank]
 	push af
-	res  3, [hl]
-	ld   a, [hl]
-	and  a, $11
-	jp   nz, L000D65
-	push hl
-	ld   de, $001B
-	add  hl, de
-	ld   a, [hl]
-	or   a
-	jp   z, L000BD8
-	dec  a
-	ld   [hl], a
-	pop  hl
-	jp   L000D65
-L000BD8:;J
-	inc  hl
-	ldd  a, [hl]
-	ld   [hl], a
-	pop  hl
-	push hl
-	ld   de, $0010
-	add  hl, de
-	ldi  a, [hl]
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	ld   e, [hl]
-	inc  hl
-	ld   d, [hl]
-	inc  hl
-	ld   a, [hl]
-	add  a, $04
-	ld   [hl], a
-	ld   b, $00
-	ld   c, a
-	push de
-	push hl
-	pop  de
-	pop  hl
-	push hl
-	add  hl, bc
-	inc  hl
-	ld   a, [hl]
-	cp   $FF
-	jp   nz, L000C0C
-	ld   a, [de]
-	sub  a, $04
-	ld   [de], a
-	pop  hl
-	pop  hl
-	ld   a, [hl]
-	or   a, $10
-	ld   [hl], a
-	jp   L000D65
-L000C0C:;J
-	dec  hl
-	pop  de
-	jp   L000C5B
-L000C11:;C
-	ldh  a, [hROMBank]
-	push af
-	res  3, [hl]
-	ld   a, [hl]
-	and  a, $11
-	jp   nz, L000D65
-	push hl
-	ld   de, $001B
-	add  hl, de
-	ld   a, [hl]
-	or   a
-	jp   z, L000C2C
-	dec  a
-	ld   [hl], a
-	pop  hl
-	jp   L000D65
-L000C2C:;J
-	inc  hl
-	ldd  a, [hl]
-	ld   [hl], a
-	pop  hl
-	push hl
-	ld   de, $0010
-	add  hl, de
-	ldi  a, [hl]
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	ld   e, [hl]
-	inc  hl
-	ld   d, [hl]
-	inc  hl
-	ld   a, [hl]
-	add  a, $04
-	ld   [hl], a
-	ld   b, $00
-	ld   c, a
-	push de
-	push hl
-	pop  de
-	pop  hl
-	push hl
-	add  hl, bc
-	inc  hl
-	ld   a, [hl]
-	cp   $FF
-	jp   nz, L000C59
-	xor  a
-	ld   [de], a
-	pop  hl
-	jp   L000C5B
-L000C59:;J
-	dec  hl
-	pop  de
-L000C5B:;J
-	pop  bc
-	ld   e, [hl]
-	inc  hl
-	ld   d, [hl]
-	inc  hl
-	push de
-	push hl
-	pop  de
-	pop  hl
-	bit  7, [hl]
-	jp   nz, L000D65
-	push bc
-	ld   a, [bc]
-	ld   [$C014], a
-	bit  0, a
-	jp   nz, L000C7E
-	xor  $02
-	or   a, $01
-	ld   [bc], a
-	ld   [wOBJLstUserFlags], a
-	jp   L000C86
-L000C7E:;J
-	ld   [wOBJLstUserFlags], a
-	xor  $02
-	ld   [$C014], a
-L000C86:;J
-	push de
-	push hl
-	ld   hl, $001D
-	add  hl, bc
-	ld   e, [hl]
-	inc  hl
-	ld   d, [hl]
-	pop  hl
-	inc  hl
-	inc  hl
-	inc  hl
-	push hl
-	ld   hl, $000E
-	add  hl, bc
-	ld   c, [hl]
-	inc  hl
-	ld   b, [hl]
-	pop  hl
-	ld   a, [wOBJLstUserFlags]
-	bit  1, a
-	jp   z, L000CA8
-	ld   a, $02
-	add  b
-	ld   b, a
-L000CA8:;J
-	ld   a, c
-	ld   [de], a
-	inc  de
-	ld   a, b
-	ld   [de], a
-	inc  de
-	call L000D6C
-	ld   c, [hl]
-	inc  hl
-	ld   b, [hl]
-	ld   a, [bc]
-	add  a, a
-	ld   [de], a
-	inc  de
-	pop  hl
-	ld   c, [hl]
-	inc  hl
-	ld   b, [hl]
-	ld   a, b
-	cp   $FF
-	jp   nz, L000CCD
-	xor  a
-	ld   [de], a
-	inc  de
-	ld   [de], a
-	inc  de
-	inc  de
-	ld   [de], a
-	inc  de
-	jp   L000CDA
-L000CCD:;J
-	push bc
-	pop  hl
-	inc  hl
-	call L000D6C
-	ld   c, [hl]
-	inc  hl
-	ld   b, [hl]
-	ld   a, [bc]
-	add  a, a
-	ld   [de], a
-	inc  de
-L000CDA:;J
-	ld   hl, $FFF6
-	add  hl, de
-	push hl
-	pop  bc
-	ld   hl, $0010
-	add  hl, bc
-	push hl
-	pop  de
-	ld   hl, $0002
-	add  hl, bc
-	ld   a, [de]
-	cp   a, [hl]
-	jp   nz, L000D48
-	inc  de
-	inc  hl
-	ld   a, [de]
-	cp   a, [hl]
-	jp   nz, L000D48
-	inc  de
-	inc  hl
-	ld   a, [de]
-	cp   a, [hl]
-	jp   nz, L000D48
-	inc  de
-	inc  hl
-	inc  hl
-	ld   a, [de]
-	cp   a, [hl]
-	jp   nz, L000D48
-	inc  de
-	inc  hl
-	ld   a, [de]
-	cp   a, [hl]
-	jp   nz, L000D48
-	inc  de
-	inc  hl
-	ld   a, [de]
-	cp   a, [hl]
-	jp   nz, L000D48
-	ld   hl, $0002
-	add  hl, bc
-	xor  a
-	ldi  [hl], a
-	ldi  [hl], a
-	ldi  [hl], a
-	ldi  [hl], a
-	ldi  [hl], a
-	ldi  [hl], a
-	ldi  [hl], a
-	ldi  [hl], a
-	pop  bc
-	ld   a, [$C014]
-	res  0, a
-	set  3, a
-	ld   [bc], a
-	ld   hl, $0001
-	add  hl, bc
-	ldi  a, [hl]
-	ld   [hl], a
-	ld   hl, $0010
-	add  hl, bc
-	push hl
-	pop  de
-	ld   hl, $0014
-	add  hl, bc
-	ld   a, [de]
-	ldi  [hl], a
-	inc  de
-	ld   a, [de]
-	ldi  [hl], a
-	inc  de
-	ld   a, [de]
-	ldi  [hl], a
-	inc  de
-	ld   a, [de]
-	ldi  [hl], a
-	inc  de
-	jp   L000D65
-L000D48:;J
-	ld   hl, $000A
-	add  hl, bc
-	push hl
-	pop  de
-	ld   hl, $0002
-	add  hl, bc
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	inc  hl
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ld   a, [hl]
-	ld   [de], a
-	pop  bc
-L000D65:;J
+		res  OSTB_BIT3, [hl]			; Reset OSTB_BIT3
+			
+		;
+		; If the animation is marked as ended or GFX are still being copied to the other buffer,
+		; don't even decrement the frame counter.
+		;
+		ld   a, [hl]
+		and  a, OST_ANIMEND|OST_GFXLOAD		; Any of the two bits set?
+		jp   nz, OBJLstS_CommonAnim_End				; If so, return immediately
+		
+		;
+		; Continue showing the current animation frame until iOBJInfo_FrameLeft elapses.
+		;
+		push hl
+			ld   de, iOBJInfo_FrameLeft		; Seek to anim timer iOBJInfo_FrameLeft
+			add  hl, de
+			ld   a, [hl]
+			or   a							; Is it $00?
+			jp   z, .setNextFrame			; If so, jump
+			dec  a							; Otherwise, decrement the timer		
+			ld   [hl], a					; And save it back
+		pop  hl								; HL = Ptr to wOBJInfo
+		jp   OBJLstS_CommonAnim_End					; We're done for now
+		
+		.setNextFrame:
+			;
+			; Set the anim timer to the animation speed value.
+			;
+			inc  hl							; Seek to iOBJInfo_FrameTotal
+			ldd  a, [hl]					; Read total frame length; seek back to iOBJInfo_FrameLeft
+			ld   [hl], a					; Set it to the anim timer
+		pop  hl								; HL = Ptr to wOBJInfo
+		
+		;
+		; Set the next sprite mapping in the list, according to the current OBJLstPtrTbl in set 0
+		;
+		push hl
+			ld   de, iOBJInfo_BankNum0		; Seek to bank number
+			add  hl, de
+			
+			ldi  a, [hl]					; Read it
+			ld   [MBC1RomBank], a			; Switch banks there
+			ldh  [hROMBank], a
+			
+			; Gets args
+			ld   e, [hl]				; DE = Ptr to OBJLstPtrTable
+			inc  hl
+			ld   d, [hl]
+			inc  hl
+			
+			; Increase the offset by 4 bytes (OBJLstHdrA_* and OBJLstHdrB_* pointers)
+			; and use the updated value as table offset
+			ld   a, [hl]				; A = Offset + $04
+			add  a, $02*2
+			ld   [hl], a
+			ld   b, $00					; BC = New offset
+			ld   c, a
+			
+			; Switch DE and HL
+			push de
+			push hl
+			pop  de						; DE = iOBJInfo_OBJLstPtrTblOffset0
+			pop  hl						; HL = Ptr to OBJLstPtrTable entry
+			
+			;
+			; Determine if the OBJLstHdrA_* pointer is "null" ($FFFF).
+			; If it is, the animation has ended and should loop.
+			; Otherwise, continue normally with the updated iOBJInfo_OBJLstPtrTblOffset0.
+			;
+			push hl
+				add  hl, bc				; Seek to current OBJLst ptr
+				inc  hl					; Seek to high byte of ptr (since it can't happen to be $FF for valid pointers)
+				ld   a, [hl]			; Read high byte of ptr
+				cp   HIGH($FFFF)		; Is it $FF?
+				jp   nz, .nextOk		; If not, jump (this is a valid pointer)
+			.finished:
+			;------------------------
+				; Otherwise, reset the offset
+				xor  a
+				ld   [de], a			; iOBJInfo_OBJLstPtrTblOffset0 = 0
+			pop  hl						; HL = Ptr to OBJLstPtrTable entry
+			jp   OBJLstS_UpdateGFXBufInfo
+			;------------------------
+			.nextOk:
+				dec  hl					; Seek back to the low byte of the OBJLstHdrA_* ptr		
+			pop  de						; Don't pop to hl, keep the OBJLstPtrTable entry 
+			
+; =============== OBJLstS_UpdateGFXBufInfo ===============
+; Common code for setting up the initial state of new GFX buffer info.
+;
+; POP BEFORE RET: 2
+; IN
+; - HL: OBJLstPtrTable entry to OBJLstHdrA_*
+; - (SP+2): Ptr to wOBJInfo struct
+OBJLstS_UpdateGFXBufInfo:
+		pop  bc				; BC = Ptr to wOBJInfo struct
+		
+		;
+		; Seek to the first byte of OBJLstHdrA_*
+		;
+		
+		; DE = Ptr to OBJLstHdrA_*
+		ld   e, [hl]
+		inc  hl
+		ld   d, [hl]
+		inc  hl				; To second ptr
+		
+		; Switch pointers
+		push de
+		push hl
+		pop  de		; DE = OBJLstPtrTable entry to OBJLstHdrB_*
+		pop  hl		; HL = Ptr to OBJLstHdrA_*
+		
+		;
+		; If this sprite mapping doesn't use the GFX buffer system, we're done.
+		;
+		bit  OLFB_NOBUF, [hl]			; Is the flag set?
+		jp   nz, OBJLstS_CommonAnim_End	; If so, return
+		
+	.useBuf:
+		push bc
+			; Save iOBJInfo_Status (global flags) to a temp location
+			ld   a, [bc]
+			ld   [wOBJLstCurStatus], a
+			
+			;
+			; Determine if the buffer should be switched or not.
+			;
+			; When following animations normally, we won't get here until the other GFX buffer is fully written to (OSTB_GFXLOAD clear).
+			; In that case, switch the buffers and set back the OSTB_GFXLOAD flag, saving the result back.
+			;
+			; However, if we got here with an incomplete buffer, keep using it, so the new GFX will be written at its start.
+			; 
+			
+			bit  OSTB_GFXLOAD, a		; Is the buffer ready yet?
+			jp   nz, .gfxNotDone		; If not, jump
+		.gfxDone:
+			xor  OST_GFXBUF2			; Use other buffer
+			or   a, OST_GFXLOAD			; Set loading flag
+			ld   [bc], a				; Write back to iOBJInfo_Status
+			ld   [wOBJLstCurStatus0], a	; Write to wOBJLstCurStatus0
+			; wOBJLstCurStatus does not get updated here
+			jp   .getArgs
+		.gfxNotDone:
+			;???????????????
+			; Do not change wOBJLstCurStatus0 (used later to determine buffer)
+			ld   [wOBJLstCurStatus0], a	; ???
+			
+			; But reverse the buffer bit in the temporary copy of iOBJInfo_Status
+			; with the original value kept unchanged
+			xor  OST_GFXBUF2			
+			ld   [wOBJLstCurStatus], a	
+			
+		.getArgs:
+			push de						; OBJLstPtrTable entry to OBJLstHdrB_*
+			
+				;
+				; Get the data off the wOBJInfo we need later for writing to the wGFXBufInfo
+				;
+			
+				; DE = Ptr to start of wGFXBufInfo
+				push hl
+					ld   hl, iOBJInfo_BufInfoPtr_Low
+					add  hl, bc						; Seek to iOBJInfo_BufInfoPtr_Low
+					ld   e, [hl]					; Read low byte
+					inc  hl
+					ld   d, [hl]					; Read high byte
+				pop  hl
+				
+				; Seek to iOBJLstHdrA_GFXPtr_Low
+				inc  hl		; Seek to iOBJLstHdrA_Byte1
+				inc  hl     ; ...
+				inc  hl
+				
+				; BC = Ptr to location in VRAM for copying tiles
+				push hl
+					ld   hl, iOBJInfo_VRAMPtr_Low ; Seek to iOBJInfo_VRAMPtr_Low
+					add  hl, bc
+					ld   c, [hl]					; Read low byte
+					inc  hl
+					ld   b, [hl]					; Read high byte
+				pop  hl
+				
+				
+				;
+				; If we're using the second buffer, make the VRAM location point $20 tiles ahead,
+				; which is the size of a single buffer.
+				;
+				; NOTE: If we didn't finish copying the tiles to the previous buffer,
+				;       the old buffer will be used.
+				;
+				ld   a, [wOBJLstCurStatus0]
+				bit  OSTB_GFXBUF2, a				; Using the second buffer?
+				jp   z, .setBufInfo					; If not, skip
+			.buf2:
+				; B += $02
+				ld   a, HIGH(TILESIZE * GFXBUF_TILECOUNT)						; BC += $0200
+				add  b
+				ld   b, a
+				
+			.setBufInfo:
+			
+				;
+				; Write the data to the current wGFXBufInfo structure.
+				;
+			
+				
+				; VRAM destination ptr
+				ld   a, c		; A = iOBJInfo_VRAMPtr_Low
+				ld   [de], a	; Write to iGFXBufInfo_DestPtr_Low
+				inc  de			; Seek to iGFXBufInfo_DestPtr_High
+				ld   a, b		; A = iOBJInfo_VRAMPtr_High
+				ld   [de], a	; Write to iGFXBufInfo_DestPtr_High
+				inc  de			; Seek to iGFXBufInfo_SrcPtrA_Low
+				
+				; Source GFX ptr - Set A
+				; HL = Source (iOBJLstHdrA_GFXPtr_Low)
+				; DE = Destination (iGFXBufInfo_SrcPtrA_Low)
+				call OBJLstS_CopyFarPtr
+				
+				;--
+				
+				; BC = Ptr to OBJLst - Set A
+				ld   c, [hl]	; C = iOBJLstHdrA_DataPtr_Low
+				inc  hl
+				ld   b, [hl]	; B = iOBJLstHdrA_DataPtr_High
+				
+				; Tiles remaining - Set A
+				; Multiplied by 2 because OBJ are always 8x16 (so 2 tiles/OBJ)
+				ld   a, [bc]	; A = iOBJLst_OBJCount
+				add  a, a		; A *= 2
+				ld   [de], a	; iGFXBufInfo_TilesLeftA = A
+				
+				inc  de			; Seek to iGFXBufInfo_SrcPtrB_Low
+			pop  hl 			; HL = OBJLstPtrTable entry to OBJLstHdrB_*
+			
+			; Source GFX ptr - Set B
+			; If high byte is $FF, there's no set B and we can skip this.
+			ld   c, [hl]		; BC = Ptr to OBJLstHdrB_*
+			inc  hl
+			ld   b, [hl]
+			ld   a, b
+			cp   HIGH($FFFF)	; B != $FF?
+			jp   nz, .hasSetB	; If so, jump
+			
+		.noSetB:
+			; Otherwise, null out the Set B info.
+			xor  a
+			ld   [de], a	; iGFXBufInfo_SrcPtrB_Low
+			inc  de
+			ld   [de], a	; iGFXBufInfo_SrcPtrB_High
+			inc  de
+			inc  de			; Ignore iGFXBufInfo_BankB, who cares
+			ld   [de], a	; iGFXBufInfo_TilesLeftB
+			inc  de			; Seek to iGFXBufInfo_SetKey
+			jp   .chkMatches
+			
+		.hasSetB:
+		
+			; Source GFX ptr - Set B
+			push bc
+			pop  hl		; HL = iOBJLstHdrB_Flags
+			inc  hl		; HL = Source (iOBJLstHdrB_GFXPtr_Low)
+						; DE = Destination (iGFXBufInfo_SrcPtrB_Low)
+			call OBJLstS_CopyFarPtr
+			
+			;--
+			
+			; BC = Ptr to OBJLst - Set B
+			ld   c, [hl]	; C = iOBJLstHdrB_DataPtr_Low
+			inc  hl
+			ld   b, [hl]	; B = iOBJLstHdrB_DataPtr_High
+			
+			; Tiles remaining - Set B
+			ld   a, [bc]	; A = iOBJLst_OBJCount
+			add  a, a		; A *= 2
+			ld   [de], a	; iGFXBufInfo_TilesLeftB = A
+			inc  de			; Seek to iGFXBufInfo_SetKey
+			
+		;------------------	
+		.chkMatches:
+		
+			;
+			; Check if the buffer set settings we just wrote are identical to the last one we fully applied in VBlankHandler.
+			; If this is the case, copy the set 0 info to set 1 ... ??? (see .identical)
+			;
+			; Otherwise the settings identifier at iGFXBufInfo_SetKey is updated and we're done. 
+			; TODO: OSTB_BIT3 and Set 1 are the key to this.
+			;
+			
+			; BC = Ptr to start of wGFXBufInfo struct
+			ld   hl, -(iGFXBufInfo_SetKey-iGFXBufInfo_DestPtr_Low)
+			add  hl, de
+			push hl
+			pop  bc
+			
+			; DE = Ptr to iGFXBufInfo_DoneSetKey
+			ld   hl, iGFXBufInfo_DoneSetKey
+			add  hl, bc
+			push hl
+			pop  de
+			
+			; HL = Ptr to iGFXBufInfo_SrcPtrA_Low
+			ld   hl, iGFXBufInfo_SrcPtrA_Low
+			add  hl, bc
+			
+			; Check if these match:
+			; - iGFXBufInfo_SrcPtrA_Low  with iGFXBufInfo_DoneSetKey
+			; - iGFXBufInfo_SrcPtrA_High with iGFXBufInfo_DoneSetKey+1
+			; - iGFXBufInfo_BankA        with iGFXBufInfo_DoneSetKey+2
+			; If they don't take the jump
+REPT 3
+			ld   a, [de]		; A = CompInfo byte
+			cp   a, [hl]		; Does it match the source Set A info?
+			jp   nz, .different	; If not, jump
+			inc  de				
+			inc  hl
+ENDR
+			inc  hl				; Skip comparing iGFXBufInfo_TilesLeftA
+			
+			; Check if these match:
+			; - iGFXBufInfo_SrcPtrB_Low  with iGFXBufInfo_DoneSetKey+3
+			; - iGFXBufInfo_SrcPtrB_High with iGFXBufInfo_DoneSetKey+4
+			; - iGFXBufInfo_BankB        with iGFXBufInfo_DoneSetKey+5
+			; If they don't take the jump			
+REPT 2
+			ld   a, [de]		; A = CompInfo byte
+			cp   a, [hl]		; Does it match the source Set A info?
+			jp   nz, .different	; If not, jump
+			inc  de
+			inc  hl
+ENDR
+			ld   a, [de]		; A = iGFXBufInfo_DoneSetKey+5
+			cp   a, [hl]		; Does it match with iGFXBufInfo_BankB?
+			jp   nz, .different	; If not, jump
+			
+		.identical:
+			; The new settings match the old settings.
+			; There's no need to doule buffer this.
+			
+			; Wipe them out for both sets (iGFXBufInfo_SrcPtrA_Low-iGFXBufInfo_TilesLeftB)
+			ld   hl, iGFXBufInfo_SrcPtrA_Low
+			add  hl, bc
+			xor  a
+REPT 8
+			ldi  [hl], a
+ENDR
+		pop  bc			; BC = Ptr to wOBJInfo struct
+		
+		
+		; Update iOBJInfo_Status
+		ld   a, [wOBJLstCurStatus]
+		res  OSTB_GFXLOAD, a		; Mark GFX as already loaded
+		set  OSTB_BIT3, a			; ????
+		ld   [bc], a
+		
+		;
+		; Copy the Set 0 info to Set 1
+		;
+		
+		; Copy iOBJInfo_Status0 to iOBJInfo_Status1
+		ld   hl, iOBJInfo_Status0
+		add  hl, bc
+		ldi  a, [hl]
+		ld   [hl], a
+		
+		
+		ld   hl, iOBJInfo_BankNum0	; DE = iOBJInfo_BankNum0
+		add  hl, bc					
+		push hl
+		pop  de
+		ld   hl, iOBJInfo_BankNum1	; BC = iOBJInfo_BankNum1
+		add  hl, bc
+REPT 4
+		ld   a, [de]				; Read from Set 0
+		ldi  [hl], a				; Write to Set 1
+		inc  de						; 
+ENDR
+		jp   OBJLstS_CommonAnim_End
+		
+		.different:
+			; BC = Ptr to iGFXBufInfo_DestPtr_Low
+			
+			;
+			; Update the current settings identifier (iGFXBufInfo_SetKey) by copying over the untouched Set settings we just wrote.
+			;
+			
+			ld   hl, iGFXBufInfo_SetKey	; DE = iGFXBufInfo_SetKey
+			add  hl, bc
+			push hl
+			pop  de
+			ld   hl, iGFXBufInfo_SrcPtrA_Low	; HL = iGFXBufInfo_SrcPtrA_Low
+			add  hl, bc
+			
+			; iGFXBufInfo_SrcPtrA_Low  -> iGFXBufInfo_SetKey
+			; iGFXBufInfo_SrcPtrA_High -> iGFXBufInfo_SetKey+1
+			; iGFXBufInfo_BankA        -> iGFXBufInfo_SetKey+2
+REPT 3
+			ldi  a, [hl]
+			ld   [de], a
+			inc  de
+ENDR
+			inc  hl
+			
+			; iGFXBufInfo_SrcPtrB_Low  with iGFXBufInfo_SetKey+3
+			; iGFXBufInfo_SrcPtrB_High with iGFXBufInfo_SetKey+4
+			; iGFXBufInfo_BankB        with iGFXBufInfo_SetKey+5
+REPT 2
+			ldi  a, [hl]
+			ld   [de], a
+			inc  de
+ENDR
+			ld   a, [hl]
+			ld   [de], a
+		pop  bc
+		
+	OBJLstS_CommonAnim_End:;J
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-L000D6C:;C
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
+
+; =============== OBJLstS_CopyFarPtr ===============
+; Copies a "dp" far pointer.
+; IN
+; - HL: Source dp
+; - DE: Destination dp
+OBJLstS_CopyFarPtr:
+REPT 3
+	ldi  a, [hl]	; Read from HL
+	ld   [de], a	; Copy to DL
+	inc  de			; Next
+ENDR
 	ret
-L000D76:;C
-	ld   b, $1F
-L000D78:;R
-	ld   a, [de]
-	inc  de
-	ldi  [hl], a
-	dec  b
-	jr   nz, L000D78
+
+; =============== OBJLstS_InitFromROM ===============
+; Initializes an wOBJInfo structure.
+; - HL: Ptr to start of wOBJInfo struct (destination)
+; - DE: Ptr to wOBJInfo data (source)
+OBJLstS_InitFrom:
+	; Copy the first $1F bytes over, which are the main fields
+	ld   b, iOBJInfo_RangeMoveAmount
+.loopCp:
+	ld   a, [de]				; Read from ROM
+	inc  de						; SrcPtr++
+	ldi  [hl], a				; Write to RAM, DestPtr++
+	dec  b						; Copied all bytes?
+	jr   nz, .loopCp			; If not, loop
+	
+	; Clear bytes $1F-$33
 	ld   b, $14
 	xor  a
-L000D81:;R
+.loopClr:
 	ldi  [hl], a
 	dec  b
-	jr   nz, L000D81
+	jr   nz, .loopClr
 	ret
 	
 ; =============== ClearOBJInfo ===============
@@ -3114,44 +3430,62 @@ CopyBGToRect:
 	dec  c						; HeightLeft--
 	jr   nz, CopyBGToRect		; Copied all rows? If not, jump
 	ret
-L000E00:;C
-	ld   a, d
-L000E01:;R
+	
+; =============== FillBGRect ===============
+; Draws a rectangle in the tilemap.
+; IN
+; - HL: Destination tilemap ptr (top left corner of rectangle)
+; - B: Rect Width
+; - C: Rect Height
+; - D: Tile ID to use, generally a completely white or black tile
+FillBGRect:
+	ld   a, d					
+.loopV:
 	push bc
-	push hl
-L000E03:;J
-	push af
-L000E04:;J
-	mWaitForHBlank
-	pop  af
-	ldi  [hl], a
-	dec  b
-	jp   nz, L000E03
-	pop  hl
-	ld   bc, $0020
-	add  hl, bc
+		push hl
+		.loopH:
+			push af				; Write the tile during HBlank
+				mWaitForHBlank
+			pop  af
+			ldi  [hl], a
+			dec  b				; Filled the row?
+			jp   nz, .loopH		; If not, loop
+		pop  hl					; Restore starting row position
+		ld   bc, BG_TILECOUNT_H	; Move down 1 row
+		add  hl, bc
 	pop  bc
-	dec  c
-	jr   nz, L000E01
+	dec  c				; Filled all rows?
+	jr   nz, .loopV		; If not, loop
 	ret
-L000E1B:;JC
+	
+; =============== FillBGStripPair ===============
+; Draws a continuous strip in the tilemap alternating between two tile IDs.
+; IN
+; - DE: Destination tilemap ptr (top left corner of rectangle)
+; - B: Width multiplier. Multiply by $10 for the effective width.
+; - H: Tile ID 1 to use
+; - L: Tile ID 2 to use
+FillBGStripPair:
 	push bc
-	ld   b, $08
-L000E1E:;J
-	mWaitForHBlank
-	ld   a, h
-	ld   [de], a
-	inc  de
-L000E28:;J
-	mWaitForHBlank
-	ld   a, l
-	ld   [de], a
-	inc  de
-	dec  b
-	jp   nz, L000E1E
+		; Write $10 tiles horizontally
+		ld   b, $10 / 2
+	.loopH:
+		; Write tile H to DE
+		mWaitForHBlank
+		ld   a, h
+		ld   [de], a
+		inc  de	
+		; Write tile L to DE
+		mWaitForHBlank
+		ld   a, l
+		ld   [de], a
+		inc  de
+		
+		dec  b				; Filled the $10 tile strip?
+		jp   nz, .loopH		; If not, loop
 	pop  bc
-	dec  b
-	jp   nz, L000E1B
+	dec  b					; Are we done repeating it?
+	jp   nz, FillBGStripPair		; If not, loop
 	ret
 	
 ; =============== CopyTilesAuto ===============
@@ -4719,12 +5053,12 @@ L0013ED:;C
 	ld   b, $0A
 	ld   c, $01
 	ld   d, $00
-	call L000E00
+	call FillBGRect
 	ld   hl, $9CA0
 	ld   b, $14
 	ld   c, $01
 	ld   d, $00
-	call L000E00
+	call FillBGRect
 	ld   a, [$C167]
 	or   a
 	jp   nz, L0014A6
@@ -4797,7 +5131,7 @@ L001445:;J
 	ld   b, $20
 	ld   c, $02
 	ld   d, $01
-	call L000E00
+	call FillBGRect
 	pop  hl
 	ld   d, $00
 	ld   e, [hl]
@@ -5580,11 +5914,11 @@ L0019CD:;J
 	ld   [$D955], a
 	ld   [$DA55], a
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   de, $241A
-	call L000D76
+	ld   de, OBJInfoInit_Terry_WinA
+	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	ld   de, $2439
-	call L000D76
+	ld   de, OBJInfoInit_Andy_WinA
+	call OBJLstS_InitFrom
 	ret
 L001A0B:;C
 	call L001F85
@@ -5979,7 +6313,7 @@ L001BC5:;C
 	call Task_PassControlFar
 	ldh  a, [hROMBank]
 	push af
-	ld   a, $01
+	ld   a, BANK(L01636A) ; BANK $01
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ld   a, [$D92C]
@@ -5999,24 +6333,24 @@ L001BC5:;C
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ld   hl, wOBJInfo2+iOBJInfo_Status
-	ld   de, $636A
-	call L000D76
+	ld   de, L01636A
+	call OBJLstS_InitFrom
 	call Task_PassControlFar
 	ld   hl, wOBJInfo3+iOBJInfo_Status
-	ld   de, $636A
-	call L000D76
+	ld   de, L01636A
+	call OBJLstS_InitFrom
 	ld   hl, $D74D
 	ld   [hl], $A6
 	call Task_PassControlFar
 	ld   hl, wOBJInfo4+iOBJInfo_Status
-	ld   de, $636A
-	call L000D76
+	ld   de, L01636A
+	call OBJLstS_InitFrom
 	ld   hl, $D78D
 	ld   [hl], $CC
 	call Task_PassControlFar
 	ld   hl, wOBJInfo5+iOBJInfo_Status
-	ld   de, $636A
-	call L000D76
+	ld   de, L01636A
+	call OBJLstS_InitFrom
 	ld   hl, $D7CD
 	ld   [hl], $CC
 	call Task_PassControlFar
@@ -6042,7 +6376,7 @@ L001C4D:;J
 	push hl
 	ld   hl, $0000
 	ld   b, $02
-	call L000E1B
+	call FillBGStripPair
 	call Task_PassControlFar
 	pop  hl
 	ldi  a, [hl]
@@ -6742,11 +7076,11 @@ L002152:;C
 	ld   hl, $0000
 	ld   b, $06
 	ld   de, $9600
-	call L000E1B
+	call FillBGStripPair
 	ld   hl, $0000
 	ld   b, $06
 	ld   de, $9660
-	call L000E1B
+	call FillBGStripPair
 	ld   hl, $4084
 	ld   de, wLZSS_Buffer
 	call DecompressGFX
@@ -6916,7 +7250,7 @@ L002263: db $E0
 L002264:;C
 	ldh  a, [hROMBank]
 	push af
-	ld   a, $01
+	ld   a, BANK(L0148C3) ; BANK $01
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ld   a, [$C167]
@@ -6949,8 +7283,8 @@ L002264:;C
 	ld   b, $08
 	call CopyTiles
 	ld   hl, wOBJInfo3+iOBJInfo_Status
-	ld   de, $48C3
-	call L000D76
+	ld   de, L0148C3
+	call OBJLstS_InitFrom
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
@@ -7133,68 +7467,73 @@ L002406:;C
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-L00241A: db $80
-L00241B: db $20
-L00241C: db $20
-L00241D: db $60
-L00241E: db $00
-L00241F: db $88
-L002420: db $00
-L002421: db $00
-L002422: db $00
-L002423: db $00
-L002424: db $00
-L002425: db $00
-L002426: db $00
-L002427: db $00
-L002428: db $00
-L002429: db $80
-L00242A: db $09
-L00242B: db $AE
-L00242C: db $4E
-L00242D: db $00
-L00242E: db $09
-L00242F: db $AE
-L002430: db $4E
-L002431: db $00
-L002432: db $00
-L002433: db $00
-L002434: db $00
-L002435: db $00
-L002436: db $00
-L002437: db $C0
-L002438: db $D8
-L002439: db $80
-L00243A: db $10
-L00243B: db $10
-L00243C: db $A0
-L00243D: db $00
-L00243E: db $88
-L00243F: db $00
-L002440: db $00
-L002441: db $00
-L002442: db $00
-L002443: db $00
-L002444: db $00
-L002445: db $00
-L002446: db $40
-L002447: db $00
-L002448: db $84
-L002449: db $08
-L00244A: db $00
-L00244B: db $40
-L00244C: db $00
-L00244D: db $08
-L00244E: db $00
-L00244F: db $40
-L002450: db $00
-L002451: db $00
-L002452: db $00
-L002453: db $00
-L002454: db $00
-L002455: db $00
-L002456: db $E0
-L002457: db $D8
+	
+OBJInfoInit_Terry_WinA:
+	db OST_VISIBLE ; iOBJInfo_Status
+	db $20 ; iOBJInfo_Status0
+	db $20 ; iOBJInfo_Status1
+	db $60 ; iOBJInfo_X
+	db $00 ; iOBJInfo_XSub
+	db $88 ; iOBJInfo_Y
+	db $00 ; iOBJInfo_YSub
+	db $00 ; $07
+	db $00 ; $08
+	db $00 ; $09
+	db $00 ; $0A
+	db $00 ; iOBJInfo_RelX (auto)
+	db $00 ; iOBJInfo_RelY (auto)
+	db $00 ; iOBJInfo_TileIDBase
+	db LOW($8000) ; iOBJInfo_VRAMPtr_Low
+	db HIGH($8000) ; iOBJInfo_VRAMPtr_High
+	db BANK(OBJLstPtrTable_Terry_WinA) ; iOBJInfo_BankNum0 (BANK $09)
+	db LOW(OBJLstPtrTable_Terry_WinA) ; iOBJInfo_OBJLstPtrTbl_Low0
+	db HIGH(OBJLstPtrTable_Terry_WinA) ; iOBJInfo_OBJLstPtrTbl_High0
+	db $00 ; iOBJInfo_OBJLstPtrTblOffset0
+	db BANK(OBJLstPtrTable_Terry_WinA) ; iOBJInfo_BankNum1 (BANK $09)
+	db LOW(OBJLstPtrTable_Terry_WinA) ; iOBJInfo_OBJLstPtrTbl_Low1
+	db HIGH(OBJLstPtrTable_Terry_WinA) ; iOBJInfo_OBJLstPtrTbl_High1
+	db $00 ; iOBJInfo_OBJLstPtrTblOffset0
+	db $00 ; iOBJInfo_OBJLstByte1 (auto)
+	db $00 ; iOBJInfo_OBJLstByte2 (auto)
+	db $00 ; iOBJInfo_Unknown_1A
+	db $00 ; iOBJInfo_FrameLeft
+	db $00 ; iOBJInfo_FrameTotal
+	db LOW(wGFXBufInfo_Pl1) ; iOBJInfo_BufInfoPtr_Low
+	db HIGH(wGFXBufInfo_Pl1) ; iOBJInfo_BufInfoPtr_High
+
+OBJInfoInit_Andy_WinA:
+	db OST_VISIBLE ; iOBJInfo_Status
+	db $10 ; iOBJInfo_Status0
+	db $10 ; iOBJInfo_Status1
+	db $A0 ; iOBJInfo_X
+	db $00 ; iOBJInfo_XSub
+	db $88 ; iOBJInfo_Y
+	db $00 ; iOBJInfo_YSub
+	db $00 ; $07
+	db $00 ; $08
+	db $00 ; $09
+	db $00 ; $0A
+	db $00 ; iOBJInfo_RelX (auto)
+	db $00 ; iOBJInfo_RelY (auto)
+	db $40 ; iOBJInfo_TileIDBase
+	db LOW($8400) ; iOBJInfo_VRAMPtr_Low
+	db HIGH($8400) ; iOBJInfo_VRAMPtr_High
+	db BANK(L084000) ; iOBJInfo_BankNum0 (BANK $08)
+	db LOW(L084000) ; iOBJInfo_OBJLstPtrTbl_Low0
+	db HIGH(L084000) ; iOBJInfo_OBJLstPtrTbl_High0
+	db $00 ; iOBJInfo_OBJLstPtrTblOffset0
+	db BANK(L084000) ; iOBJInfo_BankNum1 (BANK $08)
+	db LOW(L084000) ; iOBJInfo_OBJLstPtrTbl_Low1
+	db HIGH(L084000) ; iOBJInfo_OBJLstPtrTbl_High1
+	db $00 ; iOBJInfo_OBJLstPtrTblOffset0
+	db $00 ; iOBJInfo_OBJLstByte1 (auto)
+	db $00 ; iOBJInfo_OBJLstByte2 (auto)
+	db $00 ; iOBJInfo_Unknown_1A
+	db $00 ; iOBJInfo_FrameLeft
+	db $00 ; iOBJInfo_FrameTotal
+	db LOW(wGFXBufInfo_Pl2) ; iOBJInfo_BufInfoPtr_Low
+	db HIGH(wGFXBufInfo_Pl2) ; iOBJInfo_BufInfoPtr_High
+	
 L002458:;I
 	ld   sp, $DE00
 	ei
@@ -7776,10 +8115,10 @@ L002827:;C
 	ld   a, [hl]
 	or   a
 	jp   nz, L00283F
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_UserFlags0
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status0
 	jp   L002842
 L00283F:;J
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_UserFlags0
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status0
 L002842:;J
 	ld   a, [hl]
 	and  a, $DF
@@ -8969,7 +9308,7 @@ L002F0B:;JC
 	push de
 	push de
 	pop  hl
-	call L000C11
+	call OBJLstS_DoAnimTiming_Loop
 	pop  de
 	pop  bc
 	ret
@@ -8978,7 +9317,7 @@ L002F15:;C
 	push de
 	push de
 	pop  hl
-	call L000B9E
+	call OBJLstS_DoAnimTiming_Initial
 	pop  de
 	pop  bc
 	ret
@@ -9667,7 +10006,7 @@ L00341B:;C
 	ld   [hl], a
 	push de
 	pop  hl
-	call L000B9E
+	call OBJLstS_DoAnimTiming_Initial
 	pop  de
 	pop  bc
 	ret
@@ -9680,7 +10019,7 @@ L003431:;C
 	ld   [hl], $00
 	push de
 	pop  hl
-	call L000B9E
+	call OBJLstS_DoAnimTiming_Initial
 	pop  de
 	pop  bc
 	ret
@@ -9690,7 +10029,7 @@ L003444:;C
 	call L002849
 	push de
 	pop  hl
-	call L000B9E
+	call OBJLstS_DoAnimTiming_Initial
 	pop  de
 	pop  bc
 	ret
@@ -9707,7 +10046,7 @@ L003451:;C
 	ld   [hl], a
 	push de
 	pop  hl
-	call L000B9E
+	call OBJLstS_DoAnimTiming_Initial
 	pop  de
 	pop  bc
 	ld   hl, $C159

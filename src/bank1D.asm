@@ -8623,10 +8623,10 @@ L1D682A:;C
 	ld   b, $28
 	call CopyTiles
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   de, $68D3
-	call L000D76
+	ld   de, L1D68D3
+	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	jp   L000B9E
+	jp   OBJLstS_DoAnimTiming_Initial
 L1D684D:;C
 	ld   a, $E7
 	rst  $18
@@ -8657,13 +8657,13 @@ L1D6875:;C
 	ld   b, $14
 	ld   c, $03
 	ld   d, $00
-	call L000E00
+	call FillBGRect
 	call Task_PassControl_NoDelay
 	ld   hl, $9C60
 	ld   b, $14
 	ld   c, $03
 	ld   d, $00
-	call L000E00
+	call FillBGRect
 	call Task_PassControl_NoDelay
 	pop  hl
 	pop  bc
@@ -8679,13 +8679,13 @@ L1D68A4:;C
 	ld   b, $14
 	ld   c, $03
 	ld   d, $00
-	call L000E00
+	call FillBGRect
 	call Task_PassControl_NoDelay
 	ld   hl, $9C60
 	ld   b, $14
 	ld   c, $03
 	ld   d, $00
-	call L000E00
+	call FillBGRect
 	call Task_PassControl_NoDelay
 	pop  hl
 	pop  bc
@@ -9212,13 +9212,13 @@ L1D6CC2:;CI
 	ld   [$D684], a
 	ldh  a, [hScrollX]
 	ld   h, a
-	ldh  a, [$FFE5]
+	ldh  a, [hScrollXSub]
 	ld   l, a
 	add  hl, de
 	ld   a, h
 	ldh  [hScrollX], a
 	ld   a, l
-	ldh  [$FFE5], a
+	ldh  [hScrollXSub], a
 	ret
 L1D6CEC:;CI
 	ld   de, hTaskStats
@@ -9226,13 +9226,13 @@ L1D6CEC:;CI
 	cp   $E0
 	ret  z
 	ld   h, a
-	ldh  a, [$FFE3]
+	ldh  a, [hScrollYSub]
 	ld   l, a
 	add  hl, de
 	ld   a, h
 	ldh  [hScrollY], a
 	ld   a, l
-	ldh  [$FFE3], a
+	ldh  [hScrollYSub], a
 	ret
 L1D6D00:;I
 	call L1D71DE
@@ -9509,8 +9509,8 @@ L1D6F93:;I
 	ld   b, $5C
 	call SetSectLYC
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   de, $241A
-	call L000D76
+	ld   de, OBJInfoInit_Terry_WinA
+	call OBJLstS_InitFrom
 	ld   hl, $7149
 	call L1D70A8
 	call L1D684D
@@ -9531,8 +9531,8 @@ L1D6F93:;I
 	jp   L1D6811
 L1D6FD7:;C
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   de, $241A
-	call L000D76
+	ld   de, OBJInfoInit_Terry_WinA
+	call OBJLstS_InitFrom
 	ld   a, [$C1B3]
 	ld   c, a
 	ld   a, [$C1B4]
@@ -9696,7 +9696,7 @@ L1D70A8:;C
 	ld   [hl], a
 	push de
 	pop  hl
-	jp   L000B9E
+	jp   OBJLstS_DoAnimTiming_Initial
 L1D70D5:;C
 	ld   a, $80
 	ld   de, $70E5
@@ -9844,8 +9844,8 @@ L1D7176:;I
 	ld   b, $5C
 	call SetSectLYC
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   de, $241A
-	call L000D76
+	ld   de, OBJInfoInit_Terry_WinA
+	call OBJLstS_InitFrom
 	ld   hl, $7149
 	call L1D70A8
 	call L1D684D

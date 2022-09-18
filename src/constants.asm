@@ -91,12 +91,20 @@ TXB_NONE EQU $FF ; No custom code when waiting idle
 
 
 OBJINFO_SIZE EQU $40 ; wOBJInfo size
+GFXBUF_TILECOUNT EQU $20 ; Number of tiles in a GFX buffer
 
 ; iOBJInfo_Status bits
-OSTB_ALTSET  EQU 0 ; If set, uses an alternate set of values for user flags and sprite mapping pointer
-OSTB_BIT3    EQU 3 ; OSTB_GFXCOPIED?
+OSTB_GFXLOAD EQU 0 ; If set, the graphics are still being copied to the *opposite* buffer than the current one at OSTB_GFXBUF2
+OSTB_GFXBUF2 EQU 1 ; If set, the second GFX buffer is used for the *current* frame
+OSTB_BIT3    EQU 3 ; 
+OSTB_ANIMEND EQU 4 ; Animation has ended, repeat last frame indefinitely
 OSTB_VISIBLE EQU 7 ; If not set, the sprite mapping is hidden
 
+OST_GFXLOAD EQU 1 << OSTB_GFXLOAD
+OST_GFXBUF2 EQU 1 << OSTB_GFXBUF2
+OST_BIT3    EQU 1 << OSTB_BIT3
+OST_ANIMEND EQU 1 << OSTB_ANIMEND
+OST_VISIBLE EQU 1 << OSTB_VISIBLE
 
 
 ; OBJLST / SPRITE MAPPINGS FLAGS
@@ -105,10 +113,12 @@ OSTB_VISIBLE EQU 7 ; If not set, the sprite mapping is hidden
 OLFB_USETILEFLAGS EQU 4 ; If set, in the OBJ data, the upper two bits of a tile ID count as X/Y flip flags
 OLFB_XFLIP        EQU 5 ; User-controlled
 OLFB_YFLIP        EQU 6
+OLFB_NOBUF        EQU 7 ; Sprite mapping doesn't use the buffer copy
 
 OLF_USETILEFLAGS EQU 1 << OLFB_USETILEFLAGS ; $10
 OLF_XFLIP        EQU 1 << OLFB_XFLIP ; $20
 OLF_YFLIP        EQU 1 << OLFB_YFLIP ; $40
+OLF_NOBUF        EQU 1 << OLFB_NOBUF
 
 TASK_SIZE EQU $08
 

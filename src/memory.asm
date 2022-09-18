@@ -5,7 +5,7 @@ wMatchStartTime EQU $C002
 
 
 wTimer EQU $C005 ; Global timer
-w_Unknown_SomethingLCDC EQU $C006 ; Some marker for LCDC things
+wLCDCSectId EQU $C006 ; Starts at $00 on every frame, incremented when LCDC hits (to determine the parallax sections)
 wVBlankNotDone EQU $C007 ; If != 0, the VBlank handler hasn't finished
 
 wPaused EQU $C00E ; Game is paused
@@ -13,18 +13,20 @@ wOBJLstHeaderFlags EQU $C00F ; Raw flags value from the OBJLst header
 
 wWorkOAMCurPtr_Low EQU $C010 ; Next OBJ will be written at this location
 wWorkOAMCurPtr_High EQU $C011 ; 
-; The status contain the actual *flags*, these are then initially cocpied here when drawing the sprites
-wOBJLstUserFlags EQU $C012 ; User-controlled flags -- wOBJLstHeaderFlags is added on top of this.
-wOBJLstUserFlagsSec EQU $C013 ; User-controlled flags -- iOBJ flags specific to the secondary sprite mapping pointer in the OBJLstPtrTable entry, if any
+; The status contain the actual *flags*, these are then initially copied here when drawing the sprites
+wOBJLstCurStatus0 EQU $C012 ; Set 0 - Effective status for currently processed sprite mapping
+; ???? User-controlled flags -- wOBJLstHeaderFlags is added on top of this.
+wOBJLstCurStatus1 EQU $C013 ; Set 1 - Effective status for currently processed sprite mapping 
+; ???????? User-controlled flags -- iOBJ flags specific to the secondary sprite mapping pointer in the OBJLstPtrTable entry, if any
 
-
-wOBJLstUserSetFlags EQU $C015 ; User-controlled X/Y flip flags -- set specific
+wOBJLstCurStatus EQU $C014 ; Global status copied here for processing in OBJLstS_Common_L000C5B
+wOBJLstOrigStatusSpec EQU $C015 ; Original copy of the correct iOBJInfo_StatusSpec* field for the currently processed sprite mapping
 ; wOBJLstCurDispX = wOBJLstCurRelX + wOBJLstCurXOffset
 wOBJLstCurRelX EQU $C016 ; Calculated relative position/origin of the sprite mapping
 wOBJLstCurRelY EQU $C017 ; Calculated relative position/origin of the sprite mapping
 wOBJLstCurDispX EQU $C018 ; Effective X position of the displayed sprite mapping, relative to the screen
 wOBJLstCurDispY EQU $C019 ; Effective Y position of the displayed sprite mapping, relative to the screen
-wOBJLstCurFlags EQU $C01A ; Calculated flags for the sprite mapping (merge of wOBJLstUserFlags and wOBJLstUserSetFlags)
+wOBJLstCurFlags EQU $C01A ; Calculated flags for the sprite mapping (merge of wOBJLstCurStatus0 and wOBJLstOrigStatusSpec)
 wOBJLstCurXOffset EQU $C01B ; Offset added to wOBJLstCurRelX, and the result goes to wOBJLstCurDispX
 wOBJLstCurYOffset EQU $C01C ; Offset added to wOBJLstCurRelX, and the result goes to wOBJLstCurDispY
 
@@ -157,8 +159,20 @@ hROMBank EQU $FFE0 ; Currently loaded ROM bank
 
 
 
-hScrollY EQU $FFE2 ; Y screen position
-hScrollX EQU $FFE4 ; X screen position
+hScrollY            EQU $FFE2 ; Y screen position
+hScrollYSub         EQU $FFE3 ; Y screen subpixel position
+hScrollX            EQU $FFE4 ; X screen position
+hScrollXSub         EQU $FFE5 ; X screen subpixel position
+hTitleParallax1X    EQU $FFE6 ; X screen position
+hTitleParallax1XSub EQU $FFE7
+hTitleParallax2X    EQU $FFE8
+hTitleParallax2XSub EQU $FFE9
+hTitleParallax3X    EQU $FFEA
+hTitleParallax3XSub EQU $FFEB
+hTitleParallax4X    EQU $FFEC
+hTitleParallax4XSub EQU $FFED
+hTitleParallax5X    EQU $FFEE
+hTitleParallax5XSub EQU $FFEF
 
 hScreenSect0BGP EQU $FFF0 ; BG Palette for the first screen section
 hScreenSect1BGP EQU $FFF1 ; ...
@@ -182,59 +196,77 @@ iTaskPtr_Low EQU $02 ; Code or stack pointer
 iTaskPtr_High EQU $03
 
 ; Elements in wGFXBufInfo struct
-iGFXBufInfo_DestPtr_Low EQU $00		; Shared across buffers
-iGFXBufInfo_DestPtr_High EQU $01
-iGFXBufInfo_SrcPtr0_Low EQU $02
-iGFXBufInfo_SrcPtr0_High EQU $03
-iGFXBufInfo_Bank0 EQU $04
-iGFXBufInfo_TilesLeft0 EQU $05
-iGFXBufInfo_SrcPtr1_Low EQU $06
-iGFXBufInfo_SrcPtr1_High EQU $07
-iGFXBufInfo_Bank1 EQU $08
-iGFXBufInfo_TilesLeft1 EQU $09
-iGFXBufInfo_LastInfo EQU $0A ;
-iGFXBufInfo_CompInfo EQU $10
+iGFXBufInfo_DestPtr_Low  EQU $00 ; Shared - VRAM destination ptr
+iGFXBufInfo_DestPtr_High EQU $01	
+iGFXBufInfo_SrcPtrA_Low  EQU $02 ; Set A - Source GFX ptr
+iGFXBufInfo_SrcPtrA_High EQU $03
+iGFXBufInfo_BankA        EQU $04 ; Set A - Source GFX bank
+iGFXBufInfo_TilesLeftA   EQU $05 ; Set A - (8x8) Tiles remaining
+iGFXBufInfo_SrcPtrB_Low  EQU $06 ; Set B - Source GFX ptr
+iGFXBufInfo_SrcPtrB_High EQU $07
+iGFXBufInfo_BankB        EQU $08 ; Set B - Source GFX bank
+iGFXBufInfo_TilesLeftB   EQU $09 ; Set B - (8x8) Tiles remaining
+iGFXBufInfo_SetKey      EQU $0A ; ??? 5 bytes. Current set "Id". Combination of Set A settings.
+iGFXBufInfo_DoneSetKey  EQU $10 ; ??? 5 bytes. Last completed set "id".
 
 ; Elements in the wOBJInfo struct
-iOBJInfo_Status EQU $00 ; Generic flags
-iOBJInfo_UserFlags0 EQU $01 ; Set 0 - User-controlled sprite mapping flags
-iOBJInfo_UserFlags1 EQU $02 ; Set 1 - User-controlled sprite mapping flags
+iOBJInfo_Status EQU $00 ; Both sets - OBJInfo flags
+iOBJInfo_Status0 EQU $01 ; ??? Set 0 - OBJInfo flags (OR'd over)
+iOBJInfo_Status1 EQU $02 ; ??? Set 1 - OBJInfo flags (OR'd over)
 iOBJInfo_X EQU $03 ; X Position
+iOBJInfo_XSub EQU $04 ; X Subpixel Position
 iOBJInfo_Y EQU $05 ; Y Position
+iOBJInfo_YSub EQU $06 ; X Subpixel Position
 iOBJInfo_RelX EQU $0B ; Relative X Position (autogenerated)
 iOBJInfo_RelY EQU $0C ; Relative Y Position (autogenerated)
 iOBJInfo_TileIDBase EQU $0D ; Starting tile ID (all tile IDs in the OBJ list are relative to this)
-iOBJInfo_BankNum0 EQU $10 ; Set 0 - Bank number for sprite mapping table (animation table)
+iOBJInfo_VRAMPtr_Low EQU $0E ; VRAM GFX Pointer (low byte) - GFX is written to this address for buffer A, typically is $8000 or $8400
+iOBJInfo_VRAMPtr_High EQU $0F ; VRAM GFX Pointer (high byte)
+iOBJInfo_BankNum0 EQU $10 ; Set 0 - Bank number for OBJLstPtrTable (animation table)
 iOBJInfo_OBJLstPtrTbl_Low0 EQU $11 ; Set 0 - Ptr to OBJLstPtrTable (low byte)
 iOBJInfo_OBJLstPtrTbl_High0 EQU $12 ; Set 0 - Ptr to OBJLstPtrTable (high byte)
 iOBJInfo_OBJLstPtrTblOffset0 EQU $13 ; Set 0 - Table offset (multiple of $04)
-iOBJInfo_BankNum1 EQU $14 ; Set 1 - Bank number for sprite mapping table (animation table)
+iOBJInfo_BankNum1 EQU $14 ; Set 1 - Bank number for OBJLstPtrTable (animation table)
 iOBJInfo_OBJLstPtrTbl_Low1 EQU $15 ; Set 1 - Ptr to OBJLstPtrTable (low byte)
 iOBJInfo_OBJLstPtrTbl_High1 EQU $16 ; Set 1 - Ptr to OBJLstPtrTable (high byte)
 iOBJInfo_OBJLstPtrTblOffset1 EQU $17 ; Set 1 - Table offset (multiple of $04)
-
-iOBJInfo_RangeMoveAmount EQU $1F 	; How many pixels the player is moved to keep him in range
-
-
-
-; Elements in the primary OBJLst header/definition struct
-iOBJLstHdr_Flags EQU $00
-iOBJLstHdr_DataPtr_Low EQU $06 ; Ptr to iOBJLst_OBJCount
-iOBJLstHdr_DataPtr_High EQU $07
-iOBJLstHdr_XOffset EQU $08
-iOBJLstHdr_YOffset EQU $09
-
-; Elements in the secondary OBJLst header/definition struct
-iOBJLstHdrSec_Flags EQU $00
-iOBJLstHdrSec_DataPtr_Low EQU $04 ; Ptr to iOBJLst_OBJCount
-iOBJLstHdrSec_DataPtr_High EQU $05
-iOBJLstHdrSec_XOffset EQU $06
-iOBJLstHdrSec_YOffset EQU $07
+iOBJInfo_OBJLstByte1 EQU $18 ; iOBJLstHdrA_Byte1 is copied here during exec - skips something during gameplay
+iOBJInfo_OBJLstByte2 EQU $19 ; iOBJLstHdrA_Byte2 is copied here during exec - skips something during gameplay
+iOBJInfo_Unknown_1A EQU $1A
+iOBJInfo_FrameLeft EQU $1B ; Number of frames left before switching to the next anim frame.
+iOBJInfo_FrameTotal EQU $1C ; Animation speed. New frames will have iOBJInfo_FrameLeft set to this.
+iOBJInfo_BufInfoPtr_Low EQU $1D ; GFX Buffer info struct pointer (low byte)
+iOBJInfo_BufInfoPtr_High EQU $1E ; GFX Buffer info struct pointer (high byte)
+iOBJInfo_RangeMoveAmount EQU $1F ; How many pixels the player is moved to keep him in range
 
 
-; Elements in the OBJLst "secondary header" struct
+; Sprite mapping fields.
+
+; OBJLstPtrTable A entry elements
+iOBJLstHdrA_Flags EQU $00
+iOBJLstHdrA_Byte1 EQU $01 ; ??? - skips something during gameplay
+iOBJLstHdrA_Byte2 EQU $02 ; ??? - skips something during gameplay
+iOBJLstHdrA_GFXPtr_Low EQU $03 ; Ptr to uncompressed GFX (low byte) - will be copied to the GfxInfo
+iOBJLstHdrA_GFXPtr_High EQU $04 ; Ptr to uncompressed GFX (high byte)
+iOBJLstHdrA_GFXBank EQU $05 ; Bank num with GFX
+iOBJLstHdrA_DataPtr_Low EQU $06 ; Ptr to iOBJLst (low byte)
+iOBJLstHdrA_DataPtr_High EQU $07 ; Ptr to iOBJLst (high byte)
+iOBJLstHdrA_XOffset EQU $08
+iOBJLstHdrA_YOffset EQU $09
+
+; OBJLstPtrTable B entry elements
+iOBJLstHdrB_Flags EQU $00
+iOBJLstHdrB_GFXPtr_Low EQU $01
+iOBJLstHdrB_GFXPtr_High EQU $02
+iOBJLstHdrB_GFXBank EQU $03
+iOBJLstHdrB_DataPtr_Low EQU $04
+iOBJLstHdrB_DataPtr_High EQU $05
+iOBJLstHdrB_XOffset EQU $06
+iOBJLstHdrB_YOffset EQU $07
+
+; Actual OBJLst format
 iOBJLst_OBJCount EQU $00
-; Actual elements, right after iOBJLst_OBJCount
+; List of OBJ in "compressed" format, right after iOBJLst_OBJCount
 iOBJ_Y EQU $00
 iOBJ_X EQU $01
 iOBJ_TileIDAndFlags EQU $02

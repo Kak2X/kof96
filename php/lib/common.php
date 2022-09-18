@@ -29,8 +29,13 @@ function generate_const_label($strdb, $map) {
 	foreach ($map as $k => $lbl) {
 		if ($val & (1 << $k)) {
 			$res .= ($res ? "|" : "").$lbl;
+			//$val ^= (1 << $k); // Remove bit
 		}
 	}
+	//if ($val)
+	//	$res = ($res ? "{$res}" : "") ""
+	if (!$res)
+		return "\$00";
 	return $res;
 }
 

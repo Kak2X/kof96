@@ -943,11 +943,11 @@ L1C43DB:;J
 	call ClearWINDOWMap
 	xor  a
 	ldh  [hScrollX], a
-	ldh  [$FFE6], a
-	ldh  [$FFE8], a
-	ldh  [$FFEA], a
-	ldh  [$FFEC], a
-	ldh  [$FFEE], a
+	ldh  [hTitleParallax1X], a
+	ldh  [hTitleParallax2X], a
+	ldh  [hTitleParallax3X], a
+	ldh  [hTitleParallax4X], a
+	ldh  [hTitleParallax5X], a
 	ld   [wFieldScrollX], a
 	ld   a, $00
 	ld   [wFieldScrollY], a
@@ -1016,8 +1016,8 @@ L1C447D: db $12;X
 L1C447E:;J
 	call ClearOBJInfo
 	ld   hl, wOBJInfo2+iOBJInfo_Status
-	ld   de, $4E9B
-	call L000D76
+	ld   de, L1C4E9B
+	call OBJLstS_InitFrom
 	ld   hl, $D703
 	ld   [hl], $34
 	ld   hl, $D705
@@ -1025,8 +1025,8 @@ L1C447E:;J
 	ld   hl, $D713
 	ld   [hl], $0C
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	ld   de, $4E9B
-	call L000D76
+	ld   de, L1C4E9B
+	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
 	res  7, [hl]
 	ld   hl, $D6C3
@@ -1034,8 +1034,8 @@ L1C447E:;J
 	ld   hl, $D6C5
 	ld   [hl], $43
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   de, $4E9B
-	call L000D76
+	ld   de, L1C4E9B
+	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	res  7, [hl]
 	ld   hl, $D683
@@ -1045,8 +1045,8 @@ L1C447E:;J
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset0
 	ld   [hl], $08
 	ld   hl, wOBJInfo3+iOBJInfo_Status
-	ld   de, $4E9B
-	call L000D76
+	ld   de, L1C4E9B
+	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo3+iOBJInfo_Status
 	res  7, [hl]
 	ld   hl, $D743
@@ -1179,11 +1179,11 @@ L1C45C2:;J
 	ld   [wIntroScene], a
 	xor  a
 	ldh  [hScrollX], a
-	ldh  [$FFE6], a
-	ldh  [$FFE8], a
-	ldh  [$FFEA], a
-	ldh  [$FFEC], a
-	ldh  [$FFEE], a
+	ldh  [hTitleParallax1X], a
+	ldh  [hTitleParallax2X], a
+	ldh  [hTitleParallax3X], a
+	ldh  [hTitleParallax4X], a
+	ldh  [hTitleParallax5X], a
 	ld   a, $20
 	ldh  [hScrollY], a
 	ld   a, $F8
@@ -2562,19 +2562,19 @@ L1C4E02:;J
 	ld   hl, hScrollX
 	ld   bc, $0040
 	call L1C4E39
-	ld   hl, $FFE6
+	ld   hl, hTitleParallax1X
 	ld   bc, $0060
 	call L1C4E39
-	ld   hl, $FFE8
+	ld   hl, hTitleParallax2X
 	ld   bc, $0080
 	call L1C4E39
-	ld   hl, $FFEA
+	ld   hl, hTitleParallax3X
 	ld   bc, $00A0
 	call L1C4E39
-	ld   hl, $FFEC
+	ld   hl, hTitleParallax4X
 	ld   bc, $00C0
 	call L1C4E39
-	ld   hl, $FFEE
+	ld   hl, hTitleParallax5X
 	ld   bc, $00E0
 	call L1C4E39
 	ret
@@ -7024,10 +7024,10 @@ Intro_End:
 	ldh  [rOBP1], a
 	xor  a
 	ldh  [rSTAT], a
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft0], a
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft1], a
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft0], a
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft1], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftA], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftB], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftA], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftB], a
 	ld   b, BANK(L1C4380)
 	ld   hl, L1C4380
 	rst  $00
@@ -7165,7 +7165,7 @@ L1C6106:;I
 	ld   b, $14
 	ld   c, $06
 	ld   d, $00
-	call L000E00
+	call FillBGRect
 	ld   a, $20
 	ld   [$D683], a
 	ld   a, $00
@@ -7385,12 +7385,12 @@ L1C62E6:;I
 	res  7, [hl]
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
 	res  7, [hl]
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_UserFlags0]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_Status0]
 	xor  $20
-	ld   [wOBJInfo_Pl1+iOBJInfo_UserFlags0], a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_UserFlags0]
+	ld   [wOBJInfo_Pl1+iOBJInfo_Status0], a
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_Status0]
 	xor  $20
-	ld   [wOBJInfo_Pl2+iOBJInfo_UserFlags0], a
+	ld   [wOBJInfo_Pl2+iOBJInfo_Status0], a
 	jp   L1C63CC
 L1C6324:;I
 	xor  a
@@ -7525,7 +7525,7 @@ L1C63E9:;R
 	ld   [hl], a
 	push de
 	pop  hl
-	call L000B9E
+	call OBJLstS_DoAnimTiming_Initial
 	ld   a, $08
 	call L1C6629
 	ret
@@ -7774,7 +7774,7 @@ L1C6577:;CR
 	push bc
 	push de
 	push hl
-	call L000E00
+	call FillBGRect
 	ld   a, $01
 	call L1C6629
 	pop  hl
@@ -7791,7 +7791,7 @@ L1C658F:;CR
 	push bc
 	push de
 	push hl
-	call L000E00
+	call FillBGRect
 	ld   a, $01
 	call L1C6629
 	pop  hl
@@ -7808,7 +7808,7 @@ L1C65A7:;CR
 	push bc
 	push de
 	push hl
-	call L000E00
+	call FillBGRect
 	ld   a, $01
 	call L1C6629
 	pop  hl
@@ -7824,7 +7824,7 @@ L1C65BC:;CR
 	push bc
 	push de
 	push hl
-	call L000E00
+	call FillBGRect
 	ld   a, $01
 	call L1C6629
 	pop  hl
@@ -7844,14 +7844,14 @@ L1C65D1:;CR
 	push de
 	ld   b, $01
 	ld   d, $00
-	call L000E00
+	call FillBGRect
 	pop  de
 	pop  bc
 	push de
 	pop  hl
 	ld   b, $01
 	ld   d, $00
-	call L000E00
+	call FillBGRect
 	ld   a, $01
 	call L1C6629
 	pop  hl
@@ -7871,14 +7871,14 @@ L1C65F8:;CR
 	ld   b, $15
 	ld   c, $01
 	ld   d, $01
-	call L000E00
+	call FillBGRect
 	pop  de
 	push de
 	pop  hl
 	ld   b, $15
 	ld   c, $01
 	ld   d, $01
-	call L000E00
+	call FillBGRect
 	ld   a, $04
 	call L1C6629
 	pop  hl
@@ -7905,9 +7905,9 @@ L1C6629:;C
 L1C6632:;R
 	push af
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	call L000BBD
+	call OBJLstS_DoAnimTiming_NoLoop
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	call L000BBD
+	call OBJLstS_DoAnimTiming_NoLoop
 	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
 	call L0035B9
 	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
@@ -7923,9 +7923,9 @@ L1C6655:;R
 L1C6656:;R
 	push af
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	call L000C11
+	call OBJLstS_DoAnimTiming_Loop
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	call L000C11
+	call OBJLstS_DoAnimTiming_Loop
 	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
 	call L0035B9
 	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
@@ -7940,77 +7940,101 @@ L1C6656:;R
 ; =============== Intro_Chars_LoadVRAM ===============
 Intro_Chars_LoadVRAM:
 	di
-	rst  $10
+	;-----------------------------------
+	rst  $10				; Stop LCD
+	
+	; Reset DMG Pal & vars
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
 	xor  a
-	ld   [wIntroScene], a
+	ld   [wIntroScene], a		; Not necessary
 	ld   [wIntroCharScene], a
 	ld   [$C1B3], a
+	
+	; Reset screen & coords
 	call ClearBGMap
 	call ClearWINDOWMap
+	
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
 	ld   [wFieldScrollX], a
 	ld   [wFieldScrollY], a
-	ld   hl, $69CA
+	
+	; Load GFX for scene
+	ld   hl, GFXLZ_IntroBG
 	ld   de, wLZSS_Buffer
 	call DecompressGFX
 	ld   hl, wLZSS_Buffer
-	ld   de, $9000
+	ld   de, $9000			; full 3rd section	
 	ld   b, $80
 	call CopyTiles
 	ld   hl, $C9CA
-	ld   de, $8800
-	ld   b, $2A
+	ld   de, $8800			; 2nd section
+	ld   b, $2A				
 	call CopyTiles
-	ld   hl, $72CE
+	
+	ld   hl, GFXLZ_Intro_IoriRiseOBJ
 	ld   de, wLZSS_Buffer
 	call DecompressGFX
 	ld   hl, wLZSS_Buffer
-	ld   de, $8C60
+	ld   de, $8800+$0460	; lower part of 2nd section
 	ld   b, $3A
 	call CopyTiles
+	
+	; Fill BG black
 	ld   hl, BGMap_Begin
 	ld   b, $20
 	ld   c, $20
 	ld   d, $01
-	call L000E00
+	call FillBGRect
+	
+	; Load default sprite mappings
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   de, $241A
-	call L000D76
+	ld   de, OBJInfoInit_Terry_WinA
+	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	ld   de, $2439
-	call L000D76
+	ld   de, OBJInfoInit_Andy_WinA
+	call OBJLstS_InitFrom
+	
+	; Move the OSTB_VISIBLE flag to the set-specific fields
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	res  7, [hl]
+	res  OSTB_VISIBLE, [hl]
 	inc  hl
-	set  7, [hl]
+	set  OSTB_VISIBLE, [hl]
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	res  7, [hl]
+	res  OSTB_VISIBLE, [hl]
 	inc  hl
-	set  7, [hl]
+	set  OSTB_VISIBLE, [hl]
+	
+	; Initialize buffer info
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	call L000B9E
+	call OBJLstS_DoAnimTiming_Initial
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	call L000B9E
+	call OBJLstS_DoAnimTiming_Initial
+	
+	; Hide WINDOW
 	ld   a, $90
 	ldh  [rWY], a
 	ld   a, $07
 	ldh  [rWX], a
-	ld   a, $E7
-	rst  $18
+	
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
 	ei
+	
+	; Delay $14 frames.
 	ld   a, $14
 	call Intro_ChkStartPressed_MultiFrame
-	ld   a, $8C
+	
+	ld   a, $8C		; 1P Pal
 	ldh  [rOBP0], a
-	ld   a, $4C
+	ld   a, $4C		; 2P Pal
 	ldh  [rOBP1], a
-	ld   a, $C0
+	ld   a, $C0		; BG
 	ldh  [rBGP], a
 	ret
 L1C6729:;C
@@ -8049,11 +8073,11 @@ L1C6729:;C
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
 	res  7, [hl]
 	ld   hl, wOBJInfo2+iOBJInfo_Status
-	ld   de, $6934
-	call L000D76
+	ld   de, L1C6934
+	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo3+iOBJInfo_Status
-	ld   de, $6934
-	call L000D76
+	ld   de, L1C6934
+	call OBJLstS_InitFrom
 	ld   a, $04
 	ld   [$D753], a
 	ld   a, $00
@@ -8101,17 +8125,17 @@ L1C67BF:;C
 	ld   b, $20
 	ld   c, $07
 	ld   d, $01
-	call L000E00
+	call FillBGRect
 	ld   hl, $9920
 	ld   b, $20
 	ld   c, $08
 	ld   d, $01
-	call L000E00
+	call FillBGRect
 	ld   hl, WINDOWMap_Begin
 	ld   b, $14
 	ld   c, $08
 	ld   d, $01
-	call L000E00
+	call FillBGRect
 	ld   hl, $71DE
 	ld   de, wLZSS_Buffer
 	call DecompressGFX
@@ -8352,7 +8376,7 @@ L1C69C6: db $14
 L1C69C7: db $50
 L1C69C8: db $49
 L1C69C9: db $16
-L1C69CA: db $E5
+GFXLZ_IntroBG: db $E5
 L1C69CB: db $40
 L1C69CC: db $6F
 L1C69CD: db $00
@@ -10660,7 +10684,7 @@ L1C72CA: db $A4
 L1C72CB: db $A5
 L1C72CC: db $A6
 L1C72CD: db $A5
-L1C72CE: db $40
+GFXLZ_Intro_IoriRiseOBJ: db $40
 L1C72CF: db $00
 L1C72D0: db $26
 L1C72D1: db $5F

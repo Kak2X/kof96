@@ -3756,40 +3756,52 @@ L094EAA: db $B2
 L094EAB: db $53
 L094EAC: db $FF;X
 L094EAD: db $FF;X
-L094EAE: db $DB
-L094EAF: db $53
-L094EB0: db $F2
-L094EB1: db $53
-L094EB2: db $07
-L094EB3: db $54
-L094EB4: db $F2
-L094EB5: db $53
-L094EB6: db $21
-L094EB7: db $54
-L094EB8: db $38
-L094EB9: db $54
-L094EBA: db $21
-L094EBB: db $54
-L094EBC: db $50
-L094EBD: db $54
-L094EBE: db $21
-L094EBF: db $54
-L094EC0: db $38
-L094EC1: db $54
-L094EC2: db $21
-L094EC3: db $54
-L094EC4: db $50
-L094EC5: db $54
-L094EC6: db $07
-L094EC7: db $54
-L094EC8: db $F2
-L094EC9: db $53
-L094ECA: db $68
-L094ECB: db $54
-L094ECC: db $FF
-L094ECD: db $FF
-L094ECE: db $FF;X
-L094ECF: db $FF
+
+;L094EAE: db $DB
+;L094EAF: db $53
+;L094EB0: db $F2
+;L094EB1: db $53
+;L094EB2: db $07
+;L094EB3: db $54
+;L094EB4: db $F2
+;L094EB5: db $53
+;L094EB6: db $21
+;L094EB7: db $54
+;L094EB8: db $38
+;L094EB9: db $54
+;L094EBA: db $21
+;L094EBB: db $54
+;L094EBC: db $50
+;L094EBD: db $54
+;L094EBE: db $21
+;L094EBF: db $54
+;L094EC0: db $38
+;L094EC1: db $54
+;L094EC2: db $21
+;L094EC3: db $54
+;L094EC4: db $50
+;L094EC5: db $54
+;L094EC6: db $07
+;L094EC7: db $54
+;L094EC8: db $F2
+;L094EC9: db $53
+;L094ECA: db $68
+;L094ECB: db $54
+;L094ECC: db $FF
+;L094ECD: db $FF
+;L094ECE: db $FF;X
+;L094ECF: db $FF
+OBJLstPtrTable_Terry_WinA: 
+	dw OBJLstHdrA_Terry_WinA0, OBJLstHdrB_Terry_WinA0
+	dw L095407, OBJLstHdrB_Terry_WinA0
+	dw L095421, L095438
+	dw L095421, L095450
+	dw L095421, L095438
+	dw L095421, L095450
+	dw L095407, OBJLstHdrB_Terry_WinA0
+	dw L095468, $FFFF
+	dw $FFFF
+
 L094ED0: db $0A
 L094ED1: db $52
 L094ED2: db $29
@@ -5081,50 +5093,82 @@ L0953D7: db $01
 L0953D8: db $22
 L0953D9: db $F7
 L0953DA: db $00
-L0953DB: db $00
-L0953DC: db $01
-L0953DD: db $00
-L0953DE: db $60
-L0953DF: db $5A
-L0953E0: db $0D
-L0953E1: db $E5
-L0953E2: db $53
-L0953E3: db $F8
-L0953E4: db $00
-L0953E5: db $04
-L0953E6: db $20
-L0953E7: db $FF
-L0953E8: db $00
-L0953E9: db $20
-L0953EA: db $07
-L0953EB: db $02
-L0953EC: db $21
-L0953ED: db $0F
-L0953EE: db $04
-L0953EF: db $10
-L0953F0: db $07
-L0953F1: db $06
-L0953F2: db $00
-L0953F3: db $E0
-L0953F4: db $5A
-L0953F5: db $0D
-L0953F6: db $FA
-L0953F7: db $53
-L0953F8: db $F8
-L0953F9: db $00
-L0953FA: db $04
-L0953FB: db $28
-L0953FC: db $F7
-L0953FD: db $00
-L0953FE: db $30
-L0953FF: db $FF
-L095400: db $02
-L095401: db $30
-L095402: db $07
-L095403: db $04
-L095404: db $3D
-L095405: db $0F
-L095406: db $06
+
+;L0953DB: db $00
+;L0953DC: db $01
+;L0953DD: db $00
+;L0953DE: db $60
+;L0953DF: db $5A
+;L0953E0: db $0D
+;L0953E1: db $E5
+;L0953E2: db $53
+;L0953E3: db $F8
+;L0953E4: db $00
+;L0953E5: db $04
+;L0953E6: db $20
+;L0953E7: db $FF
+;L0953E8: db $00
+;L0953E9: db $20
+;L0953EA: db $07
+;L0953EB: db $02
+;L0953EC: db $21
+;L0953ED: db $0F
+;L0953EE: db $04
+;L0953EF: db $10
+;L0953F0: db $07
+;L0953F1: db $06
+;L0953F2: db $00
+;L0953F3: db $E0
+;L0953F4: db $5A
+;L0953F5: db $0D
+;L0953F6: db $FA
+;L0953F7: db $53
+;L0953F8: db $F8
+;L0953F9: db $00
+;L0953FA: db $04
+;L0953FB: db $28
+;L0953FC: db $F7
+;L0953FD: db $00
+;L0953FE: db $30
+;L0953FF: db $FF
+;L095400: db $02
+;L095401: db $30
+;L095402: db $07
+;L095403: db $04
+;L095404: db $3D
+;L095405: db $0F
+;L095406: db $06
+
+OBJLstHdrA_Terry_WinA0:
+	db $00 ; iOBJLstHdrA_Flags
+	db $01 ; iOBJLstHdrA_Byte1
+	db $00 ; iOBJLstHdrA_Byte2
+	dp L0D5A60 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw .bin ; iOBJLstHdrA_DataPtr
+	db $F8 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+.bin:
+	db $04 ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $20,$FF,$00 ; $00
+	db $20,$07,$02 ; $01
+	db $21,$0F,$04 ; $02
+	db $10,$07,$06 ; $03
+
+OBJLstHdrB_Terry_WinA0:
+	db $00 ; iOBJLstHdrB_Flags
+	dp L0D5AE0 ; iOBJLstHdrB_GFXPtr + iOBJLstHdrB_GFXBank
+	dw .bin ; iOBJLstHdrB_DataPtr
+	db $F8 ; iOBJLstHdrB_XOffset
+	db $00 ; iOBJLstHdrB_YOffset
+.bin:
+	db $04  ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $28,$F7,$00 ; $01
+	db $30,$FF,$02 ; $01
+	db $30,$07,$04 ; $01
+	db $3D,$0F,$06 ; $01
+
 L095407: db $00
 L095408: db $01
 L095409: db $00

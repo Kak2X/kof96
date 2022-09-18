@@ -298,8 +298,8 @@ L1E422F:;J
 L1E427A:;J
 	call ClearOBJInfo
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   de, $60E6
-	call L000D76
+	ld   de, L1E60E6
+	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset0
 	ld   de, $D6A7
 	ld   a, [$D920]
@@ -324,9 +324,9 @@ L1E42A7:;J
 	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
 	call L1E4B99
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	ld   de, $60E6
-	call L000D76
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_UserFlags0
+	ld   de, L1E60E6
+	call OBJLstS_InitFrom
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status0
 	ld   [hl], $10
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffset0
 	ld   de, $D6E7
@@ -355,8 +355,8 @@ L1E42D7:;J
 	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
 	call L1E4B99
 	ld   hl, wOBJInfo2+iOBJInfo_Status
-	ld   de, $60E6
-	call L000D76
+	ld   de, L1E60E6
+	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo2+iOBJInfo_Status
 	ld   [hl], $00
 	ld   hl, $D703
@@ -370,8 +370,8 @@ L1E42D7:;J
 	inc  hl
 	ld   [hl], $61
 	ld   hl, wOBJInfo3+iOBJInfo_Status
-	ld   de, $60E6
-	call L000D76
+	ld   de, L1E60E6
+	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo3+iOBJInfo_Status
 	ld   [hl], $00
 	ld   hl, $D743
@@ -385,8 +385,8 @@ L1E42D7:;J
 	inc  hl
 	ld   [hl], $61
 	ld   hl, wOBJInfo4+iOBJInfo_Status
-	ld   de, $60E6
-	call L000D76
+	ld   de, L1E60E6
+	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo4+iOBJInfo_Status
 	ld   [hl], $00
 	ld   hl, $D783
@@ -1096,7 +1096,7 @@ L1E47E8:;J
 L1E47F0:;J
 	push de
 	pop  hl
-	call L000C11
+	call OBJLstS_DoAnimTiming_Loop
 	ret
 L1E47F6:;C
 	ld   a, [$C1B6]
@@ -7529,8 +7529,8 @@ L1E6402:;R
 L1E6414:;R
 	call ClearOBJInfo
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   de, $60E6
-	call L000D76
+	ld   de, L1E60E6
+	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTbl_Low0
 	ld   [hl], $DB
 	inc  hl
@@ -7540,8 +7540,8 @@ L1E6414:;R
 	ld   a, $80
 	ld   [$D685], a
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	ld   de, $60E6
-	call L000D76
+	ld   de, L1E60E6
+	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTbl_Low0
 	ld   [hl], $DB
 	inc  hl
@@ -7551,8 +7551,8 @@ L1E6414:;R
 	ld   a, $80
 	ld   [$D6C5], a
 	ld   hl, wOBJInfo2+iOBJInfo_Status
-	ld   de, $60E6
-	call L000D76
+	ld   de, L1E60E6
+	call OBJLstS_InitFrom
 	ld   hl, $D701
 	ld   [hl], $90
 	ld   hl, $D711
@@ -13361,10 +13361,10 @@ L1E7D20: db $1A
 L1E7D21:;I
 	rst  $10
 	xor  a
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft0], a
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft1], a
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft0], a
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft1], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftA], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftB], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftA], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftB], a
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
@@ -13379,8 +13379,8 @@ L1E7D21:;I
 	ld   de, $C1EA
 	call DecompressGFX
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   de, $241A
-	call L000D76
+	ld   de, OBJInfoInit_Terry_WinA
+	call OBJLstS_InitFrom
 	call L1E7DEE
 	ld   a, $60
 	ldh  [rWY], a
@@ -13444,14 +13444,14 @@ L1E7D21:;I
 	ld   [$D683], a
 	ld   [$D685], a
 	xor  a
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft0], a
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft1], a
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft0], a
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft1], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftA], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftB], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftA], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftB], a
 	jp   Task_PassControl_NoDelay
 L1E7DE8:;I
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	jp   L000BBD
+	jp   OBJLstS_DoAnimTiming_NoLoop
 L1E7DEE:;C
 	ld   a, [$C1B3]
 	ld   c, a
@@ -13499,7 +13499,7 @@ L1E7DEE:;C
 	ld   [hl], a
 	push de
 	pop  hl
-	call L000B9E
+	call OBJLstS_DoAnimTiming_Initial
 	pop  bc
 	ld   hl, $002D
 	add  hl, bc
@@ -13592,7 +13592,7 @@ L1E7ECB:;J
 	bit  7, a
 	jp   nz, L1E7EE8
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	call L000BBD
+	call OBJLstS_DoAnimTiming_NoLoop
 	call Task_PassControl_NoDelay
 	dec  b
 	jp   nz, L1E7ECB

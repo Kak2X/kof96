@@ -42,6 +42,14 @@ mWaitForVBlankOrHBlankFast: MACRO
 	jr   nz, .waitVBlankOrHBlank_\@
 ENDM
 
+
+; =============== dp ===============
+; Shorthand for far pointers.
+dp: MACRO
+	dw \1
+	db BANK(\1)
+ENDM
+
 ; =============== pkg ===============
 ; Shorthand for the header of a (set of) SGB Packets
 ; IN

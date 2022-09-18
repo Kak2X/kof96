@@ -9728,9 +9728,9 @@ L01679A:;R
 	ld   [$D96F], a
 	ld   a, [$DA23]
 	ld   [$D970], a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_UserFlags0]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_Status0]
 	ld   [$DA7F], a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_UserFlags0]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_Status0]
 	ld   [$D97F], a
 	ld   a, [$D683]
 	ld   [$DA80], a
@@ -10014,7 +10014,7 @@ L016A24:;C
 	jp   z, L016ABF
 	jp   nc, L016A77
 	push af
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_UserFlags0
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status0
 	set  3, [hl]
 	ld   a, [$D921]
 	bit  1, a
@@ -10029,7 +10029,7 @@ L016A24:;C
 	ldi  a, [hl]
 	ld   [hl], a
 L016A53:;J
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_UserFlags0
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status0
 	res  3, [hl]
 	ld   a, [$DA21]
 	bit  1, a
@@ -10050,7 +10050,7 @@ L016A72:;JR
 	jr   L016ABF
 L016A77:;J
 	push af
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_UserFlags0
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status0
 	res  3, [hl]
 	ld   a, [$D921]
 	bit  1, a
@@ -10067,7 +10067,7 @@ L016A77:;J
 	ldi  a, [hl]
 	ld   [hl], a
 L016A9B:;JR
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_UserFlags0
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status0
 	set  3, [hl]
 	ld   a, [$DA21]
 	bit  1, a
@@ -10096,7 +10096,7 @@ L016ABF:;JR
 	ld   a, [$D6C3]
 	ld   b, a
 L016AD5:;J
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_UserFlags0
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status0
 	res  2, [hl]
 	ld   a, [$D683]
 	sub  a, b
@@ -10115,7 +10115,7 @@ L016AE8:;J
 	ld   a, [$D683]
 	ld   b, a
 L016AFB:;J
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_UserFlags0
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status0
 	res  2, [hl]
 	ld   a, [$D6C3]
 	sub  a, b
@@ -10150,7 +10150,7 @@ L016B12:;C
 	ld   b, a
 	ld   a, [$D685]
 	ld   c, a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_UserFlags1]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_Status1]
 	ld   [wLZSS_Buffer], a
 	ld   a, [$D6D8]
 	or   a
@@ -10161,7 +10161,7 @@ L016B12:;C
 	ld   d, a
 	ld   a, [$D6C5]
 	ld   e, a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_UserFlags1]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_Status1]
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016B80
@@ -10192,7 +10192,7 @@ L016B94:;R
 	ld   b, a
 	ld   a, [$D685]
 	ld   c, a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_UserFlags1]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_Status1]
 	ld   [wLZSS_Buffer], a
 	ld   a, [$D6D8]
 	or   a
@@ -10203,7 +10203,7 @@ L016B94:;R
 	ld   d, a
 	ld   a, [$D6C5]
 	ld   e, a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_UserFlags1]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_Status1]
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016BD5
@@ -10230,7 +10230,7 @@ L016BE9:;R
 	ld   b, a
 	ld   a, [$D6C5]
 	ld   c, a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_UserFlags1]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_Status1]
 	ld   [wLZSS_Buffer], a
 	ld   a, [$D698]
 	or   a
@@ -10241,7 +10241,7 @@ L016BE9:;R
 	ld   d, a
 	ld   a, [$D685]
 	ld   e, a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_UserFlags1]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_Status1]
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016C2A
@@ -10281,7 +10281,7 @@ L016C2A:;JR
 	ld   d, a
 	ld   a, [$D6C5]
 	ld   e, a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_UserFlags1]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_Status1]
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016C8F
@@ -10323,7 +10323,7 @@ L016C8F:;JR
 	ld   d, a
 	ld   a, [$D685]
 	ld   e, a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_UserFlags1]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_Status1]
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016CF4
@@ -10362,7 +10362,7 @@ L016CF4:;JR
 	ld   d, a
 	ld   a, [$D6C5]
 	ld   e, a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_UserFlags1]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_Status1]
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016D70
@@ -10443,7 +10443,7 @@ L016D70:;JR
 	ld   d, a
 	ld   a, [$D685]
 	ld   e, a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_UserFlags1]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_Status1]
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016DEB
@@ -11407,10 +11407,10 @@ L0172C1:;C
 	ldh  [hScreenSect1BGP], a
 	ldh  [hScreenSect2BGP], a
 	xor  a
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft0], a
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft1], a
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft0], a
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft1], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftA], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftB], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftA], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftB], a
 	call Task_PassControlFar
 	xor  a
 	ldh  [rWY], a
@@ -11424,10 +11424,10 @@ L0172C1:;C
 	ld   a, $03
 	call Task_RemoveAt
 	xor  a
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft0], a
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeft1], a
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft0], a
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeft1], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftA], a
+	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftB], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftA], a
+	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftB], a
 	call Task_PassControlFar
 	ret
 L017309:;CR
@@ -11474,8 +11474,8 @@ L017324:;R
 	ld   b, $2E
 	call L01739A
 	ld   hl, wOBJInfo3+iOBJInfo_Status
-	ld   de, $48C3
-	call L000D76
+	ld   de, L0148C3
+	call OBJLstS_InitFrom
 	ld   hl, $D751
 	ld   [hl], $08
 	inc  hl
@@ -11483,13 +11483,13 @@ L017324:;R
 	ld   b, $01
 	call L01756D
 	ld   hl, wOBJInfo5+iOBJInfo_Status
-	ld   de, $48A4
-	call L000D76
+	ld   de, L0148A4
+	call OBJLstS_InitFrom
 	ld   b, $01
 	call L01756D
 	ld   hl, wOBJInfo4+iOBJInfo_Status
-	ld   de, $48A4
-	call L000D76
+	ld   de, L0148A4
+	call OBJLstS_InitFrom
 	ld   b, $01
 	call L01756D
 	ret
@@ -13270,7 +13270,7 @@ L017ECC:;C
 	ld   e, a
 	ld   a, [$D945]
 	and  a, $0F
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_UserFlags0
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status0
 	bit  3, [hl]
 	jr   z, L017EE9
 	ld   b, a
