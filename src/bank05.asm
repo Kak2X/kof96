@@ -8794,10 +8794,10 @@ L05651E:;J
 	ld   a, $14
 	ld   h, $01
 	call L002E49
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L05659E
 L056535:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L05659B
 L05653B:;J
 	ld   hl, $0080
@@ -9199,7 +9199,7 @@ L056885:;J
 	call L003890
 	jp   L0568A8
 L056896:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L0568A8
 L05689C:;J
 	call L002DD9
@@ -9327,10 +9327,10 @@ L05698A:;J
 	ld   a, [hl]
 	or   a
 	jp   nz, L0569AA
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status0
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_StatusEx0
 	jp   L0569AD
 L0569AA:;J
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status0
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_StatusEx0
 L0569AD:;J
 	ld   a, [hl]
 	and  a, $DF
@@ -9406,7 +9406,7 @@ L056A26:;J
 	call L003890
 	jp   L056A4F
 L056A31:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L056A4F
 L056A37:;J
 	call L002DD9
@@ -9626,7 +9626,7 @@ L056BF8: db $C3;X
 L056BF9: db $10;X
 L056BFA: db $6C;X
 L056BFB:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L056C0D
 L056C01:;J
 	call L002DD9
@@ -9920,10 +9920,10 @@ L056E65:;J
 	ld   a, $10
 	ld   h, $00
 	call L002E49
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L0570F1
 L056E7C:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L056EBF
 L056E82:;J
 	ld   hl, $0103
@@ -10306,7 +10306,7 @@ L057188:;C
 	call L003875
 	ld   a, $01
 	ld   [$C178], a
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	scf
 	ret
 L0571D0:;J
@@ -10396,7 +10396,7 @@ L057270:;J
 	ld   [$C173], a
 	jp   L0572A2
 L05727D:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L05729F
 L057283:;J
 	call L057188
@@ -10716,7 +10716,7 @@ L0574F8:;J
 	ld   a, $0C
 	ld   h, $00
 	call L002E49
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L057623
 L05750B:;J
 	call L057556
@@ -10724,7 +10724,7 @@ L05750B:;J
 	ld   a, $0C
 	ld   h, $00
 	call L002E49
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L057623
 L05751E:;J
 	call L002DD2
@@ -10738,7 +10738,7 @@ L05752C:;J
 	ld   a, $0C
 	ld   h, $00
 	call L002E49
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L057623
 L05753F:;J
 	call L002DD2
@@ -10844,7 +10844,7 @@ L057605:;J
 	jp   nc, L057620
 	jp   L05761A
 L057614:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L057620
 L05761A:;J
 	call L002EA2
@@ -11009,7 +11009,7 @@ L057745:;J
 	call HomeCall_Sound_ReqPlayExId
 	jp   L05776A
 L057759:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L05776A
 L05775F:;J
 	call L002DD9
@@ -11407,7 +11407,7 @@ L057A78:;J
 	call HomeCall_Sound_ReqPlayExId
 	jp   L057A89
 L057A89:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L057AB7
 L057A8F:;J
 	call L003C6D

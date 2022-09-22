@@ -12,14 +12,14 @@ if (!file_exists("tempconv.txt")) {
 //const DELIMN = 0;
 
 $objlst_flags = [
-	0 => "OLFB_BIT0",
-	1 => "OLFB_BIT1",
-	2 => "OLFB_BIT2",
-	3 => "OLFB_BIT3",
-	4 => "OLFB_USETILEFLAGS",
-	5 => "OLFB_XFLIP",
-	6 => "OLFB_YFLIP",
-	7 => "OLFB_BIT7",
+	0 => "OLF_BIT0",
+	1 => "OLF_BIT1",
+	2 => "OLF_BIT2",
+	3 => "OLF_BIT3",
+	4 => "OLF_USETILEFLAGS",
+	5 => "OLF_XFLIP",
+	6 => "OLF_YFLIP",
+	7 => "OLF_NOBUF",
 ];
 
 print "Converting data...".PHP_EOL;
@@ -29,7 +29,7 @@ $h = fopen("tempconv.asm", 'w');
 $lines = file("tempconv.txt");
 
 if (count($lines) > 0)
-	$banknum = substr($lines[0], 1, 2);
+	$banknum = substr($lines[1], 1, 2);
 
 $objlst_a = [];
 $objlst_b = [];
@@ -37,16 +37,11 @@ $objlst_b = [];
 
 for ($i = 0; $i < count($lines);) {
 	
-	//if (strpos($lines[$i], "SndHeader_") !== 0 || strpos($lines[$i], "SndHeader_01") === 0){
-	//	++$i;
-	//	continue;
-	//}
-	
-	if ($lines[$i][0] != "L") {
-		fwrite($h, $lines[$i][0]);
+	/*
+	if (strpos($lines[$i], "OBJLstPtrTable_") !== 0){
 		++$i;
 		continue;
-	}
+	}*/
 	
 	$base_label = get_label($lines[$i]);
 	
@@ -65,6 +60,10 @@ for ($i = 0; $i < count($lines);) {
 		$data_high = get_db($lines[$i++]);
 		$xoff = get_db($lines[$i++]);
 		$yoff = get_db($lines[$i++]);
+		
+		$gfx_ptr = ($gfx_bank == "FF" && $gfx_high == "FF" && $gfx_low == "FF") 
+			? "db \$FF,\$FF,\$FF"
+			: "dp L{$gfx_bank}{$gfx_high}{$gfx_low}";
 		
 		$data_ptr = "L{$banknum}{$data_high}{$data_low}";
 		$objinfo = "";
@@ -93,7 +92,7 @@ for ($i = 0; $i < count($lines);) {
 	db {$flags} ; iOBJLstHdrA_Flags
 	db \${$byte1} ; iOBJLstHdrA_Byte1
 	db \${$byte2} ; iOBJLstHdrA_Byte2
-	dp L{$gfx_bank}{$gfx_high}{$gfx_low} ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	{$gfx_ptr} ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw {$data_ptr} ; iOBJLstHdrA_DataPtr
 	db \${$xoff} ; iOBJLstHdrA_XOffset
 	db \${$yoff} ; iOBJLstHdrA_YOffset{$objinfo}";
@@ -111,6 +110,10 @@ for ($i = 0; $i < count($lines);) {
 		$data_high = get_db($lines[$i++]);
 		$xoff = get_db($lines[$i++]);
 		$yoff = get_db($lines[$i++]);
+		
+		$gfx_ptr = ($gfx_bank == "FF" && $gfx_high == "FF" && $gfx_low == "FF") 
+			? "db \$FF,\$FF,\$FF"
+			: "dp L{$gfx_bank}{$gfx_high}{$gfx_low}";
 		
 		$data_ptr = "L{$banknum}{$data_high}{$data_low}";
 		$objinfo = "";
@@ -153,12 +156,12 @@ for ($i = 0; $i < count($lines);) {
 		
 		$b = "{$label}:
 	db {$flags} ; iOBJLstHdrA_Flags
-	dp L{$gfx_bank}{$gfx_high}{$gfx_low} ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	{$gfx_ptr} ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw {$data_ptr} ; iOBJLstHdrA_DataPtr
 	db \${$xoff} ; iOBJLstHdrA_XOffset
 	db \${$yoff} ; iOBJLstHdrA_YOffset{$objinfo}";
-	} else {
-		$label = "OBJLstPtrTable_".$base_label;
+	} else if (strpos($lines[$i], "OBJLstPtrTable_") === 0) {
+		$label = $base_label;
 		
 		$chcount = get_db($lines[$i]);
 		
@@ -187,7 +190,7 @@ for ($i = 0; $i < count($lines);) {
 			$header_a_merged = "OBJLstHdrA_".$header_a_merged;
 			
 			if ($header_b_high == "FF")
-				$header_b_merged = "\$FFFF";
+				$header_b_merged = "OBJLSTPTR_NONE";
 			else {
 				$header_b_merged = "L{$banknum}{$header_b_high}{$header_b_low}";
 				$objlst_b[] = $header_b_merged;
@@ -197,6 +200,8 @@ for ($i = 0; $i < count($lines);) {
 			$b .= "
 	dw {$header_a_merged}, {$header_b_merged}{$unused_marker}";
 		}
+	} else {
+		$i++;
 	}
 	
 		$b .= "

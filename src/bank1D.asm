@@ -3264,7 +3264,7 @@ L1D509F:;I
 	jp   z, L1D50F6
 	ld   bc, $D900
 	ld   a, c
-	ld   [$C1B3], a
+	ld   [wUnknownTimer_C1B3], a
 	ld   a, b
 	ld   [$C1B4], a
 	ld   a, [$C163]
@@ -3280,7 +3280,7 @@ L1D50F6:;J
 	jp   z, L1D511B
 	ld   bc, $DA00
 	ld   a, c
-	ld   [$C1B3], a
+	ld   [wUnknownTimer_C1B3], a
 	ld   a, b
 	ld   [$C1B4], a
 	ld   a, [$C163]
@@ -3970,7 +3970,7 @@ L1D5504:;J
 	ld   hl, $56DD
 	call TextPrinter_Instant
 	ld   a, $09
-	ld   [$C1B3], a
+	ld   [wUnknownTimer_C1B3], a
 	ld   a, $3C
 	ld   [$C1B4], a
 	ld   a, $1B
@@ -4010,7 +4010,7 @@ L1D5559:;J
 	ld   hl, $56DD
 	call TextPrinter_Instant
 	ld   a, $09
-	ld   [$C1B3], a
+	ld   [wUnknownTimer_C1B3], a
 	ld   a, $3C
 	ld   [$C1B4], a
 	ld   a, $1B
@@ -4104,14 +4104,14 @@ L1D55DA:;J
 L1D55F1:;J
 	ld   a, $3C
 	ld   [$C1B4], a
-	ld   a, [$C1B3]
+	ld   a, [wUnknownTimer_C1B3]
 	or   a
 	jp   z, L1D561B
 	dec  a
-	ld   [$C1B3], a
+	ld   [wUnknownTimer_C1B3], a
 	ld   a, $8E
 	call HomeCall_Sound_ReqPlayExId
-	ld   a, [$C1B3]
+	ld   a, [wUnknownTimer_C1B3]
 	ld   de, $9AED
 	call NumberPrinter_Instant
 	ld   hl, $56EA
@@ -8617,7 +8617,7 @@ L1D6811:;J
 L1D682A:;C
 	ld   hl, $65AB
 	ld   de, $C1DA
-	call DecompressGFX
+	call DecompressLZSS
 	ld   hl, $C1DA
 	ld   de, Tiles_Begin
 	ld   b, $28
@@ -8797,14 +8797,14 @@ L1D6934:;I
 	call SetSectLYC
 	ld   hl, $56FB
 	ld   de, $C1DA
-	call DecompressGFX
+	call DecompressLZSS
 	ld   hl, $C1DA
 	ld   de, $8800
 	ld   b, $68
 	call CopyTiles
 	ld   hl, $5C51
 	ld   de, $C1DA
-	call DecompressGFX
+	call DecompressLZSS
 	ld   de, $C1DA
 	ld   hl, $9823
 	ld   b, $0E
@@ -8944,14 +8944,14 @@ L1D6A90:;R
 L1D6A97:;C
 	ld   hl, $5CD9
 	ld   de, $C1DA
-	call DecompressGFX
+	call DecompressLZSS
 	ld   hl, $C1DA
 	ld   de, $8800
 	ld   b, $4C
 	call CopyTiles
 	ld   hl, $60D7
 	ld   de, $C1DA
-	call DecompressGFX
+	call DecompressLZSS
 	ld   de, $C1DA
 	ld   hl, $9844
 	ld   b, $0C
@@ -9002,7 +9002,7 @@ L1D6B08:;I
 	ldh  [hScrollX], a
 	call L1D682A
 	ld   a, $80
-	ld   [$D683], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 	call L1D684D
 	ld   [wLZSS_Buffer], a
 	xor  a
@@ -9046,7 +9046,7 @@ L1D6B08:;I
 	ld   a, $80
 	ld   [wOBJInfo_Pl1+iOBJInfo_Status], a
 	ld   a, $28
-	ld   [$D683], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 	ei
 	ld   a, $E7
 	rst  $18
@@ -9077,14 +9077,14 @@ L1D6BB3:;C
 	call SetSectLYC
 	ld   hl, $613D
 	ld   de, $C1DA
-	call DecompressGFX
+	call DecompressLZSS
 	ld   hl, $C1DA
 	ld   de, $8800
 	ld   b, $50
 	call CopyTiles
 	ld   hl, $6541
 	ld   de, $C1DA
-	call DecompressGFX
+	call DecompressLZSS
 	ld   de, $C1DA
 	ld   hl, $9844
 	ld   b, $08
@@ -9198,18 +9198,18 @@ L1D6CC2:;CI
 	ld   a, [wLZSS_Buffer]
 	and  a, a
 	ret  z
-	ld   a, [$D683]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	cp   $50
 	ret  z
 	ld   h, a
-	ld   a, [$D684]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_XSub]
 	ld   l, a
 	ld   de, hScreenSect0BGP
 	add  hl, de
 	ld   a, h
-	ld   [$D683], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 	ld   a, l
-	ld   [$D684], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_XSub], a
 	ldh  a, [hScrollX]
 	ld   h, a
 	ldh  a, [hScrollXSub]
@@ -9533,7 +9533,7 @@ L1D6FD7:;C
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	ld   de, OBJInfoInit_Terry_WinA
 	call OBJLstS_InitFrom
-	ld   a, [$C1B3]
+	ld   a, [wUnknownTimer_C1B3]
 	ld   c, a
 	ld   a, [$C1B4]
 	ld   b, a
@@ -9834,7 +9834,7 @@ L1D7159:;C
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect2BGP], a
 	ld   a, $20
-	ld   [$D685], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_Y], a
 	ld   a, $9F
 	call HomeCall_Sound_ReqPlayExId_Stub
 	jp   Task_PassControl_NoDelay

@@ -24,14 +24,14 @@ L1E4000:;I
 	call CopyTiles
 	ld   hl, $5481
 	ld   de, wLZSS_Buffer
-	call DecompressGFX
+	call DecompressLZSS
 	ld   hl, wLZSS_Buffer
 	ld   de, $8800
 	ld   b, $78
 	call CopyTiles
 	ld   hl, $5B87
 	ld   de, wLZSS_Buffer
-	call DecompressGFX
+	call DecompressLZSS
 	ld   hl, wLZSS_Buffer
 	ld   de, Tiles_Begin
 	ld   b, $62
@@ -326,7 +326,7 @@ L1E42A7:;J
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
 	ld   de, L1E60E6
 	call OBJLstS_InitFrom
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status0
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_StatusEx0
 	ld   [hl], $10
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffset0
 	ld   de, $D6E7
@@ -359,9 +359,9 @@ L1E42D7:;J
 	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo2+iOBJInfo_Status
 	ld   [hl], $00
-	ld   hl, $D703
+	ld   hl, wOBJInfo2+iOBJInfo_X
 	ld   [hl], $78
-	ld   hl, $D705
+	ld   hl, wOBJInfo2+iOBJInfo_Y
 	ld   [hl], $00
 	ld   hl, $D70D
 	ld   [hl], $0E
@@ -374,9 +374,9 @@ L1E42D7:;J
 	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo3+iOBJInfo_Status
 	ld   [hl], $00
-	ld   hl, $D743
+	ld   hl, wOBJInfo3+iOBJInfo_X
 	ld   [hl], $78
-	ld   hl, $D745
+	ld   hl, wOBJInfo3+iOBJInfo_Y
 	ld   [hl], $30
 	ld   hl, $D74D
 	ld   [hl], $2A
@@ -7411,21 +7411,21 @@ L1E62EF:;J
 	ld   [wFieldScrollY], a
 	ld   hl, $7BB7
 	ld   de, $C1EA
-	call DecompressGFX
+	call DecompressLZSS
 	ld   hl, $C1EA
 	ld   de, Tiles_Begin
 	ld   b, $1C
 	call CopyTiles
 	ld   hl, $6998
 	ld   de, $C1EA
-	call DecompressGFX
+	call DecompressLZSS
 	ld   hl, $C1EA
 	ld   de, $9000
 	ld   b, $5A
 	call CopyTiles
 	ld   hl, $6D22
 	ld   de, $C1EA
-	call DecompressGFX
+	call DecompressLZSS
 	ld   de, $C1EA
 	ld   hl, $9803
 	ld   b, $0E
@@ -7536,9 +7536,9 @@ L1E6414:;R
 	inc  hl
 	ld   [hl], $7C
 	ld   a, $00
-	ld   [$D683], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 	ld   a, $80
-	ld   [$D685], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_Y], a
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
 	ld   de, L1E60E6
 	call OBJLstS_InitFrom
@@ -7547,22 +7547,22 @@ L1E6414:;R
 	inc  hl
 	ld   [hl], $7C
 	ld   a, $88
-	ld   [$D6C3], a
+	ld   [wOBJInfo_Pl2+iOBJInfo_X], a
 	ld   a, $80
-	ld   [$D6C5], a
+	ld   [wOBJInfo_Pl2+iOBJInfo_Y], a
 	ld   hl, wOBJInfo2+iOBJInfo_Status
 	ld   de, L1E60E6
 	call OBJLstS_InitFrom
-	ld   hl, $D701
+	ld   hl, wOBJInfo2+iOBJInfo_StatusEx0
 	ld   [hl], $90
 	ld   hl, $D711
 	ld   [hl], $D5
 	inc  hl
 	ld   [hl], $7C
 	ld   a, $32
-	ld   [$D703], a
+	ld   [wOBJInfo2+iOBJInfo_X], a
 	ld   a, $58
-	ld   [$D705], a
+	ld   [wOBJInfo2+iOBJInfo_Y], a
 	call L001776
 	call L0014F9
 	ld   a, $C7
@@ -7696,9 +7696,9 @@ L1E6559:;JR
 	ld   a, [$D92E]
 	ld   hl, $C1CE
 	push af
-	ld   a, [$D683]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	add  a, $18
-	ld   [$D683], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 	ld   a, [wLZSS_Buffer]
 	ld   [$C1DA], a
 	inc  a
@@ -7706,9 +7706,9 @@ L1E6559:;JR
 	ld   a, [$C1D0]
 	and  a, a
 	jr   z, L1E65AA
-	ld   a, [$D683]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	add  a, $18
-	ld   [$D683], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 	ld   a, [wLZSS_Buffer]
 	inc  a
 	ld   [wLZSS_Buffer], a
@@ -7717,9 +7717,9 @@ L1E65AA:;R
 	jr   L1E6602
 L1E65AD:;R
 	push af
-	ld   a, [$D683]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	add  a, $18
-	ld   [$D683], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 	ld   a, [wLZSS_Buffer]
 	ld   [$C1DA], a
 	inc  a
@@ -7727,9 +7727,9 @@ L1E65AD:;R
 	ld   a, [$C1D2]
 	and  a, a
 	jr   z, L1E65D6
-	ld   a, [$D683]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	sub  a, $30
-	ld   [$D683], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 	ld   a, [wLZSS_Buffer]
 	dec  a
 	dec  a
@@ -7739,9 +7739,9 @@ L1E65D6:;R
 	jr   L1E6602
 L1E65D9:;R
 	push af
-	ld   a, [$D683]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	sub  a, $18
-	ld   [$D683], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 	ld   a, [wLZSS_Buffer]
 	ld   [$C1DA], a
 	dec  a
@@ -7749,9 +7749,9 @@ L1E65D9:;R
 	ld   a, [$C1D0]
 	and  a, a
 	jr   z, L1E6601
-	ld   a, [$D683]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	sub  a, $18
-	ld   [$D683], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 	ld   a, [wLZSS_Buffer]
 	dec  a
 	ld   [wLZSS_Buffer], a
@@ -7791,9 +7791,9 @@ L1E662D:;R
 	cp   $FF
 	ret  nz
 L1E6643:;R
-	ld   a, [$D683]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	sub  a, $10
-	ld   [$D683], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 	ld   a, $03
 	ld   [$C1B4], a
 	ret
@@ -7832,9 +7832,9 @@ L1E6679:;J
 	ld   a, [$DA2E]
 	ld   hl, $C1D4
 	push af
-	ld   a, [$D6C3]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
 	sub  a, $18
-	ld   [$D6C3], a
+	ld   [wOBJInfo_Pl2+iOBJInfo_X], a
 	ld   a, [$C1CB]
 	ld   [$C1DB], a
 	inc  a
@@ -7842,9 +7842,9 @@ L1E6679:;J
 	ld   a, [$C1D6]
 	and  a, a
 	jr   z, L1E66C3
-	ld   a, [$D6C3]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
 	sub  a, $18
-	ld   [$D6C3], a
+	ld   [wOBJInfo_Pl2+iOBJInfo_X], a
 	ld   a, [$C1CB]
 	inc  a
 	ld   [$C1CB], a
@@ -7853,9 +7853,9 @@ L1E66C3:;R
 	jr   L1E671B
 L1E66C6:;R
 	push af
-	ld   a, [$D6C3]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
 	add  a, $18
-	ld   [$D6C3], a
+	ld   [wOBJInfo_Pl2+iOBJInfo_X], a
 	ld   a, [$C1CB]
 	ld   [$C1DB], a
 	dec  a
@@ -7863,9 +7863,9 @@ L1E66C6:;R
 	ld   a, [$C1D4]
 	and  a, a
 	jr   z, L1E66EF
-	ld   a, [$D6C3]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
 	sub  a, $30
-	ld   [$D6C3], a
+	ld   [wOBJInfo_Pl2+iOBJInfo_X], a
 	ld   a, [$C1CB]
 	inc  a
 	inc  a
@@ -7875,9 +7875,9 @@ L1E66EF:
 	jr   L1E671B
 L1E66F2:;R
 	push af
-	ld   a, [$D6C3]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
 	add  a, $18
-	ld   [$D6C3], a
+	ld   [wOBJInfo_Pl2+iOBJInfo_X], a
 	ld   a, [$C1CB]
 	ld   [$C1DB], a
 	dec  a
@@ -7885,9 +7885,9 @@ L1E66F2:;R
 	ld   a, [$C1D6]
 	and  a, a
 	jr   z, L1E671A
-	ld   a, [$D6C3]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
 	add  a, $18
-	ld   [$D6C3], a
+	ld   [wOBJInfo_Pl2+iOBJInfo_X], a
 	ld   a, [$C1CB]
 	dec  a
 	ld   [$C1CB], a
@@ -7927,9 +7927,9 @@ L1E6746:;R
 	cp   $FF
 	ret  nz
 L1E675C:;R
-	ld   a, [$D6C3]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
 	sub  a, $10
-	ld   [$D6C3], a
+	ld   [wOBJInfo_Pl2+iOBJInfo_X], a
 	ld   a, $03
 	ld   [$C1B5], a
 	ret
@@ -7990,13 +7990,13 @@ L1E67CC:;R
 	ld   a, [wLZSS_Buffer]
 	dec  a
 	ld   [wLZSS_Buffer], a
-	ld   a, [$D683]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	sub  a, $18
-	ld   [$D683], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 L1E67DB:;R
-	ld   a, [$D683]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	sub  a, $18
-	ld   [$D683], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 	ret
 L1E67E4: db $FA;X
 L1E67E5: db $B5;X
@@ -8116,13 +8116,13 @@ L1E686F:;R
 	ld   a, [wLZSS_Buffer]
 	inc  a
 	ld   [wLZSS_Buffer], a
-	ld   a, [$D683]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	add  a, $18
-	ld   [$D683], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 L1E687E:;R
-	ld   a, [$D683]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	add  a, $18
-	ld   [$D683], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 	ret
 L1E6887: db $FA;X
 L1E6888: db $B5;X
@@ -8272,7 +8272,7 @@ L1E6933:;C
 L1E6937:;CI
 	ld   hl, $6DA5
 	ld   de, $C1EA
-	jp   DecompressGFX
+	jp   DecompressLZSS
 L1E6940:;C
 	ld   a, [wTimer]
 	and  a, $01
@@ -13377,7 +13377,7 @@ L1E7D21:;I
 	call SetSectLYC
 	ld   hl, $6DA5
 	ld   de, $C1EA
-	call DecompressGFX
+	call DecompressLZSS
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	ld   de, OBJInfoInit_Terry_WinA
 	call OBJLstS_InitFrom
@@ -13441,8 +13441,8 @@ L1E7D21:;I
 	xor  a
 	ldh  [rSTAT], a
 	ld   [wOBJInfo_Pl1+iOBJInfo_Status], a
-	ld   [$D683], a
-	ld   [$D685], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_Y], a
 	xor  a
 	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftA], a
 	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftB], a

@@ -63,8 +63,8 @@ Rst_EnableSerialInt:
 ;--
 L00002F: db $35;X
 ; =============== RESET VECTOR $30 ===============
-Rst_FarDecompressGFX:
-	jp   FarDecompressGFX
+Rst_FarDecompressLZSS:
+	jp   FarDecompressLZSS
 ;--
 L000033: db $CD;X
 L000034: db $66;X
@@ -141,20 +141,20 @@ FarCall:
 .exec:
 	jp   hl
 	
-; =============== FarDecompressGFX ===============
+; =============== FarDecompressLZSS ===============
 ; Decompresses the GFX on a different bank to the specified location in memory.
 ; IN
 ; - B: Bank number
 ; - DE: Ptr to decompression buffer
 ; - HL: Ptr to compressed graphics
-FarDecompressGFX:
+FarDecompressLZSS:
 	; Homecall-ish
 	ldh  a, [hROMBank]
 	push af
 	ld   a, b
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	call DecompressGFX
+	call DecompressLZSS
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
@@ -1036,7 +1036,7 @@ Task_EndOfFrame:
 	
 
 ; =============== SetSectLYC ===============
-; Sets the scanline numbers for two of the three default screen sections.
+; Enables section mode and and sets the scanline numbers for two of the three default screen sections.
 ; The first section always starts at $00 and is set during VBLANK,
 ; using hScrollY and hScrollX directly as its X/Y positions.
 ; IN
@@ -1047,13 +1047,16 @@ SetSectLYC:
 	ld   a, b
 	ld   [wScreenSect2LYC], a
 	ld   a, [wMisc_C028]
-	or   a, $01				
+	or   a, MISC_USE_SECT			
 	ld   [wMisc_C028], a
 	ret
-L00047C:;C
+	
+; =============== DisableSectLYC ===============
+; Disables section mode.
+DisableSectLYC:
 	push hl
-	ld   hl, wMisc_C028
-	res  0, [hl]
+		ld   hl, wMisc_C028
+		res  MISCB_USE_SECT, [hl]
 	pop  hl
 	ret
 	
@@ -1071,8 +1074,9 @@ LCDCHandler:
 ; =============== LCDCHandler_Sect ===============
 ; Standard 3-section mode.
 ;
-; This is used to draw the HUD during gameplay by enabling and disabling the WINDOW
+; The most important use for this is to draw the HUD during gameplay by enabling and disabling the WINDOW
 ; (alongside setting other things) at certain scanlines.
+; This is additionally used in cutscenes to display the black borders.
 LCDCHandler_Sect:
 		
 		; wLCDCSectId is either 0 (Section 1) or 1 (Section 2)
@@ -1461,8 +1465,8 @@ ENDR
 	
 	; Additionally, copy over the set0 info to set1.
 	; The wGFXBufInfo init code will do the same for its own fields if it detects the same settings for the next frame.
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_Status0]
-	ld   [wOBJInfo_Pl1+iOBJInfo_Status1], a
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_StatusEx0]
+	ld   [wOBJInfo_Pl1+iOBJInfo_StatusEx1], a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_BankNum0]
 	ld   [wOBJInfo_Pl1+iOBJInfo_BankNum1], a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTbl_Low0]
@@ -1608,8 +1612,8 @@ VBlank_CopyPl2Tiles:
 	inc  de
 	ld   a, [hl]
 	ld   [de], a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_Status0]
-	ld   [wOBJInfo_Pl2+iOBJInfo_Status1], a
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_StatusEx0]
+	ld   [wOBJInfo_Pl2+iOBJInfo_StatusEx1], a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_BankNum0]
 	ld   [wOBJInfo_Pl2+iOBJInfo_BankNum1], a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTbl_Low0]
@@ -1973,9 +1977,9 @@ OBJLstS_DoOBJInfoSlot:
 	
 	; Additionally, 
 
-	ld   b, a					; B = A
-	ld   [wOBJLstCurStatus0], a	; Primary ptr
-	ld   [wOBJLstCurStatus1], a	; Secondary ptr
+	ld   b, a						; B = A
+	ld   [wOBJLstCurStatusEx0], a	; Primary ptr
+	ld   [wOBJLstCurStatusEx1], a	; Secondary ptr
 	
 	;--
 	;
@@ -1997,14 +2001,14 @@ OBJLstS_DoOBJInfoSlot:
 	jp   nz, .useUserSet1		; If so, jump
 	
 .useUserSet0:	
-	ldi  a, [hl]				; Read iOBJInfo_Status0	
-	ld   [wOBJLstOrigStatusSpec], a
+	ldi  a, [hl]				; Read iOBJInfo_StatusEx0	
+	ld   [wOBJLstOrigStatusEx], a
 	inc  hl
 	jp   .calcRelX
 .useUserSet1:
 	inc  hl
-	ldi  a, [hl]				; Read iOBJInfo_Status1
-	ld   [wOBJLstOrigStatusSpec], a
+	ldi  a, [hl]				; Read iOBJInfo_StatusEx1
+	ld   [wOBJLstOrigStatusEx], a
 
 .calcRelX:
 	;--
@@ -2257,9 +2261,9 @@ OBJLstS_DoOBJLstHeaderA:
 	; Add the X/Y flip flags on top of the existing ones
 	and  a, OLF_XFLIP|OLF_YFLIP		
 	ld   b, a
-	ld   a, [wOBJLstCurStatus0]
+	ld   a, [wOBJLstCurStatusEx0]
 	or   b
-	ld   [wOBJLstCurStatus0], a
+	ld   [wOBJLstCurStatusEx0], a
 	
 	
 	; Are these for the second sprite mapping???
@@ -2330,9 +2334,9 @@ OBJLstS_DoOBJLstHeaderB:
 	; Add the X/Y flip flags on top of the existing ones
 	and  a, OLF_XFLIP|OLF_YFLIP		
 	ld   b, a
-	ld   a, [wOBJLstCurStatus1]
+	ld   a, [wOBJLstCurStatusEx1]
 	or   b
-	ld   [wOBJLstCurStatus0], a
+	ld   [wOBJLstCurStatusEx0], a
 	
 	; $01
 	inc  hl
@@ -2388,12 +2392,12 @@ OBJLstS_WriteToWorkOAM:
 	;
 	
 	; B = Default flip flags for the sprite mapping
-	ld   a, [wOBJLstCurStatus0]		
+	ld   a, [wOBJLstCurStatusEx0]		
 	and  a, OLF_XFLIP|OLF_YFLIP
 	ld   b, a
 	
 	; A = High nybble of the user-controlled flags
-	ld   a, [wOBJLstOrigStatusSpec]		
+	ld   a, [wOBJLstOrigStatusEx]		
 	and  a, $F0
 	
 	; Merge the flags over
@@ -2628,7 +2632,7 @@ OBJLstS_CalcDispCoords:
 	; Unlike with the Y location, here flipping the sprite horizontally inverts the X offset.
 	;
 	
-	ld   a, [wOBJLstOrigStatusSpec]
+	ld   a, [wOBJLstOrigStatusEx]
 	and  a, OLF_XFLIP			; Is the X flip flag set?
 	jp   nz, .invXOff			; If so, jump
 .normXOff:
@@ -2995,13 +2999,13 @@ OBJLstS_UpdateGFXBufInfo:
 			xor  OST_GFXBUF2			; Use other buffer
 			or   a, OST_GFXLOAD			; Set loading flag
 			ld   [bc], a				; Write back to iOBJInfo_Status
-			ld   [wOBJLstCurStatus0], a	; Write to wOBJLstCurStatus0
+			ld   [wOBJLstCurStatusEx0], a	; Write to wOBJLstCurStatusEx0
 			; wOBJLstCurStatus does not get updated here
 			jp   .getArgs
 		.gfxNotDone:
 			;???????????????
-			; Do not change wOBJLstCurStatus0 (used later to determine buffer)
-			ld   [wOBJLstCurStatus0], a	; ???
+			; Do not change wOBJLstCurStatusEx0 (used later to determine buffer)
+			ld   [wOBJLstCurStatusEx0], a	; ???
 			
 			; But reverse the buffer bit in the temporary copy of iOBJInfo_Status
 			; with the original value kept unchanged
@@ -3046,7 +3050,7 @@ OBJLstS_UpdateGFXBufInfo:
 				; NOTE: If we didn't finish copying the tiles to the previous buffer,
 				;       the old buffer will be used.
 				;
-				ld   a, [wOBJLstCurStatus0]
+				ld   a, [wOBJLstCurStatusEx0]
 				bit  OSTB_GFXBUF2, a				; Using the second buffer?
 				jp   z, .setBufInfo					; If not, skip
 			.buf2:
@@ -3215,8 +3219,8 @@ ENDR
 		; Copy the Set 0 info to Set 1
 		;
 		
-		; Copy iOBJInfo_Status0 to iOBJInfo_Status1
-		ld   hl, iOBJInfo_Status0
+		; Copy iOBJInfo_StatusEx0 to iOBJInfo_StatusEx1
+		ld   hl, iOBJInfo_StatusEx0
 		add  hl, bc
 		ldi  a, [hl]
 		ld   [hl], a
@@ -3271,7 +3275,7 @@ ENDR
 			ld   [de], a
 		pop  bc
 		
-	OBJLstS_CommonAnim_End:;J
+	OBJLstS_CommonAnim_End:
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
@@ -3290,7 +3294,7 @@ REPT 3
 ENDR
 	ret
 
-; =============== OBJLstS_InitFromROM ===============
+; =============== OBJLstS_InitFrom ===============
 ; Initializes an wOBJInfo structure.
 ; - HL: Ptr to start of wOBJInfo struct (destination)
 ; - DE: Ptr to wOBJInfo data (source)
@@ -3639,15 +3643,23 @@ L000EF1:;C
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-; =============== DecompressGFX ===============
-; Decompresses the GFX to the specified location in memory.
+; =============== DecompressLZSS ===============
+; Decompresses data (usually GFX) to the specified location in memory.
 ; The compression used appears to be based off the public domain code "lzss.c".
+;
+; NOTE
+;   Due to how the compression works, it may write some garbage padding bytes at the end.
+;   Because the game decompresses to a buffer and then copies a fixed amount of tiles from
+;   that buffer to VRAM, this isn't an issue normally.
+;   Care must be taken if the middleman is cut out.
+;
 ; IN
 ; - DE: Ptr to decompression buffer
 ; - HL: Ptr to compressed graphics
 ; OUT
 ; -  B: Number of uncompressed tiles written to the buffer.
-DecompressGFX:
+;       Ignore if not decompressing GFX.
+DecompressLZSS:
 	push de		; Save DE for the very end
 
 	;-------------------
@@ -5108,7 +5120,7 @@ L001445:;J
 	push bc
 	pop  hl
 	ld   de, wLZSS_Buffer
-	call DecompressGFX
+	call DecompressLZSS
 	ld   hl, wLZSS_Buffer
 	ld   de, $9000
 	call CopyTiles
@@ -5121,7 +5133,7 @@ L001445:;J
 	push de
 	pop  hl
 	ld   de, wLZSS_Buffer
-	call DecompressGFX
+	call DecompressLZSS
 	ld   de, wLZSS_Buffer
 	ld   hl, $9880
 	ld   b, $20
@@ -5719,7 +5731,7 @@ L0017F5:;J
 	ldh  [hROMBank], a
 	ld   hl, $4AF8
 	ld   de, wLZSS_Buffer
-	call DecompressGFX
+	call DecompressLZSS
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
@@ -6496,7 +6508,7 @@ L001CEB:;C
 	jp   nz, L001D0C
 	ld   hl, $4A52
 	ld   de, wLZSS_Buffer
-	call DecompressGFX
+	call DecompressLZSS
 	ld   hl, wLZSS_Buffer
 	ld   de, $8D00
 	ld   b, $2C
@@ -7083,7 +7095,7 @@ L002152:;C
 	call FillBGStripPair
 	ld   hl, $4084
 	ld   de, wLZSS_Buffer
-	call DecompressGFX
+	call DecompressLZSS
 	ld   a, [$D92C]
 	call L00217E
 	ld   a, [$DA2C]
@@ -7258,7 +7270,7 @@ L002264:;C
 	ld   [$C167], a
 	ld   hl, $4000
 	ld   de, wLZSS_Buffer
-	call DecompressGFX
+	call DecompressLZSS
 	ld   hl, wLZSS_Buffer
 	ld   de, $8800
 	ld   b, $44
@@ -7470,14 +7482,14 @@ L002406:;C
 	
 OBJInfoInit_Terry_WinA:
 	db OST_VISIBLE ; iOBJInfo_Status
-	db $20 ; iOBJInfo_Status0
-	db $20 ; iOBJInfo_Status1
+	db $20 ; iOBJInfo_StatusEx0
+	db $20 ; iOBJInfo_StatusEx1
 	db $60 ; iOBJInfo_X
 	db $00 ; iOBJInfo_XSub
 	db $88 ; iOBJInfo_Y
 	db $00 ; iOBJInfo_YSub
-	db $00 ; $07
-	db $00 ; $08
+	db $00 ; iOBJInfo_SpeedX
+	db $00 ; iOBJInfo_SpeedXSub
 	db $00 ; $09
 	db $00 ; $0A
 	db $00 ; iOBJInfo_RelX (auto)
@@ -7503,14 +7515,14 @@ OBJInfoInit_Terry_WinA:
 
 OBJInfoInit_Andy_WinA:
 	db OST_VISIBLE ; iOBJInfo_Status
-	db $10 ; iOBJInfo_Status0
-	db $10 ; iOBJInfo_Status1
+	db $10 ; iOBJInfo_StatusEx0
+	db $10 ; iOBJInfo_StatusEx1
 	db $A0 ; iOBJInfo_X
 	db $00 ; iOBJInfo_XSub
 	db $88 ; iOBJInfo_Y
 	db $00 ; iOBJInfo_YSub
-	db $00 ; $07
-	db $00 ; $08
+	db $00 ; iOBJInfo_SpeedX
+	db $00 ; iOBJInfo_SpeedXSub
 	db $00 ; $09
 	db $00 ; $0A
 	db $00 ; iOBJInfo_RelX (auto)
@@ -8115,10 +8127,10 @@ L002827:;C
 	ld   a, [hl]
 	or   a
 	jp   nz, L00283F
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status0
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_StatusEx0
 	jp   L002842
 L00283F:;J
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status0
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_StatusEx0
 L002842:;J
 	ld   a, [hl]
 	and  a, $DF
@@ -8225,7 +8237,7 @@ L0028B2:;C
 	cp   $02
 	jp   z, L0028E1
 L0028D0:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	xor  a
 	ret
 L0028D5:;J
@@ -10324,37 +10336,57 @@ L0035AD:;C
 	ld   [hl], c
 	pop  bc
 	ret
-L0035B9:;C
+; =============== OBJLstS_ApplyXSpeed ===============
+; Moves the sprite horizontally as specified in iOBJInfo_SpeedX and iOBJInfo_SpeedXSub.
+; iOBJInfo_X += iOBJInfo_SpeedX
+;
+; IN
+; - HL: Ptr to wOBJInfo
+OBJLstS_ApplyXSpeed:
 	push bc
-	push de
-	ld   hl, $0003
-	add  hl, de
-	push hl
-	pop  de
-	push de
-	ld   a, [de]
-	ld   h, a
-	inc  de
-	ld   a, [de]
-	ld   l, a
-	inc  de
-	inc  de
-	inc  de
-	ld   a, [de]
-	ld   b, a
-	inc  de
-	ld   a, [de]
-	ld   c, a
-	add  hl, bc
-	pop  de
-	ld   a, h
-	ld   [de], a
-	inc  de
-	ld   a, l
-	ld   [de], a
-	pop  de
+		push de
+			
+			; DE = Ptr to iOBJInfo_X
+			ld   hl, iOBJInfo_X
+			add  hl, de				; Seek to X position
+			push hl
+			pop  de
+			
+			push de
+				; H = X position
+				ld   a, [de]
+				ld   h, a
+				inc  de				; iOBJInfo_XSub
+				; L = X subpixel position
+				ld   a, [de]
+				ld   l, a
+				
+				inc  de				; iOBJInfo_Y
+				inc  de				; iOBJInfo_YSub
+				inc  de				; iOBJInfo_SpeedX
+				
+				; B = H speed
+				ld   a, [de]
+				ld   b, a
+				inc  de				; iOBJInfo_SpeedXSub
+				; C = H subpixel speed
+				ld   a, [de]
+				ld   c, a
+				
+				; Add the speed values to the X position
+				add  hl, bc
+			pop  de
+			
+			; Write the updated result to X & XSub
+			ld   a, h		; Write iOBJInfo_X
+			ld   [de], a
+			inc  de
+			ld   a, l		; Write iOBJInfo_XSub
+			ld   [de], a
+		pop  de
 	pop  bc
 	ret
+	
 L0035D9:;C
 	push bc
 	push de
@@ -10402,7 +10434,7 @@ L003602:;J
 L00360D:;J
 	pop  de
 	pop  bc
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	or   a
 	ret
 L003614:;C
@@ -10481,7 +10513,7 @@ L003653:;J
 L00366B:;J
 	pop  de
 	pop  bc
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	xor  a
 	ret
 L003672:;C
@@ -11071,12 +11103,12 @@ L0039FC:;J
 	or   a
 	jp   z, L003A1B
 	push bc
-	ld   a, [$D6C3]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
 	ld   b, a
-	ld   a, [$D683]
-	ld   [$D6C3], a
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
+	ld   [wOBJInfo_Pl2+iOBJInfo_X], a
 	ld   a, b
-	ld   [$D683], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 	pop  bc
 	ld   hl, $0001
 	add  hl, de

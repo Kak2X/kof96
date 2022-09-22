@@ -898,7 +898,7 @@ L1C4380:;I
 	ld   sp, $DD00
 	di
 	rst  $10
-	call L00047C
+	call DisableSectLYC
 	ld   hl, wMisc_C028
 	res  1, [hl]
 	set  2, [hl]
@@ -1018,9 +1018,9 @@ L1C447E:;J
 	ld   hl, wOBJInfo2+iOBJInfo_Status
 	ld   de, L1C4E9B
 	call OBJLstS_InitFrom
-	ld   hl, $D703
+	ld   hl, wOBJInfo2+iOBJInfo_X
 	ld   [hl], $34
-	ld   hl, $D705
+	ld   hl, wOBJInfo2+iOBJInfo_Y
 	ld   [hl], $48
 	ld   hl, $D713
 	ld   [hl], $0C
@@ -1029,18 +1029,18 @@ L1C447E:;J
 	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
 	res  7, [hl]
-	ld   hl, $D6C3
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_X
 	ld   [hl], $28
-	ld   hl, $D6C5
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_Y
 	ld   [hl], $43
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	ld   de, L1C4E9B
 	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	res  7, [hl]
-	ld   hl, $D683
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_X
 	ld   [hl], $28
-	ld   hl, $D685
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_Y
 	ld   [hl], $43
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset0
 	ld   [hl], $08
@@ -1049,9 +1049,9 @@ L1C447E:;J
 	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo3+iOBJInfo_Status
 	res  7, [hl]
-	ld   hl, $D743
+	ld   hl, wOBJInfo3+iOBJInfo_X
 	ld   [hl], $50
-	ld   hl, $D745
+	ld   hl, wOBJInfo3+iOBJInfo_Y
 	ld   [hl], $60
 	ld   hl, $D753
 	ld   [hl], $10
@@ -1119,7 +1119,7 @@ L1C4551:;J
 	ld   [$C1B4], a
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	set  7, [hl]
-	ld   hl, $D685
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_Y
 	ld   [hl], $43
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
 	set  7, [hl]
@@ -1188,9 +1188,9 @@ L1C45C2:;J
 	ldh  [hScrollY], a
 	ld   a, $F8
 	ld   [wFieldScrollY], a
-	ld   a, [$D683]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	ld   [$C1B5], a
-	ld   a, [$D685]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
 	ld   [$C1B6], a
 	jp   L1C4645
 L1C45FC:;J
@@ -1212,9 +1212,9 @@ L1C45FC:;J
 	ldh  [hScrollY], a
 	ld   a, $08
 	ld   [wFieldScrollY], a
-	ld   a, [$D683]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	ld   [$C1B5], a
-	ld   a, [$D685]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
 	ld   [$C1B6], a
 	call L1C48CB
 	call L1C491C
@@ -1224,9 +1224,9 @@ L1C45FC:;J
 	call L1C4B75
 L1C4645:;J
 	ld   a, $20
-	ld   [$D683], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 	ld   a, $00
-	ld   [$D685], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_Y], a
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	set  7, [hl]
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
@@ -1286,15 +1286,15 @@ L1C46BA:;J
 	ld   [$C1B4], a
 	cp   $00
 	jp   z, L1C46D6
-	ld   a, [$D685]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
 	add  a, $08
-	ld   [$D685], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_Y], a
 	xor  a
 	ret
 L1C46D6:;J
-	ld   a, [$D685]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
 	sub  a, $08
-	ld   [$D685], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_Y], a
 	xor  a
 	ret
 L1C46E0:;J
@@ -1497,7 +1497,7 @@ L1C4833:;J
 	ld   [$C1B7], a
 L1C483C:;J
 	swap a
-	ld   [$D685], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_Y], a
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	set  7, [hl]
 	xor  a
@@ -2211,7 +2211,7 @@ L1C4C11:;J
 L1C4C1B:;J
 	swap a
 L1C4C1D:;J
-	ld   [$D685], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_Y], a
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	set  7, [hl]
 	xor  a
@@ -2388,9 +2388,9 @@ L1C4CC2:;J
 	ld   hl, wMisc_C028
 	set  2, [hl]
 	ld   a, [$C1B5]
-	ld   [$D683], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 	ld   a, [$C1B6]
-	ld   [$D685], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_Y], a
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset0
 	ld   [hl], $08
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
@@ -3236,7 +3236,7 @@ L1C5105:;I
 	call CopyTilesAutoNum
 	ld   hl, $5C23
 	ld   de, $C1DA
-	call DecompressGFX
+	call DecompressLZSS
 	ld   de, $C1DA
 	ld   hl, WINDOWMap_Begin
 	ld   b, $14
@@ -3244,14 +3244,14 @@ L1C5105:;I
 	call CopyBGToRect
 	ld   hl, $5819
 	ld   de, $C1DA
-	call DecompressGFX
+	call DecompressLZSS
 	ld   hl, $C1DA
 	ld   de, $8800
 	ld   b, $80
 	call CopyTiles
 	ld   hl, $51C1
 	ld   de, $C1DA
-	call DecompressGFX
+	call DecompressLZSS
 	ld   hl, $C1DA
 	ld   de, $9000
 	ld   b, $80
@@ -7017,20 +7017,26 @@ Intro_ExecScene:
 ; =============== Intro_End ===============	
 ; Switches to the title screen mode.
 Intro_End:
-	;
+	; Blank palette
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
+	
+	; Disable LYC
 	xor  a
 	ldh  [rSTAT], a
+	
 	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftA], a
 	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftB], a
 	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftA], a
 	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftB], a
+	
+	; Jump to title screen
 	ld   b, BANK(L1C4380)
 	ld   hl, L1C4380
 	rst  $00
+	
 Intro_ScenePtrTable:
 	dw IntroScene_TextPrint ; Text print
 	dw IntroScene_Chars ; Char sprites animating (including the scene after Iori rises)
@@ -7082,7 +7088,7 @@ IntroScene_TextPrint:
 	; Prepare next scene
 	ld   a, BGM_IN1996
 	call HomeCall_Sound_ReqPlayExId_Stub
-	call Intro_Chars_LoadVRAM
+	call Intro_CharS_LoadVRAM
 	ld   a, ISC_CHAR
 	ld   [wIntroScene], a
 	ret
@@ -7092,853 +7098,1269 @@ IntroScene_TextPrint:
 	pop  bc
 	scf
 	ret
+
+; =============== IntroScene_Chars ===============
+; Animates character sprites while moving rectangles across the screen.
+; OUT
+; - C flag: If set, end the intro prematurely
+IntroScene_Chars:
+	; Use wIntroCharScene as offset to the jump table Intro_CharScene_PtrTable.
+	; There are also a few special cases for exiting to different intro scenes.
 	
-IntroScene_Chars:;RI
 	ld   a, [wIntroCharScene]
-	cp   $1C
-	jr   z, L1C60C2
-	cp   $26
-	jr   z, L1C60CC
-	ld   hl, $60E0
+	cp   ISCC_CHG_IORIRISE	; SceneId == $1C?
+	jr   z, .startIoriRise	; If so, jump
+	cp   ISCC_CHG_IORIKYO	; SceneId == $26?
+	jr   z, .startIoriKyo	; If so, jump
+.dynJump:
+	ld   hl, Intro_CharScene_PtrTable
 	call Intro_ExecScene
-	jr   IntroScene_Chars
-L1C60C2:;R
-	call L1C6729
-	ld   a, $04
+	jr   IntroScene_Chars	; Handle next
+	
+.startIoriRise:
+	; Prepare VRAM and exit
+	; (we disabled player sprites at the end of Intro_CharScene_Mature)
+	call Intro_IoriRise_LoadVRAM
+	ld   a, ISC_IORIRISE
 	ld   [wIntroScene], a
 	xor  a
 	ret
-L1C60CC:;R
+	
+.startIoriKyo:
+	; Disable player sprites, they aren't needed anymore
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	res  7, [hl]
+	res  OSTB_VISIBLE, [hl]
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	res  7, [hl]
-	call L1C67BF
-	ld   a, $06
+	res  OSTB_VISIBLE, [hl]
+	; Prepare VRAM and exit
+	call Intro_IoriKyo_LoadVRAM
+	ld   a, ISC_IORIKYO		
 	ld   [wIntroScene], a
 	xor  a
 	ret
-L1C60E0: db $06
-L1C60E1: db $61
-L1C60E2: db $4B
-L1C60E3: db $61
-L1C60E4: db $5D
-L1C60E5: db $61
-L1C60E6: db $A5
-L1C60E7: db $61
-L1C60E8: db $B5
-L1C60E9: db $61
-L1C60EA: db $C5
-L1C60EB: db $61
-L1C60EC: db $03
-L1C60ED: db $62
-L1C60EE: db $13
-L1C60EF: db $62
-L1C60F0: db $23
-L1C60F1: db $62
-L1C60F2: db $3E
-L1C60F3: db $62
-L1C60F4: db $68
-L1C60F5: db $62
-L1C60F6: db $8F
-L1C60F7: db $62
-L1C60F8: db $BA
-L1C60F9: db $62
-L1C60FA: db $E6
-L1C60FB: db $62
-L1C60FC: db $00;X
-L1C60FD: db $00;X
-L1C60FE: db $24
-L1C60FF: db $63
-L1C6100: db $42
-L1C6101: db $63
-L1C6102: db $77
-L1C6103: db $63
-L1C6104: db $7D
-L1C6105: db $63
-L1C6106:;I
-	ld   a, $FF
+	
+Intro_CharScene_PtrTable:
+	dw Intro_CharScene_Init
+	dw Intro_CharScene_Terry
+	dw Intro_CharScene_Andy
+	dw Intro_CharScene_Mai
+	dw Intro_CharScene_Athena
+	dw Intro_CharScene_Leona
+	dw Intro_CharScene_Robert
+	dw Intro_CharScene_Ryo
+	dw Intro_CharScene_MrKarate
+	dw Intro_CharScene_MrBig
+	dw Intro_CharScene_Geese
+	dw Intro_CharScene_Krauser
+	dw Intro_CharScene_Daimon
+	dw Intro_CharScene_Mature
+	dw $0000 ; N/A
+	dw Intro_CharScene_Kyo
+	dw Intro_CharScene_IoriKyoA
+	dw Intro_CharScene_IoriKyoB
+	dw Intro_CharScene_IoriKyoC
+	
+; =============== Intro_CharScene_Init ===============
+; Init code for the Terry scene.
+Intro_CharScene_Init:
+	ld   a, $FF				; Clear BG Palette
 	ldh  [rBGP], a
-	ld   d, $01
+	
+	;
+	; The way the intro backgrounds work is a combination of moving the screen
+	; (while keeping the sprites at the same positions) and updating the tilemap
+	; when shrinking the white cut-in.
+	;
+
+	; Fill the screen with a black tile that hides sprites
+	ld   d, TILE_INTRO_BLACK				
 	call ClearBGMapCustom
-	ld   hl, $9A40
-	ld   b, $14
-	ld   c, $06
-	ld   d, $00
+
+	; Draw a full (visible) screen white rectangle off-screen where sprites inside are visible.
+	; This will be later moved upwards by scrolling the screen down.
+	ld   hl, $9A40 ; Left corner pos
+	ld   b, $14 ; Rect Width
+	ld   c, $06 ; Rect Height
+	ld   d, TILE_INTRO_WHITE ; Tile ID
 	call FillBGRect
+	
+	; Set Terry sprite pos
 	ld   a, $20
-	ld   [$D683], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 	ld   a, $00
-	ld   [$D685], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_Y], a
+	
+	; Set Andy sprite pos
 	ld   a, $80
-	ld   [$D6C3], a
+	ld   [wOBJInfo_Pl2+iOBJInfo_X], a
 	ld   a, $40
-	ld   [$D6C5], a
+	ld   [wOBJInfo_Pl2+iOBJInfo_Y], a
+	
+	; Screen in top left corner
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
+	
+	; Next scene
 	ld   a, [wIntroCharScene]
 	add  a, $02
 	ld   [wIntroCharScene], a
+	
 	ld   a, $01
 	call Intro_ChkStartPressed_MultiFrame
+	
+	; Enable Terry sprite
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	set  7, [hl]
-	ld   a, $F0
+	set  OSTB_VISIBLE, [hl]
+	
+	ld   a, $F0				; Set actual BG Palette
 	ldh  [rBGP], a
 	ret
-L1C614B:;I
+	
+; =============== Intro_CharScene_Terry ===============
+; Terry scene.
+Intro_CharScene_Terry:
+	; Move white bar up $10*$10 px
 	ld   a, $10
-	call L1C6533
+	call Intro_CharS_MoveBGUp_MultiFrame
+	
+	; Show Andy
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	set  7, [hl]
+	set  OSTB_VISIBLE, [hl]
+	
+	; Wait $0F frames animating chars
 	ld   a, $0F
-	call L1C6629
-	jp   L1C63CC
-L1C615D:;I
+	call Intro_CharS_WaitVBlank
+	
+	jp   Intro_CharS_NextMode
+	
+; =============== Intro_CharScene_Andy ===============
+; Andy scene.
+Intro_CharScene_Andy:
+
+	; Move white bar down $0B*$0B px
 	ld   a, $0B
-	call L1C6544
-	ld   a, $0D
-	ld   b, $01
-	ld   c, $06
-	ld   d, $01
-	ld   hl, $9A40
-	call L1C65BC
+	call Intro_CharS_MoveBGDown_MultiFrame
+	
+	; Shrink left side $0D tiles
+	ld   a, $0D ; Black out $0D columns
+	ld   b, $01 ; Width
+	ld   c, $06 ; Height
+	ld   d, TILE_INTRO_BLACK ; Tile ID
+	ld   hl, $9A40 ; Origin
+	call Intro_CharS_FillBGRectRight_MultiFrame
+	
+	; Shrink right side $02 tiles
 	ld   a, $02
 	ld   b, $01
 	ld   c, $06
-	ld   d, $01
+	ld   d, TILE_INTRO_BLACK
 	ld   hl, $9A53
-	call L1C65A7
+	call Intro_CharS_FillBGRectLeft_MultiFrame
+	
+	; Grow bottom side
 	ld   a, $03
 	ld   b, $05
 	ld   c, $01
-	ld   d, $00
+	ld   d, TILE_INTRO_WHITE
 	ld   hl, $9B0D
-	call L1C658F
+	call Intro_CharS_FillBGRectDown_MultiFrame
+	
+	; Grow top side
 	ld   a, $0B
 	ld   b, $05
 	ld   c, $01
-	ld   d, $00
+	ld   d, TILE_INTRO_WHITE
 	ld   hl, $9A4D
-	call L1C6577
+	call Intro_CharS_FillBGRectUp_MultiFrame
+	
+	; Wait $0F frames
 	ld   a, $0F
-	call L1C6629
-	call L1C63D5
-	jp   L1C63CC
-L1C61A5:;I
+	call Intro_CharS_WaitVBlank
+	
+	; Next scene
+	call Intro_CharS_SetNextChar
+	jp   Intro_CharS_NextMode
+	
+; =============== Intro_CharScene_Mai ===============
+; Mai scene.
+Intro_CharScene_Mai:
+	; Move white section to the middle
 	ld   a, $09
-	call L1C6555
+	call Intro_CharS_MoveBGLeft_MultiFrame
+	
 	ld   a, $0F
-	call L1C6629
-	call L1C63D5
-	jp   L1C63CC
-L1C61B5:;I
+	call Intro_CharS_WaitVBlank
+	
+	call Intro_CharS_SetNextChar
+	jp   Intro_CharS_NextMode
+	
+; =============== Intro_CharScene_Athena ===============
+; Athena scene.
+Intro_CharScene_Athena:
+	; Move white section to the left
 	ld   a, $09
-	call L1C6555
+	call Intro_CharS_MoveBGLeft_MultiFrame
+	
 	ld   a, $0F
-	call L1C6629
-	call L1C63D5
-	jp   L1C63CC
-L1C61C5:;I
+	call Intro_CharS_WaitVBlank
+	
+	call Intro_CharS_SetNextChar
+	jp   Intro_CharS_NextMode
+	
+; =============== Intro_CharScene_Leona ===============
+; Leona scene.
+Intro_CharScene_Leona:
+	; Move white section to the middle
 	ld   a, $09
-	call L1C6566
+	call Intro_CharS_MoveBGRight_MultiFrame
+	
+	; Shrink from below
 	ld   a, $04
 	ld   b, $05
 	ld   c, $01
-	ld   d, $01
+	ld   d, TILE_INTRO_BLACK
 	ld   hl, $9B6D
-	call L1C6577
+	call Intro_CharS_FillBGRectUp_MultiFrame
+	
+	; Shrink from above
 	ld   a, $0A
 	ld   b, $05
 	ld   c, $01
-	ld   d, $01
+	ld   d, TILE_INTRO_BLACK
 	ld   hl, $990D
-	call L1C658F
+	call Intro_CharS_FillBGRectDown_MultiFrame
+	
+	; Hide Athena
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	res  7, [hl]
+	res  OSTB_VISIBLE, [hl]
+	
+	; Expand horizontally to full screen
 	ld   a, $08
 	ld   c, $06
 	ld   hl, $9A4C
 	ld   de, $9A52
-	call L1C65D1
+	call Intro_CharS_CropOpenH_MultiFrame
+	
 	ld   a, $0A
-	call L1C6629
-	call L1C63D5
-	jp   L1C63CC
-L1C6203:;I
+	call Intro_CharS_WaitVBlank
+	call Intro_CharS_SetNextChar
+	jp   Intro_CharS_NextMode
+; =============== Intro_CharScene_Robert ===============
+; Robert scene.
+Intro_CharScene_Robert:
+	; Move bar up near the top
 	ld   a, $0B
-	call L1C6533
+	call Intro_CharS_MoveBGUp_MultiFrame
+	
 	ld   a, $0F
-	call L1C6629
-	call L1C63D5
-	jp   L1C63CC
-L1C6213:;I
+	call Intro_CharS_WaitVBlank
+	call Intro_CharS_SetNextChar
+	jp   Intro_CharS_NextMode
+; =============== Intro_CharScene_Ryo ===============
+; Ryo scene.
+Intro_CharScene_Ryo:
+	; Move bar down near the bottom
 	ld   a, $0C
-	call L1C6544
+	call Intro_CharS_MoveBGDown_MultiFrame
+	
 	ld   a, $0F
-	call L1C6629
-	call L1C63D5
-	jp   L1C63CC
-L1C6223:;I
+	call Intro_CharS_WaitVBlank
+	call Intro_CharS_SetNextChar
+	jp   Intro_CharS_NextMode
+; =============== Intro_CharScene_MrKarate ===============
+; Mr. Karate scene.
+Intro_CharScene_MrKarate:
+	; Move bar up at the middle
 	ld   a, $09
-	call L1C6533
+	call Intro_CharS_MoveBGUp_MultiFrame
+	
 	ld   a, $0F
-	call L1C6629
+	call Intro_CharS_WaitVBlank
+	
+	; Completely close vertically
 	ld   a, $03
 	ld   hl, $9A45
 	ld   de, $9AE5
-	call L1C65F8
-	call L1C63D5
-	jp   L1C63CC
-L1C623E:;I
+	call Intro_CharS_CropCloseH_MultiFrame
+	
+	call Intro_CharS_SetNextChar
+	jp   Intro_CharS_NextMode
+; =============== Intro_CharScene_MrBig ===============
+; Mr. Big scene.
+Intro_CharScene_MrBig:
+
+	; Use the opportunity of the tilemap being completely black to reset the X scroll
 	xor  a
 	ldh  [hScrollX], a
+	
+	; Open window with Mr. Big on the left
 	ld   a, $05
 	ld   b, $01
 	ld   c, $06
-	ld   d, $00
+	ld   d, TILE_INTRO_WHITE
 	ld   hl, $9A45
-	call L1C65A7
+	call Intro_CharS_FillBGRectLeft_MultiFrame
+	
 	ld   a, $0F
-	call L1C6629
+	call Intro_CharS_WaitVBlank
+	
+	; Completely close window we just opened
 	ld   a, $05
 	ld   b, $01
 	ld   c, $06
-	ld   d, $01
+	ld   d, TILE_INTRO_BLACK
 	ld   hl, $9A45
-	call L1C65A7
-	call L1C63D5
-	jp   L1C63CC
-L1C6268:;I
+	call Intro_CharS_FillBGRectLeft_MultiFrame
+	
+	call Intro_CharS_SetNextChar
+	jp   Intro_CharS_NextMode
+; =============== Intro_CharScene_Geese ===============
+; Geese scene.
+Intro_CharScene_Geese:
+
+	; Open window on the right
 	ld   a, $05
 	ld   b, $01
 	ld   c, $06
-	ld   d, $00
+	ld   d, TILE_INTRO_WHITE
 	ld   hl, $9A4E
-	call L1C65BC
+	call Intro_CharS_FillBGRectRight_MultiFrame
+	
 	ld   a, $0F
-	call L1C6629
+	call Intro_CharS_WaitVBlank
+	
+	; Close it
 	ld   a, $05
 	ld   b, $01
 	ld   c, $06
-	ld   d, $01
+	ld   d, TILE_INTRO_BLACK
 	ld   hl, $9A4E
-	call L1C65BC
-	call L1C63D5
-	jp   L1C63CC
-L1C628F:;I
+	call Intro_CharS_FillBGRectRight_MultiFrame
+	
+	call Intro_CharS_SetNextChar
+	jp   Intro_CharS_NextMode
+; =============== Intro_CharScene_Krauser ===============
+; Krauser scene.
+Intro_CharScene_Krauser:
+	; Move slightly left to center the window
 	ld   a, $FC
 	ldh  [hScrollX], a
+	
+	; Open window at the center
 	ld   a, $06
 	ld   b, $05
 	ld   c, $01
-	ld   d, $00
+	ld   d, TILE_INTRO_WHITE
 	ld   hl, $9AE7
-	call L1C6577
+	call Intro_CharS_FillBGRectUp_MultiFrame
+	
 	ld   a, $0F
-	call L1C6629
+	call Intro_CharS_WaitVBlank
+	
+	; Close it
 	ld   a, $06
 	ld   b, $05
 	ld   c, $01
-	ld   d, $01
+	ld   d, TILE_INTRO_BLACK
 	ld   hl, $9AE7
-	call L1C6577
-	call L1C63D5
-	jp   L1C63CC
-L1C62BA:;I
+	call Intro_CharS_FillBGRectUp_MultiFrame
+	
+	call Intro_CharS_SetNextChar
+	jp   Intro_CharS_NextMode
+; =============== Intro_CharScene_Daimon ===============
+; Daimon scene.
+Intro_CharScene_Daimon:
+	; Reset coords to top-left
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
+	
+	; Open tall section on the right side
 	ld   a, $05
 	ld   b, $01
 	ld   c, $12
-	ld   d, $00
+	ld   d, TILE_INTRO_WHITE
 	ld   hl, $980E
-	call L1C65BC
+	call Intro_CharS_FillBGRectRight_MultiFrame
+	
 	ld   a, $0F
-	call L1C6629
+	call Intro_CharS_WaitVBlank
+	
+	; Close section
 	ld   a, $05
 	ld   b, $01
 	ld   c, $12
-	ld   d, $01
+	ld   d, TILE_INTRO_BLACK
 	ld   hl, $980E
-	call L1C65BC
-	call L1C63D5
-	jp   L1C63CC
-L1C62E6:;I
+	call Intro_CharS_FillBGRectRight_MultiFrame
+	
+	call Intro_CharS_SetNextChar
+	jp   Intro_CharS_NextMode
+; =============== Intro_CharScene_Mature ===============
+; Mature scene.
+Intro_CharScene_Mature:
+	; Open tall section on the left side
 	ld   a, $05
 	ld   b, $01
 	ld   c, $12
-	ld   d, $00
+	ld   d, TILE_INTRO_WHITE
 	ld   hl, $9805
-	call L1C65A7
+	call Intro_CharS_FillBGRectLeft_MultiFrame
+	
 	ld   a, $0F
-	call L1C6629
+	call Intro_CharS_WaitVBlank
+	
+	; Close section
 	ld   a, $05
 	ld   b, $01
 	ld   c, $12
-	ld   d, $01
+	ld   d, TILE_INTRO_BLACK
 	ld   hl, $9805
-	call L1C65A7
+	call Intro_CharS_FillBGRectLeft_MultiFrame
+	
+	; Hide player sprites since we're moving to ISC_IORIRISE
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	res  7, [hl]
+	res  OSTB_VISIBLE, [hl]
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	res  7, [hl]
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_Status0]
-	xor  $20
-	ld   [wOBJInfo_Pl1+iOBJInfo_Status0], a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_Status0]
-	xor  $20
-	ld   [wOBJInfo_Pl2+iOBJInfo_Status0], a
-	jp   L1C63CC
-L1C6324:;I
+	res  OSTB_VISIBLE, [hl]
+	
+	; Flip both sprites for Intro_CharScene_Kyo, to make Iori and Kyo face each other
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_StatusEx0] ; Make Kyo face left
+	xor  OST_XFLIP
+	ld   [wOBJInfo_Pl1+iOBJInfo_StatusEx0], a
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_StatusEx0] ; Make Kyo face right
+	xor  OST_XFLIP
+	ld   [wOBJInfo_Pl2+iOBJInfo_StatusEx0], a
+	
+	jp   Intro_CharS_NextMode
+; =============== Intro_CharScene_Kyo ===============
+; Kyo scene.
+Intro_CharScene_Kyo:
+
+	; Reset coords
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
+	
+	; Open tall section on the right side
 	ld   a, $05
 	ld   b, $01
 	ld   c, $12
-	ld   d, $00
+	ld   d, TILE_INTRO_WHITE
 	ld   hl, $980E
-	call L1C65BC
+	call Intro_CharS_FillBGRectRight_MultiFrame
+	
 	ld   a, $0F
-	call L1C6629
-	call L1C63D5
-	jp   L1C63CC
-L1C6342:;I
+	call Intro_CharS_WaitVBlank
+	
+	call Intro_CharS_SetNextChar
+	jp   Intro_CharS_NextMode
+; =============== Intro_CharScene_IoriKyoA ===============
+; Iori + Kyo sprite scene.
+Intro_CharScene_IoriKyoA:
+	; Open tall section on the left side
 	ld   a, $05
 	ld   b, $01
 	ld   c, $12
-	ld   d, $00
+	ld   d, TILE_INTRO_WHITE
 	ld   hl, $9805
-	call L1C65A7
+	call Intro_CharS_FillBGRectLeft_MultiFrame
+	
+	; Wait for a bit
 	ld   a, $28
-	call L1C6629
+	call Intro_CharS_WaitVBlank
+	
+	; Remove left border
 	ld   a, $01
 	ld   b, $01
 	ld   c, $12
-	ld   d, $00
+	ld   d, TILE_INTRO_WHITE
 	ld   hl, $9813
-	call L1C65A7
+	call Intro_CharS_FillBGRectLeft_MultiFrame
+	
+	; Remove right border
 	ld   a, $01
 	ld   b, $01
 	ld   c, $12
 	ld   d, $00
 	ld   hl, BGMap_Begin
-	call L1C65A7
-	call L1C63D5
-	jp   L1C63CC
-L1C6377:;I
-	call L1C63D5
-	jp   L1C63CC
-L1C637D:;RI
+	call Intro_CharS_FillBGRectLeft_MultiFrame
+	
+	call Intro_CharS_SetNextChar ; Set Kyo run anim.
+	jp   Intro_CharS_NextMode
+	
+; =============== Intro_CharScene_IoriKyoB ===============
+; Iori + Kyo sprite scene II.
+Intro_CharScene_IoriKyoB:
+	call Intro_CharS_SetNextChar ; Set Iori run anim
+	jp   Intro_CharS_NextMode
+; =============== Intro_CharScene_IoriKyoC ===============
+; Iori + Kyo sprite scene III.
+Intro_CharScene_IoriKyoC:
+
+	;
+	; Make the attack animations freeze at a certain point.
+	; It's a little bit odd -- setting OSTB_ANIMEND prematurely will cause the
+	; currently loading frame to be the last one to be applied (several frames later).
+	;
+	; This (with help from the animation speed definition in Intro_CharS_SetNextChar) is
+	; specifically timed so that the player sprites change into a good
+	; attack frame when they get to the center of the screen.
+	;
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset0]
-	cp   $10
-	jr   nz, L1C6389
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	set  4, [hl]
-L1C6389:;R
+	cp   $04*4								; Reached frame 4? (which is still loading)
+	jr   nz, .chkIori						; If not, skip
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status	; End animation. The frame will still applied when it loads.
+	set  OSTB_ANIMEND, [hl]
+.chkIori:;R
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffset0]
-	cp   $04
-	jr   nz, L1C6395
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	set  4, [hl]
-L1C6395:;R
+	cp   $01*4								; Reached frame 1? (which is still loading)
+	jr   nz, .waitEnd						; If not, skip
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status	; End animation. The frame will still applied when it loads.
+	set  OSTB_ANIMEND, [hl]
+.waitEnd:
+
+	; Wait 1 frane
 	ld   a, $01
-	call L1C6629
+	call Intro_CharS_WaitVBlank
+	
+	; Continue looping until both anims are marked as ended
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_Status]
-	ld   b, a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_Status]
-	and  a, b
-	bit  4, a
-	jr   z, L1C637D
-	ld   a, $F9
-	ld   [$D687], a
-	ld   a, $07
-	ld   [$D6C7], a
+	ld   b, a								; B = StatusPl1
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_Status]	; A = StatusPl2
+	and  a, b								; 
+	bit  OSTB_ANIMEND, a					; (A & B) & OSTB_ANIMEND != 0? (OSTB_ANIMEND set on both players?)
+	jr   z, Intro_CharScene_IoriKyoC		; If not, loop
+	
+	;
+	; Remove the middle black section while moving Iori and Kyo to the center of the screen.
+	;
+	ld   a, -$07							; Make Kyo move to the left
+	ld   [wOBJInfo_Pl1+iOBJInfo_SpeedX], a
+	ld   a, $07								; Make Iori move to the right
+	ld   [wOBJInfo_Pl2+iOBJInfo_SpeedX], a
+	
+	; White out center section
 	ld   a, $04
 	ld   c, $12
 	ld   hl, $980D
 	ld   de, $9806
-	call L1C65D1
+	call Intro_CharS_CropOpenH_MultiFrame
+	
+.end:
+	; Reset speed
 	xor  a
-	ld   [$D687], a
-	ld   [$D6C7], a
+	ld   [wOBJInfo_Pl1+iOBJInfo_SpeedX], a
+	ld   [wOBJInfo_Pl2+iOBJInfo_SpeedX], a
+	
+	; Wait for a bit so the last anim frames get applied
 	ld   a, $0A
-	call L1C6629
-	jp   L1C63CC
-L1C63CC:;J
+	call Intro_CharS_WaitVBlank
+	jp   Intro_CharS_NextMode
+	
+; =============== Intro_CharS_NextMode ===============
+; Switches to the next character scene.
+Intro_CharS_NextMode:
 	ld   a, [wIntroCharScene]
 	add  a, $02
 	ld   [wIntroCharScene], a
 	ret
-L1C63D5:;C
-	ld   hl, $6427
-	ld   a, [wIntroCharScene]
-	srl  a
-	sub  a, $02
+	
+; =============== Intro_CharS_SetNextChar ===============
+; Set the next player sprites on the first free slot where the win animation ended.
+;
+; This will update the player's sprite mappings and positions.
+;
+; It should be only used on players hidden behind the black background, to give
+; time for the new graphics to load and to avoid having the sprite visibly change position.
+Intro_CharS_SetNextChar:
+	
+	;
+	; Get the table index and starting ptr
+	;
+	ld   hl, .charDefTbl			; HL = .charDefTbl
+	; Generate the index to the table
+	ld   a, [wIntroCharScene]	; A = (wIntroCharScene / 2) - 2
+	srl  a						; /2 because it's an offset, not index
+	sub  a, (ISCC_ANDY/2)		; -2 to save bytes, since the Andy scene is the first one to call this
+	
+	; Pick the first player slot whose animation is ended.
+	;
+	; Because it relies on OSTB_GFXLOAD on being cleared, care should be taken
+	; to make sure the visible sprite is still animating when this is called. (more or less)
+	;
+	; (The win animations are set to *not* loop, so OSTB_GFXLOAD is unset when the animation ends)
+	
 	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
-	bit  0, a
-	jr   z, L1C63E9
-	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
-L1C63E9:;R
-	sla  a
-	ld   b, a
-	sla  a
-	add  b
-	ld   b, $00
+	bit  OSTB_GFXLOAD, a					; GFX loading on Pl1 side?
+	jr   z, .go								; If not, jump
+	ld   de, wOBJInfo_Pl2+iOBJInfo_Status	; Otherwise use Pl2
+.go:
+
+	;
+	; Index the table
+	;
+	
+	; Build the index to a table with 6 byte entries
+	; BC = A * 6
+	sla  a			; B = A * 2		
+	ld   b, a		
+	sla  a			; A = A * 4
+	add  b			; A += B
+	ld   b, $00		; Put that in BC
 	ld   c, a
-	add  hl, bc
+	
+	; Seek to the table entry
+	add  hl, bc		; BC = HL + BC
 	push hl
 	pop  bc
-	ld   a, [de]
-	and  a, $EF
-	or   a, $80
+	
+	;
+	; Update the wOBJInfo field
+	;
+	
+	
+	; Reinitialize status
+	ld   a, [de]		; A = iOBJInfo_Status
+	and  a, $FF^OST_ANIMEND ; Remove repeat flag
+	or   a, OST_VISIBLE	    ; Force visibility
 	ld   [de], a
-	ld   hl, $0010
+	
+	; byte0 -> iOBJInfo_BankNum0
+	ld   hl, iOBJInfo_BankNum0	; Seek to iOBJInfo_BankNum0
 	add  hl, de
+	ld   a, [bc]		; Read byte0
+	ldi  [hl], a		; Write to iOBJInfo_BankNum0
+	inc  bc
+	
+	; byte1-2 to iOBJInfo_OBJLstPtrTbl_*0
 	ld   a, [bc]
 	ldi  [hl], a
 	inc  bc
 	ld   a, [bc]
 	ldi  [hl], a
 	inc  bc
-	ld   a, [bc]
-	ldi  [hl], a
-	inc  bc
+	
+	; $00 -> iOBJInfo_OBJLstPtrTblOffset0
 	xor  a
 	ld   [hl], a
-	ld   hl, $0003
+	
+	; The target position should also hide the sprite behind the background.
+	
+	; byte3 -> iOBJInfo_X
+	ld   hl, iOBJInfo_X	; Seek to iOBJInfo_X
 	add  hl, de
 	ld   a, [bc]
 	ldi  [hl], a
 	inc  bc
-	inc  hl
+	inc  hl				; Ignore subpixel val
+	
+	; byte4 -> iOBJInfo_Y
 	ld   a, [bc]
 	ld   [hl], a
 	inc  bc
-	ld   hl, $001B
+	
+	; Anim speed
+	; byte5 -> iOBJInfo_FrameLeft & iOBJInfo_FrameTotal
+	ld   hl, iOBJInfo_FrameLeft
 	add  hl, de
 	ld   a, [bc]
-	ldi  [hl], a
-	ld   [hl], a
+	ldi  [hl], a ; iOBJInfo_FrameLeft
+	ld   [hl], a ; iOBJInfo_FrameTotal
 	push de
-	pop  hl
+	pop  hl	; DE = Start of wOBJInfo
+	
+	; Initialize animation with newly written settings
 	call OBJLstS_DoAnimTiming_Initial
+	
+	; Wait $08 frames
 	ld   a, $08
-	call L1C6629
+	call Intro_CharS_WaitVBlank
 	ret
-L1C6427: db $08
-L1C6428: db $DC
-L1C6429: db $60
-L1C642A: db $50
-L1C642B: db $40
-L1C642C: db $00
-L1C642D: db $08
-L1C642E: db $6D
-L1C642F: db $52
-L1C6430: db $20
-L1C6431: db $40
-L1C6432: db $00
-L1C6433: db $0A
-L1C6434: db $BD
-L1C6435: db $5D
-L1C6436: db $50
-L1C6437: db $40
-L1C6438: db $03
-L1C6439: db $07
-L1C643A: db $91
-L1C643B: db $53
-L1C643C: db $80
-L1C643D: db $00
-L1C643E: db $06
-L1C643F: db $0A
-L1C6440: db $FC
-L1C6441: db $40
-L1C6442: db $20
-L1C6443: db $50
-L1C6444: db $04
-L1C6445: db $0A
-L1C6446: db $0C
-L1C6447: db $46
-L1C6448: db $50
-L1C6449: db $24
-L1C644A: db $08
-L1C644B: db $07
-L1C644C: db $C1
-L1C644D: db $70
-L1C644E: db $20
-L1C644F: db $24
-L1C6450: db $00
-L1C6451: db $07
-L1C6452: db $26
-L1C6453: db $62
-L1C6454: db $80
-L1C6455: db $24
-L1C6456: db $00
-L1C6457: db $09
-L1C6458: db $53
-L1C6459: db $5B
-L1C645A: db $50
-L1C645B: db $24
-L1C645C: db $00
-L1C645D: db $09
-L1C645E: db $9E
-L1C645F: db $40
-L1C6460: db $84
-L1C6461: db $40
-L1C6462: db $00
-L1C6463: db $09
-L1C6464: db $91
-L1C6465: db $68
-L1C6466: db $1C
-L1C6467: db $40
-L1C6468: db $06
-L1C6469: db $00;X
-L1C646A: db $00;X
-L1C646B: db $00;X
-L1C646C: db $00;X
-L1C646D: db $00;X
-L1C646E: db $00;X
-L1C646F: db $07
-L1C6470: db $F2
-L1C6471: db $40
-L1C6472: db $84
-L1C6473: db $40
-L1C6474: db $00
-L1C6475: db $05
-L1C6476: db $AC
-L1C6477: db $40
-L1C6478: db $1C
-L1C6479: db $40
-L1C647A: db $00
-L1C647B: db $07
-L1C647C: db $3C
-L1C647D: db $44
-L1C647E: db $84
-L1C647F: db $40
-L1C6480: db $03
-L1C6481: db $05
-L1C6482: db $64
-L1C6483: db $44
-L1C6484: db $1C
-L1C6485: db $40
-L1C6486: db $0F
-IntroScene_IoriRise:;I
-	ld   bc, $012C
-L1C648A:;R
+	
+.charDefTbl:
+
+mIntroCharDef: MACRO
+	db BANK(\1)
+	dw \1
+	db \2,\3,\4
+ENDM
+
+	;;;;;;;;;;;;; ANIMATION TABLE       |  X|   Y| ANIMDELAY ; BANK | For Scene Loading
+	mIntroCharDef L0860DC,               $50, $40,       $00 ;  $08 | ISCC_MAI        
+	mIntroCharDef L08526D,               $20, $40,       $00 ;  $08 | ISCC_ATHENA     
+	mIntroCharDef L0A5DBD,               $50, $40,       $03 ;  $0A | ISCC_LEONA      
+	mIntroCharDef L075391,               $80, $00,       $06 ;  $07 | ISCC_ROBERT     
+	mIntroCharDef L0A40FC,               $20, $50,       $04 ;  $0A | ISCC_RYO        
+	mIntroCharDef L0A460C,               $50, $24,       $08 ;  $0A | ISCC_MRKARATE   
+	mIntroCharDef L0770C1,               $20, $24,       $00 ;  $07 | ISCC_MRBIG      
+	mIntroCharDef L076226,               $80, $24,       $00 ;  $07 | ISCC_GEESE      
+	mIntroCharDef L095B53,               $50, $24,       $00 ;  $09 | ISCC_KRAUSER    
+	mIntroCharDef L09409E,               $84, $40,       $00 ;  $09 | ISCC_DAIMON     
+	mIntroCharDef L096891,               $1C, $40,       $06 ;  $09 | ISCC_MATURE     
+	db      $00,  $00,$00,               $00, $00,       $00 ;  $00 | ISCC_CHG_IORIRISE (N/A)
+	mIntroCharDef L0740F2,               $84, $40,       $00 ;  $07 | ISCC_KYO        
+	mIntroCharDef L0540AC,               $1C, $40,       $00 ;  $05 | ISCC_IORIKYOA   
+	mIntroCharDef L07443C,               $84, $40,       $03 ;  $07 | ISCC_IORIKYOB   
+	mIntroCharDef L054464,               $1C, $40,       $0F ;  $05 | ISCC_IORIKYOC 
+	
+; =============== IntroScene_IoriRise ===============
+; OUT
+; - C flag: If set, end the intro prematurely
+IntroScene_IoriRise:
+	;
+	; Move Iori sprite upwards for $012C frames
+	;
+	ld   bc, $012C		; BC = Frames to move up
+.loop:
 	push bc
-	ld   hl, hScrollY
-	ld   bc, $0004
-	call L1C6507
-	ld   hl, $D705
-	ld   bc, $FFCA
-	call L1C6507
-	ld   hl, $D745
-	ld   bc, $FFCA
-	call L1C6507
-	ld   a, [$D705]
-	cp   $30
-	jr   nz, L1C64B2
-	ld   hl, $D701
-	res  7, [hl]
-L1C64B2:;R
-	ld   a, $01
-	call Intro_ChkStartPressed_MultiFrame
+		; Move BG Sun up at $00.04px/frame
+		ld   hl, hScrollY	; Pos ptr
+		ld   bc, $0004		; Speed
+		call .addToPos
+		
+		; Move Iori up at $00.36px/frame
+		ld   hl, wOBJInfo2+iOBJInfo_Y
+		ld   bc, -$0036
+		call .addToPos
+		ld   hl, wOBJInfo3+iOBJInfo_Y
+		ld   bc, -$0036
+		call .addToPos
+		
+		; When Iori is about to overlap the Sun, disable its BG priority.
+		;
+		; The reason the flag is set to begin with is because, otherwise,
+		; it would be visible on the lower section.
+		;
+		; The lower half of the sprite in wOBJInfo3 never reaches high enough,
+		; so it gets to keep its BG Priority flag.
+		
+		ld   a, [wOBJInfo2+iOBJInfo_Y]
+		cp   $30								; Has Y position $30?
+		jr   nz, .noRemBGPr						; If not, skip
+		ld   hl, wOBJInfo2+iOBJInfo_StatusEx0	; Otherwise, remove BG priority
+		res  OSXB_BGPRIORITY, [hl]
+	.noRemBGPr:
+	
+		; Wait 1 frame
+		ld   a, $01
+		call Intro_ChkStartPressed_MultiFrame
 	pop  bc
-	dec  bc
+	
+	dec  bc			; BC--
 	ld   a, b
-	or   a, c
-	jr   nz, L1C648A
+	or   a, c		; BC == 0?
+	jr   nz, .loop	; If not, loop
+	
+.end:
+
+	; Reset pal
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
-	call L00047C
-	ld   d, $01
+	
+	call DisableSectLYC
+	
+	ld   d, TILE_INTRO_BLACK
 	call ClearBGMapCustom
+	
+	; Reset scroll for char mode
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
+	
+	; Hide WINDOW
 	ld   a, $90
 	ldh  [rWY], a
 	ld   a, $07
 	ldh  [rWX], a
+	
+	; Disable LYC
 	xor  a
 	ldh  [rSTAT], a
+	
+	; Hide large sprite
 	ld   hl, wOBJInfo2+iOBJInfo_Status
-	res  7, [hl]
+	res  OSTB_VISIBLE, [hl]
 	ld   hl, wOBJInfo3+iOBJInfo_Status
-	res  7, [hl]
+	res  OSTB_VISIBLE, [hl]
+	
+	; Set new pal
 	ld   a, $F0
 	ldh  [rBGP], a
 	ld   a, $8C
 	ldh  [rOBP0], a
 	ld   a, $4C
 	ldh  [rOBP1], a
+	
+	; Loop the animations from the remainder of the modes (ISCC_KYO and above) 
 	ld   a, $FF
-	ld   [$C1B3], a
-	call L1C63D5
-	ld   a, $1E
+	ld   [wIntroLoopOBJAnim], a
+	
+	; Next mode
+	call Intro_CharS_SetNextChar
+	ld   a, ISCC_KYO
 	ld   [wIntroCharScene], a
-	ld   a, $02
+	ld   a, ISC_CHAR
 	ld   [wIntroScene], a
 	xor  a
 	ret
-L1C6507:;C
-	push hl
-	ld   d, [hl]
+	
+; IN
+; - HL: Ptr to pixel position
+; - BC: Amount to add
+.addToPos:
+	push hl ; Save coord ptr
+		; HL = Coordinate
+		ld   d, [hl]	; D = Pixels
+		inc  hl
+		ld   e, [hl]	; E = Subpixels
+		push de			;
+		pop  hl			; Move to HL
+		
+		; DE = HL + BC
+		add  hl, bc		
+		push hl
+		pop  de
+	pop  hl ; Restore coord ptr
+	
+	; Write back updated coord
+	ld  [hl], d		; Write pixels
 	inc  hl
-	ld   e, [hl]
-	push de
-	pop  hl
-	add  hl, bc
-	push hl
-	pop  de
-	pop  hl
-	ld   [hl], d
-	inc  hl
-	ld   [hl], e
-	ret
-IntroScene_IoriKyo:;I
-	ld   a, $0F
-L1C6517:;R
-	push af
-	ld   b, a
-	ldh  a, [hScrollX]
-	sub  a, b
-	ldh  [hScrollX], a
-	ldh  a, [rWX]
-	sub  a, b
-	ldh  [rWX], a
-	ld   a, $01
-	call Intro_ChkStartPressed_MultiFrame
-	pop  af
-	dec  a
-	jr   nz, L1C6517
-	ld   a, $78
-	call Intro_ChkStartPressed_MultiFrame
-	scf
-	ret
-L1C6533:;CR
-	push af
-	ld   b, a
-	ldh  a, [hScrollY]
-	add  b
-	ldh  [hScrollY], a
-	ld   a, $01
-	call L1C6629
-	pop  af
-	dec  a
-	jr   nz, L1C6533
-	ret
-L1C6544:;CR
-	push af
-	ld   b, a
-	ldh  a, [hScrollY]
-	sub  a, b
-	ldh  [hScrollY], a
-	ld   a, $01
-	call L1C6629
-	pop  af
-	dec  a
-	jr   nz, L1C6544
-	ret
-L1C6555:;CR
-	push af
-	ld   b, a
-	ldh  a, [hScrollX]
-	add  b
-	ldh  [hScrollX], a
-	ld   a, $01
-	call L1C6629
-	pop  af
-	dec  a
-	jr   nz, L1C6555
-	ret
-L1C6566:;CR
-	push af
-	ld   b, a
-	ldh  a, [hScrollX]
-	sub  a, b
-	ldh  [hScrollX], a
-	ld   a, $01
-	call L1C6629
-	pop  af
-	dec  a
-	jr   nz, L1C6566
-	ret
-L1C6577:;CR
-	push af
-	push bc
-	push de
-	push hl
-	call FillBGRect
-	ld   a, $01
-	call L1C6629
-	pop  hl
-	ld   de, hROMBank
-	add  hl, de
-	pop  de
-	pop  bc
-	pop  af
-	dec  a
-	jr   nz, L1C6577
-	ret
-L1C658F:;CR
-	push af
-	push bc
-	push de
-	push hl
-	call FillBGRect
-	ld   a, $01
-	call L1C6629
-	pop  hl
-	ld   de, $0020
-	add  hl, de
-	pop  de
-	pop  bc
-	pop  af
-	dec  a
-	jr   nz, L1C658F
-	ret
-L1C65A7:;CR
-	push af
-	push bc
-	push de
-	push hl
-	call FillBGRect
-	ld   a, $01
-	call L1C6629
-	pop  hl
-	dec  hl
-	pop  de
-	pop  bc
-	pop  af
-	dec  a
-	jr   nz, L1C65A7
-	ret
-L1C65BC:;CR
-	push af
-	push bc
-	push de
-	push hl
-	call FillBGRect
-	ld   a, $01
-	call L1C6629
-	pop  hl
-	inc  hl
-	pop  de
-	pop  bc
-	pop  af
-	dec  a
-	jr   nz, L1C65BC
-	ret
-L1C65D1:;CR
-	push af
-	push bc
-	push de
-	push hl
-	push bc
-	push de
-	ld   b, $01
-	ld   d, $00
-	call FillBGRect
-	pop  de
-	pop  bc
-	push de
-	pop  hl
-	ld   b, $01
-	ld   d, $00
-	call FillBGRect
-	ld   a, $01
-	call L1C6629
-	pop  hl
-	pop  de
-	dec  hl
-	inc  de
-	pop  bc
-	pop  af
-	dec  a
-	jr   nz, L1C65D1
-	ret
-L1C65F8:;CR
-	push af
-	push de
-	push hl
-	push de
-	ld   b, $15
-	ld   c, $01
-	ld   d, $01
-	call FillBGRect
-	pop  de
-	push de
-	pop  hl
-	ld   b, $15
-	ld   c, $01
-	ld   d, $01
-	call FillBGRect
-	ld   a, $04
-	call L1C6629
-	pop  hl
-	pop  de
-	ld   bc, $0020
-	add  hl, bc
-	push hl
-	ld   hl, hROMBank
-	add  hl, de
-	push hl
-	pop  de
-	pop  hl
-	pop  af
-	dec  a
-	jr   nz, L1C65F8
-	ret
-L1C6629:;C
-	push af
-	ld   a, [$C1B3]
-	ld   b, a
-	or   a
-	jr   nz, L1C6655
-	pop  af
-L1C6632:;R
-	push af
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	call OBJLstS_DoAnimTiming_NoLoop
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	call OBJLstS_DoAnimTiming_NoLoop
-	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
-	call L0035B9
-	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
-	call L0035B9
-	ld   a, $01
-	call Intro_ChkStartPressed_MultiFrame
-	pop  af
-	dec  a
-	jr   nz, L1C6632
-	ret
-L1C6655:;R
-	pop  af
-L1C6656:;R
-	push af
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	call OBJLstS_DoAnimTiming_Loop
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	call OBJLstS_DoAnimTiming_Loop
-	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
-	call L0035B9
-	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
-	call L0035B9
-	ld   a, $01
-	call Intro_ChkStartPressed_MultiFrame
-	pop  af
-	dec  a
-	jr   nz, L1C6656
+	ld   [hl], e	; Write subpixels
 	ret
 	
-; =============== Intro_Chars_LoadVRAM ===============
-Intro_Chars_LoadVRAM:
+; =============== IntroScene_IoriKyo ===============
+; Iori and Kyo cutouts scroll towards the center of the screen.
+; OUT
+; - C flag: If set, end the intro
+IntroScene_IoriKyo:
+	
+	;
+	; Move "sections" at 15 frames at 15px/frame
+	;
+	ld   a, $0F	
+.loop:
+	push af
+		ld   b, a	
+		; Move Iori to the right
+		ldh  a, [hScrollX]	; hScrollX -= A
+		sub  a, b
+		ldh  [hScrollX], a
+		; Move Kyo to the left
+		ldh  a, [rWX]		; rWX -= A
+		sub  a, b
+		ldh  [rWX], a
+		
+		; Wait 1 frame
+		ld   a, $01
+		call Intro_ChkStartPressed_MultiFrame
+	pop  af
+	dec  a			; Are we done?
+	jr   nz, .loop	; If not, loop
+	
+	; Wait $78 frames
+	ld   a, $78
+	call Intro_ChkStartPressed_MultiFrame
+	
+	; End the intro 
+	scf 		; Set C flag
+	ret
+	
+; =============== Intro_CharS_MoveBG*_MultiFrame ===============
+; Sets of subroutines to move the background across multiple frames.
+; 
+; IN
+; - A: Number of frames *and* movement speed.
+;      This value is used for both purposes, meaning the target
+;      location grows exponentially.
+;
+
+; =============== Intro_CharS_MoveBGUp_MultiFrame ===============
+; Moves the background up across multiple frames.
+; IN
+; - A: Number of frames *and* movement speed
+Intro_CharS_MoveBGUp_MultiFrame:
+	push af
+		; Scroll screen down to move BG up
+		ld   b, a
+		ldh  a, [hScrollY]	; hScrollY += A
+		add  b
+		ldh  [hScrollY], a
+		
+		; Wait 1 frame
+		ld   a, $01
+		call Intro_CharS_WaitVBlank
+	pop  af
+	dec  a								; FramesLeft--
+	jr   nz, Intro_CharS_MoveBGUp_MultiFrame	; No frames left? If not, loop
+	ret
+	
+; =============== Intro_CharS_MoveBGDown_MultiFrame ===============
+; Moves the background down across multiple frames.
+; IN
+; - A: Number of frames *and* movement speed
+Intro_CharS_MoveBGDown_MultiFrame:
+	push af
+		; Scroll screen up to move BG down
+		ld   b, a
+		ldh  a, [hScrollY]	; hScrollY -= A
+		sub  a, b
+		ldh  [hScrollY], a
+		
+		; Wait 1 frame
+		ld   a, $01
+		call Intro_CharS_WaitVBlank
+	pop  af
+	dec  a									; FramesLeft--
+	jr   nz, Intro_CharS_MoveBGDown_MultiFrame	; No frames left? If not, loop
+	ret
+	
+; =============== Intro_CharS_MoveBGLeft_MultiFrame ===============
+; Moves the background left across multiple frames.
+; IN
+; - A: Number of frames *and* movement speed
+Intro_CharS_MoveBGLeft_MultiFrame:
+	push af
+		; Scroll screen right to move BG left
+		ld   b, a
+		ldh  a, [hScrollX]	; hScrollX += A
+		add  b
+		ldh  [hScrollX], a
+		
+		; Wait 1 frame
+		ld   a, $01
+		call Intro_CharS_WaitVBlank
+	pop  af
+	dec  a									; FramesLeft--
+	jr   nz, Intro_CharS_MoveBGLeft_MultiFrame	; No frames left? If not, loop
+	ret
+	
+; =============== Intro_CharS_MoveBGRight_MultiFrame ===============
+; Moves the background right across multiple frames.
+; IN
+; - A: Number of frames *and* movement speed
+Intro_CharS_MoveBGRight_MultiFrame:
+	push af
+		; Scroll screen left to move BG right
+		ld   b, a
+		ldh  a, [hScrollX] ; hScrollX -= A
+		sub  a, b
+		ldh  [hScrollX], a
+		
+		; Wait 1 frame
+		ld   a, $01
+		call Intro_CharS_WaitVBlank
+	pop  af
+	dec  a									; FramesLeft--
+	jr   nz, Intro_CharS_MoveBGRight_MultiFrame	; No frames left? If not, loop
+	ret
+	
+; =============== Intro_CharS_FillBGRect* ===============
+; Set of functions that animate the tilemap to enlarge or shrink the white rectangles during the intro.
+; These work by drawing a small rectangle to the tilemap and then moving the starting position.
+; This is repeated for the specified amount of frames.
+;
+; Since the tilemap isn't cleared before drawing the rectangles, this allows the growing/shrinking
+; effect to work, otherwise it would look like small rectangles moving.
+; 
+	
+; =============== Intro_CharS_FillBGRectUp ===============
+; Draws a rectangle that grows upwards every frame.
+; IN
+; - A: Number of frames
+; IN (FillBGRect)
+; - HL: Initial rect top left corner in tilemap
+; - B: Rect Width
+; - C: Rect Height
+; - D: Tile ID to use
+Intro_CharS_FillBGRectUp_MultiFrame:
+	push af
+	push bc
+	push de
+		push hl
+			; Draw rectangle with current settings
+			call FillBGRect
+			
+			; Wait 1 frame
+			ld   a, $01
+			call Intro_CharS_WaitVBlank
+		pop  hl
+		
+		; Move origin up by 1 tile
+		ld   de, -BG_TILECOUNT_H
+		add  hl, de
+	pop  de
+	pop  bc
+	pop  af
+	
+	dec  a											; Are we done?
+	jr   nz, Intro_CharS_FillBGRectUp_MultiFrame	; If not, loop
+	ret
+
+; =============== Intro_CharS_FillBGRectDown_MultiFrame ===============
+; Draws a rectangle that grows downwards every frame.
+; IN
+; - A: Number of frames
+; IN (FillBGRect)
+; - HL: Initial rect top left corner in tilemap
+; - B: Rect Width
+; - C: Rect Height
+; - D: Tile ID to use
+Intro_CharS_FillBGRectDown_MultiFrame:
+	push af
+	push bc
+	push de
+		push hl
+			; Draw rectangle with current settings
+			call FillBGRect
+			
+			; Wait 1 frame
+			ld   a, $01
+			call Intro_CharS_WaitVBlank
+		pop  hl
+		
+		; Move origin down by 1 tile
+		ld   de, BG_TILECOUNT_H
+		add  hl, de
+	pop  de
+	pop  bc
+	pop  af
+	
+	dec  a											; Are we done?
+	jr   nz, Intro_CharS_FillBGRectDown_MultiFrame	; If not, loop
+	ret
+	
+; =============== Intro_CharS_FillBGRectLeft_MultiFrame ===============
+; Draws a rectangle that grows left every frame.
+; IN
+; - A: Number of frames
+; IN (FillBGRect)
+; - HL: Initial rect top left corner in tilemap
+; - B: Rect Width
+; - C: Rect Height
+; - D: Tile ID to use
+Intro_CharS_FillBGRectLeft_MultiFrame:
+	push af
+	push bc
+	push de
+		push hl
+			; Draw rectangle with current settings
+			call FillBGRect
+			
+			; Wait 1 frame
+			ld   a, $01
+			call Intro_CharS_WaitVBlank
+		pop  hl
+		
+		; Move origin left by 1 tile
+		dec  hl
+	pop  de
+	pop  bc
+	pop  af
+	
+	dec  a											; Are we done?
+	jr   nz, Intro_CharS_FillBGRectLeft_MultiFrame	; If not, loop
+	ret
+	
+; =============== Intro_CharS_FillBGRectRight_MultiFrame ===============
+; Draws a rectangle that grows right every frame.
+; IN
+; - A: Number of frames
+; IN (FillBGRect)
+; - HL: Initial rect top left corner in tilemap
+; - B: Rect Width
+; - C: Rect Height
+; - D: Tile ID to use
+Intro_CharS_FillBGRectRight_MultiFrame:
+	push af
+	push bc
+	push de
+		push hl
+			; Draw rectangle with current settings
+			call FillBGRect
+			
+			; Wait 1 frame
+			ld   a, $01
+			call Intro_CharS_WaitVBlank
+		pop  hl
+		
+		; Move origin right by 1 tile
+		inc  hl
+	pop  de
+	pop  bc
+	pop  af
+	
+	dec  a	
+	jr   nz, Intro_CharS_FillBGRectRight_MultiFrame	; If not, loop
+	ret
+	
+; =============== Intro_CharS_CropOpenH_MultiFrame ===============
+; Applies an horizontal crop opening transition to the tilemap.
+;
+; This is handled by drawing two white vertical strips, one at the left and one at the right.
+; After the frame ends, the origin points are moved outwards.
+;
+; IN
+; - A: Number of frames
+; - HL: Left origin point
+; - DE: Right origin point
+; - C: Rect Height
+Intro_CharS_CropOpenH_MultiFrame:
+	push af
+		push bc
+			;#####
+			push de
+				push hl
+					;------
+					; Draw vertical strip on the left
+					push bc
+						push de
+							ld   b, $01 				; B = Width
+							ld   d, TILE_INTRO_WHITE
+							call FillBGRect
+						pop  de
+					pop  bc
+					
+					; Draw vertical strip on the right		
+					push de
+					pop  hl						; HL = Right origin point
+					ld   b, $01					; B = Width
+					ld   d, TILE_INTRO_WHITE
+					call FillBGRect
+					
+					; Wait 1 frame
+					ld   a, $01
+					call Intro_CharS_WaitVBlank
+					;------
+				pop  hl ; Restore left origin
+			pop  de ; Restore right origin
+			;#####
+			
+			; Move left origin point left by 1 tile
+			dec  hl 
+			; Move right origin point right by 1 tile
+			inc  de
+		pop  bc
+	pop  af
+	dec  a
+	jr   nz, Intro_CharS_CropOpenH_MultiFrame
+	ret
+	
+; =============== Intro_CharS_CropCloseH_MultiFrame ===============
+; Applies a vertical crop closing transition to the tilemap.
+;
+; This is handled by drawing two black horizontal strips, one at the top and the other at the bottom.
+; After the frame ends, the origin points are moved inwards.
+;
+; See also: Intro_CharS_CropOpenH_MultiFrame
+;
+; IN
+; - A: Number of frames
+; - HL: Top origin point
+; - DE: Bottom origin point
+Intro_CharS_CropCloseH_MultiFrame:
+		push af
+		push de
+			push hl
+				;------
+				; Draw horizontal strip at the top
+				push de
+					ld   b, $15					; B = Width
+					ld   c, $01					; C = Height
+					ld   d, TILE_INTRO_BLACK	
+					call FillBGRect
+				pop  de
+				
+				; Draw horizontal strip at the bottom
+				push de
+				pop  hl							; HL = Bottom origin point
+					ld   b, $15					; B = Width
+					ld   c, $01					; C = Height
+				ld   d, TILE_INTRO_BLACK
+				call FillBGRect
+				
+				; Wait 4 frames
+				ld   a, $04
+				call Intro_CharS_WaitVBlank
+				;------
+			pop  hl ; Restore top origin 
+		pop  de ; Restore bottom origin 
+		
+		; Move top origin point down by 1 tile
+		ld   bc, BG_TILECOUNT_H			; HL += BG_TILECOUNT_H 
+		add  hl, bc
+		
+		; Move bottom origin point up by 1 tile
+		push hl
+			ld   hl, -BG_TILECOUNT_H	; DE -= BG_TILECOUNT_H 
+			add  hl, de
+			push hl
+			pop  de
+		pop  hl
+	pop  af
+	dec  a
+	jr   nz, Intro_CharS_CropCloseH_MultiFrame
+	ret
+	
+; =============== Intro_CharS_WaitVBlank ===============
+; Common code shared across character scenes.
+Intro_CharS_WaitVBlank:
+	; If wIntroLoopOBJAnim is set, use OBJLstS_DoAnimTiming_Loop as animation function,
+	; otherwise use OBJLstS_DoAnimTiming_NoLoop. The two code paths are otherwise identical. 
+	push af
+		ld   a, [wIntroLoopOBJAnim]
+		ld   b, a
+		or   a				; wIntroLoopOBJAnim != 0?
+		jr   nz, .useLoop	; If so, jump
+.noLoop:
+	pop  af
+.delay1:
+	push af
+		; Animate Pl1 and Pl2 sprites
+		ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
+		call OBJLstS_DoAnimTiming_NoLoop
+		ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
+		call OBJLstS_DoAnimTiming_NoLoop
+		; Apply H speed
+		ld   de, wOBJInfo_Pl1+iOBJInfo_Status
+		call OBJLstS_ApplyXSpeed
+		ld   de, wOBJInfo_Pl2+iOBJInfo_Status
+		call OBJLstS_ApplyXSpeed
+		; Wait 1 frame
+		ld   a, $01
+		call Intro_ChkStartPressed_MultiFrame
+	pop  af
+	dec  a				; Waited all frames?
+	jr   nz, .delay1	; If not, loop
+	ret
+	
+.useLoop:
+	pop  af
+.delay2:
+	push af
+		; Animate Pl1 and Pl2 sprites
+		ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
+		call OBJLstS_DoAnimTiming_Loop
+		ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
+		call OBJLstS_DoAnimTiming_Loop
+		; Apply H speed
+		ld   de, wOBJInfo_Pl1+iOBJInfo_Status
+		call OBJLstS_ApplyXSpeed
+		ld   de, wOBJInfo_Pl2+iOBJInfo_Status
+		call OBJLstS_ApplyXSpeed
+		; Wait 1 frame
+		ld   a, $01
+		call Intro_ChkStartPressed_MultiFrame
+	pop  af
+	dec  a				; Waited all frames?
+	jr   nz, .delay2	; If not, loop
+	ret
+	
+; =============== Intro_CharS_LoadVRAM ===============
+Intro_CharS_LoadVRAM:
 	di
 	;-----------------------------------
 	rst  $10				; Stop LCD
@@ -7951,7 +8373,7 @@ Intro_Chars_LoadVRAM:
 	xor  a
 	ld   [wIntroScene], a		; Not necessary
 	ld   [wIntroCharScene], a
-	ld   [$C1B3], a
+	ld   [wIntroLoopOBJAnim], a
 	
 	; Reset screen & coords
 	call ClearBGMap
@@ -7966,7 +8388,7 @@ Intro_Chars_LoadVRAM:
 	; Load GFX for scene
 	ld   hl, GFXLZ_IntroBG
 	ld   de, wLZSS_Buffer
-	call DecompressGFX
+	call DecompressLZSS
 	ld   hl, wLZSS_Buffer
 	ld   de, $9000			; full 3rd section	
 	ld   b, $80
@@ -7978,7 +8400,7 @@ Intro_Chars_LoadVRAM:
 	
 	ld   hl, GFXLZ_Intro_IoriRiseOBJ
 	ld   de, wLZSS_Buffer
-	call DecompressGFX
+	call DecompressLZSS
 	ld   hl, wLZSS_Buffer
 	ld   de, $8800+$0460	; lower part of 2nd section
 	ld   b, $3A
@@ -7999,15 +8421,16 @@ Intro_Chars_LoadVRAM:
 	ld   de, OBJInfoInit_Andy_WinA
 	call OBJLstS_InitFrom
 	
-	; Move the OSTB_VISIBLE flag to the set-specific fields
+	; Hide both sprites while the GFX are loading, and make them display
+	; behind the background (for the window reveal effect to work).
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
+	res  OSTB_VISIBLE, [hl]					; Hide for now
+	inc  hl									; Seek to iOBJInfo_StatusEx0
+	set  OSXB_BGPRIORITY, [hl]				; Set BG priority
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status	; Do the same for Andy's sprite
 	res  OSTB_VISIBLE, [hl]
 	inc  hl
-	set  OSTB_VISIBLE, [hl]
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	res  OSTB_VISIBLE, [hl]
-	inc  hl
-	set  OSTB_VISIBLE, [hl]
+	set  OSXB_BGPRIORITY, [hl]
 	
 	; Initialize buffer info
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
@@ -8037,132 +8460,209 @@ Intro_Chars_LoadVRAM:
 	ld   a, $C0		; BG
 	ldh  [rBGP], a
 	ret
-L1C6729:;C
+	
+; =============== Intro_IoriRise_LoadVRAM ===============
+; Sets up the scene for Iori rising from below.
+Intro_IoriRise_LoadVRAM:
 	di
-	rst  $10
-	ld   a, $1E
-	ld   b, $6F
+	;-----------------------------------
+	rst  $10				; Stop LCD
+	
+	; The scene uses the sector system to display the black borders thanks to the WINDOW layer.
+	
+	; Set the middle section start/end, where the WINDOW is disabled and sprites are visible.
+	ld   a, $1E			; Disable at this scanline
+	ld   b, $6F			; Enable again here
 	call SetSectLYC
+	
+	; Reset DMG Pal & vars
 	xor  $FF
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
 	xor  a
 	ld   [wIntroScene], a
+	
+	; Clear BG layer
 	call ClearBGMap
-	ld   d, $01
+	; Color WINDOW black to hide sprites
+	ld   d, TILE_INTRO_BLACK
 	call ClearWINDOWMapCustom
+	
+	; Reset coords
 	xor  a
 	ldh  [hScrollY], a
 	ld   [wFieldScrollX], a
 	ld   [wFieldScrollY], a
+	
+	;
+	; Display "Sun" at the center of the tilemap
+	;
+	
+	; Set BG scrolling to partially hide it behind the WINDOW.
+	; As frames pass it will become progressively more visible.
 	ld   a, $F0
 	ldh  [hScrollX], a
 	ld   a, $E0
 	ldh  [hScrollY], a
-	ld   hl, $72A0
+	
+	; Decompress Sun tilemap to a rectangle area
+	ld   hl, BGLZ_Intro_Sun
 	ld   de, wLZSS_Buffer
-	call DecompressGFX
+	call DecompressLZSS
 	ld   de, wLZSS_Buffer
 	ld   hl, BGMap_Begin
-	ld   b, $10
-	ld   c, $06
+	ld   b, $10			; Width
+	ld   c, $06			; Height
 	call CopyBGToRect
+	
+	; Really disable the player sprites, to be sure I guess
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	res  7, [hl]
+	res  OSTB_VISIBLE, [hl]
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	res  7, [hl]
+	res  OSTB_VISIBLE, [hl]
+	
+	; Write Iori's sprites to the special slots.
+	; This Iori is big enough that two sprites are needed to display him.
 	ld   hl, wOBJInfo2+iOBJInfo_Status
-	ld   de, L1C6934
+	ld   de, OBJInfoInit_Intro_Iori
 	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo3+iOBJInfo_Status
-	ld   de, L1C6934
+	ld   de, OBJInfoInit_Intro_Iori
 	call OBJLstS_InitFrom
+	
+	; ???
 	ld   a, $04
 	ld   [$D753], a
+	
+	; Display the WINDOW
 	ld   a, $00
 	ldh  [rWY], a
 	ld   a, $07
 	ldh  [rWX], a
-	ld   a, $E7
-	rst  $18
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
+	
+	; Enable scanline (and VBlank, for some reason) interrupts
 	ldh  a, [rSTAT]
-	or   a, $40
+	or   a, STAT_LYC
 	ldh  [rSTAT], a
 	ldh  a, [rIE]
-	or   a, $03
+	or   a, I_STAT|I_VBLANK
 	ldh  [rIE], a
+	
 	ei
+	
+	; Wait 2 frames while the sprite graphics load
 	call Task_PassControl_NoDelay
 	call Task_PassControl_NoDelay
-	ld   a, $8C
+	
+	; Only after that set the proper palettes to make things visible
+	ld   a, $8C					; OBJ palettes
 	ldh  [rOBP0], a
 	ld   a, $00
 	ldh  [rOBP1], a
-	ld   a, $1B
+	ld   a, $1B					; Standard colors for the BG
 	ldh  [hScreenSect1BGP], a
-	ld   a, $FF
+	ld   a, $FF					; Completely black borders
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect2BGP], a
 	ret
-L1C67BF:;C
+	
+; =============== Intro_IoriKyo_LoadVRAM ===============
+; Sets up the scene for Iori and Kyo cutouts moving into view.
+Intro_IoriKyo_LoadVRAM:
 	di
-	rst  $10
+	;-----------------------------------
+	rst  $10				; Stop LCD
+	
+	; Reset DMG Pal & vars
 	xor  a
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
 	ld   [wIntroScene], a
+	
+	; Reset screen & coords
 	call ClearBGMap
 	call ClearWINDOWMap
+	
 	xor  a
 	ldh  [hScrollY], a
 	ld   [wFieldScrollX], a
 	ld   [wFieldScrollY], a
+	
+	; 
 	ld   a, $60
 	ldh  [hScrollX], a
+	
+	; Notes:
+	; - Due to the palettes used, Black and White are inverted in this scene.
+	; - This scene does not use the section system.
+	;   Instead, Kyo is in the WINDOW layer and gets scrolled independently.
+	
+	; Create white horizontal bar for Iori for upper section
 	ld   hl, $9820
 	ld   b, $20
 	ld   c, $07
-	ld   d, $01
+	ld   d, TILE_INTRO_BLACK
 	call FillBGRect
+	
+	; Create white horizontal bar for Kyo in the lower section
 	ld   hl, $9920
 	ld   b, $20
 	ld   c, $08
-	ld   d, $01
+	ld   d, TILE_INTRO_BLACK
 	call FillBGRect
+	
+	; Create white backdrop for the section used to display Kyo
 	ld   hl, WINDOWMap_Begin
 	ld   b, $14
 	ld   c, $08
 	ld   d, $01
 	call FillBGRect
-	ld   hl, $71DE
+	
+	; Draw Iori tilemap on the left side of the upper section.
+	; Written to the BG layer.
+	ld   hl, BGLZ_Intro_IoriCutout
 	ld   de, wLZSS_Buffer
-	call DecompressGFX
+	call DecompressLZSS
 	ld   de, wLZSS_Buffer
 	ld   hl, $9820
 	ld   b, $0E
 	ld   c, $07
 	call CopyBGToRect
-	ld   hl, $7240
+	
+	; Draw Kyo tilemap on the right side of the lower section
+	; Written to the top of the WINDOW, which will be moved down
+	ld   hl, BGLZ_Intro_KyoCutout
 	ld   de, wLZSS_Buffer
-	call DecompressGFX
+	call DecompressLZSS
 	ld   de, wLZSS_Buffer
 	ld   hl, WINDOWMap_Begin
 	ld   b, $0E
 	ld   c, $08
 	call CopyBGToRect
+	
+	; Remove all sprites
 	call ClearOBJInfo
+	
+	; Align WINDOW with lower horizontal bar, off-screen on the right
 	ld   a, $90
 	ld   a, $48
 	ldh  [rWY], a
 	ld   a, $A3
 	ldh  [rWX], a
-	ld   a, $E7
-	rst  $18
+	
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
 	ei
 	call Task_PassControl_NoDelay
 	call Task_PassControl_NoDelay
+	
+	; Set palettes
 	ld   a, $18
 	ldh  [rOBP0], a
 	ld   a, $00
@@ -8226,2464 +8726,103 @@ TextDef_Intro3:
 	dw $9920
 .c:	db $14
 .s: db "       AGAIN....",C_NL,C_NL,C_NL,C_NL
-L1C6934: db $80
-L1C6935: db $80
-L1C6936: db $00
-L1C6937: db $18
-L1C6938: db $00
-L1C6939: db $50
-L1C693A: db $00
-L1C693B: db $00
-L1C693C: db $00
-L1C693D: db $00
-L1C693E: db $00
-L1C693F: db $00
-L1C6940: db $00
-L1C6941: db $C6
-L1C6942: db $00
-L1C6943: db $80
-L1C6944: db $1C
-L1C6945: db $53
-L1C6946: db $69
-L1C6947: db $00
-L1C6948: db $00
-L1C6949: db $53
-L1C694A: db $69
-L1C694B: db $00
-L1C694C: db $00
-L1C694D: db $00
-L1C694E: db $00
-L1C694F: db $02
-L1C6950: db $02
-L1C6951: db $C0
-L1C6952: db $D8
-L1C6953: db $5D
-L1C6954: db $69
-L1C6955: db $FF
-L1C6956: db $FF
-L1C6957: db $9B
-L1C6958: db $69
-L1C6959: db $FF
-L1C695A: db $FF
-L1C695B: db $FF;X
-L1C695C: db $FF;X
-L1C695D: db $80
-L1C695E: db $00
-L1C695F: db $00
-L1C6960: db $FF;X
-L1C6961: db $FF;X
-L1C6962: db $FF;X
-L1C6963: db $67
-L1C6964: db $69
-L1C6965: db $00
-L1C6966: db $00
-L1C6967: db $11
-L1C6968: db $40
-L1C6969: db $21
-L1C696A: db $18
-L1C696B: db $40
-L1C696C: db $29
-L1C696D: db $1A
-L1C696E: db $40
-L1C696F: db $31
-L1C6970: db $1C
-L1C6971: db $40
-L1C6972: db $39
-L1C6973: db $1E
-L1C6974: db $40
-L1C6975: db $41
-L1C6976: db $20
-L1C6977: db $40
-L1C6978: db $49
-L1C6979: db $22
-L1C697A: db $30
-L1C697B: db $29
-L1C697C: db $24
-L1C697D: db $30
-L1C697E: db $31
-L1C697F: db $26
-L1C6980: db $30
-L1C6981: db $39
-L1C6982: db $28
-L1C6983: db $30
-L1C6984: db $41
-L1C6985: db $2A
-L1C6986: db $30
-L1C6987: db $49
-L1C6988: db $2C
-L1C6989: db $20
-L1C698A: db $29
-L1C698B: db $2E
-L1C698C: db $20
-L1C698D: db $31
-L1C698E: db $30
-L1C698F: db $20
-L1C6990: db $39
-L1C6991: db $32
-L1C6992: db $20
-L1C6993: db $41
-L1C6994: db $34
-L1C6995: db $20
-L1C6996: db $49
-L1C6997: db $36
-L1C6998: db $35
-L1C6999: db $51
-L1C699A: db $38
-L1C699B: db $80
-L1C699C: db $00
-L1C699D: db $00
-L1C699E: db $FF;X
-L1C699F: db $FF;X
-L1C69A0: db $FF;X
-L1C69A1: db $A5
-L1C69A2: db $69
-L1C69A3: db $00
-L1C69A4: db $00
-L1C69A5: db $0C
-L1C69A6: db $60
-L1C69A7: db $21
-L1C69A8: db $00
-L1C69A9: db $60
-L1C69AA: db $29
-L1C69AB: db $02
-L1C69AC: db $60
-L1C69AD: db $31
-L1C69AE: db $04
-L1C69AF: db $60
-L1C69B0: db $39
-L1C69B1: db $06
-L1C69B2: db $60
-L1C69B3: db $41
-L1C69B4: db $08
-L1C69B5: db $60
-L1C69B6: db $49
-L1C69B7: db $0A
-L1C69B8: db $50
-L1C69B9: db $21
-L1C69BA: db $0C
-L1C69BB: db $50
-L1C69BC: db $29
-L1C69BD: db $0E
-L1C69BE: db $50
-L1C69BF: db $31
-L1C69C0: db $10
-L1C69C1: db $50
-L1C69C2: db $39
-L1C69C3: db $12
-L1C69C4: db $50
-L1C69C5: db $41
-L1C69C6: db $14
-L1C69C7: db $50
-L1C69C8: db $49
-L1C69C9: db $16
-GFXLZ_IntroBG: db $E5
-L1C69CB: db $40
-L1C69CC: db $6F
-L1C69CD: db $00
-L1C69CE: db $07
-L1C69CF: db $06
-L1C69D0: db $FF
-L1C69D1: db $07
-L1C69D2: db $07
-L1C69D3: db $07
-L1C69D4: db $00
-L1C69D5: db $52
-L1C69D6: db $F8
-L1C69D7: db $00
-L1C69D8: db $E4
-L1C69D9: db $00
-L1C69DA: db $C8
-L1C69DB: db $CC
-L1C69DC: db $4B
-L1C69DD: db $FC
-L1C69DE: db $AF
-L1C69DF: db $00
-L1C69E0: db $E0
-L1C69E1: db $00
-L1C69E2: db $00
-L1C69E3: db $06
-L1C69E4: db $7B
-L1C69E5: db $5F
-L1C69E6: db $7F
-L1C69E7: db $55
-L1C69E8: db $0F
-L1C69E9: db $00
-L1C69EA: db $01
-L1C69EB: db $00
-L1C69EC: db $0E
-L1C69ED: db $02
-L1C69EE: db $1C
-L1C69EF: db $00
-L1C69F0: db $75
-L1C69F1: db $1D
-L1C69F2: db $08
-L1C69F3: db $7B
-L1C69F4: db $03
-L1C69F5: db $60
-L1C69F6: db $00
-L1C69F7: db $1F
-L1C69F8: db $D8
-L1C69F9: db $1A
-L1C69FA: db $5F
-L1C69FB: db $3F
-L1C69FC: db $7F
-L1C69FD: db $77
-L1C69FE: db $00
-L1C69FF: db $0F
-L1C6A00: db $00
-L1C6A01: db $F3
-L1C6A02: db $06
-L1C6A03: db $03
-L1C6A04: db $E4
-L1C6A05: db $F8
-L1C6A06: db $F9
-L1C6A07: db $FE
-L1C6A08: db $7F
-L1C6A09: db $05
-L1C6A0A: db $3F
-L1C6A0B: db $FD
-L1C6A0C: db $00
-L1C6A0D: db $2B
-L1C6A0E: db $A0
-L1C6A0F: db $00
-L1C6A10: db $C0
-L1C6A11: db $00
-L1C6A12: db $F2
-L1C6A13: db $00
-L1C6A14: db $5D
-L1C6A15: db $E2
-L1C6A16: db $00
-L1C6A17: db $C4
-L1C6A18: db $02
-L1C6A19: db $CF
-L1C6A1A: db $AB
-L1C6A1B: db $FD
-L1C6A1C: db $02
-L1C6A1D: db $5A
-L1C6A1E: db $84
-L1C6A1F: db $04
-L1C6A20: db $04
-L1C6A21: db $02
-L1C6A22: db $3B
-L1C6A23: db $82
-L1C6A24: db $00
-L1C6A25: db $9C
-L1C6A26: db $1D
-L1C6A27: db $98
-L1C6A28: db $08
-L1C6A29: db $18
-L1C6A2A: db $08
-L1C6A2B: db $00
-L1C6A2C: db $60
-L1C6A2D: db $00
-L1C6A2E: db $07
-L1C6A2F: db $A7
-L1C6A30: db $05
-L1C6A31: db $01
-L1C6A32: db $08
-L1C6A33: db $9F
-L1C6A34: db $7F
-L1C6A35: db $5F
-L1C6A36: db $07
-L1C6A37: db $07
-L1C6A38: db $89
-L1C6A39: db $01
-L1C6A3A: db $0B
-L1C6A3B: db $07
-L1C6A3C: db $BF
-L1C6A3D: db $E8
-L1C6A3E: db $FA
-L1C6A3F: db $FC
-L1C6A40: db $5D
-L1C6A41: db $00
-L1C6A42: db $3B
-L1C6A43: db $39
-L1C6A44: db $F7
-L1C6A45: db $F3
-L1C6A46: db $CB
-L1C6A47: db $E7
-L1C6A48: db $4F
-L1C6A49: db $87
-L1C6A4A: db $2B
-L1C6A4B: db $1F
-L1C6A4C: db $0F
-L1C6A4D: db $09
-L1C6A4E: db $2F
-L1C6A4F: db $10
-L1C6A50: db $3E
-L1C6A51: db $08
-L1C6A52: db $AD
-L1C6A53: db $A8
-L1C6A54: db $05
-L1C6A55: db $01
-L1C6A56: db $08
-L1C6A57: db $03
-L1C6A58: db $08
-L1C6A59: db $3F
-L1C6A5A: db $1E
-L1C6A5B: db $5D
-L1C6A5C: db $A0
-L1C6A5D: db $A0
-L1C6A5E: db $75
-L1C6A5F: db $08
-L1C6A60: db $67
-L1C6A61: db $3C
-L1C6A62: db $D3
-L1C6A63: db $6C
-L1C6A64: db $BB
-L1C6A65: db $0B
-L1C6A66: db $44
-L1C6A67: db $6B
-L1C6A68: db $84
-L1C6A69: db $ED
-L1C6A6A: db $78
-L1C6A6B: db $FF
-L1C6A6C: db $07
-L1C6A6D: db $04
-L1C6A6E: db $D5
-L1C6A6F: db $98
-L1C6A70: db $08
-L1C6A71: db $FE
-L1C6A72: db $08
-L1C6A73: db $FB
-L1C6A74: db $08
-L1C6A75: db $FD
-L1C6A76: db $20
-L1C6A77: db $D9
-L1C6A78: db $29
-L1C6A79: db $01
-L1C6A7A: db $7F
-L1C6A7B: db $72
-L1C6A7C: db $38
-L1C6A7D: db $DD
-L1C6A7E: db $BF
-L1C6A7F: db $08
-L1C6A80: db $00
-L1C6A81: db $AD
-L1C6A82: db $DE
-L1C6A83: db $B7
-L1C6A84: db $CE
-L1C6A85: db $3F
-L1C6A86: db $C6
-L1C6A87: db $BA
-L1C6A88: db $47
-L1C6A89: db $87
-L1C6A8A: db $60
-L1C6A8B: db $43
-L1C6A8C: db $7B
-L1C6A8D: db $01
-L1C6A8E: db $6C
-L1C6A8F: db $08
-L1C6A90: db $D8
-L1C6A91: db $58
-L1C6A92: db $8A
-L1C6A93: db $A8
-L1C6A94: db $E6
-L1C6A95: db $EB
-L1C6A96: db $77
-L1C6A97: db $18
-L1C6A98: db $33
-L1C6A99: db $08
-L1C6A9A: db $39
-L1C6A9B: db $88
-L1C6A9C: db $D8
-L1C6A9D: db $19
-L1C6A9E: db $EF
-L1C6A9F: db $18
-L1C6AA0: db $40
-L1C6AA1: db $8C
-L1C6AA2: db $9F
-L1C6AA3: db $1F
-L1C6AA4: db $00
-L1C6AA5: db $6F
-L1C6AA6: db $8F
-L1C6AA7: db $37
-L1C6AA8: db $C7
-L1C6AA9: db $DB
-L1C6AAA: db $23
-L1C6AAB: db $7D
-L1C6AAC: db $81
-L1C6AAD: db $13
-L1C6AAE: db $BE
-L1C6AAF: db $C0
-L1C6AB0: db $AF
-L1C6AB1: db $08
-L1C6AB2: db $D7
-L1C6AB3: db $E0
-L1C6AB4: db $B8
-L1C6AB5: db $07
-L1C6AB6: db $A0
-L1C6AB7: db $02
-L1C6AB8: db $7F
-L1C6AB9: db $02
-L1C6ABA: db $EB
-L1C6ABB: db $70
-L1C6ABC: db $ED
-L1C6ABD: db $30
-L1C6ABE: db $F5
-L1C6ABF: db $00
-L1C6AC0: db $18
-L1C6AC1: db $E6
-L1C6AC2: db $98
-L1C6AC3: db $B3
-L1C6AC4: db $CC
-L1C6AC5: db $FB
-L1C6AC6: db $C4
-L1C6AC7: db $DF
-L1C6AC8: db $85
-L1C6AC9: db $E8
-L1C6ACA: db $FD
-L1C6ACB: db $62
-L1C6ACC: db $BF
-L1C6ACD: db $3F
-L1C6ACE: db $28
-L1C6ACF: db $1F
-L1C6AD0: db $09
-L1C6AD1: db $09
-L1C6AD2: db $EF
-L1C6AD3: db $0F
-L1C6AD4: db $77
-L1C6AD5: db $07
-L1C6AD6: db $09
-L1C6AD7: db $BB
-L1C6AD8: db $03
-L1C6AD9: db $09
-L1C6ADA: db $56
-L1C6ADB: db $FF
-L1C6ADC: db $04
-L1C6ADD: db $FE
-L1C6ADE: db $00
-L1C6ADF: db $FC
-L1C6AE0: db $D0
-L1C6AE1: db $03
-L1C6AE2: db $FB
-L1C6AE3: db $A8
-L1C6AE4: db $04
-L1C6AE5: db $F7
-L1C6AE6: db $00
-L1C6AE7: db $E7
-L1C6AE8: db $00
-L1C6AE9: db $C7
-L1C6AEA: db $D7
-L1C6AEB: db $D3
-L1C6AEC: db $15
-L1C6AED: db $DB
-L1C6AEE: db $B9
-L1C6AEF: db $BF
-L1C6AF0: db $01
-L1C6AF1: db $82
-L1C6AF2: db $04
-L1C6AF3: db $C1
-L1C6AF4: db $00
-L1C6AF5: db $6D
-L1C6AF6: db $C0
-L1C6AF7: db $0A
-L1C6AF8: db $00
-L1C6AF9: db $E0
-L1C6AFA: db $18
-L1C6AFB: db $08
-L1C6AFC: db $BE
-L1C6AFD: db $88
-L1C6AFE: db $54
-L1C6AFF: db $7F
-L1C6B00: db $04
-L1C6B01: db $3F
-L1C6B02: db $08
-L1C6B03: db $9F
-L1C6B04: db $48
-L1C6B05: db $C7
-L1C6B06: db $FF
-L1C6B07: db $58
-L1C6B08: db $F0
-L1C6B09: db $08
-L1C6B0A: db $00
-L1C6B0B: db $10
-L1C6B0C: db $08
-L1C6B0D: db $B0
-L1C6B0E: db $80
-L1C6B0F: db $C8
-L1C6B10: db $AB
-L1C6B11: db $B8
-L1C6B12: db $E4
-L1C6B13: db $08
-L1C6B14: db $F8
-L1C6B15: db $D0
-L1C6B16: db $FE
-L1C6B17: db $08
-L1C6B18: db $68
-L1C6B19: db $FE
-L1C6B1A: db $09
-L1C6B1B: db $68
-L1C6B1C: db $07
-L1C6B1D: db $03
-L1C6B1E: db $C0
-L1C6B1F: db $0B
-L1C6B20: db $00
-L1C6B21: db $40
-L1C6B22: db $E0
-L1C6B23: db $18
-L1C6B24: db $08
-L1C6B25: db $11
-L1C6B26: db $21
-L1C6B27: db $01
-L1C6B28: db $20
-L1C6B29: db $03
-L1C6B2A: db $14
-L1C6B2B: db $74
-L1C6B2C: db $02
-L1C6B2D: db $08
-L1C6B2E: db $79
-L1C6B2F: db $04
-L1C6B30: db $7E
-L1C6B31: db $00
-L1C6B32: db $81
-L1C6B33: db $C3
-L1C6B34: db $BB
-L1C6B35: db $3B
-L1C6B36: db $18
-L1C6B37: db $00
-L1C6B38: db $90
-L1C6B39: db $18
-L1C6B3A: db $05
-L1C6B3B: db $0A
-L1C6B3C: db $29
-L1C6B3D: db $A8
-L1C6B3E: db $0F
-L1C6B3F: db $CD
-L1C6B40: db $08
-L1C6B41: db $8D
-L1C6B42: db $08
-L1C6B43: db $0E
-L1C6B44: db $60
-L1C6B45: db $4E
-L1C6B46: db $14
-L1C6B47: db $E0
-L1C6B48: db $8E
-L1C6B49: db $A0
-L1C6B4A: db $09
-L1C6B4B: db $8F
-L1C6B4C: db $08
-L1C6B4D: db $0D
-L1C6B4E: db $40
-L1C6B4F: db $58
-L1C6B50: db $01
-L1C6B51: db $06
-L1C6B52: db $81
-L1C6B53: db $00
-L1C6B54: db $10
-L1C6B55: db $61
-L1C6B56: db $08
-L1C6B57: db $10
-L1C6B58: db $40
-L1C6B59: db $04
-L1C6B5A: db $D8
-L1C6B5B: db $45
-L1C6B5C: db $70
-L1C6B5D: db $A5
-L1C6B5E: db $B0
-L1C6B5F: db $C6
-L1C6B60: db $C0
-L1C6B61: db $44
-L1C6B62: db $E6
-L1C6B63: db $F8
-L1C6B64: db $E2
-L1C6B65: db $E8
-L1C6B66: db $E3
-L1C6B67: db $08
-L1C6B68: db $E1
-L1C6B69: db $EC
-L1C6B6A: db $14
-L1C6B6B: db $F0
-L1C6B6C: db $F6
-L1C6B6D: db $2D
-L1C6B6E: db $88
-L1C6B6F: db $36
-L1C6B70: db $08
-L1C6B71: db $16
-L1C6B72: db $40
-L1C6B73: db $1A
-L1C6B74: db $0A
-L1C6B75: db $60
-L1C6B76: db $03
-L1C6B77: db $A8
-L1C6B78: db $F8
-L1C6B79: db $88
-L1C6B7A: db $F0
-L1C6B7B: db $50
-L1C6B7C: db $00
-L1C6B7D: db $18
-L1C6B7E: db $58
-L1C6B7F: db $57
-L1C6B80: db $8C
-L1C6B81: db $59
-L1C6B82: db $86
-L1C6B83: db $E9
-L1C6B84: db $06
-L1C6B85: db $95
-L1C6B86: db $A8
-L1C6B87: db $42
-L1C6B88: db $6C
-L1C6B89: db $80
-L1C6B8A: db $2E
-L1C6B8B: db $80
-L1C6B8C: db $B7
-L1C6B8D: db $C8
-L1C6B8E: db $40
-L1C6B8F: db $56
-L1C6B90: db $18
-L1C6B91: db $0F
-L1C6B92: db $4F
-L1C6B93: db $07
-L1C6B94: db $67
-L1C6B95: db $80
-L1C6B96: db $3C
-L1C6B97: db $2E
-L1C6B98: db $9F
-L1C6B99: db $3F
-L1C6B9A: db $30
-L1C6B9B: db $1F
-L1C6B9C: db $38
-L1C6B9D: db $50
-L1C6B9E: db $08
-L1C6B9F: db $7F
-L1C6BA0: db $12
-L1C6BA1: db $B8
-L1C6BA2: db $38
-L1C6BA3: db $17
-L1C6BA4: db $98
-L1C6BA5: db $93
-L1C6BA6: db $C0
-L1C6BA7: db $D0
-L1C6BA8: db $E0
-L1C6BA9: db $20
-L1C6BAA: db $C3
-L1C6BAB: db $E8
-L1C6BAC: db $08
-L1C6BAD: db $F8
-L1C6BAE: db $D1
-L1C6BAF: db $FC
-L1C6BB0: db $E1
-L1C6BB1: db $F0
-L1C6BB2: db $41
-L1C6BB3: db $61
-L1C6BB4: db $18
-L1C6BB5: db $BF
-L1C6BB6: db $60
-L1C6BB7: db $EF
-L1C6BB8: db $30
-L1C6BB9: db $CF
-L1C6BBA: db $08
-L1C6BBB: db $95
-L1C6BBC: db $18
-L1C6BBD: db $10
-L1C6BBE: db $6B
-L1C6BBF: db $08
-L1C6BC0: db $7B
-L1C6BC1: db $C8
-L1C6BC2: db $BD
-L1C6BC3: db $0B
-L1C6BC4: db $2A
-L1C6BC5: db $01
-L1C6BC6: db $D5
-L1C6BC7: db $0A
-L1C6BC8: db $DA
-L1C6BC9: db $38
-L1C6BCA: db $EA
-L1C6BCB: db $0A
-L1C6BCC: db $ED
-L1C6BCD: db $D5
-L1C6BCE: db $0A
-L1C6BCF: db $89
-L1C6BD0: db $DD
-L1C6BD1: db $08
-L1C6BD2: db $DE
-L1C6BD3: db $0C
-L1C6BD4: db $CE
-L1C6BD5: db $0A
-L1C6BD6: db $74
-L1C6BD7: db $8C
-L1C6BD8: db $9C
-L1C6BD9: db $09
-L1C6BDA: db $D8
-L1C6BDB: db $02
-L1C6BDC: db $09
-L1C6BDD: db $EB
-L1C6BDE: db $03
-L1C6BDF: db $8A
-L1C6BE0: db $09
-L1C6BE1: db $C7
-L1C6BE2: db $07
-L1C6BE3: db $FF
-L1C6BE4: db $06
-L1C6BE5: db $F8
-L1C6BE6: db $00
-L1C6BE7: db $FB
-L1C6BE8: db $AD
-L1C6BE9: db $00
-L1C6BEA: db $7B
-L1C6BEB: db $00
-L1C6BEC: db $7D
-L1C6BED: db $00
-L1C6BEE: db $5B
-L1C6BEF: db $FE
-L1C6BF0: db $00
-L1C6BF1: db $54
-L1C6BF2: db $FD
-L1C6BF3: db $02
-L1C6BF4: db $78
-L1C6BF5: db $00
-L1C6BF6: db $B7
-L1C6BF7: db $00
-L1C6BF8: db $A1
-L1C6BF9: db $A3
-L1C6BFA: db $7C
-L1C6BFB: db $7C
-L1C6BFC: db $88
-L1C6BFD: db $0B
-L1C6BFE: db $50
-L1C6BFF: db $D1
-L1C6C00: db $00
-L1C6C01: db $73
-L1C6C02: db $77
-L1C6C03: db $A0
-L1C6C04: db $01
-L1C6C05: db $F7
-L1C6C06: db $00
-L1C6C07: db $98
-L1C6C08: db $9D
-L1C6C09: db $80
-L1C6C0A: db $85
-L1C6C0B: db $B0
-L1C6C0C: db $00
-L1C6C0D: db $B6
-L1C6C0E: db $A8
-L1C6C0F: db $AA
-L1C6C10: db $81
-L1C6C11: db $99
-L1C6C12: db $82
-L1C6C13: db $C7
-L1C6C14: db $00
-L1C6C15: db $6A
-L1C6C16: db $FF
-L1C6C17: db $09
-L1C6C18: db $03
-L1C6C19: db $7F
-L1C6C1A: db $00
-L1C6C1B: db $BF
-L1C6C1C: db $00
-L1C6C1D: db $1F
-L1C6C1E: db $07
-L1C6C1F: db $DF
-L1C6C20: db $8F
-L1C6C21: db $EF
-L1C6C22: db $4F
-L1C6C23: db $6F
-L1C6C24: db $0F
-L1C6C25: db $59
-L1C6C26: db $09
-L1C6C27: db $B5
-L1C6C28: db $89
-L1C6C29: db $3F
-L1C6C2A: db $A8
-L1C6C2B: db $C9
-L1C6C2C: db $FB
-L1C6C2D: db $04
-L1C6C2E: db $F7
-L1C6C2F: db $00
-L1C6C30: db $54
-L1C6C31: db $F4
-L1C6C32: db $08
-L1C6C33: db $F0
-L1C6C34: db $08
-L1C6C35: db $F3
-L1C6C36: db $2A
-L1C6C37: db $E0
-L1C6C38: db $EC
-L1C6C39: db $13
-L1C6C3A: db $E3
-L1C6C3B: db $E8
-L1C6C3C: db $E7
-L1C6C3D: db $20
-L1C6C3E: db $CF
-L1C6C3F: db $C0
-L1C6C40: db $E0
-L1C6C41: db $0A
-L1C6C42: db $A3
-L1C6C43: db $F0
-L1C6C44: db $80
-L1C6C45: db $09
-L1C6C46: db $FC
-L1C6C47: db $FF
-L1C6C48: db $FE
-L1C6C49: db $08
-L1C6C4A: db $03
-L1C6C4B: db $54
-L1C6C4C: db $21
-L1C6C4D: db $08
-L1C6C4E: db $F8
-L1C6C4F: db $4A
-L1C6C50: db $0F
-L1C6C51: db $08
-L1C6C52: db $00
-L1C6C53: db $F9
-L1C6C54: db $05
-L1C6C55: db $04
-L1C6C56: db $F5
-L1C6C57: db $84
-L1C6C58: db $F6
-L1C6C59: db $C6
-L1C6C5A: db $08
-L1C6C5B: db $E6
-L1C6C5C: db $08
-L1C6C5D: db $14
-L1C6C5E: db $62
-L1C6C5F: db $FB
-L1C6C60: db $13
-L1C6C61: db $08
-L1C6C62: db $03
-L1C6C63: db $08
-L1C6C64: db $01
-L1C6C65: db $1F
-L1C6C66: db $5C
-L1C6C67: db $E0
-L1C6C68: db $20
-L1C6C69: db $FC
-L1C6C6A: db $A0
-L1C6C6B: db $B1
-L1C6C6C: db $0F
-L1C6C6D: db $C1
-L1C6C6E: db $FD
-L1C6C6F: db $41
-L1C6C70: db $61
-L1C6C71: db $08
-L1C6C72: db $10
-L1C6C73: db $FE
-L1C6C74: db $08
-L1C6C75: db $3F
-L1C6C76: db $C0
-L1C6C77: db $B9
-L1C6C78: db $0E
-L1C6C79: db $0F
-L1C6C7A: db $F0
-L1C6C7B: db $07
-L1C6C7C: db $F8
-L1C6C7D: db $D8
-L1C6C7E: db $80
-L1C6C7F: db $40
-L1C6C80: db $30
-L1C6C81: db $01
-L1C6C82: db $B0
-L1C6C83: db $40
-L1C6C84: db $70
-L1C6C85: db $C8
-L1C6C86: db $EC
-L1C6C87: db $90
-L1C6C88: db $D8
-L1C6C89: db $A8
-L1C6C8A: db $52
-L1C6C8B: db $53
-L1C6C8C: db $58
-L1C6C8D: db $56
-L1C6C8E: db $08
-L1C6C8F: db $9A
-L1C6C90: db $18
-L1C6C91: db $02
-L1C6C92: db $1C
-L1C6C93: db $BD
-L1C6C94: db $00
-L1C6C95: db $0E
-L1C6C96: db $00
-L1C6C97: db $E0
-L1C6C98: db $00
-L1C6C99: db $E0
-L1C6C9A: db $87
-L1C6C9B: db $E0
-L1C6C9C: db $E2
-L1C6C9D: db $10
-L1C6C9E: db $08
-L1C6C9F: db $28
-L1C6CA0: db $80
-L1C6CA1: db $8C
-L1C6CA2: db $F3
-L1C6CA3: db $00
-L1C6CA4: db $3F
-L1C6CA5: db $75
-L1C6CA6: db $FF
-L1C6CA7: db $40
-L1C6CA8: db $10
-L1C6CA9: db $C8
-L1C6CAA: db $C7
-L1C6CAB: db $08
-L1C6CAC: db $F8
-L1C6CAD: db $08
-L1C6CAE: db $FF
-L1C6CAF: db $38
-L1C6CB0: db $09
-L1C6CB1: db $40
-L1C6CB2: db $61
-L1C6CB3: db $04
-L1C6CB4: db $C0
-L1C6CB5: db $59
-L1C6CB6: db $9C
-L1C6CB7: db $6D
-L1C6CB8: db $02
-L1C6CB9: db $10
-L1C6CBA: db $05
-L1C6CBB: db $80
-L1C6CBC: db $09
-L1C6CBD: db $01
-L1C6CBE: db $C0
-L1C6CBF: db $01
-L1C6CC0: db $25
-L1C6CC1: db $F0
-L1C6CC2: db $F7
-L1C6CC3: db $08
-L1C6CC4: db $F6
-L1C6CC5: db $79
-L1C6CC6: db $00
-L1C6CC7: db $3B
-L1C6CC8: db $00
-L1C6CC9: db $58
-L1C6CCA: db $3D
-L1C6CCB: db $02
-L1C6CCC: db $1E
-L1C6CCD: db $00
-L1C6CCE: db $B9
-L1C6CCF: db $C7
-L1C6CD0: db $E7
-L1C6CD1: db $C1
-L1C6CD2: db $47
-L1C6CD3: db $E1
-L1C6CD4: db $A0
-L1C6CD5: db $EE
-L1C6CD6: db $E0
-L1C6CD7: db $FF
-L1C6CD8: db $18
-L1C6CD9: db $08
-L1C6CDA: db $50
-L1C6CDB: db $F4
-L1C6CDC: db $0B
-L1C6CDD: db $00
-L1C6CDE: db $E8
-L1C6CDF: db $01
-L1C6CE0: db $F8
-L1C6CE1: db $00
-L1C6CE2: db $FC
-L1C6CE3: db $78
-L1C6CE4: db $15
-L1C6CE5: db $7C
-L1C6CE6: db $70
-L1C6CE7: db $7E
-L1C6CE8: db $50
-L1C6CE9: db $BE
-L1C6CEA: db $08
-L1C6CEB: db $BF
-L1C6CEC: db $08
-L1C6CED: db $08
-L1C6CEE: db $3F
-L1C6CEF: db $13
-L1C6CF0: db $33
-L1C6CF1: db $17
-L1C6CF2: db $00
-L1C6CF3: db $88
-L1C6CF4: db $D8
-L1C6CF5: db $C7
-L1C6CF6: db $4E
-L1C6CF7: db $EF
-L1C6CF8: db $F8
-L1C6CF9: db $F7
-L1C6CFA: db $E0
-L1C6CFB: db $B0
-L1C6CFC: db $E9
-L1C6CFD: db $01
-L1C6CFE: db $01
-L1C6CFF: db $38
-L1C6D00: db $0C
-L1C6D01: db $C1
-L1C6D02: db $68
-L1C6D03: db $18
-L1C6D04: db $E0
-L1C6D05: db $09
-L1C6D06: db $E8
-L1C6D07: db $18
-L1C6D08: db $BD
-L1C6D09: db $28
-L1C6D0A: db $06
-L1C6D0B: db $00
-L1C6D0C: db $38
-L1C6D0D: db $00
-L1C6D0E: db $79
-L1C6D0F: db $8C
-L1C6D10: db $0A
-L1C6D11: db $55
-L1C6D12: db $08
-L1C6D13: db $0A
-L1C6D14: db $10
-L1C6D15: db $DA
-L1C6D16: db $80
-L1C6D17: db $00
-L1C6D18: db $40
-L1C6D19: db $00
-L1C6D1A: db $14
-L1C6D1B: db $C7
-L1C6D1C: db $07
-L1C6D1D: db $C6
-L1C6D1E: db $B8
-L1C6D1F: db $89
-L1C6D20: db $F0
-L1C6D21: db $8B
-L1C6D22: db $0B
-L1C6D23: db $F7
-L1C6D24: db $01
-L1C6D25: db $20
-L1C6D26: db $04
-L1C6D27: db $A0
-L1C6D28: db $20
-L1C6D29: db $CB
-L1C6D2A: db $07
-L1C6D2B: db $01
-L1C6D2C: db $7E
-L1C6D2D: db $08
-L1C6D2E: db $00
-L1C6D2F: db $78
-L1C6D30: db $07
-L1C6D31: db $00
-L1C6D32: db $D0
-L1C6D33: db $00
-L1C6D34: db $60
-L1C6D35: db $80
-L1C6D36: db $00
-L1C6D37: db $F6
-L1C6D38: db $F7
-L1C6D39: db $76
-L1C6D3A: db $77
-L1C6D3B: db $84
-L1C6D3C: db $87
-L1C6D3D: db $B4
-L1C6D3E: db $08
-L1C6D3F: db $B7
-L1C6D40: db $D4
-L1C6D41: db $DF
-L1C6D42: db $C0
-L1C6D43: db $0A
-L1C6D44: db $E0
-L1C6D45: db $EF
-L1C6D46: db $00
-L1C6D47: db $41
-L1C6D48: db $FE
-L1C6D49: db $09
-L1C6D4A: db $01
-L1C6D4B: db $FD
-L1C6D4C: db $03
-L1C6D4D: db $FB
-L1C6D4E: db $07
-L1C6D4F: db $B8
-L1C6D50: db $56
-L1C6D51: db $0F
-L1C6D52: db $58
-L1C6D53: db $1F
-L1C6D54: db $78
-L1C6D55: db $3F
-L1C6D56: db $00
-L1C6D57: db $88
-L1C6D58: db $EC
-L1C6D59: db $59
-L1C6D5A: db $E3
-L1C6D5B: db $00
-L1C6D5C: db $67
-L1C6D5D: db $58
-L1C6D5E: db $09
-L1C6D5F: db $23
-L1C6D60: db $7B
-L1C6D61: db $98
-L1C6D62: db $AE
-L1C6D63: db $0C
-L1C6D64: db $FF
-L1C6D65: db $02
-L1C6D66: db $F8
-L1C6D67: db $00
-L1C6D68: db $A8
-L1C6D69: db $00
-L1C6D6A: db $C0
-L1C6D6B: db $AB
-L1C6D6C: db $00
-L1C6D6D: db $80
-L1C6D6E: db $00
-L1C6D6F: db $00
-L1C6D70: db $00
-L1C6D71: db $1C
-L1C6D72: db $08
-L1C6D73: db $7B
-L1C6D74: db $7A
-L1C6D75: db $01
-L1C6D76: db $00
-L1C6D77: db $49
-L1C6D78: db $01
-L1C6D79: db $21
-L1C6D7A: db $30
-L1C6D7B: db $08
-L1C6D7C: db $0E
-L1C6D7D: db $D4
-L1C6D7E: db $7C
-L1C6D7F: db $01
-L1C6D80: db $3F
-L1C6D81: db $00
-L1C6D82: db $0F
-L1C6D83: db $00
-L1C6D84: db $83
-L1C6D85: db $03
-L1C6D86: db $5D
-L1C6D87: db $E1
-L1C6D88: db $90
-L1C6D89: db $40
-L1C6D8A: db $90
-L1C6D8B: db $7D
-L1C6D8C: db $01
-L1C6D8D: db $FE
-L1C6D8E: db $00
-L1C6D8F: db $51
-L1C6D90: db $FC
-L1C6D91: db $02
-L1C6D92: db $F8
-L1C6D93: db $02
-L1C6D94: db $F2
-L1C6D95: db $F0
-L1C6D96: db $F6
-L1C6D97: db $08
-L1C6D98: db $49
-L1C6D99: db $F4
-L1C6D9A: db $08
-L1C6D9B: db $EC
-L1C6D9C: db $E0
-L1C6D9D: db $09
-L1C6D9E: db $E4
-L1C6D9F: db $E8
-L1C6DA0: db $09
-L1C6DA1: db $E0
-L1C6DA2: db $99
-L1C6DA3: db $30
-L1C6DA4: db $00
-L1C6DA5: db $9C
-L1C6DA6: db $80
-L1C6DA7: db $3A
-L1C6DA8: db $00
-L1C6DA9: db $01
-L1C6DAA: db $00
-L1C6DAB: db $30
-L1C6DAC: db $10
-L1C6DAD: db $66
-L1C6DAE: db $C0
-L1C6DAF: db $6E
-L1C6DB0: db $40
-L1C6DB1: db $ED
-L1C6DB2: db $07
-L1C6DB3: db $D0
-L1C6DB4: db $4A
-L1C6DB5: db $10
-L1C6DB6: db $38
-L1C6DB7: db $08
-L1C6DB8: db $20
-L1C6DB9: db $08
-L1C6DBA: db $06
-L1C6DBB: db $2E
-L1C6DBC: db $10
-L1C6DBD: db $1F
-L1C6DBE: db $7E
-L1C6DBF: db $7F
-L1C6DC0: db $E0
-L1C6DC1: db $FF
-L1C6DC2: db $C3
-L1C6DC3: db $CB
-L1C6DC4: db $C7
-L1C6DC5: db $AA
-L1C6DC6: db $01
-L1C6DC7: db $CF
-L1C6DC8: db $09
-L1C6DC9: db $44
-L1C6DCA: db $08
-L1C6DCB: db $41
-L1C6DCC: db $08
-L1C6DCD: db $E3
-L1C6DCE: db $0C
-L1C6DCF: db $4F
-L1C6DD0: db $62
-L1C6DD1: db $4E
-L1C6DD2: db $FB
-L1C6DD3: db $88
-L1C6DD4: db $01
-L1C6DD5: db $DE
-L1C6DD6: db $FE
-L1C6DD7: db $04
-L1C6DD8: db $78
-L1C6DD9: db $F9
-L1C6DDA: db $E0
-L1C6DDB: db $E7
-L1C6DDC: db $C6
-L1C6DDD: db $30
-L1C6DDE: db $0C
-L1C6DDF: db $3E
-L1C6DE0: db $00
-L1C6DE1: db $00
-L1C6DE2: db $EC
-L1C6DE3: db $86
-L1C6DE4: db $01
-L1C6DE5: db $20
-L1C6DE6: db $C1
-L1C6DE7: db $B0
-L1C6DE8: db $70
-L1C6DE9: db $52
-L1C6DEA: db $38
-L1C6DEB: db $00
-L1C6DEC: db $1C
-L1C6DED: db $00
-L1C6DEE: db $0E
-L1C6DEF: db $8E
-L1C6DF0: db $68
-L1C6DF1: db $C7
-L1C6DF2: db $83
-L1C6DF3: db $08
-L1C6DF4: db $C3
-L1C6DF5: db $50
-L1C6DF6: db $B8
-L1C6DF7: db $F8
-L1C6DF8: db $FC
-L1C6DF9: db $D8
-L1C6DFA: db $A8
-L1C6DFB: db $40
-L1C6DFC: db $66
-L1C6DFD: db $88
-L1C6DFE: db $0A
-L1C6DFF: db $30
-L1C6E00: db $21
-L1C6E01: db $18
-L1C6E02: db $14
-L1C6E03: db $08
-L1C6E04: db $2F
-L1C6E05: db $0C
-L1C6E06: db $80
-L1C6E07: db $88
-L1C6E08: db $81
-L1C6E09: db $08
-L1C6E0A: db $19
-L1C6E0B: db $30
-L1C6E0C: db $08
-L1C6E0D: db $DA
-L1C6E0E: db $E0
-L1C6E0F: db $08
-L1C6E10: db $10
-L1C6E11: db $08
-L1C6E12: db $00
-L1C6E13: db $01
-L1C6E14: db $00
-L1C6E15: db $25
-L1C6E16: db $AD
-L1C6E17: db $A0
-L1C6E18: db $04
-L1C6E19: db $68
-L1C6E1A: db $C2
-L1C6E1B: db $38
-L1C6E1C: db $09
-L1C6E1D: db $60
-L1C6E1E: db $0A
-L1C6E1F: db $55
-L1C6E20: db $20
-L1C6E21: db $08
-L1C6E22: db $B0
-L1C6E23: db $08
-L1C6E24: db $30
-L1C6E25: db $68
-L1C6E26: db $7F
-L1C6E27: db $00
-L1C6E28: db $55
-L1C6E29: db $3F
-L1C6E2A: db $00
-L1C6E2B: db $1F
-L1C6E2C: db $00
-L1C6E2D: db $0F
-L1C6E2E: db $02
-L1C6E2F: db $07
-L1C6E30: db $02
-L1C6E31: db $5A
-L1C6E32: db $03
-L1C6E33: db $04
-L1C6E34: db $01
-L1C6E35: db $04
-L1C6E36: db $E0
-L1C6E37: db $10
-L1C6E38: db $0A
-L1C6E39: db $18
-L1C6E3A: db $11
-L1C6E3B: db $E5
-L1C6E3C: db $E8
-L1C6E3D: db $ED
-L1C6E3E: db $08
-L1C6E3F: db $E9
-L1C6E40: db $EC
-L1C6E41: db $EA
-L1C6E42: db $20
-L1C6E43: db $5F
-L1C6E44: db $EF
-L1C6E45: db $08
-L1C6E46: db $E7
-L1C6E47: db $10
-L1C6E48: db $58
-L1C6E49: db $08
-L1C6E4A: db $40
-L1C6E4B: db $20
-L1C6E4C: db $21
-L1C6E4D: db $F5
-L1C6E4E: db $E2
-L1C6E4F: db $28
-L1C6E50: db $F2
-L1C6E51: db $F3
-L1C6E52: db $F0
-L1C6E53: db $F1
-L1C6E54: db $08
-L1C6E55: db $28
-L1C6E56: db $F9
-L1C6E57: db $F8
-L1C6E58: db $01
-L1C6E59: db $FC
-L1C6E5A: db $02
-L1C6E5B: db $00
-L1C6E5C: db $65
-L1C6E5D: db $40
-L1C6E5E: db $48
-L1C6E5F: db $21
-L1C6E60: db $08
-L1C6E61: db $20
-L1C6E62: db $30
-L1C6E63: db $30
-L1C6E64: db $32
-L1C6E65: db $04
-L1C6E66: db $10
-L1C6E67: db $83
-L1C6E68: db $18
-L1C6E69: db $0B
-L1C6E6A: db $82
-L1C6E6B: db $09
-L1C6E6C: db $81
-L1C6E6D: db $60
-L1C6E6E: db $C8
-L1C6E6F: db $00
-L1C6E70: db $89
-L1C6E71: db $B8
-L1C6E72: db $FF
-L1C6E73: db $1F
-L1C6E74: db $0F
-L1C6E75: db $0A
-L1C6E76: db $07
-L1C6E77: db $3F
-L1C6E78: db $0A
-L1C6E79: db $0A
-L1C6E7A: db $2F
-L1C6E7B: db $44
-L1C6E7C: db $80
-L1C6E7D: db $C2
-L1C6E7E: db $B8
-L1C6E7F: db $61
-L1C6E80: db $08
-L1C6E81: db $20
-L1C6E82: db $9B
-L1C6E83: db $08
-L1C6E84: db $90
-L1C6E85: db $01
-L1C6E86: db $40
-L1C6E87: db $18
-L1C6E88: db $40
-L1C6E89: db $08
-L1C6E8A: db $01
-L1C6E8B: db $20
-L1C6E8C: db $4E
-L1C6E8D: db $6F
-L1C6E8E: db $38
-L1C6E8F: db $A6
-L1C6E90: db $21
-L1C6E91: db $79
-L1C6E92: db $27
-L1C6E93: db $77
-L1C6E94: db $00
-L1C6E95: db $16
-L1C6E96: db $36
-L1C6E97: db $30
-L1C6E98: db $F8
-L1C6E99: db $78
-L1C6E9A: db $FC
-L1C6E9B: db $3C
-L1C6E9C: db $7C
-L1C6E9D: db $02
-L1C6E9E: db $03
-L1C6E9F: db $85
-L1C6EA0: db $AD
-L1C6EA1: db $9F
-L1C6EA2: db $CB
-L1C6EA3: db $C7
-L1C6EA4: db $40
-L1C6EA5: db $FE
-L1C6EA6: db $16
-L1C6EA7: db $C0
-L1C6EA8: db $F1
-L1C6EA9: db $FF
-L1C6EAA: db $04
-L1C6EAB: db $90
-L1C6EAC: db $F0
-L1C6EAD: db $08
-L1C6EAE: db $40
-L1C6EAF: db $5B
-L1C6EB0: db $10
-L1C6EB1: db $08
-L1C6EB2: db $14
-L1C6EB3: db $70
-L1C6EB4: db $30
-L1C6EB5: db $C4
-L1C6EB6: db $10
-L1C6EB7: db $09
-L1C6EB8: db $45
-L1C6EB9: db $CC
-L1C6EBA: db $09
-L1C6EBB: db $07
-L1C6EBC: db $8F
-L1C6EBD: db $73
-L1C6EBE: db $00
-L1C6EBF: db $E1
-L1C6EC0: db $00
-L1C6EC1: db $E5
-L1C6EC2: db $68
-L1C6EC3: db $00
-L1C6EC4: db $38
-L1C6EC5: db $00
-L1C6EC6: db $1F
-L1C6EC7: db $08
-L1C6EC8: db $3F
-L1C6EC9: db $08
-L1C6ECA: db $42
-L1C6ECB: db $3E
-L1C6ECC: db $08
-L1C6ECD: db $D0
-L1C6ECE: db $DC
-L1C6ECF: db $F0
-L1C6ED0: db $FD
-L1C6ED1: db $08
-L1C6ED2: db $F8
-L1C6ED3: db $49
-L1C6ED4: db $E0
-L1C6ED5: db $10
-L1C6ED6: db $60
-L1C6ED7: db $70
-L1C6ED8: db $08
-L1C6ED9: db $71
-L1C6EDA: db $40
-L1C6EDB: db $18
-L1C6EDC: db $AA
-L1C6EDD: db $F8
-L1C6EDE: db $E8
-L1C6EDF: db $80
-L1C6EE0: db $18
-L1C6EE1: db $0A
-L1C6EE2: db $28
-L1C6EE3: db $09
-L1C6EE4: db $01
-L1C6EE5: db $72
-L1C6EE6: db $11
-L1C6EE7: db $08
-L1C6EE8: db $78
-L1C6EE9: db $08
-L1C6EEA: db $61
-L1C6EEB: db $03
-L1C6EEC: db $00
-L1C6EED: db $FF
-L1C6EEE: db $A1
-L1C6EEF: db $06
-L1C6EF0: db $FC
-L1C6EF1: db $00
-L1C6EF2: db $FA
-L1C6EF3: db $F9
-L1C6EF4: db $F5
-L1C6EF5: db $F3
-L1C6EF6: db $00
-L1C6EF7: db $47
-L1C6EF8: db $F7
-L1C6EF9: db $80
-L1C6EFA: db $C3
-L1C6EFB: db $07
-L1C6EFC: db $E7
-L1C6EFD: db $E8
-L1C6EFE: db $02
-L1C6EFF: db $F0
-L1C6F00: db $10
-L1C6F01: db $E0
-L1C6F02: db $A1
-L1C6F03: db $C1
-L1C6F04: db $50
-L1C6F05: db $01
-L1C6F06: db $0A
-L1C6F07: db $B3
-L1C6F08: db $EB
-L1C6F09: db $A2
-L1C6F0A: db $68
-L1C6F0B: db $CE
-L1C6F0C: db $08
-L1C6F0D: db $C7
-L1C6F0E: db $EE
-L1C6F0F: db $A4
-L1C6F10: db $20
-L1C6F11: db $A0
-L1C6F12: db $86
-L1C6F13: db $08
-L1C6F14: db $C2
-L1C6F15: db $8C
-L1C6F16: db $4E
-L1C6F17: db $80
-L1C6F18: db $10
-L1C6F19: db $B8
-L1C6F1A: db $FF
-L1C6F1B: db $B0
-L1C6F1C: db $00
-L1C6F1D: db $F8
-L1C6F1E: db $00
-L1C6F1F: db $78
-L1C6F20: db $C0
-L1C6F21: db $37
-L1C6F22: db $0F
-L1C6F23: db $BF
-L1C6F24: db $3B
-L1C6F25: db $7F
-L1C6F26: db $F3
-L1C6F27: db $00
-L1C6F28: db $38
-L1C6F29: db $00
-L1C6F2A: db $8F
-L1C6F2B: db $00
-L1C6F2C: db $79
-L1C6F2D: db $40
-L1C6F2E: db $07
-L1C6F2F: db $00
-L1C6F30: db $E1
-L1C6F31: db $01
-L1C6F32: db $98
-L1C6F33: db $E0
-L1C6F34: db $EC
-L1C6F35: db $F0
-L1C6F36: db $51
-L1C6F37: db $F6
-L1C6F38: db $B8
-L1C6F39: db $E8
-L1C6F3A: db $18
-L1C6F3B: db $F1
-L1C6F3C: db $C1
-L1C6F3D: db $1F
-L1C6F3E: db $C8
-L1C6F3F: db $E0
-L1C6F40: db $00
-L1C6F41: db $10
-L1C6F42: db $70
-L1C6F43: db $1E
-L1C6F44: db $32
-L1C6F45: db $0C
-L1C6F46: db $3C
-L1C6F47: db $00
-L1C6F48: db $51
-L1C6F49: db $38
-L1C6F4A: db $0A
-L1C6F4B: db $30
-L1C6F4C: db $08
-L1C6F4D: db $C3
-L1C6F4E: db $83
-L1C6F4F: db $87
-L1C6F50: db $F8
-L1C6F51: db $EA
-L1C6F52: db $91
-L1C6F53: db $A2
-L1C6F54: db $02
-L1C6F55: db $3F
-L1C6F56: db $00
-L1C6F57: db $3E
-L1C6F58: db $08
-L1C6F59: db $FF
-L1C6F5A: db $B1
-L1C6F5B: db $06
-L1C6F5C: db $7F
-L1C6F5D: db $00
-L1C6F5E: db $99
-L1C6F5F: db $73
-L1C6F60: db $F3
-L1C6F61: db $F9
-L1C6F62: db $00
-L1C6F63: db $54
-L1C6F64: db $F0
-L1C6F65: db $00
-L1C6F66: db $E7
-L1C6F67: db $00
-L1C6F68: db $DF
-L1C6F69: db $00
-L1C6F6A: db $BE
-L1C6F6B: db $BF
-L1C6F6C: db $0C
-L1C6F6D: db $FC
-L1C6F6E: db $FE
-L1C6F6F: db $78
-L1C6F70: db $7C
-L1C6F71: db $50
-L1C6F72: db $69
-L1C6F73: db $FB
-L1C6F74: db $3F
-L1C6F75: db $AA
-L1C6F76: db $00
-L1C6F77: db $9F
-L1C6F78: db $00
-L1C6F79: db $EF
-L1C6F7A: db $00
-L1C6F7B: db $2F
-L1C6F7C: db $00
-L1C6F7D: db $17
-L1C6F7E: db $23
-L1C6F7F: db $77
-L1C6F80: db $07
-L1C6F81: db $10
-L1C6F82: db $03
-L1C6F83: db $E3
-L1C6F84: db $3C
-L1C6F85: db $B1
-L1C6F86: db $00
-L1C6F87: db $68
-L1C6F88: db $FF
-L1C6F89: db $07
-L1C6F8A: db $04
-L1C6F8B: db $00
-L1C6F8C: db $00
-L1C6F8D: db $0A
-L1C6F8E: db $0C
-L1C6F8F: db $87
-L1C6F90: db $AC
-L1C6F91: db $00
-L1C6F92: db $C3
-L1C6F93: db $00
-L1C6F94: db $F1
-L1C6F95: db $00
-L1C6F96: db $7D
-L1C6F97: db $1E
-L1C6F98: db $3E
-L1C6F99: db $11
-L1C6F9A: db $07
-L1C6F9B: db $1F
-L1C6F9C: db $41
-L1C6F9D: db $78
-L1C6F9E: db $F8
-L1C6F9F: db $F9
-L1C6FA0: db $FE
-L1C6FA1: db $00
-L1C6FA2: db $D0
-L1C6FA3: db $7D
-L1C6FA4: db $39
-L1C6FA5: db $FD
-L1C6FA6: db $00
-L1C6FA7: db $FA
-L1C6FA8: db $FB
-L1C6FA9: db $F4
-L1C6FAA: db $F7
-L1C6FAB: db $84
-L1C6FAC: db $09
-L1C6FAD: db $E4
-L1C6FAE: db $E7
-L1C6FAF: db $E8
-L1C6FB0: db $EB
-L1C6FB1: db $09
-L1C6FB2: db $7C
-L1C6FB3: db $00
-L1C6FB4: db $0E
-L1C6FB5: db $71
-L1C6FB6: db $03
-L1C6FB7: db $82
-L1C6FB8: db $8F
-L1C6FB9: db $28
-L1C6FBA: db $B8
-L1C6FBB: db $30
-L1C6FBC: db $3C
-L1C6FBD: db $40
-L1C6FBE: db $C0
-L1C6FBF: db $00
-L1C6FC0: db $A0
-L1C6FC1: db $BE
-L1C6FC2: db $40
-L1C6FC3: db $7F
-L1C6FC4: db $80
-L1C6FC5: db $E9
-L1C6FC6: db $02
-L1C6FC7: db $09
-L1C6FC8: db $D8
-L1C6FC9: db $08
-L1C6FCA: db $B8
-L1C6FCB: db $18
-L1C6FCC: db $78
-L1C6FCD: db $08
-L1C6FCE: db $F8
-L1C6FCF: db $57
-L1C6FD0: db $38
-L1C6FD1: db $08
-L1C6FD2: db $39
-L1C6FD3: db $08
-L1C6FD4: db $70
-L1C6FD5: db $00
-L1C6FD6: db $78
-L1C6FD7: db $C9
-L1C6FD8: db $56
-L1C6FD9: db $FC
-L1C6FDA: db $08
-L1C6FDB: db $FD
-L1C6FDC: db $08
-L1C6FDD: db $FE
-L1C6FDE: db $0C
-L1C6FDF: db $48
-L1C6FE0: db $02
-L1C6FE1: db $87
-L1C6FE2: db $88
-L1C6FE3: db $44
-L1C6FE4: db $4C
-L1C6FE5: db $1E
-L1C6FE6: db $3E
-L1C6FE7: db $40
-L1C6FE8: db $99
-L1C6FE9: db $09
-L1C6FEA: db $3A
-L1C6FEB: db $7F
-L1C6FEC: db $3F
-L1C6FED: db $10
-L1C6FEE: db $00
-L1C6FEF: db $E0
-L1C6FF0: db $C0
-L1C6FF1: db $08
-L1C6FF2: db $D6
-L1C6FF3: db $04
-L1C6FF4: db $E3
-L1C6FF5: db $25
-L1C6FF6: db $C6
-L1C6FF7: db $CA
-L1C6FF8: db $0C
-L1C6FF9: db $00
-L1C6FFA: db $10
-L1C6FFB: db $38
-L1C6FFC: db $BB
-L1C6FFD: db $60
-L1C6FFE: db $60
-L1C6FFF: db $71
-L1C7000: db $89
-L1C7001: db $00
-L1C7002: db $8C
-L1C7003: db $08
-L1C7004: db $58
-L1C7005: db $AB
-L1C7006: db $0C
-L1C7007: db $04
-L1C7008: db $08
-L1C7009: db $06
-L1C700A: db $0A
-L1C700B: db $02
-L1C700C: db $8A
-L1C700D: db $03
-L1C700E: db $D5
-L1C700F: db $CA
-L1C7010: db $10
-L1C7011: db $C0
-L1C7012: db $10
-L1C7013: db $40
-L1C7014: db $08
-L1C7015: db $20
-L1C7016: db $8A
-L1C7017: db $6E
-L1C7018: db $01
-L1C7019: db $9E
-L1C701A: db $05
-L1C701B: db $10
-L1C701C: db $0A
-L1C701D: db $07
-L1C701E: db $03
-L1C701F: db $3E
-L1C7020: db $1B
-L1C7021: db $3F
-L1C7022: db $7D
-L1C7023: db $7F
-L1C7024: db $0B
-L1C7025: db $01
-L1C7026: db $7B
-L1C7027: db $0C
-L1C7028: db $BF
-L1C7029: db $AA
-L1C702A: db $05
-L1C702B: db $08
-L1C702C: db $08
-L1C702D: db $3B
-L1C702E: db $88
-L1C702F: db $39
-L1C7030: db $A0
-L1C7031: db $19
-L1C7032: db $BA
-L1C7033: db $20
-L1C7034: db $09
-L1C7035: db $08
-L1C7036: db $41
-L1C7037: db $08
-L1C7038: db $1D
-L1C7039: db $0A
-L1C703A: db $0E
-L1C703B: db $11
-L1C703C: db $E0
-L1C703D: db $F7
-L1C703E: db $E1
-L1C703F: db $08
-L1C7040: db $C3
-L1C7041: db $EF
-L1C7042: db $C7
-L1C7043: db $0A
-L1C7044: db $15
-L1C7045: db $87
-L1C7046: db $DF
-L1C7047: db $83
-L1C7048: db $08
-L1C7049: db $8F
-L1C704A: db $08
-L1C704B: db $FF
-L1C704C: db $02
-L1C704D: db $5B
-L1C704E: db $F9
-L1C704F: db $08
-L1C7050: db $FE
-L1C7051: db $33
-L1C7052: db $04
-L1C7053: db $9F
-L1C7054: db $88
-L1C7055: db $09
-L1C7056: db $C8
-L1C7057: db $A9
-L1C7058: db $D8
-L1C7059: db $CF
-L1C705A: db $80
-L1C705B: db $09
-L1C705C: db $D7
-L1C705D: db $00
-L1C705E: db $D9
-L1C705F: db $2B
-L1C7060: db $02
-L1C7061: db $EC
-L1C7062: db $89
-L1C7063: db $7F
-L1C7064: db $08
-L1C7065: db $BF
-L1C7066: db $08
-L1C7067: db $60
-L1C7068: db $A6
-L1C7069: db $08
-L1C706A: db $07
-L1C706B: db $98
-L1C706C: db $03
-L1C706D: db $EE
-L1C706E: db $78
-L1C706F: db $09
-L1C7070: db $0E
-L1C7071: db $40
-L1C7072: db $0F
-L1C7073: db $00
-L1C7074: db $83
-L1C7075: db $F3
-L1C7076: db $C1
-L1C7077: db $FD
-L1C7078: db $20
-L1C7079: db $FC
-L1C707A: db $D5
-L1C707B: db $E8
-L1C707C: db $88
-L1C707D: db $C0
-L1C707E: db $08
-L1C707F: db $E0
-L1C7080: db $28
-L1C7081: db $F0
-L1C7082: db $00
-L1C7083: db $D5
-L1C7084: db $F9
-L1C7085: db $05
-L1C7086: db $7F
-L1C7087: db $00
-L1C7088: db $1F
-L1C7089: db $00
-L1C708A: db $07
-L1C708B: db $00
-L1C708C: db $7D
-L1C708D: db $03
-L1C708E: db $00
-L1C708F: db $98
-L1C7090: db $00
-L1C7091: db $E8
-L1C7092: db $00
-L1C7093: db $83
-L1C7094: db $00
-L1C7095: db $16
-L1C7096: db $86
-L1C7097: db $06
-L1C7098: db $0C
-L1C7099: db $00
-L1C709A: db $08
-L1C709B: db $09
-L1C709C: db $00
-L1C709D: db $00
-L1C709E: db $07
-L1C709F: db $18
-L1C70A0: db $4D
-L1C70A1: db $71
-L1C70A2: db $80
-L1C70A3: db $C0
-L1C70A4: db $28
-L1C70A5: db $07
-L1C70A6: db $02
-L1C70A7: db $55
-L1C70A8: db $FF
-L1C70A9: db $02
-L1C70AA: db $7F
-L1C70AB: db $00
-L1C70AC: db $3F
-L1C70AD: db $02
-L1C70AE: db $1F
-L1C70AF: db $02
-L1C70B0: db $45
-L1C70B1: db $0F
-L1C70B2: db $00
-L1C70B3: db $F4
-L1C70B4: db $F5
-L1C70B5: db $FA
-L1C70B6: db $00
-L1C70B7: db $FD
-L1C70B8: db $00
-L1C70B9: db $78
-L1C70BA: db $FE
-L1C70BB: db $00
-L1C70BC: db $BB
-L1C70BD: db $29
-L1C70BE: db $40
-L1C70BF: db $FC
-L1C70C0: db $04
-L1C70C1: db $F1
-L1C70C2: db $00
-L1C70C3: db $0D
-L1C70C4: db $E1
-L1C70C5: db $1C
-L1C70C6: db $40
-L1C70C7: db $BD
-L1C70C8: db $81
-L1C70C9: db $79
-L1C70CA: db $03
-L1C70CB: db $55
-L1C70CC: db $78
-L1C70CD: db $08
-L1C70CE: db $F8
-L1C70CF: db $08
-L1C70D0: db $FB
-L1C70D1: db $08
-L1C70D2: db $C0
-L1C70D3: db $00
-L1C70D4: db $45
-L1C70D5: db $A0
-L1C70D6: db $00
-L1C70D7: db $70
-L1C70D8: db $60
-L1C70D9: db $F0
-L1C70DA: db $00
-L1C70DB: db $E0
-L1C70DC: db $60
-L1C70DD: db $69
-L1C70DE: db $7C
-L1C70DF: db $D8
-L1C70E0: db $01
-L1C70E1: db $FE
-L1C70E2: db $00
-L1C70E3: db $10
-L1C70E4: db $00
-L1C70E5: db $09
-L1C70E6: db $55
-L1C70E7: db $08
-L1C70E8: db $0A
-L1C70E9: db $04
-L1C70EA: db $0A
-L1C70EB: db $06
-L1C70EC: db $08
-L1C70ED: db $02
-L1C70EE: db $1A
-L1C70EF: db $75
-L1C70F0: db $01
-L1C70F1: db $08
-L1C70F2: db $07
-L1C70F3: db $05
-L1C70F4: db $C3
-L1C70F5: db $08
-L1C70F6: db $7E
-L1C70F7: db $90
-L1C70F8: db $12
-L1C70F9: db $1C
-L1C70FA: db $03
-L1C70FB: db $07
-L1C70FC: db $6E
-L1C70FD: db $05
-L1C70FE: db $79
-L1C70FF: db $50
-L1C7100: db $83
-L1C7101: db $00
-L1C7102: db $37
-L1C7103: db $F7
-L1C7104: db $7B
-L1C7105: db $FB
-L1C7106: db $0C
-L1C7107: db $FC
-L1C7108: db $E3
-L1C7109: db $1F
-L1C710A: db $E2
-L1C710B: db $A9
-L1C710C: db $00
-L1C710D: db $78
-L1C710E: db $F2
-L1C710F: db $F4
-L1C7110: db $F0
-L1C7111: db $08
-L1C7112: db $F8
-L1C7113: db $EA
-L1C7114: db $00
-L1C7115: db $60
-L1C7116: db $02
-L1C7117: db $3E
-L1C7118: db $00
-L1C7119: db $CF
-L1C711A: db $00
-L1C711B: db $93
-L1C711C: db $54
-L1C711D: db $73
-L1C711E: db $80
-L1C711F: db $18
-L1C7120: db $08
-L1C7121: db $30
-L1C7122: db $09
-L1C7123: db $20
-L1C7124: db $10
-L1C7125: db $D5
-L1C7126: db $22
-L1C7127: db $0A
-L1C7128: db $C0
-L1C7129: db $00
-L1C712A: db $0F
-L1C712B: db $00
-L1C712C: db $07
-L1C712D: db $04
-L1C712E: db $5F
-L1C712F: db $03
-L1C7130: db $02
-L1C7131: db $01
-L1C7132: db $02
-L1C7133: db $41
-L1C7134: db $52
-L1C7135: db $28
-L1C7136: db $0B
-L1C7137: db $E6
-L1C7138: db $00
-L1C7139: db $E8
-L1C713A: db $0B
-L1C713B: db $FF
-L1C713C: db $7F
-L1C713D: db $09
-L1C713E: db $00
-L1C713F: db $3F
-L1C7140: db $DA
-L1C7141: db $09
-L1C7142: db $00
-L1C7143: db $1F
-L1C7144: db $09
-L1C7145: db $00
-L1C7146: db $0F
-L1C7147: db $09
-L1C7148: db $E0
-L1C7149: db $6F
-L1C714A: db $C0
-L1C714B: db $09
-L1C714C: db $00
-L1C714D: db $80
-L1C714E: db $0B
-L1C714F: db $00
-L1C7150: db $D8
-L1C7151: db $0B
-L1C7152: db $B6
-L1C7153: db $E8
-L1C7154: db $FE
-L1C7155: db $09
-L1C7156: db $00
-L1C7157: db $FC
-L1C7158: db $09
-L1C7159: db $00
-L1C715A: db $F8
-L1C715B: db $D2
-L1C715C: db $09
-L1C715D: db $00
-L1C715E: db $F0
-L1C715F: db $09
-L1C7160: db $0F
-L1C7161: db $07
-L1C7162: db $00
-L1C7163: db $03
-L1C7164: db $DF
-L1C7165: db $09
-L1C7166: db $00
-L1C7167: db $01
-L1C7168: db $00
-L1C7169: db $C8
-L1C716A: db $09
-L1C716B: db $03
-L1C716C: db $E8
-L1C716D: db $D5
-L1C716E: db $07
-L1C716F: db $03
-L1C7170: db $7F
-L1C7171: db $00
-L1C7172: db $3F
-L1C7173: db $00
-L1C7174: db $1F
-L1C7175: db $00
-L1C7176: db $57
-L1C7177: db $0F
-L1C7178: db $00
-L1C7179: db $07
-L1C717A: db $00
-L1C717B: db $03
-L1C717C: db $00
-L1C717D: db $F0
-L1C717E: db $FF
-L1C717F: db $FA
-L1C7180: db $07
-L1C7181: db $EC
-L1C7182: db $D0
-L1C7183: db $67
-L1C7184: db $04
-L1C7185: db $FE
-L1C7186: db $00
-L1C7187: db $FC
-L1C7188: db $EB
-L1C7189: db $57
-L1C718A: db $6D
-L1C718B: db $00
-L1C718C: db $F0
-L1C718D: db $08
-L1C718E: db $F8
-L1C718F: db $00
-L1C7190: db $18
-L1C7191: db $AA
-L1C7192: db $00
-L1C7193: db $E0
-L1C7194: db $00
-L1C7195: db $C0
-L1C7196: db $00
-L1C7197: db $80
-L1C7198: db $00
-L1C7199: db $00
-L1C719A: db $F2
-L1C719B: db $03
-L1C719C: db $5B
-L1C719D: db $6D
-L1C719E: db $7D
-L1C719F: db $0F
-L1C71A0: db $07
-L1C71A1: db $00
-L1C71A2: db $01
-L1C71A3: db $EA
-L1C71A4: db $00
-L1C71A5: db $4C
-L1C71A6: db $05
-L1C71A7: db $FF
-L1C71A8: db $03
-L1C71A9: db $7F
-L1C71AA: db $00
-L1C71AB: db $1F
-L1C71AC: db $FD
-L1C71AD: db $00
-L1C71AE: db $B9
-L1C71AF: db $7F
-L1C71B0: db $07
-L1C71B1: db $01
-L1C71B2: db $A9
-L1C71B3: db $01
-L1C71B4: db $00
-L1C71B5: db $FE
-L1C71B6: db $AC
-L1C71B7: db $07
-L1C71B8: db $FA
-L1C71B9: db $99
-L1C71BA: db $57
-L1C71BB: db $7D
-L1C71BC: db $01
-L1C71BD: db $7F
-L1C71BE: db $EE
-L1C71BF: db $00
-L1C71C0: db $67
-L1C71C1: db $7D
-L1C71C2: db $FE
-L1C71C3: db $00
-L1C71C4: db $67
-L1C71C5: db $7B
-L1C71C6: db $F8
-L1C71C7: db $FD
-L1C71C8: db $00
-L1C71C9: db $57
-L1C71CA: db $FF
-L1C71CB: db $07
-L1C71CC: db $01
-L1C71CD: db $D9
-L1C71CE: db $80
-L1C71CF: db $3C
-L1C71D0: db $6D
-L1C71D1: db $FE
-L1C71D2: db $00
-L1C71D3: db $49
-L1C71D4: db $E0
-L1C71D5: db $00
-L1C71D6: db $FC
-L1C71D7: db $F0
-L1C71D8: db $39
-L1C71D9: db $F0
-L1C71DA: db $98
-L1C71DB: db $00
-L1C71DC: db $4C
-L1C71DD: db $05
-L1C71DE: db $0A
-L1C71DF: db $80
-L1C71E0: db $40
-L1C71E1: db $01
-L1C71E2: db $01
-L1C71E3: db $02
-L1C71E4: db $03
-L1C71E5: db $04
-L1C71E6: db $05
-L1C71E7: db $06
-L1C71E8: db $07
-L1C71E9: db $60
-L1C71EA: db $08
-L1C71EB: db $26
-L1C71EC: db $02
-L1C71ED: db $09
-L1C71EE: db $0C
-L1C71EF: db $0D
-L1C71F0: db $0F
-L1C71F1: db $10
-L1C71F2: db $08
-L1C71F3: db $13
-L1C71F4: db $14
-L1C71F5: db $17
-L1C71F6: db $18
-L1C71F7: db $33
-L1C71F8: db $0A
-L1C71F9: db $0B
-L1C71FA: db $0E
-L1C71FB: db $81
-L1C71FC: db $00
-L1C71FD: db $11
-L1C71FE: db $12
-L1C71FF: db $15
-L1C7200: db $16
-L1C7201: db $19
-L1C7202: db $1A
-L1C7203: db $37
-L1C7204: db $10
-L1C7205: db $1C
-L1C7206: db $1D
-L1C7207: db $20
-L1C7208: db $34
-L1C7209: db $23
-L1C720A: db $24
-L1C720B: db $27
-L1C720C: db $28
-L1C720D: db $00
-L1C720E: db $2B
-L1C720F: db $2C
-L1C7210: db $2F
-L1C7211: db $30
-L1C7212: db $33
-L1C7213: db $1B
-L1C7214: db $1E
-L1C7215: db $1F
-L1C7216: db $00
-L1C7217: db $21
-L1C7218: db $22
-L1C7219: db $25
-L1C721A: db $26
-L1C721B: db $29
-L1C721C: db $2A
-L1C721D: db $2D
-L1C721E: db $2E
-L1C721F: db $00
-L1C7220: db $31
-L1C7221: db $32
-L1C7222: db $34
-L1C7223: db $35
-L1C7224: db $37
-L1C7225: db $38
-L1C7226: db $3B
-L1C7227: db $3C
-L1C7228: db $00
-L1C7229: db $3F
-L1C722A: db $40
-L1C722B: db $43
-L1C722C: db $44
-L1C722D: db $45
-L1C722E: db $46
-L1C722F: db $49
-L1C7230: db $4A
-L1C7231: db $80
-L1C7232: db $A0
-L1C7233: db $36
-L1C7234: db $39
-L1C7235: db $3A
-L1C7236: db $3D
-L1C7237: db $3E
-L1C7238: db $41
-L1C7239: db $42
-L1C723A: db $88
-L1C723B: db $ED
-L1C723C: db $47
-L1C723D: db $48
-L1C723E: db $4B
-L1C723F: db $D9
-L1C7240: db $0A
-L1C7241: db $00
-L1C7242: db $46
-L1C7243: db $01
-L1C7244: db $00
-L1C7245: db $4C
-L1C7246: db $4D
-L1C7247: db $4E
-L1C7248: db $41
-L1C7249: db $06
-L1C724A: db $4F
-L1C724B: db $04
-L1C724C: db $51
-L1C724D: db $52
-L1C724E: db $55
-L1C724F: db $56
-L1C7250: db $59
-L1C7251: db $D7
-L1C7252: db $50
-L1C7253: db $53
-L1C7254: db $08
-L1C7255: db $54
-L1C7256: db $57
-L1C7257: db $58
-L1C7258: db $5A
-L1C7259: db $D7
-L1C725A: db $5B
-L1C725B: db $5D
-L1C725C: db $5E
-L1C725D: db $01
-L1C725E: db $61
-L1C725F: db $62
-L1C7260: db $65
-L1C7261: db $66
-L1C7262: db $69
-L1C7263: db $6A
-L1C7264: db $6D
-L1C7265: db $D3
-L1C7266: db $00
-L1C7267: db $5C
-L1C7268: db $5F
-L1C7269: db $60
-L1C726A: db $63
-L1C726B: db $64
-L1C726C: db $67
-L1C726D: db $68
-L1C726E: db $6B
-L1C726F: db $10
-L1C7270: db $6C
-L1C7271: db $6E
-L1C7272: db $6F
-L1C7273: db $D2
-L1C7274: db $70
-L1C7275: db $71
-L1C7276: db $72
-L1C7277: db $74
-L1C7278: db $00
-L1C7279: db $75
-L1C727A: db $78
-L1C727B: db $79
-L1C727C: db $7C
-L1C727D: db $7D
-L1C727E: db $80
-L1C727F: db $81
-L1C7280: db $84
-L1C7281: db $40
-L1C7282: db $85
-L1C7283: db $F2
-L1C7284: db $73
-L1C7285: db $76
-L1C7286: db $77
-L1C7287: db $7A
-L1C7288: db $7B
-L1C7289: db $7E
-L1C728A: db $02
-L1C728B: db $7F
-L1C728C: db $82
-L1C728D: db $83
-L1C728E: db $86
-L1C728F: db $87
-L1C7290: db $88
-L1C7291: db $D1
-L1C7292: db $89
-L1C7293: db $00
-L1C7294: db $8A
-L1C7295: db $8B
-L1C7296: db $8C
-L1C7297: db $0E
-L1C7298: db $8D
-L1C7299: db $8E
-L1C729A: db $8F
-L1C729B: db $90
-L1C729C: db $40
-L1C729D: db $91
-L1C729E: db $50
-L1C729F: db $92
-L1C72A0: db $04
-L1C72A1: db $00
-L1C72A2: db $22
-L1C72A3: db $93
-L1C72A4: db $01
-L1C72A5: db $0C
-L1C72A6: db $95
-L1C72A7: db $00
-L1C72A8: db $94
-L1C72A9: db $EB
-L1C72AA: db $96
-L1C72AB: db $C9
-L1C72AC: db $E0
-L1C72AD: db $00
-L1C72AE: db $97
-L1C72AF: db $98
-L1C72B0: db $E9
-L1C72B1: db $9B
-L1C72B2: db $9E
-L1C72B3: db $F1
-L1C72B4: db $93
-L1C72B5: db $00
-L1C72B6: db $99
-L1C72B7: db $9A
-L1C72B8: db $E7
-L1C72B9: db $9C
-L1C72BA: db $9D
-L1C72BB: db $E2
-L1C72BC: db $01
-L1C72BD: db $11
-L1C72BE: db $9F
-L1C72BF: db $A0
-L1C72C0: db $A1
-L1C72C1: db $D3
-L1C72C2: db $A7
-L1C72C3: db $A8
-L1C72C4: db $A9
-L1C72C5: db $E4
-L1C72C6: db $82
-L1C72C7: db $02
-L1C72C8: db $A2
-L1C72C9: db $A3
-L1C72CA: db $A4
-L1C72CB: db $A5
-L1C72CC: db $A6
-L1C72CD: db $A5
+
+OBJInfoInit_Intro_Iori:
+	db OST_VISIBLE ; iOBJInfo_Status
+	db $80 ; iOBJInfo_StatusEx0
+	db $00 ; iOBJInfo_StatusEx1
+	db $18 ; iOBJInfo_X
+	db $00 ; iOBJInfo_XSub
+	db $50 ; iOBJInfo_Y
+	db $00 ; iOBJInfo_YSub
+	db $00 ; iOBJInfo_SpeedX
+	db $00 ; iOBJInfo_SpeedXSub
+	db $00 ; $09
+	db $00 ; $0A
+	db $00 ; iOBJInfo_RelX (auto)
+	db $00 ; iOBJInfo_RelY (auto)
+	db $C6 ; iOBJInfo_TileIDBase
+	db LOW($8000) ; iOBJInfo_VRAMPtr_Low
+	db HIGH($8000) ; iOBJInfo_VRAMPtr_High
+	db BANK(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_BankNum0 (BANK $1C)
+	db LOW(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_Low0
+	db HIGH(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_High0
+	db $00 ; iOBJInfo_OBJLstPtrTblOffset0
+	db $00 ; iOBJInfo_BankNum1 (N/A)
+	db LOW(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_Low1 (N/A)
+	db HIGH(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_High1 (N/A)
+	db $00 ; iOBJInfo_OBJLstPtrTblOffset0
+	db $00 ; iOBJInfo_OBJLstByte1 (auto)
+	db $00 ; iOBJInfo_OBJLstByte2 (auto)
+	db $00 ; iOBJInfo_Unknown_1A
+	db $02 ; iOBJInfo_FrameLeft
+	db $02 ; iOBJInfo_FrameTotal
+	db LOW(wGFXBufInfo_Pl1) ; iOBJInfo_BufInfoPtr_Low
+	db HIGH(wGFXBufInfo_Pl1) ; iOBJInfo_BufInfoPtr_High
+
+OBJLstPtrTable_Intro_Iori:
+	dw OBJLstHdrA_L1C695D, $FFFF
+	dw OBJLstHdrA_L1C699B, $FFFF
+	dw $FFFF
+		
+OBJLstHdrA_L1C695D:
+	db OLF_NOBUF ; iOBJLstHdrA_Flags
+	db $00 ; iOBJLstHdrA_Byte1
+	db $00 ; iOBJLstHdrA_Byte2
+	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw .bin ; iOBJLstHdrA_DataPtr
+	db $00 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+.bin:
+	db $11 ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $40,$21,$18 ; $00
+	db $40,$29,$1A ; $01
+	db $40,$31,$1C ; $02
+	db $40,$39,$1E ; $03
+	db $40,$41,$20 ; $04
+	db $40,$49,$22 ; $05
+	db $30,$29,$24 ; $06
+	db $30,$31,$26 ; $07
+	db $30,$39,$28 ; $08
+	db $30,$41,$2A ; $09
+	db $30,$49,$2C ; $0A
+	db $20,$29,$2E ; $0B
+	db $20,$31,$30 ; $0C
+	db $20,$39,$32 ; $0D
+	db $20,$41,$34 ; $0E
+	db $20,$49,$36 ; $0F
+	db $35,$51,$38 ; $10
+		
+OBJLstHdrA_L1C699B:
+	db OLF_NOBUF ; iOBJLstHdrA_Flags
+	db $00 ; iOBJLstHdrA_Byte1
+	db $00 ; iOBJLstHdrA_Byte2
+	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw .bin ; iOBJLstHdrA_DataPtr
+	db $00 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+.bin:
+	db $0C ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $60,$21,$00 ; $00
+	db $60,$29,$02 ; $01
+	db $60,$31,$04 ; $02
+	db $60,$39,$06 ; $03
+	db $60,$41,$08 ; $04
+	db $60,$49,$0A ; $05
+	db $50,$21,$0C ; $06
+	db $50,$29,$0E ; $07
+	db $50,$31,$10 ; $08
+	db $50,$39,$12 ; $09
+	db $50,$41,$14 ; $0A
+	db $50,$49,$16 ; $0B
+	
+GFXLZ_IntroBG: INCBIN "data/gfx/intro_bg.lzc"
+BGLZ_Intro_IoriCutout: INCBIN "data/bg/intro_ioricutout.lzs"
+BGLZ_Intro_KyoCutout: INCBIN "data/bg/intro_kyocutout.lzs"
+BGLZ_Intro_Sun: INCBIN "data/bg/intro_sun.lzs"
+
 GFXLZ_Intro_IoriRiseOBJ: db $40
 L1C72CF: db $00
 L1C72D0: db $26

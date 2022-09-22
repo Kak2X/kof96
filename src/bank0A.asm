@@ -12158,7 +12158,7 @@ TakaraLogo_Do:
 	; Copy logo GFX
 	ld   hl, GFXLZ_TakaraLogo
 	ld   de, wLZSS_Buffer
-	call DecompressGFX
+	call DecompressLZSS
 	ld   hl, wLZSS_Buffer
 	ld   de, $9000
 	call CopyTiles
@@ -12668,7 +12668,7 @@ L0A75DD:;J
 	jp   nc, L0A75F7
 	jp   L0A75F2
 L0A75EC:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L0A75F7
 L0A75F2:;J
 	call L002EA2
@@ -13139,7 +13139,7 @@ L0A79D4:;J
 	ld   hl, $0080
 	call L003569
 L0A79E0:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	call L002DD9
 	jp   nc, L0A7A92
 	ld   hl, $010A
@@ -13147,7 +13147,7 @@ L0A79E0:;J
 	call L003890
 	jp   L0A7A75
 L0A79F4:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	call L002DD9
 	jp   nc, L0A7A92
 	ld   hl, $010A
@@ -13155,7 +13155,7 @@ L0A79F4:;J
 	call L003890
 	jp   L0A7A75
 L0A7A08:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	call L002DD9
 	jp   nc, L0A7A92
 	ld   hl, $0083
@@ -13175,7 +13175,7 @@ L0A7A2B:;J
 	call L003890
 	jp   L0A7A75
 L0A7A36:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	call L002DD9
 	jp   nc, L0A7A92
 	call L003A28
@@ -13316,7 +13316,7 @@ L0A7B2D: db $C3;X
 L0A7B2E: db $30;X
 L0A7B2F: db $7B;X
 L0A7B30:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L0A7B48
 L0A7B36: db $21;X
 L0A7B37: db $80;X
@@ -13475,7 +13475,7 @@ L0A7C22: db $C3;X
 L0A7C23: db $25;X
 L0A7C24: db $7C;X
 L0A7C25:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L0A7C3D
 L0A7C2B: db $21;X
 L0A7C2C: db $80;X

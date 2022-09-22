@@ -55,8 +55,14 @@ SERIAL_PL2_ID EQU $03
 
 C_NL EQU $FF ; Newline character in strings
 
+TILE_INTRO_WHITE EQU $00
+TILE_INTRO_BLACK EQU $01
+
 OBJ_OFFSET_X        EQU $08 ; Standard offset used when sprite positions are compared to the screen/scroll
-OBJLSTPTR_NONE      EQU $FFFF ; Placeholder pointer that marks the lack of a secondary sprite mapping
+OBJLSTPTR_NONE      EQU $FFFF ; Placeholder pointer that marks the lack of a secondary sprite mapping and the end separator
+
+
+; FLAGS
 
 ; $C025
 MISCB_FREEZE EQU 3 ; Prevents tasks and almost everything from executing, effectively freezing the game until it's unset. May be used to force sync in serial VS???
@@ -71,7 +77,7 @@ MISCB_PL_RANGE_CHECK EQU 1 ; Enables the player range enforcement, which is part
                            ; Should only be used during gameplay, otherwise it could get in the way.
 MISCB_TITLE_SECT EQU 2 ; Allows parallax for the title screen
 
-
+MISC_USE_SECT EQU 1 << MISCB_USE_SECT
 ;--
 
 
@@ -98,16 +104,26 @@ OSTB_GFXLOAD EQU 0 ; If set, the graphics are still being copied to the *opposit
 OSTB_GFXBUF2 EQU 1 ; If set, the second GFX buffer is used for the *current* frame
 OSTB_BIT3    EQU 3 ; 
 OSTB_ANIMEND EQU 4 ; Animation has ended, repeat last frame indefinitely
+OSTB_XFLIP   EQU 5 ; Horizontal flip
+OSTB_YFLIP   EQU 6 ; Vertical flip
 OSTB_VISIBLE EQU 7 ; If not set, the sprite mapping is hidden
 
 OST_GFXLOAD EQU 1 << OSTB_GFXLOAD
 OST_GFXBUF2 EQU 1 << OSTB_GFXBUF2
 OST_BIT3    EQU 1 << OSTB_BIT3
 OST_ANIMEND EQU 1 << OSTB_ANIMEND
+OST_XFLIP   EQU 1 << OSTB_XFLIP
+OST_YFLIP   EQU 1 << OSTB_YFLIP
 OST_VISIBLE EQU 1 << OSTB_VISIBLE
 
+; iOBJInfo_StatusEx* bits from RAM
+; Almost the same as iOBJInfo_Status, but not completely.
+; Only the unique values will be listed.
+OSXB_BGPRIORITY EQU 7 ; If set, the BG has priority over the sprite mapping
+OSX_BGPRIORITY EQU 1 << OSXB_BGPRIORITY
 
-; OBJLST / SPRITE MAPPINGS FLAGS
+; OBJLST / SPRITE MAPPINGS FLAGS from ROM
+; These are almost the same as the iOBJInfo_StatusEx* bits.
 ; item0
 
 OLFB_USETILEFLAGS EQU 4 ; If set, in the OBJ data, the upper two bits of a tile ID count as X/Y flip flags
@@ -250,7 +266,28 @@ SCRPAL_STAGE_BOSS EQU $09
 SCRPAL_STAGE_STADIUM EQU $0A
 
 ; Intro Scene IDs (Intro_ExecScene)
-ISC_TEXTPRINT EQU $00
-ISC_CHAR      EQU $02
-ISC_IORIRISE  EQU $04
-ISC_IORIKYO   EQU $06
+ISC_TEXTPRINT       EQU $00
+ISC_CHAR            EQU $02
+ISC_IORIRISE        EQU $04
+ISC_IORIKYO         EQU $06
+
+ISCC_INIT           EQU $00
+ISCC_TERRY          EQU $02
+ISCC_ANDY           EQU $04
+ISCC_MAI            EQU $06
+ISCC_ATHENA         EQU $08
+ISCC_LEONA          EQU $0A
+ISCC_ROBERT         EQU $0C
+ISCC_RYO            EQU $0E
+ISCC_MRKARATE       EQU $10
+ISCC_MRBIG          EQU $12
+ISCC_GEESE          EQU $14
+ISCC_KRAUSER        EQU $16
+ISCC_DAIMON         EQU $18
+ISCC_MATURE         EQU $1A
+ISCC_CHG_IORIRISE   EQU $1C
+ISCC_KYO            EQU $1E
+ISCC_IORIKYOA       EQU $20
+ISCC_IORIKYOB       EQU $22
+ISCC_IORIKYOC       EQU $24
+ISCC_CHG_IORIKYO    EQU $26

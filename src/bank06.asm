@@ -1207,10 +1207,10 @@ L0649AA:;J
 	ld   a, $14
 	ld   h, $01
 	call L002E49
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L064A09
 L0649C1:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L064A06
 L0649C7:;J
 	ld   hl, $0080
@@ -2650,7 +2650,7 @@ L0654B7:;J
 	ld   a, $01
 	call L003890
 L0654CD:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L065535
 L0654D3:;J
 	call L002DD2
@@ -3198,7 +3198,7 @@ L0658F1:;J
 	call L003890
 	jp   L065907
 L065907:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L065985
 L06590D:;J
 	call L002DD2
@@ -3354,7 +3354,7 @@ L065A2E:;J
 	call L003890
 	jp   L065A44
 L065A44:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L065ABC
 L065A4A:;J
 	call L002DD2
@@ -4007,7 +4007,7 @@ L065FA0:;J
 	add  hl, bc
 	res  7, [hl]
 L065FAE:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	call L002DD9
 	jp   nc, L065FDC
 	inc  hl
@@ -6232,7 +6232,7 @@ L066CAD:;J
 	ld   a, $10
 	ld   h, $06
 	call L002E49
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	ld   hl, $0408
 	ld   a, $01
 	call L003890
@@ -6244,7 +6244,7 @@ L066CD5:;J
 	jp   nc, L066CE4
 	jp   L066CF6
 L066CE4:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L066CF6
 L066CEA:;J
 	call L002DD9
@@ -6684,7 +6684,7 @@ L0670A5:;J
 	call L002EA2
 	jr   L0670B6
 L0670B0:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 L0670B3:;J
 	call L002F0B
 L0670B6:;JR
@@ -7131,7 +7131,7 @@ L067427:;J
 	jp   nc, L067442
 	jp   L06743C
 L067436:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L067442
 L06743C:;J
 	call L002EA2
@@ -7254,7 +7254,7 @@ L067529:;J
 	jp   nc, L067544
 	jp   L06753E
 L067538:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L067544
 L06753E:;J
 	call L002EA2
@@ -7344,7 +7344,7 @@ L0675D7:;J
 	call L003890
 	jp   L0675F0
 L0675E7:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L0675ED
 L0675ED:;J
 	call L002F0B
@@ -7444,7 +7444,7 @@ L0676AB:;J
 	ld   a, $10
 	call L003890
 L0676B0:;J
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L0676C5
 L0676B6:;J
 	call L002DD9
@@ -7877,7 +7877,7 @@ L067A00:;J
 	ld   a, $08
 	ld   h, $05
 	call L002E49
-	call L0035B9
+	call OBJLstS_ApplyXSpeed
 	jp   L067A87
 L067A27:;J
 	ld   hl, $0080
