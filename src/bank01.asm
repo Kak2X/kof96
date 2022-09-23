@@ -9728,9 +9728,9 @@ L01679A:;R
 	ld   [$D96F], a
 	ld   a, [$DA23]
 	ld   [$D970], a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_StatusEx0]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlags]
 	ld   [$DA7F], a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_StatusEx0]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlags]
 	ld   [$D97F], a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	ld   [$DA80], a
@@ -10014,7 +10014,7 @@ L016A24:;C
 	jp   z, L016ABF
 	jp   nc, L016A77
 	push af
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_StatusEx0
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstFlags
 	set  3, [hl]
 	ld   a, [$D921]
 	bit  1, a
@@ -10029,7 +10029,7 @@ L016A24:;C
 	ldi  a, [hl]
 	ld   [hl], a
 L016A53:;J
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_StatusEx0
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstFlags
 	res  3, [hl]
 	ld   a, [$DA21]
 	bit  1, a
@@ -10050,7 +10050,7 @@ L016A72:;JR
 	jr   L016ABF
 L016A77:;J
 	push af
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_StatusEx0
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstFlags
 	res  3, [hl]
 	ld   a, [$D921]
 	bit  1, a
@@ -10067,7 +10067,7 @@ L016A77:;J
 	ldi  a, [hl]
 	ld   [hl], a
 L016A9B:;JR
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_StatusEx0
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstFlags
 	set  3, [hl]
 	ld   a, [$DA21]
 	bit  1, a
@@ -10096,7 +10096,7 @@ L016ABF:;JR
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
 	ld   b, a
 L016AD5:;J
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_StatusEx0
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstFlags
 	res  2, [hl]
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	sub  a, b
@@ -10115,7 +10115,7 @@ L016AE8:;J
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	ld   b, a
 L016AFB:;J
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_StatusEx0
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstFlags
 	res  2, [hl]
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
 	sub  a, b
@@ -10150,7 +10150,7 @@ L016B12:;C
 	ld   b, a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
 	ld   c, a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_StatusEx1]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsOld]
 	ld   [wLZSS_Buffer], a
 	ld   a, [$D6D8]
 	or   a
@@ -10161,7 +10161,7 @@ L016B12:;C
 	ld   d, a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_Y]
 	ld   e, a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_StatusEx1]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlagsOld]
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016B80
@@ -10192,7 +10192,7 @@ L016B94:;R
 	ld   b, a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
 	ld   c, a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_StatusEx1]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsOld]
 	ld   [wLZSS_Buffer], a
 	ld   a, [$D6D8]
 	or   a
@@ -10203,7 +10203,7 @@ L016B94:;R
 	ld   d, a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_Y]
 	ld   e, a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_StatusEx1]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlagsOld]
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016BD5
@@ -10230,7 +10230,7 @@ L016BE9:;R
 	ld   b, a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_Y]
 	ld   c, a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_StatusEx1]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlagsOld]
 	ld   [wLZSS_Buffer], a
 	ld   a, [$D698]
 	or   a
@@ -10241,7 +10241,7 @@ L016BE9:;R
 	ld   d, a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
 	ld   e, a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_StatusEx1]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsOld]
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016C2A
@@ -10270,7 +10270,7 @@ L016C2A:;JR
 	ld   b, a
 	ld   a, [wOBJInfo2+iOBJInfo_Y]
 	ld   c, a
-	ld   a, [wOBJInfo2+iOBJInfo_StatusEx0]
+	ld   a, [wOBJInfo2+iOBJInfo_OBJLstFlags]
 	ld   [wLZSS_Buffer], a
 	ld   a, [$D6D8]
 	or   a
@@ -10281,7 +10281,7 @@ L016C2A:;JR
 	ld   d, a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_Y]
 	ld   e, a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_StatusEx1]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlagsOld]
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016C8F
@@ -10312,7 +10312,7 @@ L016C8F:;JR
 	ld   b, a
 	ld   a, [wOBJInfo3+iOBJInfo_Y]
 	ld   c, a
-	ld   a, [wOBJInfo3+iOBJInfo_StatusEx0]
+	ld   a, [wOBJInfo3+iOBJInfo_OBJLstFlags]
 	ld   [wLZSS_Buffer], a
 	ld   a, [$D698]
 	or   a
@@ -10323,7 +10323,7 @@ L016C8F:;JR
 	ld   d, a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
 	ld   e, a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_StatusEx1]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsOld]
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016CF4
@@ -10351,7 +10351,7 @@ L016CF4:;JR
 	ld   b, a
 	ld   a, [wOBJInfo2+iOBJInfo_Y]
 	ld   c, a
-	ld   a, [wOBJInfo2+iOBJInfo_StatusEx0]
+	ld   a, [wOBJInfo2+iOBJInfo_OBJLstFlags]
 	ld   [wLZSS_Buffer], a
 	ld   a, [$D6D9]
 	or   a
@@ -10362,7 +10362,7 @@ L016CF4:;JR
 	ld   d, a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_Y]
 	ld   e, a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_StatusEx1]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlagsOld]
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016D70
@@ -10432,7 +10432,7 @@ L016D70:;JR
 	ld   b, a
 	ld   a, [wOBJInfo3+iOBJInfo_Y]
 	ld   c, a
-	ld   a, [wOBJInfo3+iOBJInfo_StatusEx0]
+	ld   a, [wOBJInfo3+iOBJInfo_OBJLstFlags]
 	ld   [wLZSS_Buffer], a
 	ld   a, [$D699]
 	or   a
@@ -10443,7 +10443,7 @@ L016D70:;JR
 	ld   d, a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
 	ld   e, a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_StatusEx1]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsOld]
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016DEB
@@ -13270,7 +13270,7 @@ L017ECC:;C
 	ld   e, a
 	ld   a, [$D945]
 	and  a, $0F
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_StatusEx0
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstFlags
 	bit  3, [hl]
 	jr   z, L017EE9
 	ld   b, a

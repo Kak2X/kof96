@@ -894,7 +894,14 @@ L1C437C: db $00
 L1C437D: db $00
 L1C437E: db $00
 L1C437F: db $00
-L1C4380:;I
+
+; 
+; =============== START OF MODULE Title ===============
+;
+; =============== Module_Title ===============
+; EntryPoint for Title Screen. Called by rst $00 jump from Module_Intro.
+L1C4380:
+Module_Title:
 	ld   sp, $DD00
 	di
 	rst  $10
@@ -1042,7 +1049,7 @@ L1C447E:;J
 	ld   [hl], $28
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Y
 	ld   [hl], $43
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset0
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset
 	ld   [hl], $08
 	ld   hl, wOBJInfo3+iOBJInfo_Status
 	ld   de, L1C4E9B
@@ -1123,7 +1130,7 @@ L1C4551:;J
 	ld   [hl], $43
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
 	set  7, [hl]
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffset0
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffset
 	ld   [hl], $04
 	ret
 L1C4570:;C
@@ -1164,7 +1171,7 @@ L1C45A8:;J
 	ld   [wTitleResetTimer_Low], a
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	res  7, [hl]
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffset0
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffset
 	ld   [hl], $00
 	ret
 L1C45C2:;J
@@ -2391,7 +2398,7 @@ L1C4CC2:;J
 	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 	ld   a, [$C1B6]
 	ld   [wOBJInfo_Pl1+iOBJInfo_Y], a
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset0
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset
 	ld   [hl], $08
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	set  7, [hl]
@@ -7033,8 +7040,8 @@ Intro_End:
 	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftB], a
 	
 	; Jump to title screen
-	ld   b, BANK(L1C4380)
-	ld   hl, L1C4380
+	ld   b, BANK(Module_Title)
+	ld   hl, Module_Title
 	rst  $00
 	
 Intro_ScenePtrTable:
@@ -7526,12 +7533,12 @@ Intro_CharScene_Mature:
 	res  OSTB_VISIBLE, [hl]
 	
 	; Flip both sprites for Intro_CharScene_Kyo, to make Iori and Kyo face each other
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_StatusEx0] ; Make Kyo face left
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlags] ; Make Kyo face left
 	xor  OST_XFLIP
-	ld   [wOBJInfo_Pl1+iOBJInfo_StatusEx0], a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_StatusEx0] ; Make Kyo face right
+	ld   [wOBJInfo_Pl1+iOBJInfo_OBJLstFlags], a
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlags] ; Make Kyo face right
 	xor  OST_XFLIP
-	ld   [wOBJInfo_Pl2+iOBJInfo_StatusEx0], a
+	ld   [wOBJInfo_Pl2+iOBJInfo_OBJLstFlags], a
 	
 	jp   Intro_CharS_NextMode
 ; =============== Intro_CharScene_Kyo ===============
@@ -7608,13 +7615,13 @@ Intro_CharScene_IoriKyoC:
 	; specifically timed so that the player sprites change into a good
 	; attack frame when they get to the center of the screen.
 	;
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset0]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset]
 	cp   $04*4								; Reached frame 4? (which is still loading)
 	jr   nz, .chkIori						; If not, skip
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status	; End animation. The frame will still applied when it loads.
 	set  OSTB_ANIMEND, [hl]
 .chkIori:;R
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffset0]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffset]
 	cp   $01*4								; Reached frame 1? (which is still loading)
 	jr   nz, .waitEnd						; If not, skip
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status	; End animation. The frame will still applied when it loads.
@@ -7727,11 +7734,11 @@ Intro_CharS_SetNextChar:
 	or   a, OST_VISIBLE	    ; Force visibility
 	ld   [de], a
 	
-	; byte0 -> iOBJInfo_BankNum0
-	ld   hl, iOBJInfo_BankNum0	; Seek to iOBJInfo_BankNum0
+	; byte0 -> iOBJInfo_BankNum
+	ld   hl, iOBJInfo_BankNum	; Seek to iOBJInfo_BankNum
 	add  hl, de
 	ld   a, [bc]		; Read byte0
-	ldi  [hl], a		; Write to iOBJInfo_BankNum0
+	ldi  [hl], a		; Write to iOBJInfo_BankNum
 	inc  bc
 	
 	; byte1-2 to iOBJInfo_OBJLstPtrTbl_*0
@@ -7742,7 +7749,7 @@ Intro_CharS_SetNextChar:
 	ldi  [hl], a
 	inc  bc
 	
-	; $00 -> iOBJInfo_OBJLstPtrTblOffset0
+	; $00 -> iOBJInfo_OBJLstPtrTblOffset
 	xor  a
 	ld   [hl], a
 	
@@ -7839,7 +7846,7 @@ IntroScene_IoriRise:
 		ld   a, [wOBJInfo2+iOBJInfo_Y]
 		cp   $30								; Has Y position $30?
 		jr   nz, .noRemBGPr						; If not, skip
-		ld   hl, wOBJInfo2+iOBJInfo_StatusEx0	; Otherwise, remove BG priority
+		ld   hl, wOBJInfo2+iOBJInfo_OBJLstFlags	; Otherwise, remove BG priority
 		res  OSXB_BGPRIORITY, [hl]
 	.noRemBGPr:
 	
@@ -8425,7 +8432,7 @@ Intro_CharS_LoadVRAM:
 	; behind the background (for the window reveal effect to work).
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	res  OSTB_VISIBLE, [hl]					; Hide for now
-	inc  hl									; Seek to iOBJInfo_StatusEx0
+	inc  hl									; Seek to iOBJInfo_OBJLstFlags
 	set  OSXB_BGPRIORITY, [hl]				; Set BG priority
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status	; Do the same for Andy's sprite
 	res  OSTB_VISIBLE, [hl]
@@ -8729,8 +8736,8 @@ TextDef_Intro3:
 
 OBJInfoInit_Intro_Iori:
 	db OST_VISIBLE ; iOBJInfo_Status
-	db $80 ; iOBJInfo_StatusEx0
-	db $00 ; iOBJInfo_StatusEx1
+	db $80 ; iOBJInfo_OBJLstFlags
+	db $00 ; iOBJInfo_OBJLstFlagsOld
 	db $18 ; iOBJInfo_X
 	db $00 ; iOBJInfo_XSub
 	db $50 ; iOBJInfo_Y
@@ -8744,14 +8751,14 @@ OBJInfoInit_Intro_Iori:
 	db $C6 ; iOBJInfo_TileIDBase
 	db LOW($8000) ; iOBJInfo_VRAMPtr_Low
 	db HIGH($8000) ; iOBJInfo_VRAMPtr_High
-	db BANK(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_BankNum0 (BANK $1C)
-	db LOW(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_Low0
-	db HIGH(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_High0
-	db $00 ; iOBJInfo_OBJLstPtrTblOffset0
-	db $00 ; iOBJInfo_BankNum1 (N/A)
-	db LOW(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_Low1 (N/A)
-	db HIGH(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_High1 (N/A)
-	db $00 ; iOBJInfo_OBJLstPtrTblOffset0
+	db BANK(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_BankNum (BANK $1C)
+	db LOW(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_Low
+	db HIGH(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_High
+	db $00 ; iOBJInfo_OBJLstPtrTblOffset
+	db $00 ; iOBJInfo_BankNumOld (N/A)
+	db LOW(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_LowOld (N/A)
+	db HIGH(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_HighOld (N/A)
+	db $00 ; iOBJInfo_OBJLstPtrTblOffset
 	db $00 ; iOBJInfo_OBJLstByte1 (auto)
 	db $00 ; iOBJInfo_OBJLstByte2 (auto)
 	db $00 ; iOBJInfo_Unknown_1A

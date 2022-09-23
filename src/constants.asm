@@ -116,14 +116,20 @@ OST_XFLIP   EQU 1 << OSTB_XFLIP
 OST_YFLIP   EQU 1 << OSTB_YFLIP
 OST_VISIBLE EQU 1 << OSTB_VISIBLE
 
-; iOBJInfo_StatusEx* bits from RAM
+; iOBJInfo_OBJLstFlags* bits from RAM
 ; Almost the same as iOBJInfo_Status, but not completely.
 ; Only the unique values will be listed.
+OSXB_USETILEFLAGS EQU 4
+OSXB_XFLIP   EQU 5 ; Horizontal flip
+OSXB_YFLIP   EQU 6 ; Vertical flip
 OSXB_BGPRIORITY EQU 7 ; If set, the BG has priority over the sprite mapping
+OSX_USETILEFLAGS EQU 1 << OSXB_USETILEFLAGS
+OSX_XFLIP   EQU 1 << OSXB_XFLIP
+OSX_YFLIP   EQU 1 << OSXB_YFLIP
 OSX_BGPRIORITY EQU 1 << OSXB_BGPRIORITY
 
 ; OBJLST / SPRITE MAPPINGS FLAGS from ROM
-; These are almost the same as the iOBJInfo_StatusEx* bits.
+; These are almost the same as the iOBJInfo_OBJLstFlags* bits.
 ; item0
 
 OLFB_USETILEFLAGS EQU 4 ; If set, in the OBJ data, the upper two bits of a tile ID count as X/Y flip flags

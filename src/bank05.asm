@@ -9327,10 +9327,10 @@ L05698A:;J
 	ld   a, [hl]
 	or   a
 	jp   nz, L0569AA
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_StatusEx0
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstFlags
 	jp   L0569AD
 L0569AA:;J
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_StatusEx0
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstFlags
 L0569AD:;J
 	ld   a, [hl]
 	and  a, $DF

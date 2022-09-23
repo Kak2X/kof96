@@ -300,7 +300,7 @@ L1E427A:;J
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	ld   de, L1E60E6
 	call OBJLstS_InitFrom
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset0
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset
 	ld   de, $D6A7
 	ld   a, [$D920]
 	bit  7, a
@@ -326,9 +326,9 @@ L1E42A7:;J
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
 	ld   de, L1E60E6
 	call OBJLstS_InitFrom
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_StatusEx0
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstFlags
 	ld   [hl], $10
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffset0
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffset
 	ld   de, $D6E7
 	ld   a, [$DA20]
 	bit  7, a
@@ -7531,7 +7531,7 @@ L1E6414:;R
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	ld   de, L1E60E6
 	call OBJLstS_InitFrom
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTbl_Low0
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTbl_Low
 	ld   [hl], $DB
 	inc  hl
 	ld   [hl], $7C
@@ -7542,7 +7542,7 @@ L1E6414:;R
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
 	ld   de, L1E60E6
 	call OBJLstS_InitFrom
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTbl_Low0
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTbl_Low
 	ld   [hl], $DB
 	inc  hl
 	ld   [hl], $7C
@@ -7553,7 +7553,7 @@ L1E6414:;R
 	ld   hl, wOBJInfo2+iOBJInfo_Status
 	ld   de, L1E60E6
 	call OBJLstS_InitFrom
-	ld   hl, wOBJInfo2+iOBJInfo_StatusEx0
+	ld   hl, wOBJInfo2+iOBJInfo_OBJLstFlags
 	ld   [hl], $90
 	ld   hl, $D711
 	ld   [hl], $D5
