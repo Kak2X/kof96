@@ -9115,7 +9115,7 @@ L016392:;J
 L0163B3:;C
 	ld   hl, $C008
 	inc  [hl]
-	ld   hl, $D920
+	ld   hl, wPlInfo_Pl1+iPlInfo_Status
 	bit  7, [hl]
 	jp   nz, L016441
 	ldh  a, [hJoyKeys]
@@ -9186,7 +9186,7 @@ L016441:;J
 	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
 	call L0024E4
 L01644A:;J
-	ld   hl, $DA20
+	ld   hl, wPlInfo_Pl2+iPlInfo_Status
 	bit  7, [hl]
 	jp   nz, L0164D4
 L016452: db $F0;X
@@ -9554,7 +9554,7 @@ L016662:;J
 	ldh  [rOBP0], a
 	jp   L01669D
 L016667:;J
-	ld   a, [$D920]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
 	bit  6, a
 	jp   z, L016699
 	ld   a, [$C008]
@@ -9649,7 +9649,7 @@ L016714:;J
 	ldh  [rOBP1], a
 	jp   L01674F
 L016719:;J
-	ld   a, [$DA20]
+	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
 	bit  6, a
 	jp   z, L01674B
 	ld   a, [$C008]
@@ -9692,7 +9692,7 @@ L01674F:;J
 	ld   [$DA44], a
 L01676F:;R
 	call L016A24
-	ld   hl, $D920
+	ld   hl, wPlInfo_Pl1+iPlInfo_Status
 	res  0, [hl]
 	ld   a, [wOBJInfo2+iOBJInfo_Status]
 	and  a, $80
@@ -9702,7 +9702,7 @@ L01676F:;R
 	jr   z, L016786
 	set  0, [hl]
 L016786:;R
-	ld   hl, $DA20
+	ld   hl, wPlInfo_Pl2+iPlInfo_Status
 	res  0, [hl]
 	ld   a, [wOBJInfo3+iOBJInfo_Status]
 	and  a, $80
@@ -9712,7 +9712,7 @@ L016786:;R
 	jr   z, L01679A
 	set  0, [hl]
 L01679A:;R
-	ld   a, [$D920]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
 	ld   [$DA6D], a
 	ld   a, [$D921]
 	ld   [$DA6E], a
@@ -9720,7 +9720,7 @@ L01679A:;R
 	ld   [$DA6F], a
 	ld   a, [$D923]
 	ld   [$DA70], a
-	ld   a, [$DA20]
+	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
 	ld   [$D96D], a
 	ld   a, [$DA21]
 	ld   [$D96E], a
@@ -10336,7 +10336,7 @@ L016C8F:;JR
 	set  0, [hl]
 	set  6, [hl]
 L016CF4:;JR
-	ld   a, [$DA20]
+	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
 	and  a, $30
 	jp   z, L016D70
 	ld   a, [wOBJInfo2+iOBJInfo_Status]
@@ -10417,7 +10417,7 @@ L016D6D: db $CE;X
 L016D6E: db $CB;X
 L016D6F: db $FE;X
 L016D70:;JR
-	ld   a, [$D920]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
 	and  a, $30
 	jp   z, L016DEB
 	ld   a, [wOBJInfo3+iOBJInfo_Status]
@@ -10447,10 +10447,10 @@ L016D70:;JR
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016DEB
-	ld   a, [$D920]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
 	bit  5, a
 	jp   nz, L016DD8
-	ld   a, [$D920]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
 	bit  6, a
 	jp   nz, L016DD0
 	ld   a, [$D767]
@@ -11281,7 +11281,7 @@ L0171EB:;J
 L0171F1:;J
 	xor  a
 	ld   [$C161], a
-	ld   a, [$C163]
+	ld   a, [wPlayMode]
 	bit  1, a
 	jp   nz, L01724A
 	ld   a, [$C162]
@@ -11289,7 +11289,7 @@ L0171F1:;J
 	jp   nz, L01724A
 	ld   a, $01
 	ld   [$C161], a
-	ld   a, [$C165]
+	ld   a, [wUnknown_C165]
 	or   a
 	jp   z, L01722D
 L017210:;J
@@ -11519,11 +11519,11 @@ L01739E:;J
 	jr   nz, L01739A
 	ret
 L0173BA:;C
-	ld   hl, $D753
+	ld   hl, wOBJInfo3+iOBJInfo_OBJLstPtrTblOffset
 	ld   [hl], $04
 	jp   L0173C7
 L0173C2:;C
-	ld   hl, $D753
+	ld   hl, wOBJInfo3+iOBJInfo_OBJLstPtrTblOffset
 	ld   [hl], $00
 L0173C7:;J
 	ld   hl, wOBJInfo3+iOBJInfo_Status
@@ -11566,16 +11566,16 @@ L017412:;J
 L01741A:;J
 	ld   hl, $DA2D
 	inc  [hl]
-	ld   a, [wFieldScrollX]
+	ld   a, [wOBJScrollX]
 	add  a, $98
 	ld   [$D7C3], a
 	ld   hl, wOBJInfo5+iOBJInfo_Status
 	ld   [hl], $80
 L01742B:;J
-	ld   a, [$C163]
+	ld   a, [wPlayMode]
 	bit  1, a
 	jp   nz, L01743D
-	ld   a, [$C165]
+	ld   a, [wUnknown_C165]
 	or   a
 	jp   z, L01745A
 L01743A: db $C3;X
@@ -11650,16 +11650,16 @@ L017496:;J
 L01749E:;J
 	ld   hl, $D92D
 	inc  [hl]
-	ld   a, [wFieldScrollX]
+	ld   a, [wOBJScrollX]
 	add  a, $08
 	ld   [$D783], a
 	ld   hl, wOBJInfo4+iOBJInfo_Status
 	ld   [hl], $80
 L0174AF:;J
-	ld   a, [$C163]
+	ld   a, [wPlayMode]
 	bit  1, a
 	jp   nz, L0174C1
-	ld   a, [$C165]
+	ld   a, [wUnknown_C165]
 	or   a
 	jp   nz, L0174DE
 	jp   L0174D9
@@ -11712,7 +11712,7 @@ L0174EA:;J
 L0174F8:;C
 	ld   hl, wOBJInfo3+iOBJInfo_Status
 	ld   [hl], $80
-	ld   [$D753], a
+	ld   [wOBJInfo3+iOBJInfo_OBJLstPtrTblOffset], a
 	call L0175DE
 	call Task_PassControlFar
 	ld   b, $3C
@@ -11739,10 +11739,10 @@ L01750C:;C
 	cp   $03
 	jp   z, L017554
 L01753A:;J
-	ld   a, [wFieldScrollX]
+	ld   a, [wOBJScrollX]
 	add  a, $98
 	ld   [$D7C3], a
-	ld   a, [wFieldScrollX]
+	ld   a, [wOBJScrollX]
 	add  a, $08
 	ld   [$D783], a
 	ld   hl, wOBJInfo5+iOBJInfo_Status
@@ -11756,7 +11756,7 @@ L017554:;J
 	ld   a, $00
 	jp   L017561
 L017561:;J
-	ld   [$D753], a
+	ld   [wOBJInfo3+iOBJInfo_OBJLstPtrTblOffset], a
 	call Task_PassControlFar
 	ld   b, $3C
 	call L01758C
@@ -11821,7 +11821,7 @@ L0175D4:;R
 	jp   nz, L0175C0
 	ret
 L0175DE:;C
-	ld   a, [wFieldScrollX]
+	ld   a, [wOBJScrollX]
 	add  a, $50
 	ld   [wOBJInfo3+iOBJInfo_X], a
 	ret
@@ -11836,7 +11836,7 @@ L0175E7:;C
 	srl  b
 	add  b
 	ld   b, a
-	ld   a, [wFieldScrollX]
+	ld   a, [wOBJScrollX]
 	add  a, $50
 	cp   a, b
 	jp   z, L017661
@@ -11846,13 +11846,13 @@ L0175E7:;C
 	inc  a
 	ld   b, a
 L01760C:;J
-	ld   a, [wFieldScrollX]
+	ld   a, [wOBJScrollX]
 	add  b
-	ld   [wFieldScrollX], a
+	ld   [wOBJScrollX], a
 	bit  7, a
 	jp   z, L017661
 	ld   a, $00
-	ld   [wFieldScrollX], a
+	ld   [wOBJScrollX], a
 	jp   L017661
 L017620:;J
 	sub  a, b
@@ -11860,13 +11860,13 @@ L017620:;J
 	inc  a
 	ld   b, a
 L017624:;J
-	ld   a, [wFieldScrollX]
+	ld   a, [wOBJScrollX]
 	add  b
-	ld   [wFieldScrollX], a
+	ld   [wOBJScrollX], a
 	cp   $60
 	jp   c, L017661
 	ld   a, $60
-	ld   [wFieldScrollX], a
+	ld   [wOBJScrollX], a
 	jp   L017661
 L017638:;J
 	ld   a, [$D68B]
@@ -11889,7 +11889,7 @@ L01765B:;J
 	ld   b, a
 	jp   L017624
 L017661:;J
-	ld   a, [wFieldScrollX]
+	ld   a, [wOBJScrollX]
 	ldh  [hScrollX], a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
 	ld   b, a
@@ -11913,7 +11913,7 @@ L017685:;J
 	inc  a
 	ldh  [hScrollY], a
 	add  a, $40
-	ld   [wFieldScrollY], a
+	ld   [wOBJScrollY], a
 	ld   a, [$C159]
 	or   a
 	jp   z, L0176A6
@@ -13247,13 +13247,13 @@ L017EA2:;J
 	jp   nz, L017EA0
 	ret
 L017EB1:;C
-	ld   hl, $D920
+	ld   hl, wPlInfo_Pl1+iPlInfo_Status
 	bit  7, [hl]
 	jr   nz, L017EBE
 	call L017ECC
 	call L017F4C
 L017EBE:;R
-	ld   hl, $DA20
+	ld   hl, wPlInfo_Pl2+iPlInfo_Status
 	bit  7, [hl]
 	jr   nz, L017ECB
 L017EC5: db $CD;X

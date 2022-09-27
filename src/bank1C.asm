@@ -896,58 +896,73 @@ L1C437E: db $00
 L1C437F: db $00
 
 ; 
-; =============== START OF MODULE Title ===============
+; =============== START OF MODULE TitleMenu ===============
 ;
 ; =============== Module_Title ===============
-; EntryPoint for Title Screen. Called by rst $00 jump from Module_Intro.
+; EntryPoint for Title Screen and Menus. Called by rst $00 jump from Module_Intro.
 L1C4380:
 Module_Title:
 	ld   sp, $DD00
 	di
-	rst  $10
+	;-----------------------------------
+	rst  $10				; Stop LCD
 	call DisableSectLYC
 	ld   hl, wMisc_C028
-	res  1, [hl]
-	set  2, [hl]
+	res  MISCB_PL_RANGE_CHECK, [hl]
+	set  MISCB_TITLE_SECT, [hl]			; Enable title parallax mode
+	
+	; Init vars
 	xor  a
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
-	ld   [wIntroScene], a
-	ld   [$C165], a
-	ld   [$C1B4], a
-	ld   [$C1B5], a
-	ld   [$C1B6], a
-	ld   [$C1B7], a
-	ld   [$C1B8], a
-	ld   [$C1B9], a
-	ld   [$C1BA], a
-	ld   [$C1BB], a
-	ld   [$C1BC], a
-	ld   [$C1BD], a
-	ld   [$C1BE], a
-	ld   [$C1BF], a
-	ld   [$C1C0], a
-	ld   [$C1C3], a
-	ld   [$C1C4], a
-	ld   a, $1E
+	ld   [wTitleMode], a
+	ld   [wTitleActivePl], a
+	ld   [wTitleMenuOptId], a
+	ld   [wTitleMenuCursorXBak], a
+	ld   [wTitleMenuCursorYBak], a
+	ld   [wTitleSubMenuOptId], a
+	ld   [wOptionsSGBSndOptId], a
+	ld   [wOptionsBGMId], a
+	ld   [wOptionsSFXId], a
+	ld   [wOptionsMenuMode], a
+	ld   [wTitleBlinkTimer], a
+	ld   [wOptionsSGBSndIdA], a
+	ld   [wOptionsSGBSndBankA], a
+	ld   [wOptionsSGBSndIdB], a
+	ld   [wOptionsSGBSndBankB], a
+	ld   [wTitleParallaxBaseSpeed], a
+	ld   [wTitleParallaxBaseSpeedSub], a
+	
+	; After 30 seconds of inactivity in GM_TITLE_TITLE, return to the intro
+	ld   a, HIGH(TITLE_RESET_TIMER)
 	ld   [wTitleResetTimer_High], a
-	ld   a, $3C
+	ld   a, LOW(TITLE_RESET_TIMER)
 	ld   [wTitleResetTimer_Low], a
-	ld   hl, $5052
-	ldi  a, [hl]
-	ld   b, a
-	ld   de, wLZSS_Buffer
-L1C43DB:;J
-	ldi  a, [hl]
-	ld   [de], a
+	
+	; Copy the SGB packet used to play audio in the SGB Sound Test at the start of the LZSS Buffer.
+	; This will take up $10 bytes, and cause the actual LZSS buffer in the module to start $10 bytes after.
+	ld   hl, SGBPacketDef_Options_PlaySnd
+	ldi  a, [hl]					; B = Bytes to copy
+	ld   b, a						
+	ld   de, wOptionsSGBPacketSnd	; DE = Target
+	; The remaining bytes are copied into the buffer
+.cpLoop:
+	ldi  a, [hl]			
+	ld   [de], a			
 	inc  de
-	dec  b
-	jp   nz, L1C43DB
+	dec  b					; Are we done?
+	jp   nz, .cpLoop		; If not, loop
+	
+	; Load SGB palettes
 	ld   de, SCRPAL_TITLE
 	call HomeCall_SGB_ApplyScreenPalSet
+	
+	; Clear tilemaps
 	call ClearBGMap
 	call ClearWINDOWMap
+	
+	; Init scroll positions for BG layer, used for the parallax clouds
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hTitleParallax1X], a
@@ -955,235 +970,302 @@ L1C43DB:;J
 	ldh  [hTitleParallax3X], a
 	ldh  [hTitleParallax4X], a
 	ldh  [hTitleParallax5X], a
-	ld   [wFieldScrollX], a
+	ld   [wOBJScrollX], a
 	ld   a, $00
-	ld   [wFieldScrollY], a
+	ld   [wOBJScrollY], a
 	ld   a, $7C
 	ldh  [hScrollY], a
-	ld   b, $1C
-	ld   hl, $5105
+	
+	; FarCall to self bank... did it use to be elsewhere?
+	ld   b, BANK(Title_LoadVRAM) ; BANK $1C
+	ld   hl, Title_LoadVRAM
 	rst  $08
-	ld   hl, $4F67
+	
+	;
+	; Write the menu text in the BG layer.
+	;
+	; Because the BG layer only contains a 3-tiles tall horizontal strip, there's enough space
+	; to generate both text-only menu screens.
+	; The tilemap won't be touched again when navigating through the title screen/menus,
+	; only the graphics will be reloaded.
+	;
+	
+	ld   hl, TextDef_Menu_Title
 	call TextPrinter_Instant
-	ld   hl, $4F75
+	ld   hl, TextDef_Menu_SinglePlay
 	call TextPrinter_Instant
-	ld   hl, $4F83
+	ld   hl, TextDef_Menu_TeamPlay
 	call TextPrinter_Instant
-	ld   hl, $4F8F
+	ld   hl, TextDef_Menu_SingleVS
 	call TextPrinter_Instant
-	ld   hl, $4F9B
+	ld   hl, TextDef_Menu_TeamVS
 	call TextPrinter_Instant
-	ld   hl, $4FA5
+	ld   hl, TextDef_Options_Title
 	call TextPrinter_Instant
-	ld   hl, $4FAE
+	ld   hl, TextDef_Options_Time
 	call TextPrinter_Instant
-	ld   hl, $4FBD
+	ld   hl, TextDef_Options_Level
 	call TextPrinter_Instant
-	ld   hl, $4FCC
+	ld   hl, TextDef_Options_BGMTest
 	call TextPrinter_Instant
-	ld   hl, $4FDB
+	ld   hl, TextDef_Options_SFXTest
 	call TextPrinter_Instant
-	ld   hl, $4FF9
+	ld   hl, TextDef_Options_Exit
 	call TextPrinter_Instant
+	
+	; If dip switches are set, display the dip value and any extra options
 	ld   a, [wDipSwitch]
-	or   a
-	jp   z, L1C445C
-	ld   hl, $5000
+	or   a						; Any dip switch set?
+	jp   z, .noDip				; If not, skip
+	ld   hl, TextDef_Options_Dip
 	call TextPrinter_Instant
-L1C445C:;J
+.noDip:
+	; Print text for SGB sound test
 	ld   a, [wMisc_C025]
-	bit  7, a
-	jp   z, L1C447E
-L1C4464: db $FA;X
-L1C4465: db $00;X
-L1C4466: db $C0;X
-L1C4467: db $CB;X
-L1C4468: db $67;X
-L1C4469: db $CA;X
-L1C446A: db $7E;X
-L1C446B: db $44;X
-L1C446C: db $21;X
-L1C446D: db $EA;X
-L1C446E: db $4F;X
-L1C446F: db $CD;X
-L1C4470: db $65;X
-L1C4471: db $12;X
-L1C4472: db $21;X
-L1C4473: db $30;X
-L1C4474: db $50;X
-L1C4475: db $CD;X
-L1C4476: db $65;X
-L1C4477: db $12;X
-L1C4478: db $21;X
-L1C4479: db $3D;X
-L1C447A: db $50;X
-L1C447B: db $CD;X
-L1C447C: db $65;X
-L1C447D: db $12;X
-L1C447E:;J
+	bit  MISCB_IS_SGB, a		; Running on a SGB?
+	jp   z, .initOBJ			; If not, skip
+	ld   a, [wDipSwitch]
+	bit  DIPB_SGB_SOUND_TEST, a	; SGB sound test enabled?
+	jp   z, .initOBJ			; If not, skip
+	
+	ld   hl, TextDef_Options_SGBSndTest
+	call TextPrinter_Instant
+	ld   hl, TextDef_Options_SGBSndTypes
+	call TextPrinter_Instant
+	ld   hl, TextDef_Options_SGBSndPlaceholders
+	call TextPrinter_Instant
+.initOBJ:
+	;
+	; Prepare sprites.
+	; These all use OBJLstPtrTable_Title, with different offsets.
+	;
+	
 	call ClearOBJInfo
-	ld   hl, wOBJInfo2+iOBJInfo_Status
-	ld   de, L1C4E9B
+	
+	; OBJ2 - (C)SNK 1996 text
+	ld   hl, wOBJInfo_SnkText+iOBJInfo_Status
+	ld   de, OBJInfoInit_Title
 	call OBJLstS_InitFrom
-	ld   hl, wOBJInfo2+iOBJInfo_X
+	ld   hl, wOBJInfo_SnkText+iOBJInfo_X
 	ld   [hl], $34
-	ld   hl, wOBJInfo2+iOBJInfo_Y
+	ld   hl, wOBJInfo_SnkText+iOBJInfo_Y
 	ld   [hl], $48
-	ld   hl, $D713
-	ld   [hl], $0C
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	ld   de, L1C4E9B
+	ld   hl, wOBJInfo_SnkText+iOBJInfo_OBJLstPtrTblOffset
+	ld   [hl], TITLE_OBJ_SNKCOPYRIGHT*OBJLSTPTR_ENTRYSIZE
+	
+	; OBJ1 - Title screen menu text (PUSH START, ...)
+	ld   hl, wOBJInfo_MenuText+iOBJInfo_Status
+	ld   de, OBJInfoInit_Title
 	call OBJLstS_InitFrom
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	res  7, [hl]
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_X
+	ld   hl, wOBJInfo_MenuText+iOBJInfo_Status
+	res  OSTB_VISIBLE, [hl]
+	ld   hl, wOBJInfo_MenuText+iOBJInfo_X
 	ld   [hl], $28
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_Y
+	ld   hl, wOBJInfo_MenuText+iOBJInfo_Y
 	ld   [hl], $43
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   de, L1C4E9B
+	; Entry $00
+	
+	; OBJ0 - Cursor pointing right
+	ld   hl, wOBJInfo_CursorR+iOBJInfo_Status
+	ld   de, OBJInfoInit_Title
 	call OBJLstS_InitFrom
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	res  7, [hl]
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_X
+	ld   hl, wOBJInfo_CursorR+iOBJInfo_Status
+	res  OSTB_VISIBLE, [hl]
+	ld   hl, wOBJInfo_CursorR+iOBJInfo_X
 	ld   [hl], $28
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Y
+	ld   hl, wOBJInfo_CursorR+iOBJInfo_Y
 	ld   [hl], $43
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset
-	ld   [hl], $08
-	ld   hl, wOBJInfo3+iOBJInfo_Status
-	ld   de, L1C4E9B
+	ld   hl, wOBJInfo_CursorR+iOBJInfo_OBJLstPtrTblOffset
+	ld   [hl], TITLE_OBJ_CURSOR_R*OBJLSTPTR_ENTRYSIZE
+	
+	; OBJ3 - Cursor pointing up (for SGB Sound Test)
+	ld   hl, wOBJInfo_CursorU+iOBJInfo_Status
+	ld   de, OBJInfoInit_Title
 	call OBJLstS_InitFrom
-	ld   hl, wOBJInfo3+iOBJInfo_Status
-	res  7, [hl]
-	ld   hl, wOBJInfo3+iOBJInfo_X
+	ld   hl, wOBJInfo_CursorU+iOBJInfo_Status
+	res  OSTB_VISIBLE, [hl]
+	ld   hl, wOBJInfo_CursorU+iOBJInfo_X
 	ld   [hl], $50
-	ld   hl, wOBJInfo3+iOBJInfo_Y
+	ld   hl, wOBJInfo_CursorU+iOBJInfo_Y
 	ld   [hl], $60
-	ld   hl, $D753
-	ld   [hl], $10
+	ld   hl, wOBJInfo_CursorU+iOBJInfo_OBJLstPtrTblOffset
+	ld   [hl], TITLE_OBJ_CURSOR_U*OBJLSTPTR_ENTRYSIZE
+	
+	; Put WINDOW over BG
 	xor  a
 	ldh  [rWY], a
 	ld   a, $07
 	ldh  [rWX], a
-	ld   a, $E7
-	rst  $18
+	
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
+	
+	; Enable LYC, start parallax at line $66
 	ldh  a, [rSTAT]
-	or   a, $40
+	or   a, STAT_LYC
 	ldh  [rSTAT], a
 	ld   a, $66
 	ldh  [rLYC], a
 	ldh  a, [rIE]
-	or   a, $03
+	or   a, I_STAT|I_VBLANK
 	ldh  [rIE], a
+	
 	ei
+	
 	call Task_PassControl_NoDelay
+	
+	; Load DMG palettes
 	ld   a, $3F
 	ldh  [rOBP0], a
 	ld   a, $00
 	ldh  [rOBP1], a
 	ld   a, $1B
 	ldh  [rBGP], a
-	ld   a, $00
+	
+	; Stop music
+	ld   a, SND_MUTE
 	call HomeCall_Sound_ReqPlayExId_Stub
-	call L1C5073
-L1C451D:;J
-	call L00112E
-	call L1C4529
+	
+	; Disable serial since the game shouldn't process the other GB inputs on the menu
+	; (outside of when a VS mode is selected)
+	call Title_DisableSerial
+	
+.mainLoop:
+	call JoyKeys_DoCursorDelayTimer
+	call .execMode
 	call Task_PassControl_NoDelay
-	jp   L1C451D
-L1C4529:;C
-	ld   hl, $4539
+	jp   .mainLoop
+.execMode:
+	; DynJump for title screen mode
+	ld   hl, Title_ModePtrTable	; HL = Title_ModePtrTable
 	ld   d, $00
-	ld   a, [wIntroScene]
+	ld   a, [wTitleMode]		; DE = wTitleMode
 	ld   e, a
-	add  hl, de
-	ld   e, [hl]
+	add  hl, de					; Offset the table
+	ld   e, [hl]				; Read out jump target to DE
 	inc  hl
 	ld   d, [hl]
 	push de
-	pop  hl
+	pop  hl						; Move to HL and jump there
 	jp   hl
-L1C4539: db $41
-L1C453A: db $45
-L1C453B: db $8E
-L1C453C: db $45
-L1C453D: db $EA
-L1C453E: db $46
-L1C453F: db $52
-L1C4540: db $48
-L1C4541:;I
-	call L1C4570
-	call L1C4DAA
-	call L1C4DF2
-	call L1C4D39
-	jp   c, L1C4551
+	
+Title_ModePtrTable:
+	dw Title_Mode_TitleScreen
+	dw Title_Mode_TitleMenu
+	dw Title_Mode_ModeSelect
+	dw Title_Mode_Options
+	
+; =============== Title_Mode_TitleScreen ===============
+; Title screen - Initial mode.
+Title_Mode_TitleScreen:
+	call TitleScreen_CheckReset
+	call TitleScreen_BlinkPushStartText
+	call Title_UpdateParallaxCoords
+	call TitleScreen_IsStartPressed ; Pressed START?
+	jp   c, .switchToTitleMenu ; If so, jump
 	ret
-L1C4551:;J
-	ld   a, $02
-	ld   [wIntroScene], a
-	ld   a, $00
-	ld   [$C1B4], a
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	set  7, [hl]
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Y
+.switchToTitleMenu:
+	;
+	; Activate the GAME START/OPTIONS menu on the title screen
+	;
+	ld   a, GM_TITLE_TITLEMENU		; Next mode
+	ld   [wTitleMode], a
+	ld   a, $00						; Select GAME START
+	ld   [wTitleMenuOptId], a
+	
+	; Display cursor
+	ld   hl, wOBJInfo_CursorR+iOBJInfo_Status
+	set  OSTB_VISIBLE, [hl]
+	ld   hl, wOBJInfo_CursorR+iOBJInfo_Y
 	ld   [hl], $43
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	set  7, [hl]
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffset
-	ld   [hl], $04
+	
+	; Change OBJLst id to GAME START/OPTIONS text
+	ld   hl, wOBJInfo_MenuText+iOBJInfo_Status
+	set  OSTB_VISIBLE, [hl]
+	ld   hl, wOBJInfo_MenuText+iOBJInfo_OBJLstPtrTblOffset
+	ld   [hl], TITLE_OBJ_MENU*OBJLSTPTR_ENTRYSIZE
 	ret
-L1C4570:;C
-	ld   hl, wTitleResetTimer_Low
-	dec  [hl]
-	jp   nz, L1C458D
-	ld   [hl], $3C
-	ld   hl, wTitleResetTimer_High
-	dec  [hl]
-	jp   nz, L1C458D
+	
+; =============== TitleScreen_CheckReset ===============
+; Checks if enough time has passed without pressing START.
+; If enough frames have passed, reset to the intro.
+TitleScreen_CheckReset:
+	; wTitleResetTimer--
+	ld   hl, wTitleResetTimer_Low	
+	dec  [hl]							; Decrement low byte
+	jp   nz, .ret						; Is it 0 now? If not, return
+	ld   [hl], LOW(TITLE_RESET_TIMER)	; Reset to 60 frames
+	ld   hl, wTitleResetTimer_High	
+	dec  [hl]							; Decrement high byte
+	jp   nz, .ret						; Is it 0 now? If not, return
+	
+	; If we got here, wTitleResetTimer_Low and wTitleResetTimer_High are 0.
+	; Return to the TAKARA logo.
 	xor  a
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
-	ld   b, $0A
-	ld   hl, $6F42
+	ld   b, BANK(Module_TakaraLogo) ; BANK $0A
+	ld   hl, Module_TakaraLogo
 	rst  $00
-L1C458D:;J
+.ret:
 	ret
-L1C458E:;I
-	call L1C4DC2
-	call L1C4DF2
-	call L1C467C
-	ret  nc
-	cp   $00
-	jp   z, L1C45A8
-	cp   $01
-	jp   z, L1C45C2
-	cp   $02
-	jp   z, L1C45FC
-L1C45A7: db $C9;X
-L1C45A8:;J
-	ld   a, $00
-	ld   [wIntroScene], a
-	ld   a, $1E
+	
+; =============== Title_Mode_TitleMenu ===============
+; Title screen - Menu.
+Title_Mode_TitleMenu:
+	call Title_BlinkCursorR
+	call Title_UpdateParallaxCoords
+	call TitleMenu_DoCtrl
+	ret  nc	; If we're not switching (C flag clear), return
+	
+	cp   TITLEMENU_TO_TITLE
+	jp   z, .toTitle
+	cp   TITLEMENU_TO_MODESELECT
+	jp   z, .toModeSelect
+	cp   TITLEMENU_TO_OPTIONS
+	jp   z, .toOptions
+	ret ; We never get here
+	
+.toTitle:
+	;
+	; Return back to PUSH START prompt
+	;
+	ld   a, GM_TITLE_TITLE			
+	ld   [wTitleMode], a
+	ld   a, HIGH(TITLE_RESET_TIMER)	
 	ld   [wTitleResetTimer_High], a
-	ld   a, $3C
+	ld   a, LOW(TITLE_RESET_TIMER)
 	ld   [wTitleResetTimer_Low], a
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	res  7, [hl]
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffset
-	ld   [hl], $00
+	
+	; Hide cursor
+	ld   hl, wOBJInfo_CursorR+iOBJInfo_Status
+	res  OSTB_VISIBLE, [hl]
+	; Switch to PUSH START text
+	ld   hl, wOBJInfo_MenuText+iOBJInfo_OBJLstPtrTblOffset
+	ld   [hl], TITLE_OBJ_PUSHSTART
 	ret
-L1C45C2:;J
-	call L1C5073
+	
+.toModeSelect:
+	
+	call Title_DisableSerial
+	
+	; Reset pal
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
+	
+	; Start over SINGLE PLAY
 	ld   a, $00
-	ld   [$C1B7], a
-	ld   a, $04
-	ld   [wIntroScene], a
+	ld   [wTitleSubMenuOptId], a
+	
+	; Next mode
+	ld   a, GM_TITLE_MODESELECT
+	ld   [wTitleMode], a
+	
+	; Set the BG scroll to where the mode select text is
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hTitleParallax1X], a
@@ -1193,61 +1275,102 @@ L1C45C2:;J
 	ldh  [hTitleParallax5X], a
 	ld   a, $20
 	ldh  [hScrollY], a
-	ld   a, $F8
-	ld   [wFieldScrollY], a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
-	ld   [$C1B5], a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
-	ld   [$C1B6], a
-	jp   L1C4645
-L1C45FC:;J
+	
+	; Move cursor sprite down 8px by pretending the screen is scrolled up by 8px.
+	;
+	; We aren't using sections in menus so the BG is unaffected, 
+	; but the sprite mapping writer still takes this into consideration.
+	ld   a, -$08					
+	ld   [wOBJScrollY], a
+	
+	; Save current cursor location
+	ld   a, [wOBJInfo_CursorR+iOBJInfo_X]
+	ld   [wTitleMenuCursorXBak], a
+	ld   a, [wOBJInfo_CursorR+iOBJInfo_Y]
+	ld   [wTitleMenuCursorYBak], a
+	
+	jp   .initMenu
+.toOptions:
+
+	; Reset pal
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
+	
+	; Reset cursor pos
 	ld   a, $00
-	ld   [$C1B7], a
-	ld   [$C1B8], a
-	ld   [$C1BB], a
-	ld   [$C1B9], a
-	ld   [$C1BA], a
-	ld   a, $06
-	ld   [wIntroScene], a
+	ld   [wTitleSubMenuOptId], a
+	ld   [wOptionsSGBSndOptId], a
+	ld   [wOptionsMenuMode], a
+	ld   [wOptionsBGMId], a
+	ld   [wOptionsSFXId], a
+	
+	; Next mode
+	ld   a, GM_TITLE_OPTIONS
+	ld   [wTitleMode], a
+	
+	; Set the BG scroll to where the option menu text is
 	ld   a, $80
 	ldh  [hScrollX], a
 	ld   a, $20
 	ldh  [hScrollY], a
-	ld   a, $08
-	ld   [wFieldScrollY], a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
-	ld   [$C1B5], a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
-	ld   [$C1B6], a
-	call L1C48CB
-	call L1C491C
-	call L1C49A3
-	call L1C4A1B
-	call L1C4B2C
-	call L1C4B75
-L1C4645:;J
+	ld   a, $08					; ???
+	ld   [wOBJScrollY], a
+	
+	; Save current cursor location
+	ld   a, [wOBJInfo_CursorR+iOBJInfo_X]
+	ld   [wTitleMenuCursorXBak], a
+	ld   a, [wOBJInfo_CursorR+iOBJInfo_Y]
+	ld   [wTitleMenuCursorYBak], a
+	
+	; Print the current option values
+	call Options_PrintMatchTime
+	call Options_PrintDifficulty
+	call Options_PrintBGMId
+	call Options_PrintSFXId
+	call Options_PrintSGBSndTestVals
+	call Options_PrintDipSwitch
+.initMenu:
+
+	;
+	; Common menu loader
+	;
+
+	; Menu options start at the same X position
+	; The screen scrolling and text positions must account for this and be aligned perfectly.
 	ld   a, $20
-	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
+	ld   [wOBJInfo_CursorR+iOBJInfo_X], a
 	ld   a, $00
-	ld   [wOBJInfo_Pl1+iOBJInfo_Y], a
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	set  7, [hl]
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	res  7, [hl]
-	ld   hl, wOBJInfo2+iOBJInfo_Status
-	res  7, [hl]
+	ld   [wOBJInfo_CursorR+iOBJInfo_Y], a
+	
+	; Show horizontal cursor
+	ld   hl, wOBJInfo_CursorR+iOBJInfo_Status
+	set  OSTB_VISIBLE, [hl]
+	; Hide title screen menu & SNK copyright
+	ld   hl, wOBJInfo_MenuText+iOBJInfo_Status
+	res  OSTB_VISIBLE, [hl]
+	ld   hl, wOBJInfo_SnkText+iOBJInfo_Status
+	res  OSTB_VISIBLE, [hl]
+	
+	; Disable title screen parallax
 	ld   hl, wMisc_C028
-	res  2, [hl]
+	res  MISCB_TITLE_SECT, [hl]		; Disable parallax mode
 	xor  a
-	ldh  [rSTAT], a
+	ldh  [rSTAT], a					; Disable LYC
+	
+	; Load generic font
 	call LoadGFX_1bppFont_Default
-	ld   a, $C7
-	rst  $18
+	
+	; Disable WINDOW
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
+	
 	call Task_PassControl_NoDelay
+	
+	; Load palettes.
+	; Note that the SGB palette configuration remains the same as the title screen.
 	ld   a, $3F
 	ldh  [rOBP0], a
 	ld   a, $00
@@ -1255,194 +1378,218 @@ L1C4645:;J
 	ld   a, $1B
 	ldh  [rBGP], a
 	ret
-L1C467C:;C
-	call L1C4D76
-	bit  3, b
-	jp   nz, L1C46BA
-	bit  2, b
-	jp   nz, L1C46BA
-	bit  1, b
-	jp   nz, L1C46A4
-	bit  0, b
-	jp   nz, L1C46AF
-	bit  7, a
-	jp   nz, L1C46E0
-	bit  6, a
-	jp   nz, L1C46E6
-	bit  4, a
-	jp   nz, L1C46E0
+	
+; =============== TitleMenu_DoCtrl ===============
+; Checks for player input in the title screen menu.
+; OUT
+; - C flag: If set, the game should transition to another submode.
+; - A: Determines the new mode (TITLEMENU_TO_*)
+TitleMenu_DoCtrl:
+	call Title_GetMenuInput
+	bit  KEYB_DOWN, b
+	jp   nz, .moveV
+	bit  KEYB_UP, b
+	jp   nz, .moveV
+	bit  KEYB_LEFT, b
+	jp   nz, .incParallaxSpeed
+	bit  KEYB_RIGHT, b
+	jp   nz, .decParallaxSpeed
+	bit  KEYB_START, a
+	jp   nz, .enter
+	bit  KEYB_SELECT, a
+	jp   nz, .exit
+	bit  KEYB_A, a
+	jp   nz, .enter
 	xor  a
 	ret
-L1C46A4:;J
-	ld   hl, $C1C3
+	
+; [POI] Secret.
+;       Hold right or left to change cloud speed.
+.incParallaxSpeed:
+	ld   hl, wTitleParallaxBaseSpeed
 	ld   bc, $0008
-	call L1C4E48
+	call Title_AddWithSubpixels
 	xor  a
 	ret
-L1C46AF:;J
-	ld   hl, $C1C3
-	ld   bc, hSndInfoCurPtr_Low
-	call L1C4E48
+.decParallaxSpeed:
+	ld   hl, wTitleParallaxBaseSpeed
+	ld   bc, -$0008
+	call Title_AddWithSubpixels
 	xor  a
 	ret
-L1C46BA:;J
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	set  7, [hl]
-	ld   a, [$C1B4]
+.moveV:
+	;--
+	; Not necessary
+	ld   hl, wOBJInfo_CursorR+iOBJInfo_Status
+	set  OSTB_VISIBLE, [hl]
+	;--
+	
+	; Change selected option
+	; Because there are only two menu options, a xor is all that's needed
+	ld   a, [wTitleMenuOptId]
 	xor  $01
-	ld   [$C1B4], a
-	cp   $00
-	jp   z, L1C46D6
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
+	ld   [wTitleMenuOptId], a
+	
+	; Move the cursor 8px up or down depending on the new selected option
+	cp   TITLEMENU_TO_MODESELECT-1		; wTitleMenuOptId == 0?
+	jp   z, .modeSelect					; If so, jump
+.options:
+	ld   a, [wOBJInfo_CursorR+iOBJInfo_Y]	; Low option, move down
 	add  a, $08
-	ld   [wOBJInfo_Pl1+iOBJInfo_Y], a
+	ld   [wOBJInfo_CursorR+iOBJInfo_Y], a
 	xor  a
 	ret
-L1C46D6:;J
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
+.modeSelect:
+	ld   a, [wOBJInfo_CursorR+iOBJInfo_Y]	; High option, move up
 	sub  a, $08
-	ld   [wOBJInfo_Pl1+iOBJInfo_Y], a
+	ld   [wOBJInfo_CursorR+iOBJInfo_Y], a
 	xor  a
 	ret
-L1C46E0:;J
-	ld   a, [$C1B4]
+.enter:
+	; RetVal = wTitleMenuOptId+1
+	; Will be TITLEMENU_TO_MODESELECT or TITLEMENU_TO_OPTIONS
+	ld   a, [wTitleMenuOptId]
 	inc  a
-	scf
+	scf			; Change mode
 	ret
-L1C46E6:;J
-	ld   a, $00
-	scf
+.exit:
+	ld   a, TITLEMENU_TO_TITLE
+	scf			; Change mode
 	ret
-L1C46EA:;I
-	call L1C5083
-	call L1C4DC2
-	call L1C4809
-	jr   nc, L1C470F
-	cp   $00
-	jp   z, L1C4CC2
-	cp   $01
-	jp   z, L1C471D
-	cp   $02
-	jp   z, L1C4725
-	cp   $03
-	jp   z, L1C472D
-	cp   $04
-	jp   z, L1C474E
-L1C470E: db $C9;X
-L1C470F:;R
-	call L1C50D1
-	cp   $04
-	jp   z, L1C4767
-	cp   $03
-	jp   z, L1C4746
+	
+; =============== Title_Mode_ModeSelect ===============
+; Mode selection menu.
+Title_Mode_ModeSelect:
+	call ModeSelect_SetSerialIdle	; Every time so the GBs are always ready to listen to each other.
+	call Title_BlinkCursorR
+	call ModeSelect_DoCtrl
+	jr   nc, .checkOtherPl			; No action returned? If so, jump
+.chkAct:
+	cp   MODESELECT_ACT_EXIT
+	jp   z, TitleSubMenu_Exit
+	cp   MODESELECT_ACT_SINGLE1P
+	jp   z, .single1P
+	cp   MODESELECT_ACT_TEAM1P
+	jp   z, .team1P
+	cp   MODESELECT_ACT_SINGLEVS
+	jp   z, .singleVS
+	cp   MODESELECT_ACT_TEAMVS
+	jp   z, .teamVS
+	ret ; We never get here
+.checkOtherPl:
+	; Check if the other player (over serial only) sent us a mode id value.
+	; If so, start the mode directly.
+	call ModeSelect_GetCtrlFromSerial
+	cp   MODESELECT_SBCMD_TEAMVS
+	jp   z, .startTeamVS
+	cp   MODESELECT_SBCMD_SINGLEVS
+	jp   z, .startSingleVS
 	ret
-L1C471D:;J
-	ld   a, $00
-	ld   [$C163], a
-	jp   L1C476F
-L1C4725:;J
-	ld   a, $01
-	ld   [$C163], a
-	jp   L1C476F
-L1C472D:;J
+	
+.single1P:
+	; 1P Modes don't need special checks
+	ld   a, MODE_SINGLE1P
+	ld   [wPlayMode], a
+	jp   ModeSelect_PrepSingle
+.team1P:
+	ld   a, MODE_TEAM1P
+	ld   [wPlayMode], a
+	jp   ModeSelect_PrepSingle
+	
+.singleVS:
+	;
+	; Verify that there's a second player
+	;
 	ld   a, [wMisc_C025]
-	bit  7, a
-	jp   nz, L1C4746
-	ld   a, $03
-	call L1C508C
-	call L1C509D
-	cp   $02
-	jr   z, L1C4746
-	ld   a, $B1
+	bit  MISCB_IS_SGB, a		; Playing on SGB?
+	jp   nz, .startSingleVS		; If so, skip the serial checks
+	
+	; [Master 1/3] Send out VS mode option
+	ld   a, MODESELECT_SBCMD_SINGLEVS
+	call ModeSelect_Serial_SendAndWait
+	; Try to send the rest for sync
+	call ModeSelect_TrySendVSData
+	cp   MODESELECT_SBCMD_IDLE		; Did the other GB listen to the original request? 
+	jr   z, .startSingleVS			; If so, jump
+	ld   a, SFX_GAMEOVER
 	jp   HomeCall_Sound_ReqPlayExId
-L1C4746: db $3E;X
-L1C4747: db $02;X
-L1C4748: db $EA;X
-L1C4749: db $63;X
-L1C474A: db $C1;X
-L1C474B: db $C3;X
-L1C474C: db $97;X
-L1C474D: db $47;X
-L1C474E:;J
+.startSingleVS:
+	ld   a, MODE_SINGLEVS
+	ld   [wPlayMode], a
+	jp   ModeSelect_PrepVS
+	
+.teamVS:
 	ld   a, [wMisc_C025]
-	bit  7, a
-	jp   nz, L1C4767
-	ld   a, $04
-	call L1C508C
-	call L1C509D
-	cp   $02
-	jr   z, L1C4767
-	ld   a, $B1
+	bit  MISCB_IS_SGB, a		; Playing on SGB?
+	jp   nz, .startTeamVS		; If so, skip the serial checks
+	; [Master 1/3] Send out VS mode option
+	ld   a, MODESELECT_SBCMD_TEAMVS
+	call ModeSelect_Serial_SendAndWait
+	; Try to send the rest for sync
+	call ModeSelect_TrySendVSData
+	cp   MODESELECT_SBCMD_IDLE		; Did the other GB listen to the original request? 
+	jr   z, .startTeamVS			; If so, jump
+	; Otherwise, play an error sound
+	ld   a, SFX_GAMEOVER
 	jp   HomeCall_Sound_ReqPlayExId
-L1C4767: db $3E;X
-L1C4768: db $03;X
-L1C4769: db $EA;X
-L1C476A: db $63;X
-L1C476B: db $C1;X
-L1C476C: db $C3;X
-L1C476D: db $97;X
-L1C476E: db $47;X
-L1C476F:;J
-	ld   a, [$C165]
-	cp   $00
-	jp   nz, L1C4787
-	ld   hl, $D920
-	res  7, [hl]
-	ld   hl, $DA20
-	set  7, [hl]
-	call L1C4E56
-	jp   L1C47B8
-L1C4787: db $21;X
-L1C4788: db $20;X
-L1C4789: db $D9;X
-L1C478A: db $CB;X
-L1C478B: db $FE;X
-L1C478C: db $21;X
-L1C478D: db $20;X
-L1C478E: db $DA;X
-L1C478F: db $CB;X
-L1C4790: db $BE;X
-L1C4791: db $CD;X
-L1C4792: db $56;X
-L1C4793: db $4E;X
-L1C4794: db $C3;X
-L1C4795: db $B8;X
-L1C4796: db $47;X
-L1C4797: db $21;X
-L1C4798: db $20;X
-L1C4799: db $D9;X
-L1C479A: db $CB;X
-L1C479B: db $BE;X
-L1C479C: db $21;X
-L1C479D: db $20;X
-L1C479E: db $DA;X
-L1C479F: db $CB;X
-L1C47A0: db $BE;X
-L1C47A1: db $21;X
-L1C47A2: db $7F;X
-L1C47A3: db $C1;X
-L1C47A4: db $36;X
-L1C47A5: db $00;X
-L1C47A6: db $C3;X
-L1C47A7: db $B8;X
-L1C47A8: db $47;X
-L1C47A9: db $21;X
-L1C47AA: db $20;X
-L1C47AB: db $D9;X
-L1C47AC: db $CB;X
-L1C47AD: db $FE;X
-L1C47AE: db $21;X
-L1C47AF: db $20;X
-L1C47B0: db $DA;X
-L1C47B1: db $CB;X
-L1C47B2: db $FE;X
-L1C47B3: db $21;X
-L1C47B4: db $7F;X
-L1C47B5: db $C1;X
-L1C47B6: db $36;X
-L1C47B7: db $00;X
-L1C47B8:;J
-	call L1C4D57
+.startTeamVS: 
+	ld   a, MODE_TEAMVS
+	ld   [wPlayMode], a
+	jp   ModeSelect_PrepVS
+	
+; =============== ModeSelect_Prep* ===============
+; Sets of functions to set which players are controlled by the CPU, depending on the mode.
+
+ModeSelect_PrepSingle:
+	; SGB-only, wTitleActivePl is always TITLE_CTRL_PL1 in DMG
+	ld   a, [wTitleActivePl]
+	cp   TITLE_CTRL_PL1		; Does player 1 have control?
+	jp   nz, .pl2			; If not, jump
+.pl1:
+	; P1: Player, P2: CPU
+	ld   hl, wPlInfo_Pl1+iPlInfo_Status
+	res  PSB_CPU, [hl]
+	ld   hl, wPlInfo_Pl2+iPlInfo_Status
+	set  PSB_CPU, [hl]
+	call ModeSelect_MakeRoundSeq
+	jp   ModeSelect_SwitchToCharSelect
+.pl2:
+	; P1: CPU, P2: Player
+	ld   hl, wPlInfo_Pl1+iPlInfo_Status
+	set  PSB_CPU, [hl]
+	ld   hl, wPlInfo_Pl2+iPlInfo_Status
+	res  PSB_CPU, [hl]
+	call ModeSelect_MakeRoundSeq
+	jp   ModeSelect_SwitchToCharSelect
+	
+ModeSelect_PrepVS:
+	; P1: Player, P2: Player
+	ld   hl, wPlInfo_Pl1+iPlInfo_Status
+	res  PSB_CPU, [hl]
+	ld   hl, wPlInfo_Pl2+iPlInfo_Status
+	res  PSB_CPU, [hl]
+	; No round sequence in 2P mode
+	ld   hl, wRoundSeqId
+	ld   [hl], $00
+	jp   ModeSelect_SwitchToCharSelect
+	
+; [TCRF] Unreferenced code.
+;        Sets up a CPU vs CPU battle in VS mode, which is normally restricted to 1P modes.
+ModeSelect_Unused_PrepVSCPU:
+	; P1: CPU, P2: CPU
+	ld   hl, wPlInfo_Pl1+iPlInfo_Status
+	set  PSB_CPU, [hl]
+	ld   hl, wPlInfo_Pl2+iPlInfo_Status
+	set  PSB_CPU, [hl]
+	; No round sequence in 2P mode
+	ld   hl, wRoundSeqId
+	ld   [hl], $00
+	; Fall-through
+	
+ModeSelect_SwitchToCharSelect:
+	call ModeSelect_CheckCPUvsCPU
+	
+	; Initialize character select vars
 	ld   a, $00
 	ld   [$C162], a
 	ld   [$C17E], a
@@ -1457,974 +1604,982 @@ L1C47B8:;J
 	ld   [$C1AE], a
 	ld   [$C1AF], a
 	ld   [$C1B0], a
+	
+	; Force cursor to be visible while waiting
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	set  7, [hl]
+	set  OSTB_VISIBLE, [hl]
+	
+	; Wait $3C frames
 	ld   b, $3C
-L1C47E8:;J
+.wait:
 	call Task_PassControl_NoDelay
 	dec  b
-	jp   nz, L1C47E8
+	jp   nz, .wait
+	
 	ld   hl, wMisc_C028
-	res  2, [hl]
+	res  MISCB_TITLE_SECT, [hl]		; Not necessary
+	
 	di
-	rst  $10
+	;-----------------------------------
+	rst  $10				; Stop LCD
+	
+	; Reset screen coords
 	xor  a
 	ldh  [rWY], a
 	ldh  [rWX], a
 	ldh  [rSTAT], a
-	ld   [$C009], a
+	
+	; These two influence Rand and should be kept in sync across GBs
+	ld   [wRand], a		
 	ld   [wTimer], a
-	ld   b, $1E
-	ld   hl, $4000
+	
+	; Jump to the character select screen
+	ld   b, BANK(L1E4000) ; BANK $1E
+	ld   hl, L1E4000
 	rst  $00
-L1C4809:;C
-	call L1C4D76
-	bit  7, a
-	jp   nz, L1C4848
-	bit  4, a
-	jp   nz, L1C4848
-	bit  6, a
-	jp   nz, L1C484E
-	bit  3, b
-	jp   nz, L1C4833
-	bit  2, b
-	jp   nz, L1C4827
+	
+; =============== ModeSelect_DoCtrl ===============
+; Checks for player input in the mode select menu.
+; OUT
+; - C flag: If set, the returned value should be used
+; - A: Action id (MODESELECT_ACT_*)
+ModeSelect_DoCtrl:
+	call Title_GetMenuInput
+	bit  KEYB_START, a
+	jp   nz, .select
+	bit  KEYB_A, a
+	jp   nz, .select
+	bit  KEYB_SELECT, a
+	jp   nz, .exit
+	bit  KEYB_DOWN, b
+	jp   nz, .moveD
+	bit  KEYB_UP, b
+	jp   nz, .moveU
 	xor  a
 	ret
-L1C4827:;J
-	ld   a, [$C1B7]
+.moveU:
+	; Move cursor up, and wrap around
+	ld   a, [wTitleSubMenuOptId]
 	dec  a
 	and  a, $03
-	ld   [$C1B7], a
-	jp   L1C483C
-L1C4833:;J
-	ld   a, [$C1B7]
+	ld   [wTitleSubMenuOptId], a
+	jp   .setYPos
+.moveD:
+	; Move cursor down, and wrap around
+	ld   a, [wTitleSubMenuOptId]
 	inc  a
 	and  a, $03
-	ld   [$C1B7], a
-L1C483C:;J
+	ld   [wTitleSubMenuOptId], a
+.setYPos:
+	; Set the cursor's Y position (Y = wTitleSubMenuOptId * 10) and show it, even if for a single frame
+	; See also: SetCursorYPos on Options_DoCtrl
 	swap a
 	ld   [wOBJInfo_Pl1+iOBJInfo_Y], a
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	set  7, [hl]
+	set  OSTB_VISIBLE, [hl]
 	xor  a
 	ret
-L1C4848:;J
-	ld   a, [$C1B7]
+.select:
+	; A = wTitleSubMenuOptId + 1
+	; MODESELECT_ACT_* follows the same order as the mode entries (which are identical to MODE_*)
+	ld   a, [wTitleSubMenuOptId]
 	inc  a
 	scf
 	ret
-L1C484E:;J
-	ld   a, $00
+.exit:
+	; Exit to GM_TITLE_TITLEMENU
+	ld   a, MODESELECT_ACT_EXIT
 	scf
 	ret
-L1C4852:;I
-	ld   hl, $4864
+	
+; =============== Title_Mode_Options ===============
+; Options menu.
+Title_Mode_Options:
+	;
+	; Execute different code depending on the selected menu option.
+	; Each jump target will handle controls its own way.
+	;
+	ld   hl, .targetPtrs			; HL = Jump Table	
 	ld   d, $00
-	ld   a, [$C1B7]
+	ld   a, [wTitleSubMenuOptId]	; DE = wTitleSubMenuOptId * 2
 	sla  a
 	ld   e, a
-	add  hl, de
-	ld   e, [hl]
+	add  hl, de						; Index this table
+	ld   e, [hl]					; E = Low byte target
 	inc  hl
-	ld   d, [hl]
+	ld   d, [hl]					; D = High byte target
 	push de
-	pop  hl
+	pop  hl							; Move DE to HL and jump there
 	jp   hl
-L1C4864: db $82
-L1C4865: db $48
-L1C4866: db $E9
-L1C4867: db $48
-L1C4868: db $43
-L1C4869: db $49
-L1C486A: db $B0
-L1C486B: db $49
-L1C486C: db $28;X
-L1C486D: db $4A;X
-L1C486E: db $70
-L1C486F: db $48
-L1C4870:;I
-	call L1C4DC2
-	call L1C4B85
+.targetPtrs:
+	dw Options_Item_Time
+	dw Options_Item_Level
+	dw Options_Item_BGMTest
+	dw Options_Item_SFXTest
+	dw Options_Item_SGBSndTest
+	dw Options_Item_Exit
+	
+; =============== mOptionMin ===============
+; A = MIN(Value - 1, MinValue)
+; IN
+; - 1: Ptr to value
+; - 2: Min value
+; - 3: Target location on fail
+mOptionMin: MACRO
+	ld   a, [\1]
+	cp   \2			; Value == MinValue?
+	jp   z, \3		; If so, skip
+	dec  a			; Value--
+ENDM
+
+; =============== mOptionMax ===============
+; A = MAX(Value + 1, MaxValue)
+; IN
+; - 1: Ptr to value
+; - 2: Min value
+; - 3: Target location on fail
+mOptionMax: MACRO
+	ld   a, [\1]
+	cp   \2			; Value == MaxValue?
+	jp   z, \3		; If so, skip
+	inc  a			; Value++
+ENDM
+	
+; =============== Options_Item_Exit ===============
+; EXIT option selected.
+Options_Item_Exit:
+	call Title_BlinkCursorR
+	call Options_DoCtrl
 	ret  nc
-	cp   $00
-	jp   z, L1C4CC2
-	cp   $03
-	jp   z, L1C4CC2
+	cp   OPTIONS_ACT_EXIT		; Exiting the menu?
+	jp   z, TitleSubMenu_Exit	; If so, exit
+	cp   OPTIONS_ACT_A			; Pressed A on the EXIT option?
+	jp   z, TitleSubMenu_Exit	; If so, exit
 	ret
-L1C4882:;I
-	call L1C4DC2
-	call L1C4B85
-	ret  nc
-	cp   $00
-	jp   z, L1C4CC2
-	cp   $01
-	jp   z, L1C4899
-	cp   $02
-	jp   z, L1C48B0
+	
+; =============== Options_Item_Time ===============	
+Options_Item_Time:
+	call Title_BlinkCursorR
+	call Options_DoCtrl			; Check for current action
+	ret  nc						; None specified? If so, return
+	cp   OPTIONS_ACT_EXIT		; Act == OPTIONS_ACT_EXIT?
+	jp   z, TitleSubMenu_Exit	; If so, jump
+	cp   OPTIONS_ACT_L			; ...
+	jp   z, .decTimer
+	cp   OPTIONS_ACT_R
+	jp   z, .incTimer
 	ret
-L1C4899:;J
+.decTimer:
+	; Decrement the timer unless it reached the low limit.
 	ld   a, [wMatchStartTime]
-	cp   $10
-	jp   z, L1C48C4
-	cp   $FF
-	jp   nz, L1C48AB
-	ld   a, $90
-	jp   L1C48C4
-L1C48AB:;J
-	sub  a, $10
-	jp   L1C48C4
-L1C48B0:;J
-	ld   a, [wMatchStartTime]
-	cp   $FF
-	jp   z, L1C48C4
-	cp   $90
-	jp   nz, L1C48C2
-	ld   a, $FF
-	jp   L1C48C4
-L1C48C2:;J
-	add  a, $10
-L1C48C4:;J
-	ld   [wMatchStartTime], a
-	call L1C48CB
+	cp   OPTIONS_TIMER_MIN		; Time == MinValue? 
+	jp   z, .save				; If so, don't decrement
+	; Special case to jump from the special Infinite value to the normal max
+	cp   TIMER_INFINITE			; Time == Infinite?
+	jp   nz, .doDec				; If not, jump
+	ld   a, OPTIONS_TIMER_MAX					
+	jp   .save
+.doDec:
+	sub  a, OPTIONS_TIMER_INC	; Time -= Interval
+	jp   .save
+.incTimer:
+	; Increment the timer unless it's at the max.
+	ld   a, [wMatchStartTime]	
+	cp   TIMER_INFINITE			; Time == Infinite? 
+	jp   z, .save				; If so, don't increment
+	; Special case to jump from the normal max value to Infinite
+	cp   OPTIONS_TIMER_MAX		; Time == MaxValue?
+	jp   nz, .doInc				; If not, jump
+	ld   a, TIMER_INFINITE
+	jp   .save
+.doInc:
+	add  a, OPTIONS_TIMER_INC	; Time += Interval
+.save:
+	ld   [wMatchStartTime], a	; Save timer setting
+	call Options_PrintMatchTime	; Update tilemap
 	ret
-L1C48CB:;C
+	
+; =============== Options_PrintMatchTime ===============
+; Prints the current value of the match timer.
+Options_PrintMatchTime:
 	ld   a, [wMatchStartTime]
-	cp   $FF
-	jp   z, L1C48E2
-	ld   de, $98FE
+	cp   TIMER_INFINITE				; Infinite time set?
+	jp   z, .infinite				; If so, jump
+.num:
+	ld   de, $98FE					; Otherwise print A as number
 	ld   c, $00
 	call NumberPrinter_Instant
-	ld   hl, $5011
+	ld   hl, TextDef_Options_ClrOff	; Remove "O" from OFF
 	call TextPrinter_Instant
 	ret
-L1C48E2:;J
-	ld   hl, $500B
+.infinite:
+	ld   hl, TextDef_Options_Off	; Print "OFF"
 	call TextPrinter_Instant
 	ret
-L1C48E9:;I
-	call L1C4DC2
-	call L1C4B85
+	
+; =============== Options_Item_Level ===============	
+Options_Item_Level:
+	call Title_BlinkCursorR
+	call Options_DoCtrl
 	ret  nc
-	cp   $00
-	jp   z, L1C4CC2
-	cp   $01
-	jp   z, L1C4900
-	cp   $02
-	jp   z, L1C490C
+	cp   OPTIONS_ACT_EXIT
+	jp   z, TitleSubMenu_Exit
+	cp   OPTIONS_ACT_L
+	jp   z, .dec
+	cp   OPTIONS_ACT_R
+	jp   z, .inc
 	ret
-L1C4900:;J
-	ld   a, [wDifficulty]
-	cp   $00
-	jp   z, L1C4915
-	dec  a
-	jp   L1C4915
-L1C490C:;J
-	ld   a, [wDifficulty]
-	cp   $02
-	jp   z, L1C4915
-	inc  a
-L1C4915:;J
+.dec:
+	mOptionMin wDifficulty, DIFFICULTY_EASY, .save
+	jp   .save
+.inc:
+	mOptionMax wDifficulty, DIFFICULTY_HARD, .save
+.save:
 	ld   [wDifficulty], a
-	call L1C491C
+	call Options_PrintDifficulty
 	ret
-L1C491C:;C
+	
+; =============== Options_PrintDifficulty ===============
+; Prints the current difficulty setting.
+Options_PrintDifficulty:
 	ld   a, [wDifficulty]
-	cp   $00
-	jp   z, L1C492E
-	cp   $01
-	jp   z, L1C4935
-	cp   $02
-	jp   z, L1C493C
-L1C492E:;J
-	ld   hl, $5015
+	cp   DIFFICULTY_EASY
+	jp   z, .easy
+	cp   DIFFICULTY_NORMAL
+	jp   z, .normal
+	cp   DIFFICULTY_HARD
+	jp   z, .hard
+.easy:
+	ld   hl, TextDef_Options_Easy
 	call TextPrinter_Instant
 	ret
-L1C4935:;J
-	ld   hl, $501E
+.normal:
+	ld   hl, TextDef_Options_Normal
 	call TextPrinter_Instant
 	ret
-L1C493C:;J
-	ld   hl, $5027
+.hard:
+	ld   hl, TextDef_Options_Hard
 	call TextPrinter_Instant
 	ret
-L1C4943:;I
-	call L1C4DC2
-	call L1C4B85
+	
+; =============== Options_Item_BGMTest ===============	
+Options_Item_BGMTest:;I
+	call Title_BlinkCursorR
+	call Options_DoCtrl
 	ret  nc
-	cp   $00
-	jp   z, L1C4CC2
-	cp   $01
-	jp   z, L1C4978
-	cp   $02
-	jp   z, L1C4984
-	cp   $03
-	jp   z, L1C4964
-	cp   $04
-	jp   z, L1C4973
-L1C4963: db $C9;X
-L1C4964:;J
-	ld   a, [$C1B9]
-	ld   hl, $4994
+	cp   OPTIONS_ACT_EXIT
+	jp   z, TitleSubMenu_Exit
+	cp   OPTIONS_ACT_L
+	jp   z, .dec
+	cp   OPTIONS_ACT_R
+	jp   z, .inc
+	cp   OPTIONS_ACT_A
+	jp   z, .play
+	cp   OPTIONS_ACT_B
+	jp   z, .stop
+	ret ; We don't get here
+.play:
+	; Index the real sound ID off the map table
+	ld   a, [wOptionsBGMId]			; A = VisualBGMId
+	ld   hl, Options_BGMIdMapTbl	; HL = MapTable
 	ld   d, $00
 	ld   e, a
-	add  hl, de
-	ld   a, [hl]
+	add  hl, de						
+	ld   a, [hl]					; SoundId = HL[A]
+	; Play that
 	call HomeCall_Sound_ReqPlayId
 	ret
-L1C4973:;J
+.stop:
 	xor  a
 	call HomeCall_Sound_ReqPlayId
 	ret
-L1C4978:;J
-	ld   a, [$C1B9]
-	cp   $00
-	jp   z, L1C498D
-	dec  a
-	jp   L1C498D
-L1C4984:;J
-	ld   a, [$C1B9]
-	cp   $0E
-	jp   z, L1C498D
+.dec:
+	mOptionMin wOptionsBGMId, $00, .save
+	jp   .save
+.inc:
+	mOptionMax wOptionsBGMId, Options_BGMIdMapTbl.end-Options_BGMIdMapTbl-1, .save
+.save:
+	ld   [wOptionsBGMId], a
+	call Options_PrintBGMId
+	ret	
+; =============== Options_BGMIdMapTbl ===============
+; Maps the BGM Ids to the sound IDs used by the sound driver.
+Options_BGMIdMapTbl: 
+	db BGM_IN1996               ; $01
+	db BGM_ESAKA                ; $02
+	db BGM_BIGSHOT              ; $03
+	db BGM_ARASHI               ; $04
+	db BGM_GEESE                ; $05
+	db BGM_FAIRY                ; $06
+	db BGM_TRASHHEAD            ; $07
+	db BGM_MRKARATE             ; $08
+	db BGM_ROULETTE             ; $09
+	db BGM_STAGECLEAR           ; $0A
+	db BGM_WIND                 ; $0B
+	db BGM_TOTHESKY             ; $0C
+	db BGM_PROTECTOR            ; $0D
+	db BGM_MRKARATECUTSCENE     ; $0E
+	db BGM_RISINGRED            ; $0F
+.end:
+                                
+; =============== Options_PrintBGMId ===============
+; Prints the current BGM number.
+Options_PrintBGMId:
+	ld   a, [wOptionsBGMId]		; A = wOptionsBGMId+1
 	inc  a
-L1C498D:;J
-	ld   [$C1B9], a
-	call L1C49A3
-	ret
-L1C4994: db $9E
-L1C4995: db $84
-L1C4996: db $83
-L1C4997: db $87
-L1C4998: db $86
-L1C4999: db $88
-L1C499A: db $89
-L1C499B: db $99
-L1C499C: db $81
-L1C499D: db $82
-L1C499E: db $8A
-L1C499F: db $8B
-L1C49A0: db $98
-L1C49A1: db $9F
-L1C49A2: db $85
-L1C49A3:;C
-	ld   a, [$C1B9]
-	inc  a
-	ld   de, $997E
-	ld   c, $00
+	ld   de, $997E				; DE = Location
+	ld   c, $00					; C = Tile ID base
 	call NumberPrinter_Instant
 	ret
-L1C49B0:;I
-	call L1C4DC2
-	call L1C4B85
+	
+Options_Item_SFXTest:;I
+	call Title_BlinkCursorR
+	call Options_DoCtrl
 	ret  nc
-	cp   $00
-	jp   z, L1C4CC2
-	cp   $01
-	jp   z, L1C49E5
-	cp   $02
-	jp   z, L1C49F1
-	cp   $03
-	jp   z, L1C49D1
-	cp   $04
-	jp   z, L1C49E0
-L1C49D0: db $C9;X
-L1C49D1:;J
-	ld   a, [$C1BA]
-	ld   hl, $4A01
+	cp   OPTIONS_ACT_EXIT
+	jp   z, TitleSubMenu_Exit
+	cp   OPTIONS_ACT_L
+	jp   z, .dec
+	cp   OPTIONS_ACT_R
+	jp   z, .inc
+	cp   OPTIONS_ACT_A
+	jp   z, .play
+	cp   OPTIONS_ACT_B
+	jp   z, .stop
+	ret ; We don't get here
+.play:
+	; Index the real sound ID off the map table
+	ld   a, [wOptionsSFXId]			; A = VisualSFXId
+	ld   hl, Options_SFXIdMapTbl	; HL = MapTable
 	ld   d, $00
 	ld   e, a
-	add  hl, de
-	ld   a, [hl]
+	add  hl, de						
+	ld   a, [hl]					; SoundId = HL[A]
+	; Play that
 	call HomeCall_Sound_ReqPlayId
 	ret
-L1C49E0:;J
+.stop:
 	xor  a
 	call HomeCall_Sound_ReqPlayId
 	ret
-L1C49E5:;J
-	ld   a, [$C1BA]
-	cp   $00
-	jp   z, L1C49FA
-	dec  a
-	jp   L1C49FA
-L1C49F1:;J
-	ld   a, [$C1BA]
-	cp   $19
-	jp   z, L1C49FA
-	inc  a
-L1C49FA:;J
-	ld   [$C1BA], a
-	call L1C4A1B
+.dec:
+	mOptionMin wOptionsSFXId, $00, .save
+	jp   .save
+.inc:
+	mOptionMax wOptionsSFXId, Options_SFXIdMapTbl.end-Options_SFXIdMapTbl-1, .save
+.save:
+	ld   [wOptionsSFXId], a
+	call Options_PrintSFXId
 	ret
-L1C4A01: db $8E
-L1C4A02: db $8F
-L1C4A03: db $90
-L1C4A04: db $91
-L1C4A05: db $92
-L1C4A06: db $93
-L1C4A07: db $94
-L1C4A08: db $95
-L1C4A09: db $96
-L1C4A0A: db $97
-L1C4A0B: db $9A
-L1C4A0C: db $9B
-L1C4A0D: db $9C
-L1C4A0E: db $9D
-L1C4A0F: db $A6
-L1C4A10: db $A7
-L1C4A11: db $A8
-L1C4A12: db $A9
-L1C4A13: db $AA
-L1C4A14: db $AB
-L1C4A15: db $AC
-L1C4A16: db $AD
-L1C4A17: db $AE
-L1C4A18: db $AF
-L1C4A19: db $B0
-L1C4A1A: db $B1
-L1C4A1B:;C
-	ld   a, [$C1BA]
+; =============== Options_SFXIdMapTbl ===============
+; Maps the SFX Ids to the sound IDs used by the sound driver.
+Options_SFXIdMapTbl:
+	db SFX_CHARCURSORMOVE ; $01
+	db SFX_CHARSELECTED   ; $02
+	db SFX_METERCHARGE    ; $03
+	db SFX_SUPERMOVE      ; $04
+	db SFX_LIGHT          ; $05
+	db SFX_HEAVY          ; $06
+	db SND_ID_14          ; $07
+	db SFX_TAUNT          ; $08
+	db SFX_HIT            ; $09
+	db SND_ID_17          ; $0A
+	db SND_ID_1A          ; $0B
+	db SFX_DROP           ; $0C
+	db SFX_SUPERJUMP      ; $0D
+	db SFX_STEP           ; $0E
+	db SND_ID_26          ; $0F
+	db SFX_GRABSTART      ; $10
+	db SND_ID_28          ; $11
+	db SND_ID_29          ; $12
+	db SND_ID_2A          ; $13
+	db SND_ID_2B          ; $14
+	db SND_ID_2C          ; $15
+	db SND_ID_2D          ; $16
+	db SND_ID_2E          ; $17
+	db SND_ID_2F          ; $18
+	db SND_ID_30          ; $19
+	db SFX_GAMEOVER       ; $1A
+.end:
+ 
+; =============== Options_PrintSFXId ===============
+; Prints the current SFX number.
+Options_PrintSFXId:
+	ld   a, [wOptionsSFXId]		; A = wOptionsSFXId+1
 	inc  a
 	ld   de, $99BE
 	ld   c, $00
 	call NumberPrinter_Instant
 	ret
-L1C4A28: db $21;X
-L1C4A29: db $38;X
-L1C4A2A: db $4A;X
-L1C4A2B: db $16;X
-L1C4A2C: db $00;X
-L1C4A2D: db $FA;X
-L1C4A2E: db $BB;X
-L1C4A2F: db $C1;X
-L1C4A30: db $5F;X
-L1C4A31: db $19;X
-L1C4A32: db $5E;X
-L1C4A33: db $23;X
-L1C4A34: db $56;X
-L1C4A35: db $D5;X
-L1C4A36: db $E1;X
-L1C4A37: db $E9;X
-L1C4A38: db $3C;X
-L1C4A39: db $4A;X
-L1C4A3A: db $6D;X
-L1C4A3B: db $4A;X
-L1C4A3C: db $CD;X
-L1C4A3D: db $C2;X
-L1C4A3E: db $4D;X
-L1C4A3F: db $CD;X
-L1C4A40: db $85;X
-L1C4A41: db $4B;X
-L1C4A42: db $D0;X
-L1C4A43: db $FE;X
-L1C4A44: db $00;X
-L1C4A45: db $CA;X
-L1C4A46: db $C2;X
-L1C4A47: db $4C;X
-L1C4A48: db $FE;X
-L1C4A49: db $02;X
-L1C4A4A: db $CA;X
-L1C4A4B: db $4E;X
-L1C4A4C: db $4A;X
-L1C4A4D: db $C9;X
-L1C4A4E: db $3E;X
-L1C4A4F: db $00;X
-L1C4A50: db $EA;X
-L1C4A51: db $B8;X
-L1C4A52: db $C1;X
-L1C4A53: db $3E;X
-L1C4A54: db $02;X
-L1C4A55: db $EA;X
-L1C4A56: db $BB;X
-L1C4A57: db $C1;X
-L1C4A58: db $21;X
-L1C4A59: db $80;X
-L1C4A5A: db $D6;X
-L1C4A5B: db $CB;X
-L1C4A5C: db $FE;X
-L1C4A5D: db $21;X
-L1C4A5E: db $40;X
-L1C4A5F: db $D7;X
-L1C4A60: db $CB;X
-L1C4A61: db $FE;X
-L1C4A62: db $21;X
-L1C4A63: db $43;X
-L1C4A64: db $D7;X
-L1C4A65: db $36;X
-L1C4A66: db $3C;X
-L1C4A67: db $21;X
-L1C4A68: db $45;X
-L1C4A69: db $D7;X
-L1C4A6A: db $36;X
-L1C4A6B: db $60;X
-L1C4A6C: db $C9;X
-L1C4A6D: db $CD;X
-L1C4A6E: db $DA;X
-L1C4A6F: db $4D;X
-L1C4A70: db $CD;X
-L1C4A71: db $37;X
-L1C4A72: db $4C;X
-L1C4A73: db $D0;X
-L1C4A74: db $FE;X
-L1C4A75: db $00;X
-L1C4A76: db $CA;X
-L1C4A77: db $C2;X
-L1C4A78: db $4C;X
-L1C4A79: db $FE;X
-L1C4A7A: db $01;X
-L1C4A7B: db $CA;X
-L1C4A7C: db $A3;X
-L1C4A7D: db $4A;X
-L1C4A7E: db $FE;X
-L1C4A7F: db $02;X
-L1C4A80: db $CA;X
-L1C4A81: db $BA;X
-L1C4A82: db $4A;X
-L1C4A83: db $FE;X
-L1C4A84: db $03;X
-L1C4A85: db $CA;X
-L1C4A86: db $DF;X
-L1C4A87: db $4A;X
-L1C4A88: db $FE;X
-L1C4A89: db $04;X
-L1C4A8A: db $CA;X
-L1C4A8B: db $16;X
-L1C4A8C: db $4B;X
-L1C4A8D: db $FE;X
-L1C4A8E: db $05;X
-L1C4A8F: db $CA;X
-L1C4A90: db $93;X
-L1C4A91: db $4A;X
-L1C4A92: db $C9;X
-L1C4A93: db $3E;X
-L1C4A94: db $00;X
-L1C4A95: db $EA;X
-L1C4A96: db $B8;X
-L1C4A97: db $C1;X
-L1C4A98: db $3E;X
-L1C4A99: db $00;X
-L1C4A9A: db $EA;X
-L1C4A9B: db $BB;X
-L1C4A9C: db $C1;X
-L1C4A9D: db $21;X
-L1C4A9E: db $40;X
-L1C4A9F: db $D7;X
-L1C4AA0: db $CB;X
-L1C4AA1: db $BE;X
-L1C4AA2: db $C9;X
-L1C4AA3: db $FA;X
-L1C4AA4: db $B8;X
-L1C4AA5: db $C1;X
-L1C4AA6: db $57;X
-L1C4AA7: db $CD;X
-L1C4AA8: db $21;X
-L1C4AA9: db $4B;X
-L1C4AAA: db $7E;X
-L1C4AAB: db $CB;X
-L1C4AAC: db $42;X
-L1C4AAD: db $C2;X
-L1C4AAE: db $B5;X
-L1C4AAF: db $4A;X
-L1C4AB0: db $FE;X
-L1C4AB1: db $00;X
-L1C4AB2: db $CA;X
-L1C4AB3: db $DB;X
-L1C4AB4: db $4A;X
-L1C4AB5: db $3D;X
-L1C4AB6: db $77;X
-L1C4AB7: db $C3;X
-L1C4AB8: db $DB;X
-L1C4AB9: db $4A;X
-L1C4ABA: db $FA;X
-L1C4ABB: db $B8;X
-L1C4ABC: db $C1;X
-L1C4ABD: db $57;X
-L1C4ABE: db $CD;X
-L1C4ABF: db $21;X
-L1C4AC0: db $4B;X
-L1C4AC1: db $7E;X
-L1C4AC2: db $CB;X
-L1C4AC3: db $42;X
-L1C4AC4: db $C2;X
-L1C4AC5: db $D9;X
-L1C4AC6: db $4A;X
-L1C4AC7: db $CB;X
-L1C4AC8: db $4A;X
-L1C4AC9: db $C2;X
-L1C4ACA: db $D4;X
-L1C4ACB: db $4A;X
-L1C4ACC: db $FE;X
-L1C4ACD: db $30;X
-L1C4ACE: db $CA;X
-L1C4ACF: db $DB;X
-L1C4AD0: db $4A;X
-L1C4AD1: db $C3;X
-L1C4AD2: db $D9;X
-L1C4AD3: db $4A;X
-L1C4AD4: db $FE;X
-L1C4AD5: db $19;X
-L1C4AD6: db $CA;X
-L1C4AD7: db $DB;X
-L1C4AD8: db $4A;X
-L1C4AD9: db $3C;X
-L1C4ADA: db $77;X
-L1C4ADB: db $CD;X
-L1C4ADC: db $2C;X
-L1C4ADD: db $4B;X
-L1C4ADE: db $C9;X
-L1C4ADF: db $FA;X
-L1C4AE0: db $B8;X
-L1C4AE1: db $C1;X
-L1C4AE2: db $CB;X
-L1C4AE3: db $4F;X
-L1C4AE4: db $C2;X
-L1C4AE5: db $FA;X
-L1C4AE6: db $4A;X
-L1C4AE7: db $21;X
-L1C4AE8: db $CB;X
-L1C4AE9: db $C1;X
-L1C4AEA: db $FA;X
-L1C4AEB: db $BD;X
-L1C4AEC: db $C1;X
-L1C4AED: db $22;X
-L1C4AEE: db $3E;X
-L1C4AEF: db $00;X
-L1C4AF0: db $22;X
-L1C4AF1: db $FA;X
-L1C4AF2: db $BE;X
-L1C4AF3: db $C1;X
-L1C4AF4: db $E6;X
-L1C4AF5: db $0F;X
-L1C4AF6: db $22;X
-L1C4AF7: db $C3;X
-L1C4AF8: db $0C;X
-L1C4AF9: db $4B;X
-L1C4AFA: db $21;X
-L1C4AFB: db $CB;X
-L1C4AFC: db $C1;X
-L1C4AFD: db $3E;X
-L1C4AFE: db $80;X
-L1C4AFF: db $22;X
-L1C4B00: db $FA;X
-L1C4B01: db $BF;X
-L1C4B02: db $C1;X
-L1C4B03: db $22;X
-L1C4B04: db $FA;X
-L1C4B05: db $C0;X
-L1C4B06: db $C1;X
-L1C4B07: db $E6;X
-L1C4B08: db $0F;X
-L1C4B09: db $CB;X
-L1C4B0A: db $37;X
-L1C4B0B: db $22;X
-L1C4B0C: db $CD;X
-L1C4B0D: db $08;X
-L1C4B0E: db $04;X
-L1C4B0F: db $21;X
-L1C4B10: db $CA;X
-L1C4B11: db $C1;X
-L1C4B12: db $CD;X
-L1C4B13: db $B3;X
-L1C4B14: db $02;X
-L1C4B15: db $C9;X
-L1C4B16: db $CD;X
-L1C4B17: db $08;X
-L1C4B18: db $04;X
-L1C4B19: db $21;X
-L1C4B1A: db $63;X
-L1C4B1B: db $50;X
-L1C4B1C: db $CD;X
-L1C4B1D: db $B3;X
-L1C4B1E: db $02;X
-L1C4B1F: db $FB;X
-L1C4B20: db $C9;X
-L1C4B21: db $21;X
-L1C4B22: db $BD;X
-L1C4B23: db $C1;X
-L1C4B24: db $FA;X
-L1C4B25: db $B8;X
-L1C4B26: db $C1;X
-L1C4B27: db $06;X
-L1C4B28: db $00;X
-L1C4B29: db $4F;X
-L1C4B2A: db $09;X
-L1C4B2B: db $C9;X
-L1C4B2C:;C
-	ld   a, [wMisc_C025]
-	bit  7, a
-	jp   z, L1C4B74
-L1C4B34: db $FA;X
-L1C4B35: db $00;X
-L1C4B36: db $C0;X
-L1C4B37: db $CB;X
-L1C4B38: db $67;X
-L1C4B39: db $CA;X
-L1C4B3A: db $74;X
-L1C4B3B: db $4B;X
-L1C4B3C: db $FA;X
-L1C4B3D: db $BD;X
-L1C4B3E: db $C1;X
-L1C4B3F: db $11;X
-L1C4B40: db $56;X
-L1C4B41: db $9A;X
-L1C4B42: db $0E;X
-L1C4B43: db $00;X
-L1C4B44: db $CD;X
-L1C4B45: db $9A;X
-L1C4B46: db $12;X
-L1C4B47: db $FA;X
-L1C4B48: db $BE;X
-L1C4B49: db $C1;X
-L1C4B4A: db $11;X
-L1C4B4B: db $58;X
-L1C4B4C: db $9A;X
-L1C4B4D: db $0E;X
-L1C4B4E: db $00;X
-L1C4B4F: db $CD;X
-L1C4B50: db $9A;X
-L1C4B51: db $12;X
-L1C4B52: db $FA;X
-L1C4B53: db $BF;X
-L1C4B54: db $C1;X
-L1C4B55: db $11;X
-L1C4B56: db $5C;X
-L1C4B57: db $9A;X
-L1C4B58: db $0E;X
-L1C4B59: db $00;X
-L1C4B5A: db $CD;X
-L1C4B5B: db $9A;X
-L1C4B5C: db $12;X
-L1C4B5D: db $FA;X
-L1C4B5E: db $C0;X
-L1C4B5F: db $C1;X
-L1C4B60: db $11;X
-L1C4B61: db $5E;X
-L1C4B62: db $9A;X
-L1C4B63: db $0E;X
-L1C4B64: db $00;X
-L1C4B65: db $CD;X
-L1C4B66: db $9A;X
-L1C4B67: db $12;X
-L1C4B68: db $21;X
-L1C4B69: db $4A;X
-L1C4B6A: db $50;X
-L1C4B6B: db $CD;X
-L1C4B6C: db $65;X
-L1C4B6D: db $12;X
-L1C4B6E: db $21;X
-L1C4B6F: db $4E;X
-L1C4B70: db $50;X
-L1C4B71: db $CD;X
-L1C4B72: db $65;X
-L1C4B73: db $12;X
-L1C4B74:;J
+	
+; =============== Options_Item_SGBSndTest ===============
+Options_Item_SGBSndTest:
+	;
+	; There are two cursor modes here because selecting this option
+	; activates a submenu.
+	;
+	ld   hl, .modePtrs			; HL = Jump table
+	ld   d, $00
+	ld   a, [wOptionsMenuMode]	; DE = wOptionsMenuMode
+	ld   e, a
+	add  hl, de						
+	ld   e, [hl]					
+	inc  hl
+	ld   d, [hl]
+	push de
+	pop  hl
+	jp   hl
+  
+.modePtrs:
+ 	dw SGBSndTest_Hover
+	dw SGBSndTest_SubMenu
+	
+; =============== SGBSndTest_Hover =============== 
+; When hovering over the main SGB Test option.
+SGBSndTest_Hover:
+	call Title_BlinkCursorR
+	call Options_DoCtrl
+	ret  nc
+	cp   a, OPTIONS_ACT_EXIT
+	jp   z, TitleSubMenu_Exit
+	cp   a, OPTIONS_ACT_R
+	jp   z, .enterSubMenu
+	ret 
+	
+.enterSubMenu:
+	; Start on leftmost option
+	ld   a, $00
+	ld   [wOptionsSGBSndOptId], a
+	; Enter option
+	ld   a, OPTION_MENU_SGBTEST
+	ld   [wOptionsMenuMode], a
+	; Show both cursors
+	ld   hl, wOBJInfo_CursorR+iOBJInfo_Status
+	set  OSTB_VISIBLE, [hl]
+	ld   hl, wOBJInfo_CursorU+iOBJInfo_Status
+	set  OSTB_VISIBLE, [hl]
+	; Set initial CursorU position for leftmost option
+	ld   hl, wOBJInfo_CursorU+iOBJInfo_X
+	ld   [hl], $3C
+	ld   hl, wOBJInfo_CursorU+iOBJInfo_Y
+	ld   [hl], $60
+	ret 
+	
+; =============== SGBSndTest_SubMenu =============== 
+; Selecting a digit.
+SGBSndTest_SubMenu:
+	call Title_BlinkCursorU
+	call Options_SGBSndTest_DoCtrl
+	ret  nc
+	cp   a, OPTIONS_SACT_EXIT
+	jp   z, TitleSubMenu_Exit
+	cp   a, OPTIONS_SACT_UP
+	jp   z, SGBSndTest_Act_DecNum
+	cp   a, OPTIONS_SACT_DOWN
+	jp   z, SGBSndTest_Act_IncNum
+	cp   a, OPTIONS_SACT_A
+	jp   z, SGBSndTest_Act_PlaySound
+	cp   a, OPTIONS_SACT_B
+	jp   z, SGBSndTest_Act_StopSound
+	cp   a, OPTIONS_SACT_SUBEXIT
+	jp   z, SGBSndTest_Act_Exit
+	ret 
+	
+; =============== SGBSndTest_SubMenu =============== 
+; Returns to the main options selection.
+SGBSndTest_Act_Exit:
+	ld   a, $00						; Reset CursorU pos
+	ld   [wOptionsSGBSndOptId], a
+	ld   a, OPTION_MENU_NORMAL		; Back to options
+	ld   [wOptionsMenuMode], a
+	; Hide up cursor
+	ld   hl, wOBJInfo_CursorU+iOBJInfo_Status
+	res  OSTB_VISIBLE, [hl]
+	ret  
+	
+; =============== SGBSndTest_Act_DecNum =============== 
+; Decreases the selected option digit.
+SGBSndTest_Act_DecNum:                  
+	; Get the address where the number is stored
+	ld   a, [wOptionsSGBSndOptId]		; D = OptionId
+	ld   d, a
+	call SGBSndTest_GetOptPtr			; HL = Option value
+	
+	ld   a, [hl]						; A = Current digit
+	bit  0, d							; Editing the bank number? (OptionId == 1 || OptionId == 3)
+	jp   nz, .dec						; If so, always decrease it (allow wraparound)
+.isSet:
+	cp   a, $00							; Digit == $00?
+	jp   z, SGBSndTest_Act_IncNum.end	; If so, skip
+.dec:
+	dec  a								; Digit--
+	ld   [hl], a						; Save it back
+	jp   SGBSndTest_Act_IncNum.end
+	
+; =============== SGBSndTest_Act_DecNum =============== 
+; Increases the selected option digit.
+SGBSndTest_Act_IncNum:
+	; Get the address where the number is stored
+	ld   a, [wOptionsSGBSndOptId]	; D = OptionId
+	ld   d, a
+	call SGBSndTest_GetOptPtr		; HL = Option value
+	
+	; There are different upper limits for each number.
+	; The bit checks work due to how the Option IDs are ordered.
+	ld   a, [hl]			; A = Current digit
+	bit  0, d				; Editing the bank number? (OptionId == 1 || OptionId == 3)
+	jp   nz, .inc			; If so, always increase (allow wraparound)
+	bit  1, d				; Is this for Set B? (OptionId == 2 || OptionId == 3)
+	jp   nz, .setB			; If so, jump
+.setA:
+	cp   a, $30				; Set A max sound ID
+	jp   z, .end			; A == $30? If so, don't increase it
+	jp   .inc
+.setB:
+	cp   a, $19				; Set B max sound ID
+	jp   z, .end			; A == $19? If so, don't increase it
+.inc:
+	inc  a					; Digit++
+	ld   [hl], a			; Save it back
+.end:
+	call Options_PrintSGBSndTestVals
+	ret  
+	
+; =============== SGBSndTest_Act_PlaySound =============== 
+SGBSndTest_Act_PlaySound:
+	ld   a, [wOptionsSGBSndOptId]
+	bit  1, a							; Set B selected?
+	jp   nz, .setB						; If so, jump
+.setA:
+	; Set the options in the SGB packet.
+	ld   hl, wOptionsSGBPacketSndIdA	; HL = Ptr to SGB Sound Packet byte1
+	; Set A Sound ID
+	ld   a, [wOptionsSGBSndIdA]			; wOptionsSGBPacketSndIdA = wOptionsSGBSndIdA
+	ldi  [hl], a						
+	; Nothing in Set B
+	ld   a, $00							; wOptionsSGBPacketSndIdB = 0
+	ldi  [hl], a				
+	; Low nybble -> Bank number for Set A
+	ld   a, [wOptionsSGBSndBankA]		; wOptionsSGBPacketSndBank = wOptionsSGBSndBankA & $0F
+	and  a, $0F							; filter valid values
+	ldi  [hl], a
+	jp   .sendPkg
+.setB:
+	ld   hl, wOptionsSGBPacketSndIdA	; HL = Ptr to SGB Sound Packet byte1
+	; Nothing in Set A
+	ld   a, $80							; wOptionsSGBPacketSndIdA = $80
+	ldi  [hl], a
+	; Set B Sound ID
+	ld   a, [wOptionsSGBSndIdB]			; wOptionsSGBPacketSndIdB = wOptionsSGBSndIdB
+	ldi  [hl], a
+	; High nybble -> Bank number for Set B
+	ld   a, [wOptionsSGBSndBankB]		; wOptionsSGBPacketSndBank = (wOptionsSGBSndBankB & $0F) << 4
+	and  a, $0F							; filter valid values
+	swap a
+	ldi  [hl], a
+.sendPkg:
+	call Task_PassControl_NoDelay
+	ld   hl, wOptionsSGBPacketSnd
+	call SGB_SendPackets
+	ret  
+	
+; =============== SGBSndTest_Act_StopSound =============== 
+SGBSndTest_Act_StopSound:
+	call Task_PassControl_NoDelay
+	ld   hl, SGBPacket_Options_StopSnd
+	call SGB_SendPackets
+	ei   
+	ret  
+	
+; =============== SGBSndTest_GetOptPtr ===============
+; HL = wOptionsSGBBase[wOptionsSGBSndOptId]
+; OUT
+; - HL: Ptr to value of the currently selected option
+SGBSndTest_GetOptPtr:
+	; The current values for the four SGB options start at wOptionsSGBBase.
+	; They are ordered by OPTION_SITEM_*, so getting their address is like indexing a table.
+	ld   hl, wOptionsSGBBase		; HL = Starting address
+	ld   a, [wOptionsSGBSndOptId]	; BC = SGB Option Id
+	ld   b, $00
+	ld   c, a
+	add  hl, bc						; Index it
 	ret
-L1C4B75:;C
+	
+; =============== Options_PrintSGBSndTestVals ===============
+; Prints the digits displayed in the SGB sound test.
+Options_PrintSGBSndTestVals:
+
+	; SGB Mode only
+	ld   a, [wMisc_C025]
+	bit  MISCB_IS_SGB, a
+	jp   z, .ret
+	
+	; Don't print if the SGB sound test isn't enabled
 	ld   a, [wDipSwitch]
-	or   a
-	jp   z, L1C4B84
+	bit  DIPB_SGB_SOUND_TEST, a
+	jp   z, .ret
+	
+	; Print out all of the digits
+	ld   a, [wOptionsSGBSndIdA]
+	ld   de, $9A56
+	ld   c, $00
+	call NumberPrinter_Instant
+	
+	ld   a, [wOptionsSGBSndBankA]
+	ld   de, $9A58
+	ld   c, $00
+	call NumberPrinter_Instant
+	
+	ld   a, [wOptionsSGBSndIdB]
+	ld   de, $9A5C
+	ld   c, $00
+	call NumberPrinter_Instant
+	
+	ld   a, [wOptionsSGBSndBankB]
+	ld   de, $9A5E
+	ld   c, $00
+	call NumberPrinter_Instant
+	
+	; Blank out high digit of banks A & B
+	ld   hl, TextDef_Options_ClrSGBSndA
+	call TextPrinter_Instant
+	ld   hl, TextDef_Options_ClrSGBSndB
+	call TextPrinter_Instant
+.ret:
+	ret 
+	
+; =============== Options_PrintDipSwitch ===============
+; Prints the current dip switch value.
+Options_PrintDipSwitch:
+	; Don't reveal the feature if no dipswitches are enabled.
+	ld   a, [wDipSwitch]
+	or   a					; wDipSwitch == 0?
+	jp   z, .ret			; If so, return
+.ok:
 	ld   de, $9ABE
 	ld   c, $00
 	call NumberPrinter_Instant
-L1C4B84:;J
+.ret:
 	ret
-L1C4B85:;C
-	call L1C4D76
-	bit  7, a
-	jp   nz, L1C4BB2
-	bit  6, a
-	jp   nz, L1C4BB2
-	bit  5, a
-	jp   nz, L1C4C33
-	bit  3, b
-	jp   nz, L1C4BE3
-	bit  2, b
-	jp   nz, L1C4BB6
-	bit  1, b
-	jp   nz, L1C4C27
-	bit  0, b
-	jp   nz, L1C4C2B
-	bit  4, b
-	jp   nz, L1C4C2F
+	
+; =============== Options_DoCtrl ===============
+; Checks for player input in the options menu.
+; OUT
+; - C flag: If set, the returned value should be used
+; - A: Action id (OPTIONS_ACT_*), handled by the option-specific code
+Options_DoCtrl:
+	call Title_GetMenuInput
+	bit  KEYB_START, a
+	jp   nz, Options_DoCtrl_Exit
+	bit  KEYB_SELECT, a
+	jp   nz, Options_DoCtrl_Exit
+	bit  KEYB_B, a
+	jp   nz, Options_DoCtrl_PressB
+	bit  KEYB_DOWN, b
+	jp   nz, Options_DoCtrl_MoveD
+	bit  KEYB_UP, b
+	jp   nz, Options_DoCtrl_MoveU
+	bit  KEYB_LEFT, b
+	jp   nz, Options_DoCtrl_MoveL
+	bit  KEYB_RIGHT, b
+	jp   nz, Options_DoCtrl_MoveR
+	bit  KEYB_A, b
+	jp   nz, Options_DoCtrl_PressA
 	xor  a
 	ret
-L1C4BB2:;J
-	ld   a, $00
-	scf
+	
+; =============== Options_DoCtrl_Exit ===============
+Options_DoCtrl_Exit:
+	ld   a, OPTIONS_ACT_EXIT	; Action
+	scf							; Enable action
 	ret
-L1C4BB6:;J
-	ld   a, [$C1B7]
-	or   a
-	jp   nz, L1C4BC2
-	ld   a, $05
-	jp   L1C4BDD
-L1C4BC2:;J
+; =============== Options_DoCtrl_MoveU ===============
+Options_DoCtrl_MoveU:
+	;
+	; Wrap around from OPTION_ITEM_TIME to OPTION_ITEM_EXIT
+	;
+	ld   a, [wTitleSubMenuOptId]
+	or   a							; Are we over the highest option? (OPTION_ITEM_TIME)
+	jp   nz, .chkOpen				; If not, jump
+	ld   a, OPTION_ITEM_EXIT		; Otherwise, wrap around
+	jp   .end
+.chkOpen:
+	;
+	; Skip the SGB sound test option if it's disabled
+	;
 	ld   hl, wMisc_C025
-	bit  7, [hl]
-	jp   z, L1C4BD2
-L1C4BCA: db $21;X
-L1C4BCB: db $00;X
-L1C4BCC: db $C0;X
-L1C4BCD: db $CB;X
-L1C4BCE: db $66;X
-L1C4BCF: db $C2;X
-L1C4BD0: db $DC;X
-L1C4BD1: db $4B;X
-L1C4BD2:;J
-	cp   $05
-	jp   nz, L1C4BDC
-	ld   a, $03
-	jp   L1C4BDD
-L1C4BDC:;J
-	dec  a
-L1C4BDD:;J
-	ld   [$C1B7], a
-	jp   L1C4C11
-L1C4BE3:;J
-	ld   a, [$C1B7]
-	cp   $05
-	jp   nz, L1C4BF0
-	ld   a, $00
-	jp   L1C4C0E
-L1C4BF0:;J
+	bit  MISCB_IS_SGB, [hl]			; Are we in SGB mode?
+	jp   z, .noSGBTest				; If not, jump
+	ld   hl, wDipSwitch
+	bit  DIPB_SGB_SOUND_TEST, [hl]	; Is the SGB sound test enabled?
+	jp   nz, .moveUp				; If so, we can always move up
+.noSGBTest:
+	; If we got here there's no SGB sound test, so skip it
+	cp   OPTION_ITEM_EXIT			; Are we over the EXIT option?
+	jp   nz, .moveUp				; If not, move up
+	ld   a, OPTION_ITEM_SFXTEST		; Otherwise, skip directly to SFX Test
+	jp   .end
+.moveUp:
+	dec  a							; Move selected option up		
+.end:
+	ld   [wTitleSubMenuOptId], a
+	jp   Options_DoCtrl_SetCursorYPos
+	
+; =============== Options_DoCtrl_MoveD ===============
+Options_DoCtrl_MoveD:
+	;
+	; Wrap around from OPTION_ITEM_EXIT to OPTION_ITEM_TIME
+	;
+	ld   a, [wTitleSubMenuOptId]
+	cp   OPTION_ITEM_EXIT			; Are we over the lowest option?
+	jp   nz, .chkOpen				; If not, jump
+	ld   a, OPTION_ITEM_TIME		; Otherwise, wrap around
+	jp   .end
+.chkOpen:
 	ld   hl, wMisc_C025
-	bit  7, [hl]
-	jp   z, L1C4C00
-L1C4BF8: db $21;X
-L1C4BF9: db $00;X
-L1C4BFA: db $C0;X
-L1C4BFB: db $CB;X
-L1C4BFC: db $66;X
-L1C4BFD: db $C2;X
-L1C4BFE: db $0D;X
-L1C4BFF: db $4C;X
-L1C4C00:;J
-	cp   $03
-	jp   nz, L1C4C0D
-	ld   a, $05
-	jp   L1C4BDD
-L1C4C0A: db $C3;X
-L1C4C0B: db $0E;X
-L1C4C0C: db $4C;X
-L1C4C0D:;J
-	inc  a
-L1C4C0E:;J
-	ld   [$C1B7], a
-L1C4C11:;J
-	cp   $05
-	jp   nz, L1C4C1B
-	ld   a, $68
-	jp   L1C4C1D
-L1C4C1B:;J
+	bit  MISCB_IS_SGB, [hl]			; Are we in SGB mode?
+	jp   z, .noSGBTest				; If not, jump
+	ld   hl, wDipSwitch
+	bit  DIPB_SGB_SOUND_TEST, [hl]	; Is the SGB sound test enabled?
+	jp   nz, .moveDown				; If so, we can always move down
+.noSGBTest:
+	; If we got here there's no SGB sound test, so skip it
+	cp   OPTION_ITEM_SFXTEST		; Are we over the SFX Test option?
+	jp   nz, .moveDown				; If not, move down
+	ld   a, OPTION_ITEM_EXIT		; Otherwise, skip directly to EXIT
+	jp   Options_DoCtrl_MoveU.end	; (Does the same thing as the line below)
+	jp   .end						; [TCRF] Unreachable duplicate jump
+.moveDown:
+	inc  a							; Move selected option down
+.end:
+	ld   [wTitleSubMenuOptId], a
+	; Fall-through
+; =============== Options_DoCtrl_SetCursorYPos ===============
+; Common code for setting the new cursor Y position.
+; The X position is never changed in menus.
+; IN
+; - A: wTitleSubMenuOptId
+Options_DoCtrl_SetCursorYPos:
+	cp   OPTION_ITEM_EXIT			; Are we now over the EXIT option?
+	jp   nz, .otherY				; If not, jump
+.exitY:
+	ld   a, $68						; Otherwise, Y pos = $68
+	jp   .setY
+.otherY:
+	; ID trickery.
+	; The menu options (outside of EXIT) are positioned in a way so that:
+	; CursorY = wTitleSubMenuOptId * 4
 	swap a
-L1C4C1D:;J
-	ld   [wOBJInfo_Pl1+iOBJInfo_Y], a
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	set  7, [hl]
+.setY:
+	ld   [wOBJInfo_CursorR+iOBJInfo_Y], a		; Set the Y cursor
+	ld   hl, wOBJInfo_CursorR+iOBJInfo_Status
+	set  OSTB_VISIBLE, [hl]						; Force cursor visibility, at least for 1 frame
 	xor  a
 	ret
-L1C4C27:;J
-	ld   a, $01
+; =============== Options_DoCtrl_MoveL ===============
+Options_DoCtrl_MoveL:
+	ld   a, OPTIONS_ACT_L
 	scf
 	ret
-L1C4C2B:;J
-	ld   a, $02
+; =============== Options_DoCtrl_MoveR ===============
+Options_DoCtrl_MoveR:
+	ld   a, OPTIONS_ACT_R
 	scf
 	ret
-L1C4C2F:;J
-	ld   a, $03
+; =============== Options_DoCtrl_PressA ===============
+Options_DoCtrl_PressA:
+	ld   a, OPTIONS_ACT_A
 	scf
 	ret
-L1C4C33:;J
-	ld   a, $04
+; =============== Options_DoCtrl_PressB ===============
+Options_DoCtrl_PressB:
+	ld   a, OPTIONS_ACT_B
 	scf
 	ret
-L1C4C37: db $CD;X
-L1C4C38: db $76;X
-L1C4C39: db $4D;X
-L1C4C3A: db $CB;X
-L1C4C3B: db $7F;X
-L1C4C3C: db $C2;X
-L1C4C3D: db $64;X
-L1C4C3E: db $4C;X
-L1C4C3F: db $CB;X
-L1C4C40: db $77;X
-L1C4C41: db $C2;X
-L1C4C42: db $64;X
-L1C4C43: db $4C;X
-L1C4C44: db $CB;X
-L1C4C45: db $4F;X
-L1C4C46: db $C2;X
-L1C4C47: db $78;X
-L1C4C48: db $4C;X
-L1C4C49: db $CB;X
-L1C4C4A: db $47;X
-L1C4C4B: db $C2;X
-L1C4C4C: db $8A;X
-L1C4C4D: db $4C;X
-L1C4C4E: db $CB;X
-L1C4C4F: db $6F;X
-L1C4C50: db $C2;X
-L1C4C51: db $74;X
-L1C4C52: db $4C;X
-L1C4C53: db $CB;X
-L1C4C54: db $58;X
-L1C4C55: db $C2;X
-L1C4C56: db $6C;X
-L1C4C57: db $4C;X
-L1C4C58: db $CB;X
-L1C4C59: db $50;X
-L1C4C5A: db $C2;X
-L1C4C5B: db $68;X
-L1C4C5C: db $4C;X
-L1C4C5D: db $CB;X
-L1C4C5E: db $60;X
-L1C4C5F: db $C2;X
-L1C4C60: db $70;X
-L1C4C61: db $4C;X
-L1C4C62: db $AF;X
-L1C4C63: db $C9;X
-L1C4C64: db $3E;X
-L1C4C65: db $00;X
-L1C4C66: db $37;X
-L1C4C67: db $C9;X
-L1C4C68: db $3E;X
-L1C4C69: db $01;X
-L1C4C6A: db $37;X
-L1C4C6B: db $C9;X
-L1C4C6C: db $3E;X
-L1C4C6D: db $02;X
-L1C4C6E: db $37;X
-L1C4C6F: db $C9;X
-L1C4C70: db $3E;X
-L1C4C71: db $03;X
-L1C4C72: db $37;X
-L1C4C73: db $C9;X
-L1C4C74: db $3E;X
-L1C4C75: db $04;X
-L1C4C76: db $37;X
-L1C4C77: db $C9;X
-L1C4C78: db $FA;X
-L1C4C79: db $B8;X
-L1C4C7A: db $C1;X
-L1C4C7B: db $FE;X
-L1C4C7C: db $00;X
-L1C4C7D: db $CA;X
-L1C4C7E: db $86;X
-L1C4C7F: db $4C;X
-L1C4C80: db $3D;X
-L1C4C81: db $E6;X
-L1C4C82: db $03;X
-L1C4C83: db $C3;X
-L1C4C84: db $95;X
-L1C4C85: db $4C;X
-L1C4C86: db $3E;X
-L1C4C87: db $05;X
-L1C4C88: db $37;X
-L1C4C89: db $C9;X
-L1C4C8A: db $FA;X
-L1C4C8B: db $B8;X
-L1C4C8C: db $C1;X
-L1C4C8D: db $FE;X
-L1C4C8E: db $03;X
-L1C4C8F: db $CA;X
-L1C4C90: db $95;X
-L1C4C91: db $4C;X
-L1C4C92: db $3C;X
-L1C4C93: db $E6;X
-L1C4C94: db $03;X
-L1C4C95: db $EA;X
-L1C4C96: db $B8;X
-L1C4C97: db $C1;X
-L1C4C98: db $FE;X
-L1C4C99: db $01;X
-L1C4C9A: db $CA;X
-L1C4C9B: db $AC;X
-L1C4C9C: db $4C;X
-L1C4C9D: db $FE;X
-L1C4C9E: db $02;X
-L1C4C9F: db $CA;X
-L1C4CA0: db $B1;X
-L1C4CA1: db $4C;X
-L1C4CA2: db $FE;X
-L1C4CA3: db $03;X
-L1C4CA4: db $CA;X
-L1C4CA5: db $B6;X
-L1C4CA6: db $4C;X
-L1C4CA7: db $3E;X
-L1C4CA8: db $3C;X
-L1C4CA9: db $C3;X
-L1C4CAA: db $B8;X
-L1C4CAB: db $4C;X
-L1C4CAC: db $3E;X
-L1C4CAD: db $50;X
-L1C4CAE: db $C3;X
-L1C4CAF: db $B8;X
-L1C4CB0: db $4C;X
-L1C4CB1: db $3E;X
-L1C4CB2: db $6C;X
-L1C4CB3: db $C3;X
-L1C4CB4: db $B8;X
-L1C4CB5: db $4C;X
-L1C4CB6: db $3E;X
-L1C4CB7: db $80;X
-L1C4CB8: db $EA;X
-L1C4CB9: db $43;X
-L1C4CBA: db $D7;X
-L1C4CBB: db $21;X
-L1C4CBC: db $40;X
-L1C4CBD: db $D7;X
-L1C4CBE: db $CB;X
-L1C4CBF: db $FE;X
-L1C4CC0: db $AF;X
-L1C4CC1: db $C9;X
-L1C4CC2:;J
+	
+	
+; =============== Options_SGBSndTest_DoCtrl ===============	
+; Special version of Options_DoCtrl used for the SGB Sound Test.
+; This uses an up cursor moving horizontally, so movement is handled differently.
+; OUT
+; - C flag: If set, the returned value should be used
+; - A: Action id (OPTIONS_SACT_*), handled by the option-specific code
+Options_SGBSndTest_DoCtrl:
+	call Title_GetMenuInput
+	bit  KEYB_START, a
+	jp   nz, .exit
+	bit  KEYB_SELECT, a
+	jp   nz, .exit
+	bit  KEYB_LEFT, a
+	jp   nz, .moveL
+	bit  KEYB_RIGHT, a
+	jp   nz, .moveR
+	bit  KEYB_B, a
+	jp   nz, .b
+	bit  KEYB_DOWN, b
+	jp   nz, .down
+	bit  KEYB_UP, b
+	jp   nz, .up
+	bit  KEYB_A, b
+	jp   nz, .a
+	xor  a
+	ret
+.exit:
+	ld   a, OPTIONS_SACT_EXIT
+	scf  
+	ret  
+.up:
+	ld   a, OPTIONS_SACT_UP
+	scf  
+	ret  
+.down:
+	ld   a, OPTIONS_SACT_DOWN
+	scf  
+	ret  
+.a:
+	ld   a, OPTIONS_SACT_A
+	scf  
+	ret  
+.b:
+	ld   a, OPTIONS_SACT_B
+	scf  
+	ret  
+;--
+.moveL:
+	; If we're moving left from the leftmost option, signal out the exit from the submenu
+	ld   a, [wOptionsSGBSndOptId]
+	cp   a, OPTION_SITEM_ID_A		; OptionId == 0?
+	jp   z, .leftMin				; If so, jump
+	; Otherwise decrement the option
+	dec  a				
+	and  a, $03						; And force it in range ($00-$03)
+	jp   .setCursorXPos
+.leftMin:
+	ld   a, OPTIONS_SACT_SUBEXIT
+	scf  
+	ret 
+;--
+.moveR:
+	; If we're moving right from the leftmost option, ignore it
+	ld   a, [wOptionsSGBSndOptId]
+	cp   a, OPTION_SITEM_BANK_B		; OptionId == $03?
+	jp   z, .setCursorXPos			; If so, jump
+	; Otherwise increment the option
+	inc  a
+	and  a, $03						; And force it in range ($00-$03)
+	
+.setCursorXPos:
+	;
+	; Determine the up cursor's X position.
+	; Unlike Options_DoCtrl, there's no trickery here, it's just a series of id checks.
+	;
+	ld   [wOptionsSGBSndOptId], a
+	cp   a, OPTION_SITEM_BANK_A		; OptionId == $01?
+	jp   z, .x1						; If so, jump
+	cp   a, OPTION_SITEM_ID_B		; ...
+	jp   z, .x2
+	cp   a, OPTION_SITEM_BANK_B
+	jp   z, .x3
+	; Otherwise, OptionId == $00
+.x0:
+	ld   a, $3C
+	jp   .saveX
+.x1:
+	ld   a, $50
+	jp   .saveX
+.x2:
+	ld   a, $6C
+	jp   .saveX
+.x3:
+	ld   a, $80
+.saveX:
+	; Show up cursor and set its position
+	ld   [wOBJInfo_CursorU+iOBJInfo_X], a
+	ld   hl, wOBJInfo_CursorU+iOBJInfo_Status
+	set  OSTB_VISIBLE, [hl]
+	xor  a
+	ret
+	
+; =============== TitleSubMenu_Exit ===============
+; Exits from the mode select or options menu back to the title menu.
+TitleSubMenu_Exit:
+	
+	; Disable serial (Mode Select)
 	xor  a
 	ldh  [rSB], a
-	ld   hl, $5063
+	
+	; Stop any playing SGB sound (Options)
+	ld   hl, SGBPacket_Options_StopSnd
 	call SGB_SendPackets
+	
+	; Reset DMG pal
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
-	ld   a, $02
-	ld   [wIntroScene], a
-	ld   b, $1C
-	ld   hl, $51B5
+	
+	; Next mode
+	ld   a, GM_TITLE_TITLEMENU
+	ld   [wTitleMode], a
+	
+	; Load GFX
+	ld   b, BANK(Title_LoadVRAM_Mini) ; BANK $1C
+	ld   hl, Title_LoadVRAM_Mini
 	rst  $08
+	
+	; Enable title screen parallax mode
 	ld   hl, wMisc_C028
-	set  2, [hl]
-	ld   a, [$C1B5]
-	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
-	ld   a, [$C1B6]
-	ld   [wOBJInfo_Pl1+iOBJInfo_Y], a
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset
-	ld   [hl], $08
+	set  MISCB_TITLE_SECT, [hl]
+	
+	; Restore cursor position & visibility
+	ld   a, [wTitleMenuCursorXBak]
+	ld   [wOBJInfo_CursorR+iOBJInfo_X], a
+	ld   a, [wTitleMenuCursorYBak]
+	ld   [wOBJInfo_CursorR+iOBJInfo_Y], a
+	ld   hl, wOBJInfo_CursorR+iOBJInfo_OBJLstPtrTblOffset
+	ld   [hl], TITLE_OBJ_CURSOR_R*OBJLSTPTR_ENTRYSIZE
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	set  7, [hl]
-	ld   hl, wOBJInfo3+iOBJInfo_Status
-	res  7, [hl]
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	set  7, [hl]
-	ld   hl, wOBJInfo2+iOBJInfo_Status
-	set  7, [hl]
+	set  OSTB_VISIBLE, [hl]
+	
+	; Hide vertical cursor
+	ld   hl, wOBJInfo_CursorU+iOBJInfo_Status
+	res  OSTB_VISIBLE, [hl]
+	
+	; Show menu text and SNK copyright
+	ld   hl, wOBJInfo_MenuText+iOBJInfo_Status
+	set  OSTB_VISIBLE, [hl]
+	ld   hl, wOBJInfo_SnkText+iOBJInfo_Status
+	set  OSTB_VISIBLE, [hl]
+	
+	; Reset scrolling to make clouds appear already at the final Y pos
+	; without having to move them up again
 	ld   a, $00
-	ld   [wFieldScrollY], a
-	ld   a, $90
+	ld   [wOBJScrollY], a
+	ld   a, $90 		; Matches with Y target in Title_UpdateParallaxCoords
 	ldh  [hScrollY], a
-	ld   a, $E7
-	rst  $18
+	
+	; Enable WINDOW
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
+	
+	; Enable LYC interrupt
 	ldh  a, [rSTAT]
-	or   a, $40
+	or   a, STAT_LYC
 	ldh  [rSTAT], a
-	ld   a, $66
+	ld   a, $66			; Same as title init code
 	ldh  [rLYC], a
 	ldh  a, [rIE]
-	or   a, $03
+	or   a, I_STAT|I_VBLANK
 	ldh  [rIE], a
+	
+	; Stop DMG sound
 	ld   a, $00
 	call HomeCall_Sound_ReqPlayExId_Stub
+	
 	call Task_PassControl_NoDelay
+	
+	; Set DMG title pal
 	ld   a, $3F
 	ldh  [rOBP0], a
 	ld   a, $00
@@ -2432,4485 +2587,800 @@ L1C4CC2:;J
 	ld   a, $1B
 	ldh  [rBGP], a
 	ret
-L1C4D39:;C
+
+; =============== TitleScreen_IsStartPressed ===============
+; OUT
+; - C flag: If set, START was pressed on either controller
+TitleScreen_IsStartPressed:
+	; Serial is disabled, so hJoyNewKeys2 will only come from the SGB side.
+	
+	; Whoever presses START on the PUSH START screen takes control of the main menu,
+	; while the other player won't be able to do anything.
+	
 	ldh  a, [hJoyNewKeys]
-	bit  7, a
-	jp   nz, L1C4D49
+	bit  KEYB_START, a		; Pressing START on P1 side?
+	jp   nz, .pressed1		; If so, jump
 	ldh  a, [hJoyNewKeys2]
-	bit  7, a
-	jp   nz, L1C4D50
-	xor  a
+	bit  KEYB_START, a		; Pressing START on P2 side?	
+	jp   nz, .pressed2		; If so, jump
+.notPressed:
+	xor  a					; C = 0, not pressed
 	ret
-L1C4D49:;J
-	ld   a, $00
-	ld   [$C165], a
-	scf
+.pressed1:
+	ld   a, TITLE_CTRL_PL1	; Player 1 pressed it
+	ld   [wTitleActivePl], a
+	scf						; C = 1, pressed
 	ret
-L1C4D50: db $3E;X
-L1C4D51: db $01;X
-L1C4D52: db $EA;X
-L1C4D53: db $65;X
-L1C4D54: db $C1;X
-L1C4D55: db $37;X
-L1C4D56: db $C9;X
-L1C4D57:;C
+.pressed2:
+	ld   a, TITLE_CTRL_PL2	; Player 2 pressed it
+	ld   [wTitleActivePl], a
+	scf						; C = 1, pressed
+	ret
+	
+; =============== ModeSelect_CheckCPUvsCPU ===============
+; [POI] Handles the secret where holding B when selecting a mode activates a CPU vs CPU battle.
+ModeSelect_CheckCPUvsCPU:
+
+	; CPU vs CPU disallowed in VS modes.
 	ld   a, [wMisc_C025]
-	bit  6, a
-	ret  nz
+	bit  MISCB_SERIAL_MODE, a		; Setting up a VS battle?
+	ret  nz							; If so, return
+	
+	; Check both controllers
+.chkPl1:
 	ldh  a, [hJoyKeys]
-	bit  5, a
-	jp   z, L1C4D69
-	ld   hl, $D920
-	set  7, [hl]
-L1C4D69:;J
+	bit  KEYB_B, a					; Holding B on controller 1?
+	jp   z, .chkPl2					; If not, jump
+	ld   hl, wPlInfo_Pl1+iPlInfo_Status
+	set  PSB_CPU, [hl]				; Otherwise, set P1 as CPU
+.chkPl2:
 	ldh  a, [hJoyKeys2]
-	bit  5, a
-	jp   z, L1C4D75
-L1C4D70: db $21;X
-L1C4D71: db $20;X
-L1C4D72: db $DA;X
-L1C4D73: db $CB;X
-L1C4D74: db $FE;X
-L1C4D75:;J
+	bit  KEYB_B, a					; Holding B on controller 2?
+	jp   z, .ret					; If not, jump
+	ld   hl, wPlInfo_Pl2+iPlInfo_Status
+	set  PSB_CPU, [hl]				; Otherwise, set P2 as CPU
+.ret:
 	ret
-L1C4D76:;C
-	ld   a, [$C165]
-	cp   $00
-	jp   nz, L1C4D84
-	ld   hl, hJoyKeys
-	jp   L1C4D87
-L1C4D84: db $21;X
-L1C4D85: db $AB;X
-L1C4D86: db $FF;X
-L1C4D87:;J
-	ld   a, [hl]
-	or   a
-	jp   z, L1C4D90
-	xor  a
-	ld   [$C1BC], a
-L1C4D90:;J
-	inc  hl
-	ld   a, [hl]
+	
+; =============== Title_GetMenuInput ===============
+; Gets the player input for the menu screens.
+; This merges the key info from the delayed held input fields set in JoyKeys_DoCursorDelayTimer.
+; OUT
+; - B: Pressed KEY_*
+Title_GetMenuInput:
+	
+	;
+	; Pick the controller from the active side
+	;
+	ld   a, [wTitleActivePl]
+	cp   TITLE_CTRL_PL1			; Is pad 1 active?
+	jp   nz, .usePl2			; If not, jump
+.usePl1:
+	ld   hl, hJoyKeys			; HL = Controller 1 input
+	jp   .getKeys
+.usePl2:
+	ld   hl, hJoyKeys2			; HL = Controller 2 input
+
+.getKeys:
+
+	;
+	; If we're holding any key, force blinking sprites to be visible (in practice, the cursor)
+	;
+	ld   a, [hl]				; A = Held keys
+	or   a						; Holding anything?
+	jp   z, .calcKeys			; If not, skip
+	xor  a						; Otherwise, reset the blink timer
+	ld   [wTitleBlinkTimer], a
+	
+.calcKeys:
+	inc  hl						; Seek to hJoyNewKeys
+	ld   a, [hl]				; A = Newly pressed keys
 	push af
-	inc  hl
-	inc  hl
-	ld   b, $00
-	ld   c, $08
-L1C4D99:;J
-	ldi  a, [hl]
-	inc  hl
-	cp   $01
-	jp   nz, L1C4DA2
-	set  7, b
-L1C4DA2:;J
-	rlc  b
-	dec  c
-	jp   nz, L1C4D99
+		inc  hl
+		inc  hl					; Seek to hJoyKeysDelayTbl
+		
+		;
+		; Merge back the bits in the 8 iKeyMenuHeld fields into a into a KEY_* bitmask.
+		;
+		
+		; For each DelayTbl entry mark the MSB if needed and rotate left.
+		
+		ld   b, $00				; B = Output KEY_* mask
+		ld   c, $08				; C = Bits in byte
+	.loop:
+		ldi  a, [hl]			; A = iKeyMenuHeld
+		inc  hl					; Skip to next entry
+		; Only use key entries with value $01, which means that either:
+		; - The key was just pressed
+		; - The delay countdown reached 0, which set the key entry to $01
+		cp   $01				; iKeyMenuHeld == $01?
+		jp   nz, .next			; If not, skip
+		set  7, b				; Set the MSB
+	.next:
+		rlc  b					; Next bit (<<R 1)
+		dec  c					; BitsLeft--
+		jp   nz, .loop			; Are we done? If not, loop
 	pop  af
 	ret
-L1C4DAA:;C
-	ld   a, [$C1BC]
+	
+; =============== TitleScreen_BlinkPushStartText ===============
+; Blinks the PUSH START text every $10 frames.
+TitleScreen_BlinkPushStartText:
+	ld   a, [wTitleBlinkTimer]		; Timer++
 	inc  a
-	ld   [$C1BC], a
-	bit  4, a
-	jp   z, L1C4DBC
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	res  7, [hl]
+	ld   [wTitleBlinkTimer], a
+	bit  4, a						; Timer & $10 == 0?
+	jp   z, .show					; If so, show it
+.hide:								; Otherwise, hide it
+	ld   hl, wOBJInfo_MenuText+iOBJInfo_Status
+	res  OSTB_VISIBLE, [hl]
 	ret
-L1C4DBC:;J
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	set  7, [hl]
+.show:
+	ld   hl, wOBJInfo_MenuText+iOBJInfo_Status
+	set  OSTB_VISIBLE, [hl]
 	ret
-L1C4DC2:;C
-	ld   a, [$C1BC]
+; =============== Title_BlinkCursorR ===============
+; Blinks the horizontal cursor every $08 frames.
+Title_BlinkCursorR:
+	ld   a, [wTitleBlinkTimer]		; Timer++
 	inc  a
-	ld   [$C1BC], a
-	bit  3, a
-	jp   z, L1C4DD4
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	res  7, [hl]
+	ld   [wTitleBlinkTimer], a
+	bit  3, a						; Timer & $08 == 0?
+	jp   z, .show					; If so, show it
+.hide:								; Otherwise, hide it
+	ld   hl, wOBJInfo_CursorR+iOBJInfo_Status
+	res  OSTB_VISIBLE, [hl]
 	ret
-L1C4DD4:;J
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	set  7, [hl]
+.show:
+	ld   hl, wOBJInfo_CursorR+iOBJInfo_Status
+	set  OSTB_VISIBLE, [hl]
 	ret
-L1C4DDA: db $FA;X
-L1C4DDB: db $BC;X
-L1C4DDC: db $C1;X
-L1C4DDD: db $3C;X
-L1C4DDE: db $EA;X
-L1C4DDF: db $BC;X
-L1C4DE0: db $C1;X
-L1C4DE1: db $CB;X
-L1C4DE2: db $5F;X
-L1C4DE3: db $CA;X
-L1C4DE4: db $EC;X
-L1C4DE5: db $4D;X
-L1C4DE6: db $21;X
-L1C4DE7: db $40;X
-L1C4DE8: db $D7;X
-L1C4DE9: db $CB;X
-L1C4DEA: db $BE;X
-L1C4DEB: db $C9;X
-L1C4DEC: db $21;X
-L1C4DED: db $40;X
-L1C4DEE: db $D7;X
-L1C4DEF: db $CB;X
-L1C4DF0: db $FE;X
-L1C4DF1: db $C9;X
-L1C4DF2:;C
+; =============== Title_BlinkCursorU ===============
+; Blinks the vertical cursor every $08 frames.
+Title_BlinkCursorU:
+	ld   a, [wTitleBlinkTimer]		; Timer++
+	inc  a
+	ld   [wTitleBlinkTimer], a
+	bit  3, a						; Timer & $08 == 0?
+	jp   z, .show					; If so, show it
+.hide:								; Otherwise, hide it
+	ld   hl, wOBJInfo_CursorU+iOBJInfo_Status
+	res  OSTB_VISIBLE, [hl]
+	ret
+.show:
+	ld   hl, wOBJInfo_CursorU+iOBJInfo_Status
+	set  OSTB_VISIBLE, [hl]
+	ret
+	
+; =============== Title_UpdateParallaxCoords ===============
+; Updates the positions for the various cloud strips for the parallax effect.
+Title_UpdateParallaxCoords:
+
+	;
+	; Move clouds up by scrolling the BG down $00.40px/frame until Y $90 is reached.
+	;
 	ldh  a, [hScrollY]
-	cp   $90
-	jp   z, L1C4E02
-	ld   hl, hScrollY
-	ld   bc, $0040
-	call L1C4E39
-L1C4E02:;J
+	cp   $90				; hScrollY == $90?
+	jp   z, .scrollX		; If so, skip
+	ld   hl, hScrollY		
+	ld   bc, $0040			; hScrollY += $00.40
+	call .addToPos	
+	
+.scrollX:
+
+	;
+	; Scroll the clouds horizontally.
+	; The higher the section number, the faster it will scroll.
+	;
 	ld   hl, hScrollX
 	ld   bc, $0040
-	call L1C4E39
+	call .addToPos
 	ld   hl, hTitleParallax1X
 	ld   bc, $0060
-	call L1C4E39
+	call .addToPos
 	ld   hl, hTitleParallax2X
 	ld   bc, $0080
-	call L1C4E39
+	call .addToPos
 	ld   hl, hTitleParallax3X
 	ld   bc, $00A0
-	call L1C4E39
+	call .addToPos
 	ld   hl, hTitleParallax4X
 	ld   bc, $00C0
-	call L1C4E39
+	call .addToPos
 	ld   hl, hTitleParallax5X
 	ld   bc, $00E0
-	call L1C4E39
+	call .addToPos
 	ret
-L1C4E39:;C
+
+; IN
+; - HL: Ptr to pixel position
+; - BC: Amount to add
+.addToPos:
+	; HL += BC + *wTitleParallaxBaseSpeed
 	push hl
-	call L1C4E48
-	ld   hl, $C1C3
-	ld   b, [hl]
-	inc  hl
-	ld   c, [hl]
+		; HL += BC
+		call Title_AddWithSubpixels
+		
+		; HL += wTitleParallaxBaseSpeed
+		ld   hl, wTitleParallaxBaseSpeed
+		ld   b, [hl]		; Pixel count
+		inc  hl
+		ld   c, [hl]		; Subpixel count
 	pop  hl
-	call L1C4E48
+	call Title_AddWithSubpixels
 	ret
-L1C4E48:;C
-	push hl
-	ld   d, [hl]
+	
+; =============== Title_AddWithSubpixels ===============
+; Adds the specified number of pixels to a coordinate.
+; This requires the coordinate pointed by HL to be 2 bytes large:
+; - 0 -> Pixel value
+; - 2 -> Subpixel value
+; IN
+; - HL: Ptr to pixel position
+; - B: Pixels to add
+; - C: Subpixels to add
+Title_AddWithSubpixels:
+	push hl ; Save coord ptr
+		; HL = Coordinate
+		ld   d, [hl]	; D = Pixels
+		inc  hl
+		ld   e, [hl]	; E = Subpixels
+		push de			;
+		pop  hl			; Move to HL
+		
+		; DE = HL + BC
+		add  hl, bc		
+		push hl
+		pop  de
+	pop  hl ; Restore coord ptr
+	
+	; Write back updated coord
+	ld  [hl], d		; Write pixels
 	inc  hl
-	ld   e, [hl]
-	push de
-	pop  hl
-	add  hl, bc
-	push hl
-	pop  de
-	pop  hl
-	ld   [hl], d
-	inc  hl
-	ld   [hl], e
+	ld   [hl], e	; Write subpixels
 	ret
-L1C4E56:;C
-	ld   hl, $C17F
+	
+; =============== ModeSelect_MakeRoundSeq ===============
+; Generates the sequence of opponents to fight in 1P modes.
+ModeSelect_MakeRoundSeq:
+	; Reset starting round
+	ld   hl, wRoundSeqId
 	ld   [hl], $00
-	ld   b, $12
-	ld   hl, $C180
-	ld   a, $FF
-L1C4E62:;R
-	ldi  [hl], a
+	
+	;
+	; Fill the sequence with $FF values.
+	;
+	ld   b, $12				; B = Total number of opponents
+	ld   hl, wRoundSeqTbl	; HL = Ptr to start of table
+	ld   a, $FF				; A = Overwrite with
+.fillLoop:
+	ldi  [hl], a			
 	dec  b
-	jr   nz, L1C4E62
-	ld   b, $0E
-L1C4E68:;JR
-	call L001185
-	and  a, $0F
-	cp   $0F
-	jr   z, L1C4E68
-	ld   d, $00
+	jr   nz, .fillLoop
+	
+	;
+	; Randomize the first 14 opponents
+	;
+	
+	; This is done by going through character *select* IDs from highest allowed to lowest,
+	; and placing that character in a randomly generated slot in wRoundSeqTbl.
+	ld   b, $0E				; B = Current CHARSEL_ID_* / Remaining chars
+.getRand:
+	call RandLY				; A = Random opponent slot
+	and  a, $0F				; Filter valid positions only
+	cp   $0F				; Did we get Goenitz's slot? (15th character in the sequence)
+	jr   z, .getRand		; If so, reroll again
+	
+	; HL = Ptr to generated slot
+	ld   d, $00				; DE = Current index
 	ld   e, a
-	ld   hl, $C180
-	add  hl, de
-	ld   a, [hl]
-	cp   $FF
-	jr   nz, L1C4E68
-	ld   a, b
-	cp   $0E
-	jr   nz, L1C4E84
-	ld   a, $11
-L1C4E84:;R
-	ld   [hl], a
-	dec  b
-	ld   a, b
-	cp   $FF
-	jp   nz, L1C4E68
-	ld   hl, $C18F
-	ld   [hl], $13
+	ld   hl, wRoundSeqTbl	; HL = wRoundSeqTbl
+	add  hl, de				; Index it
+	
+	; Avoid overwriting already filled slots, which don't have the $FF placeholder anymore
+	ld   a, [hl]			; A = SlotVal
+	cp   $FF				; SlotVal != $FF?
+	jr   nz, .getRand		; If so, reroll
+	
+	; Replace Mr Karate ($0E) with Leona ($11)
+	; The CHARSEL_ID_* values are in the same order as the character select screen from left to right, top to bottom.
+	; Leona is the only character after the hidden ones, as the last one in the lower right corner.
+	ld   a, b					; B = CHARSEL_ID_* value
+	cp   CHARSEL_ID_MRKARATE0	; B == $0E?
+	jr   nz, .setCharId			; If so, skip
+	ld   a, CHARSEL_ID_LEONA
+.setCharId:
+	ld   [hl], a			; Write value
+	dec  b					; CharsLeft--
+	ld   a, b				
+	cp   $FF				; CharsLeft < 0?
+	jp   nz, .getRand		; If not, generate the next one
+	
+	;
+	; Add the 2 bosses and 2 secrets at the end.
+	; These are raw character IDs as they don't go through the char select screen.
+	;
+	ld   hl, wRoundSeqTbl+$0F
+	ld   [hl], CHAR_ID_KAGURA
 	inc  hl
-	ld   [hl], $0F
+	ld   [hl], CHAR_ID_GOENITZ
 	inc  hl
-	ld   [hl], $00
+	ld   [hl], $00 ; Placeholder for bonus fight, team-specific.
 	inc  hl
-	ld   [hl], $10
+	ld   [hl], CHAR_ID_MRKARATE
 	ret
-L1C4E9B: db $80
-L1C4E9C: db $00
-L1C4E9D: db $00
-L1C4E9E: db $28
-L1C4E9F: db $00
-L1C4EA0: db $40
-L1C4EA1: db $00
-L1C4EA2: db $00
-L1C4EA3: db $00
-L1C4EA4: db $00
-L1C4EA5: db $00
-L1C4EA6: db $00
-L1C4EA7: db $00
-L1C4EA8: db $00
-L1C4EA9: db $00
-L1C4EAA: db $80
-L1C4EAB: db $1C
-L1C4EAC: db $BA
-L1C4EAD: db $4E
-L1C4EAE: db $00
-L1C4EAF: db $00
-L1C4EB0: db $BA
-L1C4EB1: db $4E
-L1C4EB2: db $00
-L1C4EB3: db $00
-L1C4EB4: db $00
-L1C4EB5: db $00
-L1C4EB6: db $00
-L1C4EB7: db $00
-L1C4EB8: db $C0
-L1C4EB9: db $D8
-L1C4EBA: db $D0
-L1C4EBB: db $4E
-L1C4EBC: db $FF
-L1C4EBD: db $FF
-L1C4EBE: db $F6
-L1C4EBF: db $4E
-L1C4EC0: db $FF
-L1C4EC1: db $FF
-L1C4EC2: db $2E
-L1C4EC3: db $4F
-L1C4EC4: db $FF
-L1C4EC5: db $FF
-L1C4EC6: db $4A
-L1C4EC7: db $4F
-L1C4EC8: db $FF
-L1C4EC9: db $FF
-L1C4ECA: db $3C;X
-L1C4ECB: db $4F;X
-L1C4ECC: db $FF;X
-L1C4ECD: db $FF;X
-L1C4ECE: db $FF;X
-L1C4ECF: db $FF;X
-L1C4ED0: db $80
-L1C4ED1: db $00
-L1C4ED2: db $00
-L1C4ED3: db $FF;X
-L1C4ED4: db $FF;X
-L1C4ED5: db $FF;X
-L1C4ED6: db $DA
-L1C4ED7: db $4E
-L1C4ED8: db $00
-L1C4ED9: db $00
-L1C4EDA: db $09
-L1C4EDB: db $34
-L1C4EDC: db $00
-L1C4EDD: db $10
-L1C4EDE: db $34
-L1C4EDF: db $08
-L1C4EE0: db $18
-L1C4EE1: db $34
-L1C4EE2: db $10
-L1C4EE3: db $14
-L1C4EE4: db $34
-L1C4EE5: db $18
-L1C4EE6: db $06
-L1C4EE7: db $34
-L1C4EE8: db $28
-L1C4EE9: db $14
-L1C4EEA: db $34
-L1C4EEB: db $30
-L1C4EEC: db $16
-L1C4EED: db $34
-L1C4EEE: db $38
-L1C4EEF: db $00
-L1C4EF0: db $34
-L1C4EF1: db $40
-L1C4EF2: db $12
-L1C4EF3: db $34
-L1C4EF4: db $48
-L1C4EF5: db $16
-L1C4EF6: db $80
-L1C4EF7: db $00
-L1C4EF8: db $00
-L1C4EF9: db $FF;X
-L1C4EFA: db $FF;X
-L1C4EFB: db $FF;X
-L1C4EFC: db $00
-L1C4EFD: db $4F
-L1C4EFE: db $00
-L1C4EFF: db $00
-L1C4F00: db $0F
-L1C4F01: db $38
-L1C4F02: db $00
-L1C4F03: db $0E
-L1C4F04: db $38
-L1C4F05: db $08
-L1C4F06: db $10
-L1C4F07: db $38
-L1C4F08: db $10
-L1C4F09: db $16
-L1C4F0A: db $38
-L1C4F0B: db $18
-L1C4F0C: db $08
-L1C4F0D: db $38
-L1C4F0E: db $20
-L1C4F0F: db $0E
-L1C4F10: db $38
-L1C4F11: db $28
-L1C4F12: db $0C
-L1C4F13: db $30
-L1C4F14: db $00
-L1C4F15: db $04
-L1C4F16: db $30
-L1C4F17: db $08
-L1C4F18: db $00
-L1C4F19: db $30
-L1C4F1A: db $10
-L1C4F1B: db $0A
-L1C4F1C: db $30
-L1C4F1D: db $18
-L1C4F1E: db $02
-L1C4F1F: db $30
-L1C4F20: db $28
-L1C4F21: db $14
-L1C4F22: db $30
-L1C4F23: db $30
-L1C4F24: db $16
-L1C4F25: db $30
-L1C4F26: db $38
-L1C4F27: db $00
-L1C4F28: db $30
-L1C4F29: db $40
-L1C4F2A: db $12
-L1C4F2B: db $30
-L1C4F2C: db $48
-L1C4F2D: db $16
-L1C4F2E: db $80
-L1C4F2F: db $00
-L1C4F30: db $00
-L1C4F31: db $FF;X
-L1C4F32: db $FF;X
-L1C4F33: db $FF;X
-L1C4F34: db $38
-L1C4F35: db $4F
-L1C4F36: db $00
-L1C4F37: db $00
-L1C4F38: db $01
-L1C4F39: db $30
-L1C4F3A: db $F6
-L1C4F3B: db $1A
-L1C4F3C: db $80;X
-L1C4F3D: db $00;X
-L1C4F3E: db $00;X
-L1C4F3F: db $FF;X
-L1C4F40: db $FF;X
-L1C4F41: db $FF;X
-L1C4F42: db $46;X
-L1C4F43: db $4F;X
-L1C4F44: db $00;X
-L1C4F45: db $00;X
-L1C4F46: db $01;X
-L1C4F47: db $30;X
-L1C4F48: db $F8;X
-L1C4F49: db $1C;X
-L1C4F4A: db $80
-L1C4F4B: db $00
-L1C4F4C: db $00
-L1C4F4D: db $FF;X
-L1C4F4E: db $FF;X
-L1C4F4F: db $FF;X
-L1C4F50: db $54
-L1C4F51: db $4F
-L1C4F52: db $00
-L1C4F53: db $00
-L1C4F54: db $06
-L1C4F55: db $48
-L1C4F56: db $00
-L1C4F57: db $1E
-L1C4F58: db $48
-L1C4F59: db $08
-L1C4F5A: db $20
-L1C4F5B: db $48
-L1C4F5C: db $10
-L1C4F5D: db $22
-L1C4F5E: db $48
-L1C4F5F: db $18
-L1C4F60: db $24
-L1C4F61: db $48
-L1C4F62: db $20
-L1C4F63: db $26
-L1C4F64: db $48
-L1C4F65: db $28
-L1C4F66: db $28
-L1C4F67: db $C4
-L1C4F68: db $98
-L1C4F69: db $0B
-L1C4F6A: db $47
-L1C4F6B: db $41
-L1C4F6C: db $4D
-L1C4F6D: db $45
-L1C4F6E: db $20
-L1C4F6F: db $53
-L1C4F70: db $45
-L1C4F71: db $4C
-L1C4F72: db $45
-L1C4F73: db $43
-L1C4F74: db $54
-L1C4F75: db $24
-L1C4F76: db $99
-L1C4F77: db $0B
-L1C4F78: db $53
-L1C4F79: db $49
-L1C4F7A: db $4E
-L1C4F7B: db $47
-L1C4F7C: db $4C
-L1C4F7D: db $45
-L1C4F7E: db $20
-L1C4F7F: db $50
-L1C4F80: db $4C
-L1C4F81: db $41
-L1C4F82: db $59
-L1C4F83: db $64
-L1C4F84: db $99
-L1C4F85: db $09
-L1C4F86: db $54
-L1C4F87: db $45
-L1C4F88: db $41
-L1C4F89: db $4D
-L1C4F8A: db $20
-L1C4F8B: db $50
-L1C4F8C: db $4C
-L1C4F8D: db $41
-L1C4F8E: db $59
-L1C4F8F: db $A4
-L1C4F90: db $99
-L1C4F91: db $09
-L1C4F92: db $53
-L1C4F93: db $49
-L1C4F94: db $4E
-L1C4F95: db $47
-L1C4F96: db $4C
-L1C4F97: db $45
-L1C4F98: db $20
-L1C4F99: db $56
-L1C4F9A: db $53
-L1C4F9B: db $E4
-L1C4F9C: db $99
-L1C4F9D: db $07
-L1C4F9E: db $54
-L1C4F9F: db $45
-L1C4FA0: db $41
-L1C4FA1: db $4D
-L1C4FA2: db $20
-L1C4FA3: db $56
-L1C4FA4: db $53
-L1C4FA5: db $B7
-L1C4FA6: db $98
-L1C4FA7: db $06
-L1C4FA8: db $4F
-L1C4FA9: db $50
-L1C4FAA: db $54
-L1C4FAB: db $49
-L1C4FAC: db $4F
-L1C4FAD: db $4E
-L1C4FAE: db $F4
-L1C4FAF: db $98
-L1C4FB0: db $0C
-L1C4FB1: db $54
-L1C4FB2: db $49
-L1C4FB3: db $4D
-L1C4FB4: db $45
-L1C4FB5: db $20
-L1C4FB6: db $20
-L1C4FB7: db $20
-L1C4FB8: db $20
-L1C4FB9: db $20
-L1C4FBA: db $20
-L1C4FBB: db $58
-L1C4FBC: db $58
-L1C4FBD: db $34
-L1C4FBE: db $99
-L1C4FBF: db $0C
-L1C4FC0: db $4C
-L1C4FC1: db $45
-L1C4FC2: db $56
-L1C4FC3: db $45
-L1C4FC4: db $4C
-L1C4FC5: db $20
-L1C4FC6: db $4E
-L1C4FC7: db $4F
-L1C4FC8: db $52
-L1C4FC9: db $4D
-L1C4FCA: db $41
-L1C4FCB: db $4C
-L1C4FCC: db $74
-L1C4FCD: db $99
-L1C4FCE: db $0C
-L1C4FCF: db $42
-L1C4FD0: db $47
-L1C4FD1: db $4D
-L1C4FD2: db $20
-L1C4FD3: db $54
-L1C4FD4: db $45
-L1C4FD5: db $53
-L1C4FD6: db $54
-L1C4FD7: db $20
-L1C4FD8: db $20
-L1C4FD9: db $58
-L1C4FDA: db $58
-L1C4FDB: db $B4
-L1C4FDC: db $99
-L1C4FDD: db $0C
-L1C4FDE: db $53
-L1C4FDF: db $2E
-L1C4FE0: db $45
-L1C4FE1: db $2E
-L1C4FE2: db $54
-L1C4FE3: db $45
-L1C4FE4: db $53
-L1C4FE5: db $54
-L1C4FE6: db $20
-L1C4FE7: db $20
-L1C4FE8: db $58
-L1C4FE9: db $58
-L1C4FEA: db $F4;X
-L1C4FEB: db $99;X
-L1C4FEC: db $0C;X
-L1C4FED: db $53;X
-L1C4FEE: db $47;X
-L1C4FEF: db $42;X
-L1C4FF0: db $20;X
-L1C4FF1: db $53;X
-L1C4FF2: db $2E;X
-L1C4FF3: db $45;X
-L1C4FF4: db $2E;X
-L1C4FF5: db $54;X
-L1C4FF6: db $45;X
-L1C4FF7: db $53;X
-L1C4FF8: db $54;X
-L1C4FF9: db $94
-L1C4FFA: db $9A
-L1C4FFB: db $04
-L1C4FFC: db $45
-L1C4FFD: db $58
-L1C4FFE: db $49
-L1C4FFF: db $54
-L1C5000: db $B8
-L1C5001: db $9A
-L1C5002: db $08
-L1C5003: db $44
-L1C5004: db $49
-L1C5005: db $50
-L1C5006: db $53
-L1C5007: db $57
-L1C5008: db $2D
-L1C5009: db $30
-L1C500A: db $30
-L1C500B: db $FD
-L1C500C: db $98
-L1C500D: db $03
-L1C500E: db $4F
-L1C500F: db $46
-L1C5010: db $46
-L1C5011: db $FD
-L1C5012: db $98
-L1C5013: db $01
-L1C5014: db $20
-L1C5015: db $3A
-L1C5016: db $99
-L1C5017: db $06
-L1C5018: db $20
-L1C5019: db $20
-L1C501A: db $45
-L1C501B: db $41
-L1C501C: db $53
-L1C501D: db $59
-L1C501E: db $3A
-L1C501F: db $99
-L1C5020: db $06
-L1C5021: db $4E
-L1C5022: db $4F
-L1C5023: db $52
-L1C5024: db $4D
-L1C5025: db $41
-L1C5026: db $4C
-L1C5027: db $3A
-L1C5028: db $99
-L1C5029: db $06
-L1C502A: db $20
-L1C502B: db $20
-L1C502C: db $48
-L1C502D: db $41
-L1C502E: db $52
-L1C502F: db $44
-L1C5030: db $36;X
-L1C5031: db $9A;X
-L1C5032: db $0A;X
-L1C5033: db $53;X
-L1C5034: db $45;X
-L1C5035: db $2D;X
-L1C5036: db $41;X
-L1C5037: db $20;X
-L1C5038: db $20;X
-L1C5039: db $53;X
-L1C503A: db $45;X
-L1C503B: db $2D;X
-L1C503C: db $42;X
-L1C503D: db $56;X
-L1C503E: db $9A;X
-L1C503F: db $0A;X
-L1C5040: db $58;X
-L1C5041: db $58;X
-L1C5042: db $20;X
-L1C5043: db $58;X
-L1C5044: db $20;X
-L1C5045: db $20;X
-L1C5046: db $58;X
-L1C5047: db $58;X
-L1C5048: db $20;X
-L1C5049: db $58;X
-L1C504A: db $58;X
-L1C504B: db $9A;X
-L1C504C: db $01;X
-L1C504D: db $20;X
-L1C504E: db $5E;X
-L1C504F: db $9A;X
-L1C5050: db $01;X
-L1C5051: db $20;X
-L1C5052: db $10
-L1C5053: db $41
-L1C5054: db $00
-L1C5055: db $00
-L1C5056: db $00
-L1C5057: db $00
-L1C5058: db $00
-L1C5059: db $00
-L1C505A: db $00
-L1C505B: db $00
-L1C505C: db $00
-L1C505D: db $00
-L1C505E: db $00
-L1C505F: db $00
-L1C5060: db $00
-L1C5061: db $00
-L1C5062: db $00
-L1C5063: db $41
-L1C5064: db $80
-L1C5065: db $80
-L1C5066: db $00
-L1C5067: db $00
-L1C5068: db $00
-L1C5069: db $00
-L1C506A: db $00
-L1C506B: db $00
-L1C506C: db $00
-L1C506D: db $00
-L1C506E: db $00
-L1C506F: db $00
-L1C5070: db $00
-L1C5071: db $00
-L1C5072: db $00
-L1C5073:;C
+	
+OBJInfoInit_Title:
+	db OST_VISIBLE
+	db $00 ; iOBJInfo_OBJLstFlags
+	db $00 ; iOBJInfo_OBJLstFlagsOld
+	db $28 ; iOBJInfo_X
+	db $00 ; iOBJInfo_XSub
+	db $40 ; iOBJInfo_Y
+	db $00 ; iOBJInfo_YSub
+	db $00 ; iOBJInfo_SpeedX
+	db $00 ; iOBJInfo_SpeedXSub
+	db $00 ; iOBJInfo_Unknown_09
+	db $00 ; iOBJInfo_Unknown_0A
+	db $00 ; iOBJInfo_RelX (auto)
+	db $00 ; iOBJInfo_RelY (auto)
+	db $00 ; iOBJInfo_TileIDBase
+	db LOW($8000) ; iOBJInfo_VRAMPtr_Low
+	db HIGH($8000) ; iOBJInfo_VRAMPtr_High
+	db BANK(OBJLstPtrTable_Title)
+	db LOW(OBJLstPtrTable_Title)
+	db HIGH(OBJLstPtrTable_Title)
+	db TITLE_OBJ_PUSHSTART*OBJLSTPTR_ENTRYSIZE ; iOBJInfo_OBJLstPtrTblOffset
+	db $00 ; iOBJInfo_BankNumOld
+	db LOW(OBJLstPtrTable_Title) ; iOBJInfo_OBJLstPtrTbl_LowOld
+	db HIGH(OBJLstPtrTable_Title) ; iOBJInfo_OBJLstPtrTbl_HighOld
+	db $00 ; iOBJInfo_OBJLstPtrTblOffset
+	db $00 ; iOBJInfo_OBJLstByte1 (auto)
+	db $00 ; iOBJInfo_OBJLstByte2 (auto)
+	db $00 ; iOBJInfo_Unknown_1A
+	db $00 ; iOBJInfo_FrameLeft
+	db $00 ; iOBJInfo_FrameTotal
+	db LOW(wGFXBufInfo_Pl1) ; iOBJInfo_BufInfoPtr_Low
+	db HIGH(wGFXBufInfo_Pl1) ; iOBJInfo_BufInfoPtr_High
+
+OBJLstPtrTable_Title:
+	dw OBJLstHdrA_Title_PushStart, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Title_Menu, OBJLSTPTR_NONE ; GAME SELECT / OPTIONS
+	dw OBJLstHdrA_Title_CursorR, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Title_SNKCopyright, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Title_CursorU, OBJLSTPTR_NONE
+	dw $FFFF
+		
+OBJLstHdrA_Title_PushStart:
+	db OLF_NOBUF ; iOBJLstHdrA_Flags
+	db $00 ; iOBJLstHdrA_Byte1
+	db $00 ; iOBJLstHdrA_Byte2
+	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw .bin ; iOBJLstHdrA_DataPtr
+	db $00 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+.bin:
+	db $09 ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $34,$00,$10 ; $00
+	db $34,$08,$18 ; $01
+	db $34,$10,$14 ; $02
+	db $34,$18,$06 ; $03
+	db $34,$28,$14 ; $04
+	db $34,$30,$16 ; $05
+	db $34,$38,$00 ; $06
+	db $34,$40,$12 ; $07
+	db $34,$48,$16 ; $08
+		
+OBJLstHdrA_Title_Menu:
+	db OLF_NOBUF ; iOBJLstHdrA_Flags
+	db $00 ; iOBJLstHdrA_Byte1
+	db $00 ; iOBJLstHdrA_Byte2
+	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw .bin ; iOBJLstHdrA_DataPtr
+	db $00 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+.bin:
+	db $0F ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $38,$00,$0E ; $00
+	db $38,$08,$10 ; $01
+	db $38,$10,$16 ; $02
+	db $38,$18,$08 ; $03
+	db $38,$20,$0E ; $04
+	db $38,$28,$0C ; $05
+	db $30,$00,$04 ; $06
+	db $30,$08,$00 ; $07
+	db $30,$10,$0A ; $08
+	db $30,$18,$02 ; $09
+	db $30,$28,$14 ; $0A
+	db $30,$30,$16 ; $0B
+	db $30,$38,$00 ; $0C
+	db $30,$40,$12 ; $0D
+	db $30,$48,$16 ; $0E
+		
+OBJLstHdrA_Title_CursorR:
+	db OLF_NOBUF ; iOBJLstHdrA_Flags
+	db $00 ; iOBJLstHdrA_Byte1
+	db $00 ; iOBJLstHdrA_Byte2
+	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw .bin ; iOBJLstHdrA_DataPtr
+	db $00 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+.bin:
+	db $01 ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $30,$F6,$1A ; $00
+		
+OBJLstHdrA_Title_CursorU:
+	db OLF_NOBUF ; iOBJLstHdrA_Flags
+	db $00 ; iOBJLstHdrA_Byte1
+	db $00 ; iOBJLstHdrA_Byte2
+	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw .bin ; iOBJLstHdrA_DataPtr
+	db $00 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+.bin:
+	db $01 ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $30,$F8,$1C ; $00
+		
+OBJLstHdrA_Title_SNKCopyright:
+	db OLF_NOBUF ; iOBJLstHdrA_Flags
+	db $00 ; iOBJLstHdrA_Byte1
+	db $00 ; iOBJLstHdrA_Byte2
+	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw .bin ; iOBJLstHdrA_DataPtr
+	db $00 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+.bin:
+	db $06 ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $48,$00,$1E ; $00
+	db $48,$08,$20 ; $01
+	db $48,$10,$22 ; $02
+	db $48,$18,$24 ; $03
+	db $48,$20,$26 ; $04
+	db $48,$28,$28 ; $05
+
+TextDef_Menu_Title:
+	dw $98C4
+	db $0B
+	db "GAME SELECT"
+TextDef_Menu_SinglePlay:
+	dw $9924
+	db $0B
+	db "SINGLE PLAY"
+TextDef_Menu_TeamPlay:
+	dw $9964
+	db $09
+	db "TEAM PLAY"
+TextDef_Menu_SingleVS: 
+	dw $99A4
+	db $09
+	db "SINGLE VS"
+TextDef_Menu_TeamVS:
+	dw $99E4
+	db $07
+	db "TEAM VS"
+TextDef_Options_Title:
+	dw $98B7
+	db $06
+	db "OPTION"
+TextDef_Options_Time:
+	dw $98F4
+	db $0C
+	db "TIME      XX"
+TextDef_Options_Level:
+	dw $9934
+	db $0C
+	db "LEVEL NORMAL"
+TextDef_Options_BGMTest:
+	dw $9974
+	db $0C
+	db "BGM TEST  XX"
+TextDef_Options_SFXTest:
+	dw $99B4
+	db $0C
+	db "S.E.TEST  XX"
+TextDef_Options_SGBSndTest:
+	dw $99F4
+	db $0C
+	db "SGB S.E.TEST"
+TextDef_Options_Exit:
+	dw $9A94
+	db $04
+	db "EXIT"
+TextDef_Options_Dip:
+	dw $9AB8
+	db $08
+	db "DIPSW-00"
+TextDef_Options_Off:
+	dw $98FD
+	db $03
+	db "OFF"
+; Removes the O from OFF when printing a number
+TextDef_Options_ClrOff:
+	dw $98FD
+	db $01
+	db " "
+TextDef_Options_Easy:
+	dw $993A
+	db $06
+	db "  EASY"
+TextDef_Options_Normal:
+	dw $993A
+	db $06
+	db "NORMAL"
+TextDef_Options_Hard:
+	dw $993A
+	db $06
+	db "  HARD"
+TextDef_Options_SGBSndTypes:
+	dw $9A36
+	db $0A
+	db "SE-A  SE-B"
+TextDef_Options_SGBSndPlaceholders: 
+	dw $9A56
+	db $0A
+	db "XX X  XX X"
+; NumberPrinter_Instant always prints two digits.
+; These spaces are used to cover the upper digit for the SGB sound test.
+TextDef_Options_ClrSGBSndA:
+	dw $9A58
+	db $01
+	db " "
+TextDef_Options_ClrSGBSndB:
+	dw $9A5E
+	db $01
+	db " "
+	
+; =============== SGBPacket_Options_PlaySnd ===============
+; Used to play a SGB sound in the SGB Sound Test.
+; This is copied to RAM to allow updating the bytes marking the Sound IDs to play.
+
+SGBPacketDef_Options_PlaySnd: 
+	db SGBPacket_Options_PlaySnd.end-SGBPacket_Options_PlaySnd ; Copy $10 bytes
+SGBPacket_Options_PlaySnd:
+	pkg SGB_PACKET_SOUND, $01
+	db $00 ; wOptionsSGBPacketSndIdAA
+	db $00 ; wOptionsSGBPacketSndIdAB
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+.end:
+
+; =============== SGBPacket_Options_StopSnd ===============
+; Used to stop any SGB Sound currently playing.
+SGBPacket_Options_StopSnd:
+	pkg SGB_PACKET_SOUND, $01
+	db $80 ; Stop A
+	db $80 ; Stop B
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+
+; =============== Title_DisableSerial ===============
+Title_DisableSerial:
 	xor  a
 	ldh  [rSB], a
 	ld   [wSerialDataReceiveBuffer], a
-	ld   [wSerialPlId], a
-	ld   [wSerial_Unknown_Done], a
+	ld   [wModeSelectTmpSerialData], a
+	ld   [wSerialTransferDone], a
 	ld   [wSerialDataSendBuffer], a
 	ret
-L1C5083:;C
-	; Send out the command in return to the other GB (that selected the VS option)?
-	ld   a, VS_SELECTED_THIS
-	ldh  [rSB], a
-	ld   a, START_TRANSFER_EXTERNAL_CLOCK
+	
+; =============== ModeSelect_SetSerialIdle ===============
+; Marks that the GB is ready to listen to the other player.
+ModeSelect_SetSerialIdle:
+	; Prepare default the serial settings with what we're replying to 
+	; if the other GB sends something through serial.
+	ld   a, MODESELECT_SBCMD_IDLE			; Set idle flag
+	ldh  [rSB], a							; It will be checked by the other GB in ModeSelect_TrySendVSData
+	ld   a, START_TRANSFER_EXTERNAL_CLOCK	; Autoreply MODESELECT_SBCMD_IDLE when the other GB sends something
 	ldh  [rSC], a
 	ret
-L1C508C:;C
+	
+; =============== ModeSelect_Serial_SendAndWait ===============
+; Sends a byte through the serial cable, and waits a reply from the other GB.
+; This marks us as master, overwriting what was set in ModeSelect_SetSerialIdle.
+; IN
+; - A: Byte to send (MODESELECT_SBCMD_*)
+ModeSelect_Serial_SendAndWait:
 	ldh  [rSB], a
-	ld   a, $81
+	ld   a, START_TRANSFER_INTERNAL_CLOCK	; Start master transfer
 	ldh  [rSC], a
-L1C5092:;CR
-	ld   a, [wSerial_Unknown_Done]
-	and  a, a
-	jr   z, L1C5092
-	xor  a
-	ld   [wSerial_Unknown_Done], a
+	
+	
+; =============== ModeSelect_Serial_Wait ===============
+; Waits for a byte to be fully received.
+ModeSelect_Serial_Wait:
+	ld   a, [wSerialTransferDone]
+	and  a							; Are we done?
+	jr   z, ModeSelect_Serial_Wait	; If not, wait
+	xor  a							; Reset marker before exit
+	ld   [wSerialTransferDone], a
 	ret
-L1C509D:;C
+	
+; =============== ModeSelect_TrySendVSData ===============
+; Attempts to send the additional data to sync up both players.
+; OUT
+; - A: Value received from the slave
+ModeSelect_TrySendVSData:
+	; [Master 1/3 Recv] If the slave didn't isn't ready (see: not at the Mode Select menu), return
 	ld   a, [wSerialDataReceiveBuffer]
-	cp   $02
-	jr   z, L1C50A5
+	cp   MODESELECT_SBCMD_IDLE			; RecByte == MODESELECT_SBCMD_IDLE?
+	jr   z, .send						; If so, jump
 	ret
-L1C50A5: db $EA;X
-L1C50A6: db $45;X
-L1C50A7: db $C1;X
-L1C50A8: db $21;X
-L1C50A9: db $25;X
-L1C50AA: db $C0;X
-L1C50AB: db $CB;X
-L1C50AC: db $F6;X
-L1C50AD: db $CB;X
-L1C50AE: db $AE;X
-L1C50AF: db $CD;X
-L1C50B0: db $08;X
-L1C50B1: db $04;X
-L1C50B2: db $CD;X
-L1C50B3: db $08;X
-L1C50B4: db $04;X
-L1C50B5: db $CD;X
-L1C50B6: db $08;X
-L1C50B7: db $04;X
-L1C50B8: db $FA;X
-L1C50B9: db $02;X
-L1C50BA: db $C0;X
-L1C50BB: db $CD;X
-L1C50BC: db $8C;X
-L1C50BD: db $50;X
-L1C50BE: db $CD;X
-L1C50BF: db $08;X
-L1C50C0: db $04;X
-L1C50C1: db $CD;X
-L1C50C2: db $08;X
-L1C50C3: db $04;X
-L1C50C4: db $CD;X
-L1C50C5: db $08;X
-L1C50C6: db $04;X
-L1C50C7: db $FA;X
-L1C50C8: db $00;X
-L1C50C9: db $C0;X
-L1C50CA: db $CD;X
-L1C50CB: db $8C;X
-L1C50CC: db $50;X
-L1C50CD: db $FA;X
-L1C50CE: db $45;X
-L1C50CF: db $C1;X
-L1C50D0: db $C9;X
-L1C50D1:;C
-	ld   a, [wSerialDataReceiveBuffer]
-	cp   $04
-	jr   z, L1C50DD
-	cp   $03
-	jr   z, L1C50DD
-	ret
-L1C50DD:;R
-	ld   [wSerialPlId], a
+.send: 	
+	
+	ld   [wModeSelectTmpSerialData], a 		; Save RecByte
+	
+	; Set ourselves as master
 	ld   hl, wMisc_C025
-	set  6, [hl]
-	set  5, [hl]
+	set  MISCB_SERIAL_MODE, [hl]
+	res  MISCB_SERIAL_PL2_SLAVE, [hl]
+	
+	; Wait for a bit
+	call Task_PassControl_NoDelay
+	call Task_PassControl_NoDelay
+	call Task_PassControl_NoDelay
+	
+	; [Master 2/3] Send out the timer setting and wait some more
+	ld   a, [wMatchStartTime]
+	call ModeSelect_Serial_SendAndWait
+	call Task_PassControl_NoDelay
+	call Task_PassControl_NoDelay
+	call Task_PassControl_NoDelay
+	
+	; [Master 3/3] Send out the dip settings (unlocked chars, etc...)
+	ld   a, [wDipSwitch]
+	call ModeSelect_Serial_SendAndWait
+	
+	ld   a, [wModeSelectTmpSerialData]		; Restore RecByte
+	ret  
+	
+; =============== ModeSelect_GetCtrlFromSerial ===============
+; Listens to the serial port to check if the other player selected a VS mode.
+; If so, it syncs up the options.
+; OUT
+; - A: Action id (MODESELECT_SBCMD_*) received by master, if it's there
+ModeSelect_GetCtrlFromSerial:
+	; If we were sent a VS Mode option ID, also listen to the next two settings bytes.
+	ld   a, [wSerialDataReceiveBuffer] ; A = Value from master
+	cp   MODESELECT_SBCMD_TEAMVS			
+	jr   z, .receiveVSData
+	cp   MODESELECT_SBCMD_SINGLEVS
+	jr   z, .receiveVSData
+	; Otherwise, nothing happened.
+	ret
+.receiveVSData:
+	; Save what we were sent here
+	ld   [wModeSelectTmpSerialData], a		; Save temp MODESELECT_ACT_*
+	
+	; Set ourselves as slave, since we're on the receiving end.
+	ld   hl, wMisc_C025
+	set  MISCB_SERIAL_MODE, [hl]
+	set  MISCB_SERIAL_PL2_SLAVE, [hl]
+	
+	; [Slave 2/3] Wait for the other GB to send wMatchStartTime
 	xor  a
-	ld   [wSerial_Unknown_Done], a
-	call L1C5092
-L1C50EE: db $FA;X
-L1C50EF: db $3E;X
-L1C50F0: db $C0;X
-L1C50F1: db $EA;X
-L1C50F2: db $02;X
-L1C50F3: db $C0;X
-L1C50F4: db $AF;X
-L1C50F5: db $EA;X
-L1C50F6: db $46;X
-L1C50F7: db $C1;X
-L1C50F8: db $CD;X
-L1C50F9: db $92;X
-L1C50FA: db $50;X
-L1C50FB: db $FA;X
-L1C50FC: db $3E;X
-L1C50FD: db $C0;X
-L1C50FE: db $EA;X
-L1C50FF: db $00;X
-L1C5100: db $C0;X
-L1C5101: db $FA;X
-L1C5102: db $45;X
-L1C5103: db $C1;X
-L1C5104: db $C9;X
-L1C5105:;I
-	ld   hl, $5D31
-	ld   de, Tiles_Begin
+	ld   [wSerialTransferDone], a
+	call ModeSelect_Serial_Wait
+	ld   a, [wSerialDataReceiveBuffer]
+	ld   [wMatchStartTime], a
+	
+	; [Slave 3/3] Wait for the other GB to send wDipSwitch
+	xor  a
+	ld   [wSerialTransferDone], a
+	call ModeSelect_Serial_Wait
+	ld   a, [wSerialDataReceiveBuffer]
+	ld   [wDipSwitch], a
+	
+	; Return the action ID
+	ld   a, [wModeSelectTmpSerialData]		; Restore MODESELECT_ACT_* value
+	ret  
+
+; =============== Title_LoadVRAM ===============
+; Loads tilemaps and GFX for the title screen.
+; The menus load the 1bpp text over this, and reuse the cursor already loaded here.
+Title_LoadVRAM:
+	; Title screen & menu sprites
+	ld   hl, GFXAuto_TitleOBJ 
+	ld   de, Tiles_Begin		
 	call CopyTilesAutoNum
-	ld   hl, $5C23
-	ld   de, $C1DA
+	
+	; wLZSS_Buffer offset by $10 since a SGB packet got copied at the start of the buffer.
+	
+	; KOF96 Title logo tilemap
+	ld   hl, BGLZ_Title_Logo
+	ld   de, wLZSS_Buffer+$10
 	call DecompressLZSS
-	ld   de, $C1DA
+	ld   de, wLZSS_Buffer+$10
 	ld   hl, WINDOWMap_Begin
 	ld   b, $14
 	ld   c, $0F
 	call CopyBGToRect
-	ld   hl, $5819
-	ld   de, $C1DA
+	
+	; Title screen logo GFX (2 parts)
+	ld   hl, GFXLZ_Title_Logo1
+	ld   de, wLZSS_Buffer+$10
 	call DecompressLZSS
-	ld   hl, $C1DA
-	ld   de, $8800
+	ld   hl, wLZSS_Buffer+$10
+	ld   de, $8800				; Block 2
 	ld   b, $80
 	call CopyTiles
-	ld   hl, $51C1
-	ld   de, $C1DA
+	
+	ld   hl, GFXLZ_Title_Logo0
+	ld   de, wLZSS_Buffer+$10
 	call DecompressLZSS
-	ld   hl, $C1DA
-	ld   de, $9000
+	ld   hl, wLZSS_Buffer+$10
+	ld   de, $9000				; Block 3
 	ld   b, $80
 	call CopyTiles
-	ld   de, $5D25
-	ld   hl, BGMap_Begin
-	ld   b, $04
-	ld   c, $03
+	
+	; Tilemap in BG layer for cloud parallax, repeated to fill the tilemap's width
+I = 0
+REPT 8
+	ld   de, BG_Title_Clouds
+	ld   hl, BGMap_Begin+($04*I)
+	ld   b, $04	; 4 tiles width * 8 = $20 (tilemap length)
+	ld   c, $03 ; 3 tiles tall
 	call CopyBGToRect
-	ld   de, $5D25
-	ld   hl, $9804
-	ld   b, $04
-	ld   c, $03
-	call CopyBGToRect
-	ld   de, $5D25
-	ld   hl, $9808
-	ld   b, $04
-	ld   c, $03
-	call CopyBGToRect
-	ld   de, $5D25
-	ld   hl, $980C
-	ld   b, $04
-	ld   c, $03
-	call CopyBGToRect
-	ld   de, $5D25
-	ld   hl, $9810
-	ld   b, $04
-	ld   c, $03
-	call CopyBGToRect
-	ld   de, $5D25
-	ld   hl, $9814
-	ld   b, $04
-	ld   c, $03
-	call CopyBGToRect
-	ld   de, $5D25
-	ld   hl, $9818
-	ld   b, $04
-	ld   c, $03
-	call CopyBGToRect
-	ld   de, $5D25
-	ld   hl, $981C
-	ld   b, $04
-	ld   c, $03
-	call CopyBGToRect
+I = I + 1
+ENDR
 	ret
-L1C51B5:;I
-	ld   hl, $C1DA
-	ld   de, $9000
-	ld   b, $80
-	call L000E7D
+	
+; =============== Title_LoadVRAM_Mini ===============
+; Loads the title screen GFX which were overwritten by the 1bpp font.
+Title_LoadVRAM_Mini:
+	; Title screen logo GFX (2nd part, at $9000)
+	
+	; This takes advantage that GFXLZ_Title_Logo0 was the last LZSS data to be decompressed.
+	; As a result, the decompressed copy is still stored in the buffer.
+
+	ld   hl, wLZSS_Buffer+$10	; HL = Source
+	ld   de, $9000				; DE = Destination
+	ld   b, $80					; B = Tiles to copy
+	call CopyTilesHBlank
 	ret
-L1C51C1: db $B4
-L1C51C2: db $80
-L1C51C3: db $7D
-L1C51C4: db $00
-L1C51C5: db $03
-L1C51C6: db $03
-L1C51C7: db $03
-L1C51C8: db $03
-L1C51C9: db $00
-L1C51CA: db $88
-L1C51CB: db $04
-L1C51CC: db $55
-L1C51CD: db $54
-L1C51CE: db $04
-L1C51CF: db $AA
-L1C51D0: db $04
-L1C51D1: db $75
-L1C51D2: db $04
-L1C51D3: db $FB
-L1C51D4: db $04
-L1C51D5: db $6D
-L1C51D6: db $FF
-L1C51D7: db $06
-L1C51D8: db $01
-L1C51D9: db $28
-L1C51DA: db $3F
-L1C51DB: db $04
-L1C51DC: db $D5
-L1C51DD: db $04
-L1C51DE: db $50
-L1C51DF: db $FA
-L1C51E0: db $04
-L1C51E1: db $FD
-L1C51E2: db $3E
-L1C51E3: db $F7
-L1C51E4: db $08
-L1C51E5: db $EB
-L1C51E6: db $14
-L1C51E7: db $7A
-L1C51E8: db $55
-L1C51E9: db $38
-L1C51EA: db $00
-L1C51EB: db $08
-L1C51EC: db $4C
-L1C51ED: db $AB
-L1C51EE: db $9C
-L1C51EF: db $77
-L1C51F0: db $9C
-L1C51F1: db $83
-L1C51F2: db $DF
-L1C51F3: db $20
-L1C51F4: db $20
-L1C51F5: db $28
-L1C51F6: db $3F
-L1C51F7: db $45
-L1C51F8: db $BA
-L1C51F9: db $75
-L1C51FA: db $02
-L1C51FB: db $7B
-L1C51FC: db $C3
-L1C51FD: db $00
-L1C51FE: db $11
-L1C51FF: db $BE
-L1C5200: db $5D
-L1C5201: db $33
-L1C5202: db $D7
-L1C5203: db $3B
-L1C5204: db $00
-L1C5205: db $80
-L1C5206: db $04
-L1C5207: db $51
-L1C5208: db $3E
-L1C5209: db $80
-L1C520A: db $0E
-L1C520B: db $6E
-L1C520C: db $DD
-L1C520D: db $3E
-L1C520E: db $0C
-L1C520F: db $22
-L1C5210: db $AD
-L1C5211: db $BF
-L1C5212: db $BF
-L1C5213: db $01
-L1C5214: db $7D
-L1C5215: db $FE
-L1C5216: db $41
-L1C5217: db $45
-L1C5218: db $10
-L1C5219: db $18
-L1C521A: db $AC
-L1C521B: db $A2
-L1C521C: db $4F
-L1C521D: db $9A
-L1C521E: db $0D
-L1C521F: db $15
-L1C5220: db $EA
-L1C5221: db $4D
-L1C5222: db $45
-L1C5223: db $04
-L1C5224: db $04
-L1C5225: db $8A
-L1C5226: db $FA
-L1C5227: db $04
-L1C5228: db $28
-L1C5229: db $04
-L1C522A: db $34
-L1C522B: db $0E
-L1C522C: db $AE
-L1C522D: db $04
-L1C522E: db $7F
-L1C522F: db $BF
-L1C5230: db $04
-L1C5231: db $20
-L1C5232: db $04
-L1C5233: db $F4
-L1C5234: db $2F
-L1C5235: db $0E
-L1C5236: db $94
-L1C5237: db $04
-L1C5238: db $7F
-L1C5239: db $BE
-L1C523A: db $3E
-L1C523B: db $7C
-L1C523C: db $03
-L1C523D: db $03
-L1C523E: db $03
-L1C523F: db $03
-L1C5240: db $44
-L1C5241: db $7D
-L1C5242: db $40
-L1C5243: db $04
-L1C5244: db $F8
-L1C5245: db $7F
-L1C5246: db $BF
-L1C5247: db $04
-L1C5248: db $DD
-L1C5249: db $7D
-L1C524A: db $BD
-L1C524B: db $3E
-L1C524C: db $A8
-L1C524D: db $3F
-L1C524E: db $0F
-L1C524F: db $3F
-L1C5250: db $02
-L1C5251: db $08
-L1C5252: db $00
-L1C5253: db $48
-L1C5254: db $0E
-L1C5255: db $00
-L1C5256: db $07
-L1C5257: db $05
-L1C5258: db $04
-L1C5259: db $04
-L1C525A: db $03
-L1C525B: db $02
-L1C525C: db $FA
-L1C525D: db $05
-L1C525E: db $3F
-L1C525F: db $01
-L1C5260: db $8C
-L1C5261: db $00
-L1C5262: db $60
-L1C5263: db $00
-L1C5264: db $70
-L1C5265: db $02
-L1C5266: db $50
-L1C5267: db $78
-L1C5268: db $48
-L1C5269: db $7C
-L1C526A: db $44
-L1C526B: db $06
-L1C526C: db $00
-L1C526D: db $0F
-L1C526E: db $48
-L1C526F: db $09
-L1C5270: db $05
-L1C5271: db $1F
-L1C5272: db $10
-L1C5273: db $05
-L1C5274: db $3F
-L1C5275: db $20
-L1C5276: db $31
-L1C5277: db $CB
-L1C5278: db $04
-L1C5279: db $5D
-L1C527A: db $3E
-L1C527B: db $22
-L1C527C: db $1C
-L1C527D: db $21
-L1C527E: db $25
-L1C527F: db $05
-L1C5280: db $3F
-L1C5281: db $9F
-L1C5282: db $90
-L1C5283: db $E8
-L1C5284: db $80
-L1C5285: db $04
-L1C5286: db $4C
-L1C5287: db $F9
-L1C5288: db $45
-L1C5289: db $7F
-L1C528A: db $80
-L1C528B: db $03
-L1C528C: db $1C
-L1C528D: db $07
-L1C528E: db $05
-L1C528F: db $03
-L1C5290: db $03
-L1C5291: db $4B
-L1C5292: db $03
-L1C5293: db $C1
-L1C5294: db $41
-L1C5295: db $C3
-L1C5296: db $42
-L1C5297: db $67
-L1C5298: db $24
-L1C5299: db $37
-L1C529A: db $01
-L1C529B: db $B8
-L1C529C: db $95
-L1C529D: db $C0
-L1C529E: db $01
-L1C529F: db $0D
-L1C52A0: db $06
-L1C52A1: db $2F
-L1C52A2: db $28
-L1C52A3: db $1F
-L1C52A4: db $AA
-L1C52A5: db $D4
-L1C52A6: db $0F
-L1C52A7: db $3C
-L1C52A8: db $07
-L1C52A9: db $04
-L1C52AA: db $03
-L1C52AB: db $06
-L1C52AC: db $01
-L1C52AD: db $F8
-L1C52AE: db $04
-L1C52AF: db $88
-L1C52B0: db $04
-L1C52B1: db $45
-L1C52B2: db $94
-L1C52B3: db $43
-L1C52B4: db $CF
-L1C52B5: db $4C
-L1C52B6: db $3C
-L1C52B7: db $FF
-L1C52B8: db $70
-L1C52B9: db $04
-L1C52BA: db $1C
-L1C52BB: db $04
-L1C52BC: db $38
-L1C52BD: db $6F
-L1C52BE: db $93
-L1C52BF: db $3D
-L1C52C0: db $AF
-L1C52C1: db $50
-L1C52C2: db $B7
-L1C52C3: db $03
-L1C52C4: db $03
-L1C52C5: db $01
-L1C52C6: db $20
-L1C52C7: db $00
-L1C52C8: db $6F
-L1C52C9: db $E0
-L1C52CA: db $00
-L1C52CB: db $D7
-L1C52CC: db $80
-L1C52CD: db $02
-L1C52CE: db $35
-L1C52CF: db $84
-L1C52D0: db $01
-L1C52D1: db $FF
-L1C52D2: db $53
-L1C52D3: db $03
-L1C52D4: db $03
-L1C52D5: db $3F
-L1C52D6: db $1B
-L1C52D7: db $03
-L1C52D8: db $03
-L1C52D9: db $00
-L1C52DA: db $4A
-L1C52DB: db $FE
-L1C52DC: db $00
-L1C52DD: db $FC
-L1C52DE: db $04
-L1C52DF: db $15
-L1C52E0: db $03
-L1C52E1: db $00
-L1C52E2: db $07
-L1C52E3: db $AA
-L1C52E4: db $02
-L1C52E5: db $0F
-L1C52E6: db $00
-L1C52E7: db $1B
-L1C52E8: db $00
-L1C52E9: db $17
-L1C52EA: db $00
-L1C52EB: db $27
-L1C52EC: db $AE
-L1C52ED: db $00
-L1C52EE: db $CF
-L1C52EF: db $00
-L1C52F0: db $F0
-L1C52F1: db $00
-L1C52F2: db $EF
-L1C52F3: db $01
-L1C52F4: db $0C
-L1C52F5: db $1B
-L1C52F6: db $08
-L1C52F7: db $DE
-L1C52F8: db $D8
-L1C52F9: db $7C
-L1C52FA: db $2C
-L1C52FB: db $2F
-L1C52FC: db $00
-L1C52FD: db $65
-L1C52FE: db $B7
-L1C52FF: db $03
-L1C5300: db $0B
-L1C5301: db $00
-L1C5302: db $9D
-L1C5303: db $01
-L1C5304: db $02
-L1C5305: db $45
-L1C5306: db $04
-L1C5307: db $5D
-L1C5308: db $F8
-L1C5309: db $04
-L1C530A: db $E0
-L1C530B: db $05
-L1C530C: db $E8
-L1C530D: db $1C
-L1C530E: db $FF
-L1C530F: db $1C
-L1C5310: db $2F
-L1C5311: db $7F
-L1C5312: db $7E
-L1C5313: db $04
-L1C5314: db $78
-L1C5315: db $1C
-L1C5316: db $9C
-L1C5317: db $1C
-L1C5318: db $04
-L1C5319: db $77
-L1C531A: db $43
-L1C531B: db $BB
-L1C531C: db $03
-L1C531D: db $00
-L1C531E: db $60
-L1C531F: db $00
-L1C5320: db $0D
-L1C5321: db $88
-L1C5322: db $D6
-L1C5323: db $04
-L1C5324: db $F9
-L1C5325: db $C0
-L1C5326: db $04
-L1C5327: db $40
-L1C5328: db $2D
-L1C5329: db $04
-L1C532A: db $20
-L1C532B: db $AB
-L1C532C: db $04
-L1C532D: db $21
-L1C532E: db $04
-L1C532F: db $7C
-L1C5330: db $00
-L1C5331: db $3C
-L1C5332: db $00
-L1C5333: db $67
-L1C5334: db $F5
-L1C5335: db $4F
-L1C5336: db $05
-L1C5337: db $15
-L1C5338: db $4D
-L1C5339: db $38
-L1C533A: db $04
-L1C533B: db $0E
-L1C533C: db $04
-L1C533D: db $6A
-L1C533E: db $03
-L1C533F: db $96
-L1C5340: db $03
-L1C5341: db $10
-L1C5342: db $04
-L1C5343: db $61
-L1C5344: db $04
-L1C5345: db $EB
-L1C5346: db $B7
-L1C5347: db $04
-L1C5348: db $FE
-L1C5349: db $04
-L1C534A: db $89
-L1C534B: db $08
-L1C534C: db $41
-L1C534D: db $4A
-L1C534E: db $7C
-L1C534F: db $80
-L1C5350: db $0D
-L1C5351: db $F8
-L1C5352: db $06
-L1C5353: db $F6
-L1C5354: db $07
-L1C5355: db $67
-L1C5356: db $1F
-L1C5357: db $DF
-L1C5358: db $80
-L1C5359: db $8C
-L1C535A: db $CE
-L1C535B: db $3F
-L1C535C: db $BF
-L1C535D: db $3B
-L1C535E: db $BB
-L1C535F: db $1E
-L1C5360: db $9E
-L1C5361: db $07
-L1C5362: db $E0
-L1C5363: db $13
-L1C5364: db $F0
-L1C5365: db $0F
-L1C5366: db $70
-L1C5367: db $04
-L1C5368: db $14
-L1C5369: db $40
-L1C536A: db $E0
-L1C536B: db $14
-L1C536C: db $40
-L1C536D: db $61
-L1C536E: db $F1
-L1C536F: db $0D
-L1C5370: db $69
-L1C5371: db $15
-L1C5372: db $7F
-L1C5373: db $AE
-L1C5374: db $00
-L1C5375: db $7D
-L1C5376: db $00
-L1C5377: db $71
-L1C5378: db $00
-L1C5379: db $6C
-L1C537A: db $00
-L1C537B: db $E3
-L1C537C: db $AA
-L1C537D: db $00
-L1C537E: db $F3
-L1C537F: db $00
-L1C5380: db $B6
-L1C5381: db $00
-L1C5382: db $B7
-L1C5383: db $00
-L1C5384: db $C7
-L1C5385: db $83
-L1C5386: db $C0
-L1C5387: db $30
-L1C5388: db $37
-L1C5389: db $B0
-L1C538A: db $B1
-L1C538B: db $7C
-L1C538C: db $4C
-L1C538D: db $05
-L1C538E: db $0B
-L1C538F: db $EC
-L1C5390: db $ED
-L1C5391: db $D8
-L1C5392: db $D9
-L1C5393: db $04
-L1C5394: db $DB
-L1C5395: db $94
-L1C5396: db $3C
-L1C5397: db $26
-L1C5398: db $05
-L1C5399: db $F5
-L1C539A: db $FC
-L1C539B: db $F7
-L1C539C: db $0C
-L1C539D: db $30
-L1C539E: db $C8
-L1C539F: db $EF
-L1C53A0: db $6A
-L1C53A1: db $19
-L1C53A2: db $34
-L1C53A3: db $D0
-L1C53A4: db $DF
-L1C53A5: db $FC
-L1C53A6: db $DE
-L1C53A7: db $6D
-L1C53A8: db $B4
-L1C53A9: db $60
-L1C53AA: db $B5
-L1C53AB: db $65
-L1C53AC: db $54
-L1C53AD: db $F9
-L1C53AE: db $E0
-L1C53AF: db $E6
-L1C53B0: db $60
-L1C53B1: db $6E
-L1C53B2: db $A0
-L1C53B3: db $05
-L1C53B4: db $E1
-L1C53B5: db $24
-L1C53B6: db $3B
-L1C53B7: db $BB
-L1C53B8: db $3C
-L1C53B9: db $BC
-L1C53BA: db $62
-L1C53BB: db $EF
-L1C53BC: db $00
-L1C53BD: db $20
-L1C53BE: db $00
-L1C53BF: db $D5
-L1C53C0: db $00
-L1C53C1: db $18
-L1C53C2: db $00
-L1C53C3: db $F5
-L1C53C4: db $7F
-L1C53C5: db $9D
-L1C53C6: db $00
-L1C53C7: db $B8
-L1C53C8: db $00
-L1C53C9: db $C8
-L1C53CA: db $00
-L1C53CB: db $98
-L1C53CC: db $00
-L1C53CD: db $55
-L1C53CE: db $93
-L1C53CF: db $00
-L1C53D0: db $BF
-L1C53D1: db $00
-L1C53D2: db $B3
-L1C53D3: db $00
-L1C53D4: db $3F
-L1C53D5: db $00
-L1C53D6: db $5C
-L1C53D7: db $7E
-L1C53D8: db $00
-L1C53D9: db $7F
-L1C53DA: db $3C
-L1C53DB: db $10
-L1C53DC: db $04
-L1C53DD: db $9F
-L1C53DE: db $A0
-L1C53DF: db $D5
-L1C53E0: db $05
-L1C53E1: db $FC
-L1C53E2: db $30
-L1C53E3: db $04
-L1C53E4: db $71
-L1C53E5: db $04
-L1C53E6: db $73
-L1C53E7: db $04
-L1C53E8: db $2A
-L1C53E9: db $70
-L1C53EA: db $06
-L1C53EB: db $00
-L1C53EC: db $56
-L1C53ED: db $00
-L1C53EE: db $FC
-L1C53EF: db $00
-L1C53F0: db $AC
-L1C53F1: db $00
-L1C53F2: db $AD
-L1C53F3: db $78
-L1C53F4: db $79
-L1C53F5: db $58
-L1C53F6: db $5B
-L1C53F7: db $F0
-L1C53F8: db $F3
-L1C53F9: db $F1
-L1C53FA: db $78
-L1C53FB: db $F6
-L1C53FC: db $44
-L1C53FD: db $10
-L1C53FE: db $04
-L1C53FF: db $10
-L1C5400: db $1E
-L1C5401: db $E2
-L1C5402: db $1C
-L1C5403: db $00
-L1C5404: db $E4
-L1C5405: db $38
-L1C5406: db $C8
-L1C5407: db $3E
-L1C5408: db $DE
-L1C5409: db $7C
-L1C540A: db $84
-L1C540B: db $F8
-L1C540C: db $60
-L1C540D: db $08
-L1C540E: db $05
-L1C540F: db $40
-L1C5410: db $10
-L1C5411: db $E0
-L1C5412: db $20
-L1C5413: db $C0
-L1C5414: db $40
-L1C5415: db $7F
-L1C5416: db $80
-L1C5417: db $00
-L1C5418: db $D8
-L1C5419: db $00
-L1C541A: db $1C
-L1C541B: db $00
-L1C541C: db $1F
-L1C541D: db $1D
-L1C541E: db $FF
-L1C541F: db $03
-L1C5420: db $03
-L1C5421: db $03
-L1C5422: db $03
-L1C5423: db $03
-L1C5424: db $03
-L1C5425: db $A0
-L1C5426: db $00
-L1C5427: db $45
-L1C5428: db $30
-L1C5429: db $A4
-L1C542A: db $BF
-L1C542B: db $BC
-L1C542C: db $1F
-L1C542D: db $00
-L1C542E: db $07
-L1C542F: db $00
-L1C5430: db $FD
-L1C5431: db $37
-L1C5432: db $03
-L1C5433: db $03
-L1C5434: db $03
-L1C5435: db $03
-L1C5436: db $00
-L1C5437: db $01
-L1C5438: db $06
-L1C5439: db $6F
-L1C543A: db $03
-L1C543B: db $F9
-L1C543C: db $05
-L1C543D: db $FF
-L1C543E: db $00
-L1C543F: db $3B
-L1C5440: db $03
-L1C5441: db $01
-L1C5442: db $5F
-L1C5443: db $1C
-L1C5444: db $04
-L1C5445: db $3C
-L1C5446: db $3F
-L1C5447: db $03
-L1C5448: db $03
-L1C5449: db $25
-L1C544A: db $8E
-L1C544B: db $A8
-L1C544C: db $04
-L1C544D: db $06
-L1C544E: db $10
-L1C544F: db $0C
-L1C5450: db $10
-L1C5451: db $38
-L1C5452: db $07
-L1C5453: db $E0
-L1C5454: db $5F
-L1C5455: db $1F
-L1C5456: db $20
-L1C5457: db $7F
-L1C5458: db $45
-L1C5459: db $B8
-L1C545A: db $0D
-L1C545B: db $51
-L1C545C: db $07
-L1C545D: db $D7
-L1C545E: db $07
-L1C545F: db $05
-L1C5460: db $7D
-L1C5461: db $68
-L1C5462: db $7E
-L1C5463: db $BF
-L1C5464: db $03
-L1C5465: db $03
-L1C5466: db $AF
-L1C5467: db $24
-L1C5468: db $26
-L1C5469: db $00
-L1C546A: db $49
-L1C546B: db $3F
-L1C546C: db $03
-L1C546D: db $03
-L1C546E: db $25
-L1C546F: db $01
-L1C5470: db $18
-L1C5471: db $E7
-L1C5472: db $10
-L1C5473: db $C7
-L1C5474: db $30
-L1C5475: db $CF
-L1C5476: db $20
-L1C5477: db $05
-L1C5478: db $0D
-L1C5479: db $8F
-L1C547A: db $60
-L1C547B: db $9F
-L1C547C: db $40
-L1C547D: db $05
-L1C547E: db $4B
-L1C547F: db $FE
-L1C5480: db $CC
-L1C5481: db $02
-L1C5482: db $FC
-L1C5483: db $03
-L1C5484: db $F8
-L1C5485: db $06
-L1C5486: db $F0
-L1C5487: db $0C
-L1C5488: db $04
-L1C5489: db $08
-L1C548A: db $47
-L1C548B: db $E0
-L1C548C: db $74
-L1C548D: db $CD
-L1C548E: db $C1
-L1C548F: db $1E
-L1C5490: db $BF
-L1C5491: db $03
-L1C5492: db $03
-L1C5493: db $DF
-L1C5494: db $48
-L1C5495: db $01
-L1C5496: db $07
-L1C5497: db $3F
-L1C5498: db $03
-L1C5499: db $03
-L1C549A: db $01
-L1C549B: db $D4
-L1C549C: db $A4
-L1C549D: db $B0
-L1C549E: db $C0
-L1C549F: db $44
-L1C54A0: db $80
-L1C54A1: db $04
-L1C54A2: db $BC
-L1C54A3: db $14
-L1C54A4: db $13
-L1C54A5: db $01
-L1C54A6: db $36
-L1C54A7: db $31
-L1C54A8: db $73
-L1C54A9: db $70
-L1C54AA: db $E6
-L1C54AB: db $E1
-L1C54AC: db $0F
-L1C54AD: db $40
-L1C54AE: db $0E
-L1C54AF: db $FA
-L1C54B0: db $05
-L1C54B1: db $27
-L1C54B2: db $D8
-L1C54B3: db $44
-L1C54B4: db $F8
-L1C54B5: db $05
-L1C54B6: db $49
-L1C54B7: db $21
-L1C54B8: db $B6
-L1C54B9: db $C9
-L1C54BA: db $48
-L1C54BB: db $1F
-L1C54BC: db $E0
-L1C54BD: db $A7
-L1C54BE: db $A0
-L1C54BF: db $45
-L1C54C0: db $F5
-L1C54C1: db $BF
-L1C54C2: db $03
-L1C54C3: db $03
-L1C54C4: db $F8
-L1C54C5: db $10
-L1C54C6: db $48
-L1C54C7: db $20
-L1C54C8: db $C0
-L1C54C9: db $FD
-L1C54CA: db $00
-L1C54CB: db $27
-L1C54CC: db $03
-L1C54CD: db $01
-L1C54CE: db $E8
-L1C54CF: db $04
-L1C54D0: db $BC
-L1C54D1: db $04
-L1C54D2: db $09
-L1C54D3: db $E7
-L1C54D4: db $18
-L1C54D5: db $82
-L1C54D6: db $7D
-L1C54D7: db $05
-L1C54D8: db $CF
-L1C54D9: db $30
-L1C54DA: db $CD
-L1C54DB: db $38
-L1C54DC: db $04
-L1C54DD: db $FB
-L1C54DE: db $45
-L1C54DF: db $14
-L1C54E0: db $04
-L1C54E1: db $C4
-L1C54E2: db $03
-L1C54E3: db $7C
-L1C54E4: db $42
-L1C54E5: db $83
-L1C54E6: db $F5
-L1C54E7: db $CB
-L1C54E8: db $34
-L1C54E9: db $8E
-L1C54EA: db $71
-L1C54EB: db $B0
-L1C54EC: db $EF
-L1C54ED: db $C4
-L1C54EE: db $24
-L1C54EF: db $34
-L1C54F0: db $D5
-L1C54F1: db $28
-L1C54F2: db $3F
-L1C54F3: db $BC
-L1C54F4: db $3C
-L1C54F5: db $C3
-L1C54F6: db $80
-L1C54F7: db $05
-L1C54F8: db $4E
-L1C54F9: db $B1
-L1C54FA: db $4C
-L1C54FB: db $B3
-L1C54FC: db $F9
-L1C54FD: db $06
-L1C54FE: db $01
-L1C54FF: db $BC
-L1C5500: db $3C
-L1C5501: db $E1
-L1C5502: db $04
-L1C5503: db $3D
-L1C5504: db $5D
-L1C5505: db $05
-L1C5506: db $3E
-L1C5507: db $C1
-L1C5508: db $9B
-L1C5509: db $4D
-L1C550A: db $21
-L1C550B: db $DE
-L1C550C: db $BD
-L1C550D: db $03
-L1C550E: db $0F
-L1C550F: db $00
-L1C5510: db $D5
-L1C5511: db $E1
-L1C5512: db $65
-L1C5513: db $04
-L1C5514: db $02
-L1C5515: db $30
-L1C5516: db $20
-L1C5517: db $74
-L1C5518: db $44
-L1C5519: db $05
-L1C551A: db $10
-L1C551B: db $FF
-L1C551C: db $80
-L1C551D: db $FE
-L1C551E: db $34
-L1C551F: db $54
-L1C5520: db $A8
-L1C5521: db $A9
-L1C5522: db $51
-L1C5523: db $08
-L1C5524: db $53
-L1C5525: db $A3
-L1C5526: db $F2
-L1C5527: db $03
-L1C5528: db $0C
-L1C5529: db $A2
-L1C552A: db $F6
-L1C552B: db $04
-L1C552C: db $47
-L1C552D: db $40
-L1C552E: db $3C
-L1C552F: db $43
-L1C5530: db $83
-L1C5531: db $C4
-L1C5532: db $14
-L1C5533: db $10
-L1C5534: db $4C
-L1C5535: db $C3
-L1C5536: db $04
-L1C5537: db $0C
-L1C5538: db $A6
-L1C5539: db $56
-L1C553A: db $16
-L1C553B: db $26
-L1C553C: db $78
-L1C553D: db $68
-L1C553E: db $DF
-L1C553F: db $2C
-L1C5540: db $00
-L1C5541: db $E4
-L1C5542: db $00
-L1C5543: db $A0
-L1C5544: db $00
-L1C5545: db $E2
-L1C5546: db $49
-L1C5547: db $E0
-L1C5548: db $03
-L1C5549: db $02
-L1C554A: db $E5
-L1C554B: db $C3
-L1C554C: db $C2
-L1C554D: db $87
-L1C554E: db $84
-L1C554F: db $0F
-L1C5550: db $62
-L1C5551: db $08
-L1C5552: db $1D
-L1C5553: db $0C
-L1C5554: db $0E
-L1C5555: db $3F
-L1C5556: db $30
-L1C5557: db $FC
-L1C5558: db $C0
-L1C5559: db $D4
-L1C555A: db $04
-L1C555B: db $44
-L1C555C: db $FC
-L1C555D: db $E4
-L1C555E: db $F3
-L1C555F: db $28
-L1C5560: db $EC
-L1C5561: db $1C
-L1C5562: db $20
-L1C5563: db $17
-L1C5564: db $18
-L1C5565: db $05
-L1C5566: db $2B
-L1C5567: db $34
-L1C5568: db $35
-L1C5569: db $2A
-L1C556A: db $4A
-L1C556B: db $02
-L1C556C: db $75
-L1C556D: db $25
-L1C556E: db $7A
-L1C556F: db $D3
-L1C5570: db $FD
-L1C5571: db $E9
-L1C5572: db $58
-L1C5573: db $D0
-L1C5574: db $86
-L1C5575: db $6C
-L1C5576: db $A3
-L1C5577: db $63
-L1C5578: db $C6
-L1C5579: db $46
-L1C557A: db $00
-L1C557B: db $08
-L1C557C: db $8C
-L1C557D: db $FF
-L1C557E: db $02
-L1C557F: db $70
-L1C5580: db $00
-L1C5581: db $DD
-L1C5582: db $94
-L1C5583: db $00
-L1C5584: db $48
-L1C5585: db $9C
-L1C5586: db $F0
-L1C5587: db $AD
-L1C5588: db $07
-L1C5589: db $D4
-L1C558A: db $CC
-L1C558B: db $DF
-L1C558C: db $E0
-L1C558D: db $5F
-L1C558E: db $60
-L1C558F: db $D0
-L1C5590: db $45
-L1C5591: db $01
-L1C5592: db $84
-L1C5593: db $00
-L1C5594: db $C2
-L1C5595: db $42
-L1C5596: db $E3
-L1C5597: db $23
-L1C5598: db $0B
-L1C5599: db $E1
-L1C559A: db $21
-L1C559B: db $F1
-L1C559C: db $11
-L1C559D: db $05
-L1C559E: db $2F
-L1C559F: db $BC
-L1C55A0: db $07
-L1C55A1: db $F0
-L1C55A2: db $07
-L1C55A3: db $05
-L1C55A4: db $75
-L1C55A5: db $05
-L1C55A6: db $F0
-L1C55A7: db $10
-L1C55A8: db $F8
-L1C55A9: db $08
-L1C55AA: db $FF
-L1C55AB: db $07
-L1C55AC: db $1C
-L1C55AD: db $06
-L1C55AE: db $14
-L1C55AF: db $A4
-L1C55B0: db $05
-L1C55B1: db $03
-L1C55B2: db $03
-L1C55B3: db $AE
-L1C55B4: db $03
-L1C55B5: db $80
-L1C55B6: db $02
-L1C55B7: db $C0
-L1C55B8: db $03
-L1C55B9: db $02
-L1C55BA: db $3A
-L1C55BB: db $FC
-L1C55BC: db $CF
-L1C55BD: db $10
-L1C55BE: db $C4
-L1C55BF: db $01
-L1C55C0: db $C1
-L1C55C1: db $5F
-L1C55C2: db $03
-L1C55C3: db $03
-L1C55C4: db $01
-L1C55C5: db $6F
-L1C55C6: db $E0
-L1C55C7: db $00
-L1C55C8: db $08
-L1C55C9: db $07
-L1C55CA: db $1F
-L1C55CB: db $03
-L1C55CC: db $03
-L1C55CD: db $02
-L1C55CE: db $5F
-L1C55CF: db $FF
-L1C55D0: db $13
-L1C55D1: db $7F
-L1C55D2: db $00
-L1C55D3: db $17
-L1C55D4: db $03
-L1C55D5: db $3F
-L1C55D6: db $01
-L1C55D7: db $75
-L1C55D8: db $FE
-L1C55D9: db $15
-L1C55DA: db $E8
-L1C55DB: db $06
-L1C55DC: db $03
-L1C55DD: db $04
-L1C55DE: db $02
-L1C55DF: db $04
-L1C55E0: db $55
-L1C55E1: db $06
-L1C55E2: db $18
-L1C55E3: db $04
-L1C55E4: db $06
-L1C55E5: db $0C
-L1C55E6: db $28
-L1C55E7: db $08
-L1C55E8: db $04
-L1C55E9: db $50
-L1C55EA: db $18
-L1C55EB: db $E8
-L1C55EC: db $10
-L1C55ED: db $05
-L1C55EE: db $1F
-L1C55EF: db $C0
-L1C55F0: db $3F
-L1C55F1: db $80
-L1C55F2: db $F0
-L1C55F3: db $07
-L1C55F4: db $C1
-L1C55F5: db $07
-L1C55F6: db $99
-L1C55F7: db $E1
-L1C55F8: db $11
-L1C55F9: db $C1
-L1C55FA: db $31
-L1C55FB: db $25
-L1C55FC: db $C3
-L1C55FD: db $23
-L1C55FE: db $05
-L1C55FF: db $87
-L1C5600: db $67
-L1C5601: db $48
-L1C5602: db $40
-L1C5603: db $3A
-L1C5604: db $F7
-L1C5605: db $74
-L1C5606: db $E4
-L1C5607: db $A8
-L1C5608: db $05
-L1C5609: db $FC
-L1C560A: db $A8
-L1C560B: db $04
-L1C560C: db $DC
-L1C560D: db $BB
-L1C560E: db $05
-L1C560F: db $F8
-L1C5610: db $E4
-L1C5611: db $04
-L1C5612: db $DC
-L1C5613: db $F0
-L1C5614: db $DC
-L1C5615: db $BD
-L1C5616: db $3C
-L1C5617: db $0F
-L1C5618: db $60
-L1C5619: db $07
-L1C561A: db $B2
-L1C561B: db $28
-L1C561C: db $80
-L1C561D: db $50
-L1C561E: db $47
-L1C561F: db $3F
-L1C5620: db $70
-L1C5621: db $C4
-L1C5622: db $A8
-L1C5623: db $A4
-L1C5624: db $A0
-L1C5625: db $01
-L1C5626: db $2C
-L1C5627: db $03
-L1C5628: db $FA
-L1C5629: db $01
-L1C562A: db $BD
-L1C562B: db $00
-L1C562C: db $F0
-L1C562D: db $7C
-L1C562E: db $E0
-L1C562F: db $22
-L1C5630: db $07
-L1C5631: db $BF
-L1C5632: db $00
-L1C5633: db $7E
-L1C5634: db $00
-L1C5635: db $3F
-L1C5636: db $04
-L1C5637: db $E4
-L1C5638: db $09
-L1C5639: db $07
-L1C563A: db $FA
-L1C563B: db $05
-L1C563C: db $40
-L1C563D: db $E8
-L1C563E: db $05
-L1C563F: db $D5
-L1C5640: db $9F
-L1C5641: db $C8
-L1C5642: db $F8
-L1C5643: db $E9
-L1C5644: db $1A
-L1C5645: db $05
-L1C5646: db $8C
-L1C5647: db $1C
-L1C5648: db $D8
-L1C5649: db $30
-L1C564A: db $CF
-L1C564B: db $5F
-L1C564C: db $8D
-L1C564D: db $04
-L1C564E: db $9C
-L1C564F: db $63
-L1C5650: db $F7
-L1C5651: db $E7
-L1C5652: db $01
-L1C5653: db $1F
-L1C5654: db $04
-L1C5655: db $F3
-L1C5656: db $44
-L1C5657: db $59
-L1C5658: db $05
-L1C5659: db $FC
-L1C565A: db $CE
-L1C565B: db $EF
-L1C565C: db $37
-L1C565D: db $EF
-L1C565E: db $C8
-L1C565F: db $AC
-L1C5660: db $B5
-L1C5661: db $3F
-L1C5662: db $80
-L1C5663: db $58
-L1C5664: db $C0
-L1C5665: db $3E
-L1C5666: db $81
-L1C5667: db $29
-L1C5668: db $7C
-L1C5669: db $03
-L1C566A: db $D4
-L1C566B: db $06
-L1C566C: db $CC
-L1C566D: db $0E
-L1C566E: db $E1
-L1C566F: db $CD
-L1C5670: db $11
-L1C5671: db $28
-L1C5672: db $83
-L1C5673: db $58
-L1C5674: db $45
-L1C5675: db $78
-L1C5676: db $07
-L1C5677: db $70
-L1C5678: db $98
-L1C5679: db $D9
-L1C567A: db $35
-L1C567B: db $A0
-L1C567C: db $1E
-L1C567D: db $3D
-L1C567E: db $04
-L1C567F: db $0C
-L1C5680: db $F3
-L1C5681: db $90
-L1C5682: db $77
-L1C5683: db $93
-L1C5684: db $0C
-L1C5685: db $E1
-L1C5686: db $01
-L1C5687: db $38
-L1C5688: db $00
-L1C5689: db $BE
-L1C568A: db $0A
-L1C568B: db $06
-L1C568C: db $FE
-L1C568D: db $01
-L1C568E: db $23
-L1C568F: db $DC
-L1C5690: db $DE
-L1C5691: db $F7
-L1C5692: db $33
-L1C5693: db $60
-L1C5694: db $E6
-L1C5695: db $98
-L1C5696: db $90
-L1C5697: db $A8
-L1C5698: db $B0
-L1C5699: db $FC
-L1C569A: db $EC
-L1C569B: db $F4
-L1C569C: db $02
-L1C569D: db $F8
-L1C569E: db $C4
-L1C569F: db $F5
-L1C56A0: db $94
-L1C56A1: db $04
-L1C56A2: db $31
-L1C56A3: db $18
-L1C56A4: db $E7
-L1C56A5: db $10
-L1C56A6: db $3F
-L1C56A7: db $C7
-L1C56A8: db $30
-L1C56A9: db $44
-L1C56AA: db $0C
-L1C56AB: db $5C
-L1C56AC: db $C0
-L1C56AD: db $B6
-L1C56AE: db $9C
-L1C56AF: db $D4
-L1C56B0: db $7E
-L1C56B1: db $5C
-L1C56B2: db $F8
-L1C56B3: db $5C
-L1C56B4: db $F1
-L1C56B5: db $5C
-L1C56B6: db $04
-L1C56B7: db $0B
-L1C56B8: db $00
-L1C56B9: db $0D
-L1C56BA: db $12
-L1C56BB: db $1E
-L1C56BC: db $21
-L1C56BD: db $3E
-L1C56BE: db $41
-L1C56BF: db $1D
-L1C56C0: db $E2
-L1C56C1: db $35
-L1C56C2: db $1B
-L1C56C3: db $24
-L1C56C4: db $84
-L1C56C5: db $08
-L1C56C6: db $E4
-L1C56C7: db $2C
-L1C56C8: db $81
-L1C56C9: db $24
-L1C56CA: db $1F
-L1C56CB: db $80
-L1C56CC: db $40
-L1C56CD: db $C0
-L1C56CE: db $3C
-L1C56CF: db $04
-L1C56D0: db $40
-L1C56D1: db $1C
-L1C56D2: db $14
-L1C56D3: db $57
-L1C56D4: db $3F
-L1C56D5: db $20
-L1C56D6: db $7F
-L1C56D7: db $88
-L1C56D8: db $FE
-L1C56D9: db $9C
-L1C56DA: db $99
-L1C56DB: db $B8
-L1C56DC: db $8B
-L1C56DD: db $32
-L1C56DE: db $3C
-L1C56DF: db $83
-L1C56E0: db $7C
-L1C56E1: db $B6
-L1C56E2: db $F0
-L1C56E3: db $B4
-L1C56E4: db $04
-L1C56E5: db $57
-L1C56E6: db $08
-L1C56E7: db $04
-L1C56E8: db $0E
-L1C56E9: db $30
-L1C56EA: db $71
-L1C56EB: db $50
-L1C56EC: db $08
-L1C56ED: db $18
-L1C56EE: db $AB
-L1C56EF: db $00
-L1C56F0: db $38
-L1C56F1: db $00
-L1C56F2: db $70
-L1C56F3: db $00
-L1C56F4: db $60
-L1C56F5: db $00
-L1C56F6: db $C4
-L1C56F7: db $F7
-L1C56F8: db $00
-L1C56F9: db $3C
-L1C56FA: db $00
-L1C56FB: db $80
-L1C56FC: db $0F
-L1C56FD: db $04
-L1C56FE: db $0C
-L1C56FF: db $09
-L1C5700: db $9D
-L1C5701: db $9D
-L1C5702: db $FC
-L1C5703: db $03
-L1C5704: db $A0
-L1C5705: db $98
-L1C5706: db $08
-L1C5707: db $C3
-L1C5708: db $18
-L1C5709: db $FF
-L1C570A: db $D8
-L1C570B: db $04
-L1C570C: db $BD
-L1C570D: db $41
-L1C570E: db $94
-L1C570F: db $F0
-L1C5710: db $74
-L1C5711: db $95
-L1C5712: db $5D
-L1C5713: db $31
-L1C5714: db $00
-L1C5715: db $33
-L1C5716: db $00
-L1C5717: db $38
-L1C5718: db $00
-L1C5719: db $BF
-L1C571A: db $68
-L1C571B: db $54
-L1C571C: db $5F
-L1C571D: db $04
-L1C571E: db $AF
-L1C571F: db $04
-L1C5720: db $97
-L1C5721: db $04
-L1C5722: db $4B
-L1C5723: db $7F
-L1C5724: db $44
-L1C5725: db $25
-L1C5726: db $2C
-L1C5727: db $1A
-L1C5728: db $1F
-L1C5729: db $02
-L1C572A: db $88
-L1C572B: db $84
-L1C572C: db $87
-L1C572D: db $57
-L1C572E: db $FA
-L1C572F: db $2C
-L1C5730: db $FD
-L1C5731: db $04
-L1C5732: db $FE
-L1C5733: db $04
-L1C5734: db $01
-L1C5735: db $0C
-L1C5736: db $D7
-L1C5737: db $02
-L1C5738: db $6C
-L1C5739: db $60
-L1C573A: db $58
-L1C573B: db $40
-L1C573C: db $84
-L1C573D: db $C4
-L1C573E: db $05
-L1C573F: db $FC
-L1C5740: db $30
-L1C5741: db $C0
-L1C5742: db $1C
-L1C5743: db $04
-L1C5744: db $14
-L1C5745: db $24
-L1C5746: db $5C
-L1C5747: db $A0
-L1C5748: db $F5
-L1C5749: db $E4
-L1C574A: db $D8
-L1C574B: db $04
-L1C574C: db $F4
-L1C574D: db $E0
-L1C574E: db $04
-L1C574F: db $E3
-L1C5750: db $94
-L1C5751: db $0E
-L1C5752: db $CF
-L1C5753: db $0C
-L1C5754: db $9F
-L1C5755: db $10
-L1C5756: db $44
-L1C5757: db $6C
-L1C5758: db $55
-L1C5759: db $AB
-L1C575A: db $00
-L1C575B: db $53
-L1C575C: db $57
-L1C575D: db $A4
-L1C575E: db $2B
-L1C575F: db $CC
-L1C5760: db $15
-L1C5761: db $DA
-L1C5762: db $AA
-L1C5763: db $0B
-L1C5764: db $B5
-L1C5765: db $45
-L1C5766: db $7A
-L1C5767: db $A2
-L1C5768: db $D8
-L1C5769: db $D1
-L1C576A: db $D9
-L1C576B: db $6C
-L1C576C: db $C2
-L1C576D: db $08
-L1C576E: db $84
-L1C576F: db $FC
-L1C5770: db $02
-L1C5771: db $F8
-L1C5772: db $04
-L1C5773: db $94
-L1C5774: db $08
-L1C5775: db $B4
-L1C5776: db $70
-L1C5777: db $90
-L1C5778: db $70
-L1C5779: db $08
-L1C577A: db $4F
-L1C577B: db $C8
-L1C577C: db $0F
-L1C577D: db $0E
-L1C577E: db $3D
-L1C577F: db $3F
-L1C5780: db $30
-L1C5781: db $4C
-L1C5782: db $F5
-L1C5783: db $56
-L1C5784: db $4C
-L1C5785: db $06
-L1C5786: db $DC
-L1C5787: db $50
-L1C5788: db $18
-L1C5789: db $20
-L1C578A: db $20
-L1C578B: db $07
-L1C578C: db $C4
-L1C578D: db $24
-L1C578E: db $84
-L1C578F: db $44
-L1C5790: db $DD
-L1C5791: db $80
-L1C5792: db $10
-L1C5793: db $0C
-L1C5794: db $00
-L1C5795: db $88
-L1C5796: db $00
-L1C5797: db $78
-L1C5798: db $00
-L1C5799: db $95
-L1C579A: db $58
-L1C579B: db $C1
-L1C579C: db $07
-L1C579D: db $00
-L1C579E: db $1E
-L1C579F: db $00
-L1C57A0: db $38
-L1C57A1: db $00
-L1C57A2: db $7F
-L1C57A3: db $70
-L1C57A4: db $00
-L1C57A5: db $74
-L1C57A6: db $00
-L1C57A7: db $90
-L1C57A8: db $00
-L1C57A9: db $C4
-L1C57AA: db $00
-L1C57AB: db $FF
-L1C57AC: db $15
-L1C57AD: db $0D
-L1C57AE: db $1D
-L1C57AF: db $03
-L1C57B0: db $03
-L1C57B1: db $03
-L1C57B2: db $03
-L1C57B3: db $03
-L1C57B4: db $F3
-L1C57B5: db $03
-L1C57B6: db $00
-L1C57B7: db $B8
-L1C57B8: db $B0
-L1C57B9: db $30
-L1C57BA: db $0F
-L1C57BB: db $FC
-L1C57BC: db $04
-L1C57BD: db $13
-L1C57BE: db $60
-L1C57BF: db $1F
-L1C57C0: db $40
-L1C57C1: db $06
-L1C57C2: db $C0
-L1C57C3: db $3F
-L1C57C4: db $A4
-L1C57C5: db $05
-L1C57C6: db $D5
-L1C57C7: db $45
-L1C57C8: db $04
-L1C57C9: db $03
-L1C57CA: db $04
-L1C57CB: db $02
-L1C57CC: db $04
-L1C57CD: db $06
-L1C57CE: db $18
-L1C57CF: db $55
-L1C57D0: db $0C
-L1C57D1: db $18
-L1C57D2: db $08
-L1C57D3: db $04
-L1C57D4: db $18
-L1C57D5: db $75
-L1C57D6: db $7F
-L1C57D7: db $28
-L1C57D8: db $AE
-L1C57D9: db $05
-L1C57DA: db $FE
-L1C57DB: db $30
-L1C57DC: db $FC
-L1C57DD: db $28
-L1C57DE: db $04
-L1C57DF: db $4C
-L1C57E0: db $F8
-L1C57E1: db $AF
-L1C57E2: db $4C
-L1C57E3: db $F0
-L1C57E4: db $4C
-L1C57E5: db $E0
-L1C57E6: db $44
-L1C57E7: db $0C
-L1C57E8: db $54
-L1C57E9: db $05
-L1C57EA: db $20
-L1C57EB: db $E1
-L1C57EC: db $19
-L1C57ED: db $04
-L1C57EE: db $11
-L1C57EF: db $C1
-L1C57F0: db $31
-L1C57F1: db $C2
-L1C57F2: db $23
-L1C57F3: db $05
-L1C57F4: db $82
-L1C57F5: db $63
-L1C57F6: db $84
-L1C57F7: db $47
-L1C57F8: db $CF
-L1C57F9: db $48
-L1C57FA: db $8F
-L1C57FB: db $04
-L1C57FC: db $62
-L1C57FD: db $9F
-L1C57FE: db $E4
-L1C57FF: db $EF
-L1C5800: db $3C
-L1C5801: db $83
-L1C5802: db $7C
-L1C5803: db $94
-L1C5804: db $78
-L1C5805: db $95
-L1C5806: db $8C
-L1C5807: db $04
-L1C5808: db $86
-L1C5809: db $78
-L1C580A: db $8E
-L1C580B: db $78
-L1C580C: db $1C
-L1C580D: db $78
-L1C580E: db $88
-L1C580F: db $04
-L1C5810: db $33
-L1C5811: db $38
-L1C5812: db $27
-L1C5813: db $EC
-L1C5814: db $66
-L1C5815: db $71
-L1C5816: db $4C
-L1C5817: db $80
-L1C5818: db $84
-L1C5819: db $72
-L1C581A: db $80
-L1C581B: db $20
-L1C581C: db $F0
-L1C581D: db $0C
-L1C581E: db $05
-L1C581F: db $E0
-L1C5820: db $18
-L1C5821: db $C0
-L1C5822: db $30
-L1C5823: db $81
-L1C5824: db $02
-L1C5825: db $61
-L1C5826: db $03
-L1C5827: db $C3
-L1C5828: db $07
-L1C5829: db $87
-L1C582A: db $0E
-L1C582B: db $00
-L1C582C: db $3F
-L1C582D: db $03
-L1C582E: db $80
-L1C582F: db $7F
-L1C5830: db $00
-L1C5831: db $FE
-L1C5832: db $01
-L1C5833: db $F8
-L1C5834: db $28
-L1C5835: db $44
-L1C5836: db $54
-L1C5837: db $3D
-L1C5838: db $18
-L1C5839: db $E1
-L1C583A: db $04
-L1C583B: db $83
-L1C583C: db $60
-L1C583D: db $1A
-L1C583E: db $FF
-L1C583F: db $A3
-L1C5840: db $10
-L1C5841: db $FC
-L1C5842: db $60
-L1C5843: db $1C
-L1C5844: db $C2
-L1C5845: db $38
-L1C5846: db $64
-L1C5847: db $05
-L1C5848: db $4A
-L1C5849: db $70
-L1C584A: db $9C
-L1C584B: db $73
-L1C584C: db $08
-L1C584D: db $AC
-L1C584E: db $0F
-L1C584F: db $A0
-L1C5850: db $32
-L1C5851: db $A2
-L1C5852: db $1C
-L1C5853: db $76
-L1C5854: db $60
-L1C5855: db $E4
-L1C5856: db $C1
-L1C5857: db $CC
-L1C5858: db $B0
-L1C5859: db $C8
-L1C585A: db $AF
-L1C585B: db $70
-L1C585C: db $98
-L1C585D: db $90
-L1C585E: db $10
-L1C585F: db $05
-L1C5860: db $ED
-L1C5861: db $04
-L1C5862: db $0C
-L1C5863: db $B7
-L1C5864: db $AC
-L1C5865: db $31
-L1C5866: db $04
-L1C5867: db $D9
-L1C5868: db $78
-L1C5869: db $80
-L1C586A: db $A4
-L1C586B: db $AD
-L1C586C: db $C5
-L1C586D: db $7D
-L1C586E: db $44
-L1C586F: db $90
-L1C5870: db $0E
-L1C5871: db $21
-L1C5872: db $BC
-L1C5873: db $43
-L1C5874: db $B4
-L1C5875: db $6F
-L1C5876: db $86
-L1C5877: db $B5
-L1C5878: db $4C
-L1C5879: db $39
-L1C587A: db $38
-L1C587B: db $A0
-L1C587C: db $04
-L1C587D: db $EC
-L1C587E: db $7D
-L1C587F: db $7F
-L1C5880: db $60
-L1C5881: db $68
-L1C5882: db $20
-L1C5883: db $50
-L1C5884: db $88
-L1C5885: db $1F
-L1C5886: db $0C
-L1C5887: db $46
-L1C5888: db $1E
-L1C5889: db $C8
-L1C588A: db $3E
-L1C588B: db $81
-L1C588C: db $3C
-L1C588D: db $C8
-L1C588E: db $90
-L1C588F: db $04
-L1C5890: db $FE
-L1C5891: db $44
-L1C5892: db $30
-L1C5893: db $04
-L1C5894: db $18
-L1C5895: db $50
-L1C5896: db $3D
-L1C5897: db $AE
-L1C5898: db $E3
-L1C5899: db $F7
-L1C589A: db $E4
-L1C589B: db $AC
-L1C589C: db $B9
-L1C589D: db $24
-L1C589E: db $7B
-L1C589F: db $26
-L1C58A0: db $DF
-L1C58A1: db $20
-L1C58A2: db $D4
-L1C58A3: db $D0
-L1C58A4: db $88
-L1C58A5: db $30
-L1C58A6: db $04
-L1C58A7: db $20
-L1C58A8: db $80
-L1C58A9: db $63
-L1C58AA: db $CF
-L1C58AB: db $FF
-L1C58AC: db $0C
-L1C58AD: db $C0
-L1C58AE: db $C8
-L1C58AF: db $38
-L1C58B0: db $20
-L1C58B1: db $04
-L1C58B2: db $AC
-L1C58B3: db $04
-L1C58B4: db $1E
-L1C58B5: db $8E
-L1C58B6: db $01
-L1C58B7: db $70
-L1C58B8: db $50
-L1C58B9: db $2A
-L1C58BA: db $97
-L1C58BB: db $1C
-L1C58BC: db $60
-L1C58BD: db $D4
-L1C58BE: db $BC
-L1C58BF: db $24
-L1C58C0: db $7E
-L1C58C1: db $38
-L1C58C2: db $FC
-L1C58C3: db $D8
-L1C58C4: db $F8
-L1C58C5: db $06
-L1C58C6: db $FF
-L1C58C7: db $95
-L1C58C8: db $AF
-L1C58C9: db $09
-L1C58CA: db $04
-L1C58CB: db $3C
-L1C58CC: db $30
-L1C58CD: db $00
-L1C58CE: db $4C
-L1C58CF: db $FF
-L1C58D0: db $00
-L1C58D1: db $3C
-L1C58D2: db $00
-L1C58D3: db $A0
-L1C58D4: db $A5
-L1C58D5: db $2F
-L1C58D6: db $2F
-L1C58D7: db $00
-L1C58D8: db $E5
-L1C58D9: db $1C
-L1C58DA: db $03
-L1C58DB: db $00
-L1C58DC: db $E1
-L1C58DD: db $19
-L1C58DE: db $04
-L1C58DF: db $0D
-L1C58E0: db $48
-L1C58E1: db $E3
-L1C58E2: db $9C
-L1C58E3: db $30
-L1C58E4: db $44
-L1C58E5: db $7C
-L1C58E6: db $81
-L1C58E7: db $3E
-L1C58E8: db $6C
-L1C58E9: db $50
-L1C58EA: db $DF
-L1C58EB: db $DC
-L1C58EC: db $38
-L1C58ED: db $3F
-L1C58EE: db $85
-L1C58EF: db $78
-L1C58F0: db $00
-L1C58F1: db $0D
-L1C58F2: db $20
-L1C58F3: db $81
-L1C58F4: db $00
-L1C58F5: db $30
-L1C58F6: db $B0
-L1C58F7: db $18
-L1C58F8: db $D8
-L1C58F9: db $0C
-L1C58FA: db $6C
-L1C58FB: db $B6
-L1C58FC: db $BA
-L1C58FD: db $00
-L1C58FE: db $E0
-L1C58FF: db $00
-L1C5900: db $D6
-L1C5901: db $02
-L1C5902: db $01
-L1C5903: db $00
-L1C5904: db $07
-L1C5905: db $DF
-L1C5906: db $00
-L1C5907: db $78
-L1C5908: db $38
-L1C5909: db $1D
-L1C590A: db $F5
-L1C590B: db $18
-L1C590C: db $BC
-L1C590D: db $A4
-L1C590E: db $0E
-L1C590F: db $1C
-L1C5910: db $7F
-L1C5911: db $70
-L1C5912: db $FF
-L1C5913: db $54
-L1C5914: db $04
-L1C5915: db $2C
-L1C5916: db $FE
-L1C5917: db $BA
-L1C5918: db $4C
-L1C5919: db $05
-L1C591A: db $30
-L1C591B: db $5D
-L1C591C: db $47
-L1C591D: db $0F
-L1C591E: db $B0
-L1C591F: db $1E
-L1C5920: db $02
-L1C5921: db $19
-L1C5922: db $3D
-L1C5923: db $32
-L1C5924: db $7E
-L1C5925: db $61
-L1C5926: db $FD
-L1C5927: db $00
-L1C5928: db $BB
-L1C5929: db $02
-L1C592A: db $FB
-L1C592B: db $DB
-L1C592C: db $7B
-L1C592D: db $27
-L1C592E: db $F7
-L1C592F: db $17
-L1C5930: db $04
-L1C5931: db $8B
-L1C5932: db $05
-L1C5933: db $6F
-L1C5934: db $4D
-L1C5935: db $AF
-L1C5936: db $9A
-L1C5937: db $5F
-L1C5938: db $96
-L1C5939: db $80
-L1C593A: db $9D
-L1C593B: db $42
-L1C593C: db $FC
-L1C593D: db $84
-L1C593E: db $F8
-L1C593F: db $04
-L1C5940: db $E0
-L1C5941: db $18
-L1C5942: db $20
-L1C5943: db $60
-L1C5944: db $80
-L1C5945: db $A8
-L1C5946: db $81
-L1C5947: db $51
-L1C5948: db $9F
-L1C5949: db $A8
-L1C594A: db $37
-L1C594B: db $34
-L1C594C: db $AB
-L1C594D: db $02
-L1C594E: db $2A
-L1C594F: db $35
-L1C5950: db $75
-L1C5951: db $4A
-L1C5952: db $7A
-L1C5953: db $45
-L1C5954: db $A8
-L1C5955: db $C2
-L1C5956: db $D5
-L1C5957: db $FC
-L1C5958: db $3C
-L1C5959: db $E8
-L1C595A: db $70
-L1C595B: db $F4
-L1C595C: db $04
-L1C595D: db $FA
-L1C595E: db $04
-L1C595F: db $FF
-L1C5960: db $24
-L1C5961: db $04
-L1C5962: db $24
-L1C5963: db $04
-L1C5964: db $03
-L1C5965: db $9C
-L1C5966: db $00
-L1C5967: db $C8
-L1C5968: db $20
-L1C5969: db $50
-L1C596A: db $57
-L1C596B: db $80
-L1C596C: db $2B
-L1C596D: db $D4
-L1C596E: db $15
-L1C596F: db $EA
-L1C5970: db $8A
-L1C5971: db $6C
-L1C5972: db $F5
-L1C5973: db $78
-L1C5974: db $58
-L1C5975: db $A2
-L1C5976: db $58
-L1C5977: db $B4
-L1C5978: db $7E
-L1C5979: db $78
-L1C597A: db $90
-L1C597B: db $E0
-L1C597C: db $B0
-L1C597D: db $F0
-L1C597E: db $14
-L1C597F: db $F1
-L1C5980: db $23
-L1C5981: db $F3
-L1C5982: db $03
-L1C5983: db $00
-L1C5984: db $E3
-L1C5985: db $83
-L1C5986: db $63
-L1C5987: db $47
-L1C5988: db $A7
-L1C5989: db $A6
-L1C598A: db $46
-L1C598B: db $28
-L1C598C: db $02
-L1C598D: db $3F
-L1C598E: db $94
-L1C598F: db $9F
-L1C5990: db $DA
-L1C5991: db $DF
-L1C5992: db $9D
-L1C5993: db $0C
-L1C5994: db $1E
-L1C5995: db $6D
-L1C5996: db $1F
-L1C5997: db $03
-L1C5998: db $01
-L1C5999: db $E0
-L1C599A: db $00
-L1C599B: db $78
-L1C599C: db $30
-L1C599D: db $88
-L1C599E: db $50
-L1C599F: db $18
-L1C59A0: db $04
-L1C59A1: db $08
-L1C59A2: db $A8
-L1C59A3: db $05
-L1C59A4: db $7C
-L1C59A5: db $84
-L1C59A6: db $BE
-L1C59A7: db $2E
-L1C59A8: db $42
-L1C59A9: db $5E
-L1C59AA: db $C8
-L1C59AB: db $00
-L1C59AC: db $03
-L1C59AD: db $03
-L1C59AE: db $00
-L1C59AF: db $80
-L1C59B0: db $A0
-L1C59B1: db $02
-L1C59B2: db $40
-L1C59B3: db $00
-L1C59B4: db $AC
-L1C59B5: db $52
-L1C59B6: db $56
-L1C59B7: db $A8
-L1C59B8: db $2A
-L1C59B9: db $02
-L1C59BA: db $D4
-L1C59BB: db $14
-L1C59BC: db $EA
-L1C59BD: db $88
-L1C59BE: db $F4
-L1C59BF: db $44
-L1C59C0: db $90
-L1C59C1: db $A0
-L1C59C2: db $37
-L1C59C3: db $FC
-L1C59C4: db $D0
-L1C59C5: db $0C
-L1C59C6: db $45
-L1C59C7: db $60
-L1C59C8: db $03
-L1C59C9: db $03
-L1C59CA: db $00
-L1C59CB: db $BA
-L1C59CC: db $ED
-L1C59CD: db $C0
-L1C59CE: db $00
-L1C59CF: db $A7
-L1C59D0: db $00
-L1C59D1: db $01
-L1C59D2: db $04
-L1C59D3: db $03
-L1C59D4: db $A8
-L1C59D5: db $04
-L1C59D6: db $06
-L1C59D7: db $10
-L1C59D8: db $0C
-L1C59D9: db $10
-L1C59DA: db $10
-L1C59DB: db $0F
-L1C59DC: db $20
-L1C59DD: db $FA
-L1C59DE: db $37
-L1C59DF: db $2D
-L1C59E0: db $04
-L1C59E1: db $20
-L1C59E2: db $04
-L1C59E3: db $38
-L1C59E4: db $63
-L1C59E5: db $07
-L1C59E6: db $95
-L1C59E7: db $00
-L1C59E8: db $1C
-L1C59E9: db $C3
-L1C59EA: db $48
-L1C59EB: db $1E
-L1C59EC: db $18
-L1C59ED: db $F0
-L1C59EE: db $04
-L1C59EF: db $6F
-L1C59F0: db $80
-L1C59F1: db $6C
-L1C59F2: db $00
-L1C59F3: db $1F
-L1C59F4: db $00
-L1C59F5: db $F0
-L1C59F6: db $00
-L1C59F7: db $18
-L1C59F8: db $FA
-L1C59F9: db $00
-L1C59FA: db $60
-L1C59FB: db $D4
-L1C59FC: db $18
-L1C59FD: db $CC
-L1C59FE: db $3F
-L1C59FF: db $14
-L1C5A00: db $7E
-L1C5A01: db $B6
-L1C5A02: db $8C
-L1C5A03: db $FC
-L1C5A04: db $3C
-L1C5A05: db $50
-L1C5A06: db $0E
-L1C5A07: db $20
-L1C5A08: db $8D
-L1C5A09: db $E0
-L1C5A0A: db $84
-L1C5A0B: db $0C
-L1C5A0C: db $30
-L1C5A0D: db $81
-L1C5A0E: db $61
-L1C5A0F: db $02
-L1C5A10: db $8C
-L1C5A11: db $04
-L1C5A12: db $86
-L1C5A13: db $7D
-L1C5A14: db $08
-L1C5A15: db $60
-L1C5A16: db $A4
-L1C5A17: db $00
-L1C5A18: db $38
-L1C5A19: db $00
-L1C5A1A: db $70
-L1C5A1B: db $00
-L1C5A1C: db $FB
-L1C5A1D: db $60
-L1C5A1E: db $38
-L1C5A1F: db $CD
-L1C5A20: db $C0
-L1C5A21: db $00
-L1C5A22: db $78
-L1C5A23: db $00
-L1C5A24: db $60
-L1C5A25: db $E4
-L1C5A26: db $00
-L1C5A27: db $FF
-L1C5A28: db $01
-L1C5A29: db $98
-L1C5A2A: db $C6
-L1C5A2B: db $80
-L1C5A2C: db $8C
-L1C5A2D: db $40
-L1C5A2E: db $FD
-L1C5A2F: db $08
-L1C5A30: db $18
-L1C5A31: db $98
-L1C5A32: db $FD
-L1C5A33: db $80
-L1C5A34: db $00
-L1C5A35: db $3C
-L1C5A36: db $00
-L1C5A37: db $FF
-L1C5A38: db $CC
-L1C5A39: db $00
-L1C5A3A: db $97
-L1C5A3B: db $95
-L1C5A3C: db $75
-L1C5A3D: db $40
-L1C5A3E: db $00
-L1C5A3F: db $77
-L1C5A40: db $FF
-L1C5A41: db $02
-L1C5A42: db $C0
-L1C5A43: db $04
-L1C5A44: db $BC
-L1C5A45: db $1B
-L1C5A46: db $03
-L1C5A47: db $03
-L1C5A48: db $30
-L1C5A49: db $7A
-L1C5A4A: db $10
-L1C5A4B: db $08
-L1C5A4C: db $9C
-L1C5A4D: db $1F
-L1C5A4E: db $5E
-L1C5A4F: db $06
-L1C5A50: db $08
-L1C5A51: db $18
-L1C5A52: db $8B
-L1C5A53: db $0C
-L1C5A54: db $7F
-L1C5A55: db $80
-L1C5A56: db $71
-L1C5A57: db $0C
-L1C5A58: db $86
-L1C5A59: db $1D
-L1C5A5A: db $54
-L1C5A5B: db $2A
-L1C5A5C: db $60
-L1C5A5D: db $1F
-L1C5A5E: db $20
-L1C5A5F: db $78
-L1C5A60: db $9D
-L1C5A61: db $F8
-L1C5A62: db $5E
-L1C5A63: db $F0
-L1C5A64: db $BB
-L1C5A65: db $09
-L1C5A66: db $03
-L1C5A67: db $00
-L1C5A68: db $34
-L1C5A69: db $00
-L1C5A6A: db $70
-L1C5A6B: db $00
-L1C5A6C: db $93
-L1C5A6D: db $DF
-L1C5A6E: db $9A
-L1C5A6F: db $00
-L1C5A70: db $3F
-L1C5A71: db $00
-L1C5A72: db $48
-L1C5A73: db $4E
-L1C5A74: db $03
-L1C5A75: db $03
-L1C5A76: db $AD
-L1C5A77: db $9D
-L1C5A78: db $7E
-L1C5A79: db $44
-L1C5A7A: db $FC
-L1C5A7B: db $7C
-L1C5A7C: db $40
-L1C5A7D: db $0C
-L1C5A7E: db $9F
-L1C5A7F: db $E9
-L1C5A80: db $9D
-L1C5A81: db $6D
-L1C5A82: db $D0
-L1C5A83: db $C7
-L1C5A84: db $04
-L1C5A85: db $87
-L1C5A86: db $0E
-L1C5A87: db $00
-L1C5A88: db $5B
-L1C5A89: db $1C
-L1C5A8A: db $00
-L1C5A8B: db $38
-L1C5A8C: db $00
-L1C5A8D: db $95
-L1C5A8E: db $C0
-L1C5A8F: db $00
-L1C5A90: db $FA
-L1C5A91: db $FF
-L1C5A92: db $00
-L1C5A93: db $80
-L1C5A94: db $00
-L1C5A95: db $9F
-L1C5A96: db $03
-L1C5A97: db $03
-L1C5A98: db $03
-L1C5A99: db $01
-L1C5A9A: db $EF
-L1C5A9B: db $C8
-L1C5A9C: db $00
-L1C5A9D: db $88
-L1C5A9E: db $0F
-L1C5A9F: db $1F
-L1C5AA0: db $27
-L1C5AA1: db $BC
-L1C5AA2: db $00
-L1C5AA3: db $8E
-L1C5AA4: db $D0
-L1C5AA5: db $3C
-L1C5AA6: db $FC
-L1C5AA7: db $C3
-L1C5AA8: db $20
-L1C5AA9: db $08
-L1C5AAA: db $37
-L1C5AAB: db $FF
-L1C5AAC: db $F7
-L1C5AAD: db $01
-L1C5AAE: db $CC
-L1C5AAF: db $04
-L1C5AB0: db $14
-L1C5AB1: db $F8
-L1C5AB2: db $44
-L1C5AB3: db $09
-L1C5AB4: db $67
-L1C5AB5: db $CF
-L1C5AB6: db $32
-L1C5AB7: db $00
-L1C5AB8: db $E0
-L1C5AB9: db $1E
-L1C5ABA: db $20
-L1C5ABB: db $08
-L1C5ABC: db $2D
-L1C5ABD: db $8D
-L1C5ABE: db $57
-L1C5ABF: db $3E
-L1C5AC0: db $00
-L1C5AC1: db $F0
-L1C5AC2: db $00
-L1C5AC3: db $80
-L1C5AC4: db $00
-L1C5AC5: db $27
-L1C5AC6: db $40
-L1C5AC7: db $BF
-L1C5AC8: db $00
-L1C5AC9: db $78
-L1C5ACA: db $00
-L1C5ACB: db $48
-L1C5ACC: db $4E
-L1C5ACD: db $03
-L1C5ACE: db $C6
-L1C5ACF: db $4C
-L1C5AD0: db $F2
-L1C5AD1: db $07
-L1C5AD2: db $07
-L1C5AD3: db $07
-L1C5AD4: db $05
-L1C5AD5: db $7F
-L1C5AD6: db $40
-L1C5AD7: db $07
-L1C5AD8: db $3F
-L1C5AD9: db $48
-L1C5ADA: db $20
-L1C5ADB: db $05
-L1C5ADC: db $1F
-L1C5ADD: db $10
-L1C5ADE: db $A8
-L1C5ADF: db $08
-L1C5AE0: db $01
-L1C5AE1: db $06
-L1C5AE2: db $18
-L1C5AE3: db $46
-L1C5AE4: db $A6
-L1C5AE5: db $86
-L1C5AE6: db $08
-L1C5AE7: db $05
-L1C5AE8: db $8E
-L1C5AE9: db $4E
-L1C5AEA: db $8C
-L1C5AEB: db $7D
-L1C5AEC: db $4C
-L1C5AED: db $07
-L1C5AEE: db $05
-L1C5AEF: db $5C
-L1C5AF0: db $03
-L1C5AF1: db $00
-L1C5AF2: db $2F
-L1C5AF3: db $04
-L1C5AF4: db $50
-L1C5AF5: db $57
-L1C5AF6: db $90
-L1C5AF7: db $4B
-L1C5AF8: db $04
-L1C5AF9: db $C5
-L1C5AFA: db $BF
-L1C5AFB: db $A2
-L1C5AFC: db $DF
-L1C5AFD: db $00
-L1C5AFE: db $89
-L1C5AFF: db $49
-L1C5B00: db $E2
-L1C5B01: db $23
-L1C5B02: db $DD
-L1C5B03: db $3E
-L1C5B04: db $E3
-L1C5B05: db $1C
-L1C5B06: db $B1
-L1C5B07: db $E4
-L1C5B08: db $00
-L1C5B09: db $07
-L1C5B0A: db $05
-L1C5B0B: db $51
-L1C5B0C: db $AF
-L1C5B0D: db $A8
-L1C5B0E: db $68
-L1C5B0F: db $07
-L1C5B10: db $D4
-L1C5B11: db $2A
-L1C5B12: db $E8
-L1C5B13: db $14
-L1C5B14: db $F0
-L1C5B15: db $EC
-L1C5B16: db $04
-L1C5B17: db $2C
-L1C5B18: db $49
-L1C5B19: db $E1
-L1C5B1A: db $F8
-L1C5B1B: db $83
-L1C5B1C: db $03
-L1C5B1D: db $24
-L1C5B1E: db $F8
-L1C5B1F: db $F1
-L1C5B20: db $02
-L1C5B21: db $D5
-L1C5B22: db $7C
-L1C5B23: db $02
-L1C5B24: db $C7
-L1C5B25: db $00
-L1C5B26: db $C6
-L1C5B27: db $00
-L1C5B28: db $8E
-L1C5B29: db $00
-L1C5B2A: db $5E
-L1C5B2B: db $C0
-L1C5B2C: db $02
-L1C5B2D: db $80
-L1C5B2E: db $02
-L1C5B2F: db $70
-L1C5B30: db $03
-L1C5B31: db $02
-L1C5B32: db $0C
-L1C5B33: db $EA
-L1C5B34: db $00
-L1C5B35: db $E8
-L1C5B36: db $00
-L1C5B37: db $38
-L1C5B38: db $02
-L1C5B39: db $70
-L1C5B3A: db $00
-L1C5B3B: db $E0
-L1C5B3C: db $FF
-L1C5B3D: db $00
-L1C5B3E: db $67
-L1C5B3F: db $40
-L1C5B40: db $CC
-L1C5B41: db $57
-L1C5B42: db $03
-L1C5B43: db $03
-L1C5B44: db $01
-L1C5B45: db $6F
-L1C5B46: db $7E
-L1C5B47: db $A7
-L1C5B48: db $00
-L1C5B49: db $1F
-L1C5B4A: db $00
-L1C5B4B: db $17
-L1C5B4C: db $03
-L1C5B4D: db $03
-L1C5B4E: db $AB
-L1C5B4F: db $01
-L1C5B50: db $FA
-L1C5B51: db $00
-L1C5B52: db $23
-L1C5B53: db $00
-L1C5B54: db $22
-L1C5B55: db $03
-L1C5B56: db $00
-L1C5B57: db $D5
-L1C5B58: db $37
-L1C5B59: db $01
-L1C5B5A: db $20
-L1C5B5B: db $00
-L1C5B5C: db $60
-L1C5B5D: db $00
-L1C5B5E: db $A0
-L1C5B5F: db $00
-L1C5B60: db $DF
-L1C5B61: db $15
-L1C5B62: db $01
-L1C5B63: db $FF
-L1C5B64: db $03
-L1C5B65: db $03
-L1C5B66: db $03
-L1C5B67: db $03
-L1C5B68: db $00
-L1C5B69: db $55
-L1C5B6A: db $99
-L1C5B6B: db $00
-L1C5B6C: db $66
-L1C5B6D: db $00
-L1C5B6E: db $54
-L1C5B6F: db $00
-L1C5B70: db $56
-L1C5B71: db $00
-L1C5B72: db $75
-L1C5B73: db $64
-L1C5B74: db $00
-L1C5B75: db $17
-L1C5B76: db $3D
-L1C5B77: db $33
-L1C5B78: db $00
-L1C5B79: db $CD
-L1C5B7A: db $00
-L1C5B7B: db $56
-L1C5B7C: db $AA
-L1C5B7D: db $02
-L1C5B7E: db $CC
-L1C5B7F: db $00
-L1C5B80: db $8A
-L1C5B81: db $02
-L1C5B82: db $3D
-L1C5B83: db $BB
-L1C5B84: db $EF
-L1C5B85: db $00
-L1C5B86: db $5D
-L1C5B87: db $35
-L1C5B88: db $A8
-L1C5B89: db $00
-L1C5B8A: db $4F
-L1C5B8B: db $25
-L1C5B8C: db $3D
-L1C5B8D: db $5B
-L1C5B8E: db $3B
-L1C5B8F: db $00
-L1C5B90: db $D4
-L1C5B91: db $00
-L1C5B92: db $2F
-L1C5B93: db $CE
-L1C5B94: db $00
-L1C5B95: db $17
-L1C5B96: db $B7
-L1C5B97: db $3D
-L1C5B98: db $55
-L1C5B99: db $00
-L1C5B9A: db $15
-L1C5B9B: db $EE
-L1C5B9C: db $00
-L1C5B9D: db $2F
-L1C5B9E: db $03
-L1C5B9F: db $AA
-L1C5BA0: db $3D
-L1C5BA1: db $27
-L1C5BA2: db $00
-L1C5BA3: db $DB
-L1C5BA4: db $00
-L1C5BA5: db $95
-L1C5BA6: db $00
-L1C5BA7: db $D5
-L1C5BA8: db $F5
-L1C5BA9: db $00
-L1C5BAA: db $0D
-L1C5BAB: db $01
-L1C5BAC: db $25
-L1C5BAD: db $FC
-L1C5BAE: db $00
-L1C5BAF: db $FB
-L1C5BB0: db $00
-L1C5BB1: db $57
-L1C5BB2: db $F4
-L1C5BB3: db $00
-L1C5BB4: db $EB
-L1C5BB5: db $00
-L1C5BB6: db $EA
-L1C5BB7: db $00
-L1C5BB8: db $0D
-L1C5BB9: db $1D
-L1C5BBA: db $AB
-L1C5BBB: db $2D
-L1C5BBC: db $60
-L1C5BBD: db $00
-L1C5BBE: db $AF
-L1C5BBF: db $00
-L1C5BC0: db $42
-L1C5BC1: db $00
-L1C5BC2: db $9D
-L1C5BC3: db $6A
-L1C5BC4: db $2A
-L1C5BC5: db $00
-L1C5BC6: db $0D
-L1C5BC7: db $5A
-L1C5BC8: db $00
-L1C5BC9: db $BA
-L1C5BCA: db $00
-L1C5BCB: db $66
-L1C5BCC: db $AA
-L1C5BCD: db $00
-L1C5BCE: db $99
-L1C5BCF: db $00
-L1C5BD0: db $25
-L1C5BD1: db $00
-L1C5BD2: db $A5
-L1C5BD3: db $00
-L1C5BD4: db $BD
-L1C5BD5: db $EA
-L1C5BD6: db $00
-L1C5BD7: db $0D
-L1C5BD8: db $03
-L1C5BD9: db $D9
-L1C5BDA: db $00
-L1C5BDB: db $26
-L1C5BDC: db $00
-L1C5BDD: db $49
-L1C5BDE: db $AD
-L1C5BDF: db $00
-L1C5BE0: db $89
-L1C5BE1: db $00
-L1C5BE2: db $4F
-L1C5BE3: db $00
-L1C5BE4: db $15
-L1C5BE5: db $29
-L1C5BE6: db $02
-L1C5BE7: db $55
-L1C5BE8: db $8E
-L1C5BE9: db $00
-L1C5BEA: db $75
-L1C5BEB: db $00
-L1C5BEC: db $4A
-L1C5BED: db $02
-L1C5BEE: db $73
-L1C5BEF: db $00
-L1C5BF0: db $D5
-L1C5BF1: db $17
-L1C5BF2: db $01
-L1C5BF3: db $7F
-L1C5BF4: db $00
-L1C5BF5: db $BE
-L1C5BF6: db $00
-L1C5BF7: db $5D
-L1C5BF8: db $00
-L1C5BF9: db $5D
-L1C5BFA: db $5E
-L1C5BFB: db $00
-L1C5BFC: db $DE
-L1C5BFD: db $00
-L1C5BFE: db $0D
-L1C5BFF: db $03
-L1C5C00: db $67
-L1C5C01: db $00
-L1C5C02: db $6B
-L1C5C03: db $98
-L1C5C04: db $00
-L1C5C05: db $DF
-L1C5C06: db $9C
-L1C5C07: db $00
-L1C5C08: db $84
-L1C5C09: db $00
-L1C5C0A: db $15
-L1C5C0B: db $AD
-L1C5C0C: db $2D
-L1C5C0D: db $30
-L1C5C0E: db $00
-L1C5C0F: db $CF
-L1C5C10: db $00
-L1C5C11: db $D5
-L1C5C12: db $21
-L1C5C13: db $00
-L1C5C14: db $55
-L1C5C15: db $E2
-L1C5C16: db $00
-L1C5C17: db $25
-L1C5C18: db $02
-L1C5C19: db $C5
-L1C5C1A: db $00
-L1C5C1B: db $FF
-L1C5C1C: db $00
-L1C5C1D: db $F8
-L1C5C1E: db $C5
-L1C5C1F: db $03
-L1C5C20: db $1D
-L1C5C21: db $03
-L1C5C22: db $01
-L1C5C23: db $1C
-L1C5C24: db $40
-L1C5C25: db $41
-L1C5C26: db $0B
-L1C5C27: db $00
-L1C5C28: db $0F
-L1C5C29: db $10
-L1C5C2A: db $13
-L1C5C2B: db $14
-L1C5C2C: db $17
-L1C5C2D: db $31
-L1C5C2E: db $C0
-L1C5C2F: db $07
-L1C5C30: db $03
-L1C5C31: db $0E
-L1C5C32: db $11
-L1C5C33: db $12
-L1C5C34: db $15
-L1C5C35: db $16
-L1C5C36: db $18
-L1C5C37: db $58
-L1C5C38: db $19
-L1C5C39: db $01
-L1C5C3A: db $1A
-L1C5C3B: db $8F
-L1C5C3C: db $00
-L1C5C3D: db $1B
-L1C5C3E: db $1C
-L1C5C3F: db $1F
-L1C5C40: db $00
-L1C5C41: db $20
-L1C5C42: db $23
-L1C5C43: db $24
-L1C5C44: db $27
-L1C5C45: db $28
-L1C5C46: db $2B
-L1C5C47: db $2C
-L1C5C48: db $2F
-L1C5C49: db $C0
-L1C5C4A: db $97
-L1C5C4B: db $00
-L1C5C4C: db $1D
-L1C5C4D: db $1E
-L1C5C4E: db $21
-L1C5C4F: db $22
-L1C5C50: db $25
-L1C5C51: db $26
-L1C5C52: db $05
-L1C5C53: db $29
-L1C5C54: db $2A
-L1C5C55: db $2D
-L1C5C56: db $2E
-L1C5C57: db $30
-L1C5C58: db $61
-L1C5C59: db $31
-L1C5C5A: db $A6
-L1C5C5B: db $00
-L1C5C5C: db $32
-L1C5C5D: db $34
-L1C5C5E: db $35
-L1C5C5F: db $38
-L1C5C60: db $39
-L1C5C61: db $3C
-L1C5C62: db $3D
-L1C5C63: db $40
-L1C5C64: db $40
-L1C5C65: db $41
-L1C5C66: db $51
-L1C5C67: db $46
-L1C5C68: db $47
-L1C5C69: db $4A
-L1C5C6A: db $4B
-L1C5C6B: db $4E
-L1C5C6C: db $4F
-L1C5C6D: db $40
-L1C5C6E: db $52
-L1C5C6F: db $41
-L1C5C70: db $33
-L1C5C71: db $36
-L1C5C72: db $37
-L1C5C73: db $3A
-L1C5C74: db $3B
-L1C5C75: db $3E
-L1C5C76: db $00
-L1C5C77: db $3F
-L1C5C78: db $42
-L1C5C79: db $43
-L1C5C7A: db $44
-L1C5C7B: db $45
-L1C5C7C: db $48
-L1C5C7D: db $49
-L1C5C7E: db $4C
-L1C5C7F: db $04
-L1C5C80: db $4D
-L1C5C81: db $50
-L1C5C82: db $51
-L1C5C83: db $53
-L1C5C84: db $54
-L1C5C85: db $98
-L1C5C86: db $55
-L1C5C87: db $56
-L1C5C88: db $00
-L1C5C89: db $57
-L1C5C8A: db $59
-L1C5C8B: db $5A
-L1C5C8C: db $5D
-L1C5C8D: db $5E
-L1C5C8E: db $61
-L1C5C8F: db $62
-L1C5C90: db $65
-L1C5C91: db $00
-L1C5C92: db $66
-L1C5C93: db $69
-L1C5C94: db $6A
-L1C5C95: db $6D
-L1C5C96: db $6E
-L1C5C97: db $71
-L1C5C98: db $72
-L1C5C99: db $75
-L1C5C9A: db $60
-L1C5C9B: db $76
-L1C5C9C: db $98
-L1C5C9D: db $01
-L1C5C9E: db $58
-L1C5C9F: db $5B
-L1C5CA0: db $5C
-L1C5CA1: db $5F
-L1C5CA2: db $60
-L1C5CA3: db $00
-L1C5CA4: db $63
-L1C5CA5: db $64
-L1C5CA6: db $67
-L1C5CA7: db $68
-L1C5CA8: db $6B
-L1C5CA9: db $6C
-L1C5CAA: db $6F
-L1C5CAB: db $70
-L1C5CAC: db $08
-L1C5CAD: db $73
-L1C5CAE: db $74
-L1C5CAF: db $77
-L1C5CB0: db $78
-L1C5CB1: db $91
-L1C5CB2: db $79
-L1C5CB3: db $7A
-L1C5CB4: db $7D
-L1C5CB5: db $00
-L1C5CB6: db $7E
-L1C5CB7: db $81
-L1C5CB8: db $82
-L1C5CB9: db $85
-L1C5CBA: db $86
-L1C5CBB: db $89
-L1C5CBC: db $8A
-L1C5CBD: db $8D
-L1C5CBE: db $01
-L1C5CBF: db $8E
-L1C5CC0: db $91
-L1C5CC1: db $92
-L1C5CC2: db $95
-L1C5CC3: db $96
-L1C5CC4: db $99
-L1C5CC5: db $9A
-L1C5CC6: db $99
-L1C5CC7: db $00
-L1C5CC8: db $7B
-L1C5CC9: db $7C
-L1C5CCA: db $7F
-L1C5CCB: db $80
-L1C5CCC: db $83
-L1C5CCD: db $84
-L1C5CCE: db $87
-L1C5CCF: db $88
-L1C5CD0: db $00
-L1C5CD1: db $8B
-L1C5CD2: db $8C
-L1C5CD3: db $8F
-L1C5CD4: db $90
-L1C5CD5: db $93
-L1C5CD6: db $94
-L1C5CD7: db $97
-L1C5CD8: db $98
-L1C5CD9: db $20
-L1C5CDA: db $9B
-L1C5CDB: db $9C
-L1C5CDC: db $90
-L1C5CDD: db $9D
-L1C5CDE: db $A0
-L1C5CDF: db $A1
-L1C5CE0: db $A3
-L1C5CE1: db $A4
-L1C5CE2: db $00
-L1C5CE3: db $A6
-L1C5CE4: db $A7
-L1C5CE5: db $AA
-L1C5CE6: db $AB
-L1C5CE7: db $AD
-L1C5CE8: db $AE
-L1C5CE9: db $AF
-L1C5CEA: db $B0
-L1C5CEB: db $00
-L1C5CEC: db $B1
-L1C5CED: db $B2
-L1C5CEE: db $B4
-L1C5CEF: db $B5
-L1C5CF0: db $B8
-L1C5CF1: db $B9
-L1C5CF2: db $9E
-L1C5CF3: db $9F
-L1C5CF4: db $21
-L1C5CF5: db $A2
-L1C5CF6: db $78
-L1C5CF7: db $B8
-L1C5CF8: db $A5
-L1C5CF9: db $A8
-L1C5CFA: db $A9
-L1C5CFB: db $AC
-L1C5CFC: db $20
-L1C5CFD: db $87
-L1C5CFE: db $04
-L1C5CFF: db $B3
-L1C5D00: db $B6
-L1C5D01: db $B7
-L1C5D02: db $BA
-L1C5D03: db $4D
-L1C5D04: db $07
-L1C5D05: db $01
-L1C5D06: db $07
-L1C5D07: db $BB
-L1C5D08: db $BC
-L1C5D09: db $B1
-L1C5D0A: db $BD
-L1C5D0B: db $BE
-L1C5D0C: db $67
-L1C5D0D: db $07
-L1C5D0E: db $03
-L1C5D0F: db $40
-L1C5D10: db $BF
-L1C5D11: db $01
-L1C5D12: db $C0
-L1C5D13: db $C1
-L1C5D14: db $C2
-L1C5D15: db $C3
-L1C5D16: db $C4
-L1C5D17: db $C5
-L1C5D18: db $00
-L1C5D19: db $C6
-L1C5D1A: db $C7
-L1C5D1B: db $C8
-L1C5D1C: db $C9
-L1C5D1D: db $CA
-L1C5D1E: db $CB
-L1C5D1F: db $CC
-L1C5D20: db $CD
-L1C5D21: db $40
-L1C5D22: db $CE
-L1C5D23: db $81
-L1C5D24: db $00
-L1C5D25: db $01
-L1C5D26: db $02
-L1C5D27: db $05
-L1C5D28: db $06
-L1C5D29: db $03
-L1C5D2A: db $04
-L1C5D2B: db $07
-L1C5D2C: db $08
-L1C5D2D: db $09
-L1C5D2E: db $0A
-L1C5D2F: db $0C
-L1C5D30: db $0D
-L1C5D31: db $2A
-L1C5D32: db $7C
-L1C5D33: db $7E
-L1C5D34: db $C6
-L1C5D35: db $FF
-L1C5D36: db $C6
-L1C5D37: db $E7
-L1C5D38: db $FE
-L1C5D39: db $FF
-L1C5D3A: db $C6
-L1C5D3B: db $FF
-L1C5D3C: db $C6
-L1C5D3D: db $E7
-L1C5D3E: db $C6
-L1C5D3F: db $E7
-L1C5D40: db $00
-L1C5D41: db $63
-L1C5D42: db $00
-L1C5D43: db $00
-L1C5D44: db $00
-L1C5D45: db $00
-L1C5D46: db $00
-L1C5D47: db $00
-L1C5D48: db $00
-L1C5D49: db $00
-L1C5D4A: db $00
-L1C5D4B: db $00
-L1C5D4C: db $00
-L1C5D4D: db $00
-L1C5D4E: db $00
-L1C5D4F: db $00
-L1C5D50: db $00
-L1C5D51: db $00
-L1C5D52: db $FE
-L1C5D53: db $FF
-L1C5D54: db $C0
-L1C5D55: db $FF
-L1C5D56: db $C0
-L1C5D57: db $E0
-L1C5D58: db $FC
-L1C5D59: db $FF
-L1C5D5A: db $C0
-L1C5D5B: db $FF
-L1C5D5C: db $C0
-L1C5D5D: db $E0
-L1C5D5E: db $FE
-L1C5D5F: db $FF
-L1C5D60: db $00
-L1C5D61: db $7F
-L1C5D62: db $00
-L1C5D63: db $00
-L1C5D64: db $00
-L1C5D65: db $00
-L1C5D66: db $00
-L1C5D67: db $00
-L1C5D68: db $00
-L1C5D69: db $00
-L1C5D6A: db $00
-L1C5D6B: db $00
-L1C5D6C: db $00
-L1C5D6D: db $00
-L1C5D6E: db $00
-L1C5D6F: db $00
-L1C5D70: db $00
-L1C5D71: db $00
-L1C5D72: db $7C
-L1C5D73: db $7E
-L1C5D74: db $C6
-L1C5D75: db $FF
-L1C5D76: db $C0
-L1C5D77: db $E0
-L1C5D78: db $DE
-L1C5D79: db $FF
-L1C5D7A: db $C6
-L1C5D7B: db $EF
-L1C5D7C: db $C6
-L1C5D7D: db $E7
-L1C5D7E: db $7E
-L1C5D7F: db $7F
-L1C5D80: db $00
-L1C5D81: db $3F
-L1C5D82: db $00
-L1C5D83: db $00
-L1C5D84: db $00
-L1C5D85: db $00
-L1C5D86: db $00
-L1C5D87: db $00
-L1C5D88: db $00
-L1C5D89: db $00
-L1C5D8A: db $00
-L1C5D8B: db $00
-L1C5D8C: db $00
-L1C5D8D: db $00
-L1C5D8E: db $00
-L1C5D8F: db $00
-L1C5D90: db $00
-L1C5D91: db $00
-L1C5D92: db $C6
-L1C5D93: db $E7
-L1C5D94: db $C6
-L1C5D95: db $E7
-L1C5D96: db $C6
-L1C5D97: db $E7
-L1C5D98: db $FE
-L1C5D99: db $FF
-L1C5D9A: db $C6
-L1C5D9B: db $FF
-L1C5D9C: db $C6
-L1C5D9D: db $E7
-L1C5D9E: db $C6
-L1C5D9F: db $E7
-L1C5DA0: db $00
-L1C5DA1: db $63
-L1C5DA2: db $00
-L1C5DA3: db $00
-L1C5DA4: db $00
-L1C5DA5: db $00
-L1C5DA6: db $00
-L1C5DA7: db $00
-L1C5DA8: db $00
-L1C5DA9: db $00
-L1C5DAA: db $00
-L1C5DAB: db $00
-L1C5DAC: db $00
-L1C5DAD: db $00
-L1C5DAE: db $00
-L1C5DAF: db $00
-L1C5DB0: db $00
-L1C5DB1: db $00
-L1C5DB2: db $3C
-L1C5DB3: db $3E
-L1C5DB4: db $18
-L1C5DB5: db $3E
-L1C5DB6: db $18
-L1C5DB7: db $1C
-L1C5DB8: db $18
-L1C5DB9: db $1C
-L1C5DBA: db $18
-L1C5DBB: db $1C
-L1C5DBC: db $18
-L1C5DBD: db $1C
-L1C5DBE: db $3C
-L1C5DBF: db $3E
-L1C5DC0: db $00
-L1C5DC1: db $1E
-L1C5DC2: db $00
-L1C5DC3: db $00
-L1C5DC4: db $00
-L1C5DC5: db $00
-L1C5DC6: db $00
-L1C5DC7: db $00
-L1C5DC8: db $00
-L1C5DC9: db $00
-L1C5DCA: db $00
-L1C5DCB: db $00
-L1C5DCC: db $00
-L1C5DCD: db $00
-L1C5DCE: db $00
-L1C5DCF: db $00
-L1C5DD0: db $00
-L1C5DD1: db $00
-L1C5DD2: db $C6
-L1C5DD3: db $E7
-L1C5DD4: db $EE
-L1C5DD5: db $EF
-L1C5DD6: db $FE
-L1C5DD7: db $FF
-L1C5DD8: db $D6
-L1C5DD9: db $FF
-L1C5DDA: db $C6
-L1C5DDB: db $FF
-L1C5DDC: db $C6
-L1C5DDD: db $E7
-L1C5DDE: db $C6
-L1C5DDF: db $E7
-L1C5DE0: db $00
-L1C5DE1: db $63
-L1C5DE2: db $00
-L1C5DE3: db $00
-L1C5DE4: db $00
-L1C5DE5: db $00
-L1C5DE6: db $00
-L1C5DE7: db $00
-L1C5DE8: db $00
-L1C5DE9: db $00
-L1C5DEA: db $00
-L1C5DEB: db $00
-L1C5DEC: db $00
-L1C5DED: db $00
-L1C5DEE: db $00
-L1C5DEF: db $00
-L1C5DF0: db $00
-L1C5DF1: db $00
-L1C5DF2: db $C6
-L1C5DF3: db $E7
-L1C5DF4: db $E6
-L1C5DF5: db $E7
-L1C5DF6: db $F6
-L1C5DF7: db $F7
-L1C5DF8: db $DE
-L1C5DF9: db $FF
-L1C5DFA: db $CE
-L1C5DFB: db $FF
-L1C5DFC: db $C6
-L1C5DFD: db $EF
-L1C5DFE: db $C6
-L1C5DFF: db $E7
-L1C5E00: db $00
-L1C5E01: db $63
-L1C5E02: db $00
-L1C5E03: db $00
-L1C5E04: db $00
-L1C5E05: db $00
-L1C5E06: db $00
-L1C5E07: db $00
-L1C5E08: db $00
-L1C5E09: db $00
-L1C5E0A: db $00
-L1C5E0B: db $00
-L1C5E0C: db $00
-L1C5E0D: db $00
-L1C5E0E: db $00
-L1C5E0F: db $00
-L1C5E10: db $00
-L1C5E11: db $00
-L1C5E12: db $7C
-L1C5E13: db $7E
-L1C5E14: db $C6
-L1C5E15: db $FF
-L1C5E16: db $C6
-L1C5E17: db $E7
-L1C5E18: db $C6
-L1C5E19: db $E7
-L1C5E1A: db $C6
-L1C5E1B: db $E7
-L1C5E1C: db $C6
-L1C5E1D: db $E7
-L1C5E1E: db $7C
-L1C5E1F: db $7F
-L1C5E20: db $00
-L1C5E21: db $3E
-L1C5E22: db $00
-L1C5E23: db $00
-L1C5E24: db $00
-L1C5E25: db $00
-L1C5E26: db $00
-L1C5E27: db $00
-L1C5E28: db $00
-L1C5E29: db $00
-L1C5E2A: db $00
-L1C5E2B: db $00
-L1C5E2C: db $00
-L1C5E2D: db $00
-L1C5E2E: db $00
-L1C5E2F: db $00
-L1C5E30: db $00
-L1C5E31: db $00
-L1C5E32: db $FC
-L1C5E33: db $FE
-L1C5E34: db $C6
-L1C5E35: db $FF
-L1C5E36: db $C6
-L1C5E37: db $E7
-L1C5E38: db $FC
-L1C5E39: db $FE
-L1C5E3A: db $C0
-L1C5E3B: db $FE
-L1C5E3C: db $C0
-L1C5E3D: db $E0
-L1C5E3E: db $C0
-L1C5E3F: db $E0
-L1C5E40: db $00
-L1C5E41: db $60
-L1C5E42: db $00
-L1C5E43: db $00
-L1C5E44: db $00
-L1C5E45: db $00
-L1C5E46: db $00
-L1C5E47: db $00
-L1C5E48: db $00
-L1C5E49: db $00
-L1C5E4A: db $00
-L1C5E4B: db $00
-L1C5E4C: db $00
-L1C5E4D: db $00
-L1C5E4E: db $00
-L1C5E4F: db $00
-L1C5E50: db $00
-L1C5E51: db $00
-L1C5E52: db $FC
-L1C5E53: db $FE
-L1C5E54: db $C6
-L1C5E55: db $FF
-L1C5E56: db $C6
-L1C5E57: db $E7
-L1C5E58: db $FC
-L1C5E59: db $FE
-L1C5E5A: db $CC
-L1C5E5B: db $EE
-L1C5E5C: db $C6
-L1C5E5D: db $E7
-L1C5E5E: db $C6
-L1C5E5F: db $E7
-L1C5E60: db $00
-L1C5E61: db $63
-L1C5E62: db $00
-L1C5E63: db $00
-L1C5E64: db $00
-L1C5E65: db $00
-L1C5E66: db $00
-L1C5E67: db $00
-L1C5E68: db $00
-L1C5E69: db $00
-L1C5E6A: db $00
-L1C5E6B: db $00
-L1C5E6C: db $00
-L1C5E6D: db $00
-L1C5E6E: db $00
-L1C5E6F: db $00
-L1C5E70: db $00
-L1C5E71: db $00
-L1C5E72: db $7C
-L1C5E73: db $7E
-L1C5E74: db $E0
-L1C5E75: db $FE
-L1C5E76: db $E0
-L1C5E77: db $F0
-L1C5E78: db $7C
-L1C5E79: db $7E
-L1C5E7A: db $0E
-L1C5E7B: db $3F
-L1C5E7C: db $0E
-L1C5E7D: db $0F
-L1C5E7E: db $FC
-L1C5E7F: db $FF
-L1C5E80: db $00
-L1C5E81: db $7C
-L1C5E82: db $00
-L1C5E83: db $00
-L1C5E84: db $00
-L1C5E85: db $00
-L1C5E86: db $00
-L1C5E87: db $00
-L1C5E88: db $00
-L1C5E89: db $00
-L1C5E8A: db $00
-L1C5E8B: db $00
-L1C5E8C: db $00
-L1C5E8D: db $00
-L1C5E8E: db $00
-L1C5E8F: db $00
-L1C5E90: db $00
-L1C5E91: db $00
-L1C5E92: db $7E
-L1C5E93: db $7F
-L1C5E94: db $18
-L1C5E95: db $3F
-L1C5E96: db $18
-L1C5E97: db $1C
-L1C5E98: db $18
-L1C5E99: db $1C
-L1C5E9A: db $18
-L1C5E9B: db $1C
-L1C5E9C: db $18
-L1C5E9D: db $1C
-L1C5E9E: db $18
-L1C5E9F: db $1C
-L1C5EA0: db $00
-L1C5EA1: db $0C
-L1C5EA2: db $00
-L1C5EA3: db $00
-L1C5EA4: db $00
-L1C5EA5: db $00
-L1C5EA6: db $00
-L1C5EA7: db $00
-L1C5EA8: db $00
-L1C5EA9: db $00
-L1C5EAA: db $00
-L1C5EAB: db $00
-L1C5EAC: db $00
-L1C5EAD: db $00
-L1C5EAE: db $00
-L1C5EAF: db $00
-L1C5EB0: db $00
-L1C5EB1: db $00
-L1C5EB2: db $C6
-L1C5EB3: db $E7
-L1C5EB4: db $C6
-L1C5EB5: db $E7
-L1C5EB6: db $C6
-L1C5EB7: db $E7
-L1C5EB8: db $C6
-L1C5EB9: db $E7
-L1C5EBA: db $C6
-L1C5EBB: db $E7
-L1C5EBC: db $C6
-L1C5EBD: db $E7
-L1C5EBE: db $7C
-L1C5EBF: db $7F
-L1C5EC0: db $00
-L1C5EC1: db $1E
-L1C5EC2: db $00
-L1C5EC3: db $00
-L1C5EC4: db $00
-L1C5EC5: db $00
-L1C5EC6: db $00
-L1C5EC7: db $00
-L1C5EC8: db $00
-L1C5EC9: db $00
-L1C5ECA: db $00
-L1C5ECB: db $00
-L1C5ECC: db $00
-L1C5ECD: db $00
-L1C5ECE: db $00
-L1C5ECF: db $00
-L1C5ED0: db $00
-L1C5ED1: db $00
-L1C5ED2: db $C0
-L1C5ED3: db $C0
-L1C5ED4: db $F0
-L1C5ED5: db $F0
-L1C5ED6: db $FC
-L1C5ED7: db $FC
-L1C5ED8: db $FF
-L1C5ED9: db $FF
-L1C5EDA: db $FC
-L1C5EDB: db $FF
-L1C5EDC: db $F0
-L1C5EDD: db $FE
-L1C5EDE: db $C0
-L1C5EDF: db $F8
-L1C5EE0: db $00
-L1C5EE1: db $E0
-L1C5EE2: db $00
-L1C5EE3: db $00
-L1C5EE4: db $00
-L1C5EE5: db $00
-L1C5EE6: db $00
-L1C5EE7: db $00
-L1C5EE8: db $00
-L1C5EE9: db $00
-L1C5EEA: db $00
-L1C5EEB: db $00
-L1C5EEC: db $00
-L1C5EED: db $00
-L1C5EEE: db $00
-L1C5EEF: db $00
-L1C5EF0: db $00
-L1C5EF1: db $00
-L1C5EF2: db $10
-L1C5EF3: db $18
-L1C5EF4: db $10
-L1C5EF5: db $1C
-L1C5EF6: db $38
-L1C5EF7: db $3C
-L1C5EF8: db $38
-L1C5EF9: db $3E
-L1C5EFA: db $7C
-L1C5EFB: db $7E
-L1C5EFC: db $7C
-L1C5EFD: db $7F
-L1C5EFE: db $FE
-L1C5EFF: db $FF
-L1C5F00: db $00
-L1C5F01: db $7F
-L1C5F02: db $00
-L1C5F03: db $00
-L1C5F04: db $00
-L1C5F05: db $00
-L1C5F06: db $00
-L1C5F07: db $00
-L1C5F08: db $00
-L1C5F09: db $00
-L1C5F0A: db $00
-L1C5F0B: db $00
-L1C5F0C: db $00
-L1C5F0D: db $00
-L1C5F0E: db $00
-L1C5F0F: db $00
-L1C5F10: db $00
-L1C5F11: db $00
-L1C5F12: db $00
-L1C5F13: db $1C
-L1C5F14: db $1C
-L1C5F15: db $3E
-L1C5F16: db $22
-L1C5F17: db $7F
-L1C5F18: db $5D
-L1C5F19: db $FF
-L1C5F1A: db $51
-L1C5F1B: db $FF
-L1C5F1C: db $5D
-L1C5F1D: db $FF
-L1C5F1E: db $22
-L1C5F1F: db $7F
-L1C5F20: db $1C
-L1C5F21: db $3E
-L1C5F22: db $00
-L1C5F23: db $1C
-L1C5F24: db $00
-L1C5F25: db $00
-L1C5F26: db $00
-L1C5F27: db $00
-L1C5F28: db $00
-L1C5F29: db $00
-L1C5F2A: db $00
-L1C5F2B: db $00
-L1C5F2C: db $00
-L1C5F2D: db $00
-L1C5F2E: db $00
-L1C5F2F: db $00
-L1C5F30: db $00
-L1C5F31: db $00
-L1C5F32: db $00
-L1C5F33: db $0F
-L1C5F34: db $06
-L1C5F35: db $0F
-L1C5F36: db $09
-L1C5F37: db $1F
-L1C5F38: db $08
-L1C5F39: db $9F
-L1C5F3A: db $06
-L1C5F3B: db $8F
-L1C5F3C: db $01
-L1C5F3D: db $8F
-L1C5F3E: db $09
-L1C5F3F: db $1F
-L1C5F40: db $06
-L1C5F41: db $1F
-L1C5F42: db $00
-L1C5F43: db $0F
-L1C5F44: db $00
-L1C5F45: db $00
-L1C5F46: db $00
-L1C5F47: db $00
-L1C5F48: db $00
-L1C5F49: db $00
-L1C5F4A: db $00
-L1C5F4B: db $00
-L1C5F4C: db $00
-L1C5F4D: db $00
-L1C5F4E: db $00
-L1C5F4F: db $00
-L1C5F50: db $00
-L1C5F51: db $00
-L1C5F52: db $00
-L1C5F53: db $FF
-L1C5F54: db $4A
-L1C5F55: db $FF
-L1C5F56: db $6A
-L1C5F57: db $FF
-L1C5F58: db $6B
-L1C5F59: db $FF
-L1C5F5A: db $5B
-L1C5F5B: db $FF
-L1C5F5C: db $5A
-L1C5F5D: db $FF
-L1C5F5E: db $4A
-L1C5F5F: db $FF
-L1C5F60: db $4A
-L1C5F61: db $FF
-L1C5F62: db $00
-L1C5F63: db $FF
-L1C5F64: db $00
-L1C5F65: db $00
-L1C5F66: db $00
-L1C5F67: db $00
-L1C5F68: db $00
-L1C5F69: db $00
-L1C5F6A: db $00
-L1C5F6B: db $00
-L1C5F6C: db $00
-L1C5F6D: db $00
-L1C5F6E: db $00
-L1C5F6F: db $00
-L1C5F70: db $00
-L1C5F71: db $00
-L1C5F72: db $00
-L1C5F73: db $E1
-L1C5F74: db $41
-L1C5F75: db $E3
-L1C5F76: db $83
-L1C5F77: db $C7
-L1C5F78: db $01
-L1C5F79: db $83
-L1C5F7A: db $01
-L1C5F7B: db $83
-L1C5F7C: db $81
-L1C5F7D: db $C3
-L1C5F7E: db $81
-L1C5F7F: db $C3
-L1C5F80: db $41
-L1C5F81: db $E3
-L1C5F82: db $00
-L1C5F83: db $E3
-L1C5F84: db $00
-L1C5F85: db $00
-L1C5F86: db $00
-L1C5F87: db $00
-L1C5F88: db $00
-L1C5F89: db $00
-L1C5F8A: db $00
-L1C5F8B: db $00
-L1C5F8C: db $00
-L1C5F8D: db $00
-L1C5F8E: db $00
-L1C5F8F: db $00
-L1C5F90: db $00
-L1C5F91: db $00
-L1C5F92: db $00
-L1C5F93: db $FB
-L1C5F94: db $31
-L1C5F95: db $FF
-L1C5F96: db $4A
-L1C5F97: db $FF
-L1C5F98: db $4A
-L1C5F99: db $FF
-L1C5F9A: db $39
-L1C5F9B: db $FF
-L1C5F9C: db $08
-L1C5F9D: db $FF
-L1C5F9E: db $4A
-L1C5F9F: db $FF
-L1C5FA0: db $31
-L1C5FA1: db $FF
-L1C5FA2: db $00
-L1C5FA3: db $FB
-L1C5FA4: db $00
-L1C5FA5: db $00
-L1C5FA6: db $00
-L1C5FA7: db $00
-L1C5FA8: db $00
-L1C5FA9: db $00
-L1C5FAA: db $00
-L1C5FAB: db $00
-L1C5FAC: db $00
-L1C5FAD: db $00
-L1C5FAE: db $00
-L1C5FAF: db $00
-L1C5FB0: db $00
-L1C5FB1: db $00
-L1C5FB2: db $00
-L1C5FB3: db $DE
-L1C5FB4: db $8C
-L1C5FB5: db $FF
-L1C5FB6: db $52
-L1C5FB7: db $FF
-L1C5FB8: db $50
-L1C5FB9: db $FF
-L1C5FBA: db $DC
-L1C5FBB: db $FF
-L1C5FBC: db $52
-L1C5FBD: db $FF
-L1C5FBE: db $52
-L1C5FBF: db $FF
-L1C5FC0: db $8C
-L1C5FC1: db $DE
-L1C5FC2: db $00
-L1C5FC3: db $DE
-L1C5FC4: db $00
-L1C5FC5: db $00
-L1C5FC6: db $00
-L1C5FC7: db $00
-L1C5FC8: db $00
-L1C5FC9: db $00
-L1C5FCA: db $00
-L1C5FCB: db $00
-L1C5FCC: db $00
-L1C5FCD: db $00
-L1C5FCE: db $00
-L1C5FCF: db $00
-L1C5FD0: db $00
-L1C5FD1: db $00
+	
+GFXLZ_Title_Logo0: INCBIN "data/gfx/title_logo0.lzc"
+GFXLZ_Title_Logo1: INCBIN "data/gfx/title_logo1.lzc"
+BGLZ_Title_Logo: INCBIN "data/bg/title_logo.lzs"
+BG_Title_Clouds: INCBIN "data/bg/title_clouds.bin"
+
+GFXAuto_TitleOBJ:
+	db (GFXAuto_TitleOBJ.end-GFXAuto_TitleOBJ.start)/TILESIZE ; Number of tiles
+.start:
+	INCBIN "data/gfx/title_obj.bin"
+.end:
+
+; 
+; =============== END OF MODULE TitleMenu ===============
+;
+
+
 
 ; 
 ; =============== START OF MODULE Intro ===============
@@ -6948,8 +3418,8 @@ Module_Intro:
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
-	ld   [wFieldScrollX], a
-	ld   [wFieldScrollY], a
+	ld   [wOBJScrollX], a
+	ld   [wOBJScrollY], a
 	
 	call LoadGFX_1bppFont_Default
 	call ClearOBJInfo
@@ -8389,8 +4859,8 @@ Intro_CharS_LoadVRAM:
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
-	ld   [wFieldScrollX], a
-	ld   [wFieldScrollY], a
+	ld   [wOBJScrollX], a
+	ld   [wOBJScrollY], a
 	
 	; Load GFX for scene
 	ld   hl, GFXLZ_IntroBG
@@ -8499,8 +4969,8 @@ Intro_IoriRise_LoadVRAM:
 	; Reset coords
 	xor  a
 	ldh  [hScrollY], a
-	ld   [wFieldScrollX], a
-	ld   [wFieldScrollY], a
+	ld   [wOBJScrollX], a
+	ld   [wOBJScrollY], a
 	
 	;
 	; Display "Sun" at the center of the tilemap
@@ -8540,7 +5010,7 @@ Intro_IoriRise_LoadVRAM:
 	
 	; ???
 	ld   a, $04
-	ld   [$D753], a
+	ld   [wOBJInfo3+iOBJInfo_OBJLstPtrTblOffset], a
 	
 	; Display the WINDOW
 	ld   a, $00
@@ -8597,8 +5067,8 @@ Intro_IoriKyo_LoadVRAM:
 	
 	xor  a
 	ldh  [hScrollY], a
-	ld   [wFieldScrollX], a
-	ld   [wFieldScrollY], a
+	ld   [wOBJScrollX], a
+	ld   [wOBJScrollY], a
 	
 	; 
 	ld   a, $60
@@ -8744,8 +5214,8 @@ OBJInfoInit_Intro_Iori:
 	db $00 ; iOBJInfo_YSub
 	db $00 ; iOBJInfo_SpeedX
 	db $00 ; iOBJInfo_SpeedXSub
-	db $00 ; $09
-	db $00 ; $0A
+	db $00 ; iOBJInfo_Unknown_09
+	db $00 ; iOBJInfo_Unknown_0A
 	db $00 ; iOBJInfo_RelX (auto)
 	db $00 ; iOBJInfo_RelY (auto)
 	db $C6 ; iOBJInfo_TileIDBase
@@ -8755,9 +5225,9 @@ OBJInfoInit_Intro_Iori:
 	db LOW(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_Low
 	db HIGH(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_High
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
-	db $00 ; iOBJInfo_BankNumOld (N/A)
-	db LOW(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_LowOld (N/A)
-	db HIGH(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_HighOld (N/A)
+	db $00 ; iOBJInfo_BankNumOld
+	db LOW(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_LowOld
+	db HIGH(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_HighOld
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
 	db $00 ; iOBJInfo_OBJLstByte1 (auto)
 	db $00 ; iOBJInfo_OBJLstByte2 (auto)
@@ -8768,11 +5238,11 @@ OBJInfoInit_Intro_Iori:
 	db HIGH(wGFXBufInfo_Pl1) ; iOBJInfo_BufInfoPtr_High
 
 OBJLstPtrTable_Intro_Iori:
-	dw OBJLstHdrA_L1C695D, $FFFF
-	dw OBJLstHdrA_L1C699B, $FFFF
+	dw OBJLstHdrA_Intro_Iori0, $FFFF
+	dw OBJLstHdrA_Intro_Iori1, $FFFF
 	dw $FFFF
 		
-OBJLstHdrA_L1C695D:
+OBJLstHdrA_Intro_Iori0:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_Byte1
 	db $00 ; iOBJLstHdrA_Byte2
@@ -8801,7 +5271,7 @@ OBJLstHdrA_L1C695D:
 	db $20,$49,$36 ; $0F
 	db $35,$51,$38 ; $10
 		
-OBJLstHdrA_L1C699B:
+OBJLstHdrA_Intro_Iori1:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_Byte1
 	db $00 ; iOBJLstHdrA_Byte2

@@ -7,6 +7,8 @@ wMatchStartTime EQU $C002
 wTimer EQU $C005 ; Global timer
 wLCDCSectId EQU $C006 ; Starts at $00 on every frame, incremented when LCDC hits (to determine the parallax sections)
 wVBlankNotDone EQU $C007 ; If != 0, the VBlank handler hasn't finished
+wRand EQU $C009
+wRandLY EQU $C00A
 
 wPaused EQU $C00E ; Game is paused
 wOBJLstCurHeaderFlags EQU $C00F ; Raw flags value from the OBJLst header
@@ -36,6 +38,9 @@ wMisc_C028 EQU $C028 ; appears to select a parallax type (how to divide the scre
 
 wIntroScene EQU $C029 ; Offset to scene ID in scene pointer table (some scenes have different parts)
 wIntroCharScene EQU $C02A ; Offset to the subscene ID when animating player sprites
+wTitleMode EQU $C029
+; ??? wModuleMode EQU $C029
+; ??? wModuleSubmode EQU $C02A
 
 wSGBSendPacketAtFrameEnd EQU $C02B ; If set, there are SGB packets to send after all tasks are processed
 wSGBSoundPacket EQU $C02C ; Data for the sound effect packet to be sent at the end of the frame.
@@ -55,8 +60,9 @@ wSerialDataSendBufferIndex_Tail EQU $C141 ; Index of last buffer entry - used fo
 wSerial_Unknown_SlaveRetransfer EQU $C142
 wSerial_Unknown_0_IncDecMarker EQU $C143
 wSerial_Unknown_1_IncDecMarker EQU $C144
-wSerialPlId EQU $C145 ; $02 -> Player 1; $03 -> Player 2
-wSerial_Unknown_Done EQU $C146 ; Marks if the serial handler was executed for the frame? otherwise waits
+wSerialPlayMode EQU $C145 ; Copy of wPlayMode set exclusively on VS modes ??
+wModeSelectTmpSerialData EQU $C145 ; Temporary value
+wSerialTransferDone EQU $C146 ; Marks if the serial handler was executed for the frame? otherwise waits
 wSerialJoyLastKeys EQU $C147 ; Player 1 - Most recent New Joypad Input (when controlling P1)
 wSerialJoyKeys EQU $C148 ; Player 1 - Joypad Input (when controlling P1)
 wSerialJoyLastKeys2 EQU $C149 ; Player 2 - Most recent Joypad Input (when controlling P1)
@@ -75,32 +81,68 @@ wTextPrintFrameCodePtr_Low EQU $C153 ; Ptr to the code itself
 wTextPrintFrameCodePtr_High EQU $C154
 
 
-wFieldScrollX EQU $C155 ; X Scroll coordinate of the viewport during gameplay 
-wFieldScrollY EQU $C157 ; Y Scroll coordinate of the viewport during gameplay 
+wOBJScrollX EQU $C155 ; X position *subtracted* to every OBJ.
+wOBJScrollY EQU $C157 ; Y position *subtracted* to every OBJ.
 
 ; a supposed wScreenSect0LYC for the first section is fixed, and always starts at $00
 wScreenSect1LYC EQU $C15A ; Scanline number the second screen section starts. During gameplay, it's the playfield.
 wScreenSect2LYC EQU $C15B ; Scanline number the third screen section starts. During gameplay, it's the meter HUD
 
+wPlayMode EQU $C163 ; Single/Team 1P/VS
 
+wUnknown_C165 EQU $C165
+wTitleActivePl EQU $C165 ; Determines the player side which has control on the main menu
+
+
+wRoundSeqId EQU $C17F ; Index to the char sequence table, essentially the number of beat opponents after clearing a stage
+wRoundSeqTbl EQU $C180 ; Sequence of CPU opponents in order.
+wCharIdExtra EQU $C191 ; Part of wRoundSeqTbl, the optional opponent for certain team combinations. 
+wCharSelIdMapTbl EQU $C194 ; Maps cursor locations in the char select screen (CHARSEL_ID_*) to actual character IDs (CHAR_ID_*)
+                           ; This is updated when flipping a tile.
+
+						   
 wIntroLoopOBJAnim EQU $C1B3 ; If set in the intro, sprite animations are set to loop
 wUnknownTimer_C1B3 EQU $C1B3
+wTitleMenuOptId EQU $C1B4 ; Cursor location in title screen
+wTitleMenuCursorXBak EQU $C1B5 ; Backup location of cursor X position
+wTitleMenuCursorYBak EQU $C1B6 ; Backup location of cursor Y position
+wUnknown_C1B7 EQU $C1B7
+wTitleSubMenuOptId EQU $C1B7 ; Cursor location for Game Select / Option menus
+wOptionsSGBSndOptId EQU $C1B8 ; Vertical cursor location in the SGB Sound Test
+wOptionsBGMId EQU $C1B9 ; ID of the selected music in the BGM Test
+wOptionsSFXId EQU $C1BA ; ID of the selected sound effect in the SFX Test
+wOptionsMenuMode EQU $C1BB ; $00 -> Normal, $02 -> SGB Sound Test
+wTitleBlinkTimer EQU $C1BC ; Increments in the title screen, determines when to hide or show blinking sprites
+wOptionsSGBBase EQU $C1BD ; These are ordered in the same way as OPTION_SITEM_*
+wOptionsSGBSndIdA EQU $C1BD ; Selected SGB Sound Id - Set A
+wOptionsSGBSndBankA EQU $C1BE ; Selected SGB Bank number Id - Set A
+wOptionsSGBSndIdB EQU $C1BF ; Selected SGB Sound Id - Set B
+wOptionsSGBSndBankB EQU $C1C0 ; Selected SGB Bank number Id - Set B
+
+
 
 wTitleResetTimer_High EQU $C1C1
 wTitleResetTimer_Low EQU $C1C2
+wTitleParallaxBaseSpeed EQU $C1C3 ; Extra cloud speed - Pixels
+wTitleParallaxBaseSpeedSub EQU $C1C4 ; Extra cloud speed - Subpixels
+
 wSerial_Unknown_PausedFrameTimer EQU $C1C5 ; Amount of frames the game is paused, waiting for serial connection ???
 
 wLZSS_CurCmdMask EQU $C1C7
 wLZSS_SplitNum EQU $C1C8
 wLZSS_SplitMask EQU $C1C9
 wLZSS_Buffer EQU $C1CA
+
 ; Variables sitting on top of the buffer
 wCheatGoenitzKeysLeft   EQU $C1CA ; Amount of times to press the button before cheat activates
 wCheatAllCharKeysLeft   EQU $C1CB ; each for the 4 cheats
 wCheat_Unused_KeysLeft  EQU $C1CC
 wCheatEasyMovesKeysLeft EQU $C1CD
 
-
+wOptionsSGBPacketSnd EQU $C1CA ; Start of SGB packet used when selecting a song in the sound test
+wOptionsSGBPacketSndIdA  EQU $C1CB ; Byte 1 determines Sound ID A
+wOptionsSGBPacketSndIdB  EQU $C1CC ; Byte 2 determines Sound ID B
+wOptionsSGBPacketSndBank EQU $C1CC ; Byte 3 determines Sound Bank
 
 wSnd_Unk_Unused_D480 EQU $D480 ; $80 is always written here, but never read back
 wSnd_Unused_ChUsed EQU $D481 ; Appears to be a bitmask intended to mark the used sound channels, but it is only set properly in unreachable code.
@@ -121,10 +163,6 @@ wSndIdReqTbl EQU $D5F8 ; Sound IDs to play are written here
 
 
 
-
-; size: $40 (is this for an entire object, or does it contain the OBJLst directly?)
-; Fixed sprite mappings ???
-
 wOBJInfo0 EQU $D680
 wOBJInfo_Pl1 EQU $D680
 wOBJInfo1 EQU $D6C0
@@ -137,9 +175,20 @@ wOBJInfo6 EQU $D800
 wOBJInfo7 EQU $D840
 wOBJInfo8 EQU $D880
 
+; Special purpose mappings
+; Title screen
+wOBJInfo_CursorR  EQU wOBJInfo0
+wOBJInfo_MenuText EQU wOBJInfo1
+wOBJInfo_SnkText  EQU wOBJInfo2
+wOBJInfo_CursorU  EQU wOBJInfo3
+
+
+
 wGFXBufInfo_Pl1 EQU $D8C0
 wGFXBufInfo_Pl2 EQU $D8E0
 
+wPlInfo_Pl1 EQU $D920
+wPlInfo_Pl2 EQU $DA20
 
 wWorkOAM EQU $DF00
 wWorkOAM_End EQU $DFA0
@@ -149,8 +198,13 @@ wWorkOAM_End EQU $DFA0
 hOAMDMA EQU $FF80 ; OAMDMA routine
 hJoyKeys EQU $FF98 ; Player 1 - Joypad keys
 hJoyNewKeys EQU $FF99 ; Player 1 - Newly pressed keys
+hJoyKeys_Unknown_2 EQU $FF9A
+hJoyKeysDelayTbl EQU $FF9B ; Player 1 - Menu hold delay info ($10 bytes, 2 for each KEY_*)
+
 hJoyKeys2 EQU $FFAB ; Player 2 - Joypad keys
 hJoyNewKeys2 EQU $FFAC ; Player 2 - Newly pressed keys
+hJoyKeys2_Unknown_2 EQU $FFAD
+hJoyKeys2DelayTbl EQU $FFAE
 
 hTaskStats EQU $FFC0 ; Global task system info
 hCurTaskId EQU $FFC1 ; $01-$03 ?
@@ -197,6 +251,10 @@ iTaskPauseTimer EQU $01 ; Decrements every frame. If != 0, the task isn't marked
 iTaskPtr_Low EQU $02 ; Code or stack pointer
 iTaskPtr_High EQU $03
 
+; Elements in hJoyKeysDelayTbl entry struct
+iKeyMenuHeld  EQU $00
+iKeyMenuTimer EQU $01
+
 ; Elements in wGFXBufInfo struct
 ; Set A -> Primary sprite mapping
 ; Set B -> Secondary sprite mapping, not always present
@@ -210,8 +268,8 @@ iGFXBufInfo_SrcPtrB_Low  EQU $06 ; Set B - Source GFX ptr
 iGFXBufInfo_SrcPtrB_High EQU $07
 iGFXBufInfo_BankB        EQU $08 ; Set B - Source GFX bank
 iGFXBufInfo_TilesLeftB   EQU $09 ; Set B - (8x8) Tiles remaining
-iGFXBufInfo_SetKeyOld       EQU $0A ; ??? 5 bytes. Current set "Id". Combination of Set A settings.
-iGFXBufInfo_DoneSetKey   EQU $10 ; ??? 5 bytes. Last completed set "id".
+iGFXBufInfo_SetKey       EQU $0A ; ??? 5 bytes. Current set "Id". Combination of Set A settings.
+iGFXBufInfo_SetKeyOld    EQU $10 ; ??? 5 bytes. Last completed set "id".
 
 ; Elements in the wOBJInfo struct
 ; Current -> Current data
@@ -226,8 +284,8 @@ iOBJInfo_Y EQU $05 ; Y Position
 iOBJInfo_YSub EQU $06 ; Y Subpixel Position
 iOBJInfo_SpeedX EQU $07 ; X speed - Added to iOBJInfo_X every frame
 iOBJInfo_SpeedXSub EQU $08 ; X Subpixel speed - Added to iOBJInfo_XSub every frame
-;iOBJInfo_SpeedY EQU $09 ; X speed
-;iOBJInfo_SpeedYSub EQU $0A ; Y Subpixel speed
+iOBJInfo_Unknown_09 EQU $09 ; ???
+iOBJInfo_Unknown_0A EQU $0A ; ???
 iOBJInfo_RelX EQU $0B ; Relative X Position (autogenerated)
 iOBJInfo_RelY EQU $0C ; Relative Y Position (autogenerated)
 iOBJInfo_TileIDBase EQU $0D ; Starting tile ID (all tile IDs in the OBJ list are relative to this)
@@ -281,6 +339,10 @@ iOBJLst_OBJCount EQU $00
 iOBJ_Y EQU $00
 iOBJ_X EQU $01
 iOBJ_TileIDAndFlags EQU $02
+
+; Player struct (wPlInfo) format
+iPlInfo_Status EQU $00
+
 
 ; Sound channel data header (ROM)
 ; =============== SONG FORMAT ===============

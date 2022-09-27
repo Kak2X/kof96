@@ -3251,8 +3251,8 @@ L1D509F:;I
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
-	ld   [wFieldScrollX], a
-	ld   [wFieldScrollY], a
+	ld   [wOBJScrollX], a
+	ld   [wOBJScrollY], a
 	call LoadGFX_1bppFont_Default
 	call ClearOBJInfo
 	call L0014F9
@@ -3266,11 +3266,11 @@ L1D509F:;I
 	ld   a, c
 	ld   [wUnknownTimer_C1B3], a
 	ld   a, b
-	ld   [$C1B4], a
-	ld   a, [$C163]
+	ld   [wTitleMenuOptId], a
+	ld   a, [wPlayMode]
 	bit  1, a
 	jp   nz, L1D512F
-	ld   a, [$C165]
+	ld   a, [wUnknown_C165]
 	or   a
 	jp   nz, L1D5138
 	jp   L1D5135
@@ -3282,11 +3282,11 @@ L1D50F6:;J
 	ld   a, c
 	ld   [wUnknownTimer_C1B3], a
 	ld   a, b
-	ld   [$C1B4], a
-	ld   a, [$C163]
+	ld   [wTitleMenuOptId], a
+	ld   a, [wPlayMode]
 	bit  1, a
 	jp   nz, L1D5132
-	ld   a, [$C165]
+	ld   a, [wUnknown_C165]
 	or   a
 	jp   z, L1D5138
 L1D5118: db $C3;X
@@ -3295,7 +3295,7 @@ L1D511A: db $51;X
 L1D511B:;J
 	ld   hl, $56D6
 	call TextPrinter_Instant
-	ld   a, [$C163]
+	ld   a, [wPlayMode]
 	bit  1, a
 	jp   nz, L1D512C
 	jp   L1D553E
@@ -3325,7 +3325,7 @@ L1D5144:;J
 	call L1D5649
 L1D5147:;X
 	call L1D5697
-	ld   a, [$C17F]
+	ld   a, [wRoundSeqId]
 	cp   $0F
 	jp   z, L1D5169
 	cp   $10
@@ -3343,7 +3343,7 @@ L1D5169:;J
 	rst  $08
 	ld   bc, $0000
 	call L1D54D8
-	ld   a, [$C163]
+	ld   a, [wPlayMode]
 	bit  0, a
 	jp   nz, L1D5183
 	call L001776
@@ -3372,7 +3372,7 @@ L1D518C:;J
 L1D51AC:;J
 	ld   bc, $0000
 	call L1D54D8
-	ld   a, [$C163]
+	ld   a, [wPlayMode]
 	bit  0, a
 	jp   nz, L1D51C0
 	call L001776
@@ -3446,7 +3446,7 @@ L1D5241:;J
 	ld   a, [$C15C]
 	call L1D5428
 	ld   a, $11
-	ld   [$C17F], a
+	ld   [wRoundSeqId], a
 	call L001776
 	ld   b, $1E
 	ld   hl, $626E
@@ -3474,7 +3474,7 @@ L1D5264:;J
 	ld   hl, $6F93
 	rst  $08
 	ld   a, $12
-	ld   [$C17F], a
+	ld   [wRoundSeqId], a
 	ld   bc, $0000
 	call L1D54D8
 	call L001776
@@ -3499,10 +3499,10 @@ L1D52A4: db $42;X
 L1D52A5: db $6F;X
 L1D52A6: db $C7;X
 L1D52A7:;C
-	ld   a, [$C163]
+	ld   a, [wPlayMode]
 	bit  0, a
 	jp   z, L1D5306
-	ld   a, [$C165]
+	ld   a, [wUnknown_C165]
 	or   a
 	jp   nz, L1D52BF
 	ld   hl, $D92E
@@ -3764,7 +3764,7 @@ L1D5426:;R
 	ret
 L1D5428:;C
 	push af
-	ld   a, [$C165]
+	ld   a, [wUnknown_C165]
 	or   a
 	jp   nz, L1D5439
 	ld   hl, $D92C
@@ -3925,15 +3925,15 @@ L1D54D5: db $12
 L1D54D6: db $14
 L1D54D7: db $FF
 L1D54D8:;C
-	ld   a, [$C17F]
-	ld   hl, $C180
+	ld   a, [wRoundSeqId]
+	ld   hl, wRoundSeqTbl
 	ld   d, $00
 	ld   e, a
 	add  hl, de
 	ld   a, [hl]
 	sla  a
 	push af
-	ld   a, [$C165]
+	ld   a, [wUnknown_C165]
 	or   a
 	jp   nz, L1D54F6
 	ld   hl, $DA2E
@@ -3954,7 +3954,7 @@ L1D54FC:;J
 	ld   [hl], a
 	ret
 L1D5504:;J
-	ld   a, [$C17F]
+	ld   a, [wRoundSeqId]
 	cp   $11
 	jp   nc, L1D5144
 	call L1D5649
@@ -3972,7 +3972,7 @@ L1D5504:;J
 	ld   a, $09
 	ld   [wUnknownTimer_C1B3], a
 	ld   a, $3C
-	ld   [$C1B4], a
+	ld   [wTitleMenuOptId], a
 	ld   a, $1B
 	ldh  [rBGP], a
 	ld   a, $C7
@@ -3995,7 +3995,7 @@ L1D5556: db $C3;X
 L1D5557: db $4D;X
 L1D5558: db $55;X
 L1D5559:;J
-	ld   a, [$C17F]
+	ld   a, [wRoundSeqId]
 	cp   $11
 	jp   nc, L1D5147
 	rst  $10
@@ -4012,7 +4012,7 @@ L1D5559:;J
 	ld   a, $09
 	ld   [wUnknownTimer_C1B3], a
 	ld   a, $3C
-	ld   [$C1B4], a
+	ld   [wTitleMenuOptId], a
 	ld   a, $1B
 	ldh  [rBGP], a
 	ld   a, $C7
@@ -4094,16 +4094,16 @@ L1D55D7:;J
 L1D55DA:;J
 	call L1D5685
 	jp   c, L1D5629
-	ld   a, [$C1B4]
+	ld   a, [wTitleMenuOptId]
 	or   a
 	jp   z, L1D55F1
 	dec  a
-	ld   [$C1B4], a
+	ld   [wTitleMenuOptId], a
 	call Task_PassControl_NoDelay
 	jp   L1D55DA
 L1D55F1:;J
 	ld   a, $3C
-	ld   [$C1B4], a
+	ld   [wTitleMenuOptId], a
 	ld   a, [wUnknownTimer_C1B3]
 	or   a
 	jp   z, L1D561B
@@ -4205,8 +4205,8 @@ L1D5695:;J
 	scf
 	ret
 L1D5697:;C
-	ld   hl, $C180
-	ld   a, [$C17F]
+	ld   hl, wRoundSeqTbl
+	ld   a, [wRoundSeqId]
 	add  a, L
 	jp   nc, L1D56A2
 L1D56A1: db $24;X
@@ -4214,8 +4214,8 @@ L1D56A2:;J
 	ld   l, a
 	push hl
 	pop  de
-	ld   hl, $C17F
-	ld   a, [$C17F]
+	ld   hl, wRoundSeqId
+	ld   a, [wRoundSeqId]
 	cp   $0F
 	jp   z, L1D56C9
 	cp   $10
@@ -4225,7 +4225,7 @@ L1D56A2:;J
 	cp   $12
 	jp   z, L1D56C9
 	ld   b, $03
-	ld   a, [$C163]
+	ld   a, [wPlayMode]
 	bit  0, a
 	jp   nz, L1D56CB
 L1D56C9:;J
@@ -9535,7 +9535,7 @@ L1D6FD7:;C
 	call OBJLstS_InitFrom
 	ld   a, [wUnknownTimer_C1B3]
 	ld   c, a
-	ld   a, [$C1B4]
+	ld   a, [wTitleMenuOptId]
 	ld   b, a
 	push bc
 	ld   hl, $002C
@@ -9899,8 +9899,8 @@ L1D71DE:;C
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
-	ld   [wFieldScrollX], a
-	ld   [wFieldScrollY], a
+	ld   [wOBJScrollX], a
+	ld   [wOBJScrollY], a
 	call LoadGFX_1bppFont_Default
 	call ClearOBJInfo
 	ld   a, $5C
@@ -9924,8 +9924,8 @@ L1D7220:;I
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
-	ld   [wFieldScrollX], a
-	ld   [wFieldScrollY], a
+	ld   [wOBJScrollX], a
+	ld   [wOBJScrollY], a
 	call LoadGFX_1bppFont_Default
 	call ClearOBJInfo
 	ld   a, $C7
@@ -10077,8 +10077,8 @@ L1D73C5:;I
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
-	ld   [wFieldScrollX], a
-	ld   [wFieldScrollY], a
+	ld   [wOBJScrollX], a
+	ld   [wOBJScrollY], a
 	call LoadGFX_1bppFont_Default
 	call ClearOBJInfo
 	ld   a, $C7

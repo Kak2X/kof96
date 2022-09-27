@@ -1028,12 +1028,24 @@ Task_EndOfFrame:
 	; If we get here too late, the flag ends up not being cleared and we wait
 	; for an extra frame.
 	ei
+	
+
+	
 .waitVBlank:
+IF CPU_USAGE
+	ld   a, [wVBlankNotDone]
+	and  a
+	ret  z
+	halt
+	jr   .waitVBlank		; In case something other than VBLANK occurred
+ELSE
 	ld   a, [wVBlankNotDone]
 	or   a						; VBlank done yet?
 	jp   nz, .waitVBlank		; If not, loop
 	ret
-	
+ENDC
+
+
 
 ; =============== SetSectLYC ===============
 ; Enables section mode and and sets the scanline numbers for two of the three default screen sections.
@@ -1270,7 +1282,7 @@ VBlankHandler:
 ;--
 .unmarkSerialDone:
 	xor  a								; ???
-	ld   [wSerial_Unknown_Done], a
+	ld   [wSerialTransferDone], a
 	
 ; =============== VBlank_ChkCopyPlTiles ===============
 ; Determines if the player graphics should be copied to VRAM.
@@ -1452,10 +1464,10 @@ VBlank_CopyPl1Tiles:
 	;--------
 .move1:
 	
-	; Copy over the unique identifier for the Set settings from iGFXBufInfo_SetKeyOld to iGFXBufInfo_DoneSetKey.
+	; Copy over the unique identifier for the Set settings from iGFXBufInfo_SetKey to iGFXBufInfo_SetKeyOld.
 	; This tells the wGFXBufInfo init code which settings were the last to be completely applied.
-	ld   hl, wGFXBufInfo_Pl1+iGFXBufInfo_SetKeyOld 		; HL = Source
-	ld   de, wGFXBufInfo_Pl1+iGFXBufInfo_DoneSetKey 	; DE = Destination
+	ld   hl, wGFXBufInfo_Pl1+iGFXBufInfo_SetKey 		; HL = Source
+	ld   de, wGFXBufInfo_Pl1+iGFXBufInfo_SetKeyOld 	; DE = Destination
 	
 REPT 5
 	ldi  a, [hl]
@@ -1595,8 +1607,8 @@ VBlank_CopyPl2Tiles:
 	ld   [hl], $00
 .move1:
 
-	ld   hl, wGFXBufInfo_Pl2+iGFXBufInfo_SetKeyOld
-	ld   de, wGFXBufInfo_Pl2+iGFXBufInfo_DoneSetKey
+	ld   hl, wGFXBufInfo_Pl2+iGFXBufInfo_SetKey
+	ld   de, wGFXBufInfo_Pl2+iGFXBufInfo_SetKeyOld
 	ldi  a, [hl]
 	ld   [de], a
 	inc  de
@@ -1903,8 +1915,9 @@ mPL_KeepInScreenRange: MACRO
 	; TODO: VERIFY
 	;
 	
-	; B = -ScrollX
-	ld   a, [wFieldScrollX]
+	; Take the relative X position into account, since that's outside of iOBJInfo_X
+	; B = -OBJScrollX
+	ld   a, [wOBJScrollX]	; Invert as it simulates wScrollX behaviour
 	cpl
 	inc  a
 	ld   b, a
@@ -2007,19 +2020,25 @@ OBJLstS_DoOBJInfoSlot:
 .calcRelX:
 	;--
 	;
-	; Determine the relative X position of the sprite.
-	; RelX = AbsoluteX - ScrollX + OBJ_OFFSET_X
+	; Determine the relative X position of the sprite mapping.
+	; RelX = AbsoluteX - BaseX + OBJ_OFFSET_X
+	;
+	; The wOBJScroll* values are "inverted", to simulate how scrolling the screen right would move the BG left.
+	; So here, setting wOBJScrollX to 5 will move the sprites left by 5px.
+	;
+	; This is done this way to allow easy sync with the BG scrolling during gameplay -- as one of the
+	; main purposes of these values is to move all sprites accordingly when the playfield scrolls.
 	;
 
 	; C = Sprite X position
 	ld   c, [hl]				; Read iOBJInfo_X
-	; A = -ScrollX
-	ld   a, [wFieldScrollX]
+	; A = -BaseX
+	ld   a, [wOBJScrollX]
 	cpl
 	inc  a
 	
-	add  c						; XPos - ScrollX
-	add  a, OBJ_OFFSET_X		; + OBJ_OFFSET_X
+	add  c						; A = XPos - BaseX
+	add  a, OBJ_OFFSET_X		; A += OBJ_OFFSET_X
 	
 	; Seek to next entry (this has 2 bytes assigned?)
 	inc  hl						; HL += 2
@@ -2030,18 +2049,18 @@ OBJLstS_DoOBJInfoSlot:
 .calcRelY:
 	;--
 	;
-	; Determine the relative Y position of the sprite.
-	; RelY = AbsoluteY - ScrollY
+	; Determine the relative Y position of the sprite mapping.
+	; RelY = AbsoluteY - BaseY
 	;
 	
 	; C = Sprite Y position
 	ld   c, [hl]				; Read iOBJInfo_Y
-	; A = -ScrollY
-	ld   a, [wFieldScrollY]
+	; A = -BaseY
+	ld   a, [wOBJScrollY]
 	cpl
 	inc  a
 	
-	add  c					; YPos - ScrollY
+	add  c						; A = YPos - BaseY
 	; Seek to next entry (this has 2 bytes assigned?)
 	inc  hl						; HL += 2
 	inc  hl
@@ -2796,10 +2815,9 @@ OBJLstS_DoAnimTiming_NoLoop:
 			ld   d, [hl]
 			inc  hl
 			
-			; Increase the offset by 4 bytes (OBJLstHdrA_* and OBJLstHdrB_* pointers)
-			; and use the updated value as table offset
+			; Seek to the next entry in the table, and also save back the updated value
 			ld   a, [hl]				; A = Offset + $04
-			add  a, $02*2
+			add  a, OBJLSTPTR_ENTRYSIZE
 			ld   [hl], a
 			ld   b, $00					; BC = New offset
 			ld   c, a
@@ -2825,7 +2843,7 @@ OBJLstS_DoAnimTiming_NoLoop:
 				;------------------------
 				; Otherwise, move back the offset
 				ld   a, [de]			; iOBJInfo_OBJLstPtrTblOffset -= $04
-				sub  a, $02*2
+				sub  a, OBJLSTPTR_ENTRYSIZE
 				ld   [de], a
 			pop  hl						
 		pop  hl							; Restore ptr to start of OBJInfo
@@ -2904,10 +2922,9 @@ OBJLstS_DoAnimTiming_Loop:
 			ld   d, [hl]
 			inc  hl
 			
-			; Increase the offset by 4 bytes (OBJLstHdrA_* and OBJLstHdrB_* pointers)
-			; and use the updated value as table offset
+			; Seek to the next entry in the table, and also save back the updated value
 			ld   a, [hl]				; A = Offset + $04
-			add  a, $02*2
+			add  a, OBJLSTPTR_ENTRYSIZE
 			ld   [hl], a
 			ld   b, $00					; BC = New offset
 			ld   c, a
@@ -3108,7 +3125,7 @@ OBJLstS_UpdateGFXBufInfo:
 			inc  de
 			inc  de			; Ignore iGFXBufInfo_BankB, who cares
 			ld   [de], a	; iGFXBufInfo_TilesLeftB
-			inc  de			; Seek to iGFXBufInfo_SetKeyOld
+			inc  de			; Seek to iGFXBufInfo_SetKey
 			jp   .chkMatches
 			
 		.hasSetB:
@@ -3131,7 +3148,7 @@ OBJLstS_UpdateGFXBufInfo:
 			ld   a, [bc]	; A = iOBJLst_OBJCount
 			add  a, a		; A *= 2
 			ld   [de], a	; iGFXBufInfo_TilesLeftB = A
-			inc  de			; Seek to iGFXBufInfo_SetKeyOld
+			inc  de			; Seek to iGFXBufInfo_SetKey
 			
 		;------------------	
 		.chkMatches:
@@ -3144,17 +3161,17 @@ OBJLstS_UpdateGFXBufInfo:
 			; A side effect of this is that the new frame will animate much faster -- since normally the game has to
 			; wait for the graphics to load before decrementing the frame timer, but here the graphics are already loaded.
 			;
-			; Otherwise the settings identifier at iGFXBufInfo_SetKeyOld is updated and we're done. 
+			; Otherwise the settings identifier at iGFXBufInfo_SetKey is updated and we're done. 
 			;
 			
 			; BC = Ptr to start of wGFXBufInfo struct
-			ld   hl, -(iGFXBufInfo_SetKeyOld-iGFXBufInfo_DestPtr_Low)
+			ld   hl, -(iGFXBufInfo_SetKey-iGFXBufInfo_DestPtr_Low)
 			add  hl, de
 			push hl
 			pop  bc
 			
-			; DE = Ptr to iGFXBufInfo_DoneSetKey
-			ld   hl, iGFXBufInfo_DoneSetKey
+			; DE = Ptr to iGFXBufInfo_SetKeyOld
+			ld   hl, iGFXBufInfo_SetKeyOld
 			add  hl, bc
 			push hl
 			pop  de
@@ -3164,9 +3181,9 @@ OBJLstS_UpdateGFXBufInfo:
 			add  hl, bc
 			
 			; Check if these match:
-			; - iGFXBufInfo_SrcPtrA_Low  with iGFXBufInfo_DoneSetKey
-			; - iGFXBufInfo_SrcPtrA_High with iGFXBufInfo_DoneSetKey+1
-			; - iGFXBufInfo_BankA        with iGFXBufInfo_DoneSetKey+2
+			; - iGFXBufInfo_SrcPtrA_Low  with iGFXBufInfo_SetKeyOld
+			; - iGFXBufInfo_SrcPtrA_High with iGFXBufInfo_SetKeyOld+1
+			; - iGFXBufInfo_BankA        with iGFXBufInfo_SetKeyOld+2
 			; If they don't take the jump
 REPT 3
 			ld   a, [de]		; A = CompInfo byte
@@ -3178,9 +3195,9 @@ ENDR
 			inc  hl				; Skip comparing iGFXBufInfo_TilesLeftA
 			
 			; Check if these match:
-			; - iGFXBufInfo_SrcPtrB_Low  with iGFXBufInfo_DoneSetKey+3
-			; - iGFXBufInfo_SrcPtrB_High with iGFXBufInfo_DoneSetKey+4
-			; - iGFXBufInfo_BankB        with iGFXBufInfo_DoneSetKey+5
+			; - iGFXBufInfo_SrcPtrB_Low  with iGFXBufInfo_SetKeyOld+3
+			; - iGFXBufInfo_SrcPtrB_High with iGFXBufInfo_SetKeyOld+4
+			; - iGFXBufInfo_BankB        with iGFXBufInfo_SetKeyOld+5
 			; If they don't take the jump			
 REPT 2
 			ld   a, [de]		; A = CompInfo byte
@@ -3189,7 +3206,7 @@ REPT 2
 			inc  de
 			inc  hl
 ENDR
-			ld   a, [de]		; A = iGFXBufInfo_DoneSetKey+5
+			ld   a, [de]		; A = iGFXBufInfo_SetKeyOld+5
 			cp   a, [hl]		; Does it match with iGFXBufInfo_BankB?
 			jp   nz, .different	; If not, jump
 			
@@ -3253,19 +3270,19 @@ ENDR
 			; BC = Ptr to iGFXBufInfo_DestPtr_Low
 			
 			;
-			; Update the current settings identifier (iGFXBufInfo_SetKeyOld) by copying over the untouched Set settings we just wrote.
+			; Update the current settings identifier (iGFXBufInfo_SetKey) by copying over the untouched Set settings we just wrote.
 			;
 			
-			ld   hl, iGFXBufInfo_SetKeyOld	; DE = iGFXBufInfo_SetKeyOld
+			ld   hl, iGFXBufInfo_SetKey	; DE = iGFXBufInfo_SetKey
 			add  hl, bc
 			push hl
 			pop  de
 			ld   hl, iGFXBufInfo_SrcPtrA_Low	; HL = iGFXBufInfo_SrcPtrA_Low
 			add  hl, bc
 			
-			; iGFXBufInfo_SrcPtrA_Low  -> iGFXBufInfo_SetKeyOld
-			; iGFXBufInfo_SrcPtrA_High -> iGFXBufInfo_SetKeyOld+1
-			; iGFXBufInfo_BankA        -> iGFXBufInfo_SetKeyOld+2
+			; iGFXBufInfo_SrcPtrA_Low  -> iGFXBufInfo_SetKey
+			; iGFXBufInfo_SrcPtrA_High -> iGFXBufInfo_SetKey+1
+			; iGFXBufInfo_BankA        -> iGFXBufInfo_SetKey+2
 REPT 3
 			ldi  a, [hl]
 			ld   [de], a
@@ -3273,9 +3290,9 @@ REPT 3
 ENDR
 			inc  hl
 			
-			; iGFXBufInfo_SrcPtrB_Low  with iGFXBufInfo_SetKeyOld+3
-			; iGFXBufInfo_SrcPtrB_High with iGFXBufInfo_SetKeyOld+4
-			; iGFXBufInfo_BankB        with iGFXBufInfo_SetKeyOld+5
+			; iGFXBufInfo_SrcPtrB_Low  with iGFXBufInfo_SetKey+3
+			; iGFXBufInfo_SrcPtrB_High with iGFXBufInfo_SetKey+4
+			; iGFXBufInfo_BankB        with iGFXBufInfo_SetKey+5
 REPT 2
 			ldi  a, [hl]
 			ld   [de], a
@@ -3546,20 +3563,28 @@ L000E79: db $56;X
 L000E7A: db $23;X
 L000E7B: db $46;X
 L000E7C: db $23;X
-L000E7D:;JC
+
+; =============== CopyTilesHBlank ===============
+; Tile copy function during HBlank.
+; IN
+; - HL: Ptr to uncompressed GFX
+; - DE: Ptr to destination in VRAM
+; -  B: Number of tiles to copy
+CopyTilesHBlank:;
 	push bc
-	ld   b, $10
-L000E80:;J
-	mWaitForHBlank
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	dec  b
-	jp   nz, L000E80
+		ld   b, TILESIZE		; B = Bytes in tile
+	.loop:
+		mWaitForHBlank
+		ldi  a, [hl]			; Read byte, SourcePtr++
+		ld   [de], a			; Copy it over
+		inc  de					; DestPtr++
+		dec  b					; Copied all bytes in the tile?
+		jp   nz, .loop			; If not, loop
 	pop  bc
-	dec  b
-	jp   nz, L000E7D
+	dec  b						; Copied all tiles?
+	jp   nz, CopyTilesHBlank	; If not, loop
 	ret
+	
 L000E94: db $5E;X
 L000E95: db $23;X
 L000E96: db $56;X
@@ -4171,8 +4196,8 @@ JoyKeys_Get:
 	bit  MISCB_IS_SGB, a			; Running in SGB mode?
 	jp   nz, JoyKeys_Get_SGB		; If so, grab inputs for both players
 	ld   hl, hJoyKeys				; For later
-	ld   a, [wSerialPlId]
-	and  a							; Serial mode set? (seemingly set to 02 if so)
+	ld   a, [wSerialPlayMode]
+	and  a							; Playing in VS mode?
 	jr   nz, JoyKeys_Get_Serial		; If so, jump
 	
 ; =============== JoyKeys_Get_Standard ===============
@@ -4364,77 +4389,135 @@ JoyKeys_Get_SGB:
 	jp   nz, .loop	; All pads red? If not, loop
 	ret
 	
-L00112E:;C
+; =============== JoyKeys_DoCursorDelayTimer ===============
+; Handles the cursor movement delay timers, used to determine when to move the cursor.
+JoyKeys_DoCursorDelayTimer:
 	ld   hl, hJoyKeys
-	call L00113B
+	call .calcInfo
 	ld   hl, hJoyKeys2
-	call L00113B
+	call .calcInfo
 	ret
-L00113B:;C
-	ld   d, [hl]
-	inc  hl
-	inc  hl
-	inc  hl
-	ld   e, $08
-L001141:;J
-	ld   b, [hl]
-	inc  hl
-	ld   c, [hl]
-	dec  hl
+	
+; =============== .calcInfo ===============
+; IN
+; - HL: Ptr to hJoyKeys*
+.calcInfo:
+	ld   d, [hl]	; D = hJoyKeys
+	
+	; Seek to hJoyKeysDelayTbl
+	inc  hl			
+	inc  hl			
+	inc  hl			
+	
+	; For each KEY_* value, calculate this information, going from MSB to bit 0.
+	
+	ld   e, $08		; E = Bits in byte
+.nextPair:
+
+	;
+	; Each entry in the hJoyKeysDelayTbl array is 2 bytes large.
+	;
+	; 0 -> Marks if the KEY_* value is pressed.
+	;      Separated in two nybbles, with the low one containing the current info
+	;      and the high one info for the previous frame.
+	;      Split like this to easily determine when we just started holding a key without juggling hJoyNewKeys.
+	;
+	; 1 -> Countdown timer.
+	;      This is set to $11 when we start holding a key, then to $06 once it reaches $00.
+	;      When it reaches $00, the upper nybble of byte0 is unmarked by setting the byte to $01,
+	;      which tells Title_GetMenuInput to treat the input as held.
+	;      
+
+	ld   b, [hl]	; B = Marker (byte0)
+	inc  hl			; 
+	ld   c, [hl]	; C = Timer (byte1)
+	dec  hl			; Seek back to byte0
+	
+	; Move the existing keypress marker to the upper nybble.
+	; If what we had here was $01 and that gets shifted to the upper nybble, it will cause
+	; Title_GetMenuInput to ignore the key unless it gets set to $01 by the time we exit this function.
+	sla  b		; B << 4
 	sla  b
 	sla  b
 	sla  b
-	sla  b
-	rlc  d
-	jp   nc, L001167
-	set  0, b
+	
+	; Check if the current key was pressed.
+	; If not, the lower nybble will be kept at 0, and next time we get here it will be pushed out.
+	rlc  d			; Push KEY_* to carry
+	jp   nc, .save	; Is the bit set? If not, jump
+.press:
+	set  0, b		; Mark the key as presssed
+	
+	; Check if we just started holding a key.
+	; If not, A will be $11 when we get here.
 	ld   a, b
-	cp   $01
-	jp   nz, L00115F
-	ld   c, $11
-	jp   L001167
-L00115F:;J
-	dec  c
-	jp   nz, L001167
-	ld   b, $01
+	cp   $01			; Marker == $01? (just started)
+	jp   nz, .decTimer	; If not, jump
+.initTimer:
+	; Set the initial delay to $11 frames.
+	ld   c, $11			
+	jp   .save
+	
+.decTimer:
+
+	; Decrement the key timer.
+	; If it reaches 0, reset it.
+	dec  c				; Timer--
+	jp   nz, .save		; Timer == 0? If not, jump
+.resetTimerNext:
+	; Set the delay to $06 frames
+	ld   b, $01			; Treat input as held
 	ld   c, $06
-L001167:;J
-	ld   [hl], b
+	;--
+.save:
+	ld   [hl], b		; Save back key marker
 	inc  hl
-	ld   [hl], c
-	inc  hl
-	dec  e
-	jp   nz, L001141
+	ld   [hl], c		; Save back timer
+	inc  hl				; Seek to next entry in delay table
+	dec  e				; Processed all bits?
+	jp   nz, .nextPair	; If not, loop
 	ret
-L001170:;C
+; =============== Rand ===============
+; Random generator without using cycles.
+; OUT
+; - A: Random number
+Rand:
+	; wRand += wTimer + (wRand * 5) + 1
 	push bc
-	ld   a, [$C009]
-	ld   b, a
-	sla  a
-	sla  a
-	add  b
-	inc  a
-	ld   b, a
-	ld   a, [wTimer]
-	add  b
-	ld   [$C009], a
+		ld   a, [wRand]		; A = wRand
+		ld   b, a			; B = wRand
+		sla  a				; A *= 4
+		sla  a
+		add  b				; A += B + 1
+		inc  a
+		ld   b, a			; B = A
+		ld   a, [wTimer]	; A = wTimer + B
+		add  b
+		ld   [wRand], a		; wRand = A
 	pop  bc
 	ret
-L001185:;C
+; =============== RandLY ===============
+; Random generator using cycles.
+; OUT
+; - A: Random number
+RandLY:
+	; wRandLY += wTimer + (wRandLY * 5) + rLY + 1 
 	push bc
-	ld   a, [$C00A]
-	ld   b, a
-	sla  a
-	sla  a
-	add  b
-	inc  a
-	ld   b, a
-	ld   a, [wTimer]
-	add  b
-	ld   b, a
-	ldh  a, [rLY]
-	add  b
-	ld   [$C00A], a
+		ld   a, [wRandLY]	; A = wRand
+		ld   b, a			; B = wRand
+		sla  a				; A *= 4
+		sla  a
+		add  b				; A += B + 1
+		inc  a
+		ld   b, a			; B = A
+		ld   a, [wTimer]	; A = wTimer + B
+		add  b	
+		;--
+		ld   b, a			; B = A
+		ldh  a, [rLY]		; wRand = B + rLY 
+		add  b
+		;--
+		ld   [wRandLY], a
 	pop  bc
 	ret
 ; =============== LoadGFX_1bppFont_Default ===============
@@ -5059,7 +5142,7 @@ HomeCall_SGB_ApplyScreenPalSet:
 	ret  z						; If not, return
 	ldh  a, [hROMBank]
 	push af
-	ld   a, BANK(SGB_ApplyScreenPalSet)
+	ld   a, BANK(SGB_ApplyScreenPalSet) ; BANK $04
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	call SGB_ApplyScreenPalSet
@@ -5084,10 +5167,10 @@ L0013ED:;C
 	ld   a, [$C167]
 	or   a
 	jp   nz, L0014A6
-	ld   a, [$C163]
+	ld   a, [wPlayMode]
 	bit  1, a
 	jp   nz, L001445
-	ld   a, [$C165]
+	ld   a, [wUnknown_C165]
 	or   a
 	jp   nz, L001424
 	ld   hl, $DA2C
@@ -5104,7 +5187,7 @@ L001427:;J
 	add  hl, de
 	ld   a, [hl]
 	ld   [$C166], a
-	ld   a, [$C17F]
+	ld   a, [wRoundSeqId]
 	cp   $11
 	jp   nz, L001445
 	ld   a, $06
@@ -5264,14 +5347,14 @@ L0014F9:;C
 	ldh  [rIE], a
 	ei   
 	xor  a
-	ld   [wSerial_Unknown_Done], a
+	ld   [wSerialTransferDone], a
 	ld   hl, wMisc_C025
 	bit  MISCB_SERIAL_PL2_SLAVE, [hl]
 	jp   nz, L00155C
 	ld   bc, Rst_StopLCDOperation
 	call SGB_DelayAfterPacketSendCustom
 	xor  a
-	ld   [wSerial_Unknown_Done], a
+	ld   [wSerialTransferDone], a
 L001531:
 	di   
 	ld   a, $43
@@ -5281,7 +5364,7 @@ L001531:
 	ei   
 	ld   bc, $0600
 L00153F:
-	ld   a, [wSerial_Unknown_Done]
+	ld   a, [wSerialTransferDone]
 	or   a
 	jr   nz, L00154E
 	dec  bc
@@ -5291,7 +5374,7 @@ L00153F:
 	jp   L001531
 L00154E:
 	xor  a
-	ld   [wSerial_Unknown_Done], a
+	ld   [wSerialTransferDone], a
 	ld   a, [wSerialDataReceiveBuffer]
 	cp   a, $4C
 	jr   nz, L001531
@@ -5303,7 +5386,7 @@ L00155C:
 	ldh  [rSC], a
 	ld   bc, $0600
 L001568:
-	ld   a, [wSerial_Unknown_Done]
+	ld   a, [wSerialTransferDone]
 	or   a
 	jr   nz, L001577
 	dec  bc
@@ -5313,7 +5396,7 @@ L001568:
 	jp   L00155C
 L001577:
 	xor  a
-	ld   [wSerial_Unknown_Done], a
+	ld   [wSerialTransferDone], a
 	ld   a, [wSerialDataReceiveBuffer]
 	cp   a, $43
 	jr   nz, L00155C
@@ -5388,7 +5471,7 @@ L001613:
 	ldh  [rIE], a
 	ret  
 	xor  a
-	ld   [wSerial_Unknown_Done], a
+	ld   [wSerialTransferDone], a
 	ld   a, $10
 L001620:
 	push af
@@ -5400,7 +5483,7 @@ L001620:
 	ldh  [rSC], a
 	ei   
 	call L001767
-	ld   a, [wSerial_Unknown_Done]
+	ld   a, [wSerialTransferDone]
 	or   a
 	jr   nz, L001636
 L001636:
@@ -5412,16 +5495,16 @@ L001636:
 ; =============== JoyKeys_Serial_GetFromReceiveAndSetToSendBuffer ===============
 ; Obtains the joypad keys value from the tail of the buffer for received serial data.
 JoyKeys_Serial_GetFromReceiveAndSetToSendBuffer:
-	; Only do this if we're accepting serial inputs
+	; Only do this if we're accepting serial inputs and in VS mode
 	ld   a, [wSerialInputEnabled]
 	and  a
 	ret  z
-	ld   a, [wSerialPlId]
+	ld   a, [wSerialPlayMode]
 	and  a
 	ret  z
 	
 	ld   hl, hJoyKeys		; HL = Joypad input
-	cp   a, SERIAL_PL1_ID	; Playing as PL1?
+	cp   a, MODE_SINGLEVS	; Playing in single mode?
 	jr   nz, .go			; If not, jump
 	ld   hl, hJoyKeys2
 .go:
@@ -5470,10 +5553,10 @@ JoyKeys_Serial_GetFromReceiveAndSetToSendBuffer:
 ; =============== JoyKeys_Serial_WriteNewValueToSendBuffer ===============
 ; Writes the last pressed keys value to the top of the serial output buffer.
 JoyKeys_Serial_WriteNewValueToSendBuffer: 
-	ld   a, [wSerialPlId]
-	cp   a, SERIAL_PL1_ID		; Playing as P1?
-	jr   nz, .pl2				; If not, jump
-.pl1:
+	ld   a, [wSerialPlayMode]
+	cp   a, MODE_SINGLEVS		; Playing in single mode?
+	jr   nz, .teamMode			; If not, jump
+.singleMode:
 	;
 	; Write wSerialJoyLastKeys to latest send buffer entry
 	;
@@ -5494,7 +5577,7 @@ JoyKeys_Serial_WriteNewValueToSendBuffer:
 	ld   a, START_TRANSFER_INTERNAL_CLOCK
 	ldh  [rSC], a
 	ret  
-.pl2:
+.teamMode:
 	;
 	; Write wSerialJoyLastKeys2 to latest send buffer entry
 	;
@@ -5542,8 +5625,8 @@ Serial_Init:
 	ldh  [rSB], a
 	ld   [wSerialInputEnabled], a
 	ld   [wSerialDataReceiveBuffer], a
-	ld   [wSerialPlId], a
-	ld   [wSerial_Unknown_Done], a
+	ld   [wSerialPlayMode], a
+	ld   [wSerialTransferDone], a
 	ld   [wSerialDataSendBuffer], a
 	; Set the initial serial code.
 	ld   a, LOW(Serial_Mode_WaitVSMenuSelect)
@@ -5593,12 +5676,12 @@ Serial_Mode_WaitVSMenuSelect:
 	ld   a, START_TRANSFER_EXTERNAL_CLOCK	; Otherwise, try to start a transfer back to master
 	ldh  [rSC], a
 	ld   a, $01
-	ld   [wSerial_Unknown_Done], a
+	ld   [wSerialTransferDone], a
 	ret
 .selectedThis:
 	; Nothing to do
 	ld   a, $01							
-	ld   [wSerial_Unknown_Done], a
+	ld   [wSerialTransferDone], a
 	ret  
 	
 L001708:
@@ -5607,7 +5690,7 @@ L001708:
 	ld   a, [wSerialDataSendBuffer]
 	ldh  [rSB], a
 	ld   a, $01
-	ld   [wSerial_Unknown_Done], a
+	ld   [wSerialTransferDone], a
 	ld   a, [$C025]
 	bit  5, a
 	ret  z
@@ -5617,14 +5700,14 @@ L001708:
 L001722:
 	call L001738
 	ld   a, $01
-	ld   [wSerial_Unknown_Done], a
+	ld   [wSerialTransferDone], a
 	ret  
 L00172B:
 	call L001738
 	ld   a, $80
 	ldh  [rSC], a
 	ld   a, $01
-	ld   [wSerial_Unknown_Done], a
+	ld   [wSerialTransferDone], a
 	ret  
 L001738:
 	ld   a, [wSerialDataReceiveBufferIndex_Head]
@@ -5714,11 +5797,11 @@ L00179D:;J
 L0017E0:;J
 	ld   a, $30
 	ldh  [hScrollX], a
-	ld   [wFieldScrollX], a
+	ld   [wOBJScrollX], a
 	xor  a
 	ldh  [hScrollY], a
 	ld   a, $40
-	ld   [wFieldScrollY], a
+	ld   [wOBJScrollY], a
 	ld   hl, wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_Low
 	ld   b, $40
 	xor  a
@@ -5770,7 +5853,7 @@ L0017F5:;J
 	ei
 	call Task_PassControlFar
 	call Task_PassControlFar
-	ld   a, [$C17F]
+	ld   a, [wRoundSeqId]
 	cp   $0F
 	jp   z, L00187C
 	cp   $10
@@ -5836,12 +5919,12 @@ L0018C4:;C
 	ld   [$D92B], a
 	ld   a, $01
 	ld   [$DA2B], a
-	ld   a, [$D920]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
 	and  a, $80
-	ld   [$D920], a
-	ld   a, [$DA20]
+	ld   [wPlInfo_Pl1+iPlInfo_Status], a
+	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
 	and  a, $80
-	ld   [$DA20], a
+	ld   [wPlInfo_Pl2+iPlInfo_Status], a
 	xor  a
 	ld   [$D921], a
 	ld   [$D922], a
@@ -6573,7 +6656,7 @@ L001D2C:;J
 	ld   b, $02
 	ld   c, $01
 	call CopyBGToRect
-	ld   a, [$D920]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
 	bit  7, a
 	jp   nz, L001D9B
 	ld   hl, $4000
@@ -6585,7 +6668,7 @@ L001D9B:;J
 	ld   de, $8FC0
 	call CopyTilesAutoNum
 L001DA4:;J
-	ld   a, [$DA20]
+	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
 	bit  7, a
 	jp   nz, L001DB8
 L001DAC: db $21;X
@@ -6822,7 +6905,7 @@ L001F79:;J
 L001F84:;J
 	ret
 L001F85:;C
-	ld   a, [$C163]
+	ld   a, [wPlayMode]
 	bit  0, a
 	jp   z, L001F95
 	bit  1, a
@@ -6903,7 +6986,7 @@ L001FE7:;C
 	ld   hl, $4552
 	add  hl, bc
 	ld   b, $04
-	call L000E7D
+	call CopyTilesHBlank
 	pop  hl
 	pop  af
 	ld   [MBC1RomBank], a
@@ -7025,7 +7108,7 @@ L0020E5:;C
 	push hl
 	ld   hl, wLZSS_Buffer
 	ld   b, $06
-	call L000E7D
+	call CopyTilesHBlank
 	pop  hl
 	ld   a, c
 	ld   b, $03
@@ -7322,7 +7405,7 @@ L0022C1:;C
 L0022D3:;J
 	ld   a, $04
 L0022D5:;J
-	ld   hl, $D753
+	ld   hl, wOBJInfo3+iOBJInfo_OBJLstPtrTblOffset
 	ld   [hl], a
 	ld   b, $78
 	call L0022FC
@@ -7500,8 +7583,8 @@ OBJInfoInit_Terry_WinA:
 	db $00 ; iOBJInfo_YSub
 	db $00 ; iOBJInfo_SpeedX
 	db $00 ; iOBJInfo_SpeedXSub
-	db $00 ; $09
-	db $00 ; $0A
+	db $00 ; iOBJInfo_Unknown_09
+	db $00 ; iOBJInfo_Unknown_0A
 	db $00 ; iOBJInfo_RelX (auto)
 	db $00 ; iOBJInfo_RelY (auto)
 	db $00 ; iOBJInfo_TileIDBase
@@ -7533,8 +7616,8 @@ OBJInfoInit_Andy_WinA:
 	db $00 ; iOBJInfo_YSub
 	db $00 ; iOBJInfo_SpeedX
 	db $00 ; iOBJInfo_SpeedXSub
-	db $00 ; $09
-	db $00 ; $0A
+	db $00 ; iOBJInfo_Unknown_09
+	db $00 ; iOBJInfo_Unknown_0A
 	db $00 ; iOBJInfo_RelX (auto)
 	db $00 ; iOBJInfo_RelY (auto)
 	db $40 ; iOBJInfo_TileIDBase

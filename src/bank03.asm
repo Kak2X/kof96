@@ -14156,7 +14156,7 @@ L03777C:;J
 	ld   [hl], a
 	jr   L0377DD
 L037789:;R
-	call L001170
+	call Rand
 	or   a, $07
 	ld   a, $0B
 	ld   e, a
@@ -14164,7 +14164,7 @@ L037789:;R
 	ld   hl, $0086
 	add  hl, bc
 	ld   [hl], a
-	call L001170
+	call Rand
 	cp   $28
 	jr   c, L0377AE
 	cp   $64
@@ -14237,19 +14237,19 @@ L037809:;J
 	jp   z, L03782E
 	cp   $02
 	jp   z, L03784B
-	ld   a, [$C17F]
+	ld   a, [wRoundSeqId]
 	cp   $0F
 	jp   nc, L03784B
 	ld   hl, $0089
 	add  hl, bc
 	ld   a, $0A
 	ld   [hl], a
-	call L001170
+	call Rand
 	cp   $64
 	ret  c
 	jp   L0378A0
 L03782E:;J
-	ld   a, [$C17F]
+	ld   a, [wRoundSeqId]
 	cp   $10
 	jp   nc, L03787D
 	cp   $0F
@@ -14258,7 +14258,7 @@ L03782E:;J
 	add  hl, bc
 	ld   a, $01
 	ld   [hl], a
-	call L001170
+	call Rand
 	cp   $14
 	ret  c
 	jp   L0378A0
@@ -14327,7 +14327,7 @@ L03787D:;J
 	bit  7, [hl]
 	jp   nz, L03791E
 L0378A0:;J
-	call L001170
+	call Rand
 	cp   $28
 	jp   c, L037A5E
 	cp   $3C
@@ -14375,15 +14375,15 @@ L0378FD:;J
 	scf
 	jp   L037B41
 L037903:;J
-	call L001170
+	call Rand
 	cp   $A0
 	jp   c, L037914
-	call L001170
+	call Rand
 	and  a, $07
 	scf
 	jp   L037B41
 L037914:;J
-	call L001170
+	call Rand
 	and  a, $07
 	scf
 	ccf
@@ -14410,7 +14410,7 @@ L03793C:;J
 	jp   z, L037AF6
 	jp   L037ADF
 L03794A:;J
-	call L001170
+	call Rand
 	cp   $28
 	ret  c
 L037950:;JR
@@ -14489,7 +14489,7 @@ L0379D1:;J
 	ld   a, [wDifficulty]
 	cp   $02
 	jp   z, L0379E1
-	call L001170
+	call Rand
 	cp   $32
 	jp   c, L037950
 L0379E1:;J
@@ -14526,12 +14526,12 @@ L037A1A:;J
 	ld   d, $00
 	jp   L037B3A
 L037A21:;J
-	call L001170
+	call Rand
 	and  a, $07
 	scf
 	jp   L037B41
 L037A2A:;J
-	call L001170
+	call Rand
 	bit  0, a
 	ret  z
 	ld   hl, $0001
@@ -14549,7 +14549,7 @@ L037A47:;J
 	ld   a, [wDifficulty]
 	cp   $02
 	jp   z, L037A58
-	call L001170
+	call Rand
 	bit  0, a
 	ret  z
 	bit  1, a
@@ -14562,7 +14562,7 @@ L037A5E:;J
 	ld   a, [wDifficulty]
 	cp   $02
 	jp   z, L037A6F
-	call L001170
+	call Rand
 	bit  0, a
 	ret  z
 	bit  1, a
@@ -14575,7 +14575,7 @@ L037A76:;J
 	ld   a, [wDifficulty]
 	cp   $02
 	jp   z, L037A87
-	call L001170
+	call Rand
 	bit  0, a
 	ret  z
 	bit  1, a
@@ -14637,7 +14637,7 @@ L037AC9:;J
 	ld   a, [wDifficulty]
 	cp   $02
 	jp   z, L037ADF
-	call L001170
+	call Rand
 	bit  7, a
 	jp   z, L037ADF
 	ld   hl, $3EC9
@@ -14672,7 +14672,7 @@ L037B0D:;J
 	ld   a, [hl]
 	cp   $1A
 	ret  c
-	call L001170
+	call Rand
 	bit  7, a
 	jp   z, L037B23
 	ld   hl, $3EDA

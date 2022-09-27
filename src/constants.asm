@@ -19,27 +19,9 @@ KEY_B            EQU 1 << KEYB_B
 KEY_SELECT       EQU 1 << KEYB_SELECT
 KEY_START        EQU 1 << KEYB_START
 
-DIPB_0 EQU 0
-DIPB_1 EQU 1
-DIPB_2 EQU 2
-DIPB_3 EQU 3
-DIPB_4 EQU 4
-DIPB_5 EQU 5
-DIPB_6 EQU 6
-DIPB_7 EQU 7
-
 DIFFICULTY_EASY		EQU $00
 DIFFICULTY_NORMAL	EQU $01
 DIFFICULTY_HARD		EQU $02
-
-
-DIPB_EASY_MOVES       EQU 2 ; SELECT + A/B for easy super moves
-DIPB_INFINITE_METER   EQU 3 ; Unlimited super moves + Meter always grows
-DIPB_SGB_SOUND_TEST   EQU 4 ; Adds SGB S.E TEST to the options menu
-DIPB_TEAM_DUPL        EQU 5 ; Allow duplicate characters in a team
-DIPB_UNLOCK_GOENITZ   EQU 6 ; Unlock Goenitz
-DIPB_UNLOCK_OTHER     EQU 7 ; Unlock everyone else (Mr Karate, Boss Kagura, Orochi Iori and Orochi Leona)
-
 
 BORDER_NONE			EQU $00
 BORDER_MAIN 		EQU $01
@@ -47,7 +29,41 @@ BORDER_ALTERNATE 	EQU $02
 
 TIMER_INFINITE		EQU $FF
 
-; Are these the same?
+MODEB_TEAM    EQU 0
+MODEB_VS      EQU 1
+MODE_SINGLE1P EQU $00
+MODE_TEAM1P   EQU $01
+MODE_SINGLEVS EQU $02
+MODE_TEAMVS   EQU $03
+
+
+; Character IDs
+; [POI] These are grouped by team, not like it matters.
+CHAR_ID_KYO      EQU $00
+CHAR_ID_DAIMON   EQU $01
+CHAR_ID_TERRY    EQU $02
+CHAR_ID_ANDY     EQU $03
+CHAR_ID_RYO      EQU $04
+CHAR_ID_ROBERT   EQU $05
+CHAR_ID_ATHENA   EQU $06
+CHAR_ID_MAI      EQU $07
+CHAR_ID_LEONA    EQU $08
+CHAR_ID_GEESE    EQU $09
+CHAR_ID_KRAUSER  EQU $0A
+CHAR_ID_MRBIG    EQU $0B
+CHAR_ID_IORI     EQU $0C
+CHAR_ID_MATURE   EQU $0D
+CHAR_ID_CHIZURU  EQU $0E
+CHAR_ID_GOENITZ  EQU $0F
+CHAR_ID_MRKARATE EQU $10
+CHAR_ID_OIORI    EQU $11
+CHAR_ID_OLEONA   EQU $12
+CHAR_ID_KAGURA   EQU $13
+
+
+
+
+; Replace with MODE_* 
 VS_SELECTED_THIS  EQU $02
 VS_SELECTED_OTHER EQU $03
 SERIAL_PL1_ID EQU $02
@@ -55,14 +71,17 @@ SERIAL_PL2_ID EQU $03
 
 C_NL EQU $FF ; Newline character in strings
 
-TILE_INTRO_WHITE EQU $00
-TILE_INTRO_BLACK EQU $01
-
 OBJ_OFFSET_X        EQU $08 ; Standard offset used when sprite positions are compared to the screen/scroll
 OBJLSTPTR_NONE      EQU $FFFF ; Placeholder pointer that marks the lack of a secondary sprite mapping and the end separator
-
+OBJLSTPTR_ENTRYSIZE EQU 4 ; Size of each OBJLstPtrTable entry (pair of OBJLstHdrA_* and OBJLstHdrB_* pointers)
 
 ; FLAGS
+DIPB_EASY_MOVES       EQU 2 ; SELECT + A/B for easy super moves
+DIPB_INFINITE_METER   EQU 3 ; Unlimited super moves + Meter always grows
+DIPB_SGB_SOUND_TEST   EQU 4 ; Adds SGB S.E TEST to the options menu
+DIPB_TEAM_DUPL        EQU 5 ; Allow duplicate characters in a team
+DIPB_UNLOCK_GOENITZ   EQU 6 ; Unlock Goenitz
+DIPB_UNLOCK_OTHER     EQU 7 ; Unlock everyone else (Mr Karate, Boss Kagura, Orochi Iori and Orochi Leona)
 
 ; $C025
 MISCB_FREEZE EQU 3 ; Prevents tasks and almost everything from executing, effectively freezing the game until it's unset. May be used to force sync in serial VS???
@@ -150,6 +169,10 @@ TASK_EXEC_DONE EQU $01 ; Already executed this frame
 TASK_EXEC_CUR  EQU $02 ; Currently executing
 TASK_EXEC_TODO EQU $04 ; Not executed yet, but was executed previously already. Stack pointer type.
 TASK_EXEC_NEW  EQU $08 ; Never executed before. Likely init code which will set a new task. Jump HL type.
+
+; iPlInfo_Status flags
+PSB_CPU        EQU 7 ; If set, the player is a CPU-controlled
+PS_CPU         EQU 1 << PSB_CPU
 
 SNDIDREQ_SIZE      EQU $08
 SNDINFO_SIZE       EQU $20 ; Size of iSndInfo struct
@@ -271,7 +294,14 @@ SCRPAL_STAGE_YAGAMI EQU $08
 SCRPAL_STAGE_BOSS EQU $09
 SCRPAL_STAGE_STADIUM EQU $0A
 
-; Intro Scene IDs (Intro_ExecScene)
+;
+; MODE IDs & CONSTANTS
+;
+
+; ============================================================
+; INTRO
+
+; TODO: GM_INTRO_TEXTPRINT...
 ISC_TEXTPRINT       EQU $00
 ISC_CHAR            EQU $02
 ISC_IORIRISE        EQU $04
@@ -297,3 +327,103 @@ ISCC_IORIKYOA       EQU $20
 ISCC_IORIKYOB       EQU $22
 ISCC_IORIKYOC       EQU $24
 ISCC_CHG_IORIKYO    EQU $26
+
+TILE_INTRO_WHITE    EQU $00
+TILE_INTRO_BLACK    EQU $01
+
+; ============================================================
+; TITLE SCREEN / MENUS
+
+GM_TITLE_TITLE          EQU $00
+GM_TITLE_TITLEMENU      EQU $02 
+GM_TITLE_MODESELECT     EQU $04
+GM_TITLE_OPTIONS        EQU $06
+
+; SHARED
+TITLE_CTRL_PL1          EQU $00
+TITLE_CTRL_PL2          EQU $01
+
+TITLE_OBJ_PUSHSTART     EQU $00
+TITLE_OBJ_MENU          EQU $01
+TITLE_OBJ_CURSOR_R      EQU $02
+TITLE_OBJ_SNKCOPYRIGHT  EQU $03
+TITLE_OBJ_CURSOR_U      EQU $04
+
+; TITLE
+TITLE_RESET_TIMER       EQU (30 * $100) | 60 ; 30 seconds
+
+; TITLEMENU
+TITLEMENU_TO_TITLE      EQU $00
+TITLEMENU_TO_MODESELECT EQU $01
+TITLEMENU_TO_OPTIONS    EQU $02
+
+; MODESELECT
+MODESELECT_ACT_EXIT     EQU $00
+MODESELECT_ACT_SINGLE1P EQU MODE_SINGLE1P+1
+MODESELECT_ACT_TEAM1P   EQU MODE_TEAM1P+1
+MODESELECT_ACT_SINGLEVS EQU MODE_SINGLEVS+1
+MODESELECT_ACT_TEAMVS   EQU MODE_TEAMVS+1
+
+; Mode IDs sent out through the serial
+MODESELECT_SBCMD_IDLE     EQU $02
+MODESELECT_SBCMD_SINGLEVS EQU MODESELECT_ACT_SINGLEVS
+MODESELECT_SBCMD_TEAMVS   EQU MODESELECT_ACT_TEAMVS
+
+; OPTIONS
+
+; Main options
+OPTION_ITEM_TIME        EQU $00
+OPTION_ITEM_LEVEL       EQU $01
+OPTION_ITEM_BGMTEST     EQU $02
+OPTION_ITEM_SFXTEST     EQU $03
+OPTION_ITEM_SGBSNDTEST  EQU $04
+OPTION_ITEM_EXIT        EQU $05
+
+; SGB sound test options
+OPTION_SITEM_ID_A       EQU $00
+OPTION_SITEM_BANK_A     EQU $01
+OPTION_SITEM_ID_B       EQU $02
+OPTION_SITEM_BANK_B     EQU $03
+
+
+OPTIONS_ACT_EXIT EQU $00
+OPTIONS_ACT_L EQU $01
+OPTIONS_ACT_R EQU $02
+OPTIONS_ACT_A EQU $03
+OPTIONS_ACT_B EQU $04
+
+OPTIONS_SACT_EXIT    EQU $00
+OPTIONS_SACT_UP      EQU $01
+OPTIONS_SACT_DOWN    EQU $02
+OPTIONS_SACT_A       EQU $03
+OPTIONS_SACT_B       EQU $04
+OPTIONS_SACT_SUBEXIT EQU $05
+
+OPTIONS_TIMER_MIN EQU $10
+OPTIONS_TIMER_INC EQU $10
+OPTIONS_TIMER_MAX EQU $90
+
+OPTION_MENU_NORMAL  EQU $00
+OPTION_MENU_SGBTEST EQU $02
+
+; ============================================================
+; CHARACTER SELECT
+
+CHARSEL_ID_KYO       EQU $00
+CHARSEL_ID_ANDY      EQU $01
+CHARSEL_ID_TERRY     EQU $02
+CHARSEL_ID_RYO       EQU $03
+CHARSEL_ID_ROBERT    EQU $04
+CHARSEL_ID_IORI      EQU $05
+CHARSEL_ID_DAIMON    EQU $06
+CHARSEL_ID_MAI       EQU $07
+CHARSEL_ID_GEESE     EQU $08
+CHARSEL_ID_MRBIG     EQU $09
+CHARSEL_ID_KRAUSER   EQU $0A
+CHARSEL_ID_MATURE    EQU $0B
+CHARSEL_ID_ATHENA    EQU $0C
+CHARSEL_ID_CHIZURU   EQU $0D
+CHARSEL_ID_MRKARATE0 EQU $0E ; 2 slots
+CHARSEL_ID_MRKARATE1 EQU $0F
+CHARSEL_ID_GOENITZ   EQU $10
+CHARSEL_ID_LEONA     EQU $11

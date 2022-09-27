@@ -15,8 +15,8 @@ L1E4000:;I
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
-	ld   [wFieldScrollX], a
-	ld   [wFieldScrollY], a
+	ld   [wOBJScrollX], a
+	ld   [wOBJScrollY], a
 	call LoadGFX_1bppFont_Default
 	ld   hl, $4F71
 	ld   de, $92F0
@@ -36,7 +36,7 @@ L1E4000:;I
 	ld   de, Tiles_Begin
 	ld   b, $62
 	call CopyTiles
-	ld   hl, $C194
+	ld   hl, wCharSelIdMapTbl
 	ld   de, $4F2A
 	ld   b, $15
 L1E4066:;J
@@ -47,23 +47,23 @@ L1E4066:;J
 	jp   nz, L1E4066
 	xor  a
 	ld   [$C1B3], a
-	ld   [$C1B4], a
+	ld   [wTitleMenuOptId], a
 	ld   [$C1B5], a
 	ld   [$C1B6], a
 	ld   [$C1B1], a
 	ld   [$C1B2], a
-	call L001170
+	call Rand
 	and  a, $1F
 	add  a, $07
-	ld   [$C1B7], a
-	call L001170
+	ld   [wUnknown_C1B7], a
+	call Rand
 	and  a, $1F
 	add  a, $07
-	ld   [$C1B8], a
-	ld   a, [$C163]
+	ld   [wOptionsSGBSndOptId], a
+	ld   a, [wPlayMode]
 	bit  1, a
 	jp   nz, L1E40FA
-	ld   a, [$C165]
+	ld   a, [wUnknown_C165]
 	or   a
 	jp   z, L1E40B9
 L1E40A3: db $3E;X
@@ -96,7 +96,7 @@ L1E40B9:;J
 	ld   a, [$C162]
 	bit  1, a
 	jp   z, L1E40EF
-	ld   a, [$C17F]
+	ld   a, [wRoundSeqId]
 	cp   $0F
 	jp   z, L1E40DC
 	cp   $10
@@ -147,7 +147,7 @@ L1E4108:;J
 	cp   $FF
 	jp   z, L1E4115
 	ld   a, $02
-	ld   [$C1B4], a
+	ld   [wTitleMenuOptId], a
 L1E4115:;J
 	ld   a, [$C1AE]
 	cp   $FF
@@ -192,10 +192,10 @@ L1E4176:;J
 	ld   hl, $99E1
 	ld   c, $EC
 	call L1E49DF
-	ld   a, [$C163]
+	ld   a, [wPlayMode]
 	bit  1, a
 	jp   nz, L1E41A0
-	ld   a, [$C165]
+	ld   a, [wUnknown_C165]
 	or   a
 	jp   z, L1E41A0
 L1E4193: db $FA;X
@@ -221,13 +221,13 @@ L1E41A0:;J
 	ld   hl, $99F1
 	ld   c, $EC
 	call L1E49DF
-	ld   a, [$C163]
+	ld   a, [wPlayMode]
 	bit  1, a
 	jp   nz, L1E41D4
-	ld   a, [$C165]
+	ld   a, [wUnknown_C165]
 	or   a
 	jp   nz, L1E41D4
-	ld   a, [$C17F]
+	ld   a, [wRoundSeqId]
 	cp   $0F
 	jp   z, L1E41E4
 	cp   $10
@@ -302,7 +302,7 @@ L1E427A:;J
 	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset
 	ld   de, $D6A7
-	ld   a, [$D920]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
 	bit  7, a
 	jp   nz, L1E429F
 	ld   a, $00
@@ -330,7 +330,7 @@ L1E42A7:;J
 	ld   [hl], $10
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffset
 	ld   de, $D6E7
-	ld   a, [$DA20]
+	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
 	bit  7, a
 	jp   nz, L1E42D7
 L1E42CC: db $3E;X
@@ -401,7 +401,7 @@ L1E42D7:;J
 	ld   [hl], $61
 	call L001776
 	call L0014F9
-	ld   a, [$C163]
+	ld   a, [wPlayMode]
 	bit  1, a
 	jp   z, L1E436D
 L1E4365: db $CD;X
@@ -428,10 +428,10 @@ L1E436D:;J
 	call HomeCall_Sound_ReqPlayExId_Stub
 	call Task_PassControl_NoDelay
 L1E438B:;J
-	call L00112E
+	call JoyKeys_DoCursorDelayTimer
 	call L1E43C2
 	call L1E43CE
-	ld   a, [$C1B4]
+	ld   a, [wTitleMenuOptId]
 	cp   $04
 	jp   nz, L1E43A7
 	ld   a, [$C1B5]
@@ -455,7 +455,7 @@ L1E43AF:;J
 L1E43C2:;C
 	ld   a, $00
 	ld   [$C1B6], a
-	ld   a, [$C1B4]
+	ld   a, [wTitleMenuOptId]
 	call L1E43DA
 	ret
 L1E43CE:;C
@@ -516,7 +516,7 @@ L1E4433:;J
 	or   a
 	jp   nz, L1E4440
 	ld   a, $00
-	ld   [$C1B4], a
+	ld   [wTitleMenuOptId], a
 	ret
 L1E4440: db $3E;X
 L1E4441: db $00;X
@@ -532,7 +532,7 @@ L1E4446:;J
 	or   a
 	jp   nz, L1E445C
 	ld   a, $04
-	ld   [$C1B4], a
+	ld   [wTitleMenuOptId], a
 	ret
 L1E445C:;J
 	ld   a, $04
@@ -635,7 +635,7 @@ L1E44F4:;J
 	or   a
 	jp   nz, L1E4509
 	ld   a, $02
-	ld   [$C1B4], a
+	ld   [wTitleMenuOptId], a
 	ret
 L1E4509:;J
 	ld   a, $02
@@ -699,7 +699,7 @@ L1E455F: db $C3;X
 L1E4560: db $71;X
 L1E4561: db $45;X
 L1E4562:;J
-	ld   bc, $C1B8
+	ld   bc, wOptionsSGBSndOptId
 	ld   hl, $C1AA
 	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
 	call L1E4586
@@ -728,7 +728,7 @@ L1E4586:;C
 	dec  a
 	ld   [bc], a
 L1E458D:;J
-	call L001170
+	call Rand
 	push hl
 	ld   h, $00
 	ld   l, a
@@ -763,11 +763,11 @@ L1E45BA:;J
 L1E45BF:;J
 	push de
 	push hl
-	call L001170
+	call Rand
 	and  a, $1F
 	add  a, $07
 	ld   [bc], a
-	ld   a, [$C163]
+	ld   a, [wPlayMode]
 	bit  1, a
 	jp   nz, L1E4612
 	ld   a, [$C1B6]
@@ -787,12 +787,12 @@ L1E45E2: db $C3;X
 L1E45E3: db $EF;X
 L1E45E4: db $45;X
 L1E45E5:;J
-	ld   a, [$C165]
+	ld   a, [wUnknown_C165]
 	or   a
 	jp   nz, L1E4612
 	ld   hl, $C1AE
-	ld   a, [$C17F]
-	ld   de, $C180
+	ld   a, [wRoundSeqId]
+	ld   de, wRoundSeqTbl
 	add  a, e
 	jp   nc, L1E45FA
 L1E45F9: db $14;X
@@ -973,7 +973,7 @@ L1E471F:;C
 	add  hl, de
 	ld   [hl], c
 	call L1E4736
-	ld   hl, $C194
+	ld   hl, wCharSelIdMapTbl
 	ld   d, $00
 	ld   e, a
 	add  hl, de
@@ -1270,7 +1270,7 @@ L1E48FF:;J
 	ret
 L1E4902:;C
 	push hl
-	ld   hl, $C194
+	ld   hl, wCharSelIdMapTbl
 	add  a, L
 	jp   nc, L1E490B
 L1E490A: db $24;X
@@ -1287,7 +1287,7 @@ L1E4915:;J
 	xor  a
 	ret
 L1E4918:;C
-	ld   a, [$C163]
+	ld   a, [wPlayMode]
 	bit  1, a
 	jr   z, L1E4928
 L1E491F: db $21;X
@@ -1300,7 +1300,7 @@ L1E4925: db $1D;X
 L1E4926: db $18;X
 L1E4927: db $07;X
 L1E4928:;R
-	ld   a, [$C17F]
+	ld   a, [wRoundSeqId]
 	or   a
 	jp   nz, L1E4943
 	ld   a, [$C1B6]
@@ -1602,7 +1602,7 @@ L1E4AF9:;C
 L1E4B01:;C
 	push hl
 	push de
-	ld   hl, $C194
+	ld   hl, wCharSelIdMapTbl
 	ld   d, $00
 	ld   e, a
 	add  hl, de
@@ -1646,7 +1646,7 @@ L1E4B35:;J
 	pop  af
 	ret
 L1E4B40:;C
-	ld   hl, $C180
+	ld   hl, wRoundSeqTbl
 	ld   b, $0F
 L1E4B45:;J
 	ldi  a, [hl]
@@ -2320,7 +2320,7 @@ L1E4EB1: db $99
 L1E4EB2: db $24
 L1E4EB3: db $99
 L1E4EB4:;C
-	ld   a, [$C163]
+	ld   a, [wPlayMode]
 	bit  1, a
 	jp   z, L1E4ECA
 L1E4EBC: db $FA;X
@@ -2342,20 +2342,20 @@ L1E4ECA:;J
 	ccf
 	ret
 L1E4ECD:;C
-	ld   a, [$C163]
+	ld   a, [wPlayMode]
 	bit  1, a
 	jp   nz, L1E4EEF
 	ld   a, [$C1B6]
 	or   a
 	jp   nz, L1E4EE6
-	ld   a, [$C165]
+	ld   a, [wUnknown_C165]
 	or   a
 	jp   z, L1E4EEF
 L1E4EE3: db $C3;X
 L1E4EE4: db $ED;X
 L1E4EE5: db $4E;X
 L1E4EE6:;J
-	ld   a, [$C165]
+	ld   a, [wUnknown_C165]
 	or   a
 	jp   nz, L1E4EEF
 	scf
@@ -2365,13 +2365,13 @@ L1E4EEF:;J
 	ccf
 	ret
 L1E4EF2:;C
-	ld   a, [$C163]
+	ld   a, [wPlayMode]
 	bit  1, a
 	jp   nz, L1E4F27
 	ld   a, [$C1B6]
 	or   a
 	jp   nz, L1E4F13
-	ld   a, [$C165]
+	ld   a, [wUnknown_C165]
 	or   a
 	jp   nz, L1E4F27
 	ld   a, [$C162]
@@ -7344,7 +7344,7 @@ L1E626E:;I
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
 	ld   [$C1B3], a
-	ld   [$C1B4], a
+	ld   [wTitleMenuOptId], a
 	ld   [$C1B5], a
 	ld   [$C1B6], a
 	ld   [$C1B1], a
@@ -7367,10 +7367,10 @@ L1E626E:;I
 	ld   [$C1D9], a
 	ld   [$C1DA], a
 	ld   [$C1DB], a
-	ld   a, [$C163]
+	ld   a, [wPlayMode]
 	cp   $01
 	jp   nz, L1E62E1
-	ld   a, [$C165]
+	ld   a, [wUnknown_C165]
 	or   a
 	jp   z, L1E62D9
 L1E62D1: db $3E;X
@@ -7407,8 +7407,8 @@ L1E62EF:;J
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
-	ld   [wFieldScrollX], a
-	ld   [wFieldScrollY], a
+	ld   [wOBJScrollX], a
+	ld   [wOBJScrollY], a
 	ld   hl, $7BB7
 	ld   de, $C1EA
 	call DecompressLZSS
@@ -7581,11 +7581,11 @@ L1E6414:;R
 	call Task_PassControl_Delay1D
 L1E6491:;J
 	call L1E6940
-	call L00112E
+	call JoyKeys_DoCursorDelayTimer
 	ld   a, $00
 	ld   [$C1B6], a
 	call L1E6503
-	ld   a, [$C1B4]
+	ld   a, [wTitleMenuOptId]
 	cp   $03
 	jp   nz, L1E64AC
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
@@ -7600,7 +7600,7 @@ L1E64AC:;J
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
 	res  7, [hl]
 L1E64C1:;J
-	ld   a, [$C1B4]
+	ld   a, [wTitleMenuOptId]
 	ld   hl, $C1B5
 	cp   a, [hl]
 	jp   nz, L1E64D3
@@ -7629,7 +7629,7 @@ L1E6503:;C
 	ld   a, [$C1B6]
 	or   a
 	jp   nz, L1E6522
-	ld   a, [$C1B4]
+	ld   a, [wTitleMenuOptId]
 	cp   $02
 	jr   z, L1E6559
 	ld   a, [$C1B1]
@@ -7680,7 +7680,7 @@ L1E6559:;JR
 	ld   a, [$C1B6]
 	or   a
 	jp   nz, L1E6679
-	ld   a, [$C1B4]
+	ld   a, [wTitleMenuOptId]
 	cp   $03
 	ret  z
 	ld   a, [wLZSS_Buffer]
@@ -7760,9 +7760,9 @@ L1E6601:;R
 L1E6602:;R
 	ld   [hl], $01
 	ld   [$C1CC], a
-	ld   a, [$C1B4]
+	ld   a, [wTitleMenuOptId]
 	inc  a
-	ld   [$C1B4], a
+	ld   [wTitleMenuOptId], a
 	ld   a, [$C1DA]
 	ld   hl, $99E3
 	dec  a
@@ -7772,7 +7772,7 @@ L1E6602:;R
 	jr   z, L1E6620
 	ld   hl, $99E0
 L1E6620:;R
-	ld   a, [$C1B4]
+	ld   a, [wTitleMenuOptId]
 	dec  a
 	jr   z, L1E662D
 	dec  a
@@ -7795,7 +7795,7 @@ L1E6643:;R
 	sub  a, $10
 	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 	ld   a, $03
-	ld   [$C1B4], a
+	ld   [wTitleMenuOptId], a
 	ret
 L1E6651:;R
 	ld   a, [$C1CC]
@@ -7955,7 +7955,7 @@ L1E6792:;J
 	ld   a, [$C1B6]
 	or   a
 	jp   nz, L1E67E4
-	ld   a, [$C1B4]
+	ld   a, [wTitleMenuOptId]
 	cp   $03
 	ret  z
 	ld   a, [wLZSS_Buffer]
@@ -8080,7 +8080,7 @@ L1E6832:;J
 	ld   a, [$C1B6]
 	or   a
 	jp   nz, L1E6887
-	ld   a, [$C1B4]
+	ld   a, [wTitleMenuOptId]
 	cp   $03
 	ret  z
 	ld   a, [wLZSS_Buffer]
@@ -13411,7 +13411,7 @@ L1E7D21:;I
 	ld   [hl], HIGH(L1E7DE8)
 	ld   a, [$C1B3]
 	ld   c, a
-	ld   a, [$C1B4]
+	ld   a, [wTitleMenuOptId]
 	ld   b, a
 	ld   hl, $002C
 	add  hl, bc
@@ -13455,7 +13455,7 @@ L1E7DE8:;I
 L1E7DEE:;C
 	ld   a, [$C1B3]
 	ld   c, a
-	ld   a, [$C1B4]
+	ld   a, [wTitleMenuOptId]
 	ld   b, a
 	push bc
 	ld   hl, $002C

@@ -262,6 +262,7 @@ rSC         EQU $ff02 ; Serial Transfer Control (R/W)
 rSC_ON    EQU 7
 rSC_CGB   EQU 1
 rSC_CLOCK EQU 0
+
 rDIV        EQU $ff04 ; Divider Register (R/W)
 rTIMA       EQU $ff05 ; Timer counter (R/W)
 rTMA        EQU $ff06 ; Timer Modulo (R/W)
