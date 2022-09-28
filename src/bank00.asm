@@ -453,7 +453,6 @@ EntryPoint:
 ; - A: Border type
 ;      $01 -> Standard
 ;      $02 -> Alternate
-L000201:
 SGB_LoadBorder:
 
 	; If we aren't in SGB mode, return
@@ -478,62 +477,54 @@ SGB_LoadBorder:
 	di   
 	ldh  a, [hROMBank]
 	push af
-		ld   a, BANK(L044000)
+		ld   a, BANK(SGBPacket_FreezeScreen) ; BANK $04
 		ld   [MBC1RomBank], a
 		ldh  [hROMBank], a
-		ld   hl, L044000
-		call SGB_SendPackets
-		ld   bc, $0004
-		call SGB_DelayAfterPacketSendCustom
-		ld   hl, L044050
-		call SGB_SendPackets
-		ld   bc, $0004
-		call SGB_DelayAfterPacketSendCustom
-		ld   hl, L044060
-		call SGB_SendPackets
-		ld   bc, $0004
-		call SGB_DelayAfterPacketSendCustom
-		ld   hl, L044070
-		call SGB_SendPackets
-		ld   bc, $0004
-		call SGB_DelayAfterPacketSendCustom
-		ld   hl, L044080
-		call SGB_SendPackets
-		ld   bc, $0004
-		call SGB_DelayAfterPacketSendCustom
-		ld   hl, L044090
-		call SGB_SendPackets
-		ld   bc, $0004
-		call SGB_DelayAfterPacketSendCustom
-		ld   hl, L0440A0
-		call SGB_SendPackets
-		ld   bc, $0004
-		call SGB_DelayAfterPacketSendCustom
-		ld   hl, L0440B0
-		call SGB_SendPackets
-		ld   bc, $0004
-		call SGB_DelayAfterPacketSendCustom
-		ld   hl, L0440C0
-		call SGB_SendPackets
-		ld   bc, $0004
-		call SGB_DelayAfterPacketSendCustom
-		ld   b, $04
-		ld   hl, $4351
 		
+mSendPkg: MACRO
+	ld   hl, \1
+	call SGB_SendPackets
+	ld   bc, $0004
+	call SGB_DelayAfterPacketSendCustom
+ENDM
+
+		; Stop the screen on the TAKARA logo to prevent it from displaying the data sent to the SGB side through VRAM
+		mSendPkg SGBPacket_FreezeScreen
+		
+		; Unknown byte sequence written to SNES RAM from 00:0810 to 00:0868.
+		; Seems to match with what's already there, going by BSNES-plus with SGB2
+		mSendPkg SGBPacket_Unknown_SNESWrite7
+		mSendPkg SGBPacket_Unknown_SNESWrite6
+		mSendPkg SGBPacket_Unknown_SNESWrite5
+		mSendPkg SGBPacket_Unknown_SNESWrite4
+		mSendPkg SGBPacket_Unknown_SNESWrite3
+		mSendPkg SGBPacket_Unknown_SNESWrite2
+		mSendPkg SGBPacket_Unknown_SNESWrite1
+		mSendPkg SGBPacket_Unknown_SNESWrite0
+		
+		;-----------------------------------
+		; FarCall into border loader, which also stops the LCD
+		ld   b, BANK(SGB_SendBorderData) ; BANK $04
+		ld   hl, SGB_SendBorderData
 		rst  $08
-			call ClearBGMap
-			xor  a
-			ldh  [rBGP], a
-			ld   a, $C1
-		rst  $18
+		
+		; Clear the tilemap and zero out the BG palette to actually hide the SGB transfer leftovers.
+		; Why isn't this part of SGB_SendBorderData, which tries to do something similar with the GFX?
+		call ClearBGMap
+		xor  a
+		ldh  [rBGP], a
+		
+		ld   a, LCDC_PRIORITY|LCDC_WTILEMAP|LCDC_ENABLE
+		rst  $18				; Resume LCD
+		;-----------------------------------
 		
 		call Task_SkipAllAndWaitVBlank
 		ld   bc, $0078
 		call SGB_DelayAfterPacketSendCustom
-		ld   hl, L044010
-		call SGB_SendPackets
-		ld   bc, $0004
-		call SGB_DelayAfterPacketSendCustom
+		
+		; Resume the screen since we're done now
+		mSendPkg SGBPacket_ResumeScreen
+		
 		call HomeCall_Sound_Init
 	pop  af
 	ld   [MBC1RomBank], a
@@ -544,7 +535,6 @@ SGB_LoadBorder:
 ; Sends one or more packets to the Super Game Boy.
 ; IN
 ; - HL: Ptr to packet structure (format: <number of packets><packet 0>[<packet 1>]...)
-L0002B3:
 SGB_SendPackets:
 	
 	; The first byte marks the number of packets to send in the lower 3 bits.
@@ -610,7 +600,6 @@ SGB_SendPackets:
 
 ; =============== SGB_DelayAfterPacketSend ===============
 ; Delays for a bit after sending a packet.
-L0002E9:
 SGB_DelayAfterPacketSend:
 	ld   de, $1B58
 .loop:
