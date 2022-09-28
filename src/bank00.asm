@@ -1244,9 +1244,9 @@ VBlankHandler:
 	bit  MISCB_SERIAL_MODE, [hl]	; Is VS Mode Serial enabled?
 	jp   z, VBlank_ChkCopyPlTiles	; If not, skip
 .serialVS:
-	res  MISCB_FREEZE, [hl]			; Unfreeze game
+	res  MISCB_FREEZE, [hl]			; Default to an unfrozen game
 	ld   a, [wSerialInputEnabled]
-	or   a							; Is serial input enabled?
+	or   a							; Is serial input enabled/*ready* ???
 	jp   z, .unmarkSerialDone		; If not, skip
 	bit  MISCB_SERIAL_PL2_SLAVE, [hl]		; Playing as PL2 (slave)?
 	jp   nz, .serialPl2				; If so, jump
@@ -5610,6 +5610,7 @@ JoyKeys_FixInvalidCombinations:
 ; =============== Serial_Init ===============
 ; Initializes serial.
 Serial_Init:
+	; Disabled by default
 	xor  a
 	ldh  [rSB], a
 	ld   [wSerialInputEnabled], a
@@ -5617,15 +5618,17 @@ Serial_Init:
 	ld   [wSerialPlayMode], a
 	ld   [wSerialTransferDone], a
 	ld   [wSerialDataSendBuffer], a
-	; Set the initial serial code.
-	ld   a, LOW(Serial_Mode_WaitVSMenuSelect)
+	; Set the initial serial mode handler.
+	; The Mode Select screen is the first to enable it.
+	ld   a, LOW(ModeSelect_SerialHandler)
 	ld   [wSerialIntPtr_Low], a
-	ld   a, HIGH(Serial_Mode_WaitVSMenuSelect)
+	ld   a, HIGH(ModeSelect_SerialHandler)
 	ld   [wSerialIntPtr_High], a
 	ret
 	
 ; =============== SerialHandler ===============	
 ; By default this isn't called.
+; The handler is called when a byte is received by either the master or slave.
 SerialHandler:
 	push af
 	push bc
@@ -5647,29 +5650,54 @@ SerialHandler:
 	; Jump there
 	jp   hl
 	
-; =============== Serial_Mode_WaitVSMenuSelect ===============
-Serial_Mode_WaitVSMenuSelect:
-	; TODO
+; =============== ModeSelect_SerialHandler ===============
+; Serial handler for Module_Title.
+ModeSelect_SerialHandler:
+	; This handler is used to make the game wait at ModeSelect_Serial_Wait
+	; until both DMGs have sent a byte (MODESELECT_SBCMD_*) to each other.
 	
-	; The Game Boy which selects the VS option sends out VS_SELECTED_OTHER
-	; to the other Game Boy.
-	; The other Game Boy sends out VS_SELECTED_THIS in return.
+	ldh  a, [rSB]						; Read byte from serial
+	ld   [wSerialDataReceiveBuffer], a	; Copy it here
 	
-	; What matters here is the received data.
-	
-	ldh  a, [rSB]						; Copy current serial data
-	ld   [wSerialDataReceiveBuffer], a
-	cp   VS_SELECTED_THIS				; Did this GB select a VS option?
-	jr   z, .selectedThis				; If so, jump
-.selectedOther:
-	ld   a, START_TRANSFER_EXTERNAL_CLOCK	; Otherwise, try to start a transfer back to master
+	; When a byte from serial is received, the transfer flag from rSC gets automatically unset
+	; from both sides.
+	;
+	; In case of the master, that doesn't make a difference since when it starts a transfer
+	; in ModeSelect_Serial_SendAndWait, the rSC value gets set to the proper value.
+	;
+	; That would be bad since with the slave though. If the master tries to send a byte while
+	; the slave isn't listening (START_TRANSFER_EXTERNAL_CLOCK unset), ModeSelect_Serial_Wait will infinite loop.
+	;
+	; It's also important, at least when the ModeSelect main loop is still executing,
+	; that the master doesn't get START_TRANSFER_EXTERNAL_CLOCK immediately set before the frame ends (see below).
+	; Otherwise, because of how ModeSelect is programmed, the next frame it will treat the previously
+	; sent MODESELECT_SBCMD_* value as what the *other* DMG sent, set itself as a slave,
+	; and infinite loop in ModeSelect_Serial_Wait listening for a byte that will never be sent.
+	; 
+	;
+	; Therefore, if we are set as slave, immediately set START_TRANSFER_EXTERNAL_CLOCK to listen for the next byte.
+	; Normally START_TRANSFER_EXTERNAL_CLOCK would be set at the start of the ModeSelect main loop,
+	; but the serial send and receive functions take exclusive control.
+	;
+
+
+	; Dumb detection of master/slave since we can't use MISCB_SERIAL_PL2_SLAVE yet.
+	; Because the master is expecting the slave to reply with MODESELECT_SBCMD_IDLE, we can
+	; use it to determine on which side we are.
+	;
+	; Because rSB is "shared" across master/slave in a delayed way, eventually the master will read
+	; its own values back, but it won't matter anymore by that point.
+	cp   MODESELECT_SBCMD_IDLE			; Did we receive the idle command?
+	jr   z, .master						; If so, jump
+.slave:
+	ld   a, START_TRANSFER_EXTERNAL_CLOCK	; Allow listening for next byte immediately
 	ldh  [rSC], a
-	ld   a, $01
+	ld   a, $01							; Allow exit from ModeSelect_Serial_Wait
 	ld   [wSerialTransferDone], a
 	ret
-.selectedThis:
-	; Nothing to do
-	ld   a, $01							
+.master:
+	; Stop listening for bytes
+	ld   a, $01							; Allow exit from ModeSelect_Serial_Wait
 	ld   [wSerialTransferDone], a
 	ret  
 	
