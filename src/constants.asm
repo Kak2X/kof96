@@ -36,6 +36,12 @@ MODE_TEAM1P   EQU $01
 MODE_SINGLEVS EQU $02
 MODE_TEAMVS   EQU $03
 
+ACTIVE_CTRL_PL1          EQU $00
+ACTIVE_CTRL_PL2          EQU $01
+
+LASTWIN_PL1 EQU 0
+LASTWIN_PL2 EQU 1
+
 
 ; Character IDs
 ; [POI] These are grouped by team, not like it matters.
@@ -59,15 +65,14 @@ CHAR_ID_MRKARATE EQU $10
 CHAR_ID_OIORI    EQU $11
 CHAR_ID_OLEONA   EQU $12
 CHAR_ID_KAGURA   EQU $13
+CHAR_ID_NONE     EQU $FF
 
-
-
-
-; Replace with MODE_* 
-VS_SELECTED_THIS  EQU $02
-VS_SELECTED_OTHER EQU $03
-SERIAL_PL1_ID EQU $02
-SERIAL_PL2_ID EQU $03
+; Special hardcoded stages for bosses or secrets.
+; These are special indexes to wRoundSeqTbl that return CHAR_ID_* instead of CHARSEL_ID_*
+STAGE_KAGURA   EQU $0F
+STAGE_GOENITZ  EQU $10
+STAGE_BONUS    EQU $11
+STAGE_MRKARATE EQU $12
 
 C_NL EQU $FF ; Newline character in strings
 
@@ -84,19 +89,20 @@ DIPB_UNLOCK_GOENITZ   EQU 6 ; Unlock Goenitz
 DIPB_UNLOCK_OTHER     EQU 7 ; Unlock everyone else (Mr Karate, Boss Kagura, Orochi Iori and Orochi Leona)
 
 ; $C025
-MISCB_FREEZE EQU 3 ; Prevents tasks and almost everything from executing, effectively freezing the game until it's unset. May be used to force sync in serial VS???
-MISCB_SERIAL_PL2_SLAVE EQU 5 ; If set, the GB is the slave (matches PL2), otherwise it's the master (PL1)
-MISCB_SERIAL_MODE EQU 6 ; Marks a VS battle through serial cable. Not in SGB mode.
-MISCB_IS_SGB EQU 7	; Enables SGB features
+MISCB_SERIAL_LAG      EQU 3 ; If set, it freezes the game. Essentially a version of MISCB_LAG_FRAME for the other GB.
+                            ; Used to force the slave to wait (and not read new player inputs) until the master sends new bytes.
+MISCB_SERIAL_SLAVE    EQU 5 ; If set, the GB is the slave (matches PL2), otherwise it's the master (PL1)
+MISCB_SERIAL_MODE     EQU 6 ; Marks a VS battle through serial cable. Not in SGB mode.
+MISCB_IS_SGB          EQU 7 ; Enables SGB features
 ; $C026
-MISCB_LAG_FRAME EQU 3 ; Is set when the task cycler is called, and unset right before the VBlank wait loop.
+MISCB_LAG_FRAME       EQU 3 ; Is set when the task cycler is called, and unset right before the VBlank wait loop.
 ; $C028
-MISCB_USE_SECT EQU 0 ; If set, the screen uses the three-section mode (SetSectLYC was called). Otherwise there's a single section governed by hScrollX and hScrollY.
-MISCB_PL_RANGE_CHECK EQU 1 ; Enables the player range enforcement, which is part of the sprite drawing routine.
-                           ; Should only be used during gameplay, otherwise it could get in the way.
-MISCB_TITLE_SECT EQU 2 ; Allows parallax for the title screen
+MISCB_USE_SECT        EQU 0 ; If set, the screen uses the three-section mode (SetSectLYC was called). Otherwise there's a single section governed by hScrollX and hScrollY.
+MISCB_PL_RANGE_CHECK  EQU 1 ; Enables the player range enforcement, which is part of the sprite drawing routine.
+                            ; Should only be used during gameplay, otherwise it could get in the way.
+MISCB_TITLE_SECT      EQU 2 ; Allows parallax for the title screen
 
-MISC_USE_SECT EQU 1 << MISCB_USE_SECT
+MISC_USE_SECT         EQU 1 << MISCB_USE_SECT
 ;--
 
 
@@ -135,18 +141,6 @@ OST_XFLIP   EQU 1 << OSTB_XFLIP
 OST_YFLIP   EQU 1 << OSTB_YFLIP
 OST_VISIBLE EQU 1 << OSTB_VISIBLE
 
-; iOBJInfo_OBJLstFlags* bits from RAM
-; Almost the same as iOBJInfo_Status, but not completely.
-; Only the unique values will be listed.
-OSXB_USETILEFLAGS EQU 4
-OSXB_XFLIP   EQU 5 ; Horizontal flip
-OSXB_YFLIP   EQU 6 ; Vertical flip
-OSXB_BGPRIORITY EQU 7 ; If set, the BG has priority over the sprite mapping
-OSX_USETILEFLAGS EQU 1 << OSXB_USETILEFLAGS
-OSX_XFLIP   EQU 1 << OSXB_XFLIP
-OSX_YFLIP   EQU 1 << OSXB_YFLIP
-OSX_BGPRIORITY EQU 1 << OSXB_BGPRIORITY
-
 ; OBJLST / SPRITE MAPPINGS FLAGS from ROM
 ; These are almost the same as the iOBJInfo_OBJLstFlags* bits.
 ; item0
@@ -171,7 +165,7 @@ TASK_EXEC_TODO EQU $04 ; Not executed yet, but was executed previously already. 
 TASK_EXEC_NEW  EQU $08 ; Never executed before. Likely init code which will set a new task. Jump HL type.
 
 ; iPlInfo_Status flags
-PSB_CPU        EQU 7 ; If set, the player is a CPU-controlled
+PSB_CPU        EQU 7 ; If set, the player is CPU-controlled (1P mode) or autopicks characters (VS mode)
 PS_CPU         EQU 1 << PSB_CPU
 
 SNDIDREQ_SIZE      EQU $08
@@ -340,9 +334,6 @@ GM_TITLE_MODESELECT     EQU $04
 GM_TITLE_OPTIONS        EQU $06
 
 ; SHARED
-TITLE_CTRL_PL1          EQU $00
-TITLE_CTRL_PL2          EQU $01
-
 TITLE_OBJ_PUSHSTART     EQU $00
 TITLE_OBJ_MENU          EQU $01
 TITLE_OBJ_CURSOR_R      EQU $02
@@ -368,6 +359,10 @@ MODESELECT_ACT_TEAMVS   EQU MODE_TEAMVS+1
 MODESELECT_SBCMD_IDLE     EQU $02
 MODESELECT_SBCMD_SINGLEVS EQU MODESELECT_ACT_SINGLEVS
 MODESELECT_SBCMD_TEAMVS   EQU MODESELECT_ACT_TEAMVS
+
+; Implementation detail leads to this
+SERIAL_PL1_ID             EQU MODESELECT_SBCMD_IDLE
+; SERIAL_PL2_ID is not a constant, but any val != $00 && != $02
 
 ; OPTIONS
 
@@ -409,6 +404,8 @@ OPTION_MENU_SGBTEST EQU $02
 ; ============================================================
 ; CHARACTER SELECT
 
+; Portrait IDs
+; These identify the blocks in the character select screen that the cursor can go over.
 CHARSEL_ID_KYO       EQU $00
 CHARSEL_ID_ANDY      EQU $01
 CHARSEL_ID_TERRY     EQU $02
@@ -427,3 +424,53 @@ CHARSEL_ID_MRKARATE0 EQU $0E ; 2 slots
 CHARSEL_ID_MRKARATE1 EQU $0F
 CHARSEL_ID_GOENITZ   EQU $10
 CHARSEL_ID_LEONA     EQU $11
+; Extra entries not part of the slots
+CHARSEL_ID_SPEC_OIORI  EQU $12
+CHARSEL_ID_SPEC_OLEONA EQU $13
+CHARSEL_ID_SPEC_KAGURA EQU $14
+
+CHARSEL_POSFB_BOSS EQU 7
+CHARSEL_POSF_BOSS EQU 1 << CHARSEL_POSFB_BOSS
+
+CHARSEL_MODE_SELECT    EQU $00
+CHARSEL_MODE_READY     EQU $02
+CHARSEL_MODE_CONFIRMED EQU $04
+
+CHARSEL_1P EQU $00
+CHARSEL_2P EQU $01	
+
+CHARSEL_TEAM_REMAIN EQU $00
+CHARSEL_TEAM_FILLED EQU $FF
+
+CHARSEL_GRID_W    EQU $06
+CHARSEL_GRID_H    EQU $03
+CHARSEL_GRID_SIZE EQU CHARSEL_GRID_W * CHARSEL_GRID_H
+
+CHARSEL_OBJ_CURSOR1P        EQU $00
+CHARSEL_OBJ_CURSOR1PWIDE    EQU $04
+CHARSEL_OBJ_CURSOR2P        EQU $08
+CHARSEL_OBJ_CURSOR2PWIDE    EQU $0C
+CHARSEL_OBJ_CURSORCPU1P     EQU $10
+CHARSEL_OBJ_CURSORCPU1PWIDE EQU $14
+CHARSEL_OBJ_CURSORCPU2P     EQU $18
+CHARSEL_OBJ_CURSORCPU2PWIDE EQU $1C
+
+BG_CHARSEL_P1ICON0 EQU $99E1
+BG_CHARSEL_P1ICON1 EQU $99E3
+BG_CHARSEL_P1ICON2 EQU $99E5
+BG_CHARSEL_P2ICON0 EQU $99F1
+BG_CHARSEL_P2ICON1 EQU $99EF
+BG_CHARSEL_P2ICON2 EQU $99ED
+
+; Blank boxes with numbers
+TILE_CHARSEL_ICONEMPTY1 EQU $EC
+TILE_CHARSEL_ICONEMPTY2 EQU $F0
+TILE_CHARSEL_ICONEMPTY3 EQU $F4
+
+TILE_CHARSEL_P1ICON0 EQU $F8
+TILE_CHARSEL_P1ICON1 EQU $1F
+TILE_CHARSEL_P1ICON2 EQU $23
+
+TILE_CHARSEL_P2ICON0 EQU $FC
+TILE_CHARSEL_P2ICON1 EQU $27
+TILE_CHARSEL_P2ICON2 EQU $2B

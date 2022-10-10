@@ -33,6 +33,7 @@ if (count($lines) > 0)
 
 $objlst_a = [];
 $objlst_b = [];
+$objdata = [];
 
 
 for ($i = 0; $i < count($lines);) {
@@ -44,10 +45,12 @@ for ($i = 0; $i < count($lines);) {
 	}*/
 	
 	$base_label = get_label($lines[$i]);
-	
-	if (in_array($base_label, $objlst_a)) {
+	if (in_array($base_label, $objdata)) {
+		print "O hit: $base_label\r\n";
+		$b = objdata_parse($base_label, $lines, $i);
+	} else if (in_array($base_label, $objlst_a)) {
 		print "A hit: $base_label\r\n";
-		
+		$unused_marker = strpos($lines[$i], ";X") !== false ? " ;X" : "";
 		$label = "OBJLstHdrA_".$base_label;
 		
 		$flags = generate_const_label(get_db($lines[$i++]), $objlst_flags);
@@ -66,40 +69,28 @@ for ($i = 0; $i < count($lines);) {
 			: "dp L{$gfx_bank}{$gfx_high}{$gfx_low}";
 		
 		$data_ptr = "L{$banknum}{$data_high}{$data_low}";
-		$objinfo = "";
 		if (get_label($lines[$i]) == $data_ptr) {
 			$data_ptr = ".bin";
-			
-			$objcount = get_db($lines[$i++]);
-			
-			$objinfo .= "
-.bin:
-	db \${$objcount} ; OBJ Count
-	;    Y   X  ID+FLAG";
-			
-			for ($j = 0, $max = hexdec($objcount); $j < $max; $j++) {
-				$y = get_db($lines[$i++]);
-				$x = get_db($lines[$i++]);
-				$f = get_db($lines[$i++]);
-				$objinfo .= "
-	db \${$y},\${$x},\${$f} ; \$".fmthexnum($j);
-			}
-			
-			// 
+			$objinfo = objdata_parse($data_ptr, $lines, $i);
+		} else {
+			$objinfo = "";
+			$objdata[] = $data_ptr;
 		}
 		
-		$b = "{$label}:
+		$b = "{$label}:{$unused_marker}
 	db {$flags} ; iOBJLstHdrA_Flags
 	db \${$byte1} ; iOBJLstHdrA_Byte1
 	db \${$byte2} ; iOBJLstHdrA_Byte2
 	{$gfx_ptr} ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw {$data_ptr} ; iOBJLstHdrA_DataPtr
 	db \${$xoff} ; iOBJLstHdrA_XOffset
-	db \${$yoff} ; iOBJLstHdrA_YOffset{$objinfo}";
-		
+	db \${$yoff} ; iOBJLstHdrA_YOffset";
+		if ($objinfo)
+			$b .= "
+{$objinfo}";	
 	} else if (in_array($base_label, $objlst_b)) {
 		print "B hit: $base_label\r\n";
-		
+		$unused_marker = strpos($lines[$i], ";X") !== false ? " ;X" : "";
 		$label = "OBJLstHdrB_".$base_label;
 		
 		$flags = generate_const_label(get_db($lines[$i++]), $objlst_flags);
@@ -116,50 +107,25 @@ for ($i = 0; $i < count($lines);) {
 			: "dp L{$gfx_bank}{$gfx_high}{$gfx_low}";
 		
 		$data_ptr = "L{$banknum}{$data_high}{$data_low}";
-		$objinfo = "";
-		
 		
 		if (get_label($lines[$i]) == $data_ptr) {
 			$data_ptr = ".bin";
-		//$isMatch = get_label($lines[$i]) != $data_ptr;
-		//if ($isMatch) {
-		//	$data_ptr = ".bin";
-		//} else {
-		//	while ($i < count($lines)) {
-		//		$isMatch = get_label($lines[$i]) != $data_ptr;
-		//		if ($isMatch) {
-		//			break;
-		//		}
-		//		$b .= $lines[$i];
-		//		$i++;
-		//	}	
-		//}
-		//
-		//if ($isMatch) {
-		//	$objcount = get_db($lines[$i++]);
-			
-			$objinfo .= "
-{$data_ptr}:
-	db \${$objcount} ; OBJ Count
-	;    Y   X  ID+FLAG";
-			
-			for ($j = 0, $max = hexdec($objcount); $j < $max; $j++) {
-				$y = get_db($lines[$i++]);
-				$x = get_db($lines[$i++]);
-				$f = get_db($lines[$i++]);
-				$objinfo .= "
-	db \${$y},\${$x},\${$f} ; \$".fmthexnum($j);
-			}
-			
-			// 
+			$objinfo = objdata_parse($data_ptr, $lines, $i);
+		} else {
+			$objinfo = "";
+			$objdata[] = $data_ptr;
 		}
 		
-		$b = "{$label}:
+		$b = "{$label}:{$unused_marker}
 	db {$flags} ; iOBJLstHdrA_Flags
 	{$gfx_ptr} ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw {$data_ptr} ; iOBJLstHdrA_DataPtr
 	db \${$xoff} ; iOBJLstHdrA_XOffset
-	db \${$yoff} ; iOBJLstHdrA_YOffset{$objinfo}";
+	db \${$yoff} ; iOBJLstHdrA_YOffset";
+		if ($objinfo)
+			$b .= "
+{$objinfo}";
+
 	} else if (strpos($lines[$i], "OBJLstPtrTable_") === 0) {
 		$label = $base_label;
 		
@@ -175,7 +141,7 @@ for ($i = 0; $i < count($lines);) {
 			if ($header_a_high == "FF") {
 				// End of the OBJLst
 				$b .= "
-	dw \$FFFF";
+	dw OBJLSTPTR_NONE";
 				break;
 			}
 			
@@ -201,7 +167,9 @@ for ($i = 0; $i < count($lines);) {
 	dw {$header_a_merged}, {$header_b_merged}{$unused_marker}";
 		}
 	} else {
+		fwrite($h, $lines[$i]);	
 		$i++;
+		continue;
 	}
 	
 		$b .= "
@@ -213,3 +181,22 @@ for ($i = 0; $i < count($lines);) {
 	
 }
 fclose($h);
+
+function objdata_parse($data_ptr, $lines, &$i) {
+	$unused_marker = strpos($lines[$i], ";X") !== false ? " ;X" : "";
+	$objcount = get_db($lines[$i++]);
+			
+	$objinfo = "{$data_ptr}:{$unused_marker}
+	db \${$objcount} ; OBJ Count
+	;    Y   X  ID+FLAG";
+			
+	for ($j = 0, $max = hexdec($objcount); $j < $max; $j++) {
+		$y = get_db($lines[$i++]);
+		$x = get_db($lines[$i++]);
+		$f = get_db($lines[$i++]);
+		$objinfo .= "
+	db \${$y},\${$x},\${$f} ; \$".fmthexnum($j);
+	}
+	
+	return $objinfo;
+}

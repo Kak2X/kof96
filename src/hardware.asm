@@ -99,9 +99,14 @@ OAM_TILE  EQU $02
 OAM_FLAGS EQU $03
 
 ; OAM Sprite Flags
-SPR_XFLIP        equ %10000
-SPR_YFLIP        equ %100000
-SPR_PRIORITY     equ %1000000
+SPRB_OBP1       EQU 4
+SPRB_XFLIP      EQU 5
+SPRB_YFLIP      EQU 6
+SPRB_BGPRIORITY EQU 7
+SPR_OBP1        EQU 1 << SPRB_OBP1     
+SPR_XFLIP       EQU 1 << SPRB_XFLIP    
+SPR_YFLIP       EQU 1 << SPRB_YFLIP    
+SPR_BGPRIORITY  EQU 1 << SPRB_BGPRIORITY 
 
 ; NR*2 Flags
 SNDENVB_INC EQU 3 ; If set, it's an increasing envelope sweep

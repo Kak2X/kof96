@@ -917,7 +917,7 @@ Module_Title:
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
 	ld   [wTitleMode], a
-	ld   [wTitleActivePl], a
+	ld   [wJoyActivePl], a
 	ld   [wTitleMenuOptId], a
 	ld   [wTitleMenuCursorXBak], a
 	ld   [wTitleMenuCursorYBak], a
@@ -1541,9 +1541,9 @@ Title_Mode_ModeSelect:
 ; Sets of functions to set which players are controlled by the CPU, depending on the mode.
 
 ModeSelect_PrepSingle:
-	; SGB-only, wTitleActivePl is always TITLE_CTRL_PL1 in DMG
-	ld   a, [wTitleActivePl]
-	cp   TITLE_CTRL_PL1		; Does player 1 have control?
+	; SGB-only, wJoyActivePl is always ACTIVE_CTRL_PL1 in DMG
+	ld   a, [wJoyActivePl]
+	cp   ACTIVE_CTRL_PL1		; Does player 1 have control?
 	jp   nz, .pl2			; If not, jump
 .pl1:
 	; P1: Player, P2: CPU
@@ -1591,19 +1591,19 @@ ModeSelect_SwitchToCharSelect:
 	
 	; Initialize character select vars
 	ld   a, $00
-	ld   [$C162], a
+	ld   [wLastWinner], a
 	ld   [$C17E], a
 	ld   a, $00
-	ld   [$C1A9], a
+	ld   [wCharSelP1CursorPos], a
 	ld   a, $05
-	ld   [$C1AA], a
+	ld   [wCharSelP2CursorPos], a
 	ld   a, $FF
-	ld   [$C1AB], a
-	ld   [$C1AC], a
-	ld   [$C1AD], a
-	ld   [$C1AE], a
-	ld   [$C1AF], a
-	ld   [$C1B0], a
+	ld   [wCharSelP1Char0], a
+	ld   [wCharSelP1Char1], a
+	ld   [wCharSelP1Char2], a
+	ld   [wCharSelP2Char0], a
+	ld   [wCharSelP2Char1], a
+	ld   [wCharSelP2Char2], a
 	
 	; Force cursor to be visible while waiting
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
@@ -1634,8 +1634,8 @@ ModeSelect_SwitchToCharSelect:
 	ld   [wTimer], a
 	
 	; Jump to the character select screen
-	ld   b, BANK(L1E4000) ; BANK $1E
-	ld   hl, L1E4000
+	ld   b, BANK(Module_CharSel) ; BANK $1E
+	ld   hl, Module_CharSel
 	rst  $00
 	
 ; =============== ModeSelect_DoCtrl ===============
@@ -2607,13 +2607,13 @@ TitleScreen_IsStartPressed:
 	xor  a					; C = 0, not pressed
 	ret
 .pressed1:
-	ld   a, TITLE_CTRL_PL1	; Player 1 pressed it
-	ld   [wTitleActivePl], a
+	ld   a, ACTIVE_CTRL_PL1	; Player 1 pressed it
+	ld   [wJoyActivePl], a
 	scf						; C = 1, pressed
 	ret
 .pressed2:
-	ld   a, TITLE_CTRL_PL2	; Player 2 pressed it
-	ld   [wTitleActivePl], a
+	ld   a, ACTIVE_CTRL_PL2	; Player 2 pressed it
+	ld   [wJoyActivePl], a
 	scf						; C = 1, pressed
 	ret
 	
@@ -2652,8 +2652,8 @@ Title_GetMenuInput:
 	;
 	; Pick the controller from the active side
 	;
-	ld   a, [wTitleActivePl]
-	cp   TITLE_CTRL_PL1			; Is pad 1 active?
+	ld   a, [wJoyActivePl]
+	cp   ACTIVE_CTRL_PL1			; Is pad 1 active?
 	jp   nz, .usePl2			; If not, jump
 .usePl1:
 	ld   hl, hJoyKeys			; HL = Controller 1 input
@@ -2859,16 +2859,17 @@ ModeSelect_MakeRoundSeq:
 	jr   nz, .fillLoop
 	
 	;
-	; Randomize the first 14 opponents
+	; Randomize the first 14 opponents (all of the normal ones).
+	; This *does* mean you will always fight both normal and boss Chizuru.
 	;
 	
-	; This is done by going through character *select* IDs from highest allowed to lowest,
+	; This is done by going through character *select* portrait IDs from highest allowed to lowest,
 	; and placing that character in a randomly generated slot in wRoundSeqTbl.
 	ld   b, $0E				; B = Current CHARSEL_ID_* / Remaining chars
 .getRand:
 	call RandLY				; A = Random opponent slot
-	and  a, $0F				; Filter valid positions only
-	cp   $0F				; Did we get Goenitz's slot? (15th character in the sequence)
+	and  a, $0F				; Filter valid IDs only
+	cp   $0F				; Did we get Kagura's slot? (15th character in the sequence)
 	jr   z, .getRand		; If so, reroll again
 	
 	; HL = Ptr to generated slot
@@ -3185,7 +3186,7 @@ Title_DisableSerial:
 	xor  a
 	ldh  [rSB], a
 	ld   [wSerialDataReceiveBuffer], a
-	ld   [wModeSelectTmpSerialData], a
+	ld   [wSerialPlayerId], a
 	ld   [wSerialTransferDone], a
 	ld   [wSerialDataSendBuffer], a
 	ret
@@ -3232,16 +3233,23 @@ ModeSelect_TrySendVSData:
 	cp   MODESELECT_SBCMD_IDLE			; RecByte == MODESELECT_SBCMD_IDLE?
 	jr   z, .send						; If so, jump
 	ret
-.send: 	
-	
-	ld   [wModeSelectTmpSerialData], a 		; Save RecByte
+.send: 
+	; Save the received byte for later in wSerialPlayerId.
+	; This also has the effect of always writing SERIAL_PL1_ID, marking the current
+	; player as being 1P / using hJoyKeys for the serial input handler.
+	;
+	; This works because only the master can ever write MODESELECT_SBCMD_IDLE here (which has the same value as SERIAL_PL1_ID),
+	; while the slave can only write in ModeSelect_GetCtrlFromSerial the command IDs we send
+	; (MODESELECT_SBCMD_TEAMVS or MODESELECT_SBCMD_SINGLEVS).
+	ld   [wSerialPlayerId], a 		; Save received byte
 	
 	; Set ourselves as master
 	ld   hl, wMisc_C025
 	set  MISCB_SERIAL_MODE, [hl]
-	res  MISCB_SERIAL_PL2_SLAVE, [hl]
+	res  MISCB_SERIAL_SLAVE, [hl]
 	
-	; Wait for a bit
+	; Wait for a bit.
+	; This also disables wSerialTransferDone on VBlank.
 	call Task_PassControl_NoDelay
 	call Task_PassControl_NoDelay
 	call Task_PassControl_NoDelay
@@ -3249,6 +3257,7 @@ ModeSelect_TrySendVSData:
 	; [Master 2/3] Send out the timer setting and wait some more
 	ld   a, [wMatchStartTime]
 	call ModeSelect_Serial_SendAndWait
+	; Wait for a bit and reset wSerialTransferDone
 	call Task_PassControl_NoDelay
 	call Task_PassControl_NoDelay
 	call Task_PassControl_NoDelay
@@ -3257,7 +3266,7 @@ ModeSelect_TrySendVSData:
 	ld   a, [wDipSwitch]
 	call ModeSelect_Serial_SendAndWait
 	
-	ld   a, [wModeSelectTmpSerialData]		; Restore RecByte
+	ld   a, [wSerialPlayerId]		; Restore received byte
 	ret  
 	
 ; =============== ModeSelect_GetCtrlFromSerial ===============
@@ -3275,13 +3284,15 @@ ModeSelect_GetCtrlFromSerial:
 	; Otherwise, nothing happened.
 	ret
 .receiveVSData:
-	; Save what we were sent here
-	ld   [wModeSelectTmpSerialData], a		; Save temp MODESELECT_ACT_*
+	; Save the MODESELECT_ACT_* value we were sent here.
+	; This also has the effect of marking the current player as being 2P / using hJoyKeys2.
+	; See also: ModeSelect_TrySendVSData.
+	ld   [wSerialPlayerId], a
 	
 	; Set ourselves as slave, since we're on the receiving end.
 	ld   hl, wMisc_C025
 	set  MISCB_SERIAL_MODE, [hl]
-	set  MISCB_SERIAL_PL2_SLAVE, [hl]
+	set  MISCB_SERIAL_SLAVE, [hl]
 	
 	; [Slave 2/3] Wait for the other GB to send wMatchStartTime
 	xor  a
@@ -3298,7 +3309,7 @@ ModeSelect_GetCtrlFromSerial:
 	ld   [wDipSwitch], a
 	
 	; Return the action ID
-	ld   a, [wModeSelectTmpSerialData]		; Restore MODESELECT_ACT_* value
+	ld   a, [wSerialPlayerId]		; Restore MODESELECT_ACT_* value
 	ret  
 
 ; =============== Title_LoadVRAM ===============
@@ -4317,7 +4328,7 @@ IntroScene_IoriRise:
 		cp   $30								; Has Y position $30?
 		jr   nz, .noRemBGPr						; If not, skip
 		ld   hl, wOBJInfo2+iOBJInfo_OBJLstFlags	; Otherwise, remove BG priority
-		res  OSXB_BGPRIORITY, [hl]
+		res  SPRB_BGPRIORITY, [hl]
 	.noRemBGPr:
 	
 		; Wait 1 frame
@@ -4903,11 +4914,11 @@ Intro_CharS_LoadVRAM:
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	res  OSTB_VISIBLE, [hl]					; Hide for now
 	inc  hl									; Seek to iOBJInfo_OBJLstFlags
-	set  OSXB_BGPRIORITY, [hl]				; Set BG priority
+	set  SPRB_BGPRIORITY, [hl]				; Set BG priority
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status	; Do the same for Andy's sprite
 	res  OSTB_VISIBLE, [hl]
 	inc  hl
-	set  OSXB_BGPRIORITY, [hl]
+	set  SPRB_BGPRIORITY, [hl]
 	
 	; Initialize buffer info
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status

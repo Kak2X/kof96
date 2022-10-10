@@ -51,23 +51,21 @@ wSerialDataReceiveBuffer EQU $C03E
 wSerialDataReceiveBuffer_End EQU $C0BE
 wSerialDataSendBuffer EQU $C0BE
 wSerialDataSendBuffer_End EQU $C13E
-;????
-; Two separate indexes, with Tail pointing at Head - 1
 wSerialDataReceiveBufferIndex_Head EQU $C13E
 wSerialDataReceiveBufferIndex_Tail EQU $C13F
 wSerialDataSendBufferIndex_Head EQU $C140 ; Index of most recent buffer entry
 wSerialDataSendBufferIndex_Tail EQU $C141 ; Index of last buffer entry - used for current player input in VS serial
-wSerial_Unknown_SlaveRetransfer EQU $C142
-wSerial_Unknown_0_IncDecMarker EQU $C143
-wSerial_Unknown_1_IncDecMarker EQU $C144
-wSerialPlayMode EQU $C145 ; Copy of wPlayMode set exclusively on VS modes ??
-wModeSelectTmpSerialData EQU $C145 ; Temporary value
+; These mark the balance for increasing the head/tail indexes
+wSerialReceivedLeft EQU $C142 ; Number of received bytes wSerialDataReceiveBufferIndex_Tail is behind of. 
+wSerialSentLeft EQU $C143  ; Number of sent bytes wSerialDataReceiveBufferIndex_Tail is behind of.
+wSerial_Unknown_Unused_C144 EQU $C144
+wSerialPlayerId EQU $C145 ; Determines who is 1P/2P due to an implementation detail of how MODESELECT_SBCMD_* is sent.
 wSerialTransferDone EQU $C146 ; Marks if the serial handler was executed for the frame? otherwise waits
-wSerialJoyLastKeys EQU $C147 ; Player 1 - Most recent New Joypad Input (when controlling P1)
-wSerialJoyKeys EQU $C148 ; Player 1 - Joypad Input (when controlling P1)
-wSerialJoyLastKeys2 EQU $C149 ; Player 2 - Most recent Joypad Input (when controlling P1)
-wSerialJoyKeys2 EQU $C14A ; Player 2 - Joypad Input (when controlling P1)
-wSerialInputEnabled EQU $C14B ; If set, controls are enabled during serial mode
+wSerialPendingJoyKeys EQU $C147 ; Player 1 Only - Next inputs to send after receiving a byte
+wSerialPendingJoyNewKeys EQU $C148
+wSerialPendingJoyKeys2 EQU $C149 ; Player 2 Only - Next inputs to send after receiving a byte
+wSerialPendingJoyNewKeys2 EQU $C14A ;
+wSerialInputMode EQU $C14B ; If set, controls are enabled during serial mode
 wSGBBorderType EQU $C14C ; Current border type loaded 
 wFontLoadBit1Col EQU $C14D ; 2pp color mapped to bit1 on 1bpp graphics
 wFontLoadBit0Col EQU $C14E ; 2pp color mapped to bit0 on 1bpp graphics
@@ -88,27 +86,51 @@ wOBJScrollY EQU $C157 ; Y position *subtracted* to every OBJ.
 wScreenSect1LYC EQU $C15A ; Scanline number the second screen section starts. During gameplay, it's the playfield.
 wScreenSect2LYC EQU $C15B ; Scanline number the third screen section starts. During gameplay, it's the meter HUD
 
+wLastWinner EQU $C162 ; Marks using bits the player who won the last round.
 wPlayMode EQU $C163 ; Single/Team 1P/VS
 
-wUnknown_C165 EQU $C165
-wTitleActivePl EQU $C165 ; Determines the player side which has control on the main menu
+wJoyActivePl EQU $C165 ; Determines the active SGB pad, generally for 1P modes.
 
+wRoundNum EQU $C167 ; Round number in a stage
 
 wRoundSeqId EQU $C17F ; Index to the char sequence table, essentially the number of beat opponents after clearing a stage
-wRoundSeqTbl EQU $C180 ; Sequence of CPU opponents in order.
+wRoundSeqTbl EQU $C180 ; Sequence of CPU opponents in order, containing initially CHARSEL_ID_* for normal rounds and CHAR_ID_* for bosses
 wCharIdExtra EQU $C191 ; Part of wRoundSeqTbl, the optional opponent for certain team combinations. 
 wCharSelIdMapTbl EQU $C194 ; Maps cursor locations in the char select screen (CHARSEL_ID_*) to actual character IDs (CHAR_ID_*)
-                           ; This is updated when flipping a tile.
+                           ; $15 bytes ($C194-$C1A8), this is updated when flipping a tile.
 
-						   
+wCharSelP1CursorPos EQU $C1A9 ; Player 1 cursor position, CHARSEL_ID_*
+wCharSelP2CursorPos EQU $C1AA ; Player 2 cursor position, CHARSEL_ID_*
+
+; Character ID selected for both players
+wCharSelP1Char0 EQU $C1AB
+wCharSelP1Char1 EQU $C1AC
+wCharSelP1Char2 EQU $C1AD
+wCharSelP2Char0 EQU $C1AE
+wCharSelP2Char1 EQU $C1AF
+wCharSelP2Char2 EQU $C1B0
+
+
+wCharSelRandom1P EQU $C1B1 ; Randomize team on 1P side
+wCharSelRandom2P EQU $C1B2 ; Randomize team on 1P side
+
+wCharSelTeamFull EQU $C1B3 ; Temporary value when adding characters, determines if more can be added
+
+wCharSelP1CursorMode EQU $C1B4
+wCharSelP2CursorMode EQU $C1B5
+wCharSelCurPl EQU $C1B6 ; Player num currently handled in the character select screen.
+
+	
 wIntroLoopOBJAnim EQU $C1B3 ; If set in the intro, sprite animations are set to loop
 wUnknownTimer_C1B3 EQU $C1B3
 wTitleMenuOptId EQU $C1B4 ; Cursor location in title screen
+wUnknown_C1B4 EQU $C1B4
 wTitleMenuCursorXBak EQU $C1B5 ; Backup location of cursor X position
 wTitleMenuCursorYBak EQU $C1B6 ; Backup location of cursor Y position
-wUnknown_C1B7 EQU $C1B7
+wCharSelRandomDelay1P EQU $C1B7 ; Delay until the CPU autopicks the next character
 wTitleSubMenuOptId EQU $C1B7 ; Cursor location for Game Select / Option menus
 wOptionsSGBSndOptId EQU $C1B8 ; Vertical cursor location in the SGB Sound Test
+wCharSelRandomDelay2P EQU $C1B8 ; Delay until the CPU autopicks the next character
 wOptionsBGMId EQU $C1B9 ; ID of the selected music in the BGM Test
 wOptionsSFXId EQU $C1BA ; ID of the selected sound effect in the SFX Test
 wOptionsMenuMode EQU $C1BB ; $00 -> Normal, $02 -> SGB Sound Test
@@ -126,7 +148,8 @@ wTitleResetTimer_Low EQU $C1C2
 wTitleParallaxBaseSpeed EQU $C1C3 ; Extra cloud speed - Pixels
 wTitleParallaxBaseSpeedSub EQU $C1C4 ; Extra cloud speed - Subpixels
 
-wSerial_Unknown_PausedFrameTimer EQU $C1C5 ; Amount of frames the game is paused, waiting for serial connection ???
+wSerialLagCounter EQU $C1C5 ; Amount of frames the serial lags for the slave
+wSerial_Unknown_Unused_C1C6 EQU $C1C6
 
 wLZSS_CurCmdMask EQU $C1C7
 wLZSS_SplitNum EQU $C1C8
@@ -181,12 +204,18 @@ wOBJInfo_CursorR  EQU wOBJInfo0
 wOBJInfo_MenuText EQU wOBJInfo1
 wOBJInfo_SnkText  EQU wOBJInfo2
 wOBJInfo_CursorU  EQU wOBJInfo3
+; Character select
+wOBJInfo_IoriFlip    EQU wOBJInfo2
+wOBJInfo_LeonaFlip   EQU wOBJInfo3
+wOBJInfo_ChizuruFlip EQU wOBJInfo4
 
 
 
 wGFXBufInfo_Pl1 EQU $D8C0
 wGFXBufInfo_Pl2 EQU $D8E0
 
+wJoyBuffer_Pl2 EQU $D900 ; Table with 8 entries of 2 byte each (KEY_* + length)
+wJoyBuffer_Pl1 EQU $D910
 wPlInfo_Pl1 EQU $D920
 wPlInfo_Pl2 EQU $DA20
 
@@ -276,7 +305,7 @@ iGFXBufInfo_SetKeyOld    EQU $10 ; ??? 5 bytes. Last completed set "id".
 ; Old -> Old data, used only when loading new graphics.
 ; These are unrelated to the "Set A" and "Set B" of wGFXBufInfo.
 iOBJInfo_Status EQU $00 ; Both sets - OBJInfo flags + X/Y OBJLst flip flags (OR'd over ROM flags)
-iOBJInfo_OBJLstFlags EQU $01 ; Current - OBJLst flags (XOR'd over ROM flags after above)
+iOBJInfo_OBJLstFlags EQU $01 ; Current - HW OBJ flags used for the entire OBJLst (XOR'd over ROM flags after above)
 iOBJInfo_OBJLstFlagsOld EQU $02 ; Old - See above
 iOBJInfo_X EQU $03 ; X Position
 iOBJInfo_XSub EQU $04 ; X Subpixel Position
@@ -307,7 +336,16 @@ iOBJInfo_FrameTotal EQU $1C ; Animation speed. New frames will have iOBJInfo_Fra
 iOBJInfo_BufInfoPtr_Low EQU $1D ; GFX Buffer info struct pointer (low byte)
 iOBJInfo_BufInfoPtr_High EQU $1E ; GFX Buffer info struct pointer (high byte)
 iOBJInfo_RangeMoveAmount EQU $1F ; How many pixels the player is moved to keep him in range
+iOBJInfo_Custom EQU $20 ; $20 bytes of free space
 
+; Things going into said free space:
+iOBJInfo_CharSel_CursorOBJId EQU iOBJInfo_Custom+$07 ; iOBJInfo_OBJLstPtrTblOffset used for normal portraits
+iOBJInfo_CharSel_CursorWideOBJId EQU iOBJInfo_Custom+$08 ; iOBJInfo_OBJLstPtrTblOffset used for the wide portrait
+iOBJInfo_CharSel_FlipOBJInfoOffset EQU iOBJInfo_Custom+$09 ; Seems related to the tile flip
+
+iOBJInfo_CharSelFlip_PortraitId EQU iOBJInfo_Custom+$07
+iOBJInfo_CharSelFlip_BaseTileId EQU iOBJInfo_Custom+$08
+iOBJInfo_CharSelFlip_OBJIdTarget EQU iOBJInfo_Custom+$09
 
 ; Sprite mapping fields.
 
@@ -341,7 +379,29 @@ iOBJ_X EQU $01
 iOBJ_TileIDAndFlags EQU $02
 
 ; Player struct (wPlInfo) format
+;wPlInfo_Pl1 EQU $D920
+;wPlInfo_Pl2 EQU $DA20
+
 iPlInfo_Status EQU $00
+iPlInfo_02Flags EQU $02
+iPlInfo_CharId EQU $0C ; Character ID (*2)
+iPlInfo_TeamLossCount EQU $0D ; Team Mode - Loss count. If it reaches 3 the stage ends.
+iPlInfo_TeamCharId0 EQU $0E ; 1st team member ID (*2)
+iPlInfo_TeamCharId1 EQU $0F ; 2nd team member ID (*2)
+iPlInfo_TeamCharId2 EQU $10 ; 3rd team member ID (*2)
+iPlInfo_RoundWinStreak EQU $11 ; Number of consecutive wins in a stage (determines win pose)
+iPlInfo_16 EQU $16
+iPlInfo_HitComboRecvSet EQU $17 ; Sets the combo count of received hits (shown on the other player side)
+iPlInfo_HitComboRecv EQU $18 ; Copy of the above
+iPlInfo_1A EQU $1A ; Old set?
+iPlInfo_1B EQU $1B ; Old set?
+iPlInfo_1C EQU $1C ; Old set?
+iPlInfo_1D EQU $1D ; New set? Set to $00 on copy end
+iPlInfo_1E EQU $1E ; New set? Set to $00 on copy end
+iPlInfo_1F EQU $1F ; New set? Set to $00 on copy end
+iPlInfo_Unknown_TimerTarget EQU $2E ; Set to something, resets the timer below
+iPlInfo_Unknown_Timer EQU $2F ; Counts up until it reaches iPlInfo_Unknown_TimerTarget
+
 
 
 ; Sound channel data header (ROM)

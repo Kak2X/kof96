@@ -673,7 +673,6 @@ IsSGBHardware:
 ; Delays for the specified amount of times after sending a packet.
 ; IN
 ; - BC: Amount of times to wait $06D6 loops.
-L00034A:
 SGB_DelayAfterPacketSendCustom:
 	; Total delay = BC * $06D6
 	ld   de, $06D6
@@ -733,7 +732,7 @@ Task_GetNext:
 	ld   [wMisc_C026], a
 	
 	ld   a, [wMisc_C025]			
-	bit  MISCB_FREEZE, a			; Is everything frozen?
+	bit  MISCB_SERIAL_LAG, a			; Is everything frozen?
 	jp   nz, .execCommon			; If so, skip executing all tasks
 	
 	; If we can execute the task (marked as TASK_EXEC_TODO or TASK_EXEC_NEW), then do it
@@ -995,7 +994,7 @@ Task_ExecCommon:
 	
 	; If game is frozen, skip over these ones too
 	ld   a, [wMisc_C025]
-	bit  MISCB_FREEZE, a			; Is it set?
+	bit  MISCB_SERIAL_LAG, a			; Is it set?
 	jp   nz, Task_EndOfFrame		; If so, skip
 	
 	call OBJLstS_WriteAll
@@ -1241,36 +1240,57 @@ VBlankHandler:
 	;--
 	
 	ld   hl, wMisc_C025
-	bit  MISCB_SERIAL_MODE, [hl]	; Is VS Mode Serial enabled?
+	bit  MISCB_SERIAL_MODE, [hl]	; Is serial mode enabled?
 	jp   z, VBlank_ChkCopyPlTiles	; If not, skip
 .serialVS:
-	res  MISCB_FREEZE, [hl]			; Default to an unfrozen game
-	ld   a, [wSerialInputEnabled]
-	or   a							; Is serial input enabled/*ready* ???
-	jp   z, .unmarkSerialDone		; If not, skip
-	bit  MISCB_SERIAL_PL2_SLAVE, [hl]		; Playing as PL2 (slave)?
-	jp   nz, .serialPl2				; If so, jump
-	jp   VBlank_ChkCopyPlTiles		; Otherwise skip
-.serialPl2:
-	; The slave gets to do this, but only when ???
-	; Reconnection attempt?
-	ld   a, [wSerial_Unknown_SlaveRetransfer]
-	or   a							; ???
-	jp   nz, .unmarkSerialDone
+	res  MISCB_SERIAL_LAG, [hl]			; Default to an unfrozen game
 	
-	ld   hl, wMisc_C025							; Freeze game while waiting for serial ???
-	set  MISCB_FREEZE, [hl]	
-	ld   a, START_TRANSFER_EXTERNAL_CLOCK		; Start transfer with clock on other GB
+	;
+	; Peculiar logic for resetting the "transfer complete" flag.
+	;
+	; If wSerialInputMode isn't set, it means buffered serial input mode isn't enabled.
+	; The only point we get here where this is ever the case is when ModeSelect_SerialHandler is being used,
+	; as it doesn't treat serial input the standard way -- instead, it treats single received bytes as commands.
+	;
+	; For some reason, the mode select screen never resets wSerialTransferDone on the *master* side,
+	; and instead relies on the VBlank handler to clear it. Which is what we're checking now.
+	;
+	ld   a, [wSerialInputMode]
+	or   a							; Buffered serial input enabled?
+	jp   z, .resetSerialDone		; If not, jump
+	
+	;
+	; In buffered input mode, never reset wSerialTransferDone to the master.
+	;
+	bit  MISCB_SERIAL_SLAVE, [hl]	; Are we set as slave?
+	jp   nz, .slaveDelayChk			; If so, jump
+	jp   VBlank_ChkCopyPlTiles		; Otherwise, skip
+.slaveDelayChk:
+	;
+	; Panic scenario.
+	; If there are no more inputs currently left to process, it means the master
+	; hasn't managed to send out a new byte yet.
+	; In that case, force the slave to wait/freeze until other bytes come in, otherwise
+	; the GBs would desync.
+	;
+	ld   a, [wSerialReceivedLeft]
+	or   a									; Is the balance of received/processed inputs 0?
+	jp   nz, .resetSerialDone				; If not, jump
+	ld   hl, wMisc_C025						; Freeze game while waiting for serial
+	set  MISCB_SERIAL_LAG, [hl]	
+	
+	; Lessen the effect of the lag by always setting the latest input to the head of the send buffer.
+	; (with the index staying as-is)
+	ld   a, START_TRANSFER_EXTERNAL_CLOCK		; Force start listening
 	ldh  [rSC], a					
-	ld   hl, wSerial_Unknown_PausedFrameTimer	; PauseTimer++
+	ld   hl, wSerialLagCounter					; PauseTimer++
 	inc  [hl]
-	ld   hl, wSerialJoyLastKeys2				; Get joypad input for current player (P2)
+	ld   hl, wSerialPendingJoyKeys2				; Poll for 2P inputs (since only 2P is slave)
 	call JoyKeys_Get_Standard
-	call JoyKeys_Serial_WriteNewValueToSendBuffer
+	call JoyKeys_Serial_SetNextTransfer			; Save those into the send buffer
 	jp   VBlank_ChkCopyPlTiles
-;--
-.unmarkSerialDone:
-	xor  a								; ???
+.resetSerialDone:
+	xor  a
 	ld   [wSerialTransferDone], a
 	
 ; =============== VBlank_ChkCopyPlTiles ===============
@@ -1280,7 +1300,7 @@ VBlank_ChkCopyPlTiles:
 	bit  MISCB_LAG_FRAME, a			; Is this a lag frame?
 	jp   nz, VBlank_SetInitialSect	; If so, don't update player gfx
 	ld   a, [wMisc_C025]
-	bit  MISCB_FREEZE, a			; Is everything frozen?
+	bit  MISCB_SERIAL_LAG, a			; Is everything frozen?
 	jp   nz, VBlank_SetInitialSect	; If so, also skip copying GFX
 	ld   a, [wPaused]
 	or   a							; Game is paused?
@@ -1293,7 +1313,7 @@ L0005A1:
 	ld   a, [$D921]
 	bit  4, a
 	jp   nz, VBlank_CopyPl1Tiles
-	ld   a, [$D922]
+	ld   a, [wPlInfo_Pl1+iPlInfo_02Flags]
 	bit  2, a
 	jp   nz, VBlank_CopyPl1Tiles
 	ld   a, [$C172]
@@ -1422,16 +1442,16 @@ VBlank_CopyPl1Tiles:
 	;--------
 	; ??? Very likely in the middle of the Player actor, related to gameplay
 	
-	ld   hl, $D922
-	bit  0, [hl]		; $D922 bit 0 set?
+	ld   hl, wPlInfo_Pl1+iPlInfo_02Flags
+	bit  0, [hl]		; wPlInfo_Pl1+iPlInfo_02Flags bit 0 set?
 	jp   nz, .move1		; If so, skip
 	
 	; Copy $D93D-$D93F to $D93A-$D93C and clear the former range
 	; as long as they aren't 0 already.
-	ld   hl, $D93D		; HL = Source
-	ld   de, $D93A		; DE = Destination
+	ld   hl, wPlInfo_Pl1+iPlInfo_1D		; HL = Source
+	ld   de, wPlInfo_Pl1+iPlInfo_1A		; DE = Destination
 	ld   a, [hl]
-	or   a				; $D93D == 0?
+	or   a				; iPlInfo_1D == 0?
 	jp   z, .move1		; If so, skip
 	
 .move0:
@@ -1487,7 +1507,7 @@ L0006A7:
 	ld   a, [$DA21]
 	bit  4, a
 	jp   nz, VBlank_CopyPl2Tiles
-	ld   a, [$DA22]
+	ld   a, [wPlInfo_Pl2+iPlInfo_02Flags]
 	bit  2, a
 	jp   nz, VBlank_CopyPl2Tiles
 	ld   a, [$C172]
@@ -1572,12 +1592,12 @@ VBlank_CopyPl2Tiles:
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
 	res  OSTB_GFXLOAD, [hl]
 	set  OSTB_BIT3, [hl]
-	ld   hl, $DA22
+	ld   hl, wPlInfo_Pl2+iPlInfo_02Flags
 	bit  0, [hl]
 	jp   nz, .move1
 	
-	ld   hl, $DA3D
-	ld   de, $DA3A
+	ld   hl, wPlInfo_Pl2+iPlInfo_1D
+	ld   de, wPlInfo_Pl2+iPlInfo_1A
 	ld   a, [hl]
 	or   a
 	jp   z, .move1
@@ -1658,12 +1678,13 @@ VBlank_SetInitialSect:
 	ldh  [rBGP], a
 	
 	; If we have a lag frame or game is frozen, don't update sprites.
-	; Otherwise (for the former, at least) we may risk copying over an incomplete OAM mirror.
+	; Important for battle syncronization purposes, as sprites also determine
+	; something ??? in the player actor info.
 	ld   a, [wMisc_C026]
 	bit  MISCB_LAG_FRAME, a				
 	jp   nz, .stdSect_noDMA
 	ld   a, [wMisc_C025]
-	bit  MISCB_FREEZE, a
+	bit  MISCB_SERIAL_LAG, a
 	jp   nz, .stdSect_noDMA
 	call hOAMDMA
 .stdSect_noDMA:
@@ -1707,15 +1728,18 @@ VBlank_SetInitialSect:
 ; =============== VBlank_LastPart ===============
 VBlank_LastPart:
 	
-	; If we're lagging or everything is paused, skip directly to the end.
-	; This prevents unsetting wVBlankNotDone, forcing to wait an extra frame
-	; for the former or essentially freezing the game for the latter.
+	; If the current or other GB is lagging, skip directly to the end.
+	; This prevents unsetting wVBlankNotDone or reading new inputs.
+
+	; This is especially important for serial syncronization purposes,
+	; as we don't want to set new inputs if we're lagging or if the
+	; other is lagging and not sending us inputs to reply with fast enough.
 	ld   a, [wMisc_C026]
-	bit  MISCB_LAG_FRAME, a
-	jp   nz, .end
+	bit  MISCB_LAG_FRAME, a		; Are we lagging?
+	jp   nz, .end				; If so, skip
 	ld   a, [wMisc_C025]
-	bit  MISCB_FREEZE, a
-	jp   nz, .end
+	bit  MISCB_SERIAL_LAG, a	; Did the other send at least one byte not yet processed?
+	jp   nz, .end				; If not, skip
 	
 	call JoyKeys_Get			; Get player input
 	ld   hl, wTimer				; GlobalTimer++
@@ -2390,7 +2414,7 @@ OBJLstS_WriteToWorkOAM:
 	;--
 	;
 	; Calculate the effective flags value for the sprite mapping.
-	; Merge the sprite mapping X/Y flip options from ROM with the user-controlled flip options in iOBJInfo_OBJLstFlags
+	; Merge the sprite mapping X/Y flip options from ROM with the hardware OBJ flags in iOBJInfo_OBJLstFlags
 	;
 	
 	; B = Default flip flags for the sprite mapping from ROM*.
@@ -2399,9 +2423,9 @@ OBJLstS_WriteToWorkOAM:
 	and  a, OLF_XFLIP|OLF_YFLIP
 	ld   b, a
 	
-	; A = Usable user flags from iOBJInfo_OBJLstFlags*
+	; A = User-controlled OBJ flags from iOBJInfo_OBJLstFlags*
 	ld   a, [wOBJLstOrigFlags]		
-	and  a, OSX_USETILEFLAGS|OSX_XFLIP|OSX_YFLIP|OSX_BGPRIORITY
+	and  a, SPR_OBP1|SPR_XFLIP|SPR_YFLIP|SPR_BGPRIORITY
 	
 	; Xor the flags over
 	xor  b			
@@ -3397,34 +3421,48 @@ MemSetOnHBlank:
 	jp   nz, MemSetOnHBlank	; If not, loop
 	ret
 	
-L000DC2:;JCR
-	push bc
-	push hl
-L000DC4:;J
-	push bc
-	push af
-	push af
-	ld   a, [de]
-	ld   b, a
-	pop  af
-	add  b
-	inc  de
-	push af
-L000DCD:;J
-	mWaitForHBlank
-	pop  af
-	ldi  [hl], a
-	pop  af
-	pop  bc
-	dec  b
-	jp   nz, L000DC4
-	pop  hl
-	ld   bc, $0020
-	add  hl, bc
-	pop  bc
-	dec  c
-	jr   nz, L000DC2
+; =============== CopyBGToRectWithBase ===============
+; Copies a partial tilemap to a location in VRAM,
+; with tile IDs offset by the specified value.
+; IN
+; - DE: Ptr to uncompressed tilemap
+; - HL: Destination Ptr in VRAM
+; - B: Rect Width
+; - C: Rect Height
+; - A: Tile ID base offset
+CopyBGToRectWithBase:
+	push bc			; Save height
+		push hl			; Save tilemap ptr
+		
+		.rowLoop:
+			push bc			; Save width
+				push af			; Save tile ID base
+					push af
+						ld   a, [de]	; B = Relative tile ID
+						ld   b, a
+					pop  af
+					
+					add  b			; A = tile ID base + relative tile ID
+					inc  de			; Next tile in tilemap
+					
+					push af			
+					mWaitForHBlank	; In case we're calling it in the middle of the frame
+					pop  af
+					
+					ldi  [hl], a
+				pop  af 		; Restore tile ID base
+			pop  bc			; Restore width
+			dec  b				; Printed all tiles in the row?
+			jp   nz, .rowLoop	; If not, jump
+			
+		pop  hl					; Rewind ptr to initial X value
+		ld   bc, BG_TILECOUNT_H	; Move down by 1 tile
+		add  hl, bc
+	pop  bc			; Restore height
+	dec  c							; Printed all rows?
+	jr   nz, CopyBGToRectWithBase	; If not, jump
 	ret
+	
 ; =============== CopyBGToRect ===============
 ; Copies a partial tilemap to a location in VRAM.
 ; IN
@@ -3578,91 +3616,144 @@ L000E94: db $5E;X
 L000E95: db $23;X
 L000E96: db $56;X
 L000E97: db $23;X
-L000E98:;C
-	ld   a, [hl]
+; =============== CopyTilesOver ===============
+; Draws a transparent GFX on top of an existing one.
+;
+; IN
+; - HL: Ptr to GFX to copy over
+; - BC: Ptr to GFX with transparency mask
+; - DE: Ptr to destination in VRAM.
+CopyTilesOver:
+	; The GFXDef structure starts with the number of tiles to process
+	ld   a, [hl]			; A = Number of tiles
 	inc  hl
-L000E9A:;C
+; IN
+; - HL: Ptr to GFX to copy over
+; - BC: Ptr to GFX with transparency mask
+; - DE: Ptr to destination in VRAM.
+; - A: Number of tiles
+CopyTilesOver_Custom:
+
+	;
+	; Apply the transparency mask.
+	;
+	; The transparency mask is simply a 2bpp GFX which marks with set/black pixels (0b11)
+	; the portion of the original GFX to keep.
+	;
+	; Since all of these graphics are already in 2bpp format, there's no conversion
+	; involved, just a straight AND operation to remove all of the bits not set in the mask.
+	;
 	push af
-	push de
-	push hl
-	push bc
-	pop  hl
-L000E9F:;J
-	push af
-	ld   a, $10
-L000EA2:;J
-	push af
-	ld   a, [de]
-	and  a, [hl]
-	ld   [de], a
-	inc  de
-	inc  hl
+		push de
+			push hl
+				;--
+				push bc				; HL = BC
+				pop  hl
+			.nextTile:
+				push af				; Save tiles remaining
+					ld   a, TILESIZE	; A = Bytes remaining in tile
+				.tileLoop:
+					push af				; Save bytes left
+						
+						ld   a, [de]	; Read GFX from VRAM
+						and  a, [hl]	; Filter with mask
+						ld   [de], a	; Save back
+						inc  de			; Next byte in VRAM
+						inc  hl			; Next byte in mask
+					pop  af				; A = Bytes left
+					dec  a				; Masked all bytes in the tile?
+					jp   nz, .tileLoop	; If not, loop
+				pop  af				; Restore tiles remaining
+				dec  a				; Masked all tiles?
+				jp   nz, .nextTile	; If not, loop
+				;--
+			pop  hl
+		pop  de
 	pop  af
-	dec  a
-	jp   nz, L000EA2
-	pop  af
-	dec  a
-	jp   nz, L000E9F
-	pop  hl
-	pop  de
-	pop  af
-L000EB5:;J
-	push af
-	ld   a, $10
-L000EB8:;J
-	push af
-	ld   a, [de]
-	or   a, [hl]
-	ld   [de], a
-	inc  de
-	inc  hl
-	pop  af
-	dec  a
-	jp   nz, L000EB8
-	pop  af
-	dec  a
-	jp   nz, L000EB5
+	
+	;
+	; Apply the actual GFX now that the transparency mask cleared away pixels.
+	; This is the same as the above, except this other graphic is OR'd over.
+	;
+	; The new GFX shouldn't have pixels in the transparent area.
+	;
+.nextOrTile:
+	push af					; Save tiles remaining
+		ld   a, TILESIZE		; A = Bytes remaining in tile
+	.tileOrLoop:
+		push af					; Save bytes left
+			ld   a, [de]		; Read GFX from VRAM
+			or   a, [hl]		; Merge with new graphic over
+			ld   [de], a		; Save back
+			inc  de				; Next byte in VRAM
+			inc  hl				; Next byte in new GFX
+		pop  af					; A = Bytes left
+		dec  a					; Processed all bytes in the tile?
+		jp   nz, .tileOrLoop	; If not, loop
+	pop  af					; Restore tiles remaining
+	dec  a					; Processed all tiles?
+	jp   nz, .nextOrTile	; If not, loop
 	ret
+	
 L000EC9: db $5E;X
 L000ECA: db $23;X
 L000ECB: db $56;X
 L000ECC: db $23;X
 L000ECD: db $46;X
 L000ECE: db $23;X
-L000ECF:;JC
-	push bc
-	ld   b, $10
-L000ED2:;J
-	push bc
-	ld   b, $00
-	ld   c, [hl]
-	inc  hl
-	call L000EF1
-	ld   a, b
-	push af
-L000EDC:;J
-	mWaitForHBlank
-	pop  af
-	ld   [de], a
-	inc  de
-	pop  bc
-	dec  b
-	jp   nz, L000ED2
-	pop  bc
-	dec  b
-	jp   nz, L000ECF
+; =============== CopyTilesHBlankFlipX ===============
+; Copies graphics to VRAM and flips them horizontally.
+;
+; This doesn't change their order, so when incrementing tilemaps are used,
+; a special subroutine for updating the tilemap may be needed.
+;
+; IN
+; - HL: Ptr to source GFX in ROM
+; - DE: Ptr to destination in VRAM
+; - B: Number of tiles
+CopyTilesHBlankFlipX:
+	push bc	; Save TileCount
+		ld   b, TILESIZE	; B = Bytes in a tile
+	.loop:
+		push bc				; Save B
+			
+			ld   b, $00		
+			ld   c, [hl]		; BC = Source GFX
+			inc  hl				; SrcPtr++
+			call .flipX			; Flip it
+			ld   a, b
+			
+			push af
+			mWaitForHBlank
+			pop  af
+			
+			ld   [de], a	; Write the byte to VRAM
+			inc  de			; DestPtr++
+		pop  bc				; Restore B
+		dec  b				; Fully copied the tile?
+		jp   nz, .loop		; If not, loop
+	pop  bc	; Restore TileCount
+	dec  b				; Copied all tiles?
+	jp   nz, CopyTilesHBlankFlipX	; If not, loop
 	ret
-L000EF1:;C
+	
+; =============== .flipX ===============
+; Flips an half-plane (1bpp) line horizontally.
+; IN
+; - BC: Original GFX byte
+; OUT
+; - B: X flipped GFX byte
+.flipX:
 	ldh  a, [hROMBank]
 	push af
-	ld   a, $1F
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	push hl
-	ld   hl, $7DDC
-	add  hl, bc
-	ld   b, [hl]
-	pop  hl
+		ld   a, BANK(GFXS_XFlipTbl) ; BANK $1F
+		ld   [MBC1RomBank], a
+		ldh  [hROMBank], a
+		push hl
+			ld   hl, GFXS_XFlipTbl	; HL = Start conversion table
+			add  hl, bc				; Index it
+			ld   b, [hl]			; B = Flipped line
+		pop  hl
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
@@ -4185,7 +4276,7 @@ JoyKeys_Get:
 	bit  MISCB_IS_SGB, a			; Running in SGB mode?
 	jp   nz, JoyKeys_Get_SGB		; If so, grab inputs for both players
 	ld   hl, hJoyKeys				; For later
-	ld   a, [wSerialPlayMode]
+	ld   a, [wSerialPlayerId]
 	and  a							; Playing in VS mode?
 	jr   nz, JoyKeys_Get_Serial		; If so, jump
 	
@@ -4238,75 +4329,112 @@ JoyKeys_Get_Standard:
 	ret
 	
 ; =============== JoyKeys_Get_Serial ===============
-; Gets the DMG joypad input for player 1 + Player 2 input from serial.
+; Handles the joypad reader in serial mode.
+;
+; HOW IT WORKS
+;
+; Two buffers with looping indexes keep track of the player inputs 
+; sent to the other player (current player) and those received through serial (other player);
+;
+; Input lifetime:
+; - Frame 0, VBLANK
+;  - Input is polled the standard way and stored in wSerialPendingJoyKeys*
+;  - wSerialPendingJoyKeys is written to the head of the send buffer
+;  - (Master Only) A transfer starts of what's currently currently in rSB (previous frame inputs).
+;                  The slave is expected to have the same thing set in rSB when this happens.
+; - Frame 0, INT
+;  - The contents of rSB are stored to the head of the receive buffer.
+;      Note how there's an inconsistency here:
+;      - The head of the receive buffer has info for the other player's *previous* frame
+;      - The head of the send buffer has info for this player's *current* frame.
+;      This results in the tail index for the send buffer being set further back.
+;  - The head of the send buffer (current input) is written to rSB
+;  - The head index is increased
+; - Frame 1, VBLANK
+;  - (input for previous frame is processed)
+; - Frame 1, INT
+;  - Done like last time, now with the received input we need
+; - Frame 2, VBLANK
+;  - The value at the tail of the send buffer is copied to the current player's hJoyKeys*
+;  - The value at the tail of the receive buffer is copied to the other player's hJoyKeys*
+;  - Both tail indexes are increased
+;
+; Additionally, the head indexes always point to a free slot, so the tail indexes (used for active inputs) are at least offset by 1.
+; As a result, the buffer indexes are set so that:
+; - Send buffer tail is 2 values before the head
+; - Receive buffer tail is 1 value before the head
+;
 ; IN
 ; - A: Player ID
 JoyKeys_Get_Serial:
 	ld   c, a
-		ld   a, [wSerialInputEnabled]
+		ld   a, [wSerialInputMode]
 		and  a							; Do we allow input?
 		ret  z							; If not, return
 	ld   a, c
 	
 	; Depending on the player side, pick the correct current/remote addresses
-	ld   de, hJoyKeys		; P1 Side - Current GB
-	ld   hl, wSerialJoyLastKeys 			; P1 Side - Other GB
-	cp   a, SERIAL_PL1_ID	; Are we playing on the 1P side?
-	jr   z, .go				; If so, jump
-	ld   hl, wSerialJoyLastKeys2			; P2 Side - Other GB
-	ld   de, hJoyKeys2		; P2 Side - Current GB
+	ld   de, hJoyKeys				; P1 Side - Current GB
+	ld   hl, wSerialPendingJoyKeys 	; P1 Side - Other GB
+	cp   a, SERIAL_PL1_ID			; Are we playing on the 1P side?
+	jr   z, .go						; If so, jump
+	ld   hl, wSerialPendingJoyKeys2	; P2 Side - Other GB
+	ld   de, hJoyKeys2				; P2 Side - Current GB
 .go:
 
-	; C = Keys not held in current GB
+	;
+	; [Frame 2]
+	; Get the active input for this GB.
+	;
+
+	; C = Keys not currently held on *this frame*
 	ld   a, [de]			
 	cpl						
 	ld   c, a	
 	
-	;
-	; Obtain the held input of the current GB from the buffer of sent inputs.
-	; The reason we're doing this is to account for the delay of sending input to the other player
-	; through the serial cable.
-	;
-	; After getting the entry, clear it and increase the tail index.
-	;
+	; A = Held input at the tail value of the send buffer
 	push de
-	push hl
-		
-		
-		; Get index to the last byte (tracked by wSerialDataSendBufferIndex_Tail)
-		ld   a, [wSerialDataSendBufferIndex_Tail]
-		ld   e, a									
-		; Save back an incremented copy
-		inc  a										; Index++
-		and  a, $7F									; Size of buffer, cyles back
-		ld   [wSerialDataSendBufferIndex_Tail], a	; Save the updated index
-		
-		; Offset the value to clear
-		xor  a
-		ld   d, a
-		ld   hl, wSerialDataSendBuffer		; HL = Table
-		add  hl, de							; Offset it
-		
-		; A = Pressed keys on current GB
-		ld   a, [hl]						; Read entry out
-		
-		; Blank the entry. This only happens with the send buffer.
-		ld   [hl], $00						; Blank it
-		
-		; ??? Mark that a byte was processed from the buffer by decrementing this
-		ld   hl, wSerial_Unknown_0_IncDecMarker
-		dec  [hl]			
-	pop  hl
+		push hl
+			; Get index to the buffer
+			ld   a, [wSerialDataSendBufferIndex_Tail]
+			ld   e, a									
+			; Save back an incremented copy
+			inc  a										; Index++
+			and  a, $7F									; Size of buffer, cyles back
+			ld   [wSerialDataSendBufferIndex_Tail], a	; Save the updated index
+			
+			; Index the buffer of sent inputs and read out its value.
+			xor  a
+			ld   d, a
+			ld   hl, wSerialDataSendBuffer		; HL = Table
+			add  hl, de							; Offset it
+			ld   a, [hl]						; A = Buffer entry
+			ld   [hl], $00						; Clear what was here
+			
+			; Decrement the counter/balance of remaining bytes to process.
+			ld   hl, wSerialSentLeft
+			dec  [hl]			
+		pop  hl
 	pop  de
-	ld   [de], a			; Write entry to hJoyKeys
-	inc  de					; Seek to hJoyNewKeys
-	and  c					; hJoyNewKeys = hJoyKeys & C
-	ld   [de], a			; Write entry to hJoyNewKeys
 	
-	; Handle the other player keys
+	; Set hJoyKeys
+	ld   [de], a
+	inc  de		
+	
+	; Set hJoyNewKeys.
+	; Unlike the normal joypad handler, this has the keys *RELEASED* in the last 2 frames set
+	and  c					
+	ld   [de], a
+	
+	;--
+	
+	;
+	; [Frame 0] Poll for input to wSerialPendingJoyKeys*
+	;
 	call JoyKeys_Get_Standard
-	; Handle the next buffer values (tail from receive + head for send)
-	call JoyKeys_Serial_GetFromReceiveAndSetToSendBuffer
+	
+	; Part 2
+	call JoyKeys_Serial_GetActiveOtherInput
 	ret  
 	
 ; =============== JoyKeys_Get_SGB ===============
@@ -5153,16 +5281,16 @@ L0013ED:;C
 	ld   c, $01
 	ld   d, $00
 	call FillBGRect
-	ld   a, [$C167]
+	ld   a, [wRoundNum]
 	or   a
 	jp   nz, L0014A6
 	ld   a, [wPlayMode]
 	bit  1, a
 	jp   nz, L001445
-	ld   a, [wUnknown_C165]
+	ld   a, [wJoyActivePl]
 	or   a
 	jp   nz, L001424
-	ld   hl, $DA2C
+	ld   hl, wPlInfo_Pl2+iPlInfo_CharId
 	jp   L001427
 L001424: db $21;X
 L001425: db $2C;X
@@ -5316,200 +5444,300 @@ L0014F5: db $06
 L0014F6: db $06
 L0014F7: db $06
 L0014F8: db $04
-L0014F9:;C
+; =============== Serial_DoHandshake ===============
+; Performs an handshake between master and slave GBs.
+; If it succeeds, the standard serial handlers (master/slave-specific) are set.
+;
+; For the handshake, the master sends out $43 and expects the slave to return $4C.
+; Both the master and slave wait in a loop $600 times for a byte to be received, after which:
+; - The master tries sending $43 again
+; - The slave resets its "reply byte" and sets the listen flag again
+; The same also happens if the received byte doesn't match what the master/slave is expecting.
+;
+; Every interrupt other than the serial one is disabled on both Game Boys while this happens,
+; to give the handshake exclusive priority.
+;
+Serial_DoHandshake:
 	ld   hl, wMisc_C025
 	bit  MISCB_SERIAL_MODE, [hl]	; Are we in VS mode serial?
 	ret  z							; If not, return
+	;--
+	
+	;
+	; Prepare system to give exclusive control to the handshake check.
+	;
+	
 	di   
-	ld   a, LOW(L001708)
+	; Set the serial handler used for this, which handles both master and slave.
+	ld   a, LOW(SerialHandler_Handshake)
 	ld   [wSerialIntPtr_Low], a
-	ld   a, HIGH(L001708)
+	ld   a, HIGH(SerialHandler_Handshake)
 	ld   [wSerialIntPtr_High], a
+	
 	xor  a
-	ldh  [rSB], a
-	ld   [wSerialInputEnabled], a
+	ldh  [rSB], a					; Remove sent values from queue
+	ld   [wSerialInputMode], a	; Disable input processing just in case
+	
+	; Disable every interrupt except for serial, and discard any existing one.
 	ldh  a, [rIE]
-	push af
-	xor  a
-	ldh  [rIF], a
-	ld   a, $08
+	push af				; Save rIE
+		xor  a				; Stop all existing interrupts
+		ldh  [rIF], a		
+		ld   a, I_SERIAL	; Enable Serial interrupt only
+		ldh  [rIE], a
+		ei
+	
+	
+		; Clear marker to prepare for transfer.
+		xor  a							
+		ld   [wSerialTransferDone], a
+		
+		ld   hl, wMisc_C025
+		bit  MISCB_SERIAL_SLAVE, [hl]	; Are we set as slave?
+		jp   nz, .slave						; If so, jump
+	.master:
+		;
+		; MASTER
+		; Sends $43 to slave and expects $4C back.
+		;
+		; [POI] There's a design flaw where if something goes wrong
+		;       after the slave reads $43, the master will infinite loop.
+		;
+	
+		; Wait for a bit before starting, to give time to the slave
+		ld   bc, $0010
+		call SGB_DelayAfterPacketSendCustom
+		
+		; Reset transfer flag
+		xor  a
+		ld   [wSerialTransferDone], a
+	.trySendToSlave:
+		; Perform Master->Slave transfer
+		;--
+		di   
+		ld   a, $43								; Send $43 to slave
+		ld   [wSerialDataSendBuffer], a
+		ld   a, START_TRANSFER_INTERNAL_CLOCK	; Start transfer
+		ldh  [rSC], a
+		ei 
+		;--
+		; Wait $0600 times in a loop for a reply before retrying.
+		; [POI] This is a point where the master can infinite loop,	as it's possible for the slave 
+		;       to receive a byte but not send one back in time. This results in the slave continuing,
+		;       but the master still waiting. There's no timeout here.
+		ld   bc, $0600					; BC = Loop cycles before retry
+	.waitSlaveReply:
+		ld   a, [wSerialTransferDone]
+		or   a							; Did we receive anything yet?
+		jr   nz, .chkSlaveReply			; If so, jump
+		dec  bc							; CyclesLeft--
+		ld   a, b
+		or   c							; CyclesLeft != 0?
+		jp   nz, .waitSlaveReply		; If so, loop
+		jp   .trySendToSlave			; Otherwise, try to send the byte again
+		
+	.chkSlaveReply:
+		xor  a							; Reset transfer flag
+		ld   [wSerialTransferDone], a
+		ld   a, [wSerialDataReceiveBuffer]
+		cp   a, $4C						; Did we receive $4C from the slave?
+		jr   nz, .trySendToSlave		; If not, try to send the byte again
+		jp   .handshakeOk				; Otherwise, we're done
+		
+	.slave:
+		;
+		; SLAVE
+		; Waits to receive $43 from the master, then sends $4C back.
+		;
+		ld   a, $4C						; Set byte we're replying with
+		ld   [wSerialDataSendBuffer], a
+		ld   a, START_TRANSFER_EXTERNAL_CLOCK ; Start listening to master			
+		ldh  [rSC], a
+		ld   bc, $0600					; BC = Loop cycles before retry
+	.waitMaster:
+		ld   a, [wSerialTransferDone]
+		or   a							; Did we receive anything yet?
+		jr   nz, .chkMasterRecv			; If so, jump
+		dec  bc							; CyclesLeft--
+		ld   a, b
+		or   c							; CyclesLeft != 0?
+		jp   nz, .waitMaster			; If so, loop
+		jp   .slave						; Otherwise, re-listen again
+	.chkMasterRecv:
+		xor  a							; Reset transfer flag
+		ld   [wSerialTransferDone], a
+		ld   a, [wSerialDataReceiveBuffer]
+		cp   a, $43						; Did we receive $43 from the master?
+		jr   nz, .slave					; If not, re-listen again
+		; Otherwise, we're done.
+		; Note that the master still has to check our response.
+		
+	.handshakeOk:
+		;--
+		di   
+		
+		;
+		; Initialize and clear serial variables
+		;
+		
+		; Clear entire buffer of received bytes
+		xor  a
+		ld   b, wSerialDataReceiveBuffer_End-wSerialDataReceiveBuffer ; B = Buffer length
+		ld   hl, wSerialDataReceiveBuffer	; HL = Starting ptr
+	.clrRecvBufLoop:
+		ldi  [hl], a
+		dec  b
+		jp   nz, .clrRecvBufLoop
+		
+		; Clear entire buffer of sent bytes
+		ld   b, wSerialDataSendBuffer_End-wSerialDataSendBuffer ; B = Buffer length
+		ld   hl, wSerialDataSendBuffer		; HL = Starting ptr
+	.clrSendBufLoop:
+		ldi  [hl], a
+		dec  b
+		jp   nz, .clrSendBufLoop
+		
+		; Reset misc variables
+		ld   [wTimer], a
+		ldh  [rSB], a
+		ldh  [hJoyKeys], a
+		ldh  [hJoyKeys2], a
+		ldh  [hJoyNewKeys], a
+		ldh  [hJoyNewKeys2], a
+		ld   [wSerialPendingJoyKeys], a
+		ld   [wSerialPendingJoyKeys2], a
+		ld   [wSerialPendingJoyNewKeys], a
+		ld   [wSerialPendingJoyNewKeys2], a
+		ld   [wSerialReceivedLeft], a
+		ld   [wSerialSentLeft], a
+		ld   [wSerial_Unknown_Unused_C144], a
+		ld   [wSerialLagCounter], a
+		ld   [wSerial_Unknown_Unused_C1C6], a
+		
+		; By default, listen to the other GB
+		ld   a, START_TRANSFER_EXTERNAL_CLOCK
+		ldh  [rSC], a
+		; Enable input buffer processing since we're ready
+		ld   a, $01
+		ld   [wSerialInputMode], a
+		
+		; Set the proper interrupt target between master/slave
+		ld   hl, wMisc_C025
+		bit  MISCB_SERIAL_SLAVE, [hl]	; Are we a slave?
+		jp   nz, .setSlaveInt				; If so, jump
+	.setMasterInt:
+		; Set master serial handler
+		ld   a, LOW(SerialHandler_Master)
+		ld   [wSerialIntPtr_Low], a
+		ld   a, HIGH(SerialHandler_Master)
+		ld   [wSerialIntPtr_High], a
+		
+		; Initialize head/tail buffer indexes 
+		; See also: JoyKeys_Get_Serial
+		
+		; Receive buffer offset by 1
+		ld   a, $01
+		ld   [wSerialDataReceiveBufferIndex_Head], a
+		ld   a, $00
+		ld   [wSerialDataReceiveBufferIndex_Tail], a
+		; Send buffer offset by 2
+		ld   a, $02
+		ld   [wSerialDataSendBufferIndex_Head], a
+		ld   a, $00
+		ld   [wSerialDataSendBufferIndex_Tail], a
+		jp   .end
+	.setSlaveInt:
+		; Set slave serial handler
+		ld   a, LOW(SerialHandler_Slave)
+		ld   [wSerialIntPtr_Low], a
+		ld   a, HIGH(SerialHandler_Slave)
+		ld   [wSerialIntPtr_High], a
+		; Initialize head/tail buffer indexes (same as master)
+		ld   a, $01
+		ld   [wSerialDataReceiveBufferIndex_Head], a
+		ld   a, $00
+		ld   [wSerialDataReceiveBufferIndex_Tail], a
+		ld   a, $02
+		ld   [wSerialDataSendBufferIndex_Head], a
+		ld   a, $00
+		ld   [wSerialDataSendBufferIndex_Tail], a
+		call Serial_Unknown_WaitAfterSend
+	.end:
+		; End all existing interrupt requests
+		xor  a
+		ldh  [rIF], a
+	; Restore original enabled interrupts
+	pop  af			
 	ldh  [rIE], a
-	ei   
-	xor  a
-	ld   [wSerialTransferDone], a
-	ld   hl, wMisc_C025
-	bit  MISCB_SERIAL_PL2_SLAVE, [hl]
-	jp   nz, L00155C
-	ld   bc, Rst_StopLCDOperation
-	call SGB_DelayAfterPacketSendCustom
-	xor  a
-	ld   [wSerialTransferDone], a
-L001531:
-	di   
-	ld   a, $43
-	ld   [wSerialDataSendBuffer], a
-	ld   a, $81
-	ldh  [rSC], a
-	ei   
-	ld   bc, $0600
-L00153F:
-	ld   a, [wSerialTransferDone]
-	or   a
-	jr   nz, L00154E
-	dec  bc
-	ld   a, b
-	or   c
-	jp   nz, L00153F
-	jp   L001531
-L00154E:
-	xor  a
-	ld   [wSerialTransferDone], a
-	ld   a, [wSerialDataReceiveBuffer]
-	cp   a, $4C
-	jr   nz, L001531
-	jp   L001582
-L00155C:
-	ld   a, $4C
-	ld   [wSerialDataSendBuffer], a
-	ld   a, $80
-	ldh  [rSC], a
-	ld   bc, $0600
-L001568:
-	ld   a, [wSerialTransferDone]
-	or   a
-	jr   nz, L001577
-	dec  bc
-	ld   a, b
-	or   c
-	jp   nz, L001568
-	jp   L00155C
-L001577:
-	xor  a
-	ld   [wSerialTransferDone], a
-	ld   a, [wSerialDataReceiveBuffer]
-	cp   a, $43
-	jr   nz, L00155C
-L001582:
-	di   
-	xor  a
-	ld   b, $80
-	ld   hl, wSerialDataReceiveBuffer
-L001589:
-	ldi  [hl], a
-	dec  b
-	jp   nz, L001589
-	ld   b, $80
-	ld   hl, wSerialDataSendBuffer
-L001593:
-	ldi  [hl], a
-	dec  b
-	jp   nz, L001593
-	ld   [wTimer], a
-	ldh  [rSB], a
-	ldh  [hJoyKeys], a
-	ldh  [hJoyKeys2], a
-	ldh  [hJoyNewKeys], a
-	ldh  [hJoyNewKeys2], a
-	ld   [wSerialJoyLastKeys], a
-	ld   [wSerialJoyLastKeys2], a
-	ld   [wSerialJoyKeys], a
-	ld   [wSerialJoyKeys2], a
-	ld   [wSerial_Unknown_SlaveRetransfer], a
-	ld   [wSerial_Unknown_0_IncDecMarker], a
-	ld   [wSerial_Unknown_1_IncDecMarker], a
-	ld   [wSerial_Unknown_PausedFrameTimer], a
-	ld   [$C1C6], a
-	ld   a, $80
-	ldh  [rSC], a
-	ld   a, $01
-	ld   [wSerialInputEnabled], a
-	ld   hl, wMisc_C025
-	bit  MISCB_SERIAL_PL2_SLAVE, [hl]
-	jp   nz, L0015F2
-	ld   a, LOW(L001722)
-	ld   [wSerialIntPtr_Low], a
-	ld   a, HIGH(L001722)
-	ld   [wSerialIntPtr_High], a
-	ld   a, $01
-	ld   [wSerialDataReceiveBufferIndex_Head], a
-	ld   a, $00
-	ld   [wSerialDataReceiveBufferIndex_Tail], a
-	ld   a, $02
-	ld   [wSerialDataSendBufferIndex_Head], a
-	ld   a, $00
-	ld   [wSerialDataSendBufferIndex_Tail], a
-	jp   L001613
-L0015F2:
-	ld   a, LOW(L00172B)
-	ld   [wSerialIntPtr_Low], a
-	ld   a, HIGH(L00172B)
-	ld   [wSerialIntPtr_High], a
-	ld   a, $01
-	ld   [wSerialDataReceiveBufferIndex_Head], a
-	ld   a, $00
-	ld   [wSerialDataReceiveBufferIndex_Tail], a
-	ld   a, $02
-	ld   [wSerialDataSendBufferIndex_Head], a
-	ld   a, $00
-	ld   [wSerialDataSendBufferIndex_Tail], a
-	call L001767
-L001613:
-	xor  a
-	ldh  [rIF], a
-	pop  af
-	ldh  [rIE], a
-	ret  
+	ret
+; =============== Serial_UnkSend ===============	
+; Sends a null byte $10 times to the other GB.
+L00161A:
+	; Clear transfer flag... if it's useful
 	xor  a
 	ld   [wSerialTransferDone], a
 	ld   a, $10
-L001620:
+.loop:
 	push af
-	di   
-	xor  a
-	ld   [wSerialDataSendBuffer], a
-	ldh  [rSB], a
-	ld   a, $81
-	ldh  [rSC], a
-	ei   
-	call L001767
-	ld   a, [wSerialTransferDone]
-	or   a
-	jr   nz, L001636
-L001636:
+		;--
+		; Send $00 to the other GB
+		di   
+		xor  a
+		ld   [wSerialDataSendBuffer], a
+		ldh  [rSB], a
+		ld   a, START_TRANSFER_INTERNAL_CLOCK
+		ldh  [rSC], a
+		ei 
+		;--
+		call Serial_Unknown_WaitAfterSend
+		;--
+		; What's the point
+		ld   a, [wSerialTransferDone]
+		or   a
+		jr   nz, .okThen
+	.okThen:
+		;--
 	pop  af
-	dec  a
-	jp   nz, L001620
+	dec  a				; Sent it $10 times?
+	jp   nz, .loop		; If not, loop
 	ret  
 	
-; =============== JoyKeys_Serial_GetFromReceiveAndSetToSendBuffer ===============
-; Obtains the joypad keys value from the tail of the buffer for received serial data.
-JoyKeys_Serial_GetFromReceiveAndSetToSendBuffer:
+; =============== JoyKeys_Serial_GetActiveOtherInput ===============
+; Gets the active inputs for the other player in a serial match.
+; Only called with input balance != 0.
+JoyKeys_Serial_GetActiveOtherInput:
 	; Only do this if we're accepting serial inputs and in VS mode
-	ld   a, [wSerialInputEnabled]
-	and  a
-	ret  z
-	ld   a, [wSerialPlayMode]
-	and  a
-	ret  z
+	ld   a, [wSerialInputMode]
+	and  a						; Handshake completed yet?
+	ret  z						; If not, return
+	ld   a, [wSerialPlayerId]
+	and  a						; Playing in serial mode?
+	ret  z						; If not, return
 	
-	ld   hl, hJoyKeys		; HL = Joypad input
-	cp   a, MODE_SINGLEVS	; Playing in single mode?
+	; Determine the player ID on the other side.
+	; ie: if we're playing on the 1P side, get 2P's joypad inputs
+	ld   hl, hJoyKeys		
+	cp   a, SERIAL_PL1_ID	; Controlling 1P?
 	jr   nz, .go			; If not, jump
-	ld   hl, hJoyKeys2
+	ld   hl, hJoyKeys2		
+	
 .go:
-	; C = Keys not held
+
+	;
+	; [Frame 2]
+	; Get the active input for the other GB.
+	;
+	
+	; C = Keys not held on the other GB
 	ld   a, [hl]			
 	cpl  
 	ld   c, a
 	
-	;
-	; Obtain the held input of the other GB from the buffer of received inputs.
-	;
-	; After getting the entry, increase the tail index but *DON'T* clear it.
-	;
+	; A = Held input at the tail value of the send buffer
+	; After getting the entry, increase the tail index but don't clear it (unlike JoyKeys_Get_Serial).
 	push hl
 	
-		; Get index to the last byte (tracked by wSerialDataReceiveBufferIndex_Tail)
+		; Get index to the receive buffer tail
 		ld   a, [wSerialDataReceiveBufferIndex_Tail]
 		ld   e, a
 		; Save back an incremented copy
@@ -5517,37 +5745,43 @@ JoyKeys_Serial_GetFromReceiveAndSetToSendBuffer:
 		and  a, $7F										; Size of buffer, cyles back
 		ld   [wSerialDataReceiveBufferIndex_Tail], a	; Save the updated index
 		
-		; Offset the value to clear
+		; Index the buffer of read inputs and read out its value.
 		xor  a
-		ld   d, a
+		ld   d, a							; Index the data
 		ld   hl, wSerialDataReceiveBuffer
 		add  hl, de
-		
-		; A = Pressed keys on current GB
 		ld   a, [hl]
 		
-		; ??? Mark that a byte was processed from the buffer by decrementing this
-		ld   hl, wSerial_Unknown_SlaveRetransfer
+		; Decrement number of remaining inputs to read.
+		ld   hl, wSerialReceivedLeft
 		dec  [hl]
 	pop  hl
 	
+	; Set hJoyKeys
 	ldi  [hl], a		; Write entry to hJoyKeys
+	
+	; Like in JoyKeys_Get_Serial, set to hJoyNewKeys the keys released since the point hJoyKeys was recorded
 	and  c				; hJoyNewKeys = hJoyKeys & C
 	ld   [hl], a		; Write entry to hJoyNewKeys
 	
 	;
-	call JoyKeys_Serial_WriteNewValueToSendBuffer
+	; [Frame 0]
+	; Set the values to send *after* the *next* transfer completes.
+	;
+	; In theory it would have been more correct to put this in JoyKeys_Get_Serial.
+	call JoyKeys_Serial_SetNextTransfer
 	ret
 	
-; =============== JoyKeys_Serial_WriteNewValueToSendBuffer ===============
-; Writes the last pressed keys value to the top of the serial output buffer.
-JoyKeys_Serial_WriteNewValueToSendBuffer: 
-	ld   a, [wSerialPlayMode]
-	cp   a, MODE_SINGLEVS		; Playing in single mode?
-	jr   nz, .teamMode			; If not, jump
-.singleMode:
+; =============== JoyKeys_Serial_SetNextTransfer ===============
+; Sets up the next values to send when the current transfer is finished.
+; This also causes the master to start the transfer.
+JoyKeys_Serial_SetNextTransfer: 
+	ld   a, [wSerialPlayerId]
+	cp   a, SERIAL_PL1_ID		; Are we player 1?
+	jr   nz, .pl2				; If not, jump
+.pl1:
 	;
-	; Write wSerialJoyLastKeys to latest send buffer entry
+	; Write wSerialPendingJoyKeys (1P) to head send buffer entry.
 	;
 	ld   a, [wSerialDataSendBufferIndex_Head]	; DE = IndexTop for send buffer
 	ld   e, a
@@ -5555,20 +5789,20 @@ JoyKeys_Serial_WriteNewValueToSendBuffer:
 	ld   hl, wSerialDataSendBuffer				; HL = SendBuffer
 	add  hl, de									; Index it
 	
-	ld   a, [wSerialJoyLastKeys]				; A = Newly pressed keys	
+	ld   a, [wSerialPendingJoyKeys]				; A = Latest joypad keys	
 	call JoyKeys_FixInvalidCombinations			; Fix it
 	ld   [hl], a								; Write it out
 	
 	xor  a										; Reset key status
-	ld   [wSerialJoyLastKeys], a
+	ld   [wSerialPendingJoyKeys], a
 	
-	; Player 1 (master) sends stuff with its clock
+	; Start transfering what's already set in rSB
 	ld   a, START_TRANSFER_INTERNAL_CLOCK
 	ldh  [rSC], a
 	ret  
-.teamMode:
+.pl2:
 	;
-	; Write wSerialJoyLastKeys2 to latest send buffer entry
+	; Write wSerialPendingJoyKeys2 (2P) to head send buffer entry
 	;
 	ld   a, [wSerialDataSendBufferIndex_Head]	; DE = IndexTop for send buffer
 	ld   e, a
@@ -5576,12 +5810,12 @@ JoyKeys_Serial_WriteNewValueToSendBuffer:
 	ld   hl, wSerialDataSendBuffer				; HL = SendBuffer
 	add  hl, de									; Index it
 	
-	ld   a, [wSerialJoyLastKeys2]				; A = Newly pressed keys		
+	ld   a, [wSerialPendingJoyKeys2]			; A = Latest joypad keys	
 	call JoyKeys_FixInvalidCombinations			; Fix it
 	ld   [hl], a								; Write it out
 	
 	xor  a										; Reset key status
-	ld   [wSerialJoyLastKeys2], a
+	ld   [wSerialPendingJoyKeys2], a
 	ret  
 	
 ; =============== JoyKeys_FixInvalidCombinations ===============
@@ -5613,9 +5847,9 @@ Serial_Init:
 	; Disabled by default
 	xor  a
 	ldh  [rSB], a
-	ld   [wSerialInputEnabled], a
+	ld   [wSerialInputMode], a
 	ld   [wSerialDataReceiveBuffer], a
-	ld   [wSerialPlayMode], a
+	ld   [wSerialPlayerId], a
 	ld   [wSerialTransferDone], a
 	ld   [wSerialDataSendBuffer], a
 	; Set the initial serial mode handler.
@@ -5673,6 +5907,9 @@ ModeSelect_SerialHandler:
 	; Otherwise, because of how ModeSelect is programmed, the next frame it will treat the previously
 	; sent MODESELECT_SBCMD_* value as what the *other* DMG sent, set itself as a slave,
 	; and infinite loop in ModeSelect_Serial_Wait listening for a byte that will never be sent.
+	;
+	; This is only a problem here because the game treats the received data as something
+	; other than joypad input.
 	; 
 	;
 	; Therefore, if we are set as slave, immediately set START_TRANSFER_EXTERNAL_CLOCK to listen for the next byte.
@@ -5681,7 +5918,7 @@ ModeSelect_SerialHandler:
 	;
 
 
-	; Dumb detection of master/slave since we can't use MISCB_SERIAL_PL2_SLAVE yet.
+	; Dumb detection of master/slave since we can't use MISCB_SERIAL_SLAVE yet.
 	; Because the master is expecting the slave to reply with MODESELECT_SBCMD_IDLE, we can
 	; use it to determine on which side we are.
 	;
@@ -5701,84 +5938,133 @@ ModeSelect_SerialHandler:
 	ld   [wSerialTransferDone], a
 	ret  
 	
-L001708:
-	ldh  a, [rSB]
-	ld   [wSerialDataReceiveBuffer], a
-	ld   a, [wSerialDataSendBuffer]
-	ldh  [rSB], a
-	ld   a, $01
+; =============== SerialHandler_Handshake ===============
+; Simple serial handler used when doing the handshake between master and slave,
+; typically when a module is initializing.
+SerialHandler_Handshake:
+
+	; Handle Send/Receive (single byte, no buffer)
+	ldh  a, [rSB]						; Read received byte from serial
+	ld   [wSerialDataReceiveBuffer], a	; Save to receive buffer
+	ld   a, [wSerialDataSendBuffer]		; Read from send buffer
+	ldh  [rSB], a						; Send it out
+	ld   a, $01							; Mark transfer as done since we're received the byte
 	ld   [wSerialTransferDone], a
-	ld   a, [$C025]
-	bit  5, a
-	ret  z
-	ld   a, $80
+	
+	; If we're set as slave, listen to the next received byte.
+	ld   a, [wMisc_C025]
+	bit  MISCB_SERIAL_SLAVE, a			; Are we set as slave?
+	ret  z									; If not, return
+	ld   a, START_TRANSFER_EXTERNAL_CLOCK	; Listen for new byte
 	ldh  [rSC], a
-	ret 
-L001722:
-	call L001738
-	ld   a, $01
-	ld   [wSerialTransferDone], a
-	ret  
-L00172B:
-	call L001738
-	ld   a, $80
-	ldh  [rSC], a
-	ld   a, $01
-	ld   [wSerialTransferDone], a
-	ret  
-L001738:
-	ld   a, [wSerialDataReceiveBufferIndex_Head]
-	ld   e, a
-	inc  a
-	and  a, $7F
-	ld   [wSerialDataReceiveBufferIndex_Head], a
-	ld   d, $00
-	ld   hl, wSerialDataReceiveBuffer
-	add  hl, de
-	ldh  a, [rSB]
-	ld   [hl], a
-	ld   hl, wSerial_Unknown_SlaveRetransfer
-	inc  [hl]
-	ld   a, [wSerialDataSendBufferIndex_Head]
-	ld   e, a
-	inc  a
-	and  a, $7F
-	ld   [wSerialDataSendBufferIndex_Head], a
-	ld   d, $00
-	ld   hl, wSerialDataSendBuffer
-	add  hl, de
-	ld   a, [hl]
-	ldh  [rSB], a
-	ld   hl, wSerial_Unknown_0_IncDecMarker
-	inc  [hl]
-	ret  
-L001767:
-	ld   bc, $0600
-L00176A:
-	nop  ; [POI] What was here?
-	nop  
-	dec  bc
-	ld   a, b
-	or   c
-	jp   nz, L00176A
-	ret  
-	jp   $4380
-L001776:;C
-	ld   a, $FF
-	ld   [$C167], a
-	xor  a
-	ld   [$D931], a
-	ld   [$DA31], a
-	ld   [$D92D], a
-	ld   [$DA2D], a
-	ld   [$D936], a
-	ld   [$DA36], a
-	ld   [$D937], a
-	ld   [$DA37], a
-	ld   a, $48
-	ld   [$D94E], a
-	ld   [$DA4E], a
 	ret
+	
+; =============== SerialHandler_Master ===============
+; Serial handler for buffered input mode.
+SerialHandler_Master:
+	call SerialHandler_HeadBufferSet
+	; The master only starts a transfer when it gets to send more data in JoyKeys_Serial_SetNextTransfer
+	ld   a, $01
+	ld   [wSerialTransferDone], a
+	ret  
+; =============== SerialHandler_Slave ===============
+; Serial handler for buffered input mode.
+SerialHandler_Slave:
+	call SerialHandler_HeadBufferSet
+	; The slave always needs to listen to new transfers
+	ld   a, START_TRANSFER_EXTERNAL_CLOCK
+	ldh  [rSC], a
+	ld   a, $01
+	ld   [wSerialTransferDone], a
+	ret 
+
+; =============== SerialHandler_HeadBufferSet ===============
+; Sets the next serial data to the top of the receive and send buffers.
+SerialHandler_HeadBufferSet:
+
+	;
+	; Write the current byte from rSB to the head index of the receive buffer.
+	; Increase the index as well, wrapping back to $00 when it reaches the end.
+	;
+
+	ld   a, [wSerialDataReceiveBufferIndex_Head]
+	ld   e, a										; E = Copy of RecvHeadIdx for indexing
+	inc  a											; Increase RecvHeadIdx
+	and  a, $7F										; Wrap around to $00 if past the buffer
+	ld   [wSerialDataReceiveBufferIndex_Head], a	; Save back the increased index
+	
+	ld   d, $00										; DE = RecvHeadIdx
+	ld   hl, wSerialDataReceiveBuffer				; HL = RecvBuffer
+	add  hl, de										; Index the receive buffer table
+	ldh  a, [rSB]									; Read the received byte from the other GB
+	ld   [hl], a									; Write it in the buffer
+	
+	ld   hl, wSerialReceivedLeft			; Mark that a byte was received
+	inc  [hl]										
+	
+	;
+	; Write the current byte from the head index of the send buffer to rSB.
+	; Update its index the same way.
+	;
+	ld   a, [wSerialDataSendBufferIndex_Head]
+	ld   e, a										; E = Copy of SentHeadIdx for indexing
+	inc  a											; Increase SentHeadIdx
+	and  a, $7F										; Wrap around to $00 if past the buffer
+	ld   [wSerialDataSendBufferIndex_Head], a		; Save back the increased index
+	
+	ld   d, $00										; DE = SentHeadIdx
+	ld   hl, wSerialDataSendBuffer					; HL = SentBuffer
+	add  hl, de										; Index the send buffer table
+	ld   a, [hl]									; Read the newest byte to send
+	ldh  [rSB], a									; Send it out
+	
+	ld   hl, wSerialSentLeft				; Mark that a byte was sent
+	inc  [hl]
+	ret  
+	
+; =============== Serial_Unknown_WaitAfterSend ===============
+; Waits for exactly <???> hardware cycles after finishing with ???.
+Serial_Unknown_WaitAfterSend:
+	ld   bc, $0600		; BC = Loop count
+.loop:
+	nop  				; Waste some cycles
+	nop  
+	dec  bc				; LoopCount--
+	ld   a, b
+	or   c				; LoopCount == 0?
+	jp   nz, .loop		; If not, loop
+	ret 
+	
+; =============== Unknown_Unused_4380Jump ===============
+; ?????	
+Unknown_Unused_4380Jump:
+	jp   $4380
+	
+; =============== Pl_Unknown_InitBeforeRound ===============
+; Initializes parts of the player struct outside gameplay for both players.
+Pl_Unknown_InitBeforeRound:
+	; Initialize the round number to -1.
+	; At the start of a round, it always gets increased by 1.
+	ld   a, -$01
+	ld   [wRoundNum], a
+	
+	; Win streak and losses is stage-specific
+	xor  a
+	ld   [wPlInfo_Pl1+iPlInfo_RoundWinStreak], a
+	ld   [wPlInfo_Pl2+iPlInfo_RoundWinStreak], a
+	ld   [wPlInfo_Pl1+iPlInfo_TeamLossCount], a
+	ld   [wPlInfo_Pl2+iPlInfo_TeamLossCount], a
+	ld   [wPlInfo_Pl1+iPlInfo_16], a
+	ld   [wPlInfo_Pl2+iPlInfo_16], a
+	ld   [wPlInfo_Pl1+iPlInfo_HitComboRecvSet], a
+	ld   [wPlInfo_Pl2+iPlInfo_HitComboRecvSet], a
+	; ??? Set initial timer, used on the intro pose
+	ld   a, $48
+	ld   [wPlInfo_Pl1+iPlInfo_Unknown_TimerTarget], a
+	ld   [wPlInfo_Pl2+iPlInfo_Unknown_TimerTarget], a
+	ret
+; =============== Module_Play ===============
+; Initializes the module where actual gameplay takes place.
 L00179D:;J
 	ld   sp, $DD00
 	di
@@ -5806,7 +6092,7 @@ L00179D:;J
 	ldh  [hScreenSect2BGP], a
 	xor  a
 	ldh  [rSTAT], a
-	ld   a, [$C167]
+	ld   a, [wRoundNum]
 	cp   $FF
 	jp   nz, L0017E0
 	call ClearBGMap
@@ -5849,7 +6135,7 @@ L0017F5:;J
 	ldh  [rWY], a
 	ld   a, $07
 	ldh  [rWX], a
-	call L0014F9
+	call Serial_DoHandshake
 	ld   a, $E7
 	rst  $18
 	ldh  a, [rSTAT]
@@ -5918,7 +6204,7 @@ L001895:;J
 	ldh  [hROMBank], a
 	jp   $6389
 L0018C4:;C
-	ld   bc, $D900
+	ld   bc, wJoyBuffer_Pl2
 	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
 	call L001A0B
 	ld   bc, $DA00
@@ -5944,10 +6230,10 @@ L0018C4:;C
 	ld   [wPlInfo_Pl2+iPlInfo_Status], a
 	xor  a
 	ld   [$D921], a
-	ld   [$D922], a
+	ld   [wPlInfo_Pl1+iPlInfo_02Flags], a
 	ld   [$D923], a
 	ld   [$DA21], a
-	ld   [$DA22], a
+	ld   [wPlInfo_Pl2+iPlInfo_02Flags], a
 	ld   [$DA23], a
 	ld   [$D933], a
 	ld   [$DA33], a
@@ -5961,8 +6247,8 @@ L0018C4:;C
 	ld   [$DA59], a
 	ld   [$D958], a
 	ld   [$DA58], a
-	ld   [$D937], a
-	ld   [$DA37], a
+	ld   [wPlInfo_Pl1+iPlInfo_HitComboRecvSet], a
+	ld   [wPlInfo_Pl2+iPlInfo_HitComboRecvSet], a
 	ld   [$D960], a
 	ld   [$DA60], a
 	ld   a, $FF
@@ -5977,52 +6263,52 @@ L0018C4:;C
 	ld   [$DA5C], a
 	ld   [$D95D], a
 	ld   [$DA5D], a
-	ld   a, [$D92C]
+	ld   a, [wPlInfo_Pl1+iPlInfo_CharId]
 	ld   [$DA71], a
-	ld   a, [$DA2C]
+	ld   a, [wPlInfo_Pl2+iPlInfo_CharId]
 	ld   [$D971], a
 	xor  a
 	ld   [$C160], a
-	call L001F85
+	call IsInTeamMode
 	jp   nc, L0019AD
-	ld   a, [$C162]
+	ld   a, [wLastWinner]
 	bit  0, a
 	jp   nz, L00198D
 	ld   a, $48
-	ld   [$D94E], a
+	ld   [wPlInfo_Pl1+iPlInfo_Unknown_TimerTarget], a
 L00198D:;J
-	ld   a, [$C162]
+	ld   a, [wLastWinner]
 	bit  1, a
 	jp   nz, L00199A
 	ld   a, $48
-	ld   [$DA4E], a
+	ld   [wPlInfo_Pl2+iPlInfo_Unknown_TimerTarget], a
 L00199A:;J
-	ld   a, [$D92D]
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamLossCount]
 	cp   $03
 	jp   z, L0019B5
-	ld   a, [$DA2D]
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamLossCount]
 	cp   $03
 	jp   z, L0019B5
 	jp   L0019CD
 L0019AD:;J
-	ld   a, [$C167]
+	ld   a, [wRoundNum]
 	cp   $03
 	jp   nz, L0019C5
 L0019B5:;J
 	ld   a, $01
 	ld   [$C160], a
 	ld   a, $17
-	ld   [$D94E], a
-	ld   [$DA4E], a
+	ld   [wPlInfo_Pl1+iPlInfo_Unknown_TimerTarget], a
+	ld   [wPlInfo_Pl2+iPlInfo_Unknown_TimerTarget], a
 	jp   L0019CD
 L0019C5:;J
 	ld   a, $48
-	ld   [$D94E], a
-	ld   [$DA4E], a
+	ld   [wPlInfo_Pl1+iPlInfo_Unknown_TimerTarget], a
+	ld   [wPlInfo_Pl2+iPlInfo_Unknown_TimerTarget], a
 L0019CD:;J
 	xor  a
-	ld   [$D94F], a
-	ld   [$DA4F], a
+	ld   [wPlInfo_Pl1+iPlInfo_Unknown_Timer], a
+	ld   [wPlInfo_Pl2+iPlInfo_Unknown_Timer], a
 	ld   [$D950], a
 	ld   [$DA50], a
 	ld   [$D951], a
@@ -6043,7 +6329,7 @@ L0019CD:;J
 	call OBJLstS_InitFrom
 	ret
 L001A0B:;C
-	call L001F85
+	call IsInTeamMode
 	jp   nc, L001A2D
 	ld   hl, $002D
 	add  hl, bc
@@ -6054,7 +6340,7 @@ L001A0B:;C
 L001A1D:;J
 	ld   hl, $002E
 	add  hl, bc
-	add  a, L
+	add  a, l
 	jp   nc, L001A26
 L001A25: db $24;X
 L001A26:;J
@@ -6438,11 +6724,11 @@ L001BC5:;C
 	ld   a, BANK(L01636A) ; BANK $01
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	ld   a, [$D92C]
+	ld   a, [wPlInfo_Pl1+iPlInfo_CharId]
 	ld   de, $8800
 	call L001C45
 	call Task_PassControlFar
-	ld   a, [$DA2C]
+	ld   a, [wPlInfo_Pl2+iPlInfo_CharId]
 	ld   de, $8A60
 	call L001C45
 	call Task_PassControlFar
@@ -6461,13 +6747,13 @@ L001BC5:;C
 	ld   hl, wOBJInfo3+iOBJInfo_Status
 	ld   de, L01636A
 	call OBJLstS_InitFrom
-	ld   hl, $D74D
+	ld   hl, wOBJInfo3+iOBJInfo_TileIDBase
 	ld   [hl], $A6
 	call Task_PassControlFar
 	ld   hl, wOBJInfo4+iOBJInfo_Status
 	ld   de, L01636A
 	call OBJLstS_InitFrom
-	ld   hl, $D78D
+	ld   hl, wOBJInfo4+iOBJInfo_TileIDBase
 	ld   [hl], $CC
 	call Task_PassControlFar
 	ld   hl, wOBJInfo5+iOBJInfo_Status
@@ -6482,7 +6768,7 @@ L001BC5:;C
 	ret
 L001C45:;C
 	ld   hl, $1CC3
-	add  a, L
+	add  a, l
 	jp   nc, L001C4D
 L001C4C: db $24;X
 L001C4D:;J
@@ -6613,7 +6899,7 @@ L001CEA: db $58
 L001CEB:;C
 	ld   a, [wMatchStartTime]
 	ld   [$C169], a
-	ld   a, [$C167]
+	ld   a, [wRoundNum]
 	or   a
 	jp   nz, L001D0C
 	ld   hl, $4A52
@@ -6706,30 +6992,30 @@ L001DB8:;J
 	call CopyTilesAutoNum
 	ret
 L001DC2:;C
-	call L001F85
+	call IsInTeamMode
 	jp   c, L001E5E
 	ld   hl, $4BFA
 	ld   de, $9740
 	ld   b, $02
 	call CopyTiles
-	ld   a, [$D92E]
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId0]
 	ld   de, $96C0
 	ld   hl, $9C41
 	ld   c, $6C
-	call L001FAC
-	ld   a, [$D936]
+	call Char_DrawIconFlipX
+	ld   a, [wPlInfo_Pl1+iPlInfo_16]
 	cp   $01
 	jp   c, L001DF4
 	ld   hl, $9C42
 	ld   c, $74
-	call L001F9A
+	call Unknown_CopyByteOnFirstThreeRounds
 	jp   L001DFC
 L001DF4:;J
 	ld   hl, $9C42
 	ld   c, $75
-	call L001F9A
+	call Unknown_CopyByteOnFirstThreeRounds
 L001DFC:;J
-	ld   a, [$D936]
+	ld   a, [wPlInfo_Pl1+iPlInfo_16]
 	cp   $02
 	jp   c, L001E0F
 L001E04: db $21;X
@@ -6746,25 +7032,25 @@ L001E0E: db $1E;X
 L001E0F:;J
 	ld   hl, $9C43
 	ld   c, $75
-	call L001F9A
-	ld   a, [$DA2E]
+	call Unknown_CopyByteOnFirstThreeRounds
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId0]
 	ld   de, $9700
 	ld   hl, $9C52
 	ld   c, $70
-	call L001FE7
-	ld   a, [$DA36]
+	call Char_DrawIcon
+	ld   a, [wPlInfo_Pl2+iPlInfo_16]
 	cp   $01
 	jp   c, L001E38
 	ld   hl, $9C51
 	ld   c, $74
-	call L001F9A
+	call Unknown_CopyByteOnFirstThreeRounds
 	jp   L001E40
 L001E38:;J
 	ld   hl, $9C51
 	ld   c, $75
-	call L001F9A
+	call Unknown_CopyByteOnFirstThreeRounds
 L001E40:;J
-	ld   a, [$DA36]
+	ld   a, [wPlInfo_Pl2+iPlInfo_16]
 	cp   $02
 	jp   c, L001E53
 L001E48: db $21;X
@@ -6781,16 +7067,16 @@ L001E52: db $1E;X
 L001E53:;J
 	ld   hl, $9C50
 	ld   c, $75
-	call L001F9A
+	call Unknown_CopyByteOnFirstThreeRounds
 	jp   L001F84
 L001E5E:;J
-	ld   hl, $D92E
-	ld   a, [$D92D]
+	ld   hl, wPlInfo_Pl1+iPlInfo_TeamCharId0
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamLossCount]
 	cp   $03
 	jp   nz, L001E6B
 	ld   a, $02
 L001E6B:;J
-	add  a, L
+	add  a, l
 	jp   nc, L001E70
 L001E6F: db $24;X
 L001E70:;J
@@ -6799,29 +7085,29 @@ L001E70:;J
 	ld   de, $96C0
 	ld   hl, $9C41
 	ld   c, $6C
-	call L001FAC
-	ld   a, [$D92D]
+	call Char_DrawIconFlipX
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamLossCount]
 	cp   $00
 	jp   z, L001E8D
 	cp   $01
 	jp   z, L001EA2
 	jp   L001ED4
 L001E8D:;J
-	ld   a, [$D930]
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId2]
 	ld   de, wLZSS_Buffer
 	call L002087
-	ld   a, [$D92F]
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId1]
 	ld   de, $C20A
 	call L002087
 	jp   L001EE6
 L001EA2:;J
-	ld   a, [$D930]
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId2]
 	cp   $FF
 	jp   z, L001EBF
-	ld   a, [$D92E]
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId0]
 	ld   de, wLZSS_Buffer
 	call L002022
-	ld   a, [$D930]
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId2]
 	ld   de, $C20A
 	call L002087
 	jp   L001EE6
@@ -6847,10 +7133,10 @@ L001ED1: db $C3;X
 L001ED2: db $E6;X
 L001ED3: db $1E;X
 L001ED4:;J
-	ld   a, [$D92F]
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId1]
 	ld   de, wLZSS_Buffer
 	call L002022
-	ld   a, [$D92E]
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId0]
 	ld   de, $C20A
 	call L002022
 L001EE6:;J
@@ -6858,13 +7144,13 @@ L001EE6:;J
 	ld   de, $9740
 	ld   c, $74
 	call L0020D1
-	ld   hl, $DA2E
-	ld   a, [$DA2D]
+	ld   hl, wPlInfo_Pl2+iPlInfo_TeamCharId0
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamLossCount]
 	cp   $03
 	jp   nz, L001EFE
 	ld   a, $02
 L001EFE:;J
-	add  a, L
+	add  a, l
 	jp   nc, L001F03
 L001F02: db $24;X
 L001F03:;J
@@ -6873,45 +7159,45 @@ L001F03:;J
 	ld   de, $9700
 	ld   hl, $9C52
 	ld   c, $70
-	call L001FE7
-	ld   a, [$DA2D]
+	call Char_DrawIcon
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamLossCount]
 	cp   $00
 	jp   z, L001F20
 	cp   $01
 	jp   z, L001F35
 	jp   L001F67
 L001F20:;J
-	ld   a, [$DA30]
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId2]
 	ld   de, wLZSS_Buffer
 	call L002087
-	ld   a, [$DA2F]
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId1]
 	ld   de, $C20A
 	call L002087
 	jp   L001F79
 L001F35:;J
-	ld   a, [$D930]
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId2]
 	cp   $FF
 	jp   z, L001F52
-	ld   a, [$DA2E]
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId0]
 	ld   de, wLZSS_Buffer
 	call L002066
-	ld   a, [$DA30]
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId2]
 	ld   de, $C20A
 	call L002087
 	jp   L001F79
 L001F52:;J
-	ld   a, [$DA2E]
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId0]
 	ld   de, $C20A
 	call L002066
-	ld   a, [$DA30]
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId2]
 	ld   de, wLZSS_Buffer
 	call L002087
 	jp   L001F79
 L001F67:;J
-	ld   a, [$DA2F]
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId1]
 	ld   de, wLZSS_Buffer
 	call L002066
-	ld   a, [$DA2E]
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId0]
 	ld   de, $C20A
 	call L002066
 L001F79:;J
@@ -6921,97 +7207,147 @@ L001F79:;J
 	call L0020E5
 L001F84:;J
 	ret
-L001F85:;C
+; =============== IsInTeamMode ===============
+; OUT
+; - C flag: If set, Team mode is enabled
+IsInTeamMode:
 	ld   a, [wPlayMode]
-	bit  0, a
-	jp   z, L001F95
-	bit  1, a
-	jp   nz, L001F98
-	jp   L001F98
-L001F95:;J
+	bit  MODEB_TEAM, a	; Playing in Team mode?
+	jp   z, .no			; If not, jump
+	bit  MODEB_VS, a	; Playing in VS mode?
+	jp   nz, .yes		; If so, jump
+	jp   .yes
+.no:
 	scf
-	ccf
+	ccf		; C = 0
 	ret
-L001F98:;J
-	scf
+.yes:
+	scf		; C = 1
 	ret
-L001F9A:;C
-	ld   a, [$C167]
-	cp   $03
-	jp   z, L001FAB
-L001FA2:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L001FA2
-	ld   a, c
-	ldi  [hl], a
-L001FAB:;J
+	
+; =============== Unknown_CopyByteOnFirstThreeRounds ===============
+; Writes the value to VRAM if we aren't on the fourth round.
+; IN
+; - C: Value to write
+; - HL: VRAM ptr
+Unknown_CopyByteOnFirstThreeRounds:
+	ld   a, [wRoundNum]
+	cp   $03				; wRoundNum == 3? (4th round)
+	jp   z, .ret			; If so, skip
+	mWaitForVBlankOrHBlank
+	ld   a, c				; Otherwise, write C to HL
+	ldi  [hl], a			
+.ret:
 	ret
-L001FAC:;C
+	
+; =============== Char_DrawIconFlipX ===============
+; Draws a 16x16 icon for a character flipped horizontally.
+; This is used to draw icons on the P1 side, which face right.
+; IN	
+; - DE: Ptr to GFX ptr in VRAM
+; - HL: Ptr to top-*right* corner of the icon in the tilemap
+; - C: Tile number DE points to
+; - A: Character ID * 2
+;      Multiplied by 2 because ???
+Char_DrawIconFlipX:
+
 	push bc
-	ld   b, $00
-	ld   c, a
-	sla  c
-	rl   b
-	sla  c
-	rl   b
-	sla  c
-	rl   b
-	sla  c
-	rl   b
-	sla  c
-	rl   b
-	ldh  a, [hROMBank]
-	push af
-	ld   a, $1D
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	push hl
-	ld   hl, $4552
-	add  hl, bc
-	ld   b, $04
-	call L000ECF
-	pop  hl
-	pop  af
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
+	
+		;
+		; Generate offset to PlIconsGFXTbl.
+		; Each entry in the table contains 4 tiles ($40 bytes), and the entries
+		; are ordered by character ID.
+		;
+		; Because A is already multiplied by 2 already when calling this function,
+		; BC = A * $20
+		ld   b, $00
+		ld   c, a		; BC = A
+REPT 5
+		sla  c		 	; << 1  5 times
+		rl   b
+ENDR
+		;--
+		; Switch to the bank with icons
+		ldh  a, [hROMBank]
+		push af
+			ld   a, BANK(PlIconsGFXTbl) ; BANK $1D
+			ld   [MBC1RomBank], a
+			ldh  [hROMBank], a
+			push hl
+				; Offset the GFX table to the location of the needed icon
+				ld   hl, PlIconsGFXTbl	
+				add  hl, bc			; HL = PlIconsGFXTbl[BC]
+				
+				; Copy the next 4 tiles to VRAM flipped horizontally, from *HL to *DE
+				ld   b, $04			; B = 4
+				call CopyTilesHBlankFlipX	; Copy the tiles over
+			pop  hl
+		pop  af
+		ld   [MBC1RomBank], a
+		ldh  [hROMBank], a
 	pop  bc
-	ld   a, c
-	ld   b, $02
-	call L00211E
+	
+	;
+	; Update the tilemap to point to the newly copied tiles.
+	;
+	; As a side effect of the icon GFX being horizontally flipped but still keeping
+	; their tile order, now tiles are stored top to bottom, then *right* to *left*.
+	;
+	; To account for it, a special subroutine is used which updates the tilemap
+	; in that order, using incrementing tile IDs as needed.
+	; 
+	ld   a, c		; A = Initial tile ID for top-right corner
+	ld   b, $02		; B = Width in tiles, Icons are 2 tiles large
+	call CreateRectIncXFlip_2H ; R to L tilemap set func, 2 tiles high
 	ret
-L001FE7:;C
+	
+; =============== Char_DrawIcon ===============
+; Draws a 16x16 icon for a character.
+; This is used to draw icons on the P2 side, which face left.
+; See also: Char_DrawIconFlipX
+; IN	
+; - DE: Ptr to GFX ptr in VRAM
+; - HL: Ptr to top-left corner of the icon in the tilemap
+; - C: Tile number DE points to
+; - A: Character ID * 2
+;      Multiplied by 2 because ???
+Char_DrawIcon:
+
+
 	push bc
-	ld   b, $00
-	ld   c, a
-	sla  c
-	rl   b
-	sla  c
-	rl   b
-	sla  c
-	rl   b
-	sla  c
-	rl   b
-	sla  c
-	rl   b
-	ldh  a, [hROMBank]
-	push af
-	ld   a, $1D
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	push hl
-	ld   hl, $4552
-	add  hl, bc
-	ld   b, $04
-	call CopyTilesHBlank
-	pop  hl
-	pop  af
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
+	
+		; BC = Offset to PlIconsGFXTbl.
+		ld   b, $00
+		ld   c, a		; BC = A
+REPT 5
+		sla  c		 	; << 1  5 times
+		rl   b
+ENDR
+
+		; Switch to the bank with icons
+		ldh  a, [hROMBank]
+		push af
+			ld   a, BANK(PlIconsGFXTbl) ; BANK $1D
+			ld   [MBC1RomBank], a
+			ldh  [hROMBank], a
+			push hl
+				; HL = PlIconsGFXTbl[BC]
+				ld   hl, PlIconsGFXTbl	
+				add  hl, bc			
+				
+				; Copy the next 4 tiles to VRAM from *HL to *DE
+				ld   b, $04				; B = Tile count
+				call CopyTilesHBlank	
+			pop  hl
+		pop  af
+		ld   [MBC1RomBank], a
+		ldh  [hROMBank], a
 	pop  bc
-	ld   a, c
-	ld   b, $02
-	call L002138
+	
+	; Update the tilemap to point to the newly copied tiles.
+	ld   a, c		; A = Initial tile ID for top-right corner
+	ld   b, $02		; B = Width in tiles, Icons are 2 tiles large
+	call CreateRectInc_2H 	; L to R tilemap set func, 2 tiles high
 	ret
 L002022:;C
 	push de
@@ -7026,20 +7362,20 @@ L002022:;C
 	ld   hl, $4C1A
 	ld   de, $C2CA
 	ld   b, $04
-	call L000ECF
+	call CopyTilesHBlankFlipX
 	ld   hl, $4C5A
 	ld   de, $C30A
 	ld   b, $04
-	call L000ECF
+	call CopyTilesHBlankFlipX
 	pop  de
 	ld   hl, $C2EA
 	ld   bc, $C32A
 	ld   a, $02
-	call L000E9A
+	call CopyTilesOver_Custom
 	ld   hl, $C2CA
 	ld   bc, $C30A
 	ld   a, $02
-	call L000E9A
+	call CopyTilesOver_Custom
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
@@ -7056,7 +7392,7 @@ L002066:;C
 	ld   hl, $4C1A
 	ld   bc, $4C5A
 	ld   a, $40
-	call L000E9A
+	call CopyTilesOver_Custom
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
@@ -7114,11 +7450,11 @@ L0020D1:;C
 	push hl
 	ld   hl, wLZSS_Buffer
 	ld   b, $06
-	call L000ECF
+	call CopyTilesHBlankFlipX
 	pop  hl
 	ld   a, c
 	ld   b, $03
-	call L00211E
+	call CreateRectIncXFlip_2H
 	ret
 L0020E5:;C
 	call L0020F9
@@ -7129,7 +7465,7 @@ L0020E5:;C
 	pop  hl
 	ld   a, c
 	ld   b, $03
-	call L002138
+	call CreateRectInc_2H
 	ret
 L0020F9:;C
 	push bc
@@ -7158,41 +7494,55 @@ L002104:;J
 	pop  de
 	pop  bc
 	ret
-L00211E:;JC
+; =============== CreateRectIncXFlip_2H ===============
+; Creates a 2 tile high rectangle, drawn top to bottom, right to left
+; with incrementing tile IDs.
+; Used when the source graphics are flipped horizontally.
+; IN
+; - HL: Ptr to tilemap location in VRAM
+; - A: Initial Tile ID
+; - B: Rectangle width
+CreateRectIncXFlip_2H:
 	push af
-L00211F:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L00211F
+	mWaitForVBlankOrHBlank
 	pop  af
-	ld   [hl], a
-	inc  a
-	ld   de, $0020
+	
+	ld   [hl], a					; Write TileID at the top
+	inc  a							; TileID++
+	ld   de, BG_TILECOUNT_H			; Move down 1 tile
 	add  hl, de
-	ldd  [hl], a
-	inc  a
-	ld   de, hROMBank
+	ldd  [hl], a					; Write TileID at the bottom, move left 1 tile
+	inc  a							; TileID++
+	ld   de, -BG_TILECOUNT_H		; Move up 1 tile
 	add  hl, de
-	dec  b
-	jp   nz, L00211E
+	dec  b							; WidthLeft--
+	jp   nz, CreateRectIncXFlip_2H	; Drawn all columns? If not, loop
 	ret
-L002138:;JC
+	
+; =============== CreateRectInc_2H ===============
+; Creates a 2 tile high rectangle, drawn top to bottom, left to right
+; with incrementing tile IDs.
+; Used when the source graphics aren't flipped.
+; IN
+; - HL: Ptr to tilemap location in VRAM
+; - A: Initial Tile ID
+; - B: Rectangle width
+CreateRectInc_2H:
+
 	push af
-L002139:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L002139
+	mWaitForVBlankOrHBlank
 	pop  af
-	ld   [hl], a
-	inc  a
-	ld   de, $0020
+	
+	ld   [hl], a					; Write TileID at the top
+	inc  a							; TileID++
+	ld   de, BG_TILECOUNT_H			; Move down 1 tile
 	add  hl, de
-	ldi  [hl], a
-	inc  a
-	ld   de, hROMBank
+	ldi  [hl], a					; Write TileID at the bottom, move right 1 tile
+	inc  a							; TileID++
+	ld   de, -BG_TILECOUNT_H		; Move up 1 tile
 	add  hl, de
-	dec  b
-	jp   nz, L002138
+	dec  b							; WidthLeft--
+	jp   nz, CreateRectInc_2H	; Drawn all columns? If not, loop
 	ret
 L002152:;C
 	ld   hl, $0000
@@ -7206,9 +7556,9 @@ L002152:;C
 	ld   hl, $4084
 	ld   de, wLZSS_Buffer
 	call DecompressLZSS
-	ld   a, [$D92C]
+	ld   a, [wPlInfo_Pl1+iPlInfo_CharId]
 	call L00217E
-	ld   a, [$DA2C]
+	ld   a, [wPlInfo_Pl2+iPlInfo_CharId]
 	call L0021B3
 	ret
 L00217E:;C
@@ -7375,9 +7725,9 @@ L002264:;C
 	ld   a, BANK(L0148C3) ; BANK $01
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	ld   a, [$C167]
+	ld   a, [wRoundNum]
 	inc  a
-	ld   [$C167], a
+	ld   [wRoundNum], a
 	ld   hl, $4000
 	ld   de, wLZSS_Buffer
 	call DecompressLZSS
@@ -7385,7 +7735,7 @@ L002264:;C
 	ld   de, $8800
 	ld   b, $44
 	call CopyTiles
-	ld   a, [$C167]
+	ld   a, [wRoundNum]
 	sla  a
 	sla  a
 	sla  a
@@ -7460,11 +7810,11 @@ L0022FD:;J
 	pop  hl
 	ret
 L00231E:;C
-	ld   bc, $D900
+	ld   bc, wJoyBuffer_Pl2
 	ld   de, $DA00
 	call L002331
 	ld   bc, $DA00
-	ld   de, $D900
+	ld   de, wJoyBuffer_Pl2
 	call L002331
 	ret
 L002331:;C
@@ -7535,11 +7885,11 @@ L00239D:;R
 L0023A3:;C
 	ld   b, $3C
 	call L0022FC
-	ld   bc, $D900
+	ld   bc, wJoyBuffer_Pl2
 	ld   de, $DA00
 	call L0023BB
 	ld   bc, $DA00
-	ld   de, $D900
+	ld   de, wJoyBuffer_Pl2
 	call L0023BB
 	ret
 L0023BB:;C
@@ -7659,7 +8009,7 @@ OBJInfoInit_Andy_WinA:
 L002458:;I
 	ld   sp, $DE00
 	ei
-	ld   bc, $D900
+	ld   bc, wJoyBuffer_Pl2
 	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
 	jr   L00246E
 L002464:;I
@@ -7723,7 +8073,7 @@ L0024CD:;J
 	ld   h, $00
 	ld   l, a
 	srl  a
-	add  a, L
+	add  a, l
 	ld   l, a
 	pop  de
 	add  hl, de
@@ -8870,7 +9220,7 @@ L002BF5:;J
 L002BFC:;C
 	ldh  a, [hROMBank]
 	push af
-	ld   bc, $D900
+	ld   bc, wJoyBuffer_Pl2
 	ld   de, wOBJInfo2+iOBJInfo_Status
 	ld   a, $04
 L002C07:;J

@@ -1,376 +1,600 @@
-L1E4000:;I
+; 
+; =============== START OF MODULE CharSel ===============
+;
+; =============== Module_CharSel ===============
+; EntryPoint for character select screen. Called by rst $00 jump from Module_Title.
+L1E4000:
+Module_CharSel:
 	ld   sp, $DD00
 	di
-	rst  $10
+	;-----------------------------------
+	rst  $10				; Stop LCD
 	ld   hl, wMisc_C028
-	res  1, [hl]
+	; No player sprites here
+	res  MISCB_PL_RANGE_CHECK, [hl]
+	
+	; Reset palette as usual
 	xor  a
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
+	
+	; Apply SGB palette for characters
 	ld   de, SCRPAL_CHARSELECT
 	call HomeCall_SGB_ApplyScreenPalSet
+	
+	; Reset tilemaps
 	call ClearBGMap
 	call ClearWINDOWMap
+	; Reset screen coords to top-left corner
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
 	ld   [wOBJScrollX], a
 	ld   [wOBJScrollY], a
+	
+	;
+	; Copy graphics
+	;
+	
+	; We're displaying character names here.
+	; Only the letters, period and the dash are usable as everything
+	; else gets overwritten.
 	call LoadGFX_1bppFont_Default
-	ld   hl, $4F71
+	
+	; This set of graphics is uncompressed, and is written over the 
+	; Japanese font characters, leaving us with the ASCII ones.
+	; Also note the numbers are overwritten with the small 16x16 icons on the fly.
+	ld   hl, GFX_CharSel_BG0	; Player portraits
 	ld   de, $92F0
 	ld   b, $51
 	call CopyTiles
-	ld   hl, $5481
+	
+	ld   hl, GFXLZ_CharSel_BG1	; Player tiles, icon placeholders
 	ld   de, wLZSS_Buffer
 	call DecompressLZSS
 	ld   hl, wLZSS_Buffer
 	ld   de, $8800
 	ld   b, $78
 	call CopyTiles
-	ld   hl, $5B87
+	
+	ld   hl, GFXLZ_CharSel_OBJ	; All OBJ (cursors, tile flip anim)
 	ld   de, wLZSS_Buffer
 	call DecompressLZSS
 	ld   hl, wLZSS_Buffer
-	ld   de, Tiles_Begin
+	ld   de, Tiles_Begin		; At the start of the GFX area
 	ld   b, $62
 	call CopyTiles
-	ld   hl, wCharSelIdMapTbl
-	ld   de, $4F2A
-	ld   b, $15
-L1E4066:;J
-	ld   a, [de]
+	
+	; Copy default values for CHARSEL_ID_* -> CHAR_ID_* mapping table.
+	; These determine what character you get depending on the cursor's position,
+	; and it can be updated when flipping tiles.
+	ld   hl, wCharSelIdMapTbl 						; HL = Destination
+	ld   de, CharSel_IdMapTbl						; DE = Source
+	ld   b, CharSel_IdMapTbl.end-CharSel_IdMapTbl	; B = Bytes to copy
+.idInitLoop:
+	ld   a, [de]		
 	ldi  [hl], a
 	inc  de
 	dec  b
-	jp   nz, L1E4066
+	jp   nz, .idInitLoop
+	
+	
+	; Init
 	xor  a
-	ld   [$C1B3], a
-	ld   [wTitleMenuOptId], a
-	ld   [$C1B5], a
-	ld   [$C1B6], a
-	ld   [$C1B1], a
-	ld   [$C1B2], a
+	ld   [wCharSelTeamFull], a
+	ld   [wCharSelP1CursorMode], a
+	ld   [wCharSelP2CursorMode], a
+	ld   [wCharSelCurPl], a
+	ld   [wCharSelRandom1P], a
+	ld   [wCharSelRandom2P], a
+	
+	; Set the delay timers used to ranzomize the cursor before picking the character.
+	;
+	; For both players, it may take anything between $07 and $26 frames
+	; before the CPU picks the next character in the sequence:
+	; Delay = (Rand & $1F) + 7
+	;
+	; See also: CharSel_SetRandomPortrait
 	call Rand
 	and  a, $1F
 	add  a, $07
-	ld   [wUnknown_C1B7], a
+	ld   [wCharSelRandomDelay1P], a
+	
+	; wCharSelRandomDelay2P = (Rand & $1F) + 7
 	call Rand
 	and  a, $1F
 	add  a, $07
-	ld   [wOptionsSGBSndOptId], a
+	ld   [wCharSelRandomDelay2P], a
+	
+	;--
+	;
+	; In single modes, the CPU *opponent* (the inactive side) has the autopicker enabled
+	; to have it automatically select the characters in the previously generated CPU sequence.
+	;
+	; This behaviour is toggled by wCharSelRandom1P and wCharSelRandom2P, and can be
+	; also enabled by 1P/2P through a button combination (though it skips the sequence code and does set random characters)
+	; 	
+	
+
 	ld   a, [wPlayMode]
-	bit  1, a
-	jp   nz, L1E40FA
-	ld   a, [wUnknown_C165]
-	or   a
-	jp   z, L1E40B9
-L1E40A3: db $3E;X
-L1E40A4: db $01;X
-L1E40A5: db $EA;X
-L1E40A6: db $B1;X
-L1E40A7: db $C1;X
-L1E40A8: db $21;X
-L1E40A9: db $AB;X
-L1E40AA: db $C1;X
-L1E40AB: db $11;X
-L1E40AC: db $A9;X
-L1E40AD: db $C1;X
-L1E40AE: db $FA;X
-L1E40AF: db $62;X
-L1E40B0: db $C1;X
-L1E40B1: db $CB;X
-L1E40B2: db $47;X
-L1E40B3: db $CA;X
-L1E40B4: db $EF;X
-L1E40B5: db $40;X
-L1E40B6: db $C3;X
-L1E40B7: db $CC;X
-L1E40B8: db $40;X
-L1E40B9:;J
-	ld   a, $01
-	ld   [$C1B2], a
-	ld   hl, $C1AE
-	ld   de, $C1AA
-	ld   a, [$C162]
-	bit  1, a
-	jp   z, L1E40EF
+	bit  MODEB_VS, a			; Is VS mode?
+	jp   nz, .initVSMode		; If so, jump
+	
+.init1PMode:
+	;
+	; Check which player is the CPU opponent.
+	; See also: CharSelect_IsCPUOpponent
+	;
+	ld   a, [wJoyActivePl]
+	or   a						; Playing on the Pl1 side? (== ACTIVE_CTRL_PL1)
+	jp   z, .cpu2P				; If so, jump
+.cpu1P:
+	; We're playing on the 2P side, and the CPU is 1P
+	
+	ld   a, $01							; 1P CPU autopicks team
+	ld   [wCharSelRandom1P], a
+	
+	;
+	; If the CPU lost, clear out its selected opponents.
+	; Since wCharSelRandom1P is set, a new set of opponents will be quickly filled in (elsewhere).
+	;
+	ld   hl, wCharSelP1Char0			; HL = Team start
+	ld   de, wCharSelP1CursorPos		; DE = Cursor position
+	
+	ld   a, [wLastWinner]		
+	bit  LASTWIN_PL1, a					; Did the CPU win?
+	jp   z, .clearCPUTeam				; If not, jump
+	jp   .lost				
+	
+.cpu2P:
+	; Same thing as above, except when playing as 1P
+	
+	ld   a, $01							; 2P CPU autopicks team
+	ld   [wCharSelRandom2P], a
+	
+	ld   hl, wCharSelP2Char0			; HL = Cursor position
+	ld   de, wCharSelP2CursorPos		; DE = Cursor position
+	ld   a, [wLastWinner]
+	bit  LASTWIN_PL2, a					; Did the other player win?
+	jp   z, .clearCPUTeam				; If not, jump
+	
+.lost:
+	; The player lost the previous match, so the CPU keeps its opponents.
+	
+	; Additionally, if we lost to a boss, we have to set their selected "team" manually.
+	; This is because they go alone instead of being part of a team. 
+	; If we didn't check this, the game would try to select three characters anyway.
 	ld   a, [wRoundSeqId]
-	cp   $0F
-	jp   z, L1E40DC
-	cp   $10
-	jp   z, L1E40DC
-	jp   L1E4108
-L1E40DC: db $E5;X
-L1E40DD: db $21;X
-L1E40DE: db $80;X
-L1E40DF: db $C1;X
-L1E40E0: db $06;X
-L1E40E1: db $00;X
-L1E40E2: db $4F;X
-L1E40E3: db $09;X
-L1E40E4: db $7E;X
-L1E40E5: db $E1;X
-L1E40E6: db $12;X
-L1E40E7: db $22;X
-L1E40E8: db $3E;X
-L1E40E9: db $FF;X
-L1E40EA: db $22;X
-L1E40EB: db $77;X
-L1E40EC: db $C3;X
-L1E40ED: db $08;X
-L1E40EE: db $41;X
-L1E40EF:;J
-	ld   a, $FF
+	cp   STAGE_KAGURA		; Did we lose to Kagura?
+	jp   z, .lostOnBoss		; If so, jump
+	cp   STAGE_GOENITZ		; Did we lose to Goenitz?
+	jp   z, .lostOnBoss		; If so, jump
+	jp   .chkInitialMode
+	
+.lostOnBoss:
+	
+	; Retrieve the current wRoundSeqTbl value.
+	; The index is high enough that the value isn't stored as CHARSEL_ID_*, but directly as CHAR_ID_*.
+	;                                                                    (see ModeSelect_MakeRoundSeq)
+	push hl
+		ld   hl, wRoundSeqTbl	; HL = Sequence table
+		ld   b, $00				; BC = RoundId
+		ld   c, a
+		add  hl, bc				; Index the table
+		ld   a, [hl]			; A = CPU character id
+		
+	; Set the boss as part of the team
+	pop  hl				; HL = Ptr to start of CPU team
+	ld   [de], a		; Whatever
+	ldi  [hl], a		; 1st opponent: Boss
+	ld   a, CHAR_ID_NONE
+	ldi  [hl], a		; 2nd opponent: Nobody
+	ld   [hl], a		; 3rd opponent: Nobody
+	jp   .chkInitialMode
+	
+.clearCPUTeam:
+	; The CPU lost.
+	; Clear its three characters off the team.
+	ld   a, CHAR_ID_NONE
 	ldi  [hl], a
 	ldi  [hl], a
 	ld   [hl], a
-	call L1E4B40
-	jp   L1E4108
-L1E40FA: db $CD;X
-L1E40FB: db $B4;X
-L1E40FC: db $4E;X
-L1E40FD: db $D2;X
-L1E40FE: db $08;X
-L1E40FF: db $41;X
-L1E4100: db $3E;X
-L1E4101: db $01;X
-L1E4102: db $EA;X
-L1E4103: db $B1;X
-L1E4104: db $C1;X
-L1E4105: db $EA;X
-L1E4106: db $B2;X
-L1E4107: db $C1;X
-L1E4108:;J
-	ld   a, [$C1AB]
-	cp   $FF
-	jp   z, L1E4115
-	ld   a, $02
-	ld   [wTitleMenuOptId], a
-L1E4115:;J
-	ld   a, [$C1AE]
-	cp   $FF
-	jp   z, L1E4122
-	ld   a, $02
-	ld   [$C1B5], a
-L1E4122:;J
-	call L1E4E01
-	call L001F85
-	jp   c, L1E4176
-	ld   hl, $4F51
+	
+	; Draw the cross over defeated characters.
+	; This is specifically only done while the CPU picks a new set of characters,
+	; presumably because it would be annoying having the crosses cover the portraits
+	; when the player can select them.
+	call CharSel_DrawCrossOnDefeatedChars
+	jp   .chkInitialMode
+	
+.initVSMode:
+	call CharSel_IsVSRandCharEnabled	; Are *both players* randomizing their teams?
+	jp   nc, .chkInitialMode			; If not, jump
+	ld   a, $01							; Otherwise, set the autopicker flag for both
+	ld   [wCharSelRandom1P], a
+	ld   [wCharSelRandom2P], a
+	
+.chkInitialMode:
+	;
+	; Determine which mode to start with.
+	; If a player has at least the first character set when initializing
+	; the char select screen, he's considered ready (cursor frozen, blinking START).
+	;
+	; This way it works universally for Single mode, Team mode and bosses.
+	;
+	ld   a, [wCharSelP1Char0]
+	cp   CHAR_ID_NONE					; Is the first character empty?
+	jp   z, chkInitialModeP2			; If so, skip
+	ld   a, CHARSEL_MODE_READY			; Otherwise, skip to the next mode for P1
+	ld   [wCharSelP1CursorMode], a
+chkInitialModeP2:
+	ld   a, [wCharSelP2Char0]			; Same as above, for P2
+	cp   CHAR_ID_NONE
+	jp   z, .drawBG
+	ld   a, CHARSEL_MODE_READY
+	ld   [wCharSelP2CursorMode], a
+	
+.drawBG:
+	;
+	; Draw the initial tilemap.
+	;
+
+	; Draw character portraits
+	call CharSel_DrawUnlockedChars
+	
+	call IsInTeamMode		; Are we in Team mode?
+	jp   c, .drawBG_Team	; If so, jump
+;--
+.drawBG_Single:
+
+	ld   hl, TextDef_CharSel_SingleTitle
 	call TextPrinter_Instant
-	ld   hl, $99E1
-	ld   c, $EC
-	call L1E49DF
-	ld   hl, $99F1
-	ld   c, $EC
-	call L1E49DF
-	ld   a, [$C1AB]
-	cp   $FF
-	jp   z, L1E415A
-	ld   de, $8F80
-	ld   hl, $99E2
-	ld   c, $F8
-	call L1E4AF1
-	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
-	call L1E4BFD
-L1E415A:;J
-	ld   a, [$C1AE]
-	cp   $FF
-	jp   z, L1E427A
+	
+	;
+	; Draw the placeholders for the icons of selected characters at the bottom of the screen.
+	; In single mode, draw one for each player.
+	;
+	
+	; 1P side, leftmost
+	ld   hl, BG_CHARSEL_P1ICON0		; Tilemap ptr
+	ld   c, TILE_CHARSEL_ICONEMPTY1	; Initial tile ID
+	call CharSel_DrawEmptyIcon
+	; 2P side, rightmost
+	ld   hl, BG_CHARSEL_P2ICON0		; Tilemap ptr
+	ld   c, TILE_CHARSEL_ICONEMPTY1	; Initial tile ID
+	call CharSel_DrawEmptyIcon
+	
+.singleChkIconP1:
+
+	ld   a, [wCharSelP1Char0]
+	cp   CHAR_ID_NONE			; Has P1 the first character selected?
+	jp   z, .singleChkIconP2	; If not, skip
+	
+	; Otherwise, draw the character icon
+	ld   de, $8F80					; Where to load GFX
+	ld   hl, $99E2					; Top-right corner of icon in tilemap
+	ld   c, TILE_CHARSEL_P1ICON0	; Starting tile ID 
+	call CharSel_DrawP1CharIcon
+	; And print its name
+	ld   de, wOBJInfo_Pl1			; 1P side
+	call CharSel_PrintCharName
+	
+.singleChkIconP2:
+	ld   a, [wCharSelP2Char0]
+	cp   CHAR_ID_NONE			; Has P2 the first character selected?
+	jp   z, .initOBJ				; If not, skip
+	
+	; Otherwise, draw the character icon
 	ld   de, $8FC0
 	ld   hl, $99F1
-	ld   c, $FC
-	call L1E4AF9
-	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
-	call L1E4BFD
-	jp   L1E427A
-L1E4176:;J
-	ld   hl, $4F62
+	ld   c, TILE_CHARSEL_P2ICON0
+	call CharSel_DrawP2CharIcon
+	; And print its name
+	ld   de, wOBJInfo_Pl2		;2P side
+	call CharSel_PrintCharName
+	jp   .initOBJ
+;--
+.drawBG_Team:
+	ld   hl, TextDef_CharSel_TeamTitle
 	call TextPrinter_Instant
-	ld   hl, $99E1
-	ld   c, $EC
-	call L1E49DF
+	
+	;
+	; Draw the placeholders for the icons of selected characters at the bottom of the screen.
+	; In team mode, draw either one or three icon slots for each player.
+	;
+	
+.team1PDraw:
+	;
+	; 1P SIDE
+	;
+	
+	; The first placeholder is always drawn
+	ld   hl, BG_CHARSEL_P1ICON0	; 1P side, leftmost	
+	ld   c, TILE_CHARSEL_ICONEMPTY1
+	call CharSel_DrawEmptyIcon
+	
+	; Don't draw the two other placeholders if we're in a boss round.
+	; No "boss rounds" in VS mode
 	ld   a, [wPlayMode]
-	bit  1, a
-	jp   nz, L1E41A0
-	ld   a, [wUnknown_C165]
-	or   a
-	jp   z, L1E41A0
-L1E4193: db $FA;X
-L1E4194: db $7F;X
-L1E4195: db $C1;X
-L1E4196: db $FE;X
-L1E4197: db $0F;X
-L1E4198: db $CA;X
-L1E4199: db $B0;X
-L1E419A: db $41;X
-L1E419B: db $FE;X
-L1E419C: db $10;X
-L1E419D: db $CA;X
-L1E419E: db $B0;X
-L1E419F: db $41;X
-L1E41A0:;J
-	ld   hl, $99E3
-	ld   c, $F0
-	call L1E49DF
-	ld   hl, $99E5
-	ld   c, $F4
-	call L1E49DF
-	ld   hl, $99F1
-	ld   c, $EC
-	call L1E49DF
-	ld   a, [wPlayMode]
-	bit  1, a
-	jp   nz, L1E41D4
-	ld   a, [wUnknown_C165]
-	or   a
-	jp   nz, L1E41D4
+	bit  MODEB_VS, a			; Playing in VS mode?
+	jp   nz, .team1PDrawEmpty	; If so, jump
+	; 2P should be the active player
+	ld   a, [wJoyActivePl]
+	or   a						; Are we playing on the 1P side? (wJoyActivePl == ACTIVE_CTRL_PL1)
+	jp   z, .team1PDrawEmpty	; If so, jump
+	
+	; Round sequence check
 	ld   a, [wRoundSeqId]
-	cp   $0F
-	jp   z, L1E41E4
-	cp   $10
-	jp   z, L1E41E4
-L1E41D4:
-	ld   hl, $99EF
-	ld   c, $F0
-	call L1E49DF
-	ld   hl, $99ED
-	ld   c, $F4
-	call L1E49DF
-L1E41E4:
-	ld   a, [$C1AB]
-	cp   $FF
-	jp   z, L1E422F
-	ld   de, $8F80
-	ld   hl, $99E2
-	ld   c, $F8
-	call L1E4AF1
-	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
-	call L1E4BFD
-	ld   a, [$C1AC]
-	cp   $FF
-	jp   z, L1E422F
+	cp   STAGE_KAGURA			; Fighting Kagura next?
+	jp   z, .team2PDraw			; If so, skip
+	cp   STAGE_GOENITZ			; Fighting Goenitz next?
+	jp   z, .team2PDraw			; If so, skip
+.team1PDrawEmpty:
+	; Draw second and third placeholder
+	ld   hl, BG_CHARSEL_P1ICON1
+	ld   c, TILE_CHARSEL_ICONEMPTY2
+	call CharSel_DrawEmptyIcon
+	ld   hl, BG_CHARSEL_P1ICON2
+	ld   c, TILE_CHARSEL_ICONEMPTY3
+	call CharSel_DrawEmptyIcon
+	
+.team2PDraw:
+	;
+	; Do the same for the
+	; 2P SIDE
+	;
+	
+	; The first placeholder is always drawn
+	ld   hl, BG_CHARSEL_P2ICON0	; 2P side, rightmost	
+	ld   c, TILE_CHARSEL_ICONEMPTY1		
+	call CharSel_DrawEmptyIcon
+	
+	; Don't draw the two other placeholders if we're in a boss round.
+	; No "boss rounds" in VS mode
+	ld   a, [wPlayMode]
+	bit  MODEB_VS, a			; Playing in VS mode?
+	jp   nz, .team2PDrawEmpty	; If so, jump
+	; 1P should be the active player
+	ld   a, [wJoyActivePl]
+	or   a						; Are we playing on the 1P side? (wJoyActivePl == ACTIVE_CTRL_PL1)
+	jp   nz, .team2PDrawEmpty	; If *not*, jump
+	
+	; Round sequence check
+	ld   a, [wRoundSeqId]
+	cp   STAGE_KAGURA			; Fighting Kagura next?
+	jp   z, .fillSelChars1P		; If so, skip
+	cp   STAGE_GOENITZ			; Fighting Goenitz next?
+	jp   z, .fillSelChars1P		; If so, skip
+.team2PDrawEmpty:
+	; Draw second and third placeholder
+	ld   hl, BG_CHARSEL_P2ICON1
+	ld   c, TILE_CHARSEL_ICONEMPTY2
+	call CharSel_DrawEmptyIcon
+	ld   hl, BG_CHARSEL_P2ICON2
+	ld   c, TILE_CHARSEL_ICONEMPTY3
+	call CharSel_DrawEmptyIcon
+	
+.fillSelChars1P:
+
+	;
+	; The placeholder numeric icons are written.
+	; Now replace them, in order, with the icons of the actual selected characters.
+	;
+	; The character names are also written, with only the last one remaining
+	; as they overwrite each other.
+	;
+	
+	ld   a, [wCharSelP1Char0]
+	cp   CHAR_ID_NONE				; Is there a character on the first slot?
+	jp   z, .fillSelChars2P			; If not, skip
+	
+	; Because the player 1 icons are X flipped, the BG_CHARSEL_P1ICON* are offset by 1
+	; to point to the top-right tile of the icon. See also: Char_DrawIconFlipX
+	
+	; Set the icon in slot 1
+	ld   de, $8F80					; Where to load the GFX
+	ld   hl, BG_CHARSEL_P1ICON0+1	; Top-right corner of icon in tilemap
+	ld   c, TILE_CHARSEL_P1ICON0	; Tile ID of DE
+	call CharSel_DrawP1CharIcon
+	; Write the character name
+	ld   de, wOBJInfo_Pl1			; P1 side
+	call CharSel_PrintCharName
+	
+	; Player 1 - Icon 2
+	ld   a, [wCharSelP1Char1]
+	cp   CHAR_ID_NONE
+	jp   z, .fillSelChars2P	
 	ld   de, $91F0
-	ld   hl, $99E4
-	ld   c, $1F
-	call L1E4AF1
-	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
-	call L1E4BFD
-	ld   a, [$C1AD]
-	cp   $FF
-	jp   z, L1E422F
+	ld   hl, BG_CHARSEL_P1ICON1+1
+	ld   c, TILE_CHARSEL_P1ICON1
+	call CharSel_DrawP1CharIcon
+	ld   de, wOBJInfo_Pl1
+	call CharSel_PrintCharName
+	
+	; Player 1 - Icon 3
+	ld   a, [wCharSelP1Char2]
+	cp   CHAR_ID_NONE
+	jp   z, .fillSelChars2P
 	ld   de, $9230
-	ld   hl, $99E6
-	ld   c, $23
-	call L1E4AF1
-	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
-	call L1E4BFD
-L1E422F:;J
-	ld   a, [$C1AE]
-	cp   $FF
-	jp   z, L1E427A
+	ld   hl, BG_CHARSEL_P1ICON2+1
+	ld   c, TILE_CHARSEL_P1ICON2
+	call CharSel_DrawP1CharIcon
+	ld   de, wOBJInfo_Pl1
+	call CharSel_PrintCharName
+	
+.fillSelChars2P:
+
+	; Player 2 - Icon 1
+	ld   a, [wCharSelP2Char0]
+	cp   CHAR_ID_NONE
+	jp   z, .initDefaultNames
 	ld   de, $8FC0
-	ld   hl, $99F1
+	ld   hl, BG_CHARSEL_P2ICON0
 	ld   c, $FC
-	call L1E4AF9
-	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
-	call L1E4BFD
-	ld   a, [$C1AF]
-	cp   $FF
-	jp   z, L1E427A
+	call CharSel_DrawP2CharIcon
+	ld   de, wOBJInfo_Pl2
+	call CharSel_PrintCharName
+	
+	; Player 2 - Icon 2
+	ld   a, [wCharSelP2Char1]
+	cp   CHAR_ID_NONE
+	jp   z, .initOBJ
 	ld   de, $9270
-	ld   hl, $99EF
-	ld   c, $27
-	call L1E4AF9
-	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
-	call L1E4BFD
-	ld   a, [$C1B0]
-	cp   $FF
-	jp   z, L1E427A
+	ld   hl, BG_CHARSEL_P2ICON1
+	ld   c, TILE_CHARSEL_P2ICON1
+	call CharSel_DrawP2CharIcon
+	ld   de, wOBJInfo_Pl2
+	call CharSel_PrintCharName
+	
+	; Player 2 - Icon 3
+	ld   a, [wCharSelP2Char2]
+	cp   CHAR_ID_NONE
+	jp   z, .initOBJ
 	ld   de, $92B0
-	ld   hl, $99ED
-	ld   c, $2B
-	call L1E4AF9
-	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
-	call L1E4BFD
-L1E427A:;J
+	ld   hl, BG_CHARSEL_P2ICON2
+	ld   c, TILE_CHARSEL_P2ICON2
+	call CharSel_DrawP2CharIcon
+	ld   de, wOBJInfo_Pl2
+	call CharSel_PrintCharName
+	
+.initDefaultNames:
+	; NOTE: In KOF95, before .initOBJ there was code to write the default character names
+	;       when no characters are selected yet.
+	;       The removal of this code means that CharSel_Select_DoCtrl_NoAction gets to do 
+	;       it every frame (which didn't exist in 95)
+	
+;--
+.initOBJ:
+
+	;
+	; Set the initial sprite mappings for the cursors
+	;
+	
 	call ClearOBJInfo
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   de, L1E60E6
+	
+.cursor_1P:
+	;
+	; Player 1 Cursor
+	;
+	
+	; Initialize the sprite
+	ld   hl, wOBJInfo_Pl1
+	ld   de, OBJInfoInit_CharSel_Cursor
 	call OBJLstS_InitFrom
+	
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset
-	ld   de, $D6A7
+	ld   de, wOBJInfo_Pl1+iOBJInfo_CharSel_CursorOBJId
+	
+	; Set the correct sprites for the normal/wide versions
 	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
-	bit  7, a
-	jp   nz, L1E429F
-	ld   a, $00
+	bit  PSB_CPU, a			; Is this character a CPU?
+	jp   nz, .cursorCPU_1P	; If so, jump
+	
+.cursorPl_1P:
+	; Use this as current 1P cursor and when moving on a normal portrait
+	ld   a, CHARSEL_OBJ_CURSOR1P
+	ld   [hl], a	; Save to iOBJInfo_OBJLstPtrTblOffset
+	ld   [de], a	; Save to iOBJInfo_CharSel_CursorOBJId
+	inc  de
+	; Use the ptr table entry right after when moving on a wide portrait
+	add  a, CHARSEL_OBJ_CURSOR1PWIDE - CHARSEL_OBJ_CURSOR1P
+	ld   [de], a	; Save to iOBJInfo_CharSel_CursorWideOBJId
+	jp   .cursorRefresh_1P
+.cursorCPU_1P:
+	; Cursor for the CPU, regardless of the player having control or not
+	ld   a, CHARSEL_OBJ_CURSORCPU1P
 	ld   [hl], a
 	ld   [de], a
 	inc  de
-	add  a, $04
+	add  a, CHARSEL_OBJ_CURSORCPU1PWIDE - CHARSEL_OBJ_CURSORCPU1P
 	ld   [de], a
-	jp   L1E42A7
-L1E429F:;J
-	ld   a, $10
-	ld   [hl], a
-	ld   [de], a
-	inc  de
-	add  a, $04
-	ld   [de], a
-L1E42A7:;J
-	ld   a, [$C1A9]
-	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
-	call L1E4B99
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	ld   de, L1E60E6
+	
+.cursorRefresh_1P:
+	; Refresh the cursor to set its sprite and coords
+	ld   a, [wCharSelP1CursorPos]
+	ld   de, wOBJInfo_Pl1
+	call CharSel_RefreshCursor
+	
+.cursor_2P:
+	;
+	; Player 2 Cursor
+	;
+	; Do the same thing, but for player 2
+	
+	; Initialize the sprite
+	ld   hl, wOBJInfo_Pl2
+	ld   de, OBJInfoInit_CharSel_Cursor
 	call OBJLstS_InitFrom
+	
+	; 2P cursor uses its own palette.
+	; This allows unique flashing speed for both players.
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstFlags
-	ld   [hl], $10
+	ld   [hl], SPR_OBP1
+	
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffset
-	ld   de, $D6E7
+	ld   de, wOBJInfo_Pl2+iOBJInfo_CharSel_CursorOBJId
+	
+	; Set the correct sprites for the normal/wide versions
 	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
-	bit  7, a
-	jp   nz, L1E42D7
-L1E42CC: db $3E;X
-L1E42CD: db $08;X
-L1E42CE: db $77;X
-L1E42CF: db $12;X
-L1E42D0: db $13;X
-L1E42D1: db $C6;X
-L1E42D2: db $04;X
-L1E42D3: db $12;X
-L1E42D4: db $C3;X
-L1E42D5: db $DF;X
-L1E42D6: db $42;X
-L1E42D7:;J
-	ld   a, $18
+	bit  PSB_CPU, a			; Is this character a CPU?
+	jp   nz, .cursorCPU_2P	; If so, jump
+	
+.cursorPl_2P:
+	; Use this as current 2P cursor and when moving on a normal portrait
+	ld   a, CHARSEL_OBJ_CURSOR2P
+	ld   [hl], a	; Save to iOBJInfo_OBJLstPtrTblOffset
+	ld   [de], a	; Save to iOBJInfo_CharSel_CursorOBJId
+	inc  de
+	; Use the ptr table entry right after when moving on a wide portrait
+	add  a, CHARSEL_OBJ_CURSOR2PWIDE - CHARSEL_OBJ_CURSOR2P
+	ld   [de], a	; Save to iOBJInfo_CharSel_CursorWideOBJId
+	jp   .cursorRefresh_2P
+.cursorCPU_2P:
+	; Cursor for the CPU, regardless of the player having control or not
+	ld   a, CHARSEL_OBJ_CURSORCPU2P
 	ld   [hl], a
 	ld   [de], a
 	inc  de
-	add  a, $04
+	add  a, CHARSEL_OBJ_CURSORCPU2PWIDE - CHARSEL_OBJ_CURSORCPU2P
 	ld   [de], a
-	ld   a, [$C1AA]
-	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
-	call L1E4B99
+	
+.cursorRefresh_2P:
+	; Refresh the cursor to set its sprite and coords
+	ld   a, [wCharSelP2CursorPos]
+	ld   de, wOBJInfo_Pl2
+	call CharSel_RefreshCursor
+	
+	;
+	; Set the sprite mappings for the three tile flip animations.
+	; Each of them takes its own wOBJInfo slot, and all are hidden by default.
+	;
+	; All of these tile flipping anims use the same exact sprite mapping, but
+	; with different Tile ID base values.
+	; As a result, the graphics for the tile flipping (stored in GFXLZ_CharSel_OBJ)
+	; have to all be stored in the same order.
+	;
+	
+	; IORI <-> IORI'
 	ld   hl, wOBJInfo2+iOBJInfo_Status
-	ld   de, L1E60E6
-	call OBJLstS_InitFrom
-	ld   hl, wOBJInfo2+iOBJInfo_Status
-	ld   [hl], $00
-	ld   hl, wOBJInfo2+iOBJInfo_X
-	ld   [hl], $78
-	ld   hl, wOBJInfo2+iOBJInfo_Y
-	ld   [hl], $00
-	ld   hl, $D70D
+	ld   de, OBJInfoInit_CharSel_Cursor
+	call OBJLstS_InitFrom					; Copy default settings from Cursor sprite mapping
+	ld   hl, wOBJInfo2+iOBJInfo_Status		; Hide sprite
+	ld   [hl], $00							
+	ld   hl, wOBJInfo2+iOBJInfo_X			; Set X position -- over Iori's portrait
+	ld   [hl], $78							
+	ld   hl, wOBJInfo2+iOBJInfo_Y			; Set Y position -- over Iori's portrait
+	ld   [hl], $00							
+	ld   hl, wOBJInfo2+iOBJInfo_TileIDBase	; Add $0E to every tile ID
 	ld   [hl], $0E
-	ld   hl, $D711
-	ld   [hl], $EB
+	ld   hl, wOBJInfo2+iOBJInfo_OBJLstPtrTbl_Low	; Use tile flip sprite mapping
+	ld   [hl], LOW(OBJLstPtrTable_CharSel_Flip)
 	inc  hl
-	ld   [hl], $61
+	ld   [hl], HIGH(OBJLstPtrTable_CharSel_Flip)
+	
+	; LEONA <-> LEONA'
 	ld   hl, wOBJInfo3+iOBJInfo_Status
-	ld   de, L1E60E6
+	ld   de, OBJInfoInit_CharSel_Cursor
 	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo3+iOBJInfo_Status
 	ld   [hl], $00
@@ -378,6964 +602,2954 @@ L1E42D7:;J
 	ld   [hl], $78
 	ld   hl, wOBJInfo3+iOBJInfo_Y
 	ld   [hl], $30
-	ld   hl, $D74D
+	ld   hl, wOBJInfo3+iOBJInfo_TileIDBase
 	ld   [hl], $2A
-	ld   hl, $D751
-	ld   [hl], $EB
+	ld   hl, wOBJInfo3+iOBJInfo_OBJLstPtrTbl_Low
+	ld   [hl], LOW(OBJLstPtrTable_CharSel_Flip)
 	inc  hl
-	ld   [hl], $61
+	ld   [hl], HIGH(OBJLstPtrTable_CharSel_Flip)
+	
+	; CHIZURU <-> KAGURA
 	ld   hl, wOBJInfo4+iOBJInfo_Status
-	ld   de, L1E60E6
+	ld   de, OBJInfoInit_CharSel_Cursor
 	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo4+iOBJInfo_Status
 	ld   [hl], $00
-	ld   hl, $D783
+	ld   hl, wOBJInfo4+iOBJInfo_X
 	ld   [hl], $18
-	ld   hl, $D785
+	ld   hl, wOBJInfo4+iOBJInfo_Y
 	ld   [hl], $30
-	ld   hl, $D78D
+	ld   hl, wOBJInfo4+iOBJInfo_TileIDBase
 	ld   [hl], $46
-	ld   hl, $D791
-	ld   [hl], $EB
+	ld   hl, wOBJInfo4+iOBJInfo_OBJLstPtrTbl_Low
+	ld   [hl], LOW(OBJLstPtrTable_CharSel_Flip)
 	inc  hl
-	ld   [hl], $61
-	call L001776
-	call L0014F9
+	ld   [hl], HIGH(OBJLstPtrTable_CharSel_Flip)
+	
+	
+	call Pl_Unknown_InitBeforeRound
+	call Serial_DoHandshake
+	
+	;
+	; In VS mode, $C166 = Rand & $03
+	;
 	ld   a, [wPlayMode]
-	bit  1, a
-	jp   z, L1E436D
-L1E4365: db $CD;X
-L1E4366: db $70;X
-L1E4367: db $11;X
-L1E4368: db $E6;X
-L1E4369: db $03;X
-L1E436A: db $EA;X
-L1E436B: db $66;X
-L1E436C: db $C1;X
-L1E436D:;J
-	ld   a, $C7
-	rst  $18
+	bit  MODEB_VS, a	; Playing in VS mode? 
+	jp   z, .initEnd		; If not, skip
+	call Rand
+	and  a, $03
+	ld   [$C166], a
+	
+.initEnd:
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
 	ei
+	
 	call Task_PassControl_NoDelay
 	call Task_PassControl_NoDelay
+	; Set DMG palette
 	ld   a, $74
 	ldh  [rOBP0], a
 	ld   a, $74
 	ldh  [rOBP1], a
 	ld   a, $1B
 	ldh  [rBGP], a
-	ld   a, $81
+	; Play character select BGM
+	ld   a, BGM_ROULETTE
 	call HomeCall_Sound_ReqPlayExId_Stub
 	call Task_PassControl_NoDelay
-L1E438B:;J
+	
+.mainLoop:
 	call JoyKeys_DoCursorDelayTimer
-	call L1E43C2
-	call L1E43CE
-	ld   a, [wTitleMenuOptId]
-	cp   $04
-	jp   nz, L1E43A7
-	ld   a, [$C1B5]
-	cp   $04
-	jp   nz, L1E43A7
-	jp   L1E43AD
-L1E43A7:;J
+	call CharSel_DoMode1P
+	call CharSel_DoMode2P
+	
+	; Unless both players have confirmed their characters, continue looping
+	ld   a, [wCharSelP1CursorMode]
+	cp   CHARSEL_MODE_CONFIRMED		; Did player 1 confirm their character(s)?
+	jp   nz, .noEnd					; If not, jump
+	ld   a, [wCharSelP2CursorMode]
+	cp   CHARSEL_MODE_CONFIRMED		; Did player 2 confirm their character(s)?
+	jp   nz, .noEnd					; If not, jump
+	jp   .end						; Otherwise, we're done
+.noEnd:
 	call Task_PassControl_NoDelay
-	jp   L1E438B
-L1E43AD:;J
+	jp   .mainLoop
+.end:
+
+	; Wait for $3C frames before switching
 	ld   b, $3C
-L1E43AF:;J
+.endDelayLoop:
 	call Task_PassControl_NoDelay
 	dec  b
-	jp   nz, L1E43AF
-	call L001F85
-	jp   nc, L00179D
-	ld   b, $1E
-	ld   hl, $626E
+	jp   nz, .endDelayLoop
+	
+	; 
+	; If we aren't in team mode, gameplay can start right away.
+	; Otherwise, we've still got to choose the team order.
+	;
+	call IsInTeamMode	; Are we in team mode?
+	jp   nc, L00179D	; If not, jump
+	ld   b, BANK(Module_OrdSel) ; BANK $1E
+	ld   hl, Module_OrdSel
 	rst  $00
-L1E43C2:;C
-	ld   a, $00
-	ld   [$C1B6], a
-	ld   a, [wTitleMenuOptId]
-	call L1E43DA
+; =============== CharSel_DoMode1P ===============	
+; Handles the character select mode for Player 1.
+CharSel_DoMode1P:
+	ld   a, CHARSEL_1P
+	ld   [wCharSelCurPl], a
+	ld   a, [wCharSelP1CursorMode]
+	call CharSel_DoMode
 	ret
-L1E43CE:;C
-	ld   a, $01
-	ld   [$C1B6], a
-	ld   a, [$C1B5]
-	call L1E43DA
+; =============== CharSel_DoMode2P ===============	
+; Handles the character select mode for Player 2.
+CharSel_DoMode2P:
+	ld   a, CHARSEL_2P
+	ld   [wCharSelCurPl], a
+	ld   a, [wCharSelP2CursorMode]
+	call CharSel_DoMode
 	ret
-L1E43DA:;C
-	ld   hl, $43E7
-	ld   d, $00
+; =============== CharSel_DoMode ===============
+; IN
+; - A: Mode ID
+CharSel_DoMode:
+	ld   hl, .tbl	; HL = Jump table
+	ld   d, $00		; DE = Mode ID
 	ld   e, a
-	add  hl, de
-	ld   e, [hl]
+	add  hl, de		; Index the table
+	ld   e, [hl]	; Read it out to DE
 	inc  hl
 	ld   d, [hl]
 	push de
-	pop  hl
+	pop  hl			; Move to HL and jump there
 	jp   hl
-L1E43E7: db $62
-L1E43E8: db $44
-L1E43E9: db $EE
-L1E43EA: db $43
-L1E43EB: db $ED
-L1E43EC: db $43
-L1E43ED:;I
+.tbl:
+	dw CharSel_Mode_Select
+	dw CharSel_Mode_Ready
+	dw CharSel_Mode_Confirmed
+	
+; =============== CharSel_Mode_Confirmed ===============
+; After all characters are confirmed.
+; This does nothing at all - the game uses this mode to wait until both players are 
+; in this mode before continuing.
+CharSel_Mode_Confirmed:
 	ret
-L1E43EE:;I
-	call L1E4D28
-	call L1E4D71
-	call L1E4ECD
-	jp   c, L1E4446
-	call L1E4EF2
-	jp   c, L1E4446
-	call L1E4EB4
-	jp   c, L1E4446
-	call L1E4B10
-	bit  7, a
-	jp   nz, L1E4446
-	bit  6, a
-	jp   nz, L1E441E
-	bit  4, a
-	jp   nz, L1E4446
-	bit  5, a
-	jp   nz, L1E442D
+	
+; =============== CharSel_Mode_Ready ===============
+; After all three characters are selected.
+CharSel_Mode_Ready:
+	call CharSel_AnimCursorPalSlow
+	call CharSel_BlinkStartText
+	
+	; Autoconfirm checks
+	call CharSelect_IsCPUOpponent		; Is the current player the CPU opponent?
+	jp   c, .confirm					; If so, autoconfirm the choice
+	call CharSelect_IsLastWinner						;
+	jp   c, .confirm					; If so, jump
+	call CharSel_IsVSRandCharEnabled	; Randomizing characters in VS mode?
+	jp   c, .confirm					; If so, there's no rerolling
+	
+	; Input checks
+	call CharSel_GetInput
+	
+	; - START or A -> Confirm selected characters
+	bit  KEYB_START, a
+	jp   nz, .confirm
+	; - SELECT -> Remove all characters from team (like in CHARSEL_MODE_SELECT)
+	bit  KEYB_SELECT, a
+	jp   nz, .removeAll
+	;
+	bit  KEYB_A, a
+	jp   nz, .confirm
+	; - B -> Remove last character from team (like in CHARSEL_MODE_SELECT)
+	bit  KEYB_B, a
+	jp   nz, .removeOne
 	ret
-L1E441E:;J
-	call L1E4D79
-	call L1E4947
-	call L1E4947
-	call L1E4947
-	jp   L1E4433
-L1E442D:;J
-	call L1E4D79
-	call L1E4947
-L1E4433:;J
-	ld   a, [$C1B6]
-	or   a
-	jp   nz, L1E4440
-	ld   a, $00
-	ld   [wTitleMenuOptId], a
+	
+; =============== .removeAll ===============
+.removeAll
+	; Remove all three characters from the team.
+	call CharSel_HideStartText	; For changing mode
+	call CharSel_RemoveChar
+	call CharSel_RemoveChar
+	call CharSel_RemoveChar
+	jp   .switchToSelectMode
+	
+; =============== .removeOne ===============
+.removeOne:
+	; Remove the third character from the team
+	call CharSel_HideStartText	; For changing mode
+	call CharSel_RemoveChar
+	
+; =============== .switchToSelectMode ===============
+.switchToSelectMode:
+	; Enable controllable cursor for current player
+	ld   a, [wCharSelCurPl]
+	or   a					; Currently handling player 1?
+	jp   nz, .selectP2		; If not, jump
+.selectP1:
+	ld   a, CHARSEL_MODE_SELECT
+	ld   [wCharSelP1CursorMode], a
 	ret
-L1E4440: db $3E;X
-L1E4441: db $00;X
-L1E4442: db $EA;X
-L1E4443: db $B5;X
-L1E4444: db $C1;X
-L1E4445: db $C9;X
-L1E4446:;J
-	call L1E4D79
-	call L1E4DB5
-	call L1E4DC8
-	ld   a, [$C1B6]
-	or   a
-	jp   nz, L1E445C
+.selectP2:
+	ld   a, CHARSEL_MODE_SELECT
+	ld   [wCharSelP2CursorMode], a
+	ret
+	
+; =============== .confirm ===============
+.confirm:
+	; Disable controls for current player by switching to the next mode.
+	call CharSel_HideStartText
+	call CharSel_HideCursor
+	call CharSel_SetPlInfo
+	; Switch for the current player
+	ld   a, [wCharSelCurPl]
+	or   a					
+	jp   nz, .confirmPl2
+.confirmPl1:
 	ld   a, $04
-	ld   [wTitleMenuOptId], a
+	ld   [wCharSelP1CursorMode], a
 	ret
-L1E445C:;J
+.confirmPl2:
 	ld   a, $04
-	ld   [$C1B5], a
+	ld   [wCharSelP2CursorMode], a
 	ret
-L1E4462:;I
-	call L1E4785
-	call L1E4D1E
-	ret  z
-	ld   a, [$C1B6]
-	or   a
-	jp   nz, L1E447A
-	ld   a, [$C1B1]
-	or   a
-	jp   z, L1E4488
-L1E4477: db $C3;X
-L1E4478: db $81;X
-L1E4479: db $44;X
-L1E447A:;J
-	ld   a, [$C1B2]
-	or   a
-	jp   z, L1E4488
-	call L1E4549
-	jp   c, L1E44F4
+	
+; =============== CharSel_Mode_Select ===============
+; Initial mode when characters are selectable.
+CharSel_Mode_Select:
+	call CharSel_AnimPortraitFlip
+	call CharSel_AnimCursorPalFast
+	ret  z							; Is the cursor visible? If not, return
+	
+	;
+	; Detect if we're randomizing/autopicking characters
+	;
+	ld   a, [wCharSelCurPl]
+	or   a						; Are we handling player 1? (== CHARSEL_1P)
+	jp   nz, .pl2				; If not, jump
+.pl1:
+	ld   a, [wCharSelRandom1P]
+	or   a						; Randomizing 1P characters?
+	jp   z, .doCtrl				; If not, jump
+	jp   .randomPick
+.pl2:
+	ld   a, [wCharSelRandom2P]
+	or   a						; Randomizing 2P characters?
+	jp   z, .doCtrl				; If not, jump
+.randomPick:	
+	call CharSel_RandomPick			; Randomize selected character
+	jp   c, CharSel_Select_DoCtrl_A	; Signaled to add it to the team? If so, jump
 	ret
-L1E4488:;J
-	call L1E4B10
-	bit  7, b
-	jp   nz, L1E44CA
-	bit  6, a
-	jp   nz, L1E44B7
-	bit  4, a
-	jp   nz, L1E44F4
-	bit  3, b
-	jp   nz, L1E4513
-	bit  2, b
-	jp   nz, L1E4519
-	bit  1, b
-	jp   nz, L1E451F
-	bit  0, b
-	jp   nz, L1E4525
-	bit  5, a
-	jp   nz, L1E450F
-	call L1E452E
+	
+.doCtrl:
+	call CharSel_GetInput
+	; Input list:
+
+	; START -> Flips the selected tile, if possible
+	; START + B -> Enable autopicker
+	bit  KEYB_START, b						; Holding START?
+	jp   nz, CharSel_Select_DoCtrl_Start	; If so, jump
+	
+	; SELECT -> Removes all selected characters
+	;           If there are none, returns to the title screen.
+	bit  KEYB_SELECT, a						; Pressed SELECT?
+	jp   nz, CharSel_Select_DoCtrl_Select	; If so, jump
+	
+	; A -> Selects a character
+	bit  KEYB_A, a							; Pressed A?
+	jp   nz, CharSel_Select_DoCtrl_A		; If so, jump
+	
+	; Directional keys -> Move cursor
+	bit  KEYB_DOWN, b						; Holding down?
+	jp   nz, CharSel_Select_DoCtrl_Down		; If so, jump
+	bit  KEYB_UP, b							; Holding up?
+	jp   nz, CharSel_Select_DoCtrl_Up		; If so, jump
+	bit  KEYB_LEFT, b						; Holding left?
+	jp   nz, CharSel_Select_DoCtrl_Left		; If so, jump
+	bit  KEYB_RIGHT, b						; Holding right?
+	jp   nz, CharSel_Select_DoCtrl_Right	; If so, jump
+	
+	; B -> Removes the last selected character
+	bit  KEYB_B, a							; Pressed B?
+	jp   nz, CharSel_Select_DoCtrl_B		; If so, jump
+	
+	call CharSel_Select_DoCtrl_NoAction		; Why
 	ret
-L1E44B7:;J
-	call L1E4918
-	jp   c, L1E44C4
-	call L1E4947
-	call L1E4947
+	
+; =============== CharSel_Select_DoCtrl_Select ===============
+CharSel_Select_DoCtrl_Select:
+	call CharSel_CanExitToTitle		; Can we exit?
+	jp   c, .toTitle				; If so, jump
+	; Otherwise, remove all selected characters.
+	; Note that at most 2 characters can be selected in this mode.
+	call CharSel_RemoveChar
+	call CharSel_RemoveChar
 	ret
-L1E44C4:;J
-	ld   b, $1C
-	ld   hl, $4380
+.toTitle:
+	ld   b, BANK(Module_Title) ; BANK $1C
+	ld   hl, Module_Title
 	rst  $00
-L1E44CA:;J
-	bit  5, c
-	jp   nz, L1E44D3
-	call L1E4616
+	
+; =============== CharSel_Select_DoCtrl_Start ===============
+CharSel_Select_DoCtrl_Start:
+	bit  KEYB_B, c					; Holding B as well?
+	jp   nz, .chkSetRandom			; If so, try enabling the random picker
+	call CharSel_StartPortraitFlip	; Otherwise, try flipping the tile
 	ret
-L1E44D3: db $FA;X
-L1E44D4: db $63;X
-L1E44D5: db $C1;X
-L1E44D6: db $CB;X
-L1E44D7: db $4F;X
-L1E44D8: db $CA;X
-L1E44D9: db $E1;X
-L1E44DA: db $44;X
-L1E44DB: db $21;X
-L1E44DC: db $25;X
-L1E44DD: db $C0;X
-L1E44DE: db $CB;X
-L1E44DF: db $7E;X
-L1E44E0: db $C8;X
-L1E44E1: db $FA;X
-L1E44E2: db $B6;X
-L1E44E3: db $C1;X
-L1E44E4: db $B7;X
-L1E44E5: db $C2;X
-L1E44E6: db $EE;X
-L1E44E7: db $44;X
-L1E44E8: db $3E;X
-L1E44E9: db $01;X
-L1E44EA: db $EA;X
-L1E44EB: db $B1;X
-L1E44EC: db $C1;X
-L1E44ED: db $C9;X
-L1E44EE: db $3E;X
-L1E44EF: db $01;X
-L1E44F0: db $EA;X
-L1E44F1: db $B2;X
-L1E44F2: db $C1;X
-L1E44F3: db $C9;X
-L1E44F4:;J
-	call L1E49FC
-	ld   a, [$C1B3]
-	or   a
-	ret  z
-	ld   a, [$C1B6]
-	or   a
-	jp   nz, L1E4509
-	ld   a, $02
-	ld   [wTitleMenuOptId], a
-	ret
-L1E4509:;J
-	ld   a, $02
-	ld   [$C1B5], a
-	ret
-L1E450F:;J
-	call L1E4947
-	ret
-L1E4513:;J
-	call L1E47F6
-	jp   L1E4528
-L1E4519:;J
-	call L1E482E
-	jp   L1E4528
-L1E451F:;J
-	call L1E4866
-	jp   L1E4528
-L1E4525:;J
-	call L1E48B4
-L1E4528:;J
-	ld   a, $8E
-	call HomeCall_Sound_ReqPlayExId
-	ret
-L1E452E:;C
-	ld   a, [$C1B6]
-	or   a
-	jp   nz, L1E453E
-	ld   hl, $C1A9
-	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
-	jp   L1E4544
-L1E453E: db $21;X
-L1E453F: db $AA;X
-L1E4540: db $C1;X
-L1E4541: db $11;X
-L1E4542: db $C0;X
-L1E4543: db $D6;X
-L1E4544:;J
-	ld   a, [hl]
-	call L1E4B91
-	ret
-L1E4549:;C
-	ld   a, [$C1B6]
-	or   a
-	jp   nz, L1E4562
-L1E4550: db $01;X
-L1E4551: db $B7;X
-L1E4552: db $C1;X
-L1E4553: db $21;X
-L1E4554: db $A9;X
-L1E4555: db $C1;X
-L1E4556: db $11;X
-L1E4557: db $80;X
-L1E4558: db $D6;X
-L1E4559: db $CD;X
-L1E455A: db $86;X
-L1E455B: db $45;X
-L1E455C: db $DA;X
-L1E455D: db $85;X
-L1E455E: db $45;X
-L1E455F: db $C3;X
-L1E4560: db $71;X
-L1E4561: db $45;X
-L1E4562:;J
-	ld   bc, wOptionsSGBSndOptId
-	ld   hl, $C1AA
-	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
-	call L1E4586
-	jp   c, L1E4585
-	push af
-	call L1E4ECD
-	jp   c, L1E4580
-L1E4578: db $CD;X
-L1E4579: db $16;X
-L1E457A: db $46;X
-L1E457B: db $38;X
-L1E457C: db $03;X
-L1E457D: db $F1;X
-L1E457E: db $AF;X
-L1E457F: db $C9;X
-L1E4580:;J
-	pop  af
-	call L1E4B91
-	xor  a
-L1E4585:;J
-	ret
-L1E4586:;C
-	ld   a, [bc]
-	or   a
-	jp   z, L1E45BF
-	dec  a
-	ld   [bc], a
-L1E458D:;J
-	call Rand
-	push hl
-	ld   h, $00
-	ld   l, a
-	push hl
-	sla  l
-	rl   h
-	sla  l
-	rl   h
-	sla  l
-	rl   h
-	sla  l
-	rl   h
-	push hl
-	pop  bc
-	pop  hl
-	sla  l
-	rl   h
-	add  hl, bc
-	ld   a, h
-	pop  hl
-	push af
-	call L1E4902
-	jp   nc, L1E45BA
-	pop  af
-	jp   L1E458D
-L1E45BA:;J
-	pop  af
-	ld   [hl], a
-	scf
-	ccf
-	ret
-L1E45BF:;J
-	push de
-	push hl
-	call Rand
-	and  a, $1F
-	add  a, $07
-	ld   [bc], a
+.chkSetRandom:
+	;
+	; Do not enable the autopicker when playing through serial, otherwise things will desync.
+	; VS mode under the SGB is fine, since everything is handled locally.
+	;
 	ld   a, [wPlayMode]
-	bit  1, a
-	jp   nz, L1E4612
-	ld   a, [$C1B6]
-	or   a
-	jp   nz, L1E45E5
-L1E45D8: db $FA;X
-L1E45D9: db $65;X
-L1E45DA: db $C1;X
-L1E45DB: db $B7;X
-L1E45DC: db $CA;X
-L1E45DD: db $12;X
-L1E45DE: db $46;X
-L1E45DF: db $21;X
-L1E45E0: db $AB;X
-L1E45E1: db $C1;X
-L1E45E2: db $C3;X
-L1E45E3: db $EF;X
-L1E45E4: db $45;X
-L1E45E5:;J
-	ld   a, [wUnknown_C165]
-	or   a
-	jp   nz, L1E4612
-	ld   hl, $C1AE
-	ld   a, [wRoundSeqId]
-	ld   de, wRoundSeqTbl
-	add  a, e
-	jp   nc, L1E45FA
-L1E45F9: db $14;X
-L1E45FA:;J
-	ld   e, a
-	ldi  a, [hl]
-	cp   $FF
-	jp   z, L1E4609
-	inc  de
-	ldi  a, [hl]
-	cp   $FF
-	jp   z, L1E4609
-	inc  de
-L1E4609:;J
-	ld   a, [de]
-	pop  hl
-	pop  de
-	ld   [hl], a
-	call L1E4B91
-	scf
+	bit  MODEB_VS, a		; Playing in VS mode?
+	jp   z, .setRandom		; If not, jump
+	ld   hl, wMisc_C025
+	bit  MISCB_IS_SGB, [hl]	; Playing on a SGB?
+	ret  z					; If not, return
+.setRandom:
+	; Enable random picker for current player
+	ld   a, [wCharSelCurPl]
+	or   a					; Are we handling player 1?
+	jp   nz, .pl2			; If not, jump
+	ld   a, $01				; Set random for 1P
+	ld   [wCharSelRandom1P], a
+	ret  
+.pl2:
+	ld   a, $01				; Set random for 2P
+	ld   [wCharSelRandom2P], a
+	ret  
+	
+; =============== CharSel_Select_DoCtrl_A ===============	
+CharSel_Select_DoCtrl_A:
+	call CharSel_AddChar
+	
+	;
+	; When the full team is set, switch to the next mode
+	;
+	ld   a, [wCharSelTeamFull]
+	or   a						; Is the team full now?
+	ret  z						; If not, return
+	ld   a, [wCharSelCurPl]
+	or   a						; Are we handling player 1?
+	jp   nz, .ready2P			; If not, jump
+.ready1P:
+	ld   a, CHARSEL_MODE_READY
+	ld   [wCharSelP1CursorMode], a
 	ret
-L1E4612: db $E1;X
-L1E4613: db $D1;X
-L1E4614: db $37;X
-L1E4615: db $C9;X
-L1E4616:;C
-	ld   a, [wDipSwitch]
-	bit  7, a
-	jr   z, L1E465E
-	ld   a, [$C1B6]
+.ready2P:
+	ld   a, CHARSEL_MODE_READY
+	ld   [wCharSelP2CursorMode], a
+	ret
+; =============== CharSel_Select_DoCtrl_B ===============		
+CharSel_Select_DoCtrl_B:
+	call CharSel_RemoveChar
+	ret
+; =============== CharSel_Select_DoCtrl_Down ===============
+CharSel_Select_DoCtrl_Down:
+	call CharSel_MoveCursorD
+	jp   CharSel_PlayCursorMoveSFX
+; =============== CharSel_Select_DoCtrl_Up ===============
+CharSel_Select_DoCtrl_Up:
+	call CharSel_MoveCursorU
+	jp   CharSel_PlayCursorMoveSFX
+; =============== CharSel_Select_DoCtrl_Left ===============
+CharSel_Select_DoCtrl_Left:
+	call CharSel_MoveCursorL
+	jp   CharSel_PlayCursorMoveSFX
+; =============== CharSel_Select_DoCtrl_Right ===============
+CharSel_Select_DoCtrl_Right:
+	call CharSel_MoveCursorR
+	; Fall-through
+; =============== CharSel_PlayCursorMoveSFX ===============
+CharSel_PlayCursorMoveSFX:
+	ld   a, SFX_CHARCURSORMOVE
+	call HomeCall_Sound_ReqPlayExId
+	ret
+	
+; =============== CharSel_Select_DoCtrl_NoAction ===============
+; Updates the cursor OBJInfo and redraws the character name every frame without player input.
+;
+; This is a bizzare change from KOF95, which didn't need to do this.
+; The only side effect of removing this is that the character name won't be visible until
+; the cursor moves, because the game doesn't write the default player name anymore during init (unlike KOF95).
+CharSel_Select_DoCtrl_NoAction:
+	ld   a, [wCharSelCurPl]
 	or   a
-	jp   nz, L1E463D
-	ld   hl, $C1A9
+	jp   nz, .pl2
+.pl1:
+	ld   hl, wCharSelP1CursorPos
 	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   b, $00
+	jp   .refresh
+.pl2:
+	ld   hl, wCharSelP2CursorPos
+	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
+.refresh:
+	ld   a, [hl]
+	call CharSel_RefreshNameAndCursor
+	ret
+	
+; =============== CharSel_RandomPick ===============
+; Handles the automatic cursor picker.
+;
+; OUT
+; - C flag: If set, the character should be added to the team
+;           (bubbled up from CharSel_SetRandomPortrait)
+CharSel_RandomPick:
+	ld   a, [wCharSelCurPl]
+	or   a						; Currently handling player 1?
+	jp   nz, .pl2				; If not, jump
+.pl1:
+	; Randomize 1P cursor position
+	ld   bc, wCharSelRandomDelay1P
+	ld   hl, wCharSelP1CursorPos
+	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
+	call CharSel_SetRandomPortrait
+	; If it was requested to add the character, return (preserving the C flag)
+	jp   c, .ret							
+	jp   .chkRandomFlip
+.pl2:
+	; Randomize 2P cursor position
+	ld   bc, wCharSelRandomDelay2P
+	ld   hl, wCharSelP2CursorPos
+	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
+	call CharSel_SetRandomPortrait
+	; If it was requested to add the character, return (preserving the C flag)
+	jp   c, .ret
+	
+.chkRandomFlip:
+	;
+	; Try to randomly flip the current tile.
+	; This is only executed when we aren't told to select the character yet.
+	;
+	; If the tile does get flipped, there's no need to call CharSel_RefreshNameAndCursor
+	; since CharSel_StartPortraitFlip does it already.
+	;
+	push af
+		call CharSelect_IsCPUOpponent	; Is this a CPU opponent?
+		jp   c, .refresh				; If so, jump
+		; Try to flip the tile
+		call CharSel_StartPortraitFlip	; Did we manage to start the tile flip?
+		jr   c, .refresh				; If not, jump
+	pop  af
+	xor  a		; C flag clear, no select
+	ret
+	
+	.refresh:
+	pop  af
+	call CharSel_RefreshNameAndCursor
+	xor  a		; C flag clear, no select
+.ret:
+	ret
+; =============== CharSel_SetRandomPortrait ===============	
+; Randomizes the cursor position on the character select screen
+; and decides if it should be selected or not.
+;
+; IN
+; - BC: Ptr to CPU delay timer. Not applicable on user-triggered randomizer.
+; - HL: Ptr to selected portrait. The new portrait ID will be set here.
+; - DE: Ptr to cursor OBJLst
+; OUT
+; - C flag: If set, the character should be added to the team
+CharSel_SetRandomPortrait:
+	;
+	; Wait until the delay timer expires before signaling that the character should be selected.
+	;
+	ld   a, [bc]
+	or   a					; DelayTimer == 0?
+	jp   z, .setPick		; If so, jump
+	dec  a					; DelayTimer--
+	ld   [bc], a
+.genRandomPos:
+
+	;--
+	;
+	; Generate a random portrait ID
+	; A = HIGH(Rand * $12)
+	;
+	call Rand			; A = Random byte
+	push hl
+		ld   h, $00		; HL = A
+		ld   l, a
+		push hl
+REPT 4
+			sla  l		; HL *= $10
+			rl   h
+ENDR
+			push hl
+			pop  bc		; Move to BC
+		pop  hl
+		
+		sla  l			; HL = A * 2
+		rl   h
+		add  hl, bc		; Merge those (HL = A * $12)
+		ld   a, h		; Only pick the high byte (which will always be in $00-$11 range)
+	pop  hl
+	;--
+	
+	; Regenerate it if the portrait is locked 
+	push af
+		call CharSel_IsPortraitLocked	; Is this a locked character?
+		jp   nc, .setRandomPos			; If not, jump
+	pop  af
+	jp   .genRandomPos					; Otherwise, rerand
+.setRandomPos:
+	pop  af
+	ld   [hl], a			; Set selected portrait ID
+	scf
+	ccf						; C flag = 0
+	ret
+	
+.setPick:
+	push de
+		push hl
+			
+			; Generate a new random delay value identically to the init code.
+			call Rand
+			and  a, $1F
+			add  a, $07
+			ld   [bc], a
+			;--
+			
+			;
+			; If the current player is the CPU opponent, replace whatever portrait is selected
+			; with the correct value from the CPU opponent sequence.
+			;
+			; See also: CharSelect_IsCPUOpponent
+			;
+			
+			; No round sequence in VS modes
+			ld   a, [wPlayMode]
+			bit  MODEB_VS, a		; Playing in VS mode?
+			jp   nz, .noChange		; If so, skip
+			
+			; The current player must be a CPU opponent (ie: no way to control cursor movement)
+			ld   a, [wCharSelCurPl]
+			or   a					; Currently handling player 1?
+			jp   nz, .chkPl2		; If not, jump
+		.chkPl1:
+			; If the active player is 2P, 1P is the CPU opponent
+			ld   a, [wJoyActivePl]
+			or   a					; Is 1P the active player?
+			jp   z, .noChange		; If so, skip
+			ld   hl, wCharSelP1Char0
+			jp   .getSeqOffset
+		.chkPl2:
+			; If the active player is 1P, 2P is the CPU opponent
+			ld   a, [wJoyActivePl]
+			or   a					; Is 1P the active player?
+			jp   nz, .noChange		; If not, skip
+			ld   hl, wCharSelP2Char0
+		.getSeqOffset:
+			;--
+			
+			;
+			; Get the char ID off the sequence of CPU opponents.
+			;
+			; CharId = wRoundSeqTbl[wRoundSeqId + TeamPos]
+			;          Where TeamPos is the 0-based number of the first free slot found.
+			;
+			
+			; Index wRoundSeqTbl by wRoundSeqId
+			ld   a, [wRoundSeqId]	; A = SeqId
+			ld   de, wRoundSeqTbl	; DE = SeqTbl
+			add  a, e				; DE += A
+			jp   nc, .chkFreeSlot
+			inc  d 					; We never get here
+		.chkFreeSlot:
+			ld   e, a				
+
+			; Add TeamPos by incrementing DE for every filled slot
+			ldi  a, [hl]			; A = First slot, TeamSlot++
+			cp   CHAR_ID_NONE		; Is the first slot filled?
+			jp   z, .setChar		; If so, fill it
+			inc  de					; + 1
+			
+			ldi  a, [hl]			; A = Second slot, TeamSlot++
+			cp   CHAR_ID_NONE		; Is the first slot filled?
+			jp   z, .setChar		; If so, fill it
+			inc  de					; + 2
+		.setChar:
+			ld   a, [de]			; Get character ID from sequence
+		pop  hl
+	pop  de
+	
+	; Update cursor position with new CharId we just got
+	ld   [hl], a				
+	; Reload screen due to update
+	call CharSel_RefreshNameAndCursor
+	; C flag set, request char select
+	scf		
+	ret
+	
+		.noChange:
+		
+		pop  hl
+	pop  de
+	; C flag set, request char select
+	scf		
+	ret  
+	
+; =============== CharSel_StartPortraitFlip ===============
+; Attempts to start flipping the tile.
+; OUT
+; - C flag: If set, the request was denied
+CharSel_StartPortraitFlip:
+	; The characters accessible through tile flipping are all unlockables
+	ld   a, [wDipSwitch]
+	bit  DIPB_UNLOCK_OTHER, a	; Are all characters unlocked?
+	jr   z, .notDone			; If not, return
+	
+	; Use player-specific vars.
+	; Palette lines are different between players, just like with the cursors, to avoid palette conflicts.
+	ld   a, [wCharSelCurPl]
+	or   a							; Playing as 1P?
+	jp   nz, .pl2					; If not, jump
+.pl1:
+	ld   hl, wCharSelP1CursorPos	; HL = 1P Cursor position
+	ld   de, wOBJInfo_Pl1			; DE = 1P Cursor wOBJInfo
+	ld   b, $00						; B = OBJLst flags (use OBP0)
 	push de
 	push hl
-	call L1E4660
+	call CharSel_StartPortraitFlip_CheckChar
 	pop  hl
 	pop  de
-	jp   c, L1E465E
-	ld   a, $1B
+	jp   c, .notDone				; Was a portrait flip started? If not, return
+	ld   a, $1B						; Set tile flip palette
 	ldh  [rOBP0], a
-	jp   L1E4653
-L1E463D: db $21;X
-L1E463E: db $AA;X
-L1E463F: db $C1;X
-L1E4640: db $11;X
-L1E4641: db $C0;X
-L1E4642: db $D6;X
-L1E4643: db $06;X
-L1E4644: db $10;X
-L1E4645: db $D5;X
-L1E4646: db $E5;X
-L1E4647: db $CD;X
-L1E4648: db $60;X
-L1E4649: db $46;X
-L1E464A: db $E1;X
-L1E464B: db $D1;X
-L1E464C: db $DA;X
-L1E464D: db $5E;X
-L1E464E: db $46;X
-L1E464F: db $3E;X
-L1E4650: db $1B;X
-L1E4651: db $E0;X
-L1E4652: db $49;X
-L1E4653:;J
-	ld   a, [hl]
-	call L1E4B91
-	ld   a, $93
+	jp   .started
+.pl2:
+	ld   hl, wCharSelP2CursorPos	; HL = 2P Cursor position
+	ld   de, wOBJInfo_Pl2			; DE = 2P Cursor wOBJInfo
+	ld   b, SPR_OBP1				; B = OBJLst flags (use OBP1)
+	push de
+	push hl
+	call CharSel_StartPortraitFlip_CheckChar
+	pop  hl
+	pop  de
+	jp   c, .notDone				; Was a portrait flip started? If not, return
+	ld   a, $1B						; Set tile flip palette
+	ldh  [rOBP1], a
+.started:
+	; Refresh the character name with the updated one
+	ld   a, [hl]						; A = wCharSelP*CursorPos
+	call CharSel_RefreshNameAndCursor
+	; Play SFX when starting a tile flip
+	ld   a, SFX_HEAVY
 	call HomeCall_Sound_ReqPlayExId
+	xor  a	; C flag clear -- Started
+	ret
+.notDone:
+	scf		; C flag set -- Not started
+	ret
+; =============== CharSel_StartPortraitFlip_CheckChar ===============
+; Attempts to starts the portrait flip animation and sets up the updated character IDs.
+; IN
+; - HL: Ptr to cursor position
+; - DE: Ptr to cursor wOBJInfo
+; - B: OBJLst flags for tile flip
+; OUT
+; - C flag: If set, we can't do it
+CharSel_StartPortraitFlip_CheckChar:
+	; Determine what to do based on these hardcoded positions
+	ld   a, [hl]			; Read wCharSelP*CursorPos
+	cp   CHARSEL_ID_IORI	; Over Iori's position?
+	jp   z, .iori			; If so, switch between Iori and O. Iori
+	cp   CHARSEL_ID_CHIZURU	; Over Chizuru's position?
+	jp   z, .chizuru		; If so, switch between Chizuru and Kagura
+	cp   CHARSEL_ID_LEONA	; Over Leona's position?
+	jp   z, .leona			; If so, switch between Leona and O. Leona
+	; Otherwise, the tile's not flippable
+	scf	
+	ret
+; =============== mStartFlipPortrait ===============
+; Generates code to start flipping a specific portrait.
+; IN
+; - 1: Ptr to OBJInfo for tile flip
+; - 2: Normal character id (CHAR_ID_*)
+; - 3: Normal portrait id (CHARSEL_ID_*)
+; - 4: Normal tile id base
+; - 5: Alternate char id
+; - 6: Alternate character id (CHAR_ID_*)
+; - 7: Alternate portrait id (CHARSEL_ID_*)
+mStartFlipPortrait: MACRO
+
+	; Not applicable if this tile flip is in progress already.
+	push af
+		ld   a, [\1+iOBJInfo_Status]
+		bit  OSTB_VISIBLE, a		; Is the tile flip sprite visible?
+		jp   nz, .retFail			; If so, return
+	pop  af
+	
+	; Initialize common things (set data in cursor wOBJInfo, blank out portrait)
+	ld   c, LOW(\1-wOBJInfo_IoriFlip)	; C = Offset to correct wOBJInfo from wOBJInfo_IoriFlip (the first one)
+	call .initAndGetArgs	; Init things and get HL, A
+	; - HL: Ptr to wCharSelIdMapTbl entry.
+	; - A: Character ID currently selectable at this position
+	
+	
+	; Toggle between original and alterate depending on the currently active character.
+	cp   \2	; Is normal character selectable?
+	jr   z, .setAlt_\@	; If so, jump (switch to alternate)
+.setNorm_\@:
+	;
+	; Switch from alternate to normal portrait
+	;
+	
+	; Set normal character ID (ie: CHAR_ID_IORI) to wCharSelIdMapTbl entry
+	ld   [hl], \2		
+	
+	; Display and start tile flipping anim (alt to norm)
+	ld   de, \1
+	call .setFlipToNorm
+	
+	; Save in the tile flip wOBJInfo the arguments to CharSel_DrawPortrait.
+	; It will be called with these args when the new portrait gets drawn once the tile flip animation ends.
+	ld   hl, \1+iOBJInfo_CharSelFlip_PortraitId
+	ld   [hl], \3	; Portrait ID (ie: CHARSEL_ID_IORI)
+	inc  hl
+	ld   [hl], \4	; Tile ID
+	jp   .retOk
+.setAlt_\@:
+	;
+	; Switch from normal to alternate portrait
+	;
+	
+	; Set alternate character ID (ie: CHAR_ID_OIORI) to wCharSelIdMapTbl entry
+	ld   [hl], \5
+	
+	; Display and start tile flipping anim (norm to alt)
+	ld   de, \1
+	call .setFlipToAlt
+	
+	; Like the other part
+	ld   hl, \1+iOBJInfo_CharSelFlip_PortraitId
+	ld   [hl], \6	; Portrait ID (ie: CHARSEL_ID_SPEC_OIORI)
+	inc  hl
+	ld   [hl], \7	; Tile ID
+ENDM
+	
+
+.iori:
+	;                 | OBJINFO          | NORMAL                                         | ALT
+	;                 |                  | CHAR ID            PORTRAIT ID         TILE ID | CHAR ID         PORTRAIT ID             TILE ID
+	mStartFlipPortrait wOBJInfo_IoriFlip   , CHAR_ID_IORI   , CHARSEL_ID_IORI   , $2D     , CHAR_ID_OIORI , CHARSEL_ID_SPEC_OIORI , $A2
+	jp   .retOk
+.leona:
+	mStartFlipPortrait wOBJInfo_LeonaFlip  , CHAR_ID_LEONA  , CHARSEL_ID_LEONA  , $99     , CHAR_ID_OLEONA, CHARSEL_ID_SPEC_OLEONA, $AB
+	jp   .retOk	
+.chizuru:
+	mStartFlipPortrait wOBJInfo_ChizuruFlip, CHAR_ID_CHIZURU, CHARSEL_ID_CHIZURU, $75     , CHAR_ID_KAGURA, CHARSEL_ID_SPEC_KAGURA, $B4
+.retOk:
+	; Tile flip was started (C flag clear)
 	xor  a
 	ret
-L1E465E:;JR
-	scf
-	ret
-L1E4660:;C
-	ld   a, [hl]
-	cp   $05
-	jp   z, L1E4672
-	cp   $0D
-	jp   z, L1E46E4
-	cp   $11
-	jp   z, L1E46AB
-	scf
-	ret
-L1E4672:;J
-	push af
-	ld   a, [wOBJInfo2+iOBJInfo_Status]
-	bit  7, a
-	jp   nz, L1E471C
+.retFail:
+	; Error (C flag set)
 	pop  af
-	ld   c, $00
-	call L1E471F
-	cp   $0C
-	jr   z, L1E4698
-	ld   [hl], $0C
-	ld   de, wOBJInfo2+iOBJInfo_Status
-	call L1E4745
-	ld   hl, $D727
-	ld   [hl], $05
-	inc  hl
-	ld   [hl], $2D
-	jp   L1E471A
-L1E4698:;R
-	ld   [hl], $11
-	ld   de, wOBJInfo2+iOBJInfo_Status
-	call L1E4765
-	ld   hl, $D727
-	ld   [hl], $12
-	inc  hl
-	ld   [hl], $A2
-	jp   L1E471A
-L1E46AB:;J
-	push af
-	ld   a, [wOBJInfo3+iOBJInfo_Status]
-	bit  7, a
-	jp   nz, L1E471C
-	pop  af
-	ld   c, $40
-	call L1E471F
-	cp   $08
-	jr   z, L1E46D1
-	ld   [hl], $08
-	ld   de, wOBJInfo3+iOBJInfo_Status
-	call L1E4745
-	ld   hl, $D767
-	ld   [hl], $11
-	inc  hl
-	ld   [hl], $99
-	jp   L1E471A
-L1E46D1:;R
-	ld   [hl], $12
-	ld   de, wOBJInfo3+iOBJInfo_Status
-	call L1E4765
-	ld   hl, $D767
-	ld   [hl], $13
-	inc  hl
-	ld   [hl], $AB
-	jp   L1E471A
-L1E46E4:;J
-	push af
-	ld   a, [wOBJInfo4+iOBJInfo_Status]
-	bit  7, a
-	jp   nz, L1E471C
-	pop  af
-	ld   c, $80
-	call L1E471F
-	cp   $0E
-	jr   z, L1E470A
-	ld   [hl], $0E
-	ld   de, wOBJInfo4+iOBJInfo_Status
-	call L1E4745
-	ld   hl, $D7A7
-	ld   [hl], $0D
-	inc  hl
-	ld   [hl], $75
-	jp   L1E471A
-L1E470A:;R
-	ld   [hl], $13
-	ld   de, wOBJInfo4+iOBJInfo_Status
-	call L1E4765
-	ld   hl, $D7A7
-	ld   [hl], $14
-	inc  hl
-	ld   [hl], $B4
-L1E471A:;J
-	xor  a
-	ret
-L1E471C: db $F1;X
-L1E471D: db $37;X
-L1E471E: db $C9;X
-L1E471F:;C
-	ld   hl, $0000
+	scf  
+	ret 
+	
+; =============== .initAndGetArgs ===============
+; Contains the init code shared across all tile flips, and returns out needed vars.
+; IN
+; - A: Cursor position (CHARSEL_ID_*)
+; - C: OBJInfo offset (multiple of OBJINFO_SIZE)
+; - DE: Ptr to cursor wOBJInfo
+; OUT
+; - HL: Ptr to wCharSelIdMapTbl entry.
+;       Writing here will change the character you get when selecting the tile.
+; - A: Character ID currently selectable at this position
+.initAndGetArgs:
+
+	; Hide the cursor
+	ld   hl, iOBJInfo_Status
 	add  hl, de
-	ld   [hl], $00
-	ld   hl, $0029
-	add  hl, de
-	ld   [hl], c
-	call L1E4736
-	ld   hl, wCharSelIdMapTbl
-	ld   d, $00
+	ld   [hl], $00		; Clear out OST_VISIBLE flag
+	
+	; Write the offset for the flip OBJInfo to the cursor's free space
+	ld   hl, iOBJInfo_CharSel_FlipOBJInfoOffset
+	add  hl, de			; DE = Seek to offset byte
+	ld   [hl], c		; Write it
+	
+	; Blank out the portrait, since the flipping tile sprite will take its place
+	call .blankPortrait		
+	
+	; Get the character ID we get by selecting the tile (before it changes)
+	ld   hl, wCharSelIdMapTbl	; HL = Pos to ID map table
+	ld   d, $00					; DE = Cursor position
 	ld   e, a
-	add  hl, de
-	ld   a, [hl]
+	add  hl, de					; Index the table
+	ld   a, [hl]				; A = Source character ID
 	ret
-L1E4736:;C
+.blankPortrait:
+	; Save all args
 	push af
 	push bc
 	push de
 	push hl
-	ld   b, a
-	ld   c, $00
-	call L1E4E6D
+	ld   b, a		; B = Cursor position
+	ld   c, $00		; A = Base tile ID (all black tiles)
+	call CharSel_ClearPortrait
 	pop  hl
 	pop  de
 	pop  bc
 	pop  af
 	ret
-L1E4745:;C
-	ld   hl, $0000
+
+; =============== .setFlipToNorm ===============
+; Updates the tile flip OBJInfo when switching from alternate to normal.
+; IN
+; - DE: Ptr to tile flip wOBJInfo
+; - B: OBJLst flags for tile flip (coming from CharSel_StartPortraitFlip_CheckChar)
+.setFlipToNorm:
+
+	; Show the sprite mapping
+	ld   hl, iOBJInfo_Status
+	add  hl, de					; Seek to OBJInfo flags
+	ld   [hl], OST_VISIBLE		; Set visibility flag
+	
+	; Set sprite mapping flags (to use OBP1 for 2P)
+	ld   a, b					
+	ld   hl, iOBJInfo_OBJLstFlags
+	add  hl, de					; Seek to spr. map flags
+	ld   [hl], a				; Write them out
+	
+	;--
+	; The alternate-to-normal tile flip displays these frames in sequence:
+	; 4-5-6-7-0
+	;
+	; Note that the 4 and 0 overlap with the other flip animation.
+	;
+	; Start animation from 4
+	ld   hl, iOBJInfo_OBJLstPtrTblOffset
 	add  hl, de
-	ld   [hl], $80
-	ld   a, b
-	ld   hl, $0001
+	ld   [hl], 4*OBJLSTPTR_ENTRYSIZE
+
+	; End animation when 0 finishes displaying
+	ld   hl, iOBJInfo_CharSelFlip_OBJIdTarget
 	add  hl, de
-	ld   [hl], a
-	ld   hl, $0013
-	add  hl, de
-	ld   [hl], $10
-	ld   hl, $0029
-	add  hl, de
-	ld   [hl], $00
-	ld   hl, $001C
-	add  hl, de
-	ld   a, [hl]
-	dec  hl
-	ld   [hl], a
+	ld   [hl], 0*OBJLSTPTR_ENTRYSIZE
+	;--
+	
+	; Reset the anim frame counter
+	ld   hl, iOBJInfo_FrameTotal
+	add  hl, de		; Seek to iOBJInfo_FrameTotal
+	ld   a, [hl]	; Read anim speed value
+	dec  hl			; Seek back to iOBJInfo_FrameLeft
+	ld   [hl], a	; Copy it here
 	ret
-L1E4765:;C
-	ld   hl, $0000
+	
+; =============== .setFlipToAlt ===============
+; Updates the tile flip OBJInfo when switching from normal to alternate.
+; See also: .setFlipToNorm
+; IN
+; - DE: Ptr to tile flip wOBJInfo
+.setFlipToAlt:
+
+	; Show the sprite mapping
+	ld   hl, iOBJInfo_Status
+	add  hl, de					; Seek to OBJInfo flags
+	ld   [hl], OST_VISIBLE		; Set visibility flag
+	
+	; Set sprite mapping flags (to use OBP1 for 2P)
+	ld   a, b					
+	ld   hl, iOBJInfo_OBJLstFlags
+	add  hl, de					; Seek to spr. map flags
+	ld   [hl], a				; Write them out
+	
+	;--
+	; The normal-to-alt tile flip displays these frames in sequence:
+	; 0-1-2-3-4
+	;
+	; Start animation from 0
+	ld   hl, iOBJInfo_OBJLstPtrTblOffset
 	add  hl, de
-	ld   [hl], $80
-	ld   a, b
-	ld   hl, $0001
+	ld   [hl], 0*OBJLSTPTR_ENTRYSIZE
+
+	; End animation when 4 finishes displaying
+	ld   hl, iOBJInfo_CharSelFlip_OBJIdTarget
 	add  hl, de
-	ld   [hl], a
-	ld   hl, $0013
-	add  hl, de
-	ld   [hl], $00
-	ld   hl, $0029
-	add  hl, de
-	ld   [hl], $10
-	ld   hl, $001C
-	add  hl, de
-	ld   a, [hl]
-	dec  hl
-	ld   [hl], a
+	ld   [hl], 4*OBJLSTPTR_ENTRYSIZE
+	;--
+	
+	; Reset the anim frame counter
+	ld   hl, iOBJInfo_FrameTotal
+	add  hl, de		; Seek to iOBJInfo_FrameTotal
+	ld   a, [hl]	; Read anim speed value
+	dec  hl			; Seek back to iOBJInfo_FrameLeft
+	ld   [hl], a	; Copy it here
 	ret
-L1E4785:;C
-	ld   a, [$C1B6]
-	or   a
-	jp   nz, L1E4792
+	
+; =============== CharSel_AnimPortraitFlip ===============
+; Handles the animation for flipping portraits (aka tile flip).
+CharSel_AnimPortraitFlip:
+
+	;
+	; Pick the wOBJInfo for the current player cursor
+	;
+	ld   a, [wCharSelCurPl]
+	or   a						; Playing as Player 1? (== CHARSEL_1P)
+	jp   nz, .pl2				; If not, jump
+.pl1:
 	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
-	jp   L1E4795
-L1E4792:;J
+	jp   .go
+.pl2:
 	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
-L1E4795:;J
-	ld   hl, $0000
+	
+.go:
+
+	; The cursor must be hidden to do this
+	ld   hl, iOBJInfo_Status
+	add  hl, de					; Seek to the status
+	bit  OSTB_VISIBLE, [hl]		; Is the visibility flag set?
+	ret  nz						; If so, return
+	
+	; Seek to the wOBJInfo for the tile flip animation and store it to DE.
+	;
+	; Three continuous OBJInfo (slots 2,3,4) are allocated for the three different tile flips,
+	; with the value in the cursor custom area iOBJInfo_CharSel_FlipOBJInfoOffset being added to the first slot's address.
+	; DE = wOBJInfo_IoriFlip + *iOBJInfo_CharSel_FlipOBJInfoOffset
+	ld   hl, iOBJInfo_CharSel_FlipOBJInfoOffset	; Seek to offset (will be multiple of wOBJInfo size)
 	add  hl, de
-	bit  7, [hl]
-	ret  nz
-	ld   hl, $0029
-	add  hl, de
-	ld   l, [hl]
+	ld   l, [hl]					; Read out the value to HL
 	ld   h, $00
-	ld   de, wOBJInfo2+iOBJInfo_Status
-	add  hl, de
+	ld   de, wOBJInfo_IoriFlip		; DE = Ptr to first OBJInfo used for the tile flip
+	add  hl, de						; Offset it
 	push hl
-	pop  de
-	ld   hl, $0000
+	pop  de							; Move it out to DE
+	
+	; If the tile flip OBJInfo isn't visible, return
+	ld   hl, iOBJInfo_Status
 	add  hl, de
-	bit  7, [hl]
+	bit  OSTB_VISIBLE, [hl]
 	ret  z
-	ld   hl, $0013
-	add  hl, de
+	
+	;
+	; Determine if the animation is over.
+	;
+	
+	; If we aren't displaying the last sprite mapping (the target), skip
+	ld   hl, iOBJInfo_OBJLstPtrTblOffset
+	add  hl, de								; Seek to iOBJInfo_OBJLstPtrTblOffset
+	ld   a, [hl]							; A = Current Sprite mapping ID
+	ld   hl, iOBJInfo_CharSelFlip_OBJIdTarget
+	add  hl, de								; Seek to iOBJInfo_CharSelFlip_OBJIdTarget
+	cp   a, [hl]							; Does the current value match the target?
+	jp   nz, .animCont						; If not, jump
+	
+	; If there are anim. frames left, skip
+	ld   hl, iOBJInfo_FrameLeft
+	add  hl, de								; Seek to iOBJInfo_FrameLeft
 	ld   a, [hl]
-	ld   hl, $0029
-	add  hl, de
-	cp   a, [hl]
-	jp   nz, L1E47F0
-	ld   hl, $001B
-	add  hl, de
-	ld   a, [hl]
-	or   a
-	jp   nz, L1E47F0
-	ld   hl, $0027
-	add  hl, de
-	ld   b, [hl]
+	or   a									; FramesLeft == 0?
+	jp   nz, .animCont						; If not, jump
+	
+.animEnd:
+	;
+	; It's over
+	;
+	
+	; When the animation started, we blanked out the portrait.
+	; Draw the updated portrait with the args we've saved in the OBJInfo custom area.
+	ld   hl, iOBJInfo_CharSelFlip_PortraitId
+	add  hl, de								; 
+	ld   b, [hl]							; B = Portrait ID
 	inc  hl
-	ld   c, [hl]
+	ld   c, [hl]							; C = Base Tile ID
 	push de
-	call L1E4E50
+		call CharSel_DrawPortrait			; Draw the portrait
 	pop  de
-	ld   hl, $0000
-	add  hl, de
-	ld   [hl], $00
-	ld   a, [$C1B6]
-	or   a
-	jp   nz, L1E47E5
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	jp   L1E47E8
-L1E47E5: db $21;X
-L1E47E6: db $C0;X
-L1E47E7: db $D6;X
-L1E47E8:;J
-	ld   [hl], $80
-	ld   a, $A6
+	
+	; Hide the tile flip sprite mapping
+	ld   hl, iOBJInfo_Status
+	add  hl, de								; Seek to tile flip iOBJInfo_Status
+	ld   [hl], $00							; Clear out status field, hiding it
+	
+	; Display the current player cursor again
+	ld   a, [wCharSelCurPl]
+	or   a									; Playing as Player 1? (== CHARSEL_1P)
+	jp   nz, .endPl2						; If not, jump
+.endPl1:
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status	; HL = Status for 1P cursor
+	jp   .end
+.endPl2:
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status	; HL = Status for 2P cursor
+.end:
+	ld   [hl], OST_VISIBLE					; Set visibility flag
+	
+	; Play a sound effect
+	ld   a, SND_ID_26
 	call HomeCall_Sound_ReqPlayExId
 	ret
-L1E47F0:;J
+	
+.animCont:
+	; Continue animating the sprite mapping for the tile flip
 	push de
 	pop  hl
 	call OBJLstS_DoAnimTiming_Loop
 	ret
-L1E47F6:;C
-	ld   a, [$C1B6]
+	
+; =============== CharSel_MoveCursorD ===============
+; Moves the cursor for the current player down in the character select screen.
+CharSel_MoveCursorD:
+	; Pick current player args
+	ld   a, [wCharSelCurPl]
 	or   a
-	jp   nz, L1E4809
-	ld   hl, $C1A9
+	jp   nz, .pl2
+.pl1:
+	ld   hl, wCharSelP1CursorPos
 	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
-	call L1E4816
-	jp   L1E4812
-L1E4809: db $21;X
-L1E480A: db $AA;X
-L1E480B: db $C1;X
-L1E480C: db $11;X
-L1E480D: db $C0;X
-L1E480E: db $D6;X
-L1E480F: db $CD;X
-L1E4810: db $16;X
-L1E4811: db $48;X
-L1E4812:;J
-	call L1E4B91
+	call CharSel_MoveCursorPosD
+	jp   .redraw
+.pl2: 
+	ld   hl, wCharSelP2CursorPos
+	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
+	call CharSel_MoveCursorPosD
+.redraw:
+	; Refesh the cursor OBJInfo and char name for the new position
+	call CharSel_RefreshNameAndCursor
 	ret
-L1E4816:;C
-	ld   a, [hl]
-L1E4817:;J
-	add  a, $06
-	cp   $12
-	jp   c, L1E4820
-	sub  a, $12
-L1E4820:;J
+	
+; =============== CharSel_MoveCursorPosD ===============
+; Moves the specified cursor position down by 1 in the character select screen.
+; IN
+; - HL: Ptr to cursor position
+CharSel_MoveCursorPosD:
+	; The character select grid is 6x3, which is $12 slots.
+	ld   a, [hl]				; A = CursorPos
+.moveD:
+	; Move down by 1 portrait 
+	add  a, CHARSEL_GRID_W		; CursorPos += RowSize
+.chkBound:
+	; Handle the bounds check.
+	; If we moved past the last entry, wrap back to the top
+	cp   CHARSEL_GRID_SIZE		; CursorPos >= GridSize?
+	jp   c, .chkLock			; If not, skip
+	sub  a, CHARSEL_GRID_SIZE	; CursorPos -= GridSize
+.chkLock:
+	; Skip locked characters
 	push af
-	call L1E4902
-	jp   nc, L1E482B
+		call CharSel_IsPortraitLocked	; Is the cursor over a locked character?
+		jp   nc, .save					; If not, save the value back
 	pop  af
-	jp   L1E4817
-L1E482B:;J
+	jp   .moveD			; Otherwise, move down again
+.save:
 	pop  af
-	ld   [hl], a
+	ld   [hl], a		; Save back CursorPos
 	ret
-L1E482E:;C
-	ld   a, [$C1B6]
+	
+; =============== CharSel_MoveCursorU ===============
+; Moves the cursor for the current player up in the character select screen.
+; See also: CharSel_MoveCursorD
+CharSel_MoveCursorU:
+	ld   a, [wCharSelCurPl]
 	or   a
-	jp   nz, L1E4841
-	ld   hl, $C1A9
+	jp   nz, .pl2
+.pl1:
+	ld   hl, wCharSelP1CursorPos
 	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
-	call L1E484E
-	jp   L1E484A
-L1E4841: db $21;X
-L1E4842: db $AA;X
-L1E4843: db $C1;X
-L1E4844: db $11;X
-L1E4845: db $C0;X
-L1E4846: db $D6;X
-L1E4847: db $CD;X
-L1E4848: db $4E;X
-L1E4849: db $48;X
-L1E484A:;J
-	call L1E4B91
+	call CharSel_MoveCursorPosU
+	jp   .redraw
+.pl2:
+	ld   hl, wCharSelP2CursorPos
+	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
+	call CharSel_MoveCursorPosU
+.redraw:
+	call CharSel_RefreshNameAndCursor
 	ret
-L1E484E:;C
-	ld   a, [hl]
-L1E484F:;J
-	sub  a, $06
-	bit  7, a
-	jp   z, L1E4858
-	add  a, $12
-L1E4858:;J
+	
+; =============== CharSel_MoveCursorPosU ===============
+; IN
+; - HL: Ptr to cursor position
+CharSel_MoveCursorPosU:
+	ld   a, [hl]			; A = CursorPos
+.moveU:
+	; Move up by 1 portrait
+	sub  a, CHARSEL_GRID_W	; CursorPos -= RowSize
+.chkBound:
+	; Handle the bounds check.
+	; If we underflowed (could have been a "jr c"), wrap to the bottom
+	bit  7, a					; CursorPos < 0?
+	jp   z, .chkLock			; If not, skip
+	add  a, CHARSEL_GRID_SIZE	; CursorPos += GridSize
+.chkLock:
+	; Skip locked characters
 	push af
-	call L1E4902
-	jp   nc, L1E4863
+		call CharSel_IsPortraitLocked	; Is the cursor over a locked character?
+		jp   nc, .save					; If not, save the value back
 	pop  af
-	jp   L1E484F
-L1E4863:;J
+	jp   .moveU			; Otherwise, move up again
+.save:
 	pop  af
-	ld   [hl], a
+	ld   [hl], a		; Save back CursorPos
 	ret
-L1E4866:;C
-	ld   a, [$C1B6]
+	
+; =============== CharSel_MoveCursorL ===============
+; Moves the cursor for the current player left in the character select screen.
+; See also: CharSel_MoveCursorD
+CharSel_MoveCursorL:
+	ld   a, [wCharSelCurPl]
 	or   a
-	jp   nz, L1E4879
-	ld   hl, $C1A9
+	jp   nz, .pl2
+.pl1:
+	ld   hl, wCharSelP1CursorPos
 	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
-	call L1E4886
-	jp   L1E4882
-L1E4879: db $21;X
-L1E487A: db $AA;X
-L1E487B: db $C1;X
-L1E487C: db $11;X
-L1E487D: db $C0;X
-L1E487E: db $D6;X
-L1E487F: db $CD;X
-L1E4880: db $86;X
-L1E4881: db $48;X
-L1E4882:;J
-	call L1E4B91
+	call CharSel_MoveCursorPosL
+	jp   .refresh
+.pl2:
+	ld   hl, wCharSelP2CursorPos
+	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
+	call CharSel_MoveCursorPosL
+.refresh:
+	call CharSel_RefreshNameAndCursor
 	ret
-L1E4886:;C
-	ld   a, [hl]
-L1E4887:;J
-	cp   $00
-	jp   z, L1E489F
-	cp   $06
-	jp   z, L1E489F
-	cp   $0C
-	jp   z, L1E489F
-	cp   $0F
-	jp   z, L1E48A4
-	dec  a
-	jp   L1E48A6
-L1E489F:;J
-	add  a, $05
-	jp   L1E48A6
-L1E48A4:;J
-	sub  a, $02
-L1E48A6:;J
+	
+; =============== CharSel_MoveCursorPosL ===============
+; IN
+; - HL: Ptr to cursor position
+CharSel_MoveCursorPosL:
+	ld   a, [hl]			; A = CursorPos
+.moveL:
+	; Handle row wrapping
+	cp   CHARSEL_GRID_W*0	; First row
+	jp   z, .wrapH
+	cp   CHARSEL_GRID_W*1	; Second row
+	jp   z, .wrapH
+	cp   CHARSEL_GRID_W*2	; Third row
+	jp   z, .wrapH
+	
+	; Handle wide portrait special case.
+	; If we're on the right side of Mr. Karate's portrait, skip the left side when moving left.
+	cp   CHARSEL_ID_MRKARATE1
+	jp   z, .mrKarate
+	
+.moveNorm:
+	dec  a					; Otherwise, move left once
+	jp   .chkLock
+.wrapH:
+	add  a, CHARSEL_GRID_W-1	; Move to rightmost portrait in row
+	jp   .chkLock
+.mrKarate:
+	sub  a, $02				; Skip left side of portrait
+.chkLock:
+	; Skip locked characters
 	push af
-	call L1E4902
-	jp   nc, L1E48B1
+		call CharSel_IsPortraitLocked	; Is the cursor over a locked character?
+		jp   nc, .save					; If not, save the value back
 	pop  af
-	jp   L1E4887
-L1E48B1:;J
+	jp   .moveL			; Otherwise, move left again
+.save:
 	pop  af
-	ld   [hl], a
+	ld   [hl], a		; Save back CursorPos
 	ret
-L1E48B4:;C
-	ld   a, [$C1B6]
+	
+; =============== CharSel_MoveCursorR ===============
+; Moves the cursor for the current player right in the character select screen.
+; See also: CharSel_MoveCursorD
+CharSel_MoveCursorR:
+	ld   a, [wCharSelCurPl]
 	or   a
-	jp   nz, L1E48C7
-	ld   hl, $C1A9
+	jp   nz, .pl2
+.pl1:
+	ld   hl, wCharSelP1CursorPos
 	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
-	call L1E48D4
-	jp   L1E48D0
-L1E48C7: db $21;X
-L1E48C8: db $AA;X
-L1E48C9: db $C1;X
-L1E48CA: db $11;X
-L1E48CB: db $C0;X
-L1E48CC: db $D6;X
-L1E48CD: db $CD;X
-L1E48CE: db $D4;X
-L1E48CF: db $48;X
-L1E48D0:;J
-	call L1E4B91
+	call CharSel_MoveCursorPosR
+	jp   .refresh
+.pl2:
+	ld   hl, $C1AA
+	ld   de, $D6C0
+	call CharSel_MoveCursorPosR
+.refresh:
+	call CharSel_RefreshNameAndCursor
 	ret
-L1E48D4:;C
-	ld   a, [hl]
-L1E48D5:;J
-	cp   $05
-	jp   z, L1E48ED
-	cp   $0B
-	jp   z, L1E48ED
-	cp   $11
-	jp   z, L1E48ED
-	cp   $0E
-	jp   z, L1E48F2
-	inc  a
-	jp   L1E48F4
-L1E48ED:;J
-	sub  a, $05
-	jp   L1E48F4
-L1E48F2:;J
-	add  a, $02
-L1E48F4:;J
+	
+; =============== CharSel_MoveCursorPosR ===============
+; IN
+; - HL: Ptr to cursor position
+CharSel_MoveCursorPosR:
+	ld   a, [hl]		; A = CursorPos
+.moveR:
+	; Handle row wrapping
+	cp   (CHARSEL_GRID_W*1)-1	; First row
+	jp   z, .wrapH
+	cp   (CHARSEL_GRID_W*2)-1	; Second row
+	jp   z, .wrapH
+	cp   (CHARSEL_GRID_W*3)-1	; Third row
+	jp   z, .wrapH
+	
+	; Handle wide portrait special case.
+	; If we're on the left side of Mr. Karate's portrait, skip the right side when moving right.
+	cp   CHARSEL_ID_MRKARATE0
+	jp   z, .mrKarate
+	
+.moveNorm:
+	inc  a					; Otherwise, move right once
+	jp   .chkLock
+.wrapH:
+	sub  a, CHARSEL_GRID_W-1	; Move to leftmost portrait in row
+	jp   .chkLock
+.mrKarate:
+	add  a, $02			; Skip right side of portrait
+.chkLock:
+	; Skip locked characters
 	push af
-	call L1E4902
-	jp   nc, L1E48FF
+		call CharSel_IsPortraitLocked	; Is the cursor over a locked character?
+		jp   nc, .save					; If not, save the value back
 	pop  af
-	jp   L1E48D5
-L1E48FF:;J
+	jp   .moveR			; Otherwise, move right again
+.save:
 	pop  af
-	ld   [hl], a
+	ld   [hl], a		; Save back CursorPos
 	ret
-L1E4902:;C
+	
+; =============== CharSel_IsPortraitLocked ===============
+; Determines if the specified cursor is over a locked character.
+;
+; IN
+; - A: Portrait ID (cursor position)
+; OUT
+; - C flag: If set, the cursor is over a locked character
+CharSel_IsPortraitLocked:
+	; Locked characters are set during init by repacing their entries
+	; in the "PortraitID to CharID" table to CHAR_ID_NONE.
+	;
+	; Determining if a character is unlocked, therefore, only involves checking 
+	; for that value without dealing with dip switches or character ID checks.
 	push hl
-	ld   hl, wCharSelIdMapTbl
-	add  a, L
-	jp   nc, L1E490B
-L1E490A: db $24;X
-L1E490B:;J
-	ld   l, a
-	ld   a, [hl]
-	cp   $FF
-	jp   nz, L1E4915
+		ld   hl, wCharSelIdMapTbl	; HL = Mapping table
+		; Index it with the portrait ID
+		; HL += A
+		add  a, l
+		jp   nc, .noInc
+		inc  h
+	.noInc:
+		ld   l, a
+		;--
+		ld   a, [hl]			; A = Character ID
+		cp   CHAR_ID_NONE		; Is this entry CHAR_ID_NONE?
+		jp   nz, .isUnlocked	; If not, jump
+.isLocked:
 	pop  hl
-	scf
+	scf		; C flag set, locked
 	ret
-L1E4915:;J
+.isUnlocked:
 	pop  hl
-	xor  a
+	xor  a	; C flag clear, unlocked
 	ret
-L1E4918:;C
+	
+; =============== CharSel_CanExitToTitle ===============
+; Determines if it's possible to return to the title screen.
+;
+; This is NOT possible when:
+; - Playing VS mode through serial
+; - A character is selected
+; - In Single mode, at least one stage is beaten (prevents exit after a game over)
+;
+; OUT
+; - C flag: If set, the game can return to the title screen
+CharSel_CanExitToTitle:
+	; In single mode, check which round we're in
 	ld   a, [wPlayMode]
-	bit  1, a
-	jr   z, L1E4928
-L1E491F: db $21;X
-L1E4920: db $25;X
-L1E4921: db $C0;X
-L1E4922: db $CB;X
-L1E4923: db $7E;X
-L1E4924: db $28;X
-L1E4925: db $1D;X
-L1E4926: db $18;X
-L1E4927: db $07;X
-L1E4928:;R
+	bit  MODEB_VS, a		; Playing in VS mode?
+	jr   z, .chkRound		; If not, jump
+	
+	; In VS *serial* mode, don't allow exiting
+	ld   hl, wMisc_C025
+	bit  MISCB_IS_SGB, [hl]	; Running on a SGB?
+	jr   z, .no				; If not, jump
+	
+	; Skip round check, it's not applicable in VS mode
+	jr   .chkSel
+	
+.chkRound:
+	; No exit on next rounds
 	ld   a, [wRoundSeqId]
-	or   a
-	jp   nz, L1E4943
-	ld   a, [$C1B6]
-	or   a
-	jp   nz, L1E493B
-	ld   hl, $C1AB
-	jr   L1E493E
-L1E493B: db $21;X
-L1E493C: db $AE;X
-L1E493D: db $C1;X
-L1E493E:;R
-	ld   a, [hl]
-	cp   $FF
-	jr   z, L1E4945
-L1E4943:;J
-	xor  a
+	or   a					; Beaten at least one round? (not the first char select screen)
+	jp   nz, .no			; If so, jump
+.chkSel:
+
+	; Check if at least one character is selected on the current side
+	ld   a, [wCharSelCurPl]
+	or   a						; Playing as 1P?
+	jp   nz, .pl2				; If not, jump
+.pl1:
+	ld   hl, wCharSelP1Char0	; Check 1P side
+	jr   .doChk
+.pl2:
+	ld   hl, wCharSelP2Char0	; Check 2P side
+.doChk:
+	ld   a, [hl]				; Read character id
+	cp   CHAR_ID_NONE			; Is the first character slot empty?
+	jr   z, .ok					; If so, we can exit
+.no:
+	xor  a		; C flag = 0, can't exit
 	ret
-L1E4945:;R
-	scf
+.ok:
+	scf			; C flag = 1, can exit
 	ret
-L1E4947:;C
-	ld   a, [$C1B6]
-	or   a
-	jp   nz, L1E495D
-	ld   de, $C1AD
-	call L1E496A
-	jp   c, L1E4969
-	call L1E4997
-	jp   L1E4969
-L1E495D: db $11;X
-L1E495E: db $B0;X
-L1E495F: db $C1;X
-L1E4960: db $CD;X
-L1E4961: db $6A;X
-L1E4962: db $49;X
-L1E4963: db $DA;X
-L1E4964: db $69;X
-L1E4965: db $49;X
-L1E4966: db $CD;X
-L1E4967: db $BB;X
-L1E4968: db $49;X
-L1E4969:;J
+	
+; =============== CharSel_RemoveChar ===============
+; Removes the last selected character for the current player.
+CharSel_RemoveChar:
+
+	; Pick the player-specific initial address
+	ld   a, [wCharSelCurPl]
+	or   a						; Playing as 1P?
+	jp   nz, .pl2				; If so, jump
+.pl1:
+	ld   de, wCharSelP1Char2
+	call CharSel_ClearSlot		; Try to clear a slot
+	jp   c, .ret				; If nothing found, return
+	call CharSel_ClearTopIcon1P	; Otherwise, also remove the char icon
+	jp   .ret
+.pl2:
+	ld   de, wCharSelP2Char2
+	call CharSel_ClearSlot
+	jp   c, .ret
+	call CharSel_ClearTopIcon2P
+.ret:
 	ret
-L1E496A:;C
-	call L001F85
-	jp   c, L1E497B
-	ld   b, $00
-	push de
+	
+; =============== CharSel_ClearSlot ===============
+; Clears the first filled slot found, searching from highest to lowest.
+; IN
+; - DE: Ptr to third selected character
+; OUT
+; - B: Updated number of selected characters
+; - C flag: If set, no slot was found
+CharSel_ClearSlot:
+	;
+	; In single mode, there's only one slot to check.
+	;
+	call IsInTeamMode		; Are we in team mode?
+	jp   c, .team			; If so, jump
+.single:
+	ld   b, $00				; B = No characters selected
+	
+	push de					; Seek back to first character slot
 	pop  hl
+	dec  hl					; HL -= 2
 	dec  hl
-	dec  hl
-	ld   a, $FF
-	jp   L1E498D
-L1E497B:;J
-	ld   b, $02
+	
+	ld   a, CHAR_ID_NONE	; A = Comparison valye
+	jp   .chkSlot0
+	
+	;
+	; In Team mode, check all 3 characters.
+	;
+.team:
+	; Start B with the highest value, and decrement it as slot
+	ld   b, $02				; 3 characters (with 1 removed)
 	push de
-	pop  hl
-	ld   a, $FF
-	cp   a, [hl]
-	jp   nz, L1E4993
-	dec  b
-	dec  hl
-	cp   a, [hl]
-	jp   nz, L1E4993
-	dec  b
-	dec  hl
-L1E498D:;J
-	cp   a, [hl]
-	jp   nz, L1E4993
-	scf
+	pop  hl					; HL = Third team slot
+	ld   a, CHAR_ID_NONE	; A = Comparison valye
+.chkSlot2:
+	cp   a, [hl]			; Is the third character empty?
+	jp   nz, .clearSlot		; If not, clear it
+	dec  b					; RemNum--
+	dec  hl					; Seek to previous slot
+.chkSlot1:
+	cp   a, [hl]			; Is the second character empty?
+	jp   nz, .clearSlot		; If not, clear it
+	dec  b					; RemNum--
+	dec  hl					; Seek to previous slot
+.chkSlot0:
+	cp   a, [hl]			; Is the first character empty?
+	jp   nz, .clearSlot		; If not, clear it
+	; Otherwise, there's nothing to clear
+	scf						; C flag cleared, no slot found
 	ret
-L1E4993:;J
-	ld   [hl], $FF
-	xor  a
+.clearSlot:
+	ld   [hl], CHAR_ID_NONE	; Clear out slot
+	xor  a					; C flag cleared, slot found
 	ret
-L1E4997:;C
+; =============== CharSel_ClearTopIcon1P ===============
+; Clears the icon for the deselected character, replacing it with the numeric placeholder.
+; IN
+; - B: Updated number of selected characters (passed by CharSel_ClearSlot)
+CharSel_ClearTopIcon1P:
 	ld   a, b
-	cp   $01
-	jp   z, L1E49AA
-	cp   $02
-	jp   z, L1E49B2
-	ld   hl, $99E1
-	ld   c, $EC
-	jp   L1E49B7
-L1E49AA:;J
-	ld   hl, $99E3
-	ld   c, $F0
-	jp   L1E49B7
-L1E49B2:;J
-	ld   hl, $99E5
-	ld   c, $F4
-L1E49B7:;J
-	call L1E49DF
+	cp   $01			; Is there 1 selected character now (down from 2)?
+	jp   z, .blank2		; If so, jump
+	cp   $02			; Are there 2 selected characters now (down from 3)?
+	jp   z, .blank3		; If so, jump
+	; Otherwise, there are no selected characters (down from 1).
+.blank1:
+	; Blank out the icon for the first slot.
+	ld   hl, BG_CHARSEL_P1ICON0
+	ld   c, TILE_CHARSEL_ICONEMPTY1
+	jp   .go
+.blank2:
+	; Blank out the icon for the second slot.
+	ld   hl, BG_CHARSEL_P1ICON1
+	ld   c, TILE_CHARSEL_ICONEMPTY2
+	jp   .go
+.blank3:
+	; Blank out the icon for the third slot.
+	ld   hl, BG_CHARSEL_P1ICON2
+	ld   c, TILE_CHARSEL_ICONEMPTY3
+.go:
+	call CharSel_DrawEmptyIcon
 	ret
-L1E49BB: db $78;X
-L1E49BC: db $FE;X
-L1E49BD: db $01;X
-L1E49BE: db $CA;X
-L1E49BF: db $CE;X
-L1E49C0: db $49;X
-L1E49C1: db $FE;X
-L1E49C2: db $02;X
-L1E49C3: db $CA;X
-L1E49C4: db $D6;X
-L1E49C5: db $49;X
-L1E49C6: db $21;X
-L1E49C7: db $F1;X
-L1E49C8: db $99;X
-L1E49C9: db $0E;X
-L1E49CA: db $EC;X
-L1E49CB: db $C3;X
-L1E49CC: db $DB;X
-L1E49CD: db $49;X
-L1E49CE: db $21;X
-L1E49CF: db $EF;X
-L1E49D0: db $99;X
-L1E49D1: db $0E;X
-L1E49D2: db $F0;X
-L1E49D3: db $C3;X
-L1E49D4: db $DB;X
-L1E49D5: db $49;X
-L1E49D6: db $21;X
-L1E49D7: db $ED;X
-L1E49D8: db $99;X
-L1E49D9: db $0E;X
-L1E49DA: db $F4;X
-L1E49DB: db $CD;X
-L1E49DC: db $DF;X
-L1E49DD: db $49;X
-L1E49DE: db $C9;X
-L1E49DF:;JC
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L1E49DF
-	ld   a, c
-	ldi  [hl], a
+	
+; =============== CharSel_ClearTopIcon2P ===============
+; Clears the icon for the deselected character, replacing it with the numeric placeholder.
+; IN
+; - B: Updated number of selected characters	
+CharSel_ClearTopIcon2P:
+	ld   a, b
+	cp   $01			; Is there 1 selected character now (down from 2)?
+	jp   z, .blank2		; If so, jump
+	cp   $02			; Are there 2 selected characters now (down from 3)?
+	jp   z, .blank3		; If so, jump
+	; Otherwise, there are no selected characters (down from 1).
+.blank1:
+	; Blank out the icon for the first slot.
+	ld   hl, BG_CHARSEL_P2ICON0
+	ld   c, TILE_CHARSEL_ICONEMPTY1
+	jp   .go
+.blank2:
+	; Blank out the icon for the second slot.
+	ld   hl, BG_CHARSEL_P2ICON1
+	ld   c, TILE_CHARSEL_ICONEMPTY2
+	jp   .go
+.blank3:
+	; Blank out the icon for the third slot.
+	ld   hl, BG_CHARSEL_P2ICON2
+	ld   c, TILE_CHARSEL_ICONEMPTY3
+.go:
+	call CharSel_DrawEmptyIcon
+	ret
+
+; =============== CharSel_DrawEmptyIcon ===============
+; Draws an empty 2x2 square, for blank slots in the list of selected characters.
+; Used when initializing the character select screen, or when removing a selected character.
+; - HL: Ptr to tilemap
+; - C: Base tile ID (TILE_CHARSEL_ICONEMPTY*)
+;      The icon will use the four next tiles starting from this one.
+CharSel_DrawEmptyIcon:
+	mWaitForVBlankOrHBlank
+	
+	; Top left corner -> TileId
+	ld   a, c		
+	ldi  [hl], a	; BGPtr++
+	inc  a		
+	; Top right corner -> TileId+1	
+	ldd  [hl], a	; BGPtr--
 	inc  a
-	ldd  [hl], a
-	inc  a
-	ld   de, $0020
+	
+	; Move down 1 tile
+	ld   de, BG_TILECOUNT_H	; BgPtr += $20
 	add  hl, de
+	
+	; Wait for next HBlank
 	push af
-L1E49F0:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L1E49F0
+		mWaitForVBlankOrHBlank
 	pop  af
+	
+	; Bottom left corner -> TileId+2
 	ldi  [hl], a
 	inc  a
+	
+	; Bottom right corner -> TileId+3
 	ld   [hl], a
 	ret
-L1E49FC:;C
-	ld   a, $00
-	ld   [$C1B3], a
-	ld   a, [$C1B6]
+	
+; =============== CharSel_AddChar ===============
+; Adds the character the cursor is placed on to the team.
+CharSel_AddChar:
+	; Default with $00, to mark that further characters are selectable
+	ld   a, CHARSEL_TEAM_REMAIN
+	ld   [wCharSelTeamFull], a
+	
+	; Depending on the current player...
+	ld   a, [wCharSelCurPl]
 	or   a
-	jp   nz, L1E4A20
-	ld   de, $C1AB
-	ld   a, [$C1A9]
+	jp   nz, .pl2
+.pl1:
+	ld   de, wCharSelP1Char0			; DE = 1st char in 1P team
+	ld   a, [wCharSelP1CursorPos]		; C = Selected portrait id
 	ld   c, a
-	call L1E4A36
-	jp   c, L1E4A35
-	call L1E4A91
-	ld   a, $8F
+	call CharSel_AddCharToFirstFreeSlot	; Was the character added?
+	jp   c, .ret						; If not, return
+	; Otherwise, draw icon and play its specific SFX
+	call CharSel_DrawP1CharIconForNew	
+	ld   a, SFX_CHARSELECTED
 	call HomeCall_Sound_ReqPlayExId
-	jp   L1E4A35
-L1E4A20:;J
-	ld   de, $C1AE
-	ld   a, [$C1AA]
+	jp   .ret
+.pl2:
+	ld   de, wCharSelP2Char0			; DE = 1st char in 2P team
+	ld   a, [wCharSelP2CursorPos]		; C = Selected portrait id
 	ld   c, a
-	call L1E4A36
-	jp   c, L1E4A35
-	call L1E4AC1
-	ld   a, $8F
+	call CharSel_AddCharToFirstFreeSlot	; Was the character added?
+	jp   c, .ret						; If not, return
+	; Otherwise, draw icon and play its specific SFX
+	call CharSel_DrawP2CharIconForNew
+	ld   a, SFX_CHARSELECTED
 	call HomeCall_Sound_ReqPlayExId
-L1E4A35:;J
+.ret:
 	ret
-L1E4A36:;C
+	
+; =============== CharSel_AddCharToFirstFreeSlot ===============
+; Adds the specified character to the first free team slot.
+; IN
+; - DE: Ptr to first character in team
+; - C: Portrait ID
+; OUT
+; - B: Team slot number the character was added to (0-based)
+; - C flag: If set, the character couldn't be added
+CharSel_AddCharToFirstFreeSlot:
+	; C = ID of the character we want to add
 	ld   a, c
-	call L1E4B01
-	ld   c, a
-	call L001F85
-	jp   nc, L1E4A5D
+	call CharSel_GetCharIdByPortraitId
+	ld   c, a				; Save CharID
+	
+	;
+	; In team mode, prevent selecting duplicate characters,
+	; unless the cheat for it is enablead.
+	;
+	call IsInTeamMode		; Are we in team mode?
+	jp   nc, .single		; If not, jump
 	ld   a, [wDipSwitch]
-	bit  5, a
-	jp   nz, L1E4A70
-	ld   a, c
+	bit  DIPB_TEAM_DUPL, a	; Allow selecting duplicate characters?
+	jp   nz, .teamSet		; If so, skip check
+	
+	ld   a, c				; A = CharID
 	push de
-	pop  hl
-	cp   a, [hl]
-	jp   z, L1E4A8F
+	pop  hl					; HL = wCharSelP*Char0
+	
+	; If the character is already in the team, return
+	cp   a, [hl]			; Is it already the first member?
+	jp   z, .noAdd			; If so, jump
 	inc  hl
-	cp   a, [hl]
-	jp   z, L1E4A8F
+	cp   a, [hl]			; 2
+	jp   z, .noAdd
 	inc  hl
-	cp   a, [hl]
-	jp   z, L1E4A8F
-	jp   L1E4A70
-L1E4A5D:;J
-	ld   b, $00
-	ld   a, $FF
+	cp   a, [hl]			; 3
+	jp   z, .noAdd
+	; OK
+	jp   .teamSet
+.single:
+	ld   b, $00				; Slot 0 (only one)
+	
+	; In single mode, only one character can be selected, so only wCharSelP*Char0 is checked.
+	
+	;--
+	; This can never jump, as this is never called when a character is already selected.
+	ld   a, CHAR_ID_NONE	; Comparison value
 	push de
-	pop  hl
-	cp   a, [hl]
-	jp   nz, L1E4A8F
-	ld   a, c
-	ld   [hl], a
-	ld   a, $FF
-	ld   [$C1B3], a
-	xor  a
-	ret
-L1E4A70:;J
-	ld   b, $00
-	ld   a, $FF
-	push de
-	pop  hl
-	cp   a, [hl]
-	jp   z, L1E4A8B
-	inc  hl
-	inc  b
-	cp   a, [hl]
-	jp   z, L1E4A8B
-	inc  hl
-	inc  b
-	cp   a, [hl]
-	jp   nz, L1E4A8F
-	ld   a, $FF
-	ld   [$C1B3], a
-L1E4A8B:;J
+	pop  hl					; HL = First slot
+	cp   a, [hl]			; Is this slot free?
+	jp   nz, .noAdd			; If not, jump
+	;--
+	
+	; Write the char ID to the first slot
 	ld   a, c
 	ld   [hl], a
+	; Mark that no further characters can be added
+	ld   a, CHARSEL_TEAM_FILLED
+	ld   [wCharSelTeamFull], a
+	; C flag cleared, added OK
 	xor  a
 	ret
-L1E4A8F:;J
+	
+.teamSet:
+	ld   b, $00				; Slot 0
+	
+	; Find the first free slot in the team
+	ld   a, CHAR_ID_NONE	; A = Comparison value (no char)
+	push de
+	pop  hl					; HL = Ptr to first slot
+	;--
+	cp   a, [hl]			; Is the first char slot empty?
+	jp   z, .setSlot		; If so, write CharID here
+	inc  hl					; Otherwise, check the next
+	inc  b					; Slot 1
+	;--
+	cp   a, [hl]			; Is the second char slot empty?
+	jp   z, .setSlot		; If so, write CharID here
+	inc  hl					; Otherwise, check the next
+	inc  b					; Slot 2
+	
+	;--
+	; This can never jump, as this is never called when the team is full
+	cp   a, [hl]			; Is the second char in the team set?
+	jp   nz, .noAdd			; If so, don't add anything
+	;--
+	; Mark that no further characters can be added
+	ld   a, CHARSEL_TEAM_FILLED
+	ld   [wCharSelTeamFull], a
+.setSlot:
+	; Write the char ID to the picked slot
+	ld   a, c
+	ld   [hl], a			
+	; C flag cleared, added OK
+	xor  a
+	ret
+.noAdd:
+	; C flag set, not added
 	scf
 	ret
-L1E4A91:;C
+	
+; =============== CharSel_DrawP1CharIconForNew ===============
+; Draws the icon for a newly selected character on the 1P side.
+;
+; IN
+; - B: Slot number (0-based)
+; - C: Character ID
+CharSel_DrawP1CharIconForNew:
+	;
+	; Depending on the slot the character was added to, pick a different location
+	; and tile numbers to draw the icon to.
+	;
 	ld   a, b
-	cp   $01
-	jp   z, L1E4AA8
-	cp   $02
-	jp   z, L1E4AB4
-	ld   a, c
-	ld   de, $8F80
-	ld   hl, $99E2
-	ld   c, $F8
-	jp   L1E4ABD
-L1E4AA8:;J
+	cp   $01			; Is this the second character in the team?
+	jp   z, .char1		; If so, jump
+	cp   $02			; Is this the third character in the team?
+	jp   z, .char2		; If so, jump
+	
+	; Otherwise, it's the first.
+	; In single mode, this is the only one available.
+.char0:
+	ld   a, c						; A = Character ID
+	ld   de, $8F80					; DE = GFX Ptr
+	ld   hl, $99E2					; HL = Tilemap ptr
+	ld   c, TILE_CHARSEL_P1ICON0	; C = Tile ID pointing to DE
+	jp   .draw
+.char1:
 	ld   a, c
 	ld   de, $91F0
 	ld   hl, $99E4
-	ld   c, $1F
-	jp   L1E4ABD
-L1E4AB4:;J
+	ld   c, TILE_CHARSEL_P1ICON1
+	jp   .draw
+.char2:
 	ld   a, c
 	ld   de, $9230
 	ld   hl, $99E6
-	ld   c, $23
-L1E4ABD:;J
-	call L1E4AF1
+	ld   c, TILE_CHARSEL_P1ICON2
+.draw:
+	call CharSel_DrawP1CharIcon
 	ret
-L1E4AC1:;C
+	
+; =============== CharSel_DrawP2CharIconForNew ===============
+; Draws the icon for a newly selected character on the 2P side.
+; See also: CharSel_DrawP1CharIconForNew
+;
+; IN
+; - B: Slot number (0-based)
+; - C: Character ID
+CharSel_DrawP2CharIconForNew:
 	ld   a, b
 	cp   $01
-	jp   z, L1E4AD8
+	jp   z, .char1
 	cp   $02
-	jp   z, L1E4AE4
+	jp   z, .char2
+.char0:
 	ld   a, c
 	ld   de, $8FC0
 	ld   hl, $99F1
-	ld   c, $FC
-	jp   L1E4AED
-L1E4AD8:;J
+	ld   c, TILE_CHARSEL_P2ICON0
+	jp   .draw
+.char1:
 	ld   a, c
 	ld   de, $9270
 	ld   hl, $99EF
-	ld   c, $27
-	jp   L1E4AED
-L1E4AE4:;J
+	ld   c, TILE_CHARSEL_P2ICON1
+	jp   .draw
+.char2:
 	ld   a, c
 	ld   de, $92B0
 	ld   hl, $99ED
-	ld   c, $2B
-L1E4AED:;J
-	call L1E4AF9
+	ld   c, TILE_CHARSEL_P2ICON2
+.draw:
+	call CharSel_DrawP2CharIcon
 	ret
-L1E4AF1:;C
+	
+; =============== CharSel_DrawP1CharIcon ===============
+; Draws the icon for the specified character on the player 1 side to the tilemap.
+;
+; The reason this doesn't reuse CharSel_DrawEmptyIcon is because the graphics
+; for the empty number icons are always loaded to VRAM at fixed locations.
+;
+; The graphics for the actual character icons instead are written to VRAM dynamically
+; as they are requested, over parts of the 1bpp font not used in the character select screen,
+; and may be loaded at different locations.
+;
+; IN	
+; - DE: Ptr to GFX ptr in VRAM
+; - HL: Ptr to top-*right* corner of the icon in the tilemap
+;       This is because 
+; - C: Tile number DE points to
+; - A: Character ID to draw
+CharSel_DrawP1CharIcon:
 	push af
-	sla  a
-	call L001FAC
+	sla  a					; A *= 2
+	call Char_DrawIconFlipX
 	pop  af
 	ret
-L1E4AF9:;C
+	
+; =============== CharSel_DrawP2CharIcon ===============
+; Draws the icon for the specified character on the player 2 side to the tilemap.
+CharSel_DrawP2CharIcon:
 	push af
-	sla  a
-	call L001FE7
+	sla  a					; A *= 2
+	call Char_DrawIcon
 	pop  af
 	ret
-L1E4B01:;C
+	
+; =============== CharSel_GetCharIdByPortraitId ===============
+; Gets the character ID from the specified cursor position ID,
+; without the extra flags stored in the upper bits.
+;
+; IN
+; - A: Portrait ID (CHARSEL_ID_*)
+; OUT
+; - A: Character ID (CHAR_ID_*)
+CharSel_GetCharIdByPortraitId:
 	push hl
 	push de
-	ld   hl, wCharSelIdMapTbl
-	ld   d, $00
+	
+	; CharID = wCharSelIdMapTbl[A] & $3F
+	
+	ld   hl, wCharSelIdMapTbl	; HL = wCharSelIdMapTbl
+	ld   d, $00					; DE = A
 	ld   e, a
-	add  hl, de
-	ld   a, [hl]
-	and  a, $3F
+	add  hl, de					; Index the thing
+	ld   a, [hl]				; A = Character ID + flags
+	and  a, $3F					; Filter away flags (why not filter by $1F)? 
+	
 	pop  de
 	pop  hl
 	ret
-L1E4B10:;C
-	ld   a, [$C1B6]
-	cp   $00
-	jp   nz, L1E4B1E
+	
+; =============== CharSel_GetInput ===============
+; Gets the player input for the character select screen.
+; This merges the key info from the delayed held input fields set in JoyKeys_DoCursorDelayTimer.
+; See also: Title_GetMenuInput
+; OUT
+; - A: Newly pressed KEY_*
+; - B: Intermittent KEY_*
+; - C: Held KEY_*
+CharSel_GetInput:
+
+	;
+	; Pick the controller from the active side
+	;
+	ld   a, [wCharSelCurPl]
+	cp   CHARSEL_1P			; Playing as player 1?
+	jp   nz, .pl2			; If not, jump
+.pl1:
 	ld   hl, hJoyKeys
-	jp   L1E4B21
-L1E4B1E: db $21;X
-L1E4B1F: db $AB;X
-L1E4B20: db $FF;X
-L1E4B21:;J
-	ld   c, [hl]
-	inc  hl
-	ld   a, [hl]
+	jp   .go
+.pl2:
+	ld   hl, hJoyKeys2
+.go:
+	ld   c, [hl]		; C = Held keys
+	inc  hl				; Seek to hJoyNewKeys
+	ld   a, [hl]		; A = Newly held keys
+	
 	push af
-	push bc
-	inc  hl
-	inc  hl
-	ld   b, $00
-	ld   c, $08
-L1E4B2C:;J
-	ldi  a, [hl]
-	inc  hl
-	cp   $01
-	jp   nz, L1E4B35
-	set  7, b
-L1E4B35:;J
-	rlc  b
-	dec  c
-	jp   nz, L1E4B2C
-	ld   d, b
-	pop  bc
-	ld   b, d
+		push bc
+			inc  hl
+			inc  hl					; Seek to hJoyKeysDelayTbl
+			
+			;
+			; Merge back the bits in the 8 iKeyMenuHeld fields into a into a KEY_* bitmask.
+			;
+			
+			; For each DelayTbl entry mark the MSB if needed and rotate left.
+			
+			ld   b, $00				; B = Output KEY_* mask
+			ld   c, $08				; C = Bits in byte
+		.loop:
+			ldi  a, [hl]			; A = iKeyMenuHeld
+			inc  hl					; Skip to next entry
+			; Only use key entries with value $01, which means that either:
+			; - The key was just pressed
+			; - The delay countdown reached 0, which set the key entry to $01
+			cp   $01				; iKeyMenuHeld == $01?
+			jp   nz, .next			; If not, skip
+			set  7, b				; Set the MSB
+		.next:
+			rlc  b					; Next bit (<<R 1)
+			dec  c					; BitsLeft--
+			jp   nz, .loop			; Are we done? If not, loop	
+
+			ld   d, b		; Save B
+		pop  bc				; Restore C
+		ld   b, d			; Restore B
 	pop  af
 	ret
-L1E4B40:;C
-	ld   hl, wRoundSeqTbl
-	ld   b, $0F
-L1E4B45:;J
-	ldi  a, [hl]
+; =============== CharSel_DrawCrossOnDefeatedChars ===============
+; Draws an X over all portraits of defeated characters.
+; This is done for characters in the sequence $00-$0E, which is up to and excluding Kagura.
+; Characters from Kagura and above don't have a CHARSEL_ID_* value in the sequence anyway.
+CharSel_DrawCrossOnDefeatedChars:
+	ld   hl, wRoundSeqTbl	; HL = Round sequence table
+	ld   b, $0F				; HL = Number of slots remaining
+.loop:
+	ldi  a, [hl]			; A = Char portrait ID
 	push bc
 	push hl
-	call L1E4B52
+	call .drawCross
 	pop  hl
 	pop  bc
-	dec  b
-	jp   nz, L1E4B45
+	dec  b					; Next char
+	jp   nz, .loop			; Processed all chars? If not, loop
 	ret
-L1E4B52:;C
-	bit  7, a
-	ret  z
-	and  a, $7F
-	sla  a
-	ld   de, $4B6D
-	ld   h, $00
+; IN
+; - A: CHARSEL_ID_* value
+; - HL: Ptr to start of wRoundSeqTbl 
+.drawCross:
+	bit  CHARSEL_POSFB_BOSS, a		; Did we beat this opponent yet?
+	ret  z							; If not, return
+	and  a, $FF^CHARSEL_POSF_BOSS	; Filter out flag to get real cursor pos id
+	sla  a							; A *= 2
+	ld   de, CharSel_IdTilesMapTbl	; DE = Table of VRAM pointers
+	ld   h, $00						; HL = A * 2
 	ld   l, a
-	add  hl, de
-	ld   e, [hl]
+	add  hl, de						; Index it
+	ld   e, [hl]					; DE = Ptr to portrait GFX in VRAM
 	inc  hl
 	ld   d, [hl]
-	ld   hl, $5FC5
-	ld   bc, $6056
-	call L000E98
+	ld   hl, GFXDef_CharSel_Cross	; HL = Ptr to (Tile count + cross GFX)
+	ld   bc, GFX_CharSel_Cross_Mask	; DE = Ptr to transparency mask
+	call CopyTilesOver				; Draw the cross
 	ret
-L1E4B6D: db $F0
-L1E4B6E: db $92
-L1E4B6F: db $80
-L1E4B70: db $93
-L1E4B71: db $10
-L1E4B72: db $94
-L1E4B73: db $A0
-L1E4B74: db $94
-L1E4B75: db $30
-L1E4B76: db $95
-L1E4B77: db $C0
-L1E4B78: db $95
-L1E4B79: db $50
-L1E4B7A: db $96
-L1E4B7B: db $E0
-L1E4B7C: db $96
-L1E4B7D: db $70
-L1E4B7E: db $97
-L1E4B7F: db $00
-L1E4B80: db $88
-L1E4B81: db $90
-L1E4B82: db $88
-L1E4B83: db $20
-L1E4B84: db $89
-L1E4B85: db $B0
-L1E4B86: db $89
-L1E4B87: db $40
-L1E4B88: db $8A
-L1E4B89: db $D0;X
-L1E4B8A: db $8A;X
-L1E4B8B: db $60;X
-L1E4B8C: db $8B;X
-L1E4B8D: db $F0;X
-L1E4B8E: db $8B;X
-L1E4B8F: db $80
-L1E4B90: db $8C
-L1E4B91:;C
+	
+; =============== CharSel_IdTilesMapTbl ===============
+; This table maps portrait IDs to the position of their portrait GFX in VRAM.
+;
+; Specifically, this maps CHARSEL_ID_*, which are commonly used in the character select
+; in place of real character IDs as they correspond to the order of characters in the
+; character select screen.
+;
+; These pointers of course are based on the location GFX_CharSel_BG0 and GFXLZ_CharSel_BG1 are loaded to.
+;
+; [TCRF] These also contain unique pointers for Mr. Karate and Goenitz, which aren't possible
+;        to see normally.
+CharSel_IdTilesMapTbl:
+	dw $92F0 ; CHARSEL_ID_KYO      
+	dw $9380 ; CHARSEL_ID_ANDY     
+	dw $9410 ; CHARSEL_ID_TERRY    
+	dw $94A0 ; CHARSEL_ID_RYO      
+	dw $9530 ; CHARSEL_ID_ROBERT   
+	dw $95C0 ; CHARSEL_ID_IORI     
+	dw $9650 ; CHARSEL_ID_DAIMON   
+	dw $96E0 ; CHARSEL_ID_MAI      
+	dw $9770 ; CHARSEL_ID_GEESE    
+	dw $8800 ; CHARSEL_ID_MRBIG    
+	dw $8890 ; CHARSEL_ID_KRAUSER  
+	dw $8920 ; CHARSEL_ID_MATURE   
+	dw $89B0 ; CHARSEL_ID_ATHENA   
+	dw $8A40 ; CHARSEL_ID_CHIZURU  
+	dw $8AD0 ; CHARSEL_ID_MRKARATE0 (impossible to see)
+	dw $8B60 ; CHARSEL_ID_MRKARATE1 (impossible to see)
+	dw $8BF0 ; CHARSEL_ID_GOENITZ   (impossible to see)
+	dw $8C80 ; CHARSEL_ID_LEONA    
+	
+; =============== CharSel_RefreshNameAndCursor ===============
+; Updates the character name and cursor sprite for the specified portrait.
+; This is called after the cursor is moved, to update the tilemap and sprites.
+; IN
+; - A: Portrait ID
+; - DE: Ptr to wOBJInfo
+CharSel_RefreshNameAndCursor:
+	; Display the character name
 	push af
-	call L1E4B01
-	call L1E4BFD
+		call CharSel_GetCharIdByPortraitId
+		call CharSel_PrintCharName
 	pop  af
-L1E4B99:;C
-	cp   $0E
-	jp   z, L1E4BAC
-	cp   $0F
-	jp   z, L1E4BAC
+	; Fall-through
+	
+; =============== CharSel_RefreshCursor ===============
+; Displays the cursor over the specified portrait.
+; IN
+; - A: Portrait ID
+; - DE: Ptr to wOBJInfo
+CharSel_RefreshCursor:
+
+	;
+	; Determine the size of the cursor to display.
+	; In practice, Mr. Karate is the only character to have a wide portrait,
+	; who as a result has two portrait "slots".
+	;
+	
+	cp   CHARSEL_ID_MRKARATE0	; Cursor over Mr. Karate?
+	jp   z, .wide				; If so, jump
+	cp   CHARSEL_ID_MRKARATE1	; ""
+	jp   z, .wide				; ""
+.normal:
+	; Otherwise, we're on a normal sized tile.
+	; A = iOBJInfo_CharSel_CursorOBJId
 	push af
-	ld   hl, $0027
-	add  hl, de
-	ld   a, [hl]
-	jp   L1E4BB2
-L1E4BAC:;J
+		ld   hl, iOBJInfo_CharSel_CursorOBJId
+		add  hl, de				
+		ld   a, [hl]			
+		jp   .setInfo
+.wide:
+	; A = iOBJInfo_CharSel_CursorWideOBJId
 	push af
-	ld   hl, $0028
-	add  hl, de
-	ld   a, [hl]
-L1E4BB2:;J
-	ld   hl, $0013
-	add  hl, de
-	ld   [hl], a
+		ld   hl, iOBJInfo_CharSel_CursorWideOBJId
+		add  hl, de
+		ld   a, [hl]	
+		
+	.setInfo:
+		; Copy A to the sprite mapping ID field
+		ld   hl, iOBJInfo_OBJLstPtrTblOffset
+		add  hl, de
+		ld   [hl], a
 	pop  af
+	
+	;
+	; Determine the X and Y positions of the cursor.
+	; This is determined by a table of coordinates.
+	;
 	push bc
-	sla  a
-	ld   bc, $4BD3
-	ld   h, $00
-	ld   l, a
-	add  hl, bc
-	push hl
-	pop  bc
-	ld   hl, $0003
-	add  hl, de
-	ld   a, [bc]
-	ld   [hl], a
-	inc  bc
-	ld   hl, $0005
-	add  hl, de
-	ld   a, [bc]
-	ld   [hl], a
+	
+		; Seek to the table entry.
+		sla  a				; PicId * 2 since entries are 2 bytes
+		ld   bc, CharSel_CursorPosTable	; BC = Table start
+		ld   h, $00			; HL = A
+		ld   l, a
+		add  hl, bc			; Offset the table
+		push hl
+		pop  bc				; Move result to BC
+		
+		; 
+		ld   hl, iOBJInfo_X	; Seek to iOBJInfo_X
+		add  hl, de
+		ld   a, [bc]		; Read X position from byte0
+		ld   [hl], a		; Write it
+		inc  bc				; Seek to byte1
+		ld   hl, iOBJInfo_Y	; Seek to iOBJInfo_Y
+		add  hl, de
+		ld   a, [bc]		; Read Y position from byte1
+		ld   [hl], a		; Write it
 	pop  bc
 	ret
-L1E4BD3: db $00
-L1E4BD4: db $00
-L1E4BD5: db $18
-L1E4BD6: db $00
-L1E4BD7: db $30
-L1E4BD8: db $00
-L1E4BD9: db $48
-L1E4BDA: db $00
-L1E4BDB: db $60
-L1E4BDC: db $00
-L1E4BDD: db $78
-L1E4BDE: db $00
-L1E4BDF: db $00
-L1E4BE0: db $18
-L1E4BE1: db $18
-L1E4BE2: db $18
-L1E4BE3: db $30
-L1E4BE4: db $18
-L1E4BE5: db $48
-L1E4BE6: db $18
-L1E4BE7: db $60
-L1E4BE8: db $18
-L1E4BE9: db $78
-L1E4BEA: db $18
-L1E4BEB: db $00
-L1E4BEC: db $30
-L1E4BED: db $18
-L1E4BEE: db $30
-L1E4BEF: db $30
-L1E4BF0: db $30
-L1E4BF1: db $30
-L1E4BF2: db $30
-L1E4BF3: db $60
-L1E4BF4: db $30
-L1E4BF5: db $78
-L1E4BF6: db $30
-L1E4BF7: db $78;X
-L1E4BF8: db $00;X
-L1E4BF9: db $78;X
-L1E4BFA: db $30;X
-L1E4BFB: db $18;X
-L1E4BFC: db $30;X
-L1E4BFD:;C
+	
+; =============== CharSel_CursorPosTable ===============
+; Maps portrait IDs to cursor sprite positions.
+CharSel_CursorPosTable:
+	db $00,$00 ; CHARSEL_ID_KYO      
+	db $18,$00 ; CHARSEL_ID_ANDY     
+	db $30,$00 ; CHARSEL_ID_TERRY    
+	db $48,$00 ; CHARSEL_ID_RYO      
+	db $60,$00 ; CHARSEL_ID_ROBERT   
+	db $78,$00 ; CHARSEL_ID_IORI     
+	db $00,$18 ; CHARSEL_ID_DAIMON   
+	db $18,$18 ; CHARSEL_ID_MAI      
+	db $30,$18 ; CHARSEL_ID_GEESE    
+	db $48,$18 ; CHARSEL_ID_MRBIG    
+	db $60,$18 ; CHARSEL_ID_KRAUSER  
+	db $78,$18 ; CHARSEL_ID_MATURE   
+	db $00,$30 ; CHARSEL_ID_ATHENA   
+	db $18,$30 ; CHARSEL_ID_CHIZURU
+	; Mr. Karate has a trick -- the same position is used for both slots.
+	; Even if they look identical, having two different slots prevents the cursor from jumping
+	; to another column when scrolling up.
+	db $30,$30 ; CHARSEL_ID_MRKARATE0
+	db $30,$30 ; CHARSEL_ID_MRKARATE1
+	db $60,$30 ; CHARSEL_ID_GOENITZ  
+	db $78,$30 ; CHARSEL_ID_LEONA  
+	; [TCRF] The secret characters accessible by flipping the portraits
+	;        reuse the previous portrait IDs, leaving these unreachable.
+	db $78,$00 ; CHARSEL_ID_SPEC_OIORI 
+	db $78,$30 ; CHARSEL_ID_SPEC_OLEONA
+	db $18,$30 ; CHARSEL_ID_SPEC_KAGURA
+; =============== CharSel_PrintCharName ===============
+; Writes the name for the specified character to the tilemap.
+; IN
+; -  A: Character ID
+; - DE: Ptr to start of wOBJInfo, marks player
+CharSel_PrintCharName:
 	push af
-	push de
-	ld   b, a
-	ld   a, $80
-	cp   a, e
-	jp   nz, L1E4C17
-	push bc
-	ld   hl, $4C96
-	ld   de, $99A1
-	call TextPrinter_Instant_CustomPos
-	pop  bc
-	ld   de, $99A1
-	jp   L1E4C31
-L1E4C17:;J
-	push bc
-	ld   hl, $4C96
-	ld   de, $99AB
-	call TextPrinter_Instant_CustomPos
-	pop  bc
-	push bc
-	ld   a, b
-	sla  a
-	ld   bc, $4C46
-	ld   h, $00
-	ld   l, a
-	add  hl, bc
-	ld   e, [hl]
-	inc  hl
-	ld   d, [hl]
-	pop  bc
-L1E4C31:;J
-	ld   a, b
-	sla  a
-	ld   bc, $4C6E
-	ld   h, $00
-	ld   l, a
-	add  hl, bc
-	ld   c, [hl]
-	inc  hl
-	ld   b, [hl]
-	push bc
-	pop  hl
-	call TextPrinter_Instant_CustomPos
-	pop  de
+		push de
+			ld   b, a			; B = CharId
+			
+			; Determine the player we're printing text for through wOBJInfo's location.
+			; This is checked since player 1 and player 2 align the text differently.
+			ld   a, LOW(wOBJInfo_Pl1)	; A = Player 1 location
+			cp   a, e					; Does it match with what we sent?
+			jp   nz, .pl2				; If not, it's player 2
+			
+		.pl1:
+			; Blank out the old name
+			push bc
+				ld   hl, TextC_Char_None
+				ld   de, $99A1
+				call TextPrinter_Instant_CustomPos
+			pop  bc
+			
+			; Player 1 aligns the name to the left.
+			; There's nothing special to do, the starting location is always the same.
+			ld   de, $99A1
+			jp   .printString
+			
+		.pl2:
+			; Blank out the old name
+			push bc
+				ld   hl, TextC_Char_None
+				ld   de, $99B3-$08
+				call TextPrinter_Instant_CustomPos
+			pop  bc
+			
+			; Player 2 aligns the name to the right.
+			
+			; The strings here aren't padded (as they are shared between players),
+			; so the starting location depends on the character and is obtained through a table.
+			; DE = CharSel_CharNameBGPtrTbl[CharId]
+			push bc
+				ld   a, b							; A = CharId * 2
+				sla  a
+				ld   bc, CharSel_CharNameBGPtrTbl	; BC = VRAM Ptr table
+				ld   h, $00							; HL = A
+				ld   l, a
+				add  hl, bc							; Index it
+				ld   e, [hl]						; Read it out to DE
+				inc  hl
+				ld   d, [hl]
+			pop  bc
+			
+		.printString:
+			; Get the ptr to the TextC structure off the table
+			; HL = CharSel_CharNamePtrTable[CharId]
+			ld   a, b							; A = CharId * 2
+			sla  a
+			ld   bc, CharSel_CharNamePtrTable	; BC = Text ptr table
+			ld   h, $00							; HL = A
+			ld   l, a
+			add  hl, bc							; Index it
+			ld   c, [hl]						; Read it out to BC
+			inc  hl
+			ld   b, [hl]
+			push bc
+			pop  hl								; Move it to HL
+			
+			; HL = Ptr to TextC structure
+			; DE = Tilemap ptr
+			call TextPrinter_Instant_CustomPos
+		pop  de
 	pop  af
 	ret
-L1E4C46: db $B0
-L1E4C47: db $99
-L1E4C48: db $AD
-L1E4C49: db $99
-L1E4C4A: db $AE
-L1E4C4B: db $99
-L1E4C4C: db $AF
-L1E4C4D: db $99
-L1E4C4E: db $B0
-L1E4C4F: db $99
-L1E4C50: db $AD
-L1E4C51: db $99
-L1E4C52: db $AD
-L1E4C53: db $99
-L1E4C54: db $B0
-L1E4C55: db $99
-L1E4C56: db $AE
-L1E4C57: db $99
-L1E4C58: db $AE
-L1E4C59: db $99
-L1E4C5A: db $AC
-L1E4C5B: db $99
-L1E4C5C: db $AE
-L1E4C5D: db $99
-L1E4C5E: db $AF
-L1E4C5F: db $99
-L1E4C60: db $AD
-L1E4C61: db $99
-L1E4C62: db $AC
-L1E4C63: db $99
-L1E4C64: db $AC
-L1E4C65: db $99
-L1E4C66: db $AB
-L1E4C67: db $99
-L1E4C68: db $AE;X
-L1E4C69: db $99;X
-L1E4C6A: db $AD;X
-L1E4C6B: db $99;X
-L1E4C6C: db $AD;X
-L1E4C6D: db $99;X
-L1E4C6E: db $9F
-L1E4C6F: db $4C
-L1E4C70: db $A3
-L1E4C71: db $4C
-L1E4C72: db $AA
-L1E4C73: db $4C
-L1E4C74: db $B0
-L1E4C75: db $4C
-L1E4C76: db $B5
-L1E4C77: db $4C
-L1E4C78: db $B9
-L1E4C79: db $4C
-L1E4C7A: db $C0
-L1E4C7B: db $4C
-L1E4C7C: db $C7
-L1E4C7D: db $4C
-L1E4C7E: db $CB
-L1E4C7F: db $4C
-L1E4C80: db $D1
-L1E4C81: db $4C
-L1E4C82: db $D7
-L1E4C83: db $4C
-L1E4C84: db $DF
-L1E4C85: db $4C
-L1E4C86: db $E5
-L1E4C87: db $4C
-L1E4C88: db $EA
-L1E4C89: db $4C
-L1E4C8A: db $F1
-L1E4C8B: db $4C
-L1E4C8C: db $F9
-L1E4C8D: db $4C
-L1E4C8E: db $01
-L1E4C8F: db $4D
-L1E4C90: db $0A
-L1E4C91: db $4D
-L1E4C92: db $10
-L1E4C93: db $4D
-L1E4C94: db $17
-L1E4C95: db $4D
-L1E4C96: db $08
-L1E4C97: db $20
-L1E4C98: db $20
-L1E4C99: db $20
-L1E4C9A: db $20
-L1E4C9B: db $20
-L1E4C9C: db $20
-L1E4C9D: db $20
-L1E4C9E: db $20
-L1E4C9F: db $03
-L1E4CA0: db $4B
-L1E4CA1: db $59
-L1E4CA2: db $4F
-L1E4CA3: db $06
-L1E4CA4: db $44
-L1E4CA5: db $41
-L1E4CA6: db $49
-L1E4CA7: db $4D
-L1E4CA8: db $4F
-L1E4CA9: db $4E
-L1E4CAA: db $05
-L1E4CAB: db $54
-L1E4CAC: db $45
-L1E4CAD: db $52
-L1E4CAE: db $52
-L1E4CAF: db $59
-L1E4CB0: db $04
-L1E4CB1: db $41
-L1E4CB2: db $4E
-L1E4CB3: db $44
-L1E4CB4: db $59
-L1E4CB5: db $03
-L1E4CB6: db $52
-L1E4CB7: db $59
-L1E4CB8: db $4F
-L1E4CB9: db $06
-L1E4CBA: db $52
-L1E4CBB: db $4F
-L1E4CBC: db $42
-L1E4CBD: db $45
-L1E4CBE: db $52
-L1E4CBF: db $54
-L1E4CC0: db $06
-L1E4CC1: db $41
-L1E4CC2: db $54
-L1E4CC3: db $48
-L1E4CC4: db $45
-L1E4CC5: db $4E
-L1E4CC6: db $41
-L1E4CC7: db $03
-L1E4CC8: db $4D
-L1E4CC9: db $41
-L1E4CCA: db $49
-L1E4CCB: db $05
-L1E4CCC: db $4C
-L1E4CCD: db $45
-L1E4CCE: db $4F
-L1E4CCF: db $4E
-L1E4CD0: db $41
-L1E4CD1: db $05
-L1E4CD2: db $47
-L1E4CD3: db $45
-L1E4CD4: db $45
-L1E4CD5: db $53
-L1E4CD6: db $45
-L1E4CD7: db $07
-L1E4CD8: db $4B
-L1E4CD9: db $52
-L1E4CDA: db $41
-L1E4CDB: db $55
-L1E4CDC: db $53
-L1E4CDD: db $45
-L1E4CDE: db $52
-L1E4CDF: db $05
-L1E4CE0: db $4D
-L1E4CE1: db $40
-L1E4CE2: db $42
-L1E4CE3: db $49
-L1E4CE4: db $47
-L1E4CE5: db $04
-L1E4CE6: db $49
-L1E4CE7: db $4F
-L1E4CE8: db $52
-L1E4CE9: db $49
-L1E4CEA: db $06
-L1E4CEB: db $4D
-L1E4CEC: db $41
-L1E4CED: db $54
-L1E4CEE: db $55
-L1E4CEF: db $52
-L1E4CF0: db $45
-L1E4CF1: db $07
-L1E4CF2: db $43
-L1E4CF3: db $48
-L1E4CF4: db $49
-L1E4CF5: db $5A
-L1E4CF6: db $55
-L1E4CF7: db $52
-L1E4CF8: db $55
-L1E4CF9: db $07
-L1E4CFA: db $47
-L1E4CFB: db $4F
-L1E4CFC: db $45
-L1E4CFD: db $4E
-L1E4CFE: db $49
-L1E4CFF: db $54
-L1E4D00: db $5A
-L1E4D01: db $08
-L1E4D02: db $4D
-L1E4D03: db $40
-L1E4D04: db $4B
-L1E4D05: db $41
-L1E4D06: db $52
-L1E4D07: db $41
-L1E4D08: db $54
-L1E4D09: db $45
-L1E4D0A: db $05
-L1E4D0B: db $49
-L1E4D0C: db $4F
-L1E4D0D: db $52
-L1E4D0E: db $49
-L1E4D0F: db $60
-L1E4D10: db $06
-L1E4D11: db $4C
-L1E4D12: db $45
-L1E4D13: db $4F
-L1E4D14: db $4E
-L1E4D15: db $41
-L1E4D16: db $60
-L1E4D17: db $06
-L1E4D18: db $4B
-L1E4D19: db $41
-L1E4D1A: db $47
-L1E4D1B: db $55
-L1E4D1C: db $52
-L1E4D1D: db $41
-L1E4D1E:;C
+; =============== CharSel_CharNameBGPtrTbl ===============
+; Ptr table to the starting tilemap positions on 2P side, indexed by character ID.
+; The pointer for each character should always be equal to $99B3-(name length).
+CharSel_CharNameBGPtrTbl:
+	dw $99B0 ; CHAR_ID_KYO     
+	dw $99AD ; CHAR_ID_DAIMON  
+	dw $99AE ; CHAR_ID_TERRY   
+	dw $99AF ; CHAR_ID_ANDY    
+	dw $99B0 ; CHAR_ID_RYO     
+	dw $99AD ; CHAR_ID_ROBERT  
+	dw $99AD ; CHAR_ID_ATHENA  
+	dw $99B0 ; CHAR_ID_MAI     
+	dw $99AE ; CHAR_ID_LEONA   
+	dw $99AE ; CHAR_ID_GEESE   
+	dw $99AC ; CHAR_ID_KRAUSER 
+	dw $99AE ; CHAR_ID_MRBIG   
+	dw $99AF ; CHAR_ID_IORI    
+	dw $99AD ; CHAR_ID_MATURE  
+	dw $99AC ; CHAR_ID_CHIZURU 
+	dw $99AC ; CHAR_ID_GOENITZ 
+	dw $99AB ; CHAR_ID_MRKARATE
+	dw $99AE ; CHAR_ID_OIORI   
+	dw $99AD ; CHAR_ID_OLEONA  
+	dw $99AD ; CHAR_ID_KAGURA  
+; =============== CharSel_CharNamePtrTable ===============
+; Ptr table to the character names, indexed by character ID.
+CharSel_CharNamePtrTable:
+	dw TextC_Char_Kyo
+	dw TextC_Char_Daimon
+	dw TextC_Char_Terry
+	dw TextC_Char_Andy
+	dw TextC_Char_Ryo
+	dw TextC_Char_Robert
+	dw TextC_Char_Athena
+	dw TextC_Char_Mai
+	dw TextC_Char_Leona
+	dw TextC_Char_Geese
+	dw TextC_Char_Krauser
+	dw TextC_Char_MrBig
+	dw TextC_Char_Iori
+	dw TextC_Char_Mature
+	dw TextC_Char_Chizuru
+	dw TextC_Char_Goenitz
+	dw TextC_Char_MrKarate
+	dw TextC_Char_OIori
+	dw TextC_Char_OLeona
+	dw TextC_Char_Kagura
+
+; =============== TextC_Char_* ===============
+; Lite versions of TextDef which lack the tilemap offset, as they are passed to TextPrinter_Instant_CustomPos.
+
+; Empty line used to clear out the old character name.
+TextC_Char_None:
+	db $08 ; String length
+	db "        "
+; Actual player names.
+; @ is a stand-in for "r.".
+TextC_Char_Kyo:
+	db $03
+	db "KYO"
+TextC_Char_Daimon:
+	db $06
+	db "DAIMON"
+TextC_Char_Terry:
+	db $05
+	db "TERRY"
+TextC_Char_Andy:
+	db $04
+	db "ANDY"
+TextC_Char_Ryo:
+	db $03
+	db "RYO"
+TextC_Char_Robert:
+	db $06
+	db "ROBERT"
+TextC_Char_Athena:
+	db $06
+	db "ATHENA"
+TextC_Char_Mai:
+	db $03
+	db "MAI"
+TextC_Char_Leona:
+	db $05
+	db "LEONA"
+TextC_Char_Geese:
+	db $05
+	db "GEESE"
+TextC_Char_Krauser:
+	db $07
+	db "KRAUSER"
+TextC_Char_MrBig:
+	db $05
+	db "M@BIG"
+TextC_Char_Iori:
+	db $04
+	db "IORI"
+TextC_Char_Mature:
+	db $06
+	db "MATURE"
+TextC_Char_Chizuru:
+	db $07
+	db "CHIZURU"
+TextC_Char_Goenitz:
+	db $07
+	db "GOENITZ"
+TextC_Char_MrKarate:
+	db $08
+	db "M@KARATE"
+TextC_Char_OIori:
+	db $05
+	db "IORI`"
+TextC_Char_OLeona:
+	db $06
+	db "LEONA`"
+TextC_Char_Kagura:
+	db $06
+	db "KAGURA"
+	
+; =============== CharSel_AnimCursorPalFast ===============
+; Cycles the cursor palette fast, used when still selecting something.
+; OUT
+; - Z: If set, the cursor isn't visible
+CharSel_AnimCursorPalFast:
+	; A = (Timer % 8) / 2
 	ld   a, [wTimer]
 	and  a, $07
-	srl  a
-	jp   L1E4D31
-L1E4D28:;C
+	srl  a			; / 2 for fast speed
+	jp   CharSel_AnimCursorPal
+; =============== CharSel_AnimCursorPalSlow ===============
+; Cycles the cursor palette slowly, used after selecting all characters.
+; OUT
+; - Z: If set, the cursor isn't visible
+CharSel_AnimCursorPalSlow:
+	; A = (Timer % $10) / 4
 	ld   a, [wTimer]
 	and  a, $0F
+	srl  a			; / 2 for slow speed
 	srl  a
-	srl  a
-L1E4D31:;J
-	cp   $01
-	jp   z, L1E4D45
-	cp   $02
-	jp   z, L1E4D4A
+; =============== CharSel_AnimCursorPal ===============
+; IN
+; - A: Palette ID (0-3)
+; OUT
+; - Z: If set, the cursor isn't visible
+CharSel_AnimCursorPal:
+	cp   $01			; A == 1?
+	jp   z, .pal1		; If so, jump
+	cp   $02			; ...
+	jp   z, .pal2
 	cp   $03
-	jp   z, L1E4D4F
-	ld   a, $3C
-	jp   L1E4D51
-L1E4D45:;J
+	jp   z, .pal3
+	; Otherwise, A == 0
+.pal0:
+	ld   a, $3C			; A = OBP pal 0
+	jp   .setPal
+.pal1:
 	ld   a, $34
-	jp   L1E4D51
-L1E4D4A:;J
+	jp   .setPal
+.pal2:
 	ld   a, $F0
-	jp   L1E4D51
-L1E4D4F:;J
+	jp   .setPal
+.pal3:
 	ld   a, $F4
-L1E4D51:;J
-	ld   hl, $C1B6
-	bit  0, [hl]
-	jp   nz, L1E4D65
+	
+.setPal:
+	ld   hl, wCharSelCurPl
+	bit  0, [hl]			; Are we player 1?
+	jp   nz, .pl2			; If not, jump
+.pl1:
+	; If the 1P cursor isn't visible, return
 	push af
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_Status]
-	ld   b, a
+		ld   a, [wOBJInfo_Pl1+iOBJInfo_Status]
+		ld   b, a			; B = Status flags
 	pop  af
-	bit  7, b
-	ret  z
+	bit  OSTB_VISIBLE, b	; Is the visibility flag set?
+	ret  z					; If not, return
+	; Set the previously specified palette
 	ldh  [rOBP0], a
 	ret
-L1E4D65:;J
+.pl2:
+	; If the 2P cursor isn't visible, return
 	push af
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_Status]
-	ld   b, a
+		ld   a, [wOBJInfo_Pl2+iOBJInfo_Status]
+		ld   b, a			; B = Status flags
 	pop  af
-	bit  7, b
-	ret  z
+	bit  OSTB_VISIBLE, b	; Is the visibility flag set?
+	ret  z					; If not, return
+	; Set the previously specified palette
 	ldh  [rOBP1], a
 	ret
-L1E4D71:;C
+	
+; =============== CharSel_BlinkStartText ===============
+; Blinks the "START" text under the character icons.
+CharSel_BlinkStartText:
+
+	; Alternate every 8 frames between showing and hiding the string
 	ld   a, [wTimer]
-	bit  3, a
-	jp   nz, L1E4D91
-L1E4D79:;C
-	ld   hl, $4DAF
-	ld   a, [$C1B6]
-	bit  0, a
-	jp   nz, L1E4D8A
+	bit  3, a						; (wTimer & 8) != 0?
+	jp   nz, CharSel_PrintStartText	; If so, jump
+	; Fall-through
+	
+; =============== CharSel_HideStartText ===============
+; Hides the START text for the current character.
+CharSel_HideStartText:
+	ld   hl, TextC_CharSel_StartBlank
+	
+	; Different tilemap ptr between players
+	ld   a, [wCharSelCurPl]
+	bit  0, a				; Handling player 1? (CurPl == 0)
+	jp   nz, .pl2			; If not, jump
+.pl1:
 	ld   de, $9A21
-	jp   L1E4D8D
-L1E4D8A:;J
+	jp   .print
+.pl2:
 	ld   de, $9A2E
-L1E4D8D:;J
+.print:
 	call TextPrinter_Instant_CustomPos
 	ret
-L1E4D91:;J
-	ld   hl, $4DA9
-	ld   a, [$C1B6]
-	bit  0, a
-	jp   nz, L1E4DA2
+	
+; =============== CharSel_PrintStartText ===============
+; Displays the START text for the current character.
+CharSel_PrintStartText:
+	ld   hl, TextC_CharSel_Start
+	; Different tilemap ptr between players
+	ld   a, [wCharSelCurPl]
+	bit  0, a				; Handling player 1? (CurPl == 0)
+	jp   nz, .pl2		; If not, jump
+.pl1:
 	ld   de, $9A21
-	jp   L1E4DA5
-L1E4DA2:;J
+	jp   .print
+.pl2:
 	ld   de, $9A2E
-L1E4DA5:;J
+.print:
 	call TextPrinter_Instant_CustomPos
 	ret
-L1E4DA9: db $05
-L1E4DAA: db $53
-L1E4DAB: db $54
-L1E4DAC: db $41
-L1E4DAD: db $52
-L1E4DAE: db $54
-L1E4DAF: db $05
-L1E4DB0: db $20
-L1E4DB1: db $20
-L1E4DB2: db $20
-L1E4DB3: db $20
-L1E4DB4: db $20
-L1E4DB5:;C
-	ld   a, [$C1B6]
-	or   a
-	jp   nz, L1E4DC2
+	
+TextC_CharSel_Start:
+	db $05
+	db "START"
+TextC_CharSel_StartBlank:
+	db $05
+	db "     "
+	
+; =============== CharSel_HideCursor ===============
+; Hides the cursor for the current player.
+CharSel_HideCursor:
+	ld   a, [wCharSelCurPl]
+	or   a					; wCharSelCurPl == CHARSEL_1P?
+	jp   nz, .pl2			; If not, jump
+.pl1:
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	res  7, [hl]
+	res  OSTB_VISIBLE, [hl]
 	ret
-L1E4DC2:;J
+.pl2:;J
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	res  7, [hl]
+	res  OSTB_VISIBLE, [hl]
 	ret
-L1E4DC8:;C
-	ld   a, [$C1B6]
-	or   a
-	jp   nz, L1E4DE0
-	ld   de, $C1AB
+	
+; =============== CharSel_SetPlInfo ===============
+; Sets the selected characters into the player struct (wPlInfo).
+CharSel_SetPlInfo:
+	ld   a, [wCharSelCurPl]
+	or   a					; wCharSelCurPl == CHARSEL_1P?
+	jp   nz, .pl2			; If not, jump
+.pl1:
+	; Set the first team member for 1P, which always exist.
+	;
+	; Note that the character IDs written to the player struct are
+	; all multiplied by 2, to work as-is with ptr tables.
+	ld   de, wCharSelP1Char0		; DE = Ptr to 1st team member
+	ld   a, [de]					; A = CharId * 2
+	sla  a
+	
+	; Copy to current character ID (first to fight)
+	ld   hl, wPlInfo_Pl1+iPlInfo_CharId
+	ld   [hl], a
+	; Write to 1st team member ID
+	ld   hl, wPlInfo_Pl1+iPlInfo_TeamCharId0
+	ld   [hl], a
+	jp   .setOther
+.pl2:
+	; Like the other, but for 2P
+	ld   de, wCharSelP2Char0
 	ld   a, [de]
 	sla  a
-	ld   hl, $D92C
+	
+	ld   hl, wPlInfo_Pl2+iPlInfo_CharId
 	ld   [hl], a
-	ld   hl, $D92E
+	
+	ld   hl, wPlInfo_Pl2+iPlInfo_TeamCharId0
 	ld   [hl], a
-	jp   L1E4DEE
-L1E4DE0:;J
-	ld   de, $C1AE
-	ld   a, [de]
-	sla  a
-	ld   hl, $DA2C
-	ld   [hl], a
-	ld   hl, $DA2E
-	ld   [hl], a
-L1E4DEE:;J
-	inc  hl
-	inc  de
-	ld   b, $02
-L1E4DF2:;J
-	ld   a, [de]
-	cp   $FF
-	jr   z, L1E4DF9
-	sla  a
-L1E4DF9:;R
-	ld   [hl], a
-	inc  hl
-	inc  de
-	dec  b
-	jp   nz, L1E4DF2
+	
+.setOther:
+	;
+	; Write the 2nd and 3rd team members, which may not exist in case of CPU bosses or single mode.
+	; In those cases, both characters are set to the magic value CHAR_ID_NONE.
+	;
+	
+	; Switch to 2nd team member
+	inc  hl			; Seek to iPlInfo_TeamCharId1
+	inc  de			; Seek to wCharSelP*Char1
+	ld   b, 3-1		; B = Remaining characters
+.loop:
+	; Do not multiply the CHAR_ID_NONE marker.
+	ld   a, [de]		; A = CharId
+	cp   CHAR_ID_NONE	; Is this an empty slot?
+	jr   z, .noMul		; If so, jump
+	sla  a				; CharId *= 2
+.noMul:
+	ld   [hl], a		; Write it
+	inc  hl				; Next team member
+	inc  de				; ""
+	dec  b				; Copied all other members?
+	jp   nz, .loop		; If not, loop
 	ret
-L1E4E01:;C
-	ld   b, $00
-	ld   c, $00
-L1E4E05:;J
+	
+; =============== CharSel_DrawUnlockedChars ===============
+; Draws all of the portraits for unlocked characters.
+; This also sets the values that prevent the cursor from moving over
+; the locked characters.
+CharSel_DrawUnlockedChars:
+	; Go in the CHARSEL_ID_* order, since it's the order of the characters
+	ld   b, $00		; B = Starting character id
+	ld   c, $00		; C = Starting tile id base
+.loop:
+
+	;
+	; Hide locked characters.
+	;
+	; Hiding locked characters is simply accomplished by skipping the
+	; call to draw the portrait to the tilemap.
+	; Additionally, it also sets the wCharSelIdMapTbl entries for locked
+	; characters to CHAR_ID_NONE, which prevents access to those.
+	;
+
+	; Mr. Karate is only drawn when the "All Characters" dip switch is set
 	ld   a, b
-	cp   $0E
-	jp   z, L1E4E13
-	cp   $0F
-	jp   z, L1E4E13
-	jp   L1E4E26
-L1E4E13:;J
+	cp   CHARSEL_ID_MRKARATE0	; Trying to draw the first part of Mr. Karate's portrait?
+	jp   z, .chkUnlockMrKarate	; If so, jump
+	cp   CHARSEL_ID_MRKARATE1	; Trying to draw the second part of Mr. Karate's portrait?
+	jp   z, .chkUnlockMrKarate	; If so, jump
+	jp   .chkGoenitz			; Skip ahead
+.chkUnlockMrKarate:
 	ld   a, [wDipSwitch]
-	bit  7, a
-	jp   nz, L1E4E3F
-	ld   a, $FF
-	ld   [$C1A2], a
-	ld   [$C1A3], a
-	jp   L1E4E44
-L1E4E26:;J
+	bit  DIPB_UNLOCK_OTHER, a	; Are all characters unlocked?
+	jp   nz, .charOk			; If so, jump
+	; Otherwise, disable his slots and skip him
+	ld   a, CHAR_ID_NONE
+	ld   [wCharSelIdMapTbl+CHARSEL_ID_MRKARATE0], a
+	ld   [wCharSelIdMapTbl+CHARSEL_ID_MRKARATE1], a
+	jp   .nextChar
+.chkGoenitz:
 	ld   a, b
-	cp   $10
-	jp   z, L1E4E2F
-	jp   L1E4E3F
-L1E4E2F:;J
+	cp   CHARSEL_ID_GOENITZ		; Trying to draw Goenitz's portrait?
+	jp   z, .chkUnlockGoenitz	; If so, jump
+	jp   .charOk				; Everything else can be drawn
+.chkUnlockGoenitz:
 	ld   a, [wDipSwitch]
-	bit  6, a
-	jp   nz, L1E4E3F
-	ld   a, $FF
-	ld   [$C1A4], a
-	jp   L1E4E44
-L1E4E3F:;J
+	bit  DIPB_UNLOCK_GOENITZ, a	; Is Goenitz unlocked?
+	jp   nz, .charOk			; If so, jump
+	; Otherwise, disable his slot and skip him
+	ld   a, CHAR_ID_NONE
+	ld   [wCharSelIdMapTbl+CHARSEL_ID_GOENITZ], a
+	jp   .nextChar
+.charOk:
 	push bc
-	call L1E4E50
+	call CharSel_DrawPortrait
 	pop  bc
-L1E4E44:;J
-	ld   a, $09
-	add  c
+.nextChar:
+	; Set the info for the next portrait.
+	; Each portrait uses 9 continuous tiles, and they are also ordered by CHARSEL_ID_* in the GFX.
+	; Therefore, increasing the TileId offset by 9 is all that's needed to seek to the next. 
+	ld   a, $09				; TileId += 9
+	add  c					
 	ld   c, a
-	inc  b
+	inc  b					; Next portrait id
 	ld   a, b
-	cp   $12
-	jp   nz, L1E4E05
+	cp   CHARSEL_ID_LEONA+1	; Went past the last valid portrait?
+	jp   nz, .loop			; If so, jump
 	ret
-L1E4E50:;C
-	ld   hl, $4E8A
-	ld   a, b
+	
+; =============== CharSel_DrawPortrait ===============
+; Draws a character portrait.
+;
+; IN
+; - B: Portrait ID (CHARSEL_ID_*)
+;      Determines the portrait position.
+; - C: Base tile ID.
+;      This is supplied separately because some portraits are used by multiple characters
+;      (ie: Iori / Orochi Iori)
+CharSel_DrawPortrait:
+	;
+	; Index CharSel_IdBGMapTbl with B and read out its pointer to HL.
+	; 
+	ld   hl, CharSel_IdBGMapTbl	; HL = Map index
+	ld   a, b					; A = L + (CharselId * 2)			
 	sla  a
-	add  a, L
-	jp   nc, L1E4E5B
-L1E4E5A: db $24;X
-L1E4E5B:;J
-	ld   l, a
-	ld   e, [hl]
+	add  a, l
+	jp   nc, .noInc				; Did we overflow? If not, skip
+	inc  h						; If so, H++ (never happens)
+.noInc:
+	ld   l, a					; HL = CharSel_IdBGMapTbl entry
+	; Read out the tilemap ptr to DE
+	ld   e, [hl]				
 	inc  hl
-	ld   d, [hl]
-	push de
-	pop  hl
-	ld   de, $4F3F
+	ld   d, [hl]				
+	push de						; And move it to HL
+	pop  hl						; HL = Tilemap ptr
+	
+	;
+	; Draw the portrait.
+	; The tilemap for the portrait is always the same as it uses 9 consecutive tiles.
+	; What makes the difference is the base tile ID CopyBGToRectWithBase.
+	;
+	ld   de, BG_CharSel_Portrait; DE = Relative tile IDs
+	ld   a, c					; A = Tile ID base
+	ld   b, $03					; B = Portrait width
+	ld   c, $03					; C = Portrait height
+	call CopyBGToRectWithBase
+	ret
+	
+; =============== CharSel_ClearPortrait ===============
+; Clears a character portrait.
+; See also: CharSel_DrawPortrait
+;
+; IN
+; - B: Portrait ID (CHARSEL_ID_*)
+;      Determines the portrait position.
+; - C: Base tile ID. 
+;      Should always be $00, pointing to a black tile.
+CharSel_ClearPortrait:
+	;
+	; Index CharSel_IdBGMapTbl with B and read out its pointer to HL.
+	; 
+	ld   hl, CharSel_IdBGMapTbl	; HL = Map index
+	ld   a, b					; A = L + (CharselId * 2)			
+	sla  a
+	add  a, l
+	jp   nc, .noInc				; Did we overflow? If not, skip
+	inc  h						; If so, H++ (never happens)
+.noInc:
+	ld   l, a					; HL = CharSel_IdBGMapTbl entry
+	; Read out the tilemap ptr to DE
+	ld   e, [hl]				
+	inc  hl
+	ld   d, [hl]				
+	push de						; And move it to HL
+	pop  hl						; HL = Tilemap ptr
+	
+	; Replace the 3x3 portrait area with black tiles
+	ld   de, BG_CharSel_EmptyPortrait
 	ld   a, c
 	ld   b, $03
 	ld   c, $03
-	call L000DC2
+	call CopyBGToRectWithBase
 	ret
-L1E4E6D:;C
-	ld   hl, $4E8A
-	ld   a, b
-	sla  a
-	add  a, L
-	jp   nc, L1E4E78
-L1E4E77: db $24;X
-L1E4E78:;J
-	ld   l, a
-	ld   e, [hl]
-	inc  hl
-	ld   d, [hl]
-	push de
-	pop  hl
-	ld   de, $4F48
-	ld   a, c
-	ld   b, $03
-	ld   c, $03
-	call L000DC2
-	ret
-L1E4E8A: db $61
-L1E4E8B: db $98
-L1E4E8C: db $64
-L1E4E8D: db $98
-L1E4E8E: db $67
-L1E4E8F: db $98
-L1E4E90: db $6A
-L1E4E91: db $98
-L1E4E92: db $6D
-L1E4E93: db $98
-L1E4E94: db $70
-L1E4E95: db $98
-L1E4E96: db $C1
-L1E4E97: db $98
-L1E4E98: db $C4
-L1E4E99: db $98
-L1E4E9A: db $C7
-L1E4E9B: db $98
-L1E4E9C: db $CA
-L1E4E9D: db $98
-L1E4E9E: db $CD
-L1E4E9F: db $98
-L1E4EA0: db $D0
-L1E4EA1: db $98
-L1E4EA2: db $21
-L1E4EA3: db $99
-L1E4EA4: db $24
-L1E4EA5: db $99
-L1E4EA6: db $27
-L1E4EA7: db $99
-L1E4EA8: db $2A
-L1E4EA9: db $99
-L1E4EAA: db $2D
-L1E4EAB: db $99
-L1E4EAC: db $30
-L1E4EAD: db $99
-L1E4EAE: db $70
-L1E4EAF: db $98
-L1E4EB0: db $30
-L1E4EB1: db $99
-L1E4EB2: db $24
-L1E4EB3: db $99
-L1E4EB4:;C
+	
+; =============== CharSel_IdBGMapTbl ===============
+; This table maps portrait IDs to their origin in the tilemap.
+;
+; Portraits are 3 tiles wide and 3 tiles high, and their origin is the top-left tile.
+;
+CharSel_IdBGMapTbl:
+	dw $9861 ; CHARSEL_ID_KYO      
+	dw $9864 ; CHARSEL_ID_ANDY     
+	dw $9867 ; CHARSEL_ID_TERRY    
+	dw $986A ; CHARSEL_ID_RYO      
+	dw $986D ; CHARSEL_ID_ROBERT   
+	dw $9870 ; CHARSEL_ID_IORI     
+	dw $98C1 ; CHARSEL_ID_DAIMON   
+	dw $98C4 ; CHARSEL_ID_MAI      
+	dw $98C7 ; CHARSEL_ID_GEESE    
+	dw $98CA ; CHARSEL_ID_MRBIG    
+	dw $98CD ; CHARSEL_ID_KRAUSER  
+	dw $98D0 ; CHARSEL_ID_MATURE   
+	dw $9921 ; CHARSEL_ID_ATHENA   
+	dw $9924 ; CHARSEL_ID_CHIZURU  
+	dw $9927 ; CHARSEL_ID_MRKARATE0
+	dw $992A ; CHARSEL_ID_MRKARATE1
+	dw $992D ; CHARSEL_ID_GOENITZ  
+	dw $9930 ; CHARSEL_ID_LEONA
+	; These still happen to get used, unlike what's in CharSel_CursorPosTable.
+	; Unsurprisingly, they have the same tilemap pointers as their normal versions.
+	dw $9870 ; CHARSEL_ID_SPEC_OIORI 
+	dw $9930 ; CHARSEL_ID_SPEC_OLEONA
+	dw $9924 ; CHARSEL_ID_SPEC_KAGURA
+
+; =============== CharSel_IsVSRandCharEnabled ===============
+; Checks if the automatic character picker is enabled for both players in VS mode.
+; OUT
+; - C flag: If set, the autopicker is enabled
+CharSel_IsVSRandCharEnabled:
+	; Since CPUs don't exist in VS mode, the PS_CPU flag is reused to
+	; check if both players enabled the autopicker.
 	ld   a, [wPlayMode]
-	bit  1, a
-	jp   z, L1E4ECA
-L1E4EBC: db $FA;X
-L1E4EBD: db $20;X
-L1E4EBE: db $D9;X
-L1E4EBF: db $47;X
-L1E4EC0: db $FA;X
-L1E4EC1: db $20;X
-L1E4EC2: db $DA;X
-L1E4EC3: db $A0;X
-L1E4EC4: db $E6;X
-L1E4EC5: db $80;X
-L1E4EC6: db $28;X
-L1E4EC7: db $02;X
-L1E4EC8: db $37;X
-L1E4EC9: db $C9;X
-L1E4ECA:;J
+	bit  MODEB_VS, a						; Are we in VS mode?
+	jp   z, .notSet							; If not, jump
+	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
+	ld   b, a								; B = P1 status
+	ld   a, [wPlInfo_Pl2+iPlInfo_Status]	; A = P2 status
+	and  b									; Merge them
+	and  a, PS_CPU							; Is the CPU flag set on both?
+	jr   z, .notSet							; If not, jump
+.set:
+	scf  ; Autopicker enabled
+	ret 
+.notSet:
 	scf
-	ccf
+	ccf  ; Autopicker disabled
 	ret
-L1E4ECD:;C
+	
+; =============== CharSelect_IsCPUOpponent ===============
+; Checks if the current player is a CPU opponent, meaning it's not actively
+; controlled by the GB's joypad input.
+;
+; Note that this is separate from a player being CPU-controlled, as in CPU vs CPU matches
+; the player does get to control one of the cursors.
+;
+; OUT
+; - C flag: If set, this player is the CPU opponent
+CharSelect_IsCPUOpponent:
+
+	; No CPU opponents in VS modes
 	ld   a, [wPlayMode]
-	bit  1, a
-	jp   nz, L1E4EEF
-	ld   a, [$C1B6]
-	or   a
-	jp   nz, L1E4EE6
-	ld   a, [wUnknown_C165]
-	or   a
-	jp   z, L1E4EEF
-L1E4EE3: db $C3;X
-L1E4EE4: db $ED;X
-L1E4EE5: db $4E;X
-L1E4EE6:;J
-	ld   a, [wUnknown_C165]
-	or   a
-	jp   nz, L1E4EEF
-	scf
+	bit  MODEB_VS, a			; Are we in VS mode?
+	jp   nz, .retClear			; If so, return clear
+	
+	; Depending on the current player...
+	ld   a, [wCharSelCurPl]
+	or   a						; Currently handling player 1? (== CHARSEL_1P)
+	jp   nz, .chkCpu2P			; If not, jump
+.chkCpu1P:
+	; Currently handling 1P.
+	; For 1P to be a CPU opponent, P2 must have control on the char select screen
+	ld   a, [wJoyActivePl]
+	or   a						; Playing on the 1P side? (== ACTIVE_CTRL_PL1)
+	jp   z, .retClear			; If so, return clear
+	
+	jp   .retSet
+.chkCpu2P:
+	; Currently handling 2P.
+	; For 2P to be a CPU opponent, 1P must have control on the char select screen
+	ld   a, [wJoyActivePl]
+	or   a						; Playing on the 2P side? (!= ACTIVE_CTRL_PL1)
+	jp   nz, .retClear			; If so, return clear 
+.retSet:
+	scf		; C flag = 1, not controllable by player
 	ret
-L1E4EEF:;J
+.retClear:
 	scf
-	ccf
+	ccf		; C flag = 0, controllable by player
 	ret
-L1E4EF2:;C
+	
+; =============== CharSelect_IsLastWinner ===============
+; Checks if, in single modes, the active player won the last round.
+;
+; This is used to prevent the player from changing team between rounds,
+; unless it's after a game over.
+; OUT
+; - C flag: If set, the active side won
+CharSelect_IsLastWinner:
+	; Not applicable in VS mode, since both players are allowed to change teams
 	ld   a, [wPlayMode]
-	bit  1, a
-	jp   nz, L1E4F27
-	ld   a, [$C1B6]
-	or   a
-	jp   nz, L1E4F13
-	ld   a, [wUnknown_C165]
-	or   a
-	jp   nz, L1E4F27
-	ld   a, [$C162]
-	bit  0, a
-	jp   nz, L1E4F25
-	jp   L1E4F27
-L1E4F13: db $FA;X
-L1E4F14: db $65;X
-L1E4F15: db $C1;X
-L1E4F16: db $B7;X
-L1E4F17: db $CA;X
-L1E4F18: db $27;X
-L1E4F19: db $4F;X
-L1E4F1A: db $FA;X
-L1E4F1B: db $62;X
-L1E4F1C: db $C1;X
-L1E4F1D: db $CB;X
-L1E4F1E: db $4F;X
-L1E4F1F: db $C2;X
-L1E4F20: db $25;X
-L1E4F21: db $4F;X
-L1E4F22: db $C3;X
-L1E4F23: db $27;X
-L1E4F24: db $4F;X
-L1E4F25:;J
-	scf
+	bit  MODEB_VS, a		; Playing in VS mode?
+	jp   nz, .retClear		; If so, return clear
+	
+	; Depending on the current player...
+	ld   a, [wCharSelCurPl]
+	or   a					; Are we handling 1P?
+	jp   nz, .pl2			; If not, jump
+.pl1:
+	; Not applicable here if 1P is the CPU opponent
+	ld   a, [wJoyActivePl]
+	or   a					; Playing on the 1P side?
+	jp   nz, .retClear		; If not, return clear
+	
+	; Final check
+	ld   a, [wLastWinner]
+	bit  LASTWIN_PL1, a		; Did 1P win the last round?
+	jp   nz, .retSet		; If so, return set
+	
+	; Otherwise, we game over'd before.
+	; Allow changing the team.
+	jp   .retClear
+.pl2:
+	; Not applicable here if 2P is the CPU opponent
+	ld   a, [wJoyActivePl]
+	or   a					; Playing on the 1P side?
+	jp   z, .retClear		; If so, return clear
+	
+	; Final check
+	ld   a, [wLastWinner]
+	bit  LASTWIN_PL2, a		; Did 2P win the last round?
+	jp   nz, .retSet		; If so, return set
+	
+	; Otherwise, we game over'd before.
+	; Allow changing the team.
+	jp   .retClear
+.retSet:
+	scf		; C flag = 1
 	ret
-L1E4F27:;J
+.retClear:
 	scf
-	ccf
+	ccf		; C flag = 0
 	ret
-L1E4F2A: db $00
-L1E4F2B: db $03
-L1E4F2C: db $02
-L1E4F2D: db $04
-L1E4F2E: db $05
-L1E4F2F: db $0C
-L1E4F30: db $01
-L1E4F31: db $07
-L1E4F32: db $09
-L1E4F33: db $0B
-L1E4F34: db $0A
-L1E4F35: db $0D
-L1E4F36: db $06
-L1E4F37: db $0E
-L1E4F38: db $10
-L1E4F39: db $10
-L1E4F3A: db $0F
-L1E4F3B: db $08
-L1E4F3C: db $11
-L1E4F3D: db $12
-L1E4F3E: db $13
-L1E4F3F: db $2F
-L1E4F40: db $30
-L1E4F41: db $31
-L1E4F42: db $32
-L1E4F43: db $33
-L1E4F44: db $34
-L1E4F45: db $35
-L1E4F46: db $36
-L1E4F47: db $37
-L1E4F48: db $00
-L1E4F49: db $00
-L1E4F4A: db $00
-L1E4F4B: db $00
-L1E4F4C: db $00
-L1E4F4D: db $00
-L1E4F4E: db $00
-L1E4F4F: db $00
-L1E4F50: db $00
-L1E4F51: db $23
-L1E4F52: db $98
-L1E4F53: db $0E
-L1E4F54: db $50
-L1E4F55: db $4C
-L1E4F56: db $41
-L1E4F57: db $59
-L1E4F58: db $45
-L1E4F59: db $52
-L1E4F5A: db $20
-L1E4F5B: db $20
-L1E4F5C: db $53
-L1E4F5D: db $45
-L1E4F5E: db $4C
-L1E4F5F: db $45
-L1E4F60: db $43
-L1E4F61: db $54
-L1E4F62: db $24
-L1E4F63: db $98
-L1E4F64: db $0C
-L1E4F65: db $54
-L1E4F66: db $45
-L1E4F67: db $41
-L1E4F68: db $4D
-L1E4F69: db $20
-L1E4F6A: db $20
-L1E4F6B: db $53
-L1E4F6C: db $45
-L1E4F6D: db $4C
-L1E4F6E: db $45
-L1E4F6F: db $43
-L1E4F70: db $54
-L1E4F71: db $FF
-L1E4F72: db $FF
-L1E4F73: db $A0
-L1E4F74: db $FB
-L1E4F75: db $D7
-L1E4F76: db $F6
-L1E4F77: db $AE
-L1E4F78: db $EF
-L1E4F79: db $CF
-L1E4F7A: db $EF
-L1E4F7B: db $9B
-L1E4F7C: db $DF
-L1E4F7D: db $D1
-L1E4F7E: db $DD
-L1E4F7F: db $91
-L1E4F80: db $A8
-L1E4F81: db $FF
-L1E4F82: db $FF
-L1E4F83: db $00
-L1E4F84: db $20
-L1E4F85: db $40
-L1E4F86: db $C0
-L1E4F87: db $80
-L1E4F88: db $C0
-L1E4F89: db $80
-L1E4F8A: db $80
-L1E4F8B: db $08
-L1E4F8C: db $8C
-L1E4F8D: db $18
-L1E4F8E: db $1C
-L1E4F8F: db $39
-L1E4F90: db $39
-L1E4F91: db $FF
-L1E4F92: db $FF
-L1E4F93: db $7F
-L1E4F94: db $FF
-L1E4F95: db $3F
-L1E4F96: db $7F
-L1E4F97: db $01
-L1E4F98: db $33
-L1E4F99: db $01
-L1E4F9A: db $21
-L1E4F9B: db $01
-L1E4F9C: db $01
-L1E4F9D: db $C1
-L1E4F9E: db $C1
-L1E4F9F: db $F1
-L1E4FA0: db $F1
-L1E4FA1: db $88
-L1E4FA2: db $A0
-L1E4FA3: db $A0
-L1E4FA4: db $80
-L1E4FA5: db $80
-L1E4FA6: db $80
-L1E4FA7: db $80
-L1E4FA8: db $82
-L1E4FA9: db $80
-L1E4FAA: db $83
-L1E4FAB: db $93
-L1E4FAC: db $9B
-L1E4FAD: db $93
-L1E4FAE: db $9B
-L1E4FAF: db $91
-L1E4FB0: db $9B
-L1E4FB1: db $1B
-L1E4FB2: db $1B
-L1E4FB3: db $01
-L1E4FB4: db $01
-L1E4FB5: db $06
-L1E4FB6: db $C6
-L1E4FB7: db $03
-L1E4FB8: db $03
-L1E4FB9: db $49
-L1E4FBA: db $49
-L1E4FBB: db $0B
-L1E4FBC: db $0B
-L1E4FBD: db $1F
-L1E4FBE: db $9F
-L1E4FBF: db $FE
-L1E4FC0: db $FF
-L1E4FC1: db $F9
-L1E4FC2: db $F9
-L1E4FC3: db $F9
-L1E4FC4: db $F9
-L1E4FC5: db $79
-L1E4FC6: db $79
-L1E4FC7: db $11
-L1E4FC8: db $91
-L1E4FC9: db $01
-L1E4FCA: db $C1
-L1E4FCB: db $01
-L1E4FCC: db $09
-L1E4FCD: db $01
-L1E4FCE: db $91
-L1E4FCF: db $01
-L1E4FD0: db $01
-L1E4FD1: db $C9
-L1E4FD2: db $CD
-L1E4FD3: db $C0
-L1E4FD4: db $E1
-L1E4FD5: db $A0
-L1E4FD6: db $F0
-L1E4FD7: db $C0
-L1E4FD8: db $E0
-L1E4FD9: db $90
-L1E4FDA: db $D9
-L1E4FDB: db $D1
-L1E4FDC: db $DD
-L1E4FDD: db $91
-L1E4FDE: db $DD
-L1E4FDF: db $FF
-L1E4FE0: db $FF
-L1E4FE1: db $CF
-L1E4FE2: db $FF
-L1E4FE3: db $C0
-L1E4FE4: db $C7
-L1E4FE5: db $CC
-L1E4FE6: db $EC
-L1E4FE7: db $60
-L1E4FE8: db $F3
-L1E4FE9: db $3C
-L1E4FEA: db $7F
-L1E4FEB: db $1C
-L1E4FEC: db $BF
-L1E4FED: db $80
-L1E4FEE: db $DE
-L1E4FEF: db $FF
-L1E4FF0: db $FF
-L1E4FF1: db $41
-L1E4FF2: db $F1
-L1E4FF3: db $41
-L1E4FF4: db $E1
-L1E4FF5: db $09
-L1E4FF6: db $E9
-L1E4FF7: db $11
-L1E4FF8: db $D9
-L1E4FF9: db $21
-L1E4FFA: db $B3
-L1E4FFB: db $55
-L1E4FFC: db $7F
-L1E4FFD: db $AB
-L1E4FFE: db $FF
-L1E4FFF: db $FF
-L1E5000: db $FF
-L1E5001: db $FF
-L1E5002: db $FF
-L1E5003: db $D1
-L1E5004: db $F9
-L1E5005: db $A5
-L1E5006: db $F5
-L1E5007: db $D4
-L1E5008: db $F6
-L1E5009: db $A8
-L1E500A: db $E8
-L1E500B: db $CB
-L1E500C: db $EB
-L1E500D: db $A3
-L1E500E: db $EB
-L1E500F: db $D6
-L1E5010: db $D6
-L1E5011: db $FF
-L1E5012: db $FF
-L1E5013: db $20
-L1E5014: db $BE
-L1E5015: db $21
-L1E5016: db $BD
-L1E5017: db $21
-L1E5018: db $BD
-L1E5019: db $92
-L1E501A: db $DB
-L1E501B: db $12
-L1E501C: db $5A
-L1E501D: db $00
-L1E501E: db $29
-L1E501F: db $83
-L1E5020: db $C7
-L1E5021: db $FF
-L1E5022: db $FF
-L1E5023: db $81
-L1E5024: db $EF
-L1E5025: db $01
-L1E5026: db $D7
-L1E5027: db $01
-L1E5028: db $B7
-L1E5029: db $01
-L1E502A: db $2B
-L1E502B: db $01
-L1E502C: db $DB
-L1E502D: db $81
-L1E502E: db $ED
-L1E502F: db $81
-L1E5030: db $D9
-L1E5031: db $90
-L1E5032: db $D0
-L1E5033: db $D0
-L1E5034: db $D6
-L1E5035: db $90
-L1E5036: db $D5
-L1E5037: db $C2
-L1E5038: db $E2
-L1E5039: db $80
-L1E503A: db $D0
-L1E503B: db $D3
-L1E503C: db $D3
-L1E503D: db $92
-L1E503E: db $D2
-L1E503F: db $D5
-L1E5040: db $D5
-L1E5041: db $93
-L1E5042: db $BF
-L1E5043: db $17
-L1E5044: db $BF
-L1E5045: db $16
-L1E5046: db $3F
-L1E5047: db $08
-L1E5048: db $AA
-L1E5049: db $00
-L1E504A: db $49
-L1E504B: db $00
-L1E504C: db $2A
-L1E504D: db $00
-L1E504E: db $08
-L1E504F: db $C1
-L1E5050: db $EF
-L1E5051: db $81
-L1E5052: db $C5
-L1E5053: db $01
-L1E5054: db $B5
-L1E5055: db $01
-L1E5056: db $47
-L1E5057: db $01
-L1E5058: db $B3
-L1E5059: db $01
-L1E505A: db $05
-L1E505B: db $41
-L1E505C: db $45
-L1E505D: db $21
-L1E505E: db $25
-L1E505F: db $C1
-L1E5060: db $D5
-L1E5061: db $AA
-L1E5062: db $EA
-L1E5063: db $C3
-L1E5064: db $E3
-L1E5065: db $AD
-L1E5066: db $ED
-L1E5067: db $CC
-L1E5068: db $ED
-L1E5069: db $AC
-L1E506A: db $EE
-L1E506B: db $CC
-L1E506C: db $EF
-L1E506D: db $AC
-L1E506E: db $EF
-L1E506F: db $FF
-L1E5070: db $FF
-L1E5071: db $26
-L1E5072: db $2F
-L1E5073: db $FF
-L1E5074: db $FF
-L1E5075: db $C3
-L1E5076: db $E3
-L1E5077: db $DC
-L1E5078: db $DD
-L1E5079: db $60
-L1E507A: db $E1
-L1E507B: db $3C
-L1E507C: db $7F
-L1E507D: db $08
-L1E507E: db $9E
-L1E507F: db $FF
-L1E5080: db $FF
-L1E5081: db $01
-L1E5082: db $2B
-L1E5083: db $81
-L1E5084: db $E7
-L1E5085: db $01
-L1E5086: db $D7
-L1E5087: db $01
-L1E5088: db $D9
-L1E5089: db $01
-L1E508A: db $A7
-L1E508B: db $01
-L1E508C: db $1F
-L1E508D: db $01
-L1E508E: db $3F
-L1E508F: db $FF
-L1E5090: db $FF
-L1E5091: db $FF
-L1E5092: db $FF
-L1E5093: db $A3
-L1E5094: db $F3
-L1E5095: db $D3
-L1E5096: db $F7
-L1E5097: db $A3
-L1E5098: db $EF
-L1E5099: db $C3
-L1E509A: db $EF
-L1E509B: db $A0
-L1E509C: db $EE
-L1E509D: db $C1
-L1E509E: db $E8
-L1E509F: db $A7
-L1E50A0: db $E0
-L1E50A1: db $FF
-L1E50A2: db $FF
-L1E50A3: db $FF
-L1E50A4: db $FF
-L1E50A5: db $FF
-L1E50A6: db $FF
-L1E50A7: db $FF
-L1E50A8: db $FF
-L1E50A9: db $FF
-L1E50AA: db $FF
-L1E50AB: db $03
-L1E50AC: db $03
-L1E50AD: db $FC
-L1E50AE: db $00
-L1E50AF: db $FF
-L1E50B0: db $00
-L1E50B1: db $FF
-L1E50B2: db $FF
-L1E50B3: db $D9
-L1E50B4: db $C1
-L1E50B5: db $DF
-L1E50B6: db $C1
-L1E50B7: db $EF
-L1E50B8: db $E1
-L1E50B9: db $EF
-L1E50BA: db $E1
-L1E50BB: db $EF
-L1E50BC: db $E1
-L1E50BD: db $6F
-L1E50BE: db $61
-L1E50BF: db $8F
-L1E50C0: db $01
-L1E50C1: db $CF
-L1E50C2: db $E0
-L1E50C3: db $9F
-L1E50C4: db $C1
-L1E50C5: db $BE
-L1E50C6: db $8E
-L1E50C7: db $F0
-L1E50C8: db $B0
-L1E50C9: db $C0
-L1E50CA: db $C2
-L1E50CB: db $81
-L1E50CC: db $85
-L1E50CD: db $A4
-L1E50CE: db $F5
-L1E50CF: db $D0
-L1E50D0: db $F9
-L1E50D1: db $FF
-L1E50D2: db $00
-L1E50D3: db $FF
-L1E50D4: db $FF
-L1E50D5: db $00
-L1E50D6: db $00
-L1E50D7: db $02
-L1E50D8: db $92
-L1E50D9: db $13
-L1E50DA: db $17
-L1E50DB: db $48
-L1E50DC: db $4E
-L1E50DD: db $80
-L1E50DE: db $97
-L1E50DF: db $0C
-L1E50E0: db $DF
-L1E50E1: db $C7
-L1E50E2: db $C1
-L1E50E3: db $01
-L1E50E4: db $11
-L1E50E5: db $09
-L1E50E6: db $09
-L1E50E7: db $4B
-L1E50E8: db $4B
-L1E50E9: db $21
-L1E50EA: db $2B
-L1E50EB: db $71
-L1E50EC: db $77
-L1E50ED: db $71
-L1E50EE: db $F7
-L1E50EF: db $F1
-L1E50F0: db $F1
-L1E50F1: db $AA
-L1E50F2: db $FE
-L1E50F3: db $90
-L1E50F4: db $98
-L1E50F5: db $A9
-L1E50F6: db $EB
-L1E50F7: db $92
-L1E50F8: db $B6
-L1E50F9: db $80
-L1E50FA: db $C0
-L1E50FB: db $A0
-L1E50FC: db $A0
-L1E50FD: db $C0
-L1E50FE: db $D8
-L1E50FF: db $FF
-L1E5100: db $FF
-L1E5101: db $08
-L1E5102: db $DE
-L1E5103: db $00
-L1E5104: db $CC
-L1E5105: db $02
-L1E5106: db $73
-L1E5107: db $80
-L1E5108: db $3C
-L1E5109: db $01
-L1E510A: db $1C
-L1E510B: db $E1
-L1E510C: db $0C
-L1E510D: db $F1
-L1E510E: db $00
-L1E510F: db $FF
-L1E5110: db $FF
-L1E5111: db $E5
-L1E5112: db $F1
-L1E5113: db $C9
-L1E5114: db $E1
-L1E5115: db $17
-L1E5116: db $87
-L1E5117: db $49
-L1E5118: db $09
-L1E5119: db $B7
-L1E511A: db $37
-L1E511B: db $21
-L1E511C: db $2F
-L1E511D: db $21
-L1E511E: db $2F
-L1E511F: db $FF
-L1E5120: db $FF
-L1E5121: db $FF
-L1E5122: db $FF
-L1E5123: db $80
-L1E5124: db $9F
-L1E5125: db $80
-L1E5126: db $EC
-L1E5127: db $83
-L1E5128: db $DB
-L1E5129: db $82
-L1E512A: db $A6
-L1E512B: db $80
-L1E512C: db $CC
-L1E512D: db $80
-L1E512E: db $AA
-L1E512F: db $80
-L1E5130: db $D5
-L1E5131: db $FF
-L1E5132: db $FF
-L1E5133: db $80
-L1E5134: db $96
-L1E5135: db $45
-L1E5136: db $E7
-L1E5137: db $02
-L1E5138: db $A2
-L1E5139: db $41
-L1E513A: db $55
-L1E513B: db $80
-L1E513C: db $B5
-L1E513D: db $04
-L1E513E: db $AE
-L1E513F: db $0C
-L1E5140: db $6E
-L1E5141: db $FF
-L1E5142: db $FF
-L1E5143: db $65
-L1E5144: db $E7
-L1E5145: db $99
-L1E5146: db $99
-L1E5147: db $C5
-L1E5148: db $C7
-L1E5149: db $61
-L1E514A: db $69
-L1E514B: db $21
-L1E514C: db $B5
-L1E514D: db $05
-L1E514E: db $B5
-L1E514F: db $81
-L1E5150: db $DB
-L1E5151: db $80
-L1E5152: db $C5
-L1E5153: db $80
-L1E5154: db $92
-L1E5155: db $80
-L1E5156: db $D0
-L1E5157: db $80
-L1E5158: db $D8
-L1E5159: db $85
-L1E515A: db $85
-L1E515B: db $84
-L1E515C: db $A4
-L1E515D: db $82
-L1E515E: db $AA
-L1E515F: db $81
-L1E5160: db $D7
-L1E5161: db $0C
-L1E5162: db $6E
-L1E5163: db $0C
-L1E5164: db $DE
-L1E5165: db $46
-L1E5166: db $5F
-L1E5167: db $00
-L1E5168: db $14
-L1E5169: db $08
-L1E516A: db $08
-L1E516B: db $0C
-L1E516C: db $6E
-L1E516D: db $0E
-L1E516E: db $CF
-L1E516F: db $8E
-L1E5170: db $CF
-L1E5171: db $C1
-L1E5172: db $EB
-L1E5173: db $C1
-L1E5174: db $C9
-L1E5175: db $01
-L1E5176: db $11
-L1E5177: db $01
-L1E5178: db $09
-L1E5179: db $A5
-L1E517A: db $A5
-L1E517B: db $25
-L1E517C: db $25
-L1E517D: db $51
-L1E517E: db $55
-L1E517F: db $21
-L1E5180: db $EB
-L1E5181: db $80
-L1E5182: db $C7
-L1E5183: db $80
-L1E5184: db $EB
-L1E5185: db $80
-L1E5186: db $EB
-L1E5187: db $80
-L1E5188: db $C5
-L1E5189: db $B0
-L1E518A: db $B0
-L1E518B: db $EA
-L1E518C: db $E0
-L1E518D: db $D4
-L1E518E: db $C0
-L1E518F: db $FF
-L1E5190: db $FF
-L1E5191: db $86
-L1E5192: db $E7
-L1E5193: db $01
-L1E5194: db $E1
-L1E5195: db $1D
-L1E5196: db $DD
-L1E5197: db $03
-L1E5198: db $C3
-L1E5199: db $0E
-L1E519A: db $7F
-L1E519B: db $04
-L1E519C: db $9C
-L1E519D: db $00
-L1E519E: db $E1
-L1E519F: db $FF
-L1E51A0: db $FF
-L1E51A1: db $E1
-L1E51A2: db $E7
-L1E51A3: db $C1
-L1E51A4: db $E7
-L1E51A5: db $D1
-L1E51A6: db $C3
-L1E51A7: db $99
-L1E51A8: db $81
-L1E51A9: db $17
-L1E51AA: db $47
-L1E51AB: db $2D
-L1E51AC: db $8D
-L1E51AD: db $59
-L1E51AE: db $19
-L1E51AF: db $FF
-L1E51B0: db $FF
-L1E51B1: db $FF
-L1E51B2: db $FF
-L1E51B3: db $AC
-L1E51B4: db $EF
-L1E51B5: db $C8
-L1E51B6: db $DC
-L1E51B7: db $90
-L1E51B8: db $99
-L1E51B9: db $80
-L1E51BA: db $D3
-L1E51BB: db $80
-L1E51BC: db $8B
-L1E51BD: db $C0
-L1E51BE: db $CD
-L1E51BF: db $90
-L1E51C0: db $DE
-L1E51C1: db $FF
-L1E51C2: db $FF
-L1E51C3: db $00
-L1E51C4: db $00
-L1E51C5: db $00
-L1E51C6: db $00
-L1E51C7: db $00
-L1E51C8: db $80
-L1E51C9: db $00
-L1E51CA: db $80
-L1E51CB: db $00
-L1E51CC: db $80
-L1E51CD: db $00
-L1E51CE: db $80
-L1E51CF: db $00
-L1E51D0: db $00
-L1E51D1: db $FF
-L1E51D2: db $FF
-L1E51D3: db $0B
-L1E51D4: db $0F
-L1E51D5: db $05
-L1E51D6: db $07
-L1E51D7: db $03
-L1E51D8: db $03
-L1E51D9: db $01
-L1E51DA: db $03
-L1E51DB: db $01
-L1E51DC: db $01
-L1E51DD: db $01
-L1E51DE: db $01
-L1E51DF: db $01
-L1E51E0: db $01
-L1E51E1: db $D0
-L1E51E2: db $DC
-L1E51E3: db $B0
-L1E51E4: db $B9
-L1E51E5: db $A0
-L1E51E6: db $A0
-L1E51E7: db $92
-L1E51E8: db $D2
-L1E51E9: db $C4
-L1E51EA: db $EC
-L1E51EB: db $A6
-L1E51EC: db $EE
-L1E51ED: db $CC
-L1E51EE: db $DC
-L1E51EF: db $9F
-L1E51F0: db $DF
-L1E51F1: db $00
-L1E51F2: db $40
-L1E51F3: db $04
-L1E51F4: db $E4
-L1E51F5: db $08
-L1E51F6: db $2E
-L1E51F7: db $08
-L1E51F8: db $6A
-L1E51F9: db $04
-L1E51FA: db $76
-L1E51FB: db $40
-L1E51FC: db $72
-L1E51FD: db $84
-L1E51FE: db $F4
-L1E51FF: db $88
-L1E5200: db $FC
-L1E5201: db $01
-L1E5202: db $01
-L1E5203: db $01
-L1E5204: db $01
-L1E5205: db $01
-L1E5206: db $01
-L1E5207: db $01
-L1E5208: db $01
-L1E5209: db $01
-L1E520A: db $01
-L1E520B: db $01
-L1E520C: db $01
-L1E520D: db $01
-L1E520E: db $01
-L1E520F: db $01
-L1E5210: db $03
-L1E5211: db $C0
-L1E5212: db $E8
-L1E5213: db $A6
-L1E5214: db $F6
-L1E5215: db $D1
-L1E5216: db $F9
-L1E5217: db $AB
-L1E5218: db $FB
-L1E5219: db $D4
-L1E521A: db $FD
-L1E521B: db $A9
-L1E521C: db $FD
-L1E521D: db $D4
-L1E521E: db $FC
-L1E521F: db $FF
-L1E5220: db $FF
-L1E5221: db $80
-L1E5222: db $F2
-L1E5223: db $82
-L1E5224: db $F7
-L1E5225: db $C2
-L1E5226: db $F7
-L1E5227: db $C0
-L1E5228: db $E0
-L1E5229: db $DF
-L1E522A: db $C8
-L1E522B: db $BF
-L1E522C: db $98
-L1E522D: db $7F
-L1E522E: db $00
-L1E522F: db $FF
-L1E5230: db $FF
-L1E5231: db $03
-L1E5232: db $03
-L1E5233: db $05
-L1E5234: db $07
-L1E5235: db $33
-L1E5236: db $B7
-L1E5237: db $01
-L1E5238: db $03
-L1E5239: db $C1
-L1E523A: db $01
-L1E523B: db $C1
-L1E523C: db $01
-L1E523D: db $C1
-L1E523E: db $01
-L1E523F: db $FF
-L1E5240: db $FF
-L1E5241: db $FF
-L1E5242: db $FF
-L1E5243: db $FF
-L1E5244: db $80
-L1E5245: db $FF
-L1E5246: db $80
-L1E5247: db $FF
-L1E5248: db $80
-L1E5249: db $FF
-L1E524A: db $80
-L1E524B: db $FF
-L1E524C: db $80
-L1E524D: db $FF
-L1E524E: db $80
-L1E524F: db $FF
-L1E5250: db $80
-L1E5251: db $FF
-L1E5252: db $FF
-L1E5253: db $FF
-L1E5254: db $12
-L1E5255: db $FF
-L1E5256: db $36
-L1E5257: db $BF
-L1E5258: db $7D
-L1E5259: db $DF
-L1E525A: db $68
-L1E525B: db $F7
-L1E525C: db $48
-L1E525D: db $3D
-L1E525E: db $C0
-L1E525F: db $ED
-L1E5260: db $80
-L1E5261: db $FF
-L1E5262: db $FF
-L1E5263: db $FF
-L1E5264: db $53
-L1E5265: db $FF
-L1E5266: db $FB
-L1E5267: db $AF
-L1E5268: db $DD
-L1E5269: db $FF
-L1E526A: db $89
-L1E526B: db $27
-L1E526C: db $89
-L1E526D: db $AD
-L1E526E: db $01
-L1E526F: db $A5
-L1E5270: db $01
-L1E5271: db $FF
-L1E5272: db $80
-L1E5273: db $FF
-L1E5274: db $80
-L1E5275: db $FF
-L1E5276: db $80
-L1E5277: db $DB
-L1E5278: db $80
-L1E5279: db $DB
-L1E527A: db $80
-L1E527B: db $DB
-L1E527C: db $80
-L1E527D: db $EB
-L1E527E: db $80
-L1E527F: db $A5
-L1E5280: db $80
-L1E5281: db $69
-L1E5282: db $82
-L1E5283: db $C9
-L1E5284: db $12
-L1E5285: db $C0
-L1E5286: db $16
-L1E5287: db $80
-L1E5288: db $0E
-L1E5289: db $A0
-L1E528A: db $25
-L1E528B: db $86
-L1E528C: db $17
-L1E528D: db $07
-L1E528E: db $77
-L1E528F: db $03
-L1E5290: db $73
-L1E5291: db $45
-L1E5292: db $11
-L1E5293: db $05
-L1E5294: db $01
-L1E5295: db $45
-L1E5296: db $49
-L1E5297: db $01
-L1E5298: db $BD
-L1E5299: db $3B
-L1E529A: db $F9
-L1E529B: db $79
-L1E529C: db $F9
-L1E529D: db $F9
-L1E529E: db $FF
-L1E529F: db $CD
-L1E52A0: db $CD
-L1E52A1: db $91
-L1E52A2: db $C0
-L1E52A3: db $C6
-L1E52A4: db $C6
-L1E52A5: db $BF
-L1E52A6: db $BF
-L1E52A7: db $C7
-L1E52A8: db $C7
-L1E52A9: db $A8
-L1E52AA: db $F8
-L1E52AB: db $D4
-L1E52AC: db $FC
-L1E52AD: db $A8
-L1E52AE: db $F8
-L1E52AF: db $FF
-L1E52B0: db $FF
-L1E52B1: db $10
-L1E52B2: db $71
-L1E52B3: db $13
-L1E52B4: db $3B
-L1E52B5: db $48
-L1E52B6: db $5C
-L1E52B7: db $E1
-L1E52B8: db $EF
-L1E52B9: db $F0
-L1E52BA: db $F7
-L1E52BB: db $38
-L1E52BC: db $39
-L1E52BD: db $18
-L1E52BE: db $1A
-L1E52BF: db $FF
-L1E52C0: db $FF
-L1E52C1: db $1D
-L1E52C2: db $1D
-L1E52C3: db $83
-L1E52C4: db $B3
-L1E52C5: db $5F
-L1E52C6: db $DF
-L1E52C7: db $8F
-L1E52C8: db $CF
-L1E52C9: db $A7
-L1E52CA: db $A7
-L1E52CB: db $37
-L1E52CC: db $B7
-L1E52CD: db $65
-L1E52CE: db $65
-L1E52CF: db $FF
-L1E52D0: db $FF
-L1E52D1: db $FF
-L1E52D2: db $FF
-L1E52D3: db $C0
-L1E52D4: db $E0
-L1E52D5: db $81
-L1E52D6: db $C1
-L1E52D7: db $C7
-L1E52D8: db $C7
-L1E52D9: db $8D
-L1E52DA: db $CD
-L1E52DB: db $D3
-L1E52DC: db $D3
-L1E52DD: db $8C
-L1E52DE: db $CE
-L1E52DF: db $D0
-L1E52E0: db $D8
-L1E52E1: db $FF
-L1E52E2: db $FF
-L1E52E3: db $6E
-L1E52E4: db $60
-L1E52E5: db $DF
-L1E52E6: db $C0
-L1E52E7: db $DF
-L1E52E8: db $C0
-L1E52E9: db $DF
-L1E52EA: db $C0
-L1E52EB: db $0E
-L1E52EC: db $E0
-L1E52ED: db $00
-L1E52EE: db $00
-L1E52EF: db $1A
-L1E52F0: db $3F
-L1E52F1: db $FF
-L1E52F2: db $FF
-L1E52F3: db $C5
-L1E52F4: db $C7
-L1E52F5: db $63
-L1E52F6: db $67
-L1E52F7: db $15
-L1E52F8: db $77
-L1E52F9: db $23
-L1E52FA: db $77
-L1E52FB: db $05
-L1E52FC: db $F7
-L1E52FD: db $03
-L1E52FE: db $07
-L1E52FF: db $01
-L1E5300: db $C3
-L1E5301: db $80
-L1E5302: db $D2
-L1E5303: db $C2
-L1E5304: db $C3
-L1E5305: db $87
-L1E5306: db $A7
-L1E5307: db $86
-L1E5308: db $A6
-L1E5309: db $A7
-L1E530A: db $B7
-L1E530B: db $A5
-L1E530C: db $B5
-L1E530D: db $A5
-L1E530E: db $BD
-L1E530F: db $D4
-L1E5310: db $D5
-L1E5311: db $08
-L1E5312: db $1A
-L1E5313: db $00
-L1E5314: db $8A
-L1E5315: db $00
-L1E5316: db $06
-L1E5317: db $00
-L1E5318: db $E6
-L1E5319: db $80
-L1E531A: db $DA
-L1E531B: db $00
-L1E531C: db $B2
-L1E531D: db $80
-L1E531E: db $F6
-L1E531F: db $80
-L1E5320: db $F8
-L1E5321: db $03
-L1E5322: db $8B
-L1E5323: db $01
-L1E5324: db $3B
-L1E5325: db $03
-L1E5326: db $17
-L1E5327: db $01
-L1E5328: db $7B
-L1E5329: db $03
-L1E532A: db $9B
-L1E532B: db $01
-L1E532C: db $7B
-L1E532D: db $03
-L1E532E: db $77
-L1E532F: db $05
-L1E5330: db $E7
-L1E5331: db $A6
-L1E5332: db $E6
-L1E5333: db $D7
-L1E5334: db $D7
-L1E5335: db $93
-L1E5336: db $D7
-L1E5337: db $A1
-L1E5338: db $AB
-L1E5339: db $A0
-L1E533A: db $A8
-L1E533B: db $D2
-L1E533C: db $DB
-L1E533D: db $A4
-L1E533E: db $B7
-L1E533F: db $FF
-L1E5340: db $FF
-L1E5341: db $40
-L1E5342: db $C0
-L1E5343: db $BF
-L1E5344: db $BF
-L1E5345: db $80
-L1E5346: db $80
-L1E5347: db $FC
-L1E5348: db $FF
-L1E5349: db $D0
-L1E534A: db $FF
-L1E534B: db $18
-L1E534C: db $3E
-L1E534D: db $00
-L1E534E: db $80
-L1E534F: db $FF
-L1E5350: db $FF
-L1E5351: db $03
-L1E5352: db $77
-L1E5353: db $85
-L1E5354: db $B7
-L1E5355: db $03
-L1E5356: db $37
-L1E5357: db $05
-L1E5358: db $EF
-L1E5359: db $0B
-L1E535A: db $EF
-L1E535B: db $05
-L1E535C: db $CF
-L1E535D: db $03
-L1E535E: db $37
-L1E535F: db $FF
-L1E5360: db $FF
-L1E5361: db $FF
-L1E5362: db $FF
-L1E5363: db $83
-L1E5364: db $A3
-L1E5365: db $82
-L1E5366: db $C7
-L1E5367: db $83
-L1E5368: db $C6
-L1E5369: db $83
-L1E536A: db $8F
-L1E536B: db $87
-L1E536C: db $8F
-L1E536D: db $84
-L1E536E: db $8F
-L1E536F: db $80
-L1E5370: db $9E
-L1E5371: db $FF
-L1E5372: db $FF
-L1E5373: db $0E
-L1E5374: db $B0
-L1E5375: db $74
-L1E5376: db $78
-L1E5377: db $C0
-L1E5378: db $F0
-L1E5379: db $80
-L1E537A: db $C0
-L1E537B: db $00
-L1E537C: db $91
-L1E537D: db $00
-L1E537E: db $21
-L1E537F: db $01
-L1E5380: db $63
-L1E5381: db $FF
-L1E5382: db $FF
-L1E5383: db $01
-L1E5384: db $01
-L1E5385: db $51
-L1E5386: db $31
-L1E5387: db $09
-L1E5388: db $0D
-L1E5389: db $05
-L1E538A: db $87
-L1E538B: db $81
-L1E538C: db $83
-L1E538D: db $81
-L1E538E: db $D1
-L1E538F: db $C1
-L1E5390: db $D1
-L1E5391: db $A8
-L1E5392: db $94
-L1E5393: db $D4
-L1E5394: db $A8
-L1E5395: db $E8
-L1E5396: db $81
-L1E5397: db $80
-L1E5398: db $83
-L1E5399: db $80
-L1E539A: db $80
-L1E539B: db $82
-L1E539C: db $C2
-L1E539D: db $82
-L1E539E: db $B2
-L1E539F: db $A3
-L1E53A0: db $B3
-L1E53A1: db $03
-L1E53A2: db $C7
-L1E53A3: db $01
-L1E53A4: db $0F
-L1E53A5: db $C3
-L1E53A6: db $F3
-L1E53A7: db $03
-L1E53A8: db $0B
-L1E53A9: db $07
-L1E53AA: db $07
-L1E53AB: db $87
-L1E53AC: db $87
-L1E53AD: db $0F
-L1E53AE: db $8F
-L1E53AF: db $1F
-L1E53B0: db $2F
-L1E53B1: db $C1
-L1E53B2: db $D1
-L1E53B3: db $C1
-L1E53B4: db $C1
-L1E53B5: db $D1
-L1E53B6: db $C1
-L1E53B7: db $81
-L1E53B8: db $A1
-L1E53B9: db $C1
-L1E53BA: db $C1
-L1E53BB: db $A5
-L1E53BC: db $A5
-L1E53BD: db $85
-L1E53BE: db $C5
-L1E53BF: db $85
-L1E53C0: db $C5
-L1E53C1: db $A1
-L1E53C2: db $B3
-L1E53C3: db $91
-L1E53C4: db $9B
-L1E53C5: db $88
-L1E53C6: db $8D
-L1E53C7: db $80
-L1E53C8: db $81
-L1E53C9: db $80
-L1E53CA: db $88
-L1E53CB: db $80
-L1E53CC: db $89
-L1E53CD: db $81
-L1E53CE: db $89
-L1E53CF: db $FF
-L1E53D0: db $FF
-L1E53D1: db $1F
-L1E53D2: db $1F
-L1E53D3: db $8F
-L1E53D4: db $8F
-L1E53D5: db $F0
-L1E53D6: db $F0
-L1E53D7: db $F7
-L1E53D8: db $F3
-L1E53D9: db $7A
-L1E53DA: db $F8
-L1E53DB: db $3A
-L1E53DC: db $78
-L1E53DD: db $1C
-L1E53DE: db $BD
-L1E53DF: db $FF
-L1E53E0: db $FF
-L1E53E1: db $8B
-L1E53E2: db $8B
-L1E53E3: db $C1
-L1E53E4: db $DB
-L1E53E5: db $1B
-L1E53E6: db $3B
-L1E53E7: db $15
-L1E53E8: db $77
-L1E53E9: db $03
-L1E53EA: db $F7
-L1E53EB: db $05
-L1E53EC: db $EF
-L1E53ED: db $0B
-L1E53EE: db $DF
-L1E53EF: db $FF
-L1E53F0: db $FF
-L1E53F1: db $FF
-L1E53F2: db $FF
-L1E53F3: db $A6
-L1E53F4: db $EF
-L1E53F5: db $C1
-L1E53F6: db $E7
-L1E53F7: db $80
-L1E53F8: db $D9
-L1E53F9: db $C0
-L1E53FA: db $DA
-L1E53FB: db $98
-L1E53FC: db $DB
-L1E53FD: db $C0
-L1E53FE: db $DB
-L1E53FF: db $90
-L1E5400: db $D3
-L1E5401: db $FF
-L1E5402: db $FF
-L1E5403: db $00
-L1E5404: db $BE
-L1E5405: db $90
-L1E5406: db $DE
-L1E5407: db $48
-L1E5408: db $ED
-L1E5409: db $04
-L1E540A: db $34
-L1E540B: db $00
-L1E540C: db $41
-L1E540D: db $5E
-L1E540E: db $5F
-L1E540F: db $0C
-L1E5410: db $5F
-L1E5411: db $FF
-L1E5412: db $FF
-L1E5413: db $01
-L1E5414: db $FB
-L1E5415: db $01
-L1E5416: db $D3
-L1E5417: db $01
-L1E5418: db $2D
-L1E5419: db $09
-L1E541A: db $ED
-L1E541B: db $05
-L1E541C: db $ED
-L1E541D: db $41
-L1E541E: db $ED
-L1E541F: db $C5
-L1E5420: db $F5
-L1E5421: db $D6
-L1E5422: db $D7
-L1E5423: db $81
-L1E5424: db $CF
-L1E5425: db $80
-L1E5426: db $A9
-L1E5427: db $84
-L1E5428: db $AC
-L1E5429: db $84
-L1E542A: db $AC
-L1E542B: db $86
-L1E542C: db $B6
-L1E542D: db $C2
-L1E542E: db $D7
-L1E542F: db $A3
-L1E5430: db $E7
-L1E5431: db $0C
-L1E5432: db $9E
-L1E5433: db $00
-L1E5434: db $9D
-L1E5435: db $81
-L1E5436: db $DD
-L1E5437: db $00
-L1E5438: db $EB
-L1E5439: db $00
-L1E543A: db $28
-L1E543B: db $01
-L1E543C: db $09
-L1E543D: db $08
-L1E543E: db $DA
-L1E543F: db $C8
-L1E5440: db $F9
-L1E5441: db $E1
-L1E5442: db $F5
-L1E5443: db $81
-L1E5444: db $CB
-L1E5445: db $01
-L1E5446: db $9B
-L1E5447: db $01
-L1E5448: db $0B
-L1E5449: db $41
-L1E544A: db $5B
-L1E544B: db $81
-L1E544C: db $B7
-L1E544D: db $01
-L1E544E: db $F5
-L1E544F: db $03
-L1E5450: db $73
-L1E5451: db $D0
-L1E5452: db $F3
-L1E5453: db $A0
-L1E5454: db $F3
-L1E5455: db $C0
-L1E5456: db $E3
-L1E5457: db $90
-L1E5458: db $D5
-L1E5459: db $B0
-L1E545A: db $B6
-L1E545B: db $F2
-L1E545C: db $F7
-L1E545D: db $FA
-L1E545E: db $FB
-L1E545F: db $FF
-L1E5460: db $FF
-L1E5461: db $00
-L1E5462: db $69
-L1E5463: db $00
-L1E5464: db $13
-L1E5465: db $A0
-L1E5466: db $A0
-L1E5467: db $DE
-L1E5468: db $DE
-L1E5469: db $60
-L1E546A: db $E1
-L1E546B: db $38
-L1E546C: db $7F
-L1E546D: db $80
-L1E546E: db $BE
-L1E546F: db $FF
-L1E5470: db $FF
-L1E5471: db $05
-L1E5472: db $EF
-L1E5473: db $03
-L1E5474: db $67
-L1E5475: db $01
-L1E5476: db $63
-L1E5477: db $01
-L1E5478: db $C1
-L1E5479: db $03
-L1E547A: db $87
-L1E547B: db $07
-L1E547C: db $0F
-L1E547D: db $0F
-L1E547E: db $1F
-L1E547F: db $FF
-L1E5480: db $FF
-L1E5481: db $C7
-L1E5482: db $80
-L1E5483: db $40
-L1E5484: db $FF
-L1E5485: db $00
-L1E5486: db $D4
-L1E5487: db $FE
-L1E5488: db $A8
-L1E5489: db $FD
-L1E548A: db $D1
-L1E548B: db $FB
-L1E548C: db $11
-L1E548D: db $A3
-L1E548E: db $F7
-L1E548F: db $D3
-L1E5490: db $04
-L1E5491: db $A7
-L1E5492: db $EF
-L1E5493: db $C6
-L1E5494: db $04
-L1E5495: db $BA
-L1E5496: db $3D
-L1E5497: db $3E
-L1E5498: db $09
-L1E5499: db $02
-L1E549A: db $21
-L1E549B: db $E3
-L1E549C: db $04
-L1E549D: db $71
-L1E549E: db $B0
-L1E549F: db $44
-L1E54A0: db $00
-L1E54A1: db $5C
-L1E54A2: db $25
-L1E54A3: db $15
-L1E54A4: db $BF
-L1E54A5: db $0B
-L1E54A6: db $DF
-L1E54A7: db $74
-L1E54A8: db $05
-L1E54A9: db $38
-L1E54AA: db $0C
-L1E54AB: db $04
-L1E54AC: db $65
-L1E54AD: db $34
-L1E54AE: db $63
-L1E54AF: db $77
-L1E54B0: db $12
-L1E54B1: db $01
-L1E54B2: db $7B
-L1E54B3: db $A0
-L1E54B4: db $1C
-L1E54B5: db $C0
-L1E54B6: db $EC
-L1E54B7: db $0C
-L1E54B8: db $E0
-L1E54B9: db $1F
-L1E54BA: db $D0
-L1E54BB: db $DB
-L1E54BC: db $91
-L1E54BD: db $B8
-L1E54BE: db $1C
-L1E54BF: db $0C
-L1E54C0: db $1C
-L1E54C1: db $24
-L1E54C2: db $25
-L1E54C3: db $80
-L1E54C4: db $85
-L1E54C5: db $84
-L1E54C6: db $02
-L1E54C7: db $30
-L1E54C8: db $03
-L1E54C9: db $B1
-L1E54CA: db $1C
-L1E54CB: db $30
-L1E54CC: db $C3
-L1E54CD: db $C1
-L1E54CE: db $A4
-L1E54CF: db $58
-L1E54D0: db $F1
-L1E54D1: db $40
-L1E54D2: db $60
-L1E54D3: db $03
-L1E54D4: db $1F
-L1E54D5: db $83
-L1E54D6: db $21
-L1E54D7: db $23
-L1E54D8: db $01
-L1E54D9: db $0D
-L1E54DA: db $1D
-L1E54DB: db $AD
-L1E54DC: db $0C
-L1E54DD: db $68
-L1E54DE: db $17
-L1E54DF: db $DC
-L1E54E0: db $04
-L1E54E1: db $F0
-L1E54E2: db $4C
-L1E54E3: db $B0
-L1E54E4: db $BD
-L1E54E5: db $D8
-L1E54E6: db $2B
-L1E54E7: db $DC
-L1E54E8: db $AE
-L1E54E9: db $00
-L1E54EA: db $96
-L1E54EB: db $00
-L1E54EC: db $8B
-L1E54ED: db $00
-L1E54EE: db $B0
-L1E54EF: db $E7
-L1E54F0: db $00
-L1E54F1: db $88
-L1E54F2: db $00
-L1E54F3: db $43
-L1E54F4: db $C7
-L1E54F5: db $9C
-L1E54F6: db $00
-L1E54F7: db $0D
-L1E54F8: db $EE
-L1E54F9: db $B4
-L1E54FA: db $A0
-L1E54FB: db $04
-L1E54FC: db $06
-L1E54FD: db $04
-L1E54FE: db $00
-L1E54FF: db $F4
-L1E5500: db $C0
-L1E5501: db $DD
-L1E5502: db $3D
-L1E5503: db $98
-L1E5504: db $D7
-L1E5505: db $8D
-L1E5506: db $0C
-L1E5507: db $EC
-L1E5508: db $09
-L1E5509: db $00
-L1E550A: db $33
-L1E550B: db $0D
-L1E550C: db $4D
-L1E550D: db $04
-L1E550E: db $00
-L1E550F: db $07
-L1E5510: db $1F
-L1E5511: db $3D
-L1E5512: db $01
-L1E5513: db $90
-L1E5514: db $40
-L1E5515: db $F7
-L1E5516: db $A7
-L1E5517: db $D0
-L1E5518: db $CF
-L1E5519: db $E0
-L1E551A: db $AF
-L1E551B: db $EF
-L1E551C: db $72
-L1E551D: db $CE
-L1E551E: db $0C
-L1E551F: db $D0
-L1E5520: db $04
-L1E5521: db $DE
-L1E5522: db $C6
-L1E5523: db $3D
-L1E5524: db $FE
-L1E5525: db $51
-L1E5526: db $8C
-L1E5527: db $04
-L1E5528: db $C4
-L1E5529: db $04
-L1E552A: db $24
-L1E552B: db $0E
-L1E552C: db $02
-L1E552D: db $00
-L1E552E: db $14
-L1E552F: db $F2
-L1E5530: db $60
-L1E5531: db $FC
-L1E5532: db $04
-L1E5533: db $E7
-L1E5534: db $3D
-L1E5535: db $DF
-L1E5536: db $01
-L1E5537: db $5C
-L1E5538: db $DD
-L1E5539: db $04
-L1E553A: db $B1
-L1E553B: db $04
-L1E553C: db $CC
-L1E553D: db $C4
-L1E553E: db $03
-L1E553F: db $39
-L1E5540: db $82
-L1E5541: db $04
-L1E5542: db $F9
-L1E5543: db $63
-L1E5544: db $79
-L1E5545: db $9E
-L1E5546: db $C8
-L1E5547: db $8C
-L1E5548: db $D0
-L1E5549: db $03
-L1E554A: db $98
-L1E554B: db $C0
-L1E554C: db $B0
-L1E554D: db $84
-L1E554E: db $A9
-L1E554F: db $8D
-L1E5550: db $04
-L1E5551: db $00
-L1E5552: db $11
-L1E5553: db $E9
-L1E5554: db $CD
-L1E5555: db $E8
-L1E5556: db $04
-L1E5557: db $70
-L1E5558: db $F8
-L1E5559: db $38
-L1E555A: db $94
-L1E555B: db $80
-L1E555C: db $5C
-L1E555D: db $7B
-L1E555E: db $10
-L1E555F: db $3F
-L1E5560: db $08
-L1E5561: db $0D
-L1E5562: db $30
-L1E5563: db $31
-L1E5564: db $20
-L1E5565: db $80
-L1E5566: db $8E
-L1E5567: db $C8
-L1E5568: db $FA
-L1E5569: db $61
-L1E556A: db $FD
-L1E556B: db $21
-L1E556C: db $7D
-L1E556D: db $C8
-L1E556E: db $04
-L1E556F: db $B8
-L1E5570: db $41
-L1E5571: db $E1
-L1E5572: db $C0
-L1E5573: db $45
-L1E5574: db $11
-L1E5575: db $15
-L1E5576: db $32
-L1E5577: db $65
-L1E5578: db $ED
-L1E5579: db $50
-L1E557A: db $34
-L1E557B: db $F4
-L1E557C: db $94
-L1E557D: db $04
-L1E557E: db $A5
-L1E557F: db $BA
-L1E5580: db $88
-L1E5581: db $A0
-L1E5582: db $88
-L1E5583: db $C4
-L1E5584: db $04
-L1E5585: db $C1
-L1E5586: db $28
-L1E5587: db $81
-L1E5588: db $A0
-L1E5589: db $05
-L1E558A: db $FF
-L1E558B: db $00
-L1E558C: db $62
-L1E558D: db $F6
-L1E558E: db $00
-L1E558F: db $72
-L1E5590: db $8C
-L1E5591: db $05
-L1E5592: db $EC
-L1E5593: db $50
-L1E5594: db $D0
-L1E5595: db $06
-L1E5596: db $47
-L1E5597: db $1C
-L1E5598: db $B8
-L1E5599: db $BC
-L1E559A: db $4F
-L1E559B: db $DF
-L1E559C: db $3D
-L1E559D: db $1B
-L1E559E: db $79
-L1E559F: db $F4
-L1E55A0: db $05
-L1E55A1: db $E4
-L1E55A2: db $04
-L1E55A3: db $D5
-L1E55A4: db $B0
-L1E55A5: db $04
-L1E55A6: db $91
-L1E55A7: db $04
-L1E55A8: db $E9
-L1E55A9: db $04
-L1E55AA: db $C9
-L1E55AB: db $3D
-L1E55AC: db $88
-L1E55AD: db $01
-L1E55AE: db $C6
-L1E55AF: db $CF
-L1E55B0: db $F2
-L1E55B1: db $8C
-L1E55B2: db $90
-L1E55B3: db $BB
-L1E55B4: db $88
-L1E55B5: db $43
-L1E55B6: db $9D
-L1E55B7: db $74
-L1E55B8: db $89
-L1E55B9: db $A1
-L1E55BA: db $87
-L1E55BB: db $B1
-L1E55BC: db $04
-L1E55BD: db $3D
-L1E55BE: db $51
-L1E55BF: db $96
-L1E55C0: db $1C
-L1E55C1: db $5C
-L1E55C2: db $28
-L1E55C3: db $40
-L1E55C4: db $2B
-L1E55C5: db $7F
-L1E55C6: db $6B
-L1E55C7: db $90
-L1E55C8: db $00
-L1E55C9: db $F8
-L1E55CA: db $FC
-L1E55CB: db $0D
-L1E55CC: db $A9
-L1E55CD: db $6F
-L1E55CE: db $73
-L1E55CF: db $1D
-L1E55D0: db $43
-L1E55D1: db $0F
-L1E55D2: db $B4
-L1E55D3: db $D9
-L1E55D4: db $C1
-L1E55D5: db $C7
-L1E55D6: db $E1
-L1E55D7: db $F8
-L1E55D8: db $04
-L1E55D9: db $31
-L1E55DA: db $65
-L1E55DB: db $71
-L1E55DC: db $85
-L1E55DD: db $05
-L1E55DE: db $A0
-L1E55DF: db $81
-L1E55E0: db $B0
-L1E55E1: db $84
-L1E55E2: db $06
-L1E55E3: db $BA
-L1E55E4: db $82
-L1E55E5: db $D8
-L1E55E6: db $84
-L1E55E7: db $DA
-L1E55E8: db $0D
-L1E55E9: db $24
-L1E55EA: db $F0
-L1E55EB: db $08
-L1E55EC: db $F3
-L1E55ED: db $E0
-L1E55EE: db $E4
-L1E55EF: db $C0
-L1E55F0: db $00
-L1E55F1: db $C4
-L1E55F2: db $F4
-L1E55F3: db $7E
-L1E55F4: db $38
-L1E55F5: db $FE
-L1E55F6: db $7C
-L1E55F7: db $AC
-L1E55F8: db $04
-L1E55F9: db $C6
-L1E55FA: db $E3
-L1E55FB: db $F1
-L1E55FC: db $07
-L1E55FD: db $00
-L1E55FE: db $11
-L1E55FF: db $83
-L1E5600: db $B9
-L1E5601: db $13
-L1E5602: db $39
-L1E5603: db $03
-L1E5604: db $21
-L1E5605: db $29
-L1E5606: db $2F
-L1E5607: db $6D
-L1E5608: db $F5
-L1E5609: db $00
-L1E560A: db $85
-L1E560B: db $00
-L1E560C: db $74
-L1E560D: db $8C
-L1E560E: db $B4
-L1E560F: db $0A
-L1E5610: db $8B
-L1E5611: db $88
-L1E5612: db $DD
-L1E5613: db $D4
-L1E5614: db $74
-L1E5615: db $AA
-L1E5616: db $64
-L1E5617: db $D5
-L1E5618: db $B0
-L1E5619: db $04
-L1E561A: db $A8
-L1E561B: db $84
-L1E561C: db $7D
-L1E561D: db $3F
-L1E561E: db $7F
-L1E561F: db $C1
-L1E5620: db $C3
-L1E5621: db $24
-L1E5622: db $33
-L1E5623: db $B7
-L1E5624: db $8C
-L1E5625: db $CF
-L1E5626: db $0F
-L1E5627: db $1C
-L1E5628: db $06
-L1E5629: db $1E
-L1E562A: db $22
-L1E562B: db $00
-L1E562C: db $01
-L1E562D: db $3D
-L1E562E: db $25
-L1E562F: db $75
-L1E5630: db $15
-L1E5631: db $00
-L1E5632: db $D1
-L1E5633: db $31
-L1E5634: db $D7
-L1E5635: db $91
-L1E5636: db $04
-L1E5637: db $D0
-L1E5638: db $37
-L1E5639: db $61
-L1E563A: db $FD
-L1E563B: db $38
-L1E563C: db $62
-L1E563D: db $F9
-L1E563E: db $3D
-L1E563F: db $01
-L1E5640: db $8E
-L1E5641: db $80
-L1E5642: db $9C
-L1E5643: db $04
-L1E5644: db $D8
-L1E5645: db $AC
-L1E5646: db $90
-L1E5647: db $F1
-L1E5648: db $2C
-L1E5649: db $81
-L1E564A: db $08
-L1E564B: db $05
-L1E564C: db $C2
-L1E564D: db $E2
-L1E564E: db $D1
-L1E564F: db $3D
-L1E5650: db $94
-L1E5651: db $08
-L1E5652: db $04
-L1E5653: db $2C
-L1E5654: db $04
-L1E5655: db $24
-L1E5656: db $01
-L1E5657: db $6B
-L1E5658: db $20
-L1E5659: db $04
-L1E565A: db $1C
-L1E565B: db $64
-L1E565C: db $04
-L1E565D: db $48
-L1E565E: db $3D
-L1E565F: db $68
-L1E5660: db $EF
-L1E5661: db $00
-L1E5662: db $9C
-L1E5663: db $A8
-L1E5664: db $21
-L1E5665: db $05
-L1E5666: db $00
-L1E5667: db $14
-L1E5668: db $05
-L1E5669: db $E9
-L1E566A: db $80
-L1E566B: db $04
-L1E566C: db $E8
-L1E566D: db $C0
-L1E566E: db $84
-L1E566F: db $A0
-L1E5670: db $A5
-L1E5671: db $B8
-L1E5672: db $55
-L1E5673: db $82
-L1E5674: db $04
-L1E5675: db $86
-L1E5676: db $50
-L1E5677: db $E1
-L1E5678: db $0C
-L1E5679: db $B4
-L1E567A: db $04
-L1E567B: db $55
-L1E567C: db $A4
-L1E567D: db $34
-L1E567E: db $F6
-L1E567F: db $84
-L1E5680: db $19
-L1E5681: db $04
-L1E5682: db $CA
-L1E5683: db $04
-L1E5684: db $45
-L1E5685: db $1F
-L1E5686: db $05
-L1E5687: db $1C
-L1E5688: db $3F
-L1E5689: db $3C
-L1E568A: db $06
-L1E568B: db $FE
-L1E568C: db $B4
-L1E568D: db $F8
-L1E568E: db $84
-L1E568F: db $01
-L1E5690: db $AC
-L1E5691: db $48
-L1E5692: db $00
-L1E5693: db $07
-L1E5694: db $0D
-L1E5695: db $83
-L1E5696: db $28
-L1E5697: db $91
-L1E5698: db $2D
-L1E5699: db $00
-L1E569A: db $2F
-L1E569B: db $04
-L1E569C: db $2B
-L1E569D: db $29
-L1E569E: db $A1
-L1E569F: db $59
-L1E56A0: db $B3
-L1E56A1: db $D0
-L1E56A2: db $9B
-L1E56A3: db $9C
-L1E56A4: db $08
-L1E56A5: db $90
-L1E56A6: db $B2
-L1E56A7: db $A8
-L1E56A8: db $5E
-L1E56A9: db $B6
-L1E56AA: db $B8
-L1E56AB: db $84
-L1E56AC: db $D0
-L1E56AD: db $00
-L1E56AE: db $78
-L1E56AF: db $00
-L1E56B0: db $20
-L1E56B1: db $98
-L1E56B2: db $00
-L1E56B3: db $EC
-L1E56B4: db $ED
-L1E56B5: db $04
-L1E56B6: db $EC
-L1E56B7: db $68
-L1E56B8: db $63
-L1E56B9: db $30
-L1E56BA: db $4C
-L1E56BB: db $B7
-L1E56BC: db $EC
-L1E56BD: db $DE
-L1E56BE: db $E0
-L1E56BF: db $1C
-L1E56C0: db $3D
-L1E56C1: db $47
-L1E56C2: db $E7
-L1E56C3: db $28
-L1E56C4: db $99
-L1E56C5: db $D9
-L1E56C6: db $AC
-L1E56C7: db $C1
-L1E56C8: db $CC
-L1E56C9: db $BD
-L1E56CA: db $0F
-L1E56CB: db $7F
-L1E56CC: db $3C
-L1E56CD: db $1F
-L1E56CE: db $BF
-L1E56CF: db $F8
-L1E56D0: db $04
-L1E56D1: db $3D
-L1E56D2: db $01
-L1E56D3: db $A8
-L1E56D4: db $F8
-L1E56D5: db $02
-L1E56D6: db $D1
-L1E56D7: db $F1
-L1E56D8: db $A2
-L1E56D9: db $E3
-L1E56DA: db $C3
-L1E56DB: db $E6
-L1E56DC: db $B9
-L1E56DD: db $A6
-L1E56DE: db $58
-L1E56DF: db $C5
-L1E56E0: db $DC
-L1E56E1: db $A5
-L1E56E2: db $3D
-L1E56E3: db $6C
-L1E56E4: db $03
-L1E56E5: db $60
-L1E56E6: db $80
-L1E56E7: db $94
-L1E56E8: db $28
-L1E56E9: db $38
-L1E56EA: db $58
-L1E56EB: db $10
-L1E56EC: db $A0
-L1E56ED: db $C0
-L1E56EE: db $40
-L1E56EF: db $87
-L1E56F0: db $7A
-L1E56F1: db $00
-L1E56F2: db $90
-L1E56F3: db $3D
-L1E56F4: db $D0
-L1E56F5: db $00
-L1E56F6: db $71
-L1E56F7: db $7C
-L1E56F8: db $31
-L1E56F9: db $05
-L1E56FA: db $79
-L1E56FB: db $19
-L1E56FC: db $39
-L1E56FD: db $09
-L1E56FE: db $1D
-L1E56FF: db $04
-L1E5700: db $0D
-L1E5701: db $6C
-L1E5702: db $E0
-L1E5703: db $04
-L1E5704: db $94
-L1E5705: db $54
-L1E5706: db $88
-L1E5707: db $99
-L1E5708: db $8F
-L1E5709: db $9F
-L1E570A: db $CF
-L1E570B: db $D9
-L1E570C: db $00
-L1E570D: db $68
-L1E570E: db $C7
-L1E570F: db $C4
-L1E5710: db $04
-L1E5711: db $AB
-L1E5712: db $EB
-L1E5713: db $C0
-L1E5714: db $D9
-L1E5715: db $DC
-L1E5716: db $A0
-L1E5717: db $7F
-L1E5718: db $F8
-L1E5719: db $84
-L1E571A: db $E0
-L1E571B: db $F0
-L1E571C: db $C0
-L1E571D: db $E6
-L1E571E: db $30
-L1E571F: db $A4
-L1E5720: db $08
-L1E5721: db $0C
-L1E5722: db $4D
-L1E5723: db $1C
-L1E5724: db $A4
-L1E5725: db $E4
-L1E5726: db $55
-L1E5727: db $E5
-L1E5728: db $84
-L1E5729: db $05
-L1E572A: db $04
-L1E572B: db $85
-L1E572C: db $04
-L1E572D: db $81
-L1E572E: db $06
-L1E572F: db $54
-L1E5730: db $C9
-L1E5731: db $04
-L1E5732: db $DD
-L1E5733: db $04
-L1E5734: db $D5
-L1E5735: db $04
-L1E5736: db $CD
-L1E5737: db $A3
-L1E5738: db $C1
-L1E5739: db $84
-L1E573A: db $20
-L1E573B: db $E9
-L1E573C: db $AF
-L1E573D: db $EF
-L1E573E: db $D6
-L1E573F: db $F6
-L1E5740: db $AC
-L1E5741: db $0E
-L1E5742: db $FB
-L1E5743: db $D1
-L1E5744: db $F9
-L1E5745: db $A8
-L1E5746: db $A9
-L1E5747: db $00
-L1E5748: db $A8
-L1E5749: db $F3
-L1E574A: db $D1
-L1E574B: db $94
-L1E574C: db $0C
-L1E574D: db $FE
-L1E574E: db $04
-L1E574F: db $1E
-L1E5750: db $3F
-L1E5751: db $FC
-L1E5752: db $00
-L1E5753: db $FC
-L1E5754: db $30
-L1E5755: db $3C
-L1E5756: db $24
-L1E5757: db $2C
-L1E5758: db $3D
-L1E5759: db $84
-L1E575A: db $D9
-L1E575B: db $41
-L1E575C: db $82
-L1E575D: db $AC
-L1E575E: db $29
-L1E575F: db $B1
-L1E5760: db $09
-L1E5761: db $31
-L1E5762: db $39
-L1E5763: db $14
-L1E5764: db $11
-L1E5765: db $EA
-L1E5766: db $D6
-L1E5767: db $3D
-L1E5768: db $02
-L1E5769: db $80
-L1E576A: db $04
-L1E576B: db $83
-L1E576C: db $04
-L1E576D: db $9F
-L1E576E: db $ED
-L1E576F: db $92
-L1E5770: db $84
-L1E5771: db $04
-L1E5772: db $8F
-L1E5773: db $3B
-L1E5774: db $00
-L1E5775: db $C0
-L1E5776: db $06
-L1E5777: db $BD
-L1E5778: db $4D
-L1E5779: db $00
-L1E577A: db $1F
-L1E577B: db $16
-L1E577C: db $61
-L1E577D: db $0C
-L1E577E: db $FD
-L1E577F: db $A0
-L1E5780: db $30
-L1E5781: db $FA
-L1E5782: db $02
-L1E5783: db $F0
-L1E5784: db $0C
-L1E5785: db $D6
-L1E5786: db $03
-L1E5787: db $CE
-L1E5788: db $07
-L1E5789: db $35
-L1E578A: db $D5
-L1E578B: db $12
-L1E578C: db $9E
-L1E578D: db $95
-L1E578E: db $9C
-L1E578F: db $04
-L1E5790: db $98
-L1E5791: db $04
-L1E5792: db $55
-L1E5793: db $90
-L1E5794: db $04
-L1E5795: db $B0
-L1E5796: db $04
-L1E5797: db $A3
-L1E5798: db $04
-L1E5799: db $9B
-L1E579A: db $D0
-L1E579B: db $CD
-L1E579C: db $74
-L1E579D: db $6C
-L1E579E: db $FB
-L1E579F: db $F8
-L1E57A0: db $04
-L1E57A1: db $00
-L1E57A2: db $38
-L1E57A3: db $1D
-L1E57A4: db $A8
-L1E57A5: db $2C
-L1E57A6: db $63
-L1E57A7: db $04
-L1E57A8: db $6E
-L1E57A9: db $04
-L1E57AA: db $78
-L1E57AB: db $1B
-L1E57AC: db $18
-L1E57AD: db $1A
-L1E57AE: db $45
-L1E57AF: db $84
-L1E57B0: db $F1
-L1E57B1: db $2C
-L1E57B2: db $35
-L1E57B3: db $7D
-L1E57B4: db $04
-L1E57B5: db $87
-L1E57B6: db $05
-L1E57B7: db $80
-L1E57B8: db $E0
-L1E57B9: db $60
-L1E57BA: db $EC
-L1E57BB: db $6F
-L1E57BC: db $44
-L1E57BD: db $9E
-L1E57BE: db $04
-L1E57BF: db $57
-L1E57C0: db $8E
-L1E57C1: db $04
-L1E57C2: db $9F
-L1E57C3: db $04
-L1E57C4: db $B3
-L1E57C5: db $04
-L1E57C6: db $38
-L1E57C7: db $04
-L1E57C8: db $5A
-L1E57C9: db $85
-L1E57CA: db $04
-L1E57CB: db $89
-L1E57CC: db $04
-L1E57CD: db $01
-L1E57CE: db $32
-L1E57CF: db $04
-L1E57D0: db $27
-L1E57D1: db $BB
-L1E57D2: db $04
-L1E57D3: db $2D
-L1E57D4: db $0E
-L1E57D5: db $74
-L1E57D6: db $04
-L1E57D7: db $83
-L1E57D8: db $0E
-L1E57D9: db $00
-L1E57DA: db $00
-L1E57DB: db $DF
-L1E57DC: db $5F
-L1E57DD: db $C0
-L1E57DE: db $50
-L1E57DF: db $C6
-L1E57E0: db $4F
-L1E57E1: db $D0
-L1E57E2: db $40
-L1E57E3: db $AE
-L1E57E4: db $AD
-L1E57E5: db $E7
-L1E57E6: db $08
-L1E57E7: db $EF
-L1E57E8: db $04
-L1E57E9: db $7E
-L1E57EA: db $00
-L1E57EB: db $6E
-L1E57EC: db $9A
-L1E57ED: db $CC
-L1E57EE: db $D8
-L1E57EF: db $DE
-L1E57F0: db $F0
-L1E57F1: db $00
-L1E57F2: db $3E
-L1E57F3: db $58
-L1E57F4: db $F1
-L1E57F5: db $0E
-L1E57F6: db $0D
-L1E57F7: db $F3
-L1E57F8: db $3B
-L1E57F9: db $42
-L1E57FA: db $50
-L1E57FB: db $3D
-L1E57FC: db $28
-L1E57FD: db $B8
-L1E57FE: db $32
-L1E57FF: db $79
-L1E5800: db $7E
-L1E5801: db $A0
-L1E5802: db $64
-L1E5803: db $1E
-L1E5804: db $1F
-L1E5805: db $58
-L1E5806: db $0F
-L1E5807: db $0B
-L1E5808: db $70
-L1E5809: db $01
-L1E580A: db $76
-L1E580B: db $06
-L1E580C: db $3D
-L1E580D: db $7F
-L1E580E: db $14
-L1E580F: db $08
-L1E5810: db $A5
-L1E5811: db $06
-L1E5812: db $3F
-L1E5813: db $04
-L1E5814: db $9F
-L1E5815: db $81
-L1E5816: db $48
-L1E5817: db $C1
-L1E5818: db $48
-L1E5819: db $33
-L1E581A: db $61
-L1E581B: db $4E
-L1E581C: db $18
-L1E581D: db $78
-L1E581E: db $38
-L1E581F: db $63
-L1E5820: db $00
-L1E5821: db $74
-L1E5822: db $B9
-L1E5823: db $00
-L1E5824: db $A1
-L1E5825: db $98
-L1E5826: db $D0
-L1E5827: db $44
-L1E5828: db $DB
-L1E5829: db $07
-L1E582A: db $44
-L1E582B: db $A8
-L1E582C: db $14
-L1E582D: db $77
-L1E582E: db $0C
-L1E582F: db $60
-L1E5830: db $05
-L1E5831: db $04
-L1E5832: db $F2
-L1E5833: db $03
-L1E5834: db $00
-L1E5835: db $B0
-L1E5836: db $41
-L1E5837: db $B2
-L1E5838: db $C7
-L1E5839: db $62
-L1E583A: db $83
-L1E583B: db $C4
-L1E583C: db $0E
-L1E583D: db $FF
-L1E583E: db $84
-L1E583F: db $60
-L1E5840: db $4C
-L1E5841: db $9E
-L1E5842: db $04
-L1E5843: db $34
-L1E5844: db $05
-L1E5845: db $C5
-L1E5846: db $88
-L1E5847: db $E7
-L1E5848: db $E6
-L1E5849: db $E0
-L1E584A: db $1B
-L1E584B: db $BC
-L1E584C: db $49
-L1E584D: db $8C
-L1E584E: db $F1
-L1E584F: db $FB
-L1E5850: db $9C
-L1E5851: db $34
-L1E5852: db $04
-L1E5853: db $C8
-L1E5854: db $04
-L1E5855: db $D0
-L1E5856: db $3D
-L1E5857: db $00
-L1E5858: db $4B
-L1E5859: db $18
-L1E585A: db $00
-L1E585B: db $80
-L1E585C: db $26
-L1E585D: db $04
-L1E585E: db $3E
-L1E585F: db $10
-L1E5860: db $05
-L1E5861: db $07
-L1E5862: db $7E
-L1E5863: db $39
-L1E5864: db $F9
-L1E5865: db $67
-L1E5866: db $E7
-L1E5867: db $3D
-L1E5868: db $8D
-L1E5869: db $BD
-L1E586A: db $81
-L1E586B: db $CC
-L1E586C: db $E1
-L1E586D: db $27
-L1E586E: db $B1
-L1E586F: db $71
-L1E5870: db $79
-L1E5871: db $F7
-L1E5872: db $00
-L1E5873: db $71
-L1E5874: db $CF
-L1E5875: db $00
-L1E5876: db $3D
-L1E5877: db $01
-L1E5878: db $C3
-L1E5879: db $DF
-L1E587A: db $83
-L1E587B: db $04
-L1E587C: db $40
-L1E587D: db $C2
-L1E587E: db $64
-L1E587F: db $A0
-L1E5880: db $EA
-L1E5881: db $C0
-L1E5882: db $EC
-L1E5883: db $84
-L1E5884: db $DE
-L1E5885: db $2A
-L1E5886: db $86
-L1E5887: db $9F
-L1E5888: db $3D
-L1E5889: db $BB
-L1E588A: db $04
-L1E588B: db $7D
-L1E588C: db $04
-L1E588D: db $74
-L1E588E: db $90
-L1E588F: db $04
-L1E5890: db $50
-L1E5891: db $FD
-L1E5892: db $05
-L1E5893: db $00
-L1E5894: db $D2
-L1E5895: db $0C
-L1E5896: db $8F
-L1E5897: db $F5
-L1E5898: db $3D
-L1E5899: db $C0
-L1E589A: db $1C
-L1E589B: db $04
-L1E589C: db $DD
-L1E589D: db $04
-L1E589E: db $D9
-L1E589F: db $04
-L1E58A0: db $5E
-L1E58A1: db $A9
-L1E58A2: db $04
-L1E58A3: db $61
-L1E58A4: db $04
-L1E58A5: db $DC
-L1E58A6: db $05
-L1E58A7: db $85
-L1E58A8: db $82
-L1E58A9: db $15
-L1E58AA: db $96
-L1E58AB: db $80
-L1E58AC: db $8B
-L1E58AD: db $04
-L1E58AE: db $81
-L1E58AF: db $04
-L1E58B0: db $88
-L1E58B1: db $04
-L1E58B2: db $3E
-L1E58B3: db $8C
-L1E58B4: db $8E
-L1E58B5: db $74
-L1E58B6: db $34
-L1E58B7: db $04
-L1E58B8: db $C8
-L1E58B9: db $EC
-L1E58BA: db $6C
-L1E58BB: db $94
-L1E58BC: db $84
-L1E58BD: db $08
-L1E58BE: db $6E
-L1E58BF: db $A4
-L1E58C0: db $5C
-L1E58C1: db $64
-L1E58C2: db $99
-L1E58C3: db $07
-L1E58C4: db $05
-L1E58C5: db $27
-L1E58C6: db $22
-L1E58C7: db $B2
-L1E58C8: db $3F
-L1E58C9: db $BF
-L1E58CA: db $8E
-L1E58CB: db $B3
-L1E58CC: db $04
-L1E58CD: db $55
-L1E58CE: db $75
-L1E58CF: db $04
-L1E58D0: db $35
-L1E58D1: db $04
-L1E58D2: db $7B
-L1E58D3: db $04
-L1E58D4: db $67
-L1E58D5: db $90
-L1E58D6: db $0A
-L1E58D7: db $D5
-L1E58D8: db $C3
-L1E58D9: db $F1
-L1E58DA: db $92
-L1E58DB: db $88
-L1E58DC: db $90
-L1E58DD: db $05
-L1E58DE: db $83
-L1E58DF: db $AF
-L1E58E0: db $04
-L1E58E1: db $85
-L1E58E2: db $05
-L1E58E3: db $98
-L1E58E4: db $E0
-L1E58E5: db $C8
-L1E58E6: db $04
-L1E58E7: db $A8
-L1E58E8: db $90
-L1E58E9: db $00
-L1E58EA: db $26
-L1E58EB: db $EE
-L1E58EC: db $9C
-L1E58ED: db $EF
-L1E58EE: db $0D
-L1E58EF: db $5D
-L1E58F0: db $03
-L1E58F1: db $87
-L1E58F2: db $00
-L1E58F3: db $7E
-L1E58F4: db $FE
-L1E58F5: db $18
-L1E58F6: db $9C
-L1E58F7: db $D4
-L1E58F8: db $00
-L1E58F9: db $3D
-L1E58FA: db $04
-L1E58FB: db $43
-L1E58FC: db $E9
-L1E58FD: db $47
-L1E58FE: db $D1
-L1E58FF: db $87
-L1E5900: db $04
-L1E5901: db $0F
-L1E5902: db $A1
-L1E5903: db $87
-L1E5904: db $04
-L1E5905: db $21
-L1E5906: db $1F
-L1E5907: db $41
-L1E5908: db $BD
-L1E5909: db $C0
-L1E590A: db $3D
-L1E590B: db $02
-L1E590C: db $6B
-L1E590D: db $80
-L1E590E: db $07
-L1E590F: db $05
-L1E5910: db $CD
-L1E5911: db $E8
-L1E5912: db $DA
-L1E5913: db $06
-L1E5914: db $3E
-L1E5915: db $D4
-L1E5916: db $95
-L1E5917: db $04
-L1E5918: db $F7
-L1E5919: db $04
-L1E591A: db $E6
-L1E591B: db $06
-L1E591C: db $62
-L1E591D: db $84
-L1E591E: db $32
-L1E591F: db $C6
-L1E5920: db $94
-L1E5921: db $39
-L1E5922: db $2C
-L1E5923: db $01
-L1E5924: db $FB
-L1E5925: db $06
-L1E5926: db $FD
-L1E5927: db $AA
-L1E5928: db $06
-L1E5929: db $3D
-L1E592A: db $C4
-L1E592B: db $5B
-L1E592C: db $04
-L1E592D: db $C8
-L1E592E: db $84
-L1E592F: db $A0
-L1E5930: db $56
-L1E5931: db $CA
-L1E5932: db $F0
-L1E5933: db $C0
-L1E5934: db $B0
-L1E5935: db $A8
-L1E5936: db $04
-L1E5937: db $00
-L1E5938: db $82
-L1E5939: db $80
-L1E593A: db $24
-L1E593B: db $A4
-L1E593C: db $8C
-L1E593D: db $A3
-L1E593E: db $8B
-L1E593F: db $40
-L1E5940: db $95
-L1E5941: db $44
-L1E5942: db $15
-L1E5943: db $91
-L1E5944: db $42
-L1E5945: db $11
-L1E5946: db $14
-L1E5947: db $12
-L1E5948: db $B0
-L1E5949: db $14
-L1E594A: db $78
-L1E594B: db $0B
-L1E594C: db $59
-L1E594D: db $3E
-L1E594E: db $7E
-L1E594F: db $7F
-L1E5950: db $00
-L1E5951: db $1B
-L1E5952: db $8D
-L1E5953: db $20
-L1E5954: db $4A
-L1E5955: db $15
-L1E5956: db $04
-L1E5957: db $05
-L1E5958: db $21
-L1E5959: db $08
-L1E595A: db $03
-L1E595B: db $04
-L1E595C: db $17
-L1E595D: db $A8
-L1E595E: db $21
-L1E595F: db $89
-L1E5960: db $80
-L1E5961: db $94
-L1E5962: db $90
-L1E5963: db $93
-L1E5964: db $A7
-L1E5965: db $BB
-L1E5966: db $A2
-L1E5967: db $14
-L1E5968: db $B9
-L1E5969: db $C8
-L1E596A: db $BA
-L1E596B: db $A2
-L1E596C: db $9D
-L1E596D: db $0C
-L1E596E: db $9C
-L1E596F: db $A0
-L1E5970: db $E8
-L1E5971: db $FF
-L1E5972: db $00
-L1E5973: db $4E
-L1E5974: db $FE
-L1E5975: db $C7
-L1E5976: db $DF
-L1E5977: db $CF
-L1E5978: db $C4
-L1E5979: db $04
-L1E597A: db $1D
-L1E597B: db $E6
-L1E597C: db $E7
-L1E597D: db $7C
-L1E597E: db $B4
-L1E597F: db $18
-L1E5980: db $BD
-L1E5981: db $82
-L1E5982: db $1D
-L1E5983: db $09
-L1E5984: db $63
-L1E5985: db $99
-L1E5986: db $C1
-L1E5987: db $19
-L1E5988: db $05
-L1E5989: db $81
-L1E598A: db $DE
-L1E598B: db $04
-L1E598C: db $DC
-L1E598D: db $39
-L1E598E: db $0C
-L1E598F: db $05
-L1E5990: db $3D
-L1E5991: db $01
-L1E5992: db $83
-L1E5993: db $2A
-L1E5994: db $80
-L1E5995: db $8F
-L1E5996: db $04
-L1E5997: db $9F
-L1E5998: db $04
-L1E5999: db $BF
-L1E599A: db $06
-L1E599B: db $EF
-L1E599C: db $B5
-L1E599D: db $04
-L1E599E: db $DB
-L1E599F: db $04
-L1E59A0: db $42
-L1E59A1: db $12
-L1E59A2: db $04
-L1E59A3: db $3C
-L1E59A4: db $04
-L1E59A5: db $55
-L1E59A6: db $48
-L1E59A7: db $04
-L1E59A8: db $00
-L1E59A9: db $05
-L1E59AA: db $F8
-L1E59AB: db $04
-L1E59AC: db $E0
-L1E59AD: db $15
-L1E59AE: db $A8
-L1E59AF: db $01
-L1E59B0: db $53
-L1E59B1: db $04
-L1E59B2: db $FB
-L1E59B3: db $64
-L1E59B4: db $4D
-L1E59B5: db $C7
-L1E59B6: db $01
-L1E59B7: db $51
-L1E59B8: db $03
-L1E59B9: db $04
-L1E59BA: db $07
-L1E59BB: db $04
-L1E59BC: db $E7
-L1E59BD: db $A1
-L1E59BE: db $B7
-L1E59BF: db $84
-L1E59C0: db $AA
-L1E59C1: db $05
-L1E59C2: db $AF
-L1E59C3: db $04
-L1E59C4: db $EE
-L1E59C5: db $04
-L1E59C6: db $EC
-L1E59C7: db $06
-L1E59C8: db $E8
-L1E59C9: db $A8
-L1E59CA: db $04
-L1E59CB: db $A8
-L1E59CC: db $04
-L1E59CD: db $C1
-L1E59CE: db $4C
-L1E59CF: db $86
-L1E59D0: db $0F
-L1E59D1: db $27
-L1E59D2: db $88
-L1E59D3: db $00
-L1E59D4: db $37
-L1E59D5: db $77
-L1E59D6: db $7E
-L1E59D7: db $00
-L1E59D8: db $41
-L1E59D9: db $C5
-L1E59DA: db $6F
-L1E59DB: db $88
-L1E59DC: db $98
-L1E59DD: db $F6
-L1E59DE: db $76
-L1E59DF: db $8D
-L1E59E0: db $84
-L1E59E1: db $1B
-L1E59E2: db $11
-L1E59E3: db $45
-L1E59E4: db $58
-L1E59E5: db $B1
-L1E59E6: db $54
-L1E59E7: db $D1
-L1E59E8: db $B4
-L1E59E9: db $18
-L1E59EA: db $13
-L1E59EB: db $3B
-L1E59EC: db $B3
-L1E59ED: db $0A
-L1E59EE: db $BB
-L1E59EF: db $65
-L1E59F0: db $71
-L1E59F1: db $A0
-L1E59F2: db $84
-L1E59F3: db $8F
-L1E59F4: db $00
-L1E59F5: db $BF
-L1E59F6: db $BA
-L1E59F7: db $00
-L1E59F8: db $83
-L1E59F9: db $00
-L1E59FA: db $18
-L1E59FB: db $00
-L1E59FC: db $82
-L1E59FD: db $02
-L1E59FE: db $FF
-L1E59FF: db $88
-L1E5A00: db $00
-L1E5A01: db $30
-L1E5A02: db $78
-L1E5A03: db $99
-L1E5A04: db $34
-L1E5A05: db $C7
-L1E5A06: db $DF
-L1E5A07: db $E1
-L1E5A08: db $8F
-L1E5A09: db $A4
-L1E5A0A: db $F1
-L1E5A0B: db $F7
-L1E5A0C: db $38
-L1E5A0D: db $00
-L1E5A0E: db $88
-L1E5A0F: db $00
-L1E5A10: db $3D
-L1E5A11: db $5A
-L1E5A12: db $E5
-L1E5A13: db $20
-L1E5A14: db $01
-L1E5A15: db $00
-L1E5A16: db $7D
-L1E5A17: db $0F
-L1E5A18: db $00
-L1E5A19: db $27
-L1E5A1A: db $9F
-L1E5A1B: db $50
-L1E5A1C: db $97
-L1E5A1D: db $E7
-L1E5A1E: db $0D
-L1E5A1F: db $3D
-L1E5A20: db $01
-L1E5A21: db $68
-L1E5A22: db $A4
-L1E5A23: db $FB
-L1E5A24: db $78
-L1E5A25: db $06
-L1E5A26: db $48
-L1E5A27: db $07
-L1E5A28: db $04
-L1E5A29: db $BE
-L1E5A2A: db $04
-L1E5A2B: db $42
-L1E5A2C: db $3A
-L1E5A2D: db $00
-L1E5A2E: db $FE
-L1E5A2F: db $84
-L1E5A30: db $4C
-L1E5A31: db $0C
-L1E5A32: db $65
-L1E5A33: db $04
-L1E5A34: db $46
-L1E5A35: db $58
-L1E5A36: db $20
-L1E5A37: db $05
-L1E5A38: db $62
-L1E5A39: db $04
-L1E5A3A: db $39
-L1E5A3B: db $F9
-L1E5A3C: db $07
-L1E5A3D: db $DD
-L1E5A3E: db $04
-L1E5A3F: db $23
-L1E5A40: db $2D
-L1E5A41: db $93
-L1E5A42: db $2F
-L1E5A43: db $91
-L1E5A44: db $08
-L1E5A45: db $49
-L1E5A46: db $53
-L1E5A47: db $68
-L1E5A48: db $09
-L1E5A49: db $05
-L1E5A4A: db $85
-L1E5A4B: db $DC
-L1E5A4C: db $04
-L1E5A4D: db $D9
-L1E5A4E: db $81
-L1E5A4F: db $DA
-L1E5A50: db $51
-L1E5A51: db $82
-L1E5A52: db $05
-L1E5A53: db $EA
-L1E5A54: db $04
-L1E5A55: db $E8
-L1E5A56: db $83
-L1E5A57: db $B4
-L1E5A58: db $24
-L1E5A59: db $6D
-L1E5A5A: db $42
-L1E5A5B: db $84
-L1E5A5C: db $05
-L1E5A5D: db $40
-L1E5A5E: db $04
-L1E5A5F: db $B0
-L1E5A60: db $26
-L1E5A61: db $88
-L1E5A62: db $52
-L1E5A63: db $0B
-L1E5A64: db $04
-L1E5A65: db $13
-L1E5A66: db $18
-L1E5A67: db $11
-L1E5A68: db $31
-L1E5A69: db $AC
-L1E5A6A: db $43
-L1E5A6B: db $B1
-L1E5A6C: db $84
-L1E5A6D: db $41
-L1E5A6E: db $24
-L1E5A6F: db $04
-L1E5A70: db $03
-L1E5A71: db $01
-L1E5A72: db $21
-L1E5A73: db $04
-L1E5A74: db $AB
-L1E5A75: db $10
-L1E5A76: db $C1
-L1E5A77: db $02
-L1E5A78: db $E1
-L1E5A79: db $00
-L1E5A7A: db $B6
-L1E5A7B: db $B5
-L1E5A7C: db $9C
-L1E5A7D: db $57
-L1E5A7E: db $EC
-L1E5A7F: db $94
-L1E5A80: db $F0
-L1E5A81: db $14
-L1E5A82: db $F8
-L1E5A83: db $AC
-L1E5A84: db $08
-L1E5A85: db $00
-L1E5A86: db $6A
-L1E5A87: db $FF
-L1E5A88: db $05
-L1E5A89: db $00
-L1E5A8A: db $B3
-L1E5A8B: db $74
-L1E5A8C: db $91
-L1E5A8D: db $84
-L1E5A8E: db $12
-L1E5A8F: db $3F
-L1E5A90: db $8A
-L1E5A91: db $59
-L1E5A92: db $44
-L1E5A93: db $10
-L1E5A94: db $6C
-L1E5A95: db $CC
-L1E5A96: db $00
-L1E5A97: db $30
-L1E5A98: db $EF
-L1E5A99: db $05
-L1E5A9A: db $00
-L1E5A9B: db $18
-L1E5A9C: db $F1
-L1E5A9D: db $95
-L1E5A9E: db $AC
-L1E5A9F: db $00
-L1E5AA0: db $38
-L1E5AA1: db $FA
-L1E5AA2: db $00
-L1E5AA3: db $0D
-L1E5AA4: db $03
-L1E5AA5: db $3D
-L1E5AA6: db $01
-L1E5AA7: db $87
-L1E5AA8: db $00
-L1E5AA9: db $8E
-L1E5AAA: db $01
-L1E5AAB: db $8F
-L1E5AAC: db $8C
-L1E5AAD: db $9E
-L1E5AAE: db $98
-L1E5AAF: db $9C
-L1E5AB0: db $90
-L1E5AB1: db $B8
-L1E5AB2: db $04
-L1E5AB3: db $79
-L1E5AB4: db $B0
-L1E5AB5: db $C0
-L1E5AB6: db $04
-L1E5AB7: db $3D
-L1E5AB8: db $0C
-L1E5AB9: db $C0
-L1E5ABA: db $06
-L1E5ABB: db $5C
-L1E5ABC: db $14
-L1E5ABD: db $61
-L1E5ABE: db $1C
-L1E5ABF: db $18
-L1E5AC0: db $10
-L1E5AC1: db $04
-L1E5AC2: db $04
-L1E5AC3: db $0D
-L1E5AC4: db $E9
-L1E5AC5: db $2E
-L1E5AC6: db $02
-L1E5AC7: db $E3
-L1E5AC8: db $3D
-L1E5AC9: db $1F
-L1E5ACA: db $34
-L1E5ACB: db $78
-L1E5ACC: db $B4
-L1E5ACD: db $47
-L1E5ACE: db $AD
-L1E5ACF: db $CC
-L1E5AD0: db $C7
-L1E5AD1: db $48
-L1E5AD2: db $21
-L1E5AD3: db $04
-L1E5AD4: db $00
-L1E5AD5: db $23
-L1E5AD6: db $28
-L1E5AD7: db $57
-L1E5AD8: db $AD
-L1E5AD9: db $74
-L1E5ADA: db $A0
-L1E5ADB: db $04
-L1E5ADC: db $A1
-L1E5ADD: db $04
-L1E5ADE: db $3C
-L1E5ADF: db $06
-L1E5AE0: db $54
-L1E5AE1: db $93
-L1E5AE2: db $04
-L1E5AE3: db $BB
-L1E5AE4: db $04
-L1E5AE5: db $AA
-L1E5AE6: db $04
-L1E5AE7: db $B3
-L1E5AE8: db $0A
-L1E5AE9: db $56
-L1E5AEA: db $EA
-L1E5AEB: db $A4
-L1E5AEC: db $FA
-L1E5AED: db $54
-L1E5AEE: db $09
-L1E5AEF: db $04
-L1E5AF0: db $7C
-L1E5AF1: db $00
-L1E5AF2: db $89
-L1E5AF3: db $44
-L1E5AF4: db $30
-L1E5AF5: db $32
-L1E5AF6: db $07
-L1E5AF7: db $00
-L1E5AF8: db $27
-L1E5AF9: db $A7
-L1E5AFA: db $94
-L1E5AFB: db $03
-L1E5AFC: db $03
-L1E5AFD: db $11
-L1E5AFE: db $99
-L1E5AFF: db $F3
-L1E5B00: db $F9
-L1E5B01: db $F1
-L1E5B02: db $00
-L1E5B03: db $E0
-L1E5B04: db $27
-L1E5B05: db $E1
-L1E5B06: db $C3
-L1E5B07: db $04
-L1E5B08: db $D7
-L1E5B09: db $D1
-L1E5B0A: db $38
-L1E5B0B: db $5C
-L1E5B0C: db $84
-L1E5B0D: db $20
-L1E5B0E: db $9B
-L1E5B0F: db $82
-L1E5B10: db $64
-L1E5B11: db $94
-L1E5B12: db $8D
-L1E5B13: db $90
-L1E5B14: db $8C
-L1E5B15: db $9C
-L1E5B16: db $AD
-L1E5B17: db $14
-L1E5B18: db $88
-L1E5B19: db $D6
-L1E5B1A: db $FF
-L1E5B1B: db $00
-L1E5B1C: db $88
-L1E5B1D: db $C7
-L1E5B1E: db $04
-L1E5B1F: db $A0
-L1E5B20: db $0C
-L1E5B21: db $7F
-L1E5B22: db $04
-L1E5B23: db $7C
-L1E5B24: db $F8
-L1E5B25: db $3F
-L1E5B26: db $3C
-L1E5B27: db $1F
-L1E5B28: db $5C
-L1E5B29: db $9F
-L1E5B2A: db $24
-L1E5B2B: db $CF
-L1E5B2C: db $3D
-L1E5B2D: db $38
-L1E5B2E: db $84
-L1E5B2F: db $97
-L1E5B30: db $91
-L1E5B31: db $47
-L1E5B32: db $F7
-L1E5B33: db $B4
-L1E5B34: db $6F
-L1E5B35: db $61
-L1E5B36: db $DF
-L1E5B37: db $1C
-L1E5B38: db $38
-L1E5B39: db $74
-L1E5B3A: db $A7
-L1E5B3B: db $44
-L1E5B3C: db $01
-L1E5B3D: db $3D
-L1E5B3E: db $00
-L1E5B3F: db $FE
-L1E5B40: db $04
-L1E5B41: db $98
-L1E5B42: db $07
-L1E5B43: db $FF
-L1E5B44: db $07
-L1E5B45: db $06
-L1E5B46: db $01
-L1E5B47: db $B0
-L1E5B48: db $04
-L1E5B49: db $54
-L1E5B4A: db $07
-L1E5B4B: db $06
-L1E5B4C: db $5F
-L1E5B4D: db $21
-L1E5B4E: db $06
-L1E5B4F: db $20
-L1E5B50: db $46
-L1E5B51: db $5F
-L1E5B52: db $07
-L1E5B53: db $07
-L1E5B54: db $B5
-L1E5B55: db $FF
-L1E5B56: db $01
-L1E5B57: db $5F
-L1E5B58: db $05
-L1E5B59: db $87
-L1E5B5A: db $05
-L1E5B5B: db $B5
-L1E5B5C: db $FF
-L1E5B5D: db $07
-L1E5B5E: db $7B
-L1E5B5F: db $83
-L1E5B60: db $17
-L1E5B61: db $FF
-L1E5B62: db $5F
-L1E5B63: db $06
-L1E5B64: db $C1
-L1E5B65: db $97
-L1E5B66: db $FE
-L1E5B67: db $5E
-L1E5B68: db $03
-L1E5B69: db $04
-L1E5B6A: db $84
-L1E5B6B: db $07
-L1E5B6C: db $7F
-L1E5B6D: db $FF
-L1E5B6E: db $04
-L1E5B6F: db $C0
-L1E5B70: db $FF
-L1E5B71: db $77
-L1E5B72: db $7F
-L1E5B73: db $17
-L1E5B74: db $FF
-L1E5B75: db $5F
-L1E5B76: db $FF
-L1E5B77: db $17
-L1E5B78: db $FF
-L1E5B79: db $FF
-L1E5B7A: db $5F
-L1E5B7B: db $7F
-L1E5B7C: db $FF
-L1E5B7D: db $FF
-L1E5B7E: db $5F
-L1E5B7F: db $7F
-L1E5B80: db $17
-L1E5B81: db $FF
-L1E5B82: db $F0
-L1E5B83: db $5F
-L1E5B84: db $06
-L1E5B85: db $FF
-L1E5B86: db $FE
-L1E5B87: db $78
-L1E5B88: db $00
-L1E5B89: db $4A
-L1E5B8A: db $06
-L1E5B8B: db $00
-L1E5B8C: db $0E
-L1E5B8D: db $0F
-L1E5B8E: db $20
-L1E5B8F: db $07
-L1E5B90: db $17
-L1E5B91: db $00
-L1E5B92: db $69
-L1E5B93: db $03
-L1E5B94: db $10
-L1E5B95: db $0E
-L1E5B96: db $3C
-L1E5B97: db $00
-L1E5B98: db $66
-L1E5B99: db $7F
-L1E5B9A: db $10
-L1E5B9B: db $00
-L1E5B9C: db $77
-L1E5B9D: db $0C
-L1E5B9E: db $3F
-L1E5B9F: db $30
-L1E5BA0: db $3E
-L1E5BA1: db $60
-L1E5BA2: db $78
-L1E5BA3: db $7E
-L1E5BA4: db $FA
-L1E5BA5: db $00
-L1E5BA6: db $E0
-L1E5BA7: db $70
-L1E5BA8: db $10
-L1E5BA9: db $0E
-L1E5BAA: db $F8
-L1E5BAB: db $00
-L1E5BAC: db $CC
-L1E5BAD: db $59
-L1E5BAE: db $FE
-L1E5BAF: db $10
-L1E5BB0: db $EE
-L1E5BB1: db $40
-L1E5BB2: db $30
-L1E5BB3: db $C0
-L1E5BB4: db $FC
-L1E5BB5: db $10
-L1E5BB6: db $6D
-L1E5BB7: db $E0
-L1E5BB8: db $11
-L1E5BB9: db $E0
-L1E5BBA: db $60
-L1E5BBB: db $10
-L1E5BBC: db $0E
-L1E5BBD: db $3C
-L1E5BBE: db $00
-L1E5BBF: db $0B
-L1E5BC0: db $66
-L1E5BC1: db $7F
-L1E5BC2: db $60
-L1E5BC3: db $77
-L1E5BC4: db $10
-L1E5BC5: db $70
-L1E5BC6: db $11
-L1E5BC7: db $70
-L1E5BC8: db $D6
-L1E5BC9: db $50
-L1E5BCA: db $A0
-L1E5BCB: db $3F
-L1E5BCC: db $E0
-L1E5BCD: db $1E
-L1E5BCE: db $10
-L1E5BCF: db $0E
-L1E5BD0: db $79
-L1E5BD1: db $96
-L1E5BD2: db $00
-L1E5BD3: db $CD
-L1E5BD4: db $FF
-L1E5BD5: db $10
-L1E5BD6: db $EF
-L1E5BD7: db $15
-L1E5BD8: db $A0
-L1E5BD9: db $7F
-L1E5BDA: db $B4
-L1E5BDB: db $E0
-L1E5BDC: db $3C
-L1E5BDD: db $10
-L1E5BDE: db $0E
-L1E5BDF: db $8C
-L1E5BE0: db $00
-L1E5BE1: db $DC
-L1E5BE2: db $DE
-L1E5BE3: db $1D
-L1E5BE4: db $FC
-L1E5BE5: db $FE
-L1E5BE6: db $AC
-L1E5BE7: db $10
-L1E5BE8: db $60
-L1E5BE9: db $11
-L1E5BEA: db $CE
-L1E5BEB: db $11
-L1E5BEC: db $B4
-L1E5BED: db $E0
-L1E5BEE: db $C6
-L1E5BEF: db $10
-L1E5BF0: db $0E
-L1E5BF1: db $FF
-L1E5BF2: db $10
-L1E5BF3: db $FC
-L1E5BF4: db $7C
-L1E5BF5: db $15
-L1E5BF6: db $F0
-L1E5BF7: db $40
-L1E5BF8: db $E0
-L1E5BF9: db $10
-L1E5BFA: db $C0
-L1E5BFB: db $12
-L1E5BFC: db $80
-L1E5BFD: db $B0
-L1E5BFE: db $DD
-L1E5BFF: db $11
-L1E5C00: db $0F
-L1E5C01: db $C0
-L1E5C02: db $0F
-L1E5C03: db $0F
-L1E5C04: db $0E
-L1E5C05: db $00
-L1E5C06: db $0E
-L1E5C07: db $52
-L1E5C08: db $FF
-L1E5C09: db $01
-L1E5C0A: db $81
-L1E5C0B: db $11
-L1E5C0C: db $FD
-L1E5C0D: db $83
-L1E5C0E: db $30
-L1E5C0F: db $82
-L1E5C10: db $83
-L1E5C11: db $11
-L1E5C12: db $F9
-L1E5C13: db $86
-L1E5C14: db $FE
-L1E5C15: db $84
-L1E5C16: db $FA
-L1E5C17: db $10
-L1E5C18: db $30
-L1E5C19: db $CC
-L1E5C1A: db $D0
-L1E5C1B: db $11
-L1E5C1C: db $FC
-L1E5C1D: db $80
-L1E5C1E: db $12
-L1E5C1F: db $50
-L1E5C20: db $D8
-L1E5C21: db $83
-L1E5C22: db $D4
-L1E5C23: db $40
-L1E5C24: db $10
-L1E5C25: db $FF
-L1E5C26: db $01
-L1E5C27: db $5B
-L1E5C28: db $10
-L1E5C29: db $5F
-L1E5C2A: db $E7
-L1E5C2B: db $48
-L1E5C2C: db $BD
-L1E5C2D: db $30
-L1E5C2E: db $85
-L1E5C2F: db $63
-L1E5C30: db $10
-L1E5C31: db $A5
-L1E5C32: db $01
-L1E5C33: db $A1
-L1E5C34: db $91
-L1E5C35: db $10
-L1E5C36: db $B1
-L1E5C37: db $49
-L1E5C38: db $30
-L1E5C39: db $41
-L1E5C3A: db $11
-L1E5C3B: db $55
-L1E5C3C: db $60
-L1E5C3D: db $04
-L1E5C3E: db $CD
-L1E5C3F: db $0F
-L1E5C40: db $3D
-L1E5C41: db $5D
-L1E5C42: db $7D
-L1E5C43: db $00
-L1E5C44: db $7F
-L1E5C45: db $75
-L1E5C46: db $C8
-L1E5C47: db $00
-L1E5C48: db $D0
-L1E5C49: db $83
-L1E5C4A: db $89
-L1E5C4B: db $00
-L1E5C4C: db $BA
-L1E5C4D: db $BB
-L1E5C4E: db $CE
-L1E5C4F: db $80
-L1E5C50: db $00
-L1E5C51: db $A7
-L1E5C52: db $F7
-L1E5C53: db $D1
-L1E5C54: db $F1
-L1E5C55: db $A9
-L1E5C56: db $E9
-L1E5C57: db $FF
-L1E5C58: db $A0
-L1E5C59: db $00
-L1E5C5A: db $00
-L1E5C5B: db $0E
-L1E5C5C: db $0D
-L1E5C5D: db $2D
-L1E5C5E: db $63
-L1E5C5F: db $EB
-L1E5C60: db $9F
-L1E5C61: db $88
-L1E5C62: db $00
-L1E5C63: db $27
-L1E5C64: db $F7
-L1E5C65: db $03
-L1E5C66: db $60
-L1E5C67: db $8B
-L1E5C68: db $AB
-L1E5C69: db $91
-L1E5C6A: db $2A
-L1E5C6B: db $D1
-L1E5C6C: db $FF
-L1E5C6D: db $00
-L1E5C6E: db $00
-L1E5C6F: db $0E
-L1E5C70: db $FF
-L1E5C71: db $01
-L1E5C72: db $8D
-L1E5C73: db $82
-L1E5C74: db $10
-L1E5C75: db $9D
-L1E5C76: db $FB
-L1E5C77: db $97
-L1E5C78: db $EF
-L1E5C79: db $91
-L1E5C7A: db $30
-L1E5C7B: db $81
-L1E5C7C: db $44
-L1E5C7D: db $F3
-L1E5C7E: db $12
-L1E5C7F: db $F7
-L1E5C80: db $89
-L1E5C81: db $E3
-L1E5C82: db $10
-L1E5C83: db $E7
-L1E5C84: db $8D
-L1E5C85: db $04
-L1E5C86: db $E1
-L1E5C87: db $8B
-L1E5C88: db $F1
-L1E5C89: db $95
-L1E5C8A: db $ED
-L1E5C8B: db $50
-L1E5C8C: db $AD
-L1E5C8D: db $9F
-L1E5C8E: db $6B
-L1E5C8F: db $AF
-L1E5C90: db $10
-L1E5C91: db $D0
-L1E5C92: db $93
-L1E5C93: db $E0
-L1E5C94: db $99
-L1E5C95: db $F0
-L1E5C96: db $00
-L1E5C97: db $2C
-L1E5C98: db $B3
-L1E5C99: db $BF
-L1E5C9A: db $60
-L1E5C9B: db $9B
-L1E5C9C: db $30
-L1E5C9D: db $00
-L1E5C9E: db $87
-L1E5C9F: db $8F
-L1E5CA0: db $54
-L1E5CA1: db $FF
-L1E5CA2: db $00
-L1E5CA3: db $00
-L1E5CA4: db $0E
-L1E5CA5: db $FF
-L1E5CA6: db $00
-L1E5CA7: db $8F
-L1E5CA8: db $81
-L1E5CA9: db $4A
-L1E5CAA: db $9F
-L1E5CAB: db $10
-L1E5CAC: db $BF
-L1E5CAD: db $82
-L1E5CAE: db $10
-L1E5CAF: db $80
-L1E5CB0: db $11
-L1E5CB1: db $DF
-L1E5CB2: db $AA
-L1E5CB3: db $10
-L1E5CB4: db $FE
-L1E5CB5: db $10
-L1E5CB6: db $AE
-L1E5CB7: db $10
-L1E5CB8: db $AC
-L1E5CB9: db $10
-L1E5CBA: db $98
-L1E5CBB: db $89
-L1E5CBC: db $10
-L1E5CBD: db $D9
-L1E5CBE: db $83
-L1E5CBF: db $D3
-L1E5CC0: db $10
-L1E5CC1: db $D2
-L1E5CC2: db $86
-L1E5CC3: db $11
-L1E5CC4: db $54
-L1E5CC5: db $97
-L1E5CC6: db $50
-L1E5CC7: db $FF
-L1E5CC8: db $01
-L1E5CC9: db $5B
-L1E5CCA: db $10
-L1E5CCB: db $9F
-L1E5CCC: db $F7
-L1E5CCD: db $0E
-L1E5CCE: db $95
-L1E5CCF: db $F3
-L1E5CD0: db $01
-L1E5CD1: db $E3
-L1E5CD2: db $10
-L1E5CD3: db $C0
-L1E5CD4: db $10
-L1E5CD5: db $13
-L1E5CD6: db $81
-L1E5CD7: db $10
-L1E5CD8: db $25
-L1E5CD9: db $21
-L1E5CDA: db $4F
-L1E5CDB: db $E9
-L1E5CDC: db $71
-L1E5CDD: db $69
-L1E5CDE: db $10
-L1E5CDF: db $00
-L1E5CE0: db $79
-L1E5CE1: db $C3
-L1E5CE2: db $CF
-L1E5CE3: db $2B
-L1E5CE4: db $2F
-L1E5CE5: db $EB
-L1E5CE6: db $EF
-L1E5CE7: db $51
-L1E5CE8: db $08
-L1E5CE9: db $59
-L1E5CEA: db $81
-L1E5CEB: db $83
-L1E5CEC: db $9D
-L1E5CED: db $00
-L1E5CEE: db $BE
-L1E5CEF: db $BF
-L1E5CF0: db $8E
-L1E5CF1: db $AA
-L1E5CF2: db $00
-L1E5CF3: db $87
-L1E5CF4: db $00
-L1E5CF5: db $89
-L1E5CF6: db $02
-L1E5CF7: db $FF
-L1E5CF8: db $00
-L1E5CF9: db $00
-L1E5CFA: db $80
-L1E5CFB: db $0E
-L1E5CFC: db $11
-L1E5CFD: db $99
-L1E5CFE: db $A1
-L1E5CFF: db $E1
-L1E5D00: db $6F
-L1E5D01: db $EF
-L1E5D02: db $27
-L1E5D03: db $00
-L1E5D04: db $E7
-L1E5D05: db $23
-L1E5D06: db $73
-L1E5D07: db $8B
-L1E5D08: db $93
-L1E5D09: db $E3
-L1E5D0A: db $F3
-L1E5D0B: db $FF
-L1E5D0C: db $A9
-L1E5D0D: db $00
-L1E5D0E: db $00
-L1E5D0F: db $0E
-L1E5D10: db $FF
-L1E5D11: db $00
-L1E5D12: db $BF
-L1E5D13: db $8D
-L1E5D14: db $10
-L1E5D15: db $52
-L1E5D16: db $95
-L1E5D17: db $40
-L1E5D18: db $87
-L1E5D19: db $10
-L1E5D1A: db $81
-L1E5D1B: db $F9
-L1E5D1C: db $10
-L1E5D1D: db $B3
-L1E5D1E: db $A9
-L1E5D1F: db $10
-L1E5D20: db $F7
-L1E5D21: db $10
-L1E5D22: db $E3
-L1E5D23: db $10
-L1E5D24: db $E9
-L1E5D25: db $89
-L1E5D26: db $F0
-L1E5D27: db $3F
-L1E5D28: db $99
-L1E5D29: db $9D
-L1E5D2A: db $00
-L1E5D2B: db $20
-L1E5D2C: db $00
-L1E5D2D: db $80
-L1E5D2E: db $00
-L1E5D2F: db $31
-L1E5D30: db $41
-L1E5D31: db $9F
-L1E5D32: db $70
-L1E5D33: db $97
-L1E5D34: db $95
-L1E5D35: db $A1
-L1E5D36: db $B9
-L1E5D37: db $EB
-L1E5D38: db $00
-L1E5D39: db $1C
-L1E5D3A: db $B3
-L1E5D3B: db $BB
-L1E5D3C: db $93
-L1E5D3D: db $A0
-L1E5D3E: db $10
-L1E5D3F: db $A0
-L1E5D40: db $8B
-L1E5D41: db $8F
-L1E5D42: db $57
-L1E5D43: db $FF
-L1E5D44: db $00
-L1E5D45: db $00
-L1E5D46: db $0E
-L1E5D47: db $C0
-L1E5D48: db $0F
-L1E5D49: db $0F
-L1E5D4A: db $0E
-L1E5D4B: db $55
-L1E5D4C: db $00
-L1E5D4D: db $0E
-L1E5D4E: db $FF
-L1E5D4F: db $01
-L1E5D50: db $80
-L1E5D51: db $13
-L1E5D52: db $FE
-L1E5D53: db $10
-L1E5D54: db $09
-L1E5D55: db $D6
-L1E5D56: db $A8
-L1E5D57: db $FA
-L1E5D58: db $AC
-L1E5D59: db $50
-L1E5D5A: db $AD
-L1E5D5B: db $D2
-L1E5D5C: db $10
-L1E5D5D: db $2A
-L1E5D5E: db $82
-L1E5D5F: db $DD
-L1E5D60: db $10
-L1E5D61: db $C1
-L1E5D62: db $10
-L1E5D63: db $91
-L1E5D64: db $E0
-L1E5D65: db $81
-L1E5D66: db $21
-L1E5D67: db $88
-L1E5D68: db $AB
-L1E5D69: db $20
-L1E5D6A: db $93
-L1E5D6B: db $8B
-L1E5D6C: db $9B
-L1E5D6D: db $FF
-L1E5D6E: db $00
-L1E5D6F: db $35
-L1E5D70: db $FB
-L1E5D71: db $01
-L1E5D72: db $20
-L1E5D73: db $10
-L1E5D74: db $7F
-L1E5D75: db $10
-L1E5D76: db $5D
-L1E5D77: db $12
-L1E5D78: db $10
-L1E5D79: db $4D
-L1E5D7A: db $11
-L1E5D7B: db $5F
-L1E5D7C: db $10
-L1E5D7D: db $0F
-L1E5D7E: db $31
-L1E5D7F: db $1F
-L1E5D80: db $21
-L1E5D81: db $6A
-L1E5D82: db $49
-L1E5D83: db $10
-L1E5D84: db $A0
-L1E5D85: db $41
-L1E5D86: db $10
-L1E5D87: db $03
-L1E5D88: db $40
-L1E5D89: db $AB
-L1E5D8A: db $00
-L1E5D8B: db $C1
-L1E5D8C: db $C9
-L1E5D8D: db $E5
-L1E5D8E: db $E3
-L1E5D8F: db $A2
-L1E5D90: db $87
-L1E5D91: db $AE
-L1E5D92: db $8F
-L1E5D93: db $58
-L1E5D94: db $BE
-L1E5D95: db $10
-L1E5D96: db $B7
-L1E5D97: db $50
-L1E5D98: db $30
-L1E5D99: db $8E
-L1E5D9A: db $B3
-L1E5D9B: db $83
-L1E5D9C: db $14
-L1E5D9D: db $B1
-L1E5D9E: db $85
-L1E5D9F: db $FF
-L1E5DA0: db $00
-L1E5DA1: db $00
-L1E5DA2: db $0E
-L1E5DA3: db $C5
-L1E5DA4: db $D3
-L1E5DA5: db $10
-L1E5DA6: db $6D
-L1E5DA7: db $F1
-L1E5DA8: db $ED
-L1E5DA9: db $11
-L1E5DAA: db $E1
-L1E5DAB: db $4D
-L1E5DAC: db $71
-L1E5DAD: db $8D
-L1E5DAE: db $4A
-L1E5DAF: db $C1
-L1E5DB0: db $10
-L1E5DB1: db $A1
-L1E5DB2: db $FF
-L1E5DB3: db $00
-L1E5DB4: db $00
-L1E5DB5: db $0E
-L1E5DB6: db $FF
-L1E5DB7: db $98
-L1E5DB8: db $01
-L1E5DB9: db $81
-L1E5DBA: db $FD
-L1E5DBB: db $12
-L1E5DBC: db $51
-L1E5DBD: db $BF
-L1E5DBE: db $C1
-L1E5DBF: db $DB
-L1E5DC0: db $3A
-L1E5DC1: db $C5
-L1E5DC2: db $CD
-L1E5DC3: db $10
-L1E5DC4: db $60
-L1E5DC5: db $10
-L1E5DC6: db $85
-L1E5DC7: db $20
-L1E5DC8: db $AB
-L1E5DC9: db $98
-L1E5DCA: db $10
-L1E5DCB: db $83
-L1E5DCC: db $89
-L1E5DCD: db $20
-L1E5DCE: db $01
-L1E5DCF: db $C3
-L1E5DD0: db $99
-L1E5DD1: db $9B
-L1E5DD2: db $42
-L1E5DD3: db $B9
-L1E5DD4: db $00
-L1E5DD5: db $C9
-L1E5DD6: db $9D
-L1E5DD7: db $E9
-L1E5DD8: db $AD
-L1E5DD9: db $11
-L1E5DDA: db $F9
-L1E5DDB: db $A8
-L1E5DDC: db $70
-L1E5DDD: db $D9
-L1E5DDE: db $70
-L1E5DDF: db $F1
-L1E5DE0: db $30
-L1E5DE1: db $D1
-L1E5DE2: db $81
-L1E5DE3: db $FF
-L1E5DE4: db $A9
-L1E5DE5: db $00
-L1E5DE6: db $00
-L1E5DE7: db $0E
-L1E5DE8: db $FF
-L1E5DE9: db $00
-L1E5DEA: db $DF
-L1E5DEB: db $80
-L1E5DEC: db $20
-L1E5DED: db $AA
-L1E5DEE: db $10
-L1E5DEF: db $FE
-L1E5DF0: db $10
-L1E5DF1: db $BA
-L1E5DF2: db $18
-L1E5DF3: db $F2
-L1E5DF4: db $12
-L1E5DF5: db $F8
-L1E5DF6: db $45
-L1E5DF7: db $88
-L1E5DF8: db $11
-L1E5DF9: db $D8
-L1E5DFA: db $89
-L1E5DFB: db $D0
-L1E5DFC: db $10
-L1E5DFD: db $A1
-L1E5DFE: db $90
-L1E5DFF: db $40
-L1E5E00: db $FF
-L1E5E01: db $00
-L1E5E02: db $FD
-L1E5E03: db $03
-L1E5E04: db $DD
-L1E5E05: db $23
-L1E5E06: db $E5
-L1E5E07: db $0B
-L1E5E08: db $02
-L1E5E09: db $27
-L1E5E0A: db $09
-L1E5E0B: db $4B
-L1E5E0C: db $15
-L1E5E0D: db $5B
-L1E5E0E: db $05
-L1E5E0F: db $11
-L1E5E10: db $53
-L1E5E11: db $80
-L1E5E12: db $10
-L1E5E13: db $51
-L1E5E14: db $07
-L1E5E15: db $11
-L1E5E16: db $03
-L1E5E17: db $01
-L1E5E18: db $41
-L1E5E19: db $61
-L1E5E1A: db $36
-L1E5E1B: db $F1
-L1E5E1C: db $71
-L1E5E1D: db $00
-L1E5E1E: db $70
-L1E5E1F: db $31
-L1E5E20: db $00
-L1E5E21: db $30
-L1E5E22: db $AD
-L1E5E23: db $02
-L1E5E24: db $80
-L1E5E25: db $F5
-L1E5E26: db $88
-L1E5E27: db $D1
-L1E5E28: db $84
-L1E5E29: db $E3
-L1E5E2A: db $10
-L1E5E2B: db $F0
-L1E5E2C: db $6D
-L1E5E2D: db $8E
-L1E5E2E: db $80
-L1E5E2F: db $00
-L1E5E30: db $FF
-L1E5E31: db $11
-L1E5E32: db $00
-L1E5E33: db $00
-L1E5E34: db $0E
-L1E5E35: db $00
-L1E5E36: db $71
-L1E5E37: db $F9
-L1E5E38: db $31
-L1E5E39: db $B1
-L1E5E3A: db $41
-L1E5E3B: db $C1
-L1E5E3C: db $A1
-L1E5E3D: db $21
-L1E5E3E: db $AA
-L1E5E3F: db $11
-L1E5E40: db $01
-L1E5E41: db $00
-L1E5E42: db $E1
-L1E5E43: db $10
-L1E5E44: db $FF
-L1E5E45: db $00
-L1E5E46: db $00
-L1E5E47: db $A4
-L1E5E48: db $0E
-L1E5E49: db $FF
-L1E5E4A: db $00
-L1E5E4B: db $BD
-L1E5E4C: db $83
-L1E5E4D: db $20
-L1E5E4E: db $81
-L1E5E4F: db $FB
-L1E5E50: db $A0
-L1E5E51: db $10
-L1E5E52: db $F3
-L1E5E53: db $10
-L1E5E54: db $E9
-L1E5E55: db $95
-L1E5E56: db $ED
-L1E5E57: db $91
-L1E5E58: db $DD
-L1E5E59: db $A0
-L1E5E5A: db $10
-L1E5E5B: db $CD
-L1E5E5C: db $12
-L1E5E5D: db $E5
-L1E5E5E: db $B1
-L1E5E5F: db $C1
-L1E5E60: db $99
-L1E5E61: db $D9
-L1E5E62: db $20
-L1E5E63: db $8D
-L1E5E64: db $9D
-L1E5E65: db $10
-L1E5E66: db $95
-L1E5E67: db $A5
-L1E5E68: db $D5
-L1E5E69: db $AD
-L1E5E6A: db $DD
-L1E5E6B: db $C5
-L1E5E6C: db $50
-L1E5E6D: db $D0
-L1E5E6E: db $85
-L1E5E6F: db $89
-L1E5E70: db $A9
-L1E5E71: db $F0
-L1E5E72: db $81
-L1E5E73: db $10
-L1E5E74: db $6A
-L1E5E75: db $A1
-L1E5E76: db $20
-L1E5E77: db $00
-L1E5E78: db $F9
-L1E5E79: db $10
-L1E5E7A: db $FF
-L1E5E7B: db $00
-L1E5E7C: db $00
-L1E5E7D: db $BA
-L1E5E7E: db $0E
-L1E5E7F: db $C0
-L1E5E80: db $0F
-L1E5E81: db $0F
-L1E5E82: db $0E
-L1E5E83: db $00
-L1E5E84: db $0E
-L1E5E85: db $FF
-L1E5E86: db $80
-L1E5E87: db $00
-L1E5E88: db $D0
-L1E5E89: db $F0
-L1E5E8A: db $A2
-L1E5E8B: db $E4
-L1E5E8C: db $CC
-L1E5E8D: db $C9
-L1E5E8E: db $8B
-L1E5E8F: db $00
-L1E5E90: db $CA
-L1E5E91: db $84
-L1E5E92: db $8E
-L1E5E93: db $8A
-L1E5E94: db $C4
-L1E5E95: db $80
-L1E5E96: db $A1
-L1E5E97: db $81
-L1E5E98: db $00
-L1E5E99: db $C3
-L1E5E9A: db $97
-L1E5E9B: db $B7
-L1E5E9C: db $DE
-L1E5E9D: db $BF
-L1E5E9E: db $9C
-L1E5E9F: db $9E
-L1E5EA0: db $88
-L1E5EA1: db $18
-L1E5EA2: db $CC
-L1E5EA3: db $C8
-L1E5EA4: db $CA
-L1E5EA5: db $40
-L1E5EA6: db $80
-L1E5EA7: db $C6
-L1E5EA8: db $CE
-L1E5EA9: db $FF
-L1E5EAA: db $88
-L1E5EAB: db $00
-L1E5EAC: db $31
-L1E5EAD: db $71
-L1E5EAE: db $19
-L1E5EAF: db $00
-L1E5EB0: db $49
-L1E5EB1: db $9D
-L1E5EB2: db $8D
-L1E5EB3: db $20
-L1E5EB4: db $0D
-L1E5EB5: db $05
-L1E5EB6: db $11
-L1E5EB7: db $65
-L1E5EB8: db $01
-L1E5EB9: db $E5
-L1E5EBA: db $81
-L1E5EBB: db $E1
-L1E5EBC: db $EA
-L1E5EBD: db $11
-L1E5EBE: db $50
-L1E5EBF: db $01
-L1E5EC0: db $61
-L1E5EC1: db $10
-L1E5EC2: db $15
-L1E5EC3: db $70
-L1E5EC4: db $BD
-L1E5EC5: db $A0
-L1E5EC6: db $30
-L1E5EC7: db $39
-L1E5EC8: db $10
-L1E5EC9: db $35
-L1E5ECA: db $8F
-L1E5ECB: db $CF
-L1E5ECC: db $D6
-L1E5ECD: db $D7
-L1E5ECE: db $02
-L1E5ECF: db $9F
-L1E5ED0: db $DF
-L1E5ED1: db $C9
-L1E5ED2: db $E9
-L1E5ED3: db $AF
-L1E5ED4: db $EF
-L1E5ED5: db $60
-L1E5ED6: db $F7
-L1E5ED7: db $54
-L1E5ED8: db $A6
-L1E5ED9: db $10
-L1E5EDA: db $FF
-L1E5EDB: db $00
-L1E5EDC: db $00
-L1E5EDD: db $0E
-L1E5EDE: db $01
-L1E5EDF: db $7D
-L1E5EE0: db $08
-L1E5EE1: db $11
-L1E5EE2: db $E1
-L1E5EE3: db $C5
-L1E5EE4: db $E9
-L1E5EE5: db $11
-L1E5EE6: db $8D
-L1E5EE7: db $81
-L1E5EE8: db $89
-L1E5EE9: db $4A
-L1E5EEA: db $A1
-L1E5EEB: db $B0
-L1E5EEC: db $61
-L1E5EED: db $FF
-L1E5EEE: db $00
-L1E5EEF: db $00
-L1E5EF0: db $0E
-L1E5EF1: db $FF
-L1E5EF2: db $80
-L1E5EF3: db $00
-L1E5EF4: db $C5
-L1E5EF5: db $8D
-L1E5EF6: db $F5
-L1E5EF7: db $A5
-L1E5EF8: db $89
-L1E5EF9: db $B5
-L1E5EFA: db $A1
-L1E5EFB: db $45
-L1E5EFC: db $91
-L1E5EFD: db $00
-L1E5EFE: db $83
-L1E5EFF: db $81
-L1E5F00: db $AB
-L1E5F01: db $10
-L1E5F02: db $EB
-L1E5F03: db $50
-L1E5F04: db $45
-L1E5F05: db $9B
-L1E5F06: db $10
-L1E5F07: db $FB
-L1E5F08: db $B1
-L1E5F09: db $F1
-L1E5F0A: db $D0
-L1E5F0B: db $A9
-L1E5F0C: db $10
-L1E5F0D: db $54
-L1E5F0E: db $A5
-L1E5F0F: db $10
-L1E5F10: db $A7
-L1E5F11: db $70
-L1E5F12: db $B7
-L1E5F13: db $12
-L1E5F14: db $BD
-L1E5F15: db $B5
-L1E5F16: db $4A
-L1E5F17: db $B9
-L1E5F18: db $01
-L1E5F19: db $89
-L1E5F1A: db $D9
-L1E5F1B: db $70
-L1E5F1C: db $F1
-L1E5F1D: db $11
-L1E5F1E: db $91
-L1E5F1F: db $AA
-L1E5F20: db $50
-L1E5F21: db $FF
-L1E5F22: db $00
-L1E5F23: db $00
-L1E5F24: db $0E
-L1E5F25: db $FF
-L1E5F26: db $00
-L1E5F27: db $8C
-L1E5F28: db $20
-L1E5F29: db $8E
-L1E5F2A: db $98
-L1E5F2B: db $00
-L1E5F2C: db $92
-L1E5F2D: db $B9
-L1E5F2E: db $B1
-L1E5F2F: db $B0
-L1E5F30: db $A0
-L1E5F31: db $91
-L1E5F32: db $11
-L1E5F33: db $A6
-L1E5F34: db $80
-L1E5F35: db $11
-L1E5F36: db $86
-L1E5F37: db $81
-L1E5F38: db $87
-L1E5F39: db $30
-L1E5F3A: db $EA
-L1E5F3B: db $01
-L1E5F3C: db $50
-L1E5F3D: db $10
-L1E5F3E: db $AC
-L1E5F3F: db $70
-L1E5F40: db $B9
-L1E5F41: db $30
-L1E5F42: db $98
-L1E5F43: db $A0
-L1E5F44: db $51
-L1E5F45: db $FF
-L1E5F46: db $00
-L1E5F47: db $0F
-L1E5F48: db $01
-L1E5F49: db $47
-L1E5F4A: db $21
-L1E5F4B: db $33
-L1E5F4C: db $18
-L1E5F4D: db $91
-L1E5F4E: db $93
-L1E5F4F: db $51
-L1E5F50: db $60
-L1E5F51: db $10
-L1E5F52: db $B1
-L1E5F53: db $A3
-L1E5F54: db $41
-L1E5F55: db $00
-L1E5F56: db $65
-L1E5F57: db $C1
-L1E5F58: db $C3
-L1E5F59: db $89
-L1E5F5A: db $CD
-L1E5F5B: db $3B
-L1E5F5C: db $BD
-L1E5F5D: db $39
-L1E5F5E: db $98
-L1E5F5F: db $00
-L1E5F60: db $13
-L1E5F61: db $31
-L1E5F62: db $10
-L1E5F63: db $F0
-L1E5F64: db $7B
-L1E5F65: db $79
-L1E5F66: db $63
-L1E5F67: db $01
-L1E5F68: db $71
-L1E5F69: db $80
-L1E5F6A: db $BE
-L1E5F6B: db $88
-L1E5F6C: db $87
-L1E5F6D: db $A3
-L1E5F6E: db $97
-L1E5F6F: db $11
-L1E5F70: db $09
-L1E5F71: db $B1
-L1E5F72: db $81
-L1E5F73: db $91
-L1E5F74: db $85
-L1E5F75: db $B0
-L1E5F76: db $86
-L1E5F77: db $FF
-L1E5F78: db $00
-L1E5F79: db $40
-L1E5F7A: db $00
-L1E5F7B: db $0E
-L1E5F7C: db $73
-L1E5F7D: db $71
-L1E5F7E: db $6B
-L1E5F7F: db $E9
-L1E5F80: db $FB
-L1E5F81: db $F9
-L1E5F82: db $11
-L1E5F83: db $97
-L1E5F84: db $91
-L1E5F85: db $F7
-L1E5F86: db $10
-L1E5F87: db $EF
-L1E5F88: db $E1
-L1E5F89: db $6F
-L1E5F8A: db $10
-L1E5F8B: db $54
-L1E5F8C: db $FF
-L1E5F8D: db $00
-L1E5F8E: db $00
-L1E5F8F: db $0E
-L1E5F90: db $FF
-L1E5F91: db $00
-L1E5F92: db $A3
-L1E5F93: db $A1
-L1E5F94: db $41
-L1E5F95: db $8B
-L1E5F96: db $10
-L1E5F97: db $97
-L1E5F98: db $C5
-L1E5F99: db $C7
-L1E5F9A: db $CD
-L1E5F9B: db $C1
-L1E5F9C: db $10
-L1E5F9D: db $88
-L1E5F9E: db $40
-L1E5F9F: db $D1
-L1E5FA0: db $89
-L1E5FA1: db $DB
-L1E5FA2: db $10
-L1E5FA3: db $99
-L1E5FA4: db $81
-L1E5FA5: db $B9
-L1E5FA6: db $20
-L1E5FA7: db $85
-L1E5FA8: db $A5
-L1E5FA9: db $12
-L1E5FAA: db $E5
-L1E5FAB: db $95
-L1E5FAC: db $FD
-L1E5FAD: db $8F
-L1E5FAE: db $8D
-L1E5FAF: db $48
-L1E5FB0: db $9B
-L1E5FB1: db $31
-L1E5FB2: db $ED
-L1E5FB3: db $8B
-L1E5FB4: db $F0
-L1E5FB5: db $DF
-L1E5FB6: db $BD
-L1E5FB7: db $D7
-L1E5FB8: db $D5
-L1E5FB9: db $C0
-L1E5FBA: db $30
-L1E5FBB: db $B5
-L1E5FBC: db $70
-L1E5FBD: db $A9
-L1E5FBE: db $11
-L1E5FBF: db $FF
-L1E5FC0: db $00
-L1E5FC1: db $40
-L1E5FC2: db $00
-L1E5FC3: db $0E
-L1E5FC4: db $00
-L1E5FC5: db $09
-L1E5FC6: db $00
-L1E5FC7: db $00
-L1E5FC8: db $00
-L1E5FC9: db $00
-L1E5FCA: db $08
-L1E5FCB: db $08
-L1E5FCC: db $1C
-L1E5FCD: db $1C
-L1E5FCE: db $3E
-L1E5FCF: db $3E
-L1E5FD0: db $1F
-L1E5FD1: db $1F
-L1E5FD2: db $0F
-L1E5FD3: db $0F
-L1E5FD4: db $07
-L1E5FD5: db $07
-L1E5FD6: db $00
-L1E5FD7: db $00
-L1E5FD8: db $00
-L1E5FD9: db $00
-L1E5FDA: db $00
-L1E5FDB: db $00
-L1E5FDC: db $00
-L1E5FDD: db $00
-L1E5FDE: db $00
-L1E5FDF: db $00
-L1E5FE0: db $00
-L1E5FE1: db $00
-L1E5FE2: db $81
-L1E5FE3: db $81
-L1E5FE4: db $C3
-L1E5FE5: db $C3
-L1E5FE6: db $00
-L1E5FE7: db $00
-L1E5FE8: db $00
-L1E5FE9: db $00
-L1E5FEA: db $10
-L1E5FEB: db $10
-L1E5FEC: db $38
-L1E5FED: db $38
-L1E5FEE: db $7C
-L1E5FEF: db $7C
-L1E5FF0: db $F8
-L1E5FF1: db $F8
-L1E5FF2: db $F0
-L1E5FF3: db $F0
-L1E5FF4: db $E0
-L1E5FF5: db $E0
-L1E5FF6: db $03
-L1E5FF7: db $03
-L1E5FF8: db $01
-L1E5FF9: db $01
-L1E5FFA: db $00
-L1E5FFB: db $00
-L1E5FFC: db $00
-L1E5FFD: db $00
-L1E5FFE: db $00
-L1E5FFF: db $00
-L1E6000: db $00
-L1E6001: db $00
-L1E6002: db $01
-L1E6003: db $01
-L1E6004: db $03
-L1E6005: db $03
-L1E6006: db $E7
-L1E6007: db $E7
-L1E6008: db $FF
-L1E6009: db $FF
-L1E600A: db $FF
-L1E600B: db $FF
-L1E600C: db $7E
-L1E600D: db $7E
-L1E600E: db $7E
-L1E600F: db $7E
-L1E6010: db $FF
-L1E6011: db $FF
-L1E6012: db $FF
-L1E6013: db $FF
-L1E6014: db $E7
-L1E6015: db $E7
-L1E6016: db $C0
-L1E6017: db $C0
-L1E6018: db $80
-L1E6019: db $80
-L1E601A: db $00
-L1E601B: db $00
-L1E601C: db $00
-L1E601D: db $00
-L1E601E: db $00
-L1E601F: db $00
-L1E6020: db $00
-L1E6021: db $00
-L1E6022: db $80
-L1E6023: db $80
-L1E6024: db $C0
-L1E6025: db $C0
-L1E6026: db $07
-L1E6027: db $07
-L1E6028: db $0F
-L1E6029: db $0F
-L1E602A: db $1F
-L1E602B: db $1F
-L1E602C: db $3E
-L1E602D: db $3E
-L1E602E: db $1C
-L1E602F: db $1C
-L1E6030: db $08
-L1E6031: db $08
-L1E6032: db $00
-L1E6033: db $00
-L1E6034: db $00
-L1E6035: db $00
-L1E6036: db $C3
-L1E6037: db $C3
-L1E6038: db $81
-L1E6039: db $81
-L1E603A: db $00
-L1E603B: db $00
-L1E603C: db $00
-L1E603D: db $00
-L1E603E: db $00
-L1E603F: db $00
-L1E6040: db $00
-L1E6041: db $00
-L1E6042: db $00
-L1E6043: db $00
-L1E6044: db $00
-L1E6045: db $00
-L1E6046: db $E0
-L1E6047: db $E0
-L1E6048: db $F0
-L1E6049: db $F0
-L1E604A: db $F8
-L1E604B: db $F8
-L1E604C: db $7C
-L1E604D: db $7C
-L1E604E: db $38
-L1E604F: db $38
-L1E6050: db $10
-L1E6051: db $10
-L1E6052: db $00
-L1E6053: db $00
-L1E6054: db $00
-L1E6055: db $00
-L1E6056: db $FF
-L1E6057: db $FF
-L1E6058: db $F7
-L1E6059: db $F7
-L1E605A: db $E3
-L1E605B: db $E3
-L1E605C: db $C1
-L1E605D: db $C1
-L1E605E: db $80
-L1E605F: db $80
-L1E6060: db $C0
-L1E6061: db $C0
-L1E6062: db $E0
-L1E6063: db $E0
-L1E6064: db $F0
-L1E6065: db $F0
-L1E6066: db $FF
-L1E6067: db $FF
-L1E6068: db $FF
-L1E6069: db $FF
-L1E606A: db $FF
-L1E606B: db $FF
-L1E606C: db $FF
-L1E606D: db $FF
-L1E606E: db $FF
-L1E606F: db $FF
-L1E6070: db $7E
-L1E6071: db $7E
-L1E6072: db $3C
-L1E6073: db $3C
-L1E6074: db $18
-L1E6075: db $18
-L1E6076: db $FF
-L1E6077: db $FF
-L1E6078: db $EF
-L1E6079: db $EF
-L1E607A: db $C7
-L1E607B: db $C7
-L1E607C: db $83
-L1E607D: db $83
-L1E607E: db $01
-L1E607F: db $01
-L1E6080: db $03
-L1E6081: db $03
-L1E6082: db $07
-L1E6083: db $07
-L1E6084: db $0F
-L1E6085: db $0F
-L1E6086: db $F8
-L1E6087: db $F8
-L1E6088: db $FC
-L1E6089: db $FC
-L1E608A: db $FE
-L1E608B: db $FE
-L1E608C: db $FF
-L1E608D: db $FF
-L1E608E: db $FF
-L1E608F: db $FF
-L1E6090: db $FE
-L1E6091: db $FE
-L1E6092: db $FC
-L1E6093: db $FC
-L1E6094: db $F8
-L1E6095: db $F8
-L1E6096: db $00
-L1E6097: db $00
-L1E6098: db $00
-L1E6099: db $00
-L1E609A: db $00
-L1E609B: db $00
-L1E609C: db $00
-L1E609D: db $00
-L1E609E: db $00
-L1E609F: db $00
-L1E60A0: db $00
-L1E60A1: db $00
-L1E60A2: db $00
-L1E60A3: db $00
-L1E60A4: db $00
-L1E60A5: db $00
-L1E60A6: db $1F
-L1E60A7: db $1F
-L1E60A8: db $3F
-L1E60A9: db $3F
-L1E60AA: db $7F
-L1E60AB: db $7F
-L1E60AC: db $FF
-L1E60AD: db $FF
-L1E60AE: db $FF
-L1E60AF: db $FF
-L1E60B0: db $7F
-L1E60B1: db $7F
-L1E60B2: db $3F
-L1E60B3: db $3F
-L1E60B4: db $1F
-L1E60B5: db $1F
-L1E60B6: db $F0
-L1E60B7: db $F0
-L1E60B8: db $E0
-L1E60B9: db $E0
-L1E60BA: db $C0
-L1E60BB: db $C0
-L1E60BC: db $80
-L1E60BD: db $80
-L1E60BE: db $C1
-L1E60BF: db $C1
-L1E60C0: db $E3
-L1E60C1: db $E3
-L1E60C2: db $F7
-L1E60C3: db $F7
-L1E60C4: db $FF
-L1E60C5: db $FF
-L1E60C6: db $18
-L1E60C7: db $18
-L1E60C8: db $3C
-L1E60C9: db $3C
-L1E60CA: db $7E
-L1E60CB: db $7E
-L1E60CC: db $FF
-L1E60CD: db $FF
-L1E60CE: db $FF
-L1E60CF: db $FF
-L1E60D0: db $FF
-L1E60D1: db $FF
-L1E60D2: db $FF
-L1E60D3: db $FF
-L1E60D4: db $FF
-L1E60D5: db $FF
-L1E60D6: db $0F
-L1E60D7: db $0F
-L1E60D8: db $07
-L1E60D9: db $07
-L1E60DA: db $03
-L1E60DB: db $03
-L1E60DC: db $01
-L1E60DD: db $01
-L1E60DE: db $83
-L1E60DF: db $83
-L1E60E0: db $C7
-L1E60E1: db $C7
-L1E60E2: db $EF
-L1E60E3: db $EF
-L1E60E4: db $FF
-L1E60E5: db $FF
-L1E60E6: db $80
-L1E60E7: db $00
-L1E60E8: db $00
-L1E60E9: db $28
-L1E60EA: db $00
-L1E60EB: db $40
-L1E60EC: db $00
-L1E60ED: db $00
-L1E60EE: db $00
-L1E60EF: db $00
-L1E60F0: db $00
-L1E60F1: db $00
-L1E60F2: db $00
-L1E60F3: db $00
-L1E60F4: db $00
-L1E60F5: db $80
-L1E60F6: db $1E
-L1E60F7: db $05
-L1E60F8: db $61
-L1E60F9: db $00
-L1E60FA: db $00
-L1E60FB: db $05
-L1E60FC: db $61
-L1E60FD: db $00
-L1E60FE: db $00
-L1E60FF: db $00
-L1E6100: db $00
-L1E6101: db $02
-L1E6102: db $02
-L1E6103: db $C0
-L1E6104: db $D8
-L1E6105: db $27
-L1E6106: db $61
-L1E6107: db $FF
-L1E6108: db $FF
-L1E6109: db $3E
-L1E610A: db $61
-L1E610B: db $FF
-L1E610C: db $FF
-L1E610D: db $55;X
-L1E610E: db $61;X
-L1E610F: db $FF;X
-L1E6110: db $FF;X
-L1E6111: db $6C;X
-L1E6112: db $61;X
-L1E6113: db $FF;X
-L1E6114: db $FF;X
-L1E6115: db $83
-L1E6116: db $61
-L1E6117: db $FF
-L1E6118: db $FF
-L1E6119: db $9D
-L1E611A: db $61
-L1E611B: db $FF
-L1E611C: db $FF
-L1E611D: db $B7
-L1E611E: db $61
-L1E611F: db $FF
-L1E6120: db $FF
-L1E6121: db $D1
-L1E6122: db $61
-L1E6123: db $FF
-L1E6124: db $FF
-L1E6125: db $FF;X
-L1E6126: db $FF;X
-L1E6127: db $90
-L1E6128: db $00
-L1E6129: db $00
-L1E612A: db $FF;X
-L1E612B: db $FF;X
-L1E612C: db $FF;X
-L1E612D: db $31
-L1E612E: db $61
-L1E612F: db $00
-L1E6130: db $00
-L1E6131: db $04
-L1E6132: db $28
-L1E6133: db $0B
-L1E6134: db $00
-L1E6135: db $28
-L1E6136: db $13
-L1E6137: db $04
-L1E6138: db $28
-L1E6139: db $08
-L1E613A: db $0C
-L1E613B: db $30
-L1E613C: db $18
-L1E613D: db $CC
-L1E613E: db $90
-L1E613F: db $00
-L1E6140: db $00
-L1E6141: db $FF;X
-L1E6142: db $FF;X
-L1E6143: db $FF;X
-L1E6144: db $48
-L1E6145: db $61
-L1E6146: db $00
-L1E6147: db $00
-L1E6148: db $04
-L1E6149: db $28
-L1E614A: db $17
-L1E614B: db $00
-L1E614C: db $28
-L1E614D: db $1F
-L1E614E: db $04
-L1E614F: db $28
-L1E6150: db $08
-L1E6151: db $0C
-L1E6152: db $30
-L1E6153: db $30
-L1E6154: db $CC
-L1E6155: db $90;X
-L1E6156: db $00;X
-L1E6157: db $00;X
-L1E6158: db $FF;X
-L1E6159: db $FF;X
-L1E615A: db $FF;X
-L1E615B: db $5F;X
-L1E615C: db $61;X
-L1E615D: db $00;X
-L1E615E: db $00;X
-L1E615F: db $04;X
-L1E6160: db $38;X
-L1E6161: db $0C;X
-L1E6162: db $02;X
-L1E6163: db $38;X
-L1E6164: db $14;X
-L1E6165: db $04;X
-L1E6166: db $28;X
-L1E6167: db $18;X
-L1E6168: db $4C;X
-L1E6169: db $30;X
-L1E616A: db $08;X
-L1E616B: db $8C;X
-L1E616C: db $90;X
-L1E616D: db $00;X
-L1E616E: db $00;X
-L1E616F: db $FF;X
-L1E6170: db $FF;X
-L1E6171: db $FF;X
-L1E6172: db $76;X
-L1E6173: db $61;X
-L1E6174: db $00;X
-L1E6175: db $00;X
-L1E6176: db $04;X
-L1E6177: db $38;X
-L1E6178: db $18;X
-L1E6179: db $02;X
-L1E617A: db $38;X
-L1E617B: db $20;X
-L1E617C: db $04;X
-L1E617D: db $28;X
-L1E617E: db $30;X
-L1E617F: db $4C;X
-L1E6180: db $30;X
-L1E6181: db $08;X
-L1E6182: db $8C;X
-L1E6183: db $90
-L1E6184: db $00
-L1E6185: db $00
-L1E6186: db $FF;X
-L1E6187: db $FF;X
-L1E6188: db $FF;X
-L1E6189: db $8D
-L1E618A: db $61
-L1E618B: db $00
-L1E618C: db $00
-L1E618D: db $05
-L1E618E: db $29
-L1E618F: db $08
-L1E6190: db $06
-L1E6191: db $29
-L1E6192: db $10
-L1E6193: db $08
-L1E6194: db $29
-L1E6195: db $18
-L1E6196: db $0A
-L1E6197: db $28
-L1E6198: db $08
-L1E6199: db $0C
-L1E619A: db $30
-L1E619B: db $18
-L1E619C: db $CC
-L1E619D: db $90
-L1E619E: db $00
-L1E619F: db $00
-L1E61A0: db $FF;X
-L1E61A1: db $FF;X
-L1E61A2: db $FF;X
-L1E61A3: db $A7
-L1E61A4: db $61
-L1E61A5: db $00
-L1E61A6: db $00
-L1E61A7: db $05
-L1E61A8: db $29
-L1E61A9: db $14
-L1E61AA: db $06
-L1E61AB: db $29
-L1E61AC: db $1C
-L1E61AD: db $08
-L1E61AE: db $29
-L1E61AF: db $24
-L1E61B0: db $0A
-L1E61B1: db $28
-L1E61B2: db $08
-L1E61B3: db $0C
-L1E61B4: db $30
-L1E61B5: db $30
-L1E61B6: db $CC
-L1E61B7: db $90
-L1E61B8: db $00
-L1E61B9: db $00
-L1E61BA: db $FF;X
-L1E61BB: db $FF;X
-L1E61BC: db $FF;X
-L1E61BD: db $C1
-L1E61BE: db $61
-L1E61BF: db $00
-L1E61C0: db $00
-L1E61C1: db $05
-L1E61C2: db $37
-L1E61C3: db $08
-L1E61C4: db $06
-L1E61C5: db $37
-L1E61C6: db $10
-L1E61C7: db $08
-L1E61C8: db $37
-L1E61C9: db $18
-L1E61CA: db $0A
-L1E61CB: db $28
-L1E61CC: db $18
-L1E61CD: db $4C
-L1E61CE: db $30
-L1E61CF: db $08
-L1E61D0: db $8C
-L1E61D1: db $90
-L1E61D2: db $00
-L1E61D3: db $00
-L1E61D4: db $FF;X
-L1E61D5: db $FF;X
-L1E61D6: db $FF;X
-L1E61D7: db $DB
-L1E61D8: db $61
-L1E61D9: db $00
-L1E61DA: db $00
-L1E61DB: db $05
-L1E61DC: db $37
-L1E61DD: db $14
-L1E61DE: db $06
-L1E61DF: db $37
-L1E61E0: db $1C
-L1E61E1: db $08
-L1E61E2: db $37
-L1E61E3: db $24
-L1E61E4: db $0A
-L1E61E5: db $28
-L1E61E6: db $30
-L1E61E7: db $4C
-L1E61E8: db $30
-L1E61E9: db $08
-L1E61EA: db $8C
-L1E61EB: db $17
-L1E61EC: db $62
-L1E61ED: db $FF
-L1E61EE: db $FF
-L1E61EF: db $21
-L1E61F0: db $62
-L1E61F1: db $FF
-L1E61F2: db $FF
-L1E61F3: db $0D
-L1E61F4: db $62
-L1E61F5: db $FF
-L1E61F6: db $FF
-L1E61F7: db $35
-L1E61F8: db $62
-L1E61F9: db $FF
-L1E61FA: db $FF
-L1E61FB: db $2B
-L1E61FC: db $62
-L1E61FD: db $FF
-L1E61FE: db $FF
-L1E61FF: db $35
-L1E6200: db $62
-L1E6201: db $FF
-L1E6202: db $FF
-L1E6203: db $0D
-L1E6204: db $62
-L1E6205: db $FF
-L1E6206: db $FF
-L1E6207: db $21
-L1E6208: db $62
-L1E6209: db $FF
-L1E620A: db $FF
-L1E620B: db $FF;X
-L1E620C: db $FF
-L1E620D: db $80
-L1E620E: db $00
-L1E620F: db $00
-L1E6210: db $FF;X
-L1E6211: db $FF;X
-L1E6212: db $FF;X
-L1E6213: db $3F
-L1E6214: db $62
-L1E6215: db $00
-L1E6216: db $00
-L1E6217: db $80
-L1E6218: db $00
-L1E6219: db $00
-L1E621A: db $FF;X
-L1E621B: db $FF;X
-L1E621C: db $FF;X
-L1E621D: db $46
-L1E621E: db $62
-L1E621F: db $00
-L1E6220: db $00
-L1E6221: db $80
-L1E6222: db $00
-L1E6223: db $00
-L1E6224: db $FF;X
-L1E6225: db $FF;X
-L1E6226: db $FF;X
-L1E6227: db $53
-L1E6228: db $62
-L1E6229: db $00
-L1E622A: db $00
-L1E622B: db $80
-L1E622C: db $00
-L1E622D: db $00
-L1E622E: db $FF;X
-L1E622F: db $FF;X
-L1E6230: db $FF;X
-L1E6231: db $5A
-L1E6232: db $62
-L1E6233: db $00
-L1E6234: db $00
-L1E6235: db $80
-L1E6236: db $00
-L1E6237: db $00
-L1E6238: db $FF;X
-L1E6239: db $FF;X
-L1E623A: db $FF;X
-L1E623B: db $67
-L1E623C: db $62
-L1E623D: db $00
-L1E623E: db $00
-L1E623F: db $02
-L1E6240: db $28
-L1E6241: db $13
-L1E6242: db $00
-L1E6243: db $38
-L1E6244: db $13
-L1E6245: db $02
-L1E6246: db $04
-L1E6247: db $28
-L1E6248: db $0C
-L1E6249: db $04
-L1E624A: db $28
-L1E624B: db $14
-L1E624C: db $06
-L1E624D: db $38
-L1E624E: db $0C
-L1E624F: db $08
-L1E6250: db $38
-L1E6251: db $14
-L1E6252: db $0A
-L1E6253: db $02
-L1E6254: db $28
-L1E6255: db $10
-L1E6256: db $0C
-L1E6257: db $38
-L1E6258: db $10
-L1E6259: db $0E
-L1E625A: db $04
-L1E625B: db $28
-L1E625C: db $0C
-L1E625D: db $10
-L1E625E: db $28
-L1E625F: db $14
-L1E6260: db $12
-L1E6261: db $38
-L1E6262: db $0C
-L1E6263: db $14
-L1E6264: db $38
-L1E6265: db $14
-L1E6266: db $16
-L1E6267: db $02
-L1E6268: db $28
-L1E6269: db $10
-L1E626A: db $18
-L1E626B: db $38
-L1E626C: db $10
-L1E626D: db $1A
-L1E626E:;I
+	
+; =============== CharSel_IdMapTbl ===============
+; CHARSEL_ID_* -> CHAR_ID_* mapping table.
+; The chars declarations below are organized like how they appear in the character select screen.
+CharSel_IdMapTbl:
+	db CHAR_ID_KYO,    CHAR_ID_ANDY,    CHAR_ID_TERRY,    CHAR_ID_RYO,      CHAR_ID_ROBERT,  CHAR_ID_IORI
+	db CHAR_ID_DAIMON, CHAR_ID_MAI,     CHAR_ID_GEESE,    CHAR_ID_MRBIG,    CHAR_ID_KRAUSER, CHAR_ID_MATURE
+	db CHAR_ID_ATHENA, CHAR_ID_CHIZURU, CHAR_ID_MRKARATE, CHAR_ID_MRKARATE, CHAR_ID_GOENITZ, CHAR_ID_LEONA
+	; [TCRF] Unused entries in the list. Not used by tile flipping since it switches between hardcoded char IDs.
+	;        These may have been used before the tile flipping was implemented, and still work properly.
+	;        They all work as intended as they also have (unused) CharSel_CursorPosTable entries.
+	db CHAR_ID_OIORI
+	db CHAR_ID_OLEONA
+	db CHAR_ID_KAGURA
+.end:
+; Relative tile IDs for portraits
+BG_CharSel_Portrait: INCBIN "data/bg/charsel_portrait.bin"
+BG_CharSel_EmptyPortrait: INCBIN "data/bg/charsel_emptyportrait.bin"
+TextDef_CharSel_SingleTitle:
+	dw $9823
+	db $0E
+	db "PLAYER  SELECT"
+TextDef_CharSel_TeamTitle:
+	dw $9824
+	db $0C
+	db "TEAM  SELECT"
+GFX_CharSel_BG0: INCBIN "data/gfx/charsel_bg0.bin"
+GFXLZ_CharSel_BG1: INCBIN "data/gfx/charsel_bg1.lzc"
+GFXLZ_CharSel_OBJ: INCBIN "data/gfx/charsel_obj.lzc"
+GFXDef_CharSel_Cross:
+	db $09 ; Tile count
+GFX_CharSel_Cross: INCBIN "data/gfx/charsel_cross.bin"
+GFX_CharSel_Cross_Mask: INCBIN "data/gfx/charsel_cross_mask.bin"
+
+OBJInfoInit_CharSel_Cursor:
+	db OST_VISIBLE ; iOBJInfo_Status
+	db $00 ; iOBJInfo_OBJLstFlags
+	db $00 ; iOBJInfo_OBJLstFlagsOld
+	db $28 ; iOBJInfo_X
+	db $00 ; iOBJInfo_XSub
+	db $40 ; iOBJInfo_Y
+	db $00 ; iOBJInfo_YSub
+	db $00 ; iOBJInfo_SpeedX
+	db $00 ; iOBJInfo_SpeedXSub
+	db $00 ; iOBJInfo_Unknown_09
+	db $00 ; iOBJInfo_Unknown_0A
+	db $00 ; iOBJInfo_RelX (auto)
+	db $00 ; iOBJInfo_RelY (auto)
+	db $00 ; iOBJInfo_TileIDBase
+	db LOW($8000) ; iOBJInfo_VRAMPtr_Low
+	db HIGH($8000) ; iOBJInfo_VRAMPtr_High
+	db BANK(OBJLstPtrTable_CharSel_Cursor) ; iOBJInfo_BankNum (BANK $1E)
+	db LOW(OBJLstPtrTable_CharSel_Cursor) ; iOBJInfo_OBJLstPtrTbl_Low
+	db HIGH(OBJLstPtrTable_CharSel_Cursor) ; iOBJInfo_OBJLstPtrTbl_High
+	db $00 ; iOBJInfo_OBJLstPtrTblOffset
+	db $00 ; iOBJInfo_BankNumOld (N/A)
+	db LOW(OBJLstPtrTable_CharSel_Cursor) ; iOBJInfo_OBJLstPtrTbl_LowOld
+	db HIGH(OBJLstPtrTable_CharSel_Cursor) ; iOBJInfo_OBJLstPtrTbl_HighOld
+	db $00 ; iOBJInfo_OBJLstPtrTblOffset
+	db $00 ; iOBJInfo_OBJLstByte1 (auto)
+	db $00 ; iOBJInfo_OBJLstByte2 (auto)
+	db $00 ; iOBJInfo_Unknown_1A
+	db $02 ; iOBJInfo_FrameLeft
+	db $02 ; iOBJInfo_FrameTotal
+	db LOW(wGFXBufInfo_Pl1) ; iOBJInfo_BufInfoPtr_Low
+	db HIGH(wGFXBufInfo_Pl1) ; iOBJInfo_BufInfoPtr_High
+	
+OBJLstPtrTable_CharSel_Cursor:
+	dw OBJLstHdrA_CharSel_CursorPl1P, OBJLSTPTR_NONE
+	dw OBJLstHdrA_CharSel_CursorPl1PWide, OBJLSTPTR_NONE
+	dw OBJLstHdrA_CharSel_CursorPl2P, OBJLSTPTR_NONE
+	dw OBJLstHdrA_CharSel_CursorPl2PWide, OBJLSTPTR_NONE
+	dw OBJLstHdrA_CharSel_CursorCPU1P, OBJLSTPTR_NONE
+	dw OBJLstHdrA_CharSel_CursorCPU1PWide, OBJLSTPTR_NONE
+	dw OBJLstHdrA_CharSel_CursorCPU2P, OBJLSTPTR_NONE
+	dw OBJLstHdrA_CharSel_CursorCPU2PWide, OBJLSTPTR_NONE
+	dw OBJLSTPTR_NONE
+		
+OBJLstHdrA_CharSel_CursorPl1P:
+	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
+	db $00 ; iOBJLstHdrA_Byte1
+	db $00 ; iOBJLstHdrA_Byte2
+	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw .bin ; iOBJLstHdrA_DataPtr
+	db $00 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+.bin:
+	db $04 ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $28,$0B,$00 ; $00
+	db $28,$13,$04 ; $01
+	db $28,$08,$0C ; $02
+	db $30,$18,$CC ; $03
+		
+OBJLstHdrA_CharSel_CursorPl1PWide:
+	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
+	db $00 ; iOBJLstHdrA_Byte1
+	db $00 ; iOBJLstHdrA_Byte2
+	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw .bin ; iOBJLstHdrA_DataPtr
+	db $00 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+.bin:
+	db $04 ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $28,$17,$00 ; $00
+	db $28,$1F,$04 ; $01
+	db $28,$08,$0C ; $02
+	db $30,$30,$CC ; $03
+		
+OBJLstHdrA_CharSel_CursorPl2P:
+	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
+	db $00 ; iOBJLstHdrA_Byte1
+	db $00 ; iOBJLstHdrA_Byte2
+	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw .bin ; iOBJLstHdrA_DataPtr
+	db $00 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+.bin:
+	db $04 ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $38,$0C,$02 ; $00
+	db $38,$14,$04 ; $01
+	db $28,$18,$4C ; $02
+	db $30,$08,$8C ; $03
+		
+OBJLstHdrA_CharSel_CursorPl2PWide:
+	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
+	db $00 ; iOBJLstHdrA_Byte1
+	db $00 ; iOBJLstHdrA_Byte2
+	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw .bin ; iOBJLstHdrA_DataPtr
+	db $00 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+.bin:
+	db $04 ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $38,$18,$02 ; $00
+	db $38,$20,$04 ; $01
+	db $28,$30,$4C ; $02
+	db $30,$08,$8C ; $03
+	
+OBJLstHdrA_CharSel_CursorCPU1P:
+	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
+	db $00 ; iOBJLstHdrA_Byte1
+	db $00 ; iOBJLstHdrA_Byte2
+	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw .bin ; iOBJLstHdrA_DataPtr
+	db $00 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+.bin:
+	db $05 ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $29,$08,$06 ; $00
+	db $29,$10,$08 ; $01
+	db $29,$18,$0A ; $02
+	db $28,$08,$0C ; $03
+	db $30,$18,$CC ; $04
+		
+OBJLstHdrA_CharSel_CursorCPU1PWide:
+	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
+	db $00 ; iOBJLstHdrA_Byte1
+	db $00 ; iOBJLstHdrA_Byte2
+	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw .bin ; iOBJLstHdrA_DataPtr
+	db $00 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+.bin:
+	db $05 ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $29,$14,$06 ; $00
+	db $29,$1C,$08 ; $01
+	db $29,$24,$0A ; $02
+	db $28,$08,$0C ; $03
+	db $30,$30,$CC ; $04
+	
+OBJLstHdrA_CharSel_CursorCPU2P:
+	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
+	db $00 ; iOBJLstHdrA_Byte1
+	db $00 ; iOBJLstHdrA_Byte2
+	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw .bin ; iOBJLstHdrA_DataPtr
+	db $00 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+.bin:
+	db $05 ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $37,$08,$06 ; $00
+	db $37,$10,$08 ; $01
+	db $37,$18,$0A ; $02
+	db $28,$18,$4C ; $03
+	db $30,$08,$8C ; $04
+		
+OBJLstHdrA_CharSel_CursorCPU2PWide:
+	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
+	db $00 ; iOBJLstHdrA_Byte1
+	db $00 ; iOBJLstHdrA_Byte2
+	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw .bin ; iOBJLstHdrA_DataPtr
+	db $00 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+.bin:
+	db $05 ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $37,$14,$06 ; $00
+	db $37,$1C,$08 ; $01
+	db $37,$24,$0A ; $02
+	db $28,$30,$4C ; $03
+	db $30,$08,$8C ; $04
+		
+OBJLstPtrTable_CharSel_Flip:
+	dw OBJLstHdrA_CharSel_FlipP0, OBJLSTPTR_NONE
+	dw OBJLstHdrA_CharSel_FlipP1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_CharSel_FlipP2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_CharSel_FlipP3, OBJLSTPTR_NONE
+	dw OBJLstHdrA_CharSel_FlipP4, OBJLSTPTR_NONE
+	dw OBJLstHdrA_CharSel_FlipP3, OBJLSTPTR_NONE
+	dw OBJLstHdrA_CharSel_FlipP2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_CharSel_FlipP1, OBJLSTPTR_NONE
+	dw OBJLSTPTR_NONE
+		
+OBJLstHdrA_CharSel_FlipP2:
+	db OLF_NOBUF ; iOBJLstHdrA_Flags
+	db $00 ; iOBJLstHdrA_Byte1
+	db $00 ; iOBJLstHdrA_Byte2
+	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw OBJLst_CharSel_Flip0 ; iOBJLstHdrA_DataPtr
+	db $00 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+		
+OBJLstHdrA_CharSel_FlipP0:
+	db OLF_NOBUF ; iOBJLstHdrA_Flags
+	db $00 ; iOBJLstHdrA_Byte1
+	db $00 ; iOBJLstHdrA_Byte2
+	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw OBJLst_CharSel_Flip1 ; iOBJLstHdrA_DataPtr
+	db $00 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+		
+OBJLstHdrA_CharSel_FlipP1:
+	db OLF_NOBUF ; iOBJLstHdrA_Flags
+	db $00 ; iOBJLstHdrA_Byte1
+	db $00 ; iOBJLstHdrA_Byte2
+	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw OBJLst_CharSel_Flip2 ; iOBJLstHdrA_DataPtr
+	db $00 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+		
+OBJLstHdrA_CharSel_FlipP4:
+	db OLF_NOBUF ; iOBJLstHdrA_Flags
+	db $00 ; iOBJLstHdrA_Byte1
+	db $00 ; iOBJLstHdrA_Byte2
+	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw OBJLst_CharSel_Flip3 ; iOBJLstHdrA_DataPtr
+	db $00 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+		
+OBJLstHdrA_CharSel_FlipP3:
+	db OLF_NOBUF ; iOBJLstHdrA_Flags
+	db $00 ; iOBJLstHdrA_Byte1
+	db $00 ; iOBJLstHdrA_Byte2
+	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw OBJLst_CharSel_Flip4 ; iOBJLstHdrA_DataPtr
+	db $00 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+		
+OBJLst_CharSel_Flip0:
+	db $02 ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $28,$13,$00 ; $00
+	db $38,$13,$02 ; $01
+		
+OBJLst_CharSel_Flip1:
+	db $04 ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $28,$0C,$04 ; $00
+	db $28,$14,$06 ; $01
+	db $38,$0C,$08 ; $02
+	db $38,$14,$0A ; $03
+		
+OBJLst_CharSel_Flip2:
+	db $02 ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $28,$10,$0C ; $00
+	db $38,$10,$0E ; $01
+		
+OBJLst_CharSel_Flip3:
+	db $04 ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $28,$0C,$10 ; $00
+	db $28,$14,$12 ; $01
+	db $38,$0C,$14 ; $02
+	db $38,$14,$16 ; $03
+		
+OBJLst_CharSel_Flip4:
+	db $02 ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $28,$10,$18 ; $00
+	db $38,$10,$1A ; $01
+; 
+; =============== END OF MODULE CharSel ===============
+;
+
+; 
+; =============== START OF MODULE OrdSel ===============
+;
+; =============== Module_OrdSel ===============
+; EntryPoint for team order select screen. Called by rst $00 jump from Module_CharSel.
+L1E626E:
+Module_OrdSel:;I
 	ld   sp, $DD00
 	di
 	rst  $10
@@ -7343,12 +3557,12 @@ L1E626E:;I
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
-	ld   [$C1B3], a
-	ld   [wTitleMenuOptId], a
-	ld   [$C1B5], a
-	ld   [$C1B6], a
-	ld   [$C1B1], a
-	ld   [$C1B2], a
+	ld   [wCharSelTeamFull], a
+	ld   [wCharSelP1CursorMode], a
+	ld   [wCharSelP2CursorMode], a
+	ld   [wCharSelCurPl], a
+	ld   [wCharSelRandom1P], a
+	ld   [wCharSelRandom2P], a
 	ld   [wLZSS_Buffer], a
 	ld   [$C1CB], a
 	ld   [$C1CC], a
@@ -7370,7 +3584,7 @@ L1E626E:;I
 	ld   a, [wPlayMode]
 	cp   $01
 	jp   nz, L1E62E1
-	ld   a, [wUnknown_C165]
+	ld   a, [wJoyActivePl]
 	or   a
 	jp   z, L1E62D9
 L1E62D1: db $3E;X
@@ -7383,7 +3597,7 @@ L1E62D7: db $EF;X
 L1E62D8: db $62;X
 L1E62D9:;J
 	ld   a, $01
-	ld   [$C1B2], a
+	ld   [wCharSelRandom2P], a
 	jp   L1E62EF
 L1E62E1: db $CD;X
 L1E62E2: db $B4;X
@@ -7432,11 +3646,11 @@ L1E62EF:;J
 	ld   c, $09
 	call CopyBGToRect
 	call L1E6937
-	ld   a, [$D92E]
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId0]
 	ld   de, $8800
 	ld   c, a
 	call L1E68D2
-	ld   a, [$D92F]
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId1]
 	cp   $FF
 	jr   z, L1E6361
 	ld   de, $8920
@@ -7449,7 +3663,7 @@ L1E6361:;R
 	ld   a, $FF
 	ld   [$C1D1], a
 L1E636B:;R
-	ld   a, [$D930]
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId2]
 	cp   $FF
 	jr   z, L1E637B
 	ld   de, $8A40
@@ -7462,11 +3676,11 @@ L1E637B:;R
 	ld   a, $FF
 	ld   [$C1D3], a
 L1E6385:;R
-	ld   a, [$DA2E]
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId0]
 	ld   de, $8B60
 	ld   c, a
 	call L1E68E5
-	ld   a, [$DA2F]
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId1]
 	cp   $FF
 	jr   z, L1E639F
 	ld   de, $8C80
@@ -7479,7 +3693,7 @@ L1E639F:;R
 	ld   a, $FF
 	ld   [$C1D7], a
 L1E63A9:;R
-	ld   a, [$DA30]
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId2]
 	cp   $FF
 	jr   z, L1E63B9
 	ld   de, $8DA0
@@ -7529,7 +3743,7 @@ L1E6402:;R
 L1E6414:;R
 	call ClearOBJInfo
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   de, L1E60E6
+	ld   de, OBJInfoInit_CharSel_Cursor
 	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTbl_Low
 	ld   [hl], $DB
@@ -7540,7 +3754,7 @@ L1E6414:;R
 	ld   a, $80
 	ld   [wOBJInfo_Pl1+iOBJInfo_Y], a
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	ld   de, L1E60E6
+	ld   de, OBJInfoInit_CharSel_Cursor
 	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTbl_Low
 	ld   [hl], $DB
@@ -7551,11 +3765,11 @@ L1E6414:;R
 	ld   a, $80
 	ld   [wOBJInfo_Pl2+iOBJInfo_Y], a
 	ld   hl, wOBJInfo2+iOBJInfo_Status
-	ld   de, L1E60E6
+	ld   de, OBJInfoInit_CharSel_Cursor
 	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo2+iOBJInfo_OBJLstFlags
 	ld   [hl], $90
-	ld   hl, $D711
+	ld   hl, wOBJInfo2+iOBJInfo_OBJLstPtrTbl_Low
 	ld   [hl], $D5
 	inc  hl
 	ld   [hl], $7C
@@ -7563,8 +3777,8 @@ L1E6414:;R
 	ld   [wOBJInfo2+iOBJInfo_X], a
 	ld   a, $58
 	ld   [wOBJInfo2+iOBJInfo_Y], a
-	call L001776
-	call L0014F9
+	call Pl_Unknown_InitBeforeRound
+	call Serial_DoHandshake
 	ld   a, $C7
 	rst  $18
 	ei
@@ -7583,25 +3797,25 @@ L1E6491:;J
 	call L1E6940
 	call JoyKeys_DoCursorDelayTimer
 	ld   a, $00
-	ld   [$C1B6], a
+	ld   [wCharSelCurPl], a
 	call L1E6503
-	ld   a, [wTitleMenuOptId]
+	ld   a, [wCharSelP1CursorMode]
 	cp   $03
 	jp   nz, L1E64AC
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	res  7, [hl]
 L1E64AC:;J
 	ld   a, $01
-	ld   [$C1B6], a
+	ld   [wCharSelCurPl], a
 	call L1E6503
-	ld   a, [$C1B5]
+	ld   a, [wCharSelP2CursorMode]
 	cp   $03
 	jp   nz, L1E64C1
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
 	res  7, [hl]
 L1E64C1:;J
-	ld   a, [wTitleMenuOptId]
-	ld   hl, $C1B5
+	ld   a, [wCharSelP1CursorMode]
+	ld   hl, wCharSelP2CursorMode
 	cp   a, [hl]
 	jp   nz, L1E64D3
 	cp   $03
@@ -7612,27 +3826,27 @@ L1E64D3:;J
 	jp   L1E6491
 L1E64D9:;J
 	ld   a, [$C1CF]
-	ld   [$D92E], a
+	ld   [wPlInfo_Pl1+iPlInfo_TeamCharId0], a
 	ld   a, [$C1D1]
-	ld   [$D92F], a
+	ld   [wPlInfo_Pl1+iPlInfo_TeamCharId1], a
 	ld   a, [$C1D3]
-	ld   [$D930], a
+	ld   [wPlInfo_Pl1+iPlInfo_TeamCharId2], a
 	ld   a, [$C1D5]
-	ld   [$DA2E], a
+	ld   [wPlInfo_Pl2+iPlInfo_TeamCharId0], a
 	ld   a, [$C1D7]
-	ld   [$DA2F], a
+	ld   [wPlInfo_Pl2+iPlInfo_TeamCharId1], a
 	ld   a, [$C1D9]
-	ld   [$DA30], a
+	ld   [wPlInfo_Pl2+iPlInfo_TeamCharId2], a
 	call Task_PassControl_Delay3B
 	jp   L00179D
 L1E6503:;C
-	ld   a, [$C1B6]
+	ld   a, [wCharSelCurPl]
 	or   a
 	jp   nz, L1E6522
-	ld   a, [wTitleMenuOptId]
+	ld   a, [wCharSelP1CursorMode]
 	cp   $02
 	jr   z, L1E6559
-	ld   a, [$C1B1]
+	ld   a, [wCharSelRandom1P]
 	and  a, a
 	jp   z, L1E653A
 L1E6518: db $FE;X
@@ -7646,19 +3860,19 @@ L1E651F: db $B1;X
 L1E6520: db $C1;X
 L1E6521: db $C9;X
 L1E6522:;J
-	ld   a, [$C1B5]
+	ld   a, [wCharSelP2CursorMode]
 	cp   $02
 	jr   z, L1E6559
-	ld   a, [$C1B2]
+	ld   a, [wCharSelRandom2P]
 	and  a, a
 	jp   z, L1E653A
 	cp   $01
 	jp   z, L1E6554
 	dec  a
-	ld   [$C1B2], a
+	ld   [wCharSelRandom2P], a
 	ret
 L1E653A:;J
-	call L1E4B10
+	call CharSel_GetInput
 	bit  4, a
 	jp   nz, L1E6559
 	bit  1, b
@@ -7675,25 +3889,25 @@ L1E6552: db $18;X
 L1E6553: db $05;X
 L1E6554:;J
 	ld   a, $3C
-	ld   [$C1B2], a
+	ld   [wCharSelRandom2P], a
 L1E6559:;JR
-	ld   a, [$C1B6]
+	ld   a, [wCharSelCurPl]
 	or   a
 	jp   nz, L1E6679
-	ld   a, [wTitleMenuOptId]
+	ld   a, [wCharSelP1CursorMode]
 	cp   $03
 	ret  z
 	ld   a, [wLZSS_Buffer]
 	ld   b, a
-	ld   a, [$D92F]
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId1]
 	ld   hl, $C1D0
 	dec  b
 	jr   z, L1E65AD
-	ld   a, [$D930]
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId2]
 	ld   hl, $C1D2
 	dec  b
 	jr   z, L1E65D9
-	ld   a, [$D92E]
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId0]
 	ld   hl, $C1CE
 	push af
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
@@ -7760,9 +3974,9 @@ L1E6601:;R
 L1E6602:;R
 	ld   [hl], $01
 	ld   [$C1CC], a
-	ld   a, [wTitleMenuOptId]
+	ld   a, [wCharSelP1CursorMode]
 	inc  a
-	ld   [wTitleMenuOptId], a
+	ld   [wCharSelP1CursorMode], a
 	ld   a, [$C1DA]
 	ld   hl, $99E3
 	dec  a
@@ -7772,7 +3986,7 @@ L1E6602:;R
 	jr   z, L1E6620
 	ld   hl, $99E0
 L1E6620:;R
-	ld   a, [wTitleMenuOptId]
+	ld   a, [wCharSelP1CursorMode]
 	dec  a
 	jr   z, L1E662D
 	dec  a
@@ -7787,7 +4001,7 @@ L1E662D:;R
 	ld   b, $03
 	ld   c, $03
 	call CopyBGToRect
-	ld   a, [$D92F]
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId1]
 	cp   $FF
 	ret  nz
 L1E6643:;R
@@ -7795,7 +4009,7 @@ L1E6643:;R
 	sub  a, $10
 	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 	ld   a, $03
-	ld   [wTitleMenuOptId], a
+	ld   [wCharSelP1CursorMode], a
 	ret
 L1E6651:;R
 	ld   a, [$C1CC]
@@ -7804,7 +4018,7 @@ L1E6651:;R
 	ld   b, $03
 	ld   c, $03
 	call CopyBGToRect
-	ld   a, [$D930]
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId2]
 	cp   $FF
 	ret  nz
 	jr   L1E6643
@@ -7816,20 +4030,20 @@ L1E6669:;R
 	ld   c, $03
 	jp   CopyBGToRect
 L1E6679:;J
-	ld   a, [$C1B5]
+	ld   a, [wCharSelP2CursorMode]
 	cp   $03
 	ret  z
 	ld   a, [$C1CB]
 	ld   b, a
-	ld   a, [$DA2F]
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId1]
 	ld   hl, $C1D6
 	dec  b
 	jr   z, L1E66C6
-	ld   a, [$DA30]
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId2]
 	ld   hl, $C1D8
 	dec  b
 	jr   z, L1E66F2
-	ld   a, [$DA2E]
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId0]
 	ld   hl, $C1D4
 	push af
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
@@ -7896,9 +4110,9 @@ L1E671A:
 L1E671B:;R
 	ld   [hl], $01
 	ld   [$C1CD], a
-	ld   a, [$C1B5]
+	ld   a, [wCharSelP2CursorMode]
 	inc  a
-	ld   [$C1B5], a
+	ld   [wCharSelP2CursorMode], a
 	ld   a, [$C1DB]
 	ld   hl, $99EE
 	dec  a
@@ -7908,7 +4122,7 @@ L1E671B:;R
 	jr   z, L1E6739
 	ld   hl, $99F1
 L1E6739:;R
-	ld   a, [$C1B5]
+	ld   a, [wCharSelP2CursorMode]
 	dec  a
 	jr   z, L1E6746
 	dec  a
@@ -7923,7 +4137,7 @@ L1E6746:;R
 	ld   b, $03
 	ld   c, $03
 	call CopyBGToRect
-	ld   a, [$DA2F]
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId1]
 	cp   $FF
 	ret  nz
 L1E675C:;R
@@ -7931,7 +4145,7 @@ L1E675C:;R
 	sub  a, $10
 	ld   [wOBJInfo_Pl2+iOBJInfo_X], a
 	ld   a, $03
-	ld   [$C1B5], a
+	ld   [wCharSelP2CursorMode], a
 	ret
 L1E676A:;R
 	ld   a, [$C1CD]
@@ -7940,7 +4154,7 @@ L1E676A:;R
 	ld   b, $03
 	ld   c, $03
 	call CopyBGToRect
-	ld   a, [$DA30]
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId2]
 	cp   $FF
 	ret  nz
 	jr   L1E675C
@@ -7952,10 +4166,10 @@ L1E6782:;R
 	ld   c, $03
 	jp   CopyBGToRect
 L1E6792:;J
-	ld   a, [$C1B6]
+	ld   a, [wCharSelCurPl]
 	or   a
 	jp   nz, L1E67E4
-	ld   a, [wTitleMenuOptId]
+	ld   a, [wCharSelP1CursorMode]
 	cp   $03
 	ret  z
 	ld   a, [wLZSS_Buffer]
@@ -8077,10 +4291,10 @@ L1E682F: db $C3;X
 L1E6830: db $D6;X
 L1E6831: db $C9;X
 L1E6832:;J
-	ld   a, [$C1B6]
+	ld   a, [wCharSelCurPl]
 	or   a
 	jp   nz, L1E6887
-	ld   a, [wTitleMenuOptId]
+	ld   a, [wCharSelP1CursorMode]
 	cp   $03
 	ret  z
 	ld   a, [wLZSS_Buffer]
@@ -8205,7 +4419,7 @@ L1E68D5:;J
 	push bc
 	push hl
 	call L1E690A
-	call L000ECF
+	call CopyTilesHBlankFlipX
 	pop  hl
 	inc  hl
 	pop  bc
@@ -8265,7 +4479,7 @@ L1E6929:;CR
 L1E692C:;JC
 	ld   b, $03
 	ld   c, $06
-	jp   L000DC2
+	jp   CopyBGToRectWithBase
 L1E6933:;C
 	ld   a, $92
 	jr   L1E6929
@@ -13409,9 +9623,9 @@ L1E7D21:;I
 	ld   [hl], LOW(L1E7DE8)
 	inc  hl
 	ld   [hl], HIGH(L1E7DE8)
-	ld   a, [$C1B3]
+	ld   a, [wCharSelTeamFull]
 	ld   c, a
-	ld   a, [wTitleMenuOptId]
+	ld   a, [wCharSelP1CursorMode]
 	ld   b, a
 	ld   hl, $002C
 	add  hl, bc
@@ -13453,9 +9667,9 @@ L1E7DE8:;I
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	jp   OBJLstS_DoAnimTiming_NoLoop
 L1E7DEE:;C
-	ld   a, [$C1B3]
+	ld   a, [wCharSelTeamFull]
 	ld   c, a
-	ld   a, [wTitleMenuOptId]
+	ld   a, [wCharSelP1CursorMode]
 	ld   b, a
 	push bc
 	ld   hl, $002C

@@ -14701,7 +14701,7 @@ L037B41:;J
 	add  hl, bc
 	ld   a, [hl]
 	ld   hl, $7BD3
-	add  a, L
+	add  a, l
 	jp   nc, L037B4F
 L037B4E: db $24;X
 L037B4F:;J
@@ -14715,7 +14715,7 @@ L037B4F:;J
 	push af
 	sla  a
 	sla  a
-	add  a, L
+	add  a, l
 	jp   nc, L037B60
 	inc  h
 L037B60:;J
@@ -14766,7 +14766,7 @@ L037B92:;C
 	ld   [hl], a
 	ld   hl, $0000
 	add  hl, bc
-	add  a, L
+	add  a, l
 	ld   l, a
 	ld   a, [de]
 	inc  de
@@ -14784,7 +14784,7 @@ L037BAA:;C
 	ld   [hl], a
 	ld   hl, $0010
 	add  hl, bc
-	add  a, L
+	add  a, l
 	ld   l, a
 	ld   a, [de]
 	inc  de

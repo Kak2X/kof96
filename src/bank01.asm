@@ -9182,7 +9182,7 @@ L016433:;J
 L01643E:;J
 	jp   L01644A
 L016441:;J
-	ld   bc, $D900
+	ld   bc, wJoyBuffer_Pl2
 	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
 	call L0024E4
 L01644A:;J
@@ -9716,7 +9716,7 @@ L01679A:;R
 	ld   [$DA6D], a
 	ld   a, [$D921]
 	ld   [$DA6E], a
-	ld   a, [$D922]
+	ld   a, [wPlInfo_Pl1+iPlInfo_02Flags]
 	ld   [$DA6F], a
 	ld   a, [$D923]
 	ld   [$DA70], a
@@ -9724,7 +9724,7 @@ L01679A:;R
 	ld   [$D96D], a
 	ld   a, [$DA21]
 	ld   [$D96E], a
-	ld   a, [$DA22]
+	ld   a, [wPlInfo_Pl2+iPlInfo_02Flags]
 	ld   [$D96F], a
 	ld   a, [$DA23]
 	ld   [$D970], a
@@ -9756,7 +9756,7 @@ L01679A:;R
 	or   a
 	jr   z, L016827
 	xor  a
-	ld   [$DA3A], a
+	ld   [wPlInfo_Pl2+iPlInfo_1A], a
 	ld   [$D97C], a
 	ld   hl, $DA21
 	set  6, [hl]
@@ -9767,7 +9767,7 @@ L016827:;R
 	or   a
 	jr   z, L01683C
 	xor  a
-	ld   [$D93A], a
+	ld   [wPlInfo_Pl1+iPlInfo_1A], a
 	ld   [$DA7C], a
 	ld   hl, $D921
 	set  6, [hl]
@@ -9778,16 +9778,16 @@ L01683C:;R
 	ld   [$DA7D], a
 	ld   a, [$DA7E]
 	ld   [$D97D], a
-	ld   hl, $D93A
+	ld   hl, wPlInfo_Pl1+iPlInfo_1A
 	ld   bc, $DA74
 	call L016A1B
-	ld   hl, $D93D
+	ld   hl, wPlInfo_Pl1+iPlInfo_1D
 	ld   bc, $DA77
 	call L016A1B
-	ld   hl, $DA3A
+	ld   hl, wPlInfo_Pl2+iPlInfo_1A
 	ld   bc, $D974
 	call L016A1B
-	ld   hl, $DA3D
+	ld   hl, wPlInfo_Pl2+iPlInfo_1D
 	ld   bc, $D977
 	call L016A1B
 	ld   a, [$D950]
@@ -10135,10 +10135,10 @@ L016B12:;C
 	ld   [$DA64], a
 	ld   [$D726], a
 	ld   [$D766], a
-	ld   a, [$D922]
+	ld   a, [wPlInfo_Pl1+iPlInfo_02Flags]
 	bit  7, a
 	jp   nz, L016B80
-	ld   a, [$DA22]
+	ld   a, [wPlInfo_Pl2+iPlInfo_02Flags]
 	bit  7, a
 	jp   nz, L016B80
 	ld   a, [$D698]
@@ -10179,7 +10179,7 @@ L016B80:;JR
 	ld   a, [$D69A]
 	or   a
 	jr   nz, L016B94
-	ld   a, [$DA22]
+	ld   a, [wPlInfo_Pl2+iPlInfo_02Flags]
 	bit  6, a
 	jp   nz, L016BD5
 	ld   a, [$D699]
@@ -10217,7 +10217,7 @@ L016BD5:;JR
 	ld   a, [$D6DA]
 	or   a
 	jr   nz, L016BE9
-	ld   a, [$D922]
+	ld   a, [wPlInfo_Pl1+iPlInfo_02Flags]
 	bit  6, a
 	jp   nz, L016C2A
 	ld   a, [$D6D9]
@@ -10255,7 +10255,7 @@ L016C2A:;JR
 	ld   a, [$DA21]
 	bit  7, a
 	jp   nz, L016C8F
-	ld   a, [$DA22]
+	ld   a, [wPlInfo_Pl2+iPlInfo_02Flags]
 	bit  6, a
 	jp   nz, L016C8F
 	ld   a, [wOBJInfo2+iOBJInfo_Status]
@@ -10297,7 +10297,7 @@ L016C8F:;JR
 	ld   a, [$D921]
 	bit  7, a
 	jp   nz, L016CF4
-	ld   a, [$D922]
+	ld   a, [wPlInfo_Pl1+iPlInfo_02Flags]
 	bit  6, a
 	jp   nz, L016CF4
 	ld   a, [wOBJInfo3+iOBJInfo_Status]
@@ -11167,10 +11167,10 @@ L0170E8:;J
 	call Task_PassControlFar
 	jp   L0170B8
 L017103:;J
-	ld   a, [$D94E]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_TimerTarget]
 	or   a
 	jr   z, L017110
-	ld   a, [$DA4E]
+	ld   a, [wPlInfo_Pl2+iPlInfo_Unknown_TimerTarget]
 	or   a
 	jp   nz, L01725C
 L017110:;R
@@ -11193,20 +11193,20 @@ L01712B:;R
 	cp   $02
 	jr   nz, L01711B
 L017136:;R
-	ld   a, [$D94E]
-	ld   hl, $DA4E
+	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_TimerTarget]
+	ld   hl, wPlInfo_Pl2+iPlInfo_Unknown_TimerTarget
 	cp   a, [hl]
 	jr   z, L01715D
 	jr   c, L01714F
 	call L0173F0
-	ld   bc, $D900
+	ld   bc, wJoyBuffer_Pl2
 	ld   de, $DA00
 	call L01725E
 	jr   L017163
 L01714F:;R
 	call L017474
 	ld   bc, $DA00
-	ld   de, $D900
+	ld   de, wJoyBuffer_Pl2
 	call L01725E
 	jr   L017163
 L01715D:;R
@@ -11217,30 +11217,30 @@ L017163:;R
 	call L01758C
 	xor  a
 	ld   [$C161], a
-	call L001F85
+	call IsInTeamMode
 	jp   c, L01718D
-	ld   a, [$C167]
+	ld   a, [wRoundNum]
 	cp   $03
 	jp   z, L0171F1
-	ld   a, [$D936]
+	ld   a, [wPlInfo_Pl1+iPlInfo_16]
 	cp   $02
 	jp   z, L017210
-	ld   a, [$DA36]
+	ld   a, [wPlInfo_Pl2+iPlInfo_16]
 	cp   $02
 	jp   z, L01722D
 	jp   L0171EB
 L01718D:;J
-	ld   a, [$D92D]
-	ld   hl, $DA2D
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamLossCount]
+	ld   hl, wPlInfo_Pl2+iPlInfo_TeamLossCount
 	cp   a, [hl]
 	jp   z, L0171B0
 	jp   nc, L0171A5
-	ld   a, [$DA2D]
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamLossCount]
 	cp   $03
 	jp   nc, L017210
 	jp   L0171BA
 L0171A5:;J
-	ld   a, [$D92D]
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamLossCount]
 	cp   $03
 	jp   nc, L01722D
 	jp   L0171BA
@@ -11250,15 +11250,15 @@ L0171B0:;J
 	cp   $03
 	jp   z, L0171EB
 L0171BA:;J
-	ld   a, [$DA2D]
-	ld   hl, $DA2E
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamLossCount]
+	ld   hl, wPlInfo_Pl2+iPlInfo_TeamCharId0
 	ld   d, $00
 	ld   e, a
 	add  hl, de
 	ld   a, [hl]
 	ld   b, a
-	ld   a, [$D92D]
-	ld   hl, $D92E
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamLossCount]
+	ld   hl, wPlInfo_Pl1+iPlInfo_TeamCharId0
 	ld   d, $00
 	ld   e, a
 	add  hl, de
@@ -11284,17 +11284,17 @@ L0171F1:;J
 	ld   a, [wPlayMode]
 	bit  1, a
 	jp   nz, L01724A
-	ld   a, [$C162]
+	ld   a, [wLastWinner]
 	or   a
 	jp   nz, L01724A
 	ld   a, $01
 	ld   [$C161], a
-	ld   a, [wUnknown_C165]
+	ld   a, [wJoyActivePl]
 	or   a
 	jp   z, L01722D
 L017210:;J
-	ld   hl, $D92D
-	ld   a, [$C162]
+	ld   hl, wPlInfo_Pl1+iPlInfo_TeamLossCount
+	ld   a, [wLastWinner]
 	or   a
 	jp   nz, L01721B
 	dec  [hl]
@@ -11304,13 +11304,13 @@ L01721B:;J
 	jp   nz, L017223
 	ld   [hl], $02
 L017223:;J
-	ld   hl, $C162
+	ld   hl, wLastWinner
 	set  0, [hl]
 	res  1, [hl]
 	jp   L01724A
 L01722D:;J
-	ld   hl, $DA2D
-	ld   a, [$C162]
+	ld   hl, wPlInfo_Pl2+iPlInfo_TeamLossCount
+	ld   a, [wLastWinner]
 	or   a
 	jp   nz, L017238
 	dec  [hl]
@@ -11320,7 +11320,7 @@ L017238:;J
 	jp   nz, L017240
 	ld   [hl], $02
 L017240:;J
-	ld   hl, $C162
+	ld   hl, wLastWinner
 	res  0, [hl]
 	set  1, [hl]
 	jp   L01724A
@@ -11336,7 +11336,7 @@ L01725C:;J
 	ret
 L01725D: db $C9;X
 L01725E:;C
-	call L001F85
+	call IsInTeamMode
 	jp   nc, L017286
 	ld   a, [$C169]
 	srl  a
@@ -11387,7 +11387,7 @@ L0172A8:;R
 	ld   [hl], a
 	ret
 L0172AE:;C
-	ld   a, [$D94E]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_TimerTarget]
 	or   a
 	jr   z, L0172B8
 	ld   a, $2A
@@ -11476,7 +11476,7 @@ L017324:;R
 	ld   hl, wOBJInfo3+iOBJInfo_Status
 	ld   de, L0148C3
 	call OBJLstS_InitFrom
-	ld   hl, $D751
+	ld   hl, wOBJInfo3+iOBJInfo_OBJLstPtrTbl_Low
 	ld   [hl], $08
 	inc  hl
 	ld   [hl], $49
@@ -11534,7 +11534,7 @@ L0173C7:;J
 	call L01758C
 	ld   hl, wOBJInfo3+iOBJInfo_Status
 	res  7, [hl]
-	ld   hl, $D751
+	ld   hl, wOBJInfo3+iOBJInfo_OBJLstPtrTbl_Low
 	ld   [hl], $12
 	inc  hl
 	ld   [hl], $49
@@ -11544,13 +11544,13 @@ L0173C7:;J
 	call L01739A
 	ret
 L0173F0:;C
-	ld   hl, $D931
+	ld   hl, wPlInfo_Pl1+iPlInfo_RoundWinStreak
 	inc  [hl]
-	ld   hl, $DA31
+	ld   hl, wPlInfo_Pl2+iPlInfo_RoundWinStreak
 	ld   [hl], $00
-	call L001F85
+	call IsInTeamMode
 	jp   c, L01741A
-	ld   hl, $D936
+	ld   hl, wPlInfo_Pl1+iPlInfo_16
 	inc  [hl]
 	ld   a, [hl]
 	cp   $02
@@ -11561,10 +11561,10 @@ L01740F:;J
 	ld   hl, $9C43
 L017412:;J
 	ld   c, $74
-	call L001F9A
+	call Unknown_CopyByteOnFirstThreeRounds
 	jp   L01742B
 L01741A:;J
-	ld   hl, $DA2D
+	ld   hl, wPlInfo_Pl2+iPlInfo_TeamLossCount
 	inc  [hl]
 	ld   a, [wOBJScrollX]
 	add  a, $98
@@ -11575,7 +11575,7 @@ L01742B:;J
 	ld   a, [wPlayMode]
 	bit  1, a
 	jp   nz, L01743D
-	ld   a, [wUnknown_C165]
+	ld   a, [wJoyActivePl]
 	or   a
 	jp   z, L01745A
 L01743A: db $C3;X
@@ -11621,20 +11621,20 @@ L017463: db $74;X
 L017464: db $3E;X
 L017465: db $08;X
 L017466:;J
-	ld   bc, $D900
+	ld   bc, wJoyBuffer_Pl2
 	call L0174F8
-	ld   hl, $C162
+	ld   hl, wLastWinner
 	set  0, [hl]
 	res  1, [hl]
 	ret
 L017474:;C
-	ld   hl, $DA31
+	ld   hl, wPlInfo_Pl2+iPlInfo_RoundWinStreak
 	inc  [hl]
-	ld   hl, $D931
+	ld   hl, wPlInfo_Pl1+iPlInfo_RoundWinStreak
 	ld   [hl], $00
-	call L001F85
+	call IsInTeamMode
 	jp   c, L01749E
-	ld   hl, $DA36
+	ld   hl, wPlInfo_Pl2+iPlInfo_16
 	inc  [hl]
 	ld   a, [hl]
 	cp   $02
@@ -11645,21 +11645,21 @@ L017493:;J
 	ld   hl, $9C50
 L017496:;J
 	ld   c, $74
-	call L001F9A
+	call Unknown_CopyByteOnFirstThreeRounds
 	jp   L0174AF
 L01749E:;J
-	ld   hl, $D92D
+	ld   hl, wPlInfo_Pl1+iPlInfo_TeamLossCount
 	inc  [hl]
 	ld   a, [wOBJScrollX]
 	add  a, $08
-	ld   [$D783], a
+	ld   [wOBJInfo4+iOBJInfo_X], a
 	ld   hl, wOBJInfo4+iOBJInfo_Status
 	ld   [hl], $80
 L0174AF:;J
 	ld   a, [wPlayMode]
 	bit  1, a
 	jp   nz, L0174C1
-	ld   a, [wUnknown_C165]
+	ld   a, [wJoyActivePl]
 	or   a
 	jp   nz, L0174DE
 	jp   L0174D9
@@ -11705,7 +11705,7 @@ L0174E9: db $08;X
 L0174EA:;J
 	ld   bc, $DA00
 	call L0174F8
-	ld   hl, $C162
+	ld   hl, wLastWinner
 	res  0, [hl]
 	set  1, [hl]
 	ret
@@ -11719,21 +11719,21 @@ L0174F8:;C
 	call L01758C
 	ret
 L01750C:;C
-	ld   hl, $D931
+	ld   hl, wPlInfo_Pl1+iPlInfo_RoundWinStreak
 	ld   [hl], $00
-	ld   hl, $DA31
+	ld   hl, wPlInfo_Pl2+iPlInfo_RoundWinStreak
 	ld   [hl], $00
-	ld   hl, $C162
+	ld   hl, wLastWinner
 	res  0, [hl]
 	res  1, [hl]
-	call L001F85
+	call IsInTeamMode
 	jp   nc, L017554
-	ld   hl, $D92D
+	ld   hl, wPlInfo_Pl1+iPlInfo_TeamLossCount
 	inc  [hl]
-	ld   hl, $DA2D
+	ld   hl, wPlInfo_Pl2+iPlInfo_TeamLossCount
 	inc  [hl]
-	ld   a, [$D92D]
-	ld   hl, $DA2D
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamLossCount]
+	ld   hl, wPlInfo_Pl2+iPlInfo_TeamLossCount
 	cp   a, [hl]
 	jp   nz, L01753A
 	cp   $03
@@ -11744,7 +11744,7 @@ L01753A:;J
 	ld   [$D7C3], a
 	ld   a, [wOBJScrollX]
 	add  a, $08
-	ld   [$D783], a
+	ld   [wOBJInfo4+iOBJInfo_X], a
 	ld   hl, wOBJInfo5+iOBJInfo_Status
 	ld   [hl], $80
 	ld   hl, wOBJInfo4+iOBJInfo_Status
@@ -11938,18 +11938,18 @@ L0176A7:;C
 	call L017E1A
 	ret
 L0176B4:;C
-	ld   a, [$D94E]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_TimerTarget]
 	ld   b, a
-	ld   a, [$D94F]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_Timer]
 	cp   a, b
 	jp   z, L01770C
 	jp   c, L0176D8
 	ld   hl, $9C20
 	ld   bc, $00AD
 	ld   de, $00B6
-	ld   a, [$D94F]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_Timer]
 	dec  a
-	ld   [$D94F], a
+	ld   [wPlInfo_Pl1+iPlInfo_Unknown_Timer], a
 	call L0178C1
 	jp   L01770C
 L0176D8:;J
@@ -11957,10 +11957,10 @@ L0176D8:;J
 	ld   bc, $00AE
 	ld   de, $00B6
 	inc  a
-	ld   [$D94F], a
+	ld   [wPlInfo_Pl1+iPlInfo_Unknown_Timer], a
 	dec  a
 	call L0178C1
-	ld   a, [$D94F]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_Timer]
 	cp   $18
 	jp   nz, L01770C
 	ld   hl, $9C28
@@ -11982,13 +11982,13 @@ L017702:;J
 	ldd  [hl], a
 	ei
 L01770C:;J
-	ld   a, [$D94F]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_Timer]
 	cp   $18
 	jp   nc, L0177BA
 	ld   a, [$C008]
 	and  a, $04
 	jp   nz, L017757
-	ld   a, [$D94F]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_Timer]
 	ld   b, $E0
 	ld   hl, $9C28
 	push af
@@ -12026,7 +12026,7 @@ L01774A:;J
 	pop  af
 	jp   L0177BA
 L017757:;J
-	ld   a, [$D94F]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_Timer]
 	ld   b, $DF
 	ld   hl, $9C28
 	sub  a, $08
@@ -12095,18 +12095,18 @@ L0177AF:;J
 	ld   [hl], a
 	ei
 L0177BA:;J
-	ld   a, [$DA4E]
+	ld   a, [wPlInfo_Pl2+iPlInfo_Unknown_TimerTarget]
 	ld   b, a
-	ld   a, [$DA4F]
+	ld   a, [wPlInfo_Pl2+iPlInfo_Unknown_Timer]
 	cp   a, b
 	jp   z, L017812
 	jp   c, L0177DE
 	ld   hl, $9C2B
 	ld   bc, $00BF
 	ld   de, $00C8
-	ld   a, [$DA4F]
+	ld   a, [wPlInfo_Pl2+iPlInfo_Unknown_Timer]
 	dec  a
-	ld   [$DA4F], a
+	ld   [wPlInfo_Pl2+iPlInfo_Unknown_Timer], a
 	call L0178C1
 	jp   L017812
 L0177DE:;J
@@ -12114,10 +12114,10 @@ L0177DE:;J
 	ld   bc, $00C0
 	ld   de, $00C8
 	inc  a
-	ld   [$DA4F], a
+	ld   [wPlInfo_Pl2+iPlInfo_Unknown_Timer], a
 	dec  a
 	call L0178C1
-	ld   a, [$DA4F]
+	ld   a, [wPlInfo_Pl2+iPlInfo_Unknown_Timer]
 	cp   $18
 	jp   nz, L017812
 	ld   hl, $9C2B
@@ -12139,13 +12139,13 @@ L017808:;J
 	ldi  [hl], a
 	ei
 L017812:;J
-	ld   a, [$DA4F]
+	ld   a, [wPlInfo_Pl2+iPlInfo_Unknown_Timer]
 	cp   $18
 	jp   nc, L0178C0
 	ld   a, [$C008]
 	and  a, $04
 	jp   nz, L01785D
-	ld   a, [$DA4F]
+	ld   a, [wPlInfo_Pl2+iPlInfo_Unknown_Timer]
 	ld   b, $E0
 	ld   hl, $9C2B
 	push af
@@ -12183,7 +12183,7 @@ L017850:;J
 	pop  af
 	jp   L0178C0
 L01785D:;J
-	ld   a, [$DA4F]
+	ld   a, [wPlInfo_Pl2+iPlInfo_Unknown_Timer]
 	ld   b, $DF
 	ld   hl, $9C2B
 	sub  a, $08
@@ -12268,7 +12268,7 @@ L0178C1:;C
 	add  a, e
 	ld   e, a
 	ld   a, [de]
-	add  a, L
+	add  a, l
 	ld   l, a
 	di
 L0178D6:;J
@@ -12317,7 +12317,7 @@ L017917:;J
 L017930:;J
 	ld   hl, $9C82
 	call L017D37
-	ld   bc, $D900
+	ld   bc, wJoyBuffer_Pl2
 	ld   de, $7CFC
 	call L017CA7
 	ld   hl, $C16B
@@ -13077,10 +13077,10 @@ L017D80:;C
 	jp   z, L017E19
 	cp   $FF
 	jp   z, L017E19
-	ld   a, [$D94E]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_TimerTarget]
 	or   a
 	jp   z, L017DEA
-	ld   a, [$DA4E]
+	ld   a, [wPlInfo_Pl2+iPlInfo_Unknown_TimerTarget]
 	or   a
 	jp   z, L017DEA
 	ld   hl, $C027
@@ -13156,12 +13156,12 @@ L017E19:;J
 	ret
 L017E1A:;C
 	ld   hl, $9C6B
-	ld   a, [$D938]
+	ld   a, [wPlInfo_Pl1+iPlInfo_HitComboRecv]
 	ld   b, a
-	ld   a, [$D937]
+	ld   a, [wPlInfo_Pl1+iPlInfo_HitComboRecvSet]
 	cp   a, b
 	jp   z, L017E31
-	ld   [$D938], a
+	ld   [wPlInfo_Pl1+iPlInfo_HitComboRecv], a
 	call L017E59
 	jp   L017E39
 L017E31:;J
@@ -13170,12 +13170,12 @@ L017E31:;J
 	call L017E9C
 L017E39:;J
 	ld   hl, $9C65
-	ld   a, [$DA38]
+	ld   a, [wPlInfo_Pl2+iPlInfo_HitComboRecv]
 	ld   b, a
-	ld   a, [$DA37]
+	ld   a, [wPlInfo_Pl2+iPlInfo_HitComboRecvSet]
 	cp   a, b
 	jp   z, L017E50
-	ld   [$DA38], a
+	ld   [wPlInfo_Pl2+iPlInfo_HitComboRecv], a
 	call L017E59
 	jp   L017E58
 L017E50:;J
@@ -13282,7 +13282,7 @@ L017ECC:;C
 L017EE8:;R
 	ld   a, b
 L017EE9:;R
-	ld   hl, $D910
+	ld   hl, wJoyBuffer_Pl1
 	add  hl, de
 	cp   a, [hl]
 	jr   z, L017F05
@@ -13293,7 +13293,7 @@ L017EE9:;R
 	and  a, $0F
 	ld   e, a
 	pop  af
-	ld   hl, $D910
+	ld   hl, wJoyBuffer_Pl1
 	add  hl, de
 	ld   [hl], a
 	inc  hl
@@ -13378,7 +13378,7 @@ L017F4C:;C
 	ld   e, a
 	ld   a, [$D945]
 	and  a, $30
-	ld   hl, $D900
+	ld   hl, wJoyBuffer_Pl2
 	add  hl, de
 	cp   a, [hl]
 	jr   z, L017F73
@@ -13389,7 +13389,7 @@ L017F4C:;C
 	and  a, $0F
 	ld   e, a
 	pop  af
-	ld   hl, $D900
+	ld   hl, wJoyBuffer_Pl2
 	add  hl, de
 	ld   [hl], a
 	inc  hl
