@@ -7254,8 +7254,8 @@ Char_DrawIconFlipX:
 	push bc
 	
 		;
-		; Generate offset to PlIconsGFXTbl.
-		; Each entry in the table contains 4 tiles ($40 bytes), and the entries
+		; Generate offset to GFX_Char_Icons.
+		; Each "entry" in the table contains 4 tiles ($40 bytes), and the entries
 		; are ordered by character ID.
 		;
 		; Because A is already multiplied by 2 already when calling this function,
@@ -7270,13 +7270,13 @@ ENDR
 		; Switch to the bank with icons
 		ldh  a, [hROMBank]
 		push af
-			ld   a, BANK(PlIconsGFXTbl) ; BANK $1D
+			ld   a, BANK(GFX_Char_Icons) ; BANK $1D
 			ld   [MBC1RomBank], a
 			ldh  [hROMBank], a
 			push hl
 				; Offset the GFX table to the location of the needed icon
-				ld   hl, PlIconsGFXTbl	
-				add  hl, bc			; HL = PlIconsGFXTbl[BC]
+				ld   hl, GFX_Char_Icons	
+				add  hl, bc			; HL = GFX_Char_Icons[BC]
 				
 				; Copy the next 4 tiles to VRAM flipped horizontally, from *HL to *DE
 				ld   b, $04			; B = 4
@@ -7316,7 +7316,7 @@ Char_DrawIcon:
 
 	push bc
 	
-		; BC = Offset to PlIconsGFXTbl.
+		; BC = Offset to GFX_Char_Icons.
 		ld   b, $00
 		ld   c, a		; BC = A
 REPT 5
@@ -7327,12 +7327,12 @@ ENDR
 		; Switch to the bank with icons
 		ldh  a, [hROMBank]
 		push af
-			ld   a, BANK(PlIconsGFXTbl) ; BANK $1D
+			ld   a, BANK(GFX_Char_Icons) ; BANK $1D
 			ld   [MBC1RomBank], a
 			ldh  [hROMBank], a
 			push hl
-				; HL = PlIconsGFXTbl[BC]
-				ld   hl, PlIconsGFXTbl	
+				; HL = GFX_Char_Icons[BC]
+				ld   hl, GFX_Char_Icons	
 				add  hl, bc			
 				
 				; Copy the next 4 tiles to VRAM from *HL to *DE

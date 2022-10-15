@@ -36,6 +36,13 @@ MODE_TEAM1P   EQU $01
 MODE_SINGLEVS EQU $02
 MODE_TEAMVS   EQU $03
 
+; TODO: Replace all other related constants with these
+; Player IDs used across multiple variables
+PL1 EQU $00		
+PL2 EQU $01
+PLB1 EQU 0
+PLB2 EQU 1
+
 ACTIVE_CTRL_PL1          EQU $00
 ACTIVE_CTRL_PL2          EQU $01
 
@@ -474,3 +481,10 @@ TILE_CHARSEL_P1ICON2 EQU $23
 TILE_CHARSEL_P2ICON0 EQU $FC
 TILE_CHARSEL_P2ICON1 EQU $27
 TILE_CHARSEL_P2ICON2 EQU $2B
+
+; ============================================================
+; ORDER SELECT
+ORDSEL_SEL0 EQU $00
+ORDSEL_SEL1 EQU $01
+ORDSEL_SEL2 EQU $02
+ORDSEL_SELDONE EQU $03

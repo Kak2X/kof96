@@ -95,13 +95,13 @@ wRoundNum EQU $C167 ; Round number in a stage
 
 wRoundSeqId EQU $C17F ; Index to the char sequence table, essentially the number of beat opponents after clearing a stage
 wRoundSeqTbl EQU $C180 ; Sequence of CPU opponents in order, containing initially CHARSEL_ID_* for normal rounds and CHAR_ID_* for bosses
+
 wCharIdExtra EQU $C191 ; Part of wRoundSeqTbl, the optional opponent for certain team combinations. 
 wCharSelIdMapTbl EQU $C194 ; Maps cursor locations in the char select screen (CHARSEL_ID_*) to actual character IDs (CHAR_ID_*)
                            ; $15 bytes ($C194-$C1A8), this is updated when flipping a tile.
 
 wCharSelP1CursorPos EQU $C1A9 ; Player 1 cursor position, CHARSEL_ID_*
 wCharSelP2CursorPos EQU $C1AA ; Player 2 cursor position, CHARSEL_ID_*
-
 ; Character ID selected for both players
 wCharSelP1Char0 EQU $C1AB
 wCharSelP1Char1 EQU $C1AC
@@ -109,28 +109,57 @@ wCharSelP1Char2 EQU $C1AD
 wCharSelP2Char0 EQU $C1AE
 wCharSelP2Char1 EQU $C1AF
 wCharSelP2Char2 EQU $C1B0
-
-
 wCharSelRandom1P EQU $C1B1 ; Randomize team on 1P side
-wCharSelRandom2P EQU $C1B2 ; Randomize team on 1P side
-
+wCharSelRandom2P EQU $C1B2 ; Randomize team on 2P side
 wCharSelTeamFull EQU $C1B3 ; Temporary value when adding characters, determines if more can be added
-
 wCharSelP1CursorMode EQU $C1B4
 wCharSelP2CursorMode EQU $C1B5
 wCharSelCurPl EQU $C1B6 ; Player num currently handled in the character select screen.
+wCharSelRandomDelay1P EQU $C1B7 ; Delay until the CPU autopicks the next character
+wCharSelRandomDelay2P EQU $C1B8 ; Delay until the CPU autopicks the next character
 
-	
+wOrdSelCPUDelay1P EQU $C1B1 ; Delay between CPU picks
+wOrdSelCPUDelay2P EQU $C1B2 ; Delay between CPU picks
+wOrdSelP1CharsSelected EQU $C1B4
+wOrdSelP2CharsSelected EQU $C1B5
+wOrdSelCurPl EQU $C1B6 ; Player num currently handled in the character select screen.
+
+
+wOrdSelP1CursorPos EQU $C1CA
+wOrdSelP2CursorPos EQU $C1CB
+wOrdSelTmpP1CharId EQU $C1CC ; Temporary value containing selected character ID
+wOrdSelTmpP2CharId EQU $C1CD
+
+
+; The last number of these labels doesn't have the same meaning in these pairs.
+; wOrdSelP*CharSel -> number of the character slot (ie: 0 is leftmost for 1P, rightmost for 2P)
+; wOrdSelP*CharId -> team member order (ie: at 0 is the first picked character)
+wOrdSelP1CharSel0 EQU $C1CE
+wOrdSelP1CharId0  EQU $C1CF
+wOrdSelP1CharSel1 EQU $C1D0
+wOrdSelP1CharId1  EQU $C1D1
+wOrdSelP1CharSel2 EQU $C1D2
+wOrdSelP1CharId2  EQU $C1D3
+wOrdSelP2CharSel0 EQU $C1D4
+wOrdSelP2CharId0  EQU $C1D5
+wOrdSelP2CharSel1 EQU $C1D6
+wOrdSelP2CharId1  EQU $C1D7
+wOrdSelP2CharSel2 EQU $C1D8
+wOrdSelP2CharId2  EQU $C1D9
+; Backup copies of the wOrdSelP*CursorPos, used by OrdSel_Ctrl_SelChar
+wOrdSelP1CursorPosBak EQU $C1DA
+wOrdSelP2CursorPosBak EQU $C1DB
+
 wIntroLoopOBJAnim EQU $C1B3 ; If set in the intro, sprite animations are set to loop
 wUnknownTimer_C1B3 EQU $C1B3
 wTitleMenuOptId EQU $C1B4 ; Cursor location in title screen
 wUnknown_C1B4 EQU $C1B4
 wTitleMenuCursorXBak EQU $C1B5 ; Backup location of cursor X position
 wTitleMenuCursorYBak EQU $C1B6 ; Backup location of cursor Y position
-wCharSelRandomDelay1P EQU $C1B7 ; Delay until the CPU autopicks the next character
+
 wTitleSubMenuOptId EQU $C1B7 ; Cursor location for Game Select / Option menus
 wOptionsSGBSndOptId EQU $C1B8 ; Vertical cursor location in the SGB Sound Test
-wCharSelRandomDelay2P EQU $C1B8 ; Delay until the CPU autopicks the next character
+
 wOptionsBGMId EQU $C1B9 ; ID of the selected music in the BGM Test
 wOptionsSFXId EQU $C1BA ; ID of the selected sound effect in the SFX Test
 wOptionsMenuMode EQU $C1BB ; $00 -> Normal, $02 -> SGB Sound Test

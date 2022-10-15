@@ -1360,7 +1360,7 @@ L1D454E: db $4D
 L1D454F: db $4E
 L1D4550: db $51
 L1D4551: db $52
-PlIconsGFXTbl: INCBIN "data/gfx/char_icons.bin"
+GFX_Char_Icons: INCBIN "data/gfx/char_icons.bin"
 L1D4A52: db $2B
 L1D4A53: db $40
 L1D4A54: db $55
