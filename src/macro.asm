@@ -42,6 +42,17 @@ mWaitForVBlankOrHBlankFast: MACRO
 	jr   nz, .waitVBlankOrHBlank_\@
 ENDM
 
+; =============== mBinDef ===============
+; Generates an include for a binary *Def structure, where the data 
+; is prepended with its length in bytes.
+; IN
+; - \1: Path to file to INCBIN
+mBinDef: MACRO
+	db (.end-.bin)	; Size of data
+.bin:
+	INCBIN \1		; Data itself
+.end:
+ENDM
 
 ; =============== dp ===============
 ; Shorthand for far pointers.

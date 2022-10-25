@@ -166,9 +166,9 @@ Module_CharSel:
 	; This is because they go alone instead of being part of a team. 
 	; If we didn't check this, the game would try to select three characters anyway.
 	ld   a, [wRoundSeqId]
-	cp   STAGE_KAGURA		; Did we lose to Kagura?
+	cp   STAGESEQ_KAGURA		; Did we lose to Kagura?
 	jp   z, .lostOnBoss		; If so, jump
-	cp   STAGE_GOENITZ		; Did we lose to Goenitz?
+	cp   STAGESEQ_GOENITZ		; Did we lose to Goenitz?
 	jp   z, .lostOnBoss		; If so, jump
 	jp   .chkInitialMode
 	
@@ -329,9 +329,9 @@ chkInitialModeP2:
 	
 	; Round sequence check
 	ld   a, [wRoundSeqId]
-	cp   STAGE_KAGURA			; Fighting Kagura next?
+	cp   STAGESEQ_KAGURA			; Fighting Kagura next?
 	jp   z, .team2PDraw			; If so, skip
-	cp   STAGE_GOENITZ			; Fighting Goenitz next?
+	cp   STAGESEQ_GOENITZ			; Fighting Goenitz next?
 	jp   z, .team2PDraw			; If so, skip
 .team1PDrawEmpty:
 	; Draw second and third placeholder
@@ -365,9 +365,9 @@ chkInitialModeP2:
 	
 	; Round sequence check
 	ld   a, [wRoundSeqId]
-	cp   STAGE_KAGURA			; Fighting Kagura next?
+	cp   STAGESEQ_KAGURA			; Fighting Kagura next?
 	jp   z, .fillSelChars1P		; If so, skip
-	cp   STAGE_GOENITZ			; Fighting Goenitz next?
+	cp   STAGESEQ_GOENITZ			; Fighting Goenitz next?
 	jp   z, .fillSelChars1P		; If so, skip
 .team2PDrawEmpty:
 	; Draw second and third placeholder
@@ -630,18 +630,18 @@ chkInitialModeP2:
 	ld   [hl], HIGH(OBJLstPtrTable_CharSel_Flip)
 	
 	
-	call Pl_Unknown_InitBeforeRound
+	call Pl_Unknown_InitBeforeStage
 	call Serial_DoHandshake
 	
 	;
-	; In VS mode, $C166 = Rand & $03
+	; In VS mode, wStageId = Rand & $03
 	;
 	ld   a, [wPlayMode]
 	bit  MODEB_VS, a	; Playing in VS mode? 
 	jp   z, .initEnd		; If not, skip
 	call Rand
 	and  a, $03
-	ld   [$C166], a
+	ld   [wStageId], a
 	
 .initEnd:
 	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WTILEMAP|LCDC_ENABLE
@@ -693,7 +693,7 @@ chkInitialModeP2:
 	; Otherwise, we've still got to choose the team order.
 	;
 	call IsInTeamMode	; Are we in team mode?
-	jp   nc, L00179D	; If not, jump
+	jp   nc, Module_Play	; If not, jump
 	ld   b, BANK(Module_OrdSel) ; BANK $1E
 	ld   hl, Module_OrdSel
 	rst  $00
@@ -3865,7 +3865,7 @@ Module_OrdSel:
 	ld   a, $58
 	ld   [wOBJInfo2+iOBJInfo_Y], a
 	
-	call Pl_Unknown_InitBeforeRound	; Just in case? This is already done by CharSel
+	call Pl_Unknown_InitBeforeStage	; Just in case? This is already done by CharSel
 	call Serial_DoHandshake
 	
 	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WTILEMAP|LCDC_ENABLE
@@ -3961,7 +3961,7 @@ Module_OrdSel:
 	
 	; Wait $3B frames, and then init gameplay
 	call Task_PassControl_Delay3B
-	jp   L00179D
+	jp   Module_Play
 	
 ; =============== OrdSel_DoMode ===============
 OrdSel_DoMode:
@@ -5072,7 +5072,7 @@ L1E7D21:;I
 	ld   de, wLZSS_Buffer+$20
 	call DecompressLZSS
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   de, OBJInfoInit_Terry_WinA
+	ld   de, OBJInfoInit_Pl1
 	call OBJLstS_InitFrom
 	call L1E7DEE
 	ld   a, $60

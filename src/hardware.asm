@@ -43,13 +43,15 @@ SCREEN_YMAX EQU $70
 ; screen size
 SCREEN_H EQU $A0 ; Right border
 SCREEN_V EQU $90 ; Top border
-
 ; Number of tiles in tilemap
 BG_TILECOUNT_H EQU $20
 BG_TILECOUNT_V EQU $20
-
 TILE_H EQU $08
 TILE_V EQU $08
+; Total tilemap size
+TILEMAP_H EQU BG_TILECOUNT_H * TILE_H ; $100
+TILEMAP_V EQU BG_TILECOUNT_V * TILE_V ; $100
+; Bytes in a tile
 TILESIZE EQU $10
 
 ; interrupt flags
@@ -103,6 +105,7 @@ SPRB_OBP1       EQU 4
 SPRB_XFLIP      EQU 5
 SPRB_YFLIP      EQU 6
 SPRB_BGPRIORITY EQU 7
+SPR_OBP0        EQU $00
 SPR_OBP1        EQU 1 << SPRB_OBP1     
 SPR_XFLIP       EQU 1 << SPRB_XFLIP    
 SPR_YFLIP       EQU 1 << SPRB_YFLIP    
@@ -259,6 +262,34 @@ SGB_SND_A_LIGHTNING    EQU $2E	;Lightning	0	2
 SGB_SND_A_EARTHQUAKE   EQU $2F	;Earthquake	0	2
 SGB_SND_A_LASER_SM     EQU $30	;Small Laser	2	2
 SGB_SND_A_STOP         EQU $80	;Effect A, stop/silent	-
+
+SGB_SND_B_DUMMY        EQU $00 ;Dummy flag, re-trigger	-	4
+SGB_SND_B_APPLAUSE_SM  EQU $01 ;Applause…small group	2	1
+SGB_SND_B_APPLAUSE_MD  EQU $02 ;Applause…medium group	2	2
+SGB_SND_B_APPLAUSE_LG  EQU $03 ;Applause…large group	2	4
+SGB_SND_B_WIND         EQU $04 ;Wind	1	2
+SGB_SND_B_RAIN         EQU $05 ;Rain	1	1
+SGB_SND_B_STORM        EQU $06 ;Storm	1	3
+SGB_SND_B_STORM_ALL    EQU $07 ;Storm with wind/thunder	2	4
+SGB_SND_B_LIGHTNING    EQU $08 ;Lightning	0	2
+SGB_SND_B_EARTHQUAKE   EQU $09 ;Earthquake	0	2
+SGB_SND_B_AVALANCHE    EQU $0A ;Avalanche	0	2
+SGB_SND_B_WAVE         EQU $0B ;Wave	0	1
+SGB_SND_B_RIVER        EQU $0C ;River	3	2
+SGB_SND_B_WATERFALL    EQU $0D ;Waterfall	2	2
+SGB_SND_B_RUNMAN       EQU $0E ;Small character running	3	1
+SGB_SND_B_RUNHORSE     EQU $0F ;Horse running	3	1
+SGB_SND_B_WARNING      EQU $10 ;Warning sound	1	1
+SGB_SND_B_CAR          EQU $11 ;Approaching car	0	1
+SGB_SND_B_JET          EQU $12 ;Jet flying	1	1
+SGB_SND_B_UFO          EQU $13 ;UFO flying	2	1
+SGB_SND_B_ELECWAVE     EQU $14 ;Electromagnetic waves	0	1
+SGB_SND_B_SCOREUP      EQU $15 ;Score UP	3	1
+SGB_SND_B_FIRE         EQU $16 ;Fire	2	1
+SGB_SND_B_CAMERA       EQU $17 ;Camera shutter, formanto	3	4
+SGB_SND_B_WRITE        EQU $18 ;Write, formanto	0	1
+SGB_SND_B_TITLE        EQU $19 ;Show up title, formanto	0	1
+SGB_SND_B_STOP         EQU $80 ;Effect B, stop/silent	-	4
 
 ; Hardware registers
 rJOYP       EQU $ff00 ; Joypad (R/W)

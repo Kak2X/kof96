@@ -628,7 +628,7 @@ L0244BB:;J
 L0244BE:;JR
 	ret
 L0244BF:;C
-	ld   a, [$C169]
+	ld   a, [wRoundTime]
 	or   a
 	jp   nz, L0244CF
 	xor  a
@@ -977,7 +977,7 @@ L024705:;I
 	ld   a, $0F
 	call L025003
 	ld   a, $00
-	ld   [$C17C], a
+	ld   [wStageBGP], a
 	call L003AE8
 	call L00347B
 	ld   hl, $0050
@@ -2048,7 +2048,7 @@ L024E7D:;J
 L024E80:;J
 	ld   d, [hl]
 L024E81:;R
-	ld   a, [$C169]
+	ld   a, [wRoundTime]
 	or   a
 	jp   z, L024F03
 	call L024F56
@@ -2346,7 +2346,7 @@ L02504C:;C
 	bit  6, [hl]
 	jp   z, L02505A
 	ld   a, $00
-	ld   [$C17C], a
+	ld   [wStageBGP], a
 L02505A:;J
 	ret
 L02505B:;I
@@ -3169,7 +3169,7 @@ L025687:;J
 	ld   a, [wTimer]
 	and  a, $80
 	jp   z, L025757
-	ld   a, [$C008]
+	ld   a, [wPlayTimer]
 	and  a, $F0
 	jp   L02569C
 L025697:;J

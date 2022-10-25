@@ -5296,7 +5296,7 @@ L06679B:;C
 	ld   a, [hl]
 	cp   $01
 	jp   z, L0667B0
-	ld   a, [$C008]
+	ld   a, [wPlayTimer]
 	bit  0, a
 	jp   z, L0667BB
 	jp   L0667B8

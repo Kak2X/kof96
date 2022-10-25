@@ -13745,7 +13745,7 @@ ENDC
 	and  a, $03
 	ld   l, a
 .sgbPlay:
-	call SGB_PrepareSoundPacket
+	call SGB_PrepareSoundPacketA
 	ret 	
 .dmg:
 	; On the DMG side use byte0 as sound ID

@@ -199,55 +199,44 @@ StartLCDOperation:
 	ldh  [rIE], a
 	ret
 
-; =============== Tilemaps for the health/pow bars ===============	
-L0000AD: db $E0
-L0000AE: db $E8
-L0000AF: db $E9
-L0000B0: db $EA
-L0000B1: db $EB
-L0000B2: db $EC
-L0000B3: db $ED
-L0000B4: db $EE
-L0000B5: db $DF
-L0000B6: db $08
-L0000B7: db $07
-L0000B8: db $06
-L0000B9: db $05
-L0000BA: db $04
-L0000BB: db $03
-L0000BC: db $02
-L0000BD: db $01
-L0000BE: db $00
-L0000BF: db $E0
-L0000C0: db $E1
-L0000C1: db $E2
-L0000C2: db $E3
-L0000C3: db $E4
-L0000C4: db $E5
-L0000C5: db $E6
-L0000C6: db $E7
-L0000C7: db $DF
-L0000C8: db $00
-L0000C9: db $01
-L0000CA: db $02
-L0000CB: db $03
-L0000CC: db $04
-L0000CD: db $05
-L0000CE: db $06
-L0000CF: db $07
-L0000D0: db $08
-L0000D1: db $EF
-L0000D2: db $F0
-L0000D3: db $F1
-L0000D4: db $F2
-L0000D5: db $F3
-L0000D6: db $F4
-L0000D7: db $F5
-L0000D8: db $F6
-L0000D9: db $F7
-L0000DA: db $F8
-L0000DB: db $D4
-L0000DC: db $D5
+; =============== Bar Data ===============	
+; Tile IDs used for bars that grow from right to left.
+; Increasing and decreasing pick different ranges of bytes due to the different tile picked as "bar tip".
+Play_Bar_TileIdTbl_RGrow:
+	db $E0 ; Only used when decreasing as last value (completely empty)
+	db $E8,$E9,$EA,$EB,$EC,$ED,$EE
+	db $DF ; Only used when increasing as last value (completely filled)
+; Tilemap offsets for each updatable tile of the bar (from least to most)
+; Not necessarily used in its entirety.
+; The offset used is usually calculated by doing BarValue/8.
+Play_Bar_BGOffsetTbl_RGrow:
+	db $08,$07,$06,$05,$04,$03,$02,$01,$00
+	
+; Like above, but for bars growing from left to right.
+Play_Bar_TileIdTbl_LGrow:
+	db $E0
+	db $E1,$E2,$E3,$E4,$E5,$E6,$E7
+	db $DF
+Play_Bar_BGOffsetTbl_LGrow:
+	db $00,$01,$02,$03,$04,$05,$06,$07,$08
+; =============== Play_HUDTileIdTbl ===============
+; Maps digits to tile IDs, relative to where GFXLZ_Play_HUD after it gets loaded to VRAM.
+Play_HUDTileIdTbl:
+	db $EF ; 0
+	db $F0 ; 1
+	db $F1 ; 2
+	db $F2 ; 3
+	db $F3 ; 4
+	db $F4 ; 5
+	db $F5 ; 6
+	db $F6 ; 7
+	db $F7 ; 8
+	db $F8 ; 9
+	
+	; Tile IDs for pause text
+L0000DB:
+	db $D4
+	db $D5
 
 L0000DD: db $CD;X
 L0000DE: db $B3;X
@@ -841,8 +830,8 @@ Task_RemoveAt:
 ; as shared code which must always run on any main loop, like the sound engine and OBJLst writer.
 ;
 ; There are three task slots and two different ways to execute subroutines:
-; TASK_EXEC_NEW -> Used for init code, when a task code pointer should change.
-; TASK_EXEC_TODO -> Used for loop code, which typically doesn't change across loops.
+; TASK_EXEC_NEW -> Used for init code, when the task pointer points to code.
+; TASK_EXEC_TODO -> Used for loop code, when the task pointer points to a stack.
 ;
 ; *ANY* time the task system is run through Task_PassControl, current slot is overwritten with an entry used
 ; to restore the original registers/SP, and is set to execute after all of the next slots + the common code is executed.
@@ -857,7 +846,7 @@ Task_RemoveAt:
 ; The same thing is done as before, until the entire task table is iterated. The common code which also waits for VBLANK
 ; is executed when that happens.
 ;
-; The VBLANK handler also re-enables every task (??? marked as TASK_EXEC_DONE) as a TASK_EXEC_TODO, and the task table is iterated again.
+; The VBLANK handler also re-enables every task marked as TASK_EXEC_DONE as TASK_EXEC_TODO, and the task table is iterated again.
 ; This WILL lead to the first task being executed again, which returns to the original state from before the task handler was
 ; called for the first time, and so on.
 ;
@@ -906,7 +895,7 @@ Task_PassControlCustom:
 
 ; =============== Task_PassControlFar ===============
 ; Wrapper for Task_PassControl_NoDelay which also saves the current bank number.
-; Use when executing tasks across different banks.
+; Use when passing control from code in BANK $00 that needs a specific bank loaded.
 Task_PassControlFar:
 	ldh  a, [hROMBank]		; Save bank for when we're returning
 	push af
@@ -948,14 +937,14 @@ Task_RemoveCurAndPassControl:
 	jp   Task_GetNext
 	
 ; =============== Task_IndexTaskAuto ===============
-; Indexes the task struct of the currently executing (???) task.
+; Indexes the task struct of the currently executing task.
 Task_IndexTaskAuto:
-	ldh  a, [hCurTaskId]	; A = Index to current task ???
+	ldh  a, [hCurTaskId]	; A = Index to current task
 	
 ; =============== Task_IndexTask ===============
 ; Indexes the specified task struct by ID.
 ; IN
-; - A: Index to task ID (must be between $01 and ???)
+; - A: Index to task ID (must be between $01 and $03)
 ; OUT
 ; - HL: Ptr to task struct
 Task_IndexTask:
@@ -1310,10 +1299,10 @@ VBlank_ChkCopyPlTiles:
 ;--
 ; [TCRF] Unreferenced code.
 L0005A1:
-	ld   a, [$D921]
+	ld   a, [wPlInfo_Pl1+iPlInfo_21]
 	bit  4, a
 	jp   nz, VBlank_CopyPl1Tiles
-	ld   a, [wPlInfo_Pl1+iPlInfo_02Flags]
+	ld   a, [wPlInfo_Pl1+iPlInfo_22Flags]
 	bit  2, a
 	jp   nz, VBlank_CopyPl1Tiles
 	ld   a, [$C172]
@@ -1442,16 +1431,16 @@ VBlank_CopyPl1Tiles:
 	;--------
 	; ??? Very likely in the middle of the Player actor, related to gameplay
 	
-	ld   hl, wPlInfo_Pl1+iPlInfo_02Flags
-	bit  0, [hl]		; wPlInfo_Pl1+iPlInfo_02Flags bit 0 set?
+	ld   hl, wPlInfo_Pl1+iPlInfo_22Flags
+	bit  0, [hl]		; wPlInfo_Pl1+iPlInfo_22Flags bit 0 set?
 	jp   nz, .move1		; If so, skip
 	
 	; Copy $D93D-$D93F to $D93A-$D93C and clear the former range
 	; as long as they aren't 0 already.
-	ld   hl, wPlInfo_Pl1+iPlInfo_1D		; HL = Source
-	ld   de, wPlInfo_Pl1+iPlInfo_1A		; DE = Destination
+	ld   hl, wPlInfo_Pl1+iPlInfo_3D		; HL = Source
+	ld   de, wPlInfo_Pl1+iPlInfo_3A		; DE = Destination
 	ld   a, [hl]
-	or   a				; iPlInfo_1D == 0?
+	or   a				; iPlInfo_3D == 0?
 	jp   z, .move1		; If so, skip
 	
 .move0:
@@ -1504,10 +1493,10 @@ ENDR
 ;--
 ; [TCRF] Unreferenced code
 L0006A7:
-	ld   a, [$DA21]
+	ld   a, [wPlInfo_Pl2+iPlInfo_21]
 	bit  4, a
 	jp   nz, VBlank_CopyPl2Tiles
-	ld   a, [wPlInfo_Pl2+iPlInfo_02Flags]
+	ld   a, [wPlInfo_Pl2+iPlInfo_22Flags]
 	bit  2, a
 	jp   nz, VBlank_CopyPl2Tiles
 	ld   a, [$C172]
@@ -1592,12 +1581,12 @@ VBlank_CopyPl2Tiles:
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
 	res  OSTB_GFXLOAD, [hl]
 	set  OSTB_BIT3, [hl]
-	ld   hl, wPlInfo_Pl2+iPlInfo_02Flags
+	ld   hl, wPlInfo_Pl2+iPlInfo_22Flags
 	bit  0, [hl]
 	jp   nz, .move1
 	
-	ld   hl, wPlInfo_Pl2+iPlInfo_1D
-	ld   de, wPlInfo_Pl2+iPlInfo_1A
+	ld   hl, wPlInfo_Pl2+iPlInfo_3D
+	ld   de, wPlInfo_Pl2+iPlInfo_3A
 	ld   a, [hl]
 	or   a
 	jp   z, .move1
@@ -2771,7 +2760,7 @@ OBJLstS_DoAnimTiming_Initial:
 			jp   OBJLstS_UpdateGFXBufInfo
 
 ; =============== OBJLstS_DoAnimTiming_NoLoop ===============
-; Handles the timing for the current animation for the specified OBJInfo and calls ????
+; Handles the timing for the current animation for the specified OBJInfo.
 ; When the animation ends, the last frame is repeated indefinitely.
 ; IN
 ; - HL: Ptr to wOBJInfo struct		
@@ -2875,7 +2864,7 @@ OBJLstS_DoAnimTiming_NoLoop:
 			jp   OBJLstS_UpdateGFXBufInfo ; ...
 			
 ; =============== OBJLstS_DoAnimTiming_Loop ===============
-; Handles the timing for the current animation for the specified OBJInfo and calls ????
+; Handles the timing for the current animation for the specified OBJInfo.
 ; When the animation ends, the animation loops back to the first frame.
 ;
 ; See also: OBJLstS_DoAnimTiming_NoLoop
@@ -3516,17 +3505,25 @@ FillBGRect:
 	jr   nz, .loopV		; If not, loop
 	ret
 	
-; =============== FillBGStripPair ===============
-; Draws a continuous strip in the tilemap alternating between two tile IDs.
-; IN
+; =============== FillGFX / FillBGStripPair ===============
+; Writes the specified number of tiles to the GFX area consting of the same line pattern repeated vertically.
+; This is also reused to draw continuous strips in the tilemap alternating between two tile IDs.
+;       
+; IN (FillGFX)
+; - DE: Ptr to GFX in VRAM
+; - B: Number of tiles to overwrite
+; - HL: 2bpp Line to repeat across the tiles.
+;
+; IN (FillBGStripPair)
 ; - DE: Destination tilemap ptr (top left corner of rectangle)
 ; - B: Width multiplier. Multiply by $10 for the effective width.
 ; - H: Tile ID 1 to use
 ; - L: Tile ID 2 to use
+FillGFX:
 FillBGStripPair:
 	push bc
-		; Write $10 tiles horizontally
-		ld   b, $10 / 2
+		; Write a full tile / Write $10 tiles horizontally
+		ld   b, TILESIZE / 2
 	.loopH:
 		; Write tile H to DE
 		mWaitForHBlank
@@ -3539,11 +3536,11 @@ FillBGStripPair:
 		ld   [de], a
 		inc  de
 		
-		dec  b				; Filled the $10 tile strip?
+		dec  b				; Finished overwriting the tile? / Filled the $10 tile strip?
 		jp   nz, .loopH		; If not, loop
 	pop  bc
-	dec  b					; Are we done repeating it?
-	jp   nz, FillBGStripPair		; If not, loop
+	dec  b						; Are we done repeating it?
+	jp   nz, FillBGStripPair	; If not, loop
 	ret
 	
 ; =============== CopyTilesAuto ===============
@@ -3627,6 +3624,8 @@ CopyTilesOver:
 	; The GFXDef structure starts with the number of tiles to process
 	ld   a, [hl]			; A = Number of tiles
 	inc  hl
+	; Fall-through
+; =============== CopyTilesOver_Custom ===============
 ; IN
 ; - HL: Ptr to GFX to copy over
 ; - BC: Ptr to GFX with transparency mask
@@ -4111,12 +4110,12 @@ SGB_SendSoundPacketAtFrameEnd:
 	ld   [wSGBSendPacketAtFrameEnd], a
 	ret
 	
-; =============== SGB_PrepareSoundPacket ===============
-; Sets up the SGB packet to play a sound ID.
+; =============== SGB_PrepareSoundPacketA ===============
+; Sets up the SGB packet to play a sound ID from Set A.
 ; IN
-; - H: Sound Effect (A) ID
+; - H: Sound Effect A ID
 ; - L: Sound Effect Attributes
-SGB_PrepareSoundPacket:
+SGB_PrepareSoundPacketA:
 	ld   a, [wMisc_C025]
 	bit  MISCB_IS_SGB, a	; In SGB mode?
 	jp   z, .end			; If not, return
@@ -4145,7 +4144,7 @@ SGB_PrepareSoundPacket:
 		;
 		ld   hl, wSGBSoundPacket+1		; Write out
 		ld   [hl], b						
-		inc  hl							; Seek to attrib.
+		inc  hl							
 		
 		;
 		; byte2 - Sound Effect B (always $00)
@@ -4171,42 +4170,66 @@ SGB_PrepareSoundPacket:
 .end:
 	ret
 	
-L000FEF:;C
+; =============== SGB_PrepareSoundPacketB ===============
+; Sets up the SGB packet to play a sound ID from Set B.
+; See also: SGB_PrepareSoundPacketA
+; IN
+; - H: Sound Effect B ID
+; - L: Sound Effect Attributes
+SGB_PrepareSoundPacketB:
 	ld   a, [wMisc_C025]
-	bit  7, a
-	jp   z, L001015
-L000FF7: db $C5;X
-L000FF8: db $D5;X
-L000FF9: db $E5;X
-L000FFA: db $C1;X
-L000FFB: db $3E;X
-L000FFC: db $0F;X
-L000FFD: db $A1;X
-L000FFE: db $CB;X
-L000FFF: db $37;X
-L001000: db $4F;X
-L001001: db $21;X
-L001002: db $2D;X
-L001003: db $C0;X
-L001004: db $36;X
-L001005: db $00;X
-L001006: db $23;X
-L001007: db $70;X
-L001008: db $23;X
-L001009: db $7E;X
-L00100A: db $E6;X
-L00100B: db $0F;X
-L00100C: db $B1;X
-L00100D: db $77;X
-L00100E: db $3E;X
-L00100F: db $01;X
-L001010: db $EA;X
-L001011: db $2B;X
-L001012: db $C0;X
-L001013: db $D1;X
-L001014: db $C1;X
-L001015:;J
+	bit  MISCB_IS_SGB, a	; In SGB mode?
+	jp   z, .end			; If not, return
+	push bc
+	push de
+		push hl				; BC = HL
+		pop  bc
+		
+
+		; C = Attributes for Sound Effect B
+		ld   a, $0F				
+		and  c
+		swap a				; Move the nybble from low to high (the low nybble is for Sound Effect A)
+		ld   c, a
+		
+		;
+		; byte0 - command id + packet count
+		;
+		; (already written in HomeCall_Sound_Init)
+		
+		
+		
+		;
+		; byte1 - Sound Effect A (always $00)
+		;
+		ld   hl, wSGBSoundPacket+1		
+		ld   [hl], $00
+		inc  hl							
+		
+		;
+		; byte2 - Sound Effect B
+		;
+		ld   [hl], b					; Write out		
+		inc  hl
+		
+		;
+		; byte3 - Attributes
+		;
+		; Preserve whatever is already there involving Sound Effect *A*.
+		; Simply replace the *high* nybble with the updated attributes.
+		ld   a, [hl]
+		and  a, $0F				; Preserve A
+		or   c					; Merge B
+		ld   [hl], a
+		
+		; Request later packet transfer
+		ld   a, $01
+		ld   [wSGBSendPacketAtFrameEnd], a
+	pop  de
+	pop  bc
+.end:
 	ret
+
 ; =============== HomeCall_Sound_ReqPlayExId ===============
 ; IN
 ; - A: Action ID or DMG Sound ID
@@ -5052,11 +5075,11 @@ TextPrinter_MultiFrame:
 				jr   nz, .sfxSpace				; If so, jump
 			.sfxChar:
 				ld   hl, (SGB_SND_A_SELECT_B << 8)|$02
-				call SGB_PrepareSoundPacket
+				call SGB_PrepareSoundPacketA
 				jr   .sfxDone
 			.sfxSpace:
 				ld   hl, (SGB_SND_A_PUNCH_B << 8)|$07
-				call SGB_PrepareSoundPacket
+				call SGB_PrepareSoundPacketA
 			.sfxDone:
 				jr   .charPrinted
 			;------
@@ -5268,182 +5291,259 @@ HomeCall_SGB_ApplyScreenPalSet:
 	ldh  [hROMBank], a
 	ret  
 	
-L0013ED:;C
+; =============== Play_LoadStage ===============
+; Loads the data for the stage/playfield.
+Play_LoadStage:
 	ldh  a, [hROMBank]
 	push af
-	ld   hl, $9C65
-	ld   b, $0A
-	ld   c, $01
-	ld   d, $00
-	call FillBGRect
-	ld   hl, $9CA0
-	ld   b, $14
-	ld   c, $01
-	ld   d, $00
-	call FillBGRect
-	ld   a, [wRoundNum]
-	or   a
-	jp   nz, L0014A6
-	ld   a, [wPlayMode]
-	bit  1, a
-	jp   nz, L001445
-	ld   a, [wJoyActivePl]
-	or   a
-	jp   nz, L001424
-	ld   hl, wPlInfo_Pl2+iPlInfo_CharId
-	jp   L001427
-L001424: db $21;X
-L001425: db $2C;X
-L001426: db $D9;X
-L001427:;J
-	ld   a, [hl]
-	srl  a
-	ld   hl, $14E5
-	ld   d, $00
-	ld   e, a
-	add  hl, de
-	ld   a, [hl]
-	ld   [$C166], a
-	ld   a, [wRoundSeqId]
-	cp   $11
-	jp   nz, L001445
-	ld   a, $06
-	ld   [$C166], a
-	jp   L001445
-L001445:;J
-	ld   a, [$C166]
-	sla  a
-	sla  a
-	sla  a
-	ld   b, $00
-	ld   c, a
-	ld   hl, $14AD
-	add  hl, bc
-	ldi  a, [hl]
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	ld   c, [hl]
-	inc  hl
-	ld   b, [hl]
-	inc  hl
-	push hl
-	push bc
-	pop  hl
-	ld   de, wLZSS_Buffer
-	call DecompressLZSS
-	ld   hl, wLZSS_Buffer
-	ld   de, $9000
-	call CopyTiles
-	pop  hl
-	ld   e, [hl]
-	inc  hl
-	ld   d, [hl]
-	inc  hl
-	push hl
-	push de
-	pop  hl
-	ld   de, wLZSS_Buffer
-	call DecompressLZSS
-	ld   de, wLZSS_Buffer
-	ld   hl, $9880
-	ld   b, $20
-	ld   c, $0C
-	call CopyBGToRect
-	ld   hl, $9840
-	ld   b, $20
-	ld   c, $02
-	ld   d, $01
-	call FillBGRect
-	pop  hl
-	ld   d, $00
-	ld   e, [hl]
-	inc  hl
-	push hl
-	call HomeCall_SGB_ApplyScreenPalSet
-	pop  hl
-	ld   a, [hl]
-	call HomeCall_Sound_ReqPlayExId_Stub
-L0014A6:;J
+		
+		; Blank out the line where the hit counters appear, in case the round ended while it was still there
+		ld   hl, $9C65	; BG Ptr
+		ld   b, $0A	; Rect Width
+		ld   c, $01 ; Rect Height
+		ld   d, $00 ; Tile ID
+		call FillBGRect
+		
+		; Blank out the line with MAXIMUM at the bottom, for the same reason
+		ld   hl, $9CA0
+		ld   b, $14
+		ld   c, $01
+		ld   d, $00
+		call FillBGRect
+		
+		; If this isn't the first round, we have everything already loaded/drawn.
+		ld   a, [wRoundNum]
+		or   a				; RoundNum > 0?
+		jp   nz, .end		; If so, we're done
+		
+		;
+		; Determine the stage to load.
+		; In VS mode, the stage ID is already randomized at the stage select screen.
+		;
+		ld   a, [wPlayMode]
+		bit  MODEB_VS, a	; Playing in VS mode?
+		jp   nz, .load		; If so, jump
+		
+		;
+		; In single mode, the stage is the one assigned to the first CPU opponent of the team.
+		;
+		
+		; A = CPU opponent
+		ld   a, [wJoyActivePl]
+		or   a				; Playing on the 2P side?
+		jp   nz, .pl2Active	; If so, jump
+	.pl1Active:
+		ld   hl, wPlInfo_Pl2+iPlInfo_CharId		; HL = Ptr to 2P CPU char id
+		jp   .getIdx
+	.pl2Active:
+		ld   hl, wPlInfo_Pl1+iPlInfo_CharId		; HL = Ptr to 1p CPU char id
+	.getIdx:
+		ld   a, [hl]	; A = CharId * 2
+		
+		; Index the Char-to-Stage mapping table
+		srl  a				; /2 to balance out the *2
+		
+		ld   hl, Play_CharStageMapTbl	; HL = Ptr to map tbl
+		ld   d, $00			; DE = CharId
+		ld   e, a
+		add  hl, de			; Index it
+		ld   a, [hl]		; A = StageId
+		ld   [wStageId], a	; Save it
+		
+		;--
+		; The extra round fighting against IORI' or LEONA' uses an hardcoded stage.
+		; [POI] ??? This is pointless, as the correct entries are already set in Play_CharStageMapTbl.
+		ld   a, [wRoundSeqId]
+		cp   STAGESEQ_BONUS	; RoundId == STAGESEQ_BONUS?
+		jp   nz, .load		; If not, skip
+		ld   a, STAGE_ID_STADIUM_EXTRA
+		ld   [wStageId], a
+		jp   .load
+		;--
+	.load:
+		
+		;
+		; Index the stage header off the table.
+		;
+		ld   a, [wStageId]				; BC = StageId * 8
+		sla  a
+		sla  a
+		sla  a
+		ld   b, $00
+		ld   c, a
+		ld   hl, Play_StageHeaderTbl	; HL = Start of header
+		add  hl, bc						; Offset it
+		
+		;--
+		
+		;
+		; bytes0-2 Stage GFX
+		;
+		
+		; Switch to the bank with both the GFX and tilemap
+		ldi  a, [hl]	; byte0
+		ld   [MBC1RomBank], a
+		ldh  [hROMBank], a
+		
+		; Read out the GFX ptr to BC
+		ld   c, [hl]	; byte1
+		inc  hl
+		ld   b, [hl]	; byte2
+		inc  hl
+		push hl
+			; Decompress the data to the third GFX block
+			push bc
+			pop  hl				
+			ld   de, wLZSS_Buffer
+			call DecompressLZSS
+			ld   hl, wLZSS_Buffer
+			ld   de, $9000
+			call CopyTiles
+		pop  hl
+		
+		;
+		; bytes3-4 Stage tilemap
+		;
+		
+		; Read out the BG ptr to DE
+		ld   e, [hl]	; byte3
+		inc  hl
+		ld   d, [hl]	; byte4
+		inc  hl
+		push hl
+			; Decompress the playfield tilemap
+			push de
+			pop  hl
+			ld   de, wLZSS_Buffer
+			call DecompressLZSS
+			
+			; The stage tilemaps are long, spanning the full $20 tiles of the hardware tilemap.
+			; Note that they never get redrawn when scrolling, so those 20 tiles are all that's ever visible.
+			ld   de, wLZSS_Buffer
+			ld   hl, $9880			; 4 tiles below top
+			ld   b, $20				; Width
+			ld   c, $0C				; Height
+			call CopyBGToRect
+			
+			; Fill with white tiles two rows above the tilemap, in case the playfield moves down too much.
+			ld   hl, $9840
+			ld   b, $20
+			ld   c, $02
+			ld   d, $01
+			call FillBGRect
+		pop  hl
+		
+		;
+		; byte5 - SGB palette ID
+		;
+		ld   d, $00
+		ld   e, [hl]		; byte5
+		inc  hl				; Seek to byte6
+		push hl
+			call HomeCall_SGB_ApplyScreenPalSet
+		pop  hl
+		
+		;
+		; byte6 - BGM ID
+		;
+		ld   a, [hl]
+		call HomeCall_Sound_ReqPlayExId_Stub
+	.end:
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-L0014AD: db $04
-L0014AE: db $18
-L0014AF: db $63
-L0014B0: db $32
-L0014B1: db $67
-L0014B2: db $06
-L0014B3: db $84
-L0014B4: db $00;X
-L0014B5: db $04
-L0014B6: db $22
-L0014B7: db $68
-L0014B8: db $42
-L0014B9: db $6D
-L0014BA: db $07
-L0014BB: db $83
-L0014BC: db $00;X
-L0014BD: db $04
-L0014BE: db $2A
-L0014BF: db $6E
-L0014C0: db $66
-L0014C1: db $72
-L0014C2: db $08
-L0014C3: db $87
-L0014C4: db $00;X
-L0014C5: db $04
-L0014C6: db $5C
-L0014C7: db $73
-L0014C8: db $A2
-L0014C9: db $77
-L0014CA: db $09
-L0014CB: db $86
-L0014CC: db $00;X
-L0014CD: db $04
-L0014CE: db $70
-L0014CF: db $78
-L0014D0: db $66
-L0014D1: db $7D
-L0014D2: db $0A
-L0014D3: db $88
-L0014D4: db $00;X
-L0014D5: db $04
-L0014D6: db $70
-L0014D7: db $78
-L0014D8: db $66
-L0014D9: db $7D
-L0014DA: db $0A
-L0014DB: db $89
-L0014DC: db $00;X
-L0014DD: db $04
-L0014DE: db $70
-L0014DF: db $78
-L0014E0: db $66
-L0014E1: db $7D
-L0014E2: db $0A
-L0014E3: db $99
-L0014E4: db $00;X
-L0014E5: db $00
-L0014E6: db $00
-L0014E7: db $01
-L0014E8: db $01
-L0014E9: db $01
-L0014EA: db $01
-L0014EB: db $00
-L0014EC: db $01
-L0014ED: db $02
-L0014EE: db $03
-L0014EF: db $03
-L0014F0: db $03
-L0014F1: db $02
-L0014F2: db $02
-L0014F3: db $00
-L0014F4: db $05
-L0014F5: db $06
-L0014F6: db $06
-L0014F7: db $06
-L0014F8: db $04
+	
+; =============== Play_StageHeaderTbl ===============
+; Defines the stage headers:
+; FORMAT:
+; - 0   : Bank number for GFX and tilemap
+; - 1-2 : Ptr to LZSS compressed GFX
+; - 3-4 : Ptr to LZSS compressed tilemap
+; - 5   : SGB screen layout ID
+; - 6   : BGM ID
+; - 7   : Padding for alignment to 8-byte boundary
+Play_StageHeaderTbl:
+	; STAGE 0
+	db BANK(GFXLZ_Play_Stage_Hero) ; BANK $04
+	dw GFXLZ_Play_Stage_Hero
+	dw BGLZ_Play_Stage_Hero
+	db SCRPAL_STAGE_HERO
+	db BGM_ESAKA
+	db $00
+	
+	; STAGE 1
+	db BANK(GFXLZ_Play_Stage_FatalFury) ; BANK $04
+	dw GFXLZ_Play_Stage_FatalFury
+	dw BGLZ_Play_Stage_FatalFury
+	db SCRPAL_STAGE_FATALFURY
+	db BGM_BIGSHOT
+	db $00
+	
+	; STAGE 2
+	db BANK(GFXLZ_Play_Stage_Yagami) ; BANK $04
+	dw GFXLZ_Play_Stage_Yagami
+	dw BGLZ_Play_Stage_Yagami
+	db SCRPAL_STAGE_YAGAMI
+	db BGM_ARASHI
+	db $00
+	
+	; STAGE 3
+	db BANK(GFXLZ_Play_Stage_Boss) ; BANK $04
+	dw GFXLZ_Play_Stage_Boss
+	dw BGLZ_Play_Stage_Boss
+	db SCRPAL_STAGE_BOSS
+	db BGM_GEESE
+	db $00
+
+	; STAGE 4
+	db BANK(GFXLZ_Play_Stage_Stadium) ; BANK $04
+	dw GFXLZ_Play_Stage_Stadium
+	dw BGLZ_Play_Stage_Stadium
+	db SCRPAL_STAGE_STADIUM
+	db BGM_FAIRY
+	db $00
+	
+	; STAGE 5
+	db BANK(GFXLZ_Play_Stage_Stadium) ; BANK $04
+	dw GFXLZ_Play_Stage_Stadium
+	dw BGLZ_Play_Stage_Stadium
+	db SCRPAL_STAGE_STADIUM
+	db BGM_TRASHHEAD
+	db $00
+	
+	; STAGE 6
+	db BANK(GFXLZ_Play_Stage_Stadium) ; BANK $04
+	dw GFXLZ_Play_Stage_Stadium
+	dw BGLZ_Play_Stage_Stadium
+	db SCRPAL_STAGE_STADIUM
+	db BGM_MRKARATE
+	db $00
+	
+; =============== Play_CharStageMapTbl ===============
+; Defines the stage associated with a character, used in single mode.
+Play_CharStageMapTbl:
+	db STAGE_ID_HERO ; CHAR_ID_KYO     
+	db STAGE_ID_HERO ; CHAR_ID_DAIMON  
+	db STAGE_ID_FATALFURY ; CHAR_ID_TERRY   
+	db STAGE_ID_FATALFURY ; CHAR_ID_ANDY    
+	db STAGE_ID_FATALFURY ; CHAR_ID_RYO     
+	db STAGE_ID_FATALFURY ; CHAR_ID_ROBERT  
+	db STAGE_ID_HERO ; CHAR_ID_ATHENA  
+	db STAGE_ID_FATALFURY ; CHAR_ID_MAI     
+	db STAGE_ID_YAGAMI ; CHAR_ID_LEONA   
+	db STAGE_ID_BOSS ; CHAR_ID_GEESE   
+	db STAGE_ID_BOSS ; CHAR_ID_KRAUSER 
+	db STAGE_ID_BOSS ; CHAR_ID_MRBIG   
+	db STAGE_ID_YAGAMI ; CHAR_ID_IORI    
+	db STAGE_ID_YAGAMI ; CHAR_ID_MATURE  
+	db STAGE_ID_HERO ; CHAR_ID_CHIZURU 
+	db STAGE_ID_STADIUM_GOENITZ ; CHAR_ID_GOENITZ 
+	db STAGE_ID_STADIUM_EXTRA ; CHAR_ID_MRKARATE
+	db STAGE_ID_STADIUM_EXTRA ; CHAR_ID_OIORI   
+	db STAGE_ID_STADIUM_EXTRA ; CHAR_ID_OLEONA  
+	db STAGE_ID_STADIUM_KAGURA ; CHAR_ID_KAGURA  
+	
 ; =============== Serial_DoHandshake ===============
 ; Performs an handshake between master and slave GBs.
 ; If it succeeds, the standard serial handlers (master/slave-specific) are set.
@@ -6040,9 +6140,9 @@ Serial_Unknown_WaitAfterSend:
 Unknown_Unused_4380Jump:
 	jp   $4380
 	
-; =============== Pl_Unknown_InitBeforeRound ===============
+; =============== Pl_Unknown_InitBeforeStage ===============
 ; Initializes parts of the player struct outside gameplay for both players.
-Pl_Unknown_InitBeforeRound:
+Pl_Unknown_InitBeforeStage:
 	; Initialize the round number to -1.
 	; At the start of a round, it always gets increased by 1.
 	ld   a, -$01
@@ -6054,35 +6154,60 @@ Pl_Unknown_InitBeforeRound:
 	ld   [wPlInfo_Pl2+iPlInfo_RoundWinStreak], a
 	ld   [wPlInfo_Pl1+iPlInfo_TeamLossCount], a
 	ld   [wPlInfo_Pl2+iPlInfo_TeamLossCount], a
-	ld   [wPlInfo_Pl1+iPlInfo_16], a
-	ld   [wPlInfo_Pl2+iPlInfo_16], a
+	ld   [wPlInfo_Pl1+iPlInfo_SingleWinCount], a
+	ld   [wPlInfo_Pl2+iPlInfo_SingleWinCount], a
 	ld   [wPlInfo_Pl1+iPlInfo_HitComboRecvSet], a
 	ld   [wPlInfo_Pl2+iPlInfo_HitComboRecvSet], a
 	; ??? Set initial timer, used on the intro pose
 	ld   a, $48
-	ld   [wPlInfo_Pl1+iPlInfo_Unknown_TimerTarget], a
-	ld   [wPlInfo_Pl2+iPlInfo_Unknown_TimerTarget], a
+	ld   [wPlInfo_Pl1+iPlInfo_Health], a
+	ld   [wPlInfo_Pl2+iPlInfo_Health], a
 	ret
+	
 ; =============== Module_Play ===============
 ; Initializes the module where actual gameplay takes place.
-L00179D:;J
+; Called by multiple places with jumps.
+L00179D:
+Module_Play:
 	ld   sp, $DD00
 	di
-	ld   a, $1D
+	; Load the bank with various init data
+	ld   a, BANK(GFXLZ_Play_HUD) ; BANK $1D
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	rst  $10
-	ld   hl, $C027
-	set  7, [hl]
-	inc  hl
-	set  1, [hl]
-	ld   a, $1E
-	ld   b, $7F
+	;-----------------------------------
+	rst  $10				; Stop LCD
+	
+	; Lock controls & timer since the intro plays first
+	ld   hl, wMisc_C027
+	set  MISCB_PLAY_STOP, [hl]
+	
+	; Prevent players from moving off-screen
+	inc  hl ; Seek to wMisc_C028
+	set  MISCB_PL_RANGE_CHECK, [hl]
+	
+	; The gameplay screen is divided into multiple sections:
+	; - HUD at the top
+	; - Playfield
+	; - HUD at the bottom
+	
+	; Specify which scanline range the playfield uses, and enable sect mode.
+	; Note that these values are slightly less than the intended ones... but the
+	; LYC trigger code performs a dubious busy loop which delays it (see LCDCHandler_Sect).
+	ld   a, $1E		; Starts in
+	ld   b, $7F		; Ends in
 	call SetSectLYC
+	
+	; Initialize global gameplay timer.
+	; Set to $FF so that first frame of gameplay starts at 0.
 	ld   a, $FF
-	ld   [$C008], a
-	ld   hl, $C164
+	ld   [wPlayTimer], a
+	
+	; [TCRF] This is the only place this counter is used.
+	ld   hl, wRoundTotal
 	inc  [hl]
+	
+	; Reset DMG pal
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
@@ -6090,1123 +6215,1385 @@ L00179D:;J
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect1BGP], a
 	ldh  [hScreenSect2BGP], a
+	
+	; Disable scanline interrupt for now
 	xor  a
 	ldh  [rSTAT], a
+	
+	; If this is the first round of the stage, clear out any leftovers
+	; in the tilemap from the previous screen.
+	;
+	; Note that this is the *only* point checking the round number before getting incremented, so if the pre-stage 
+	; defaults from Pl_Unknown_InitBeforeStage are still set, the round number will still be -1.
 	ld   a, [wRoundNum]
-	cp   $FF
-	jp   nz, L0017E0
+	cp   -$01				; RoundNum == -1?
+	jp   nz, .setPlayPos	; If not, skip
 	call ClearBGMap
 	call ClearWINDOWMap
-L0017E0:;J
-	ld   a, $30
+	
+.setPlayPos:
+	; Start the round at the center of the playfield.
+	; At the start of a round, it should be possible to scroll the screen to either direction.
+	ld   a, (TILEMAP_H - SCREEN_H) / 2	; $30
 	ldh  [hScrollX], a
 	ld   [wOBJScrollX], a
 	xor  a
 	ldh  [hScrollY], a
 	ld   a, $40
 	ld   [wOBJScrollY], a
-	ld   hl, wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_Low
-	ld   b, $40
-	xor  a
-L0017F5:;J
+	
+	; Completely clear both GFX buffers
+	ld   hl, wGFXBufInfo_Pl1	; HL = Starting point
+	ld   b, $40					; B = Bytes to clear
+	xor  a						; A = Clear with
+.bufClrLoop:
 	ldi  [hl], a
 	dec  b
-	jp   nz, L0017F5
+	jp   nz, .bufClrLoop
+	
 	call ClearOBJInfo
-	call L002264
-	call L001CEB
-	call L0018C4
-	call L002233
-	call L002152
-	call L001DC2
-	call L0013ED
+	call Play_LoadPreRoundTextAndIncRound
+	call Play_DrawHUDBaseAndInitTimer
+	call Play_InitRound
+	call Play_DrawHUDEmptyBars
+	call Play_HUD_DrawCharNames
+	call Play_DrawCharIcons
+	call Play_LoadStage
+	
+	;
+	; Decompress the full set of projectile graphics to the LZSS buffer.
+	;
+	; The needed graphics for the two characters will be copied to VRAM
+	; only after the pre-round text despawns (otherwise there'd be a conflict).
+	;
 	ldh  a, [hROMBank]
 	push af
-	ld   a, $01
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	ld   hl, $4AF8
-	ld   de, wLZSS_Buffer
-	call DecompressLZSS
+		ld   a, BANK(GFXLZ_Projectiles) ; BANK $01
+		ld   [MBC1RomBank], a
+		ldh  [hROMBank], a
+		ld   hl, GFXLZ_Projectiles
+		ld   de, wLZSS_Buffer
+		call DecompressLZSS
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
+	
+	; Display the WINDOW at the top, as that's where the status bar is.
 	xor  a
 	ldh  [rWY], a
 	ld   a, $07
 	ldh  [rWX], a
+	
+	; Initialize serial connection
 	call Serial_DoHandshake
-	ld   a, $E7
+	
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
 	rst  $18
-	ldh  a, [rSTAT]
-	or   a, $40
+	
+	; Enable VBLANK & LYC interrupts
+	ldh  a, [rSTAT]		; Enable scanline triggers
+	or   a, STAT_LYC
 	ldh  [rSTAT], a
-	ld   a, $16
-	ldh  [rLYC], a
+	; [POI] Leftover value fron KOF95, which used a smaller HUD at the top. 
+	;       This doesn't have any real effect as the screen is still black,
+	;       and by the next frame it will get reset to what was previously set in SetSectLYC.
+	ld   a, $16			
+	ldh  [rLYC], a	
 	ldh  a, [rIE]
-	or   a, $03
+	or   a, I_VBLANK|I_STAT
 	ldh  [rIE], a
+	
+	; Create two separate tasks for handling players (animation only???)
 	ld   a, $02
-	ld   bc, $2458
+	ld   bc, L002458
 	call Task_CreateAt
+	
 	ld   a, $03
-	ld   bc, $2464
+	ld   bc, L002464
 	call Task_CreateAt
-	call L00231E
+	
+	; Set intro move for characters that don't start in their idle anim
+	call Play_Char_SetIntroAnimInstant
 	ei
+	
+	; Pass control twice (??? to initialize the other tasks).
 	call Task_PassControlFar
 	call Task_PassControlFar
+	
+	;
+	; In single mode, the bosses and extra stages play a sound effect
+	; on the SGB side when a round starts.
+	;
 	ld   a, [wRoundSeqId]
-	cp   $0F
-	jp   z, L00187C
-	cp   $10
-	jp   z, L001881
-	cp   $11
-	jp   z, L001886
-	cp   $12
-	jp   z, L00188B
-	jp   L001893
-L00187C:;J
-	ld   hl, $0000
-	jr   L001890
-L001881:;J
-	ld   hl, $0400
-	jr   L001890
-L001886:;J
-	ld   hl, $0900
-	jr   L001890
-L00188B:;J
-	ld   hl, $0B00
-	jr   L001890
-L001890:;R
-	call L000FEF
-L001893:;J
+	cp   STAGESEQ_KAGURA	; Is this the Chizuru boss stage?
+	jp   z, .sndKagura		; If so, jump
+	cp   STAGESEQ_GOENITZ	; Goenitz boss stage?
+	jp   z, .sndGoenitz		; If so, jump
+	cp   STAGESEQ_BONUS		; Orochi Iori/Leona extra stage?
+	jp   z, .sndBonus		; If so, jump
+	cp   STAGESEQ_MRKARATE	; Mr. Karate extra stage?
+	jp   z, .sndMrKarate	; If so, jump
+	jp   .noSnd				; Otherwise, it's a normal round
+.sndKagura:
+	; what?
+	ld   hl, (SGB_SND_B_DUMMY << 8)|$00
+	jr   .playSnd
+.sndGoenitz:
+	; Appropriately, play a wind SFX when the round starts on Goenitz
+	ld   hl, (SGB_SND_B_WIND << 8)|$00
+	jr   .playSnd
+.sndBonus:
+	; Also appropriate (if only the wrecked stadium tileset was included)
+	ld   hl, (SGB_SND_B_EARTHQUAKE << 8)|$00
+	jr   .playSnd
+.sndMrKarate:
+	; I guess
+	ld   hl, (SGB_SND_B_WAVE << 8)|$00
+	jr   .playSnd
+.playSnd:
+	call SGB_PrepareSoundPacketB
+.noSnd:
+	
+	;
+	; Wait $0A frames for the player graphics to load while the DMG palette is black
+	;
+	; The reason this is done like this is because the player graphics are copied at VBlank,
+	; meaning the screen has to be enabled for them to be copied.
+	;
+	; fun fact: the GBC bootlegs neglect to set a completely black GBC palette before this point
+	; so the aforemented glitched graphics do show up there in GBC mode.
+	;
 	ld   b, $0A
-L001895:;J
+.waitLoad:
 	call Task_PassControlFar
 	dec  b
-	jp   nz, L001895
-	ld   a, $8C
+	jp   nz, .waitLoad
+	
+	; Show the screen by setting the real DMG palettes
+	ld   a, $8C				; 1P palette
 	ldh  [rOBP0], a
-	ld   a, $4C
+	ld   a, $4C				; 2P palette
 	ldh  [rOBP1], a
-	ld   a, $1B
-	ld   [$C17C], a
-	ldh  [rBGP], a
+	ld   a, $1B				; BG palette
+	ld   [wStageBGP], a			
+	ldh  [rBGP], a				; BG palette for all sections
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect1BGP], a
 	ldh  [hScreenSect2BGP], a
-	call L0023A3
-	call L0022C1
-	call L001BC5
-	ld   a, $01
+	
+	; Set intro move for characters that start in their idle anim.
+	call Play_Char_SetIntroAnimDelayed
+	; Execute the main intro part
+	call Play_DoPreRoundText
+	; Load projectile graphics over
+	call Play_LoadProjectileOBJInfo
+	
+	; Start the main gameplay loop
+	ld   a, BANK(L016389) ; BANK $01
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	jp   $6389
-L0018C4:;C
-	ld   bc, wJoyBuffer_Pl2
+	jp   L016389
+	
+; =============== Play_InitRound ===============
+; Initializes the round variables, including both players.
+Play_InitRound:
+
+	; Load character-specific settings
+	ld   bc, wPlInfo_Pl1
 	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
-	call L001A0B
-	ld   bc, $DA00
+	call Play_LoadChar
+	ld   bc, wPlInfo_Pl2
 	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
-	call L001A0B
+	call Play_LoadChar
+	
+	; Initialize other fields
 	xor  a
 	ld   [$C172], a
 	ld   [$C173], a
 	ld   [$C17A], a
 	ld   [$C17B], a
 	ld   [$C159], a
-	ld   [$C16B], a
-	ld   [$C16E], a
-	xor  a
-	ld   [$D92B], a
-	ld   a, $01
-	ld   [$DA2B], a
+	ld   [wPlayMaxPowScroll1P], a
+	ld   [wPlayMaxPowScroll2P], a
+	
+	; Set player numbers, mostly used so projectiles know from which players they come from
+	xor  a ; PL1
+	ld   [wPlInfo_Pl1+iPlInfo_PlId], a
+	ld   a, PL2
+	ld   [wPlInfo_Pl2+iPlInfo_PlId], a
+	
+	; Remove every status flag except for the CPU marker
 	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
-	and  a, $80
+	and  a, PS_CPU
 	ld   [wPlInfo_Pl1+iPlInfo_Status], a
 	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
-	and  a, $80
+	and  a, PS_CPU
 	ld   [wPlInfo_Pl2+iPlInfo_Status], a
+	
 	xor  a
-	ld   [$D921], a
-	ld   [wPlInfo_Pl1+iPlInfo_02Flags], a
-	ld   [$D923], a
-	ld   [$DA21], a
-	ld   [wPlInfo_Pl2+iPlInfo_02Flags], a
-	ld   [$DA23], a
-	ld   [$D933], a
-	ld   [$DA33], a
-	ld   [$D935], a
-	ld   [$DA35], a
-	ld   [$D963], a
-	ld   [$DA63], a
-	ld   [$D964], a
-	ld   [$DA64], a
-	ld   [$D959], a
-	ld   [$DA59], a
-	ld   [$D958], a
-	ld   [$DA58], a
+	ld   [wPlInfo_Pl1+iPlInfo_21], a
+	ld   [wPlInfo_Pl1+iPlInfo_22Flags], a
+	ld   [wPlInfo_Pl1+iPlInfo_23], a
+	ld   [wPlInfo_Pl2+iPlInfo_21], a
+	ld   [wPlInfo_Pl2+iPlInfo_22Flags], a
+	ld   [wPlInfo_Pl2+iPlInfo_23], a
+	ld   [wPlInfo_Pl1+iPlInfo_MoveId], a
+	ld   [wPlInfo_Pl2+iPlInfo_MoveId], a
+	ld   [wPlInfo_Pl1+iPlInfo_IntroMoveId], a
+	ld   [wPlInfo_Pl2+iPlInfo_IntroMoveId], a
+	ld   [wPlInfo_Pl1+iPlInfo_63], a
+	ld   [wPlInfo_Pl2+iPlInfo_63], a
+	ld   [wPlInfo_Pl1+iPlInfo_64], a
+	ld   [wPlInfo_Pl2+iPlInfo_64], a
+	ld   [wPlInfo_Pl1+iPlInfo_59], a
+	ld   [wPlInfo_Pl2+iPlInfo_59], a
+	ld   [wPlInfo_Pl1+iPlInfo_58], a
+	ld   [wPlInfo_Pl2+iPlInfo_58], a
 	ld   [wPlInfo_Pl1+iPlInfo_HitComboRecvSet], a
 	ld   [wPlInfo_Pl2+iPlInfo_HitComboRecvSet], a
-	ld   [$D960], a
-	ld   [$DA60], a
+	ld   [wPlInfo_Pl1+iPlInfo_60], a
+	ld   [wPlInfo_Pl2+iPlInfo_60], a
+	
+	; ???
 	ld   a, $FF
-	ld   [$D961], a
-	ld   [$DA61], a
+	ld   [wPlInfo_Pl1+iPlInfo_61], a
+	ld   [wPlInfo_Pl2+iPlInfo_61], a
+	
+	; ???
 	ld   a, $67
-	ld   [$D95A], a
-	ld   [$DA5A], a
-	ld   [$D95B], a
-	ld   [$DA5B], a
-	ld   [$D95C], a
-	ld   [$DA5C], a
-	ld   [$D95D], a
-	ld   [$DA5D], a
+	ld   [wPlInfo_Pl1+iPlInfo_5A], a
+	ld   [wPlInfo_Pl2+iPlInfo_5A], a
+	ld   [wPlInfo_Pl1+iPlInfo_5B], a
+	ld   [wPlInfo_Pl2+iPlInfo_5B], a
+	ld   [wPlInfo_Pl1+iPlInfo_5C], a
+	ld   [wPlInfo_Pl2+iPlInfo_5C], a
+	ld   [wPlInfo_Pl1+iPlInfo_5D], a
+	ld   [wPlInfo_Pl2+iPlInfo_5D], a
+	
+	; ??? Make a backup of the active character IDs
 	ld   a, [wPlInfo_Pl1+iPlInfo_CharId]
-	ld   [$DA71], a
+	ld   [wPlInfo_Pl2+iPlInfo_Unk_CharIdCopy], a
 	ld   a, [wPlInfo_Pl2+iPlInfo_CharId]
-	ld   [$D971], a
+	ld   [wPlInfo_Pl1+iPlInfo_Unk_CharIdCopy], a
+	
+	;##
+	
+	;
+	; Determine if this is the final round ("FINAL!!"), by checking if either:
+	; - In single mode, we are on the 4th round
+	; - In team mode, any team has all three members defeated.
+	; 
+	; In case of team mode, normally having all three characters defeated causes the game to show the win screen,
+	; but if we're still trying to start a new round, it means the last normal round (3rd 1P char, vs 3rd 2P char)
+	; ended in a draw.
+	; Draws cause both characters to be marked as defeated, and in the special case both teams have three defeated
+	; members, a final round starts.
+	;
+	
+.chkFinalRound:
 	xor  a
-	ld   [$C160], a
-	call IsInTeamMode
-	jp   nc, L0019AD
+	ld   [wRoundFinal], a
+	call IsInTeamMode			; Are we in team mode?
+	jp   nc, .chkFinalSingle	; If not, jump
+	
+	;--
+.chkLastWin1P:
+	;
+	; TODO: What's the point of setting the timer target? ???
+	;       By the time it finishes incrementing, the pre-round text is still there.
+	;
+	; Logic for timer target values:
+	; - $48: Losing player, or normal round in single mode
+	; - $17: Final round
+	;
+	
+	;
+	; The last winner has the timer target set to $48.
+	;
 	ld   a, [wLastWinner]
-	bit  0, a
-	jp   nz, L00198D
-	ld   a, $48
-	ld   [wPlInfo_Pl1+iPlInfo_Unknown_TimerTarget], a
-L00198D:;J
+	bit  PLB1, a			; Did 1P win the last round?
+	jp   nz, .chkLastWin2P	; If so, skip
+	ld   a, $48				; Otherwise, set timer
+	ld   [wPlInfo_Pl1+iPlInfo_Health], a
+.chkLastWin2P:
 	ld   a, [wLastWinner]
-	bit  1, a
-	jp   nz, L00199A
-	ld   a, $48
-	ld   [wPlInfo_Pl2+iPlInfo_Unknown_TimerTarget], a
-L00199A:;J
+	bit  PLB2, a			; Did 2P win the last round?
+	jp   nz, .chkFinalTeam	; If so, skip
+	ld   a, $48				; Otherwise, set timer
+	ld   [wPlInfo_Pl2+iPlInfo_Health], a
+	;--
+.chkFinalTeam:
+	
+	;
+	; If any team has 3 characters defeated, this is the final round.
+	; ??? Note that it's not necessary to check both -- if the first team 
+	; doesn't have 3 losses, the second one doesn't either.
+	;
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamLossCount]
-	cp   $03
-	jp   z, L0019B5
+	cp   $03					; Is 1P's team defeated?
+	jp   z, .setFinalRound		; If so, jump
 	ld   a, [wPlInfo_Pl2+iPlInfo_TeamLossCount]
-	cp   $03
-	jp   z, L0019B5
-	jp   L0019CD
-L0019AD:;J
+	cp   $03					; Is 2P's team defeated?
+	jp   z, .setFinalRound		; If so, jump
+	jp   .end
+.chkFinalSingle:
+
+	;
+	; If we're on the 4th round, this is the final round
+	;
 	ld   a, [wRoundNum]
-	cp   $03
-	jp   nz, L0019C5
-L0019B5:;J
+	cp   $03				; wRoundNum == $03? (4th)
+	jp   nz, .setNormRound	; If not, jump
+.setFinalRound:
+	; Enable FINAL!! round
 	ld   a, $01
-	ld   [$C160], a
+	ld   [wRoundFinal], a
+	; Set timer to $17 for both players
 	ld   a, $17
-	ld   [wPlInfo_Pl1+iPlInfo_Unknown_TimerTarget], a
-	ld   [wPlInfo_Pl2+iPlInfo_Unknown_TimerTarget], a
-	jp   L0019CD
-L0019C5:;J
-	ld   a, $48
-	ld   [wPlInfo_Pl1+iPlInfo_Unknown_TimerTarget], a
-	ld   [wPlInfo_Pl2+iPlInfo_Unknown_TimerTarget], a
-L0019CD:;J
+	ld   [wPlInfo_Pl1+iPlInfo_Health], a
+	ld   [wPlInfo_Pl2+iPlInfo_Health], a
+	jp   .end
+.setNormRound:
+	; Set timer to $48 for both players
+	ld   a, $48				
+	ld   [wPlInfo_Pl1+iPlInfo_Health], a
+	ld   [wPlInfo_Pl2+iPlInfo_Health], a
+.end:
+	;##
+	
+	
+	; Init other things
 	xor  a
-	ld   [wPlInfo_Pl1+iPlInfo_Unknown_Timer], a
-	ld   [wPlInfo_Pl2+iPlInfo_Unknown_Timer], a
-	ld   [$D950], a
-	ld   [$DA50], a
-	ld   [$D951], a
-	ld   [$DA51], a
-	ld   [$D952], a
-	ld   [$DA52], a
-	ld   [$D953], a
-	ld   [$DA53], a
-	ld   [$D954], a
-	ld   [$DA54], a
-	ld   [$D955], a
-	ld   [$DA55], a
+	ld   [wPlInfo_Pl1+iPlInfo_HealthVisual], a
+	ld   [wPlInfo_Pl2+iPlInfo_HealthVisual], a
+	ld   [wPlInfo_Pl1+iPlInfo_Pow], a
+	ld   [wPlInfo_Pl2+iPlInfo_Pow], a
+	ld   [wPlInfo_Pl1+iPlInfo_PowVisual], a
+	ld   [wPlInfo_Pl2+iPlInfo_PowVisual], a
+	ld   [wPlInfo_Pl1+iPlInfo_52], a
+	ld   [wPlInfo_Pl2+iPlInfo_52], a
+	ld   [wPlInfo_Pl1+iPlInfo_MaxPow], a
+	ld   [wPlInfo_Pl2+iPlInfo_MaxPow], a
+	ld   [wPlInfo_Pl1+iPlInfo_MaxPowVisual], a
+	ld   [wPlInfo_Pl2+iPlInfo_MaxPowVisual], a
+	ld   [wPlInfo_Pl1+iPlInfo_MaxPowExtraLen], a
+	ld   [wPlInfo_Pl2+iPlInfo_MaxPowExtraLen], a
+	
+	; Load default player sprite mappings.
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   de, OBJInfoInit_Terry_WinA
+	ld   de, OBJInfoInit_Pl1
 	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	ld   de, OBJInfoInit_Andy_WinA
+	ld   de, OBJInfoInit_Pl2
 	call OBJLstS_InitFrom
 	ret
-L001A0B:;C
-	call IsInTeamMode
-	jp   nc, L001A2D
-	ld   hl, $002D
-	add  hl, bc
+; =============== Play_LoadChar ===============
+; Loads the settings for the current character in the specfied player struct.
+; IN
+; - BC: Ptr to wPlInfo struct
+Play_LoadChar:
+
+	;
+	; In team mode, update the current character ID based on how many team members lost already.
+	; CharId = iPlInfo_TeamCharId0 + LossCount
+	;
+	; This isn't needed in single mode since the character ID already contains a copy of iPlInfo_TeamCharId0 there.
+	;
+	call IsInTeamMode		; In Team mode?
+	jp   nc, .loadCharInfo	; If not, skip
+
+	; A = Loss Count
+	ld   hl, iPlInfo_TeamLossCount
+	add  hl, bc						; Seek to loss count
 	ld   a, [hl]
-	cp   $03
-	jp   nz, L001A1D
-	ld   a, $02
-L001A1D:;J
-	ld   hl, $002E
-	add  hl, bc
-	add  a, l
-	jp   nc, L001A26
-L001A25: db $24;X
-L001A26:;J
-	ld   l, a
-	ld   a, [hl]
-	ld   hl, $002C
-	add  hl, bc
-	ld   [hl], a
-L001A2D:;J
-	ld   hl, $002C
-	add  hl, bc
-	ld   l, [hl]
+	
+	; In case this is the final round, use the 3rd character
+	cp   $03						; Did all three characters lose? (final round only)
+	jp   nz, .seekToActive			; If not, skip
+	ld   a, $02						; Otherwise, use third member
+	
+.seekToActive:
+	; Index the player struct from iPlInfo_TeamCharId0, where the team member IDs are stored in order.
+	ld   hl, iPlInfo_TeamCharId0	
+	add  hl, bc						; Seek to first member
+	; Offset to the active one
+	add  a, l						; HL += A
+	jp   nc, .noInc					; Just in case (this always jumps)
+	inc  h 							; We never get here
+.noInc:
+	ld   l, a							
+	ld   a, [hl]					; A = CharId from team def
+.setActiveChar:
+	; Set what we read out as current character
+	ld   hl, iPlInfo_CharId
+	add  hl, bc				; Seek to char ID
+	ld   [hl], a			
+	
+.loadCharInfo:
+
+	;
+	; Load the character-specific settings into the player struct.
+	;
+	; These settings are stored into a table with $10 byte entries, ordered by character ID.
+	; As CharId is already multiplied by 2, multiply the value by $08 to generate the table offset.
+	;
+	
+	; HL = CharId * $08
+	ld   hl, iPlInfo_CharId
+	add  hl, bc			; Seek to CharId * 2
+	ld   l, [hl]		; HL = CharId
 	ld   h, $00
-	sla  l
+REPT 3
+	sla  l				; HL <<= 3
 	rl   h
-	sla  l
-	rl   h
-	sla  l
-	rl   h
-	ld   de, $1A85
-	add  hl, de
-	push hl
+ENDR
+
+	; DE = Ptr to table entry
+	ld   de, Play_CharHeaderTbl		; HL = Ptr to start of table
+	add  hl, de						; Offset to entry
+	push hl							; Move ptr to DE
 	pop  de
-	ld   hl, $0025
-	call L001A77
-	ld   hl, $0027
-	call L001A77
-	ld   hl, $0029
-	call L001A77
-	ld   hl, $002A
-	call L001A7F
-	ld   hl, $0066
-	call L001A77
-	ld   hl, $0068
-	call L001A77
-	ld   hl, $006A
-	call L001A77
-	ld   hl, $006C
-	call L001A77
+	
+	; Load the settings two bytes at a time.
+	ld   hl, iPlInfo_Ptr24_Low	; byte0-1
+	call .copyPtr
+	ld   hl, iPlInfo_MovePtrTable_Low	; byte2-3
+	call .copyPtr
+	ld   hl, iPlInfo_Ptr28_Low	; byte4-5
+	call .copyPtr
+	ld   hl, iPlInfo_Ptr28_Bank	; byte6
+	call .copyByte
+	; [TCRF] The movement speed also comes from the table, but every character uses identical values.
+	;        This oddity is also in KOF95, but the feature is unfinished there as that game uses hardcoded speed values instead.
+	ld   hl, iPlInfo_SpeedX_Sub		; byte8-9
+	call .copyPtr
+	ld   hl, iPlInfo_BackSpeedX_Sub	; byteA-B
+	call .copyPtr
+	ld   hl, iPlInfo_JumpSpeed_Sub	; byteC-D
+	call .copyPtr
+	ld   hl, iPlInfo_Gravity_Sub	; byteE-F
+	call .copyPtr
 	ret
-L001A77:;C
-	add  hl, bc
-	ld   a, [de]
-	inc  de
-	ldd  [hl], a
-	ld   a, [de]
-	inc  de
-	ld   [hl], a
+; =============== .copyPtr ===============
+; Copies a word value from the header to the player struct.
+;
+; Note that words are stored in the player struct in *big-endian* format,
+; while in the header they are stored as standard little-endian.
+;
+; For this reason, the player struct pointer initially points to the low byte,
+; and then is decremented to point to the high byte.
+;
+; IN
+; - DE: Ptr to table entry byte
+; - BC: Ptr to low byte of wPlInfo field
+; - HL: iPlInfo field
+.copyPtr:
+	add  hl, bc		; Seek to the specified field
+	
+	ld   a, [de]	; A = Low byte of ptr
+	inc  de			; TablePtr++
+	ldd  [hl], a	; Write it to player struct byte1; PlInfoPtr--
+	
+	ld   a, [de]	; A = High byte of ptr
+	inc  de			; TablePtr++
+	ld   [hl], a	; Write it to player struct byte0
 	ret
-L001A7F:;C
-	add  hl, bc
-	ld   a, [de]
-	inc  de
-	ld   [hl], a
-	inc  de
+	
+; =============== .copyByte ===============
+; Copies a byte from the header to the player struct.
+; For alignment purposes (to avoid having to use a separate ptr table), the header pads
+; out 1-byte entries to two bytes, so the second byte gets skipped over before returning.
+; IN
+; - DE: Ptr to table entry byte
+; - BC: Ptr to base wPlInfo struct
+; - HL: iPlInfo field
+.copyByte:
+	add  hl, bc		; Seek to the specified field
+	ld   a, [de]	; Read byte from table
+	inc  de			; TablePtr++
+	ld   [hl], a	; Write it to player struct
+	inc  de			; TablePtr++ (skip padding)
 	ret
-L001A85: db $00
-L001A86: db $40
-L001A87: db $A7
-L001A88: db $70
-L001A89: db $52
-L001A8A: db $40
-L001A8B: db $06
-L001A8C: db $00;X
-L001A8D: db $80
-L001A8E: db $01
-L001A8F: db $00
-L001A90: db $FF
-L001A91: db $00
-L001A92: db $F9
-L001A93: db $60
-L001A94: db $00
-L001A95: db $68
-L001A96: db $42
-L001A97: db $07
-L001A98: db $71
-L001A99: db $A0
-L001A9A: db $78
-L001A9B: db $05
-L001A9C: db $00;X
-L001A9D: db $80
-L001A9E: db $01
-L001A9F: db $00
-L001AA0: db $FF
-L001AA1: db $00
-L001AA2: db $F9
-L001AA3: db $60
-L001AA4: db $00
-L001AA5: db $D0
-L001AA6: db $44
-L001AA7: db $87
-L001AA8: db $75
-L001AA9: db $A4
-L001AAA: db $4C
-L001AAB: db $06
-L001AAC: db $00;X
-L001AAD: db $80
-L001AAE: db $01
-L001AAF: db $00
-L001AB0: db $FF
-L001AB1: db $00
-L001AB2: db $F9
-L001AB3: db $60
-L001AB4: db $00
-L001AB5: db $38
-L001AB6: db $47
-L001AB7: db $67
-L001AB8: db $71
-L001AB9: db $77
-L001ABA: db $6A
-L001ABB: db $06
-L001ABC: db $00;X
-L001ABD: db $80
-L001ABE: db $01
-L001ABF: db $00
-L001AC0: db $FF
-L001AC1: db $00
-L001AC2: db $F9
-L001AC3: db $60
-L001AC4: db $00
-L001AC5: db $A0
-L001AC6: db $49
-L001AC7: db $27
-L001AC8: db $75
-L001AC9: db $D7
-L001ACA: db $57
-L001ACB: db $02
-L001ACC: db $00;X
-L001ACD: db $80
-L001ACE: db $01
-L001ACF: db $00
-L001AD0: db $FF
-L001AD1: db $00
-L001AD2: db $F9
-L001AD3: db $60
-L001AD4: db $00
-L001AD5: db $08
-L001AD6: db $4C
-L001AD7: db $C7
-L001AD8: db $71
-L001AD9: db $5C
-L001ADA: db $5E
-L001ADB: db $02
-L001ADC: db $00;X
-L001ADD: db $80
-L001ADE: db $01
-L001ADF: db $00
-L001AE0: db $FF
-L001AE1: db $00
-L001AE2: db $F9
-L001AE3: db $60
-L001AE4: db $00
-L001AE5: db $70
-L001AE6: db $4E
-L001AE7: db $E7
-L001AE8: db $75
-L001AE9: db $3A
-L001AEA: db $5B
-L001AEB: db $06
-L001AEC: db $00;X
-L001AED: db $80
-L001AEE: db $01
-L001AEF: db $00
-L001AF0: db $FF
-L001AF1: db $00
-L001AF2: db $F9
-L001AF3: db $60
-L001AF4: db $00
-L001AF5: db $D8
-L001AF6: db $50
-L001AF7: db $47
-L001AF8: db $76
-L001AF9: db $DF
-L001AFA: db $52
-L001AFB: db $06
-L001AFC: db $00;X
-L001AFD: db $80
-L001AFE: db $01
-L001AFF: db $00
-L001B00: db $FF
-L001B01: db $00
-L001B02: db $F9
-L001B03: db $60
-L001B04: db $00
-L001B05: db $40
-L001B06: db $53
-L001B07: db $27
-L001B08: db $72
-L001B09: db $46
-L001B0A: db $68
-L001B0B: db $02
-L001B0C: db $00;X
-L001B0D: db $80
-L001B0E: db $01
-L001B0F: db $00
-L001B10: db $FF
-L001B11: db $00
-L001B12: db $F9
-L001B13: db $60
-L001B14: db $00
-L001B15: db $10
-L001B16: db $58
-L001B17: db $87
-L001B18: db $72
-L001B19: db $C0
-L001B1A: db $77
-L001B1B: db $06
-L001B1C: db $00;X
-L001B1D: db $80
-L001B1E: db $01
-L001B1F: db $00
-L001B20: db $FF
-L001B21: db $00
-L001B22: db $F9
-L001B23: db $60
-L001B24: db $00
-L001B25: db $78
-L001B26: db $5A
-L001B27: db $E7
-L001B28: db $72
-L001B29: db $E6
-L001B2A: db $74
-L001B2B: db $09
-L001B2C: db $00;X
-L001B2D: db $80
-L001B2E: db $01
-L001B2F: db $00
-L001B30: db $FF
-L001B31: db $00
-L001B32: db $F9
-L001B33: db $60
-L001B34: db $00
-L001B35: db $E0
-L001B36: db $5C
-L001B37: db $47
-L001B38: db $73
-L001B39: db $EE
-L001B3A: db $71
-L001B3B: db $06
-L001B3C: db $00;X
-L001B3D: db $80
-L001B3E: db $01
-L001B3F: db $00
-L001B40: db $FF
-L001B41: db $00
-L001B42: db $F9
-L001B43: db $60
-L001B44: db $00
-L001B45: db $48
-L001B46: db $5F
-L001B47: db $A7
-L001B48: db $76
-L001B49: db $F2
-L001B4A: db $5F
-L001B4B: db $05
-L001B4C: db $00;X
-L001B4D: db $80
-L001B4E: db $01
-L001B4F: db $00
-L001B50: db $FF
-L001B51: db $00
-L001B52: db $F9
-L001B53: db $60
-L001B54: db $00
-L001B55: db $B0
-L001B56: db $61
-L001B57: db $A7
-L001B58: db $73
-L001B59: db $11
-L001B5A: db $6C
-L001B5B: db $05
-L001B5C: db $00;X
-L001B5D: db $80
-L001B5E: db $01
-L001B5F: db $00
-L001B60: db $FF
-L001B61: db $00
-L001B62: db $F9
-L001B63: db $60
-L001B64: db $00
-L001B65: db $18
-L001B66: db $64
-L001B67: db $07
-L001B68: db $74
-L001B69: db $62
-L001B6A: db $73
-L001B6B: db $05
-L001B6C: db $00;X
-L001B6D: db $80
-L001B6E: db $01
-L001B6F: db $00
-L001B70: db $FF
-L001B71: db $00
-L001B72: db $F9
-L001B73: db $60
-L001B74: db $00
-L001B75: db $E8
-L001B76: db $68
-L001B77: db $67
-L001B78: db $74
-L001B79: db $73
-L001B7A: db $73
-L001B7B: db $0A
-L001B7C: db $00;X
-L001B7D: db $80
-L001B7E: db $01
-L001B7F: db $00
-L001B80: db $FF
-L001B81: db $00
-L001B82: db $F9
-L001B83: db $60
-L001B84: db $00
-L001B85: db $50
-L001B86: db $6B
-L001B87: db $C7
-L001B88: db $74
-L001B89: db $63
-L001B8A: db $71
-L001B8B: db $02
-L001B8C: db $00;X
-L001B8D: db $80
-L001B8E: db $01
-L001B8F: db $00
-L001B90: db $FF
-L001B91: db $00
-L001B92: db $F9
-L001B93: db $60
-L001B94: db $00
-L001B95: db $B8
-L001B96: db $6D
-L001B97: db $A7
-L001B98: db $76
-L001B99: db $F2
-L001B9A: db $5F
-L001B9B: db $05
-L001B9C: db $00;X
-L001B9D: db $80
-L001B9E: db $01
-L001B9F: db $00
-L001BA0: db $FF
-L001BA1: db $00
-L001BA2: db $F9
-L001BA3: db $60
-L001BA4: db $00
-L001BA5: db $A8
-L001BA6: db $55
-L001BA7: db $27
-L001BA8: db $72
-L001BA9: db $46
-L001BAA: db $68
-L001BAB: db $02
-L001BAC: db $00;X
-L001BAD: db $80
-L001BAE: db $01
-L001BAF: db $00
-L001BB0: db $FF
-L001BB1: db $00
-L001BB2: db $F9
-L001BB3: db $60
-L001BB4: db $00
-L001BB5: db $80
-L001BB6: db $66
-L001BB7: db $07
-L001BB8: db $74
-L001BB9: db $68
-L001BBA: db $73
-L001BBB: db $05
-L001BBC: db $00;X
-L001BBD: db $80
-L001BBE: db $01
-L001BBF: db $00
-L001BC0: db $FF
-L001BC1: db $00
-L001BC2: db $F9
-L001BC3: db $60
-L001BC4: db $00
-L001BC5:;C
+
+; =============== Play_CharHeaderTbl ===============
+; Parent table with character-specific settings.
+Play_CharHeaderTbl:
+	; CHAR_ID_KYO
+	dw L034000 ; iPlInfo_Ptr24
+	dw L0370A7 ; iPlInfo_MovePtrTable 
+	dp L064052 ; iPlInfo_Ptr28 | BANK $06
+	db $00 ; Padding
+	dw +$0180 ; iPlInfo_SpeedX
+	dw -$0100 ; iPlInfo_BackSpeedX
+	dw -$0700 ; iPlInfo_JumpSpeed
+	dw +$0060 ; iPlInfo_Gravity
+	
+	; CHAR_ID_DAIMON
+	dw L034268 ; iPlInfo_Ptr24
+	dw L037107 ; iPlInfo_MovePtrTable 
+	dp L0578A0 ; iPlInfo_Ptr28 | BANK $05
+	db $00 ; Padding
+	dw +$0180 ; iPlInfo_SpeedX
+	dw -$0100 ; iPlInfo_BackSpeedX
+	dw -$0700 ; iPlInfo_JumpSpeed
+	dw +$0060 ; iPlInfo_Gravity
+	
+	; CHAR_ID_TERRY
+	dw L0344D0 ; iPlInfo_Ptr24
+	dw L037587 ; iPlInfo_MovePtrTable 
+	dp L064CA4 ; iPlInfo_Ptr28 | BANK $06
+	db $00 ; Padding
+	dw +$0180 ; iPlInfo_SpeedX
+	dw -$0100 ; iPlInfo_BackSpeedX
+	dw -$0700 ; iPlInfo_JumpSpeed
+	dw +$0060 ; iPlInfo_Gravity
+	
+	; CHAR_ID_ANDY
+	dw L034738 ; iPlInfo_Ptr24
+	dw L037167 ; iPlInfo_MovePtrTable 
+	dp L066A77 ; iPlInfo_Ptr28 | BANK $06
+	db $00 ; Padding
+	dw +$0180 ; iPlInfo_SpeedX
+	dw -$0100 ; iPlInfo_BackSpeedX
+	dw -$0700 ; iPlInfo_JumpSpeed
+	dw +$0060 ; iPlInfo_Gravity
+	
+	; CHAR_ID_RYO
+	dw L0349A0 ; iPlInfo_Ptr24
+	dw L037527 ; iPlInfo_MovePtrTable 
+	dp L0257D7 ; iPlInfo_Ptr28 | BANK $02
+	db $00 ; Padding
+	dw +$0180 ; iPlInfo_SpeedX
+	dw -$0100 ; iPlInfo_BackSpeedX
+	dw -$0700 ; iPlInfo_JumpSpeed
+	dw +$0060 ; iPlInfo_Gravity
+	
+	; CHAR_ID_ROBERT
+	dw L034C08 ; iPlInfo_Ptr24
+	dw L0371C7 ; iPlInfo_MovePtrTable 
+	dp L025E5C ; iPlInfo_Ptr28 | BANK $02
+	db $00 ; Padding
+	dw +$0180 ; iPlInfo_SpeedX
+	dw -$0100 ; iPlInfo_BackSpeedX
+	dw -$0700 ; iPlInfo_JumpSpeed
+	dw +$0060 ; iPlInfo_Gravity
+	
+	; CHAR_ID_ATHENA
+	dw L034E70 ; iPlInfo_Ptr24
+	dw L0375E7 ; iPlInfo_MovePtrTable 
+	dp L065B3A ; iPlInfo_Ptr28 | BANK $06
+	db $00 ; Padding
+	dw +$0180 ; iPlInfo_SpeedX
+	dw -$0100 ; iPlInfo_BackSpeedX
+	dw -$0700 ; iPlInfo_JumpSpeed
+	dw +$0060 ; iPlInfo_Gravity
+	
+	; CHAR_ID_MAI
+	dw L0350D8 ; iPlInfo_Ptr24
+	dw L037647 ; iPlInfo_MovePtrTable 
+	dp L0652DF ; iPlInfo_Ptr28 | BANK $06
+	db $00 ; Padding
+	dw +$0180 ; iPlInfo_SpeedX
+	dw -$0100 ; iPlInfo_BackSpeedX
+	dw -$0700 ; iPlInfo_JumpSpeed
+	dw +$0060 ; iPlInfo_Gravity
+	
+	; CHAR_ID_LEONA
+	dw L035340 ; iPlInfo_Ptr24
+	dw L037227 ; iPlInfo_MovePtrTable 
+	dp L026846 ; iPlInfo_Ptr28 | BANK $02
+	db $00 ; Padding
+	dw +$0180 ; iPlInfo_SpeedX
+	dw -$0100 ; iPlInfo_BackSpeedX
+	dw -$0700 ; iPlInfo_JumpSpeed
+	dw +$0060 ; iPlInfo_Gravity
+	
+	; CHAR_ID_GEESE
+	dw L035810 ; iPlInfo_Ptr24
+	dw L037287 ; iPlInfo_MovePtrTable 
+	dp L0677C0 ; iPlInfo_Ptr28 | BANK $06
+	db $00 ; Padding
+	dw +$0180 ; iPlInfo_SpeedX
+	dw -$0100 ; iPlInfo_BackSpeedX
+	dw -$0700 ; iPlInfo_JumpSpeed
+	dw +$0060 ; iPlInfo_Gravity
+	
+	; CHAR_ID_KRAUSER
+	dw L035A78 ; iPlInfo_Ptr24
+	dw L0372E7 ; iPlInfo_MovePtrTable 
+	dp L0974E6 ; iPlInfo_Ptr28 | BANK $09
+	db $00 ; Padding
+	dw +$0180 ; iPlInfo_SpeedX
+	dw -$0100 ; iPlInfo_BackSpeedX
+	dw -$0700 ; iPlInfo_JumpSpeed
+	dw +$0060 ; iPlInfo_Gravity
+	
+	; CHAR_ID_MRBIG
+	dw L035CE0 ; iPlInfo_Ptr24
+	dw L037347 ; iPlInfo_MovePtrTable 
+	dp L0671EE ; iPlInfo_Ptr28 | BANK $06
+	db $00 ; Padding
+	dw +$0180 ; iPlInfo_SpeedX
+	dw -$0100 ; iPlInfo_BackSpeedX
+	dw -$0700 ; iPlInfo_JumpSpeed
+	dw +$0060 ; iPlInfo_Gravity
+	
+	; CHAR_ID_IORI
+	dw L035F48 ; iPlInfo_Ptr24
+	dw L0376A7 ; iPlInfo_MovePtrTable 
+	dp L055FF2 ; iPlInfo_Ptr28 | BANK $05
+	db $00 ; Padding
+	dw +$0180 ; iPlInfo_SpeedX
+	dw -$0100 ; iPlInfo_BackSpeedX
+	dw -$0700 ; iPlInfo_JumpSpeed
+	dw +$0060 ; iPlInfo_Gravity
+	
+	; CHAR_ID_MATURE
+	dw L0361B0 ; iPlInfo_Ptr24
+	dw L0373A7 ; iPlInfo_MovePtrTable 
+	dp L056C11 ; iPlInfo_Ptr28 | BANK $05
+	db $00 ; Padding
+	dw +$0180 ; iPlInfo_SpeedX
+	dw -$0100 ; iPlInfo_BackSpeedX
+	dw -$0700 ; iPlInfo_JumpSpeed
+	dw +$0060 ; iPlInfo_Gravity
+	
+	; CHAR_ID_CHIZURU
+	dw L036418 ; iPlInfo_Ptr24
+	dw L037407 ; iPlInfo_MovePtrTable 
+	dp L057362 ; iPlInfo_Ptr28 | BANK $05
+	db $00 ; Padding
+	dw +$0180 ; iPlInfo_SpeedX
+	dw -$0100 ; iPlInfo_BackSpeedX
+	dw -$0700 ; iPlInfo_JumpSpeed
+	dw +$0060 ; iPlInfo_Gravity
+	
+	; CHAR_ID_GOENITZ
+	dw L0368E8 ; iPlInfo_Ptr24
+	dw L037467 ; iPlInfo_MovePtrTable 
+	dp L0A7373 ; iPlInfo_Ptr28 | BANK $0A
+	db $00 ; Padding
+	dw +$0180 ; iPlInfo_SpeedX
+	dw -$0100 ; iPlInfo_BackSpeedX
+	dw -$0700 ; iPlInfo_JumpSpeed
+	dw +$0060 ; iPlInfo_Gravity
+	
+	; CHAR_ID_MRKARATE
+	dw L036B50 ; iPlInfo_Ptr24
+	dw L0374C7 ; iPlInfo_MovePtrTable 
+	dp L027163 ; iPlInfo_Ptr28 | BANK $02
+	db $00 ; Padding
+	dw +$0180 ; iPlInfo_SpeedX
+	dw -$0100 ; iPlInfo_BackSpeedX
+	dw -$0700 ; iPlInfo_JumpSpeed
+	dw +$0060 ; iPlInfo_Gravity
+	
+	; CHAR_ID_OIORI
+	dw L036DB8 ; iPlInfo_Ptr24
+	dw L0376A7 ; iPlInfo_MovePtrTable 
+	dp L055FF2 ; iPlInfo_Ptr28 | BANK $05
+	db $00 ; Padding
+	dw +$0180 ; iPlInfo_SpeedX
+	dw -$0100 ; iPlInfo_BackSpeedX
+	dw -$0700 ; iPlInfo_JumpSpeed
+	dw +$0060 ; iPlInfo_Gravity
+	
+	; CHAR_ID_OLEONA
+	dw L0355A8 ; iPlInfo_Ptr24
+	dw L037227 ; iPlInfo_MovePtrTable 
+	dp L026846 ; iPlInfo_Ptr28 | BANK $02
+	db $00 ; Padding
+	dw +$0180 ; iPlInfo_SpeedX
+	dw -$0100 ; iPlInfo_BackSpeedX
+	dw -$0700 ; iPlInfo_JumpSpeed
+	dw +$0060 ; iPlInfo_Gravity
+	
+	; CHAR_ID_KAGURA
+	dw L036680 ; iPlInfo_Ptr24
+	dw L037407 ; iPlInfo_MovePtrTable 
+	dp L057368 ; iPlInfo_Ptr28 | BANK $05
+	db $00 ; Padding
+	dw +$0180 ; iPlInfo_SpeedX
+	dw -$0100 ; iPlInfo_BackSpeedX
+	dw -$0700 ; iPlInfo_JumpSpeed
+	dw +$0060 ; iPlInfo_Gravity
+	
+; =============== Play_LoadProjectileOBJInfo ===============
+; Loads the OBJInfo for the projectile (including graphics).
+; This expects an uncompressed copy of GFXLZ_Projectiles to be in the LZSS buffer,
+; as the graphics are copied from there.
+Play_LoadProjectileOBJInfo:
 	call Task_PassControlFar
+	
 	ldh  a, [hROMBank]
 	push af
-	ld   a, BANK(L01636A) ; BANK $01
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	ld   a, [wPlInfo_Pl1+iPlInfo_CharId]
-	ld   de, $8800
-	call L001C45
-	call Task_PassControlFar
-	ld   a, [wPlInfo_Pl2+iPlInfo_CharId]
-	ld   de, $8A60
-	call L001C45
-	call Task_PassControlFar
-	ld   hl, $57E4
-	ld   de, $8CC0
-	ld   a, $04
-	call L001C7E
-	call Task_PassControlFar
-	ld   a, $01
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	ld   hl, wOBJInfo2+iOBJInfo_Status
-	ld   de, L01636A
-	call OBJLstS_InitFrom
-	call Task_PassControlFar
-	ld   hl, wOBJInfo3+iOBJInfo_Status
-	ld   de, L01636A
-	call OBJLstS_InitFrom
-	ld   hl, wOBJInfo3+iOBJInfo_TileIDBase
-	ld   [hl], $A6
-	call Task_PassControlFar
-	ld   hl, wOBJInfo4+iOBJInfo_Status
-	ld   de, L01636A
-	call OBJLstS_InitFrom
-	ld   hl, wOBJInfo4+iOBJInfo_TileIDBase
-	ld   [hl], $CC
-	call Task_PassControlFar
-	ld   hl, wOBJInfo5+iOBJInfo_Status
-	ld   de, L01636A
-	call OBJLstS_InitFrom
-	ld   hl, $D7CD
-	ld   [hl], $CC
-	call Task_PassControlFar
+		ld   a, BANK(OBJInfoInit_Projectile) ; BANK $01
+		ld   [MBC1RomBank], a
+		ldh  [hROMBank], a
+		
+		;
+		; The sprite mappings for these don't use dynamic buffered graphics.
+		; Instad, they are all loaded to VRAM at the start of the round, loading
+		; over the pre-round text.
+		;
+		
+		; Load 1P projectile graphics for current player to $8800
+		ld   a, [wPlInfo_Pl1+iPlInfo_CharId]
+		ld   de, $8800 ; Tile $00
+		call Play_LoadProjectileGFXFromDef
+		
+		; Load 2P projectile graphics for current player to $8A60
+		call Task_PassControlFar
+		ld   a, [wPlInfo_Pl2+iPlInfo_CharId]
+		ld   de, $8A60 ; Tile $A6
+		call Play_LoadProjectileGFXFromDef
+		call Task_PassControlFar
+		
+		; Load the super move sparkles at $8CC0.
+		; This is its own separate uncompressed graphic.
+		ld   hl, GFX_Play_SuperSparkle
+		ld   de, $8CC0 ; Tile $CC
+		ld   a, $04
+		call Play_LoadProjectileOBJInfo_CopyGFX
+		call Task_PassControlFar
+		
+		; Load all of the OBJInfo and assign their base tile IDs.
+		; Those should be the same as the base GFX ptrs.
+		ld   a, BANK(OBJInfoInit_Projectile) ; BANK $01
+		ld   [MBC1RomBank], a
+		ldh  [hROMBank], a
+		
+		; 1P projectile
+		ld   hl, wOBJInfo_Pl1Projectile+iOBJInfo_Status
+		ld   de, OBJInfoInit_Projectile
+		call OBJLstS_InitFrom
+		; Graphics were copied to $8800, leave default $80 as iOBJInfo_TileIDBase
+		call Task_PassControlFar
+		
+		; 2P projectile
+		ld   hl, wOBJInfo_Pl2Projectile+iOBJInfo_Status
+		ld   de, OBJInfoInit_Projectile
+		call OBJLstS_InitFrom
+		ld   hl, wOBJInfo3+iOBJInfo_TileIDBase
+		ld   [hl], $A6 ; Graphics were copied to $8A60
+		call Task_PassControlFar
+		
+		; 1P Super Sparkle
+		ld   hl, wOBJInfo_Pl1SuperSparkle+iOBJInfo_Status
+		ld   de, OBJInfoInit_Projectile
+		call OBJLstS_InitFrom
+		ld   hl, wOBJInfo_Pl1SuperSparkle+iOBJInfo_TileIDBase
+		ld   [hl], $CC ; Graphics were copied to $8CC0
+		call Task_PassControlFar
+		
+		; 2P Super Sparkle
+		ld   hl, wOBJInfo_Pl2SuperSparkle+iOBJInfo_Status
+		ld   de, OBJInfoInit_Projectile
+		call OBJLstS_InitFrom
+		ld   hl, wOBJInfo_Pl2SuperSparkle+iOBJInfo_TileIDBase
+		ld   [hl], $CC ; Graphics were copied to $8CC0
+		call Task_PassControlFar
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-L001C45:;C
-	ld   hl, $1CC3
+	
+; =============== Play_LoadProjectileGFXFromDef ===============
+; Copies the projectile graphics from the LZSS buffer to VRAM.
+; IN
+; -  A: Character ID * 2
+; - DE: Ptr to GFX destination in VRAM
+Play_LoadProjectileGFXFromDef:
+
+	;
+	; Determine which tiles to copy from the buffer through the "ProjGFXDef" structure
+	; for the current character.
+	; Multiple tile ranges (relative to the buffer) can be defined in these, with
+	; the GFX they point to being copied to VRAM.
+	;
+
+	; Index the ptr table for those ProjGFXDef structures by character id (*2).
+	ld   hl, Play_ProjGFXDefPtrTbl
 	add  a, l
-	jp   nc, L001C4D
-L001C4C: db $24;X
-L001C4D:;J
+	jp   nc, .noInc
+	inc  h ; We never get here
+.noInc:
 	ld   l, a
+	
+	; Read out ProjGFXDef ptr to HL
 	ld   c, [hl]
 	inc  hl
 	ld   b, [hl]
 	push bc
 	pop  hl
+	
+	; If the ptr is null, there's nothing to copy
 	ld   a, h
 	or   a, L
-	jp   z, L001C7D
+	jp   z, .ret
+	
+	; The first 2 tiles are always empty.
 	push hl
-	ld   hl, $0000
-	ld   b, $02
-	call FillBGStripPair
-	call Task_PassControlFar
+		ld   hl, $0000
+		ld   b, $02
+		call FillGFX
+		call Task_PassControlFar
 	pop  hl
-	ldi  a, [hl]
-L001C66:;J
+	
+	;
+	; Iterate over the ProjGFXDef structure and copy the graphics over.
+	;
+	ldi  a, [hl]		; A = Number of tile ranges ranges to copy
+.rangeLoop:
+	; For each range definition...
 	push af
-	ld   c, [hl]
-	inc  hl
-	ld   b, [hl]
-	inc  hl
-	ldi  a, [hl]
-	push hl
-	ld   hl, wLZSS_Buffer
-	add  hl, bc
-	call L001C7E
-	pop  hl
+		ld   c, [hl]	; BC = Starting offset
+		inc  hl
+		ld   b, [hl]	
+		inc  hl
+		ldi  a, [hl]	; A = Tiles to copy
+		push hl
+			; Offset the LZSS buffer by BC
+			ld   hl, wLZSS_Buffer
+			add  hl, bc
+			; Copy what HL points to to VRAM
+			call Play_LoadProjectileOBJInfo_CopyGFX
+		pop  hl
 	pop  af
 	dec  a
-	jp   nz, L001C66
+	jp   nz, .rangeLoop
 	call Task_PassControlFar
-L001C7D:;J
+.ret:
 	ret
-L001C7E:;C
-	srl  a
-L001C80:;J
+	
+; =============== Play_LoadProjectileOBJInfo_CopyGFX ===============
+; Copies the projectile/sparkle graphics during HBlank 2 tiles/frame.
+; IN
+; - A: Number of tiles to copy
+; - HL: Ptr to source GFX
+; - DE: Ptr to destination in VRAM
+Play_LoadProjectileOBJInfo_CopyGFX:
+	srl  a	; A = A / 2, since the loop copies 2 tiles at once.
+	
+.loopTiles:
 	push af
-	ld   b, $08
-L001C83:;J
-	di
-L001C84:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L001C84
-	ldi  a, [hl]
-	ld   [de], a
-	ei
-	inc  de
-	di
-L001C90:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L001C90
-	ldi  a, [hl]
-	ld   [de], a
-	ei
-	inc  de
-	di
-L001C9C:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L001C9C
-	ldi  a, [hl]
-	ld   [de], a
-	ei
-	inc  de
-	di
-L001CA8:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L001CA8
-	ldi  a, [hl]
-	ld   [de], a
-	ei
-	inc  de
-	dec  b
-	jp   nz, L001C83
-	call Task_PassControlFar
+	
+		; Copt 2 tiles/frame ($20 bytes total)
+		; This was probably chosen due to using 8x16 sprite size.
+		ld   b, (TILESIZE*2)/4 ; $08
+	.loop:
+
+		; Copy over 4 bytes
+	REPT 4
+		di
+		mWaitForVBlankOrHBlank
+		ldi  a, [hl]
+		ld   [de], a
+		ei
+		inc  de
+	ENDR
+		
+		dec  b			; Copied the 2 tiles?
+		jp   nz, .loop	; If not, loop
+		
+		; After copying the 2 tiles, wait for the next frame
+		call Task_PassControlFar
 	pop  af
-	dec  a
-	jp   nz, L001C80
+	dec  a				; Copied all tiles?
+	jp   nz, .loopTiles	; If not, loop
 	call Task_PassControlFar
 	ret
-L001CC3: db $00
-L001CC4: db $00
-L001CC5: db $00
-L001CC6: db $00
-L001CC7: db $24
-L001CC8: db $58
-L001CC9: db $00
-L001CCA: db $00
-L001CCB: db $28
-L001CCC: db $58
-L001CCD: db $28
-L001CCE: db $58
-L001CCF: db $36
-L001CD0: db $58
-L001CD1: db $3A
-L001CD2: db $58
-L001CD3: db $3E
-L001CD4: db $58
-L001CD5: db $42
-L001CD6: db $58
-L001CD7: db $46
-L001CD8: db $58
-L001CD9: db $4A
-L001CDA: db $58
-L001CDB: db $51
-L001CDC: db $58
-L001CDD: db $55
-L001CDE: db $58
-L001CDF: db $59
-L001CE0: db $58
-L001CE1: db $5D
-L001CE2: db $58
-L001CE3: db $2F
-L001CE4: db $58
-L001CE5: db $61
-L001CE6: db $58
-L001CE7: db $65
-L001CE8: db $58
-L001CE9: db $59
-L001CEA: db $58
-L001CEB:;C
+; =============== Play_ProjGFXDefPtrTbl ===============
+; Maps characters to their tile range definitions for projectiles.
+; All of these pointers point to BANK $01.
+Play_ProjGFXDefPtrTbl:
+	dw $0000   					; CHAR_ID_KYO     
+	dw $0000  					; CHAR_ID_DAIMON  
+	dw ProjGFXDef_Terry 		; CHAR_ID_TERRY   
+	dw $0000   					; CHAR_ID_ANDY    
+	dw ProjGFXDef_RyoRobert 	; CHAR_ID_RYO     
+	dw ProjGFXDef_RyoRobert 	; CHAR_ID_ROBERT  
+	dw ProjGFXDef_Athena 		; CHAR_ID_ATHENA  
+	dw ProjGFXDef_Mai 			; CHAR_ID_MAI     
+	dw ProjGFXDef_Leona			; CHAR_ID_LEONA   
+	dw ProjGFXDef_Geese 		; CHAR_ID_GEESE   
+	dw ProjGFXDef_Krauser 		; CHAR_ID_KRAUSER 
+	dw ProjGFXDef_MrBig 		; CHAR_ID_MRBIG   
+	dw ProjGFXDef_Iori 			; CHAR_ID_IORI    
+	dw ProjGFXDef_Mature 		; CHAR_ID_MATURE  
+	dw ProjGFXDef_ChizuruKagura ; CHAR_ID_CHIZURU 
+	dw ProjGFXDef_Goenitz 		; CHAR_ID_GOENITZ 
+	dw ProjGFXDef_MrKarate 		; CHAR_ID_MRKARATE
+	dw ProjGFXDef_OIori 		; CHAR_ID_OIORI   
+	dw ProjGFXDef_OLeona 		; CHAR_ID_OLEONA  
+	dw ProjGFXDef_ChizuruKagura ; CHAR_ID_KAGURA  
+
+; =============== Play_DrawHUDBaseAndInitTimer ===============
+; Draws the base tilemap (without health bars) for the HUD in the upper section.
+; If needed, it also loads the HUD graphics to VRAM.
+Play_DrawHUDBaseAndInitTimer:
+	; Initialize round timer from settings
 	ld   a, [wMatchStartTime]
-	ld   [$C169], a
+	ld   [wRoundTime], a
+	
+	;
+	; GFX
+	;
+	
+	; When the first round loads, also load the HUD graphics
 	ld   a, [wRoundNum]
-	or   a
-	jp   nz, L001D0C
-	ld   hl, $4A52
+	or   a					; RoundNum == 0?
+	jp   nz, .drawTimer		; If not, skip
+	ld   hl, GFXLZ_Play_HUD
 	ld   de, wLZSS_Buffer
 	call DecompressLZSS
 	ld   hl, wLZSS_Buffer
 	ld   de, $8D00
 	ld   b, $2C
 	call CopyTiles
-L001D0C:;J
-	ld   a, [$C169]
-	cp   $FF
-	jp   nz, L001D24
+	
+	;
+	; TILEMAP
+	;
+.drawTimer:
+	; If the timer is set to infinite, make it always display "99".
+	ld   a, [wRoundTime]
+	cp   TIMER_INFINITE		; Is it infinite?
+	jp   nz, .setSubSec		; If not, jump
+	; Temporarily change to "99" to make it draw that
 	ld   a, $99
-	ld   [$C169], a
-	call L002406
-	ld   a, $FF
-	ld   [$C169], a
-	jp   L001D2C
-L001D24:;J
-	ld   a, $3C
-	ld   [$C16A], a
-	call L002406
-L001D2C:;J
-	ld   de, $4BDE
+	ld   [wRoundTime], a
+	call HomeCall_Play_DrawTime
+	; Restore it to infinite so it won't get decremented
+	ld   a, TIMER_INFINITE
+	ld   [wRoundTime], a
+	jp   .drawOther
+.setSubSec:
+	; Since the timer will decrements, initialize the subsecond timer to 60 frames.
+	; This makes the timer tick down every second.
+	ld   a, 60	; $3C
+	ld   [wRoundTimeSub], a
+	call HomeCall_Play_DrawTime
+	
+.drawOther:
+	;
+	; Write the other elements of the HUD, which is in the WINDOW
+	;
+	
+	; "TIME" string
+	ld   de, BG_Play_HUD_Time
 	ld   hl, $9C09
-	ld   b, $02
-	ld   c, $01
+	ld   b, $02			; Width
+	ld   c, $01			; Height
 	call CopyBGToRect
-	ld   de, $4BE0
+	
+	;--
+	
+	; [TCRF] The left and right borders get all overwritten
+	;        when the health bar contents are drawn to the tilemap.
+	;        This is new to 96 -- these borders weren't drawn in 95.
+	
+	; 1P Health Bar - left border
+	ld   de, BG_Play_HUD_HealthBarL
 	ld   hl, $9C80
 	ld   b, $01
 	ld   c, $01
 	call CopyBGToRect
-	ld   de, $4BE1
+	
+	; 1P Health Bar - right border
+	ld   de, BG_Play_HUD_HealthBarR
 	ld   hl, $9C88
 	ld   b, $01
 	ld   c, $01
 	call CopyBGToRect
-	ld   de, $4BE0
+	
+	; 2P Health Bar - left border
+	ld   de, BG_Play_HUD_HealthBarL
 	ld   hl, $9C8B
 	ld   b, $01
 	ld   c, $01
 	call CopyBGToRect
-	ld   de, $4BE1
+	
+	; 2P Health Bar - right border
+	ld   de, BG_Play_HUD_HealthBarR
 	ld   hl, $9C93
 	ld   b, $01
 	ld   c, $01
 	call CopyBGToRect
-	ld   de, $4BF6
-	ld   hl, WINDOWMap_Begin
+	
+	;--
+	
+	; 1P Marker (tiles)
+	ld   de, BG_Play_HUD_1PMarker
+	ld   hl, $9C00
 	ld   b, $02
 	ld   c, $01
 	call CopyBGToRect
-	ld   de, $4BF8
+	
+	; 2P Marker (tiles)
+	ld   de, BG_Play_HUD_2PMarker
 	ld   hl, $9C12
 	ld   b, $02
 	ld   c, $01
 	call CopyBGToRect
+	
+	;
+	; Determine the graphics to copy for the player markers.
+	; These are copied to the locations BG_Play_HUD_1PMarker and BG_Play_HUD_2PMarker expect them.
+	;
+.p1Draw:	
 	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
-	bit  7, a
-	jp   nz, L001D9B
-	ld   hl, $4000
+	bit  PSB_CPU, a		; Is 1P a CPU player?
+	jp   nz, .p1CPU		; If so, jump
+.p1Pl:
+	; Copy 1P marker GFX
+	ld   hl, GFX_Play_HUD_1PHuman
 	ld   de, $8FC0
 	call CopyTilesAutoNum
-	jp   L001DA4
-L001D9B:;J
-	ld   hl, $4042
+	jp   .p2Draw
+.p1CPU:
+	; Copy 1P CPU marker GFX
+	ld   hl, GFX_Play_HUD_1PCPU
 	ld   de, $8FC0
 	call CopyTilesAutoNum
-L001DA4:;J
+	
+.p2Draw:
 	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
-	bit  7, a
-	jp   nz, L001DB8
-L001DAC: db $21;X
-L001DAD: db $21;X
-L001DAE: db $40;X
-L001DAF: db $11;X
-L001DB0: db $E0;X
-L001DB1: db $8F;X
-L001DB2: db $CD;X
-L001DB3: db $40;X
-L001DB4: db $0E;X
-L001DB5: db $C3;X
-L001DB6: db $C1;X
-L001DB7: db $1D;X
-L001DB8:;J
-	ld   hl, $4063
+	bit  PSB_CPU, a		; Is 2P a CPU player?
+	jp   nz, .p2CPU		; If so, jump
+.p2Pl
+	; Copy 2P marker GFX
+	ld   hl, GFX_Play_HUD_2PHuman
 	ld   de, $8FE0
 	call CopyTilesAutoNum
+	jp   .ret
+.p2CPU:
+	; Copy 1P CPU marker GFX
+	ld   hl, GFX_Play_HUD_2PCPU
+	ld   de, $8FE0
+	call CopyTilesAutoNum
+.ret:
 	ret
-L001DC2:;C
-	call IsInTeamMode
-	jp   c, L001E5E
-	ld   hl, $4BFA
+	
+; =============== Play_DrawCharIcons ===============
+; Draws the character icons in the HUD.
+Play_DrawCharIcons:
+	;
+	; Team mode and single mode handle the character icons and win markers differently.
+	;
+	call IsInTeamMode				; In team mode?
+	jp   c, Play_DrawCharIcons_Team	; If so, jump
+	; Fall-through
+	
+; =============== Play_DrawCharIcons_Single ===============
+Play_DrawCharIcons_Single:
+	;
+	; In single mode, the player portraits are drawn normally, and to their
+	; side there are boxes representing won rounds.
+	;
+	
+	; Load GFX for round markers
+	ld   hl, GFX_Play_HUD_SingleWinMarker
 	ld   de, $9740
 	ld   b, $02
 	call CopyTiles
+	
+	
+	;
+	; PLAYER 1
+	;
+.s1P:
+	; Draw 1P's character icon
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId0]
 	ld   de, $96C0
 	ld   hl, $9C41
 	ld   c, $6C
 	call Char_DrawIconFlipX
-	ld   a, [wPlInfo_Pl1+iPlInfo_16]
-	cp   $01
-	jp   c, L001DF4
-	ld   hl, $9C42
+	
+	;
+	; Determine what to draw in the box for the first round.
+	;
+	; Note that CopyByteIfSingleFinalRound is used, meaning that, on the final round,
+	; none of the win markers show up.
+	;
+	; Which makes sense, considering who wins the round wins the stage.
+	;
+	ld   a, [wPlInfo_Pl1+iPlInfo_SingleWinCount]
+	cp   $01			; WinCount < $01?
+	jp   c, .noS1PWin1	; If so, draw the empty box
+.okS1PWin1:
+	ld   hl, $9C42		; Otherwise, draw the filled box
 	ld   c, $74
-	call Unknown_CopyByteOnFirstThreeRounds
-	jp   L001DFC
-L001DF4:;J
+	call CopyByteIfSingleFinalRound
+	jp   .chkS1PWin2
+.noS1PWin1:
 	ld   hl, $9C42
 	ld   c, $75
-	call Unknown_CopyByteOnFirstThreeRounds
-L001DFC:;J
-	ld   a, [wPlInfo_Pl1+iPlInfo_16]
-	cp   $02
-	jp   c, L001E0F
-L001E04: db $21;X
-L001E05: db $43;X
-L001E06: db $9C;X
-L001E07: db $0E;X
-L001E08: db $74;X
-L001E09: db $CD;X
-L001E0A: db $9A;X
-L001E0B: db $1F;X
-L001E0C: db $C3;X
-L001E0D: db $17;X
-L001E0E: db $1E;X
-L001E0F:;J
+	call CopyByteIfSingleFinalRound
+	
+	;
+	; Determine what to draw in the box for the second round.
+	; Same CopyByteIfSingleFinalRound usage applies.
+	; [TCRF] It's impossible to draw a filled second box here, as 2 wins end the round.
+	;
+.chkS1PWin2:
+	ld   a, [wPlInfo_Pl1+iPlInfo_SingleWinCount]
+	cp   $02			; WinCount < $02?
+	jp   c, .noS1PWin2	; If so, draw the empty box
+.unreachable_okS1PWin2:	
+	ld   hl, $9C43		; Otherwise, draw the filled box
+	ld   c, $74
+	call CopyByteIfSingleFinalRound
+	jp   .s2P
+.noS1PWin2:
 	ld   hl, $9C43
 	ld   c, $75
-	call Unknown_CopyByteOnFirstThreeRounds
+	call CopyByteIfSingleFinalRound
+	
+	;
+	; PLAYER 2
+	;
+.s2P:
+	; Identical checks to the player 1 side.
+	
+	; Draw 2P's character icon
 	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId0]
 	ld   de, $9700
 	ld   hl, $9C52
 	ld   c, $70
 	call Char_DrawIcon
-	ld   a, [wPlInfo_Pl2+iPlInfo_16]
-	cp   $01
-	jp   c, L001E38
+	
+	
+	ld   a, [wPlInfo_Pl2+iPlInfo_SingleWinCount]
+	cp   $01			; WinCount < $01?
+	jp   c, .noS2PWin1	; If so, draw the empty box
+.okS2PWin1:
 	ld   hl, $9C51
 	ld   c, $74
-	call Unknown_CopyByteOnFirstThreeRounds
-	jp   L001E40
-L001E38:;J
+	call CopyByteIfSingleFinalRound
+	jp   .chkS2PWin2
+.noS2PWin1:
 	ld   hl, $9C51
 	ld   c, $75
-	call Unknown_CopyByteOnFirstThreeRounds
-L001E40:;J
-	ld   a, [wPlInfo_Pl2+iPlInfo_16]
-	cp   $02
-	jp   c, L001E53
-L001E48: db $21;X
-L001E49: db $50;X
-L001E4A: db $9C;X
-L001E4B: db $0E;X
-L001E4C: db $74;X
-L001E4D: db $CD;X
-L001E4E: db $9A;X
-L001E4F: db $1F;X
-L001E50: db $C3;X
-L001E51: db $5B;X
-L001E52: db $1E;X
-L001E53:;J
+	call CopyByteIfSingleFinalRound
+	
+.chkS2PWin2:
+	ld   a, [wPlInfo_Pl2+iPlInfo_SingleWinCount]
+	cp   $02			; WinCount < $02?
+	jp   c, .noS2PWin2	; If so, draw the empty box
+	; [TCRF] For the same reason as 1P.
+.unreachable_okS2PWin2:
+	ld   hl, $9C50
+	ld   c, $74
+	call CopyByteIfSingleFinalRound
+	jp   .s1P_ret
+.noS2PWin2:
 	ld   hl, $9C50
 	ld   c, $75
-	call Unknown_CopyByteOnFirstThreeRounds
-	jp   L001F84
-L001E5E:;J
-	ld   hl, wPlInfo_Pl1+iPlInfo_TeamCharId0
+	call CopyByteIfSingleFinalRound
+.s1P_ret:
+	jp   Play_DrawCharIcons_Ret
+	
+; =============== Play_DrawCharIcons_Team ===============
+; Draws the character icons for a team.
+; As team members are defeated, their icon is placed in the back and crossed out,
+; with other icons moving in front. (purely visual effect, doesn't affect iPlInfo_TeamCharId* values)
+Play_DrawCharIcons_Team:
+	;
+	; Draw normally the icon for the active character on the 1P side.
+	;
+	; To determine it, the game *could* have read out the value from iPlInfo_CharId,
+	; which is guaranteed to be correct by now.
+	; Instead, it's using the same logic from Play_LoadChar (which also set iPlInfo_CharId in the first place)
+	;
+	
+	ld   hl, wPlInfo_Pl1+iPlInfo_TeamCharId0		; HL = Ptr to start of team
+	; Avoid indexing out of bounds in the final round
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamLossCount]
-	cp   $03
-	jp   nz, L001E6B
-	ld   a, $02
-L001E6B:;J
+	cp   $03										; Is this the "FINAL!!" round? (3 losses)
+	jp   nz, .t1PActiveIdx							; If not, skip
+	ld   a, $02										; Otherwise, use the 3rd team member
+	
+.t1PActiveIdx:
+	; Offset the team ptr by the loss count
+	; HL += A
 	add  a, l
-	jp   nc, L001E70
-L001E6F: db $24;X
-L001E70:;J
-	ld   l, a
-	ld   a, [hl]
-	ld   de, $96C0
-	ld   hl, $9C41
-	ld   c, $6C
+	jp   nc, .t1PNoIncH
+	inc  h ; We never get here
+.t1PNoIncH:
+	ld   l, a			
+	
+	; Draw the icon
+	ld   a, [hl]		; A = Active char ID
+	ld   de, $96C0		; DE = GFX Destination
+	ld   hl, $9C41		; HL = BG Destination
+	ld   c, $6C			; C = Starting tile ID
 	call Char_DrawIconFlipX
+	
+	;
+	; The other two icons are drawn overlapped.
+	;
+	; The icons are initially drawn separately to a buffer.
+	; If needed, crosses are drawn over to mark defeated team members.
+	; After that is done, the two icons are merged over, flipped, and copied to VRAM.
+	;
+	; As the flipping happens later, the icon positions are treated like on the 2P side:
+	; - the leftmost icon (wPlaySecIconBuffer) is displayed in the back
+	; - the one on the right (wPlaySecIconBuffer+(4 * TILESIZE)) is displayed in front
+	;
+	
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamLossCount]
-	cp   $00
-	jp   z, L001E8D
-	cp   $01
-	jp   z, L001EA2
-	jp   L001ED4
-L001E8D:;J
+	cp   $00			; No losses yet?
+	jp   z, .t1PLoss0	; If so, jump
+	cp   $01			; 1 loss?
+	jp   z, .t1PLoss1	; If so, jump
+	jp   .t1PLoss2		; Otherwise, 2 losses (includes final round)
+.t1PLoss0:
+	; Draw 3rd team member icon on the back
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId2]
-	ld   de, wLZSS_Buffer
-	call L002087
+	ld   de, wPlaySecIconBuffer
+	call Char_DrawIconToTmpBuffer
+	; Draw 2nd team member icon on the front
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId1]
-	ld   de, $C20A
-	call L002087
-	jp   L001EE6
-L001EA2:;J
+	ld   de, wPlaySecIconBuffer+(4 * TILESIZE)
+	call Char_DrawIconToTmpBuffer
+	jp   .t1PMerge
+.t1PLoss1:
+	; Keep the icons compacted.
+	; If there's no third character, draw the dead member on the front.
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId2]
-	cp   $FF
-	jp   z, L001EBF
+	cp   CHAR_ID_NONE			; Is there a character in the third slot?
+	jp   z, .t1PLoss1No3		; If not, jump
+	
+	; Draw 1st team member icon crossed out on the back
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId0]
-	ld   de, wLZSS_Buffer
-	call L002022
+	ld   de, wPlaySecIconBuffer
+	call Char_DrawCrossedIconToTmpBuffer1P
+	; Draw 3rd team member icon on the front
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId2]
-	ld   de, $C20A
-	call L002087
-	jp   L001EE6
-L001EBF: db $FA;X
-L001EC0: db $2E;X
-L001EC1: db $D9;X
-L001EC2: db $11;X
-L001EC3: db $0A;X
-L001EC4: db $C2;X
-L001EC5: db $CD;X
-L001EC6: db $22;X
-L001EC7: db $20;X
-L001EC8: db $FA;X
-L001EC9: db $30;X
-L001ECA: db $D9;X
-L001ECB: db $11;X
-L001ECC: db $CA;X
-L001ECD: db $C1;X
-L001ECE: db $CD;X
-L001ECF: db $87;X
-L001ED0: db $20;X
-L001ED1: db $C3;X
-L001ED2: db $E6;X
-L001ED3: db $1E;X
-L001ED4:;J
+	ld   de, wPlaySecIconBuffer+$40
+	call Char_DrawIconToTmpBuffer
+	jp   .t1PMerge
+.t1PLoss1No3:
+	; Draw 1st team member icon crossed out on the front
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId0]
+	ld   de, wPlaySecIconBuffer+$40
+	call Char_DrawCrossedIconToTmpBuffer1P
+	; Draw empty square to the back
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId2]
+	ld   de, wPlaySecIconBuffer
+	call Char_DrawIconToTmpBuffer
+	jp   .t1PMerge
+.t1PLoss2:
+	; We can only get here with a 3-character team, so no CHAR_ID_NONE check.
+	
+	; Draw 2nd team member icon crossed out on the back
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId1]
-	ld   de, wLZSS_Buffer
-	call L002022
+	ld   de, wPlaySecIconBuffer
+	call Char_DrawCrossedIconToTmpBuffer1P
+	; Draw 1st team member icon crossed out on the front
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId0]
-	ld   de, $C20A
-	call L002022
-L001EE6:;J
-	ld   hl, $9C44
-	ld   de, $9740
-	ld   c, $74
-	call L0020D1
-	ld   hl, wPlInfo_Pl2+iPlInfo_TeamCharId0
+	ld   de, wPlaySecIconBuffer+$40
+	call Char_DrawCrossedIconToTmpBuffer1P
+.t1PMerge:
+	; Merge the icons GFX, copy them to VRAM and update the HUD tilemap
+	ld   hl, $9C44	; BG target
+	ld   de, $9740	; GFX target
+	ld   c, $74		; Tile ID
+	call Char_CopySecIconsToVRAM_1P
+	
+	
+	;
+	; Same thing for player 2.
+	;
+	
+	;
+	; Draw normally the icon for the active character on the 2P side.
+	;
+	ld   hl, wPlInfo_Pl2+iPlInfo_TeamCharId0		; HL = Ptr to start of team
 	ld   a, [wPlInfo_Pl2+iPlInfo_TeamLossCount]
-	cp   $03
-	jp   nz, L001EFE
-	ld   a, $02
-L001EFE:;J
+	cp   $03										; Is this the "FINAL!!" round? (3 losses)
+	jp   nz, .t2PActiveIdx							; If not, skip
+	ld   a, $02										; Otherwise, use the 3rd team member
+.t2PActiveIdx:
+	; Offset the team ptr by the loss count
+	; HL += A
 	add  a, l
-	jp   nc, L001F03
-L001F02: db $24;X
-L001F03:;J
+	jp   nc, .t2PNoIncH
+	inc  h ; We never get here
+.t2PNoIncH:
 	ld   l, a
-	ld   a, [hl]
-	ld   de, $9700
-	ld   hl, $9C52
-	ld   c, $70
+	
+	; Draw the icon
+	ld   a, [hl]		; A = Active char ID
+	ld   de, $9700		; DE = GFX Destination
+	ld   hl, $9C52		; HL = BG Destination
+	ld   c, $70			; C = Starting tile ID
 	call Char_DrawIcon
+	
+	;
+	; Draw the other two icons
+	;
 	ld   a, [wPlInfo_Pl2+iPlInfo_TeamLossCount]
-	cp   $00
-	jp   z, L001F20
-	cp   $01
-	jp   z, L001F35
-	jp   L001F67
-L001F20:;J
+	cp   $00			; No losses yet?
+	jp   z, .t2PLoss0	; If so, jump
+	cp   $01			; 1 loss?
+	jp   z, .t2PLoss1	; If so, jump
+	jp   .t2PLoss2		; Otherwise, 2 losses (includes final round)
+.t2PLoss0:
+	; Draw 3rd team member icon on the back
 	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId2]
-	ld   de, wLZSS_Buffer
-	call L002087
+	ld   de, wPlaySecIconBuffer
+	call Char_DrawIconToTmpBuffer
+	; Draw 2nd team member icon on the front
 	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId1]
-	ld   de, $C20A
-	call L002087
-	jp   L001F79
-L001F35:;J
+	ld   de, wPlaySecIconBuffer+$40
+	call Char_DrawIconToTmpBuffer
+	jp   .t2PMerge
+.t2PLoss1:
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId2]
-	cp   $FF
-	jp   z, L001F52
+	cp   CHAR_ID_NONE			; Is there a character in the third slot?
+	jp   z, .t2PLoss1No3		; If not, jump
+	
+	; Draw 1st team member icon crossed out on the back
 	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId0]
-	ld   de, wLZSS_Buffer
-	call L002066
+	ld   de, wPlaySecIconBuffer
+	call Char_DrawCrossedIconToTmpBuffer2P
+	
+	; Draw 3rd team member icon on the front
 	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId2]
-	ld   de, $C20A
-	call L002087
-	jp   L001F79
-L001F52:;J
+	ld   de, wPlaySecIconBuffer+$40
+	call Char_DrawIconToTmpBuffer
+	jp   .t2PMerge
+.t2PLoss1No3:
+	; Draw 1st team member icon crossed out on the front
 	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId0]
-	ld   de, $C20A
-	call L002066
+	ld   de, wPlaySecIconBuffer+$40
+	call Char_DrawCrossedIconToTmpBuffer2P
+	; Draw empty square to the back
 	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId2]
-	ld   de, wLZSS_Buffer
-	call L002087
-	jp   L001F79
-L001F67:;J
+	ld   de, wPlaySecIconBuffer
+	call Char_DrawIconToTmpBuffer
+	jp   .t2PMerge
+.t2PLoss2:
+	; Draw 2nd team member icon crossed out on the back
 	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId1]
-	ld   de, wLZSS_Buffer
-	call L002066
+	ld   de, wPlaySecIconBuffer
+	call Char_DrawCrossedIconToTmpBuffer2P
+	; Draw 1st team member icon crossed out on the front
 	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId0]
-	ld   de, $C20A
-	call L002066
-L001F79:;J
+	ld   de, wPlaySecIconBuffer+$40
+	call Char_DrawCrossedIconToTmpBuffer2P
+.t2PMerge:
+	; Merge the icons GFX, copy them to VRAM and update the HUD tilemap
 	ld   hl, $9C4F
 	ld   de, $97A0
 	ld   c, $7A
-	call L0020E5
-L001F84:;J
+	call Char_CopySecIconsToVRAM_2P
+	; Fall-through
+Play_DrawCharIcons_Ret:
 	ret
+	
 ; =============== IsInTeamMode ===============
 ; OUT
 ; - C flag: If set, Team mode is enabled
@@ -7225,15 +7612,16 @@ IsInTeamMode:
 	scf		; C = 1
 	ret
 	
-; =============== Unknown_CopyByteOnFirstThreeRounds ===============
-; Writes the value to VRAM if we aren't on the fourth round.
+; =============== CopyByteIfSingleFinalRound ===============
+; Copies the specified value to VRAM only if this is the final round.
 ; IN
 ; - C: Value to write
-; - HL: VRAM ptr
-Unknown_CopyByteOnFirstThreeRounds:
+; - HL: Destination ptr to VRAM
+CopyByteIfSingleFinalRound:
+	; The check this uses is only applicable to Single mode.
 	ld   a, [wRoundNum]
-	cp   $03				; wRoundNum == 3? (4th round)
-	jp   z, .ret			; If so, skip
+	cp   $03				; wRoundNum == 3? (4th round, the "final!!" round in single mode)
+	jp   z, .ret			; If so, return
 	mWaitForVBlankOrHBlank
 	ld   a, c				; Otherwise, write C to HL
 	ldi  [hl], a			
@@ -7248,7 +7636,7 @@ Unknown_CopyByteOnFirstThreeRounds:
 ; - HL: Ptr to top-*right* corner of the icon in the tilemap
 ; - C: Tile number DE points to
 ; - A: Character ID * 2
-;      Multiplied by 2 because ???
+;      Multiplied by 2 for convenience when dealing with ptr tables.
 Char_DrawIconFlipX:
 
 	push bc
@@ -7310,10 +7698,8 @@ ENDR
 ; - HL: Ptr to top-left corner of the icon in the tilemap
 ; - C: Tile number DE points to
 ; - A: Character ID * 2
-;      Multiplied by 2 because ???
+;      Multiplied by 2 for convenience when dealing with ptr tables.
 Char_DrawIcon:
-
-
 	push bc
 	
 		; BC = Offset to GFX_Char_Icons.
@@ -7349,147 +7735,294 @@ ENDR
 	ld   b, $02		; B = Width in tiles, Icons are 2 tiles large
 	call CreateRectInc_2H 	; L to R tilemap set func, 2 tiles high
 	ret
-L002022:;C
+	
+; =============== Char_DrawCrossedIconToTmpBuffer1P ===============
+; Draws a character icon to a temporary buffer of $40 bytes, and then draws a cross over it.
+; Player 1 side only.
+; IN
+; -  A: Character ID (* 2)
+; - DE: Ptr to temporary buffer for the icon
+Char_DrawCrossedIconToTmpBuffer1P:
+	; Draw the normal character icon to a temp buffer
 	push de
-	call L002087
+		call Char_DrawIconToTmpBuffer
 	pop  de
+	
+	;
+	; The cross is a bit special since, unlike the main icon, it shouldn't be flipped on the 1P side.
+	;
+	; The icon however hasn't been flipped yet, so if we were to write the cross normally,
+	; the cross would be flipped horizontally too later on.
+	;
+	; To balance it out, flip the cross here so later on it will be flipped back to normal.
+	;
 	ldh  a, [hROMBank]
 	push af
-	ld   a, $1D
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	push de
-	ld   hl, $4C1A
-	ld   de, $C2CA
-	ld   b, $04
-	call CopyTilesHBlankFlipX
-	ld   hl, $4C5A
-	ld   de, $C30A
-	ld   b, $04
-	call CopyTilesHBlankFlipX
-	pop  de
-	ld   hl, $C2EA
-	ld   bc, $C32A
-	ld   a, $02
-	call CopyTilesOver_Custom
-	ld   hl, $C2CA
-	ld   bc, $C30A
-	ld   a, $02
-	call CopyTilesOver_Custom
+		ld   a, BANK(GFX_Play_HUD_Cross) ; BANK $1D
+		ld   [MBC1RomBank], a
+		ldh  [hROMBank], a
+		
+		; Copy + flip the cross data to a separate buffer away from DE
+		push de
+			ld   hl, GFX_Play_HUD_Cross
+			ld   de, wPlayCrossBuffer
+			ld   b, $04
+			call CopyTilesHBlankFlipX
+			ld   hl, GFX_Play_HUD_Cross_Mask
+			ld   de, wPlayCrossMaskBuffer
+			ld   b, $04
+			call CopyTilesHBlankFlipX
+		pop  de
+		
+		;
+		; Flipping the graphics has the side effect of rearranging their "column" order. (see CreateRectInc_2H)
+		;
+		; As the icons aren't being flipped yet, we have to rearrange back the cross graphics
+		; by copying them column by column (2 tiles at a time).
+		;
+		
+		; Tiles on the right first
+		ld   hl, wPlayCrossBuffer+$20
+		ld   bc, wPlayCrossMaskBuffer+$20
+		ld   a, $02
+		call CopyTilesOver_Custom
+		
+		; Then the left side
+		ld   hl, wPlayCrossBuffer
+		ld   bc, wPlayCrossMaskBuffer
+		ld   a, $02
+		call CopyTilesOver_Custom
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-L002066:;C
+	
+; =============== Char_DrawCrossedIconToTmpBuffer2P ===============
+; Draws a character icon to a temporary buffer of $40 bytes, and then draws a cross over it.
+; Player 2 side only.
+; IN
+; -  A: Character ID (* 2)
+; - DE: Ptr to temporary buffer for the icon
+Char_DrawCrossedIconToTmpBuffer2P:
+	; Draw the normal character icon to a temp buffer
 	push de
-	call L002087
+		call Char_DrawIconToTmpBuffer
 	pop  de
+	
+	; Draw a cross over it.
+	; 2P icons aren't flipped, so nothing special here.
 	ldh  a, [hROMBank]
 	push af
-	ld   a, $1D
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	ld   hl, $4C1A
-	ld   bc, $4C5A
-	ld   a, $40
-	call CopyTilesOver_Custom
+		ld   a, BANK(GFX_Play_HUD_Cross) ; BANK $1D
+		ld   [MBC1RomBank], a
+		ldh  [hROMBank], a
+		
+		ld   hl, GFX_Play_HUD_Cross			; HL = Main cross GFX
+		ld   bc, GFX_Play_HUD_Cross_Mask	; DE = Transparency mask
+		ld   a, 4*TILESIZE					; A = Tiles to copy
+		call CopyTilesOver_Custom
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-L002087:;C
-	cp   $FF
-	jp   nz, L002098
+	
+; =============== Char_DrawIconToTmpBuffer ===============
+; Draws a character icon to a temporary buffer of $40 bytes (4 tiles).
+; This is to copy the full 16x16 icons of inactive team members before
+; they get merged/cropped together.
+; IN
+; -  A: Character ID (* 2)
+; - DE: Ptr to temporary buffer for the icon
+Char_DrawIconToTmpBuffer:
+
+	;
+	; If there's no team member defined, draw 4 black tiles to the buffer.
+	;
+	cp   CHAR_ID_NONE	; Were we given a real character ID?
+	jp   nz, .charOk	; If so, jump
 	push bc
-	ld   b, $40
-	xor  a
-L002090:;J
-	ld   [de], a
-	inc  de
-	dec  b
-	jp   nz, L002090
+		ld   b, 4*TILESIZE	; B = Bytes to clear
+		xor  a				; A = Clear with
+	.ncLoop:
+		ld   [de], a		
+		inc  de
+		dec  b				; Overwrote all 4 tiles?
+		jp   nz, .ncLoop	; If not, loop
 	pop  bc
 	ret
-L002098:;J
+	
+.charOk:
+	;
+	; Otherwise, perform a straight copy of the character icon to the buffer.
+	; Do it like Char_DrawIcon, except that the GFX isn't being copied to VRAM.
+	;
 	push bc
-	ld   b, $00
-	ld   c, a
-	sla  c
-	rl   b
-	sla  c
-	rl   b
-	sla  c
-	rl   b
-	sla  c
-	rl   b
-	sla  c
-	rl   b
-	ldh  a, [hROMBank]
-	push af
-	ld   a, $1D
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	push hl
-	ld   hl, $4552
-	add  hl, bc
-	ld   b, $40
-L0020C1:;J
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	dec  b
-	jp   nz, L0020C1
-	pop  hl
-	pop  af
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
+		; BC = Offset to GFX_Char_Icons.
+		ld   b, $00
+		ld   c, a		; BC = A
+REPT 5
+		sla  c		 	; << 1  5 times
+		rl   b
+ENDR
+
+		; Switch to the bank with icons
+		ldh  a, [hROMBank]
+		push af
+			ld   a, BANK(GFX_Char_Icons) ; BANK $1D
+			ld   [MBC1RomBank], a
+			ldh  [hROMBank], a
+			push hl
+				; HL = GFX_Char_Icons[BC]
+				ld   hl, GFX_Char_Icons	
+				add  hl, bc			
+				
+				;##
+				; This is the part different from Char_DrawIcon
+				;
+				; Copy the next 4 tiles to the buffer from *HL to *DE
+				ld   b, 4*TILESIZE	; B = Bytes to copy ($40)
+			.loop:
+				ldi  a, [hl]		; Read from ROM, SrcPtr++
+				ld   [de], a		; Write to WRAM
+				inc  de				; DestPtr++
+				dec  b				; Copied all bytes?
+				jp   nz, .loop		; If not, loop
+				;##
+			pop  hl
+		pop  af
+		ld   [MBC1RomBank], a
+		ldh  [hROMBank], a
 	pop  bc
 	ret
-L0020D1:;C
-	call L0020F9
+	
+; =============== Char_CopySecIconsToVRAM_1P ===============
+; Merges and copies the character icons for team members "on the back" to VRAM.
+; IN
+; - HL: Destination ptr for the tilemap in VRAM (top-right corner)
+; - DE: Destination ptr for the graphics in VRAM
+; - C: Starting tile ID
+Char_CopySecIconsToVRAM_1P:
+	; Generate the merged graphic to wPlaySecIconBuffer
+	call Char_MergeSecIcons
+	
+	; Copy the 6 tiles to VRAM
 	push hl
-	ld   hl, wLZSS_Buffer
-	ld   b, $06
-	call CopyTilesHBlankFlipX
+		ld   hl, wPlaySecIconBuffer
+		ld   b, $06
+		call CopyTilesHBlankFlipX
 	pop  hl
-	ld   a, c
-	ld   b, $03
+	
+	; Generate the 3x2 tilemap to VRAM
+	ld   a, c		; A = Tile ID
+	ld   b, $03		; B = Rect Width
 	call CreateRectIncXFlip_2H
 	ret
-L0020E5:;C
-	call L0020F9
+	
+; =============== Char_CopySecIconsToVRAM_2P ===============
+; Version of Char_CopySecIconsToVRAM_1P for Player 2.
+; IN
+; - HL: Destination ptr for the tilemap in VRAM (top-left corner)
+; - DE: Destination ptr for the graphics in VRAM
+; - C: Starting tile ID
+Char_CopySecIconsToVRAM_2P:
+	; Generate the merged graphic to wPlaySecIconBuffer
+	call Char_MergeSecIcons
+	
+	; Copy the 6 tiles to VRAM
 	push hl
-	ld   hl, wLZSS_Buffer
-	ld   b, $06
-	call CopyTilesHBlank
+		ld   hl, wPlaySecIconBuffer
+		ld   b, $06
+		call CopyTilesHBlank
 	pop  hl
-	ld   a, c
-	ld   b, $03
+	
+	; Generate the 3x2 tilemap to VRAM
+	ld   a, c		; A = Tile ID
+	ld   b, $03		; B = Rect Width
 	call CreateRectInc_2H
 	ret
-L0020F9:;C
+	
+; =============== Char_MergeSecIcons ===============
+; Merges the two icons for secondary team players.
+; This is accomplished by moving the tile graphics to the left by 4px.
+;
+; How this works, visually (with pairs representing a tile):
+; AA BB -> AB B# 
+;
+; Meaning that, on repeated loops:
+; AA BB CC DD -> AB B# CC DD
+; AB B# CC DD -> AB BC C# DD
+; AB BC C# DD -> AB BC CD D#
+;
+;
+; NOTE: The graphics are treated here like in the 2P side, where the icon on the left
+;       is the one in the "back" (for the 3rd team member). This is only flipped outside.
+;
+Char_MergeSecIcons:
 	push bc
 	push de
 	push hl
-	ld   hl, $C1EA
-	ld   de, $C20A
-	ld   b, $40
-L002104:;J
-	ld   a, [hl]
+	;--
+	
+	;
+	; To shift nybbles of graphics across tiles, we must know which tile is on the left, and which one is on the right.
+	; Because these graphics are fed into CreateRectInc_2H or one of its variations, the icon GFX
+	; are consistently ordered top-to-bottom first, then left-to-right (and never right-to-left as they haven't been flipped yet).
+	;
+	; As the icons are 2 tiles high, for any tile N, tile N+2 is what will be displayed on its right in the tilemap.
+	; Get pointers to both of these tiles.
+	;
+	
+	; Tile on the left - Middle part of the 3rd team member icon
+	ld   hl, wPlaySecIconBuffer+(2*TILESIZE)				; HL = IconL
+	; Tile on the right - Starting part of the 2nd team member icon.
+	; This one starting on a new icon is what prevents the final graphic from looking cut off.
+	ld   de, wPlaySecIconBuffer+(2*TILESIZE)+(2*TILESIZE)	; DE = IconR
+	
+	; Only 4 of the 6 tiles need to be changed.
+	; The first two (left border of the 3rd icon on the unflipped 2P side) can be kept as-is.
+	ld   b, 4*TILESIZE			; B = Bytes to process (4 tiles)
+.loop:
+
+	;
+	; Shift the tile graphics left by 4px for both IconL and IconR.
+	;
+	
+	;
+	; Copy the left half of IconR to the right half of IconL.
+	; The left half of IconL remains unchanged, which allows this operation
+	; to be repeated in a loop.
+	;
+	
+	; C = Left half of IconL
+	ld   a, [hl]	; C = IconL & $F0
 	and  a, $F0
 	ld   c, a
-	ld   a, [de]
+	; A = Left half of IconR moved right
+	ld   a, [de]	; A = (IconR >> 4)
 	and  a, $F0
 	swap a
+	; Merge the two halves 
 	or   a, c
-	ldi  [hl], a
-	ld   a, [de]
+	; Write it to IconL
+	ldi  [hl], a	; IconPtrL++
+	
+	;
+	; Move the right half of IconR to the left half.
+	; The right part is replaced by blank space.
+	;
+	
+	; A = Right half of IconR moved left
+	ld   a, [de]	; A = IconR << 4
 	and  a, $0F
 	swap a
+	; Save it back
 	ld   [de], a
-	inc  de
-	dec  b
-	jp   nz, L002104
+	inc  de			; IconPtrR++
+	
+	dec  b			; Processed all bytes?
+	jp   nz, .loop	; If not, loop
+	
+	;--
 	pop  hl
 	pop  de
 	pop  bc
@@ -7544,406 +8077,588 @@ CreateRectInc_2H:
 	dec  b							; WidthLeft--
 	jp   nz, CreateRectInc_2H	; Drawn all columns? If not, loop
 	ret
-L002152:;C
-	ld   hl, $0000
+	
+; =============== Play_HUD_DrawCharNames ===============
+; Draws the character names to the HUD.
+;
+; The names use special text graphics unique to each character,
+; which are copied to 6-tile buffers in VRAM (one for each player).
+;
+; This is handled similarly to the character graphics in the order select screen,
+; where there's a compressed block of graphics that is only copied partially to VRAM.
+;
+Play_HUD_DrawCharNames:
+
+	; Clear out both VRAM GFX buffers with black tiles
+	ld   hl, $0000 ; Black line
 	ld   b, $06
-	ld   de, $9600
-	call FillBGStripPair
-	ld   hl, $0000
+	ld   de, $9600	; 1P buffer
+	call FillGFX
+	
+	ld   hl, $0000 ; Black line
 	ld   b, $06
-	ld   de, $9660
-	call FillBGStripPair
-	ld   hl, $4084
+	ld   de, $9660 ; 2P buffer
+	call FillGFX
+	
+	; Decompress all of the names into a buffer in WRAM
+	ld   hl, GFXLZ_Play_HUD_CharNames
 	ld   de, wLZSS_Buffer
 	call DecompressLZSS
+	
+	; Copy the needed GFX from said buffer into the VRAM buffers.
 	ld   a, [wPlInfo_Pl1+iPlInfo_CharId]
-	call L00217E
+	call Play_HUD_Draw1PCharName
 	ld   a, [wPlInfo_Pl2+iPlInfo_CharId]
-	call L0021B3
+	call Play_HUD_Draw2PCharName
 	ret
-L00217E:;C
-	ld   b, $00
+	
+; =============== Play_HUD_Draw1PCharName ===============
+; Draws the character name on the 1P side.
+; IN
+; - A: Character ID * 2
+Play_HUD_Draw1PCharName:
+
+	;
+	; HL = Ptr to character name text entry 
+	;      (name length + tile IDs relative to GFXLZ_Play_HUD_CharNames).
+	;
+	
+	; Seek to ptr table entry
+	ld   b, $00							; BC = CharId * 2
 	ld   c, a
-	ld   hl, $220B
-	add  hl, bc
-	ld   e, [hl]
+	ld   hl, Play_HUD_CharNamesPtrTable ; HL = Ptr table with BGX tilemaps
+	add  hl, bc							; Seek to entry
+	; Read out the ptr to DE
+	ld   e, [hl]	
 	inc  hl
 	ld   d, [hl]
+	; And move it to HL
 	push de
 	pop  hl
-	ld   b, [hl]
-	inc  hl
-	ld   a, $06
-	sub  a, b
-	ld   de, $9600
-	push hl
-	sla  a
-	sla  a
-	sla  a
-	sla  a
-	ld   h, $00
-	ld   l, a
-	add  hl, de
-	push hl
-	pop  de
-	pop  hl
-	call L0021D5
-	ld   de, $21FB
+	
+	;--
+	;
+	; The 1P side has the character name aligned to the right.
+	;
+	; With names being 6 tiles long, this results into a padding at the start of (6 - NameLength) tiles.
+	; To account for it, the destination ptr is offset by that amount:
+	;   DestPtr = $9600 + (PadCount * TILESIZE)
+	;
+	; This will leave the skipped tiles black, as the buffer was blanked out before getting here.
+	;
+	
+	ld   b, [hl]		; B = Name length
+	inc  hl				; HL = Ptr to "BGX" tilemap
+	
+	ld   a, $06			; A = Pad tile count (6 - B)
+	sub  a, b			
+	ld   de, $9600		; DE = Ptr to start of VRAM destination buffer
+	
+	; Seek the VRAM dest buffer past the padding.
+	; DE += A * $10 (TILESIZE)
+	push hl		; Save "tilemap" ptr
+REPT 4				
+		sla  a			; A << 4
+ENDR
+		ld   h, $00		; HL = A
+		ld   l, a
+		add  hl, de		; HL += DE
+		
+		push hl			; Move to DE
+		pop  de
+	pop  hl		; Restore "tilemap" ptr
+	;--
+	
+	; Copy the GFX to VRAM, according to the "BGX" tilemap HL points to.
+	call Play_HUD_CopyCharNameGFX
+	
+	; Copy the standard tilemap for 1P names
+	ld   de, BG_Play_HUD_CharName1P
 	ld   hl, $9C02
 	ld   b, $06
 	ld   c, $01
 	call CopyBGToRect
 	ret
-L0021B3:;C
-	ld   b, $00
+	
+; =============== Play_HUD_Draw2PCharName ===============
+; Draws the character name on the 2P side.
+; See also: Play_HUD_Draw1PCharName
+Play_HUD_Draw2PCharName:
+
+	;
+	; HL = Ptr to character name text entry 
+	;      (name length + tile IDs relative to GFXLZ_Play_HUD_CharNames).
+	;
+	
+	; Seek to ptr table entry
+	ld   b, $00							; BC = CharId * 2
 	ld   c, a
-	ld   hl, $220B
-	add  hl, bc
-	ld   e, [hl]
+	ld   hl, Play_HUD_CharNamesPtrTable ; HL = Ptr table with BGX tilemaps
+	add  hl, bc							; Seek to entry
+	; Read out the ptr to DE
+	ld   e, [hl]	
 	inc  hl
 	ld   d, [hl]
+	; And move it to HL
 	push de
 	pop  hl
-	ldi  a, [hl]
-	ld   b, a
+	
+	;--
+	ldi  a, [hl]		; Read name length; HL = Ptr to "BGX" tilemap
+	ld   b, a			; B = Name length
+	
+	; Copy the GFX to VRAM, according to the "BGX" tilemap HL points to.
+	; The 2P side has the character name aligned to the left, so no special handling is needed.
 	ld   de, $9660
-	call L0021D5
-	ld   de, $2203
+	call Play_HUD_CopyCharNameGFX
+	
+	; Copy the standard tilemap for 2P names
+	ld   de, BG_Play_HUD_CharName2P
 	ld   hl, $9C0C
 	ld   b, $06
 	ld   c, $01
 	call CopyBGToRect
 	ret
-L0021D5:;JC
-	push bc
-	ldi  a, [hl]
-	ld   b, $00
-	ld   c, a
-	sla  c
-	rl   b
-	sla  c
-	rl   b
-	sla  c
-	rl   b
-	sla  c
-	rl   b
-	push hl
-	ld   hl, wLZSS_Buffer
-	add  hl, bc
-	ld   b, $01
-	call CopyTiles
-	pop  hl
-	pop  bc
-	dec  b
-	jp   nz, L0021D5
+	
+; =============== Play_HUD_CopyCharNameGFX ===============
+; Copies the tile graphics for the character name to VRAM.
+;
+; IN
+; - DE: VRAM GFX destination ptr
+; - HL: Ptr to source "tilemap", with tile IDs relative to the start of the LZSS Buffer.
+; -  B: Number of tiles to copy
+Play_HUD_CopyCharNameGFX:
+	; Copy 1 tile at a time
+	push bc		; Save length
+	
+		; A = Tile ID
+		ldi  a, [hl]
+		; Multiply the tile ID by TILESIZE.
+		; BC = A * $10
+		ld   b, $00
+		ld   c, a
+	REPT 4			
+		sla  c
+		rl   b
+	ENDR
+	
+		push hl
+			; Seek to the tile to copy
+			ld   hl, wLZSS_Buffer
+			add  hl, bc
+			; And copy it over to VRAM
+			ld   b, $01
+			call CopyTiles
+		pop  hl
+	pop  bc		; Restore length
+	dec  b								; Copied all tiles?
+	jp   nz, Play_HUD_CopyCharNameGFX	; If not, loop
 	ret
-L0021FB: db $60
-L0021FC: db $61
-L0021FD: db $62
-L0021FE: db $63
-L0021FF: db $64
-L002200: db $65
-L002201: db $66;X
-L002202: db $67;X
-L002203: db $66
-L002204: db $67
-L002205: db $68
-L002206: db $69
-L002207: db $6A
-L002208: db $6B
-L002209: db $6C;X
-L00220A: db $6D;X
-L00220B: db $D8
-L00220C: db $44
-L00220D: db $DC
-L00220E: db $44
-L00220F: db $E3
-L002210: db $44
-L002211: db $E9
-L002212: db $44
-L002213: db $EE
-L002214: db $44
-L002215: db $F2
-L002216: db $44
-L002217: db $F9
-L002218: db $44
-L002219: db $00
-L00221A: db $45
-L00221B: db $04
-L00221C: db $45
-L00221D: db $0A
-L00221E: db $45
-L00221F: db $10
-L002220: db $45
-L002221: db $17
-L002222: db $45
-L002223: db $1D
-L002224: db $45
-L002225: db $22
-L002226: db $45
-L002227: db $29
-L002228: db $45
-L002229: db $30
-L00222A: db $45
-L00222B: db $37
-L00222C: db $45
-L00222D: db $3E
-L00222E: db $45
-L00222F: db $44
-L002230: db $45
-L002231: db $4B
-L002232: db $45
-L002233:;C
-	ld   de, $225B
+	
+BG_Play_HUD_CharName1P: INCBIN "data/bg/play_hud_charname1p.bin"
+; [TCRF] KOF95 leftover, where the name used to be 8 tiles long
+BG_Play_HUD_CharName1P_Unused_Extra: INCBIN "data/bg/play_hud_charname1p_unused_extra.bin"
+BG_Play_HUD_CharName2P: INCBIN "data/bg/play_hud_charname2p.bin"
+BG_Play_HUD_CharName2P_Unused_Extra: INCBIN "data/bg/play_hud_charname2p_unused_extra.bin"
+Play_HUD_CharNamesPtrTable:
+	dw BGXDef_Play_HUD_CharName_Kyo ; CHAR_ID_KYO     
+	dw BGXDef_Play_HUD_CharName_Daimon ; CHAR_ID_DAIMON  
+	dw BGXDef_Play_HUD_CharName_Terry ; CHAR_ID_TERRY   
+	dw BGXDef_Play_HUD_CharName_Andy ; CHAR_ID_ANDY    
+	dw BGXDef_Play_HUD_CharName_Ryo ; CHAR_ID_RYO     
+	dw BGXDef_Play_HUD_CharName_Robert ; CHAR_ID_ROBERT  
+	dw BGXDef_Play_HUD_CharName_Athena ; CHAR_ID_ATHENA  
+	dw BGXDef_Play_HUD_CharName_Mai ; CHAR_ID_MAI     
+	dw BGXDef_Play_HUD_CharName_Leona ; CHAR_ID_LEONA   
+	dw BGXDef_Play_HUD_CharName_Geese ; CHAR_ID_GEESE   
+	dw BGXDef_Play_HUD_CharName_Krauser ; CHAR_ID_KRAUSER 
+	dw BGXDef_Play_HUD_CharName_MrBig ; CHAR_ID_MRBIG   
+	dw BGXDef_Play_HUD_CharName_Iori ; CHAR_ID_IORI    
+	dw BGXDef_Play_HUD_CharName_Mature ; CHAR_ID_MATURE  
+	dw BGXDef_Play_HUD_CharName_Chizuru ; CHAR_ID_CHIZURU 
+	dw BGXDef_Play_HUD_CharName_Goenitz ; CHAR_ID_GOENITZ 
+	dw BGXDef_Play_HUD_CharName_MrKarate ; CHAR_ID_MRKARATE
+	dw BGXDef_Play_HUD_CharName_OIori ; CHAR_ID_OIORI   
+	dw BGXDef_Play_HUD_CharName_OLeona ; CHAR_ID_OLEONA  
+	dw BGXDef_Play_HUD_CharName_Kagura ; CHAR_ID_KAGURA   
+
+; =============== Play_DrawHUDEmptyBars ===============
+; Draws the tilemaps for all empty bars in the HUD.
+Play_DrawHUDEmptyBars:
+
+	; 1P Health bar
+	ld   de, BG_Play_HUD_BlankHealthBar
 	ld   hl, $9C20
 	ld   b, $09
 	ld   c, $01
 	call CopyBGToRect
-	ld   de, $225B
+	
+	; 2P Health bar
+	ld   de, BG_Play_HUD_BlankHealthBar
 	ld   hl, $9C2B
 	ld   b, $09
 	ld   c, $01
 	call CopyBGToRect
-	ld   de, $4BE2
+	
+	; Power meter bars (entire line, including POW text)
+	ld   de, BG_Play_HUD_BlankPowBar
 	ld   hl, $9C80
 	ld   b, $14
 	ld   c, $01
 	call CopyBGToRect
 	ret
-L00225B: db $E0
-L00225C: db $E0
-L00225D: db $E0
-L00225E: db $E0
-L00225F: db $E0
-L002260: db $E0
-L002261: db $E0
-L002262: db $E0
-L002263: db $E0
-L002264:;C
+	
+BG_Play_HUD_BlankHealthBar: INCBIN "data/bg/play_hud_blankhealthbar.bin"
+
+; =============== Play_LoadPreRoundTextAndIncRound ===============
+; Loads the initial sprite mapping + all graphics for the pre-round text (ie: ROUND 1, READY, GO).
+Play_LoadPreRoundTextAndIncRound:
 	ldh  a, [hROMBank]
 	push af
-	ld   a, BANK(L0148C3) ; BANK $01
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	ld   a, [wRoundNum]
-	inc  a
-	ld   [wRoundNum], a
-	ld   hl, $4000
-	ld   de, wLZSS_Buffer
-	call DecompressLZSS
-	ld   hl, wLZSS_Buffer
-	ld   de, $8800
-	ld   b, $44
-	call CopyTiles
-	ld   a, [wRoundNum]
-	sla  a
-	sla  a
-	sla  a
-	ld   d, $00
-	ld   e, a
-	sla  e
-	rl   d
-	sla  e
-	rl   d
-	sla  e
-	rl   d
-	sla  e
-	rl   d
-	ld   hl, $C60A
-	add  hl, de
-	ld   de, $8C40
-	ld   b, $08
-	call CopyTiles
-	ld   hl, wOBJInfo3+iOBJInfo_Status
-	ld   de, L0148C3
-	call OBJLstS_InitFrom
-	pop  af
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	ret
-L0022C1:;C
-	ld   hl, wOBJInfo3+iOBJInfo_Status
-	ld   [hl], $80
-	ld   a, [$C160]
-	cp   $01
-	jp   z, L0022D3
-	ld   a, $00
-	jp   L0022D5
-L0022D3:;J
-	ld   a, $04
-L0022D5:;J
-	ld   hl, wOBJInfo3+iOBJInfo_OBJLstPtrTblOffset
-	ld   [hl], a
-	ld   b, $78
-	call L0022FC
-	ld   [hl], $08
-	ld   b, $3C
-	call L0022FC
-	ld   [hl], $0C
-	ld   b, $08
-	call L0022FC
-	ld   [hl], $10
-	ld   b, $3C
-	call L0022FC
-	ld   hl, wOBJInfo3+iOBJInfo_Status
-	ld   [hl], $00
-	call Task_PassControlFar
-	ret
-L0022FC:;C
-	push hl
-L0022FD:;J
-	push bc
-	ldh  a, [hROMBank]
-	push af
-	ld   a, $01
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	call $75BB
-	pop  af
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	call L0023EC
-	call Task_PassControlFar
-	pop  bc
-	dec  b
-	jp   nz, L0022FD
-	pop  hl
-	ret
-L00231E:;C
-	ld   bc, wJoyBuffer_Pl2
-	ld   de, $DA00
-	call L002331
-	ld   bc, $DA00
-	ld   de, wJoyBuffer_Pl2
-	call L002331
-	ret
-L002331:;C
-	ld   hl, $002C
-	add  hl, bc
-	ld   a, [hl]
-	cp   $0E
-	jp   z, L00235F
-	cp   $0C
-	jp   z, L00235F
-	cp   $10
-	jp   z, L00235F
-	cp   $24
-	jp   z, L00235F
-	cp   $18
-	jp   z, L00235F
-	cp   $22
-	jp   z, L00235F
-	cp   $14
-	jp   z, L00235F
-	cp   $20
-	jp   z, L00235F
-	ret
-L00235F:;J
-	ld   hl, $002C
-	add  hl, bc
-	ld   a, [hl]
-	cp   $00
-	jr   z, L002372
-	cp   $18
-	jr   z, L002381
-	cp   $12
-	jr   z, L00238C
-	jr   L002397
-L002372:;R
-	ld   hl, $002C
-	add  hl, de
-	ld   a, [hl]
-	cp   $18
-	jr   z, L00239B
-	cp   $22
-	jr   z, L00239B
-	jr   L002397
-L002381:;R
-	ld   hl, $002C
-	add  hl, de
-	ld   a, [hl]
-	cp   $00
-	jr   z, L00239B
-	jr   L002397
-L00238C:;R
-	ld   hl, $002C
-	add  hl, de
-	ld   a, [hl]
-	cp   $04
-	jr   z, L00239B
-	jr   L002397
-L002397:;R
-	ld   a, $2C
-	jr   L00239D
-L00239B:;R
-	ld   a, $2E
-L00239D:;R
-	ld   hl, $0035
-	add  hl, bc
-	ld   [hl], a
-	ret
-L0023A3:;C
-	ld   b, $3C
-	call L0022FC
-	ld   bc, wJoyBuffer_Pl2
-	ld   de, $DA00
-	call L0023BB
-	ld   bc, $DA00
-	ld   de, wJoyBuffer_Pl2
-	call L0023BB
-	ret
-L0023BB:;C
-	ld   hl, $002C
-	add  hl, bc
-	ld   a, [hl]
-	cp   $0C
-	jp   z, L0023EB
-	cp   $0E
-	jp   z, L0023EB
-	cp   $10
-	jp   z, L0023EB
-	cp   $24
-	jp   z, L0023EB
-	cp   $18
-	jp   z, L0023EB
-	cp   $22
-	jp   z, L0023EB
-	cp   $14
-	jp   z, L0023EB
-	cp   $20
-	jp   z, L0023EB
-	jp   L00235F
-L0023EB:;J
-	ret
-L0023EC:;C
-	ldh  a, [hROMBank]
-	push af
-	ld   a, $01
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	call $76B4
-	call $78E1
-	call $7D80
-	pop  af
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	ret
-L002406:;C
-	ldh  a, [hROMBank]
-	push af
-	ld   a, $01
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	call $7DEA
+		ld   a, BANK(GFXLZ_Play_PreRoundText) ; BANK $01
+		ld   [MBC1RomBank], a
+		ldh  [hROMBank], a
+		
+		; RoundNum++
+		ld   a, [wRoundNum]
+		inc  a
+		ld   [wRoundNum], a
+		
+		;
+		; Load shared graphics
+		;
+		
+		; Load to a buffer the complete set of graphics for the pre-round text
+		ld   hl, GFXLZ_Play_PreRoundText
+		ld   de, wLZSS_Buffer
+		call DecompressLZSS
+		
+		; Copy everything except for the round numbers to VRAM, which are the
+		; very last thing in the graphics block.
+		ld   hl, wLZSS_Buffer	; Start from the beginning
+		ld   de, $8800			; Destination
+		ld   b, $44				; Copy first $44 tiles
+		call CopyTiles
+		
+		
+		;
+		; Load one round number graphic
+		;
+		; Every number is made of 8 unique tiles.
+		; With TILESIZE being $10, that makes $80 bytes in total.
+		; As the graphics for the numbers are stored in order, we can treat that part of the 
+		; uncompressed data as a table of $80 byte entries.
+		;
+
+		; Generate the index
+		; DE = RoundNum * $80
+		ld   a, [wRoundNum]
+		sla  a			; << 3
+		sla  a
+		sla  a
+		ld   d, $00
+		ld   e, a
+	REPT 4				; << 4
+		sla  e
+		rl   d
+	ENDR
+	
+		;; ld   a, [wRoundNum]
+		;; ld   d, a
+		;; ld   e, $00
+		;; sra  d
+		;; rr   e
+	
+		; HL = Ptr to number GFX needed
+		ld   hl, wLZSS_Buffer+$0440	; HL = Ptr to start of number GFX in uncompressed buffer
+		add  hl, de					; Offset it
+		; Copy it to VRAM
+		ld   de, $8C40				
+		ld   b, $08
+		call CopyTiles
+		
+		;
+		; Load the sprite mapping
+		;
+		ld   hl, wOBJInfo3+iOBJInfo_Status
+		ld   de, OBJInfoInit_Play_PreRoundText
+		call OBJLstS_InitFrom
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
 	
-OBJInfoInit_Terry_WinA:
+; =============== Play_DoPreRoundText ===============
+; Handles the pre-round text display while the characters continue their intro animations.
+; The same wOBJInfo is used with different sprite mappings for the text.
+Play_DoPreRoundText:
+	; Display the sprite mapping
+	ld   hl, wOBJInfo_RoundText+iOBJInfo_Status
+	ld   [hl], OST_VISIBLE
+	
+	; These mappings are displayed in sequence.
+	; The game does nothing else other than animate the sprites.
+	
+	; "ROUND *" or "FINAL!!"
+	ld   a, [wRoundFinal]
+	cp   $01			; Is this the final round?
+	jp   z, .final		; If so, use "FINAL!!"
+.roundX:
+	ld   a, PLAY_PREROUND_OBJ_ROUNDX			; Otherwise, use "ROUND *"
+	jp   .setRoundTxt
+.final:
+	ld   a, PLAY_PREROUND_OBJ_FINAL
+.setRoundTxt:
+	ld   hl, wOBJInfo_RoundText+iOBJInfo_OBJLstPtrTblOffset ; Seek to sprite mapping ID
+	ld   [hl], a	
+	ld   b, $78			; Display for $78 frames
+	call Play_DoIntro
+	
+	; "READY"
+	ld   [hl], PLAY_PREROUND_OBJ_READY
+	ld   b, $3C
+	call Play_DoIntro
+	
+	; "GO!!" (small)
+	ld   [hl], PLAY_PREROUND_OBJ_GO_SM
+	ld   b, $08
+	call Play_DoIntro
+	
+	; "GO!!" (large)
+	ld   [hl], PLAY_PREROUND_OBJ_GO_LG
+	ld   b, $3C
+	call Play_DoIntro
+	
+	; Hide the sprite mapping.
+	ld   hl, wOBJInfo_RoundText+iOBJInfo_Status
+	ld   [hl], $00
+	call Task_PassControlFar
+	ret
+	
+; =============== Play_DoIntro ===============
+; Executes the intro code for the specified amount of frames.
+; IN
+; - B: Number of frames
+Play_DoIntro:
+	push hl
+	.loop:
+		push bc
+			; Animate the pre-round text
+			ldh  a, [hROMBank]
+			push af
+				ld   a, BANK(Play_AnimTextPal) ; BANK $01
+				ld   [MBC1RomBank], a
+				ldh  [hROMBank], a
+				call Play_AnimTextPal
+			pop  af
+			ld   [MBC1RomBank], a
+			ldh  [hROMBank], a
+			
+			; Exec shared subs
+			call Play_Intro_Shared
+			
+			; Wait frame end
+			call Task_PassControlFar
+		pop  bc
+		dec  b
+		jp   nz, .loop
+	pop  hl
+	ret
+; =============== Play_Char_SetIntroAnimInstant ===============
+; Sets the intro animation for characters where it should begin immediately.
+;
+; Other characters (like Kyo), first spend 1 second in the normal idle
+; pose before starting the intro animation.
+; That is instead handled by Play_Char_SetIntroAnimDelayed (separate since the screen isn't fully setup yet).
+Play_Char_SetIntroAnimInstant:
+	; Try to set 1P's intro move
+	ld   bc, wPlInfo_Pl1	
+	ld   de, wPlInfo_Pl2
+	call .chk
+	; Try to set 2P's intro move
+	ld   bc, wPlInfo_Pl2
+	ld   de, wPlInfo_Pl1
+	call .chk
+	ret
+; =============== .chk ===============
+; IN
+; - BC: wPlInfo for currently handled player
+; - DE: wPlInfo for other player
+.chk:
+	;
+	; All of these characters start their intro animation immediately.
+	; 
+	ld   hl, iPlInfo_CharId
+	add  hl, bc
+	ld   a, [hl]					; A = Current
+	cp   CHAR_ID_MAI*2				; Playing as Athena?
+	jp   z, Play_Char_SetIntroAnim	; If so, jump
+	cp   CHAR_ID_ATHENA*2			; ...
+	jp   z, Play_Char_SetIntroAnim
+	cp   CHAR_ID_LEONA*2
+	jp   z, Play_Char_SetIntroAnim
+	cp   CHAR_ID_OLEONA*2
+	jp   z, Play_Char_SetIntroAnim
+	cp   CHAR_ID_IORI*2
+	jp   z, Play_Char_SetIntroAnim
+	cp   CHAR_ID_OIORI*2
+	jp   z, Play_Char_SetIntroAnim
+	cp   CHAR_ID_KRAUSER*2
+	jp   z, Play_Char_SetIntroAnim
+	cp   CHAR_ID_MRKARATE*2
+	jp   z, Play_Char_SetIntroAnim
+	
+	; Otherwise, don't set the anim yet.
+	ret
+	
+; =============== Play_Char_SetIntroAnim ===============
+; Sets the intro animation for the player passed throguh BC.
+; What's passed through DE is only used for comparison purposes.
+; IN
+; - BC: wPlInfo for currently handled player
+; - DE: wPlInfo for other player
+Play_Char_SetIntroAnim:
+
+	;
+	; The listed characters have special intro animations when fighting specific characters:
+	; - Kyo when fighting Iori (normal or Orochi)
+	; - Iori (normal only) when fighting Kyo
+	; - Geese when fighting Terry
+	;
+
+	ld   hl, iPlInfo_CharId
+	add  hl, bc
+	ld   a, [hl]
+	cp   CHAR_ID_KYO*2		; Playing as Kyo?
+	jr   z, .chkKyo			; If so, jump
+	cp   CHAR_ID_IORI*2		; Playing as Iori?
+	jr   z, .chkIori		; If so, jump
+	cp   CHAR_ID_GEESE*2	; Playing as Geese?
+	jr   z, .chkGeese		; If so, jump
+	
+	; Everyone else uses the normal intro animation.
+	jr   .noSpec
+.chkKyo:
+	; If playing as Kyo and...
+	ld   hl, iPlInfo_CharId
+	add  hl, de
+	ld   a, [hl]
+	cp   CHAR_ID_IORI*2		; KYO vs IORI?
+	jr   z, .isSpec			; If so, jump
+	cp   CHAR_ID_OIORI*2	; KYO vs IORI'?
+	jr   z, .isSpec			; If so, jump
+	jr   .noSpec			; Otherwise, nothing here
+.chkIori:
+	; If playing as Iori and...
+	ld   hl, iPlInfo_CharId
+	add  hl, de
+	ld   a, [hl]
+	cp   CHAR_ID_KYO*2		; IORI vs KYO?
+	jr   z, .isSpec			; If so, jump
+	jr   .noSpec			; Otherwise, nothing here
+.chkGeese:
+	; If playing as Geese and...
+	ld   hl, iPlInfo_CharId
+	add  hl, de
+	ld   a, [hl]
+	cp   CHAR_ID_TERRY*2	; GEESE vs TERRY?
+	jr   z, .isSpec
+	jr   .noSpec
+.noSpec:
+	ld   a, MOVE_SHARED_INTRO		; A = MoveId for Intro
+	jr   .save
+.isSpec:
+	ld   a, MOVE_SHARED_INTRO_SPEC	; A = MoveId for Intro
+.save:
+	ld   hl, iPlInfo_IntroMoveId
+	add  hl, bc						; Seek to iPlInfo_IntroMoveId
+	ld   [hl], a					; Write it there
+	ret
+	
+; =============== Play_Char_SetIntroAnimDelayed ===============
+; Sets the intro animation for characters that initially start out in their idle anim.
+; See also: Play_Char_SetIntroAnimInstant. 
+
+Play_Char_SetIntroAnimDelayed:
+	; Wait a second in the idle pose before the intro
+	ld   b, 60
+	call Play_DoIntro
+	
+	; Try to set 1P's intro move
+	ld   bc, wPlInfo_Pl1
+	ld   de, wPlInfo_Pl2
+	call .chk
+	; Try to set 2P's intro move
+	ld   bc, wPlInfo_Pl2
+	ld   de, wPlInfo_Pl1
+	call .chk
+	ret
+	
+; =============== .chk ===============
+; IN
+; - BC: wPlInfo for currently handled player
+; - DE: wPlInfo for other player
+.chk:
+	ld   hl, iPlInfo_CharId
+	add  hl, bc
+	ld   a, [hl]			; A = CharId
+	
+	; For all of these characters, we have already set the intro move in Play_Char_SetIntroAnimInstant,
+	; so leave the move value intact.
+	cp   CHAR_ID_ATHENA*2
+	jp   z, .ret
+	cp   CHAR_ID_MAI*2
+	jp   z, .ret
+	cp   CHAR_ID_LEONA*2
+	jp   z, .ret
+	cp   CHAR_ID_OLEONA*2
+	jp   z, .ret
+	cp   CHAR_ID_IORI*2
+	jp   z, .ret
+	cp   CHAR_ID_OIORI*2
+	jp   z, .ret
+	cp   CHAR_ID_KRAUSER*2
+	jp   z, .ret
+	cp   CHAR_ID_MRKARATE*2
+	jp   z, .ret
+	
+	; Ok, can set the move ID
+	jp   Play_Char_SetIntroAnim
+.ret:
+	ret
+	
+; =============== Play_Intro_Shared ===============
+; Executes the subroutines called by the intro that are part of the main gameplay code.
+Play_Intro_Shared:
+	ldh  a, [hROMBank]
+	push af
+	ld   a, BANK(Play_UpdateHealthBars) ; BANK $01 
+	ld   [MBC1RomBank], a
+	ldh  [hROMBank], a
+	call Play_UpdateHealthBars
+	call Play_UpdatePowBars
+	call Play_DoTime
+	pop  af
+	ld   [MBC1RomBank], a
+	ldh  [hROMBank], a
+	ret
+; =============== HomeCall_Play_DrawTime ===============
+HomeCall_Play_DrawTime:
+	ldh  a, [hROMBank]
+	push af
+	ld   a, BANK(Play_DrawTime) ; BANK $01
+	ld   [MBC1RomBank], a
+	ldh  [hROMBank], a
+	call Play_DrawTime
+	pop  af
+	ld   [MBC1RomBank], a
+	ldh  [hROMBank], a
+	ret
+	
+OBJInfoInit_Pl1:
 	db OST_VISIBLE ; iOBJInfo_Status
-	db $20 ; iOBJInfo_OBJLstFlags
-	db $20 ; iOBJInfo_OBJLstFlagsOld
+	db SPR_XFLIP ; iOBJInfo_OBJLstFlags
+	db SPR_XFLIP ; iOBJInfo_OBJLstFlagsOld
 	db $60 ; iOBJInfo_X
 	db $00 ; iOBJInfo_XSub
 	db $88 ; iOBJInfo_Y
@@ -7973,10 +8688,10 @@ OBJInfoInit_Terry_WinA:
 	db LOW(wGFXBufInfo_Pl1) ; iOBJInfo_BufInfoPtr_Low
 	db HIGH(wGFXBufInfo_Pl1) ; iOBJInfo_BufInfoPtr_High
 
-OBJInfoInit_Andy_WinA:
+OBJInfoInit_Pl2:
 	db OST_VISIBLE ; iOBJInfo_Status
-	db $10 ; iOBJInfo_OBJLstFlags
-	db $10 ; iOBJInfo_OBJLstFlagsOld
+	db SPR_OBP1 ; iOBJInfo_OBJLstFlags
+	db SPR_OBP1 ; iOBJInfo_OBJLstFlagsOld
 	db $A0 ; iOBJInfo_X
 	db $00 ; iOBJInfo_XSub
 	db $88 ; iOBJInfo_Y
@@ -8009,13 +8724,13 @@ OBJInfoInit_Andy_WinA:
 L002458:;I
 	ld   sp, $DE00
 	ei
-	ld   bc, wJoyBuffer_Pl2
+	ld   bc, wPlInfo_Pl1
 	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
 	jr   L00246E
 L002464:;I
 	ld   sp, $DF00
 	ei
-	ld   bc, $DA00
+	ld   bc, wPlInfo_Pl2
 	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
 L00246E:;R
 	ld   a, $02
@@ -9220,7 +9935,7 @@ L002BF5:;J
 L002BFC:;C
 	ldh  a, [hROMBank]
 	push af
-	ld   bc, wJoyBuffer_Pl2
+	ld   bc, wPlInfo_Pl1
 	ld   de, wOBJInfo2+iOBJInfo_Status
 	ld   a, $04
 L002C07:;J
@@ -10416,7 +11131,7 @@ L0033D7:;J
 	ld   a, $72
 	call L003451
 	ld   a, $F0
-	ld   [$C17C], a
+	ld   [wStageBGP], a
 	ld   hl, $0021
 	add  hl, bc
 	res  7, [hl]
@@ -11304,7 +12019,7 @@ L00381A:;C
 	ret
 L00386A:;C
 	ld   a, $FF
-	ld   [$C17C], a
+	ld   [wStageBGP], a
 	ld   a, $1B
 	call HomeCall_Sound_ReqPlayExId
 	ret

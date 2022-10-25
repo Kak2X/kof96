@@ -4903,10 +4903,10 @@ Intro_CharS_LoadVRAM:
 	
 	; Load default sprite mappings
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   de, OBJInfoInit_Terry_WinA
+	ld   de, OBJInfoInit_Pl1
 	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	ld   de, OBJInfoInit_Andy_WinA
+	ld   de, OBJInfoInit_Pl2
 	call OBJLstS_InitFrom
 	
 	; Hide both sprites while the GFX are loading, and make them display

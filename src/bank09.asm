@@ -6401,7 +6401,7 @@ L0958D3: db $00
 L0958D4: db $01
 L0958D5: db $1D
 L0958D6: db $00
-L0958D7: db $6C
+OBJLstPtrTable_Projectile: db $6C
 L0958D8: db $0D
 L0958D9: db $DD
 L0958DA: db $58

@@ -12261,7 +12261,7 @@ TakaraLogo_CheckCheat:
 	; Play SGB sound
 	push hl
 		ld   hl, (SGB_SND_A_CUPBREAK << 8)|$01
-		call SGB_PrepareSoundPacket
+		call SGB_PrepareSoundPacketA
 		ld   a, SFX_CHARCURSORMOVE
 		call HomeCall_Sound_ReqPlayExId
 	pop  hl
@@ -12284,7 +12284,7 @@ TakaraLogo_CheckCheat:
 	set  DIPB_UNLOCK_GOENITZ, [hl]
 	push hl
 		ld   hl, (SGB_SND_A_ESCBUBL << 8)|$00
-		call SGB_PrepareSoundPacket
+		call SGB_PrepareSoundPacketA
 		ld   a, SFX_CHARSELECTED
 		call HomeCall_Sound_ReqPlayExId
 	pop  hl
@@ -12309,7 +12309,7 @@ TakaraLogo_CheckCheat:
 	set  DIPB_UNLOCK_OTHER, [hl]
 	push hl
 		ld   hl, (SGB_SND_A_ESCBUBL << 8)|$01
-		call SGB_PrepareSoundPacket
+		call SGB_PrepareSoundPacketA
 		ld   a, SFX_SUPERMOVE
 		call HomeCall_Sound_ReqPlayExId
 	pop  hl
@@ -12339,7 +12339,7 @@ TakaraLogo_CheckCheat:
 	set  DIPB_SGB_SOUND_TEST, [hl]
 	push hl
 		ld   hl, (SGB_SND_A_PUNCH_A << 8)|$01
-		call SGB_PrepareSoundPacket
+		call SGB_PrepareSoundPacketA
 		ld   a, SND_ID_29
 		call HomeCall_Sound_ReqPlayExId
 	pop  hl

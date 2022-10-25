@@ -40,8 +40,8 @@ MODE_TEAMVS   EQU $03
 ; Player IDs used across multiple variables
 PL1 EQU $00		
 PL2 EQU $01
-PLB1 EQU 0
-PLB2 EQU 1
+PLB1 EQU 0 ; $01
+PLB2 EQU 1 ; $02
 
 ACTIVE_CTRL_PL1          EQU $00
 ACTIVE_CTRL_PL2          EQU $01
@@ -74,12 +74,21 @@ CHAR_ID_OLEONA   EQU $12
 CHAR_ID_KAGURA   EQU $13
 CHAR_ID_NONE     EQU $FF
 
+STAGE_ID_HERO             EQU $00
+STAGE_ID_FATALFURY        EQU $01
+STAGE_ID_YAGAMI           EQU $02
+STAGE_ID_BOSS             EQU $03
+STAGE_ID_STADIUM_KAGURA   EQU $04
+STAGE_ID_STADIUM_GOENITZ  EQU $05
+STAGE_ID_STADIUM_EXTRA    EQU $06
+
+
 ; Special hardcoded stages for bosses or secrets.
 ; These are special indexes to wRoundSeqTbl that return CHAR_ID_* instead of CHARSEL_ID_*
-STAGE_KAGURA   EQU $0F
-STAGE_GOENITZ  EQU $10
-STAGE_BONUS    EQU $11
-STAGE_MRKARATE EQU $12
+STAGESEQ_KAGURA   EQU $0F
+STAGESEQ_GOENITZ  EQU $10
+STAGESEQ_BONUS    EQU $11
+STAGESEQ_MRKARATE EQU $12
 
 C_NL EQU $FF ; Newline character in strings
 
@@ -103,6 +112,8 @@ MISCB_SERIAL_MODE     EQU 6 ; Marks a VS battle through serial cable. Not in SGB
 MISCB_IS_SGB          EQU 7 ; Enables SGB features
 ; $C026
 MISCB_LAG_FRAME       EQU 3 ; Is set when the task cycler is called, and unset right before the VBlank wait loop.
+; $C027
+MISCB_PLAY_STOP       EQU 7 ; If set, the game stops processing input and the timer. Used on the intro and when a round ends.
 ; $C028
 MISCB_USE_SECT        EQU 0 ; If set, the screen uses the three-section mode (SetSectLYC was called). Otherwise there's a single section governed by hScrollX and hScrollY.
 MISCB_PL_RANGE_CHECK  EQU 1 ; Enables the player range enforcement, which is part of the sprite drawing routine.
@@ -133,6 +144,7 @@ GFXBUF_TILECOUNT EQU $20 ; Number of tiles in a GFX buffer
 
 ; iOBJInfo_Status bits
 OSTB_GFXLOAD EQU 0 ; If set, the graphics are still being copied to the *opposite* buffer than the current one at OSTB_GFXBUF2
+OSTB_PL      EQU 0 ; ??? If the sprite mapping doesn't use the GFX buffer (ie: projectiles), it instead marks the player who spawned it (PLB1 or PLB2).
 OSTB_GFXBUF2 EQU 1 ; If set, the second GFX buffer is used for the *current* frame
 OSTB_BIT3    EQU 3 ; 
 OSTB_ANIMEND EQU 4 ; Animation has ended, repeat last frame indefinitely
@@ -141,6 +153,7 @@ OSTB_YFLIP   EQU 6 ; Vertical flip
 OSTB_VISIBLE EQU 7 ; If not set, the sprite mapping is hidden
 
 OST_GFXLOAD EQU 1 << OSTB_GFXLOAD
+OST_PL      EQU 1 << OSTB_PL
 OST_GFXBUF2 EQU 1 << OSTB_GFXBUF2
 OST_BIT3    EQU 1 << OSTB_BIT3
 OST_ANIMEND EQU 1 << OSTB_ANIMEND
@@ -267,7 +280,7 @@ SCT_02                EQU $03
 SCT_03                EQU $04
 SCT_04                EQU $05
 SCT_05                EQU $06
-SCT_06                EQU $07
+SCT_MAXPOWSTART       EQU $07
 SCT_07                EQU $08
 SCT_08                EQU $09
 SCT_09                EQU $0A
@@ -488,3 +501,34 @@ ORDSEL_SEL0 EQU $00
 ORDSEL_SEL1 EQU $01
 ORDSEL_SEL2 EQU $02
 ORDSEL_SELDONE EQU $03
+
+; ============================================================
+; GAMEPLAY
+
+
+MOVE_SHARED_INTRO EQU $2C
+MOVE_SHARED_INTRO_SPEC EQU $2E
+
+
+PLAY_PREROUND_OBJ_ROUNDX EQU $00
+PLAY_PREROUND_OBJ_FINAL EQU $04
+PLAY_PREROUND_OBJ_READY EQU $08
+PLAY_PREROUND_OBJ_GO_SM EQU $0C
+PLAY_PREROUND_OBJ_GO_LG EQU $10
+
+PLAY_MAXMODE_NONE EQU $00
+PLAY_MAXMODE_LENGTH1 EQU $01
+PLAY_MAXMODE_LENGTH2 EQU $02
+PLAY_MAXMODE_LENGTH3 EQU $03
+PLAY_MAXMODE_LENGTH4 EQU $04
+
+PLAY_MAXMODE_BASELENGTH EQU $04
+
+
+
+PLAY_POW_MAX EQU $28 ; Max value for normal POW bar
+
+
+PLAY_MAXPOWFADE_NONE EQU $00
+PLAY_MAXPOWFADE_IN EQU $01
+PLAY_MAXPOWFADE_OUT EQU $FF

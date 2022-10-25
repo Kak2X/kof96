@@ -1,4 +1,4 @@
-L1D4000: db $02
+GFX_Play_HUD_1PHuman: db $02
 L1D4001: db $2E
 L1D4002: db $2E
 L1D4003: db $69
@@ -31,7 +31,7 @@ L1D401D: db $00
 L1D401E: db $00
 L1D401F: db $00
 L1D4020: db $00
-L1D4021: db $02;X
+GFX_Play_HUD_2PHuman: db $02;X
 L1D4022: db $01;X
 L1D4023: db $01;X
 L1D4024: db $00;X
@@ -64,7 +64,7 @@ L1D403E: db $00;X
 L1D403F: db $00;X
 L1D4040: db $00;X
 L1D4041: db $00;X
-L1D4042: db $02
+GFX_Play_HUD_1PCPU: db $02
 L1D4043: db $22
 L1D4044: db $22
 L1D4045: db $55
@@ -97,7 +97,7 @@ L1D405F: db $00
 L1D4060: db $00
 L1D4061: db $00
 L1D4062: db $00
-L1D4063: db $02
+GFX_Play_HUD_2PCPU: db $02
 L1D4064: db $04
 L1D4065: db $04
 L1D4066: db $0A
@@ -130,7 +130,7 @@ L1D4080: db $00
 L1D4081: db $00
 L1D4082: db $00
 L1D4083: db $00
-L1D4084: db $7A
+GFXLZ_Play_HUD_CharNames: db $7A
 L1D4085: db $80
 L1D4086: db $7D
 L1D4087: db $00
@@ -1238,130 +1238,31 @@ L1D44D4: db $03
 L1D44D5: db $03
 L1D44D6: db $01
 L1D44D7: db $00
-L1D44D8: db $03
-L1D44D9: db $01
-L1D44DA: db $02
-L1D44DB: db $05
-L1D44DC: db $06
-L1D44DD: db $03
-L1D44DE: db $04
-L1D44DF: db $06
-L1D44E0: db $07
-L1D44E1: db $08
-L1D44E2: db $09
-L1D44E3: db $05
-L1D44E4: db $0A
-L1D44E5: db $0B
-L1D44E6: db $0E
-L1D44E7: db $0F
-L1D44E8: db $12
-L1D44E9: db $04
-L1D44EA: db $0C
-L1D44EB: db $0D
-L1D44EC: db $10
-L1D44ED: db $11
-L1D44EE: db $03
-L1D44EF: db $13
-L1D44F0: db $14
-L1D44F1: db $05
-L1D44F2: db $06
-L1D44F3: db $13
-L1D44F4: db $15
-L1D44F5: db $16
-L1D44F6: db $17
-L1D44F7: db $18
-L1D44F8: db $19
-L1D44F9: db $06
-L1D44FA: db $1C
-L1D44FB: db $1D
-L1D44FC: db $20
-L1D44FD: db $21
-L1D44FE: db $1F
-L1D44FF: db $22
-L1D4500: db $03
-L1D4501: db $23
-L1D4502: db $24
-L1D4503: db $27
-L1D4504: db $05
-L1D4505: db $1A
-L1D4506: db $1B
-L1D4507: db $1E
-L1D4508: db $1F
-L1D4509: db $22
-L1D450A: db $05
-L1D450B: db $2A
-L1D450C: db $2B
-L1D450D: db $2E
-L1D450E: db $2F
-L1D450F: db $32
-L1D4510: db $06
-L1D4511: db $33
-L1D4512: db $34
-L1D4513: db $36
-L1D4514: db $37
-L1D4515: db $3A
-L1D4516: db $3B
-L1D4517: db $05
-L1D4518: db $23
-L1D4519: db $35
-L1D451A: db $38
-L1D451B: db $39
-L1D451C: db $3C
-L1D451D: db $04
-L1D451E: db $25
-L1D451F: db $26
-L1D4520: db $28
-L1D4521: db $29
-L1D4522: db $06
-L1D4523: db $23
-L1D4524: db $24
-L1D4525: db $2C
-L1D4526: db $2D
-L1D4527: db $30
-L1D4528: db $31
-L1D4529: db $06
-L1D452A: db $3D
-L1D452B: db $3E
-L1D452C: db $41
-L1D452D: db $42
-L1D452E: db $45
-L1D452F: db $46
-L1D4530: db $06
-L1D4531: db $3F
-L1D4532: db $40
-L1D4533: db $43
-L1D4534: db $44
-L1D4535: db $47
-L1D4536: db $48
-L1D4537: db $06
-L1D4538: db $4B
-L1D4539: db $4C
-L1D453A: db $4F
-L1D453B: db $50
-L1D453C: db $53
-L1D453D: db $54
-L1D453E: db $05
-L1D453F: db $25
-L1D4540: db $26
-L1D4541: db $28
-L1D4542: db $29
-L1D4543: db $49
-L1D4544: db $06
-L1D4545: db $1A
-L1D4546: db $1B
-L1D4547: db $1E
-L1D4548: db $1F
-L1D4549: db $22
-L1D454A: db $49
-L1D454B: db $06
-L1D454C: db $01
-L1D454D: db $4A
-L1D454E: db $4D
-L1D454F: db $4E
-L1D4550: db $51
-L1D4551: db $52
+
+; "Tilemaps" for the character names in the HUD
+BGXDef_Play_HUD_CharName_Kyo: mBinDef "data/bg/play_hud_charname_kyo.bin"
+BGXDef_Play_HUD_CharName_Daimon: mBinDef "data/bg/play_hud_charname_daimon.bin"
+BGXDef_Play_HUD_CharName_Terry: mBinDef "data/bg/play_hud_charname_terry.bin"
+BGXDef_Play_HUD_CharName_Andy: mBinDef "data/bg/play_hud_charname_andy.bin"
+BGXDef_Play_HUD_CharName_Ryo: mBinDef "data/bg/play_hud_charname_ryo.bin"
+BGXDef_Play_HUD_CharName_Robert: mBinDef "data/bg/play_hud_charname_robert.bin"
+BGXDef_Play_HUD_CharName_Athena: mBinDef "data/bg/play_hud_charname_athena.bin"
+BGXDef_Play_HUD_CharName_Mai: mBinDef "data/bg/play_hud_charname_mai.bin"
+BGXDef_Play_HUD_CharName_Leona: mBinDef "data/bg/play_hud_charname_leona.bin"
+BGXDef_Play_HUD_CharName_Geese: mBinDef "data/bg/play_hud_charname_geese.bin"
+BGXDef_Play_HUD_CharName_Krauser: mBinDef "data/bg/play_hud_charname_krauser.bin"
+BGXDef_Play_HUD_CharName_MrBig: mBinDef "data/bg/play_hud_charname_mrbig.bin"
+BGXDef_Play_HUD_CharName_Iori: mBinDef "data/bg/play_hud_charname_iori.bin"
+BGXDef_Play_HUD_CharName_Mature: mBinDef "data/bg/play_hud_charname_mature.bin"
+BGXDef_Play_HUD_CharName_Chizuru: mBinDef "data/bg/play_hud_charname_chizuru.bin"
+BGXDef_Play_HUD_CharName_Goenitz: mBinDef "data/bg/play_hud_charname_goenitz.bin"
+BGXDef_Play_HUD_CharName_MrKarate: mBinDef "data/bg/play_hud_charname_mrkarate.bin"
+BGXDef_Play_HUD_CharName_OIori: mBinDef "data/bg/play_hud_charname_oiori.bin"
+BGXDef_Play_HUD_CharName_OLeona: mBinDef "data/bg/play_hud_charname_oleona.bin"
+BGXDef_Play_HUD_CharName_Kagura: mBinDef "data/bg/play_hud_charname_kagura.bin"
+
 GFX_Char_Icons: INCBIN "data/gfx/char_icons.bin"
-L1D4A52: db $2B
+GFXLZ_Play_HUD: db $2B
 L1D4A53: db $40
 L1D4A54: db $55
 L1D4A55: db $00
@@ -1757,11 +1658,11 @@ L1D4BDA: db $CF
 L1D4BDB: db $00
 L1D4BDC: db $79
 L1D4BDD: db $00
-L1D4BDE: db $D0
+BG_Play_HUD_Time: db $D0
 L1D4BDF: db $D1
-L1D4BE0: db $D2
-L1D4BE1: db $D3
-L1D4BE2: db $D6
+BG_Play_HUD_HealthBarL: db $D2
+BG_Play_HUD_HealthBarR: db $D3
+BG_Play_HUD_BlankPowBar: db $D6
 L1D4BE3: db $D7
 L1D4BE4: db $D2
 L1D4BE5: db $E0
@@ -1781,11 +1682,11 @@ L1D4BF2: db $E0
 L1D4BF3: db $D3
 L1D4BF4: db $D6
 L1D4BF5: db $D7
-L1D4BF6: db $FC
+BG_Play_HUD_1PMarker: db $FC
 L1D4BF7: db $FD
-L1D4BF8: db $FE
+BG_Play_HUD_2PMarker: db $FE
 L1D4BF9: db $FF
-L1D4BFA: db $00
+GFX_Play_HUD_SingleWinMarker: db $00
 L1D4BFB: db $00
 L1D4BFC: db $FF
 L1D4BFD: db $FF
@@ -1817,7 +1718,7 @@ L1D4C16: db $81
 L1D4C17: db $81
 L1D4C18: db $FF
 L1D4C19: db $FF
-L1D4C1A: db $00
+GFX_Play_HUD_Cross: db $00
 L1D4C1B: db $20
 L1D4C1C: db $00
 L1D4C1D: db $10
@@ -1881,7 +1782,7 @@ L1D4C56: db $00
 L1D4C57: db $18
 L1D4C58: db $00
 L1D4C59: db $0C
-L1D4C5A: db $8F
+GFX_Play_HUD_Cross_Mask: db $8F
 L1D4C5B: db $8F
 L1D4C5C: db $C7
 L1D4C5D: db $C7
@@ -1983,7 +1884,7 @@ L1D509F:;I
 	ld   a, [wLastWinner]
 	bit  0, a
 	jp   z, L1D50F6
-	ld   bc, wJoyBuffer_Pl2
+	ld   bc, wPlInfo_Pl1
 	ld   a, c
 	ld   [wUnknownTimer_C1B3], a
 	ld   a, b
@@ -1999,7 +1900,7 @@ L1D50F6:;J
 	ld   a, [wLastWinner]
 	bit  1, a
 	jp   z, L1D511B
-	ld   bc, $DA00
+	ld   bc, wPlInfo_Pl2
 	ld   a, c
 	ld   [wUnknownTimer_C1B3], a
 	ld   a, b
@@ -2067,10 +1968,10 @@ L1D5169:;J
 	ld   a, [wPlayMode]
 	bit  0, a
 	jp   nz, L1D5183
-	call Pl_Unknown_InitBeforeRound
-	jp   L00179D
+	call Pl_Unknown_InitBeforeStage
+	jp   Module_Play
 L1D5183:;J
-	call Pl_Unknown_InitBeforeRound
+	call Pl_Unknown_InitBeforeStage
 	ld   b, $1E
 	ld   hl, $626E
 	rst  $00
@@ -2096,10 +1997,10 @@ L1D51AC:;J
 	ld   a, [wPlayMode]
 	bit  0, a
 	jp   nz, L1D51C0
-	call Pl_Unknown_InitBeforeRound
-	jp   L00179D
+	call Pl_Unknown_InitBeforeStage
+	jp   Module_Play
 L1D51C0:;J
-	call Pl_Unknown_InitBeforeRound
+	call Pl_Unknown_InitBeforeStage
 	ld   b, $1E
 	ld   hl, $626E
 	rst  $00
@@ -2168,7 +2069,7 @@ L1D5241:;J
 	call L1D5428
 	ld   a, $11
 	ld   [wRoundSeqId], a
-	call Pl_Unknown_InitBeforeRound
+	call Pl_Unknown_InitBeforeStage
 	ld   b, $1E
 	ld   hl, $626E
 	rst  $00
@@ -2198,8 +2099,8 @@ L1D5264:;J
 	ld   [wRoundSeqId], a
 	ld   bc, $0000
 	call L1D54D8
-	call Pl_Unknown_InitBeforeRound
-	jp   L00179D
+	call Pl_Unknown_InitBeforeStage
+	jp   Module_Play
 L1D528F:;J
 	ld   b, $1D
 	ld   hl, $6F6C
@@ -8230,7 +8131,7 @@ L1D6F93:;I
 	ld   b, $5C
 	call SetSectLYC
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   de, OBJInfoInit_Terry_WinA
+	ld   de, OBJInfoInit_Pl1
 	call OBJLstS_InitFrom
 	ld   hl, $7149
 	call L1D70A8
@@ -8252,7 +8153,7 @@ L1D6F93:;I
 	jp   L1D6811
 L1D6FD7:;C
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   de, OBJInfoInit_Terry_WinA
+	ld   de, OBJInfoInit_Pl1
 	call OBJLstS_InitFrom
 	ld   a, [wUnknownTimer_C1B3]
 	ld   c, a
@@ -8565,7 +8466,7 @@ L1D7176:;I
 	ld   b, $5C
 	call SetSectLYC
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   de, OBJInfoInit_Terry_WinA
+	ld   de, OBJInfoInit_Pl1
 	call OBJLstS_InitFrom
 	ld   hl, $7149
 	call L1D70A8

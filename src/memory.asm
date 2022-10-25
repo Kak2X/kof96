@@ -1,4 +1,24 @@
 
+vGFXProjectile1P EQU $8800
+vGFXProjectile2P EQU $8A60
+vGFXSuperSparkle EQU $8CC0
+
+
+vBGHealthBar1P EQU $9C20
+vBGHealthBar1P_Last EQU vBGHealthBar1P+$08
+
+vBGRoundTime EQU $9C29
+
+vBGHealthBar2P EQU $9C2B
+vBGHealthBar2P_Last EQU vBGHealthBar2P+$08
+
+vBGPowBar1P_Left EQU $9C83
+vBGPowBar2P_Left EQU $9C8C
+
+
+wBGMaxPowBarRow EQU $9CA0
+
+
 wDipSwitch EQU $C000 ; DIP-SWITCH options
 wDifficulty EQU $C001
 wMatchStartTime EQU $C002
@@ -7,6 +27,7 @@ wMatchStartTime EQU $C002
 wTimer EQU $C005 ; Global timer
 wLCDCSectId EQU $C006 ; Starts at $00 on every frame, incremented when LCDC hits (to determine the parallax sections)
 wVBlankNotDone EQU $C007 ; If != 0, the VBlank handler hasn't finished
+wPlayTimer EQU $C008 ; Timer that increments every frame of gameplay (but not when pausing or in the intro)
 wRand EQU $C009
 wRandLY EQU $C00A
 
@@ -31,10 +52,11 @@ wOBJLstCurFlags EQU $C01A ; Calculated flags for the sprite mapping (merge of wO
 wOBJLstCurXOffset EQU $C01B ; Offset added to wOBJLstCurRelX, and the result goes to wOBJLstCurDispX
 wOBJLstCurYOffset EQU $C01C ; Offset added to wOBJLstCurRelX, and the result goes to wOBJLstCurDispY
 
-
-wMisc_C025 EQU $C025 ; bitmask with multiple different purposes
-wMisc_C026 EQU $C026
-wMisc_C028 EQU $C028 ; appears to select a parallax type (how to divide the screen sections)
+; Option flags
+wMisc_C025 EQU $C025 ; Serial + SGB
+wMisc_C026 EQU $C026 ; Task
+wMisc_C027 EQU $C027 ; Gameplay
+wMisc_C028 EQU $C028 ; Sect
 
 wIntroScene EQU $C029 ; Offset to scene ID in scene pointer table (some scenes have different parts)
 wIntroCharScene EQU $C02A ; Offset to the subscene ID when animating player sprites
@@ -85,14 +107,27 @@ wOBJScrollY EQU $C157 ; Y position *subtracted* to every OBJ.
 ; a supposed wScreenSect0LYC for the first section is fixed, and always starts at $00
 wScreenSect1LYC EQU $C15A ; Scanline number the second screen section starts. During gameplay, it's the playfield.
 wScreenSect2LYC EQU $C15B ; Scanline number the third screen section starts. During gameplay, it's the meter HUD
-
+wRoundFinal EQU $C160 ; If set, this is the "FINAL!!" round, displayed when all characters in both sides are marked as defeated (requires a draw)
 wLastWinner EQU $C162 ; Marks using bits the player who won the last round.
 wPlayMode EQU $C163 ; Single/Team 1P/VS
-
+wRoundTotal EQU $C164 ; Total number of rounds played since the system was on. Never read back.
 wJoyActivePl EQU $C165 ; Determines the active SGB pad, generally for 1P modes.
 
+wStageId EQU $C166 ; Stage ID. Determines music, backdrop and palette.
 wRoundNum EQU $C167 ; Round number in a stage
+wRoundTime EQU $C169 ; Round timer
+wRoundTimeSub EQU $C16A ; Round subsecond timer
 
+
+
+wPlayMaxPowScroll1P EQU $C16B ; Scrolls on-screen or off-screen the 1P MAX Power bar
+wPlayMaxPowScrollBGOffset1P EQU $C16C ; Tilemap offset, determines where the 1P MAX Power bar starts (special version of iPlInfo_MaxPowBGPtr)
+wPlayMaxPowScrollTimer1P EQU $C16D ; Countdown. When it elapses, the scroll animation ends
+wPlayMaxPowScroll2P EQU $C16E ; Scrolls on-screen or off-screen the 2P MAX Power bar
+wPlayMaxPowScrollBGOffset2P EQU $C16F ; Tilemap offset, determines where the 2P MAX Power bar starts (special version of iPlInfo_MaxPowBGPtr)
+wPlayMaxPowScrollTimer2P EQU $C170 ; Countdown. When it elapses, the scroll animation ends
+
+wStageBGP EQU $C17C ; ??? Determines palette for playfield (used to handle screen flashing)
 wRoundSeqId EQU $C17F ; Index to the char sequence table, essentially the number of beat opponents after clearing a stage
 wRoundSeqTbl EQU $C180 ; Sequence of CPU opponents in order, containing initially CHARSEL_ID_* for normal rounds and CHAR_ID_* for bosses
 
@@ -150,6 +185,11 @@ wOrdSelP2CharId2  EQU $C1D9
 wOrdSelP1CursorPosBak EQU $C1DA
 wOrdSelP2CursorPosBak EQU $C1DB
 
+
+wPlaySecIconBuffer EQU $C1CA ; Buffer for drawing the overlapping secondary icons in team mode
+wPlayCrossBuffer EQU wPlaySecIconBuffer+$100
+wPlayCrossMaskBuffer EQU wPlaySecIconBuffer+$140
+		
 wIntroLoopOBJAnim EQU $C1B3 ; If set in the intro, sprite animations are set to loop
 wUnknownTimer_C1B3 EQU $C1B3
 wTitleMenuOptId EQU $C1B4 ; Cursor location in title screen
@@ -237,7 +277,12 @@ wOBJInfo_CursorU  EQU wOBJInfo3
 wOBJInfo_IoriFlip    EQU wOBJInfo2
 wOBJInfo_LeonaFlip   EQU wOBJInfo3
 wOBJInfo_ChizuruFlip EQU wOBJInfo4
-
+; Gameplay
+wOBJInfo_RoundText EQU wOBJInfo3 ; Pre-round text and post-round text
+wOBJInfo_Pl1Projectile EQU wOBJInfo2
+wOBJInfo_Pl2Projectile EQU wOBJInfo3
+wOBJInfo_Pl1SuperSparkle EQU wOBJInfo4
+wOBJInfo_Pl2SuperSparkle EQU wOBJInfo5
 
 
 wGFXBufInfo_Pl1 EQU $D8C0
@@ -245,8 +290,13 @@ wGFXBufInfo_Pl2 EQU $D8E0
 
 wJoyBuffer_Pl2 EQU $D900 ; Table with 8 entries of 2 byte each (KEY_* + length)
 wJoyBuffer_Pl1 EQU $D910
-wPlInfo_Pl1 EQU $D920
-wPlInfo_Pl2 EQU $DA20
+; NOTE: The indexing is fucked here.
+;       $D900 is treated as the start of the player struct and it's what gets passed around various functions,
+;       but the struct actually starts at $D920.
+;       The first $20 bytes instead store the buffer for both player inputs.
+;       Same thing for wPlInfo_Pl2.
+wPlInfo_Pl1 EQU $D900
+wPlInfo_Pl2 EQU $DA00
 
 wWorkOAM EQU $DF00
 wWorkOAM_End EQU $DFA0
@@ -408,29 +458,88 @@ iOBJ_X EQU $01
 iOBJ_TileIDAndFlags EQU $02
 
 ; Player struct (wPlInfo) format
-;wPlInfo_Pl1 EQU $D920
-;wPlInfo_Pl2 EQU $DA20
+iPlInfo_Status EQU $20
+iPlInfo_21 EQU $21
+iPlInfo_22Flags EQU $22
+iPlInfo_23 EQU $23
+;-- 
+; from master tbl
+iPlInfo_Ptr24_High EQU $24 ; Ptr to ??? (high byte) [BANK $03]
+iPlInfo_Ptr24_Low EQU $25 ; Ptr to ??? (low byte) [BANK $03]
+; Character-specific, never changed after loading
+iPlInfo_MovePtrTable_High EQU $26 ; Ptr to move anim code ptr table (high byte) [BANK $03]
+iPlInfo_MovePtrTable_Low EQU $27 ; Ptr to move anim code ptr table (low byte) [BANK $03]
+iPlInfo_Ptr28_High EQU $28 ; Ptr to ??? (high byte)
+iPlInfo_Ptr28_Low EQU $29 ; Ptr to ??? (low byte)
+iPlInfo_Ptr28_Bank EQU $2A ; Bank num for ???
+;--
+iPlInfo_PlId EQU $2B ; Player number (PL1 or PL2), fixed per side
+iPlInfo_CharId EQU $2C ; Character ID (*2)
+iPlInfo_TeamLossCount EQU $2D ; Team Mode - Loss count. If it reaches 3 the stage ends.
+iPlInfo_TeamCharId0 EQU $2E ; 1st team member ID (*2)
+iPlInfo_TeamCharId1 EQU $2F ; 2nd team member ID (*2)
+iPlInfo_TeamCharId2 EQU $30 ; 3rd team member ID (*2)
+iPlInfo_RoundWinStreak EQU $31 ; Number of consecutive wins in a stage (determines win pose)
+iPlInfo_32 EQU $32
+iPlInfo_MoveId EQU $33 ; ID of the current move. (multiplied by 2)
+iPlInfo_34 EQU $34
+iPlInfo_IntroMoveId EQU $35 ; Intro move ID. When set, iPlInfo_MoveId should be set to the same value.
+iPlInfo_SingleWinCount EQU $36 ; Single mode - Win count. If it reaches 2 the stage ends.
+iPlInfo_HitComboRecvSet EQU $37 ; Sets the combo count of received hits (shown on the other player side)
+iPlInfo_HitComboRecv EQU $38 ; Copy of the above
+iPlInfo_3A EQU $3A ; Old set?
+iPlInfo_3B EQU $3B ; Old set?
+iPlInfo_3C EQU $3C ; Old set?
+iPlInfo_3D EQU $3D ; New set? Set to $00 on copy end
+iPlInfo_3E EQU $3E ; New set? Set to $00 on copy end
+iPlInfo_3F EQU $3F ; New set? Set to $00 on copy end
+iPlInfo_Health EQU $4E ; Player health
+iPlInfo_HealthVisual EQU $4F ; Player health as it appears on the health bar
 
-iPlInfo_Status EQU $00
-iPlInfo_02Flags EQU $02
-iPlInfo_CharId EQU $0C ; Character ID (*2)
-iPlInfo_TeamLossCount EQU $0D ; Team Mode - Loss count. If it reaches 3 the stage ends.
-iPlInfo_TeamCharId0 EQU $0E ; 1st team member ID (*2)
-iPlInfo_TeamCharId1 EQU $0F ; 2nd team member ID (*2)
-iPlInfo_TeamCharId2 EQU $10 ; 3rd team member ID (*2)
-iPlInfo_RoundWinStreak EQU $11 ; Number of consecutive wins in a stage (determines win pose)
-iPlInfo_16 EQU $16
-iPlInfo_HitComboRecvSet EQU $17 ; Sets the combo count of received hits (shown on the other player side)
-iPlInfo_HitComboRecv EQU $18 ; Copy of the above
-iPlInfo_1A EQU $1A ; Old set?
-iPlInfo_1B EQU $1B ; Old set?
-iPlInfo_1C EQU $1C ; Old set?
-iPlInfo_1D EQU $1D ; New set? Set to $00 on copy end
-iPlInfo_1E EQU $1E ; New set? Set to $00 on copy end
-iPlInfo_1F EQU $1F ; New set? Set to $00 on copy end
-iPlInfo_Unknown_TimerTarget EQU $2E ; Set to something, resets the timer below
-iPlInfo_Unknown_Timer EQU $2F ; Counts up until it reaches iPlInfo_Unknown_TimerTarget
+iPlInfo_Pow EQU $50 ; POW meter
+iPlInfo_PowVisual EQU $51 ; POW meter as it appears on the POW bar
+iPlInfo_52 EQU $52 ; ????
+iPlInfo_MaxPow EQU $53 ; MAX Power meter
+iPlInfo_MaxPowVisual EQU $54 ; MAX Power meter as it appears on screen
+iPlInfo_MaxPowExtraLen EQU $55 ; Determines the length of the MAX Power meter. If $00, it's not enabled.
+iPlInfo_MaxPowBGPtr_High EQU $56 ; Ptr to the leftmost tile of MAX Power meter. *NOT* used when scrolling it on/offscreen. (high byte)
+iPlInfo_MaxPowBGPtr_Low EQU $57 ; Ptr to the leftmost tile of MAX Power meter. *NOT* used when scrolling it on/offscreen. (low byte)
 
+iPlInfo_58 EQU $58
+iPlInfo_59 EQU $59
+iPlInfo_5A EQU $5A
+iPlInfo_5B EQU $5B
+iPlInfo_5C EQU $5C
+iPlInfo_5D EQU $5D
+iPlInfo_5E EQU $5E
+iPlInfo_5F EQU $5F
+iPlInfo_60 EQU $60
+iPlInfo_61 EQU $61
+iPlInfo_62 EQU $62
+iPlInfo_63 EQU $63
+iPlInfo_64 EQU $64
+iPlInfo_65 EQU $65
+
+;--
+; from master tbl
+
+; Word value must be positive
+iPlInfo_SpeedX EQU $65 ; Horizontal movement speed when moving forwards or jumping (pixels)
+iPlInfo_SpeedX_Sub EQU $66 ; Horizontal movement speed when moving forwards or jumping (subpixels)
+
+; Word value must be negative
+iPlInfo_BackSpeedX EQU $67 ; Horizontal movement speed when moving backwards. (pixels)
+iPlInfo_BackSpeedX_Sub EQU $68 ; Horizontal movement speed when moving backwards (subpixels)
+
+; Word value must be negative
+iPlInfo_JumpSpeed EQU $69 ; Vertical speed when starting a jump (pixels).
+iPlInfo_JumpSpeed_Sub EQU $6A ; Vertical speed when starting a jump (subpixels).
+
+; Word value must be positive
+iPlInfo_Gravity EQU $6B ; Gravity applied when jumping (pixels).
+iPlInfo_Gravity_Sub EQU $6C ; Gravity applied when jumping (subpixels).
+;--
+iPlInfo_Unk_CharIdCopy EQU $71 ; Copy of iPlInfo_CharId
 
 
 ; Sound channel data header (ROM)

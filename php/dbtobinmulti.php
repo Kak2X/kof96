@@ -3,13 +3,13 @@
 // Purpose: Convert inline db to binary data; with automatic naming
 // ==============================
 set_error_handler('error_reporter');
-const REMOVE_FILE = "BGLZ_";	// Label part to remove when generating file name
+const REMOVE_FILE = "BG_";	// Label part to remove when generating file name
 const INCBIN_PATH = "data/bg/"; // folder of incbin files
 const LOCK_WRITE = false; // Preview file names; don't write
 const OPERATOR = "INCBIN";
 const SKIP_FIRST = 0;
 const SEPARATE_FILE = false; //"scroll_locks.bin"; // If set, the generated file name will be the path, with this fixed file name
-const TARGET_EXT = ".lzs";
+const TARGET_EXT = ".bin";
 require "lib/common.php";
 
 if (!file_exists("tempconv.txt")) {

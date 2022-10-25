@@ -1,4 +1,4 @@
-L014000: db $7B
+GFXLZ_Play_PreRoundText: db $7B
 L014001: db $40
 L014002: db $60
 L014003: db $00
@@ -2210,69 +2210,72 @@ L0148A0: db $40
 L0148A1: db $28
 L0148A2: db $49
 L0148A3: db $69
-L0148A4: db $00
-L0148A5: db $10
-L0148A6: db $00
-L0148A7: db $60
-L0148A8: db $00
-L0148A9: db $68
-L0148AA: db $00
-L0148AB: db $00
-L0148AC: db $00
-L0148AD: db $00
-L0148AE: db $00
-L0148AF: db $00
-L0148B0: db $00
-L0148B1: db $80
-L0148B2: db $00
-L0148B3: db $88
-L0148B4: db $01
-L0148B5: db $E2
-L0148B6: db $48
-L0148B7: db $00
-L0148B8: db $01
-L0148B9: db $E2
-L0148BA: db $48
-L0148BB: db $00
-L0148BC: db $00
-L0148BD: db $00
-L0148BE: db $00
-L0148BF: db $00
-L0148C0: db $00
-L0148C1: db $00
-L0148C2: db $00
-L0148C3: db $00
-L0148C4: db $10
-L0148C5: db $00
-L0148C6: db $80
-L0148C7: db $00
-L0148C8: db $60
-L0148C9: db $00
-L0148CA: db $00
-L0148CB: db $00
-L0148CC: db $00
-L0148CD: db $00
-L0148CE: db $00
-L0148CF: db $00
-L0148D0: db $80
-L0148D1: db $00
-L0148D2: db $88
-L0148D3: db $01
-L0148D4: db $F2
-L0148D5: db $48
-L0148D6: db $00
-L0148D7: db $01
-L0148D8: db $F2
-L0148D9: db $48
-L0148DA: db $00
-L0148DB: db $00
-L0148DC: db $00
-L0148DD: db $00
-L0148DE: db $00
-L0148DF: db $00
-L0148E0: db $00
-L0148E1: db $00
-L0148E2: db $28
+
+L0148A4:
+	db $00 ; iOBJInfo_Status
+	db $10 ; iOBJInfo_OBJLstFlags
+	db $00 ; iOBJInfo_OBJLstFlagsOld
+	db $60 ; iOBJInfo_X
+	db $00 ; iOBJInfo_XSub
+	db $68 ; iOBJInfo_Y
+	db $00 ; iOBJInfo_YSub
+	db $00 ; iOBJInfo_SpeedX
+	db $00 ; iOBJInfo_SpeedXSub
+	db $00 ; iOBJInfo_Unknown_09
+	db $00 ; iOBJInfo_Unknown_0A
+	db $00 ; iOBJInfo_RelX (auto)
+	db $00 ; iOBJInfo_RelY (auto)
+	db $80 ; iOBJInfo_TileIDBase
+	db LOW($8800) ; iOBJInfo_VRAMPtr_Low
+	db HIGH($8800) ; iOBJInfo_VRAMPtr_High
+	db BANK(OBJLstPtrTable_L0148E2) ; iOBJInfo_BankNum (BANK $01)
+	db LOW(OBJLstPtrTable_L0148E2) ; iOBJInfo_OBJLstPtrTbl_Low
+	db HIGH(OBJLstPtrTable_L0148E2) ; iOBJInfo_OBJLstPtrTbl_High
+	db $00 ; iOBJInfo_OBJLstPtrTblOffset
+	db BANK(OBJLstPtrTable_L0148E2) ; iOBJInfo_BankNum (BANK $01)
+	db LOW(OBJLstPtrTable_L0148E2) ; iOBJInfo_OBJLstPtrTbl_Low
+	db HIGH(OBJLstPtrTable_L0148E2) ; iOBJInfo_OBJLstPtrTbl_High
+	db $00 ; iOBJInfo_OBJLstPtrTblOffset
+	db $00 ; iOBJInfo_OBJLstByte1 (auto)
+	db $00 ; iOBJInfo_OBJLstByte2 (auto)
+	db $00 ; iOBJInfo_Unknown_1A
+	db $00 ; iOBJInfo_FrameLeft
+	db $00 ; iOBJInfo_FrameTotal
+	db $00 ; iOBJInfo_BufInfoPtr_Low
+	db $00 ; iOBJInfo_BufInfoPtr_High
+OBJInfoInit_Play_PreRoundText:
+	db $00 ; iOBJInfo_Status
+	db $10 ; iOBJInfo_OBJLstFlags
+	db $00 ; iOBJInfo_OBJLstFlagsOld
+	db $80 ; iOBJInfo_X
+	db $00 ; iOBJInfo_XSub
+	db $60 ; iOBJInfo_Y
+	db $00 ; iOBJInfo_YSub
+	db $00 ; iOBJInfo_SpeedX
+	db $00 ; iOBJInfo_SpeedXSub
+	db $00 ; iOBJInfo_Unknown_09
+	db $00 ; iOBJInfo_Unknown_0A
+	db $00 ; iOBJInfo_RelX (auto)
+	db $00 ; iOBJInfo_RelY (auto)
+	db $80 ; iOBJInfo_TileIDBase
+	db LOW($8800) ; iOBJInfo_VRAMPtr_Low
+	db HIGH($8800) ; iOBJInfo_VRAMPtr_High
+	db BANK(OBJLstPtrTable_PreRoundText) ; iOBJInfo_BankNum (BANK $01)
+	db LOW(OBJLstPtrTable_PreRoundText) ; iOBJInfo_OBJLstPtrTbl_Low
+	db HIGH(OBJLstPtrTable_PreRoundText) ; iOBJInfo_OBJLstPtrTbl_High
+	db $00 ; iOBJInfo_OBJLstPtrTblOffset
+	db BANK(OBJLstPtrTable_PreRoundText) ; iOBJInfo_BankNum (BANK $01)
+	db LOW(OBJLstPtrTable_PreRoundText) ; iOBJInfo_OBJLstPtrTbl_Low
+	db HIGH(OBJLstPtrTable_PreRoundText) ; iOBJInfo_OBJLstPtrTbl_High
+	db $00 ; iOBJInfo_OBJLstPtrTblOffset
+	db $00 ; iOBJInfo_OBJLstByte1 (auto)
+	db $00 ; iOBJInfo_OBJLstByte2 (auto)
+	db $00 ; iOBJInfo_Unknown_1A
+	db $00 ; iOBJInfo_FrameLeft
+	db $00 ; iOBJInfo_FrameTotal
+	db $00 ; iOBJInfo_BufInfoPtr_Low
+	db $00 ; iOBJInfo_BufInfoPtr_High
+OBJLstPtrTable_L0148E2: db $28
 L0148E3: db $49
 L0148E4: db $FF
 L0148E5: db $FF
@@ -2288,7 +2291,7 @@ L0148EE: db $FF
 L0148EF: db $FF
 L0148F0: db $FF;X
 L0148F1: db $FF
-L0148F2: db $54
+OBJLstPtrTable_PreRoundText: db $54
 L0148F3: db $49
 L0148F4: db $FF
 L0148F5: db $FF
@@ -2806,7 +2809,7 @@ L014AF4: db $1E;X
 L014AF5: db $46;X
 L014AF6: db $9D;X
 L014AF7: db $20;X
-L014AF8: db $6F
+GFXLZ_Projectiles: db $6F
 L014AF9: db $41
 L014AFA: db $6D
 L014AFB: db $00
@@ -6114,7 +6117,7 @@ L0157E0: db $0F
 L0157E1: db $80
 L0157E2: db $0D
 L0157E3: db $00
-L0157E4: db $80
+GFX_Play_SuperSparkle: db $80
 L0157E5: db $C0
 L0157E6: db $80
 L0157E7: db $C0
@@ -6178,81 +6181,75 @@ L015820: db $30
 L015821: db $F0
 L015822: db $C0
 L015823: db $C0
-L015824: db $01
-L015825: db $00
-L015826: db $00
-L015827: db $1C
-L015828: db $02
-L015829: db $40
-L01582A: db $09
-L01582B: db $0E
-L01582C: db $C0
-L01582D: db $01
-L01582E: db $0C
-L01582F: db $02
-L015830: db $40
-L015831: db $09
-L015832: db $0E
-L015833: db $C0
-L015834: db $01
-L015835: db $12
-L015836: db $01
-L015837: db $E0
-L015838: db $02
-L015839: db $20
-L01583A: db $01
-L01583B: db $E0
-L01583C: db $04
-L01583D: db $04
-L01583E: db $01
-L01583F: db $20
-L015840: db $05
-L015841: db $24
-L015842: db $01
-L015843: db $60
-L015844: db $07
-L015845: db $1E
-L015846: db $01
-L015847: db $40
-L015848: db $09
-L015849: db $1A
-L01584A: db $02
-L01584B: db $00
-L01584C: db $00
-L01584D: db $0E
-L01584E: db $E0
-L01584F: db $0A
-L015850: db $0A
-L015851: db $01
-L015852: db $80
-L015853: db $0B
-L015854: db $18
-L015855: db $01
-L015856: db $80
-L015857: db $0B
-L015858: db $10
-L015859: db $01
-L01585A: db $C0
-L01585B: db $0D
-L01585C: db $20
-L01585D: db $01
-L01585E: db $C0
-L01585F: db $0F
-L015860: db $22
-L015861: db $01
-L015862: db $80
-L015863: db $0B
-L015864: db $24
-L015865: db $03
-L015866: db $80
-L015867: db $0B
-L015868: db $10
-L015869: db $E0
-L01586A: db $11
-L01586B: db $08
-L01586C: db $A0
-L01586D: db $06
-L01586E: db $0C
+; =============== ProjGFXDef_* ===============
+; Defines the tiles to copy when loading projectile/effect graphics for characters.
+; These are expressed in tile ranges (as pairs of starting offsets + tile count).
+;
+; Because parts of the graphics may be reused between characters, multiple ranges
+; can be defined, with the GFX being stored in that order in VRAM.
+;
+; The starting offsets are relative to an uncompressed copy of GFXLZ_Projectiles,
+; which should be stored in the LZSS buffer when these are used by Play_LoadProjectileGFXFromDef.
+
+; IN
+; - 1: Starting offset
+; - 2: Tile count (as 8x8 tiles)
+mProjDef: MACRO
+	dw \1
+	db \2
+ENDM
+
+ProjGFXDef_Terry:
+	db $01
+	mProjDef $0000, $1C
+ProjGFXDef_RyoRobert:
+	db $02
+	mProjDef $0940, $0E
+	mProjDef $01C0, $0C
+ProjGFXDef_MrKarate:
+	db $02
+	mProjDef $0940, $0E
+	mProjDef $01C0, $12
+ProjGFXDef_Athena: 
+	db $01
+	mProjDef $02E0, $20
+ProjGFXDef_Mai:
+	db $01
+	mProjDef $04E0, $04
+ProjGFXDef_Leona:
+	db $01
+	mProjDef $0520, $24
+ProjGFXDef_Geese:
+	db $01
+	mProjDef $0760, $1E
+ProjGFXDef_Krauser:
+	db $01
+	mProjDef $0940, $1A
+ProjGFXDef_MrBig:
+	db $02
+	mProjDef $0000, $0E
+	mProjDef $0AE0, $0A
+ProjGFXDef_Iori:
+	db $01
+	mProjDef $0B80, $18
+ProjGFXDef_Mature:
+	db $01
+	mProjDef $0B80, $10
+ProjGFXDef_ChizuruKagura:
+	db $01
+	mProjDef $0DC0, $20
+ProjGFXDef_Goenitz:
+	db $01
+	mProjDef $0FC0, $22
+ProjGFXDef_OIori:
+	db $01
+	mProjDef $0B80, $24
+ProjGFXDef_OLeona:
+	db $03
+	mProjDef $0B80, $10
+	mProjDef $11E0, $08
+	mProjDef $06A0, $0C
+
 L01586F: db $EB
 L015870: db $5A
 L015871: db $FF
@@ -9064,41 +9061,44 @@ L016366: db $1E
 L016367: db $30
 L016368: db $03
 L016369: db $20
-L01636A: db $00
-L01636B: db $00
-L01636C: db $00
-L01636D: db $60
-L01636E: db $00
-L01636F: db $88
-L016370: db $00
-L016371: db $00
-L016372: db $00
-L016373: db $00
-L016374: db $00
-L016375: db $00
-L016376: db $00
-L016377: db $80
-L016378: db $00
-L016379: db $88
-L01637A: db $09
-L01637B: db $D7
-L01637C: db $58
-L01637D: db $00
-L01637E: db $00
-L01637F: db $00
-L016380: db $00
-L016381: db $00
-L016382: db $00
-L016383: db $00
-L016384: db $00
-L016385: db $00
-L016386: db $00
-L016387: db $00
-L016388: db $00
+
+OBJInfoInit_Projectile:
+	db $00 ; iOBJInfo_Status
+	db $00 ; iOBJInfo_OBJLstFlags
+	db $00 ; iOBJInfo_OBJLstFlagsOld
+	db $60 ; iOBJInfo_X
+	db $00 ; iOBJInfo_XSub
+	db $88 ; iOBJInfo_Y
+	db $00 ; iOBJInfo_YSub
+	db $00 ; iOBJInfo_SpeedX
+	db $00 ; iOBJInfo_SpeedXSub
+	db $00 ; iOBJInfo_Unknown_09
+	db $00 ; iOBJInfo_Unknown_0A
+	db $00 ; iOBJInfo_RelX (auto)
+	db $00 ; iOBJInfo_RelY (auto)
+	db $80 ; iOBJInfo_TileIDBase
+	db LOW($8800) ; iOBJInfo_VRAMPtr_Low
+	db HIGH($8800) ; iOBJInfo_VRAMPtr_High
+	db BANK(OBJLstPtrTable_Projectile) ; iOBJInfo_BankNum (BANK $09)
+	db LOW(OBJLstPtrTable_Projectile) ; iOBJInfo_OBJLstPtrTbl_Low
+	db HIGH(OBJLstPtrTable_Projectile) ; iOBJInfo_OBJLstPtrTbl_High
+	db $00 ; iOBJInfo_OBJLstPtrTblOffset
+	db $00 ; iOBJInfo_BankNum [N/A]
+	db $00 ; iOBJInfo_OBJLstPtrTbl_Low
+	db $00 ; iOBJInfo_OBJLstPtrTbl_High
+	db $00 ; iOBJInfo_OBJLstPtrTblOffset
+	db $00 ; iOBJInfo_OBJLstByte1 (auto)
+	db $00 ; iOBJInfo_OBJLstByte2 (auto)
+	db $00 ; iOBJInfo_Unknown_1A
+	db $00 ; iOBJInfo_FrameLeft
+	db $00 ; iOBJInfo_FrameTotal
+	db $00 ; iOBJInfo_BufInfoPtr_Low
+	db $00 ; iOBJInfo_BufInfoPtr_High
+	
 L016389:;J
 	ld   sp, $DD00
 	ld   a, $3C
-	ld   [$C16A], a
+	ld   [wRoundTimeSub], a
 	ei
 L016392:;J
 	call L01709E
@@ -9113,7 +9113,7 @@ L016392:;J
 	call Task_PassControlFar
 	jp   L016392
 L0163B3:;C
-	ld   hl, $C008
+	ld   hl, wPlayTimer
 	inc  [hl]
 	ld   hl, wPlInfo_Pl1+iPlInfo_Status
 	bit  7, [hl]
@@ -9182,7 +9182,7 @@ L016433:;J
 L01643E:;J
 	jp   L01644A
 L016441:;J
-	ld   bc, wJoyBuffer_Pl2
+	ld   bc, wPlInfo_Pl1
 	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
 	call L0024E4
 L01644A:;J
@@ -9320,7 +9320,7 @@ L0164D1: db $C3;X
 L0164D2: db $DD;X
 L0164D3: db $64;X
 L0164D4:;J
-	ld   bc, $DA00
+	ld   bc, wPlInfo_Pl2
 	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
 	call L0024E4
 	ret
@@ -9473,10 +9473,10 @@ L01659F:;C
 	ld   [wPaused], a
 	ret
 L0165CD:;C
-	ld   a, [$C17C]
+	ld   a, [wStageBGP]
 	cp   $1B
 	jp   z, L0165E7
-	ld   hl, $C17C
+	ld   hl, wStageBGP
 	cp   $FF
 	jp   z, L0165E2
 	ld   [hl], $FF
@@ -9488,20 +9488,20 @@ L0165E7:;J
 	ld   a, $1B
 L0165E9:;J
 	ldh  [hScreenSect1BGP], a
-	ld   a, [$D923]
+	ld   a, [wPlInfo_Pl1+iPlInfo_23]
 	bit  1, a
 	jp   nz, L016631
 	bit  6, a
 	jp   nz, L01663D
-	ld   a, [$D960]
+	ld   a, [wPlInfo_Pl1+iPlInfo_60]
 	or   a
 	jp   z, L016667
-	ld   hl, $C008
+	ld   hl, wPlayTimer
 	ld   b, [hl]
 	bit  0, b
 	jp   nz, L01660C
 	dec  a
-	ld   [$D960], a
+	ld   [wPlInfo_Pl1+iPlInfo_60], a
 L01660C:;J
 	cp   $0A
 	jp   c, L01662B
@@ -9525,13 +9525,13 @@ L01662C:;J
 	and  a, $03
 	jp   L016674
 L016631:;J
-	ld   a, [$C008]
+	ld   a, [wPlayTimer]
 	and  a, $0F
 	srl  a
 	srl  a
 	jp   L016642
 L01663D:;J
-	ld   a, [$C008]
+	ld   a, [wPlayTimer]
 	and  a, $03
 L016642:;J
 	cp   $01
@@ -9557,7 +9557,7 @@ L016667:;J
 	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
 	bit  6, a
 	jp   z, L016699
-	ld   a, [$C008]
+	ld   a, [wPlayTimer]
 	and  a, $03
 L016674:;J
 	cp   $01
@@ -9583,20 +9583,20 @@ L016699:;J
 	ld   a, $8C
 	ldh  [rOBP0], a
 L01669D:;J
-	ld   a, [$DA23]
+	ld   a, [wPlInfo_Pl2+iPlInfo_23]
 	bit  1, a
 	jp   nz, L0166E3
 	bit  6, a
 	jp   nz, L0166EF
-	ld   a, [$DA60]
+	ld   a, [wPlInfo_Pl2+iPlInfo_60]
 	or   a
 	jp   z, L016719
-	ld   hl, $C008
+	ld   hl, wPlayTimer
 	ld   b, [hl]
 	bit  0, b
 	jp   nz, L0166BE
 	dec  a
-	ld   [$DA60], a
+	ld   [wPlInfo_Pl2+iPlInfo_60], a
 L0166BE:;J
 	cp   $0A
 	jp   c, L0166DD
@@ -9620,13 +9620,13 @@ L0166DE:;J
 	and  a, $03
 	jp   L016726
 L0166E3:;J
-	ld   a, [$C008]
+	ld   a, [wPlayTimer]
 	and  a, $0F
 	srl  a
 	srl  a
 	jp   L0166F4
 L0166EF:;J
-	ld   a, [$C008]
+	ld   a, [wPlayTimer]
 	and  a, $03
 L0166F4:;J
 	cp   $01
@@ -9652,7 +9652,7 @@ L016719:;J
 	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
 	bit  6, a
 	jp   z, L01674B
-	ld   a, [$C008]
+	ld   a, [wPlayTimer]
 	and  a, $03
 L016726:;J
 	cp   $01
@@ -9680,7 +9680,7 @@ L01674B:;J
 L01674F:;J
 	ld   a, [$C171]
 	ld   [$C172], a
-	ld   a, [$C027]
+	ld   a, [wMisc_C027]
 	bit  7, a
 	jr   z, L01676F
 	xor  a
@@ -9714,19 +9714,19 @@ L016786:;R
 L01679A:;R
 	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
 	ld   [$DA6D], a
-	ld   a, [$D921]
+	ld   a, [wPlInfo_Pl1+iPlInfo_21]
 	ld   [$DA6E], a
-	ld   a, [wPlInfo_Pl1+iPlInfo_02Flags]
+	ld   a, [wPlInfo_Pl1+iPlInfo_22Flags]
 	ld   [$DA6F], a
-	ld   a, [$D923]
+	ld   a, [wPlInfo_Pl1+iPlInfo_23]
 	ld   [$DA70], a
 	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
 	ld   [$D96D], a
-	ld   a, [$DA21]
+	ld   a, [wPlInfo_Pl2+iPlInfo_21]
 	ld   [$D96E], a
-	ld   a, [wPlInfo_Pl2+iPlInfo_02Flags]
+	ld   a, [wPlInfo_Pl2+iPlInfo_22Flags]
 	ld   [$D96F], a
-	ld   a, [$DA23]
+	ld   a, [wPlInfo_Pl2+iPlInfo_23]
 	ld   [$D970], a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlags]
 	ld   [$DA7F], a
@@ -9740,25 +9740,25 @@ L01679A:;R
 	ld   [$DA81], a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_Y]
 	ld   [$D981], a
-	ld   a, [$D950]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Pow]
 	ld   [$DA82], a
-	ld   a, [$DA50]
+	ld   a, [wPlInfo_Pl2+iPlInfo_Pow]
 	ld   [$D982], a
-	ld   a, [$D933]
+	ld   a, [wPlInfo_Pl1+iPlInfo_MoveId]
 	ld   [$DA72], a
-	ld   a, [$DA33]
+	ld   a, [wPlInfo_Pl2+iPlInfo_MoveId]
 	ld   [$D972], a
-	ld   a, [$D934]
+	ld   a, [wPlInfo_Pl1+iPlInfo_34]
 	ld   [$DA73], a
-	ld   a, [$DA34]
+	ld   a, [wPlInfo_Pl2+iPlInfo_34]
 	ld   [$D973], a
 	ld   a, [$D97C]
 	or   a
 	jr   z, L016827
 	xor  a
-	ld   [wPlInfo_Pl2+iPlInfo_1A], a
+	ld   [wPlInfo_Pl2+iPlInfo_3A], a
 	ld   [$D97C], a
-	ld   hl, $DA21
+	ld   hl, wPlInfo_Pl2+iPlInfo_21
 	set  6, [hl]
 	inc  hl
 	res  2, [hl]
@@ -9767,9 +9767,9 @@ L016827:;R
 	or   a
 	jr   z, L01683C
 	xor  a
-	ld   [wPlInfo_Pl1+iPlInfo_1A], a
+	ld   [wPlInfo_Pl1+iPlInfo_3A], a
 	ld   [$DA7C], a
-	ld   hl, $D921
+	ld   hl, wPlInfo_Pl1+iPlInfo_21
 	set  6, [hl]
 	inc  hl
 	res  2, [hl]
@@ -9778,74 +9778,74 @@ L01683C:;R
 	ld   [$DA7D], a
 	ld   a, [$DA7E]
 	ld   [$D97D], a
-	ld   hl, wPlInfo_Pl1+iPlInfo_1A
+	ld   hl, wPlInfo_Pl1+iPlInfo_3A
 	ld   bc, $DA74
 	call L016A1B
-	ld   hl, wPlInfo_Pl1+iPlInfo_1D
+	ld   hl, wPlInfo_Pl1+iPlInfo_3D
 	ld   bc, $DA77
 	call L016A1B
-	ld   hl, wPlInfo_Pl2+iPlInfo_1A
+	ld   hl, wPlInfo_Pl2+iPlInfo_3A
 	ld   bc, $D974
 	call L016A1B
-	ld   hl, wPlInfo_Pl2+iPlInfo_1D
+	ld   hl, wPlInfo_Pl2+iPlInfo_3D
 	ld   bc, $D977
 	call L016A1B
-	ld   a, [$D950]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Pow]
 	cp   $00
 	jp   z, L016889
 	cp   $28
 	jp   nz, L0168A5
-	ld   a, [$D953]
+	ld   a, [wPlInfo_Pl1+iPlInfo_MaxPow]
 	cp   $00
 	jp   nz, L016896
-	ld   a, [$D952]
+	ld   a, [wPlInfo_Pl1+iPlInfo_52]
 	cp   $00
 	jp   nz, L016896
 L016889:;J
 	xor  a
-	ld   [$D950], a
-	ld   [$D953], a
-	ld   [$D952], a
+	ld   [wPlInfo_Pl1+iPlInfo_Pow], a
+	ld   [wPlInfo_Pl1+iPlInfo_MaxPow], a
+	ld   [wPlInfo_Pl1+iPlInfo_52], a
 	jp   L0168A5
 L016896:;J
-	ld   a, [$D952]
+	ld   a, [wPlInfo_Pl1+iPlInfo_52]
 	ld   b, a
-	ld   a, [$C008]
+	ld   a, [wPlayTimer]
 	and  a, b
 	jp   nz, L0168A5
-	ld   hl, $D953
+	ld   hl, wPlInfo_Pl1+iPlInfo_MaxPow
 	dec  [hl]
 L0168A5:;J
-	ld   a, [$DA50]
+	ld   a, [wPlInfo_Pl2+iPlInfo_Pow]
 	cp   $00
 	jp   z, L0168C2
 	cp   $28
 	jp   nz, L0168DE
-	ld   a, [$DA53]
+	ld   a, [wPlInfo_Pl2+iPlInfo_MaxPow]
 	cp   $00
 	jp   nz, L0168CF
-	ld   a, [$DA52]
+	ld   a, [wPlInfo_Pl2+iPlInfo_52]
 	cp   $00
 	jp   nz, L0168CF
 L0168C2:;J
 	xor  a
-	ld   [$DA50], a
-	ld   [$DA53], a
-	ld   [$DA52], a
+	ld   [wPlInfo_Pl2+iPlInfo_Pow], a
+	ld   [wPlInfo_Pl2+iPlInfo_MaxPow], a
+	ld   [wPlInfo_Pl2+iPlInfo_52], a
 	jp   L0168DE
 L0168CF:;J
-	ld   a, [$DA52]
+	ld   a, [wPlInfo_Pl2+iPlInfo_52]
 	ld   b, a
-	ld   a, [$C008]
+	ld   a, [wPlayTimer]
 	and  a, b
 	jp   nz, L0168DE
-	ld   hl, $DA53
+	ld   hl, wPlInfo_Pl2+iPlInfo_MaxPow
 	dec  [hl]
 L0168DE:;J
-	ld   a, [$D950]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Pow]
 	cp   $28
 	jp   z, L016923
-	ld   a, [$D933]
+	ld   a, [wPlInfo_Pl1+iPlInfo_MoveId]
 	cp   $1A
 	jp   z, L0168FB
 	ld   a, [wDipSwitch]
@@ -9857,15 +9857,15 @@ L0168FB:;J
 	ld   b, $01
 	jp   L016900
 L016900:;J
-	ld   a, [$C008]
+	ld   a, [wPlayTimer]
 	and  a, b
 	jp   nz, L016923
-	ld   hl, $D950
+	ld   hl, wPlInfo_Pl1+iPlInfo_Pow
 	inc  [hl]
 	ld   a, [hl]
 	cp   $28
 	jp   nz, L016923
-	ld   hl, $D952
+	ld   hl, wPlInfo_Pl1+iPlInfo_52
 	ld   a, [wDipSwitch]
 	bit  3, a
 	jp   nz, L016921
@@ -9874,10 +9874,10 @@ L016900:;J
 L016921:;J
 	ld   [hl], $3F
 L016923:;J
-	ld   a, [$DA50]
+	ld   a, [wPlInfo_Pl2+iPlInfo_Pow]
 	cp   $28
 	jp   z, L016968
-	ld   a, [$DA33]
+	ld   a, [wPlInfo_Pl2+iPlInfo_MoveId]
 	cp   $1A
 	jp   z, L016940
 	ld   a, [wDipSwitch]
@@ -9889,15 +9889,15 @@ L016940:;J
 	ld   b, $01
 	jp   L016945
 L016945:;J
-	ld   a, [$C008]
+	ld   a, [wPlayTimer]
 	and  a, b
 	jp   nz, L016968
-	ld   hl, $DA50
+	ld   hl, wPlInfo_Pl2+iPlInfo_Pow
 	inc  [hl]
 	ld   a, [hl]
 	cp   $28
 	jp   nz, L016968
-	ld   hl, $DA52
+	ld   hl, wPlInfo_Pl2+iPlInfo_52
 	ld   a, [wDipSwitch]
 	bit  3, a
 	jp   nz, L016966
@@ -9906,12 +9906,12 @@ L016945:;J
 L016966:;J
 	ld   [hl], $3F
 L016968:;J
-	ld   a, [$D950]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Pow]
 	cp   $28
 	jp   z, L016989
 	cp   $00
 	jp   z, L016989
-	ld   a, [$DA33]
+	ld   a, [wPlInfo_Pl2+iPlInfo_MoveId]
 	cp   $1C
 	jp   nz, L016989
 L01697D: db $FA;X
@@ -9927,38 +9927,38 @@ L016986: db $50;X
 L016987: db $D9;X
 L016988: db $35;X
 L016989:;J
-	ld   a, [$DA50]
+	ld   a, [wPlInfo_Pl2+iPlInfo_Pow]
 	cp   $28
 	jp   z, L0169AA
 	cp   $00
 	jp   z, L0169AA
-	ld   a, [$D933]
+	ld   a, [wPlInfo_Pl1+iPlInfo_MoveId]
 	cp   $1C
 	jp   nz, L0169AA
-	ld   a, [$C008]
+	ld   a, [wPlayTimer]
 	and  a, $03
 	jp   nz, L0169AA
-	ld   hl, $DA50
+	ld   hl, wPlInfo_Pl2+iPlInfo_Pow
 	dec  [hl]
 L0169AA:;J
-	ld   a, [$C008]
+	ld   a, [wPlayTimer]
 	and  a, $0F
 	jp   nz, L0169C4
-	ld   a, [$D95B]
-	ld   hl, $D95A
+	ld   a, [wPlInfo_Pl1+iPlInfo_5B]
+	ld   hl, wPlInfo_Pl1+iPlInfo_5A
 	call L0169E1
-	ld   a, [$DA5B]
-	ld   hl, $DA5A
+	ld   a, [wPlInfo_Pl2+iPlInfo_5B]
+	ld   hl, wPlInfo_Pl2+iPlInfo_5A
 	call L0169E1
 L0169C4:;J
-	ld   a, [$C008]
+	ld   a, [wPlayTimer]
 	and  a, $1F
 	jp   nz, L0169DE
-	ld   a, [$D95D]
-	ld   hl, $D95C
+	ld   a, [wPlInfo_Pl1+iPlInfo_5D]
+	ld   hl, wPlInfo_Pl1+iPlInfo_5C
 	call L0169E1
-	ld   a, [$DA5D]
-	ld   hl, $DA5C
+	ld   a, [wPlInfo_Pl2+iPlInfo_5D]
+	ld   hl, wPlInfo_Pl2+iPlInfo_5C
 	call L0169E1
 L0169DE:;J
 	jp   L0169EE
@@ -9975,25 +9975,25 @@ L0169EC:;J
 L0169ED:;J
 	ret
 L0169EE:;J
-	ld   a, [$D95E]
+	ld   a, [wPlInfo_Pl1+iPlInfo_5E]
 	or   a
 	jr   z, L0169F8
-	ld   hl, $D95E
+	ld   hl, wPlInfo_Pl1+iPlInfo_5E
 	dec  [hl]
 L0169F8:;R
-	ld   a, [$DA5E]
+	ld   a, [wPlInfo_Pl2+iPlInfo_5E]
 	or   a
 	jr   z, L016A02
-	ld   hl, $DA5E
+	ld   hl, wPlInfo_Pl2+iPlInfo_5E
 	dec  [hl]
 L016A02:;R
-	ld   a, [$D95E]
+	ld   a, [wPlInfo_Pl1+iPlInfo_5E]
 	ld   [$DA7A], a
-	ld   a, [$DA5E]
+	ld   a, [wPlInfo_Pl2+iPlInfo_5E]
 	ld   [$D97A], a
-	ld   a, [$D95F]
+	ld   a, [wPlInfo_Pl1+iPlInfo_5F]
 	ld   [$DA7B], a
-	ld   a, [$DA5F]
+	ld   a, [wPlInfo_Pl2+iPlInfo_5F]
 	ld   [$D97B], a
 	ret
 L016A1B:;C
@@ -10016,14 +10016,14 @@ L016A24:;C
 	push af
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstFlags
 	set  3, [hl]
-	ld   a, [$D921]
+	ld   a, [wPlInfo_Pl1+iPlInfo_21]
 	bit  1, a
 	jp   nz, L016A53
 	set  5, [hl]
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_Status]
 	bit  0, a
 	jp   nz, L016A53
-	ld   a, [$D933]
+	ld   a, [wPlInfo_Pl1+iPlInfo_MoveId]
 	or   a
 	jp   z, L016A53
 	ldi  a, [hl]
@@ -10031,14 +10031,14 @@ L016A24:;C
 L016A53:;J
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstFlags
 	res  3, [hl]
-	ld   a, [$DA21]
+	ld   a, [wPlInfo_Pl2+iPlInfo_21]
 	bit  1, a
 	jr   nz, L016A72
 	res  5, [hl]
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_Status]
 	bit  0, a
 	jp   nz, L016A72
-	ld   a, [$DA33]
+	ld   a, [wPlInfo_Pl2+iPlInfo_MoveId]
 	or   a
 	jp   z, L016A72
 	ldi  a, [hl]
@@ -10052,7 +10052,7 @@ L016A77:;J
 	push af
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstFlags
 	res  3, [hl]
-	ld   a, [$D921]
+	ld   a, [wPlInfo_Pl1+iPlInfo_21]
 	bit  1, a
 	jr   nz, L016A9B
 	bit  0, c
@@ -10061,7 +10061,7 @@ L016A77:;J
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_Status]
 	bit  0, a
 	jp   nz, L016A9B
-	ld   a, [$D933]
+	ld   a, [wPlInfo_Pl1+iPlInfo_MoveId]
 	or   a
 	jp   z, L016A9B
 	ldi  a, [hl]
@@ -10069,7 +10069,7 @@ L016A77:;J
 L016A9B:;JR
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstFlags
 	set  3, [hl]
-	ld   a, [$DA21]
+	ld   a, [wPlInfo_Pl2+iPlInfo_21]
 	bit  1, a
 	jr   nz, L016ABE
 	bit  0, c
@@ -10078,7 +10078,7 @@ L016A9B:;JR
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_Status]
 	bit  0, a
 	jp   nz, L016ABE
-	ld   a, [$DA33]
+	ld   a, [wPlInfo_Pl2+iPlInfo_MoveId]
 	or   a
 	jp   z, L016ABE
 	ldi  a, [hl]
@@ -10086,8 +10086,8 @@ L016A9B:;JR
 L016ABE:;JR
 	pop  af
 L016ABF:;JR
-	ld   [$D961], a
-	ld   [$DA61], a
+	ld   [wPlInfo_Pl1+iPlInfo_61], a
+	ld   [wPlInfo_Pl2+iPlInfo_61], a
 	ld   a, [wOBJInfo3+iOBJInfo_X]
 	ld   b, a
 	ld   a, [wOBJInfo3+iOBJInfo_Status]
@@ -10106,7 +10106,7 @@ L016AD5:;J
 	cpl
 	inc  a
 L016AE8:;J
-	ld   [$D962], a
+	ld   [wPlInfo_Pl1+iPlInfo_62], a
 	ld   a, [wOBJInfo2+iOBJInfo_X]
 	ld   b, a
 	ld   a, [wOBJInfo2+iOBJInfo_Status]
@@ -10125,20 +10125,20 @@ L016AFB:;J
 	cpl
 	inc  a
 L016B0E:;J
-	ld   [$DA62], a
+	ld   [wPlInfo_Pl2+iPlInfo_62], a
 	ret
 L016B12:;C
 	xor  a
-	ld   [$D963], a
-	ld   [$DA63], a
-	ld   [$D964], a
-	ld   [$DA64], a
+	ld   [wPlInfo_Pl1+iPlInfo_63], a
+	ld   [wPlInfo_Pl2+iPlInfo_63], a
+	ld   [wPlInfo_Pl1+iPlInfo_64], a
+	ld   [wPlInfo_Pl2+iPlInfo_64], a
 	ld   [$D726], a
 	ld   [$D766], a
-	ld   a, [wPlInfo_Pl1+iPlInfo_02Flags]
+	ld   a, [wPlInfo_Pl1+iPlInfo_22Flags]
 	bit  7, a
 	jp   nz, L016B80
-	ld   a, [wPlInfo_Pl2+iPlInfo_02Flags]
+	ld   a, [wPlInfo_Pl2+iPlInfo_22Flags]
 	bit  7, a
 	jp   nz, L016B80
 	ld   a, [$D698]
@@ -10165,12 +10165,12 @@ L016B12:;C
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016B80
-	ld   hl, $D963
+	ld   hl, wPlInfo_Pl1+iPlInfo_63
 	set  0, [hl]
 	set  4, [hl]
 	inc  hl
 	ld   [hl], b
-	ld   hl, $DA63
+	ld   hl, wPlInfo_Pl2+iPlInfo_63
 	set  0, [hl]
 	set  4, [hl]
 	inc  hl
@@ -10179,7 +10179,7 @@ L016B80:;JR
 	ld   a, [$D69A]
 	or   a
 	jr   nz, L016B94
-	ld   a, [wPlInfo_Pl2+iPlInfo_02Flags]
+	ld   a, [wPlInfo_Pl2+iPlInfo_22Flags]
 	bit  6, a
 	jp   nz, L016BD5
 	ld   a, [$D699]
@@ -10207,17 +10207,17 @@ L016B94:;R
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016BD5
-	ld   hl, $D963
+	ld   hl, wPlInfo_Pl1+iPlInfo_63
 	set  1, [hl]
 	set  4, [hl]
-	ld   hl, $DA63
+	ld   hl, wPlInfo_Pl2+iPlInfo_63
 	set  0, [hl]
 	set  5, [hl]
 L016BD5:;JR
 	ld   a, [$D6DA]
 	or   a
 	jr   nz, L016BE9
-	ld   a, [wPlInfo_Pl1+iPlInfo_02Flags]
+	ld   a, [wPlInfo_Pl1+iPlInfo_22Flags]
 	bit  6, a
 	jp   nz, L016C2A
 	ld   a, [$D6D9]
@@ -10245,17 +10245,17 @@ L016BE9:;R
 	ld   [$C1CB], a
 	call L016E7C
 	jr   nc, L016C2A
-	ld   hl, $D963
+	ld   hl, wPlInfo_Pl1+iPlInfo_63
 	set  0, [hl]
 	set  5, [hl]
-	ld   hl, $DA63
+	ld   hl, wPlInfo_Pl2+iPlInfo_63
 	set  1, [hl]
 	set  4, [hl]
 L016C2A:;JR
-	ld   a, [$DA21]
+	ld   a, [wPlInfo_Pl2+iPlInfo_21]
 	bit  7, a
 	jp   nz, L016C8F
-	ld   a, [wPlInfo_Pl2+iPlInfo_02Flags]
+	ld   a, [wPlInfo_Pl2+iPlInfo_22Flags]
 	bit  6, a
 	jp   nz, L016C8F
 	ld   a, [wOBJInfo2+iOBJInfo_Status]
@@ -10287,17 +10287,17 @@ L016C2A:;JR
 	jr   nc, L016C8F
 	ld   a, $01
 	ld   [$D726], a
-	ld   hl, $D963
+	ld   hl, wPlInfo_Pl1+iPlInfo_63
 	set  2, [hl]
 	set  4, [hl]
-	ld   hl, $DA63
+	ld   hl, wPlInfo_Pl2+iPlInfo_63
 	set  0, [hl]
 	set  6, [hl]
 L016C8F:;JR
-	ld   a, [$D921]
+	ld   a, [wPlInfo_Pl1+iPlInfo_21]
 	bit  7, a
 	jp   nz, L016CF4
-	ld   a, [wPlInfo_Pl1+iPlInfo_02Flags]
+	ld   a, [wPlInfo_Pl1+iPlInfo_22Flags]
 	bit  6, a
 	jp   nz, L016CF4
 	ld   a, [wOBJInfo3+iOBJInfo_Status]
@@ -10329,10 +10329,10 @@ L016C8F:;JR
 	jr   nc, L016CF4
 	ld   a, $01
 	ld   [$D766], a
-	ld   hl, $DA63
+	ld   hl, wPlInfo_Pl2+iPlInfo_63
 	set  2, [hl]
 	set  4, [hl]
-	ld   hl, $D963
+	ld   hl, wPlInfo_Pl1+iPlInfo_63
 	set  0, [hl]
 	set  6, [hl]
 L016CF4:;JR
@@ -10464,10 +10464,10 @@ L016DD8:;X
 	ld   a, $02
 	ld   [$D766], a
 L016DDD:;J
-	ld   hl, $DA63
+	ld   hl, wPlInfo_Pl2+iPlInfo_63
 	set  3, [hl]
 	set  5, [hl]
-	ld   hl, $D963
+	ld   hl, wPlInfo_Pl1+iPlInfo_63
 	set  1, [hl]
 	set  7, [hl]
 L016DEB:;JR
@@ -11123,12 +11123,12 @@ L01709B: db $00
 L01709C: db $0D
 L01709D: db $09
 L01709E:;C
-	ld   hl, $C027
+	ld   hl, wMisc_C027
 	res  7, [hl]
-	ld   a, [$C169]
+	ld   a, [wRoundTime]
 	or   a
 	jp   nz, L0170B8
-	ld   hl, $C027
+	ld   hl, wMisc_C027
 	set  7, [hl]
 	call L017309
 	call L0173BA
@@ -11167,46 +11167,46 @@ L0170E8:;J
 	call Task_PassControlFar
 	jp   L0170B8
 L017103:;J
-	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_TimerTarget]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Health]
 	or   a
 	jr   z, L017110
-	ld   a, [wPlInfo_Pl2+iPlInfo_Unknown_TimerTarget]
+	ld   a, [wPlInfo_Pl2+iPlInfo_Health]
 	or   a
 	jp   nz, L01725C
 L017110:;R
-	ld   hl, $C027
+	ld   hl, wMisc_C027
 	set  7, [hl]
 	call L017309
 	call L0173C2
 L01711B:;J
 	ld   b, $01
 	call L01756D
-	ld   a, [$D933]
+	ld   a, [wPlInfo_Pl1+iPlInfo_MoveId]
 	cp   $00
 	jr   z, L01712B
 	cp   $02
 	jr   nz, L01711B
 L01712B:;R
-	ld   a, [$DA33]
+	ld   a, [wPlInfo_Pl2+iPlInfo_MoveId]
 	cp   $00
 	jr   z, L017136
 	cp   $02
 	jr   nz, L01711B
 L017136:;R
-	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_TimerTarget]
-	ld   hl, wPlInfo_Pl2+iPlInfo_Unknown_TimerTarget
+	ld   a, [wPlInfo_Pl1+iPlInfo_Health]
+	ld   hl, wPlInfo_Pl2+iPlInfo_Health
 	cp   a, [hl]
 	jr   z, L01715D
 	jr   c, L01714F
 	call L0173F0
-	ld   bc, wJoyBuffer_Pl2
-	ld   de, $DA00
+	ld   bc, wPlInfo_Pl1
+	ld   de, wPlInfo_Pl2
 	call L01725E
 	jr   L017163
 L01714F:;R
 	call L017474
-	ld   bc, $DA00
-	ld   de, wJoyBuffer_Pl2
+	ld   bc, wPlInfo_Pl2
+	ld   de, wPlInfo_Pl1
 	call L01725E
 	jr   L017163
 L01715D:;R
@@ -11222,10 +11222,10 @@ L017163:;R
 	ld   a, [wRoundNum]
 	cp   $03
 	jp   z, L0171F1
-	ld   a, [wPlInfo_Pl1+iPlInfo_16]
+	ld   a, [wPlInfo_Pl1+iPlInfo_SingleWinCount]
 	cp   $02
 	jp   z, L017210
-	ld   a, [wPlInfo_Pl2+iPlInfo_16]
+	ld   a, [wPlInfo_Pl2+iPlInfo_SingleWinCount]
 	cp   $02
 	jp   z, L01722D
 	jp   L0171EB
@@ -11277,7 +11277,7 @@ L0171E3:;J
 	jp   L0171EB
 L0171EB:;J
 	call L0172C1
-	jp   L00179D
+	jp   Module_Play
 L0171F1:;J
 	xor  a
 	ld   [$C161], a
@@ -11326,7 +11326,7 @@ L017240:;J
 	jp   L01724A
 L01724A:;J
 	ld   hl, Tiles_Begin
-	call L000FEF
+	call SGB_PrepareSoundPacketB
 	call Task_PassControlFar
 	call L0172C1
 	ld   b, $1D
@@ -11338,7 +11338,7 @@ L01725D: db $C9;X
 L01725E:;C
 	call IsInTeamMode
 	jp   nc, L017286
-	ld   a, [$C169]
+	ld   a, [wRoundTime]
 	srl  a
 	srl  a
 	srl  a
@@ -11387,7 +11387,7 @@ L0172A8:;R
 	ld   [hl], a
 	ret
 L0172AE:;C
-	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_TimerTarget]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Health]
 	or   a
 	jr   z, L0172B8
 	ld   a, $2A
@@ -11395,8 +11395,8 @@ L0172AE:;C
 L0172B8: db $3E;X
 L0172B9: db $FF;X
 L0172BA:;R
-	ld   [$D935], a
-	ld   [$DA35], a
+	ld   [wPlInfo_Pl1+iPlInfo_IntroMoveId], a
+	ld   [wPlInfo_Pl2+iPlInfo_IntroMoveId], a
 	ret
 L0172C1:;C
 	ld   a, $FF
@@ -11433,13 +11433,13 @@ L0172C1:;C
 L017309:;CR
 	ld   b, $01
 	call L01756D
-	ld   a, [$D933]
+	ld   a, [wPlInfo_Pl1+iPlInfo_MoveId]
 	cp   $00
 	jr   z, L017319
 	cp   $02
 	jr   nz, L017309
 L017319:;R
-	ld   a, [$DA33]
+	ld   a, [wPlInfo_Pl2+iPlInfo_MoveId]
 	cp   $00
 	jr   z, L017324
 	cp   $02
@@ -11474,7 +11474,7 @@ L017324:;R
 	ld   b, $2E
 	call L01739A
 	ld   hl, wOBJInfo3+iOBJInfo_Status
-	ld   de, L0148C3
+	ld   de, OBJInfoInit_Play_PreRoundText
 	call OBJLstS_InitFrom
 	ld   hl, wOBJInfo3+iOBJInfo_OBJLstPtrTbl_Low
 	ld   [hl], $08
@@ -11550,7 +11550,7 @@ L0173F0:;C
 	ld   [hl], $00
 	call IsInTeamMode
 	jp   c, L01741A
-	ld   hl, wPlInfo_Pl1+iPlInfo_16
+	ld   hl, wPlInfo_Pl1+iPlInfo_SingleWinCount
 	inc  [hl]
 	ld   a, [hl]
 	cp   $02
@@ -11561,7 +11561,7 @@ L01740F:;J
 	ld   hl, $9C43
 L017412:;J
 	ld   c, $74
-	call Unknown_CopyByteOnFirstThreeRounds
+	call CopyByteIfSingleFinalRound
 	jp   L01742B
 L01741A:;J
 	ld   hl, wPlInfo_Pl2+iPlInfo_TeamLossCount
@@ -11621,7 +11621,7 @@ L017463: db $74;X
 L017464: db $3E;X
 L017465: db $08;X
 L017466:;J
-	ld   bc, wJoyBuffer_Pl2
+	ld   bc, wPlInfo_Pl1
 	call L0174F8
 	ld   hl, wLastWinner
 	set  0, [hl]
@@ -11634,7 +11634,7 @@ L017474:;C
 	ld   [hl], $00
 	call IsInTeamMode
 	jp   c, L01749E
-	ld   hl, wPlInfo_Pl2+iPlInfo_16
+	ld   hl, wPlInfo_Pl2+iPlInfo_SingleWinCount
 	inc  [hl]
 	ld   a, [hl]
 	cp   $02
@@ -11645,7 +11645,7 @@ L017493:;J
 	ld   hl, $9C50
 L017496:;J
 	ld   c, $74
-	call Unknown_CopyByteOnFirstThreeRounds
+	call CopyByteIfSingleFinalRound
 	jp   L0174AF
 L01749E:;J
 	ld   hl, wPlInfo_Pl1+iPlInfo_TeamLossCount
@@ -11703,7 +11703,7 @@ L0174E7: db $74;X
 L0174E8: db $3E;X
 L0174E9: db $08;X
 L0174EA:;J
-	ld   bc, $DA00
+	ld   bc, wPlInfo_Pl2
 	call L0174F8
 	ld   hl, wLastWinner
 	res  0, [hl]
@@ -11782,7 +11782,7 @@ L01758C:;JC
 	or   a, [hl]
 	and  a, $F0
 	jp   nz, L0175B9
-	call L0175BB
+	call Play_AnimTextPal
 	call L0163B3
 	call L0176A7
 	call L0165CD
@@ -11798,35 +11798,45 @@ L01758C:;JC
 L0175B9:;J
 	pop  bc
 	ret
-L0175BB:;C
-	ld   hl, wOBJInfo3+iOBJInfo_Status
-	ld   b, $03
-L0175C0:;J
+	
+; =============== Play_AnimTextPal ===============
+; Flashes the palette for the three extra sprites at wOBJInfo3-wOBJInfo5, used for the text.
+Play_AnimTextPal:
+	ld   hl, wOBJInfo_RoundText+iOBJInfo_Status		; HL = Initial wOBJInfo
+	ld   b, $03			; B = wOBJInfo to process
+.loop:
 	push hl
-	bit  7, [hl]
-	jr   z, L0175D4
-	inc  hl
-	ld   a, [wTimer]
-	bit  2, a
-	jp   nz, L0175D2
-	ld   [hl], $00
-	jr   L0175D4
-L0175D2:;J
-	ld   [hl], $10
-L0175D4:;R
+		bit  OSTB_VISIBLE, [hl]		; Is the sprite visible?
+		jr   z, .nextOBJ			; If not, skip
+		inc  hl
+		
+		; Every 4 frames, switch between OBP0 and OBP1.
+		; This flashes the text color between the two shades of grays.
+		ld   a, [wTimer]
+		bit  2, a			; wTimer & $04 == 0?
+		jp   nz, .obp1		; If not, jump
+	.obp0:
+		ld   [hl], SPR_OBP0
+		jr   .nextOBJ
+	.obp1:
+		ld   [hl], SPR_OBP1
+	.nextOBJ:
+	
 	pop  hl
-	ld   de, $0040
+	; Seek to the next OBJInfo
+	ld   de, OBJINFO_SIZE	; HL += OBJINFO_SIZE
 	add  hl, de
-	dec  b
-	jp   nz, L0175C0
+	dec  b					; Handled all wOBJInfo?
+	jp   nz, .loop			; If not, loop
 	ret
+	
 L0175DE:;C
 	ld   a, [wOBJScrollX]
 	add  a, $50
 	ld   [wOBJInfo3+iOBJInfo_X], a
 	ret
 L0175E7:;C
-	ld   a, [$D961]
+	ld   a, [wPlInfo_Pl1+iPlInfo_61]
 	cp   $60
 	jp   c, L017638
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
@@ -11932,702 +11942,1028 @@ L0176A2:;J
 L0176A6:;J
 	ret
 L0176A7:;C
-	call L0176B4
-	call L0178E1
-	call L017D80
+	call Play_UpdateHealthBars
+	call Play_UpdatePowBars
+	call Play_DoTime
 	call L017E1A
 	ret
-L0176B4:;C
-	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_TimerTarget]
-	ld   b, a
-	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_Timer]
-	cp   a, b
-	jp   z, L01770C
-	jp   c, L0176D8
-	ld   hl, $9C20
-	ld   bc, $00AD
-	ld   de, $00B6
-	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_Timer]
+; =============== Play_UpdateHealthBars ===============
+; Draws/updates the health bar display for both players.
+;
+; This subroutine keeps the visual health value (what's displayed in the health bar) 
+; synched up with the actual health (the target).
+;
+; The health bar increases or decreases 1px/frame, until the target value is reached.
+;
+Play_UpdateHealthBars:
+
+
+; =============== mDrawHealthBarTile ===============
+; Generates the common code used to write to the health bar tilemap when flashing.
+; IN
+; - HL: Ptr to tilemap
+; - B: Tile ID
+mDrawHealthBarTile: MACRO
+	push af
+		di
+		mWaitForVBlankOrHBlank
+		ld   [hl], b
+		ei
+	pop  af
+ENDM
+	
+	ld   a, [wPlInfo_Pl1+iPlInfo_Health]
+	ld   b, a									; B = Target health
+	ld   a, [wPlInfo_Pl1+iPlInfo_HealthVisual]	; A = Visual Health
+	cp   a, b				; Do they match?
+	; If they match, skip ahead.
+	jp   z, .eqTarget1P		; Health == Target?
+	; If the visual health is less than the target, increase the bar.
+	jp   c, .ltTarget1P		; Health < Target?
+	; Otherwise, Health > Target. Decrease the bar.
+.gtTarget1P:
+	; Bar decreases to the right
+	ld   hl, vBGHealthBar1P					; HL = Ptr to start of health bar in tilemap
+	ld   bc, Play_Bar_TileIdTbl_RGrow		; BC = Tile ID table (bytes 7-0)
+	ld   de, Play_Bar_BGOffsetTbl_RGrow		; DE = Tilemap offset table
+	
+	; VisualHealth--
+	ld   a, [wPlInfo_Pl1+iPlInfo_HealthVisual] ; (not necessary, already in A)
 	dec  a
-	ld   [wPlInfo_Pl1+iPlInfo_Unknown_Timer], a
-	call L0178C1
-	jp   L01770C
-L0176D8:;J
-	ld   hl, $9C20
-	ld   bc, $00AE
-	ld   de, $00B6
+	ld   [wPlInfo_Pl1+iPlInfo_HealthVisual], a
+	; Update health bar
+	call Play_DrawBarTip
+	jp   .eqTarget1P
+	
+.ltTarget1P:
+	; Bar grows to the left
+	ld   hl, vBGHealthBar1P				; HL = Ptr to start of health bar in tilemap
+	ld   bc, Play_Bar_TileIdTbl_RGrow+1	; BC = Tile ID table (bytes 1-8)
+	ld   de, Play_Bar_BGOffsetTbl_RGrow	; DE = Tilemap offset table
+	; VisualHealth++
 	inc  a
-	ld   [wPlInfo_Pl1+iPlInfo_Unknown_Timer], a
+	ld   [wPlInfo_Pl1+iPlInfo_HealthVisual], a
+	; When the bar grows, it should always update the tile for the previous health value.
+	; If we didn't, there'd be an empty gap between tiles when the modulo'd health goes from 7 to 8.
+	;
+	; ie:
+	; -> 7 % 8 = 7 -> Tile+0 set at 7 filled pixels, 1 empty
+	; -> 8 % 8 = 0 -> NG Tile+1 set at 8 empty pixels, leaving the previous value at Tile+0
+	;                 OK Tile+0 set at 8 filled pixels
+	; -> (then continuing as normal with 1 filled pixel on Tile+1)
+	;
+	; The VisualHealth being offset by -1 is also the reason behind the +1 offset
+	; to Play_Bar_TileIdTbl_RGrow, as it shifts the tile IDs down by 1 too.
 	dec  a
-	call L0178C1
-	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_Timer]
-	cp   $18
-	jp   nz, L01770C
-	ld   hl, $9C28
+	call Play_DrawBarTip
+	
+	;--
+	
+.chkFixFlash1P:
+	;
+	; When the health increases from critical to fine, force replace
+	; the blank bar graphics with the filled ones.
+	;
+	; This is because the flashing is done by alternating between empty and filled bar,
+	; and it's very possible to switch while the bar is using the empty tiles.
+	;
+	
+	ld   a, [wPlInfo_Pl1+iPlInfo_HealthVisual]
+	cp   $18						; VisualHealth != $18?
+	jp   nz, .eqTarget1P			; If so, jump
+	ld   hl, vBGHealthBar1P_Last	; Start at lowest tile
+	
+	; Write filled bar to lowest tile
 	di
-L0176F5:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L0176F5
-	ld   a, $DF
+	mWaitForVBlankOrHBlank
+	ld   a, $DF			; Tile ID for filled bar.	
 	ldd  [hl], a
 	ei
-	push af
-	di
-L017702:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017702
-	pop  af
-	ldd  [hl], a
+	
+	; Write filled bar to 2nd-lowest tile
+	push af	; Save $DF
+		di
+		mWaitForVBlankOrHBlank
+	pop  af	; Restore $DF
+	ldd  [hl], a			
 	ei
-L01770C:;J
-	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_Timer]
-	cp   $18
-	jp   nc, L0177BA
-	ld   a, [$C008]
-	and  a, $04
-	jp   nz, L017757
-	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_Timer]
-	ld   b, $E0
-	ld   hl, $9C28
-	push af
-	di
-L017726:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017726
-	ld   [hl], b
-	ei
-	pop  af
-	sub  a, $08
-	jp   c, L0177BA
+	; No need to write it to the 3rd-lowest tile, as it's already seen done when the tip
+	; was drawn due to the -1 offset.
+	
+.eqTarget1P:
+	;
+	; Handle the aforemented health bar flashing at critical health.
+	; This is handled by alternating between blank and filled tiles every 4 frames
+	; when the health is lower than 18 (meaning 3 tiles at most do the effect)
+	;
+	ld   a, [wPlInfo_Pl1+iPlInfo_HealthVisual]
+	cp   $18							; VisualHealth >= $18?
+	jp   nc, .do2P	; If so, skip
+	
+	; Every 4 frames...
+	ld   a, [wPlayTimer]
+	and  a, $04				; wPlayTimer % 4 != 0?	
+	jp   nz, .flashShow1P	; If so, fill the bar
+	
+.flashBlank1P:
+	ld   a, [wPlInfo_Pl1+iPlInfo_HealthVisual]	; A = Current health
+	ld   b, $E0						; B = Tile ID for empty bar
+	ld   hl, vBGHealthBar1P_Last	; HL = Lowest tile of 1P health bar
+	
+	; To save time, only write to the non-empty tiles.	
+	; Decrease the health by 8 every time, until it goes negative or we updated all 3 tiles.
+	
+	;
+	; Lowest tile
+	;
+	mDrawHealthBarTile
+	
+	;
+	; 2nd-lowest tile
+	;
+	sub  a, $08		; VisualHealth < $08?
+	jp   c, .do2P	; If so, skip (2nd-lowest tile is already empty)
+	dec  hl			; Move left in tilemap
+	mDrawHealthBarTile
+	
+	;
+	; 3rd-lowest tile
+	;
+	sub  a, $08		; VisualHealth < $10?
+	jp   c, .do2P	; If so, skip
 	dec  hl
+	mDrawHealthBarTile
+	
+	jp   .do2P
+	
+.flashShow1P:
+	; Display the bar
+	ld   a, [wPlInfo_Pl1+iPlInfo_HealthVisual]	; A = Current health
+	ld   b, $DF						; B = Tile ID for filled bar
+	ld   hl, vBGHealthBar1P_Last	; HL = Lowest tile of 1P health bar
+	
+	; Move left from the lowest tile of the health bar, drawing completely filled tiles.
+	; Stop when reaching the tip as that doesn't always use the filled tile.
+	
+	;
+	; Lowest tile
+	;
+	sub  a, $08				; VisualHealth < $08?
+	jp   c, .flashTip1P		; If so, jump (tip already reached)
+	mDrawHealthBarTile
+	dec  hl					; Move left in tilemap
+	
+	;
+	; 2nd-lowest tile
+	;
+	sub  a, $08				; VisualHealth < $10?
+	jp   c, .flashTip1P		; If so, jump 
+	mDrawHealthBarTile
+	dec  hl					; Move left in tilemap
+	
+	;
+	; 3rd-lowest tile
+	;
+	sub  a, $08				; VisualHealth < $18?
+	jp   c, .flashTip1P		; If so, jump (always)
+	;--
+	; [TCRF] Unreachable code, as the health bar only flashes at VisualHealth < 18.
+	mDrawHealthBarTile
+	jp   .do2P
+	;--
+.flashTip1P:
+	;
+	; Draw the tip of the health bar.
+	; This is a simplified version of Play_DrawBarTip with somewhat hardcoded values.
+	;
+	
+	; TileId = $E7 + (Health % 8)
+	and  a, $07		; A = VisualHealth % 8
+	; The tile for the empty tile is $E0, which doesn't work with the formula above
+	or   a						; Is it $00?
+	jp   z, .flashTipEmpty1P	; If so, skip
+	add  a, $E7					; Add tile ID base
+	; Write TileId to the tilemap
 	push af
-	di
-L017738:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017738
-	ld   [hl], b
-	ei
-	pop  af
-	sub  a, $08
-	jp   c, L0177BA
-	dec  hl
-	push af
-	di
-L01774A:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L01774A
-	ld   [hl], b
-	ei
-	pop  af
-	jp   L0177BA
-L017757:;J
-	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_Timer]
-	ld   b, $DF
-	ld   hl, $9C28
-	sub  a, $08
-	jp   c, L017797
-	push af
-	di
-L017766:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017766
-	ld   [hl], b
-	ei
-	pop  af
-	dec  hl
-	sub  a, $08
-	jp   c, L017797
-	push af
-	di
-L017778:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017778
-	ld   [hl], b
-	ei
-	pop  af
-	dec  hl
-	sub  a, $08
-	jp   c, L017797
-L017788: db $F5;X
-L017789: db $F3;X
-L01778A: db $F0;X
-L01778B: db $41;X
-L01778C: db $CB;X
-L01778D: db $4F;X
-L01778E: db $C2;X
-L01778F: db $8A;X
-L017790: db $77;X
-L017791: db $70;X
-L017792: db $FB;X
-L017793: db $F1;X
-L017794: db $C3;X
-L017795: db $BA;X
-L017796: db $77;X
-L017797:;J
-	and  a, $07
-	or   a
-	jp   z, L0177AE
-	add  a, $E7
-	push af
-	di
-L0177A1:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L0177A1
+		di
+		mWaitForVBlankOrHBlank
 	pop  af
 	ld   [hl], a
 	ei
-	jp   L0177BA
-L0177AE:;J
+	jp   .do2P
+.flashTipEmpty1P:
+	; Write $E0 to the tilemap
 	di
-L0177AF:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L0177AF
+	mWaitForVBlankOrHBlank
 	ld   a, $E0
 	ld   [hl], a
 	ei
-L0177BA:;J
-	ld   a, [wPlInfo_Pl2+iPlInfo_Unknown_TimerTarget]
-	ld   b, a
-	ld   a, [wPlInfo_Pl2+iPlInfo_Unknown_Timer]
-	cp   a, b
-	jp   z, L017812
-	jp   c, L0177DE
-	ld   hl, $9C2B
-	ld   bc, $00BF
-	ld   de, $00C8
-	ld   a, [wPlInfo_Pl2+iPlInfo_Unknown_Timer]
+	
+.do2P:
+	;
+	; Same thing for the 2P Health Bar
+	;
+	
+	ld   a, [wPlInfo_Pl2+iPlInfo_Health]
+	ld   b, a									; B = Target health
+	ld   a, [wPlInfo_Pl2+iPlInfo_HealthVisual]	; A = Visual Health
+	cp   a, b										
+	jp   z, .eqTarget2P		; Health == Target? If so, jump
+	jp   c, .ltTarget2P 	; Health < Target?
+	
+.gtTarget2P:
+	; Decrease the bar to the left
+	ld   hl, vBGHealthBar2P						; HL = Ptr to start of health bar in tilemap
+	ld   bc, Play_Bar_TileIdTbl_LGrow			; BC = Tile ID table (bytes 0-7)
+	ld   de, Play_Bar_BGOffsetTbl_LGrow		; DE = Tilemap offset table
+	ld   a, [wPlInfo_Pl2+iPlInfo_HealthVisual]	; VisualHealth--
 	dec  a
-	ld   [wPlInfo_Pl2+iPlInfo_Unknown_Timer], a
-	call L0178C1
-	jp   L017812
-L0177DE:;J
-	ld   hl, $9C2B
-	ld   bc, $00C0
-	ld   de, $00C8
-	inc  a
-	ld   [wPlInfo_Pl2+iPlInfo_Unknown_Timer], a
-	dec  a
-	call L0178C1
-	ld   a, [wPlInfo_Pl2+iPlInfo_Unknown_Timer]
-	cp   $18
-	jp   nz, L017812
-	ld   hl, $9C2B
+	ld   [wPlInfo_Pl2+iPlInfo_HealthVisual], a
+	call Play_DrawBarTip
+	jp   .eqTarget2P
+	
+.ltTarget2P:
+	; Increase the bar to the right
+	ld   hl, vBGHealthBar2P
+	ld   bc, Play_Bar_TileIdTbl_LGrow+1
+	ld   de, Play_Bar_BGOffsetTbl_LGrow
+	inc  a										; VisualHealth++
+	ld   [wPlInfo_Pl2+iPlInfo_HealthVisual], a
+	dec  a										; Update tile for previous health value
+	call Play_DrawBarTip
+.chkFixFlash2P:
+	; Force replace the blank bar graphics with the filled ones.
+	ld   a, [wPlInfo_Pl2+iPlInfo_HealthVisual]
+	cp   $18				; VisualHealth != $18?
+	jp   nz, .eqTarget2P	; If so, jump
+	ld   hl, vBGHealthBar2P	; Start at lowest tile (matches origin in 2P)
+	
+	; Write filled bar to lowest tile
 	di
-L0177FB:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L0177FB
+	mWaitForVBlankOrHBlank
 	ld   a, $DF
 	ldi  [hl], a
 	ei
+	
+	; Write filled bar to 2nd-lowest tile
 	push af
-	di
-L017808:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017808
+		di
+		mWaitForVBlankOrHBlank
 	pop  af
 	ldi  [hl], a
 	ei
-L017812:;J
-	ld   a, [wPlInfo_Pl2+iPlInfo_Unknown_Timer]
-	cp   $18
-	jp   nc, L0178C0
-	ld   a, [$C008]
-	and  a, $04
-	jp   nz, L01785D
-	ld   a, [wPlInfo_Pl2+iPlInfo_Unknown_Timer]
-	ld   b, $E0
-	ld   hl, $9C2B
-	push af
-	di
-L01782C:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L01782C
-	ld   [hl], b
-	ei
-	pop  af
-	sub  a, $08
-	jp   c, L0178C0
+	
+.eqTarget2P:
+	;
+	; Handle the health bar flashing at critical health.
+	;
+	ld   a, [wPlInfo_Pl2+iPlInfo_HealthVisual]
+	cp   $18				; VisualHealth >= $18?
+	jp   nc, .ret			; If so, skip
+	; Every 4 frames...
+	ld   a, [wPlayTimer]
+	and  a, $04				; wPlayTimer % 4 != 0?	
+	jp   nz, .flashShow2P	; If so, show the bar
+	
+.flashBlank2P:
+	ld   a, [wPlInfo_Pl2+iPlInfo_HealthVisual]	; A = Current health
+	ld   b, $E0				; B = Tile ID for empty bar
+	ld   hl, vBGHealthBar2P	; HL = Lowest tile of 2P health bar
+	
+	;
+	; Lowest tile
+	;
+	mDrawHealthBarTile
+	
+	;
+	; 2nd-lowest tile
+	;
+	sub  a, $08		; VisualHealth < $08?
+	jp   c, .ret	; If so, skip (2nd-lowest tile is already empty)
+	inc  hl			; Move right in tilemap
+	mDrawHealthBarTile
+	
+	;
+	; 3rd-lowest tile
+	;
+	sub  a, $08		; VisualHealth < $10?
+	jp   c, .ret	; If so, skip
 	inc  hl
-	push af
-	di
-L01783E:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L01783E
-	ld   [hl], b
-	ei
-	pop  af
-	sub  a, $08
-	jp   c, L0178C0
-	inc  hl
-	push af
-	di
-L017850:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017850
-	ld   [hl], b
-	ei
-	pop  af
-	jp   L0178C0
-L01785D:;J
-	ld   a, [wPlInfo_Pl2+iPlInfo_Unknown_Timer]
-	ld   b, $DF
-	ld   hl, $9C2B
-	sub  a, $08
-	jp   c, L01789D
-	push af
-	di
-L01786C:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L01786C
-	ld   [hl], b
-	ei
-	pop  af
-	inc  hl
-	sub  a, $08
-	jp   c, L01789D
-	push af
-	di
-L01787E:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L01787E
-	ld   [hl], b
-	ei
-	pop  af
-	inc  hl
-	sub  a, $08
-	jp   c, L01789D
-L01788E: db $F5;X
-L01788F: db $F3;X
-L017890: db $F0;X
-L017891: db $41;X
-L017892: db $CB;X
-L017893: db $4F;X
-L017894: db $C2;X
-L017895: db $90;X
-L017896: db $78;X
-L017897: db $70;X
-L017898: db $FB;X
-L017899: db $F1;X
-L01789A: db $C3;X
-L01789B: db $C0;X
-L01789C: db $78;X
-L01789D:;J
+	mDrawHealthBarTile
+	
+	jp   .ret
+.flashShow2P:
+	; Display the bar
+	ld   a, [wPlInfo_Pl2+iPlInfo_HealthVisual]	; A = Current health
+	ld   b, $DF					; B = Tile ID for filled bar
+	ld   hl, vBGHealthBar2P		; HL = Lowest tile of 2P health bar
+	
+	; Move right from the lowest tile of the health bar, drawing completely filled tiles.
+	
+	;
+	; Lowest tile
+	;
+	sub  a, $08				; VisualHealth < $08?
+	jp   c, .flashTip2P		; If so, jump (tip already reached)
+	mDrawHealthBarTile
+	inc  hl					; Move left in tilemap
+	
+	;
+	; 2nd-lowest tile
+	;
+	sub  a, $08				; VisualHealth < $10?
+	jp   c, .flashTip2P		; If so, jump 
+	mDrawHealthBarTile
+	inc  hl					; Move left in tilemap
+	
+	;
+	; 3rd-lowest tile
+	;
+	sub  a, $08				; VisualHealth < $18?
+	jp   c, .flashTip2P		; If so, jump (always)
+	;--
+	; [TCRF] Unreachable code, as the health bar only flashes at VisualHealth < 18.
+	mDrawHealthBarTile
+	jp   .ret
+	;--
+.flashTip2P:
+	; Draw the tip of the health bar.
+	; TileId = $E0 + (Health % 8)
 	and  a, $07
-	or   a
-	jp   z, L0178B4
+	or   a						; This check is unnecessary for the 2P tilemap
+	jp   z, .flashTipEmpty2P	; as the empty bar and tile ID base are the same
 	add  a, $E0
+	; Write TileId to the tilemap
 	push af
-	di
-L0178A7:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L0178A7
+		di
+		mWaitForVBlankOrHBlank
 	pop  af
 	ld   [hl], a
 	ei
-	jp   L0178C0
-L0178B4:;J
+	jp   .ret
+.flashTipEmpty2P:
+	; Write $E0 to the tilemap
 	di
-L0178B5:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L0178B5
+	mWaitForVBlankOrHBlank
 	ld   a, $E0
 	ld   [hl], a
 	ei
-L0178C0:;J
+.ret:
 	ret
-L0178C1:;C
+	
+; =============== Play_DrawBarTip ===============
+; Updates the tip tile of a bar.
+; IN
+; - HL: Ptr to bar in the tilemap (leftmost tile, even on 2P side)
+; - BC: Ptr to tile id table. An 8 byte window of this is used.
+; - DE: Ptr to tilemap offset table
+; -  A: Visual bar value
+Play_DrawBarTip:
+	
+	;
+	; The bar graphics include multiple bar tiles to allow pixel-level precision.
+	; Determine which tile id we're using for the tip of the bar.
+	; A = TileId
+	;
 	push af
-	and  a, $07
-	add  c
-	ld   c, a
-	ld   a, [bc]
+		; As tiles are 8px long, the tip can use 8 possible tiles (VisualHealth % 8).
+		and  a, $07		; A = VisualHealth % 8
+		; Use that as index to a table mapping sub-tile values to tile IDs.
+		; This is different 
+		add  c			; BC += A
+		ld   c, a
+		ld   a, [bc]	; Read value
 	pop  bc
+	
+	;
+	; Determine the tilemap ptr to the tip of the bar.
+	; HL = TilemapPtr
+	;
 	push af
-	ld   a, b
-	srl  a
-	srl  a
-	srl  a
-	add  a, e
-	ld   e, a
-	ld   a, [de]
-	add  a, l
-	ld   l, a
-	di
-L0178D6:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L0178D6
+		; As tiles are 8px long...
+		ld   a, b		; A = B / 8
+		srl  a
+		srl  a
+		srl  a
+		; Use that as index to a table of tilemap *offsets*.
+		; The byte read out from here is added to the tilemap's origin passed in HL.
+		;
+		; Note that there are two different tables for the two players, as both
+		; bars grow from the center of the screen.
+		; Because the bar origin is always the leftmost tile for both sides, these
+		; offsets are always positive.
+		add  a, e		; DE += A (index table)
+		ld   e, a
+		ld   a, [de]	; A = TilemapOffset
+		add  a, l		; HL += A (add it to tilemap ptr)
+		ld   l, a
+		
+	;
+	; Write the tile id to the tilemap
+	;
+		di
+		mWaitForVBlankOrHBlank
 	pop  af
-	ld   [hl], a
+	
+	ld   [hl], a	
 	ei
+	
 	ret
-L0178E1:;C
-	ld   a, [$D955]
-	cp   $00
-	jp   nz, L01794E
-	ld   a, [$D950]
-	ld   b, a
-	ld   a, [$D951]
+	
+; =============== Play_UpdatePowBars ===============
+; Draws/updates the POW bar display for both players, including in the MAXIMUM POW mode.
+; See also: Play_UpdateHealthBars
+Play_UpdatePowBars:
+
+	; In max power mode, a different bar is handled.
+	ld   a, [wPlInfo_Pl1+iPlInfo_MaxPowExtraLen]
+	cp   PLAY_MAXMODE_NONE		; In Max Power mode? (!= $00)
+	jp   nz, .maxPow1P			; If so, jump
+	
+	ld   a, [wPlInfo_Pl1+iPlInfo_Pow]
+	ld   b, a								; B = Target POW
+	ld   a, [wPlInfo_Pl1+iPlInfo_PowVisual]	; A = Visual POW
 	cp   a, b
-	jp   z, L0179EC
-	jp   c, L017917
-	cp   $28
-	jp   nz, L017904
-	ld   hl, $9C82
+	; If nothing changes, skip to checking the 2P POW bar
+	jp   z, .chk2P		; VisualPOW == Target? If so, jump
+	; If the visual POW value is less than the target, increase the bar.
+	jp   c, .ltTarget1P	; VisualPOW < Target? If so, jump
+	; Otherwise, POW > Target. Decrease the POW bar.
+.gtTarget1P:
+	; If we're decreasing the bar from $28, it means the MAXIMUM POW effect just ended.
+	; That uses its own different tilemap, so replace it with the normal POW bar.
+	cp   PLAY_POW_MAX			; VisualPOW == $28?
+	jp   nz, .decPow1P			; If not, jump
+	ld   hl, vBGPowBar1P_Left-1	; HL = Ptr to left *border* of the POW bar
 	push af
-	call L017D0C
+		call Play_DrawFilledPowBar		; Write the normal POW tilemap
 	pop  af
-L017904:;J
-	ld   hl, $9C83
-	ld   bc, $00BF
-	ld   de, $00C8
+.decPow1P:
+
+	; Decrease the POW bar
+	ld   hl, vBGPowBar1P_Left
+	ld   bc, Play_Bar_TileIdTbl_LGrow
+	ld   de, Play_Bar_BGOffsetTbl_LGrow	; Use offsets 0-4
+	; VisualPOW--
 	dec  a
-	ld   [$D951], a
-	call L0178C1
-	jp   L0179EC
-L017917:;J
-	ld   hl, $9C83
-	ld   bc, $00C0
-	ld   de, $00C8
+	ld   [wPlInfo_Pl1+iPlInfo_PowVisual], a
+	call Play_DrawBarTip
+	jp   .chk2P
+.ltTarget1P:
+	;
+	; Increase the POW bar
+	;
+	ld   hl, vBGPowBar1P_Left
+	ld   bc, Play_Bar_TileIdTbl_LGrow+1
+	ld   de, Play_Bar_BGOffsetTbl_LGrow	; Use offsets 0-4
 	inc  a
-	ld   [$D951], a
-	cp   $28
-	jp   z, L017930
+	ld   [wPlInfo_Pl1+iPlInfo_PowVisual], a
+	
+	;
+	; If we've filled the POW bar, switch to MAXIMUM POW mode
+	;
+	cp   PLAY_POW_MAX 		; VisualPOW == $28?			
+	jp   z, .setMaxPow1P	; If so, jump
+	; Otherwise, draw the tip of the normal POW bar.
+	; Like with the health bar, draw it for VisualPOW-1 for modulo reasons
 	dec  a
-	call L0178C1
-	jp   L0179EC
-L017930:;J
-	ld   hl, $9C82
-	call L017D37
-	ld   bc, wJoyBuffer_Pl2
-	ld   de, $7CFC
-	call L017CA7
-	ld   hl, $C16B
-	ld   a, $01
+	call Play_DrawBarTip
+	jp   .chk2P
+.setMaxPow1P:
+	; Replace normal POW bar with "MAXIMUM" text
+	ld   hl, vBGPowBar1P_Left-1 ; Left corner 
+	call Play_DrawMaximumText
+	; Set final bar info
+	ld   bc, wPlInfo_Pl1
+	ld   de, Play_MaxPowBGPtrTbl_1P
+	call Play_PlSetMaxPowInfo
+	
+	;
+	; Prepare the scroll-in to the right.
+	;
+	
+	; Enable scroll-in for the 1P bar
+	ld   hl, wPlayMaxPowScroll1P
+	ld   a, PLAY_MAXPOWFADE_IN
 	ldi  [hl], a
-	ld   a, $00
+	; Set initial BG offset for the effect.
+	; As the bar moves to the right, this points to its right corner, which is always $00 here.
+	ld   a, $00			; wPlayMaxPowScrollBGOffset1P
 	ldi  [hl], a
-	ld   a, $0A
+	; Move right for $0A frames.
+	ld   a, $0A			; wPlayMaxPowScrollTimer1P
 	ld   [hl], a
-	jp   L0179EC
-L01794E:;J
-	ld   a, [$C16B]
-	cp   $01
-	jp   z, L0179A1
-	cp   $FF
-	jp   z, L0179C6
-	ld   a, [$D953]
-	ld   b, a
-	ld   a, [$D954]
+	jp   .chk2P
+	
+.maxPow1P:
+	; Check if the MAX power bar is moving in or out
+	ld   a, [wPlayMaxPowScroll1P]
+	cp   PLAY_MAXPOWFADE_IN		; Scrolling on-screen the MAX power bar?
+	jp   z, .maxPowScrollIn1P	; If so, jump
+	cp   PLAY_MAXPOWFADE_OUT	; Scrolling off-screen the MAX power bar?
+	jp   z, .maxPowScrollOut1P	; If so, jump
+	
+	ld   a, [wPlInfo_Pl1+iPlInfo_MaxPow]
+	ld   b, a									; B = Target MaxPow
+	ld   a, [wPlInfo_Pl1+iPlInfo_MaxPowVisual]	; A = Visual MaxPow
 	cp   a, b
-	jp   z, L0179EC
-	jp   c, L01799E
+	jp   z, .chk2P		; VisualMaxPow == Target? If so, skip
+	; [TCRF] The MAX power bar always shrinks slowly and never grows.
+	;        In case it is, don't do anything.
+	jp   c, .unused_ltTargetMax1P	; VisualMaxPow < Target? If so, skip
+	
+	; Otherwise, VisualMaxPow > Target.
+.gtTargetMax1P:
+
+	;
+	; Decrease the MAX power bar.
+	;
+	
+	; Prepare the args for Play_DrawBarTip
 	push af
-	ld   hl, $D956
-	ldi  a, [hl]
-	ld   d, a
-	ld   a, [hl]
-	ld   e, a
-	push de
-	pop  hl
+		; HL = Ptr to start of MAX power bar in tilemap
+		ld   hl, wPlInfo_Pl1+iPlInfo_MaxPowBGPtr_High
+		ldi  a, [hl]	; D = iPlInfo_MaxPowBGPtr_High
+		ld   d, a
+		ld   a, [hl]	; E = iPlInfo_MaxPowBGPtr_Low
+		ld   e, a
+		push de			; Move to HL
+		pop  hl
 	pop  af
-	ld   bc, $00BF
-	ld   de, $00C8
+	ld   bc, Play_Bar_TileIdTbl_LGrow	; BC = Tile ID table (bytes 0-8)
+	ld   de, Play_Bar_BGOffsetTbl_LGrow	; DE = Tilemap offset table (bytes 0-x)
+	
+	; VisualMaxPOW--
 	dec  a
-	ld   [$D954], a
-	call L0178C1
-	ld   a, [$D954]
-	cp   $00
-	jp   nz, L0179EC
-	ld   hl, $C16B
-	ld   a, $FF
-	ldi  [hl], a
-	ld   a, [$D955]
-	ld   b, a
-	ld   a, $04
-	sub  a, b
-	dec  a
-	ldi  [hl], a
+	ld   [wPlInfo_Pl1+iPlInfo_MaxPowVisual], a
+	call Play_DrawBarTip
+	
+	;
+	; If the MAX power bar is visually empty now, start the animation
+	; to move it off-screen to the left.
+	;
+	ld   a, [wPlInfo_Pl1+iPlInfo_MaxPowVisual]
+	cp   $00			; VisualMaxPOW == 0?
+	jp   nz, .chk2P		; If not, skip
+	
+	; Set animation mode
+	ld   hl, wPlayMaxPowScroll1P
+	ld   a, PLAY_MAXPOWFADE_OUT		
+	ldi  [hl], a	
+	
+	; Set offset to the left corner of the MAX pow bar.
+	; As the bar can grow to the left:
+	; wPlayMaxPowScrollBGOffset1P = (Max Length) - (Additional Length) - 1
+	;   With the extra -1 since the entire thing is being already moved to the left.
+	ld   a, [wPlInfo_Pl1+iPlInfo_MaxPowExtraLen]
+	ld   b, a		
+	ld   a, PLAY_MAXMODE_LENGTH4
+	sub  a, b		
+	dec  a					
+	ldi  [hl], a			; wPlayMaxPowScrollBGOffset1P = 4 - iPlInfo_MaxPowExtraLen - 1
+	; Move it left for $0A frames, to make it go fully off-screen
 	ld   a, $0A
-	ld   [hl], a
-	jp   L0179EC
-L01799E: db $C3;X
-L01799F: db $EC;X
-L0179A0: db $79;X
-L0179A1:;J
-	ld   a, [$C16C]
-	ld   e, a
-	ld   a, [$D955]
-	add  a, $04
+	ld   [hl], a			; wPlayMaxPowScrollTimer1P = $0A
+	jp   .chk2P
+	
+.unused_ltTargetMax1P:
+	jp   .chk2P
+	
+.maxPowScrollIn1P:
+	;
+	; The 1P scroll-in effect is handled by partially redrawing the bar every frame,
+	; and moving it right $0A times.
+	;
+	ld   a, [wPlayMaxPowScrollBGOffset1P]
+	ld   e, a							; E = Bar Origin (in tiles)
+	ld   a, [wPlInfo_Pl1+iPlInfo_MaxPowExtraLen]
+	add  a, PLAY_MAXMODE_BASELENGTH		; B = iPlInfo_MaxPowExtraLen + $04
 	ld   b, a
-	ld   c, $DF
-	call L017B0C
-	ld   hl, $C16C
+	ld   c, $DF							; C = Filled bar tile ID
+	call Play_DrawMaxPowBarFromR
+	
+	;
+	; Move bar to the right by 1 tile for the next time we get here
+	; When this is repeated for the last time, the bar should be
+	; in the same position that the previously set iPlInfo_MaxPowBGPtr expects it to be.
+	;
+	ld   hl, wPlayMaxPowScrollBGOffset1P
 	inc  [hl]
-	inc  hl
-	dec  [hl]
-	jp   nz, L0179EC
-	ld   a, $00
-	ld   [$C16B], a
-	ld   a, $07
+	; Decrease scroll counter
+	inc  hl			; Seek to wPlayMaxPowScrollTimer1P
+	dec  [hl]		; Counter == 0?
+	jp   nz, .chk2P	; If not, jump
+	
+	; Otherwise, we're done moving the bar
+	ld   a, PLAY_MAXPOWFADE_NONE	; Disable fade
+	ld   [wPlayMaxPowScroll1P], a
+	ld   a, SCT_MAXPOWSTART			; Play max power SFX
 	call HomeCall_Sound_ReqPlayExId
-	jp   L0179EC
-L0179C6:;J
-	ld   a, [$C16C]
-	ld   e, a
-	ld   a, [$D955]
-	add  a, $04
+	jp   .chk2P
+	
+.maxPowScrollOut1P:
+	;
+	; Move the max pow bar to the left, until it goes off-screen.
+	;
+	ld   a, [wPlayMaxPowScrollBGOffset1P]
+	ld   e, a						; E = Bar Origin (in tiles)
+	ld   a, [wPlInfo_Pl1+iPlInfo_MaxPowExtraLen]
+	add  a, PLAY_MAXMODE_BASELENGTH	; B = iPlInfo_MaxPowExtraLen + $04
 	ld   b, a
-	ld   c, $E0
-	call L017B3C
-	ld   hl, $C16C
+	ld   c, $E0						; C = Empty bar tile ID
+	call Play_DrawMaxPowBarFromL
+	
+	; Move bar to the left by 1 tile for the next time we get here
+	ld   hl, wPlayMaxPowScrollBGOffset1P
 	dec  [hl]
-	inc  hl
-	dec  [hl]
-	jp   nz, L0179EC
-	ld   a, $00
-	ld   [$C16B], a
-	ld   [$D955], a
-	ld   [$D950], a
-	jp   L0179EC
-L0179EC:;J
-	ld   a, [$DA55]
-	cp   $00
-	jp   nz, L017A59
-	ld   a, [$DA50]
-	ld   b, a
-	ld   a, [$DA51]
+	; Decrease scroll counter
+	inc  hl			; Seek to wPlayMaxPowScrollTimer1P
+	dec  [hl]		; Counter == 0?
+	jp   nz, .chk2P	; If not, jump
+	; Otherwise, we're done moving the bar
+	ld   a, PLAY_MAXPOWFADE_NONE
+	ld   [wPlayMaxPowScroll1P], a		; Stop moving the bar
+	ld   [wPlInfo_Pl1+iPlInfo_MaxPowExtraLen], a ; Return to normal POW display
+	; Reset *actual POW* value to $00, forcing the POW bar to deplete from the previous
+	; filled state to empty.
+	ld   [wPlInfo_Pl1+iPlInfo_Pow], a
+	jp   .chk2P
+	
+.chk2P:
+	
+	; In max power mode, a different bar is handled.
+	ld   a, [wPlInfo_Pl2+iPlInfo_MaxPowExtraLen]
+	cp   PLAY_MAXMODE_NONE		; In Max Power mode? (!= $00)
+	jp   nz, .maxPow2P			; If so, jump
+	
+	ld   a, [wPlInfo_Pl2+iPlInfo_Pow]
+	ld   b, a								; B = Target POW
+	ld   a, [wPlInfo_Pl2+iPlInfo_PowVisual]	; A = Visual POW
 	cp   a, b
-	jp   z, L017B0B
-	jp   c, L017A22
-	cp   $28
-	jp   nz, L017A0F
-	ld   hl, $9C8B
+	; If nothing changes, skip to checking the 2P POW bar
+	jp   z, .ret		; VisualPOW == Target? If so, jump
+	; If the visual POW value is less than the target, increase the bar.
+	jp   c, .ltTarget2P	; VisualPOW < Target? If so, jump
+	; Otherwise, POW > Target. Decrease the POW bar.
+.gtTarget2P:
+	; If we're decreasing the bar from $28, it means the MAXIMUM POW effect just ended.
+	; That uses its own different tilemap, so replace it with the normal POW bar.
+	cp   PLAY_POW_MAX			; VisualPOW == $28?
+	jp   nz, .decPow2P			; If not, jump
+	ld   hl, vBGPowBar2P_Left-1	; HL = Ptr to left *border* of the POW bar
 	push af
-	call L017D0C
+		call Play_DrawFilledPowBar		; Write the normal POW tilemap
 	pop  af
-L017A0F:;J
-	ld   hl, $9C8C
-	ld   bc, $00AD
-	ld   de, $00BA
+.decPow2P:
+	; Decrease the POW bar.
+	ld   hl, vBGPowBar2P_Left
+	ld   bc, Play_Bar_TileIdTbl_RGrow
+	ld   de, Play_Bar_BGOffsetTbl_RGrow+4	; Use offsets 4-8 (due to the reverse order of Play_Bar_BGOffsetTbl_RGrow)
+	; VisualPOW--
 	dec  a
-	ld   [$DA51], a
-	call L0178C1
-	jp   L017B0B
-L017A22:;J
-	ld   hl, $9C8C
-	ld   bc, $00AE
-	ld   de, $00BA
+	ld   [wPlInfo_Pl2+iPlInfo_PowVisual], a
+	call Play_DrawBarTip
+	jp   .ret
+.ltTarget2P:
+	;
+	; Increase the POW bar
+	;
+	ld   hl, vBGPowBar2P_Left
+	ld   bc, Play_Bar_TileIdTbl_RGrow+1
+	ld   de, Play_Bar_BGOffsetTbl_RGrow+4	; Use offsets 4-8
 	inc  a
-	ld   [$DA51], a
-	cp   $28
-	jp   z, L017A3B
+	ld   [wPlInfo_Pl2+iPlInfo_PowVisual], a
+	;
+	; If we've filled the POW bar, switch to MAXIMUM POW mode
+	;
+	cp   PLAY_POW_MAX 		; VisualPOW == $28?			
+	jp   z, .setMaxPow2P	; If so, jump
+	; Otherwise, draw the tip of the normal POW bar.
+	; Like with the health bar, draw it for VisualPOW-1 for modulo reasons
 	dec  a
-	call L0178C1
-	jp   L017B0B
-L017A3B:;J
-	ld   hl, $9C8B
-	call L017D37
-	ld   bc, $DA00
-	ld   de, $7D04
-	call L017CA7
-	ld   hl, $C16E
-	ld   a, $01
+	call Play_DrawBarTip
+	jp   .ret
+.setMaxPow2P:
+	; Replace normal POW bar with "MAXIMUM" text
+	ld   hl, vBGPowBar2P_Left-1 ; Left corner 
+	call Play_DrawMaximumText
+	; Set final bar info
+	ld   bc, wPlInfo_Pl2
+	ld   de, Play_MaxPowBGPtrTbl_2P
+	call Play_PlSetMaxPowInfo
+	
+	;
+	; Prepare the scroll-in to the left.
+	;
+	
+	; Enable scroll-in for the 2P bar
+	ld   hl, wPlayMaxPowScroll2P
+	ld   a, PLAY_MAXPOWFADE_IN
 	ldi  [hl], a
-	ld   a, $13
+	; Set initial BG offset for the effect.
+	; As the bar moves to the left, this points to its left corner, which is always $13 here.
+	ld   a, (SCREEN_H/TILE_H)-1			; wPlayMaxPowScrollBGOffset2P
 	ldi  [hl], a
-	ld   a, $0A
+	; Move left for $0A frames.
+	ld   a, $0A			; wPlayMaxPowScrollTimer2P
 	ld   [hl], a
-	jp   L017B0B
-L017A59:;J
-	ld   a, [$C16E]
-	cp   $01
-	jp   z, L017AC0
-	cp   $FF
-	jp   z, L017AE5
-	ld   a, [$DA53]
-	ld   b, a
-	ld   a, [$DA54]
+	jp   .ret
+.maxPow2P:
+	; Check if the MAX power bar is moving in or out
+	ld   a, [wPlayMaxPowScroll2P]
+	cp   PLAY_MAXPOWFADE_IN		; Scrolling on-screen the MAX power bar?
+	jp   z, .maxPowScrollIn2P	; If so, jump
+	cp   PLAY_MAXPOWFADE_OUT	; Scrolling off-screen the MAX power bar?
+	jp   z, .maxPowScrollOut2P	; If so, jump
+	
+	ld   a, [wPlInfo_Pl2+iPlInfo_MaxPow]
+	ld   b, a									; B = Target MaxPow
+	ld   a, [wPlInfo_Pl2+iPlInfo_MaxPowVisual]	; A = Visual MaxPow
 	cp   a, b
-	jp   z, L017B0B
-	jp   c, L017ABD
+	jp   z, .ret		; VisualMaxPow == Target? If so, skip
+	; [TCRF] The MAX power bar always shrinks slowly and never grows.
+	;        In case it is, don't do anything.
+	jp   c, .unused_ltTargetMax2P	; VisualMaxPow < Target? If so, skip
+	
+	; Otherwise, VisualMaxPow > Target.
+.gtTargetMax2P:
+
+	;
+	; Decrease the MAX power bar.
+	;
 	push af
-	ld   hl, $DA56
-	ldi  a, [hl]
-	ld   d, a
-	ld   a, [hl]
-	ld   e, a
-	push de
-	pop  hl
+		; HL = Ptr to start of MAX power bar in tilemap
+		ld   hl, wPlInfo_Pl2+iPlInfo_MaxPowBGPtr_High
+		ldi  a, [hl]	; D = iPlInfo_MaxPowBGPtr_High
+		ld   d, a
+		ld   a, [hl]	; E = iPlInfo_MaxPowBGPtr_Low
+		ld   e, a
+		push de			; Move to HL
+		pop  hl
 	pop  af
-	ld   bc, $00AD
+	
+	ld   bc, Play_Bar_TileIdTbl_RGrow	; BC = Tile ID table
+	
+	; Determine the starting ptr to the tilemap offset table.
 	push af
-	ld   de, $00BA
-	ld   a, [$DA55]
-	cp   $01
-	jp   z, L017A9B
-	dec  de
-	cp   $02
-	jp   z, L017A9B
-	dec  de
-	cp   $03
-	jp   z, L017A9B
-	dec  de
-L017A9B:;J
+		; Start with byte range 4-8 (5 bytes) as entries are right-aligned.
+		; For any extension to the bar, decrement the starting offset by 1.
+		ld   de, Play_Bar_BGOffsetTbl_RGrow+4  
+		
+		ld   a, [wPlInfo_Pl2+iPlInfo_MaxPowExtraLen]
+		cp   PLAY_MAXMODE_LENGTH1	; No extra length?
+		jp   z, .setVisual2P		; If so, jump
+		dec  de						; Otherwise, byte range is 3-8
+		cp   PLAY_MAXMODE_LENGTH2	; 1 additional tile?
+		jp   z, .setVisual2P		; If so, jump
+		dec  de						; Otherwise, byte range is 2-8
+		cp   PLAY_MAXMODE_LENGTH3	; 2 additional tiles?
+		jp   z, .setVisual2P		; If so, jump
+		dec  de						; Otherwise, byte range is 1-8
+	.setVisual2P:
 	pop  af
+	
+	; VisualMaxPOW--
 	dec  a
-	ld   [$DA54], a
-	call L0178C1
-	ld   a, [$DA54]
-	cp   $00
-	jp   nz, L017B0B
-	ld   hl, $C16E
-	ld   a, $FF
-	ldi  [hl], a
-	ld   a, [$DA55]
+	ld   [wPlInfo_Pl2+iPlInfo_MaxPowVisual], a
+	call Play_DrawBarTip
+	
+	;
+	; If the MAX power bar is visually empty now, start the animation
+	; to move it off-screen to the right.
+	;
+	ld   a, [wPlInfo_Pl2+iPlInfo_MaxPowVisual]
+	cp   $00			; VisualMaxPOW == 0?
+	jp   nz, .ret		; If not, skip
+	
+	; Set animation mode
+	ld   hl, wPlayMaxPowScroll2P
+	ld   a, PLAY_MAXPOWFADE_OUT		
+	ldi  [hl], a	
+	
+	; Set initial bar offset for the effect. 
+	; On the 2P side, this is the right corner of the bar.
+	ld   a, [wPlInfo_Pl2+iPlInfo_MaxPowExtraLen]
 	add  a, $10
-	ldi  [hl], a
+	ldi  [hl], a	; wPlayMaxPowScrollBGOffset2P = $10 + iPlInfo_MaxPowExtraLen
+	; Move it right for $0A frames, to make it go fully off-screen
 	ld   a, $0A
-	ld   [hl], a
-	jp   L017B0B
-L017ABD: db $C3;X
-L017ABE: db $0B;X
-L017ABF: db $7B;X
-L017AC0:;J
-	ld   a, [$C16F]
-	ld   e, a
-	ld   a, [$DA55]
-	add  a, $04
+	ld   [hl], a	; wPlayMaxPowScrollTimer2P = $0A
+	jp   .ret
+.unused_ltTargetMax2P:
+	jp   .ret
+.maxPowScrollIn2P:
+	;
+	; The 2P scroll-in effect is handled by partially redrawing the bar every frame,
+	; and moving it left $0A times.
+	;
+	ld   a, [wPlayMaxPowScrollBGOffset2P]
+	ld   e, a							; E = Bar Origin (in tiles)
+	ld   a, [wPlInfo_Pl2+iPlInfo_MaxPowExtraLen]
+	add  a, PLAY_MAXMODE_BASELENGTH		; B = iPlInfo_MaxPowExtraLen + $04
 	ld   b, a
-	ld   c, $DF
-	call L017B3C
-	ld   hl, $C16F
+	ld   c, $DF							; C = Filled bar tile ID
+	call Play_DrawMaxPowBarFromL
+	
+	;
+	; Move bar to the left by 1 tile for the next time we get here.
+	; When this is repeated for the last time, the bar should be
+	; in the same position that the previously set iPlInfo_MaxPowBGPtr expects it to be.
+	;
+	ld   hl, wPlayMaxPowScrollBGOffset2P
 	dec  [hl]
-	inc  hl
-	dec  [hl]
-	jp   nz, L017B0B
-	ld   a, $00
-	ld   [$C16E], a
-	ld   a, $07
+	; Decrease scroll counter
+	inc  hl			; Seek to wPlayMaxPowScrollTimer2P
+	dec  [hl]		; Counter == 0?
+	jp   nz, .ret	; If not, jump
+	
+	; Otherwise, we're done moving the bar
+	ld   a, PLAY_MAXPOWFADE_NONE	; Disable fade
+	ld   [wPlayMaxPowScroll2P], a
+	ld   a, SCT_MAXPOWSTART			; Play max power SFX
 	call HomeCall_Sound_ReqPlayExId
-	jp   L017B0B
-L017AE5:;J
-	ld   a, [$C16F]
-	ld   e, a
-	ld   a, [$DA55]
-	add  a, $04
+	jp   .ret
+	
+.maxPowScrollOut2P:
+	;
+	; Move the max pow bar to the right, until it goes off-screen.
+	;
+	ld   a, [wPlayMaxPowScrollBGOffset2P]
+	ld   e, a						; E = Bar Origin (in tiles)
+	ld   a, [wPlInfo_Pl2+iPlInfo_MaxPowExtraLen]
+	add  a, PLAY_MAXMODE_BASELENGTH	; B = iPlInfo_MaxPowExtraLen + $04
 	ld   b, a
-	ld   c, $E0
-	call L017B0C
-	ld   hl, $C16F
+	ld   c, $E0						; C = Empty bar tile ID
+	call Play_DrawMaxPowBarFromR
+	
+	; Move bar to the right by 1 tile for the next time we get here
+	ld   hl, wPlayMaxPowScrollBGOffset2P
 	inc  [hl]
-	inc  hl
-	dec  [hl]
-	jp   nz, L017B0B
-	ld   a, $00
-	ld   [$C16E], a
-	ld   [$DA55], a
-	ld   [$DA50], a
-	jp   L017B0B
-L017B0B:;J
+	; Decrease scroll counter
+	inc  hl			; Seek to wPlayMaxPowScrollTimer2P
+	dec  [hl]		; Counter == 0?
+	jp   nz, .ret	; If not, jump
+	; Otherwise, we're done moving the bar
+	ld   a, PLAY_MAXPOWFADE_NONE
+	ld   [wPlayMaxPowScroll2P], a		; Stop moving the bar
+	ld   [wPlInfo_Pl2+iPlInfo_MaxPowExtraLen], a ; Return to normal POW display
+	; Reset *actual POW* value to $00, forcing the POW bar to deplete from the previous
+	; filled state to empty.
+	ld   [wPlInfo_Pl2+iPlInfo_Pow], a
+	jp   .ret
+	
+.ret:
 	ret
-L017B0C:;C
-	ld   d, $00
-	bit  7, e
-	jp   z, L017B15
-L017B13: db $16;X
-L017B14: db $FF;X
-L017B15:;J
-	ld   a, $D3
-	call L017B61
-	dec  de
+	
+; =============== Play_DrawMaxPowBarFromR ===============
+; Draws part of the MAX Power bar from right to left,
+; intended to be used when doing the scroll animation.
+; IN
+; - E: Offset to the right corner of the bar, relative to wBGMaxPowBarRow
+; - B: Bar content length (in tiles)
+; - C: Tile ID for the bar contents.
+Play_DrawMaxPowBarFromR:
+	;
+	; Sign extend E to DE
+	;
+	ld   d, $00		
+	bit  7, e		; E < 0?
+	jp   z, .draw	; If not, jump
+	ld   d, $FF 	; We never get here?
+	
+.draw:
+
+	; Only the 4 edges need to be updated to move the bar.
+
+	; Draw right corner
+	ld   a, $D3		; A = $D3
+	call Play_WriteTileToMaxPowBar
+	dec  de			; Seek left in tilemap
+	
+	; Draw bar content
 	ld   a, c
-	call L017B61
-	ld   h, $00
+	call Play_WriteTileToMaxPowBar
+	
+	;
+	; Seek to the left corner of the bar by subtracting
+	; the bar length to the tilemap ptr.
+	;
+	; DE -= B (Bar length)
+	;
+	
+	; HL = B
+	ld   h, $00	
 	ld   l, b
-	ld   a, h
+	; Convert HL to negative
+	; H = ^H (flip bits)
+	ld   a, h	
 	cpl
 	ld   h, a
-	ld   a, l
+	; L = -L (invert L)
+	ld   a, l	
 	cpl
 	ld   l, a
-	inc  l
-	jp   nz, L017B2D
-L017B2C: db $24;X
-L017B2D:;J
-	add  hl, de
+	inc  l		
+	; If this overflowed to 0, increase H
+	jp   nz, .setOffset
+	inc  h ; We never get here
+.setOffset:
+	; Add that negative offset to HL, then move it to DE
+	add  hl, de	
 	push hl
 	pop  de
+	
+	; Draw left corner
 	ld   a, $D2
-	call L017B61
+	call Play_WriteTileToMaxPowBar
 	dec  de
+	
+	; Draw empty tile, to clear out the left corner of the previous frame
 	ld   a, $00
-	call L017B61
+	call Play_WriteTileToMaxPowBar
 	ret
-L017B3C:;C
-	ld   d, $00
-	bit  7, e
-	jp   z, L017B45
-	ld   d, $FF
-L017B45:;J
+	
+; =============== Play_DrawMaxPowBarFromL ===============
+; Draws part of the MAX Power bar from *left* to *right*,
+; intended to be used when doing the scroll animation.
+; See also: Play_DrawMaxPowBarFromR
+; IN
+; - E: Offset to the *left* corner of the bar, relative to wBGMaxPowBarRow
+; - B: Bar content length (in tiles)
+; - C: Tile ID for the bar contents.
+Play_DrawMaxPowBarFromL:
+	;
+	; Sign extend E to DE
+	;
+	ld   d, $00		
+	bit  7, e		; E < 0?
+	jp   z, .draw	; If not, jump
+	ld   d, $FF 	; We never get here?
+	
+.draw:
+	; Draw left corner
 	ld   a, $D2
-	call L017B61
+	call Play_WriteTileToMaxPowBar
 	inc  de
+	
+	; Draw bar content
 	ld   a, c
-	call L017B61
+	call Play_WriteTileToMaxPowBar
+	
+	; Seek to the right corner of the bar
+	; DE += B
 	ld   h, $00
 	ld   l, b
 	add  hl, de
 	push hl
 	pop  de
+	
+	; Draw right corner
 	ld   a, $D3
-	call L017B61
+	call Play_WriteTileToMaxPowBar
 	inc  de
+	
+	; Draw empty tile
 	ld   a, $00
-	call L017B61
+	call Play_WriteTileToMaxPowBar
 	ret
-L017B61:;C
+	
+; =============== Play_WriteTileToMaxPowBar ===============
+; Writes a tile to the tilemap for the MAX power bar.
+; IN
+; - A: Tile ID
+; - DE: Tilemap offset, relative to wBGMaxPowBarRow
+Play_WriteTileToMaxPowBar:
+	; Don't write off-screen tiles.
+	; This is checked because the scroll-in/scroll-out animation
+	; makes the bar move from or to the off-screen area.
 	push af
-	ld   a, e
-	bit  7, a
-	jp   nz, L017B81
-	cp   $14
-	jp   nc, L017B81
+		ld   a, e			
+		bit  7, a				; DE < 0?
+		jp   nz, .popRet		; If so, return
+		cp   SCREEN_H/TILE_H	; DE >= $14?
+		jp   nc, .popRet		; If so, return
 	pop  af
-	ld   hl, $9CA0
+	
+	; Get ptr to tilemap
+	ld   hl, wBGMaxPowBarRow	; HL = wBGMaxPowBarRow + DE
 	add  hl, de
+	
+	; Wait for VRAM to be writable
 	push af
-	di
-L017B74:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017B74
+		di
+		mWaitForVBlankOrHBlank
 	pop  af
+	
+	; Write to the tilemap
 	ld   [hl], a
 	ei
-	jp   L017B82
-L017B81:;J
+	jp   .ret
+.popRet:
 	pop  af
-L017B82:;J
+.ret:
 	ret
+	
 L017B83: db $E5;X
 L017B84: db $FA;X
 L017B85: db $6C;X
@@ -12920,240 +13256,284 @@ L017CA3: db $C2;X
 L017CA4: db $96;X
 L017CA5: db $7C;X
 L017CA6: db $C9;X
-L017CA7:;C
-	ld   hl, $004E
-	add  hl, bc
+
+; =============== Play_PlSetMaxPowInfo ===============
+; Sets the final length of the MAX Power bar for the specified player.
+; - BC: Ptr to wPlInfo struct
+; - DE: Ptr to ptr table of iPlInfo_MaxPowBGPtr
+Play_PlSetMaxPowInfo:
+	;
+	; The MAX Power bar is longer when the player has less health.
+	;
+	
+	; A = Current health
+	ld   hl, iPlInfo_Health
+	add  hl, bc		
 	ld   a, [hl]
-	ld   hl, $0053
-	add  hl, bc
-	cp   $08
-	jp   c, L017CE6
-	cp   $18
-	jp   c, L017CD7
-	cp   $30
-	jp   c, L017CCA
-	ld   [hl], $28
+	
+	ld   hl, iPlInfo_MaxPow
+	add  hl, bc		; Seek to max power for writing
+	
+	cp   $08		; Health < $08?
+	jp   c, .lv4	; If so, jump
+	cp   $18		; Health < $18?
+	jp   c, .lv3	; If so, jump
+	cp   $30		; Health < $30?
+	jp   c, .lv2	; If so, jump
+	
+.lv1:
+	; Otherwise, HP >= $30.
+	ld   [hl], $28	; iPlInfo_MaxPow
 	inc  hl
-	ld   [hl], $28
+	ld   [hl], $28	; iPlInfo_MaxPowVisual
 	inc  hl
-	ld   [hl], $01
-	jp   L017CF4
-L017CCA:;J
-	ld   [hl], $30
+	ld   [hl], $01	; iPlInfo_MaxPowExtraLen
+	; Use for ptr table offset 0
+	jp   .setBGPtr
+.lv2:
+	ld   [hl], $30	; iPlInfo_MaxPow
 	inc  hl
-	ld   [hl], $30
+	ld   [hl], $30	; iPlInfo_MaxPowVisual
 	inc  hl
-	ld   [hl], $02
+	ld   [hl], $02	; iPlInfo_MaxPowExtraLen
+	; Use for ptr table offset 2
 	inc  de
 	inc  de
-	jp   L017CF4
-L017CD7:;J
-	ld   [hl], $38
+	jp   .setBGPtr
+.lv3:
+	ld   [hl], $38	; iPlInfo_MaxPow
 	inc  hl
-	ld   [hl], $38
+	ld   [hl], $38	; iPlInfo_MaxPowVisual
 	inc  hl
-	ld   [hl], $03
+	ld   [hl], $03	; iPlInfo_MaxPowExtraLen
+	; Use for ptr table offset 4
 	inc  de
 	inc  de
 	inc  de
 	inc  de
-	jp   L017CF4
-L017CE6:;J
-	ld   [hl], $40
+	jp   .setBGPtr
+.lv4:
+	ld   [hl], $40	; iPlInfo_MaxPow
 	inc  hl
-	ld   [hl], $40
+	ld   [hl], $40	; iPlInfo_MaxPowVisual
 	inc  hl
-	ld   [hl], $04
+	ld   [hl], $04	; iPlInfo_MaxPowExtraLen
+	; Use for ptr table offset 6
 	inc  de
 	inc  de
 	inc  de
 	inc  de
 	inc  de
 	inc  de
-L017CF4:;J
-	inc  hl
-	inc  hl
-	ld   a, [de]
+.setBGPtr:
+
+	; Copy the entry from the table to iPlInfo_MaxPowBGPtr.
+	; This will be the *final* origin of the Max POW bar used after it finishes scrolling on-screen.
+	; This always points to the leftmost usable tile (see: not the corner tile) of the bar.
+	
+	; This is also stored as big endian on the wPlInfo, so more ldd usage.
+	inc  hl			; Seek to iPlInfo_MaxPowBGPtr_High
+	inc  hl 		; Seek to iPlInfo_MaxPowBGPtr_Low
+	ld   a, [de]	; Read byte0 of entry
 	inc  de
-	ldd  [hl], a
-	ld   a, [de]
-	ld   [hl], a
+	ldd  [hl], a	; Write to iPlInfo_MaxPowBGPtr_Low, seek to iPlInfo_MaxPowBGPtr_High
+	ld   a, [de]	; Read byte1 of entry
+	ld   [hl], a	; Write to iPlInfo_MaxPowBGPtr_High
 	ret
-L017CFC: db $A4
-L017CFD: db $9C
-L017CFE: db $A3
-L017CFF: db $9C
-L017D00: db $A2
-L017D01: db $9C
-L017D02: db $A1
-L017D03: db $9C
-L017D04: db $AB
-L017D05: db $9C
-L017D06: db $AB
-L017D07: db $9C
-L017D08: db $AB
-L017D09: db $9C
-L017D0A: db $AB
-L017D0B: db $9C
-L017D0C:;C
+Play_MaxPowBGPtrTbl_1P:
+	dw $9CA4 ; PLAY_MAXMODE_LENGTH1
+	dw $9CA3 ; PLAY_MAXMODE_LENGTH2
+	dw $9CA2 ; PLAY_MAXMODE_LENGTH3
+	dw $9CA1 ; PLAY_MAXMODE_LENGTH4
+Play_MaxPowBGPtrTbl_2P:
+	dw $9CAB ; PLAY_MAXMODE_LENGTH1
+	dw $9CAB ; PLAY_MAXMODE_LENGTH2
+	dw $9CAB ; PLAY_MAXMODE_LENGTH3
+	dw $9CAB ; PLAY_MAXMODE_LENGTH4
+
+; =============== Play_DrawFilledPowBar ===============
+; Draws a completely filled POW bar.
+; Meant to be used when redrawing the POW bar after Max POW mode ends,
+; since it's always visually full the first frame (only to deplete immediately).
+; IN
+; - HL: Ptr to left corner of bar in tilemap
+Play_DrawFilledPowBar:
+
+	; Left corner
 	di
-L017D0D:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017D0D
+	mWaitForVBlankOrHBlank
 	ld   a, $D2
 	ldi  [hl], a
 	ei
-	ld   b, $05
-L017D1A:;J
+	
+	; Filled bar tiles
+	ld   b, $05		; B = Bar length (5 tiles)
+.loop:
 	di
-L017D1B:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017D1B
+	mWaitForVBlankOrHBlank
 	ld   a, $DF
 	ldi  [hl], a
 	ei
-	dec  b
-	jp   nz, L017D1A
+	dec  b			; Copied all tiles?
+	jp   nz, .loop	; If not, loop
+	
+	; Right corner
 	di
-L017D2B:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017D2B
+	mWaitForVBlankOrHBlank
 	ld   a, $D3
 	ldi  [hl], a
 	ei
 	ret
-L017D37:;C
+	
+; =============== Play_DrawMaximumText ===============
+; Draws the "MAXIMUM" text, replacing a normal POW bar.
+; IN
+; - HL: Ptr to tilemap
+Play_DrawMaximumText:
 	di
-L017D38:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017D38
-	ld   a, $D8
+	mWaitForVBlankOrHBlank
+	ld   a, $D8 ; M
 	ldi  [hl], a
-L017D42:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017D42
-	ld   a, $D9
+	mWaitForVBlankOrHBlank
+	ld   a, $D9 ; A
 	ldi  [hl], a
-L017D4C:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017D4C
-	ld   a, $DA
+	mWaitForVBlankOrHBlank
+	ld   a, $DA ; X
 	ldi  [hl], a
-L017D56:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017D56
-	ld   a, $DB
+	mWaitForVBlankOrHBlank
+	ld   a, $DB ; IM
 	ldi  [hl], a
-L017D60:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017D60
-	ld   a, $DC
+	mWaitForVBlankOrHBlank
+	ld   a, $DC ; M
 	ldi  [hl], a
-L017D6A:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017D6A
-	ld   a, $DD
+	mWaitForVBlankOrHBlank
+	ld   a, $DD ; U
 	ldi  [hl], a
-L017D74:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017D74
-	ld   a, $DE
+	mWaitForVBlankOrHBlank
+	ld   a, $DE ; M
 	ld   [hl], a
 	ei
 	ret
-L017D80:;C
-	ld   a, [$C169]
+	
+	
+; =============== Play_DoTime ===============
+; Handles the round timer during gameplay.
+Play_DoTime:
+
+	;
+	; There's a gauntlet of checks before we're allowed to draw the timer or decrement a timer digit.
+	;
+	
+	ld   a, [wRoundTime]
+	or   a						; Time Over?
+	jp   z, Play_NoDrawTime		; If so, return
+	cp   TIMER_INFINITE			; Is the timer set to infinite?
+	jp   z, Play_NoDrawTime		; If so, return
+	
+	; If any player lost (has no health), constantly redraw the current time
+	ld   a, [wPlInfo_Pl1+iPlInfo_Health]
+	or   a						
+	jp   z, Play_DrawTime
+	ld   a, [wPlInfo_Pl2+iPlInfo_Health]
 	or   a
-	jp   z, L017E19
-	cp   $FF
-	jp   z, L017E19
-	ld   a, [wPlInfo_Pl1+iPlInfo_Unknown_TimerTarget]
-	or   a
-	jp   z, L017DEA
-	ld   a, [wPlInfo_Pl2+iPlInfo_Unknown_TimerTarget]
-	or   a
-	jp   z, L017DEA
-	ld   hl, $C027
-	bit  7, [hl]
-	jp   nz, L017E19
-	ld   hl, $C16A
+	jp   z, Play_DrawTime
+	
+	; If we're in a scene with controls disabled (ie: intro), return
+	ld   hl, wMisc_C027
+	bit  MISCB_PLAY_STOP, [hl]
+	jp   nz, Play_NoDrawTime
+	
+	; Decrement subsecond counter.
+	; If it reaches 0, jump and decrement the seconds too.
+	ld   hl, wRoundTimeSub
 	dec  [hl]
-	jp   z, L017DD9
-	ld   a, [$C169]
-	cp   $11
-	jp   c, L017DB4
-	jp   L017E19
-L017DB4:;J
-	ld   a, [$C008]
-	bit  2, a
-	jp   nz, L017DD6
-	ld   hl, $9C29
+	jp   z, .decTime
+	
+	; The rest is to handle the timer flashing with 10 or less seconds.
+	ld   a, [wRoundTime]
+	cp   $11				; Timer < 11?
+	jp   c, .flashTime			; If so, jump
+	jp   Play_NoDrawTime	; Otherwise, return
+.flashTime:
+	; Show/hide the timer every 4 frames
+	ld   a, [wPlayTimer]
+	bit  2, a				; wPlayTimer & 4 == 0?
+	jp   nz, .flashTimeShow	; If not, jump
+.flashTimeHide:
+	; Replace the two timer digits in the tilemap with blank tiles
+	ld   hl, vBGRoundTime
 	di
-L017DC0:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017DC0
+	mWaitForVBlankOrHBlank
 	xor  a
 	ldi  [hl], a
-L017DC9:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017DC9
+	mWaitForVBlankOrHBlank
 	xor  a
 	ld   [hl], a
 	ei
-	jp   L017E19
-L017DD6:;J
-	jp   L017DEA
-L017DD9:;J
-	ld   a, [$C169]
+	jp   Play_NoDrawTime
+.flashTimeShow:
+	; Redraw the timer normally
+	jp   Play_DrawTime
+.decTime:
+	; wRoundTime--
+	ld   a, [wRoundTime]
 	sub  a, $01
 	daa
-	ld   [$C169], a
-	ld   a, $3C
-	ld   [$C16A], a
-	jp   L017DEA
-L017DEA:;JC
-	ld   hl, $9C29
-	ld   a, [$C169]
-	ld   de, $00D1
-	swap a
-	and  a, $0F
-	add  a, e
+	ld   [wRoundTime], a
+	; Reset counter to 60 frames
+	ld   a, 60
+	ld   [wRoundTimeSub], a
+	jp   Play_DrawTime
+	
+; =============== Play_DrawTime ===============
+; Draws the round timer in the HUD.
+Play_DrawTime:
+	ld   hl, vBGRoundTime			; HL = Ptr to high digit in the tilemap
+	
+	;
+	; Get the tile ID for the upper nybble.
+	; As the round timer is in BCD format, it can be done by isolating the upper nybble
+	; and then using it as index to a number -> tileID table.
+	;
+	
+	ld   a, [wRoundTime]		; A  = Time
+	ld   de, Play_HUDTileIdTbl	; DE = Tile ID table
+	; Generate index
+	swap a				; A = A >> 4
+	and  a, $0F	 
+	; Index the map table
+	add  a, e			; DE += A
 	ld   e, a
+	; Write it to the tilemap
 	di
-L017DFA:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017DFA
-	ld   a, [de]
-	ldi  [hl], a
+	mWaitForVBlankOrHBlank
+	ld   a, [de]		; Read tile ID
+	ldi  [hl], a		; Write it over, VRAMPtr++
 	ei
-	ld   a, [$C169]
-	ld   de, $00D1
-	and  a, $0F
-	add  a, e
+	
+	;
+	; Do the same for the lower digit.
+	;
+	ld   a, [wRoundTime]		; A  = Time
+	ld   de, Play_HUDTileIdTbl	; DE = Tile ID table
+	; Generate index
+	and  a, $0F			; A = A & $0F
+	; Index the map table
+	add  a, e			; DE += A
 	ld   e, a
+	; Write it to the tilemap
 	di
-L017E0F:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017E0F
-	ld   a, [de]
-	ld   [hl], a
+	mWaitForVBlankOrHBlank
+	ld   a, [de]		; Read tile ID
+	ld   [hl], a		; Write it over
 	ei
-L017E19:;J
+	; Fall-through
+	
+; =============== Play_NoDrawTime ===============
+; Target used to skip writing the time.
+Play_NoDrawTime:
 	ret
+	
 L017E1A:;C
 	ld   hl, $9C6B
 	ld   a, [wPlInfo_Pl1+iPlInfo_HitComboRecv]
@@ -13378,7 +13758,7 @@ L017F4C:;C
 	ld   e, a
 	ld   a, [$D945]
 	and  a, $30
-	ld   hl, wJoyBuffer_Pl2
+	ld   hl, wPlInfo_Pl1
 	add  hl, de
 	cp   a, [hl]
 	jr   z, L017F73
@@ -13389,7 +13769,7 @@ L017F4C:;C
 	and  a, $0F
 	ld   e, a
 	pop  af
-	ld   hl, wJoyBuffer_Pl2
+	ld   hl, wPlInfo_Pl1
 	add  hl, de
 	ld   [hl], a
 	inc  hl
