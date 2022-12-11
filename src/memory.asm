@@ -31,7 +31,7 @@ wPlayTimer EQU $C008 ; Timer that increments every frame of gameplay (but not wh
 wRand EQU $C009
 wRandLY EQU $C00A
 
-wPaused EQU $C00E ; Game is paused
+wNoCopyGFXBuf EQU $C00E ; If set, disables the GFX copy during VBlank
 wOBJLstCurHeaderFlags EQU $C00F ; Raw flags value from the OBJLst header
 
 wWorkOAMCurPtr_Low EQU $C010 ; Next OBJ will be written at this location
@@ -103,11 +103,12 @@ wTextPrintFrameCodePtr_High EQU $C154
 
 wOBJScrollX EQU $C155 ; X position *subtracted* to every OBJ.
 wOBJScrollY EQU $C157 ; Y position *subtracted* to every OBJ.
-
+wScreenShakeY EQU $C159 ; Y offset "subtracted" from hScrollY, for vertical screen shake effects. won't alter sprites.
 ; a supposed wScreenSect0LYC for the first section is fixed, and always starts at $00
 wScreenSect1LYC EQU $C15A ; Scanline number the second screen section starts. During gameplay, it's the playfield.
 wScreenSect2LYC EQU $C15B ; Scanline number the third screen section starts. During gameplay, it's the meter HUD
 wRoundFinal EQU $C160 ; If set, this is the "FINAL!!" round, displayed when all characters in both sides are marked as defeated (requires a draw)
+wStageDraw EQU $C161 ; If set, forces the "DRAW" screen to appear in single mode when the stage ends. Single-mode specific.
 wLastWinner EQU $C162 ; Marks using bits the player who won the last round.
 wPlayMode EQU $C163 ; Single/Team 1P/VS
 wRoundTotal EQU $C164 ; Total number of rounds played since the system was on. Never read back.
@@ -126,8 +127,17 @@ wPlayMaxPowScrollTimer1P EQU $C16D ; Countdown. When it elapses, the scroll anim
 wPlayMaxPowScroll2P EQU $C16E ; Scrolls on-screen or off-screen the 2P MAX Power bar
 wPlayMaxPowScrollBGOffset2P EQU $C16F ; Tilemap offset, determines where the 2P MAX Power bar starts (special version of iPlInfo_MaxPowBGPtr)
 wPlayMaxPowScrollTimer2P EQU $C170 ; Countdown. When it elapses, the scroll animation ends
+wPlayHitstopSet EQU $C171 ; Requests hitstop for the next frame.
+wPlayHitstop EQU $C172 ; If set, hitstop is applied. Due to how tasks are carefully managed, this is only applied to 
+wPlayPlThrowActId EQU $C173 ; Act ID for a throw. This is global since two throws can't be active at once.
+wPlayPlThrowOpMode EQU $C174 ; PLAY_THROWOP_*
+wPlayPlThrowDir EQU $C175 ; Sets the throw's direction. If 0, the opponent is thrown ???back or fwd??
 
-wStageBGP EQU $C17C ; ??? Determines palette for playfield (used to handle screen flashing)
+wPlaySlowdownTimer EQU $C17A ; Countdown timer. When it's > 0, slowdown is enabled during gameplay. When it reaches 0, the slowdown stops.
+wPlaySlowdownSpeed EQU $C17B ; Determines how much the game should slow down. Execution is 1 every (wPlaySlowdownSpeed) frames.
+
+wStageBGP EQU $C17C ; Determines palette for playfield (used to handle screen flashing)
+wPauseFlags EQU $C17D ; Contains flags the pause state
 wRoundSeqId EQU $C17F ; Index to the char sequence table, essentially the number of beat opponents after clearing a stage
 wRoundSeqTbl EQU $C180 ; Sequence of CPU opponents in order, containing initially CHARSEL_ID_* for normal rounds and CHAR_ID_* for bosses
 
@@ -189,6 +199,24 @@ wOrdSelP2CursorPosBak EQU $C1DB
 wPlaySecIconBuffer EQU $C1CA ; Buffer for drawing the overlapping secondary icons in team mode
 wPlayCrossBuffer EQU wPlaySecIconBuffer+$100
 wPlayCrossMaskBuffer EQU wPlaySecIconBuffer+$140
+
+; Temporary variables used for collision box overlap checks between two boxes (marked as A and B)
+wPlayTmpColiA_OBJLstFlags EQU $C1CA ; Sprite mapping flags, to determine if it should be flipped
+wPlayTmpColiB_OBJLstFlags EQU $C1CB
+
+wPlayTmpColiA EQU $C1D4
+wPlayTmpColiA_OriginH EQU $C1D4 ; Left side of collision box, relative to player X pos (usually negative or 0)
+wPlayTmpColiA_OriginV EQU $C1D5 ; Top side of collision box, relative to player Y pos (usually negative or 0)
+wPlayTmpColiA_RadH EQU $C1D6 ; Collision box horizontal radius (extends to both sides of origin)
+wPlayTmpColiA_RadV EQU $C1D7 ; Collision box vertical radius (extends to both sides of origin)
+
+; See above, but for other player
+wPlayTmpColiB EQU $C1DE
+wPlayTmpColiB_OriginH EQU $C1DE
+wPlayTmpColiB_OriginV EQU $C1DF
+wPlayTmpColiB_RadH EQU $C1E0
+wPlayTmpColiB_RadV EQU $C1E1
+
 		
 wIntroLoopOBJAnim EQU $C1B3 ; If set in the intro, sprite animations are set to loop
 wUnknownTimer_C1B3 EQU $C1B3
@@ -279,6 +307,10 @@ wOBJInfo_LeonaFlip   EQU wOBJInfo3
 wOBJInfo_ChizuruFlip EQU wOBJInfo4
 ; Gameplay
 wOBJInfo_RoundText EQU wOBJInfo3 ; Pre-round text and post-round text
+wOBJInfo_Pl1Cross EQU wOBJInfo4
+wOBJInfo_Pl2Cross EQU wOBJInfo5
+
+
 wOBJInfo_Pl1Projectile EQU wOBJInfo2
 wOBJInfo_Pl2Projectile EQU wOBJInfo3
 wOBJInfo_Pl1SuperSparkle EQU wOBJInfo4
@@ -288,13 +320,6 @@ wOBJInfo_Pl2SuperSparkle EQU wOBJInfo5
 wGFXBufInfo_Pl1 EQU $D8C0
 wGFXBufInfo_Pl2 EQU $D8E0
 
-wJoyBuffer_Pl2 EQU $D900 ; Table with 8 entries of 2 byte each (KEY_* + length)
-wJoyBuffer_Pl1 EQU $D910
-; NOTE: The indexing is fucked here.
-;       $D900 is treated as the start of the player struct and it's what gets passed around various functions,
-;       but the struct actually starts at $D920.
-;       The first $20 bytes instead store the buffer for both player inputs.
-;       Same thing for wPlInfo_Pl2.
 wPlInfo_Pl1 EQU $D900
 wPlInfo_Pl2 EQU $DA00
 
@@ -376,8 +401,8 @@ iGFXBufInfo_SrcPtrB_Low  EQU $06 ; Set B - Source GFX ptr
 iGFXBufInfo_SrcPtrB_High EQU $07
 iGFXBufInfo_BankB        EQU $08 ; Set B - Source GFX bank
 iGFXBufInfo_TilesLeftB   EQU $09 ; Set B - (8x8) Tiles remaining
-iGFXBufInfo_SetKey       EQU $0A ; ??? 5 bytes. Current set "Id". Combination of Set A settings.
-iGFXBufInfo_SetKeyOld    EQU $10 ; ??? 5 bytes. Last completed set "id".
+iGFXBufInfo_SetKey       EQU $0A ; 5 bytes. Current set "Id". Combination of Set A settings.
+iGFXBufInfo_SetKeyOld    EQU $10 ; 5 bytes. Last completed set "id".
 
 ; Elements in the wOBJInfo struct
 ; Current -> Current data
@@ -392,8 +417,8 @@ iOBJInfo_Y EQU $05 ; Y Position
 iOBJInfo_YSub EQU $06 ; Y Subpixel Position
 iOBJInfo_SpeedX EQU $07 ; X speed - Added to iOBJInfo_X every frame
 iOBJInfo_SpeedXSub EQU $08 ; X Subpixel speed - Added to iOBJInfo_XSub every frame
-iOBJInfo_Unknown_09 EQU $09 ; ???
-iOBJInfo_Unknown_0A EQU $0A ; ???
+iOBJInfo_SpeedY EQU $09 ; Y speed
+iOBJInfo_SpeedYSub EQU $0A ; Y Subpixel speed 
 iOBJInfo_RelX EQU $0B ; Relative X Position (autogenerated)
 iOBJInfo_RelY EQU $0C ; Relative Y Position (autogenerated)
 iOBJInfo_TileIDBase EQU $0D ; Starting tile ID (all tile IDs in the OBJ list are relative to this)
@@ -407,9 +432,9 @@ iOBJInfo_BankNumOld EQU $14 ; Old - Bank number for OBJLstPtrTable (animation ta
 iOBJInfo_OBJLstPtrTbl_LowOld EQU $15 ; Old - Ptr to OBJLstPtrTable (low byte)
 iOBJInfo_OBJLstPtrTbl_HighOld EQU $16 ; Old - Ptr to OBJLstPtrTable (high byte)
 iOBJInfo_OBJLstPtrTblOffsetOld EQU $17 ; Old - Table offset (multiple of $04)
-iOBJInfo_OBJLstByte1 EQU $18 ; iOBJLstHdrA_Byte1 is copied here during exec - skips something during gameplay
-iOBJInfo_OBJLstByte2 EQU $19 ; iOBJLstHdrA_Byte2 is copied here during exec - skips something during gameplay
-iOBJInfo_Unknown_1A EQU $1A
+iOBJInfo_ColiBoxId EQU $18 ; Hurtbox/Collision box ID (copied from iOBJLstHdrA_ColiBoxId)
+iOBJInfo_HitboxId EQU $19 ; Hitbox ID (copied from iOBJLstHdrA_HitBoxId)
+iOBJInfo_ForceHitboxId EQU $1A ; If set, overrides the specified Hitbox ID (ignores iOBJInfo_HitboxId and the flags disabling the hitbox). Not for unblockables, as the guard check is still made. Used for temporary throw hitboxes. 
 iOBJInfo_FrameLeft EQU $1B ; Number of frames left before switching to the next anim frame.
 iOBJInfo_FrameTotal EQU $1C ; Animation speed. New frames will have iOBJInfo_FrameLeft set to this.
 iOBJInfo_BufInfoPtr_Low EQU $1D ; GFX Buffer info struct pointer (low byte)
@@ -426,12 +451,28 @@ iOBJInfo_CharSelFlip_PortraitId EQU iOBJInfo_Custom+$07
 iOBJInfo_CharSelFlip_BaseTileId EQU iOBJInfo_Custom+$08
 iOBJInfo_CharSelFlip_OBJIdTarget EQU iOBJInfo_Custom+$09
 
+iOBJInfo_Proj_CodeBank EQU iOBJInfo_Custom+$00 ; Bank number for the CodePtr
+iOBJInfo_Proj_CodePtr_Low EQU iOBJInfo_Custom+$01 ; Custom code for projectile (low byte)
+iOBJInfo_Proj_CodePtr_High EQU iOBJInfo_Custom+$02 ; Custom code for projectile (high byte)
+
+iOBJInfo_Proj_DamageVal EQU iOBJInfo_Custom+$03 ; Damage given the projectile hits the opponent.
+iOBJInfo_Proj_DamageHitAnimId EQU iOBJInfo_Custom+$04 ; Animation playing when the projectile hits the opponent (HITANIM_*)
+iOBJInfo_Proj_DamageFlags3 EQU iOBJInfo_Custom+$05 ; Damage flags applied when the opponent gets hit (they get copied to iPlInfo_23Flags)
+iOBJInfo_Proj_HitMode EQU iOBJInfo_Custom+$06 ; If set, marks what happens when the projectile hits a target
+iOBJInfo_Proj_Priority EQU iOBJInfo_Custom+$07 ; Higher priority projectiles erase others
+
+; Must be at same location of iOBJInfo_Proj_CodePtr
+iOBJInfo_SuperSparkle_CodeBank EQU iOBJInfo_Custom+$00 ; Bank number for the CodePtr
+iOBJInfo_SuperSparkle_CodePtr_Low EQU iOBJInfo_Custom+$01 ; Custom code for sparkle (low byte)
+iOBJInfo_SuperSparkle_CodePtr_High EQU iOBJInfo_Custom+$02 ; Custom code for sparkle (high byte)
+iOBJInfo_SuperSparkle_EnaTimer EQU iOBJInfo_Custom+$08 ; Visibility timer. When it elapses, the sparkle disappears.
+
 ; Sprite mapping fields.
 
 ; OBJLstPtrTable A entry elements
 iOBJLstHdrA_Flags EQU $00
-iOBJLstHdrA_Byte1 EQU $01 ; ??? - skips something during gameplay
-iOBJLstHdrA_Byte2 EQU $02 ; ??? - skips something during gameplay
+iOBJLstHdrA_ColiBoxId EQU $01 ; Hurtbox ID
+iOBJLstHdrA_HitBoxId EQU $02 ; Hitbox ID
 iOBJLstHdrA_GFXPtr_Low EQU $03 ; Ptr to uncompressed GFX (low byte) - will be copied to the GfxInfo
 iOBJLstHdrA_GFXPtr_High EQU $04 ; Ptr to uncompressed GFX (high byte)
 iOBJLstHdrA_GFXBank EQU $05 ; Bank num with GFX
@@ -458,20 +499,33 @@ iOBJ_X EQU $01
 iOBJ_TileIDAndFlags EQU $02
 
 ; Player struct (wPlInfo) format
-iPlInfo_Status EQU $20
-iPlInfo_21 EQU $21
-iPlInfo_22Flags EQU $22
-iPlInfo_23 EQU $23
+
+; Tables with 8 entries of 2 byte each (KEY_* + length)
+; These are the locations move input is checked from.
+; [TODO] Rough/Incomplete graph, should be visual
+;                                        o---------------------------------------o
+;                                        |                                       |
+; (joy reader) -> hJoyKeys    -> iPlInfo_JoyKeys    -> iPlInfo_Joy*Buffer   2    v
+;              -> hJoyNewKeys -> iPlInfo_JoyNewKeys -> iPlInfo_JoyNewKeysLH -> iPlInfo_JoyKeysLH
+;                                                              | 1               ^
+;                                                              v                 |
+;                                                      iPlInfo_JoyMergedKeysLH --o
+iPlInfo_JoyBtnBuffer EQU $00 ; A/B buttons
+iPlInfo_JoyDirBuffer EQU $10 ; Directional keys
+iPlInfo_Status EQU $20 ; iPlInfo_Flags0 Player flags (byte 0)
+iPlInfo_21Flags EQU $21 ; iPlInfo_Flags1 Player flags (byte 1)
+iPlInfo_22Flags EQU $22 ; iPlInfo_Flags2 Player flags (byte 2)
+iPlInfo_23Flags EQU $23 ; iPlInfo_Flags3 Player flags (byte 3 - related to damage)
 ;-- 
 ; from master tbl
-iPlInfo_Ptr24_High EQU $24 ; Ptr to ??? (high byte) [BANK $03]
-iPlInfo_Ptr24_Low EQU $25 ; Ptr to ??? (low byte) [BANK $03]
-; Character-specific, never changed after loading
-iPlInfo_MovePtrTable_High EQU $26 ; Ptr to move anim code ptr table (high byte) [BANK $03]
-iPlInfo_MovePtrTable_Low EQU $27 ; Ptr to move anim code ptr table (low byte) [BANK $03]
-iPlInfo_Ptr28_High EQU $28 ; Ptr to ??? (high byte)
-iPlInfo_Ptr28_Low EQU $29 ; Ptr to ??? (low byte)
-iPlInfo_Ptr28_Bank EQU $2A ; Bank num for ???
+;
+iPlInfo_MoveAnimTblPtr_High EQU $24 ; Ptr to move anim data ptr table (high byte) [BANK $03]
+iPlInfo_MoveAnimTblPtr_Low EQU $25 ; Ptr to move anim data ptr table (low byte) [BANK $03]
+iPlInfo_MoveCodePtrTable_High EQU $26 ; Ptr to move code ptr table (high byte) [BANK $03]
+iPlInfo_MoveCodePtrTable_Low EQU $27 ; Ptr to move code ptr table (low byte) [BANK $03]
+iPlInfo_MoveInputCodePtr_High EQU $28 ; Ptr to special move reader code (high byte)
+iPlInfo_MoveInputCodePtr_Low EQU $29 ; Ptr to special move reader code (low byte)
+iPlInfo_MoveInputCodePtr_Bank EQU $2A ; Bank num for special move reader code
 ;--
 iPlInfo_PlId EQU $2B ; Player number (PL1 or PL2), fixed per side
 iPlInfo_CharId EQU $2C ; Character ID (*2)
@@ -482,43 +536,63 @@ iPlInfo_TeamCharId2 EQU $30 ; 3rd team member ID (*2)
 iPlInfo_RoundWinStreak EQU $31 ; Number of consecutive wins in a stage (determines win pose)
 iPlInfo_32 EQU $32
 iPlInfo_MoveId EQU $33 ; ID of the current move. (multiplied by 2)
-iPlInfo_34 EQU $34
-iPlInfo_IntroMoveId EQU $35 ; Intro move ID. When set, iPlInfo_MoveId should be set to the same value.
+iPlInfo_HitAnimId EQU $34 ; ID of the currently playing hit animation. (HITANIM_*)
+iPlInfo_IntroMoveId EQU $35 ; Intro/outro move ID. When set, iPlInfo_MoveId should be set to the same value.
 iPlInfo_SingleWinCount EQU $36 ; Single mode - Win count. If it reaches 2 the stage ends.
 iPlInfo_HitComboRecvSet EQU $37 ; Sets the combo count of received hits (shown on the other player side)
 iPlInfo_HitComboRecv EQU $38 ; Copy of the above
-iPlInfo_3A EQU $3A ; Old set?
-iPlInfo_3B EQU $3B ; Old set?
-iPlInfo_3C EQU $3C ; Old set?
-iPlInfo_3D EQU $3D ; New set? Set to $00 on copy end
-iPlInfo_3E EQU $3E ; New set? Set to $00 on copy end
-iPlInfo_3F EQU $3F ; New set? Set to $00 on copy end
+iPlInfo_39 EQU $39 ; 
+; Move damage fields - current
+iPlInfo_MoveDamageVal EQU $3A ; Damage given when hitting the opponent directly
+iPlInfo_MoveDamageHitAnimId EQU $3B ; Animation playing when getting hit (HITANIM_*)
+iPlInfo_MoveDamageFlags3 EQU $3C ; Source damage flags applied when getting hit (they get copied to iPlInfo_23Flags)
+; Move damage fields - pending (for currently loading frame)
+iPlInfo_MoveDamageValNext EQU $3D
+iPlInfo_MoveDamageHitAnimIdNext EQU $3E
+iPlInfo_MoveDamageFlags3Next EQU $3F
+
+iPlInfo_40 EQU $40 ;
+iPlInfo_41 EQU $41 ;
+iPlInfo_42 EQU $42 ;
+iPlInfo_JoyKeysLH EQU $43 ; Held directional keys + A/B light/heavy info. Used for the standard Punch/Kick check.
+iPlInfo_JoyNewKeys EQU $44 ; Newly pressed joypad keys. Copied directly from hJoyNewKeys,
+iPlInfo_JoyKeys EQU $45 ; Held joypad Keys. Copied directly from hJoyKeys.
+iPlInfo_JoyNewKeysLH EQU $46 ; Newly pressed directional keys + A/B light/heavy info
+iPlInfo_JoyKeysPreJump EQU $47 ; Backup of iPlInfo_JoyKeys set before jumping
+iPlInfo_JoyNewKeysLHPreJump EQU $48 ; Backup of iPlInfo_JoyNewKeysLH set before jumping
+iPlInfo_JoyMergedKeysLH EQU $49 ; Buffered merged counter ??? A/B light/heavy info
+iPlInfo_JoyHeavyCountA EQU $4A ; Counter to detect light/heavy punches, result saved to iPlInfo_JoyNewKeysLH
+iPlInfo_JoyHeavyCountB EQU $4B ; Counter to detect light/heavy kicks, result saved to iPlInfo_JoyNewKeysLH.
+iPlInfo_JoyDirBufferOffset EQU $4C ; Current offset to iPlInfo_JoyDirBuffer
+iPlInfo_JoyBtnBufferOffset EQU $4D ; Current offset to iPlInfo_JoyBtnBuffer
 iPlInfo_Health EQU $4E ; Player health
 iPlInfo_HealthVisual EQU $4F ; Player health as it appears on the health bar
 
 iPlInfo_Pow EQU $50 ; POW meter
 iPlInfo_PowVisual EQU $51 ; POW meter as it appears on the POW bar
-iPlInfo_52 EQU $52 ; ????
+iPlInfo_MaxPowDecSpeed EQU $52 ; Determines how fast the MAX Power meter decrements. If $00, the bar is immediately wiped out.
 iPlInfo_MaxPow EQU $53 ; MAX Power meter
 iPlInfo_MaxPowVisual EQU $54 ; MAX Power meter as it appears on screen
 iPlInfo_MaxPowExtraLen EQU $55 ; Determines the length of the MAX Power meter. If $00, it's not enabled.
 iPlInfo_MaxPowBGPtr_High EQU $56 ; Ptr to the leftmost tile of MAX Power meter. *NOT* used when scrolling it on/offscreen. (high byte)
 iPlInfo_MaxPowBGPtr_Low EQU $57 ; Ptr to the leftmost tile of MAX Power meter. *NOT* used when scrolling it on/offscreen. (low byte)
 
-iPlInfo_58 EQU $58
-iPlInfo_59 EQU $59
-iPlInfo_5A EQU $5A
-iPlInfo_5B EQU $5B
-iPlInfo_5C EQU $5C
-iPlInfo_5D EQU $5D
-iPlInfo_5E EQU $5E
+iPlInfo_Dizzy EQU $58 ; If set, the player get knocked down on the next hit and becomes dizzy.
+iPlInfo_DizzyTimeLeft EQU $59 ; Countdown timer with number of frames before the player snaps out of the dizzy state.
+;--
+; Stun timers
+iPlInfo_DizzyProg EQU $5A ; Dizzy progression timer. It increments on its own, and getting hit by an attack subtracts a value from here. When it reaches 0, the player drops to the ground and becomes dizzy.
+iPlInfo_DizzyProgCap EQU $5B ; Caps iPlInfo_DizzyProg to this value. As a result, the higher it is, the more hits it takes to dizzy.
+iPlInfo_GuardBreakProg EQU $5C ; Guard break progression timer. It increments on its own, and blocking subtracts a value from here. When it reaches 0, guard temporarily breaks.
+iPlInfo_GuardBreakProgCap EQU $5D ; Caps iPlInfo_GuardBreakProg to this value. As a result, the higher it is, the more hits it takes to guard break.
+;--
+iPlInfo_TimerDec5E EQU $5E ; (Generic?) Move timer that decrements until it reaches 0. Used only for wake up?
 iPlInfo_5F EQU $5F
-iPlInfo_60 EQU $60
-iPlInfo_61 EQU $61
-iPlInfo_62 EQU $62
-iPlInfo_63 EQU $63
-iPlInfo_64 EQU $64
-iPlInfo_65 EQU $65
+iPlInfo_NoSpecialTimer EQU $60 ; Until it elapses, the player flashes and can only use normals
+iPlInfo_PlDistance EQU $61 ; Distance between players (the same across players)
+iPlInfo_ProjDistance EQU $62 ; Distance between player and the other player's projectile
+iPlInfo_ColiFlags EQU $63 ; Collision flags for Set A
+iPlInfo_Unk_ColiBoxOverlapX_A EQU $64 ; 
 
 ;--
 ; from master tbl
@@ -538,8 +612,46 @@ iPlInfo_JumpSpeed_Sub EQU $6A ; Vertical speed when starting a jump (subpixels).
 ; Word value must be positive
 iPlInfo_Gravity EQU $6B ; Gravity applied when jumping (pixels).
 iPlInfo_Gravity_Sub EQU $6C ; Gravity applied when jumping (subpixels).
+
+; All of those marked as "Other" are copied of data from the other player.
+; Additionally, those marked as "OBJInfo" come from the respective wOBJInfo struct.
+iPlInfo_StatusOther EQU $6D
+iPlInfo_21FlagsOther EQU $6E
+iPlInfo_22FlagsOther EQU $6F
+iPlInfo_23FlagsOther EQU $70
+
 ;--
-iPlInfo_Unk_CharIdCopy EQU $71 ; Copy of iPlInfo_CharId
+iPlInfo_CharIdOther EQU $71 ; Copy of iPlInfo_CharId
+iPlInfo_MoveIdOther EQU $72
+iPlInfo_HitAnimIdOther EQU $73
+iPlInfo_MoveDamageValOther EQU $74
+iPlInfo_MoveDamageHitAnimIdOther EQU $75
+iPlInfo_MoveDamageFlags3Other EQU $76
+iPlInfo_MoveDamageValNextOther EQU $77
+iPlInfo_MoveDamageHitAnimIdNextOther EQU $78
+iPlInfo_MoveDamageFlags3NextOther EQU $79
+iPlInfo_TimerDec5EOther EQU $7A
+iPlInfo_5FOther EQU $7B
+iPlInfo_PhysHitRecv EQU $7C ; If set, marks that we've been directly hit by the other player (ie: not from a projectile)
+
+iPlInfo_PushSpeedHRecv EQU $7D ; Copied from the other player's iPlInfo_PushSpeedHReq.
+iPlInfo_PushSpeedHReq EQU $7E ; Horizontal push speed used for multiple purposes. ie: after receiving a hit when cornered. This is given to the other player to make him move out of the way.
+
+iPlInfo_OBJInfoFlagsOther EQU $7F ; Copy of iOBJInfo_OBJLstFlags
+iPlInfo_OBJInfoXOther EQU $80 ; Copy of iOBJInfo_X
+iPlInfo_OBJInfoYOther EQU $81 ; Copy of iOBJInfo_Y
+iPlInfo_PowOther EQU $82
+iPlInfo_RunningJump EQU $83 ; If set, the last jump was started during a forward run (move MOVE_SHARED_DASH_F)
+
+
+
+; D-Pad Move input (MoveInput_*)
+; Format: <iMoveInput_Length>[<iMoveInputItem*> last, <iMoveInputItem*> last-1, ...]		
+iMoveInput_Length   EQU $00 ; Number of iMoveInputItem structures following this
+iMoveInputItem_JoyKeys EQU $01 ; Keys to press (JOY_*)
+iMoveInputItem_JoyMaskKeys EQU $02 ; Only these keys are checked from the input buffer
+iMoveInputItem_MinLength EQU $03 ; The key must be held >= this value
+iMoveInputItem_MaxLength EQU $04 ; The key must be held <= this value
 
 
 ; Sound channel data header (ROM)

@@ -2921,8 +2921,8 @@ OBJInfoInit_Title:
 	db $00 ; iOBJInfo_YSub
 	db $00 ; iOBJInfo_SpeedX
 	db $00 ; iOBJInfo_SpeedXSub
-	db $00 ; iOBJInfo_Unknown_09
-	db $00 ; iOBJInfo_Unknown_0A
+	db $00 ; iOBJInfo_SpeedY
+	db $00 ; iOBJInfo_SpeedYSub
 	db $00 ; iOBJInfo_RelX (auto)
 	db $00 ; iOBJInfo_RelY (auto)
 	db $00 ; iOBJInfo_TileIDBase
@@ -2936,9 +2936,9 @@ OBJInfoInit_Title:
 	db LOW(OBJLstPtrTable_Title) ; iOBJInfo_OBJLstPtrTbl_LowOld
 	db HIGH(OBJLstPtrTable_Title) ; iOBJInfo_OBJLstPtrTbl_HighOld
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
-	db $00 ; iOBJInfo_OBJLstByte1 (auto)
-	db $00 ; iOBJInfo_OBJLstByte2 (auto)
-	db $00 ; iOBJInfo_Unknown_1A
+	db $00 ; iOBJInfo_ColiBoxId (auto)
+	db $00 ; iOBJInfo_HitboxId (auto)
+	db $00 ; iOBJInfo_ForceHitboxId
 	db $00 ; iOBJInfo_FrameLeft
 	db $00 ; iOBJInfo_FrameTotal
 	db LOW(wGFXBufInfo_Pl1) ; iOBJInfo_BufInfoPtr_Low
@@ -2954,8 +2954,8 @@ OBJLstPtrTable_Title:
 		
 OBJLstHdrA_Title_PushStart:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -2975,8 +2975,8 @@ OBJLstHdrA_Title_PushStart:
 		
 OBJLstHdrA_Title_Menu:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3002,8 +3002,8 @@ OBJLstHdrA_Title_Menu:
 		
 OBJLstHdrA_Title_CursorR:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3015,8 +3015,8 @@ OBJLstHdrA_Title_CursorR:
 		
 OBJLstHdrA_Title_CursorU:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3028,8 +3028,8 @@ OBJLstHdrA_Title_CursorU:
 		
 OBJLstHdrA_Title_SNKCopyright:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -5225,8 +5225,8 @@ OBJInfoInit_Intro_Iori:
 	db $00 ; iOBJInfo_YSub
 	db $00 ; iOBJInfo_SpeedX
 	db $00 ; iOBJInfo_SpeedXSub
-	db $00 ; iOBJInfo_Unknown_09
-	db $00 ; iOBJInfo_Unknown_0A
+	db $00 ; iOBJInfo_SpeedY
+	db $00 ; iOBJInfo_SpeedYSub
 	db $00 ; iOBJInfo_RelX (auto)
 	db $00 ; iOBJInfo_RelY (auto)
 	db $C6 ; iOBJInfo_TileIDBase
@@ -5240,9 +5240,9 @@ OBJInfoInit_Intro_Iori:
 	db LOW(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_LowOld
 	db HIGH(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_HighOld
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
-	db $00 ; iOBJInfo_OBJLstByte1 (auto)
-	db $00 ; iOBJInfo_OBJLstByte2 (auto)
-	db $00 ; iOBJInfo_Unknown_1A
+	db $00 ; iOBJInfo_ColiBoxId (auto)
+	db $00 ; iOBJInfo_HitboxId (auto)
+	db $00 ; iOBJInfo_ForceHitboxId
 	db $02 ; iOBJInfo_FrameLeft
 	db $02 ; iOBJInfo_FrameTotal
 	db LOW(wGFXBufInfo_Pl1) ; iOBJInfo_BufInfoPtr_Low
@@ -5255,8 +5255,8 @@ OBJLstPtrTable_Intro_Iori:
 		
 OBJLstHdrA_Intro_Iori0:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -5284,8 +5284,8 @@ OBJLstHdrA_Intro_Iori0:
 		
 OBJLstHdrA_Intro_Iori1:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -7985,19 +7985,19 @@ L1C7D31:;I
 	jp   z, L1C7D60
 	jp   L1C7D6B
 L1C7D4F:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L1C7D6B
 	ld   hl, $0603
 	ld   a, $01
 	call L003890
 	jp   L1C7D6B
 L1C7D60:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L1C7D6B
 	call L002EA2
 	jr   L1C7D6E
 L1C7D6B:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L1C7D6E:;JR
 	ret
 L1C7D6F:;I
@@ -8015,19 +8015,19 @@ L1C7D6F:;I
 	jp   z, L1C7D9E
 	jp   L1C7DA9
 L1C7D8D:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L1C7DA9
 	ld   hl, $0604
 	ld   a, $01
 	call L003890
 	jp   L1C7DA9
 L1C7D9E:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L1C7DA9
 	call L002EA2
 	jr   L1C7DAC
 L1C7DA9:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L1C7DAC:;JR
 	ret
 L1C7DAD:;I
@@ -8047,30 +8047,30 @@ L1C7DAD:;I
 	jp   z, L1C7DFC
 	jp   L1C7E07
 L1C7DD0:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L1C7E07
 	ld   hl, $0700
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 	jp   L1C7E07
 L1C7DDF:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L1C7DEB
 	ld   hl, $0700
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 L1C7DEB:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L1C7E07
 	ld   hl, $0604
 	ld   a, $01
 	call L003890
 	jp   L1C7E07
 L1C7DFC:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L1C7E07
 	call L002EA2
 	jr   L1C7E0A
 L1C7E07:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L1C7E0A:;JR
 	ret
 L1C7E0B:;I
@@ -8090,33 +8090,33 @@ L1C7E0B:;I
 	jp   z, L1C7E60
 	jp   L1C7E6B
 L1C7E2E:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L1C7E3A
 	ld   hl, $0700
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 L1C7E3A:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L1C7E6B
 	jp   L1C7E60
 L1C7E43:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L1C7E4F
 	ld   hl, $0700
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 L1C7E4F:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L1C7E6B
 	ld   hl, $0604
 	ld   a, $01
 	call L003890
 	jp   L1C7E6B
 L1C7E60:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L1C7E6B
 	call L002EA2
 	jr   L1C7E6E
 L1C7E6B:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L1C7E6E:;JR
 	ret
 L1C7E6F:;I
@@ -8138,42 +8138,42 @@ L1C7E6F:;I
 	jp   z, L1C7EE0
 	jp   L1C7EEB
 L1C7E97:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L1C7EA3
 	ld   hl, $0700
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 L1C7EA3:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L1C7EEB
 	ld   hl, $0604
 	ld   a, $00
 	call L003890
 	jp   L1C7EEB
 L1C7EB4:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L1C7EC0
 	ld   hl, $0700
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 L1C7EC0:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L1C7EEB
 	ld   hl, $0603
 	ld   a, $01
 	call L003890
 	jp   L1C7EEB
 L1C7ED1:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L1C7EEB
 	ld   hl, $0700
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 	jp   L1C7EEB
 L1C7EE0:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L1C7EEB
 	call L002EA2
 	jr   L1C7EEE
 L1C7EEB:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L1C7EEE:;JR
 	ret
 L1C7EEF:;I
@@ -8193,30 +8193,30 @@ L1C7EEF:;I
 	jp   z, L1C7F3E
 	jp   L1C7F49
 L1C7F12:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L1C7F49
 	ld   hl, $0700
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 	jp   L1C7F49
 L1C7F21:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L1C7F2D
 	ld   hl, $0700
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 L1C7F2D:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L1C7F49
 	ld   hl, $0604
 	ld   a, $01
 	call L003890
 	jp   L1C7F49
 L1C7F3E:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L1C7F49
 	call L002EA2
 	jr   L1C7F4C
 L1C7F49:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L1C7F4C:;JR
 	ret
 L1C7F4D: db $24;X

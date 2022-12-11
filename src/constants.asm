@@ -98,7 +98,7 @@ OBJLSTPTR_ENTRYSIZE EQU 4 ; Size of each OBJLstPtrTable entry (pair of OBJLstHdr
 
 ; FLAGS
 DIPB_EASY_MOVES       EQU 2 ; SELECT + A/B for easy super moves
-DIPB_INFINITE_METER   EQU 3 ; Unlimited super moves + Meter always grows
+DIPB_INFINITE_METER   EQU 3 ; POW Meter grows on its own + Unlimited super moves (TODO: rename to DIPB_AUTO_CHARGE)
 DIPB_SGB_SOUND_TEST   EQU 4 ; Adds SGB S.E TEST to the options menu
 DIPB_TEAM_DUPL        EQU 5 ; Allow duplicate characters in a team
 DIPB_UNLOCK_GOENITZ   EQU 6 ; Unlock Goenitz
@@ -122,6 +122,9 @@ MISCB_TITLE_SECT      EQU 2 ; Allows parallax for the title screen
 
 MISC_USE_SECT         EQU 1 << MISCB_USE_SECT
 ;--
+; wPauseFlags
+PFB_1P        EQU 0 ; Player 1 paused the game
+PFB_2P        EQU 1 ; Player 2 paused the game
 
 
 ; TextPrinter_MultiFrame options
@@ -161,6 +164,14 @@ OST_XFLIP   EQU 1 << OSTB_XFLIP
 OST_YFLIP   EQU 1 << OSTB_YFLIP
 OST_VISIBLE EQU 1 << OSTB_VISIBLE
 
+; Additional iOBJInfo_OBJLstFlags for internal purposes.
+; These aren't related to the hardware flags.
+SPRXB_BIT0 EQU 0
+SPRXB_BIT1 EQU 1
+SPRXB_OTHERPROJR EQU 2 ; If set, the other player's projectile is on the right
+SPRXB_PLDIR_R EQU 3 ; If set, the player is internally facing right (nonvisual equivalent of the X flip flag)
+
+
 ; OBJLST / SPRITE MAPPINGS FLAGS from ROM
 ; These are almost the same as the iOBJInfo_OBJLstFlags* bits.
 ; item0
@@ -175,6 +186,12 @@ OLF_XFLIP        EQU 1 << OLFB_XFLIP ; $20
 OLF_YFLIP        EQU 1 << OLFB_YFLIP ; $40
 OLF_NOBUF        EQU 1 << OLFB_NOBUF
 
+; iOBJInfo_Proj_HitMode
+PHM_NONE EQU $00
+PHM_REMOVE EQU $01
+PHM_REFLECT EQU $02
+
+
 TASK_SIZE EQU $08
 
 ; Task types
@@ -184,9 +201,89 @@ TASK_EXEC_CUR  EQU $02 ; Currently executing
 TASK_EXEC_TODO EQU $04 ; Not executed yet, but was executed previously already. Stack pointer type.
 TASK_EXEC_NEW  EQU $08 ; Never executed before. Likely init code which will set a new task. Jump HL type.
 
+PLINFO_SIZE EQU $100
 ; iPlInfo_Status flags
-PSB_CPU        EQU 7 ; If set, the player is CPU-controlled (1P mode) or autopicks characters (VS mode)
+PSB_PROJ         EQU 0 ; If set, a projectile is active on-screen (ie: a new one can't be thrown)
+PSB_SPECMOVE     EQU 1 ; If set, the player is performing a special move
+PSB_AIR          EQU 2 ; If set, the player is in the air
+PSB_FARHIT       EQU 3 ; If set, the player got hit without physical contact from the other player (ie: by a projectile)
+PSB_PROJREM      EQU 4 ; If set, the player can currently remove projectiles with its hitbox
+PSB_PROJREFLECT  EQU 5 ; If set, the player can currently reflect projectiles with its hitbox
+PSB_SUPERMOVE    EQU 6 ; If set, the player is performing a super move
+PSB_CPU          EQU 7 ; If set, the player is CPU-controlled (1P mode) or autopicks characters (VS mode)
+
+
+PS_PROJ        EQU 1 << PSB_PROJ
+PS_SPECMOVE    EQU 1 << PSB_SPECMOVE
+PS_PROJREM     EQU 1 << PSB_PROJREM
+PS_PROJREFLECT EQU 1 << PSB_PROJREFLECT
+PS_SUPERMOVE   EQU 1 << PSB_SUPERMOVE
 PS_CPU         EQU 1 << PSB_CPU
+
+
+
+; iPlInfo_21Flags flags
+PI21B_NOBASICINPUT   EQU 0 ; Prevents basic input from being handled. See also: BasicInput_ChkDDDDDDDDD
+PI21B_XFLIPLOCK      EQU 1 ; Locks the direction the player is facing
+PI21B_NOSPECSTART    EQU 2 ; If set, the current move can't be cancelled into a new special.
+                           ; Primarily used to prevent starting new specials during certain non-special moves (rolling, taking damage, ...)+
+                           ; though starting specials also sets this for consistency.
+                           ; Overridden by PI21B_ALLOWHITCANCEL.
+PI21B_GUARD          EQU 3 ; If set, the player is guarding, and will receive less damage on hit.
+                           ; Primarily set when blocking, but some special moves set this as well to have the same effects as blocking when getting hit out of them.
+PI21B_COMBORECV      EQU 4 ; If set, the player is on the receiving end of a damage string.
+                           ; This is set when the player is attacked at least once (hit or blocked), and
+                           ; resets on its own if not cancelling the attack into one that hits.
+PI21B_CROUCH         EQU 5 ; If set, the player is crouching
+PI21B_ALLOWHITCANCEL EQU 6 ; If set, it's possible to cancel the move into a new special, usually after hitting the opponent. This still needs to pass the special cancelling check,
+PI21B_INVULN         EQU 7 ; If set, the player is completely invulnerable. 
+						   ; This value isn't always checked during collision -- phyisical hurtbox collisions pass,
+						   ; but they are blocked before they can deal damage.
+
+; iPlInfo_22Flags flags
+PI22B_MOVESTART      EQU 0 ; Marks that a new move has been set
+PI22B_HEAVY          EQU 1 ; Used to distinguish between light/heavy when starting an attack ?????
+PI22B_HITCOMBO       EQU 2 ; If set, the current move was combo'd from another.
+PI22B_AUTOGUARDDONE  EQU 3 ; If set, the autoguard triggered on this frame
+PI22B_AUTOGUARDLOW   EQU 4 ; If set, the move automatically blocks lows
+PI22B_AUTOGUARDMID   EQU 5 ; If set, the move automatically blocks mids
+PI22B_NOHURTBOX      EQU 6 ; If set, the player has no hurtbox (this separate from the collision box only here)
+PI22B_NOCOLIBOX      EQU 7 ; If set, the player has no collision box
+
+
+; Flags for iPlInfo_23Flags, related to the move we got attacked with
+PI23B_SHAKELONG     EQU 0 ; Getting attacked shakes the player longer (doesn't cut the shake count in half)
+PI23B_FLASH_B_SLOW  EQU 1 ; Getting hit causes the player to flash slowly
+PI23B_HITMID        EQU 2 ; The attack hits medium (must block standing)
+PI23B_HITLOW        EQU 3 ; The attack hits low (must block crouching)
+PI23B_FLASH_B_FAST  EQU 6 ; Getting hit causes the player to flash fast
+PI23B_SHAKEONCE     EQU 7 ; Getting attacked shakes the player once
+
+; Flags for iPlInfo_JoyNewKeysLH in the upper nybble
+; (low nybble is the same as KEYB_*)
+KEPB_A_LIGHT EQU 4 ; A button pressed and released before 6 frames
+KEPB_B_LIGHT EQU 5 ; B button pressed and released before 6 frames
+KEPB_A_HEAVY EQU 6 ; A button held for 6 frames
+KEPB_B_HEAVY EQU 7 ; B button held for 6 frames
+KEP_A_LIGHT EQU 1 << KEPB_A_LIGHT
+KEP_B_LIGHT EQU 1 << KEPB_B_LIGHT
+KEP_A_HEAVY EQU 1 << KEPB_A_HEAVY
+KEP_B_HEAVY EQU 1 << KEPB_B_HEAVY
+
+; Flags for iPlInfo_ColiFlags
+; One half is for our collision status, the other is for the opponent.
+
+; TODO: RECV / SEND -> "" / OTHER
+PCF_SENDPUSH    EQU 0 ; Player pushed another
+PCF_SENDHIT     EQU 1 ; Player hit the other
+PCF_SENDPROJHIT EQU 2 ; Player hit the other with a projectile
+PCF_RECVPROJREM EQU 3 ; Player has its projectile removed/reflected by the other player
+PCF_RECVPUSH    EQU 4 ; Player is being pushed
+PCF_RECVHIT     EQU 5 ; Player is hit
+PCF_RECVPROJHIT EQU 6 ; Player is by a projectile
+PCF_SENDPROJREM EQU 7 ; Player removes/reflect the other player's projectile
+
+
 
 SNDIDREQ_SIZE      EQU $08
 SNDINFO_SIZE       EQU $20 ; Size of iSndInfo struct
@@ -275,14 +372,14 @@ SND_LAST_VALID        EQU SND_BASE+$45 ; Dunno why this late
 
 ; Sound Action List (offset by 1, since $00 is handled as SND_NONE) 
 SCT_00                EQU $01
-SCT_01                EQU $02
-SCT_02                EQU $03
-SCT_03                EQU $04
-SCT_04                EQU $05
-SCT_05                EQU $06
+SCT_TAUNT_A                EQU $02
+SCT_TAUNT_B                EQU $03
+SCT_TAUNT_C                EQU $04
+SCT_TAUNT_D                EQU $05
+SCT_CHARGEMETER                EQU $06
 SCT_MAXPOWSTART       EQU $07
 SCT_07                EQU $08
-SCT_08                EQU $09
+SCT_HEAVY                EQU $09
 SCT_09                EQU $0A
 SCT_0A                EQU $0B
 SCT_0B                EQU $0C
@@ -294,6 +391,15 @@ SCT_10                EQU $11
 SCT_11                EQU $12
 SCT_12                EQU $13
 SCT_13                EQU $14
+SCT_14                EQU $15
+SCT_15                EQU $16
+SCT_16                EQU $17
+SCT_17                EQU $18
+SCT_18                EQU $19
+SCT_19                EQU $1A
+SCT_THROW                EQU $1B
+SCT_THROWTECH                EQU $1C
+SCT_1C                EQU $1D
 
 ; Screen Palette IDs, passed to SGB_ApplyScreenPalSet 
 SCRPAL_INTRO EQU $00
@@ -505,9 +611,132 @@ ORDSEL_SELDONE EQU $03
 ; ============================================================
 ; GAMEPLAY
 
-
+MOVE_SHARED_NONE EQU $00
+MOVE_SHARED_IDLE EQU $02 ; Stand
+MOVE_SHARED_WALK_F EQU $04 ; Walk forward
+MOVE_SHARED_WALK_B EQU $06 ; Walk back
+MOVE_SHARED_CROUCH EQU $08 ; Crouch
+MOVE_SHARED_JUMP_N EQU $0A ; Neutral jump
+MOVE_SHARED_JUMP_F EQU $0C ; forward jump
+MOVE_SHARED_JUMP_B EQU $0E ; Backwards jump
+MOVE_SHARED_BLOCK_G EQU $10 ; Ground block / mid
+MOVE_SHARED_BLOCK_C EQU $12 ; Crouch block / low
+MOVE_SHARED_BLOCK_A EQU $14 ; Air block
+MOVE_SHARED_DASH_F EQU $16 ; Run forward
+MOVE_SHARED_DASH_B EQU $18 ; Hop back
+MOVE_SHARED_CHARGEMETER EQU $1A ; Charge meter
+MOVE_SHARED_TAUNT EQU $1C ; Taunt
+MOVE_SHARED_ROLL_F EQU $1E ; Roll forward
+MOVE_SHARED_ROLL_B EQU $20 ; Roll back
+MOVE_SHARED_WAKEUP EQU $22 ; Get up
+MOVE_SHARED_DIZZY EQU $24 ; Dizzy
+MOVE_SHARED_WIN_NORM EQU $26
+MOVE_SHARED_WIN_ALT EQU $28
+MOVE_SHARED_LOST_TIMEOVER EQU $2A
 MOVE_SHARED_INTRO EQU $2C
 MOVE_SHARED_INTRO_SPEC EQU $2E
+
+; Basic attacks
+MOVE_SHARED_PUNCH_L EQU $30 ; Light punch
+MOVE_SHARED_PUNCH_H EQU $32 ; Heavy punch
+MOVE_SHARED_KICK_L EQU $34 ; Light kick
+MOVE_SHARED_KICK_H EQU $36 ; Heavy kick
+MOVE_SHARED_PUNCH_CL EQU $38 ; Crouch punch light
+MOVE_SHARED_PUNCH_CH EQU $3A ; Crouch punch heavy
+MOVE_SHARED_KICK_CL EQU $3C ; Crouch kick light
+MOVE_SHARED_KICK_CH EQU $3E ; Crouch kick heavy
+MOVE_SHARED_ATTACK_G EQU $40 ; Ground A + B 
+MOVE_SHARED_PUNCH_A EQU $34 ; Air punch
+MOVE_SHARED_KICK_A EQU $36 ; Air kick
+MOVE_SHARED_ATTACK_A EQU $40 ; Air A + B
+
+MOVE_SPECIAL_START EQU $64
+
+MOVE_SHARED_THROW_6C EQU $6C
+MOVE_SHARED_THROW_6E EQU $6E
+MOVE_SHARED_THROWTECH_RECV EQU $72
+
+; Character-specific
+MOVE_KYO_SHIKI_ARA_KAMI_L EQU $48
+MOVE_KYO_SHIKI_ARA_KAMI_H EQU $4A
+MOVE_KYO_SHIKI_ONIYAKI_L  EQU $4C
+MOVE_KYO_SHIKI_ONIYAKI_H  EQU $4E
+MOVE_KYO_RED_KICK_L EQU $50
+MOVE_KYO_RED_KICK_H EQU $52
+MOVE_KYO_SHIKI_KOTOTSUKI_YOU_L EQU $54
+MOVE_KYO_SHIKI_KOTOTSUKI_YOU_H EQU $56
+MOVE_KYO_SHIKI_KAI_L EQU $58
+MOVE_KYO_SHIKI_KAI_H EQU $5A
+MOVE_KYO_SHIKI_NUE_TUMI_L EQU $5C
+MOVE_KYO_SHIKI_NUE_TUMI_H EQU $5E
+MOVE_KYO_URA_SHIKI_OROCHINAGI_S EQU $64 ; Super
+MOVE_KYO_URA_SHIKI_OROCHINAGI_D EQU $66 ; Desperation super
+
+
+MOVE_CHIZURU_64 EQU $64 ; Super
+MOVE_CHIZURU_66 EQU $66 ; Desperation super
+
+MOVE_FF EQU $FF
+
+
+HITANIM_BLOCKED EQU $00 ; Nothing happens
+HITANIM_GUARDBREAK_GROUND EQU $01
+HITANIM_GUARDBREAK_AIR EQU $02
+HITANIM_HIT0_MID EQU $03 ; Punch
+HITANIM_HIT1_MID EQU $04 ; Kick... but some punches too
+HITANIM_HIT_LOW EQU $05 ; Punched or kicked while crouching
+HITANIM_DROP_SM EQU $06 ; Small drop
+HITANIM_DROP_SM_REC EQU $07 ; Small drop with recovery (Air only?)
+HITANIM_DROP_MD EQU $08 ; Standard drop without recovery
+
+; Used by certain special moves
+HITANIM_HIT_SPEC_09 EQU $09
+HITANIM_HIT_SPEC_0A EQU $0A
+HITANIM_HIT_SPEC_0B EQU $0B
+HITANIM_DROP_SPEC_0C EQU $0C ; Air throw directly to ground?
+HITANIM_DROP_SPEC_0C_GROUND EQU $0D ; Drop to ground with shake
+HITANIM_DROP_SPEC_AIR_0E EQU $0E ; Jump up then drop to ground with shake (Air throw?)
+
+HITANIM_DROP_SPEC_0F EQU $0F ; Large drop which causes the ground to shake. Used as end of the throw??
+HITANIM_THROW_START EQU $10 ; Start of the throw anim
+HITANIM_THROW_ROTU EQU $11 ; Throw rotation frame, head up
+HITANIM_THROW_ROTL EQU $12 ; Throw rotation frame, head left
+HITANIM_THROW_ROTD EQU $13 ; Throw rotation frame, head down
+HITANIM_THROW_ROTR EQU $14 ; Throw rotation frame, head right
+
+; wPlayPlThrowActId
+PLAY_THROWACT_NONE EQU $00
+PLAY_THROWACT_START EQU $01
+PLAY_THROWACT_NEXT02 EQU $02
+PLAY_THROWACT_NEXT03 EQU $03
+PLAY_THROWACT_NEXT04 EQU $04
+
+; wPlayPlThrowOpMode
+PLAY_THROWOP_GROUND EQU $00 ; The throw works on players on the ground
+PLAY_THROWOP_AIR EQU $01 ; The throw works on players in the air
+PLAY_THROWOP_UNUSED_BOTH EQU $02 ; [TCRF] Unused, works on both.
+
+; wPlayPlThrowDir
+PLAY_THROWDIR_F EQU $00
+PLAY_THROWDIR_B EQU $01
+
+PLAY_HEALTH_CRITICAL EQU $18 ; Threshold for critical health (allow infinite super & desperation supers)
+PL_FLOOR_POS EQU $88
+
+PLAY_MAXMODE_NONE EQU $00
+PLAY_MAXMODE_LENGTH1 EQU $01
+PLAY_MAXMODE_LENGTH2 EQU $02
+PLAY_MAXMODE_LENGTH3 EQU $03
+PLAY_MAXMODE_LENGTH4 EQU $04
+PLAY_MAXMODE_BASELENGTH EQU $04
+
+PLAY_POW_EMPTY EQU $00
+PLAY_POW_MAX EQU $28 ; Max value for normal POW bar
+
+
+PLAY_MAXPOWFADE_NONE EQU $00
+PLAY_MAXPOWFADE_IN EQU $01
+PLAY_MAXPOWFADE_OUT EQU $FF
 
 
 PLAY_PREROUND_OBJ_ROUNDX EQU $00
@@ -516,19 +745,11 @@ PLAY_PREROUND_OBJ_READY EQU $08
 PLAY_PREROUND_OBJ_GO_SM EQU $0C
 PLAY_PREROUND_OBJ_GO_LG EQU $10
 
-PLAY_MAXMODE_NONE EQU $00
-PLAY_MAXMODE_LENGTH1 EQU $01
-PLAY_MAXMODE_LENGTH2 EQU $02
-PLAY_MAXMODE_LENGTH3 EQU $03
-PLAY_MAXMODE_LENGTH4 EQU $04
+PLAY_POSTROUND0_OBJ_KO       EQU $00
+PLAY_POSTROUND0_OBJ_TIMEOVER EQU $04
 
-PLAY_MAXMODE_BASELENGTH EQU $04
-
-
-
-PLAY_POW_MAX EQU $28 ; Max value for normal POW bar
-
-
-PLAY_MAXPOWFADE_NONE EQU $00
-PLAY_MAXPOWFADE_IN EQU $01
-PLAY_MAXPOWFADE_OUT EQU $FF
+PLAY_POSTROUND1_OBJ_DRAWGAME EQU $00
+PLAY_POSTROUND1_OBJ_1PWON    EQU $04
+PLAY_POSTROUND1_OBJ_2PWON    EQU $08
+PLAY_POSTROUND1_OBJ_YOUWON   EQU $0C
+PLAY_POSTROUND1_OBJ_YOULOST  EQU $10

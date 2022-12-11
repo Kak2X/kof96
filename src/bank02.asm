@@ -12,12 +12,12 @@ L02400E:;JR
 	ret
 L02400F:;I
 	call L00347B
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 	ret
 L024016:;I
 	call L00347B
 	call OBJLstS_ApplyXSpeed
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L02401F:;I
 	call L00347B
 	ret
@@ -34,7 +34,7 @@ L024023:;I
 	jp   z, L02403C
 	jp   L02405D
 L02403C:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L02405D
 	ld   hl, $0052
 	add  hl, bc
@@ -51,14 +51,14 @@ L024057:;J
 	call L002EA2
 	jp   L024060
 L02405D:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L024060:;J
 	ret
 L024061:;I
 	call L00347B
 	call L0038B3
 	jp   c, L0240BB
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L024093
 	ld   hl, $0017
 	add  hl, de
@@ -79,9 +79,9 @@ L02408E:;J
 L024090:;J
 	call HomeCall_Sound_ReqPlayExId
 L024093:;J
-	call L002D8C
+	call Play_Pl_CreateJoyMergedKeysLH
 	jp   c, L0240A9
-	call L002DB2
+	call Play_Pl_GetDirKeys_ByXFlipR
 	jp   nc, L0240A9
 	bit  2, a
 	jp   nz, L0240A9
@@ -96,7 +96,7 @@ L0240A9:;J
 	jr   L0240BB
 L0240B5:;J
 	call OBJLstS_ApplyXSpeed
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L0240BB:;JR
 	ret
 L0240BC:;I
@@ -130,9 +130,9 @@ L0240E5:;J
 	bit  3, [hl]
 	jp   z, L0240FD
 	ld   hl, $FD00
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FD00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L024107
 L0240FD:;J
 	ld   a, $FD
@@ -148,12 +148,12 @@ L024107:;J
 	call L002DEC
 	jp   L024128
 L02411A:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L024125
 	call L002EA2
 	jr   L024128
 L024125:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L024128:;JR
 	ret
 L024129:;I
@@ -173,19 +173,19 @@ L024129:;I
 	jp   z, L02418B
 	jp   L024172
 L02414E:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L024172
 	inc  hl
 	ld   [hl], $12
 	jp   L024172
 L02415A:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L024172
 	inc  hl
 	ld   [hl], $03
 	jp   L024172
 L024166:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L024172
 	inc  hl
 	ld   [hl], $FF
@@ -202,12 +202,12 @@ L024172:;J
 	call L002DEC
 	jp   L024199
 L02418B:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L024196
 	call L002EA2
 	jr   L024199
 L024196:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L024199:;JR
 	ret
 L02419A:;I
@@ -236,19 +236,19 @@ L0241B5:;J
 	res  3, [hl]
 	jp   L0241DC
 L0241CE:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0241D9
 	call L002EA2
 	jr   L0241DC
 L0241D9:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L0241DC:;JR
 	ret
 L0241DD:;I
 	call L00347B
 	call L0038B3
 	jp   c, L024255
-	call L002D8C
+	call Play_Pl_CreateJoyMergedKeysLH
 	jp   nc, L0241F5
 	ld   hl, $001B
 	add  hl, de
@@ -272,13 +272,13 @@ L0241F5:;J
 L024211: db $18;X
 L024212: db $3F;X
 L024213:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L024252
 	ld   a, $08
 	call HomeCall_Sound_ReqPlayExId
 	jp   L024252
 L024221:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L024252
 	ld   hl, $0049
 	add  hl, bc
@@ -299,19 +299,19 @@ L024221:;J
 	ld   [hl], a
 	jr   L024252
 L024247:;R
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L024252
 	call L002EA2
 	jr   L024255
 L024252:;JR
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L024255:;JR
 	ret
 L024256:;I
 	call L00347B
 	call L0038B3
 	jp   c, L024279
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L024276
 	ld   hl, $0013
 	add  hl, de
@@ -323,7 +323,7 @@ L024256:;I
 	call L002EA2
 	jr   L024279
 L024276:;JR
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L024279:;JR
 	ret
 L02427A:;I
@@ -378,11 +378,11 @@ L0242D9: db $C3;X
 L0242DA: db $DC;X
 L0242DB: db $42;X
 L0242DC:;J
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L0242DF:;J
 	jp   L024325
 L0242E2:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L024325
 	inc  hl
 	ld   [hl], $04
@@ -410,16 +410,16 @@ L02430C:;J
 	res  7, [hl]
 L024314:;J
 	ld   hl, $0000
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L02431A:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L024328
 	call L002EA2
 	jr   L02432B
 L024325:;J
 	call OBJLstS_ApplyXSpeed
 L024328:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L02432B:;JR
 	ret
 L02432C:;I
@@ -442,7 +442,7 @@ L02432C:;I
 	jp   z, L024394
 	jp   L02439F
 L024354:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L02439F
 	ld   hl, $002C
 	add  hl, bc
@@ -473,12 +473,12 @@ L02438C:;J
 	ld   [hl], a
 	jp   L02439F
 L024394:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L02439F
 	call L002EA2
 	jr   L0243A2
 L02439F:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L0243A2:;JR
 	ret
 L0243A3:;J
@@ -504,42 +504,42 @@ L0243A3:;J
 	jp   z, L024411
 	jp   L02441C
 L0243D5:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L02441C
 	inc  hl
 	ld   [hl], $1E
 	jp   L02441C
 L0243E1:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L02441C
 	inc  hl
 	ld   [hl], $14
 	jp   L02441C
 L0243ED:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L02441C
 	inc  hl
 	ld   [hl], $00
 	jp   L02441C
 L0243F9:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L02441C
 	inc  hl
 	ld   [hl], $28
 	jp   L02441C
 L024405:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L02441C
 	inc  hl
 	ld   [hl], $0A
 	jp   L02441C
 L024411:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L02441C
 	call L002EA2
 	jr   L02441F
 L02441C:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L02441F:;JR
 	ret
 L024420:;I
@@ -561,16 +561,16 @@ L024420:;I
 L024442:;J
 	jp   L024451
 L024445:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L024451
 	call L024455
 	jp   L024454
 L024451:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L024454:;J
 	ret
 L024455:;C
-	call L003CAC
+	call Play_Pl_IsDizzy
 	jp   z, L02448F
 	ld   hl, $005B
 	add  hl, bc
@@ -600,7 +600,7 @@ L024467:;J
 	res  6, [hl]
 	res  7, [hl]
 	ld   a, $24
-	call L00341B
+	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
 	ret
 L02448F:;J
 	call L002EA2
@@ -615,7 +615,7 @@ L024493:;I
 	ld   a, [hl]
 	or   a
 	jp   z, L0244B6
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0244BB
 	ld   a, $01
 	call HomeCall_Sound_ReqPlayExId
@@ -624,7 +624,7 @@ L0244B6:;J
 	call L002EA2
 	jr   L0244BE
 L0244BB:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L0244BE:;JR
 	ret
 L0244BF:;C
@@ -689,7 +689,7 @@ L024529:;I
 	call L00347B
 	call L0038B3
 	jp   c, L024564
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L024561
 	ld   hl, $0013
 	add  hl, de
@@ -715,7 +715,7 @@ L024559:;R
 L02455F: db $18;X
 L024560: db $03;X
 L024561:;JR
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L024564:;J
 	ret
 L024565:;C
@@ -751,15 +751,15 @@ L024565:;C
 	ld   [hl], $08
 	inc  hl
 	ld   [hl], $08
-	call L00251B
+	call OBJLstS_Overlap
 	ld   hl, $1000
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 	ld   hl, $D000
-	call L0034DD
+	call Play_OBJLstS_MoveV
 	ld   hl, $0100
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FD00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	pop  de
 	pop  bc
 	ret
@@ -768,137 +768,204 @@ L0245BA:;I
 	ld   hl, $0030
 	call L003672
 	jp   c, L0245CA
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 	ret
 L0245CA:;J
 	ld   hl, $0000
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $0000
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	ret
-L0245D7:;I
-	ld   hl, $0028
-	add  hl, de
-	dec  [hl]
-	jp   z, L0245E9
-	ld   hl, $FE21
+; =============== ExOBJ_SuperSparkle ===============
+; Animation code for the sparkle effect shown at the start of a move.
+; IN
+; - DE: Ptr to wOBJInfo_Pl*SuperSparkle
+; - BC: Ptr to wOBJInfo_Pl*+$200
+ExOBJ_SuperSparkle:
+
+	;
+	; Continue animating the sparkle until the timer reaches 0.
+	; As this is set to $14 by default, that's how long the sparkle plays.
+	;
+	; While the sparkle is active, the player is invulnerable.
+	; This helps pulling off supers without getting immediately damaged,
+	; especially if a guard cancel was performed.
+	;
+	
+	ld   hl, iOBJInfo_SuperSparkle_EnaTimer
+	add  hl, de			; Seek to timer
+	dec  [hl]			; Timer--
+	jp   z, .hide		; Did it reach 0? If so, jump
+.anim:
+	;
+	; Give invulnerability while the sparkle is active.
+	;
+	; This is accomplished by setting PI21B_INVULN to the iPlInfo_21Flags field of the
+	; wPlInfo structure associated with the sparkle.
+	;
+	; As a side effect of the subroutine that calls this one,
+	; when we get here, BC is pointing to an invalid wPlInfo structure.
+	; This is always $200 bytes past the wPlInfo for the player side we want, so...
+	; 
+	ld   hl, -$200+iPlInfo_21Flags
 	add  hl, bc
-	set  7, [hl]
-	call L002F0B
+	set  PI21B_INVULN, [hl]	; Set proj. invul flag
+	
+	; Animate sparkle
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 	ret
-L0245E9:;J
-	ld   hl, $FE21
+.hide:
+	;
+	; Make it disappear when it gets to 0, and disable invulnerability.
+	;
+	ld   hl, -$200+iPlInfo_21Flags
 	add  hl, bc
-	res  7, [hl]
-	call L002951
+	res  PI21B_INVULN, [hl]	; Clear proj.
+	
+	; Hide sparkle
+	call OBJLstS_Hide
 	ret
-L0245F3:;C
-	call L024B70
-	jp   nc, L024648
+	
+; =============== Play_Pl_DoHit ===============
+; Handles the hit/block state and its animations.
+; Note that this is called every frame by the player tasks.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+; OUT
+; - C flag: If set, a move was started (by guard cancelling)
+Play_Pl_DoHit:
+
+	; For all intents and purposes Play_Pl_DoHit is a direct continuation of Play_Pl_SetHitAnim.
+	; Set up everything, update counters, damage player, (...) if it's applicable.
+	; A = HitAnim ID * 2
+	call Play_Pl_SetHitAnim	; Did the opponent's attack make contact?
+	jp   nc, .noHit			; If not, jump
+	
+	; We only get here for the single frame the attack makes contact.
+	; After that, the hit animation code gets executed, which takes exclusive control
+	; for a bit due to it calling the hitstun/blockstun code (only for the duration of the initial shake).
+	
+	; Empty the pow meter in case we got hit out of a super
 	push af
-	call L002E8C
+		call Play_Pl_EmptyPowOnSuperEnd
 	pop  af
-	cp   $1C
-	jp   nc, L02461A
+	
+	; HITANIM_DROP_SPEC_AIR_0E does not increment the combo counter
+	cp   HITANIM_DROP_SPEC_AIR_0E*2	; HitAnimId >= $0E?
+	jp   nc, .updateFlags			; If so, skip
+	
 	push af
-	ld   hl, $0021
-	add  hl, bc
-	bit  3, [hl]
-	jp   nz, L024619
-	ld   hl, $0037
-	add  hl, bc
-	ld   a, [hl]
-	inc  a
-	daa
-	ld   [hl], a
+		;
+		; If we got hit, increment the combo counter shown on the opponent's side.
+		;
+		ld   hl, iPlInfo_21Flags
+		add  hl, bc
+		bit  PI21B_GUARD, [hl]	; Did we block the hit?
+		jp   nz, .noComboInc	; If so, skip
+		ld   hl, iPlInfo_HitComboRecvSet
+		add  hl, bc				
+		ld   a, [hl]			; A = iPlInfo_HitComboRecvSet
+		inc  a					; A++
+		daa						; account for decimal
+		ld   [hl], a			; Save back
 	pop  af
-	jp   L02461A
-L024619:;J
+	jp   .updateFlags
+.noComboInc:
 	pop  af
-L02461A:;J
-	ld   hl, $0021
+	
+.updateFlags:
+	;
+	; If we didn't block the hit, we're definitely not doing a special or super move.
+	;
+	ld   hl, iPlInfo_21Flags
 	add  hl, bc
-	bit  3, [hl]
-	jp   nz, L02462C
-	ld   hl, $0020
+	bit  PI21B_GUARD, [hl]		; Did we block the hit?
+	jp   nz, .updateFlags1		; If so, skip
+	ld   hl, iPlInfo_Status		; Otherwise, clear move type flags
 	add  hl, bc
-	res  1, [hl]
-	res  6, [hl]
+	res  PSB_SPECMOVE, [hl]		
+	res  PSB_SUPERMOVE, [hl]
 	inc  hl
-L02462C:;J
-	set  0, [hl]
-	set  1, [hl]
-	set  4, [hl]
-	cp   $00
-	jp   z, L024639
-	set  2, [hl]
-L024639:;J
+	
+.updateFlags1:
+	; Don't override hitstun/blockstun with basic moves/normals
+	set  PI21B_NOBASICINPUT, [hl]
+	; Prevent the player from autoswitching direction during hitstun or blockstun
+	set  PI21B_XFLIPLOCK, [hl]	
+	; Mark that the opponent's attack made contact.
+	; This a few effects, like making any next hit in the combo deal less penalty to the dizzy or guard break counters.
+	set  PI21B_COMBORECV, [hl]
+	
+	;
+	; Prevent cancelling out of hitstun.
+	; (though there's a special override in PI21B_ALLOWHITCANCEL)
+	;
+	cp   HITANIM_BLOCKED			; Are we in the blockstun anim?
+	jp   z, .execCode				; If so, skip
+	set  PI21B_NOSPECSTART, [hl]	; Otherwise, we got hit. Prevent specials from starting.
+.execCode:
+	;
+	; Execute the code for the currently set Hit Animation.
+	; This has the same purpose as the move code, except it's specifically for getting hit/blocking.
+	;
+	
 	push bc
-	ld   hl, $4659
-	ld   b, $00
-	ld   c, a
-	add  hl, bc
-	ld   c, [hl]
-	inc  hl
-	ld   b, [hl]
-	push bc
-	pop  hl
+		; Index Play_HitAnimPtrTable by HitAnimId
+		ld   hl, Play_HitAnimPtrTable	; HL = Ptr to start of table
+		ld   b, $00		; BC = HitAnimId (* 2)
+		ld   c, a
+		add  hl, bc		; Index it
+		; Read it out to BC
+		ld   c, [hl]
+		inc  hl
+		ld   b, [hl]
+		push bc
+		; Move to HL
+		pop  hl			
 	pop  bc
-	jp   hl
-L024648:;J
-	ld   hl, $0021
+	jp   hl	; And jump there
+.noHit:
+	;
+	; When the opponent's attack didn't come in contact and we're out of "combo mode",
+	; hide the combo counter that's displayed on the opponent side.
+	;
+	ld   hl, iPlInfo_21Flags
 	add  hl, bc
-	bit  4, [hl]
-	jp   nz, L024657
-	ld   hl, $0037
+	bit  PI21B_COMBORECV, [hl]			; Is the combo mode enabled?
+	jp   nz, .end						; If so, skip
+	ld   hl, iPlInfo_HitComboRecvSet	; Otherwise, reset hit counter
 	add  hl, bc
 	ld   [hl], $00
-L024657:;J
-	xor  a
+.end:
+	xor  a	; C flag clear
 	ret
-L024659: db $83
-L02465A: db $46
-L02465B: db $05
-L02465C: db $47
-L02465D: db $35;X
-L02465E: db $47;X
-L02465F: db $76
-L024660: db $47
-L024661: db $7B
-L024662: db $47
-L024663: db $80
-L024664: db $47
-L024665: db $81
-L024666: db $49
-L024667: db $C0
-L024668: db $49
-L024669: db $9A
-L02466A: db $47
-L02466B: db $06
-L02466C: db $4A
-L02466D: db $0B
-L02466E: db $4A
-L02466F: db $25
-L024670: db $4A
-L024671: db $04
-L024672: db $48
-L024673: db $4B
-L024674: db $48
-L024675: db $FB
-L024676: db $48
-L024677: db $6B
-L024678: db $48
-L024679: db $D4
-L02467A: db $4A
-L02467B: db $39
-L02467C: db $4B
-L02467D: db $3E
-L02467E: db $4B
-L02467F: db $43
-L024680: db $4B
-L024681: db $48
-L024682: db $4B
-L024683:;I
+	
+Play_HitAnimPtrTable:
+	dw HitAnim_Blocked
+	dw HitAnim_GuardBreakGround
+	dw HitAnim_GuardBreakAir
+	dw HitAnim_Hit0Mid
+	dw HitAnim_Hit1Mid
+	dw HitAnim_HitLow
+	dw HitAnim_06
+	dw HitAnim_07
+	dw HitAnim_08
+	dw HitAnim_09
+	dw HitAnim_0A
+	dw HitAnim_0B
+	dw HitAnim_0C
+	dw HitAnim_0D
+	dw HitAnim_0E
+	dw HitAnim_0F
+	dw HitAnim_ThrowStart
+	dw HitAnim_ThrowRotU
+	dw HitAnim_ThrowRotL
+	dw HitAnim_ThrowRotD
+	dw HitAnim_ThrowRotR
+
+
+HitAnim_Blocked:;I
 	ld   a, $0D
 	ld   hl, $0020
 	add  hl, bc
@@ -928,7 +995,7 @@ L024695:;J
 	add  hl, bc
 	set  2, [hl]
 L0246BC:;J
-	call L003BA3
+	call Play_Pl_DoBlockstun
 	jp   c, L024702
 	call L00347B
 	ld   hl, $0033
@@ -949,14 +1016,14 @@ L0246E1:;J
 	add  hl, de
 	ld   [hl], $FF
 	ld   hl, $0080
-	call L003585
+	call Play_OBJLstS_SetSpeedH_ByXDirL
 	ld   hl, $0009
 	add  hl, de
 	ld   a, [hl]
 	bit  7, a
 	jp   nz, L024700
 	ld   hl, $0000
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L024700
 L024700:;J
 	scf
@@ -965,7 +1032,7 @@ L024702:;J
 	scf
 	ccf
 	ret
-L024705:;I
+HitAnim_GuardBreakGround:;I
 	ld   hl, $0023
 	add  hl, bc
 	res  1, [hl]
@@ -973,12 +1040,12 @@ L024705:;I
 	ld   a, $1C
 	call HomeCall_Sound_ReqPlayExId
 	ld   a, $72
-	call L003451
+	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
 	ld   a, $0F
 	call L025003
 	ld   a, $00
 	ld   [wStageBGP], a
-	call L003AE8
+	call Play_Unk_Pl_BlockstunNormal
 	call L00347B
 	ld   hl, $0050
 	add  hl, bc
@@ -989,7 +1056,7 @@ L024705:;I
 L024733:;J
 	scf
 	ret
-L024735: db $21;X
+HitAnim_GuardBreakAir: db $21;X
 L024736: db $23;X
 L024737: db $00;X
 L024738: db $09;X
@@ -1054,27 +1121,27 @@ L024772: db $36;X
 L024773: db $00;X
 L024774: db $37;X
 L024775: db $C9;X
-L024776:;I
+HitAnim_Hit0Mid:;I
 	ld   a, $76
 	jp   L024782
-L02477B:;I
+HitAnim_Hit1Mid:;I
 	ld   a, $78
 	jp   L024782
-L024780:;I
+HitAnim_HitLow:;I
 	ld   a, $7A
 L024782:;J
 	push af
 	call L0249F2
 	pop  af
-	call L003451
+	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
 	ld   a, $0F
 	call L025003
 	call L02504C
-	call L003AE8
+	call Play_Unk_Pl_BlockstunNormal
 	call L00347B
 	scf
 	ret
-L02479A:;I
+HitAnim_08:;I
 	ld   hl, $0020
 	add  hl, bc
 	bit  1, [hl]
@@ -1105,11 +1172,11 @@ L0247AA:;J
 L0247C3:;J
 	call L0249F2
 	ld   a, $7C
-	call L003451
+	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
 	ld   a, $1E
 	call L025003
 	call L02504C
-	call L003AE8
+	call Play_Unk_Pl_BlockstunNormal
 	call L00347B
 	ld   hl, $0023
 	add  hl, bc
@@ -1118,19 +1185,19 @@ L0247C3:;J
 	bit  0, [hl]
 	jp   nz, L0247F6
 	ld   hl, $0140
-	call L003585
+	call Play_OBJLstS_SetSpeedH_ByXDirL
 	ld   hl, $FC00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L024802
 L0247F6:;J
 	ld   hl, $0180
-	call L003585
+	call Play_OBJLstS_SetSpeedH_ByXDirL
 	ld   hl, $FA00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 L024802:;J
 	scf
 	ret
-L024804:;I
+HitAnim_0C:;I
 	ld   hl, $004E
 	add  hl, bc
 	ld   a, [hl]
@@ -1149,9 +1216,9 @@ L024804:;I
 L02481D:;J
 	call L0249F2
 	ld   a, $7E
-	call L003451
+	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
 	call L02504C
-	call L003AE8
+	call Play_Unk_Pl_BlockstunNormal
 	call L00347B
 	ld   hl, $0023
 	add  hl, bc
@@ -1162,12 +1229,12 @@ L02481D:;J
 L02483D:;J
 	ld   hl, $0600
 L024840:;J
-	call L003585
+	call Play_OBJLstS_SetSpeedH_ByXDirL
 	ld   hl, $0600
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	scf
 	ret
-L02484B:;I
+HitAnim_0D:;I
 	ld   hl, $0023
 	add  hl, bc
 	bit  4, [hl]
@@ -1178,13 +1245,13 @@ L02484B:;I
 L024858:;J
 	call L0249F2
 	ld   a, $80
-	call L003451
+	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
 	call L02504C
-	call L003B80
+	call Play_Unk_Pl_BlockstunNormalOnce
 	call L00347B
 	scf
 	ret
-L02486B:;I
+HitAnim_0F:;I
 	ld   hl, $004E
 	add  hl, bc
 	ld   a, [hl]
@@ -1205,7 +1272,7 @@ L024884:;J
 	add  hl, bc
 	ld   [hl], $01
 	ld   a, $8E
-	call L003451
+	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
 	ld   hl, $0071
 	add  hl, bc
 	ld   a, [hl]
@@ -1236,15 +1303,15 @@ L0248BE: db $DE;X
 L0248BF: db $48;X
 L0248C0:;J
 	ld   hl, $0900
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FC00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L0248F9
 L0248CF:;J
 	ld   hl, $FD00
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FC00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L0248F9
 L0248DE:;J
 	ld   hl, $0023
@@ -1256,21 +1323,21 @@ L0248DE:;J
 L0248ED:;J
 	ld   hl, $0300
 L0248F0:;J
-	call L003585
+	call Play_OBJLstS_SetSpeedH_ByXDirL
 	ld   hl, $FC00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 L0248F9:;J
 	scf
 	ret
-L0248FB:;I
+HitAnim_0E:;I
 	ld   hl, $0071
 	add  hl, bc
 	ld   a, [hl]
 	cp   $02
 	jp   nz, L024937
 	ld   a, $82
-	call L003451
-	call L003AD4
+	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
+	call Play_Pl_GiveKnockbackCornered
 	ld   hl, $0021
 	add  hl, bc
 	set  7, [hl]
@@ -1280,15 +1347,15 @@ L0248FB:;I
 	cp   $64
 	jr   nc, L024928
 	ld   hl, $F900
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	ld   hl, $0300
 	jp   L024931
 L024928:;R
 	ld   hl, $F400
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	ld   hl, $0200
 L024931:;J
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L02497F
 L024937:;J
 	ld   hl, $004E
@@ -1311,10 +1378,10 @@ L024950:;J
 	add  hl, bc
 	set  7, [hl]
 	ld   a, $82
-	call L003451
+	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
 	call L00347B
 	ld   hl, $0180
-	call L00354D
+	call Play_OBJLstS_MoveH_ByOtherProjOnR
 	ld   hl, $0023
 	add  hl, bc
 	bit  0, [hl]
@@ -1327,13 +1394,13 @@ L024971: db $76;X
 L024972: db $49;X
 L024973:;J
 	ld   hl, $0000
-	call L003585
+	call Play_OBJLstS_SetSpeedH_ByXDirL
 	ld   hl, OAM_Begin
 	call L003614
 L02497F:;J
 	scf
 	ret
-L024981:;I
+HitAnim_06:;I
 	ld   hl, $0020
 	add  hl, bc
 	or   a
@@ -1349,11 +1416,11 @@ L024981:;I
 L024995:
 	call L0249F2
 	ld   a, $84
-	call L003451
-	call L003AE8
+	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
+	call Play_Unk_Pl_BlockstunNormal
 	call L00347B
 	ld   hl, $0180
-	call L003585
+	call Play_OBJLstS_SetSpeedH_ByXDirL
 	ld   hl, $0023
 	add  hl, bc
 	bit  0, [hl]
@@ -1364,18 +1431,18 @@ L0249B8: db $21;X
 L0249B9: db $00;X
 L0249BA: db $FC;X
 L0249BB:;J
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	scf
 	ret
-L0249C0:;I
+HitAnim_07:;I
 	ld   hl, $0020
 	add  hl, bc
 	inc  hl
 	set  7, [hl]
 	call L0249F2
 	ld   a, $86
-	call L003451
-	call L003AE8
+	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
+	call Play_Unk_Pl_BlockstunNormal
 	call L00347B
 	ld   hl, $0023
 	add  hl, bc
@@ -1386,9 +1453,9 @@ L0249C0:;I
 L0249E4:;J
 	ld   hl, $0180
 L0249E7:;J
-	call L003585
+	call Play_OBJLstS_SetSpeedH_ByXDirL
 	ld   hl, $FC00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	scf
 	ret
 L0249F2:;C
@@ -1403,30 +1470,30 @@ L024A00:;J
 L024A02:;J
 	call HomeCall_Sound_ReqPlayExId
 	ret
-L024A06:;I
+HitAnim_09:;I
 	ld   a, $88
 	jp   L024A0D
-L024A0B:;I
+HitAnim_0A:;I
 	ld   a, $8A
 L024A0D:;J
 	push af
 	ld   a, $0C
 	call HomeCall_Sound_ReqPlayExId
 	pop  af
-	call L003451
+	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
 	call L024A5B
 	call L02504C
-	call L003B80
-	call L003AD4
+	call Play_Unk_Pl_BlockstunNormalOnce
+	call Play_Pl_GiveKnockbackCornered
 	scf
 	ret
-L024A25:;I
+HitAnim_0B:;I
 	ld   a, $8C
 	push af
 	ld   a, $0C
 	call HomeCall_Sound_ReqPlayExId
 	pop  af
-	call L003451
+	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
 	ld   hl, $0005
 	add  hl, de
 	ld   [hl], $88
@@ -1441,10 +1508,10 @@ L024A25:;I
 L024A4A:;J
 	ld   hl, $E000
 L024A4D:;J
-	call L003513
+	call Play_OBJLstS_MoveH_ByXDirR
 	call L02504C
-	call L003B80
-	call L003AD4
+	call Play_Unk_Pl_BlockstunNormalOnce
+	call Play_Pl_GiveKnockbackCornered
 	scf
 	ret
 L024A5B:;C
@@ -1508,7 +1575,7 @@ L024AA1:;J
 	ld   [hl], $88
 	call L024AB1
 	ld   hl, $E800
-	call L003513
+	call Play_OBJLstS_MoveH_ByXDirR
 	ret
 L024AB1:;C
 	push bc
@@ -1539,8 +1606,8 @@ L024AC1:;C
 	ld   [hl], a
 	pop  bc
 	ret
-L024AD4:;I
-	ld   a, [$C173]
+HitAnim_ThrowStart:;I
+	ld   a, [wPlayPlThrowActId]
 	cp   $01
 	jp   nz, L024B37
 	ld   hl, $005F
@@ -1551,12 +1618,12 @@ L024AD4:;I
 	res  7, [hl]
 	res  1, [hl]
 	ld   a, $90
-	call L003451
+	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
 	ld   a, $02
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 L024AF4:;J
 	call Task_PassControlFar
-	ld   a, [$C173]
+	ld   a, [wPlayPlThrowActId]
 	cp   $00
 	jp   z, L024B37
 	cp   $03
@@ -1565,7 +1632,7 @@ L024AF4:;J
 	ld   [$C179], a
 	ld   a, $1B
 	call HomeCall_Sound_ReqPlayExId
-	call L002EFA
+	call OBJLstS_SyncXFlip
 	ld   hl, $0021
 	add  hl, bc
 	set  1, [hl]
@@ -1576,710 +1643,1321 @@ L024AF4:;J
 	ld   [hl], $FF
 	call L024AB1
 	ld   hl, $F000
-	call L003513
+	call Play_OBJLstS_MoveH_ByXDirR
 	ld   hl, $007C
 	add  hl, bc
 	ld   [hl], $01
 	call L00347B
-	call L003AD4
+	call Play_Pl_GiveKnockbackCornered
 	scf
 	ret
 L024B37: db $AF;X
 L024B38: db $C9;X
-L024B39:;I
+HitAnim_ThrowRotU:;I
 	ld   a, $92
 	jp   L024B4D
-L024B3E:;I
+HitAnim_ThrowRotL:;I
 	ld   a, $94
 	jp   L024B4D
-L024B43:;I
+HitAnim_ThrowRotD:;I
 	ld   a, $96
 	jp   L024B4D
-L024B48:;I
+HitAnim_ThrowRotR:;I
 	ld   a, $98
 	jp   L024B4D
 L024B4D:;J
-	call L003451
+	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
 	call L024AC1
 	ld   a, [$C176]
 	ld   h, a
 	ld   l, $00
-	call L00352F
+	call Play_OBJLstS_MoveH_ByOtherXFlipL
 	ld   a, [$C177]
 	ld   h, a
 	ld   l, $00
-	call L0034DD
+	call Play_OBJLstS_MoveV
 	ld   hl, $007C
 	add  hl, bc
 	ld   [hl], $01
-	call L003AD4
+	call Play_Pl_GiveKnockbackCornered
 	scf
 	ret
-L024B70:;C
+	
+; =============== Play_Pl_SetHitAnim ===============
+; Handles the player status and damage-related fields when getting hit.
+; This does a lot of setup for Play_Pl_DoHit to do the final adjustments
+; and execute the HitAnim code.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+; OUT
+; - A: Hit Animation ID that was set, * 2 (HITANIM_*)
+; - C flag: If set, we got hit or blocked the attack. The return value in A can be used.
+;           If cleared, the hit didn't have any effect.
+Play_Pl_SetHitAnim:
 	push bc
-	push de
-	ld   hl, $0005
-	add  hl, de
-	ld   a, [hl]
-	ld   hl, $0020
-	add  hl, bc
-	cp   $88
-	jp   nz, L024B85
-	res  2, [hl]
-	jp   L024B87
-L024B85:;J
-	set  2, [hl]
-L024B87:;J
-	ld   hl, $0063
-	add  hl, bc
-	bit  6, [hl]
-	jp   nz, L024B98
-	bit  0, [hl]
-	jp   nz, L024BE5
-	jp   L024E5B
-L024B98:;J
-	ld   hl, $0021
-	add  hl, bc
-	bit  7, [hl]
-	jp   nz, L024E5B
-	ld   a, [$C173]
-	or   a
-	jp   z, L024BB4
-	ld   hl, $0063
-	add  hl, bc
-	bit  0, [hl]
-	jp   nz, L024BE5
-L024BB1: db $C3;X
-L024BB2: db $5B;X
-L024BB3: db $4E;X
-L024BB4:;J
-	ld   hl, $002B
-	add  hl, bc
-	bit  0, [hl]
-	jp   nz, L024BC3
-	ld   hl, $D763
-	jp   L024BC6
-L024BC3:;J
-	ld   hl, $D723
-L024BC6:;J
-	ld   a, [hl]
-	or   a
-	jp   z, L024E5B
-	ld   d, [hl]
-	inc  hl
-	ld   e, [hl]
-	inc  hl
-	ld   a, [hl]
-	ld   hl, $0020
-	add  hl, bc
-	set  3, [hl]
-	inc  hl
-	inc  hl
-	res  4, [hl]
-	res  5, [hl]
-	res  6, [hl]
-	res  7, [hl]
-	inc  hl
-	ld   [hl], a
-	jp   L024CCC
-L024BE5:;J
-	ld   hl, $0063
-	add  hl, bc
-	bit  5, [hl]
-	jp   z, L024E5B
-	ld   hl, $0074
-	add  hl, bc
-	ld   a, [hl]
-	or   a
-	jp   z, L024E5B
-	ld   d, [hl]
-	inc  hl
-	ld   e, [hl]
-	inc  hl
-	ld   a, [hl]
-	ld   hl, $0020
-	add  hl, bc
-	res  3, [hl]
-	inc  hl
-	inc  hl
-	res  6, [hl]
-	res  7, [hl]
-	inc  hl
-	ld   [hl], a
-	ld   a, e
-	cp   $10
-	jp   z, L024C18
-	cp   $10
-	jp   nc, L024C60
-	jp   L024C70
-L024C18:;J
-	ld   a, [$C173]
-	cp   $01
-	jp   nz, L024E5B
-	ld   hl, $006D
-	add  hl, bc
-	bit  1, [hl]
-	jp   nz, L024C60
-	ld   a, [$C174]
-	cp   $00
-	jp   z, L024C40
-	cp   $01
-	jr   z, L024C52
-L024C35: db $21;X
-L024C36: db $21;X
-L024C37: db $00;X
-L024C38: db $CB;X
-L024C39: db $7E;X
-L024C3A: db $C2;X
-L024C3B: db $5B;X
-L024C3C: db $4E;X
-L024C3D: db $C3;X
-L024C3E: db $60;X
-L024C3F: db $4C;X
-L024C40:;J
-	ld   hl, $0020
-	add  hl, bc
-	bit  2, [hl]
-	jp   nz, L024E5B
-	inc  hl
-	bit  7, [hl]
-	jp   nz, L024E5B
-	jp   L024C60
-L024C52:;R
-	ld   hl, $0020
-	add  hl, bc
-	bit  2, [hl]
-	jp   z, L024E5B
-L024C5B: db $CB;X
-L024C5C: db $7E;X
-L024C5D: db $C2;X
-L024C5E: db $5B;X
-L024C5F: db $4E;X
-L024C60:;J
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	inc  hl
-	res  3, [hl]
-	res  4, [hl]
-	res  5, [hl]
-	jp   L024E4F
-L024C70:;J
-	ld   hl, $0021
-	add  hl, bc
-	bit  7, [hl]
-	jp   z, L024C82
-	inc  hl
-	inc  hl
-	res  1, [hl]
-	res  6, [hl]
-	jp   L024E5B
-L024C82:;J
-	ld   hl, $0022
-	add  hl, bc
-	bit  4, [hl]
-	jp   nz, L024C95
-	bit  5, [hl]
-	jp   nz, L024CAB
-	res  3, [hl]
-	jp   L024CCC
-L024C95:;J
-	ld   hl, $0023
-	add  hl, bc
-	bit  2, [hl]
-	jp   nz, L024CF7
-	ld   hl, $002C
-	add  hl, bc
-	ld   a, [hl]
-	cp   $00
-	jp   z, L024CB4
-	jp   L024CBE
-L024CAB:;J
-	ld   hl, $0023
-	add  hl, bc
-	bit  3, [hl]
-	jp   nz, L024CF7
-L024CB4:;J
-	ld   hl, $006D
-	add  hl, bc
-	ld   a, [hl]
-	and  a, $42
-	jp   nz, L024CF7
-L024CBE:;J
-	ld   hl, $0022
-	add  hl, bc
-	set  3, [hl]
-	inc  hl
-	res  1, [hl]
-	res  6, [hl]
-	jp   L024E5B
-L024CCC:;J
-	ld   hl, $0021
-	add  hl, bc
-	bit  3, [hl]
-	jp   z, L024D04
-	bit  5, [hl]
-	jp   z, L024CE6
-	ld   hl, $0023
-	add  hl, bc
-	bit  3, [hl]
-	jp   nz, L024CF7
-	jp   L024CF2
-L024CE6:;J
-	ld   hl, $0023
-	add  hl, bc
-	bit  2, [hl]
-	jp   nz, L024CF7
-	jp   L024CF2
-L024CF2:;J
-	ld   e, $00
-	jp   L024D04
-L024CF7:;J
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	inc  hl
-	res  3, [hl]
-	res  4, [hl]
-	res  5, [hl]
-L024D04:;J
-	push de
-	call L024E5F
-	pop  de
-	ld   a, e
-	cp   $09
-	jp   z, L024E4F
-	cp   $0A
-	jp   z, L024E4F
-	cp   $0B
-	jp   z, L024E4F
-	cp   $08
-	jp   z, L024E4F
-	cp   $0E
-	jp   z, L024E4F
-	ld   hl, $004E
-	add  hl, bc
-	ld   a, [hl]
-	or   a
-	jp   nz, L024D80
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	ld   hl, $0075
-	add  hl, bc
-	ld   a, [hl]
-	ld   e, a
-	ld   a, [$C173]
-	or   a
-	jp   nz, L024D4B
-	ld   hl, $006D
-	add  hl, bc
-	bit  1, [hl]
-	jp   nz, L024D5E
-	jp   L024E40
-L024D4B:;J
-	ld   a, e
-	cp   $0C
-	jp   z, L024E15
-	cp   $0F
-	jp   z, L024E4F
-L024D56: db $FE;X
-L024D57: db $0E;X
-L024D58: db $CA;X
-L024D59: db $4F;X
-L024D5A: db $4E;X
-L024D5B: db $C3;X
-L024D5C: db $40;X
-L024D5D: db $4E;X
-L024D5E:;J
-	ld   a, e
-	cp   $09
-	jp   z, L024E4F
-	cp   $0A
-	jp   z, L024E4F
-	cp   $0B
-	jp   z, L024E4F
-	cp   $0C
-	jp   z, L024E15
-	cp   $0F
-	jp   z, L024E4F
-	cp   $0E
-	jp   z, L024E4F
-	jp   L024E40
-L024D80:;J
-	ld   a, e
-	cp   $00
-	jp   nz, L024D8F
-	call L024FE4
-	jp   z, L024E23
-	jp   L024E4F
-L024D8F:;J
-	call L003CAC
-	jp   z, L024DB7
-	ld   a, e
-	cp   $09
-	jp   z, L024E4F
-	cp   $0A
-	jp   z, L024E4F
-	cp   $0B
-	jp   z, L024E4F
-	cp   $0C
-	jp   z, L024E15
-	cp   $0F
-	jp   z, L024E4F
-	cp   $0E
-	jp   z, L024E4F
-	jp   L024E40
-L024DB7:;J
-	ld   a, e
-	ld   hl, $0020
-	add  hl, bc
-	bit  2, [hl]
-	jp   z, L024DEE
-	cp   $0E
-	jp   z, L024E4F
-	bit  3, [hl]
-	jp   nz, L024DE1
-	ld   hl, $006D
-	add  hl, bc
-	bit  1, [hl]
-	jp   nz, L024DE1
-	cp   $0C
-	jp   z, L024E15
-	cp   $0F
-	jp   z, L024E4F
-	jp   L024E45
-L024DE1:;J
-	cp   $0C
-	jp   z, L024E15
-	cp   $0F
-	jp   z, L024E4F
-	jp   L024E40
-L024DEE:;J
-	bit  3, [hl]
-	jp   nz, L024E0D
-	ld   hl, $006D
-	add  hl, bc
-	bit  1, [hl]
-	jp   nz, L024E0D
-	cp   $06
-	jp   z, L024E4F
-	ld   hl, $0021
-	add  hl, bc
-	bit  5, [hl]
-	jp   nz, L024E4A
-	jp   L024E4F
-L024E0D:;J
-	cp   $0C
-	jp   z, L024E15
-	jp   L024E4F
-L024E15:;J
-	ld   hl, $0020
-	add  hl, bc
-	bit  2, [hl]
-	jp   nz, L024E4F
-	ld   e, $0D
-	jp   L024E4F
-L024E23:;J
-	ld   hl, $0020
-	add  hl, bc
-	bit  2, [hl]
-	jp   z, L024E31
-L024E2C: db $1E;X
-L024E2D: db $02;X
-L024E2E: db $C3;X
-L024E2F: db $4F;X
-L024E30: db $4E;X
-L024E31:;J
-	ld   e, $01
-	jp   L024E4F
-L024E36: db $1E;X
-L024E37: db $03;X
-L024E38: db $C3;X
-L024E39: db $4F;X
-L024E3A: db $4E;X
-L024E3B: db $1E;X
-L024E3C: db $04;X
-L024E3D: db $C3;X
-L024E3E: db $4F;X
-L024E3F: db $4E;X
-L024E40:;J
-	ld   e, $08
-	jp   L024E4F
-L024E45:;J
-	ld   e, $07
-	jp   L024E4F
-L024E4A:;J
-	ld   e, $05
-	jp   L024E4F
-L024E4F:;J
-	ld   a, e
-	ld   hl, $0034
-	add  hl, bc
-	ld   [hl], a
-	sla  a
-	scf
-	pop  de
+		push de
+		
+		;--------------------------------
+		;
+		; Update the airborne flag on the player status,
+		; since it's used later on when validating hit animations.
+		; (As some animations are switched when in the air or on the ground)
+		;
+		Play_Pl_SetHitAnim_SetAirFlag:
+			ld   hl, iOBJInfo_Y
+			add  hl, de
+			ld   a, [hl]		; A = iOBJInfo_Y
+			ld   hl, iPlInfo_Status
+			add  hl, bc			; HL = Ptr to iPlInfo_Status
+			cp   PL_FLOOR_POS	; Are we on the ground?
+			jp   nz, .setAir	; If not, set PSB_AIR
+		.setGround:
+			res  PSB_AIR, [hl]	; Otherwise, reset it
+			jp   .end
+		.setAir:
+			set  PSB_AIR, [hl]
+		.end:
+		
+		;--------------------------------
+		;
+		; Start by dividing between projectile hits and physical hits.
+		; 
+		; There are significant differences between the handling of those, though the code paths later
+		; converge back at Play_Pl_SetHitAnim_ChkGuardBypass (but not before setting the PSB_FARHIT flag)
+		; when it comes to applying the damage and hit animation.
+		;
+		Play_Pl_SetHitAnim_ChkHitType:
+
+			
+			; The flags checked here were previously set this frame during collision detection by the main task.
+			ld   hl, iPlInfo_ColiFlags
+			add  hl, bc
+			bit  PCF_RECVPROJHIT, [hl]			; Were we hit by a projectile?
+			jp   nz, .proj						; If so, jump
+			; [POI] We should be checking if we got hit by a non-projectile attack (PCF_RECVHIT),
+			;       but, bizzarrely, we're checking for the generic push flag.
+			;       This is pointless to do, especially when the first thing .phys does
+			;       is checking the actual PCF_RECVHIT flag.
+			bit  PCF_SENDPUSH, [hl]				; Did we get knockback'd or pushed by the other player?			
+			jp   nz, .phys						; If so, jump
+			
+			; Otherwise, we definitely didn't get hit. Return.
+			jp   Play_Pl_SetHitAnim_RetClear
+			
+		;--------------------------------
+		;
+		; PROJECTILE HIT
+		; [POI] This contains a bunch of checks that don't matter, probably as it was based on .phys,
+		;       which had to account for getting called across multiple frames even when it's not needed.
+		;       This one though is only called once, for the single frame the projectile hits.
+		;
+		.proj:
+			;
+			; Can't get hit when we're invincible.
+			; Curiously, of all code in the subroutine for checking collision, the projectile checks
+			; are the only ones that check this flag beforehand, making the check here pointless.
+			;
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc							; Seek to iPlInfo_21Flags
+			bit  PI21B_INVULN, [hl]				; Can we get hit?
+			jp   nz, Play_Pl_SetHitAnim_RetClear	; If not, return
+			
+			;
+			; Throws have more priority than projectiles.
+			;
+			; If the projectile hit us while being/attempting to get thrown by the opponent, ignore the hit
+			; and continue to the physical hit code, where we'll continue to handle the throw.
+			;
+			ld   a, [wPlayPlThrowActId]
+			or   a								; Is a throw in progress (wPlayPlThrowActId != 0)?
+			jp   z, .getProjDamage				; If not, jump
+			
+			;
+			; [POI] This check is pointless, as if a throw is in progress PCF_SENDPUSH is always set
+			;       for the duration of the throw until we are actually thrown.
+			;
+			ld   hl, iPlInfo_ColiFlags
+			add  hl, bc							; Seek to iPlInfo_ColiFlags
+			bit  PCF_SENDPUSH, [hl]				; Did we push another player?	
+			jp   nz, .phys	; If so, jump (always happens)
+			
+			jp   Play_Pl_SetHitAnim_RetClear		; We never get here
+			
+		.getProjDamage:
+		
+			;
+			; Seek to the move damage fields from the opponent's projectile.
+			;
+			ld   hl, iPlInfo_PlId
+			add  hl, bc							; Seek to iPlInfo_PlId
+			bit  0, [hl]						; iPlInfo_PlId == PL2? ($01)
+			jp   nz, .useProj1P					; If so, use 1P's projectile damage value
+		.useProj2P:							
+			ld   hl, wOBJInfo_Pl2Projectile+iOBJInfo_Proj_DamageVal		 
+			jp   .chkProjDamage
+		.useProj1P:
+			ld   hl, wOBJInfo_Pl1Projectile+iOBJInfo_Proj_DamageVal		
+		.chkProjDamage:
+			; 
+			; Just like the PI21B_INVULN check, this was checked beforehand in the box check code.
+			; This is structured like the code checking iPlInfo_MoveDamageValOther in .phys,
+			; but the damage check in there has a real purpose.
+			;
+			ld   a, [hl]
+			or   a								; Is there damage assigned to the projectile?
+			jp   z, Play_Pl_SetHitAnim_RetClear	; If not, return
+			
+			;
+			; Retrieve the move damage fields from the projectile.
+			;
+			ld   d, [hl]	; D = iOBJInfo_Proj_DamageVal
+			inc  hl
+			ld   e, [hl]	; E = iOBJInfo_Proj_DamageHitAnimId
+			inc  hl
+			ld   a, [hl]	; A = iOBJInfo_Proj_DamageFlags3
+			
+			; Set that we were hit by a projectile
+			ld   hl, iPlInfo_Status
+			add  hl, bc							; Seek to iPlInfo_Status
+			set  PSB_FARHIT, [hl]
+			
+			inc  hl								; Seek to iPlInfo_21Flags
+			inc  hl								; Seek to iPlInfo_22Flags
+			; Projectiles bypass autoguard
+			res  PI22B_AUTOGUARDLOW, [hl]
+			res  PI22B_AUTOGUARDMID, [hl]
+			; Since it should be possible to combo off a projectile hit, restore collision boxes.
+			res  PI22B_NOHURTBOX, [hl]
+			res  PI22B_NOCOLIBOX, [hl]
+			
+			; Apply the opponent's iOBJInfo_Proj_DamageFlags3
+			inc  hl								; Seek to iPlInfo_23Flags
+			ld   [hl], a						; Copy iOBJInfo_Proj_DamageFlags3 there
+			
+			; There's nothing else to check here, skip to the shared code
+			jp   Play_Pl_SetHitAnim_ChkGuardBypass
+			
+			
+		;--------------------------------
+		;
+		; PHYSICAL HIT ("Player Hit")
+		;
+		.phys:
+
+			;
+			; Make sure we actually got hit, as we can get here just by pushing another player.
+			;
+			ld   hl, iPlInfo_ColiFlags
+			add  hl, bc							
+			bit  PCF_RECVHIT, [hl]				; Did we get hit?
+			jp   z, Play_Pl_SetHitAnim_RetClear	; If not, return
+			
+			;
+			; Make sure the opponent can damage the player.
+			;
+			; We're checking this because of what the game does to prevent a move from dealing
+			; damage for multiple continuous frames.
+			; 
+			; To ensure that, the main task at Play_DoUnkChain_ResetDamage blanks the damage field
+			; for the opponent if it detects that a physical hit happened the previous frame.
+			; Right after that, we're given visibility to those updated damage fields, so the opponent's
+			; iPlInfo_MoveDamageVal gets copied to our iPlInfo_MoveDamageValOther.
+			;
+			; So, if that is empty, return immediately.
+			;
+			ld   hl, iPlInfo_MoveDamageValOther
+			add  hl, bc							; Seek to iPlInfo_MoveDamageValOther
+			ld   a, [hl]
+			or   a								; iPlInfo_MoveDamageValOther == 0?
+			jp   z, Play_Pl_SetHitAnim_RetClear	; If so, return
+			
+			;
+			; Retrieve the move damage fields from the other player.
+			;
+			ld   d, [hl]				; D = iPlInfo_MoveDamageValOther
+			inc  hl
+			ld   e, [hl]				; E = iPlInfo_MoveDamageHitAnimIdOther
+			inc  hl
+			ld   a, [hl]				; A = iPlInfo_MoveDamageFlags3Other
+			
+			; Set that we weren't hit by a projectile
+			ld   hl, iPlInfo_Status
+			add  hl, bc					; Seek to iPlInfo_Status
+			res  PSB_FARHIT, [hl]
+			
+			inc  hl						; Seek to iPlInfo_21Flags
+			inc  hl						; Seek to iPlInfo_22Flags
+			
+			; Restore collision boxes to allow combo hits.
+			res  PI22B_NOHURTBOX, [hl]
+			res  PI22B_NOCOLIBOX, [hl]
+			
+			; Copy the opponent's iPlInfo_MoveDamageFlags3Other to our iPlInfo_23Flags value
+			inc  hl						; Seek to iPlInfo_23Flags
+			ld   [hl], a				
+			
+			ld   a, e		; A = HitAnimId
+			
+			;
+			; Perform extra validation before registering that we got damaged.
+			;
+			; First determine what type of damage move (set hit animation ID) this was, as set by the move code.
+			; The hit animation IDs are grouped in a specific order:
+			; - All standard hit/drop animations (including the end of a throw) use IDs < $10
+			; - ID $10 is used when starting a throw
+			; - IDs > $10 are the rotation frames used for the "next" parts of a throw.
+			;         Each character decides how to cycle between them.
+			;
+			; All of the validation to check if we can be thrown happens at the start of the throw (HITANIM_THROW_START).
+			; If the throw was already started (HitAnimId >= $10) then we're definitely allowed to continue it.
+			; (as long as we don't get throw tech, but that's handled elsewhere).
+			;
+			; The throws are also special since they never cause damage directly (read: as long as HitAnimId >= $10),
+			; so when they are confirmed (.setThrowFlags) they just set some flags to force the throw state and jump 
+			; directly to the end, skipping the damage evaluator.
+			; The actual damage only happens the when the code for the throw sets HitAnimId < $10, which makes
+			; it count as a normal hit.
+			;
+			cp   HITANIM_THROW_START	; HitAnimId == $10?
+			jp   z, .chkThrow			; If so, jump
+			cp   HITANIM_THROW_START	; HitAnimId >= $10?
+			jp   nc, .setThrowFlags		; If so, jump
+			; Otherwise, iPlInfo_MoveDamageHitAnimIdOther < $10, meaning it's a generic hit.
+			jp   .chkHit
+			
+			;################
+			;
+			; THROWS
+			;
+		.chkThrow:
+			;
+			; Return immediately if the other player didn't start yet a throw.
+			; Note this works in conjunction with the other player currently "waiting" in Play_Pl_ChkThrowInput.tryStart
+			; when starting a throw, which is when wPlayPlThrowActId got set to PLAY_THROWACT_START.
+			;
+			ld   a, [wPlayPlThrowActId]
+			cp   PLAY_THROWACT_START				; wPlayPlThrowActId == $01?
+			jp   nz, Play_Pl_SetHitAnim_RetClear	; If not, return
+			
+			;
+			; If we got thrown by a special move (ie: not a normal throw), always allow the throw to start.
+			; The air/ground and invulnerability checks (PI21B_INVULN) get ignored.
+			;
+			ld   hl, iPlInfo_StatusOther
+			add  hl, bc					; Seek to iPlInfo_StatusOther
+			bit  PSB_SPECMOVE, [hl]		; Is PSB_SPECMOVE set?
+			jp   nz, .setThrowFlags		; If so, jump
+			
+			;
+			; Throws can either work for opponents in the air or on the ground.
+			; Verify that we can be thrown depending on what was set as "opponent throw mode" (wPlayPlThrowOpMode).
+			; 
+			ld   a, [wPlayPlThrowOpMode]
+			cp   PLAY_THROWOP_GROUND	; Is it against grounded players?
+			jp   z, .chkThrowForGround	; If so, jump
+			cp   PLAY_THROWOP_AIR		; Is it against airborne players?
+			jr   z, .chkThrowForAir		; If so, jump
+			
+			; [TCRF] Unreachable broken code for an unused type that works on both air and ground players.        
+		.chkThrow_Unused_ForBoth:
+			; [BUG] Broken indexing. "add  hl, bc" is missing, so it reads garbage value at address $0021.
+			;       This is $FF, causing the check to always return.
+			ld   hl, iPlInfo_21Flags
+			bit  PI21B_INVULN, [hl]		; Are we invulnerable against throws?
+			jp   nz, Play_Pl_SetHitAnim_RetClear	; If so, return
+			jp   .setThrowFlags			; Otherwise, jump
+			
+		.chkThrowForGround:
+		
+			;
+			; We must be on the ground for the throw to start.
+			;
+			ld   hl, iPlInfo_Status
+			add  hl, bc					
+			bit  PSB_AIR, [hl]					; Are we in the air?
+			jp   nz, Play_Pl_SetHitAnim_RetClear	; If so, return
+			
+			;
+			; Standard invulnerability check.
+			;
+			inc  hl								; Seek to iPlInfo_21Flags
+			bit  PI21B_INVULN, [hl]				; Are we invulnerable?
+			jp   nz, Play_Pl_SetHitAnim_RetClear	; If so, return
+			
+			; OK
+			jp   .setThrowFlags
+			
+		.chkThrowForAir:
+		
+			;
+			; We must be in the air for the throw to start.
+			;
+			ld   hl, iPlInfo_Status
+			add  hl, bc							; Seek to iPlInfo_Status
+			bit  PSB_AIR, [hl]					; Are we in the air?
+			jp   z, Play_Pl_SetHitAnim_RetClear	; If not, return
+			
+			;
+			; [POI] The CPU can't be thrown in the air.
+			;
+			bit  PSB_CPU, [hl]					; Are we a CPU player?
+			jp   nz, Play_Pl_SetHitAnim_RetClear	; If so, return
+			
+		.setThrowFlags:
+			;
+			; When the throw is confirmed, we can't block the hit at all
+			; to reduce the damage.
+			;
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc				; Seek to iPlInfo_21Flags
+			res  PI21B_GUARD, [hl]	; Clear main guard flag
+			inc  hl					; Seek to iPlInfo_22Flags
+			res  PI22B_AUTOGUARDDONE, [hl] ; Clear autoguard flags
+			res  PI22B_AUTOGUARDLOW, [hl]
+			res  PI22B_AUTOGUARDMID, [hl]
+			
+			; Throws don't cause damage directly.
+			; Just set the updated hit animation ID from E and return.
+			jp   Play_Pl_SetHitAnim_SetHitAnimId
+			
+			;################
+			;
+			; HIT
+			;
+		.chkHit:	
+			;
+			; If we're invulnerable we can't get damaged.
+			; This also clears out the damage flashing effect, in case it was enabled when
+			; the opponent's iPlInfo_MoveDamageFlags3Other was copied over to our iPlInfo_23Flags.
+			;
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc					; Seek to iPlInfo_21Flags
+			bit  PI21B_INVULN, [hl]		; Are we fully invulnerable?
+			jp   z, .chkAutoguard		; If not, jump
+			
+			inc  hl			; Seek to iPlInfo_22Flags
+			inc  hl			; Seek to iPlInfo_23Flags
+			; Stop flashing 
+			res  PI23B_FLASH_B_SLOW, [hl]
+			res  PI23B_FLASH_B_FAST, [hl]
+			; Exit hit state
+			jp   Play_Pl_SetHitAnim_RetClear
+			;--
+			
+		.chkAutoguard:
+			;
+			; By default, it's impossible to guard while performing a special move,
+			; though some special moves may use PI21B_GUARD to reduce the damage received.
+			;
+			; If one of the autoguard flags are set, however, special moves can be
+			; set to either block lows or highs automatically.
+			; Unlike with normal blocks, blocking the hit prevents *any* damage from 
+			; being received (read: we return).
+			;
+			ld   hl, iPlInfo_22Flags
+			add  hl, bc						; Seek to iPlInfo_22Flags
+			bit  PI22B_AUTOGUARDLOW, [hl]	; Guarding low?
+			jp   nz, .onAutoguardLow		; If so, jump
+			bit  PI22B_AUTOGUARDMID, [hl]	; Guarding mid?
+			jp   nz, .onAutoguardMid		; If so, jump
+			
+			; Otherwise, reset the autoguard indicator
+			res  PI22B_AUTOGUARDDONE, [hl]			; Clear result flag
+			jp   Play_Pl_SetHitAnim_ChkGuardBypass	; Skip to the common block
+			
+		.onAutoguardLow:
+			; If the attack hits mid, we got hit
+			ld   hl, iPlInfo_23Flags
+			add  hl, bc									
+			bit  PI23B_HITMID, [hl]					; Does the attack hit mid?
+			jp   nz, Play_Pl_SetHitAnim_BlockBypass	; If so, we got hit
+			
+			; When playing as KYO, autoguarding lows only works against normals.
+			; [BUG?] Suspicious. Was this meant to check if the opponent is KYO (iPlInfo_CharIdOther)?
+			;        It makes more sense if KYO's low autoguards were unblockable.
+			ld   hl, iPlInfo_CharId
+			add  hl, bc				
+			ld   a, [hl]
+			cp   CHAR_ID_KYO		; Are we KYO?
+			jp   z, .chkSpecial		; If so, jump
+			
+			jp   .autoguardOk		; autoguard ok!
+			
+		.onAutoguardMid:
+			; If the attack hits low, we got hit
+			ld   hl, iPlInfo_23Flags
+			add  hl, bc		 		
+			bit  PI23B_HITLOW, [hl]					; Does the attack hit low?
+			jp   nz, Play_Pl_SetHitAnim_BlockBypass	; If so, we got hit
+			
+		.chkSpecial:
+			; Autoguarding mids only works against normals in general.
+			ld   hl, iPlInfo_StatusOther
+			add  hl, bc
+			ld   a, [hl]
+			and  a, PS_SUPERMOVE|PS_SPECMOVE			; Did we get hit by a special move?
+			jp   nz, Play_Pl_SetHitAnim_BlockBypass		; If so, jump
+		.autoguardOk:
+			
+			ld   hl, iPlInfo_22Flags
+			add  hl, bc				; Seek to iPlInfo_22Flags
+			
+			; Flag that we guarded it this way
+			set  PI22B_AUTOGUARDDONE, [hl]
+			inc  hl					; Seek to iPlInfo_23Flags
+			; Stop flashing
+			res  PI23B_FLASH_B_SLOW, [hl]
+			res  PI23B_FLASH_B_FAST, [hl]
+			jp   Play_Pl_SetHitAnim_RetClear
+			;###
+			
+		;--------------------------------
+		;
+		; SHARED - Guard Bypass Check.
+		;
+		Play_Pl_SetHitAnim_ChkGuardBypass:
+			;
+			; If we're blocking, determine if the attack bypassed the guard.
+			; If so, the guard is removed and we take full damage.
+			; ie: blocking overheads while crouching
+			;
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc									
+			bit  PI21B_GUARD, [hl]					; Were we blocking the attack?
+			jp   z, Play_Pl_SetHitAnim_ApplyDamage	; If not, skip ahead
+			bit  PI21B_CROUCH, [hl]					; Did we block low?
+			jp   z, .onBlockLow						; If not, jump
+		.onBlockMid:
+			ld   hl, iPlInfo_23Flags
+			add  hl, bc								; Seek to iPlInfo_23Flags
+			bit  PI23B_HITLOW, [hl]					; Does the attack hit low?
+			jp   nz, Play_Pl_SetHitAnim_BlockBypass	; If so, we got hit
+			jp   Play_Pl_SetHitAnim_Blocked			; Otherwise, we blocked it
+		.onBlockLow:
+			ld   hl, iPlInfo_23Flags
+			add  hl, bc								; Seek to iPlInfo_23Flags
+			bit  PI23B_HITMID, [hl]					; Does the attack hit mid?
+			jp   nz, Play_Pl_SetHitAnim_BlockBypass	; If so, we got hit
+			jp   Play_Pl_SetHitAnim_Blocked			; Otherwise, we blocked it
+			
+		Play_Pl_SetHitAnim_Blocked:
+			; Since we blocked the attack, remove the hit effect
+			; so we can continue blocking.
+			ld   e, $00
+			jp   Play_Pl_SetHitAnim_ApplyDamage
+			
+		Play_Pl_SetHitAnim_BlockBypass:
+			; We didn't guard the attack correctly.
+			; This counts as a standard hit.
+			
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			; Stop blocking the attack
+			res  PI21B_GUARD, [hl]	
+			inc  hl
+			res  PI22B_AUTOGUARDDONE, [hl]
+			res  PI22B_AUTOGUARDLOW, [hl]
+			res  PI22B_AUTOGUARDMID, [hl]
+			
+		;--------------------------------
+		;
+		; SHARED - Apply Damage
+		;
+		Play_Pl_SetHitAnim_ApplyDamage:
+			
+			; Play_Pl_ApplyDamageToStats recalculates the values in DE, so save/restore it
+			push de
+				call Play_Pl_ApplyDamageToStats
+			pop  de
+			
+		;--------------------------------
+		;
+		; SHARED - Set Hit Animation
+		;
+		Play_Pl_SetHitAnim_SetHitAnim:
+			;
+			; Second pass to validate the animation to play when getting hit,
+			; as it may get replaced with something else depending on the player status flags.
+			; After this last series of checks in made, save it to iPlInfo_HitAnimId.
+			;
+			
+			ld   a, e						; A = HitAnimId
+			
+			; These animation IDs can always be used
+			cp   HITANIM_HIT_SPEC_09				; E == $09?
+			jp   z, Play_Pl_SetHitAnim_SetHitAnimId	; If so, jump
+			cp   HITANIM_HIT_SPEC_0A				; ...
+			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			cp   HITANIM_HIT_SPEC_0B
+			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			cp   HITANIM_DROP_MD
+			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			cp   HITANIM_DROP_SPEC_AIR_0E
+			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+		
+		.chkDead:
+			;
+			; Getting KO'd restricts the number of allowed hit animations, as the player
+			; has to visibily drop to the ground, something not all HitAnims do.
+			;
+			ld   hl, iPlInfo_Health
+			add  hl, bc
+			ld   a, [hl]
+			or   a						; Do we have any health left?
+			jp   nz, .notDead			; If so, jump
+			
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc					; Seek to our iPlInfo_21Flags
+			res  PI21B_GUARD, [hl]		; Disable blocking
+			
+			; E = HitAnimId (Opponent)
+			ld   hl, iPlInfo_MoveDamageHitAnimIdOther
+			add  hl, bc					
+			ld   a, [hl]				
+			ld   e, a
+			
+			; There are different allowed HitAnims depending on whether we got
+			; killed by a hit or a throw.
+			ld   a, [wPlayPlThrowActId]
+			or   a						; Did we get thrown?
+			jp   nz, .deadThrown		; If so, jump
+		.deadHit:
+			; Getting KO'd by a normal always sets HITANIM_DROP_MD.
+			; For specials there's a whitelist.
+			ld   hl, iPlInfo_StatusOther
+			add  hl, bc					; Seek to opponent's status
+			bit  PSB_SPECMOVE, [hl]		; Did we get killed by a special move?
+			jp   nz, .deadSpecHit		; If so, jump
+			jp   .useStdDrop				; Otherwise, use HITANIM_DROP_MD
+		.deadThrown:
+			; There are three allowed animations when getting KO's by a throw.
+			; Otherwise, default to HITANIM_DROP_MD.
+			ld   a, e
+			cp   HITANIM_DROP_SPEC_0C		; HitAnimId == $0C?
+			jp   z, .useDrop0C				; If so, jump
+			cp   HITANIM_DROP_SPEC_0F		; ...
+			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			;--
+			; [TCRF?] Unreachable code?
+			cp   a, HITANIM_DROP_SPEC_AIR_0E
+			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			jp   .useStdDrop
+			;--
+		.deadSpecHit:
+			; Whitelist of allowed hit animations when getting KO'd by a hit.
+			; Otherwise, default to HITANIM_DROP_MD.
+			ld   a, e
+			cp   HITANIM_HIT_SPEC_09
+			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			cp   HITANIM_HIT_SPEC_0A
+			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			cp   HITANIM_HIT_SPEC_0B
+			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			cp   HITANIM_DROP_SPEC_0C
+			jp   z, .useDrop0C
+			cp   HITANIM_DROP_SPEC_0F
+			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			cp   HITANIM_DROP_SPEC_AIR_0E
+			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			jp   .useStdDrop
+			
+		.notDead:
+			ld   a, e
+			
+			; If we blocked the hit, determine if guard broke as that uses its own anims.
+			; Note that HITANIM_BLOCKED got set previously by the subroutine, overriding
+			; whatever the attack set when blocking it successfully.
+			cp   HITANIM_BLOCKED		; Did we block the hit?
+			jp   nz, .noBlock			; If not, jump
+			call Play_Pl_DoGuardBreak	; Did our guard break?
+			jp   z, .useGuardBreak		; If so, jump
+			jp   Play_Pl_SetHitAnim_SetHitAnimId	; Otherwise, confirm HITANIM_BLOCKED
+			
+		.noBlock:
+			call Play_Pl_IsDizzy		; Did we get dizzy? 
+			jp   z, .noDizzy			; If not, jump
+		.dizzy:
+			; Handle the animation whitelist when getting hit "right before getting" dizzy.
+			; The practical result is that moves that normally would cause minor pushback
+			; will cause the player to drop to the ground (by reaching .useStdDrop).
+			ld   a, e
+			cp   HITANIM_HIT_SPEC_09
+			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			cp   HITANIM_HIT_SPEC_0A
+			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			cp   HITANIM_HIT_SPEC_0B
+			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			cp   HITANIM_DROP_SPEC_0C
+			jp   z, .useDrop0C
+			cp   HITANIM_DROP_SPEC_0F
+			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			cp   HITANIM_DROP_SPEC_AIR_0E
+			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			jp   .useStdDrop
+		.noDizzy:
+		
+			; Air and ground use different validations
+			ld   a, e
+			ld   hl, iPlInfo_Status
+			add  hl, bc
+			bit  PSB_AIR, [hl]		; Are we in the air?
+			jp   z, .noAir			; If not, jump
+			
+			;##
+		.air:
+			; HITANIM_DROP_SPEC_AIR_0E is always allowed when getting hit in the air
+			; (alongside HITANIM_DROP_SPEC_0C and HITANIM_DROP_SPEC_0F...)
+			cp   HITANIM_DROP_SPEC_AIR_0E
+			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			
+			;
+			; When getting hit by a normal in the air, the player recovers before touching the ground.
+			; Otherwise, it's an hard drop.
+			;
+			bit  PSB_FARHIT, [hl]	; Did we get hit by a projectile?
+			jp   nz, .airSpec		; If so, jump
+			ld   hl, iPlInfo_StatusOther
+			add  hl, bc				
+			bit  PSB_SPECMOVE, [hl]	; Did we get hit by a special move?
+			jp   nz, .airSpec		; If so, jump
+		.airNorm:
+			;--
+			; [POI] This is the same between .noAirNoSpec and .noAirSpec.
+			;       It could have been moved before the PSB_FARHIT check.
+			cp   HITANIM_DROP_SPEC_0C
+			jp   z, .useDrop0C
+			cp   HITANIM_DROP_SPEC_0F
+			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			;--
+			jp   .useHitAirRec		; Use HITANIM_DROP_SM_REC
+		.airSpec:
+			;--
+			; [POI] See above
+			cp   HITANIM_DROP_SPEC_0C
+			jp   z, .useDrop0C
+			cp   HITANIM_DROP_SPEC_0F
+			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			;--
+			jp   .useStdDrop		; Use HITANIM_DROP_MD
+			;##
+			
+		.noAir:
+			;
+			; This is the only part that doesn't define default values.
+			; When getting hit on the ground without getting dizzy or blocking,
+			; every HitAnim value is valid as long as it doesn't get replaced
+			; by the crouching checks.
+			;
+			bit  PSB_FARHIT, [hl]	; Did we get hit by a projectile?
+			jp   nz, .noAirSpec		; If so, jump
+			ld   hl, iPlInfo_StatusOther
+			add  hl, bc				
+			bit  PSB_SPECMOVE, [hl]	; Did we get hit by a special move?
+			jp   nz, .noAirSpec		; If so, jump
+		.noAirNorm:
+			; HITANIM_DROP_SM is always allowed
+			cp   HITANIM_DROP_SM
+			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			
+			; If we got hit by a normal while crouching, force use HITANIM_HIT_LOW
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			bit  PI21B_CROUCH, [hl]		; Are we crouching?
+			jp   nz, .useHitLow			; If so, jump
+			
+			; Otherwise, use the existing value
+			;
+			; Of course, this assumes that normals will never set anims
+			; they aren't intended to use, like HITANIM_DROP_SPEC_0C.
+			jp   Play_Pl_SetHitAnim_SetHitAnimId
+		.noAirSpec:
+			; No special behaviour when hit by a special move, other
+			; than the standard special case for HITANIM_DROP_SPEC_0C
+			; that's also everywhere else.
+			cp   HITANIM_DROP_SPEC_0C
+			jp   z, .useDrop0C
+			jp   Play_Pl_SetHitAnim_SetHitAnimId
+			;##
+			
+		.useDrop0C:
+			; If we're not in the air, replace HITANIM_DROP_SPEC_0C with its ground version,
+			; which is a shortened version without the downwards movement.
+			ld   hl, iPlInfo_Status
+			add  hl, bc
+			bit  PSB_AIR, [hl]						; Are we in the air?
+			jp   nz, Play_Pl_SetHitAnim_SetHitAnimId			; If so, confirm the air ver
+			ld   e, HITANIM_DROP_SPEC_0C_GROUND		; Otherwise, replace it with the ground ver
+			jp   Play_Pl_SetHitAnim_SetHitAnimId
+			
+		.useGuardBreak:
+			; Like .useDrop0C, but for the guard break.
+			ld   hl, iPlInfo_Status
+			add  hl, bc						
+			bit  PSB_AIR, [hl]				; Are we in the air?
+			jp   z, .useGuardBreakGround	; If not, jump
+		.useGuardBreakAir:
+			ld   e, HITANIM_GUARDBREAK_AIR
+			jp   Play_Pl_SetHitAnim_SetHitAnimId
+		.useGuardBreakGround:
+			ld   e, HITANIM_GUARDBREAK_GROUND
+			jp   Play_Pl_SetHitAnim_SetHitAnimId
+			
+		;--
+		; [TCRF] Unreferenced code to force the standard hit animations
+		.unused_useHit03:
+			ld   e, HITANIM_HIT0_MID
+			jp   Play_Pl_SetHitAnim_SetHitAnimId
+		.unused_useHit04:
+			ld   e, HITANIM_HIT1_MID
+			jp   Play_Pl_SetHitAnim_SetHitAnimId
+		;--
+		
+		.useStdDrop:
+			ld   e, HITANIM_DROP_MD
+			jp   Play_Pl_SetHitAnim_SetHitAnimId
+		.useHitAirRec:
+			ld   e, HITANIM_DROP_SM_REC
+			jp   Play_Pl_SetHitAnim_SetHitAnimId
+		.useHitLow:
+			ld   e, HITANIM_HIT_LOW
+			jp   Play_Pl_SetHitAnim_SetHitAnimId
+			
+		Play_Pl_SetHitAnim_SetHitAnimId:
+			; Save the updated hit animation ID.
+			; iPlInfo_HitAnimId = E
+			ld   a, e			; A = E
+			ld   hl, iPlInfo_HitAnimId
+			add  hl, bc			; Seek to iPlInfo_HitAnimId
+			ld   [hl], a		; Write it over
+			
+			; Return the same value to A, except multiplied by 2.
+			; A = E * 2
+			sla  a
+			scf		; C flag set
+		pop  de
 	pop  bc
 	ret
-L024E5B:;J
-	or   a
-	pop  de
+		Play_Pl_SetHitAnim_RetClear:
+			or   a	; A = 0, C flag clear
+		pop  de
 	pop  bc
 	ret
-L024E5F:;C
-	ld   hl, $0020
-	add  hl, bc
-	bit  3, [hl]
-	jr   nz, L024E6E
-	ld   hl, $0074
-	add  hl, bc
-	ld   d, [hl]
-	jr   L024E81
-L024E6E:;R
-	ld   hl, $002B
-	add  hl, bc
-	bit  0, [hl]
-	jp   nz, L024E7D
-	ld   hl, $D763
-	jp   L024E80
-L024E7D:;J
-	ld   hl, $D723
-L024E80:;J
-	ld   d, [hl]
-L024E81:;R
+	
+; =============== Play_Pl_ApplyDamageToStats ===============
+; Applies the damage values and its related effects to the specified player.
+; This is for specifically applying the stats, not the move, so:
+; - Dizzy / guard break stats
+; - POW meter
+; - Special effects
+; - Health
+; IN
+; - BC: Ptr to wPlInfo
+Play_Pl_ApplyDamageToStats:
+
+	;
+	; D = Base damage value.
+	;
+	; Pick the correct damage field:
+	; - If we got hit by a projectile, use the damage from the opponent's projectile.
+	; - Otherwise, use the damage from the opponent we were given visibility to.
+	;
+
+	ld   hl, iPlInfo_Status
+	add  hl, bc					; Seek to iPlInfo_Status
+	bit  PSB_FARHIT, [hl]		; Did we get hit by a projectile?
+	jr   nz, .chkDamageProj		; If so, jump
+	
+.getDamagePl:
+	; We received a physical hit. 
+	; Use the opponent damage we were given visibility to at iPlInfo_MoveDamageValOther.
+	ld   hl, iPlInfo_MoveDamageValOther
+	add  hl, bc				; Seek to iPlInfo_MoveDamageValOther
+	ld   d, [hl]			; D = iPlInfo_MoveDamageValOther
+	jr   .applyDamage
+	
+.chkDamageProj:
+	; We got hit by a projectile.
+	; Determine which wOBJInfo_Pl*Projectile struct to use, and use iOBJInfo_Proj_DamageVal from there.
+	ld   hl, iPlInfo_PlId
+	add  hl, bc					; Seek to iPlInfo_PlId
+	bit  0, [hl]				; wPlInfo_Pl == 2P?
+	jp   nz, .use1P				; If so, 1P is the opponent. Use 1P's projectile's damage
+.use2P:							; Otherwise, use 2P's one
+	ld   hl, wOBJInfo_Pl2Projectile+iOBJInfo_Proj_DamageVal		 
+	jp   .getDamageProj
+.use1P:
+	ld   hl, wOBJInfo_Pl1Projectile+iOBJInfo_Proj_DamageVal		
+.getDamageProj:
+	ld   d, [hl]				; D = iOBJInfo_Proj_DamageVal
+	;--
+	
+.applyDamage:
+
+	; Don't do this when the time runs out
 	ld   a, [wRoundTime]
 	or   a
-	jp   z, L024F03
-	call L024F56
-	call L024F2C
-	call L024F04
-	ld   hl, $004E
+	jp   z, .ret
+	
+	; Apply a penalty to the appropriate stun timer, which is directly proportional to the damage received
+	call Play_Pl_DecStunTimer
+	
+	; Increment POW meter by 3 lines
+	call Play_Pl_IncPowOnHit
+	
+	; Check for any special effects on contact
+	; The only one in this game is for Chizuru's super
+	call Play_Pl_ChkSetHitEffect_NoSpecial
+	;--
+	
+	; Finally, decrement the health.
+	;
+	; There is damage scaling done here:
+	; Health $30-MAX -> Full damage
+	; Health $18-$2F -> 3/4 damage
+	; Health $00-$17 -> 1/2 damage
+	;
+	; Modify the damage value in D if we're doing the scaling.
+	;
+	ld   hl, iPlInfo_Health
 	add  hl, bc
 	ld   a, [hl]
-	cp   $30
-	jp   nc, L024EAE
-	cp   $18
-	jp   nc, L024EA5
-	srl  d
-	jp   L024EAE
-L024EA5:;J
+	cp   $30			; Health >= $30?
+	jp   nc, .chkBlock	; If so, jump
+	cp   $18			; Health >= $18?
+	jp   nc, .hLow	; If so, jump
+	; Otherwise, health is < $18 (critical)
+.hCritical:
+	; 1/2
+	srl  d		; D = D / 2
+	jp   .chkBlock
+.hLow:
+	; 3/4
 	ld   a, d
+	srl  a		; A = Damage / 4
 	srl  a
-	srl  a
-	srl  d
-	add  a, d
+	srl  d		; D = Damage / 2
+	add  a, d	; A += D
 	ld   d, a
-L024EAE:;J
-	ld   hl, $0021
+.chkBlock:
+
+	;
+	; If we blocked the attack, determine by how much damage should be reduced.
+	;
+	
+	; Not applicable if we didn't block it
+	ld   hl, iPlInfo_21Flags
 	add  hl, bc
-	bit  3, [hl]
-	jp   z, L024ED1
-	ld   hl, $0020
+	bit  PI21B_GUARD, [hl]	; Did we block the attack?
+	jp   z, .chkPow			; If not, skip
+	
+	; Blocking a projectile, special or super move divides the damage by 8.
+	ld   hl, iPlInfo_Status
 	add  hl, bc
-	bit  3, [hl]
-	jr   nz, L024ECB
-	ld   hl, $006D
+	bit  PSB_FARHIT, [hl]	; Were we hit by a projectile?
+	jr   nz, .damageDiv8	; If so, jump
+	ld   hl, iPlInfo_StatusOther
 	add  hl, bc
-	bit  1, [hl]
-	jp   nz, L024ECB
-	jp   L024F03
-L024ECB:;JR
+	bit  PSB_SPECMOVE, [hl]	; Were we hit by a special or super move?
+	jp   nz, .damageDiv8	; If so, jump
+	
+	; Otherwise, we got hit by a normal.
+	; Blocking a normal doesn't deal damage, so return.
+	jp   .ret
+	
+.damageDiv8:
+	srl  d	; D = D / 8
 	srl  d
 	srl  d
-	srl  d
-L024ED1:;J
-	ld   hl, $0082
-	add  hl, bc
+	
+.chkPow:
+	;
+	; Moves deal 1/8th more damage at Max Power.
+	;
+	ld   hl, iPlInfo_PowOther
+	add  hl, bc			; Seek to opponent POW meter
 	ld   a, [hl]
-	cp   $28
-	jp   nz, L024EE4
+	cp   PLAY_POW_MAX	; iPlInfo_PowOther == $28?
+	jp   nz, .minCap	; If not, skip
 	ld   a, d
+	srl  a				; A = Damage / 8
 	srl  a
 	srl  a
-	srl  a
-	add  a, d
-	ld   d, a
-L024EE4:;J
+	add  a, d			; A += Damage
+	ld   d, a			; Damage = A
+	
+.minCap:
+	;
+	; If we got here, the minimum amount of damage received must be 1.
+	;
 	ld   a, d
-	or   a
-	jr   nz, L024EEA
-	ld   d, $01
-L024EEA:;R
-	ld   hl, $004E
-	add  hl, bc
-	ld   a, [hl]
-	sub  a, d
-	jp   nc, L024EF4
-	xor  a
-L024EF4:;J
-	ld   [hl], a
-	or   a
-	jp   nz, L024F03
-	ld   a, $0A
-	ld   [$C17A], a
-	ld   a, $01
-	ld   [$C17B], a
-L024F03:;J
+	or   a				; Damage != 0?
+	jr   nz, .subHealth	; If so, skip
+	ld   d, $01			; Otherwise, Damage = 1
+.subHealth:
+
+	;
+	; Finally, subtract the resulting damage to the health value.
+	; If we underflow it, force it back to 0.
+	;
+	ld   hl, iPlInfo_Health
+	add  hl, bc			; Seek to health
+	ld   a, [hl]		; A = Health
+	sub  a, d			; Health -= Damage
+	jp   nc, .setHealth	; Health >= 0? If so, skip
+	xor  a				; Otherwise, force it back in range
+.setHealth:
+	ld   [hl], a		; Save the health.
+	
+	;
+	; If we just died, run the game at half-speed for 10 frames.
+	;
+	or   a					; Health != 0?
+	jp   nz, .ret			; If so, return
+	ld   a, $0A				; For 10 frames...
+	ld   [wPlaySlowdownTimer], a
+	ld   a, $01				; Run gameplay every other frame
+	ld   [wPlaySlowdownSpeed], a
+.ret:
 	ret
-L024F04:;C
-	ld   hl, $0021
+	
+; =============== Play_Pl_ChkSetHitEffect_NoSpecial ===============
+; Applies the "No Special Move" effect to the player, if applicable.
+; If it triggers, it prevents
+; IN
+; - BC: Ptr to wPlInfo
+Play_Pl_ChkSetHitEffect_NoSpecial:
+
+	;
+	; This effect triggers only when getting hit by one of Chizuru's/Kagura super moves.
+	; These are completely hardcoded checks, which makes you think how they handled it elsewhere. :^)
+	;
+
+	; If we blocked the hit, return
+	ld   hl, iPlInfo_21Flags
 	add  hl, bc
-	bit  3, [hl]
+	bit  PI21B_GUARD, [hl]
 	ret  nz
-	ld   hl, $0071
+	
+.chkChar:
+	; The opponent must be Chizuru
+	ld   hl, iPlInfo_CharIdOther
 	add  hl, bc
-	ld   a, [hl]
-	cp   $1C
-	jp   z, L024F18
-	cp   $26
-	ret  nz
-L024F18:;J
-	ld   hl, $0072
+	ld   a, [hl]			; A = Character ID of opponent
+	cp   CHAR_ID_CHIZURU*2	; Playing as normal Chizuru?
+	jp   z, .chkMove		; If so, jump
+	cp   CHAR_ID_KAGURA*2	; Playing as boss Chizuru?
+	ret  nz					; If not, return
+	
+.chkMove:
+	; Must be hit by a specific super (either variant)
+	ld   hl, iPlInfo_MoveIdOther
 	add  hl, bc
-	ld   a, [hl]
-	cp   $64
-	jp   z, L024F25
-	cp   $66
-	ret  nz
-L024F25:;J
-	ld   hl, $0060
+	ld   a, [hl]			; A = Opponent Move ID
+	cp   MOVE_CHIZURU_64	; Were we hit by the super?
+	jp   z, .setEffect		; If so, jump
+	cp   MOVE_CHIZURU_66	; Were we hit by its desperation variant?
+	ret  nz					; If not, return
+	
+.setEffect:
+	; If we got here, apply the effect.
+	; The player won't be able to use special moves for $FF frames.
+	ld   hl, iPlInfo_NoSpecialTimer
 	add  hl, bc
 	ld   [hl], $FF
 	ret
-L024F2C:;C
+	
+; =============== Play_Pl_IncPowOnHit ===============
+; Increments the POW Meter, meant to be called when the player gets hit.
+; IN
+; - BC: Ptr to wPlInfo
+; - D: Base damage received
+Play_Pl_IncPowOnHit:
 	push de
-	ld   a, d
-	or   a
-	jp   z, L024F54
-	ld   hl, $0050
-	add  hl, bc
-	ld   a, $28
-	cp   a, [hl]
-	jp   z, L024F54
-	ld   a, $03
-	add  a, [hl]
-	cp   $28
-	jp   nc, L024F47
-	jp   L024F4F
-L024F47:;J
-	ld   a, $28
-	ld   hl, $0052
-	add  hl, bc
-	ld   [hl], $0F
-L024F4F:;J
-	ld   hl, $0050
-	add  hl, bc
-	ld   [hl], a
-L024F54:;J
+	
+		; Don't receive POW meter when the attack deals no damage.
+		ld   a, d
+		or   a				; Was an initial penalty set?
+		jp   z, .ret		; If not, return
+		
+		; Can't increment it if we're already at MAX Power
+		ld   hl, iPlInfo_Pow
+		add  hl, bc			; Seek to iPlInfo_Pow
+		ld   a, PLAY_POW_MAX
+		cp   a, [hl]		; iPlInfo_Pow == $28?
+		jp   z, .ret		; If so, return
+		
+		;--
+		
+		; Increment the POW Meter by 3.
+		ld   a, $03
+		add  a, [hl]		; A = iPlInfo_Pow + 3
+		
+		; If we filled the meter just now, we got into MAX Power mode.
+		cp   PLAY_POW_MAX	; iPlInfo_Pow >= $28?
+		jp   nc, .setMax	; If so, jump
+		
+		; Otherwise, just save back the updated value
+		jp   .savePow
+		
+	.setMax:
+		; Cap the meter at $28
+		ld   a, PLAY_POW_MAX
+		; Make the MAX Power meter decrease slowly on its own
+		ld   hl, iPlInfo_MaxPowDecSpeed
+		add  hl, bc				; Seek to dec speed mask
+		ld   [hl], $0F			; Decrement every $10 frames
+		
+	.savePow:
+		ld   hl, iPlInfo_Pow
+		add  hl, bc				; Seek to iPlInfo_Pow
+		ld   [hl], a			; Save the value back
+	.ret:
 	pop  de
 	ret
-L024F56:;C
+	
+; =============== Play_Pl_DecStunTimer ===============
+; Updates the correct stun timer as a result of getting hit.
+;
+; There are two stun timers, which cause the specified action when they underflow:
+; - iPlInfo_DizzyProg
+; - iPlInfo_GuardBreakProg
+;
+; See also: Play_DoUnkChain_IncDizzyTimer
+;
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+; - D: Base damage received.
+;      This will get processed, then subtracted as "penalty" to a stun timer.
+Play_Pl_DecStunTimer:
 	push de
-	ld   a, d
-	ld   hl, $0021
-	add  hl, bc
-	bit  3, [hl]
-	jp   nz, L024F9E
-	bit  4, [hl]
-	jp   z, L024F68
-	srl  a
-L024F68:;J
-	ld   hl, $006D
-	add  hl, bc
-	bit  6, [hl]
-	jp   nz, L024FE2
-	bit  1, [hl]
-	jp   nz, L024F86
-	ld   hl, $0020
-	add  hl, bc
-	bit  3, [hl]
-	jp   nz, L024F86
-	sla  a
-	sla  a
-	jp   L024F87
-L024F86:;J
-	inc  a
-L024F87:;J
-	ld   e, a
-	ld   hl, $005A
-	add  hl, bc
-	ld   a, [hl]
-	sub  a, e
-	jp   nc, L024F9A
-	xor  a
-	push hl
-	ld   hl, $0058
-	add  hl, bc
-	ld   [hl], $01
-	pop  hl
-L024F9A:;J
-	ld   [hl], a
-	jp   L024FE2
-L024F9E:;J
-	ld   a, d
-	ld   hl, $0020
-	add  hl, bc
-	bit  1, [hl]
-	jp   nz, L024FE2
-	bit  6, [hl]
-	jp   nz, L024FE2
-	inc  hl
-	bit  4, [hl]
-	jp   z, L024FB5
-	srl  a
-L024FB5:;J
-	ld   hl, $006D
-	add  hl, bc
-	bit  6, [hl]
-	jp   nz, L024FD3
-	bit  1, [hl]
-	jp   nz, L024FD3
-	ld   hl, $0020
-	add  hl, bc
-	bit  3, [hl]
-	jp   nz, L024FD3
-	sla  a
-	sla  a
-	jp   L024FD6
-L024FD3:;J
-	srl  a
-	inc  a
-L024FD6:;J
-	ld   e, a
-	ld   hl, $005C
-	add  hl, bc
-	ld   a, [hl]
-	sub  a, e
-	jp   nc, L024FE1
-	xor  a
-L024FE1:;J
-	ld   [hl], a
-L024FE2:;J
+	
+		; A = Base damage
+		ld   a, d
+		
+		;
+		; First, check if we're in a state that allows blocking attacks.
+		; If the player is blocking, it must have the guard flag set (PI21B_GUARD).
+		;
+		ld   hl, iPlInfo_21Flags
+		add  hl, bc						; Seek to iPlInfo_21Flags
+		bit  PI21B_GUARD, [hl]	; Is the flag set?
+		jp   nz, .chkGuard				; If so, jump
+		
+	.noGuard:
+		;
+		; We didn't block the attack, so the damage influences the dizzy timer.
+		;
+		; Perform various checks which influence the initial value
+		; before iPlInfo_DizzyProg gets subtracted by it.
+		;
+		
+		;
+		; Halve the penalty with hits received after the first one in a combo string.
+		;
+		bit  PI21B_COMBORECV, [hl]	; Were we hit at least once in the combo string?
+		jp   z, .noGuard_chkOther	; If not, jump
+		srl  a						; Otherwise, Penalty /= 2
+	.noGuard_chkOther:
+	
+		;
+		; Modify the penalty based on the current status of the other player.
+		; We can read that to determine what kind of move hit us.
+		;
+	
+		;
+		; Getting hit by a super move doesn't add any penalty (return)
+		;
+		ld   hl, iPlInfo_StatusOther
+		add  hl, bc
+		bit  PSB_SUPERMOVE, [hl]	; Were we hit by a super?
+		jp   nz, .ret				; If so, return
+		
+		;
+		; Getting hit by special moves adds one extra point of penalty.
+		;
+		
+		bit  PSB_SPECMOVE, [hl]		; Were we hit by a special move?
+		jp   nz, .noGuard_add1		; If so, jump
+		; Projectiles require their own check since they can hit the opponent
+		; independently from the player's action.
+		; [POI] This check only works properly because it has the same penalty as special moves
+		;       -- if the penalties were different and we were hit by a projectile while the opponent
+		;       was in the middle of an unrelated special move, the PSB_SPECMOVE check would jump.
+		ld   hl, iPlInfo_Status
+		add  hl, bc
+		bit  PSB_FARHIT, [hl]	; Were we hit by a projectile? (special move)
+		jp   nz, .noGuard_add1	; If so, jump
+		
+		;
+		; Getting hit by normals quadruples the penalty.
+		;
+		sla  a
+		sla  a
+		jp   .addDizzyPenalty
+	.noGuard_add1:
+		inc  a
+		
+		;
+		; Subtract the processed penalty from the timer,
+		; If it underflows, the timer is reset and the dizzy flag is set.
+		; This causes the next hit (in this case, the current one) to knock down,
+		; with the player getting dizzy when getting up.
+		;
+	.addDizzyPenalty:
+		ld   e, a					; E = Penalty
+		ld   hl, iPlInfo_DizzyProg
+		add  hl, bc
+		ld   a, [hl]				; A = iPlInfo_DizzyProg
+		sub  a, e					; A -= Penalty
+		jp   nc, .saveDizzyPenalty	; Did we underflow? If not, skip
+		; Otherwise...
+		xor  a						; Force it back to 0
+		push hl						; Set the dizzy marker
+			ld   hl, iPlInfo_Dizzy
+			add  hl, bc
+			ld   [hl], $01
+		pop  hl
+	.saveDizzyPenalty:
+		ld   [hl], a
+		jp   .ret
+		
+	.chkGuard:
+		ld   a, d	; Not necessary
+		
+		;
+		; We got here by having PI21B_GUARD set.
+		;
+		; However, some special moves set that flag as well to reduce the damage 
+		; received when getting hit out of them.
+		;
+		; The player isn't explicitly blocking in that case, so if we're in the middle
+		; of a special or super move, return immediately to leave the guard break timer unchanged.
+		;
+		ld   hl, iPlInfo_Status
+		add  hl, bc
+		bit  PSB_SPECMOVE, [hl]
+		jp   nz, .ret
+		bit  PSB_SUPERMOVE, [hl]
+		jp   nz, .ret
+		
+	.guard:
+		;
+		; We blocked the attack, so the damage influences the guard break timer.
+		;
+		; Perform various checks which influence the base damage value
+		; before iPlInfo_GuardBreakProg gets subtracted by it.
+		;
+		
+		;
+		; Halve the penalty if needed, like with dizzies.
+		;
+		inc  hl						; Seek to iPlInfo_21Flags
+		bit  PI21B_COMBORECV, [hl]	; Were we hit at least once in the combo string?
+		jp   z, .guard_chkOther		; If not, jump
+		srl  a						; Otherwise, Penalty /= 2
+	.guard_chkOther:
+	
+		;
+		; Blocking a special or super move essentially halves the penalty.
+		; The result is also incremented by one, likely to make sure the penalty doesn't become 0.
+		;
+		ld   hl, iPlInfo_StatusOther
+		add  hl, bc
+		bit  PSB_SUPERMOVE, [hl]	
+		jp   nz, .guard_half
+		bit  PSB_SPECMOVE, [hl]
+		jp   nz, .guard_half
+		
+		;
+		; The same happens if we got hit by a projectile
+		;
+		ld   hl, iPlInfo_Status
+		add  hl, bc
+		bit  PSB_FARHIT, [hl]
+		jp   nz, .guard_half
+		
+		;
+		; Otherwise, Penalty = Penalty / 4
+		;
+		sla  a
+		sla  a
+		jp   .addGuardPenalty
+		
+	.guard_half:
+		srl  a		; Penalty = (Penalty / 2) + 1
+		inc  a		
+		
+		;
+		; Subtract the processed penalty from the timer.
+		; When this becomes 0, guard breaks, so only prevent it from underflowing here.
+		;
+	.addGuardPenalty:
+		ld   e, a					; E = A
+		ld   hl, iPlInfo_GuardBreakProg
+		add  hl, bc
+		ld   a, [hl]				; A = iPlInfo_GuardBreakProg
+		sub  a, e					; A -= E
+		jp   nc, .saveGuardPenalty	; Did we underflow? If not, jump
+		; Otherwise, force it back to 0
+		xor  a
+	.saveGuardPenalty:
+		ld   [hl], a
+		
+	.ret:
 	pop  de
 	ret
-L024FE4:;C
-	ld   hl, $005C
+	
+; =============== Play_Pl_DoGuardBreak ===============
+; Resets the guard break counters if we got guard break'd.
+; This is also used to detect if our guard was broken.
+; IN
+; - BC: Ptr to wPlInfo
+; OUT
+; - Z flag: If set, the guard break status was reset.
+;           This means our guard was broken.
+Play_Pl_DoGuardBreak:
+
+	;
+	; If our guard wasn't broken, return without doing anything.
+	; This will keep the Z flag cleared, preventing the guard break HitAnim from being set.
+	;
+	ld   hl, iPlInfo_GuardBreakProg
 	add  hl, bc
 	ld   a, [hl]
-	or   a
-	jp   nz, L025002
-	ld   hl, $0021
+	or   a						; iPlInfo_GuardBreakProg != 0? 
+	jp   nz, .ret				; If so, return (Z flag cleared)
+	
+	;
+	; The main effect of the guard break.
+	; The guard is removed (as if the player stopped blocking), giving a few
+	; frames to the opponent to start a new attack that won't get blocked.
+	;
+	ld   hl, iPlInfo_21Flags
 	add  hl, bc
-	res  3, [hl]
-	ld   hl, $005D
+	res  PI21B_GUARD, [hl]		; Remove guard flag
+	
+	;
+	; Every time guard breaks, the cap is increased by 8.
+	;
+	ld   hl, iPlInfo_GuardBreakProgCap
 	add  hl, bc
-	ld   a, [hl]
-	add  a, $08
-	jp   nc, L024FFF
-L024FFD: db $3E;X
-L024FFE: db $FF;X
-L024FFF:;J
-	ldd  [hl], a
-	ld   [hl], a
-	xor  a
-L025002:;J
+	ld   a, [hl]		; A = iPlInfo_GuardBreakProgCap
+	add  a, $08			; A += 8
+	jp   nc, .resetVals	; Did we overflow? If not, skip
+.cap:
+	ld   a, $FF			; Otherwise, cap the counters at $FF
+.resetVals:
+	;
+	; Reset the guard break counters to the max value.
+	;
+	ldd  [hl], a		; Reset iPlInfo_GuardBreakProgCap
+	ld   [hl], a		; Reset iPlInfo_GuardBreakProg
+	xor  a				; Z flag set
+.ret:
 	ret
+	
 L025003:;C
 	push af
 	ld   hl, $004E
@@ -2294,9 +2972,9 @@ L025003:;C
 	jp   L025023
 L025019:;J
 	pop  af
-	ld   [$C17A], a
+	ld   [wPlaySlowdownTimer], a
 	ld   a, $01
-	ld   [$C17B], a
+	ld   [wPlaySlowdownSpeed], a
 	ret
 L025023:;J
 	pop  af
@@ -2350,9 +3028,9 @@ L02504C:;C
 L02505A:;J
 	ret
 L02505B:;I
-	call L003AD4
+	call Play_Pl_GiveKnockbackCornered
 	call L00347B
-	call L002DCB
+	call OBJLstS_IsGFXLoadDone
 	jp   nz, L02509D
 	ld   hl, $001B
 	add  hl, de
@@ -2371,7 +3049,7 @@ L02505B:;I
 L025087:;J
 	ld   hl, $0400
 L02508A:;J
-	call L003585
+	call Play_OBJLstS_SetSpeedH_ByXDirL
 	jp   L02509C
 L025090:;J
 	ld   hl, $0040
@@ -2381,7 +3059,7 @@ L025090:;J
 L02509C:;J
 	ret
 L02509D:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L0250A0:;I
 	call L00347B
 	call L0038B3
@@ -2407,13 +3085,13 @@ L0250CA:;J
 	add  hl, bc
 	bit  7, [hl]
 	jp   nz, L0250DF
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025160
 	inc  hl
 	ld   [hl], $FF
 	jp   L025160
 L0250DF:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0251EE
 	inc  hl
 	ld   [hl], $FF
@@ -2422,18 +3100,18 @@ L0250DF:;J
 	bit  0, [hl]
 	jp   nz, L025100
 	ld   hl, $0140
-	call L003585
+	call Play_OBJLstS_SetSpeedH_ByXDirL
 	ld   hl, $FC00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L02510C
 L025100:;J
 	ld   hl, $0180
-	call L003585
+	call Play_OBJLstS_SetSpeedH_ByXDirL
 	ld   hl, $FA00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 L02510C:;J
 	ld   hl, rJOYP
-	call L0034DD
+	call Play_OBJLstS_MoveV
 	ld   hl, $0000
 	call L003614
 	jp   L0251EE
@@ -2443,10 +3121,10 @@ L02511B:;J
 	bit  3, [hl]
 	jp   z, L025160
 	ld   hl, rJOYP
-	call L0034DD
+	call Play_OBJLstS_MoveV
 	jp   L025160
 L02512D:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0251EE
 	inc  hl
 	ld   [hl], $FF
@@ -2467,9 +3145,9 @@ L025139:;J
 	pop  bc
 	sra  h
 	rr   l
-	call L0035A1
+	call Play_OBJLstS_SetSpeedH
 	ld   hl, $FD00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L0251CF
 L02515D:;J
 	jp   L0251CF
@@ -2477,14 +3155,14 @@ L025160:;J
 	ld   hl, $0060
 	call L003614
 	jp   nc, L0251EE
-	call L003CAC
+	call Play_Pl_IsDizzy
 	jp   nz, L02517E
 	ld   hl, $004E
 	add  hl, bc
 	ld   a, [hl]
 	or   a
 	jp   z, L02517E
-	call L002D9F
+	call Play_Pl_AreBothBtnHeld
 	jp   c, L025196
 L02517E:;J
 	ld   a, $08
@@ -2515,7 +3193,7 @@ L025196:;J
 	inc  hl
 	res  1, [hl]
 	res  6, [hl]
-	call L002DB2
+	call Play_Pl_GetDirKeys_ByXFlipR
 	jp   nc, L0251BF
 	bit  0, a
 	jp   nz, L0251C4
@@ -2526,7 +3204,7 @@ L0251C4:;J
 	ld   a, $1E
 	jp   L0251C9
 L0251C9:;J
-	call L00341B
+	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
 	jp   L0251F1
 L0251CF:;J
 	ld   hl, $0060
@@ -2537,12 +3215,12 @@ L0251CF:;J
 	call L002E1A
 	jp   L0251F1
 L0251E2:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0251EE
 	call L003CB3
 	jp   L0251F1
 L0251EE:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L0251F1:;J
 	ret
 L0251F2:;I
@@ -2583,17 +3261,17 @@ L025233:;J
 	bit  7, [hl]
 	jp   nz, L02527F
 	ld   hl, $0300
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L025242:;J
 	jp   L02527F
 L025245:;J
-	call L003C6D
-	call L002DD9
+	call Play_Pl_DoGroundScreenShake
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0252C7
 	inc  hl
 	ld   [hl], $FF
 	xor  a
-	ld   [$C159], a
+	ld   [wScreenShakeY], a
 	jp   L0252C7
 L025258:;J
 	ld   hl, $0000
@@ -2611,9 +3289,9 @@ L025258:;J
 	pop  bc
 	sra  h
 	rr   l
-	call L0035A1
+	call Play_OBJLstS_SetSpeedH
 	ld   hl, $FD00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L0252A8
 L02527C:;J
 	jp   L0252A8
@@ -2644,12 +3322,12 @@ L0252A8:;J
 	call L002E1A
 	jp   L0252CA
 L0252BB:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0252C7
 	call L003CB3
 	jp   L0252CA
 L0252C7:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L0252CA:;J
 	ret
 L0252CB:;I
@@ -2669,7 +3347,7 @@ L0252E8: db $C3;X
 L0252E9: db $23;X
 L0252EA: db $53;X
 L0252EB:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025323
 	inc  hl
 	ld   [hl], $05
@@ -2677,25 +3355,25 @@ L0252EB:;J
 	call HomeCall_Sound_ReqPlayExId
 	jp   L025323
 L0252FC:;J
-	call L003C6D
-	call L002DD9
+	call Play_Pl_DoGroundScreenShake
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025323
 	inc  hl
 	ld   [hl], $10
 	xor  a
-	ld   [$C159], a
+	ld   [wScreenShakeY], a
 	ld   hl, $0023
 	add  hl, bc
 	res  1, [hl]
 	res  6, [hl]
 	jp   L025323
 L025317:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025323
 	call L003CB3
 	jp   L025326
 L025323:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L025326:;J
 	ret
 L025327:;I
@@ -2743,7 +3421,7 @@ L02536E:;J
 	ld   [hl], $08
 	jp   L025424
 L025381:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L02541B
 	ld   hl, $0071
 	add  hl, bc
@@ -2782,15 +3460,15 @@ L0253BB:;J
 	add  hl, bc
 	res  7, [hl]
 L0253CB:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025424
 	ld   hl, $0013
 	add  hl, de
 	ld   [hl], $04
 	jp   L025424
 L0253DA:;J
-	call L003C6D
-	call L002DD9
+	call Play_Pl_DoGroundScreenShake
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025492
 	inc  hl
 	ld   [hl], $FF
@@ -2811,7 +3489,7 @@ L0253E9:;J
 	pop  bc
 	sra  h
 	rr   l
-	call L0035A1
+	call Play_OBJLstS_SetSpeedH
 	ld   hl, $0083
 	add  hl, bc
 	ld   a, [hl]
@@ -2821,7 +3499,7 @@ L0253E9:;J
 	inc  a
 	ld   h, a
 	ld   l, $FF
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L025473
 L025418:;J
 	jp   L025473
@@ -2880,12 +3558,12 @@ L025473:;J
 	call L002E1A
 	jp   L025495
 L025486:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025492
 	call L003CB3
 	jp   L025495
 L025492:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L025495:;J
 	ret
 L025496:;I
@@ -2905,7 +3583,7 @@ L0254B3: db $C3;X
 L0254B4: db $EC;X
 L0254B5: db $54;X
 L0254B6:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0254C5
 	inc  hl
 	ld   [hl], $FF
@@ -2925,12 +3603,12 @@ L0254C5:;J
 	res  6, [hl]
 	jp   L0254EF
 L0254E0:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0254EC
 	call L003CB3
 	jp   L0254EF
 L0254EC:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L0254EF:;J
 	ret
 L0254F0:;I
@@ -2955,7 +3633,7 @@ L0254F0:;I
 	cp   $18
 	jp   z, L025568
 L025521:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025555
 	inc  hl
 	ld   [hl], $FF
@@ -2989,12 +3667,12 @@ L025555:;J
 	call L002DEC
 	jp   L025576
 L025568:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025573
 	call L002EA2
 	jr   L025576
 L025573:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L025576:;JR
 	ret
 L025577: db $CD;X
@@ -3056,10 +3734,10 @@ L0255AE: db $0B;X
 L0255AF: db $2F;X
 L0255B0: db $C9;X
 L0255B1:;I
-	call L003AD4
+	call Play_Pl_GiveKnockbackCornered
 	call L0038B3
 	jp   c, L02561B
-	call L002DCB
+	call OBJLstS_IsGFXLoadDone
 	jp   nz, L02561C
 	ld   hl, $001B
 	add  hl, de
@@ -3080,7 +3758,7 @@ L0255D2:;J
 L0255E3:;J
 	ld   hl, $0400
 L0255E6:;J
-	call L003585
+	call Play_OBJLstS_SetSpeedH_ByXDirL
 	ld   hl, $0005
 	add  hl, de
 	ld   a, [hl]
@@ -3102,7 +3780,7 @@ L0255F6:;J
 	jp   L025610
 L025610:;J
 	ld   a, $7C
-	call L00341B
+	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
 	jp   L02561B
 L025618: db $CD;X
 L025619: db $A2;X
@@ -3110,9 +3788,9 @@ L02561A: db $2E;X
 L02561B:;J
 	ret
 L02561C:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L02561F:;I
-	call L003AD4
+	call Play_Pl_GiveKnockbackCornered
 	call L0038B3
 	jp   c, L02564F
 	ld   hl, $0017
@@ -3123,13 +3801,13 @@ L02561F:;I
 	cp   $04
 	jp   z, L025643
 L025637:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025650
 	inc  hl
 	ld   [hl], $FF
 	jp   L025650
 L025643:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025650
 L025649: db $CD;X
 L02564A: db $B3;X
@@ -3140,7 +3818,7 @@ L02564E: db $56;X
 L02564F:;J
 	ret
 L025650:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L025653:;I
 	ld   hl, $0072
 	add  hl, bc
@@ -3208,7 +3886,7 @@ L0256C4:;J
 	set  0, [hl]
 	set  1, [hl]
 	set  2, [hl]
-	call L003451
+	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
 	ld   hl, $001B
 	add  hl, de
 	ld   [hl], $00
@@ -3218,13 +3896,13 @@ L0256C4:;J
 	add  hl, bc
 	set  7, [hl]
 	ld   a, $00
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	ld   a, $00
 	ld   [$C179], a
 	jp   L025757
 L0256F7:;J
 	ld   a, $04
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 L0256FC:;J
 	ld   hl, $001B
 	add  hl, de
@@ -3310,10 +3988,10 @@ L025756: db $2E;X
 L025757:;J
 	ret
 L025758:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L02575B:;I
-	call L003AD4
-	call L002DCB
+	call Play_Pl_GiveKnockbackCornered
+	call OBJLstS_IsGFXLoadDone
 	jp   nz, L025773
 	ld   hl, $001B
 	add  hl, de
@@ -3330,11 +4008,11 @@ L025773:;J
 	ld   a, [$C176]
 	ld   h, a
 	ld   l, $00
-	call L00352F
+	call Play_OBJLstS_MoveH_ByOtherXFlipL
 	ld   a, [$C177]
 	ld   h, a
 	ld   l, $00
-	call L0034DD
+	call Play_OBJLstS_MoveV
 	jp   L0257D4
 L025792:;J
 	ld   [hl], $00
@@ -3350,7 +4028,7 @@ L0257A1: db $A6;X
 L0257A2: db $57;X
 L0257A3:;J
 	ld   hl, $0400
-	call L003585
+	call Play_OBJLstS_SetSpeedH_ByXDirL
 	ld   hl, $0005
 	add  hl, de
 	ld   a, [hl]
@@ -3379,7 +4057,7 @@ L0257C6: db $D0;X
 L0257C7: db $57;X
 L0257C8:;J
 	ld   a, $7C
-	call L00341B
+	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
 	jp   L0257D3
 L0257D0: db $CD;X
 L0257D1: db $A2;X
@@ -3387,15 +4065,15 @@ L0257D2: db $2E;X
 L0257D3:;J
 	ret
 L0257D4:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L0257D7:;I
-	call L0036CB
+	call MoveInputS_CanStartSpecialMove
 	jp   c, L025939
 	jp   z, L0257FB
-	call L003D52
+	call MoveInputS_CheckEasyMoveKeys
 	jp   c, L025902
 	jp   z, L0258E7
-	call L003CFB
+	call MoveInputS_CheckLHType
 	jp   nc, L025939
 	jp   z, L0257F8
 	jp   nz, L0257F8
@@ -3405,10 +4083,10 @@ L0257F7: db $59;X
 L0257F8:;J
 	jp   L025939
 L0257FB:;J
-	call L003D52
+	call MoveInputS_CheckEasyMoveKeys
 	jp   c, L025902
 	jp   z, L025879
-	call L003CFB
+	call MoveInputS_CheckLHType
 	jp   nc, L025939
 	jp   z, L025813
 	jp   nz, L025852
@@ -3416,76 +4094,76 @@ L025810: db $C3;X
 L025811: db $39;X
 L025812: db $59;X
 L025813:;J
-	call L003725
+	call MoveInputS_CanStartSuperMove
 	jp   c, L02582B
-	ld   hl, $3DE3
-	call L002CA8
+	ld   hl, MoveInput_DFDB
+	call MoveInputS_ChkInputDir
 	jp   c, L025902
-	ld   hl, $3E16
-	call L002CA8
+	ld   hl, MoveInput_FBDF
+	call MoveInputS_ChkInputDir
 	jp   c, L025918
 L02582B:;J
-	ld   hl, $3E27
-	call L002CA8
+	ld   hl, MoveInput_FDF
+	call MoveInputS_ChkInputDir
 	jp   c, L0258AB
-	ld   hl, $3D95
-	call L002CA8
+	ld   hl, MoveInput_DB
+	call MoveInputS_ChkInputDir
 	jp   c, L025879
-	ld   hl, $3E70
-	call L002CA8
+	ld   hl, MoveInput_BDF
+	call MoveInputS_ChkInputDir
 	jp   c, L0258C8
-	ld   hl, $3D8C
-	call L002CA8
+	ld   hl, MoveInput_DF
+	call MoveInputS_ChkInputDir
 	jp   c, L02585E
 	jp   L025939
 L025852:;J
-	ld   hl, $3D95
-	call L002CA8
+	ld   hl, MoveInput_DB
+	call MoveInputS_ChkInputDir
 	jp   c, L025896
 	jp   L025939
 L02585E:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L02586B
 	ld   a, $48
 	jp   L02586D
 L02586B:;R
 	ld   a, $4A
 L02586D:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0020
 	add  hl, bc
 	set  4, [hl]
 	jp   L025937
 L025879:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L025886
 	ld   a, $4C
 	jp   L025888
 L025886:;R
 	ld   a, $4E
 L025888:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0021
 	add  hl, bc
 	set  3, [hl]
 	res  5, [hl]
 	jp   L025937
 L025896:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L0258A3
 	ld   a, $50
 	jp   L0258A5
 L0258A3:;R
 	ld   a, $52
 L0258A5:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L025937
 L0258AB:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   c, L0258E7
 	jr   nz, L0258BA
 	ld   a, $54
@@ -3493,26 +4171,26 @@ L0258AB:;J
 L0258BA:;R
 	ld   a, $56
 L0258BC:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0021
 	add  hl, bc
 	set  7, [hl]
 	jp   L025937
 L0258C8:;J
-	call L002D53
+	call Play_Pl_ClearJoyDirBuffer
 	ld   hl, $0061
 	add  hl, bc
 	ld   a, [hl]
 	cp   $18
 	jp   nc, L025939
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L0258DF
 	ld   a, $58
 	jp   L0258E1
 L0258DF:;R
 	ld   a, $5A
 L0258E1:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L025937
 L0258E7: db $CD;X
 L0258E8: db $53;X
@@ -3542,28 +4220,28 @@ L0258FF: db $C3;X
 L025900: db $37;X
 L025901: db $59;X
 L025902:;J
-	call L002D53
-	call L003790
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckSuperDesperation
 	jp   c, L025910
 	ld   a, $64
 	jp   L025912
 L025910:;J
 	ld   a, $66
 L025912:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L025937
 L025918:;J
 	call L003763
 	jp   nz, L025939
-	call L002D53
-	call L003790
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckSuperDesperation
 	jp   c, L02592C
 	ld   a, $68
 	jp   L02592E
 L02592C:;J
 	ld   a, $6A
 L02592E:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	call L00389E
 	jp   L025937
 L025937:;J
@@ -3587,34 +4265,34 @@ L02593B:;I
 	jp   z, L025990
 	jp   L02599C
 L02595B:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L02596D
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   z, L02596D
 	ld   hl, $0700
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 L02596D:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L02599C
 	ld   a, $16
 	call HomeCall_Sound_ReqPlayExId
 	jp   L02599C
 L02597B:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L025987
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   z, L025987
 L025987:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L02599C
 	jp   L02599C
 L025990:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L02599C
 	call L002EA2
 	jp   L02599F
 L02599C:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L02599F:;J
 	ret
 L0259A0:;I
@@ -3640,13 +4318,13 @@ L0259CC: db $C3;X
 L0259CD: db $63;X
 L0259CE: db $5A;X
 L0259CF:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025A63
 	inc  hl
 	ld   [hl], $02
 	jp   L025A63
 L0259DB:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L025A12
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
@@ -3654,36 +4332,36 @@ L0259DB:;J
 	add  hl, bc
 	res  7, [hl]
 	res  3, [hl]
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L025A09
 	jp   nz, L025A00
 	ld   hl, $0400
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L025A40
 L025A00:;J
 	ld   hl, $0500
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L025A40
 L025A09:;J
 	ld   hl, $0600
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L025A40
 L025A12:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025A40
 	ld   hl, $0404
 	ld   a, $10
 	call L003890
 	jp   L025A40
 L025A23:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025A40
 	ld   hl, $0408
 	ld   a, $10
 	call L003890
 	jp   L025A40
 L025A34:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025A40
 	inc  hl
 	ld   [hl], $08
@@ -3699,12 +4377,12 @@ L025A49:;J
 L025A52:;J
 	ld   hl, $0080
 	call L0035D9
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025A63
 	call L002EA2
 	jr   L025A66
 L025A63:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L025A66:;JR
 	ret
 L025A67:;I
@@ -3730,29 +4408,29 @@ L025A93: db $C3;X
 L025A94: db $15;X
 L025A95: db $5B;X
 L025A96:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025B34
 	inc  hl
 	ld   [hl], $03
 	jp   L025B34
 L025AA2:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L025AE3
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L025AD4
 	jp   nz, L025AC5
 	ld   hl, $0300
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, OAM_Begin
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L025B15
 L025AC5:;J
 	ld   hl, $0400
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FD80
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L025B15
 L025AD4: db $21;X
 L025AD5: db $00;X
@@ -3770,7 +4448,7 @@ L025AE0: db $C3;X
 L025AE1: db $15;X
 L025AE2: db $5B;X
 L025AE3:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025B15
 	inc  hl
 	push hl
@@ -3787,7 +4465,7 @@ L025AFB:;J
 	ld   [hl], $03
 	jp   L025B15
 L025B01:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025B15
 	inc  hl
 	ld   [hl], $FF
@@ -3804,12 +4482,12 @@ L025B15:;J
 	call L002DEC
 	jp   L025B37
 L025B28:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025B34
 	call L002EA2
 	jp   L025B37
 L025B34:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L025B37:;J
 	ret
 L025B38:;I
@@ -3851,31 +4529,31 @@ L025B38:;I
 	jp   z, L025C9F
 	jp   L025C43
 L025B94:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L025B9A
 L025B9A:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025CAB
 	inc  hl
 	ld   [hl], $FF
 	jp   L025CAB
 L025BA6:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L025BD5
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   nz, L025BC6
 	ld   hl, $05FF
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, OAM_Begin
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L025C8C
 L025BC6:;J
 	ld   hl, $06FF
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FD80
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L025C8C
 L025BD5:;J
 	ld   hl, $0063
@@ -3897,36 +4575,36 @@ L025BD5:;J
 	ld   h, $01
 	call L002E49
 	ld   hl, $0000
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $0005
 	add  hl, de
 	ld   [hl], $88
 	jp   L025CAE
 L025C0F:;J
 	ld   hl, $0100
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L025C15:;J
 	jp   L025C8C
 L025C18:;J
 	call OBJLstS_ApplyXSpeed
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L025CAB
 	ld   hl, $010A
 	ld   a, $10
 	call L003890
 	jp   L025C54
 L025C2C:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L025CAB
 	ld   hl, $0109
 	ld   a, $10
 	call L003890
 	ld   hl, $0080
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L025CAB
 L025C43:;J
 	call OBJLstS_ApplyXSpeed
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L025CAB
 	ld   hl, $0109
 	ld   a, $10
@@ -3948,16 +4626,16 @@ L025C68: db $C3;X
 L025C69: db $AE;X
 L025C6A: db $5C;X
 L025C6B:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025CAB
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   nz, L025C7C
 	ld   a, $54
 	jp   L025C7E
 L025C7C:;J
 	ld   a, $56
 L025C7E:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0608
 	ld   a, $10
 	call L003890
@@ -3971,12 +4649,12 @@ L025C8C:;J
 	call L002DEC
 	jp   L025CAE
 L025C9F:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025CAB
 	call L002EA2
 	jp   L025CAE
 L025CAB:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L025CAE:;J
 	ret
 L025CAF:;I
@@ -4042,28 +4720,28 @@ L025CAF:;I
 	jp   z, L025E4C
 	jp   L025DF0
 L025D47:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025E58
 	inc  hl
 	ld   [hl], $FF
 	jp   L025E58
 L025D53:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L025D82
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   nz, L025D73
 	ld   hl, $05FF
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, OAM_Begin
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L025E39
 L025D73:;J
 	ld   hl, $06FF
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FD80
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L025E39
 L025D82:;J
 	ld   hl, $0063
@@ -4085,7 +4763,7 @@ L025D82:;J
 	ld   h, $01
 	call L002E49
 	ld   hl, $0000
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $0005
 	add  hl, de
 	ld   [hl], $88
@@ -4100,24 +4778,24 @@ L025DC2:;J
 	jp   L025E39
 L025DC5:;J
 	call OBJLstS_ApplyXSpeed
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L025E58
 	ld   hl, $010A
 	ld   a, $10
 	call L003890
 	jp   L025E01
 L025DD9:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L025E58
 	ld   hl, $0109
 	ld   a, $10
 	call L003890
 	ld   hl, $0080
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L025E58
 L025DF0:;J
 	call OBJLstS_ApplyXSpeed
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L025E58
 	ld   hl, $0109
 	ld   a, $10
@@ -4139,16 +4817,16 @@ L025E15: db $C3;X
 L025E16: db $5B;X
 L025E17: db $5E;X
 L025E18:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L025E58
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   nz, L025E29
 	ld   a, $5C
 	jp   L025E2B
 L025E29:;J
 	ld   a, $5E
 L025E2B:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0208
 	ld   a, $10
 	call L003890
@@ -4180,17 +4858,17 @@ L025E55: db $C3;X
 L025E56: db $5B;X
 L025E57: db $5E;X
 L025E58:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L025E5B:;J
 	ret
 L025E5C:;I
-	call L0036CB
+	call MoveInputS_CanStartSpecialMove
 	jp   c, L025FB9
 	jp   z, L025E8C
-	call L003D52
+	call MoveInputS_CheckEasyMoveKeys
 	jp   c, L025F82
 	jp   z, L025F16
-	call L003CFB
+	call MoveInputS_CheckLHType
 	jp   nc, L025FB9
 	jp   z, L025E7D
 	jp   nz, L025E80
@@ -4200,15 +4878,15 @@ L025E7C: db $5F;X
 L025E7D:;J
 	jp   L025FB9
 L025E80:;J
-	ld   hl, $3D95
-	call L002CA8
+	ld   hl, MoveInput_DB
+	call MoveInputS_ChkInputDir
 	jp   c, L025F16
 	jp   L025FB9
 L025E8C:;J
-	call L003D52
+	call MoveInputS_CheckEasyMoveKeys
 	jp   c, L025F82
 	jp   z, L025F67
-	call L003CFB
+	call MoveInputS_CheckLHType
 	jp   nc, L025FB9
 	jp   z, L025EA4
 	jp   nz, L025ED1
@@ -4216,69 +4894,69 @@ L025EA1: db $C3;X
 L025EA2: db $B9;X
 L025EA3: db $5F;X
 L025EA4:;J
-	call L003725
+	call MoveInputS_CanStartSuperMove
 	jp   c, L025EBC
-	ld   hl, $3DE3
-	call L002CA8
+	ld   hl, MoveInput_DFDB
+	call MoveInputS_ChkInputDir
 	jp   c, L025F82
-	ld   hl, $3E16
-	call L002CA8
+	ld   hl, MoveInput_FBDF
+	call MoveInputS_ChkInputDir
 	jp   c, L025F98
 L025EBC:;J
-	ld   hl, $3E27
-	call L002CA8
+	ld   hl, MoveInput_FDF
+	call MoveInputS_ChkInputDir
 	jp   c, L025F2B
-	ld   hl, $3D8C
-	call L002CA8
+	ld   hl, MoveInput_DF
+	call MoveInputS_ChkInputDir
 	jp   c, L025EE6
 	jp   L025FB9
 L025ED1:;J
-	ld   hl, $3E70
-	call L002CA8
+	ld   hl, MoveInput_BDF
+	call MoveInputS_ChkInputDir
 	jp   c, L025F48
-	ld   hl, $3E09
-	call L002CA8
+	ld   hl, MoveInput_FDB
+	call MoveInputS_ChkInputDir
 	jp   c, L025F01
 	jp   L025FB9
 L025EE6:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L025EF3
 	ld   a, $48
 	jp   L025EF5
 L025EF3:;R
 	ld   a, $4A
 L025EF5:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0020
 	add  hl, bc
 	set  4, [hl]
 	jp   L025FB7
 L025F01:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L025F0E
 	ld   a, $4C
 	jp   L025F10
 L025F0E:;R
 	ld   a, $4E
 L025F10:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L025FB7
 L025F16:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L025F23
 	ld   a, $50
 	jp   L025F25
 L025F23:;R
 	ld   a, $52
 L025F25:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L025FB7
 L025F2B:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   c, L025F67
 	jr   nz, L025F3A
 	ld   a, $54
@@ -4286,64 +4964,64 @@ L025F2B:;J
 L025F3A:;R
 	ld   a, $56
 L025F3C:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0021
 	add  hl, bc
 	set  7, [hl]
 	jp   L025FB7
 L025F48:;J
-	call L002D53
+	call Play_Pl_ClearJoyDirBuffer
 	ld   hl, $0061
 	add  hl, bc
 	ld   a, [hl]
 	cp   $18
 	jp   nc, L025FB9
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L025F5F
 	ld   a, $58
 	jp   L025F61
 L025F5F:;R
 	ld   a, $5A
 L025F61:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L025FB7
 L025F67:;JR
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L025F74
 	ld   a, $5C
 	jp   L025F76
 L025F74:;R
 	ld   a, $5E
 L025F76:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0021
 	add  hl, bc
 	set  7, [hl]
 	jp   L025FB7
 L025F82:;J
-	call L002D53
-	call L003790
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckSuperDesperation
 	jp   c, L025F90
 	ld   a, $64
 	jp   L025F92
 L025F90:;J
 	ld   a, $66
 L025F92:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L025FB7
 L025F98:;J
 	call L003763
 	jp   nz, L025FB9
-	call L002D53
-	call L003790
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckSuperDesperation
 	jp   c, L025FAC
 	ld   a, $68
 	jp   L025FAE
 L025FAC:;J
 	ld   a, $6A
 L025FAE:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	call L00389E
 	jp   L025FB7
 L025FB7:;J
@@ -4367,36 +5045,36 @@ L025FBB:;I
 	jp   z, L026016
 	jp   L026022
 L025FDB:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L025FED
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   z, L025FED
 	ld   hl, $0700
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 L025FED:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026022
 	ld   a, $16
 	call HomeCall_Sound_ReqPlayExId
 	jp   L026022
 L025FFB:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L02600D
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   z, L02600D
 	ld   hl, $0700
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 L02600D:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026022
 	jp   L026022
 L026016:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026022
 	call L002EA2
 	jp   L026025
 L026022:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L026025:;J
 	ret
 L026026:;I
@@ -4421,39 +5099,39 @@ L026026:;I
 	cp   $18
 	jp   z, L0260F5
 L026057:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026100
 	inc  hl
 	ld   [hl], $00
 	jp   L026100
 L026063:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0260A1
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L026095
 	jp   nz, L026086
 	ld   hl, $0300
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FE80
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L0260A1
 L026086:;J
 	ld   hl, $0400
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, OAM_Begin
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L0260A1
 L026095:;J
 	ld   hl, $0500
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FDC0
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 L0260A1:;J
 	jp   L0260E2
 L0260A4:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0260E2
 	ld   hl, $0404
 	ld   a, $10
@@ -4464,7 +5142,7 @@ L0260A4:;J
 L0260BA:;J
 	jp   L0260E2
 L0260BD:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0260E2
 	ld   hl, $0403
 	ld   a, $10
@@ -4473,7 +5151,7 @@ L0260BD:;J
 	call HomeCall_Sound_ReqPlayExId
 	jp   L0260E2
 L0260D3:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0260E2
 	ld   hl, $0013
 	add  hl, de
@@ -4488,12 +5166,12 @@ L0260E2:;J
 	call L002DEC
 	jp   L026103
 L0260F5:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026100
 	call L002EA2
 	jr   L026103
 L026100:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L026103:;JR
 	ret
 L026104:;I
@@ -4548,29 +5226,29 @@ L026144: db $C3;X
 L026145: db $3B;X
 L026146: db $62;X
 L026147:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L02623B
 	inc  hl
 	ld   [hl], $FF
 	jp   L02623B
 L026153:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L026194
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L026185
 	jp   nz, L026176
 	ld   hl, $0300
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $0200
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L026191
 L026176:;J
 	ld   hl, $0500
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $0180
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L026191
 L026185: db $21;X
 L026186: db $00;X
@@ -4719,12 +5397,12 @@ L02622D: db $C3;X
 L02622E: db $3E;X
 L02622F: db $62;X
 L026230:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L02623B
 	call L002EA2
 	jr   L02623E
 L02623B:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L02623E:;JR
 	ret
 L02623F:;I
@@ -4747,13 +5425,13 @@ L02623F:;I
 	cp   $14
 	jp   z, L026322
 L02626B:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L02632D
 	inc  hl
 	ld   [hl], $FF
 	ld   a, $A8
 	call HomeCall_Sound_ReqPlayExId
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L026298
 	jp   nz, L02628D
 	ld   hl, $0608
@@ -4771,33 +5449,33 @@ L026298:;J
 	call L003890
 	jp   L02632D
 L0262A3:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0262EC
 	ld   hl, $0700
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 	ld   hl, $0020
 	add  hl, bc
 	inc  hl
 	res  7, [hl]
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L0262DD
 	jp   nz, L0262CE
 	ld   hl, $0080
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FA00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L0262E9
 L0262CE:;J
 	ld   hl, $0100
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $F900
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L0262E9
 L0262DD:;J
 	ld   hl, $0200
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $F800
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 L0262E9:;J
 	jp   L02630F
 L0262EC:;J
@@ -4808,14 +5486,14 @@ L0262EC:;J
 	jp   L02630F
 L0262F9:;J
 	ld   hl, $0040
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   a, $01
 	ld   h, $FF
 	call L002E63
 	jp   L02630F
 L026309:;J
 	ld   hl, $0040
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L02630F:;J
 	ld   hl, $0060
 	call L003614
@@ -4825,12 +5503,12 @@ L02630F:;J
 	call L002DEC
 	jp   L026330
 L026322:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L02632D
 	call L002EA2
 	jr   L026330
 L02632D:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L026330:;JR
 	ret
 L026331:;I
@@ -4857,7 +5535,7 @@ L026331:;I
 	cp   $1C
 	jp   z, L026444
 L026367:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L02644F
 	inc  hl
 	ld   [hl], $00
@@ -4868,34 +5546,34 @@ L026367:;J
 	call L003890
 	jp   L02644F
 L026380:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0263CB
 	ld   hl, $0700
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 	ld   hl, $0020
 	add  hl, bc
 	inc  hl
 	res  7, [hl]
 	res  3, [hl]
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L0263BC
 	jp   nz, L0263AD
 	ld   hl, $0080
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FA00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L0263C8
 L0263AD:;J
 	ld   hl, $0100
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $F900
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L0263C8
 L0263BC:;J
 	ld   hl, $01C0
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $F800
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 L0263C8:;J
 	jp   L026431
 L0263CB:;J
@@ -4907,7 +5585,7 @@ L0263D6:;J
 	ld   hl, $0208
 	ld   a, $10
 	call L003882
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026431
 	ld   a, $FD
 	ld   h, $FF
@@ -4921,7 +5599,7 @@ L0263F7:;J
 	ld   hl, $0208
 	ld   a, $10
 	call L003882
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026431
 	ld   a, $FD
 	ld   h, $FF
@@ -4935,14 +5613,14 @@ L026412:;J
 	jp   L026431
 L02641B:;J
 	ld   hl, $0040
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   a, $00
 	ld   h, $FF
 	call L002E63
 	jp   L026431
 L02642B:;J
 	ld   hl, $0040
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L026431:;J
 	ld   hl, $0060
 	call L003614
@@ -4952,12 +5630,12 @@ L026431:;J
 	call L002DEC
 	jp   L026452
 L026444:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L02644F
 	call L002EA2
 	jr   L026452
 L02644F:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L026452:;JR
 	ret
 L026453:;I
@@ -4977,12 +5655,12 @@ L026453:;I
 	jp   z, L0264DE
 	jp   L0264E9
 L026478:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L026484
 	ld   hl, $0400
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 L026484:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0264E9
 	ld   hl, $0403
 	ld   a, $10
@@ -4991,12 +5669,12 @@ L026484:;J
 	call HomeCall_Sound_ReqPlayExId
 	jp   L0264E9
 L02649A:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0264A6
 	ld   hl, $0200
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 L0264A6:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0264E9
 	ld   hl, $0404
 	ld   a, $10
@@ -5005,12 +5683,12 @@ L0264A6:;J
 	call HomeCall_Sound_ReqPlayExId
 	jp   L0264E9
 L0264BC:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0264C8
 	ld   hl, $0600
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 L0264C8:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0264E9
 	ld   hl, $0408
 	ld   a, $11
@@ -5019,12 +5697,12 @@ L0264C8:;J
 	call HomeCall_Sound_ReqPlayExId
 	jp   L0264E9
 L0264DE:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0264E9
 	call L002EA2
 	jr   L0264EC
 L0264E9:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L0264EC:;JR
 	ret
 L0264ED:;I
@@ -5060,31 +5738,31 @@ L0264ED:;I
 	jp   z, L026645
 	jp   L0265E9
 L02653A:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L026540
 L026540:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026651
 	inc  hl
 	ld   [hl], $FF
 	jp   L026651
 L02654C:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L02657B
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   nz, L02656C
 	ld   hl, $05FF
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, OAM_Begin
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L026632
 L02656C:;J
 	ld   hl, $06FF
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FD80
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L026632
 L02657B:;J
 	ld   hl, $0063
@@ -5106,36 +5784,36 @@ L02657B:;J
 	ld   h, $01
 	call L002E49
 	ld   hl, $0000
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $0005
 	add  hl, de
 	ld   [hl], $88
 	jp   L026654
 L0265B5:;J
 	ld   hl, $0100
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L0265BB:;J
 	jp   L026632
 L0265BE:;J
 	call OBJLstS_ApplyXSpeed
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L026651
 	ld   hl, $010A
 	ld   a, $10
 	call L003890
 	jp   L0265FA
 L0265D2:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L026651
 	ld   hl, $0109
 	ld   a, $10
 	call L003890
 	ld   hl, $0080
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L026651
 L0265E9:;J
 	call OBJLstS_ApplyXSpeed
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L026651
 	ld   hl, $0109
 	ld   a, $10
@@ -5157,16 +5835,16 @@ L02660E: db $C3;X
 L02660F: db $54;X
 L026610: db $66;X
 L026611:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026651
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   nz, L026622
 	ld   a, $54
 	jp   L026624
 L026622:;J
 	ld   a, $56
 L026624:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0608
 	ld   a, $10
 	call L003890
@@ -5180,12 +5858,12 @@ L026632:;J
 	call L002DEC
 	jp   L026654
 L026645:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026651
 	call L002EA2
 	jp   L026654
 L026651:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L026654:;J
 	ret
 L026655:;I
@@ -5237,31 +5915,31 @@ L026655:;I
 	jp   z, L0267D5
 	jp   L026779
 L0266CA:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0266D0
 L0266D0:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0267E1
 	inc  hl
 	ld   [hl], $FF
 	jp   L0267E1
 L0266DC:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L02670B
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   nz, L0266FC
 	ld   hl, $05FF
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, OAM_Begin
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L0267C2
 L0266FC:;J
 	ld   hl, $06FF
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FD80
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L0267C2
 L02670B:;J
 	ld   hl, $0063
@@ -5283,36 +5961,36 @@ L02670B:;J
 	ld   h, $01
 	call L002E49
 	ld   hl, $0000
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $0005
 	add  hl, de
 	ld   [hl], $88
 	jp   L0267E4
 L026745:;J
 	ld   hl, $0100
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L02674B:;J
 	jp   L0267C2
 L02674E:;J
 	call OBJLstS_ApplyXSpeed
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0267E1
 	ld   hl, $010A
 	ld   a, $10
 	call L003890
 	jp   L02678A
 L026762:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0267E1
 	ld   hl, $0109
 	ld   a, $10
 	call L003890
 	ld   hl, $0080
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L0267E1
 L026779:;J
 	call OBJLstS_ApplyXSpeed
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0267E1
 	ld   hl, $0109
 	ld   a, $10
@@ -5326,19 +6004,19 @@ L02678A:;J
 	cp   $0A
 	jp   z, L0267E1
 	ld   a, $18
-	call L00341B
+	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
 	jp   L0267E4
 L0267A1:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0267E1
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   nz, L0267B2
 	ld   a, $5C
 	jp   L0267B4
 L0267B2:;J
 	ld   a, $5E
 L0267B4:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0208
 	ld   a, $10
 	call L003890
@@ -5352,12 +6030,12 @@ L0267C2:;J
 	call L002DEC
 	jp   L0267E4
 L0267D5:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0267E1
 	call L002EA2
 	jp   L0267E4
 L0267E1:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L0267E4:;J
 	ret
 L0267E5:;I
@@ -5375,13 +6053,13 @@ L0267E5:;I
 	jp   z, L026836
 	jp   L026842
 L026805:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026842
 	inc  hl
 	ld   [hl], $1E
 	jp   L026842
 L026811:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L02682A
 	ld   hl, $0033
 	add  hl, bc
@@ -5393,28 +6071,28 @@ L026811:;J
 L026827:;J
 	call L00272D
 L02682A:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026842
 	inc  hl
 	ld   [hl], $04
 	jp   L026842
 L026836:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026842
 	call L002EA2
 	jp   L026845
 L026842:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L026845:;J
 	ret
 L026846:;I
-	call L0036CB
+	call MoveInputS_CanStartSpecialMove
 	jp   c, L02698E
 	jp   z, L02687C
-	call L003D52
+	call MoveInputS_CheckEasyMoveKeys
 	jp   c, L026960
 	jp   z, L0268E0
-	call L003CFB
+	call MoveInputS_CheckLHType
 	jp   nc, L02698E
 	jp   z, L026867
 	jp   nz, L026879
@@ -5422,20 +6100,20 @@ L026864: db $C3;X
 L026865: db $8E;X
 L026866: db $69;X
 L026867:;J
-	call L003725
+	call MoveInputS_CanStartSuperMove
 	jp   c, L026876
-	ld   hl, $3DE3
-	call L002CA8
+	ld   hl, MoveInput_DFDB
+	call MoveInputS_ChkInputDir
 	jp   c, L026960
 L026876:;J
 	jp   L02698E
 L026879:;J
 	jp   L02698E
 L02687C:;J
-	call L003D52
+	call MoveInputS_CheckEasyMoveKeys
 	jp   c, L026960
 	jp   z, L0268E0
-	call L003CFB
+	call MoveInputS_CheckLHType
 	jp   nc, L02698E
 	jp   z, L026894
 	jp   nz, L0268CB
@@ -5448,116 +6126,116 @@ L026894:;J
 	ld   a, [hl]
 	cp   $10
 	jp   z, L0268B6
-	call L003725
+	call MoveInputS_CanStartSuperMove
 	jp   c, L0268AD
-	ld   hl, $3DE3
-	call L002CA8
+	ld   hl, MoveInput_DFDB
+	call MoveInputS_ChkInputDir
 	jp   c, L026976
 L0268AD:;J
-	ld   hl, $3E09
-	call L002CA8
+	ld   hl, MoveInput_FDB
+	call MoveInputS_ChkInputDir
 	jp   c, L026937
 L0268B6:;J
-	ld   hl, $3DA7
-	call L002CA8
+	ld   hl, MoveInput_DU_Slow
+	call MoveInputS_ChkInputDir
 	jp   c, L026922
-	ld   hl, $3E5E
-	call L002CA8
+	ld   hl, MoveInput_BF_Slow
+	call MoveInputS_ChkInputDir
 	jp   c, L0268E0
 	jp   L02698E
 L0268CB:;J
-	ld   hl, $3DA7
-	call L002CA8
+	ld   hl, MoveInput_DU_Slow
+	call MoveInputS_ChkInputDir
 	jp   c, L02690D
-	ld   hl, $3E5E
-	call L002CA8
+	ld   hl, MoveInput_BF_Slow
+	call MoveInputS_ChkInputDir
 	jp   c, L0268F8
 	jp   L02698E
 L0268E0:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L0268ED
 	ld   a, $48
 	jp   L0268EF
 L0268ED:;R
 	ld   a, $4A
 L0268EF:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	call L00389E
 	jp   L02698C
 L0268F8:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L026905
 	ld   a, $4C
 	jp   L026907
 L026905:;R
 	ld   a, $4E
 L026907:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L02698C
 L02690D:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L02691A
 	ld   a, $50
 	jp   L02691C
 L02691A:;R
 	ld   a, $52
 L02691C:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L02698C
 L026922:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L02692F
 	ld   a, $54
 	jp   L026931
 L02692F:;R
 	ld   a, $56
 L026931:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L02698C
 L026937:;J
-	call L002D53
+	call Play_Pl_ClearJoyDirBuffer
 	call L003A3E
 	jp   nc, L02698E
 	call Task_PassControlFar
 	ld   a, $03
-	ld   [$C173], a
-	call L00376A
+	ld   [wPlayPlThrowActId], a
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L026952
 	ld   a, $58
 	jp   L026954
 L026952:;R
 	ld   a, $5A
 L026954:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0021
 	add  hl, bc
 	set  7, [hl]
 	jp   L02698C
 L026960:;J
-	call L002D53
-	call L003790
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckSuperDesperation
 	jp   c, L02696E
 	ld   a, $64
 	jp   L026970
 L02696E:;J
 	ld   a, $66
 L026970:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L02698C
 L026976:;J
-	call L002D53
-	call L003790
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckSuperDesperation
 	jp   c, L026984
 	ld   a, $68
 	jp   L026986
 L026984:;J
 	ld   a, $6A
 L026986:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L02698C
 L02698C:;J
 	scf
@@ -5580,18 +6258,18 @@ L026990:;I
 	jp   z, L0269D4
 	jp   L0269DF
 L0269B0:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0269DF
 	inc  hl
 	ld   [hl], $00
 	jp   L0269DF
 L0269BC:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0269C8
 	call L00253E
 	jp   L0269DF
 L0269C8:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0269DF
 L0269CE: db $23;X
 L0269CF: db $36;X
@@ -5600,12 +6278,12 @@ L0269D1: db $C3;X
 L0269D2: db $DF;X
 L0269D3: db $69;X
 L0269D4:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0269DF
 	call L002EA2
 	jr   L0269E2
 L0269DF:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L0269E2:;JR
 	ret
 L0269E3:;I
@@ -5627,13 +6305,13 @@ L026A05: db $C3;X
 L026A06: db $70;X
 L026A07: db $6A;X
 L026A08:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026A70
 	inc  hl
 	ld   [hl], $FF
 	jp   L026A70
 L026A14:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L026A45
 	call L00253E
 	ld   hl, $0050
@@ -5642,15 +6320,15 @@ L026A14:;J
 	cp   $28
 	jp   z, L026A36
 	ld   hl, $0100
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FC00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L026A52
 L026A36:;J
 	ld   hl, $0200
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FC00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L026A52
 L026A45:;J
 	ld   a, $FE
@@ -5667,12 +6345,12 @@ L026A52:;J
 	call L002DEC
 	jp   L026A73
 L026A65:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026A70
 	call L002EA2
 	jr   L026A73
 L026A70:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L026A73:;JR
 	ret
 L026A74:;I
@@ -5718,34 +6396,34 @@ L026AD2: db $C3;X
 L026AD3: db $1B;X
 L026AD4: db $6C;X
 L026AD5:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026B44
 	inc  hl
 	ld   [hl], $01
 	jp   L026B44
 L026AE1:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L026B10
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L026B07
 	jp   nz, L026AFE
 	ld   hl, $0400
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L026B5B
 L026AFE:;J
 	ld   hl, $0500
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L026B5B
 L026B07:;J
 	ld   hl, $0600
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L026B5B
 L026B10:;J
 	jp   L026B44
 L026B13:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L026B44
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
@@ -5799,7 +6477,7 @@ L026B61:;J
 L026B6A:;J
 	ld   hl, $0080
 	call L0035D9
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026C1B
 	jp   L026C15
 L026B79:;J
@@ -5811,7 +6489,7 @@ L026B79:;J
 	add  hl, bc
 	bit  7, [hl]
 	jp   nz, L026C1B
-	call L003CFB
+	call MoveInputS_CheckLHType
 	jp   nc, L026C1B
 	jp   z, L026C1B
 	ld   hl, $0808
@@ -5822,7 +6500,7 @@ L026B79:;J
 	call L002E49
 	jp   L026C1E
 L026BA6:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L026BD4
 	ld   hl, $0050
 	add  hl, bc
@@ -5830,15 +6508,15 @@ L026BA6:;J
 	cp   $28
 	jp   z, L026BC5
 	ld   hl, $0100
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FB00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L026BFC
 L026BC5:;J
 	ld   hl, $0200
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FA80
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L026BFC
 L026BD4:;J
 	ld   a, $FC
@@ -5869,13 +6547,13 @@ L026BFC:;J
 	call L002DEC
 	jp   L026C1E
 L026C0F:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026C1B
 L026C15:;J
 	call L002EA2
 	jp   L026C1E
 L026C1B:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L026C1E:;J
 	ret
 L026C1F:;I
@@ -5902,11 +6580,11 @@ L026C1F:;I
 	cp   $1C
 	jp   z, L026D16
 L026C55:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026D22
 	inc  hl
 	ld   [hl], $FF
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L026C67
 	jp   L026C6F
 L026C67:;J
@@ -5916,10 +6594,10 @@ L026C67:;J
 L026C6F:;J
 	jp   L026D22
 L026C72:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L026CA5
 	ld   hl, $F900
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	ld   hl, $0061
 	add  hl, bc
 	ld   a, [hl]
@@ -5940,7 +6618,7 @@ L026C93:;J
 	ld   h, a
 	ld   l, a
 L026C9F:;J
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L026CF7
 L026CA5:;J
 	ld   a, $F6
@@ -5958,7 +6636,7 @@ L026CB9:;J
 	call L002E63
 	jp   L026CF7
 L026CC3:;J
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L026CCC
 	jp   L026CF7
 L026CCC:;J
@@ -5967,7 +6645,7 @@ L026CCC:;J
 	call L003882
 	jp   L026CF7
 L026CD7:;J
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L026CE0
 	jp   L026CE8
 L026CE0:;J
@@ -5975,7 +6653,7 @@ L026CE0:;J
 	ld   a, $92
 	call L003882
 L026CE8:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026CF7
 	ld   hl, $0013
 	add  hl, de
@@ -5990,18 +6668,18 @@ L026CF7:;J
 	call L002DEC
 	jp   L026D25
 L026D0A:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026D22
 	inc  hl
 	ld   [hl], $0A
 	jp   L026D22
 L026D16:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026D22
 	call L002EA2
 	jp   L026D25
 L026D22:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L026D25:;J
 	ret
 L026D26:;I
@@ -6022,7 +6700,7 @@ L026D26:;I
 	cp   $10
 	jp   z, L026DB2
 L026D4D:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026DBD
 	inc  hl
 	ld   [hl], $00
@@ -6038,19 +6716,19 @@ L026D4D:;J
 	call L003890
 	jp   L026DBD
 L026D70:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L026D7C
 	ld   hl, $0400
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 L026D7C:;J
 	jp   L026D8B
 L026D7F:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L026D8B
 	ld   hl, $0400
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 L026D8B:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026DBD
 	ld   hl, $0050
 	add  hl, bc
@@ -6062,18 +6740,18 @@ L026D8B:;J
 	call L003890
 	jp   L026DBD
 L026DA6:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026DBD
 	inc  hl
 	ld   [hl], $08
 	jp   L026DBD
 L026DB2:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026DBD
 	call L002EA2
 	jr   L026DC0
 L026DBD:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L026DC0:;JR
 	ret
 L026DC1:;I
@@ -6099,7 +6777,7 @@ L026DED: db $C3;X
 L026DEE: db $6B;X
 L026DEF: db $6E;X
 L026DF0:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026E6B
 	inc  hl
 	ld   [hl], $01
@@ -6111,14 +6789,14 @@ L026DF0:;J
 	call L003890
 	jp   L026E6B
 L026E0A:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026E6B
 	ld   hl, $010A
 	ld   a, $C0
 	call L003890
 	jp   L026E43
 L026E1B:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026E6B
 	ld   hl, $0083
 	add  hl, bc
@@ -6146,18 +6824,18 @@ L026E43:;J
 L026E4E:;J
 	jp   L026E6B
 L026E51:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026E6B
 	jp   L026E6B
 L026E5A:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026E6B
 	call L002EA2
 	ld   a, $00
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	jp   L026E6E
 L026E6B:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L026E6E:;J
 	ret
 L026E6F:;I
@@ -6182,26 +6860,26 @@ L026E6F:;I
 	cp   $18
 	jp   z, L026FB4
 L026EA0:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026FC0
 	inc  hl
 	ld   [hl], $FF
 	jp   L026FC0
 L026EAC:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L026ED6
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   nz, L026EC7
 	ld   hl, $0400
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $0400
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L026F52
 L026EC7:;J
 	ld   hl, $0600
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $0400
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L026F52
 L026ED6:;J
 	call L003745
@@ -6210,12 +6888,12 @@ L026ED6:;J
 	ld   a, $08
 	ld   h, $FF
 	call L002E49
-	call L003D77
+	call Play_Pl_TempPauseOtherAnim
 	jp   L026FC3
 L026EEC:;J
 	jp   L026F7B
 L026EEF:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026FC0
 	inc  hl
 	ld   [hl], $FF
@@ -6235,21 +6913,21 @@ L026F0D:;J
 	call L00389E
 	jp   L026FC0
 L026F1B:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L026F48
 	call L0025D0
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   nz, L026F39
 	ld   hl, $0300
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FB00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L026F9B
 L026F39:;J
 	ld   hl, $0400
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FB00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L026F9B
 L026F48:;J
 	ld   a, $FE
@@ -6310,12 +6988,12 @@ L026F9B:;J
 	call L002DEC
 	jp   L026FC3
 L026FB4:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L026FC0
 	call L002EA2
 	jp   L026FC3
 L026FC0:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L026FC3:;J
 	ret
 L026FC4:;I
@@ -6349,7 +7027,7 @@ L026FC4:;I
 	jp   z, L027122
 	jp   L027143
 L02700C:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027143
 	inc  hl
 	ld   [hl], $10
@@ -6358,13 +7036,13 @@ L02700C:;J
 	ld   [hl], $08
 	jp   L027143
 L02701E:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027030
 	ld   hl, $0021
 	add  hl, bc
 	res  7, [hl]
 	ld   hl, $0700
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L027030:;J
 	call L003745
 	jp   nc, L027057
@@ -6373,21 +7051,21 @@ L027030:;J
 	ld   h, $00
 	call L002E49
 	ld   hl, $0080
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $0109
 	ld   a, $C0
 	call L003890
 	jp   L027146
 L027051:;J
 	ld   hl, $0000
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L027057:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L02712B
 	jp   L02713D
 L027060:;J
 	call OBJLstS_ApplyXSpeed
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027143
 	ld   hl, $010A
 	ld   a, $C0
@@ -6395,7 +7073,7 @@ L027060:;J
 	jp   L0270BB
 L027074:;J
 	call OBJLstS_ApplyXSpeed
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027143
 	ld   hl, $0109
 	ld   a, $C0
@@ -6403,7 +7081,7 @@ L027074:;J
 	jp   L0270BB
 L027088:;J
 	call OBJLstS_ApplyXSpeed
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027143
 	ld   hl, $0083
 	add  hl, bc
@@ -6441,12 +7119,12 @@ L0270CF: db $C3;X
 L0270D0: db $46;X
 L0270D1: db $71;X
 L0270D2:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0270E7
 	ld   hl, $FD00
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FA80
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L02710F
 L0270E7:;J
 	ld   a, $FC
@@ -6477,7 +7155,7 @@ L02710F:;J
 	call L002DEC
 	jp   L027146
 L027122:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027143
 	jp   L02713D
 L02712B:;J
@@ -6499,7 +7177,7 @@ L02713D:;J
 	call L002EA2
 	jp   L027146
 L027143:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L027146:;J
 	ret
 L027147:;I
@@ -6512,19 +7190,19 @@ L027147:;I
 	bit  4, [hl]
 	jp   nz, L02715F
 	call L0028B2
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 	ret
 L02715F:;J
-	call L002951
+	call OBJLstS_Hide
 	ret
 L027163:;I
-	call L0036CB
+	call MoveInputS_CanStartSpecialMove
 	jp   c, L02729D
 	jp   z, L027187
-	call L003D52
+	call MoveInputS_CheckEasyMoveKeys
 	jp   c, L027266
 	jp   z, L02721D
-	call L003CFB
+	call MoveInputS_CheckLHType
 	jp   nc, L02729D
 	jp   z, L027184
 	jp   nz, L027184
@@ -6534,10 +7212,10 @@ L027183: db $72;X
 L027184:;J
 	jp   L02729D
 L027187:;J
-	call L003D52
+	call MoveInputS_CheckEasyMoveKeys
 	jp   c, L027266
 	jp   z, L027232
-	call L003CFB
+	call MoveInputS_CheckLHType
 	jp   nc, L02729D
 	jp   z, L02719F
 	jp   nz, L0271D5
@@ -6545,120 +7223,120 @@ L02719C: db $C3;X
 L02719D: db $9D;X
 L02719E: db $72;X
 L02719F:;J
-	call L003725
+	call MoveInputS_CanStartSuperMove
 	jp   c, L0271B7
-	ld   hl, $3DE3
-	call L002CA8
+	ld   hl, MoveInput_DFDB
+	call MoveInputS_ChkInputDir
 	jp   c, L027266
-	ld   hl, $3E16
-	call L002CA8
+	ld   hl, MoveInput_FBDF
+	call MoveInputS_ChkInputDir
 	jp   c, L02727C
 L0271B7:;J
-	ld   hl, $3E09
-	call L002CA8
+	ld   hl, MoveInput_FDB
+	call MoveInputS_ChkInputDir
 	jp   c, L027232
-	ld   hl, $3E70
-	call L002CA8
+	ld   hl, MoveInput_BDF
+	call MoveInputS_ChkInputDir
 	jp   c, L027247
-	ld   hl, $3D8C
-	call L002CA8
+	ld   hl, MoveInput_DF
+	call MoveInputS_ChkInputDir
 	jp   c, L0271EA
 	jp   L02729D
 L0271D5:;J
-	ld   hl, $3D95
-	call L002CA8
+	ld   hl, MoveInput_DB
+	call MoveInputS_ChkInputDir
 	jp   c, L02721D
-	ld   hl, $3E70
-	call L002CA8
+	ld   hl, MoveInput_BDF
+	call MoveInputS_ChkInputDir
 	jp   c, L027208
 	jp   L02729D
 L0271EA:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L0271F7
 	ld   a, $48
 	jp   L0271F9
 L0271F7:;R
 	ld   a, $4A
 L0271F9:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0020
 	add  hl, bc
 	set  4, [hl]
 	call L00389E
 	jp   L02729B
 L027208:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L027215
 	ld   a, $4C
 	jp   L027217
 L027215:;R
 	ld   a, $4E
 L027217:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L02729B
 L02721D:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L02722A
 	ld   a, $50
 	jp   L02722C
 L02722A:;R
 	ld   a, $52
 L02722C:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L02729B
 L027232:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L02723F
 	ld   a, $54
 	jp   L027241
 L02723F:;R
 	ld   a, $56
 L027241:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L02729B
 L027247:;J
-	call L002D53
+	call Play_Pl_ClearJoyDirBuffer
 	ld   hl, $0061
 	add  hl, bc
 	ld   a, [hl]
 	cp   $18
 	jp   nc, L02729D
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L02725E
 	ld   a, $58
 	jp   L027260
 L02725E:;R
 	ld   a, $5A
 L027260:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L02729B
 L027266:;J
-	call L002D53
-	call L003790
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckSuperDesperation
 	jp   c, L027274
 	ld   a, $64
 	jp   L027276
 L027274:;J
 	ld   a, $64
 L027276:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L02729B
 L02727C:;J
 	call L003763
 	jp   nz, L02729D
-	call L002D53
-	call L003790
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckSuperDesperation
 	jp   c, L027290
 	ld   a, $68
 	jp   L027292
 L027290:;J
 	ld   a, $6A
 L027292:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	call L00389E
 	jp   L02729B
 L02729B:;J
@@ -6685,7 +7363,7 @@ L0272BF:;J
 	ld   hl, $0108
 	ld   a, $90
 	call L003882
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0272FE
 	ld   a, $16
 	call HomeCall_Sound_ReqPlayExId
@@ -6711,16 +7389,16 @@ L0272E6: db $C3;X
 L0272E7: db $FE;X
 L0272E8: db $72;X
 L0272E9:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0272F2
 	call L002674
 L0272F2:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0272FE
 	call L002EA2
 	jp   L027301
 L0272FE:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L027301:;J
 	ret
 L027302:;I
@@ -6748,23 +7426,23 @@ L027333: db $C3;X
 L027334: db $06;X
 L027335: db $74;X
 L027336:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027362
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L02735C
 	jp   nz, L027353
 	ld   hl, $0500
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L027362
 L027353:;J
 	ld   hl, $0600
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L027362
 L02735C:;J
 	ld   hl, $0700
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L027362:;J
 	call L003745
 	jp   nc, L027389
@@ -6781,10 +7459,10 @@ L027362:;J
 	jp   L027409
 L027383:;J
 	ld   hl, $0000
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L027389:;J
 	call OBJLstS_ApplyXSpeed
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027406
 	ld   hl, $0017
 	add  hl, de
@@ -6796,21 +7474,21 @@ L027389:;J
 	call L002E49
 	jp   L027409
 L0273A6:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027406
 	ld   hl, $010A
 	ld   a, $10
 	call L003890
 	jp   L027406
 L0273B7:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027406
 	ld   hl, $0109
 	ld   a, $10
 	call L003890
 	jp   L027406
 L0273C8:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027406
 	ld   hl, $0083
 	add  hl, bc
@@ -6825,19 +7503,19 @@ L0273C8:;J
 	jp   L027406
 L0273E7:;J
 	ld   a, $86
-	call L00341B
+	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
 	ld   hl, $FD00
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FB00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L027409
 L0273FB:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027406
 	call L002EA2
 	jr   L027409
 L027406:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L027409:;JR
 	ret
 L02740A:;I
@@ -6865,13 +7543,13 @@ L02743B: db $C3;X
 L02743C: db $DC;X
 L02743D: db $74;X
 L02743E:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0274FB
 	inc  hl
 	ld   [hl], $03
 	jp   L0274FB
 L02744A:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027496
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
@@ -6881,9 +7559,9 @@ L02744A:;J
 	cp   $52
 	jp   z, L02746E
 	ld   hl, $0300
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, OAM_Begin
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L0274DC
 L02746E:;J
 	ld   hl, $0050
@@ -6892,18 +7570,18 @@ L02746E:;J
 	cp   $28
 	jp   z, L027487
 	ld   hl, $0400
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FD80
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L0274DC
 L027487:;J
 	ld   hl, $0500
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FD00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L0274DC
 L027496:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0274DC
 	inc  hl
 	push hl
@@ -6920,7 +7598,7 @@ L0274AE:;J
 	ld   [hl], $00
 	jp   L0274DC
 L0274B4:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0274DC
 	inc  hl
 	ld   [hl], $00
@@ -6929,7 +7607,7 @@ L0274B4:;J
 	call L003890
 	jp   L0274DC
 L0274C8:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0274DC
 	inc  hl
 	ld   [hl], $FF
@@ -6946,12 +7624,12 @@ L0274DC:;J
 	call L002DEC
 	jp   L0274FE
 L0274EF:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0274FB
 	call L002EA2
 	jp   L0274FE
 L0274FB:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L0274FE:;J
 	ret
 L0274FF:;I
@@ -6982,7 +7660,7 @@ L027538:;J
 	ld   hl, $0109
 	ld   a, $90
 	call L003882
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0275EB
 	inc  hl
 	ld   [hl], $00
@@ -7001,7 +7679,7 @@ L027562:;J
 	ld   hl, $0109
 	ld   a, $90
 	call L003882
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0275EB
 	ld   a, $A8
 	call HomeCall_Sound_ReqPlayExId
@@ -7022,21 +7700,21 @@ L02758E:;J
 	call L003890
 	jp   L0275EB
 L027599:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0275EB
 	ld   hl, $0109
 	ld   a, $10
 	call L003890
 	jp   L0275EB
 L0275AA:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0275EB
 	ld   hl, $010A
 	ld   a, $10
 	call L003890
 	jp   L0275EB
 L0275BB:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0275EB
 	inc  hl
 	ld   [hl], $1E
@@ -7047,18 +7725,18 @@ L0275BB:;J
 	call L003890
 	jp   L0275EB
 L0275D4:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0275EB
 	inc  hl
 	ld   [hl], $08
 	jp   L0275EB
 L0275E0:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0275EB
 	call L002EA2
 	jr   L0275EE
 L0275EB:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L0275EE:;JR
 	ret
 L0275EF:;I
@@ -7098,31 +7776,31 @@ L0275EF:;I
 	jp   z, L027754
 	jp   L0276F5
 L027646:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L02764C
 L02764C:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027760
 	inc  hl
 	ld   [hl], $FF
 	jp   L027760
 L027658:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027687
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   nz, L027678
 	ld   hl, $05FF
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, OAM_Begin
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L02773E
 L027678:;J
 	ld   hl, $06FF
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FD80
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L02773E
 L027687:;J
 	ld   hl, $0063
@@ -7144,36 +7822,36 @@ L027687:;J
 	ld   h, $01
 	call L002E49
 	ld   hl, $0000
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $0005
 	add  hl, de
 	ld   [hl], $88
 	jp   L027763
 L0276C1:;J
 	ld   hl, $0100
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L0276C7:;J
 	jp   L02773E
 L0276CA:;J
 	call OBJLstS_ApplyXSpeed
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027760
 	ld   hl, $010A
 	ld   a, $10
 	call L003890
 	jp   L027706
 L0276DE:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027760
 	ld   hl, $0109
 	ld   a, $10
 	call L003890
 	ld   hl, $0080
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L027760
 L0276F5:;J
 	call OBJLstS_ApplyXSpeed
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027760
 	ld   hl, $0109
 	ld   a, $10
@@ -7195,16 +7873,16 @@ L02771A: db $C3;X
 L02771B: db $63;X
 L02771C: db $77;X
 L02771D:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027760
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   nz, L02772E
 	ld   a, $54
 	jp   L027730
 L02772E:;J
 	ld   a, $56
 L027730:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0608
 	ld   a, $10
 	call L003890
@@ -7234,7 +7912,7 @@ L02775A:;J
 	call L002EA2
 	jp   L027763
 L027760:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L027763:;J
 	ret
 L027764: db $CD;X
@@ -7673,21 +8351,21 @@ L02790A:;I
 	jp   z, L027936
 	jp   L027945
 L027925:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027945
 	ld   hl, $0608
 	ld   a, $01
 	call L003890
 	jp   L027945
 L027936:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027945
 	call L002EA2
 	xor  a
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	jr   L027948
 L027945:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L027948:;R
 	ret
 L027949:;I
@@ -7710,7 +8388,7 @@ L02796B: db $C3;X
 L02796C: db $BC;X
 L02796D: db $79;X
 L02796E:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027982
 	ld   hl, $0611
 	ld   a, $01
@@ -7720,7 +8398,7 @@ L02796E:;J
 L027982:;J
 	jp   L0279BC
 L027985:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027999
 	ld   hl, $0612
 	ld   a, $01
@@ -7730,7 +8408,7 @@ L027985:;J
 L027999:;J
 	jp   L0279BC
 L02799C:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0279AA
 	ld   hl, $060C
 	ld   a, $01
@@ -7738,14 +8416,14 @@ L02799C:;J
 L0279AA:;J
 	jp   L0279BC
 L0279AD:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0279BC
 	call L002EA2
 	xor  a
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	jr   L0279BF
 L0279BC:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L0279BF:;R
 	ret
 L0279C0:;I
@@ -7762,21 +8440,21 @@ L0279C0:;I
 	jp   z, L0279EC
 	jp   L0279FB
 L0279DB:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0279FB
 	ld   hl, $0608
 	ld   a, $01
 	call L003890
 	jp   L0279FB
 L0279EC:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0279FB
 	call L002EA2
 	xor  a
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	jr   L0279FE
 L0279FB:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L0279FE:;R
 	ret
 L0279FF:;I
@@ -7799,7 +8477,7 @@ L027A23: db $C3;X
 L027A24: db $D3;X
 L027A25: db $7A;X
 L027A26:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027A3A
 	ld   hl, $0612
 	ld   a, $01
@@ -7807,20 +8485,20 @@ L027A26:;J
 	ld   hl, $FEE0
 	call L003875
 L027A3A:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0279FB
 	inc  hl
 	ld   [hl], $FF
 	jp   L027AD3
 L027A46:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027A70
 	ld   a, $12
 	call HomeCall_Sound_ReqPlayExId
 	ld   hl, $0000
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FA00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	ld   hl, $0614
 	ld   a, $01
 	call L003882
@@ -7839,7 +8517,7 @@ L027A73:;J
 	call L002DEC
 	jp   L027AD6
 L027A86:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027AD3
 	ld   hl, $0614
 	ld   a, $01
@@ -7848,7 +8526,7 @@ L027A86:;J
 	call L003875
 	jp   L027AD3
 L027A9D:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027AD3
 	ld   hl, $0614
 	ld   a, $01
@@ -7857,20 +8535,20 @@ L027A9D:;J
 	call L003875
 	jp   L027AD3
 L027AB4:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027AC2
 	ld   hl, $0608
 	ld   a, $01
 	call L003882
 L027AC2:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027AD3
 	call L002EA2
 	ld   a, $00
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	jp   L027AD6
 L027AD3:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L027AD6:;J
 	ret
 L027AD7:;I
@@ -7891,7 +8569,7 @@ L027AF6: db $C3;X
 L027AF7: db $47;X
 L027AF8: db $7B;X
 L027AF9:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027B47
 	ld   hl, $0611
 	ld   a, $01
@@ -7900,7 +8578,7 @@ L027AF9:;J
 	call L003875
 	jp   L027B47
 L027B10:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027B47
 	ld   hl, $0612
 	ld   a, $01
@@ -7909,21 +8587,21 @@ L027B10:;J
 	call L003875
 	jp   L027B47
 L027B27:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027B47
 	ld   hl, $060F
 	ld   a, $01
 	call L003882
 	jp   L027B47
 L027B38:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027B47
 	call L002EA2
 	xor  a
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	jr   L027B4A
 L027B47:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L027B4A:;R
 	ret
 L027B4B:;I
@@ -7938,26 +8616,26 @@ L027B4B:;I
 	jp   z, L027B74
 	jp   L027B91
 L027B63:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027B91
 	ld   hl, $0608
 	ld   a, $01
 	call L003890
 	jp   L027B91
 L027B74:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027B91
 	ld   a, $86
-	call L00341B
+	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
 	ld   hl, $FD00
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FB00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	xor  a
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	jr   L027B94
 L027B91:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L027B94:;R
 	ret
 L027B95:;I
@@ -7980,7 +8658,7 @@ L027B95:;I
 	jp   z, L027C2E
 	jp   L027C3D
 L027BC1:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027C3D
 	ld   hl, $0612
 	ld   a, $01
@@ -7989,7 +8667,7 @@ L027BC1:;J
 	call L003875
 	jp   L027C3D
 L027BD8:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027C3D
 	ld   hl, $0613
 	ld   a, $01
@@ -7998,7 +8676,7 @@ L027BD8:;J
 	call L003875
 	jp   L027C3D
 L027BEF:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027C3D
 	ld   hl, $0614
 	ld   a, $01
@@ -8007,7 +8685,7 @@ L027BEF:;J
 	call L003875
 	jp   L027C3D
 L027C06:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027C3D
 	ld   hl, $0611
 	ld   a, $01
@@ -8016,21 +8694,21 @@ L027C06:;J
 	call L003875
 	jp   L027C3D
 L027C1D:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027C3D
 	ld   hl, $060F
 	ld   a, $01
 	call L003882
 	jp   L027C3D
 L027C2E:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027C3D
 	call L002EA2
 	xor  a
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	jr   L027C40
 L027C3D:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L027C40:;R
 	ret
 L027C41: db $CD;X
@@ -8216,10 +8894,10 @@ L027D0B: db $C3;X
 L027D0C: db $A8;X
 L027D0D: db $7D;X
 L027D0E:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027DA8
 	ld   hl, $0000
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 	ld   hl, $0611
 	ld   a, $01
 	call L003882
@@ -8227,10 +8905,10 @@ L027D0E:;J
 	call L003875
 	jp   L027DA8
 L027D2B:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027DA8
 	ld   hl, $F800
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 	ld   hl, $0611
 	ld   a, $01
 	call L003882
@@ -8238,10 +8916,10 @@ L027D2B:;J
 	call L003875
 	jp   L027DA8
 L027D48:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027DA8
 	ld   hl, $1000
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 	ld   hl, $0611
 	ld   a, $01
 	call L003882
@@ -8249,10 +8927,10 @@ L027D48:;J
 	call L003875
 	jp   L027DA8
 L027D65:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027DA8
 	ld   hl, $0800
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 	ld   hl, $0611
 	ld   a, $01
 	call L003882
@@ -8260,23 +8938,23 @@ L027D65:;J
 	call L003875
 	jp   L027DA8
 L027D82:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L027DA8
 	ld   hl, $0000
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 	ld   hl, $060F
 	ld   a, $01
 	call L003882
 	jp   L027DA8
 L027D99:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027DA8
 	call L002EA2
 	xor  a
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	jr   L027DAB
 L027DA8:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L027DAB:;R
 	ret
 L027DAC: db $CD;X
@@ -8487,7 +9165,7 @@ L027E86: db $C3;X
 L027E87: db $BB;X
 L027E88: db $7E;X
 L027E89:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027EBB
 	ld   hl, $0608
 	ld   a, $01
@@ -8496,19 +9174,19 @@ L027E89:;J
 L027E9A:;J
 	jp   L027EBB
 L027E9D:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L027EBB
 	ld   a, $86
-	call L00341B
+	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
 	ld   hl, $FD00
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FB00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	xor  a
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	jp   L027EBE
 L027EBB:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L027EBE:;J
 	ret
 L027EBF: db $00;X

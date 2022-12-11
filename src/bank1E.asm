@@ -3288,8 +3288,8 @@ OBJInfoInit_CharSel_Cursor:
 	db $00 ; iOBJInfo_YSub
 	db $00 ; iOBJInfo_SpeedX
 	db $00 ; iOBJInfo_SpeedXSub
-	db $00 ; iOBJInfo_Unknown_09
-	db $00 ; iOBJInfo_Unknown_0A
+	db $00 ; iOBJInfo_SpeedY
+	db $00 ; iOBJInfo_SpeedYSub
 	db $00 ; iOBJInfo_RelX (auto)
 	db $00 ; iOBJInfo_RelY (auto)
 	db $00 ; iOBJInfo_TileIDBase
@@ -3303,9 +3303,9 @@ OBJInfoInit_CharSel_Cursor:
 	db LOW(OBJLstPtrTable_CharSel_Cursor) ; iOBJInfo_OBJLstPtrTbl_LowOld
 	db HIGH(OBJLstPtrTable_CharSel_Cursor) ; iOBJInfo_OBJLstPtrTbl_HighOld
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
-	db $00 ; iOBJInfo_OBJLstByte1 (auto)
-	db $00 ; iOBJInfo_OBJLstByte2 (auto)
-	db $00 ; iOBJInfo_Unknown_1A
+	db $00 ; iOBJInfo_ColiBoxId (auto)
+	db $00 ; iOBJInfo_HitboxId (auto)
+	db $00 ; iOBJInfo_ForceHitboxId
 	db $02 ; iOBJInfo_FrameLeft
 	db $02 ; iOBJInfo_FrameTotal
 	db LOW(wGFXBufInfo_Pl1) ; iOBJInfo_BufInfoPtr_Low
@@ -3324,8 +3324,8 @@ OBJLstPtrTable_CharSel_Cursor:
 		
 OBJLstHdrA_CharSel_CursorPl1P:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3340,8 +3340,8 @@ OBJLstHdrA_CharSel_CursorPl1P:
 		
 OBJLstHdrA_CharSel_CursorPl1PWide:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3356,8 +3356,8 @@ OBJLstHdrA_CharSel_CursorPl1PWide:
 		
 OBJLstHdrA_CharSel_CursorPl2P:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3372,8 +3372,8 @@ OBJLstHdrA_CharSel_CursorPl2P:
 		
 OBJLstHdrA_CharSel_CursorPl2PWide:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3388,8 +3388,8 @@ OBJLstHdrA_CharSel_CursorPl2PWide:
 	
 OBJLstHdrA_CharSel_CursorCPU1P:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3405,8 +3405,8 @@ OBJLstHdrA_CharSel_CursorCPU1P:
 		
 OBJLstHdrA_CharSel_CursorCPU1PWide:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3422,8 +3422,8 @@ OBJLstHdrA_CharSel_CursorCPU1PWide:
 	
 OBJLstHdrA_CharSel_CursorCPU2P:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3439,8 +3439,8 @@ OBJLstHdrA_CharSel_CursorCPU2P:
 		
 OBJLstHdrA_CharSel_CursorCPU2PWide:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3467,8 +3467,8 @@ OBJLstPtrTable_CharSel_Flip:
 		
 OBJLstHdrA_CharSel_FlipP2:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw OBJLst_CharSel_Flip0 ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3476,8 +3476,8 @@ OBJLstHdrA_CharSel_FlipP2:
 		
 OBJLstHdrA_CharSel_FlipP0:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw OBJLst_CharSel_Flip1 ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3485,8 +3485,8 @@ OBJLstHdrA_CharSel_FlipP0:
 		
 OBJLstHdrA_CharSel_FlipP1:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw OBJLst_CharSel_Flip2 ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3494,8 +3494,8 @@ OBJLstHdrA_CharSel_FlipP1:
 		
 OBJLstHdrA_CharSel_FlipP4:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw OBJLst_CharSel_Flip3 ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3503,8 +3503,8 @@ OBJLstHdrA_CharSel_FlipP4:
 		
 OBJLstHdrA_CharSel_FlipP3:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw OBJLst_CharSel_Flip4 ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -5011,8 +5011,8 @@ OBJLstPtrTable_OrdSel_Cursor:
 		
 OBJLstHdrA_OrdSel_VS:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -5034,8 +5034,8 @@ OBJLstHdrA_OrdSel_VS:
 		
 OBJLstHdrA_OrdSel_Cursor:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
-	db $00 ; iOBJLstHdrA_Byte1
-	db $00 ; iOBJLstHdrA_Byte2
+	db $00 ; iOBJLstHdrA_ColiBoxId
+	db $00 ; iOBJLstHdrA_HitBoxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset

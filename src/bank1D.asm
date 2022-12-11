@@ -1878,7 +1878,7 @@ L1D509F:;I
 	call LoadGFX_1bppFont_Default
 	call ClearOBJInfo
 	call Serial_DoHandshake
-	ld   a, [$C161]
+	ld   a, [wStageDraw]
 	or   a
 	jp   nz, L1D511B
 	ld   a, [wLastWinner]

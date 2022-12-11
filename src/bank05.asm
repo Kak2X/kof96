@@ -8177,15 +8177,15 @@ L055FEF: db $3B
 L055FF0: db $0B
 L055FF1: db $0C
 L055FF2:;I
-	call L0036CB
+	call MoveInputS_CanStartSpecialMove
 	jp   c, L056140
 	jp   z, L055FFE
 	jp   L056140
 L055FFE:;J
-	call L003D52
+	call MoveInputS_CheckEasyMoveKeys
 	jp   c, L056112
 	jp   z, L0560FD
-	call L003CFB
+	call MoveInputS_CheckLHType
 	jp   nc, L056140
 	jp   z, L056016
 	jp   nz, L05604C
@@ -8193,23 +8193,23 @@ L056013: db $C3;X
 L056014: db $40;X
 L056015: db $61;X
 L056016:;J
-	call L003725
+	call MoveInputS_CanStartSuperMove
 	jp   c, L056025
-	ld   hl, $3DB0
-	call L002CA8
+	ld   hl, MoveInput_DBDF
+	call MoveInputS_ChkInputDir
 	jp   c, L056112
 L056025:;J
-	ld   hl, $3E27
-	call L002CA8
+	ld   hl, MoveInput_FDF
+	call MoveInputS_ChkInputDir
 	jp   c, L05608F
-	ld   hl, $3E70
-	call L002CA8
+	ld   hl, MoveInput_BDF
+	call MoveInputS_ChkInputDir
 	jp   c, L0560D4
-	ld   hl, $3D8C
-	call L002CA8
+	ld   hl, MoveInput_DF
+	call MoveInputS_ChkInputDir
 	jp   c, L056071
-	ld   hl, $3D95
-	call L002CA8
+	ld   hl, MoveInput_DB
+	call MoveInputS_ChkInputDir
 	jp   c, L0560AA
 	jp   L056140
 L05604C:;J
@@ -8218,74 +8218,74 @@ L05604C:;J
 	ld   a, [hl]
 	cp   $18
 	jp   z, L056065
-	call L003725
+	call MoveInputS_CanStartSuperMove
 	jp   c, L056065
-	ld   hl, $3DB0
-	call L002CA8
+	ld   hl, MoveInput_DBDF
+	call MoveInputS_ChkInputDir
 	jp   c, L056128
 L056065:;J
-	ld   hl, $3E09
-	call L002CA8
+	ld   hl, MoveInput_FDB
+	call MoveInputS_ChkInputDir
 	jp   c, L0560BF
 	jp   L056140
 L056071:;J
 	call L003763
 	jp   nz, L056140
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L056084
 	ld   a, $48
 	jp   L056086
 L056084:;R
 	ld   a, $4A
 L056086:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	call L00389E
 	jp   L05613E
 L05608F:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L05609C
 	ld   a, $4C
 	jp   L05609E
 L05609C:;R
 	ld   a, $4E
 L05609E:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0021
 	add  hl, bc
 	set  7, [hl]
 	jp   L05613E
 L0560AA:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L0560B7
 	ld   a, $50
 	jp   L0560B9
 L0560B7:;R
 	ld   a, $52
 L0560B9:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L05613E
 L0560BF:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L0560CC
 	ld   a, $54
 	jp   L0560CE
 L0560CC:;R
 	ld   a, $56
 L0560CE:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L05613E
 L0560D4:;J
-	call L002D53
+	call Play_Pl_ClearJoyDirBuffer
 	call L003A3E
 	jp   nc, L056140
 	call Task_PassControlFar
 	ld   a, $03
-	ld   [$C173], a
-	call L00376A
+	ld   [wPlayPlThrowActId], a
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L0560EF
 L0560EA: db $3E;X
 L0560EB: db $58;X
@@ -8294,43 +8294,43 @@ L0560ED: db $F1;X
 L0560EE: db $60;X
 L0560EF:;R
 	ld   a, $5A
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0021
 	add  hl, bc
 	set  7, [hl]
 	jp   L05613E
 L0560FD:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L05610A
 	ld   a, $60
 	jp   L05610C
 L05610A: db $3E;X
 L05610B: db $62;X
 L05610C:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L05613E
 L056112:;J
-	call L002D53
-	call L003790
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckSuperDesperation
 	jp   c, L056120
 	ld   a, $64
 	jp   L056122
 L056120:;J
 	ld   a, $66
 L056122:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L05613E
 L056128:;J
-	call L002D53
-	call L003790
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckSuperDesperation
 	jp   c, L056136
 	ld   a, $68
 	jp   L056138
 L056136:;J
 	ld   a, $6A
 L056138:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L05613E
 L05613E:;J
 	scf
@@ -8342,7 +8342,7 @@ L056142:;I
 	call L00347B
 	call L0038B3
 	jp   c, L056174
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056171
 	ld   hl, $0017
 	add  hl, de
@@ -8361,7 +8361,7 @@ L05616C:;J
 	call L002EA2
 	jr   L056174
 L056171:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L056174:;JR
 	ret
 L056175:;I
@@ -8389,24 +8389,24 @@ L056175:;I
 	cp   $14
 	jp   z, L056268
 L0561AB:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0561B7
 	ld   hl, $0400
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 L0561B7:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056273
 	ld   hl, $0403
 	ld   a, $02
 	call L003890
 	jp   L056273
 L0561C8:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0561D4
 	ld   hl, $0800
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 L0561D4:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056273
 	inc  hl
 	ld   [hl], $FF
@@ -8415,7 +8415,7 @@ L0561D4:;J
 	call L003890
 	jp   L056273
 L0561E8:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056230
 	ld   a, $A8
 	call HomeCall_Sound_ReqPlayExId
@@ -8423,25 +8423,25 @@ L0561E8:;J
 	add  hl, bc
 	inc  hl
 	res  7, [hl]
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L056221
 	jp   nz, L056212
 	ld   hl, $0080
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FA00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L05622D
 L056212:;J
 	ld   hl, $0100
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $F900
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L05622D
 L056221:;J
 	ld   hl, $0200
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $F800
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 L05622D:;J
 	jp   L056255
 L056230:;J
@@ -8458,7 +8458,7 @@ L056245:;J
 	ld   h, $FF
 	call L002E63
 	ld   hl, $0040
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L056255
 L056255:;J
 	ld   hl, $0060
@@ -8469,12 +8469,12 @@ L056255:;J
 	call L002DEC
 	jp   L056276
 L056268:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056273
 	call L002EA2
 	jr   L056276
 L056273:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L056276:;JR
 	ret
 L056277:;J
@@ -8499,24 +8499,24 @@ L056277:;J
 	cp   $18
 	jp   z, L056370
 L0562A8:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0562B4
 	ld   hl, $0400
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 L0562B4:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L05637B
 	ld   hl, $0403
 	ld   a, $12
 	call L003890
 	jp   L05637B
 L0562C5:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0562D1
 	ld   hl, $0800
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 L0562D1:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L05637B
 	inc  hl
 	ld   [hl], $01
@@ -8525,7 +8525,7 @@ L0562D1:;J
 	call L003890
 	jp   L05637B
 L0562E5:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L05632D
 	ld   a, $A8
 	call HomeCall_Sound_ReqPlayExId
@@ -8533,25 +8533,25 @@ L0562E5:;J
 	add  hl, bc
 	inc  hl
 	res  7, [hl]
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L05631E
 	jp   nz, L05630F
 	ld   hl, $0100
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FA00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L05632A
 L05630F:;J
 	ld   hl, $0200
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $F900
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L05632A
 L05631E:;J
 	ld   hl, $0300
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $F800
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 L05632A:;J
 	jp   L05635D
 L05632D:;J
@@ -8561,19 +8561,19 @@ L05632D:;J
 	jp   nc, L05635D
 	jp   L05635D
 L05633A:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L05635D
 	ld   hl, $040C
 	ld   a, $13
 	call L003890
 	jp   L05635D
 L05634B:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L05635D
 	inc  hl
 	ld   [hl], $FF
 	ld   hl, $0040
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L05635D
 L05635D:;J
 	ld   hl, $0060
@@ -8584,12 +8584,12 @@ L05635D:;J
 	call L002DEC
 	jp   L05637E
 L056370:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L05637B
 	call L002EA2
 	jr   L05637E
 L05637B:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L05637E:;JR
 	ret
 L05637F:;I
@@ -8612,16 +8612,16 @@ L05637F:;I
 	cp   $14
 	jp   z, L056467
 L0563AB:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0563BC
 	ld   hl, $0400
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   a, $08
 	call HomeCall_Sound_ReqPlayExId
 L0563BC:;J
 	jp   L05640F
 L0563BF:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L05640F
 	ld   hl, $0808
 	ld   a, $10
@@ -8639,10 +8639,10 @@ L0563BF:;J
 	call L003890
 	jp   L05640F
 L0563E8:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0563F9
 	ld   hl, $0400
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   a, $08
 	call HomeCall_Sound_ReqPlayExId
 L0563F9:;J
@@ -8660,12 +8660,12 @@ L05640F:;J
 	call L0035D9
 	jp   L056472
 L056418:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056432
 	ld   hl, $0200
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, OAM_Begin
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L056454
 L05642D: db $3E;X
 L05642E: db $9C;X
@@ -8673,7 +8673,7 @@ L05642F: db $CD;X
 L056430: db $16;X
 L056431: db $10;X
 L056432:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056454
 	inc  hl
 	ld   [hl], $FF
@@ -8682,7 +8682,7 @@ L056432:;J
 	call L003890
 	jp   L056454
 L056446:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056454
 	ld   a, $08
 	call HomeCall_Sound_ReqPlayExId
@@ -8696,13 +8696,13 @@ L056454:;J
 	call L002DEC
 	jp   L056475
 L056467:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056472
 L05646D:;J
 	call L002EA2
 	jr   L056475
 L056472:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L056475:;JR
 	ret
 L056476:;I
@@ -8732,25 +8732,25 @@ L0564AC: db $C3;X
 L0564AD: db $9B;X
 L0564AE: db $65;X
 L0564AF:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L05651E
 	inc  hl
 	ld   [hl], $01
 	jp   L05651E
 L0564BB:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0564EA
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L0564E1
 	jp   nz, L0564D8
 	ld   hl, $0400
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L056535
 L0564D8:;J
 	ld   hl, $0580
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L056535
 L0564E1: db $21;X
 L0564E2: db $00;X
@@ -8764,18 +8764,18 @@ L0564E9: db $65;X
 L0564EA:;J
 	jp   L05651E
 L0564ED:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L05651E
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
 	jp   L05651E
 L0564FB:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056506
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
 L056506:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L05651E
 	inc  hl
 	ld   [hl], $FF
@@ -8811,7 +8811,7 @@ L05653B:;J
 	bit  7, [hl]
 	jp   z, L05655C
 L056553:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L05659B
 	jp   L056595
 L05655C:;J
@@ -8833,19 +8833,19 @@ L056578:;J
 	call L003890
 	jp   L05659E
 L056583:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L05659B
 	inc  hl
 	ld   [hl], $0A
 	jp   L05659B
 L05658F:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L05659B
 L056595:;J
 	call L002EA2
 	jp   L05659E
 L05659B:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L05659E:;J
 	ret
 L05659F:;I
@@ -8865,7 +8865,7 @@ L05659F:;I
 	jp   z, L056603
 	jp   L056614
 L0565C4:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056614
 	ld   hl, $0611
 	ld   a, $01
@@ -8874,7 +8874,7 @@ L0565C4:;J
 	call L003875
 	jp   L056614
 L0565DB:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056614
 	ld   hl, $0611
 	ld   a, $11
@@ -8883,21 +8883,21 @@ L0565DB:;J
 	call L003875
 	jp   L056614
 L0565F2:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056614
 	ld   hl, $0109
 	ld   a, $11
 	call L003890
 	jp   L056614
 L056603:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056614
 	call L002EA2
 	ld   a, $00
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	jp   L056617
 L056614:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L056617:;J
 	ret
 L056618:;I
@@ -8951,19 +8951,19 @@ L056618:;I
 	jp   z, L056757
 	jp   L056763
 L056692:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056763
 	inc  hl
 	ld   [hl], $1E
 	jp   L056763
 L05669E:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056763
 	inc  hl
 	ld   [hl], $28
 	jp   L056763
 L0566AA:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0566BF
 	ld   hl, $0001
 	add  hl, de
@@ -8975,7 +8975,7 @@ L0566AA:;J
 	add  hl, bc
 	ld   [hl], a
 L0566BF:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056763
 	inc  hl
 	ld   [hl], $04
@@ -8983,31 +8983,31 @@ L0566BF:;J
 	call HomeCall_Sound_ReqPlayExId
 	jp   L056763
 L0566D0:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056763
 	inc  hl
 	ld   [hl], $08
 	jp   L056763
 L0566DC:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056763
 	inc  hl
 	ld   [hl], $10
 	jp   L056763
 L0566E8:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056763
 	inc  hl
 	ld   [hl], $32
 	jp   L056763
 L0566F4:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056763
 	inc  hl
 	ld   [hl], $24
 	jp   L056763
 L056700:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056711
 	ld   hl, $0083
 	add  hl, bc
@@ -9017,44 +9017,44 @@ L056700:;J
 	ldi  [hl], a
 	ld   [hl], a
 L056711:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056763
 	inc  hl
 	ld   [hl], $00
 	jp   L056763
 L05671D:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056763
 	ld   hl, $010B
 	ld   a, $00
 	call L003890
 	jp   L056763
 L05672E:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056763
 	ld   hl, $0108
 	ld   a, $00
 	call L003890
 	jp   L056763
 L05673F:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056763
 	inc  hl
 	ld   [hl], $28
 	jp   L056763
 L05674B:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056763
 	inc  hl
 	ld   [hl], $06
 	jp   L056763
 L056757:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056763
 	call L002EA2
 	jp   L056766
 L056763:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L056766:;J
 	ret
 L056767:;I
@@ -9096,24 +9096,24 @@ L056767:;I
 	jp   z, L05689C
 	jp   L05684F
 L0567C3:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0567CE
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
 L0567CE:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0568A8
 	inc  hl
 	ld   [hl], $12
 	jp   L0568A8
 L0567DA:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0567E9
 	ld   hl, $0700
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L056896
 L0567E9:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0567F2
 	jp   L0568A2
 L0567F2:;J
@@ -9149,28 +9149,28 @@ L05682A: db $C3;X
 L05682B: db $AB;X
 L05682C: db $68;X
 L05682D:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0568A8
 	ld   hl, $010A
 	ld   a, $02
 	call L003890
 	jp   L05686E
 L05683E:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0568A8
 	ld   hl, $0109
 	ld   a, $02
 	call L003890
 	jp   L0568A8
 L05684F:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0568A8
 	ld   hl, $0109
 	ld   a, $02
 	call L003890
 	jp   L05686E
 L056860:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0568A8
 	ld   hl, $010A
 	ld   a, $00
@@ -9192,7 +9192,7 @@ L056882: db $C3;X
 L056883: db $AB;X
 L056884: db $68;X
 L056885:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0568A8
 	ld   hl, $1008
 	ld   a, $03
@@ -9202,13 +9202,13 @@ L056896:;J
 	call OBJLstS_ApplyXSpeed
 	jp   L0568A8
 L05689C:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0568A8
 L0568A2:;J
 	call L002EA2
 	jp   L0568AB
 L0568A8:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L0568AB:;J
 	ret
 L0568AC:;I
@@ -9256,24 +9256,24 @@ L0568AC:;I
 	jp   z, L056A43
 	jp   L056A4F
 L056917:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056922
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
 L056922:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056A4F
 	inc  hl
 	ld   [hl], $12
 	jp   L056A4F
 L05692E:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L05693D
 	ld   hl, $0700
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L056A31
 L05693D:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056946
 	jp   L056A49
 L056946:;J
@@ -9309,7 +9309,7 @@ L05697E: db $C3;X
 L05697F: db $52;X
 L056980: db $6A;X
 L056981:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   nz, L05698A
 	jp   L056A4F
 L05698A:;J
@@ -9339,25 +9339,25 @@ L0569AD:;J
 	pop  de
 	jp   L056A4F
 L0569B6:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056A4F
 	inc  hl
 	ld   [hl], $0A
 	jp   L056A4F
 L0569C2:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056A4F
 	inc  hl
 	ld   [hl], $1E
 	jp   L056A4F
 L0569CE:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056A4F
 	ld   a, $01
 	call HomeCall_Sound_ReqPlayExId
 	jp   L056A4F
 L0569DC:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056A4F
 	ld   hl, $050B
 	ld   a, $00
@@ -9393,9 +9393,9 @@ L056A11: db $C3;X
 L056A12: db $52;X
 L056A13: db $6A;X
 L056A14:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   nz, L056A26
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056A4F
 	inc  hl
 	ld   [hl], $3C
@@ -9409,19 +9409,19 @@ L056A31:;J
 	call OBJLstS_ApplyXSpeed
 	jp   L056A4F
 L056A37:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056A4F
 	inc  hl
 	ld   [hl], $02
 	jp   L056A4F
 L056A43:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056A4F
 L056A49:;J
 	call L002EA2
 	jp   L056A52
 L056A4F:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L056A52:;J
 	ret
 L056A53:;I
@@ -9470,24 +9470,24 @@ L056AB1: db $C3;X
 L056AB2: db $0D;X
 L056AB3: db $6C;X
 L056AB4:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056ABF
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
 L056ABF:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056C0D
 	inc  hl
 	ld   [hl], $14
 	jp   L056C0D
 L056ACB:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056ADA
 	ld   hl, $0780
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L056BFB
 L056ADA:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056AE3
 	jp   L056C07
 L056AE3:;J
@@ -9526,21 +9526,21 @@ L056B21: db $C3;X
 L056B22: db $10;X
 L056B23: db $6C;X
 L056B24:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056C0D
 	ld   hl, $010A
 	ld   a, $02
 	call L003890
 	jp   L056BDF
 L056B35:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056C0D
 	ld   hl, $0109
 	ld   a, $02
 	call L003890
 	jp   L056BDF
 L056B46:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056C0D
 	ld   hl, $0083
 	add  hl, bc
@@ -9555,7 +9555,7 @@ L056B5A:;J
 	call L003890
 	jp   L056BDF
 L056B65:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056C0D
 	ld   hl, $0083
 	add  hl, bc
@@ -9565,14 +9565,14 @@ L056B65:;J
 	call L003890
 	jp   L056BDF
 L056B7C:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056C0D
 	ld   hl, $010B
 	ld   a, $02
 	call L003890
 	jp   L056BDF
 L056B8D:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056C0D
 	ld   hl, $0083
 	add  hl, bc
@@ -9587,21 +9587,21 @@ L056BA1:;J
 	call L003890
 	jp   L056BDF
 L056BAC:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056C0D
 	ld   hl, $0109
 	ld   a, $80
 	call L003890
 	jp   L056BDF
 L056BBD:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056C0D
 	ld   hl, $010A
 	ld   a, $80
 	call L003890
 	jp   L056BDF
 L056BCE:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056C0D
 	ld   hl, $0108
 	ld   a, $03
@@ -9629,25 +9629,25 @@ L056BFB:;J
 	call OBJLstS_ApplyXSpeed
 	jp   L056C0D
 L056C01:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056C0D
 L056C07:;J
 	call L002EA2
 	jp   L056C10
 L056C0D:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L056C10:;J
 	ret
 L056C11:;I
-	call L0036CB
+	call MoveInputS_CanStartSpecialMove
 	jp   c, L056CDA
 	jp   z, L056C1D
 	jp   L056CDA
 L056C1D:;J
-	call L003D52
+	call MoveInputS_CheckEasyMoveKeys
 	jp   c, L056CC2
 	jp   z, L056C6E
-	call L003CFB
+	call MoveInputS_CheckLHType
 	jp   nc, L056CDA
 	jp   z, L056C35
 	jp   nz, L056C53
@@ -9655,81 +9655,81 @@ L056C32: db $C3;X
 L056C33: db $DA;X
 L056C34: db $6C;X
 L056C35:;J
-	ld   hl, $3E70
-	call L002CA8
+	ld   hl, MoveInput_BDF
+	call MoveInputS_ChkInputDir
 	jp   c, L056C6E
-	ld   hl, $3D95
-	call L002CA8
+	ld   hl, MoveInput_DB
+	call MoveInputS_ChkInputDir
 	jp   c, L056C98
-	ld   hl, $3D8C
-	call L002CA8
+	ld   hl, MoveInput_DF
+	call MoveInputS_ChkInputDir
 	jp   c, L056CAD
 	jp   L056CDA
 L056C53:;J
-	call L003725
+	call MoveInputS_CanStartSuperMove
 	jp   c, L056C62
-	ld   hl, $3DB0
-	call L002CA8
+	ld   hl, MoveInput_DBDF
+	call MoveInputS_ChkInputDir
 	jp   c, L056CC2
 L056C62:;J
-	ld   hl, $3D95
-	call L002CA8
+	ld   hl, MoveInput_DB
+	call MoveInputS_ChkInputDir
 	jp   c, L056C83
 	jp   L056CDA
 L056C6E:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L056C7B
 	ld   a, $48
 	jp   L056C7D
 L056C7B:;R
 	ld   a, $4A
 L056C7D:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L056CD8
 L056C83:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L056C90
 	ld   a, $4C
 	jp   L056C92
 L056C90:;R
 	ld   a, $4E
 L056C92:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L056CD8
 L056C98:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L056CA5
 	ld   a, $50
 	jp   L056CA7
 L056CA5:;R
 	ld   a, $52
 L056CA7:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L056CD8
 L056CAD:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L056CBA
 	ld   a, $54
 	jp   L056CBC
 L056CBA:;R
 	ld   a, $56
 L056CBC:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L056CD8
 L056CC2:;J
-	call L002D53
-	call L003790
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckSuperDesperation
 	jp   c, L056CD0
 	ld   a, $64
 	jp   L056CD2
 L056CD0:;J
 	ld   a, $66
 L056CD2:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L056CD8
 L056CD8:;J
 	scf
@@ -9758,7 +9758,7 @@ L056CDC:;I
 	jp   z, L056DC7
 	jp   L056DD7
 L056D0B:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056DD7
 	inc  hl
 	ld   [hl], $06
@@ -9766,27 +9766,27 @@ L056D0B:;J
 	call HomeCall_Sound_ReqPlayExId
 	jp   L056DD7
 L056D1C:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056D43
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L056D3D
 	jp   nz, L056D34
 	ld   hl, $0100
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L056D43
 L056D34:;J
 	ld   hl, $0300
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L056D43
 L056D3D:;J
 	ld   hl, $0500
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L056D43:;J
 	ld   hl, $0040
 	call L0035D9
 	call L056D6A
 	jp   c, L056DDA
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056DD7
 	inc  hl
 	ld   [hl], $14
@@ -9794,7 +9794,7 @@ L056D43:;J
 L056D5B:;J
 	ld   hl, $0040
 	call L0035D9
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056DD7
 	jp   L056DCD
 L056D6A:;C
@@ -9814,7 +9814,7 @@ L056D6A:;C
 	jp   nc, L056D9D
 	call Task_PassControlFar
 	ld   a, $03
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	ld   a, $0C
 	ld   h, $04
 	call L002E49
@@ -9824,7 +9824,7 @@ L056D9D:;J
 	xor  a
 	ret
 L056D9F:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056DD7
 	ld   hl, $0412
 	ld   a, $01
@@ -9833,22 +9833,22 @@ L056D9F:;J
 	call L003875
 	jp   L056DD7
 L056DB6:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056DD7
 	ld   hl, $040F
 	ld   a, $01
 	call L003890
 	jp   L056DD7
 L056DC7:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056DD7
 L056DCD:;J
 	ld   a, $00
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	call L002EA2
 	jr   L056DDA
 L056DD7:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L056DDA:;JR
 	ret
 L056DDB:;I
@@ -9872,36 +9872,36 @@ L056DDB:;I
 	jp   z, L056EAD
 	jp   L056E82
 L056E0A:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056E31
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L056E2B
 	jp   nz, L056E22
 	ld   hl, $0500
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L056E31
 L056E22:;J
 	ld   hl, $0600
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L056E31
 L056E2B:;J
 	ld   hl, $0700
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L056E31:;J
 	jp   L056E65
 L056E34:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056E65
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
 	jp   L056E65
 L056E42:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056E4D
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
 L056E4D:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056E65
 	inc  hl
 	ld   [hl], $FF
@@ -9938,7 +9938,7 @@ L056E93:;J
 	call L003882
 	ld   hl, $0080
 	call L0035D9
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056EBF
 	inc  hl
 	ld   [hl], $14
@@ -9946,17 +9946,17 @@ L056E93:;J
 L056EAD:;J
 	ld   hl, $0080
 	call L0035D9
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056EBF
 L056EB9:;J
 	call L002EA2
 	jp   L056EC2
 L056EBF:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L056EC2:;J
 	ret
 L056EC3:;I
-	call L002D8C
+	call Play_Pl_CreateJoyMergedKeysLH
 	call L00347B
 	call L0038B3
 	jp   c, L057030
@@ -9989,28 +9989,28 @@ L056F0B: db $C3;X
 L056F0C: db $2D;X
 L056F0D: db $70;X
 L056F0E:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L056F46
 	ld   a, $A8
 	call HomeCall_Sound_ReqPlayExId
-	call L002D53
-	call L003D2C
+	call Play_Pl_ClearJoyDirBuffer
+	call Play_Pl_ClearJoyMergedKeysLH
 	ld   hl, $0083
 	add  hl, bc
 	ld   [hl], $00
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L056F40
 	jp   nz, L056F37
 	ld   hl, $0300
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L056F46
 L056F37:;J
 	ld   hl, $0400
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L056F46
 L056F40:;J
 	ld   hl, $0500
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L056F46:;J
 	call L056FD0
 	ld   hl, $0040
@@ -10054,7 +10054,7 @@ L056F95:;J
 L056FA0:;J
 	ld   hl, $0040
 	call L0035D9
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L056EBF
 	call L056FEA
 	jp   nz, L05702D
@@ -10077,11 +10077,11 @@ L056FD0:;C
 	add  hl, bc
 	bit  0, [hl]
 	ret  nz
-	call L003D33
+	call MoveInputS_CheckPKTypeWithMergedLH
 	ret  nc
 	ret  nz
-	ld   hl, $3D95
-	call L002CA8
+	ld   hl, MoveInput_DB
+	call MoveInputS_ChkInputDir
 	ret  nc
 	ld   hl, $0083
 	add  hl, bc
@@ -10111,19 +10111,19 @@ L057005:;J
 L05700C:;J
 	ld   hl, $0040
 	call L0035D9
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L05702D
 	jp   L057027
 L05701B:;J
 	ld   hl, $0040
 	call L0035D9
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L05702D
 L057027:;J
 	call L002EA2
 	jp   L057030
 L05702D:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L057030:;J
 	ret
 L057031:;I
@@ -10145,35 +10145,35 @@ L057031:;I
 	jp   z, L0570E3
 	jp   L0570EE
 L05705B:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0570EE
 	inc  hl
 	ld   [hl], $FF
 	jp   L0570EE
 L057067:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0570A8
 	ld   a, $12
 	call HomeCall_Sound_ReqPlayExId
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L057099
 	jp   nz, L05708A
 	ld   hl, $0300
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FC00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L0570A5
 L05708A:;J
 	ld   hl, $0400
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FB80
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L0570A5
 L057099:;J
 	ld   hl, $0580
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FC00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 L0570A5:;J
 	jp   L0570D0
 L0570A8:;J
@@ -10183,7 +10183,7 @@ L0570A8:;J
 	jp   nc, L0570D0
 	jp   L0570D0
 L0570B5:;J
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   nc, L0570C3
 	ld   hl, $0203
 	ld   a, $90
@@ -10203,12 +10203,12 @@ L0570D0:;J
 	call L002DEC
 	jp   L0570F1
 L0570E3:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0570EE
 	call L002EA2
 	jr   L0570F1
 L0570EE:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L0570F1:;JR
 	ret
 L0570F2:;I
@@ -10236,7 +10236,7 @@ L057123: db $C3;X
 L057124: db $9F;X
 L057125: db $72;X
 L057126:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L05729F
 	inc  hl
 	ld   [hl], $04
@@ -10248,19 +10248,19 @@ L057132:;J
 	jp   z, L057161
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L05715B
 	jp   nz, L057152
 	ld   hl, $0500
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L057161
 L057152:;J
 	ld   hl, $0600
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L057161
 L05715B:;J
 	ld   hl, $0700
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L057161:;J
 	call L057188
 	jp   c, L0572A2
@@ -10270,7 +10270,7 @@ L05716D:;J
 	call L057188
 	jp   c, L0572A2
 	jp   z, L057270
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L05727D
 	inc  hl
 	ld   [hl], $FF
@@ -10295,7 +10295,7 @@ L057188:;C
 	ld   h, $FF
 	call L002E49
 	ld   a, $03
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	ld   hl, $0111
 	ld   a, $01
 	call L003890
@@ -10367,12 +10367,12 @@ L057233:;J
 	call L003890
 	jp   L0572A2
 L05723E:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L05724A
 	ld   hl, $F900
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 L05724A:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L05729F
 	ld   hl, $0033
 	add  hl, bc
@@ -10391,9 +10391,9 @@ L057267:;J
 	call L0572A3
 L057270:;J
 	ld   a, $18
-	call L00341B
+	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
 	ld   a, $00
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	jp   L0572A2
 L05727D:;J
 	call OBJLstS_ApplyXSpeed
@@ -10407,10 +10407,10 @@ L057283:;J
 	jp   nc, L05729F
 	call L002EA2
 	ld   a, $00
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	jr   L0572A2
 L05729F:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L0572A2:;JR
 	ret
 L0572A3:;C
@@ -10450,11 +10450,11 @@ L0572A3:;C
 	inc  hl
 	pop  af
 	ld   [hl], $32
-	call L00251B
+	call OBJLstS_Overlap
 	ld   hl, $0000
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 	ld   hl, $0000
-	call L0034DD
+	call Play_OBJLstS_MoveV
 	pop  de
 	pop  bc
 	ret
@@ -10504,11 +10504,11 @@ L0572F3:;C
 	inc  hl
 	pop  af
 	ld   [hl], $05
-	call L00251B
+	call OBJLstS_Overlap
 	ld   hl, $0000
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 	ld   hl, $0000
-	call L0034DD
+	call Play_OBJLstS_MoveV
 	pop  de
 	pop  bc
 	ret
@@ -10517,24 +10517,24 @@ L057352:;I
 	add  hl, de
 	dec  [hl]
 	jp   z, L05735E
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 	ret
 L05735E:;J
-	call L002951
+	call OBJLstS_Hide
 	ret
 L057362:;I
 	call L003763
 	jp   nz, L057497
 L057368:;I
-	call L0036CB
+	call MoveInputS_CanStartSpecialMove
 	jp   c, L057497
 	jp   z, L057374
 	jp   L057497
 L057374:;J
-	call L003D52
+	call MoveInputS_CheckEasyMoveKeys
 	jp   c, L057476
 	jp   z, L0573DA
-	call L003CFB
+	call MoveInputS_CheckLHType
 	jp   nc, L057497
 	jp   z, L05738C
 	jp   nz, L0573B9
@@ -10542,56 +10542,56 @@ L057389: db $C3;X
 L05738A: db $97;X
 L05738B: db $74;X
 L05738C:;J
-	call L003725
+	call MoveInputS_CanStartSuperMove
 	jp   c, L05739B
-	ld   hl, $3DB0
-	call L002CA8
+	ld   hl, MoveInput_DBDF
+	call MoveInputS_ChkInputDir
 	jp   c, L057460
 L05739B:;J
-	ld   hl, $3E27
-	call L002CA8
+	ld   hl, MoveInput_FDF
+	call MoveInputS_ChkInputDir
 	jp   c, L0573DA
-	ld   hl, $3E09
-	call L002CA8
+	ld   hl, MoveInput_FDB
+	call MoveInputS_ChkInputDir
 	jp   c, L0573EF
-	ld   hl, $3E70
-	call L002CA8
+	ld   hl, MoveInput_BDF
+	call MoveInputS_ChkInputDir
 	jp   c, L057439
 	jp   L057497
 L0573B9:;J
 	call L003763
 	jp   nz, L0573CE
-	call L003725
+	call MoveInputS_CanStartSuperMove
 	jp   c, L0573CE
-	ld   hl, $3DC1
-	call L002CA8
+	ld   hl, MoveInput_DBDB
+	call MoveInputS_ChkInputDir
 	jp   c, L057476
 L0573CE:;J
-	ld   hl, $3E09
-	call L002CA8
+	ld   hl, MoveInput_FDB
+	call MoveInputS_ChkInputDir
 	jp   c, L057414
 	jp   L057497
 L0573DA:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L0573E7
 	ld   a, $48
 	jp   L0573E9
 L0573E7:;R
 	ld   a, $4A
 L0573E9:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L057495
 L0573EF:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L0573FC
 	ld   a, $4C
 	jp   L0573FE
 L0573FC:;R
 	ld   a, $4E
 L0573FE:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $002C
 	add  hl, bc
 	ld   a, [hl]
@@ -10602,15 +10602,15 @@ L0573FE:;J
 	set  7, [hl]
 	jp   L057495
 L057414:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L057421
 	ld   a, $50
 	jp   L057423
 L057421:;R
 	ld   a, $52
 L057423:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $002C
 	add  hl, bc
 	ld   a, [hl]
@@ -10621,18 +10621,18 @@ L057423:;J
 	set  7, [hl]
 	jp   L057495
 L057439:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L05744F
 	ld   a, $58
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0020
 	add  hl, bc
 	set  5, [hl]
 	jp   L057495
 L05744F:;R
 	ld   a, $5A
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0020
 	add  hl, bc
 	set  5, [hl]
@@ -10640,28 +10640,28 @@ L05744F:;R
 	set  7, [hl]
 	jp   L057495
 L057460:;J
-	call L002D53
-	call L003790
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckSuperDesperation
 	jp   c, L05746E
 	ld   a, $64
 	jp   L057470
 L05746E:;J
 	ld   a, $66
 L057470:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L057495
 L057476:;J
 	call L003763
 	jp   nz, L057497
-	call L002D53
-	call L003790
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckSuperDesperation
 	jp   c, L05748A
 	ld   a, $68
 	jp   L05748C
 L05748A:;J
 	ld   a, $6A
 L05748C:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	call L00389E
 	jp   L057495
 L057495:;J
@@ -10671,7 +10671,7 @@ L057497:;J
 	or   a
 	ret
 L057499:;I
-	call L002D8C
+	call Play_Pl_CreateJoyMergedKeysLH
 	call L00347B
 	call L0038B3
 	jp   c, L057623
@@ -10691,25 +10691,25 @@ L057499:;I
 	cp   $14
 	jp   z, L057605
 L0574C8:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0574F8
-	call L003D2C
+	call Play_Pl_ClearJoyMergedKeysLH
 	ld   hl, $0083
 	add  hl, bc
 	ld   [hl], $00
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L0574F2
 	jp   nz, L0574E9
 	ld   hl, $0500
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L0574F8
 L0574E9:;J
 	ld   hl, $0600
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L0574F8
 L0574F2:;J
 	ld   hl, $0700
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L0574F8:;J
 	call L057556
 	jp   z, L057614
@@ -10727,7 +10727,7 @@ L05750B:;J
 	call OBJLstS_ApplyXSpeed
 	jp   L057623
 L05751E:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L057614
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
@@ -10741,12 +10741,12 @@ L05752C:;J
 	call OBJLstS_ApplyXSpeed
 	jp   L057623
 L05753F:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L05754A
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
 L05754A:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057614
 	inc  hl
 	ld   [hl], $00
@@ -10767,22 +10767,22 @@ L057556:;C
 	or   a
 	ret
 L057571:;J
-	call L003D33
+	call MoveInputS_CheckPKTypeWithMergedLH
 	jp   nc, L0575A0
 	jp   nz, L05758D
-	ld   hl, $3D95
-	call L002CA8
+	ld   hl, MoveInput_DB
+	call MoveInputS_ChkInputDir
 	jp   nc, L0575A0
-	call L002D53
+	call Play_Pl_ClearJoyDirBuffer
 	ld   hl, $0083
 	add  hl, bc
 	set  0, [hl]
 	ret
 L05758D:;J
-	ld   hl, $3D95
-	call L002CA8
+	ld   hl, MoveInput_DB
+	call MoveInputS_ChkInputDir
 	jp   nc, L0575A0
-	call L002D53
+	call Play_Pl_ClearJoyDirBuffer
 	ld   hl, $0083
 	add  hl, bc
 	set  1, [hl]
@@ -10797,7 +10797,7 @@ L0575A2:;C
 	or   a
 	ret
 L0575A9:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0575B4
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
@@ -10810,7 +10810,7 @@ L0575C0:;J
 	call L057556
 	ld   hl, $0080
 	call L0035D9
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057620
 	inc  hl
 	ld   [hl], $14
@@ -10825,14 +10825,14 @@ L0575E3: db $20;X
 L0575E4: db $76;X
 L0575E5:;J
 	ld   a, $54
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0208
 	ld   a, $01
 	call L003890
 	jp   L057623
 L0575F5:;J
 	ld   a, $56
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $020C
 	ld   a, $01
 	call L003890
@@ -10840,7 +10840,7 @@ L0575F5:;J
 L057605:;J
 	ld   hl, $0080
 	call L0035D9
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057620
 	jp   L05761A
 L057614:;J
@@ -10850,7 +10850,7 @@ L05761A:;J
 	call L002EA2
 	jp   L057623
 L057620:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L057623:;J
 	ret
 L057624:;I
@@ -10870,20 +10870,20 @@ L057641: db $C3;X
 L057642: db $99;X
 L057643: db $76;X
 L057644:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L05766E
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L05765F
 	ld   hl, $0100
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FC00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L05767B
 L05765F:;J
 	ld   hl, $0200
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $FC00
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L05767B
 L05766E:;J
 	ld   a, $FE
@@ -10900,12 +10900,12 @@ L05767B:;J
 	call L002DEC
 	jp   L05769C
 L05768E:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057699
 	call L002EA2
 	jr   L05769C
 L057699:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L05769C:;JR
 	ret
 L05769D:;I
@@ -10919,12 +10919,12 @@ L05769D:;I
 	jp   z, L0576B3
 	jp   L0576BE
 L0576B3:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0576BE
 	call L002EA2
 	jr   L0576C1
 L0576BE:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L0576C1:;JR
 	ret
 L0576C2:;I
@@ -10952,12 +10952,12 @@ L0576E3: db $C3;X
 L0576E4: db $F1;X
 L0576E5: db $76;X
 L0576E6:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0576F1
 	call L002EA2
 	jr   L0576F4
 L0576F1:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L0576F4:;JR
 	ret
 L0576F5:;I
@@ -10979,14 +10979,14 @@ L0576F5:;I
 	jp   z, L05775F
 	jp   L05776A
 L05771F:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L057742
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L057739
 	ld   hl, $0080
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L057742
 L057739: db $21;X
 L05773A: db $00;X
@@ -11000,7 +11000,7 @@ L057741: db $77;X
 L057742:;J
 	jp   L057759
 L057745:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057759
 	ld   hl, $0021
 	add  hl, bc
@@ -11012,12 +11012,12 @@ L057759:;J
 	call OBJLstS_ApplyXSpeed
 	jp   L05776A
 L05775F:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L05776A
 	call L002EA2
 	jr   L05776D
 L05776A:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L05776D:;JR
 	ret
 L05776E:;I
@@ -11035,36 +11035,36 @@ L05776E:;I
 	jp   z, L0577DE
 	jp   L0577F0
 L05778E:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0577F0
 	inc  hl
 	ld   [hl], $14
 	jp   L0577F0
 L05779A:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L0577CC
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
 	ld   hl, $0083
 	add  hl, bc
 	ld   [hl], $00
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L0577C6
 	jp   nz, L0577BD
 	ld   hl, $0400
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L0577CC
 L0577BD:;J
 	ld   hl, $0500
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L0577CC
 L0577C6:;J
 	ld   hl, $0600
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L0577CC:;J
 	ld   hl, $0040
 	call L0035D9
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0577F0
 	inc  hl
 	ld   [hl], $0A
@@ -11072,12 +11072,12 @@ L0577CC:;J
 L0577DE:;J
 	ld   hl, $0080
 	call L0035D9
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L0577F0
 	call L002EA2
 	jp   L0577F3
 L0577F0:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L0577F3:;J
 	ret
 L0577F4:;I
@@ -11093,18 +11093,18 @@ L057807: db $C3;X
 L057808: db $24;X
 L057809: db $78;X
 L05780A:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L057818
 	call L057828
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
 L057818:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057824
 	call L002EA2
 	jp   L057827
 L057824:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L057827:;J
 	ret
 L057828:;C
@@ -11150,9 +11150,9 @@ L057828:;C
 L05786E:;J
 	ld   [hl], $FF
 L057870:;J
-	call L00251B
+	call OBJLstS_Overlap
 	ld   hl, $0080
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	pop  de
 	pop  bc
 	ret
@@ -11170,21 +11170,21 @@ L05787C:;I
 	dec  [hl]
 	jp   z, L05789C
 L057898:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 	ret
 L05789C:;J
-	call L002951
+	call OBJLstS_Hide
 	ret
 L0578A0:;I
-	call L0036CB
+	call MoveInputS_CanStartSpecialMove
 	jp   c, L0579B5
 	jp   z, L0578AC
 	jp   L0579B5
 L0578AC:;J
-	call L003D52
+	call MoveInputS_CheckEasyMoveKeys
 	jp   c, L057989
 	jp   z, L057906
-	call L003CFB
+	call MoveInputS_CheckLHType
 	jp   nc, L0579B5
 	jp   z, L0578C4
 	jp   nz, L0578F1
@@ -11192,111 +11192,111 @@ L0578C1: db $C3;X
 L0578C2: db $B5;X
 L0578C3: db $79;X
 L0578C4:;J
-	call L003725
+	call MoveInputS_CanStartSuperMove
 	jp   c, L0578D3
-	ld   hl, $3E45
-	call L002CA8
+	ld   hl, MoveInput_FDBFDB
+	call MoveInputS_ChkInputDir
 	jp   c, L057989
 L0578D3:;J
-	ld   hl, $3E34
-	call L002CA8
+	ld   hl, MoveInput_FDBF
+	call MoveInputS_ChkInputDir
 	jp   c, L057960
-	ld   hl, $3E27
-	call L002CA8
+	ld   hl, MoveInput_FDF
+	call MoveInputS_ChkInputDir
 	jp   c, L057906
-	ld   hl, $3E70
-	call L002CA8
+	ld   hl, MoveInput_BDF
+	call MoveInputS_ChkInputDir
 	jp   c, L05794B
 	jp   L0579B5
 L0578F1:;J
-	ld   hl, $3E70
-	call L002CA8
+	ld   hl, MoveInput_BDF
+	call MoveInputS_ChkInputDir
 	jp   c, L057936
-	ld   hl, $3D95
-	call L002CA8
+	ld   hl, MoveInput_DB
+	call MoveInputS_ChkInputDir
 	jp   c, L05791B
 	jp   L0579B5
 L057906:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L057913
 	ld   a, $48
 	jp   L057915
 L057913:;R
 	ld   a, $4A
 L057915:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L0579B3
 L05791B:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L057928
 	ld   a, $4C
 	jp   L05792A
 L057928:;R
 	ld   a, $4E
 L05792A:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0021
 	add  hl, bc
 	set  7, [hl]
 	jp   L0579B3
 L057936:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L057943
 	ld   a, $50
 	jp   L057945
 L057943:;R
 	ld   a, $52
 L057945:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L0579B3
 L05794B:;J
-	call L002D53
-	call L00376A
+	call Play_Pl_ClearJoyDirBuffer
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L057958
 	ld   a, $54
 	jp   L05795A
 L057958:;R
 	ld   a, $56
 L05795A:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	jp   L0579B3
 L057960:;J
-	call L002D53
+	call Play_Pl_ClearJoyDirBuffer
 	call L003A3E
 	jp   nc, L0579B5
 	call Task_PassControlFar
 	ld   a, $03
-	ld   [$C173], a
-	call L00376A
+	ld   [wPlayPlThrowActId], a
+	call MoveInputS_CheckMoveLHVer
 	jr   nz, L05797B
 	ld   a, $58
 	jp   L05797D
 L05797B:;R
 	ld   a, $5A
 L05797D:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0021
 	add  hl, bc
 	set  7, [hl]
 	jp   L0579B3
 L057989:;J
-	call L002D53
+	call Play_Pl_ClearJoyDirBuffer
 	call L003A3E
 	jp   nc, L0579B5
 	call Task_PassControlFar
 	ld   a, $03
-	ld   [$C173], a
-	call L003790
+	ld   [wPlayPlThrowActId], a
+	call MoveInputS_CheckSuperDesperation
 	jp   c, L0579A5
 	ld   a, $64
 	jp   L0579A7
 L0579A5:;J
 	ld   a, $66
 L0579A7:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0021
 	add  hl, bc
 	set  7, [hl]
@@ -11326,13 +11326,13 @@ L0579D9: db $C3;X
 L0579DA: db $23;X
 L0579DB: db $7A;X
 L0579DC:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057A23
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
 	jp   L057A23
 L0579EA:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057A23
 	inc  hl
 	ld   [hl], $0A
@@ -11345,22 +11345,22 @@ L0579EA:;J
 	call HomeCall_Sound_ReqPlayExId
 	jp   L057A23
 L057A05:;J
-	call L003C6D
-	call L002DD9
+	call Play_Pl_DoGroundScreenShake
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057A23
 	inc  hl
 	ld   [hl], $10
 	xor  a
-	ld   [$C159], a
+	ld   [wScreenShakeY], a
 	jp   L057A23
 L057A18:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057A23
 L057A1E:;J
 	call L002EA2
 	jr   L057A26
 L057A23:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L057A26:;JR
 	ret
 L057A27:;I
@@ -11379,27 +11379,27 @@ L057A27:;I
 	cp   $0C
 	jp   z, L057AAB
 L057A49:;J
-	call L002DD2
+	call OBJLstS_Unk_ChkStatusBit3
 	jp   z, L057A75
 	ld   a, $93
 	call HomeCall_Sound_ReqPlayExId
-	call L00376A
+	call MoveInputS_CheckMoveLHVer
 	jp   c, L057A6F
 	jp   nz, L057A66
 	ld   hl, $0100
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L057A75
 L057A66:;J
 	ld   hl, $0200
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L057A75
 L057A6F:;J
 	ld   hl, $0300
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L057A75:;J
 	jp   L057A89
 L057A78:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057A89
 	inc  hl
 	ld   [hl], $04
@@ -11410,13 +11410,13 @@ L057A89:;J
 	call OBJLstS_ApplyXSpeed
 	jp   L057AB7
 L057A8F:;J
-	call L003C6D
-	call L002DD9
+	call Play_Pl_DoGroundScreenShake
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057A23
 	inc  hl
 	ld   [hl], $02
 	xor  a
-	ld   [$C159], a
+	ld   [wScreenShakeY], a
 	ld   hl, $0020
 	add  hl, bc
 	res  1, [hl]
@@ -11424,12 +11424,12 @@ L057A8F:;J
 	res  2, [hl]
 	jp   L057AB7
 L057AAB:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057AB7
 	call L002EA2
 	jp   L057ABA
 L057AB7:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L057ABA:;J
 	ret
 L057ABB:;I
@@ -11479,7 +11479,7 @@ L057AFC:;J
 	jp   nc, L057BDC
 	call Task_PassControlFar
 	ld   a, $03
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	ld   hl, $0021
 	add  hl, bc
 	set  7, [hl]
@@ -11495,7 +11495,7 @@ L057AFC:;J
 L057B44:;J
 	jp   L057BDC
 L057B47:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057BDC
 	ld   hl, $0612
 	ld   a, $01
@@ -11512,7 +11512,7 @@ L057B47:;J
 	call L003875
 	jp   L057BDC
 L057B71:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057BDC
 	ld   hl, $0613
 	ld   a, $01
@@ -11530,7 +11530,7 @@ L057B92:;J
 	call L003875
 	jp   L057BDC
 L057B9B:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057BDC
 	ld   hl, $0033
 	add  hl, bc
@@ -11546,22 +11546,22 @@ L057BB4:;J
 	call L003890
 	jp   L057BDC
 L057BBC:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057BDC
 	inc  hl
 	ld   [hl], $0A
 	jp   L057BDC
 L057BC8:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057BDC
 	jp   L057BD1
 L057BD1:;J
 	call L002EA2
 	ld   a, $00
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	jp   L057BDF
 L057BDC:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L057BDF:;J
 	ret
 L057BE0:;I
@@ -11595,7 +11595,7 @@ L057C20: db $C3;X
 L057C21: db $D8;X
 L057C22: db $7C;X
 L057C23:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057CD8
 	ld   hl, $0612
 	ld   a, $01
@@ -11604,13 +11604,13 @@ L057C23:;J
 	call L003875
 	jp   L057CD8
 L057C3A:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057CD8
 	inc  hl
 	ld   [hl], $05
 	jp   L057CD8
 L057C46:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057CD8
 	ld   hl, $0612
 	ld   a, $01
@@ -11619,23 +11619,23 @@ L057C46:;J
 	call L003875
 	jp   L057CD8
 L057C5D:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057CD8
 	ld   hl, $060B
 	ld   a, $90
 	call L003890
 	jp   L057CD8
 L057C6E:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057CD8
 	call L003A28
 	jp   nc, L057CDB
 	call Task_PassControlFar
 	ld   a, $03
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	jp   L057CD8
 L057C85:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057CD8
 	ld   hl, $0612
 	ld   a, $01
@@ -11644,7 +11644,7 @@ L057C85:;J
 	call L003875
 	jp   L057CD8
 L057C9C:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057CD8
 	ld   hl, $0612
 	ld   a, $01
@@ -11653,7 +11653,7 @@ L057C9C:;J
 	call L003875
 	jp   L057CD8
 L057CB3:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057CD8
 	inc  hl
 	ld   [hl], $1E
@@ -11662,14 +11662,14 @@ L057CB3:;J
 	call L003890
 	jp   L057CD8
 L057CC7:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057CD8
 	call L002EA2
 	ld   a, $00
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	jp   L057CDB
 L057CD8:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L057CDB:;J
 	ret
 L057CDC:;I
@@ -11721,7 +11721,7 @@ L057D49: db $C3;X
 L057D4A: db $CE;X
 L057D4B: db $7E;X
 L057D4C:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057ECE
 	inc  hl
 	ld   [hl], $05
@@ -11746,7 +11746,7 @@ L057D6D:;J
 	call L003875
 	jp   L057ECE
 L057D7E:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057ECE
 	ld   hl, $0612
 	ld   a, $01
@@ -11755,7 +11755,7 @@ L057D7E:;J
 	call L003875
 	jp   L057ECE
 L057D95:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057ECE
 	ld   hl, $0613
 	ld   a, $90
@@ -11764,14 +11764,14 @@ L057D95:;J
 	call L003875
 	jp   L057ECE
 L057DAC:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057ECE
 	ld   hl, $060B
 	ld   a, $90
 	call L003890
 	jp   L057ECE
 L057DBD:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057ECE
 	push hl
 	ld   hl, $0083
@@ -11807,40 +11807,40 @@ L057DFA:;J
 	call L003890
 	jp   L057ECE
 L057E05:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057ECE
 	call L003A28
 	jp   nc, L057ED1
 	call Task_PassControlFar
 	ld   a, $03
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	jp   L057DD1
 L057E1C:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057ECE
 	call L003A28
 	jp   nc, L057ED1
 	call Task_PassControlFar
 	ld   a, $03
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	jp   L057DDA
 L057E33:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057ECE
 	jp   L057DF4
 L057E3C:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057ECE
 	jp   L057DEB
 L057E45:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057ECE
 	ld   hl, $060B
 	ld   a, $01
 	call L003890
 	jp   L057ECE
 L057E56:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057ECE
 	inc  hl
 	ld   [hl], $0A
@@ -11849,13 +11849,13 @@ L057E56:;J
 	call L003890
 	jp   L057ECE
 L057E6A:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057ECE
 	inc  hl
 	dec  [hl]
 	jp   L057ECE
 L057E75:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057ECE
 	inc  hl
 	dec  [hl]
@@ -11876,16 +11876,16 @@ L057E90:;J
 L057E96:;J
 	jp   L057ECE
 L057E99:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057ECE
 	inc  hl
 	ld   [hl], $64
 	jp   L057ECE
 L057EA5:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L057ECE
 	ld   a, $00
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	ld   hl, $0033
 	add  hl, bc
 	ld   a, [hl]
@@ -11896,13 +11896,13 @@ L057EA5:;J
 L057EBE:;R
 	ld   a, $48
 L057EC0:;J
-	call L0037D0
+	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, $0808
 	ld   a, $83
 	call L003890
 	jp   L057ED1
 L057ECE:;J
-	call L002F0B
+	call OBJLstS_DoAnimTiming_Loop_by_DE
 L057ED1:;J
 	ret
 L057ED2: db $3E;X

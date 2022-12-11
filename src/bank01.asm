@@ -2211,7 +2211,7 @@ L0148A1: db $28
 L0148A2: db $49
 L0148A3: db $69
 
-L0148A4:
+OBJInfoInit_Play_CharCross:
 	db $00 ; iOBJInfo_Status
 	db $10 ; iOBJInfo_OBJLstFlags
 	db $00 ; iOBJInfo_OBJLstFlagsOld
@@ -2221,29 +2221,29 @@ L0148A4:
 	db $00 ; iOBJInfo_YSub
 	db $00 ; iOBJInfo_SpeedX
 	db $00 ; iOBJInfo_SpeedXSub
-	db $00 ; iOBJInfo_Unknown_09
-	db $00 ; iOBJInfo_Unknown_0A
+	db $00 ; iOBJInfo_SpeedY
+	db $00 ; iOBJInfo_SpeedYSub
 	db $00 ; iOBJInfo_RelX (auto)
 	db $00 ; iOBJInfo_RelY (auto)
 	db $80 ; iOBJInfo_TileIDBase
 	db LOW($8800) ; iOBJInfo_VRAMPtr_Low
 	db HIGH($8800) ; iOBJInfo_VRAMPtr_High
-	db BANK(OBJLstPtrTable_L0148E2) ; iOBJInfo_BankNum (BANK $01)
-	db LOW(OBJLstPtrTable_L0148E2) ; iOBJInfo_OBJLstPtrTbl_Low
-	db HIGH(OBJLstPtrTable_L0148E2) ; iOBJInfo_OBJLstPtrTbl_High
+	db BANK(OBJLstPtrTable_CharCross) ; iOBJInfo_BankNum (BANK $01)
+	db LOW(OBJLstPtrTable_CharCross) ; iOBJInfo_OBJLstPtrTbl_Low
+	db HIGH(OBJLstPtrTable_CharCross) ; iOBJInfo_OBJLstPtrTbl_High
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
-	db BANK(OBJLstPtrTable_L0148E2) ; iOBJInfo_BankNum (BANK $01)
-	db LOW(OBJLstPtrTable_L0148E2) ; iOBJInfo_OBJLstPtrTbl_Low
-	db HIGH(OBJLstPtrTable_L0148E2) ; iOBJInfo_OBJLstPtrTbl_High
+	db BANK(OBJLstPtrTable_CharCross) ; iOBJInfo_BankNum (BANK $01)
+	db LOW(OBJLstPtrTable_CharCross) ; iOBJInfo_OBJLstPtrTbl_Low
+	db HIGH(OBJLstPtrTable_CharCross) ; iOBJInfo_OBJLstPtrTbl_High
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
-	db $00 ; iOBJInfo_OBJLstByte1 (auto)
-	db $00 ; iOBJInfo_OBJLstByte2 (auto)
-	db $00 ; iOBJInfo_Unknown_1A
+	db $00 ; iOBJInfo_ColiBoxId (auto)
+	db $00 ; iOBJInfo_HitboxId (auto)
+	db $00 ; iOBJInfo_ForceHitboxId
 	db $00 ; iOBJInfo_FrameLeft
 	db $00 ; iOBJInfo_FrameTotal
 	db $00 ; iOBJInfo_BufInfoPtr_Low
 	db $00 ; iOBJInfo_BufInfoPtr_High
-OBJInfoInit_Play_PreRoundText:
+OBJInfoInit_Play_RoundText:
 	db $00 ; iOBJInfo_Status
 	db $10 ; iOBJInfo_OBJLstFlags
 	db $00 ; iOBJInfo_OBJLstFlagsOld
@@ -2253,8 +2253,8 @@ OBJInfoInit_Play_PreRoundText:
 	db $00 ; iOBJInfo_YSub
 	db $00 ; iOBJInfo_SpeedX
 	db $00 ; iOBJInfo_SpeedXSub
-	db $00 ; iOBJInfo_Unknown_09
-	db $00 ; iOBJInfo_Unknown_0A
+	db $00 ; iOBJInfo_SpeedY
+	db $00 ; iOBJInfo_SpeedYSub
 	db $00 ; iOBJInfo_RelX (auto)
 	db $00 ; iOBJInfo_RelY (auto)
 	db $80 ; iOBJInfo_TileIDBase
@@ -2268,14 +2268,14 @@ OBJInfoInit_Play_PreRoundText:
 	db LOW(OBJLstPtrTable_PreRoundText) ; iOBJInfo_OBJLstPtrTbl_Low
 	db HIGH(OBJLstPtrTable_PreRoundText) ; iOBJInfo_OBJLstPtrTbl_High
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
-	db $00 ; iOBJInfo_OBJLstByte1 (auto)
-	db $00 ; iOBJInfo_OBJLstByte2 (auto)
-	db $00 ; iOBJInfo_Unknown_1A
+	db $00 ; iOBJInfo_ColiBoxId (auto)
+	db $00 ; iOBJInfo_HitboxId (auto)
+	db $00 ; iOBJInfo_ForceHitboxId
 	db $00 ; iOBJInfo_FrameLeft
 	db $00 ; iOBJInfo_FrameTotal
 	db $00 ; iOBJInfo_BufInfoPtr_Low
 	db $00 ; iOBJInfo_BufInfoPtr_High
-OBJLstPtrTable_L0148E2: db $28
+OBJLstPtrTable_CharCross: db $28
 L0148E3: db $49
 L0148E4: db $FF
 L0148E5: db $FF
@@ -2313,7 +2313,7 @@ L014904: db $FF
 L014905: db $FF
 L014906: db $FF;X
 L014907: db $FF;X
-L014908: db $FD
+OBJLstPtrTable_PostRoundText0: db $FD
 L014909: db $49
 L01490A: db $FF
 L01490B: db $FF
@@ -2323,7 +2323,7 @@ L01490E: db $FF
 L01490F: db $FF
 L014910: db $FF;X
 L014911: db $FF;X
-L014912: db $4C
+OBJLstPtrTable_PostRoundText1: db $4C
 L014913: db $4A
 L014914: db $FF
 L014915: db $FF
@@ -6250,7 +6250,7 @@ ProjGFXDef_OLeona:
 	mProjDef $11E0, $08
 	mProjDef $06A0, $0C
 
-L01586F: db $EB
+OBJLstPtrTable_SuperSparkle: db $EB
 L015870: db $5A
 L015871: db $FF
 L015872: db $FF
@@ -9072,8 +9072,8 @@ OBJInfoInit_Projectile:
 	db $00 ; iOBJInfo_YSub
 	db $00 ; iOBJInfo_SpeedX
 	db $00 ; iOBJInfo_SpeedXSub
-	db $00 ; iOBJInfo_Unknown_09
-	db $00 ; iOBJInfo_Unknown_0A
+	db $00 ; iOBJInfo_SpeedY
+	db $00 ; iOBJInfo_SpeedYSub
 	db $00 ; iOBJInfo_RelX (auto)
 	db $00 ; iOBJInfo_RelY (auto)
 	db $80 ; iOBJInfo_TileIDBase
@@ -9087,2318 +9087,2754 @@ OBJInfoInit_Projectile:
 	db $00 ; iOBJInfo_OBJLstPtrTbl_Low
 	db $00 ; iOBJInfo_OBJLstPtrTbl_High
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
-	db $00 ; iOBJInfo_OBJLstByte1 (auto)
-	db $00 ; iOBJInfo_OBJLstByte2 (auto)
-	db $00 ; iOBJInfo_Unknown_1A
+	db $00 ; iOBJInfo_ColiBoxId (auto)
+	db $00 ; iOBJInfo_HitboxId (auto)
+	db $00 ; iOBJInfo_ForceHitboxId
 	db $00 ; iOBJInfo_FrameLeft
 	db $00 ; iOBJInfo_FrameTotal
 	db $00 ; iOBJInfo_BufInfoPtr_Low
 	db $00 ; iOBJInfo_BufInfoPtr_High
 	
-L016389:;J
+
+; =============== Play_Main ===============
+; The main gameplay loop.
+; Should be executed alongside the two other tasks Play_Unk_DoPlMove_1P and Play_Unk_DoPlMove_2P.
+Play_Main:
 	ld   sp, $DD00
-	ld   a, $3C
+	; Set 60 seconds for subsecond timer
+	ld   a, 60
 	ld   [wRoundTimeSub], a
 	ei
-L016392:;J
-	call L01709E
-	call L0163B3
-	call L0164DE
-	call L0176A7
-	call L0165CD
-	call L016B12
-	call L017EB1
-	call L0175E7
-	call L002BFC
+	; Here we go
+.mainLoop:
+	call Play_ChkEnd
+	call Play_DoPlInput
+	call Play_ChkPause
+	call Play_DoHUD
+	call Play_DoUnkChain
+	call Play_DoPlColi
+	call Play_WriteKeysToBuffer
+	call Play_DoScrollPos
+	call Play_ExecExOBJCode
 	call Task_PassControlFar
-	jp   L016392
-L0163B3:;C
+	jp   .mainLoop
+	
+; =============== Play_DoPlInput ===============
+; Handles input for both players during gameplay.
+; Essentially does some processing to the hJoyKeys fields before
+; copying them to the player struct.
+Play_DoPlInput:
+	; Increase play timer as long as we have input
 	ld   hl, wPlayTimer
 	inc  [hl]
+	
+	;
+	; PLAYER 1
+	;
+.do1P:
+	;
+	; CPU inputs are handled separately.
+	; This part handles only inputs read from the joypad (so, for human players).
+	;
 	ld   hl, wPlInfo_Pl1+iPlInfo_Status
-	bit  7, [hl]
-	jp   nz, L016441
+	bit  PSB_CPU, [hl]		; Is 1P CPU controlled?
+	jp   nz, .cpu1P		; If so, skip ahead
+	
+	;
+	; Copy over the raw joypad inputs to the player 1 struct
+	;
 	ldh  a, [hJoyKeys]
-	ld   [$D945], a
+	ld   [wPlInfo_Pl1+iPlInfo_JoyKeys], a
 	ldh  a, [hJoyNewKeys]
-	ld   [$D944], a
+	ld   [wPlInfo_Pl1+iPlInfo_JoyNewKeys], a
+	
+	;--
+	;
+	; Generate a special version of iPlInfo_JoyNewKeys which keeps the directional keys bits,
+	; and tells if the Punch (A) or Kick (B) buttons are for the light or heavy attacks.
+	;
+	; Effectively this removes the START and SELECT bits, but they aren't used for moves anyway
+	; so who cares.
+	;
+	; The punch/kick is treated as heavy if the button is pressed, then held for 6 frames.
+	; If it's released before 6 frames, it instead counts as a light.
+	;
+	
+	; The lower nybble with directional keys is identical to what's in iPlInfo_JoyNewKeys.
 	and  a, $0F
-	ld   [$D946], a
-	ld   a, [$D94A]
-	or   a
-	jp   nz, L0163DC
+	ld   [wPlInfo_Pl1+iPlInfo_JoyNewKeysLH], a
+	
+	;
+	; A Button - Check light/heavy counter for punches
+	;
+.aBufChk1P:
+
+	; If we've started counting held frames already, jump
+	ld   a, [wPlInfo_Pl1+iPlInfo_JoyHeavyCountA]
+	or   a					; iPlInfo_JoyHeavyCountA != 0?
+	jp   nz, .aBufNext1P	; If so, jump
+	
+	; Otherwise, check for having started to press A.
+	; This prevents starting another punch if we were still holding A continuously.
 	ldh  a, [hJoyNewKeys]
-	bit  4, a
-	jp   z, L016406
-L0163DC:;J
+	bit  KEYB_A, a			; Pressed A just now?
+	jp   z, .bBufChk1P		; If not, don't do anything
+.aBufNext1P:
+	; If we released A, reset the counter and set the LIGHT bit
 	ldh  a, [hJoyKeys]
-	bit  4, a
-	jp   z, L0163FB
-	ld   hl, $D94A
+	bit  KEYB_A, a			; Holding A?
+	jp   z, .aLight1P		; If not, jump
+	
+	; Otherwise, increase the held key timer.
+	ld   hl, wPlInfo_Pl1+iPlInfo_JoyHeavyCountA
 	inc  [hl]
-	ld   a, $06
-	cp   a, [hl]
-	jp   nc, L016406
-	ld   hl, $D946
-	res  4, [hl]
-	set  6, [hl]
+	
+	; If we held it for less than 6 frames, don't do anything
+	ld   a, $06			
+	cp   a, [hl]		; iPlInfo_JoyHeavyCountA < 6?
+	jp   nc, .bBufChk1P	; If so, jump
+	
+.aHeavy1P:
+	; Set the heavy attack on A
+	ld   hl, wPlInfo_Pl1+iPlInfo_JoyNewKeysLH
+	res  KEPB_A_LIGHT, [hl]
+	set  KEPB_A_HEAVY, [hl]
 	xor  a
-	ld   [$D94A], a
-	jp   L016406
-L0163FB:;J
-	ld   hl, $D946
-	set  4, [hl]
-	res  6, [hl]
+	ld   [wPlInfo_Pl1+iPlInfo_JoyHeavyCountA], a
+	jp   .bBufChk1P
+.aLight1P:
+	; Set the light attack on A
+	ld   hl, wPlInfo_Pl1+iPlInfo_JoyNewKeysLH
+	set  KEPB_A_LIGHT, [hl]
+	res  KEPB_A_HEAVY, [hl]
 	xor  a
-	ld   [$D94A], a
-L016406:;J
-	ld   a, [$D94B]
-	or   a
-	jp   nz, L016414
+	ld   [wPlInfo_Pl1+iPlInfo_JoyHeavyCountA], a
+	
+.bBufChk1P:
+
+	;
+	; B Button - Check light/heavy counter for kicks.
+	;
+
+	; Check new/current
+	ld   a, [wPlInfo_Pl1+iPlInfo_JoyHeavyCountB]
+	or   a					
+	jp   nz, .bBufNext1P
+	
 	ldh  a, [hJoyNewKeys]
-	bit  5, a
-	jp   z, L01643E
-L016414:;J
+	bit  KEYB_B, a
+	jp   z, .endBufChk1P
+.bBufNext1P:
+	; Check if premature stop (LIGHT)
 	ldh  a, [hJoyKeys]
-	bit  5, a
-	jp   z, L016433
-	ld   hl, $D94B
+	bit  KEYB_B, a
+	jp   z, .bLight1P
+	
+	; Increase counter and check for 6 frames (HEAVY)
+	ld   hl, wPlInfo_Pl1+iPlInfo_JoyHeavyCountB
 	inc  [hl]
-	ld   a, $06
+	
+	ld   a, $06			
 	cp   a, [hl]
-	jp   nc, L01643E
-	ld   hl, $D946
-	res  5, [hl]
-	set  7, [hl]
+	jp   nc, .endBufChk1P
+.bHeavy1P:
+	; Set HEAVY B press
+	ld   hl, wPlInfo_Pl1+iPlInfo_JoyNewKeysLH
+	res  KEPB_B_LIGHT, [hl]
+	set  KEPB_B_HEAVY, [hl]
 	xor  a
-	ld   [$D94B], a
-	jp   L01643E
-L016433:;J
-	ld   hl, $D946
-	set  5, [hl]
-	res  7, [hl]
+	ld   [wPlInfo_Pl1+iPlInfo_JoyHeavyCountB], a
+	jp   .endBufChk1P
+.bLight1P:
+	; Set LIGHT B press
+	ld   hl, wPlInfo_Pl1+iPlInfo_JoyNewKeysLH
+	set  KEPB_B_LIGHT, [hl]
+	res  KEPB_B_HEAVY, [hl]
 	xor  a
-	ld   [$D94B], a
-L01643E:;J
-	jp   L01644A
-L016441:;J
+	ld   [wPlInfo_Pl1+iPlInfo_JoyHeavyCountB], a
+	
+.endBufChk1P:
+	jp   .do2P
+	
+.cpu1P:
+	; Handle CPU input
 	ld   bc, wPlInfo_Pl1
-	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
+	ld   de, wOBJInfo_Pl1
 	call L0024E4
-L01644A:;J
+	
+.do2P:
+
+	;
+	; PLAYER 2
+	; Do the same.
+	;
+	
 	ld   hl, wPlInfo_Pl2+iPlInfo_Status
-	bit  7, [hl]
-	jp   nz, L0164D4
-L016452: db $F0;X
-L016453: db $AB;X
-L016454: db $EA;X
-L016455: db $45;X
-L016456: db $DA;X
-L016457: db $F0;X
-L016458: db $AC;X
-L016459: db $EA;X
-L01645A: db $44;X
-L01645B: db $DA;X
-L01645C: db $E6;X
-L01645D: db $0F;X
-L01645E: db $EA;X
-L01645F: db $46;X
-L016460: db $DA;X
-L016461: db $FA;X
-L016462: db $4A;X
-L016463: db $DA;X
-L016464: db $B7;X
-L016465: db $C2;X
-L016466: db $6F;X
-L016467: db $64;X
-L016468: db $F0;X
-L016469: db $AC;X
-L01646A: db $CB;X
-L01646B: db $67;X
-L01646C: db $CA;X
-L01646D: db $99;X
-L01646E: db $64;X
-L01646F: db $F0;X
-L016470: db $AB;X
-L016471: db $CB;X
-L016472: db $67;X
-L016473: db $CA;X
-L016474: db $8E;X
-L016475: db $64;X
-L016476: db $21;X
-L016477: db $4A;X
-L016478: db $DA;X
-L016479: db $34;X
-L01647A: db $3E;X
-L01647B: db $06;X
-L01647C: db $BE;X
-L01647D: db $D2;X
-L01647E: db $99;X
-L01647F: db $64;X
-L016480: db $21;X
-L016481: db $46;X
-L016482: db $DA;X
-L016483: db $CB;X
-L016484: db $A6;X
-L016485: db $CB;X
-L016486: db $F6;X
-L016487: db $AF;X
-L016488: db $EA;X
-L016489: db $4A;X
-L01648A: db $DA;X
-L01648B: db $C3;X
-L01648C: db $99;X
-L01648D: db $64;X
-L01648E: db $21;X
-L01648F: db $46;X
-L016490: db $DA;X
-L016491: db $CB;X
-L016492: db $E6;X
-L016493: db $CB;X
-L016494: db $B6;X
-L016495: db $AF;X
-L016496: db $EA;X
-L016497: db $4A;X
-L016498: db $DA;X
-L016499: db $FA;X
-L01649A: db $4B;X
-L01649B: db $DA;X
-L01649C: db $B7;X
-L01649D: db $C2;X
-L01649E: db $A7;X
-L01649F: db $64;X
-L0164A0: db $F0;X
-L0164A1: db $AC;X
-L0164A2: db $CB;X
-L0164A3: db $6F;X
-L0164A4: db $CA;X
-L0164A5: db $D1;X
-L0164A6: db $64;X
-L0164A7: db $F0;X
-L0164A8: db $AB;X
-L0164A9: db $CB;X
-L0164AA: db $6F;X
-L0164AB: db $CA;X
-L0164AC: db $C6;X
-L0164AD: db $64;X
-L0164AE: db $21;X
-L0164AF: db $4B;X
-L0164B0: db $DA;X
-L0164B1: db $34;X
-L0164B2: db $3E;X
-L0164B3: db $06;X
-L0164B4: db $BE;X
-L0164B5: db $D2;X
-L0164B6: db $D1;X
-L0164B7: db $64;X
-L0164B8: db $21;X
-L0164B9: db $46;X
-L0164BA: db $DA;X
-L0164BB: db $CB;X
-L0164BC: db $AE;X
-L0164BD: db $CB;X
-L0164BE: db $FE;X
-L0164BF: db $AF;X
-L0164C0: db $EA;X
-L0164C1: db $4B;X
-L0164C2: db $DA;X
-L0164C3: db $C3;X
-L0164C4: db $D1;X
-L0164C5: db $64;X
-L0164C6: db $21;X
-L0164C7: db $46;X
-L0164C8: db $DA;X
-L0164C9: db $CB;X
-L0164CA: db $EE;X
-L0164CB: db $CB;X
-L0164CC: db $BE;X
-L0164CD: db $AF;X
-L0164CE: db $EA;X
-L0164CF: db $4B;X
-L0164D0: db $DA;X
-L0164D1: db $C3;X
-L0164D2: db $DD;X
-L0164D3: db $64;X
-L0164D4:;J
-	ld   bc, wPlInfo_Pl2
-	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
-	call L0024E4
-	ret
-L0164DE:;C
-	ldh  a, [hJoyNewKeys]
-	and  a, $80
-	jp   z, L01650E
-	ld   hl, $C17D
-	set  0, [hl]
-	call L01653F
-L0164ED:;J
-	ldh  a, [hJoyNewKeys]
-	bit  7, a
-	jp   nz, L016505
-	bit  6, a
-	jp   nz, L0164FF
-	call Task_SkipAllAndWaitVBlank
-	jp   L0164ED
-L0164FF:;J
-	call L01659F
-	jp   L0164ED
-L016505:;J
-	call L016573
-	ld   hl, $C17D
-	res  0, [hl]
-	ret
-L01650E:;J
+	bit  PSB_CPU, [hl]		; Is 2P CPU controlled?
+	jp   nz, .cpu2P			; If so, skip ahead
+	
+	;
+	; Copy over the raw joypad inputs to the player 1 struct
+	;
+	ldh  a, [hJoyKeys2]
+	ld   [wPlInfo_Pl2+iPlInfo_JoyKeys], a
 	ldh  a, [hJoyNewKeys2]
-	and  a, $80
-	jp   z, L01653E
-L016515: db $21;X
-L016516: db $7D;X
-L016517: db $C1;X
-L016518: db $CB;X
-L016519: db $CE;X
-L01651A: db $CD;X
-L01651B: db $3F;X
-L01651C: db $65;X
-L01651D: db $F0;X
-L01651E: db $AC;X
-L01651F: db $CB;X
-L016520: db $7F;X
-L016521: db $C2;X
-L016522: db $35;X
-L016523: db $65;X
-L016524: db $CB;X
-L016525: db $77;X
-L016526: db $C2;X
-L016527: db $2F;X
-L016528: db $65;X
-L016529: db $CD;X
-L01652A: db $36;X
-L01652B: db $04;X
-L01652C: db $C3;X
-L01652D: db $1D;X
-L01652E: db $65;X
-L01652F: db $CD;X
-L016530: db $9F;X
-L016531: db $65;X
-L016532: db $C3;X
-L016533: db $1D;X
-L016534: db $65;X
-L016535: db $CD;X
-L016536: db $73;X
-L016537: db $65;X
-L016538: db $21;X
-L016539: db $7D;X
-L01653A: db $C1;X
-L01653B: db $CB;X
-L01653C: db $8E;X
-L01653D: db $C9;X
-L01653E:;J
+	ld   [wPlInfo_Pl2+iPlInfo_JoyNewKeys], a
+	
+	;--
+	; The lower nybble with directional keys is identical to what's in iPlInfo_JoyNewKeys.
+	and  a, $0F
+	ld   [wPlInfo_Pl2+iPlInfo_JoyNewKeysLH], a
+	
+	;
+	; A Button - Check light/heavy counter for punches
+	;
+.aBufChk2P:
+
+	; If we've started counting held frames already, jump
+	ld   a, [wPlInfo_Pl2+iPlInfo_JoyHeavyCountA]
+	or   a					; iPlInfo_JoyHeavyCountA != 0?
+	jp   nz, .aBufNext2P	; If so, jump
+	
+	; Otherwise, check for having started to press A.
+	; This prevents starting another punch if we were still holding A continuously.
+	ldh  a, [hJoyNewKeys2]
+	bit  KEYB_A, a			; Pressed A just now?
+	jp   z, .bBufChk2P		; If not, don't do anything
+.aBufNext2P:
+	; If we released A, reset the counter and set the LIGHT bit
+	ldh  a, [hJoyKeys2]
+	bit  KEYB_A, a			; Holding A?
+	jp   z, .aLight2P		; If not, jump
+	
+	; Otherwise, increase the held key timer.
+	ld   hl, wPlInfo_Pl2+iPlInfo_JoyHeavyCountA
+	inc  [hl]
+	
+	; If we held it for less than 6 frames, don't do anything
+	ld   a, $06			
+	cp   a, [hl]		; iPlInfo_JoyHeavyCountA < 6?
+	jp   nc, .bBufChk2P	; If so, jump
+	
+.aHeavy2P:
+	; Set the heavy attack on A
+	ld   hl, wPlInfo_Pl2+iPlInfo_JoyNewKeysLH
+	res  KEPB_A_LIGHT, [hl]
+	set  KEPB_A_HEAVY, [hl]
+	xor  a
+	ld   [wPlInfo_Pl2+iPlInfo_JoyHeavyCountA], a
+	jp   .bBufChk2P
+.aLight2P:
+	; Set the light attack on A
+	ld   hl, wPlInfo_Pl2+iPlInfo_JoyNewKeysLH
+	set  KEPB_A_LIGHT, [hl]
+	res  KEPB_A_HEAVY, [hl]
+	xor  a
+	ld   [wPlInfo_Pl2+iPlInfo_JoyHeavyCountA], a
+	
+.bBufChk2P:
+
+	;
+	; B Button - Check light/heavy counter for kicks.
+	;
+
+	; Check new/current
+	ld   a, [wPlInfo_Pl2+iPlInfo_JoyHeavyCountB]
+	or   a					
+	jp   nz, .bBufNext2P
+	
+	ldh  a, [hJoyNewKeys2]
+	bit  KEYB_B, a
+	jp   z, .endBufChk2P
+.bBufNext2P:
+	; Check if premature stop (LIGHT)
+	ldh  a, [hJoyKeys2]
+	bit  KEYB_B, a
+	jp   z, .bLight2P
+	
+	; Increase counter and check for 6 frames (HEAVY)
+	ld   hl, wPlInfo_Pl2+iPlInfo_JoyHeavyCountB
+	inc  [hl]
+	
+	ld   a, $06			
+	cp   a, [hl]
+	jp   nc, .endBufChk2P
+.bHeavy2P:
+	; Set HEAVY B press
+	ld   hl, wPlInfo_Pl2+iPlInfo_JoyNewKeysLH
+	res  KEPB_B_LIGHT, [hl]
+	set  KEPB_B_HEAVY, [hl]
+	xor  a
+	ld   [wPlInfo_Pl2+iPlInfo_JoyHeavyCountB], a
+	jp   .endBufChk2P
+.bLight2P:
+	; Set LIGHT B press
+	ld   hl, wPlInfo_Pl2+iPlInfo_JoyNewKeysLH
+	set  KEPB_B_LIGHT, [hl]
+	res  KEPB_B_HEAVY, [hl]
+	xor  a
+	ld   [wPlInfo_Pl2+iPlInfo_JoyHeavyCountB], a
+.endBufChk2P:
+	jp   .end
+	
+.cpu2P:
+	; Handle CPU input
+	ld   bc, wPlInfo_Pl2
+	ld   de, wOBJInfo_Pl2
+	call L0024E4
+.end:
 	ret
-L01653F:;C
+	
+; =============== Play_ChkPause ===============
+; Handles pausing during gameplay.
+;
+; Any player can pause the game.
+; However, only the player that paused the game can unpause it,
+; as there are separate main loops for each player.
+Play_ChkPause:
+
+	; When pressing START, enter the paused state.
+	ldh  a, [hJoyNewKeys]
+	and  a, KEY_START		; Did 1P press START?
+	jp   z, .chk2P			; If not, skip
+	
+	;
+	; As long as the game is paused, this main loop takes exclusive control.
+	;
+	ld   hl, wPauseFlags
+	set  PFB_1P, [hl]		; Set pause flag
+	call Play_Pause
+.mainLoop1P:
+	ldh  a, [hJoyNewKeys]
+	bit  KEYB_START, a		; Pressed START?
+	jp   nz, .unpause1P		; If so, unpause the game
+	bit  KEYB_SELECT, a		; Pressed SELECT?
+	jp   nz, .frameAdv1P	; If so, frame advance
+	; Skip other tasks to freeze players and pause the music
+	call Task_SkipAllAndWaitVBlank
+	jp   .mainLoop1P
+.frameAdv1P:
+	call Play_FrameAdv
+	jp   .mainLoop1P
+.unpause1P:
+	call Play_Unpause
+	ld   hl, wPauseFlags
+	res  PFB_1P, [hl]		; Unset pause flag
+	ret
+	
+.chk2P:
+	ldh  a, [hJoyNewKeys2]
+	and  a, KEY_START		; Did 2P press START?
+	jp   z, .ret			; If not, return
+	;
+	; As long as the game is paused, this main loop takes exclusive control.
+	;
+	ld   hl, wPauseFlags
+	set  PFB_2P, [hl]		; Set pause flag
+	call Play_Pause
+.mainLoop2P:
+	ldh  a, [hJoyNewKeys2]
+	bit  KEYB_START, a		; Pressed START?
+	jp   nz, .unpause2P		; If so, unpause the game
+	bit  KEYB_SELECT, a		; Pressed SELECT?
+	jp   nz, .frameAdv2P	; If so, frame advance
+	; Skip other tasks to freeze players and pause the music
+	call Task_SkipAllAndWaitVBlank
+	jp   .mainLoop2P
+.frameAdv2P:
+	call Play_FrameAdv
+	jp   .mainLoop2P
+.unpause2P:
+	call Play_Unpause
+	ld   hl, wPauseFlags
+	res  PFB_2P, [hl]		; Unset pause flag
+	ret
+.ret:
+	ret
+; =============== Play_Pause ===============
+; Pauses the game.
+Play_Pause:
+	; Stop player animations
 	ld   a, $01
-	ld   [wPaused], a
+	ld   [wNoCopyGFXBuf], a
+	
+	; Pause the music playback
 	ld   a, SNC_PAUSE
 	call HomeCall_Sound_ReqPlayExId
-	ld   a, [$C17D]
-	bit  0, a
-	jp   z, L016557
-	ld   hl, $9C46
-	jp   L01655A
-L016557: db $21;X
-L016558: db $4B;X
-L016559: db $9C;X
-L01655A:;J
-	ld   b, $03
-	ld   a, $F9
-L01655E:;J
+	
+	; Draw "PAUSE" on the HUD.
+	; This gets drawn to the side of the player that paused the game.
+	ld   a, [wPauseFlags]
+	bit  PFB_1P, a		; Did 1P pause the game?
+	jp   z, .bg2P		; If not, jump
+.bg1P:
+	ld   hl, $9C46		; HL = Tilemap ptr for 1P side
+	jp   .drawBG
+.bg2P:
+	ld   hl, $9C4B		; HL = Tilemap ptr for 2P side
+.drawBG:
+	; This uses tile IDs $F9-$FB.
+	ld   b, $03			; B = Number of tiles
+	ld   a, $F9			; A = Initial tile ID
+.loop:
 	push af
 	di
-L016560:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L016560
+	mWaitForVBlankOrHBlank
 	pop  af
-	ldi  [hl], a
+	ldi  [hl], a		; Write tile ID, VRAMPtr++
 	ei
-	inc  a
-	dec  b
-	jp   nz, L01655E
+	inc  a				; TileID++
+	dec  b				; Drawn all tiles?
+	jp   nz, .loop		; If not, loop
+	
 	call Task_PassControlFar
 	ret
-L016573:;C
+	
+; =============== Play_Unpause ===============
+; Unpauses the game.
+Play_Unpause:
+	; Resume player animations
 	xor  a
-	ld   [wPaused], a
-	ld   a, $8D
+	ld   [wNoCopyGFXBuf], a
+	
+	; Unpause music playback
+	ld   a, SNC_UNPAUSE
 	call HomeCall_Sound_ReqPlayExId
-	ld   a, [$C17D]
-	bit  0, a
-	jp   z, L01658A
-	ld   hl, $9C46
-	jp   L01658D
-L01658A: db $21;X
-L01658B: db $4B;X
-L01658C: db $9C;X
-L01658D:;J
-	ld   b, $03
-L01658F:;J
+	
+	; Blank out "PAUSE" from the HUD
+	ld   a, [wPauseFlags]
+	bit  PFB_1P, a		; Did 1P pause the game?
+	jp   z, .bg2P		; If not, jump
+.bg1P:
+	ld   hl, $9C46		; HL = Tilemap ptr for 1P side
+	jp   .drawBG
+.bg2P:
+	ld   hl, $9C4B		; HL = Tilemap ptr for 2P side
+.drawBG:
+	; Fill with blank ($00) tiles
+	ld   b, $03			; B = Number of tiles
+.loop:
 	di
-L016590:
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L016590
-	xor  a
-	ldi  [hl], a
+	mWaitForVBlankOrHBlank
+	xor  a				
+	ldi  [hl], a		; Write blank tile, VRAMPtr++
 	ei
-	dec  b
-	jp   nz, L01658F
+	dec  b				; Drawn all tiles?
+	jp   nz, .loop		; If not, loop
 	ret
-L01659F:;C
-	xor  a
-	ld   [wPaused], a
-	ld   a, [$C17D]
+	
+; =============== Play_Unpause ===============
+; Advances the game by a single frame.
+Play_FrameAdv:
+	; This unpauses the game, and executes gameplay code for a frame.
+	; After it's done, the game is repaused.
+	xor  a					; Enable player animations
+	ld   [wNoCopyGFXBuf], a
+	ld   a, [wPauseFlags]	; Save pause info
 	push af
-	xor  a
-	ld   [$C17D], a
-	call L0163B3
-	call L0176A7
-	call L0165CD
-	call L016B12
-	call L017EB1
-	call L0175E7
-	call L002BFC
+	xor  a					; Unpause the game
+	ld   [wPauseFlags], a
+	; Execute gameplay routines
+	call Play_DoPlInput
+	call Play_DoHUD
+	call Play_DoUnkChain
+	call Play_DoPlColi
+	call Play_WriteKeysToBuffer
+	call Play_DoScrollPos
+	call Play_ExecExOBJCode
 	call Task_PassControlFar
-	pop  af
-	ld   [$C17D], a
-	ld   a, $01
-	ld   [wPaused], a
+	pop  af					; Repause the game
+	ld   [wPauseFlags], a
+	ld   a, $01				; Pause player animations
+	ld   [wNoCopyGFXBuf], a
 	ret
-L0165CD:;C
+	
+; =============== Play_DoUnkChain ===============
+; Miscelanneous chain of checks related to gameplay / moves.
+Play_DoUnkChain:
+	
+	;
+	; PLAYFIELD FLASHING
+	;
+	;
+	; This is triggered by writing $00 to wStageBGP (though any value that isn't $FF or $1B would work too).
+	; When we get here, that value causes the playfield palette to be set to $FF (all black).
+	; The effect only lasts for a single frame, as getting here with $FF restores the original palette.
+	;
+	
+	; If the palette is normal, ignore this and continue using the normal palette
 	ld   a, [wStageBGP]
-	cp   $1B
-	jp   z, L0165E7
+	cp   $1B			; wStageBGP == normal?
+	jp   z, .useNormPal	; If so, jump
+	
+	; If the palette is currently black (as set by .setFlash last frame), restore the normal palette
 	ld   hl, wStageBGP
-	cp   $FF
-	jp   z, L0165E2
+	cp   $FF			; wStageBGP == flashing?
+	jp   z, .setNorm	; If so, jump
+	
+.setFlash:
+	; Otherwise, wStageBGP is set to $00.
+	; Set the playfield palette as completely black.
 	ld   [hl], $FF
-	jp   L0165E9
-L0165E2:;J
+	jp   .useCustomPal
+.setNorm:
 	ld   [hl], $1B
-	jp   L0165E9
-L0165E7:;J
+	jp   .useCustomPal
+	
+.useNormPal:
 	ld   a, $1B
-L0165E9:;J
+.useCustomPal:
 	ldh  [hScreenSect1BGP], a
-	ld   a, [wPlInfo_Pl1+iPlInfo_23]
-	bit  1, a
-	jp   nz, L016631
-	bit  6, a
-	jp   nz, L01663D
-	ld   a, [wPlInfo_Pl1+iPlInfo_60]
-	or   a
-	jp   z, L016667
+	; Fall-through
+	
+;
+; OBJ FLASHING
+;
+
+; =============== mFlashPlPal ===============
+; Generates code to handle the palette flashing/cycling effects for sprites.
+; This is a palette cycle effect based off wPlayTimer, and incrementing internal counter.
+; wPlayTimer is used as we want the effect to pause while the game is paused.
+; There are 4 different ways the palette is cycled:
+; - Set A - No Special
+; - Set A - Super Move
+; - Set B - Slow Speed
+; - Set B - Max Speed
+; The two sets differ in the actual palettes used, with A being used for ????
+;
+; IN
+; - 1: Ptr to wPlInfo struct
+; - 2: Ptr to target palette
+; - 3: Normal palette
+; - 4: Set A, Id 0 color
+; - 5: Set A, Id 1 color
+; - 6: Set A, Id 2 color
+; - 7: Set A, Id 3 color
+; - 8: Set B, Id 0 color
+; - 9: Set B, Id 1 color
+; - 10: Set B, Id 2 color
+; - 11: Set B, Id 3 color
+mFlashPlPal: MACRO
+	; If any of these bits is set, it uses an alternate palette cycle (Set B)
+	ld   a, [\1+iPlInfo_23Flags]
+	bit  PI23B_FLASH_B_SLOW, a	; bit1 set?	
+	jp   nz, .flashSlowB		; If so, jump
+	bit  PI23B_FLASH_B_FAST, a	; bit6 set?	
+	jp   nz, .flashMaxB			; If so, jump
+	
+	;
+	; OBJ FLASHING (Set A) - NO SPECIAL / INCREMENTING SPEED MODE
+	; 
+	; This makes use of an additional field, iPlInfo_NoSpecialTimer.
+	; This is a countdown timer set by one of Chizuru's super moves
+	; that restricts the other player to normals until it elapses.
+	;
+	; To visually indicate how much time is left, the lower the timer is,
+	; the faster the palette flashes.
+	;
+	
+	; Skip if it isn't set
+	ld   a, [\1+iPlInfo_NoSpecialTimer]
+	or   a					; FlashTimer == 0?
+	jp   z, .flashSuperA	; If so, jump
+	
+.flashDecA:
+	; Decrement iPlInfo_NoSpecialTimer every 2 frames
 	ld   hl, wPlayTimer
-	ld   b, [hl]
-	bit  0, b
-	jp   nz, L01660C
-	dec  a
-	ld   [wPlInfo_Pl1+iPlInfo_60], a
-L01660C:;J
-	cp   $0A
-	jp   c, L01662B
-	cp   $78
-	jp   c, L016629
-	cp   $B4
-	jp   c, L016627
-	cp   $F0
-	jp   c, L016625
-	ld   a, $03
-	jp   L01662C
-L016625:;J
+	ld   b, [hl]			; B = wPlayTimer
+	bit  0, b				; wPlayTimer % 2 != 0?
+	jp   nz, .chkSpeedRange	; If so, skip
+	dec  a					; Otherwise, iPlInfo_NoSpecialTimer--
+	ld   [\1+iPlInfo_NoSpecialTimer], a
+	
+.chkSpeedRange:
+	;
+	; Determine the palette cycle speed.
+	; These are triggered by iPlInfo_NoSpecialTimer reaching certain ranges.
+	;
+	; The higher the value is, more wPlayTimer gets divided by 2, slowing
+	; down the speed, with the topmost range using an outright fixed palette (ID 3).
+	;
+	cp   $0A		; iPlInfo_NoSpecialTimer < $0A?
+	jp   c, .speed4	; If so, A = wPlayTimer
+	cp   $78		; iPlInfo_NoSpecialTimer < $78?
+	jp   c, .speed3	; If so, A = wPlayTimer / 2
+	cp   $B4		; iPlInfo_NoSpecialTimer < $BA?
+	jp   c, .speed2	; If so, A = wPlayTimer / 4
+	cp   $F0		; iPlInfo_NoSpecialTimer < $F0?
+	jp   c, .speed1	; If so, A = wPlayTimer / 8
+.speed0:			; Otherwise, iPlInfo_NoSpecialTimer >= $F0
+	ld   a, $03		; A = 3 (fixed palette)
+	jp   .filter		
+.speed1:
 	srl  b
-L016627:;J
+.speed2:
 	srl  b
-L016629:;J
+.speed3:
 	srl  b
-L01662B:;J
+.speed4:
 	ld   a, b
-L01662C:;J
-	and  a, $03
-	jp   L016674
-L016631:;J
+.filter:
+	and  a, $03		; Filter in range 0-3
+	jp   .flashA
+	
+.flashSlowB:
+	;
+	; OBJ FLASHING (Set B) - SLOW SPEED
+	; 
+	
+	; PalId = ((wPlayTimer & $0F) / 4) % 4
 	ld   a, [wPlayTimer]
 	and  a, $0F
 	srl  a
 	srl  a
-	jp   L016642
-L01663D:;J
+	jp   .flashB
+	
+.flashMaxB:
+	;
+	; OBJ FLASHING (Set B) - MAX SPEED
+	; Like .flashSuperA, except for a different palette and different bit (checked before).
+	; 
+	; PalId = wPlayTimer % 4
+	;
 	ld   a, [wPlayTimer]
 	and  a, $03
-L016642:;J
-	cp   $01
-	jp   z, L016656
-	cp   $02
-	jp   z, L01665B
+.flashB:
+	; Palette cycle B.
+	; Pick the palette by ID
+	cp   $01			; PalId == 1?
+	jp   z, .flashB1	; If so, jump
+	cp   $02			; ...
+	jp   z, .flashB2
 	cp   $03
-	jp   z, L016660
-	ld   a, $4C
-	jp   L016662
-L016656:;J
-	ld   a, $D0
-	jp   L016662
-L01665B:;J
-	ld   a, $34
-	jp   L016662
-L016660:;J
-	ld   a, $54
-L016662:;J
-	ldh  [rOBP0], a
-	jp   L01669D
-L016667:;J
-	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
-	bit  6, a
-	jp   z, L016699
+	jp   z, .flashB3
+.flashB0:				; Otherwise, PalId == 0
+	ld   a, \<8>
+	jp   .setPalB
+.flashB1:
+	ld   a, \<9>
+	jp   .setPalB
+.flashB2:
+	ld   a, \<10>
+	jp   .setPalB
+.flashB3:
+	ld   a, \<11>
+.setPalB:
+	ldh  [\2], a
+	jp   .endFlash
+.flashSuperA:
+	;
+	; OBJ FLASHING (Set A) - SUPER MOVE
+	;
+	; The player flashes at max speed for the duration of the super move.
+	;
+	; PalId = wPlayTimer % 4
+	; 
+	ld   a, [\1+iPlInfo_Status]
+	bit  PSB_SUPERMOVE, a		; Is the super move bit set?
+	jp   z, .useNormPal			; If not, force the normal palette
 	ld   a, [wPlayTimer]
 	and  a, $03
-L016674:;J
-	cp   $01
-	jp   z, L016688
-	cp   $02
-	jp   z, L01668D
+.flashA:
+	; Palette cycle A
+	; Pick the palette by ID
+	cp   $01			; PalId == 1?
+	jp   z, .flashA1	; If so, jump
+	cp   $02			; ...
+	jp   z, .flashA2
 	cp   $03
-	jp   z, L016692
-	ld   a, $8C
-	jp   L016694
-L016688:;J
-	ld   a, $0C
-	jp   L016694
-L01668D:;J
-	ld   a, $8C
-	jp   L016694
-L016692:;J
-	ld   a, $80
-L016694:;J
-	ldh  [rOBP0], a
-	jp   L01669D
-L016699:;J
-	ld   a, $8C
-	ldh  [rOBP0], a
-L01669D:;J
-	ld   a, [wPlInfo_Pl2+iPlInfo_23]
-	bit  1, a
-	jp   nz, L0166E3
-	bit  6, a
-	jp   nz, L0166EF
-	ld   a, [wPlInfo_Pl2+iPlInfo_60]
-	or   a
-	jp   z, L016719
-	ld   hl, wPlayTimer
-	ld   b, [hl]
-	bit  0, b
-	jp   nz, L0166BE
-	dec  a
-	ld   [wPlInfo_Pl2+iPlInfo_60], a
-L0166BE:;J
-	cp   $0A
-	jp   c, L0166DD
-	cp   $78
-	jp   c, L0166DB
-	cp   $B4
-	jp   c, L0166D9
-	cp   $F0
-	jp   c, L0166D7
-	ld   a, $03
-	jp   L0166DE
-L0166D7:;J
-	srl  b
-L0166D9:;J
-	srl  b
-L0166DB:;J
-	srl  b
-L0166DD:;J
-	ld   a, b
-L0166DE:;J
-	and  a, $03
-	jp   L016726
-L0166E3:;J
-	ld   a, [wPlayTimer]
-	and  a, $0F
-	srl  a
-	srl  a
-	jp   L0166F4
-L0166EF:;J
-	ld   a, [wPlayTimer]
-	and  a, $03
-L0166F4:;J
-	cp   $01
-	jp   z, L016708
-	cp   $02
-	jp   z, L01670D
-	cp   $03
-	jp   z, L016712
-	ld   a, $8C
-	jp   L016714
-L016708:;J
-	ld   a, $E0
-	jp   L016714
-L01670D:;J
-	ld   a, $38
-	jp   L016714
-L016712:;J
-	ld   a, $A8
-L016714:;J
-	ldh  [rOBP1], a
-	jp   L01674F
-L016719:;J
-	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
-	bit  6, a
-	jp   z, L01674B
-	ld   a, [wPlayTimer]
-	and  a, $03
-L016726:;J
-	cp   $01
-	jp   z, L01673A
-	cp   $02
-	jp   z, L01673F
-	cp   $03
-	jp   z, L016744
-	ld   a, $4C
-	jp   L016746
-L01673A:;J
-	ld   a, $0C
-	jp   L016746
-L01673F:;J
-	ld   a, $4C
-	jp   L016746
-L016744:;J
-	ld   a, $40
-L016746:;J
-	ldh  [rOBP1], a
-	jp   L01674F
-L01674B:;J
-	ld   a, $4C
-	ldh  [rOBP1], a
-L01674F:;J
-	ld   a, [$C171]
-	ld   [$C172], a
+	jp   z, .flashA3
+.flashA0:				; Otherwise, PalId == 0
+	ld   a, \4
+	jp   .setPalA
+.flashA1:
+	ld   a, \5
+	jp   .setPalA
+.flashA2:
+	ld   a, \6
+	jp   .setPalA
+.flashA3:
+	ld   a, \7
+.setPalA:
+	ldh  [\2], a
+	jp   .endFlash
+	
+.useNormPal:
+	; Use/restore normal 1P palette
+	ld   a, \3
+	ldh  [\2], a
+.endFlash:
+ENDM
+
+;                                                      NORM | SET A          | SET B	
+Play_DoUnkChain_FlashOBJ1P: mFlashPlPal wPlInfo_Pl1, rOBP0, $8C, $8C,$0C,$8C,$80, $4C,$D0,$34,$54
+; Fall-through
+Play_DoUnkChain_FlashOBJ2P: mFlashPlPal wPlInfo_Pl2, rOBP1, $4C, $4C,$0C,$4C,$40, $8C,$E0,$38,$A8
+; Fall-through
+
+	; ???
+Play_DoUnkChain_CopyUnk:
+	; Copy over value
+	ld   a, [wPlayHitstopSet]
+	ld   [wPlayHitstop], a
+	
+Play_DoUnkChain_ClearInputProcOnStop:	
+	; If inputs aren't  processed, clear out the existing fields from both players
 	ld   a, [wMisc_C027]
-	bit  7, a
-	jr   z, L01676F
+	bit  MISCB_PLAY_STOP, a
+	jr   z, .end
 	xor  a
-	ld   [$D945], a
-	ld   [$D946], a
-	ld   [$D944], a
-	ld   [$DA45], a
-	ld   [$DA46], a
-	ld   [$DA44], a
-L01676F:;R
-	call L016A24
+	ld   [wPlInfo_Pl1+iPlInfo_JoyKeys], a
+	ld   [wPlInfo_Pl1+iPlInfo_JoyNewKeysLH], a
+	ld   [wPlInfo_Pl1+iPlInfo_JoyNewKeys], a
+	ld   [wPlInfo_Pl2+iPlInfo_JoyKeys], a
+	ld   [wPlInfo_Pl2+iPlInfo_JoyNewKeysLH], a
+	ld   [wPlInfo_Pl2+iPlInfo_JoyNewKeys], a
+.end:
+	
+Play_DoUnkChain_CalcDistance:
+	call Play_CalcPlDistanceAndXFlip
+	
+Play_DoUnkChain_SetPlProjFlag:
+
+	;
+	; Update the player status flag marking if a projectile is visible & active on-screen.
+	; This flag will be used as a shortcut to avoid checking two different fields every time
+	;
+	
 	ld   hl, wPlInfo_Pl1+iPlInfo_Status
-	res  0, [hl]
-	ld   a, [wOBJInfo2+iOBJInfo_Status]
-	and  a, $80
-	jr   z, L016786
-	ld   a, [$D723]
-	or   a
-	jr   z, L016786
-	set  0, [hl]
-L016786:;R
+	res  PSB_PROJ, [hl]		; Reset the flag to zero
+	
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_Status]
+	and  a, OST_VISIBLE		; Is the projectile visible?
+	jr   z, .do2P			; If not, skip
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_DamageVal]
+	or   a					; Is there a penalty assigned to it (ie: it was thrown)?
+	jr   z, .do2P			; If not, skip
+	
+	set  PSB_PROJ, [hl] 	; Otherwise, don
+	
+.do2P:
+	; Do the same for 2P
 	ld   hl, wPlInfo_Pl2+iPlInfo_Status
-	res  0, [hl]
-	ld   a, [wOBJInfo3+iOBJInfo_Status]
-	and  a, $80
-	jr   z, L01679A
-	ld   a, [$D763]
+	res  PSB_PROJ, [hl]
+	
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Status]
+	and  a, OST_VISIBLE
+	jr   z, .end
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_DamageVal]
 	or   a
-	jr   z, L01679A
-	set  0, [hl]
-L01679A:;R
-	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
-	ld   [$DA6D], a
-	ld   a, [wPlInfo_Pl1+iPlInfo_21]
-	ld   [$DA6E], a
+	jr   z, .end
+	set  PSB_PROJ, [hl]
+.end:
+	
+Play_DoUnkChain_ShareVars:
+	; Give visibility to some of the other player's variables.
+	; This gives functions receiving the player struct known locations
+	; to read data for the other player without having to do manual offset checks.
+	
+	ld   a, [wPlInfo_Pl1+iPlInfo_Status]		; Copy 1P status...
+	ld   [wPlInfo_Pl2+iPlInfo_StatusOther], a	; ...to 2P player's struct
+	ld   a, [wPlInfo_Pl1+iPlInfo_21Flags]			; And so on
+	ld   [wPlInfo_Pl2+iPlInfo_21FlagsOther], a
 	ld   a, [wPlInfo_Pl1+iPlInfo_22Flags]
-	ld   [$DA6F], a
-	ld   a, [wPlInfo_Pl1+iPlInfo_23]
-	ld   [$DA70], a
+	ld   [wPlInfo_Pl2+iPlInfo_22FlagsOther], a
+	ld   a, [wPlInfo_Pl1+iPlInfo_23Flags]
+	ld   [wPlInfo_Pl2+iPlInfo_23FlagsOther], a
 	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
-	ld   [$D96D], a
-	ld   a, [wPlInfo_Pl2+iPlInfo_21]
-	ld   [$D96E], a
+	ld   [wPlInfo_Pl1+iPlInfo_StatusOther], a
+	ld   a, [wPlInfo_Pl2+iPlInfo_21Flags]
+	ld   [wPlInfo_Pl1+iPlInfo_21FlagsOther], a
 	ld   a, [wPlInfo_Pl2+iPlInfo_22Flags]
-	ld   [$D96F], a
-	ld   a, [wPlInfo_Pl2+iPlInfo_23]
-	ld   [$D970], a
+	ld   [wPlInfo_Pl1+iPlInfo_22FlagsOther], a
+	ld   a, [wPlInfo_Pl2+iPlInfo_23Flags]
+	ld   [wPlInfo_Pl1+iPlInfo_23FlagsOther], a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlags]
-	ld   [$DA7F], a
+	ld   [wPlInfo_Pl2+iPlInfo_OBJInfoFlagsOther], a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlags]
-	ld   [$D97F], a
+	ld   [wPlInfo_Pl1+iPlInfo_OBJInfoFlagsOther], a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
-	ld   [$DA80], a
+	ld   [wPlInfo_Pl2+iPlInfo_OBJInfoXOther], a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
-	ld   [$D980], a
+	ld   [wPlInfo_Pl1+iPlInfo_OBJInfoXOther], a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
-	ld   [$DA81], a
+	ld   [wPlInfo_Pl2+iPlInfo_OBJInfoYOther], a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_Y]
-	ld   [$D981], a
+	ld   [wPlInfo_Pl1+iPlInfo_OBJInfoYOther], a
 	ld   a, [wPlInfo_Pl1+iPlInfo_Pow]
-	ld   [$DA82], a
+	ld   [wPlInfo_Pl2+iPlInfo_PowOther], a
 	ld   a, [wPlInfo_Pl2+iPlInfo_Pow]
-	ld   [$D982], a
+	ld   [wPlInfo_Pl1+iPlInfo_PowOther], a
 	ld   a, [wPlInfo_Pl1+iPlInfo_MoveId]
-	ld   [$DA72], a
+	ld   [wPlInfo_Pl2+iPlInfo_MoveIdOther], a
 	ld   a, [wPlInfo_Pl2+iPlInfo_MoveId]
-	ld   [$D972], a
-	ld   a, [wPlInfo_Pl1+iPlInfo_34]
-	ld   [$DA73], a
-	ld   a, [wPlInfo_Pl2+iPlInfo_34]
-	ld   [$D973], a
-	ld   a, [$D97C]
-	or   a
-	jr   z, L016827
+	ld   [wPlInfo_Pl1+iPlInfo_MoveIdOther], a
+	ld   a, [wPlInfo_Pl1+iPlInfo_HitAnimId]
+	ld   [wPlInfo_Pl2+iPlInfo_HitAnimIdOther], a
+	ld   a, [wPlInfo_Pl2+iPlInfo_HitAnimId]
+	ld   [wPlInfo_Pl1+iPlInfo_HitAnimIdOther], a
+	
+Play_DoUnkChain_ResetDamage:
+	;
+	; If we got hit *DIRECTLY* by the opponent the last frame (doesn't matter if we blocked it):
+	; - Reset physical damage-related variables to prevent the move from causing continuous damage every frame
+	; - Allow the opponent to combo off the hit.
+	;
+	; Note this isn't applicable to projectile hits, they are handled by the collision check code.
+	;
+	ld   a, [wPlInfo_Pl1+iPlInfo_PhysHitRecv]
+	or   a										; Did we get hit by the opponent?
+	jr   z, .chkHit2P							; If not, skip
 	xor  a
-	ld   [wPlInfo_Pl2+iPlInfo_3A], a
-	ld   [$D97C], a
-	ld   hl, wPlInfo_Pl2+iPlInfo_21
-	set  6, [hl]
+	ld   [wPlInfo_Pl2+iPlInfo_MoveDamageVal], a	; Prevent the move from dealing further damage
+	ld   [wPlInfo_Pl1+iPlInfo_PhysHitRecv], a	; Unmark damage received flag
+	ld   hl, wPlInfo_Pl2+iPlInfo_21Flags
+	set  PI21B_ALLOWHITCANCEL, [hl] 			; Allow the opponent to start a new special off the hit
 	inc  hl
-	res  2, [hl]
-L016827:;R
-	ld   a, [$DA7C]
-	or   a
-	jr   z, L01683C
+	res  PI22B_HITCOMBO, [hl]					; Unmark the combo flag for the next time we hit cancel
+	
+.chkHit2P:
+	; Same for the 2P side
+	ld   a, [wPlInfo_Pl2+iPlInfo_PhysHitRecv]
+	or   a					; Did we get hit by the opponent?
+	jr   z, .copyDamageVars	; If not, skip
 	xor  a
-	ld   [wPlInfo_Pl1+iPlInfo_3A], a
-	ld   [$DA7C], a
-	ld   hl, wPlInfo_Pl1+iPlInfo_21
-	set  6, [hl]
+	ld   [wPlInfo_Pl1+iPlInfo_MoveDamageVal], a
+	ld   [wPlInfo_Pl2+iPlInfo_PhysHitRecv], a
+	ld   hl, wPlInfo_Pl1+iPlInfo_21Flags
+	set  PI21B_ALLOWHITCANCEL, [hl]
 	inc  hl
-	res  2, [hl]
-L01683C:;R
-	ld   a, [$D97E]
-	ld   [$DA7D], a
-	ld   a, [$DA7E]
-	ld   [$D97D], a
-	ld   hl, wPlInfo_Pl1+iPlInfo_3A
-	ld   bc, $DA74
-	call L016A1B
-	ld   hl, wPlInfo_Pl1+iPlInfo_3D
-	ld   bc, $DA77
-	call L016A1B
-	ld   hl, wPlInfo_Pl2+iPlInfo_3A
-	ld   bc, $D974
-	call L016A1B
-	ld   hl, wPlInfo_Pl2+iPlInfo_3D
-	ld   bc, $D977
-	call L016A1B
-	ld   a, [wPlInfo_Pl1+iPlInfo_Pow]
-	cp   $00
-	jp   z, L016889
-	cp   $28
-	jp   nz, L0168A5
-	ld   a, [wPlInfo_Pl1+iPlInfo_MaxPow]
-	cp   $00
-	jp   nz, L016896
-	ld   a, [wPlInfo_Pl1+iPlInfo_52]
-	cp   $00
-	jp   nz, L016896
-L016889:;J
+	res  PI22B_HITCOMBO, [hl]
+	
+.copyDamageVars:
+	; Give visibility to the player-yo-player push request
+	ld   a, [wPlInfo_Pl1+iPlInfo_PushSpeedHReq]
+	ld   [wPlInfo_Pl2+iPlInfo_PushSpeedHRecv], a
+	ld   a, [wPlInfo_Pl2+iPlInfo_PushSpeedHReq]
+	ld   [wPlInfo_Pl1+iPlInfo_PushSpeedHRecv], a
+	
+	; Give visibility to the move damage fields, which get copied over in the VBlank GFX Buffer handler.
+	ld   hl, wPlInfo_Pl1+iPlInfo_MoveDamageVal
+	ld   bc, wPlInfo_Pl2+iPlInfo_MoveDamageValOther
+	call Play_CopyHLtoBC_3
+	ld   hl, wPlInfo_Pl1+iPlInfo_MoveDamageValNext
+	ld   bc, wPlInfo_Pl2+iPlInfo_MoveDamageValNextOther
+	call Play_CopyHLtoBC_3
+	ld   hl, wPlInfo_Pl2+iPlInfo_MoveDamageVal
+	ld   bc, wPlInfo_Pl1+iPlInfo_MoveDamageValOther
+	call Play_CopyHLtoBC_3
+	ld   hl, wPlInfo_Pl2+iPlInfo_MoveDamageValNext
+	ld   bc, wPlInfo_Pl1+iPlInfo_MoveDamageValNextOther
+	call Play_CopyHLtoBC_3
+	
+; =============== mDecMaxPow ===============
+; Generates code to automatically decrement the Max Power meter over time.
+; This part works in conjunction with Play_UpdatePowBars, to make sure the Max Pow settings are
+; only cleared after the visual indicator stops being in Max Power mode.
+;
+; IN
+; - 1: Ptr to player struct
+mDecMaxPow: MACRO
+	; Pass the gauntlet of checks before checking if the bar should be decremented.
+	ld   a, [\1+iPlInfo_Pow]
+	
+	; Once Play_UpdatePowBars acknowledges that the bar is empty (by clearing this), disable the autodec.
+	cp   $00			; iPlInfo_Pow == 0?
+	jp   z, .powEmpty	; If so, jump
+	; The bar must be full, otherwise this can't be MAX Power mode.
+	cp   PLAY_POW_MAX	; Is the POW bar full?
+	jp   nz, .end		; If not, skip
+	; If there's still something in the MAX Power meter or the dec speed isn't 0,
+	; decrement it slowly. Otherwise, empty it out completely.
+	ld   a, [\1+iPlInfo_MaxPow]
+	cp   $00			; Is the MAX Power mode enabled (!= 0)?
+	jp   nz, .tryDec	; If so, jump
+	; This check is weird. Why does it try decrementing even when iPlInfo_MaxPow is 0?
+	ld   a, [\1+iPlInfo_MaxPowDecSpeed]
+	cp   $00			; Is the decrementation speed set?
+	jp   nz, .tryDec	; If so, jump
+.powEmpty:
+	; Empty the MAX Power meter
 	xor  a
-	ld   [wPlInfo_Pl1+iPlInfo_Pow], a
-	ld   [wPlInfo_Pl1+iPlInfo_MaxPow], a
-	ld   [wPlInfo_Pl1+iPlInfo_52], a
-	jp   L0168A5
-L016896:;J
-	ld   a, [wPlInfo_Pl1+iPlInfo_52]
-	ld   b, a
-	ld   a, [wPlayTimer]
-	and  a, b
-	jp   nz, L0168A5
-	ld   hl, wPlInfo_Pl1+iPlInfo_MaxPow
+	ld   [\1+iPlInfo_Pow], a
+	ld   [\1+iPlInfo_MaxPow], a
+	ld   [\1+iPlInfo_MaxPowDecSpeed], a
+	jp   .end
+.tryDec:
+	; Decrement the Max Power meter at the set speed.
+	; The speed value is a bitmask, as the bar is only decremented when (wPlayTimer & iPlInfo_MaxPowDecSpeed) == 0
+	; This results in the bar getting decremented at a slower rate when iPlInfo_MaxPowDecSpeed is higher.
+	; Also, to have a constant decrementing speed, all set bits should be on the "right", ie:
+	; %00000001
+	; %00000011
+	; %00000111
+	; ...
+	ld   a, [\1+iPlInfo_MaxPowDecSpeed]
+	ld   b, a				; B = iPlInfo_MaxPowDecSpeed (mask)
+	ld   a, [wPlayTimer]	; A = wPlayTimer (gameplay timer)
+	and  a, b				; A & B != 0?
+	jp   nz, .end			; If so, skip
+	; Otherwise, decrement the bar
+	; Once this reaches 0 and Play_UpdatePowBars decrements iPlInfo_MaxPowVisual to $00 too,
+	; iPlInfo_Pow will be set to 0. This allows the jump to .powEmpty.
+	ld   hl, \1+iPlInfo_MaxPow
 	dec  [hl]
-L0168A5:;J
-	ld   a, [wPlInfo_Pl2+iPlInfo_Pow]
-	cp   $00
-	jp   z, L0168C2
-	cp   $28
-	jp   nz, L0168DE
-	ld   a, [wPlInfo_Pl2+iPlInfo_MaxPow]
-	cp   $00
-	jp   nz, L0168CF
-	ld   a, [wPlInfo_Pl2+iPlInfo_52]
-	cp   $00
-	jp   nz, L0168CF
-L0168C2:;J
-	xor  a
-	ld   [wPlInfo_Pl2+iPlInfo_Pow], a
-	ld   [wPlInfo_Pl2+iPlInfo_MaxPow], a
-	ld   [wPlInfo_Pl2+iPlInfo_52], a
-	jp   L0168DE
-L0168CF:;J
-	ld   a, [wPlInfo_Pl2+iPlInfo_52]
-	ld   b, a
-	ld   a, [wPlayTimer]
-	and  a, b
-	jp   nz, L0168DE
-	ld   hl, wPlInfo_Pl2+iPlInfo_MaxPow
-	dec  [hl]
-L0168DE:;J
-	ld   a, [wPlInfo_Pl1+iPlInfo_Pow]
-	cp   $28
-	jp   z, L016923
-	ld   a, [wPlInfo_Pl1+iPlInfo_MoveId]
-	cp   $1A
-	jp   z, L0168FB
+.end:
+ENDM
+
+Play_DoUnkChain_DecMaxPow1P: mDecMaxPow wPlInfo_Pl1
+Play_DoUnkChain_DecMaxPow2P: mDecMaxPow wPlInfo_Pl2
+	
+; =============== mIncPlPow ===============
+; Generates code to increment the normal POW meter if possible.
+; This also handles the cheat for "infinite" meter (or rather, automatic charge).
+; If that cheat is enabled, the meters increment automatically and increments/decrements slower.
+;
+; IN
+; - 1: Ptr to player struct
+mIncPlPow: MACRO
+	; Don't increment if the meter is at max value already
+	ld   a, [\1+iPlInfo_Pow]
+	cp   PLAY_POW_MAX		; Pow meter at max value?
+	jp   z, .end			; If so, skip
+	
+	; When charging meter, increment at 0.5px/frame
+	ld   a, [\1+iPlInfo_MoveId]
+	cp   MOVE_SHARED_CHARGEMETER	; In the charge move?
+	jp   z, .chargeSpeed	; If so, jump
+	
+	; If meter charges up automatically, do it at a slower rate (0.1px/frame)
 	ld   a, [wDipSwitch]
-	bit  3, a
-	jp   z, L016923
-	ld   b, $0F
-	jp   L016900
-L0168FB:;J
-	ld   b, $01
-	jp   L016900
-L016900:;J
+	bit  DIPB_INFINITE_METER, a	; Infinite super cheat enabled?
+	jp   z, .end				; If not, jump 
+.autoSpeed:
+	ld   b, $0F		; B = Speed mask, slow (see also: mDecMaxPow)
+	jp   .tryInc
+.chargeSpeed:
+	ld   b, $01		; B = Speed mask, fast
+	jp   .tryInc
+.tryInc:
+	
+	; Try to increment the pow meter
 	ld   a, [wPlayTimer]
-	and  a, b
-	jp   nz, L016923
-	ld   hl, wPlInfo_Pl1+iPlInfo_Pow
+	and  a, b		; wPlayTimer & SpeedMask != 0?
+	jp   nz, .end	; If so, skip
+	; Otherwise, iPlInfo_Pow++
+	ld   hl, \1+iPlInfo_Pow
 	inc  [hl]
+	
+	; If we reached the max value for the power bar, set the Max Power decrement speed.
 	ld   a, [hl]
-	cp   $28
-	jp   nz, L016923
-	ld   hl, wPlInfo_Pl1+iPlInfo_52
+	cp   PLAY_POW_MAX		; Max power reached?
+	jp   nz, .end			; If not, skip
+	; If meter charged up automatically, decrement the meter at a slower rate
+	ld   hl, \1+iPlInfo_MaxPowDecSpeed
 	ld   a, [wDipSwitch]
-	bit  3, a
-	jp   nz, L016921
-	ld   [hl], $1F
-	jp   L016923
-L016921:;J
-	ld   [hl], $3F
-L016923:;J
-	ld   a, [wPlInfo_Pl2+iPlInfo_Pow]
-	cp   $28
-	jp   z, L016968
-	ld   a, [wPlInfo_Pl2+iPlInfo_MoveId]
-	cp   $1A
-	jp   z, L016940
-	ld   a, [wDipSwitch]
-	bit  3, a
-	jp   z, L016968
-	ld   b, $0F
-	jp   L016945
-L016940:;J
-	ld   b, $01
-	jp   L016945
-L016945:;J
+	bit  DIPB_INFINITE_METER, a	; Infinite super cheat enabled?
+	jp   nz, .decSlow			; If not, jump
+.decFast:
+	ld   [hl], $1F				; Write speed to iPlInfo_MaxPowDecSpeed
+	jp   .end
+.decSlow:
+	ld   [hl], $3F				; ...
+.end:
+ENDM
+	
+Play_DoUnkChain_IncPow1P: mIncPlPow wPlInfo_Pl1
+Play_DoUnkChain_IncPow2P: mIncPlPow wPlInfo_Pl2
+
+
+; =============== mDecPlPow ===============
+; Generates code to decrement the normal POW meter when the other player is taunting.
+; IN
+; - 1: Ptr to player struct
+; - 2: Ptr to other player struct
+mDecPlPow: MACRO
+	; Only applicable if we're not at Max Power and there's something in the bar
+	ld   a, [\1+iPlInfo_Pow]
+	cp   PLAY_POW_MAX	; Is the current player at max power?
+	jp   z, .end		; If so, skip
+	cp   $00			; Is the current player's power bar empty?
+	jp   z, .end		; If so, skip
+	
+	; If the other player is taunting, decrease the meter at 0.25px/frame
+	ld   a, [\2+iPlInfo_MoveId]
+	cp   MOVE_SHARED_TAUNT	; Is the other player taunting?
+	jp   nz, .end			; If not, skip
 	ld   a, [wPlayTimer]
-	and  a, b
-	jp   nz, L016968
-	ld   hl, wPlInfo_Pl2+iPlInfo_Pow
-	inc  [hl]
-	ld   a, [hl]
-	cp   $28
-	jp   nz, L016968
-	ld   hl, wPlInfo_Pl2+iPlInfo_52
-	ld   a, [wDipSwitch]
-	bit  3, a
-	jp   nz, L016966
-	ld   [hl], $1F
-	jp   L016968
-L016966:;J
-	ld   [hl], $3F
-L016968:;J
-	ld   a, [wPlInfo_Pl1+iPlInfo_Pow]
-	cp   $28
-	jp   z, L016989
-	cp   $00
-	jp   z, L016989
-	ld   a, [wPlInfo_Pl2+iPlInfo_MoveId]
-	cp   $1C
-	jp   nz, L016989
-L01697D: db $FA;X
-L01697E: db $08;X
-L01697F: db $C0;X
-L016980: db $E6;X
-L016981: db $03;X
-L016982: db $C2;X
-L016983: db $89;X
-L016984: db $69;X
-L016985: db $21;X
-L016986: db $50;X
-L016987: db $D9;X
-L016988: db $35;X
-L016989:;J
-	ld   a, [wPlInfo_Pl2+iPlInfo_Pow]
-	cp   $28
-	jp   z, L0169AA
-	cp   $00
-	jp   z, L0169AA
-	ld   a, [wPlInfo_Pl1+iPlInfo_MoveId]
-	cp   $1C
-	jp   nz, L0169AA
-	ld   a, [wPlayTimer]
-	and  a, $03
-	jp   nz, L0169AA
-	ld   hl, wPlInfo_Pl2+iPlInfo_Pow
+	and  a, $03				; wPlayTimer % 4 != 0?
+	jp   nz, .end			; If so, skip
+.doDec:
+	ld   hl, \1+iPlInfo_Pow	; Otherwise, Pow--
 	dec  [hl]
-L0169AA:;J
+.end:
+ENDM
+
+Play_DoUnkChain_DecPowOnTaunt1P: mDecPlPow wPlInfo_Pl1, wPlInfo_Pl2
+Play_DoUnkChain_DecPowOnTaunt2P: mDecPlPow wPlInfo_Pl2, wPlInfo_Pl1
+	
+;
+; Increment the stun timers over time, until they reach the cap.
+;
+; As these timers are decremented when the player is hit/blocks a hit and the effect
+; triggers when they reach 0, this results in requiring the player to hit the opponent
+; multiple times in a short period of time to either dizzy or guard break
+;
+; See also: Play_Pl_DecStunTimer, which is executed by player tasks.
+;
+Play_DoUnkChain_IncDizzyTimer:
+	; Every $10 frames, increment iPlInfo_DizzyProg
 	ld   a, [wPlayTimer]
-	and  a, $0F
-	jp   nz, L0169C4
-	ld   a, [wPlInfo_Pl1+iPlInfo_5B]
-	ld   hl, wPlInfo_Pl1+iPlInfo_5A
-	call L0169E1
-	ld   a, [wPlInfo_Pl2+iPlInfo_5B]
-	ld   hl, wPlInfo_Pl2+iPlInfo_5A
-	call L0169E1
-L0169C4:;J
+	and  a, $0F			
+	jp   nz, .end
+	ld   a, [wPlInfo_Pl1+iPlInfo_DizzyProgCap]
+	ld   hl, wPlInfo_Pl1+iPlInfo_DizzyProg
+	call Play_DoUnkChain_IncCustomTimer
+	ld   a, [wPlInfo_Pl2+iPlInfo_DizzyProgCap]
+	ld   hl, wPlInfo_Pl2+iPlInfo_DizzyProg
+	call Play_DoUnkChain_IncCustomTimer
+.end:	
+Play_DoUnkChain_IncGuardBreakTimer:
+	; Every $20 frames, increment iPlInfo_GuardBreakProg
 	ld   a, [wPlayTimer]
 	and  a, $1F
-	jp   nz, L0169DE
-	ld   a, [wPlInfo_Pl1+iPlInfo_5D]
-	ld   hl, wPlInfo_Pl1+iPlInfo_5C
-	call L0169E1
-	ld   a, [wPlInfo_Pl2+iPlInfo_5D]
-	ld   hl, wPlInfo_Pl2+iPlInfo_5C
-	call L0169E1
-L0169DE:;J
-	jp   L0169EE
-L0169E1:;C
-	cp   a, [hl]
-	jp   z, L0169ED
-	jp   nc, L0169EC
-L0169E8: db $77;X
-L0169E9: db $C3;X
-L0169EA: db $ED;X
-L0169EB: db $69;X
-L0169EC:;J
-	inc  [hl]
-L0169ED:;J
+	jp   nz, .end
+	ld   a, [wPlInfo_Pl1+iPlInfo_GuardBreakProgCap]
+	ld   hl, wPlInfo_Pl1+iPlInfo_GuardBreakProg
+	call Play_DoUnkChain_IncCustomTimer
+	ld   a, [wPlInfo_Pl2+iPlInfo_GuardBreakProgCap]
+	ld   hl, wPlInfo_Pl2+iPlInfo_GuardBreakProg
+	call Play_DoUnkChain_IncCustomTimer
+.end:;J
+	jp   Play_DoUnkChain_DoMiscTimers
+	
+; =============== Play_DoUnkChain_IncCustomTimer ===============
+; Increments a custom timer in the player struct until the target is reached.
+; IN
+; -  A: Timer target (iPlInfo_DizzyProgCap or iPlInfo_GuardBreakProgCap)
+; - HL: Ptr to timer (iPlInfo_DizzyProg or iPlInfo_GuardBreakProg)
+Play_DoUnkChain_IncCustomTimer:
+	cp   a, [hl]		
+	jp   z, .ret	; Target == Timer? If so, jump
+	jp   nc, .inc	; Target >= Timer? If so, jump
+	; [TCRF] Unreachable code.
+	;        In case the timer went past the target, force it back to the max value.
+	ld   [hl], a	; Copy Target to Timer
+	jp   .ret
+.inc:
+	inc  [hl]		; Increment Timer
+.ret:
 	ret
-L0169EE:;J
-	ld   a, [wPlInfo_Pl1+iPlInfo_5E]
-	or   a
-	jr   z, L0169F8
-	ld   hl, wPlInfo_Pl1+iPlInfo_5E
+	
+Play_DoUnkChain_DoMiscTimers:
+	; Decrement iPlInfo_TimerDec5E if it's not 0 already
+	; iPlInfo_TimerDec5E = MAX(iPlInfo_TimerDec5E - 1, 0)
+	ld   a, [wPlInfo_Pl1+iPlInfo_TimerDec5E]
+	or   a				; Timer == 0?
+	jr   z, .chk2P		; If so, jump
+	ld   hl, wPlInfo_Pl1+iPlInfo_TimerDec5E
 	dec  [hl]
-L0169F8:;R
-	ld   a, [wPlInfo_Pl2+iPlInfo_5E]
+.chk2P:
+	; Do the same for 2P
+	ld   a, [wPlInfo_Pl2+iPlInfo_TimerDec5E]
 	or   a
-	jr   z, L016A02
-	ld   hl, wPlInfo_Pl2+iPlInfo_5E
+	jr   z, .end
+	ld   hl, wPlInfo_Pl2+iPlInfo_TimerDec5E
 	dec  [hl]
-L016A02:;R
-	ld   a, [wPlInfo_Pl1+iPlInfo_5E]
-	ld   [$DA7A], a
-	ld   a, [wPlInfo_Pl2+iPlInfo_5E]
-	ld   [$D97A], a
+.end:
+
+Play_DoUnkChain_ShareVars2:
+	; Give visibility to these variables too
+	ld   a, [wPlInfo_Pl1+iPlInfo_TimerDec5E]
+	ld   [wPlInfo_Pl2+iPlInfo_TimerDec5EOther], a
+	ld   a, [wPlInfo_Pl2+iPlInfo_TimerDec5E]
+	ld   [wPlInfo_Pl1+iPlInfo_TimerDec5EOther], a
 	ld   a, [wPlInfo_Pl1+iPlInfo_5F]
-	ld   [$DA7B], a
+	ld   [wPlInfo_Pl2+iPlInfo_5FOther], a
 	ld   a, [wPlInfo_Pl2+iPlInfo_5F]
-	ld   [$D97B], a
+	ld   [wPlInfo_Pl1+iPlInfo_5FOther], a
 	ret
-L016A1B:;C
-	ldi  a, [hl]
-	ld   [bc], a
-	inc  bc
+	
+; =============== Play_CopyHLtoBC_3 ===============
+; Copies three bytes from HL to BC in sequence, used to copy sets of
+; data across the two player structs. 
+; IN
+; - HL: Ptr to source (wPlInfo entry)
+; - BC: Ptr to destination (wPlInfo entry for the other player)
+Play_CopyHLtoBC_3:
+	ldi  a, [hl]	; Read from current player
+	ld   [bc], a	; Write to other player
+	inc  bc			; ...
 	ldi  a, [hl]
 	ld   [bc], a
 	inc  bc
 	ld   a, [hl]
 	ld   [bc], a
 	ret
-L016A24:;C
+	
+; =============== Play_CalcPlDistanceAndXFlip ===============
+; Calculates the distance between players, and between player and projectile.
+; This also sets additional properties related to distances.
+Play_CalcPlDistanceAndXFlip:
+
+	;
+	; 1P CHAR - 2P CHAR DISTANCE
+	;
+	; These related flags which are related to each other are also updated:
+	; - SPRB_XFLIP
+	; - SPRXB_PLDIR_R
+	;
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
-	ld   b, a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
-	sub  a, b
-	jp   z, L016ABF
-	jp   nc, L016A77
+	ld   b, a							; B = Player 2 X position
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]	; A = Player 1 X position
+	sub  a, b				; A = Distance between players (1P - 2P)	
+	jp   z, .setDistance	; Are they the same? If so, skip ahead
+	jp   nc, .onRight		; Is 1P on the right of 2P? If so, jump (1P > 2P)
+	; 
+.onLeft:
+
+	;
+	; Player 1 is on the left of Player 2.
+	;
+	push af		; Save distance
+	
+	.onLeftChk1P:
+		; The other player (2P) internally faces right
+		ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstFlags
+		set  SPRXB_PLDIR_R, [hl]
+		
+		; Sometimes, the horizontal flip flag may get locked.
+		; ie: when jumping over another player, we don't want to change direction
+		ld   a, [wPlInfo_Pl1+iPlInfo_21Flags]
+		bit  PI21B_XFLIPLOCK, a	; X Flip lock flag set?
+		jp   nz, .onLeftChk2P	; If so, skip
+		
+		; Like the icons, character sprites face left by default.
+		; Set the XFlip flag to make 1P face right.
+		set  SPRB_XFLIP, [hl]
+		
+		;
+		; Save the settings to iOBJInfo_OBJLstFlagsOld as well, if possible.
+		; This can be done only after the GFX finish loading (which also copies
+		; iOBJInfo_OBJLstFlags to iOBJInfo_OBJLstFlagsOld, but as we updated it just now, we resave it again)
+		;
+		ld   a, [wOBJInfo_Pl1+iOBJInfo_Status]
+		bit  OSTB_GFXLOAD, a		; Are the GFX loading for this character?
+		jp   nz, .onLeftChk2P		; If so, skip
+		ld   a, [wPlInfo_Pl1+iPlInfo_MoveId]
+		or   a						; Is there a move ID defined?
+		jp   z, .onLeftChk2P		; If not, skip
+		ldi  a, [hl]				; Read iOBJInfo_OBJLstFlags
+		ld   [hl], a				; Write to iOBJInfo_OBJLstFlagsOld
+		
+	.onLeftChk2P:
+		; The other player (1P) internally faces left
+		ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstFlags
+		res  SPRXB_PLDIR_R, [hl]
+		
+		; Don't make the character face left if the direction is locked
+		ld   a, [wPlInfo_Pl2+iPlInfo_21Flags]
+		bit  PI21B_XFLIPLOCK, a
+		jr   nz, .onLeftChkEnd
+		
+		; Make 2P face left
+		res  SPRB_XFLIP, [hl]
+		
+		; Save the settings to the old set, if possible.
+		ld   a, [wOBJInfo_Pl2+iOBJInfo_Status]
+		bit  OSTB_GFXLOAD, a		; Are the GFX loading for this character?
+		jp   nz, .onLeftChkEnd		; If so, skip
+		ld   a, [wPlInfo_Pl2+iPlInfo_MoveId]
+		or   a						; Is there a move ID defined?
+		jp   z, .onLeftChkEnd		; If not, skip
+		ldi  a, [hl]				; Read iOBJInfo_OBJLstFlags
+		ld   [hl], a				; Write to iOBJInfo_OBJLstFlagsOld
+	.onLeftChkEnd:
+	
+	pop  af		; Restore distance
+	
+	; Since 1P is on the left of 2P, the 1P - 2P calculation returned a negative value.
+	; iPlInfo_PlDistance must be a positive value, so:
+	cpl			; A = -A
+	inc  a
+	jr   .setDistance
+	
+.onRight:
+	;
+	; Player 1 is on the right of Player 2.
+	;
 	push af
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstFlags
-	set  3, [hl]
-	ld   a, [wPlInfo_Pl1+iPlInfo_21]
-	bit  1, a
-	jp   nz, L016A53
-	set  5, [hl]
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_Status]
-	bit  0, a
-	jp   nz, L016A53
-	ld   a, [wPlInfo_Pl1+iPlInfo_MoveId]
-	or   a
-	jp   z, L016A53
-	ldi  a, [hl]
-	ld   [hl], a
-L016A53:;J
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstFlags
-	res  3, [hl]
-	ld   a, [wPlInfo_Pl2+iPlInfo_21]
-	bit  1, a
-	jr   nz, L016A72
-	res  5, [hl]
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_Status]
-	bit  0, a
-	jp   nz, L016A72
-	ld   a, [wPlInfo_Pl2+iPlInfo_MoveId]
-	or   a
-	jp   z, L016A72
-	ldi  a, [hl]
-	ld   [hl], a
-L016A72:;JR
+	
+	.onRightChk1P:
+		; The current player (2P) internally faces left
+		ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstFlags
+		res  SPRXB_PLDIR_R, [hl]
+		
+		; Don't make the character face left if the direction is locked
+		ld   a, [wPlInfo_Pl1+iPlInfo_21Flags]
+		bit  PI21B_XFLIPLOCK, a		; X Flip lock flag set?
+		jr   nz, .onRightChk2P		; If so, skip
+		;--
+		; ???
+		bit  0, c
+		jr   nz, .onRightChk2P
+		;--
+		; Make 1P face left
+		res  SPRB_XFLIP, [hl]
+		
+		; Save the settings to the old set, if possible.
+		ld   a, [wOBJInfo_Pl1+iOBJInfo_Status]
+		bit  OSTB_GFXLOAD, a		; Are the GFX loading for this character?
+		jp   nz, .onRightChk2P		; If so, skip
+		ld   a, [wPlInfo_Pl1+iPlInfo_MoveId]
+		or   a						; Is there a move ID defined?
+		jp   z, .onRightChk2P		; If not, skip
+		ldi  a, [hl]				; Read iOBJInfo_OBJLstFlags
+		ld   [hl], a				; Write to iOBJInfo_OBJLstFlagsOld
+	.onRightChk2P:
+		; The other player (1P) internally faces right
+		ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstFlags
+		set  SPRXB_PLDIR_R, [hl]
+		
+		; Don't make the character face right if the direction is locked
+		ld   a, [wPlInfo_Pl2+iPlInfo_21Flags]
+		bit  PI21B_XFLIPLOCK, a
+		jr   nz, .onRightChkEnd
+		;--
+		; ???
+		bit  0, c
+		jr   nz, .onRightChkEnd
+		;--
+		; Make 2P face right
+		set  SPRB_XFLIP, [hl]
+		
+		; Save the settings to the old set, if possible.
+		ld   a, [wOBJInfo_Pl2+iOBJInfo_Status]
+		bit  OSTB_GFXLOAD, a		; Are the GFX loading for this character?
+		jp   nz, .onRightChkEnd		; If so, skip
+		ld   a, [wPlInfo_Pl2+iPlInfo_MoveId]
+		or   a						; Is there a move ID defined?
+		jp   z, .onRightChkEnd		; If not, skip
+		ldi  a, [hl]				; Read iOBJInfo_OBJLstFlags
+		ld   [hl], a				; Write to iOBJInfo_OBJLstFlagsOld
+	.onRightChkEnd:
 	pop  af
-	cpl
-	inc  a
-	jr   L016ABF
-L016A77:;J
-	push af
+	
+.setDistance:
+	; Save the calculated player distance
+	ld   [wPlInfo_Pl1+iPlInfo_PlDistance], a
+	ld   [wPlInfo_Pl2+iPlInfo_PlDistance], a
+	;--
+
+	;
+	; 1P CHAR - 2P PROJECTILE DISTANCE
+	;
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_X]
+	ld   b, a							; B = 2P Projectile X
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Status]
+	bit  OSTB_VISIBLE, a				; Is the projectile visible?
+	jp   nz, .chkProjDir1P				; If so, jump
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]	; Otherwise, use 2P's X position
+	ld   b, a
+	
+.chkProjDir1P:
+	; By default, set that 2P's projectile is on the left of Player 1.
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstFlags
-	res  3, [hl]
-	ld   a, [wPlInfo_Pl1+iPlInfo_21]
-	bit  1, a
-	jr   nz, L016A9B
-	bit  0, c
-	jr   nz, L016A9B
-	res  5, [hl]
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_Status]
-	bit  0, a
-	jp   nz, L016A9B
-	ld   a, [wPlInfo_Pl1+iPlInfo_MoveId]
-	or   a
-	jp   z, L016A9B
-	ldi  a, [hl]
-	ld   [hl], a
-L016A9B:;JR
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstFlags
-	set  3, [hl]
-	ld   a, [wPlInfo_Pl2+iPlInfo_21]
-	bit  1, a
-	jr   nz, L016ABE
-	bit  0, c
-	jr   nz, L016ABE
-	set  5, [hl]
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_Status]
-	bit  0, a
-	jp   nz, L016ABE
-	ld   a, [wPlInfo_Pl2+iPlInfo_MoveId]
-	or   a
-	jp   z, L016ABE
-	ldi  a, [hl]
-	ld   [hl], a
-L016ABE:;JR
-	pop  af
-L016ABF:;JR
-	ld   [wPlInfo_Pl1+iPlInfo_61], a
-	ld   [wPlInfo_Pl2+iPlInfo_61], a
-	ld   a, [wOBJInfo3+iOBJInfo_X]
-	ld   b, a
-	ld   a, [wOBJInfo3+iOBJInfo_Status]
-	bit  7, a
-	jp   nz, L016AD5
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
-	ld   b, a
-L016AD5:;J
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstFlags
-	res  2, [hl]
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
-	sub  a, b
-	jp   z, L016AE8
-	jp   nc, L016AE8
-	set  2, [hl]
-	cpl
+	res  SPRXB_OTHERPROJR, [hl]
+	
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]	; A = 1P X Position
+	sub  a, b							; A = Distance between 1P Char - 2P Projectile
+	jp   z, .setProjDistance1P			; Are they the same? If so, jump
+	jp   nc, .setProjDistance1P			; Is 1P on the right of 2P's projectile? If so, jump (1P > 2P)
+	; Otherwise, 2P's projectile is on the right of Player 1.
+	; Set that flag and force the negative distance to positive.
+	set  SPRXB_OTHERPROJR, [hl]
+	cpl		; A = -A
 	inc  a
-L016AE8:;J
-	ld   [wPlInfo_Pl1+iPlInfo_62], a
-	ld   a, [wOBJInfo2+iOBJInfo_X]
+.setProjDistance1P:
+	ld   [wPlInfo_Pl1+iPlInfo_ProjDistance], a
+	;--	
+	
+	;
+	; 2P CHAR - 1P PROJECTILE DISTANCE
+	;
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_X]
+	ld   b, a							; B = 1P Projectile X
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_Status]
+	bit  OSTB_VISIBLE, a				; Is the projectile visible?
+	jp   nz, .chkProjDir2P				; If so, jump
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]	; Otherwise, use 1P's X position
 	ld   b, a
-	ld   a, [wOBJInfo2+iOBJInfo_Status]
-	bit  7, a
-	jp   nz, L016AFB
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
-	ld   b, a
-L016AFB:;J
+	
+.chkProjDir2P:
+	; By default, set that 1P's projectile is on the left of Player 2.
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstFlags
-	res  2, [hl]
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
-	sub  a, b
-	jp   z, L016B0E
-	jp   nc, L016B0E
-	set  2, [hl]
-	cpl
+	res  SPRXB_OTHERPROJR, [hl]
+	
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]	; A = 2P X Position
+	sub  a, b							; A = Distance between 2P Char - 1P Projectile
+	jp   z, .setProjDistance2P			; Are they the same? If so, jump
+	jp   nc, .setProjDistance2P			; Is 2P on the right of 1P's projectile? If so, jump (2P > 1P)
+	; Otherwise, 1P's projectile is on the right of Player 1.
+	; Set that flag and force the negative distance to positive.
+	set  SPRXB_OTHERPROJR, [hl]
+	cpl		; A = -A
 	inc  a
-L016B0E:;J
-	ld   [wPlInfo_Pl2+iPlInfo_62], a
+.setProjDistance2P:
+	ld   [wPlInfo_Pl2+iPlInfo_ProjDistance], a
 	ret
-L016B12:;C
+	
+; =============== Play_DoPlColi ===============
+; Handles collision detection between players/projectile combinations.
+; This subroutine sets up the flags/fields which tell if the player are overlapping
+; with something and with what.
+; How this is actually used is something that the move code ??? decides.
+Play_DoPlColi:
+	; Start by clearing out the collision flags from the last frame
 	xor  a
-	ld   [wPlInfo_Pl1+iPlInfo_63], a
-	ld   [wPlInfo_Pl2+iPlInfo_63], a
-	ld   [wPlInfo_Pl1+iPlInfo_64], a
-	ld   [wPlInfo_Pl2+iPlInfo_64], a
-	ld   [$D726], a
-	ld   [$D766], a
+	ld   [wPlInfo_Pl1+iPlInfo_ColiFlags], a
+	ld   [wPlInfo_Pl2+iPlInfo_ColiFlags], a
+	ld   [wPlInfo_Pl1+iPlInfo_Unk_ColiBoxOverlapX_A], a
+	ld   [wPlInfo_Pl2+iPlInfo_Unk_ColiBoxOverlapX_A], a
+	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_HitMode], a
+	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_HitMode], a
+
+	;
+	; Handle collision detection between players.
+	; This is a chain of subroutines which follow the same pattern.
+	; When something is detected that would cause a player to not have collision,
+	; the check is skipped, leaving blank the values in the collision flags for both players.
+	;
+	
+Play_DoPlColi_1PChar2PChar:
+	;
+	; 1P Character Hurtbox - 2P Character Hurtbox
+	; This is a bounds check against the generic collision box of both characters,
+	; used for things like preventing two characters from overlapping.
+	;
+
+
+	; If any of the players has the "no hurtbox" flag get, skip this
 	ld   a, [wPlInfo_Pl1+iPlInfo_22Flags]
-	bit  7, a
-	jp   nz, L016B80
+	bit  PI22B_NOCOLIBOX, a
+	jp   nz, .end
 	ld   a, [wPlInfo_Pl2+iPlInfo_22Flags]
-	bit  7, a
-	jp   nz, L016B80
-	ld   a, [$D698]
-	or   a
-	jr   z, L016B80
-	ld   de, $C1D4
-	call L016E65
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
+	bit  PI22B_NOCOLIBOX, a
+	jp   nz, .end
+	
+	;
+	; Get the variables for Player 1 used for the calculation.
+	;
+	
+	; If Player 1 isn't using a collision box, skip this
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_ColiBoxId]
+	or   a				; Collision box ID == 0?
+	jr   z, .end		; If so, skip
+	
+	; Otherwise, get the variables for Player 1.
+	ld   de, wPlayTmpColiA
+	call Play_GetPlColiBox				; wPlayTmpColiA_* = 1P collision box sizes
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]	; B = 1P X position
 	ld   b, a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]	; C = 1P Y position
 	ld   c, a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsOld]
-	ld   [wLZSS_Buffer], a
-	ld   a, [$D6D8]
-	or   a
-	jr   z, L016B80
-	ld   de, $C1DE
-	call L016E65
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsOld]	; wPlayTmpColiA_OBJLstFlags = 1P Flags
+	ld   [wPlayTmpColiA_OBJLstFlags], a				; Not enough registers to hold this
+	
+	;
+	; Get the variables for Player 2 used for the calculation.
+	;
+	
+	; If Player 2 isn't using a collision box, skip this
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_ColiBoxId]
+	or   a				; Collision box ID == 0?
+	jr   z, .end		; If so, skip
+	
+	; Otherwise, get the variables for Player 2.
+	ld   de, wPlayTmpColiB
+	call Play_GetPlColiBox				; wPlayTmpColiB_* = 2P collision box sizes
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]	; D = 2P X position
 	ld   d, a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_Y]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_Y]	; E = 2P Y position
 	ld   e, a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlagsOld]
-	ld   [$C1CB], a
-	call L016E7C
-	jr   nc, L016B80
-	ld   hl, wPlInfo_Pl1+iPlInfo_63
-	set  0, [hl]
-	set  4, [hl]
-	inc  hl
+	ld   [wPlayTmpColiB_OBJLstFlags], a	; wPlayTmpColiA_OBJLstFlags = 1P Flags
+	
+	; 
+	; Perform the collision checks between those boxes.
+	;
+	call Play_CheckColi	; Did a collision occur?
+	jr   nc, .end		; If not, skip
+	
+.coliOk:
+	; Make both players push each other, by having both
+	; send and receive the outwards push.
+		
+	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
+	set  PCF_SENDPUSH, [hl]
+	set  PCF_RECVPUSH, [hl]
+	inc  hl			; Seek to iPlInfo_Unk_ColiBoxOverlapX_A
+	ld   [hl], b	; And save how much we're horz inside the other player's collision box
+	
+	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
+	set  PCF_SENDPUSH, [hl]
+	set  PCF_RECVPUSH, [hl]
+	inc  hl			
 	ld   [hl], b
-	ld   hl, wPlInfo_Pl2+iPlInfo_63
-	set  0, [hl]
-	set  4, [hl]
-	inc  hl
-	ld   [hl], b
-L016B80:;JR
-	ld   a, [$D69A]
-	or   a
-	jr   nz, L016B94
+.end:
+
+Play_DoPlColi_1PCharHitbox2PChar:
+	;
+	; 1P Character Hitbox - 2P Character Hurtbox
+	; If the 1P Hitbox overlaps with the generic 2P collision box.
+	;
+	
+	; Temporary hitboxes like the one for throw range can do collision
+	; with moves that otherwise disable the hurtbox.
+	; (this still would need to pass the guard check if it were a physical hit, but throws don't check that to begin with)
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_ForceHitboxId]
+	or   a					; Is there a forced hitbox overriding the other two checks?
+	jr   nz, .check			; If so, jump	
 	ld   a, [wPlInfo_Pl2+iPlInfo_22Flags]
-	bit  6, a
-	jp   nz, L016BD5
-	ld   a, [$D699]
-	or   a
-	jr   z, L016BD5
-L016B94:;R
-	ld   de, $C1D4
-	call L016E65
+	bit  PI22B_NOHURTBOX, a	; Can the other player be hit?
+	jp   nz, .end			; If not, skip
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_HitboxId]
+	or   a					; Is there an actual hitbox defined?
+	jr   z, .end			; If not, skip
+.check:
+	;
+	; Get 1P Hitbox data
+	;
+	; A = Hitbox ID
+	ld   de, wPlayTmpColiA
+	call Play_GetPlColiBox
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	ld   b, a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
 	ld   c, a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsOld]
-	ld   [wLZSS_Buffer], a
-	ld   a, [$D6D8]
+	ld   [wPlayTmpColiA_OBJLstFlags], a
+	
+	;
+	; Get 2P Hurtbox data
+	;
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_ColiBoxId]
 	or   a
-	jr   z, L016BD5
-	ld   de, $C1DE
-	call L016E65
+	jr   z, .end
+	ld   de, wPlayTmpColiB
+	call Play_GetPlColiBox
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
 	ld   d, a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_Y]
 	ld   e, a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlagsOld]
-	ld   [$C1CB], a
-	call L016E7C
-	jr   nc, L016BD5
-	ld   hl, wPlInfo_Pl1+iPlInfo_63
-	set  1, [hl]
-	set  4, [hl]
-	ld   hl, wPlInfo_Pl2+iPlInfo_63
-	set  0, [hl]
-	set  5, [hl]
-L016BD5:;JR
-	ld   a, [$D6DA]
-	or   a
-	jr   nz, L016BE9
+	ld   [wPlayTmpColiB_OBJLstFlags], a
+	
+	;
+	; Perform the collision check
+	;
+	call Play_CheckColi
+	jr   nc, .end
+.coliOk:
+	
+	; Signal that 1P has hit the other player.	
+	
+	; A common detail across these hit handles is that when a player sends a hit,
+	; it tries to push out the other player if too close.
+	
+	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
+	set  PCF_SENDHIT, [hl]
+	set  PCF_RECVPUSH, [hl]
+	
+	; Signal that 2P has received a hit and try to push the other out.
+	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
+	set  PCF_SENDPUSH, [hl]
+	set  PCF_RECVHIT, [hl]
+.end:
+
+Play_DoPlColi_1PChar2PCharHitbox:
+	;
+	; 2P Character Hitbox - 1P Character Hurtbox
+	; Like the other one, but the other way around.
+	;
+
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_ForceHitboxId]
+	or   a					; Is there a forced hitbox overriding the other two checks?
+	jr   nz, .check			; If so, jump	
 	ld   a, [wPlInfo_Pl1+iPlInfo_22Flags]
-	bit  6, a
-	jp   nz, L016C2A
-	ld   a, [$D6D9]
-	or   a
-	jr   z, L016C2A
-L016BE9:;R
-	ld   de, $C1D4
-	call L016E65
+	bit  PI22B_NOHURTBOX, a	; Can the other player be hit?
+	jp   nz, .end			; If not, skip
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_HitboxId]
+	or   a					; Is there an actual hitbox defined?
+	jr   z, .end			; If not, skip
+.check:
+	;
+	; Get 2P Hitbox data
+	;
+	ld   de, wPlayTmpColiA
+	call Play_GetPlColiBox
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
 	ld   b, a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_Y]
 	ld   c, a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlagsOld]
-	ld   [wLZSS_Buffer], a
-	ld   a, [$D698]
+	ld   [wPlayTmpColiA_OBJLstFlags], a
+	
+	;
+	; Get 1P Hurtbox data
+	;
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_ColiBoxId]
 	or   a
-	jr   z, L016C2A
-	ld   de, $C1DE
-	call L016E65
+	jr   z, .end
+	ld   de, wPlayTmpColiB
+	call Play_GetPlColiBox
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	ld   d, a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
 	ld   e, a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsOld]
-	ld   [$C1CB], a
-	call L016E7C
-	jr   nc, L016C2A
-	ld   hl, wPlInfo_Pl1+iPlInfo_63
-	set  0, [hl]
-	set  5, [hl]
-	ld   hl, wPlInfo_Pl2+iPlInfo_63
-	set  1, [hl]
-	set  4, [hl]
-L016C2A:;JR
-	ld   a, [wPlInfo_Pl2+iPlInfo_21]
-	bit  7, a
-	jp   nz, L016C8F
+	ld   [wPlayTmpColiB_OBJLstFlags], a
+	
+	;
+	; Perform the collision check
+	;
+	call Play_CheckColi
+	jr   nc, .end
+.coliOk:
+
+	; Signal that 1P has received a hit
+	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
+	set  PCF_SENDPUSH, [hl]
+	set  PCF_RECVHIT, [hl]
+	
+	; Signal that 2P has hit the other player
+	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
+	set  PCF_SENDHIT, [hl]
+	set  PCF_RECVPUSH, [hl]
+.end:
+
+Play_DoPlColi_1PProj2PChar:
+	;
+	; 1P Projectile Hitbox - 2P Character Hurtbox
+	;
+	
+	ld   a, [wPlInfo_Pl2+iPlInfo_21Flags]
+	bit  PI21B_INVULN, a	; Is the other player invulnerable?
+	jp   nz, .end			; If so, skip
 	ld   a, [wPlInfo_Pl2+iPlInfo_22Flags]
-	bit  6, a
-	jp   nz, L016C8F
-	ld   a, [wOBJInfo2+iOBJInfo_Status]
-	bit  7, a
-	jp   z, L016C8F
-	ld   a, [$D719]
-	or   a
-	jp   z, L016C8F
-	ld   de, $C1D4
-	call L016E65
-	ld   a, [wOBJInfo2+iOBJInfo_X]
+	bit  PI22B_NOHURTBOX, a	; Can the other player be hit in general?
+	jp   nz, .end			; If not, skip
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_Status]
+	bit  OSTB_VISIBLE, a	; Is the projectile visible?
+	jp   z, .end			; If not, skip
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_HitboxId]
+	or   a					; Does the projectile have an hitbox?
+	jp   z, .end			; If not, skip
+.check:
+
+	;
+	; Get 1P Projectile data
+	;
+	ld   de, wPlayTmpColiA
+	call Play_GetPlColiBox
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_X]
 	ld   b, a
-	ld   a, [wOBJInfo2+iOBJInfo_Y]
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_Y]
 	ld   c, a
-	ld   a, [wOBJInfo2+iOBJInfo_OBJLstFlags]
-	ld   [wLZSS_Buffer], a
-	ld   a, [$D6D8]
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_OBJLstFlags]
+	ld   [wPlayTmpColiA_OBJLstFlags], a
+	
+	;
+	; Get 2P Hurtbox data
+	;
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_ColiBoxId]
 	or   a
-	jr   z, L016C8F
-	ld   de, $C1DE
-	call L016E65
+	jr   z, .end
+	ld   de, wPlayTmpColiB
+	call Play_GetPlColiBox
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
 	ld   d, a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_Y]
 	ld   e, a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlagsOld]
-	ld   [$C1CB], a
-	call L016E7C
-	jr   nc, L016C8F
-	ld   a, $01
-	ld   [$D726], a
-	ld   hl, wPlInfo_Pl1+iPlInfo_63
-	set  2, [hl]
-	set  4, [hl]
-	ld   hl, wPlInfo_Pl2+iPlInfo_63
-	set  0, [hl]
-	set  6, [hl]
-L016C8F:;JR
-	ld   a, [wPlInfo_Pl1+iPlInfo_21]
-	bit  7, a
-	jp   nz, L016CF4
+	ld   [wPlayTmpColiB_OBJLstFlags], a
+	
+	;
+	; Perform the collision check
+	;
+	call Play_CheckColi
+	jr   nc, .end
+.coliOk:
+	; 1P projectile hit the other player
+	ld   a, PHM_REMOVE
+	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_HitMode], a
+	; 1P hit the other player with a projectile
+	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
+	set  PCF_SENDPROJHIT, [hl]
+	set  PCF_RECVPUSH, [hl]
+	; 2P received a hit by a projectile
+	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
+	set  PCF_SENDPUSH, [hl]
+	set  PCF_RECVPROJHIT, [hl]
+.end:
+
+Play_DoPlColi_1PChar2PProj:
+	;
+	; 2P Projectile Hitbox - 1P Character Hurtbox
+	;
+	ld   a, [wPlInfo_Pl1+iPlInfo_21Flags]
+	bit  PI21B_INVULN, a	; Is the other player invulnerable?
+	jp   nz, .end			; If so, skip
 	ld   a, [wPlInfo_Pl1+iPlInfo_22Flags]
-	bit  6, a
-	jp   nz, L016CF4
-	ld   a, [wOBJInfo3+iOBJInfo_Status]
-	bit  7, a
-	jp   z, L016CF4
-	ld   a, [$D759]
-	or   a
-	jp   z, L016CF4
-	ld   de, $C1D4
-	call L016E65
-	ld   a, [wOBJInfo3+iOBJInfo_X]
+	bit  PI22B_NOHURTBOX, a	; Can the other player be hit in general?
+	jp   nz, .end			; If not, skip
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Status]
+	bit  OSTB_VISIBLE, a	; Is the projectile visible?
+	jp   z, .end			; If not, skip
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_HitboxId]
+	or   a					; Does the projectile have an hitbox?
+	jp   z, .end			; If not, skip
+.check:
+	;
+	; Get 2P Projectile data
+	;
+	ld   de, wPlayTmpColiA
+	call Play_GetPlColiBox
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_X]
 	ld   b, a
-	ld   a, [wOBJInfo3+iOBJInfo_Y]
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Y]
 	ld   c, a
-	ld   a, [wOBJInfo3+iOBJInfo_OBJLstFlags]
-	ld   [wLZSS_Buffer], a
-	ld   a, [$D698]
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_OBJLstFlags]
+	ld   [wPlayTmpColiA_OBJLstFlags], a
+	
+	;
+	; Get 1P Hurtbox data
+	;
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_ColiBoxId]
 	or   a
-	jr   z, L016CF4
-	ld   de, $C1DE
-	call L016E65
+	jr   z, .end
+	ld   de, wPlayTmpColiB
+	call Play_GetPlColiBox
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	ld   d, a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
 	ld   e, a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsOld]
-	ld   [$C1CB], a
-	call L016E7C
-	jr   nc, L016CF4
-	ld   a, $01
-	ld   [$D766], a
-	ld   hl, wPlInfo_Pl2+iPlInfo_63
-	set  2, [hl]
-	set  4, [hl]
-	ld   hl, wPlInfo_Pl1+iPlInfo_63
-	set  0, [hl]
-	set  6, [hl]
-L016CF4:;JR
+	ld   [wPlayTmpColiB_OBJLstFlags], a
+	
+	;
+	; Perform the collision check
+	;
+	call Play_CheckColi
+	jr   nc, .end
+.coliOk:
+	; 2P projectile hit the other player
+	ld   a, PHM_REMOVE
+	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_HitMode], a
+	; 2P hit the other player with a projectile
+	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
+	set  PCF_SENDPROJHIT, [hl]
+	set  PCF_RECVPUSH, [hl]
+	; 1P received a hit by a projectile
+	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
+	set  PCF_SENDPUSH, [hl]
+	set  PCF_RECVPROJHIT, [hl]
+.end:
+
+Play_DoPlColi_1PProj2PCharHitbox:
+	;
+	; 1P Projectile Hitbox - 2P Character Hitbox
+	;
+	; This is used when a move from 2P with an hitbox that can influence a projectile thrown by 1P.
+	; 
+	; Moves can set the player status bit PS_PROJREM or PS_PROJREFLECT, and this happens:
+	; - PS_PROJREM -> The projectile is deleted (as if it hit the target)
+	; - PS_PROJREFLECT -> The projectile is reflected
+	;
+
+	; If neiher of those bits is set, this collision check is skipped.
 	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
-	and  a, $30
-	jp   z, L016D70
-	ld   a, [wOBJInfo2+iOBJInfo_Status]
-	bit  7, a
-	jp   z, L016D70
-	ld   a, [$D719]
-	or   a
-	jp   z, L016D70
-	ld   de, $C1D4
-	call L016E65
-	ld   a, [wOBJInfo2+iOBJInfo_X]
+	and  a, PS_PROJREM|PS_PROJREFLECT		; Is 2P currently able to reflect projectiles?
+	jp   z, .end							; If not, skip
+	
+	; If there's no active projectile, skip
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_Status]
+	bit  OSTB_VISIBLE, a		; Is the projectile visible?
+	jp   z, .end				; If not, skip
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_HitboxId]
+	or   a						; Does the projectile have an hitbox?
+	jp   z, .end				; If not, skip
+.check:
+	;
+	; Get 1P Projectile data
+	;
+	ld   de, wPlayTmpColiA
+	call Play_GetPlColiBox
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_X]
 	ld   b, a
-	ld   a, [wOBJInfo2+iOBJInfo_Y]
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_Y]
 	ld   c, a
-	ld   a, [wOBJInfo2+iOBJInfo_OBJLstFlags]
-	ld   [wLZSS_Buffer], a
-	ld   a, [$D6D9]
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_OBJLstFlags]
+	ld   [wPlayTmpColiA_OBJLstFlags], a
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_HitboxId]
 	or   a
-	jr   z, L016D70
-	ld   de, $C1DE
-	call L016E65
+	jr   z, .end
+	
+	;
+	; Get 2P Hitbox data
+	;
+	ld   de, wPlayTmpColiB
+	call Play_GetPlColiBox
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
 	ld   d, a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_Y]
 	ld   e, a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlagsOld]
-	ld   [$C1CB], a
-	call L016E7C
-	jr   nc, L016D70
-L016D3E: db $FA;X
-L016D3F: db $20;X
-L016D40: db $DA;X
-L016D41: db $CB;X
-L016D42: db $6F;X
-L016D43: db $C2;X
-L016D44: db $5D;X
-L016D45: db $6D;X
-L016D46: db $FA;X
-L016D47: db $20;X
-L016D48: db $DA;X
-L016D49: db $CB;X
-L016D4A: db $77;X
-L016D4B: db $C2;X
-L016D4C: db $55;X
-L016D4D: db $6D;X
-L016D4E: db $FA;X
-L016D4F: db $27;X
-L016D50: db $D7;X
-L016D51: db $B7;X
-L016D52: db $C2;X
-L016D53: db $70;X
-L016D54: db $6D;X
-L016D55: db $3E;X
-L016D56: db $01;X
-L016D57: db $EA;X
-L016D58: db $26;X
-L016D59: db $D7;X
-L016D5A: db $C3;X
-L016D5B: db $62;X
-L016D5C: db $6D;X
-L016D5D: db $3E;X
-L016D5E: db $02;X
-L016D5F: db $EA;X
-L016D60: db $26;X
-L016D61: db $D7;X
-L016D62: db $21;X
-L016D63: db $63;X
-L016D64: db $D9;X
-L016D65: db $CB;X
-L016D66: db $DE;X
-L016D67: db $CB;X
-L016D68: db $EE;X
-L016D69: db $21;X
-L016D6A: db $63;X
-L016D6B: db $DA;X
-L016D6C: db $CB;X
-L016D6D: db $CE;X
-L016D6E: db $CB;X
-L016D6F: db $FE;X
-L016D70:;JR
+	ld   [wPlayTmpColiB_OBJLstFlags], a
+	call Play_CheckColi
+	jr   nc, .end
+.coliOk:
+	;
+	; Determine what to do if the hitbox and projectile collide
+	;
+	
+	; If 2P can reflect projectiles, do just that.
+	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
+	bit  PSB_PROJREFLECT, a		; Is the flag set?
+	jp   nz, .reflectProj		; If so, jump
+	
+	; If 2P is performing a super move that can remove projectiles (ie: Chizuru's),
+	; any type of projectile can be erased, even from super moves.
+	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
+	bit  PSB_SUPERMOVE, a		; Flashing at max speed?
+	jp   nz, .removeProj		; If so, jump
+	
+	; Otherwise, don't allow erasing projectiles with high priority.
+	; (ie: 1P did one in his super)
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_Priority]
+	or   a						; Does the projectile have high priority?
+	jp   nz, .end				; If so, skip
+.removeProj:
+	ld   a, PHM_REMOVE
+	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_HitMode], a
+	jp   .setFlags
+.reflectProj:
+	ld   a, PHM_REFLECT
+	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_HitMode], a
+.setFlags:
+	; Sets the flag for both players
+	; ??? what's up with PCF_RECVHIT / PCF_SENDHIT ???
+	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
+	set  PCF_RECVPROJREM, [hl]
+	set  PCF_RECVHIT, [hl]
+	
+	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
+	set  PCF_SENDHIT, [hl]
+	set  PCF_SENDPROJREM, [hl]
+.end:
+
+Play_DoPlColi_1PCharHitbox2PProj:
+	;
+	; 2P Projectile Hitbox - 1P Character Hitbox
+	;
+	; Same thing, but for the other player
+	
 	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
-	and  a, $30
-	jp   z, L016DEB
-	ld   a, [wOBJInfo3+iOBJInfo_Status]
-	bit  7, a
-	jp   z, L016DEB
-	ld   a, [$D759]
+	and  a, PS_PROJREM|PS_PROJREFLECT
+	jp   z, .end
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Status]
+	bit  OSTB_VISIBLE, a
+	jp   z, .end
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_HitboxId]
 	or   a
-	jr   z, L016DEB
-	ld   de, $C1D4
-	call L016E65
-	ld   a, [wOBJInfo3+iOBJInfo_X]
+	jr   z, .end
+.check:
+	;
+	; Get 2P Projectile data
+	;
+	ld   de, wPlayTmpColiA
+	call Play_GetPlColiBox
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_X]
 	ld   b, a
-	ld   a, [wOBJInfo3+iOBJInfo_Y]
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Y]
 	ld   c, a
-	ld   a, [wOBJInfo3+iOBJInfo_OBJLstFlags]
-	ld   [wLZSS_Buffer], a
-	ld   a, [$D699]
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_OBJLstFlags]
+	ld   [wPlayTmpColiA_OBJLstFlags], a
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_HitboxId]
 	or   a
-	jr   z, L016DEB
-	ld   de, $C1DE
-	call L016E65
+	jr   z, .end
+	
+	;
+	; Get 1P Hitbox data
+	;
+	ld   de, wPlayTmpColiB
+	call Play_GetPlColiBox
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	ld   d, a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
 	ld   e, a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsOld]
-	ld   [$C1CB], a
-	call L016E7C
-	jr   nc, L016DEB
+	ld   [wPlayTmpColiB_OBJLstFlags], a
+	call Play_CheckColi
+	jr   nc, .end
+.coliOk:
+	;
+	; Determine what to do if the hitbox and projectile collide
+	;
 	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
-	bit  5, a
-	jp   nz, L016DD8
+	bit  PSB_PROJREFLECT, a
+	jp   nz, .reflectProj
 	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
-	bit  6, a
-	jp   nz, L016DD0
-	ld   a, [$D767]
+	bit  PSB_SUPERMOVE, a
+	jp   nz, .removeProj
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_Priority]
 	or   a
-	jp   nz, L016DEB
-L016DD0:
-	ld   a, $01
-	ld   [$D766], a
-	jp   L016DDD
-L016DD8:;X
-	ld   a, $02
-	ld   [$D766], a
-L016DDD:;J
-	ld   hl, wPlInfo_Pl2+iPlInfo_63
-	set  3, [hl]
-	set  5, [hl]
-	ld   hl, wPlInfo_Pl1+iPlInfo_63
-	set  1, [hl]
-	set  7, [hl]
-L016DEB:;JR
-	ld   a, [wOBJInfo2+iOBJInfo_Status]
-	bit  7, a
-	jp   z, L016E64
-	ld   a, [wOBJInfo3+iOBJInfo_Status]
-	bit  7, a
-	jp   z, L016E64
-	ld   a, [$D719]
+	jp   nz, .end
+.removeProj:
+	ld   a, PHM_REMOVE
+	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_HitMode], a
+	jp   .setFlags
+.reflectProj:
+	ld   a, PHM_REFLECT
+	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_HitMode], a
+.setFlags:
+	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
+	set  PCF_RECVPROJREM, [hl]
+	set  PCF_RECVHIT, [hl]
+	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
+	set  PCF_SENDHIT, [hl]
+	set  PCF_SENDPROJREM, [hl]
+.end:
+
+Play_DoPlColi_1PProj2PProj:
+	;
+	; 1P Projectile Hitbox - 2P Projectile Hitbox
+	;
+	; In general, they cancel each other out.
+	
+	; Both projectiles must be visible
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_Status]
+	bit  OSTB_VISIBLE, a
+	jp   z, .end
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Status]
+	bit  OSTB_VISIBLE, a
+	jp   z, .end
+.check:
+	;
+	; Get 1P Projectile data
+	;
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_HitboxId]
 	or   a
-	jr   z, L016E64
-L016E01: db $11;X
-L016E02: db $D4;X
-L016E03: db $C1;X
-L016E04: db $CD;X
-L016E05: db $65;X
-L016E06: db $6E;X
-L016E07: db $FA;X
-L016E08: db $03;X
-L016E09: db $D7;X
-L016E0A: db $47;X
-L016E0B: db $FA;X
-L016E0C: db $05;X
-L016E0D: db $D7;X
-L016E0E: db $4F;X
-L016E0F: db $FA;X
-L016E10: db $01;X
-L016E11: db $D7;X
-L016E12: db $EA;X
-L016E13: db $CA;X
-L016E14: db $C1;X
-L016E15: db $FA;X
-L016E16: db $59;X
-L016E17: db $D7;X
-L016E18: db $B7;X
-L016E19: db $28;X
-L016E1A: db $49;X
-L016E1B: db $11;X
-L016E1C: db $DE;X
-L016E1D: db $C1;X
-L016E1E: db $CD;X
-L016E1F: db $65;X
-L016E20: db $6E;X
-L016E21: db $FA;X
-L016E22: db $43;X
-L016E23: db $D7;X
-L016E24: db $57;X
-L016E25: db $FA;X
-L016E26: db $45;X
-L016E27: db $D7;X
-L016E28: db $5F;X
-L016E29: db $FA;X
-L016E2A: db $41;X
-L016E2B: db $D7;X
-L016E2C: db $EA;X
-L016E2D: db $CB;X
-L016E2E: db $C1;X
-L016E2F: db $CD;X
-L016E30: db $7C;X
-L016E31: db $6E;X
-L016E32: db $30;X
-L016E33: db $30;X
-L016E34: db $FA;X
-L016E35: db $67;X
-L016E36: db $D7;X
-L016E37: db $47;X
-L016E38: db $FA;X
-L016E39: db $27;X
-L016E3A: db $D7;X
-L016E3B: db $B8;X
-L016E3C: db $CA;X
-L016E3D: db $5C;X
-L016E3E: db $6E;X
-L016E3F: db $DA;X
-L016E40: db $4F;X
-L016E41: db $6E;X
-L016E42: db $3E;X
-L016E43: db $00;X
-L016E44: db $EA;X
-L016E45: db $26;X
-L016E46: db $D7;X
-L016E47: db $3E;X
-L016E48: db $01;X
-L016E49: db $EA;X
-L016E4A: db $66;X
-L016E4B: db $D7;X
-L016E4C: db $C3;X
-L016E4D: db $64;X
-L016E4E: db $6E;X
-L016E4F: db $3E;X
-L016E50: db $00;X
-L016E51: db $EA;X
-L016E52: db $66;X
-L016E53: db $D7;X
-L016E54: db $3E;X
-L016E55: db $01;X
-L016E56: db $EA;X
-L016E57: db $26;X
-L016E58: db $D7;X
-L016E59: db $C3;X
-L016E5A: db $64;X
-L016E5B: db $6E;X
-L016E5C: db $3E;X
-L016E5D: db $01;X
-L016E5E: db $EA;X
-L016E5F: db $26;X
-L016E60: db $D7;X
-L016E61: db $EA;X
-L016E62: db $66;X
-L016E63: db $D7;X
-L016E64:;JR
-	ret
-L016E65:;C
+	jr   z, .end
+	ld   de, wPlayTmpColiA
+	call Play_GetPlColiBox
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_X]
+	ld   b, a
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_Y]
+	ld   c, a
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_OBJLstFlags]
+	ld   [wPlayTmpColiA_OBJLstFlags], a
+	;
+	; Get 2P Projectile data
+	;
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_HitboxId]
+	or   a
+	jr   z, .end
+	ld   de, wPlayTmpColiB
+	call Play_GetPlColiBox
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_X]
+	ld   d, a
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Y]
+	ld   e, a
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_OBJLstFlags]
+	ld   [wPlayTmpColiB_OBJLstFlags], a
+	call Play_CheckColi
+	jr   nc, .end
+.coliOk:
+	; Check projectile priority.
+	; The one with higher priority value erases the other, or both cancel each
+	; other out when they have same priority.
+	; Note that, generally, super move projectiles have the higher priority.
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_Priority]
+	ld   b, a												; B = 2P Projectile Priority
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_Priority]	; A = 1P Projectile Priority
+	cp   b				
+	jp   z, .remAllProj	; 1P == 2P? If so, jump
+	jp   c, .remProj1P	; 1P < 2P? If so, jump
+.remProj2P:
+	; Otherwise, 1P > 2P.
+	; 1P Projectile stays, 2P removed
+	ld   a, PHM_NONE
+	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_HitMode], a
+	ld   a, PHM_REMOVE
+	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_HitMode], a
+	jp   .end
+.remProj1P:
+	; 2P Projectile stays, 1P removed
+	ld   a, PHM_NONE
+	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_HitMode], a
+	ld   a, PHM_REMOVE
+	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_HitMode], a
+	jp   .end
+.remAllProj:
+	; Both projectiles removed
+	ld   a, PHM_REMOVE
+	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_HitMode], a
+	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_HitMode], a
+.end:
+	ret 
+	
+; =============== Play_GetPlColiBox ===============
+; Gets the length of the collision boxes.
+; This copies 4 bytes from the indexed Play_ColiBoxTbl entry to DE.
+; IN
+; - A: Collision box ID
+; - DE: Ptr to destination
+Play_GetPlColiBox:
+
+	; Index the table with collision boxes (4 byte entries)
+	; HL = A * 4
 	ld   h, $00
-	ld   l, a
-	add  hl, hl
-	add  hl, hl
+	ld   l, a		; HL = A
+	add  hl, hl		; HL * 2
+	add  hl, hl		; HL * 2
 	push de
-	ld   de, $6ED6
-	add  hl, de
+		; Offset the table
+		ld   de, Play_ColiBoxTbl
+		add  hl, de
 	pop  de
-	ldi  a, [hl]
+	
+	; Read out the entries to DE
+	ldi  a, [hl]	; byte0 - X Origin
 	ld   [de], a
 	inc  de
-	ldi  a, [hl]
+	ldi  a, [hl]	; byte1 - Y Origin
 	ld   [de], a
 	inc  de
-	ldi  a, [hl]
+	ldi  a, [hl]	; byte2 - H Radius
 	ld   [de], a
 	inc  de
-	ld   a, [hl]
+	ld   a, [hl]	; byte3 - V Radius
 	ld   [de], a
 	ret
-L016E7C:;C
-	ld   a, [wLZSS_Buffer]
+	
+; =============== Play_CheckColi ===============
+; Checks if the specified collision boxes overlap.
+;
+; Note that player sprites don't get V-flipped, so the only special checks are made against SPRB_XFLIP.
+;
+; IN:
+; - B: 1P X position
+; - C: 1P Y position
+; - D: 2P X position
+; - E: 2P Y position
+; OUT
+; - C flag: If set, the collision boxes overlap
+; - B: X Box Overlapping (how much the collision boxes overlap horizontally)
+; - C: Y Box Overlapping (...)
+; - D: 1P Absolute X Box Origin
+; - E: 1P Absolute Y Box Origin
+Play_CheckColi:
+	
+	;--
+	;
+	; X BOUNDS CHECK
+	;
+	; In this one, we have to deal with the sprite being X flipped.
+	; When a sprite is flipped, the collision box origin is flipped relative to the player's absolute X position.
+	; (which, in practice, means A = -A)
+	; ie: the negative value (left of origin) becomes positive (right of origin).
+	;
+	; Note that it won't change the box width at all, as it's a radius that always extends equally
+	; to both the left and right sides of the box origin.
+	;
+	
+	
+	;##
+	;
+	; B = H = 1P Absolute H Origin
+	; 
+	; Convert the relative origin in wPlayTmpColiA_OriginH to absolute,
+	; by adding the X player position to it.
+	;
+	
+	; H = OBJLst flags (for the X flip flag)
+	ld   a, [wPlayTmpColiA_OBJLstFlags]
 	ld   h, a
-	ld   a, [$C1D4]
-	bit  5, h
-	jr   z, L016E89
-	cpl
+	; A = Relative X Origin (accounting for X flip)
+	ld   a, [wPlayTmpColiA_OriginH]
+	bit  SPRB_XFLIP, h		; Is the player X flipped?
+	jr   z, .setHOrigin1P	; If not, jump
+	cpl						; Otherwise, A = -A
 	inc  a
-L016E89:;R
-	add  b
-	ld   b, a
+.setHOrigin1P:
+	; Convert the relative origin to absolute.
+	add  b					; AbsXOrg = RelXOrg + AbsPlX
+	; Save the result to B and H
+	ld   b, a ; Why save it to B?
 	ld   h, a
-	ld   a, [$C1CB]
+	
+
+.getHOrigin2P:
+	;##
+	;
+	; A = 2P Absolute H Origin
+	;
+	
+	; L = OBJLst flags (for the X flip flag)
+	ld   a, [wPlayTmpColiB_OBJLstFlags]
 	ld   l, a
-	ld   a, [$C1DE]
-	bit  5, L
-	jr   z, L016E99
+	; A = Relative X origin (accounting for X flip)
+	ld   a, [wPlayTmpColiB_OriginH]
+	bit  SPRB_XFLIP, l
+	jr   z, .setHOrigin2P
 	cpl
 	inc  a
-L016E99:;R
-	add  a, d
-	sub  a, b
-	jp   nc, L016EA0
-	cpl
+.setHOrigin2P:
+	; Convert the relative origin to absolute.
+	add  a, d				; AbsXOrg = RelXOrg + AbsPlX
+	
+	
+.getHDist:
+	;##
+	;
+	; B = Distance between collision box origins.
+	;     
+	sub  a, b			; A = 2P - 1P
+	jp   nc, .setHDist	; Is that >= 0 (2P to the right of 1P)? If so, jump
+	cpl					; Otherwise, A = -A
 	inc  a
-L016EA0:;J
+.setHDist:
 	ld   b, a
+
+.getLimitH:
+	;##
+	;
+	; Determine the range threshold (max distance for collision).
+	;
+	; As the widths are radiuses that extend to both sides equally, this is always the 
+	; sum of the two players' horizontal widths, regardless of a player's position or X flip.
+	;
+	; A = wPlayTmpColiA_RadH + wPlayTmpColiB_RadH
 	push bc
-	ld   a, [$C1D6]
-	ld   b, a
-	ld   a, [$C1E0]
-	add  b
+		;
+		ld   a, [wPlayTmpColiA_RadH]	; B = 1P Box Width
+		ld   b, a
+		ld   a, [wPlayTmpColiB_RadH]	; A = 2P Box Width
+		add  b							; Add those together
 	pop  bc
-	sub  a, b
-	jp   c, L016ED4
-	ld   b, a
-	ld   a, [$C1D5]
+	
+.chkBoundsH:
+	;##
+	;
+	; Perform the bounds check.
+	; If the distance between box origins is larger than the threshold, the boxes aren't overlapping.
+	; so we can return.
+	;
+	; Otherwise, save to B by how much they overlap
+	sub  a, b			; A -= DistanceH
+	jp   c, .retClear	; A < 0? If so, return
+	ld   b, a			; Otherwise, save the result to B
+	
+	;---
+	
+.doV:
+
+	;--
+	;
+	; Y BOUNDS CHECK
+	;
+	; This is essentially the same, except there's no Y flip here.
+	;
+	
+	;
+	; C = L = 1P Absolute V Origin
+	;
+	ld   a, [wPlayTmpColiA_OriginV]
 	add  c
-	ld   c, a
+	ld   c, a	; Why save a copy here?
 	ld   l, a
-	ld   a, [$C1DF]
+.getVOrigin2P:
+	;##
+	;
+	; A = 2P Absolute V Origin
+	;
+	ld   a, [wPlayTmpColiB_OriginV]
 	add  a, e
-	sub  a, c
-	jp   nc, L016EC0
-	cpl
+	
+.getVDist:
+	;##
+	;
+	; C = Distance between collision box origins.
+	;   
+	sub  a, c			; A = 2P - 1P
+	jp   nc, .setVDist	; Is that >= 0 (2P to the right of 1P)? If so, jump
+	cpl					; Otherwise, A = -A
 	inc  a
-L016EC0:;J
+.setVDist:
 	ld   c, a
+	
+	;##
+	;
+	; Determine threshold
+	;
+	; A = wPlayTmpColiA_RadV + wPlayTmpColiB_RadV
 	push bc
-	ld   a, [$C1D7]
-	ld   b, a
-	ld   a, [$C1E1]
-	add  b
+		ld   a, [wPlayTmpColiA_RadV]
+		ld   b, a
+		ld   a, [wPlayTmpColiB_RadV]
+		add  b
 	pop  bc
-	sub  a, c
-	jp   c, L016ED4
-	ld   c, a
+	
+.chkBoundsV:
+	;##
+	;
+	; Perform the bounds check.
+	;
+	
+	; Distance must be positive
+	sub  a, c						; A -= DistanceV
+	jp   c, .retClear				; A < 0? If so, jump
+	ld   c, a						; Otherwise, save the result to C
+	
+	; Move the 1P/2P distances to DE
 	push hl
 	pop  de
-	scf
+	
+.retSet:
+	scf			; Set carry
 	ret
-L016ED4:;J
-	or   a
+.retClear:
+	or   a		; Clear carry
 	ret
-L016ED6: db $00;X
-L016ED7: db $00;X
-L016ED8: db $00;X
-L016ED9: db $00;X
-L016EDA: db $00
-L016EDB: db $FC
-L016EDC: db $08
-L016EDD: db $10
-L016EDE: db $F7
-L016EDF: db $00
-L016EE0: db $0D
-L016EE1: db $09
-L016EE2: db $00
-L016EE3: db $00
-L016EE4: db $10
-L016EE5: db $10
-L016EE6: db $00
-L016EE7: db $00
-L016EE8: db $10
-L016EE9: db $12
-L016EEA: db $00
-L016EEB: db $00
-L016EEC: db $A0
-L016EED: db $7F
-L016EEE: db $0D;X
-L016EEF: db $02;X
-L016EF0: db $10;X
-L016EF1: db $08;X
-L016EF2: db $00
-L016EF3: db $09
-L016EF4: db $08
-L016EF5: db $08
-L016EF6: db $FE
-L016EF7: db $F0
-L016EF8: db $12
-L016EF9: db $20
-L016EFA: db $00;X
-L016EFB: db $EE;X
-L016EFC: db $10;X
-L016EFD: db $20;X
-L016EFE: db $00
-L016EFF: db $00
-L016F00: db $08
-L016F01: db $08
-L016F02: db $00
-L016F03: db $00
-L016F04: db $06
-L016F05: db $12
-L016F06: db $03
-L016F07: db $00
-L016F08: db $08
-L016F09: db $1D
-L016F0A: db $00
-L016F0B: db $F0
-L016F0C: db $20
-L016F0D: db $20
-L016F0E: db $00
-L016F0F: db $C2
-L016F10: db $28
-L016F11: db $4F
-L016F12: db $00
-L016F13: db $10
-L016F14: db $A0
-L016F15: db $06
-L016F16: db $00
-L016F17: db $C2
-L016F18: db $08
-L016F19: db $6F
-L016F1A: db $00
-L016F1B: db $00
-L016F1C: db $0C
-L016F1D: db $0C
-L016F1E: db $0D
-L016F1F: db $00
-L016F20: db $15
-L016F21: db $1D
-L016F22: db $00
-L016F23: db $F4
-L016F24: db $11
-L016F25: db $1C
-L016F26: db $EA
-L016F27: db $FC
-L016F28: db $08
-L016F29: db $0E
-L016F2A: db $F2
-L016F2B: db $FC
-L016F2C: db $0E
-L016F2D: db $14
-L016F2E: db $F9
-L016F2F: db $F9
-L016F30: db $19
-L016F31: db $14
-L016F32: db $00;X
-L016F33: db $FC;X
-L016F34: db $0B;X
-L016F35: db $0B;X
-L016F36: db $00;X
-L016F37: db $F5;X
-L016F38: db $12;X
-L016F39: db $12;X
-L016F3A: db $00;X
-L016F3B: db $EE;X
-L016F3C: db $18;X
-L016F3D: db $18;X
-L016F3E: db $00
-L016F3F: db $0C
-L016F40: db $0B
-L016F41: db $0B
-L016F42: db $00;X
-L016F43: db $05;X
-L016F44: db $12;X
-L016F45: db $12;X
-L016F46: db $00;X
-L016F47: db $FE;X
-L016F48: db $18;X
-L016F49: db $18;X
-L016F4A: db $F5
-L016F4B: db $FB
-L016F4C: db $11
-L016F4D: db $09
-L016F4E: db $F5
-L016F4F: db $02
-L016F50: db $13
-L016F51: db $11
-L016F52: db $EA
-L016F53: db $FA
-L016F54: db $0F
-L016F55: db $0D
-L016F56: db $F3
-L016F57: db $FB
-L016F58: db $0D
-L016F59: db $0F
-L016F5A: db $F7
-L016F5B: db $F4
-L016F5C: db $0E
-L016F5D: db $0D
-L016F5E: db $00
-L016F5F: db $F9
-L016F60: db $11
-L016F61: db $18
-L016F62: db $F3
-L016F63: db $E3
-L016F64: db $0C
-L016F65: db $09
-L016F66: db $EE
-L016F67: db $07
-L016F68: db $0E
-L016F69: db $0A
-L016F6A: db $FD
-L016F6B: db $F8
-L016F6C: db $0D
-L016F6D: db $10
-L016F6E: db $F8
-L016F6F: db $F8
-L016F70: db $0D
-L016F71: db $0F
-L016F72: db $FA
-L016F73: db $FF
-L016F74: db $0B
-L016F75: db $0B
-L016F76: db $FB
-L016F77: db $FC
-L016F78: db $0E
-L016F79: db $14
-L016F7A: db $E0
-L016F7B: db $FC
-L016F7C: db $0B
-L016F7D: db $08
-L016F7E: db $DD
-L016F7F: db $FC
-L016F80: db $0E
-L016F81: db $08
-L016F82: db $FA
-L016F83: db $00
-L016F84: db $12
-L016F85: db $13
-L016F86: db $E8
-L016F87: db $FB
-L016F88: db $0B
-L016F89: db $10
-L016F8A: db $FB
-L016F8B: db $F4
-L016F8C: db $0D
-L016F8D: db $16
-L016F8E: db $ED
-L016F8F: db $F9
-L016F90: db $0D
-L016F91: db $10
-L016F92: db $00
-L016F93: db $04
-L016F94: db $0C
-L016F95: db $0C
-L016F96: db $E8
-L016F97: db $00
-L016F98: db $0E
-L016F99: db $09
-L016F9A: db $E8
-L016F9B: db $FE
-L016F9C: db $0A
-L016F9D: db $0B
-L016F9E: db $F5
-L016F9F: db $EE
-L016FA0: db $0C
-L016FA1: db $17
-L016FA2: db $EC
-L016FA3: db $00
-L016FA4: db $0D
-L016FA5: db $0D
-L016FA6: db $EB
-L016FA7: db $FA
-L016FA8: db $0D
-L016FA9: db $12
-L016FAA: db $FE
-L016FAB: db $FC
-L016FAC: db $14
-L016FAD: db $0E
-L016FAE: db $F6
-L016FAF: db $FA
-L016FB0: db $14
-L016FB1: db $0E
-L016FB2: db $F7
-L016FB3: db $02
-L016FB4: db $11
-L016FB5: db $0F
-L016FB6: db $F9
-L016FB7: db $FA
-L016FB8: db $12
-L016FB9: db $10
-L016FBA: db $FB
-L016FBB: db $09
-L016FBC: db $0D
-L016FBD: db $0B
-L016FBE: db $FE
-L016FBF: db $FC
-L016FC0: db $14
-L016FC1: db $13
-L016FC2: db $F4
-L016FC3: db $F7
-L016FC4: db $09
-L016FC5: db $09
-L016FC6: db $00
-L016FC7: db $FC
-L016FC8: db $10
-L016FC9: db $17
-L016FCA: db $F0
-L016FCB: db $FB
-L016FCC: db $0D
-L016FCD: db $16
-L016FCE: db $E8
-L016FCF: db $F8
-L016FD0: db $10
-L016FD1: db $18
-L016FD2: db $F5
-L016FD3: db $FE
-L016FD4: db $14
-L016FD5: db $0D
-L016FD6: db $F4
-L016FD7: db $FE
-L016FD8: db $13
-L016FD9: db $09
-L016FDA: db $F8
-L016FDB: db $00
-L016FDC: db $15
-L016FDD: db $09
-L016FDE: db $FE
-L016FDF: db $F5
-L016FE0: db $1A
-L016FE1: db $09
-L016FE2: db $EC
-L016FE3: db $FE
-L016FE4: db $13
-L016FE5: db $05
-L016FE6: db $EE
-L016FE7: db $00
-L016FE8: db $0D
-L016FE9: db $09
-L016FEA: db $F0
-L016FEB: db $FD
-L016FEC: db $13
-L016FED: db $0D
-L016FEE: db $EF
-L016FEF: db $F8
-L016FF0: db $0D
-L016FF1: db $12
-L016FF2: db $ED
-L016FF3: db $05
-L016FF4: db $0D
-L016FF5: db $0C
-L016FF6: db $F3
-L016FF7: db $FC
-L016FF8: db $0D
-L016FF9: db $13
-L016FFA: db $F6
-L016FFB: db $FA
-L016FFC: db $0C
-L016FFD: db $13
-L016FFE: db $F0
-L016FFF: db $00
-L017000: db $0D
-L017001: db $09
-L017002: db $FA
-L017003: db $ED
-L017004: db $0D
-L017005: db $09
-L017006: db $F7
-L017007: db $09
-L017008: db $0D
-L017009: db $09
-L01700A: db $F2
-L01700B: db $09
-L01700C: db $0D
-L01700D: db $09
-L01700E: db $F1
-L01700F: db $05
-L017010: db $0D
-L017011: db $09
-L017012: db $F0
-L017013: db $F5
-L017014: db $0D
-L017015: db $09
-L017016: db $EE
-L017017: db $00
-L017018: db $0D
-L017019: db $09
-L01701A: db $F3
-L01701B: db $00
-L01701C: db $0D
-L01701D: db $09
-L01701E: db $F5
-L01701F: db $09
-L017020: db $0D
-L017021: db $09
-L017022: db $EE
-L017023: db $07
-L017024: db $0D
-L017025: db $09
-L017026: db $FF
-L017027: db $F5
-L017028: db $0D
-L017029: db $09
-L01702A: db $FB
-L01702B: db $00
-L01702C: db $0D
-L01702D: db $09
-L01702E: db $F9
-L01702F: db $09
-L017030: db $0D
-L017031: db $09
-L017032: db $F2
-L017033: db $00
-L017034: db $0D
-L017035: db $09
-L017036: db $EB
-L017037: db $00
-L017038: db $0D
-L017039: db $09
-L01703A: db $F2
-L01703B: db $F3
-L01703C: db $0D
-L01703D: db $09
-L01703E: db $FD
-L01703F: db $F1
-L017040: db $0D
-L017041: db $09
-L017042: db $EF
-L017043: db $09
-L017044: db $0D
-L017045: db $09
-L017046: db $FC
-L017047: db $00
-L017048: db $0D
-L017049: db $09
-L01704A: db $F7
-L01704B: db $F5
-L01704C: db $0D
-L01704D: db $09
-L01704E: db $F4
-L01704F: db $09
-L017050: db $0D
-L017051: db $09
-L017052: db $F4
-L017053: db $F6
-L017054: db $0D
-L017055: db $09
-L017056: db $FC
-L017057: db $FC
-L017058: db $0D
-L017059: db $09
-L01705A: db $F3
-L01705B: db $FD
-L01705C: db $0D
-L01705D: db $09
-L01705E: db $F4
-L01705F: db $F9
-L017060: db $0D
-L017061: db $09
-L017062: db $FD
-L017063: db $EB
-L017064: db $0D
-L017065: db $09
-L017066: db $F8
-L017067: db $09
-L017068: db $0D
-L017069: db $09
-L01706A: db $EA
-L01706B: db $09
-L01706C: db $0D
-L01706D: db $09
-L01706E: db $ED
-L01706F: db $FA
-L017070: db $0D
-L017071: db $09
-L017072: db $E7
-L017073: db $00
-L017074: db $0D
-L017075: db $09
-L017076: db $F4
-L017077: db $09
-L017078: db $0D
-L017079: db $09
-L01707A: db $F2
-L01707B: db $F8
-L01707C: db $0D
-L01707D: db $09
-L01707E: db $ED
-L01707F: db $09
-L017080: db $0D
-L017081: db $09
-L017082: db $FA
-L017083: db $09
-L017084: db $0D
-L017085: db $09
-L017086: db $FC
-L017087: db $09
-L017088: db $0D
-L017089: db $09
-L01708A: db $FC
-L01708B: db $F3
-L01708C: db $0D
-L01708D: db $09
-L01708E: db $EF
-L01708F: db $FC
-L017090: db $0D
-L017091: db $09
-L017092: db $F6
-L017093: db $F4
-L017094: db $0D
-L017095: db $09
-L017096: db $F8
-L017097: db $F5
-L017098: db $0D
-L017099: db $09
-L01709A: db $FA
-L01709B: db $00
-L01709C: db $0D
-L01709D: db $09
-L01709E:;C
-	ld   hl, wMisc_C027
-	res  7, [hl]
+Play_ColiBoxTbl:
+	; [TCRF?] The ones marked by ;X MAY be unused (needs further checks)
+	db $00,$00,$00,$00 ; [POI] Dummy, unused
+	db $00,$FC,$08,$10
+	db $F7,$00,$0D,$09
+	db $00,$00,$10,$10
+	db $00,$00,$10,$12
+	db $00,$00,$A0,$7F
+	db $0D,$02,$10,$08;X
+	db $00,$09,$08,$08
+	db $FE,$F0,$12,$20
+	db $00,$EE,$10,$20;X
+	db $00,$00,$08,$08
+	db $00,$00,$06,$12
+	db $03,$00,$08,$1D
+	db $00,$F0,$20,$20
+	db $00,$C2,$28,$4F
+	db $00,$10,$A0,$06
+	db $00,$C2,$08,$6F
+	db $00,$00,$0C,$0C
+	db $0D,$00,$15,$1D
+	db $00,$F4,$11,$1C
+	db $EA,$FC,$08,$0E
+	db $F2,$FC,$0E,$14
+	db $F9,$F9,$19,$14
+	db $00,$FC,$0B,$0B;X
+	db $00,$F5,$12,$12;X
+	db $00,$EE,$18,$18;X
+	db $00,$0C,$0B,$0B
+	db $00,$05,$12,$12;X
+	db $00,$FE,$18,$18;X
+	db $F5,$FB,$11,$09
+	db $F5,$02,$13,$11
+	db $EA,$FA,$0F,$0D
+	db $F3,$FB,$0D,$0F
+	db $F7,$F4,$0E,$0D
+	db $00,$F9,$11,$18
+	db $F3,$E3,$0C,$09
+	db $EE,$07,$0E,$0A
+	db $FD,$F8,$0D,$10
+	db $F8,$F8,$0D,$0F
+	db $FA,$FF,$0B,$0B
+	db $FB,$FC,$0E,$14
+	db $E0,$FC,$0B,$08
+	db $DD,$FC,$0E,$08
+	db $FA,$00,$12,$13
+	db $E8,$FB,$0B,$10
+	db $FB,$F4,$0D,$16
+	db $ED,$F9,$0D,$10
+	db $00,$04,$0C,$0C
+	db $E8,$00,$0E,$09
+	db $E8,$FE,$0A,$0B
+	db $F5,$EE,$0C,$17
+	db $EC,$00,$0D,$0D
+	db $EB,$FA,$0D,$12
+	db $FE,$FC,$14,$0E
+	db $F6,$FA,$14,$0E
+	db $F7,$02,$11,$0F
+	db $F9,$FA,$12,$10
+	db $FB,$09,$0D,$0B
+	db $FE,$FC,$14,$13
+	db $F4,$F7,$09,$09
+	db $00,$FC,$10,$17
+	db $F0,$FB,$0D,$16
+	db $E8,$F8,$10,$18
+	db $F5,$FE,$14,$0D
+	db $F4,$FE,$13,$09
+	db $F8,$00,$15,$09
+	db $FE,$F5,$1A,$09
+	db $EC,$FE,$13,$05
+	db $EE,$00,$0D,$09
+	db $F0,$FD,$13,$0D
+	db $EF,$F8,$0D,$12
+	db $ED,$05,$0D,$0C
+	db $F3,$FC,$0D,$13
+	db $F6,$FA,$0C,$13
+	db $F0,$00,$0D,$09
+	db $FA,$ED,$0D,$09
+	db $F7,$09,$0D,$09
+	db $F2,$09,$0D,$09
+	db $F1,$05,$0D,$09
+	db $F0,$F5,$0D,$09
+	db $EE,$00,$0D,$09
+	db $F3,$00,$0D,$09
+	db $F5,$09,$0D,$09
+	db $EE,$07,$0D,$09
+	db $FF,$F5,$0D,$09
+	db $FB,$00,$0D,$09
+	db $F9,$09,$0D,$09
+	db $F2,$00,$0D,$09
+	db $EB,$00,$0D,$09
+	db $F2,$F3,$0D,$09
+	db $FD,$F1,$0D,$09
+	db $EF,$09,$0D,$09
+	db $FC,$00,$0D,$09
+	db $F7,$F5,$0D,$09
+	db $F4,$09,$0D,$09
+	db $F4,$F6,$0D,$09
+	db $FC,$FC,$0D,$09
+	db $F3,$FD,$0D,$09
+	db $F4,$F9,$0D,$09
+	db $FD,$EB,$0D,$09
+	db $F8,$09,$0D,$09
+	db $EA,$09,$0D,$09
+	db $ED,$FA,$0D,$09
+	db $E7,$00,$0D,$09
+	db $F4,$09,$0D,$09
+	db $F2,$F8,$0D,$09
+	db $ED,$09,$0D,$09
+	db $FA,$09,$0D,$09
+	db $FC,$09,$0D,$09
+	db $FC,$F3,$0D,$09
+	db $EF,$FC,$0D,$09
+	db $F6,$F4,$0D,$09
+	db $F8,$F5,$0D,$09
+	db $FA,$00,$0D,$09
+; =============== Play_ChkEnd ===============
+; Series of checks that handle the triggers that can end a round.
+Play_ChkEnd:
+	;
+	; Enable input processing as long as the round isn't over.
+	; There are a few different triggers that cause the round to end,
+	; which will be checked for now.
+	;
+	ld   hl, wMisc_C027			; Enable by default
+	res  MISCB_PLAY_STOP, [hl]
+	; Fall-through
+	
+; =============== Play_ChkEnd_TimeOver ===============
+Play_ChkEnd_TimeOver:
+	;
+	; TIME OVER CHECK
+	;
 	ld   a, [wRoundTime]
-	or   a
-	jp   nz, L0170B8
-	ld   hl, wMisc_C027
-	set  7, [hl]
-	call L017309
-	call L0173BA
-	jp   L01711B
-L0170B8:;J
-	ld   a, [$C17A]
-	or   a
-	jp   z, L017103
-	dec  a
-	ld   [$C17A], a
-	ld   a, [$C17B]
-L0170C6:;J
-	or   a
-	jp   z, L0170E8
-	push af
-	ld   a, $01
-	ld   [wPaused], a
-	call L0163B3
-	call L0176A7
-	call L0165CD
-	call L017EB1
-	call Task_SkipAllAndWaitVBlank
-	xor  a
-	ld   [wPaused], a
-	pop  af
-	dec  a
-	jp   L0170C6
-L0170E8:;J
-	call L0163B3
-	call L0176A7
-	call L0165CD
-	call L016B12
-	call L017EB1
-	call L0175E7
-	call L002BFC
+	or   a							; wRoundTime != 0?
+	jp   nz, Play_ChkEnd_Slowdown	; If so, jump
+.timeOver:							; Otherwise...
+	ld   hl, wMisc_C027				; Lock controls
+	set  MISCB_PLAY_STOP, [hl]
+	call Play_LoadPostRoundText0	; Prepare text set
+	call Play_DoTimeOverText		; 
+	jp   Play_ChkEnd_KO.chkWaitPost	; Continue to the standard post-round handler
+	
+; =============== Play_ChkEnd_Slowdown ===============
+Play_ChkEnd_Slowdown:
+	;
+	; Handles slowdown effect.
+	; As long as slowdown is active, this takes control as main gameplay loop.
+	;
+	; This is here because the game slows down for a moment when KO'ing an opponent,
+	; through it's also used occasionally for other parts.
+	;
+	
+	; Do the slowdown until wPlaySlowdownTimer elapses.
+	ld   a, [wPlaySlowdownTimer]
+	or   a						; wPlaySlowdownTimer == 0?
+	jp   z, Play_ChkEnd_KO		; If so, skip
+	; Otherwise, execute the slowdown
+	dec  a						; wPlaySlowdownTimer--
+	ld   [wPlaySlowdownTimer], a
+	
+	; Count down from wPlaySlowdownSpeed.
+	; When it reaches 0, execute once a complete gameplay loop.
+	ld   a, [wPlaySlowdownSpeed]	; A = TickLeft
+.loop:
+	or   a				; TickLeft == 0?
+	jp   z, .execNorm	; If so, execute a normal gameplay loop
+.execBlank:				; Otherwise, execute a simplified one that essentially doesn't process OBJInfo
+	push af				; Save TickLeft				
+		; Keep GFX buffer intact, as copying tiles to the buffer influences the animation timing.
+		ld   a, $01					
+		ld   [wNoCopyGFXBuf], a
+		call Play_DoPlInput
+		call Play_DoHUD
+		call Play_DoUnkChain
+		call Play_WriteKeysToBuffer
+		; Calling this is the main key behind how the slowdown works.
+		; This will skip processing the two other tasks, which are used
+		; to handle player movement.
+		call Task_SkipAllAndWaitVBlank
+		xor  a
+		ld   [wNoCopyGFXBuf], a
+	pop  af				; Restore TickLeft
+	dec  a				; TickLeft--
+	jp   .loop			; Go check if we're done "waiting"
+.execNorm:
+	call Play_DoPlInput
+	call Play_DoHUD
+	call Play_DoUnkChain
+	call Play_DoPlColi
+	call Play_WriteKeysToBuffer
+	call Play_DoScrollPos
+	call Play_ExecExOBJCode
 	call Task_PassControlFar
-	jp   L0170B8
-L017103:;J
+	jp   Play_ChkEnd_Slowdown
+	
+; =============== Play_ChkEnd_KO ===============
+Play_ChkEnd_KO:
+	;
+	; KO CHECK
+	;
+	; If any player has no health, handle the KO display
 	ld   a, [wPlInfo_Pl1+iPlInfo_Health]
-	or   a
-	jr   z, L017110
+	or   a				; 1P Health == 0?
+	jr   z, .showKO		; If so, round's over
 	ld   a, [wPlInfo_Pl2+iPlInfo_Health]
-	or   a
-	jp   nz, L01725C
-L017110:;R
+	or   a				; 2P Health == 0?
+	jp   nz, Play_ChkEnd_Ret		; If not, return
+.showKO:
 	ld   hl, wMisc_C027
-	set  7, [hl]
-	call L017309
-	call L0173C2
-L01711B:;J
+	set  MISCB_PLAY_STOP, [hl]
+	call Play_LoadPostRoundText0
+	call Play_DoKOText
+	;--
+	; [POI] Checking if the players were ready was already done in Play_LoadPostRoundText0.
+	;       What's the point of checking this again? (note it's also an oddity in 95).
+	;       Players can only be in the moves MOVE_SHARED_NONE or MOVE_SHARED_IDLE when we get here.
+.chkWaitPost:
+	; Execute main loop
 	ld   b, $01
-	call L01756D
+	call Play_MainLoopAlt_756D
+.chkWaitPost1P:
+	; Players must be either in the idle move (winner/draw) or have no move (lost).
+	; This is to allow any currently executing move to finish.
 	ld   a, [wPlInfo_Pl1+iPlInfo_MoveId]
-	cp   $00
-	jr   z, L01712B
-	cp   $02
-	jr   nz, L01711B
-L01712B:;R
+	cp   MOVE_SHARED_NONE	; MoveId == 0?
+	jr   z, .chkWaitPost2P	; If so, jump
+	cp   MOVE_SHARED_IDLE	; MoveId == 2?
+	jr   nz, .chkWaitPost	; If not, wait again
+.chkWaitPost2P:
 	ld   a, [wPlInfo_Pl2+iPlInfo_MoveId]
-	cp   $00
-	jr   z, L017136
-	cp   $02
-	jr   nz, L01711B
-L017136:;R
-	ld   a, [wPlInfo_Pl1+iPlInfo_Health]
-	ld   hl, wPlInfo_Pl2+iPlInfo_Health
-	cp   a, [hl]
-	jr   z, L01715D
-	jr   c, L01714F
-	call L0173F0
+	cp   MOVE_SHARED_NONE	; MoveId == 0?
+	jr   z, .chkEndType; If so, jump
+	cp   MOVE_SHARED_IDLE	; MoveId == 2?
+	jr   nz, .chkWaitPost	; If not, wait again
+	;--
+.chkEndType:
+	;
+	; Determine what kind of text to follow up the "KO" or "TIME OVER" with.
+	; Decide depending on the player health.
+	;
+	ld   a, [wPlInfo_Pl1+iPlInfo_Health]	; A = 1P Health
+	ld   hl, wPlInfo_Pl2+iPlInfo_Health		; B = Ptr to 2P Health
+	cp   a, [hl]		; Compare them
+	jr   z, .draw		; Do they match? If so, it's a DRAW GAME
+	jr   c, .won2P		; 1P < 2P? If so, 2P Won
+	; Otherwise, 1P Won
+.won1P:
+	call Play_Set1PWin
 	ld   bc, wPlInfo_Pl1
 	ld   de, wPlInfo_Pl2
-	call L01725E
-	jr   L017163
-L01714F:;R
-	call L017474
+	call Play_SetWinLoseMoves
+	jr   .showPostRoundText
+.won2P:;R
+	call Play_Set2PWin
 	ld   bc, wPlInfo_Pl2
 	ld   de, wPlInfo_Pl1
-	call L01725E
-	jr   L017163
-L01715D:;R
-	call L01750C
-	call L0172AE
-L017163:;R
+	call Play_SetWinLoseMoves
+	jr   .showPostRoundText
+.draw:
+	call Play_SetDraw
+	call Play_SetDrawMoves
+	
+.showPostRoundText:
+	; Display the win/lose anim for a long time while the text is on-screen.
+	; This is enough time for all win poses to finish, and still having a small delay when they end.
 	ld   b, $F0
-	call L01758C
+	call Play_MainLoop_PostRoundTextDisplay
+	
+
+	
+Play_ChkEnd_ChkNewRound:
+	;
+	; Determines if a new round should start.
+	;
+	
 	xor  a
-	ld   [$C161], a
-	call IsInTeamMode
-	jp   c, L01718D
+	ld   [wStageDraw], a
+	
+	call IsInTeamMode	; Playing in team mode?
+	jp   c, .team		; If so, jump
+	
+.single:
+	;
+	; SINGLE MODE
+	; 
+	
+	; The final round uses its own set of rules.
 	ld   a, [wRoundNum]
-	cp   $03
-	jp   z, L0171F1
+	cp   $03					; Is this the FINAL!! round? (round 4)
+	jp   z, .chkFinalRoundRes	; If so, jump
+	
+	; If any player won two rounds in single mode, the stage is over.
 	ld   a, [wPlInfo_Pl1+iPlInfo_SingleWinCount]
-	cp   $02
-	jp   z, L017210
+	cp   $02			; Did 1P win two rounds?
+	jp   z, .win1P		; If so, jump
 	ld   a, [wPlInfo_Pl2+iPlInfo_SingleWinCount]
-	cp   $02
-	jp   z, L01722D
-	jp   L0171EB
-L01718D:;J
-	ld   a, [wPlInfo_Pl1+iPlInfo_TeamLossCount]
-	ld   hl, wPlInfo_Pl2+iPlInfo_TeamLossCount
-	cp   a, [hl]
-	jp   z, L0171B0
-	jp   nc, L0171A5
+	cp   $02			; Did 2P win two rounds?
+	jp   z, .win2P		; If so, jump
+	
+	; Otherwise, start a new round.
+	jp   .startNewRound
+	
+.team:
+	;
+	; TEAM MODE
+	; 
+	; The team with at least 3 losses or with no characters left loses.
+	;
+	
+	; Check if the player with the largest amount of losses has iPlInfo_TeamLossCount >= $03.
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamLossCount]	; A = 1P Loss count
+	ld   hl, wPlInfo_Pl2+iPlInfo_TeamLossCount	; HL = Ptr to 2P Loss count
+	cp   a, [hl]		
+	jp   z, .teamLossEq		; Do they match? If so, jump
+	jp   nc, .chkLossCnt1P	; 1P >= 2P? If so, jump
+.chkLossCnt2P:				; Otherwise 1P < 2P. Check for 2P losses.
 	ld   a, [wPlInfo_Pl2+iPlInfo_TeamLossCount]
-	cp   $03
-	jp   nc, L017210
-	jp   L0171BA
-L0171A5:;J
+	cp   $03				; Did 2P lose at least 3 times?
+	jp   nc, .win1P			; If so, 1P won
+	jp   .chkBossLoss		; Otherwise, check if any team is completely defeated
+.chkLossCnt1P:
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamLossCount]
-	cp   $03
-	jp   nc, L01722D
-	jp   L0171BA
-L0171B0:;J
-	cp   $04
-	jp   z, L0171F1
-	cp   $03
-	jp   z, L0171EB
-L0171BA:;J
-	ld   a, [wPlInfo_Pl2+iPlInfo_TeamLossCount]
-	ld   hl, wPlInfo_Pl2+iPlInfo_TeamCharId0
-	ld   d, $00
+	cp   $03				; Did 1P lose at least 3 times?
+	jp   nc, .win2P			; If so, 2P won
+	jp   .chkBossLoss		; Otherwise, check if any team is completely defeated
+.teamLossEq:
+	; These involve the FINAL!! round, and must be checked for to avoid getting into
+	; .chkBossLoss with > $03 dead chars.
+	
+	; If we've finished the final round, skip this as a shortcut
+	cp   $04					; Do both players have 4 losses set?
+	jp   z, .chkFinalRoundRes	; If so, jump (show "DRAW" screen)
+	
+	; If we're stepping into the FINAL!! round, force start it.
+	cp   $03					; Do both players have 3 losses set?
+	jp   z, .startNewRound		; If so, start the FINAL!! round
+	
+.chkBossLoss:
+	
+	;
+	; Even though we checked if a team lost by having >= $03 defeated characters,
+	; it's not always possible to rely on it.
+	; Some "teams" (bosses and extra characters) go alone, and technically it's possible
+	; to have a 2-character team. Those teams can never pass the "3 losses" checks for obvious reasons.
+	;
+	;
+	; To deal with those, check if the new active character points to an CHAR_ID_NONE entry,	;
+	; as these teams have that value as "padding" in place of the missing characters.
+	;
+	
+	;
+	; Index the teams by loss count to get the active character. The indexed result may
+	; be a real character ID, or an CHAR_ID_NONE entry if the boss team is defeated.
+	; There's no bounds checking -- this code should never be called when a player has 3+ losses.
+	; (.teamLossEq and chkLossCnt*P should handle the >= 3 loss count before execution gets here)
+	;
+	
+	; B = Active char for 2P side
+	ld   a, [wPlInfo_Pl2+iPlInfo_TeamLossCount]	; A = Loss count
+	ld   hl, wPlInfo_Pl2+iPlInfo_TeamCharId0	; HL = Ptr to 2P team
+	ld   d, $00		; DE = Index
 	ld   e, a
-	add  hl, de
-	ld   a, [hl]
-	ld   b, a
+	add  hl, de		; Index the team tbl
+	ld   a, [hl]	; A = Active Char ID
+	ld   b, a		; Move to B
+	
+	; A = Active char for 1P side
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamLossCount]
 	ld   hl, wPlInfo_Pl1+iPlInfo_TeamCharId0
 	ld   d, $00
 	ld   e, a
 	add  hl, de
 	ld   a, [hl]
-	cp   a, b
-	jp   z, L0171E3
-	cp   $FF
-	jp   z, L01722D
-	ld   a, b
-	cp   $FF
-	jp   z, L017210
-	jp   L0171EB
-L0171E3:;J
-	cp   $FF
-	jp   z, L0171F1
-	jp   L0171EB
-L0171EB:;J
-	call L0172C1
+	
+	;--
+	; [POI] This check is here to switch to the FINAL!! round when both teams are
+	;       made of < 3 characters... but this is impossible to do in-game.
+	;       The check *can* jump, but only before starting a mirror match in team mode
+	;       (and .chkBossFinal won't ever call .chkFinalRoundRes)
+	cp   a, b					; New1PChar == New2PChar?
+	jp   z, .chkBossFinal		; If so, jump
+	;--
+	; If 1P's character is pointing to the NONE entry, 2P wins
+	cp   CHAR_ID_NONE	; New1PChar == CHAR_ID_NONE?
+	jp   z, .win2P		; If so, jump
+	; If 2P's character is pointing to the NONE entry, 1P wins
+	ld   a, b			; A = New2PChar
+	cp   CHAR_ID_NONE	; New2PChar == CHAR_ID_NONE?
+	jp   z, .win1P		; If so, jump
+	jp   .startNewRound
+.chkBossFinal:
+	;--
+	; See [POI] above
+	cp   CHAR_ID_NONE			; New1PChar == New2PChar == CHAR_ID_NONE?
+	jp   z, .chkFinalRoundRes	; If so, trigger the FINAL!! round
+	;--
+	jp   .startNewRound
+.startNewRound:
+	call Play_PrepForWinScreen
 	jp   Module_Play
-L0171F1:;J
+	
+.chkFinalRoundRes:
+	;
+	; FINAL ROUND CHECK
+	;
+	; After the FINAL!! round is over, there's no starting a new round.
+	; The stage forcefully ends, and the win screen code decides how to handle it.
+	; 
 	xor  a
-	ld   [$C161], a
+	ld   [wStageDraw], a
+	
+	;
+	; Because there is no stage progression in VS mode, the win screen
+	; is handled differently and there's no need for wStageDraw.
+	;
 	ld   a, [wPlayMode]
-	bit  1, a
-	jp   nz, L01724A
+	bit  MODEB_VS, a		; Playing a VS battle?	
+	jp   nz, .endStage		; If so, jump
+	
+	;
+	; If anyone won the FINAL!! round, the stage can end as normal
+	;
 	ld   a, [wLastWinner]
-	or   a
-	jp   nz, L01724A
-	ld   a, $01
-	ld   [$C161], a
+	or   a					; Is 2P the winner?
+	jp   nz, .endStage		; If so, jump
+	
+	;
+	; Otherwise, show the DRAW screen.
+	;
+	; As this is single mode, we also need to fake the wLastWinner data to make
+	; the game think the CPU opponent won. This will cause the continue prompt to show up
+	; instead of the game continuing anyway to the next stage.
+	;
+	; yep.
+	;
+	ld   a, $01				; Show DRAW screen
+	ld   [wStageDraw], a
+	
+	; Make the CPU opponent win
 	ld   a, [wJoyActivePl]
-	or   a
-	jp   z, L01722D
-L017210:;J
+	or   a					; wJoyActivePl == PL1? (2P is opponent)
+	jp   z, .win2P			; If so, 2P won
+.win1P:						; Otherwise, 1P won
+	;--
+	;
+	; 1P won the stage.
+	;
+	
+	; Restore the original iPlInfo_TeamLossCount value from the start of the round.
+	; Most of the time we get here, this value doesn't need to be changed... unless
+	; there was a draw that caused the stage to end (ie: when 1P Char 1 vs 2P Char 3 ends in draw)
+	; due to the $03 loss limit.
+	; That will still increase iPlInfo_TeamLossCount to both players, so we must decrement it back.
+	
 	ld   hl, wPlInfo_Pl1+iPlInfo_TeamLossCount
 	ld   a, [wLastWinner]
-	or   a
-	jp   nz, L01721B
-	dec  [hl]
-L01721B:;J
+	or   a					; Was there a winner in this round? (can only be 1P)
+	jp   nz, .win1P_capId	; If so, skip
+	dec  [hl]				; Otherwise, iPlInfo_TeamLossCount--
+	
+.win1P_capId:
+	; Cap iPlInfo_TeamLossCount to the last valid value for indexing.
+	; This only has an effect if the FINAL!! round ends in a draw.
 	ld   a, [hl]
-	cp   $03
-	jp   nz, L017223
-	ld   [hl], $02
-L017223:;J
+	cp   $03				; iPlInfo_TeamLossCount == $03
+	jp   nz, .win1P_setLast	; If not, jump
+	ld   [hl], $02			; Otherwise, cap to $02
+.win1P_setLast:
+	; Set 1P as the last winner.
+	; This is what determines if the round sequence should continue or not,
+	; even in case of the "DRAW" screen showing up.
 	ld   hl, wLastWinner
-	set  0, [hl]
-	res  1, [hl]
-	jp   L01724A
-L01722D:;J
+	set  PLB1, [hl]
+	res  PLB2, [hl]
+	jp   .endStage
+.win2P:
+	;--
+	;
+	; 2P won the stage.
+	;
 	ld   hl, wPlInfo_Pl2+iPlInfo_TeamLossCount
 	ld   a, [wLastWinner]
 	or   a
-	jp   nz, L017238
+	jp   nz, .win2P_capId
 	dec  [hl]
-L017238:;J
+.win2P_capId:
 	ld   a, [hl]
 	cp   $03
-	jp   nz, L017240
+	jp   nz, .win2P_setLast
 	ld   [hl], $02
-L017240:;J
+.win2P_setLast:
 	ld   hl, wLastWinner
-	res  0, [hl]
-	set  1, [hl]
-	jp   L01724A
-L01724A:;J
-	ld   hl, Tiles_Begin
+	res  PLB1, [hl]
+	set  PLB2, [hl]
+	jp   .endStage
+	;--
+.endStage:
+	; Stop SGB SFX
+	ld   hl, (SGB_SND_B_STOP << 8)|$00
 	call SGB_PrepareSoundPacketB
 	call Task_PassControlFar
-	call L0172C1
-	ld   b, $1D
-	ld   hl, $509F
+	
+	; Cleanup the screen
+	call Play_PrepForWinScreen
+	
+	; Initialize the win screen
+	ld   b, BANK(L1D509F) ; BANK $1D
+	ld   hl, L1D509F
 	rst  $00
-L01725C:;J
+Play_ChkEnd_Ret:
 	ret
-L01725D: db $C9;X
-L01725E:;C
-	call IsInTeamMode
-	jp   nc, L017286
+	ret ; We never get here
+; =============== Play_SetWinLoseMoves ===============
+; Sets the win and lose moves to the specified players.
+; This shouldn't be called when there are no winning players (ie: a draw).
+; IN
+; - BC: Ptr to winner wPlInfo
+; - DE: Ptr to loser wPlInfo
+Play_SetWinLoseMoves:
+	;
+	; Additionally...
+	; In team mode, the winner recovers health between rounds.
+	;
+	call IsInTeamMode		; Are we in team mode?
+	jp   nc, .chkWinMove	; If not, skip
+	
+	; The health recovered is 4 + (wRoundTime / 10).
 	ld   a, [wRoundTime]
+	srl  a				; A = A / 10
 	srl  a
 	srl  a
 	srl  a
-	srl  a
-	add  a, $04
-	ld   h, a
+	add  a, $04			; + 4
+	ld   h, a			; Save it to H
+	
+	; A = Current health
 	push hl
-	ld   hl, $004E
-	add  hl, bc
-	ld   a, [hl]
+		ld   hl, iPlInfo_Health
+		add  hl, bc				; Seek to iPlInfo_Health
+		ld   a, [hl]
 	pop  hl
-	add  a, h
-	cp   $48
-	jp   c, L017281
-	ld   a, $48
-L017281:;J
-	ld   hl, $004E
+	
+	; Add the health over, capping it at the standard value
+	add  a, h				; iPlInfo_Health += H
+	cp   $48				; Is it still < $48?
+	jp   c, .saveHealthInc	; If so, jump
+	ld   a, $48				; Otherwise, cap it
+.saveHealthInc:
+	; Save the new health value
+	ld   hl, iPlInfo_Health
+	add  hl, bc				; Seek to iPlInfo_Health
+	ld   [hl], a			; Save new value
+	
+	
+.chkWinMove:
+	;
+	; WINNING PLAYER -> Set the win move.
+	; If we've won 2 or more rounds in a row, use the alternate one.
+	;
+	ld   hl, iPlInfo_RoundWinStreak
 	add  hl, bc
-	ld   [hl], a
-L017286:;J
-	ld   hl, $0031
-	add  hl, bc
-	ld   a, [hl]
-	cp   $02
-	jr   nc, L017293
-	ld   a, $26
-	jr   L017295
-L017293:;R
-	ld   a, $28
-L017295:;R
-	ld   hl, $0035
-	add  hl, bc
-	ld   [hl], a
-	ld   hl, $004E
+	ld   a, [hl]			; A = iPlInfo_RoundWinStreak 
+	cp   $02				; iPlInfo_RoundWinStreak >= $02?
+	jr   nc, .winAlt		; If so, jump
+.winNorm:
+	ld   a, MOVE_SHARED_WIN_NORM	; A = Move ID to use
+	jr   .setWinMove
+.winAlt:
+	ld   a, MOVE_SHARED_WIN_ALT		; A = Move ID to use
+.setWinMove:
+	ld   hl, iPlInfo_IntroMoveId
+	add  hl, bc				; Seek to iPlInfo_IntroMoveId
+	ld   [hl], a			; Save it here
+	
+
+.chkLoseMove:
+	;
+	; LOSING PLAYER -> Set the lose move if possible.
+	; This is only applicable with time overs -- as otherwise the
+	; opponent stays dead on the ground.
+	;
+	ld   hl, iPlInfo_Health
 	add  hl, de
-	ld   a, [hl]
-	or   a
-	jr   nz, L0172A6
-	ld   a, $FF
-	jr   L0172A8
-L0172A6:;R
-	ld   a, $2A
-L0172A8:;R
-	ld   hl, $0035
-	add  hl, de
-	ld   [hl], a
+	ld   a, [hl]			; A = iPlInfo_Health
+	or   a					; iPlInfo_Health != 0?
+	jr   nz, .loseTimeOver	; If so, jump
+.loseNorm:
+	; Otherwise, set a dummy value which gets ignored.
+	; Note that if we get here, it means the losing player is using the move MOVE_SHARED_NONE,
+	; and it should not transition to anything else.
+	ld   a, MOVE_FF						; A = Move ID to use
+	jr   .setLoseMove
+.loseTimeOver:
+	ld   a, MOVE_SHARED_LOST_TIMEOVER	; A = Move ID to use
+.setLoseMove:
+	ld   hl, iPlInfo_IntroMoveId
+	add  hl, de		; Seek to iPlInfo_IntroMoveId
+	ld   [hl], a	; Save it here
 	ret
-L0172AE:;C
+	
+; =============== Play_SetDrawMoves ===============
+; Sets the move for draws to both players
+Play_SetDrawMoves:
+	;
+	; BOTH PLAYERS -> Set the lose move *if* possible.
+	; This is because it has to handle Double KOs as well, and with
+	; those both players lie dead on the ground.
+	;
+	
+	; Since both players have the same health, checking 1P is enough.
 	ld   a, [wPlInfo_Pl1+iPlInfo_Health]
-	or   a
-	jr   z, L0172B8
-	ld   a, $2A
-	jr   L0172BA
-L0172B8: db $3E;X
-L0172B9: db $FF;X
-L0172BA:;R
+	or   a					; iPlInfo_Health == 0?
+	jr   z, .doubleKo		; If so, it's a double KO (set dummy move)
+.timeOver:					; Otherwise, set a real move
+	ld   a, MOVE_SHARED_LOST_TIMEOVER
+	jr   .setMove
+.doubleKo:
+	ld   a, MOVE_FF
+.setMove:
 	ld   [wPlInfo_Pl1+iPlInfo_IntroMoveId], a
 	ld   [wPlInfo_Pl2+iPlInfo_IntroMoveId], a
 	ret
-L0172C1:;C
+	
+; =============== Play_PrepForWinScreen ===============
+; Performs cleanup before switching to the win screen.
+Play_PrepForWinScreen:
+	; Blank all DMG palettes
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
@@ -11406,396 +11842,618 @@ L0172C1:;C
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect1BGP], a
 	ldh  [hScreenSect2BGP], a
+	
+	; Stop all GFX buffers
 	xor  a
 	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftA], a
 	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftB], a
 	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftA], a
 	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftB], a
 	call Task_PassControlFar
+	
+	; Reset screen scroll
 	xor  a
 	ldh  [rWY], a
 	ldh  [rWX], a
 	ldh  [rSTAT], a
+	
+	; Disable range check since we'll be outside gameplay
 	ld   hl, wMisc_C028
-	res  1, [hl]
+	res  MISCB_PL_RANGE_CHECK, [hl]
+	
+	; Disable screen sections (for now, they'll get re-enabled later if not on draw)
 	call DisableSectLYC
+	
+	; Disable the two extra tasks which write stuff for the buffers	
 	ld   a, $02
 	call Task_RemoveAt
 	ld   a, $03
 	call Task_RemoveAt
+	
+	; ok I guess
 	xor  a
 	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftA], a
 	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftB], a
 	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftA], a
 	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftB], a
 	call Task_PassControlFar
+	
 	ret
-L017309:;CR
+; =============== Play_LoadPostRoundText0 ===============
+; Loads the sprite mappings + graphics for the first set of post-round text.
+; See also: Play_LoadPreRoundTextAndIncRound
+Play_LoadPostRoundText0:
+
+	;
+	; Wait for the players / objects to be ready before finishing the round.
+	; This is the state the game is in after defeating an opponent / timer runs out
+	; before the WIN/LOST/DRAW text appears.
+	;
+	; IMPORTANT: There's no timeout implemented, so if players or projectiles
+	;            get "stuck", the game softlocks.
+	;
+
+	; Execute once a cut down version of the gameplay loop ??? without the move reader.
 	ld   b, $01
-	call L01756D
+	call Play_MainLoopAlt_756D
+	
+.chkWait1P:
+	; Players must be either in the idle move (winner/draw) or have no move (lost).
+	; This is to allow any currently executing move to finish.
 	ld   a, [wPlInfo_Pl1+iPlInfo_MoveId]
-	cp   $00
-	jr   z, L017319
-	cp   $02
-	jr   nz, L017309
-L017319:;R
+	cp   MOVE_SHARED_NONE		; MoveId == 0?
+	jr   z, .chkWait2P			; If so, jump
+	cp   MOVE_SHARED_IDLE		; MoveId == 2?
+	jr   nz, Play_LoadPostRoundText0	; If not, wait again
+.chkWait2P:
 	ld   a, [wPlInfo_Pl2+iPlInfo_MoveId]
-	cp   $00
-	jr   z, L017324
-	cp   $02
-	jr   nz, L017309
-L017324:;R
+	cp   MOVE_SHARED_NONE		; MoveId == 0?
+	jr   z, .chkWaitEx			; If so, jump
+	cp   MOVE_SHARED_IDLE		; MoveId == 2?
+	jr   nz, Play_LoadPostRoundText0	; If not, wait again
+.chkWaitEx:
+
+	; Also wait for the extra sprites to become invisible, as their
+	; graphics are getting overwritten with new ones.
 	xor  a
-	ld   hl, wOBJInfo2+iOBJInfo_Status
+	; Merge the status bits of all OBJinfo
+	ld   hl, wOBJInfo_Pl1Projectile+iOBJInfo_Status
 	or   a, [hl]
-	ld   hl, wOBJInfo3+iOBJInfo_Status
+	ld   hl, wOBJInfo_Pl2Projectile+iOBJInfo_Status
 	or   a, [hl]
-	ld   hl, wOBJInfo4+iOBJInfo_Status
+	ld   hl, wOBJInfo_Pl1SuperSparkle+iOBJInfo_Status
 	or   a, [hl]
-	ld   hl, wOBJInfo5+iOBJInfo_Status
+	ld   hl, wOBJInfo_Pl2SuperSparkle+iOBJInfo_Status
 	or   a, [hl]
-	and  a, $80
-	jr   nz, L017309
+	and  a, OST_VISIBLE				; Are any of these visible?
+	jr   nz, Play_LoadPostRoundText0		; If so, wait again
+	
+	; Wait for 2 more frames
 	ld   b, $02
-	call L01756D
+	call Play_MainLoopAlt_756D
+	
+.loadGFX:
+
+	;
+	; Load the full set of post-round graphics to the LZSS buffer.
+	; For now, only copy the "KO" and cross sprite graphics to VRAM (tiles $00-$2E)
+	;
+	
+	; Do not update the GFX buffers while this is done.
+	; But why???
 	ld   a, $01
-	ld   [wPaused], a
+	ld   [wNoCopyGFXBuf], a
 	call Task_PassControlFar
-	ld   hl, $4458
-	ld   de, $C1E8
+	; Decompress to the temporary buffer
+	ld   hl, L014458
+	ld   de, wLZSS_Buffer+$1E
 	call DecompressLZSS
+	; Unpause and wait
 	ld   a, $00
-	ld   [wPaused], a
+	ld   [wNoCopyGFXBuf], a
 	call Task_PassControlFar
 	ld   b, $01
-	call L01756D
-	ld   hl, $C1E8
-	ld   de, $8800
-	ld   b, $2E
-	call L01739A
-	ld   hl, wOBJInfo3+iOBJInfo_Status
-	ld   de, OBJInfoInit_Play_PreRoundText
+	call Play_MainLoopAlt_756D
+	
+	; Copy the first set of graphics over during HBlank
+	ld   hl, wLZSS_Buffer+$1E	; HL = Source ptr
+	ld   de, $8800				; DE = Destination ptr
+	ld   b, $2E					; B = Tile count
+	call Play_CopyPostRoundGFXToVRAM
+	
+	;
+	; Load the OBJInfo for the round text, with the sprite mapping
+	; table for the KO text.
+	;
+	
+	ld   hl, wOBJInfo_RoundText+iOBJInfo_Status
+	ld   de, OBJInfoInit_Play_RoundText
 	call OBJLstS_InitFrom
-	ld   hl, wOBJInfo3+iOBJInfo_OBJLstPtrTbl_Low
-	ld   [hl], $08
+	ld   hl, wOBJInfo_RoundText+iOBJInfo_OBJLstPtrTbl_Low
+	ld   [hl], LOW(OBJLstPtrTable_PostRoundText0)
 	inc  hl
-	ld   [hl], $49
+	ld   [hl], HIGH(OBJLstPtrTable_PostRoundText0)
 	ld   b, $01
-	call L01756D
-	ld   hl, wOBJInfo5+iOBJInfo_Status
-	ld   de, L0148A4
+	call Play_MainLoopAlt_756D
+	
+	;
+	; Load the OBJInfo for both crosses.
+	; These mark the newly defeated character(s) in team mode.
+	; Usually only one ends up being visible, but draws and time overs can cause both to show up.
+	;
+	
+	; Over 2P's side
+	ld   hl, wOBJInfo_Pl2Cross+iOBJInfo_Status
+	ld   de, OBJInfoInit_Play_CharCross
 	call OBJLstS_InitFrom
 	ld   b, $01
-	call L01756D
-	ld   hl, wOBJInfo4+iOBJInfo_Status
-	ld   de, L0148A4
+	call Play_MainLoopAlt_756D
+	
+	; Over 1P's side
+	ld   hl, wOBJInfo_Pl1Cross+iOBJInfo_Status
+	ld   de, OBJInfoInit_Play_CharCross
 	call OBJLstS_InitFrom
 	ld   b, $01
-	call L01756D
+	call Play_MainLoopAlt_756D
+	
 	ret
-L01739A:;CR
+	
+; =============== Play_CopyPostRoundGFXToVRAM ===============
+; Copies the specified block of graphics to VRAM, during HBlank.
+; This is used specifically for the "post round text" (ie: KO, YOU WON, ...)
+; IN
+; - HL: Ptr to source uncompressed GFX
+; - DE: Ptr to destination in VRAM
+; - B: Tiles to copy from HL ($10*B bytes)
+Play_CopyPostRoundGFXToVRAM:
 	push bc
-	ld   b, $10
-L01739D:;R
-	di
-L01739E:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L01739E
-	ldi  a, [hl]
-	ld   [de], a
-	ei
-	inc  de
-	dec  b
-	jr   nz, L01739D
-	push de
-	push hl
-	ld   b, $01
-	call L01756D
-	pop  hl
-	pop  de
+		; Copy a tile at a time every frame
+		ld   b, TILESIZE	; B = Bytes to copy ($10)
+	.loop:
+		di
+		mWaitForVBlankOrHBlank
+		ldi  a, [hl]		; Read from source, SrcPtr++
+		ld   [de], a		; Copy it to destination
+		ei
+		inc  de				; DestPtr++
+		dec  b				; Copied the tile?
+		jr   nz, .loop		; If not, loop
+		push de
+			push hl
+				ld   b, $01
+				call Play_MainLoopAlt_756D
+			pop  hl
+		pop  de
 	pop  bc
-	dec  b
-	jr   nz, L01739A
+	dec  b									; Finished copying all tiles?
+	jr   nz, Play_CopyPostRoundGFXToVRAM	; If not, loop
 	ret
-L0173BA:;C
-	ld   hl, wOBJInfo3+iOBJInfo_OBJLstPtrTblOffset
-	ld   [hl], $04
-	jp   L0173C7
-L0173C2:;C
-	ld   hl, wOBJInfo3+iOBJInfo_OBJLstPtrTblOffset
-	ld   [hl], $00
-L0173C7:;J
-	ld   hl, wOBJInfo3+iOBJInfo_Status
-	set  7, [hl]
-	call L0175DE
+	
+; =============== Play_DoTimeOverText ===============
+; Handles the TIME OVER text display while the characters continue their animations.
+Play_DoTimeOverText:
+	ld   hl, wOBJInfo_RoundText+iOBJInfo_OBJLstPtrTblOffset
+	ld   [hl], PLAY_POSTROUND0_OBJ_TIMEOVER
+	jp   Play_DoPostRoundText0
+	
+; =============== Play_DoKOText ===============
+; Handles the KO text display while the characters continue their animations.
+Play_DoKOText:
+	ld   hl, wOBJInfo_RoundText+iOBJInfo_OBJLstPtrTblOffset
+	ld   [hl], PLAY_POSTROUND0_OBJ_KO
+	
+; =============== Play_DoPostRoundText0 ===============
+; Displays text for the first set of post-round text.
+; Whem it's finished, it loads the data for the second set.
+Play_DoPostRoundText0:
+
+	; Display the text horizontally centered...
+	ld   hl, wOBJInfo_RoundText+iOBJInfo_Status
+	set  OSTB_VISIBLE, [hl]
+	call Play_CenterRoundText
 	call Task_PassControlFar
+	; ...for $78 frames
 	ld   b, $78
-	call L01758C
-	ld   hl, wOBJInfo3+iOBJInfo_Status
-	res  7, [hl]
-	ld   hl, wOBJInfo3+iOBJInfo_OBJLstPtrTbl_Low
-	ld   [hl], $12
+	call Play_MainLoop_PostRoundTextDisplay
+	
+	; Then disable it again
+	ld   hl, wOBJInfo_RoundText+iOBJInfo_Status
+	res  OSTB_VISIBLE, [hl]
+	
+	
+	;
+	; Make the OBJInfo point to the second set of sprite mappings.
+	;
+	ld   hl, wOBJInfo_RoundText+iOBJInfo_OBJLstPtrTbl_Low
+	ld   [hl], LOW(OBJLstPtrTable_PostRoundText1)
 	inc  hl
-	ld   [hl], $49
-	ld   hl, $C4C8
-	ld   de, $8880
-	ld   b, $36
-	call L01739A
+	ld   [hl], HIGH(OBJLstPtrTable_PostRoundText1)
+	
+	;
+	; Load to VRAM the second set of text from the buffer, which contains GFX for "YOU WIN", ...
+	; This starts right after the end of the previous set 
+	; (hence the $2E*TILESIZE, with $2E being the tile count for last time)
+	;
+	
+	; Note this is copied from $8880 instead of $8800, as the first 8 tiles (ie: cross gfx) 
+	; should be left untouched.
+	ld   hl, (wLZSS_Buffer+$1E)+($2E*TILESIZE); HL = Source ptr
+	ld   de, $8880						; DE = Destination ptr
+	ld   b, $36 						; B = Tiles to copy
+	call Play_CopyPostRoundGFXToVRAM
 	ret
-L0173F0:;C
+	
+; =============== Play_Set1PWin ===============
+; Sets 1P as the winner of the current round.
+; This updates all of the needed variables across the two players and
+; handles the text display.
+Play_Set1PWin:
+
+	;
+	; Update win streaks (shared across modes)
+	;
 	ld   hl, wPlInfo_Pl1+iPlInfo_RoundWinStreak
-	inc  [hl]
+	inc  [hl]		; 1P won, RoundWinStreak++
 	ld   hl, wPlInfo_Pl2+iPlInfo_RoundWinStreak
-	ld   [hl], $00
-	call IsInTeamMode
-	jp   c, L01741A
+	ld   [hl], $00	; 2P lost, resetting the streak
+	
+	;
+	; The "win counters" are handled differently in single and team mode.
+	;
+	call IsInTeamMode	; In team mode?
+	jp   c, .team		; If so, jump
+.single:
+	; 
+	; SINGLE MODE
+	; In single mode, iPlInfo_SingleWinCount is incremented
+	; and a round marker is filled on the winner side.
+	;
 	ld   hl, wPlInfo_Pl1+iPlInfo_SingleWinCount
-	inc  [hl]
-	ld   a, [hl]
-	cp   $02
-	jp   z, L01740F
-	ld   hl, $9C42
-	jp   L017412
-L01740F:;J
-	ld   hl, $9C43
-L017412:;J
-	ld   c, $74
-	call CopyByteIfSingleFinalRound
-	jp   L01742B
-L01741A:;J
+	inc  [hl]		; 1P Win Count++
+	
+	; Determine which of the two markers/boxes in the HUD to draw.
+	ld   a, [hl]		; Read counter
+	cp   $02			; Is this the second win?
+	jp   z, .boxWin2	; If so, jump
+.boxWin1:
+	ld   hl, $9C42		; Leftmost box for first win
+	jp   .drawBox
+.boxWin2:
+	ld   hl, $9C43		; The one on its right for the second
+.drawBox:
+	ld   c, $74			; C = Tile ID for filled box
+	call CopyByteIfNotSingleFinalRound
+	jp   .chkTextType
+	
+.team:
+	; 
+	; TEAM MODE
+	; In team mode, the loss counter on the losing team is incremented,
+	; and its cross is made visible.
+	;
 	ld   hl, wPlInfo_Pl2+iPlInfo_TeamLossCount
-	inc  [hl]
+	inc  [hl]	; 2P Loss Count++
+	
+	; Set the base position for the cross.
+	; Because the active character is always on the front, it has a fixed position.
 	ld   a, [wOBJScrollX]
 	add  a, $98
-	ld   [$D7C3], a
-	ld   hl, wOBJInfo5+iOBJInfo_Status
+	ld   [wOBJInfo_Pl2Cross+iOBJInfo_X], a
+	; Display the cross
+	ld   hl, wOBJInfo_Pl2Cross+iOBJInfo_Status
 	ld   [hl], $80
-L01742B:;J
+	
+.chkTextType:
+	;
+	; Determine which text to display.
+	;
+	
 	ld   a, [wPlayMode]
-	bit  1, a
-	jp   nz, L01743D
+	bit  MODEB_VS, a	; Playing in VS mode?
+	jp   nz, .chkVS		; If so, jump
+.chkSingle:
+	
+	; In single mode, if the CPU opponent wins, "YOU LOST".
+	; Otherwise we win.
+	
 	ld   a, [wJoyActivePl]
-	or   a
-	jp   z, L01745A
-L01743A: db $C3;X
-L01743B: db $55;X
-L01743C: db $74;X
-L01743D: db $FA;X
-L01743E: db $25;X
-L01743F: db $C0;X
-L017440: db $CB;X
-L017441: db $7F;X
-L017442: db $CA;X
-L017443: db $48;X
-L017444: db $74;X
-L017445: db $C3;X
-L017446: db $5F;X
-L017447: db $74;X
-L017448: db $FA;X
-L017449: db $25;X
-L01744A: db $C0;X
-L01744B: db $CB;X
-L01744C: db $6F;X
-L01744D: db $20;X
-L01744E: db $03;X
-L01744F: db $C3;X
-L017450: db $5A;X
-L017451: db $74;X
-L017452: db $C3;X
-L017453: db $55;X
-L017454: db $74;X
-L017455: db $3E;X
-L017456: db $10;X
-L017457: db $C3;X
-L017458: db $66;X
-L017459: db $74;X
-L01745A:;J
-	ld   a, $0C
-	jp   L017466
-L01745F: db $3E;X
-L017460: db $04;X
-L017461: db $C3;X
-L017462: db $66;X
-L017463: db $74;X
-L017464: db $3E;X
-L017465: db $08;X
-L017466:;J
+	or   a				; Is 1P the active player? (not CPU opponent)
+	jp   z, .won		; If so, we won
+	jp   .lost			; Otherwise, the CPU opponent is on the 1P side.
+.chkVS:
+	ld   a, [wMisc_C025]
+	bit  MISCB_IS_SGB, a	; Running on the SGB?
+	jp   z, .chkVS_serial	; If not, jump
+	jp   .chkVS_sgb
+.chkVS_serial:
+	; On a VS serial battle, show "YOU WIN" on the master side (as it's always 1P)
+	ld   a, [wMisc_C025]
+	bit  MISCB_SERIAL_SLAVE, a	; Are we a slave?
+	jr   nz, .vsSerialLost		; If not, we lost
+	jp   .won
+.vsSerialLost:
+	jp   .lost
+.lost:
+	ld   a, PLAY_POSTROUND1_OBJ_YOULOST
+	jp   .showText
+.won:
+	ld   a, PLAY_POSTROUND1_OBJ_YOUWON
+	jp   .showText
+.chkVS_sgb:
+	; On a SGB VS battle, explicitly say that 1P won (since there's a single screen).
+	ld   a, PLAY_POSTROUND1_OBJ_1PWON
+	jp   .showText
+.chkVS_sgb_unused:
+	; [TCRF] Unreachable code "leftover" from Play_Set2PWin.
+	ld   a, PLAY_POSTROUND1_OBJ_2PWON
+.showText:
 	ld   bc, wPlInfo_Pl1
-	call L0174F8
+	call Play_DoPostRoundText1PreWin
+	
+	; Set only 1P as last winner
 	ld   hl, wLastWinner
-	set  0, [hl]
-	res  1, [hl]
+	set  PLB1, [hl]
+	res  PLB2, [hl]
 	ret
-L017474:;C
+	
+; =============== Play_Set2PWin ===============
+; Sets 2P as the winner of the current round.
+; This updates all of the needed variables across the two players and
+; handles the text display.
+; See also: Play_Set1PWin
+Play_Set2PWin:
+
+	;
+	; Update win streaks (shared across modes)
+	;
 	ld   hl, wPlInfo_Pl2+iPlInfo_RoundWinStreak
-	inc  [hl]
+	inc  [hl]		; 2P won, RoundWinStreak++
 	ld   hl, wPlInfo_Pl1+iPlInfo_RoundWinStreak
-	ld   [hl], $00
-	call IsInTeamMode
-	jp   c, L01749E
+	ld   [hl], $00	; 1P lost, resetting the streak
+	
+	;
+	; The "win counters" are handled differently in single and team mode.
+	;
+	call IsInTeamMode	; In team mode?
+	jp   c, .team		; If so, jump
+.single:
+	; 
+	; SINGLE MODE
+	; In single mode, iPlInfo_SingleWinCount is incremented
+	; and a round marker is filled on the winner side.
+	;
 	ld   hl, wPlInfo_Pl2+iPlInfo_SingleWinCount
-	inc  [hl]
-	ld   a, [hl]
-	cp   $02
-	jp   z, L017493
-	ld   hl, $9C51
-	jp   L017496
-L017493:;J
-	ld   hl, $9C50
-L017496:;J
-	ld   c, $74
-	call CopyByteIfSingleFinalRound
-	jp   L0174AF
-L01749E:;J
+	inc  [hl]		; 2P Win Count++
+	
+	; Determine which of the two markers/boxes in the HUD to draw.
+	ld   a, [hl]		; Read counter
+	cp   $02			; Is this the second win?
+	jp   z, .boxWin2	; If so, jump
+.boxWin1:
+	ld   hl, $9C51		; Leftmost box for first win
+	jp   .drawBox
+.boxWin2:
+	ld   hl, $9C50		; The one on its right for the second
+.drawBox:
+	ld   c, $74			; C = Tile ID for filled box
+	call CopyByteIfNotSingleFinalRound
+	jp   .chkTextType
+	
+.team:
+	; 
+	; TEAM MODE
+	; In team mode, the loss counter on the losing team is incremented,
+	; and its cross is made visible.
+	;
 	ld   hl, wPlInfo_Pl1+iPlInfo_TeamLossCount
-	inc  [hl]
+	inc  [hl]	; 1P Loss Count++
+	
+	; Set the base position for the cross.
+	; Because the active character is always on the front, it has a fixed position.
 	ld   a, [wOBJScrollX]
 	add  a, $08
-	ld   [wOBJInfo4+iOBJInfo_X], a
-	ld   hl, wOBJInfo4+iOBJInfo_Status
+	ld   [wOBJInfo_Pl1Cross+iOBJInfo_X], a
+	; Display the cross
+	ld   hl, wOBJInfo_Pl1Cross+iOBJInfo_Status
 	ld   [hl], $80
-L0174AF:;J
+	
+.chkTextType:
+	;
+	; Determine which text to display.
+	;
+	
 	ld   a, [wPlayMode]
-	bit  1, a
-	jp   nz, L0174C1
+	bit  MODEB_VS, a	; Playing in VS mode?
+	jp   nz, .chkVS		; If so, jump
+.chkSingle:
+	; In single mode, if the CPU opponent wins, "YOU LOST".
+	; Otherwise we win.
+	
 	ld   a, [wJoyActivePl]
-	or   a
-	jp   nz, L0174DE
-	jp   L0174D9
-L0174C1: db $FA;X
-L0174C2: db $25;X
-L0174C3: db $C0;X
-L0174C4: db $CB;X
-L0174C5: db $7F;X
-L0174C6: db $CA;X
-L0174C7: db $CC;X
-L0174C8: db $74;X
-L0174C9: db $C3;X
-L0174CA: db $E8;X
-L0174CB: db $74;X
-L0174CC: db $FA;X
-L0174CD: db $25;X
-L0174CE: db $C0;X
-L0174CF: db $CB;X
-L0174D0: db $6F;X
-L0174D1: db $20;X
-L0174D2: db $03;X
-L0174D3: db $C3;X
-L0174D4: db $D9;X
-L0174D5: db $74;X
-L0174D6: db $C3;X
-L0174D7: db $DE;X
-L0174D8: db $74;X
-L0174D9:;J
-	ld   a, $10
-	jp   L0174EA
-L0174DE: db $3E;X
-L0174DF: db $0C;X
-L0174E0: db $C3;X
-L0174E1: db $EA;X
-L0174E2: db $74;X
-L0174E3: db $3E;X
-L0174E4: db $04;X
-L0174E5: db $C3;X
-L0174E6: db $EA;X
-L0174E7: db $74;X
-L0174E8: db $3E;X
-L0174E9: db $08;X
-L0174EA:;J
+	or   a				; Is 2P the active player? (not CPU opponent)
+	jp   nz, .won		; If so, we won
+	jp   .lost			; Otherwise, the CPU opponent is on the 2P side.
+.chkVS:
+	ld   a, [wMisc_C025]
+	bit  MISCB_IS_SGB, a	; Running on the SGB?
+	jp   z, .chkVS_serial	; If not, jump
+	jp   .chkVS_sgb
+.chkVS_serial:
+	; On a VS serial battle, show "YOU WIN" on the slave side (as it's always 2P)
+	ld   a, [wMisc_C025]
+	bit  MISCB_SERIAL_SLAVE, a	; Are we a slave?
+	jr   nz, .vsSerialWon		; If so, we won
+	jp   .lost
+.vsSerialWon:
+	jp   .won
+.lost:
+	ld   a, PLAY_POSTROUND1_OBJ_YOULOST
+	jp   .showText
+.won:
+	ld   a, PLAY_POSTROUND1_OBJ_YOUWON
+	jp   .showText
+.chkVS_sgb_unused:
+	; [TCRF] Unreachable code "leftover" from Play_Set1PWin
+	ld   a, PLAY_POSTROUND1_OBJ_1PWON
+	jp   .showText
+.chkVS_sgb:
+	; On a SGB VS battle, explicitly say that 2P won (since there's a single screen).
+	ld   a, PLAY_POSTROUND1_OBJ_2PWON
+.showText:
 	ld   bc, wPlInfo_Pl2
-	call L0174F8
+	call Play_DoPostRoundText1PreWin
+	
+	; Set only 2P as last winner
 	ld   hl, wLastWinner
-	res  0, [hl]
-	set  1, [hl]
+	res  PLB1, [hl]
+	set  PLB2, [hl]
 	ret
-L0174F8:;C
-	ld   hl, wOBJInfo3+iOBJInfo_Status
-	ld   [hl], $80
-	ld   [wOBJInfo3+iOBJInfo_OBJLstPtrTblOffset], a
-	call L0175DE
+	
+; =============== Play_DoPostRoundText1PreWin ===============
+; Displays the post-round text for a second.
+; Note that this doesn't start the win pose -- that's set elsewhere
+; and has to wait for this to return first.
+; IN
+; - A: Sprite mapping ID for the text (PLAY_POSTROUND0_OBJ_*)
+; - BC: Ptr to wPlInfo
+Play_DoPostRoundText1PreWin:
+	; Display the text
+	ld   hl, wOBJInfo_RoundText+iOBJInfo_Status
+	ld   [hl], OST_VISIBLE
+	; Set the sprite mapping ID
+	ld   [wOBJInfo_RoundText+iOBJInfo_OBJLstPtrTblOffset], a
+	; Center it and update the display
+	call Play_CenterRoundText
 	call Task_PassControlFar
-	ld   b, $3C
-	call L01758C
+	
+	; Display the text for one second
+	ld   b, 60
+	call Play_MainLoop_PostRoundTextDisplay
 	ret
-L01750C:;C
+
+; =============== Play_SetDraw ===============
+; Sets the round result as a Draw, making both players lose.
+; This updates all of the needed variables across the two players and
+; handles the text display.
+Play_SetDraw:
+	; Reset all win streaks
 	ld   hl, wPlInfo_Pl1+iPlInfo_RoundWinStreak
 	ld   [hl], $00
 	ld   hl, wPlInfo_Pl2+iPlInfo_RoundWinStreak
 	ld   [hl], $00
+	
+	; There's no last winner
 	ld   hl, wLastWinner
-	res  0, [hl]
-	res  1, [hl]
-	call IsInTeamMode
-	jp   nc, L017554
+	res  PLB1, [hl]
+	res  PLB2, [hl]
+	
+	;
+	; If we're in team mode, set its specific variables and the cross sprites over the active icons.
+	; There's no box filling with single mode here.
+	;
+	call IsInTeamMode	; Are we in team mode?
+	jp   nc, .setText	; If not, skip
+	
+	; Both players lost
 	ld   hl, wPlInfo_Pl1+iPlInfo_TeamLossCount
 	inc  [hl]
 	ld   hl, wPlInfo_Pl2+iPlInfo_TeamLossCount
 	inc  [hl]
-	ld   a, [wPlInfo_Pl1+iPlInfo_TeamLossCount]
-	ld   hl, wPlInfo_Pl2+iPlInfo_TeamLossCount
-	cp   a, [hl]
-	jp   nz, L01753A
-	cp   $03
-	jp   z, L017554
-L01753A:;J
+	
+	; Draw both cross sprites as long as we didn't *reach* the FINAL!! round just now.
+	; In other words, if both loss counts have been incremented to $03, don't draw
+	; the crosses as there's a final round with the same active characters.
+	ld   a, [wPlInfo_Pl1+iPlInfo_TeamLossCount]	; A = 1P loss count
+	ld   hl, wPlInfo_Pl2+iPlInfo_TeamLossCount	; HL = Ptr to 2P loss count
+	cp   a, [hl]		; Are they the same value?
+	jp   nz, .setCross	; If not, draw the crosses
+	cp   $03			; Are they both 3?
+	jp   z, .setText	; If so, skip
+.setCross:
+	; Set 2P side cross position
 	ld   a, [wOBJScrollX]
 	add  a, $98
-	ld   [$D7C3], a
+	ld   [wOBJInfo_Pl2Cross+iOBJInfo_X], a
+	; Set 1P side cross position
 	ld   a, [wOBJScrollX]
 	add  a, $08
-	ld   [wOBJInfo4+iOBJInfo_X], a
-	ld   hl, wOBJInfo5+iOBJInfo_Status
-	ld   [hl], $80
-	ld   hl, wOBJInfo4+iOBJInfo_Status
-	ld   [hl], $80
-L017554:;J
-	ld   hl, wOBJInfo3+iOBJInfo_Status
-	ld   [hl], $80
-	call L0175DE
-	ld   a, $00
-	jp   L017561
-L017561:;J
-	ld   [wOBJInfo3+iOBJInfo_OBJLstPtrTblOffset], a
+	ld   [wOBJInfo_Pl1Cross+iOBJInfo_X], a
+	; Display the cross for both characters
+	ld   hl, wOBJInfo_Pl2Cross+iOBJInfo_Status
+	ld   [hl], OST_VISIBLE
+	ld   hl, wOBJInfo_Pl1Cross+iOBJInfo_Status
+	ld   [hl], OST_VISIBLE
+.setText:
+	; Display the round text centered
+	ld   hl, wOBJInfo_RoundText+iOBJInfo_Status
+	ld   [hl], OST_VISIBLE
+	call Play_CenterRoundText
+	
+	ld   a, PLAY_POSTROUND1_OBJ_DRAWGAME
+	
+	;--
+	; why
+	jp   .setOBJ
+.setOBJ:
+	;--
+
+	ld   [wOBJInfo_RoundText+iOBJInfo_OBJLstPtrTblOffset], a
 	call Task_PassControlFar
-	ld   b, $3C
-	call L01758C
+	
+	; Display text for a second
+	; After exiting, other code will set the draw pose to both players
+	ld   b, 60
+	call Play_MainLoop_PostRoundTextDisplay
 	ret
-L01756D:;JC
+; =============== Play_MainLoop_PostRoundTextNoDisplay ===============
+; ??? Version of the main loop used post-round when the text isn't visible.
+; IN
+; - B: Frames of execution (usually short)
+Play_MainLoopAlt_756D:
 	push bc
-	call L0163B3
-	call L0176A7
-	call L0165CD
-	call L016B12
-	call L017EB1
-	call L0175E7
-	call L002BFC
-	call Task_PassControlFar
+		call Play_DoPlInput
+		call Play_DoHUD
+		call Play_DoUnkChain
+		call Play_DoPlColi
+		call Play_WriteKeysToBuffer
+		call Play_DoScrollPos
+		call Play_ExecExOBJCode
+		call Task_PassControlFar
 	pop  bc
-	dec  b
-	jp   nz, L01756D
+	dec  b							; Done all frames?	
+	jp   nz, Play_MainLoopAlt_756D	; If not, loop
 	ret
-L01758C:;JC
+; =============== Play_MainLoop_PostRoundTextDisplay ===============
+; Version of the main loop used when displaying post-round text.
+; IN
+; - B: Frames of execution (at least 1 sec)
+Play_MainLoop_PostRoundTextDisplay:
 	push bc
-	ldh  a, [hJoyNewKeys]
-	ld   hl, hJoyNewKeys2
-	or   a, [hl]
-	and  a, $F0
-	jp   nz, L0175B9
-	call Play_AnimTextPal
-	call L0163B3
-	call L0176A7
-	call L0165CD
-	call L016B12
-	call L017EB1
-	call L0175E7
-	call L002BFC
-	call Task_PassControlFar
+		; It's possible to end the loop prematurely if a player presses any of the non-directional keys.
+		ldh  a, [hJoyNewKeys]						; A = 1P inputs
+		ld   hl, hJoyNewKeys2						; HL = Ptr to 2P inputs
+		or   a, [hl]								; Merge 1P & 2P inputs
+		and  a, KEY_A|KEY_B|KEY_SELECT|KEY_START	; Pressing any of these keys?
+		jp   nz, .abort								; If so, we're done
+		
+		; Flash the round text here
+		call Play_AnimTextPal
+		
+		; Standard calls
+		call Play_DoPlInput
+		call Play_DoHUD
+		call Play_DoUnkChain
+		call Play_DoPlColi
+		call Play_WriteKeysToBuffer
+		call Play_DoScrollPos
+		call Play_ExecExOBJCode
+		call Task_PassControlFar
+		
 	pop  bc
-	dec  b
-	jp   nz, L01758C
+	dec  b										; Executed this for all frames?
+	jp   nz, Play_MainLoop_PostRoundTextDisplay	; If not, loop
 	ret
-L0175B9:;J
+.abort:;J
 	pop  bc
 	ret
 	
@@ -11829,124 +12487,265 @@ Play_AnimTextPal:
 	dec  b					; Handled all wOBJInfo?
 	jp   nz, .loop			; If not, loop
 	ret
-	
-L0175DE:;C
+; =============== Play_CenterRoundText ===============
+; Aligns the round text to the center of the screen.
+Play_CenterRoundText:
 	ld   a, [wOBJScrollX]
-	add  a, $50
-	ld   [wOBJInfo3+iOBJInfo_X], a
+	add  a, SCREEN_H/2 ; Add half a screen
+	ld   [wOBJInfo_RoundText+iOBJInfo_X], a
 	ret
-L0175E7:;C
-	ld   a, [wPlInfo_Pl1+iPlInfo_61]
-	cp   $60
-	jp   c, L017638
+	
+; =============== Play_DoScrollPos ===============
+; Updates the screen scroll positions for playfield and sprites.
+Play_DoScrollPos:
+
+	;
+	; HORIZONTAL SCROLLING
+	;
+	; Moving too close to the edge of the screen ($20px in practice) will cause the screen to scroll,
+	; but if both players are far enough to trigger the opposite screen edges, there's special handling involved.
+	;
+	; Note that, while we're updating wOBJScrollX and the checks are performed there
+	; this value will be directly copied to hScrollX.
+	;
+SCROLL_BORDER_H EQU $20
+	
+	;
+	; If both players aren't far enough (distance < $60), a simple border check can be made.
+	;
+	; Note that $60 is the largest applicable value before the $20px border would kick in
+	; on both sides. ($60 + $20*2 = SCREEN_H)
+	;
+	ld   a, [wPlInfo_Pl1+iPlInfo_PlDistance]
+	cp   SCREEN_H-(SCROLL_BORDER_H*2)		; PlDistance < $60?
+	jp   c, .chkNearX					; If so, jump
+	
+.chkFarX:
+	;
+	; Otherwise, the screen should be positioned so both players are
+	; equally far to the edge of the screen, as long as the edge of the playfield isn't reached.
+	;
+	
+	; Calculate the new target position.
+	; This is the absolute "center point" between the two players, and the screen
+	; should be positioned so the center of the screen points to that coordinate.
+	; B = (X2 + X1) / 2
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
+	ld   b, a							; B = 2P X Pos
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]	; A = 1P X Pos
+	srl  a		; A = A / 2
+	srl  b		; B = B / 2
+	add  b		; B += A
 	ld   b, a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
-	srl  a
-	srl  b
-	add  b
-	ld   b, a
-	ld   a, [wOBJScrollX]
-	add  a, $50
-	cp   a, b
-	jp   z, L017661
-	jp   c, L017620
-	sub  a, b
-	cpl
+	
+	; However, wOBJScrollX points to the left corner of the screen, not the center.
+	; Additionally, checks are needed to prevent the camera from moving past the edge.
+	; To satisfy those conditions the calculation will be done by .moveL and .moveR.
+	;
+	; Those subroutines though scroll the screen by a specified amount and don't accept
+	; an absolute value. For this, convert the absolute value to relative (to the center of the screen):
+	
+	; Calculate absolute position currently at the center of the screen
+	ld   a, [wOBJScrollX]	; A = Absolute left corner position
+	add  a, SCREEN_H/2		; Add half a screen
+	
+	; The offset will be the distance between the center and target.
+	; Add or remove it depending on whether it's on the left or right of the screen center.
+	cp   a, b				
+	jp   z, .setScrollX	; MidPoint == Target? If so, don't change anything
+	jp   c, .moveFarR 	; MidPoint < Target? If so, move it right
+.moveFarL:				; Otherwise, move it left
+	; The target is on the left of the midpoint.
+	; Move left by:
+	; B = Target - MidPoint
+	sub  a, b		; A = MidPoint - Target
+	cpl				; Convert to negative
 	inc  a
 	ld   b, a
-L01760C:;J
-	ld   a, [wOBJScrollX]
+	
+.moveL:
+	;
+	; Scroll the playfield left by B. Force it back to $00 if it underflows.
+	;
+	
+	; wOBJScrollX = MAX(wOBJScrollX + B, 0)
+	; B must be a negative value.
+	ld   a, [wOBJScrollX]	; wOBJScrollX += B
 	add  b
 	ld   [wOBJScrollX], a
-	bit  7, a
-	jp   z, L017661
-	ld   a, $00
+	bit  7, a				; wOBJScrollX < 0?
+	jp   z, .setScrollX		; If so, jump
+	ld   a, $00				; Otherwise, force it back to 0
 	ld   [wOBJScrollX], a
-	jp   L017661
-L017620:;J
-	sub  a, b
-	cpl
+	jp   .setScrollX
+.moveFarR:
+	; The target is on the right side of the screen.
+	; Move right by:
+	; B = Target - MidPoint
+	sub  a, b		; A = MidPoint - Target
+	cpl				; Convert to positive
 	inc  a
 	ld   b, a
-L017624:;J
+.moveR:
+
+	;
+	; Scroll the playfield right by B. Force it back to $60 if it goes past that.
+	;
+	
+	; As wOBJScrollX/hScrollX point to the left corner of the screen,
+	; subtracting the screen width from the tilemap width will give the max value as $60.
+	
+	; wOBJScrollX = MIN(wOBJScrollX + B, $60)
 	ld   a, [wOBJScrollX]
 	add  b
 	ld   [wOBJScrollX], a
-	cp   $60
-	jp   c, L017661
-	ld   a, $60
+	cp   TILEMAP_H-SCREEN_H	; $60
+	jp   c, .setScrollX
+	ld   a, TILEMAP_H-SCREEN_H ; $60
 	ld   [wOBJScrollX], a
-	jp   L017661
-L017638:;J
-	ld   a, [$D68B]
-	cp   $28
-	jp   c, L017655
-	cp   $89
-	jp   nc, L01765B
-	ld   a, [$D6CB]
-	cp   $28
-	jp   c, L017655
-	cp   $89
-	jp   nc, L01765B
-	jp   L017661
-L017655:;J
-	sub  a, $28
+	jp   .setScrollX
+.chkNearX:
+	;
+	; If any player is $20px (SCROLL_BORDER_H) near the edge of the screen, scroll it accordingly.
+	; As the players are close to each other, no special checks are needed.
+	;
+	; However, the thresholds checked aren't directly $20px, since this is going off iOBJInfo_RelX.
+	; That value is offset to the right by OBJ_OFFSET_X, and as a result: 
+	;
+SCROLL_THRESHOLD_L EQU SCROLL_BORDER_H+OBJ_OFFSET_X
+SCROLL_THRESHOLD_R EQU SCREEN_H-(SCROLL_BORDER_H-OBJ_OFFSET_X)
+	
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_RelX]
+	cp   SCROLL_THRESHOLD_L			; iOBJInfo_RelX < $28?
+	jp   c, .moveNearL				; If so, scroll left
+	cp   SCROLL_THRESHOLD_R+1		; iOBJInfo_RelX >= $89? (> $88?)
+	jp   nc, .moveNearR				; If so, scroll right
+	; Same for 2P
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_RelX]
+	cp   SCROLL_THRESHOLD_L
+	jp   c, .moveNearL
+	cp   SCROLL_THRESHOLD_R+1
+	jp   nc, .moveNearR
+	jp   .setScrollX
+.moveNearL:
+	; Scroll the screen left by how much the threshold was passed.
+	; ie: if currently at position SCROLL_THRESHOLD_L-2, scroll left by 2px
+	sub  a, SCROLL_THRESHOLD_L	; B = iOBJInfo_RelX - SCROLL_THRESHOLD_L
 	ld   b, a
-	jp   L01760C
-L01765B:;J
-	sub  a, $88
+	jp   .moveL
+.moveNearR:
+	; Scroll the screen right by how much the threshold was passed, like in .moveNearL
+	sub  a, SCROLL_THRESHOLD_R ; B = iOBJInfo_RelX - SCROLL_THRESHOLD_R
 	ld   b, a
-	jp   L017624
-L017661:;J
+	jp   .moveR
+.setScrollX:
+	; Save the same result to the playfield scroll position
 	ld   a, [wOBJScrollX]
 	ldh  [hScrollX], a
+	
+.doY:
+	;
+	; VERTICAL SCROLLING
+	;
+	
+	;
+	; Calculate the base hScrollY position.
+	;
+	; On the floor, characters have the internal Y position $88 (PL_FLOOR_POS).
+	; It will never be higher than that, and jumping decreases the value.
+	;
+	; As characters move jump up, the screen scrolls up slowly, so:
+	;
+	; hScrollY = -MAX((PL_FLOOR_POS - Y1) + (PL_FLOOR_POS - Y2)) / $10, 8)
+	;
+	; Note the negative sign.
+	; When both characters stand on the floor, the Y scrolling is set up so
+	; it's at coordinate 0, and jumping makes it underflow.
+	; The tilemap of course accounts for this.
+	;
+	;
+	
+	; Get how much the 1P has jumped up
+	; H = $88 - iOBJInfo_Y (1P)
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
 	ld   b, a
-	ld   a, $88
-	sub  a, b
+	ld   a, PL_FLOOR_POS
+	sub  a, b		
 	ld   h, a
+	; Get how much the 2P has jumped up
+	; A = $88 - iOBJInfo_Y (2P)
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_Y]
 	ld   b, a
-	ld   a, $88
+	ld   a, PL_FLOOR_POS
 	sub  a, b
+	; Sum those together, so that if both players jump if makes it go even higher
 	add  a, h
+	; Slow down vertical movement as much as possible
+	; A /= $10
 	srl  a
 	srl  a
 	srl  a
 	srl  a
-	cp   $08
-	jp   c, L017685
-	ld   a, $08
-L017685:;J
-	cpl
+	
+	; Cap the result at 8.
+	; This prevents scrolling the screen in a way that would make the characters
+	; move below the bottom HUD, or scroll into the blank part of the tilemap.
+	cp   $08			; A < $08?
+	jp   c, .invY		; If so, jump
+	ld   a, $08			; Otherwise, A = $08
+.invY:
+	; Invert the result since we're scrolling up from coord 0
+	cpl		; A -= A
 	inc  a
+	; Save the result for now
 	ldh  [hScrollY], a
+	
+	; The sprites are always have their origins least $40px from the bottom of the screen
 	add  a, $40
 	ld   [wOBJScrollY], a
-	ld   a, [$C159]
-	or   a
-	jp   z, L0176A6
-	ld   b, a
-	ldh  a, [hScrollY]
+	
+	;
+	; Screen shake support.
+	;
+	; If the optional offset is specified, add it exclusively to hScrollY without affecting sprites.
+	; Note that the value is relative to the inverted version of hScrollY, so we must flip that back first.
+	;
+	ld   a, [wScreenShakeY]
+	or   a					; wScreenShakeY == 0?
+	jp   z, .ret			; If so, skip
+	
+	; Otherwise...
+	; hScrollY = MIN(hScrollY - wScreenShakeY
+	ld   b, a			; B = wScreenShakeY
+	ldh  a, [hScrollY]	; A = -hScrollY
 	cpl
 	inc  a
-	add  b
-	cp   $08
-	jp   c, L0176A2
-	ld   a, $08
-L0176A2:;J
-	cpl
+	add  b				; A += B
+	
+	; Perform the same cap as above
+	cp   $08			; A < $08?
+	jp   c, .inv2Y		; If so, jump
+	ld   a, $08			; Otherwise, A = $08
+.inv2Y:
+	cpl					; A = -A
 	inc  a
+	
+	; Save the result
 	ldh  [hScrollY], a
-L0176A6:;J
+.ret:
 	ret
-L0176A7:;C
+	
+; =============== Play_DoHUD ===============
+; Updates the HUD and the related variables during gameplay.
+; This includes decrementing the timer, as that's part of the subroutine
+; that draws it to the HUD.
+Play_DoHUD:
 	call Play_UpdateHealthBars
 	call Play_UpdatePowBars
 	call Play_DoTime
-	call L017E1A
+	call Play_UpdateHUDHitCount
 	ret
+	
 ; =============== Play_UpdateHealthBars ===============
 ; Draws/updates the health bar display for both players.
 ;
@@ -12029,7 +12828,7 @@ ENDM
 	;
 	
 	ld   a, [wPlInfo_Pl1+iPlInfo_HealthVisual]
-	cp   $18						; VisualHealth != $18?
+	cp   PLAY_HEALTH_CRITICAL		; VisualHealth != $18?
 	jp   nz, .eqTarget1P			; If so, jump
 	ld   hl, vBGHealthBar1P_Last	; Start at lowest tile
 	
@@ -12057,8 +12856,8 @@ ENDM
 	; when the health is lower than 18 (meaning 3 tiles at most do the effect)
 	;
 	ld   a, [wPlInfo_Pl1+iPlInfo_HealthVisual]
-	cp   $18							; VisualHealth >= $18?
-	jp   nc, .do2P	; If so, skip
+	cp   PLAY_HEALTH_CRITICAL	; VisualHealth >= $18?
+	jp   nc, .do2P				; If so, skip
 	
 	; Every 4 frames...
 	ld   a, [wPlayTimer]
@@ -12194,9 +12993,9 @@ ENDM
 .chkFixFlash2P:
 	; Force replace the blank bar graphics with the filled ones.
 	ld   a, [wPlInfo_Pl2+iPlInfo_HealthVisual]
-	cp   $18				; VisualHealth != $18?
-	jp   nz, .eqTarget2P	; If so, jump
-	ld   hl, vBGHealthBar2P	; Start at lowest tile (matches origin in 2P)
+	cp   PLAY_HEALTH_CRITICAL	; VisualHealth != $18?
+	jp   nz, .eqTarget2P		; If so, jump
+	ld   hl, vBGHealthBar2P		; Start at lowest tile (matches origin in 2P)
 	
 	; Write filled bar to lowest tile
 	di
@@ -12218,8 +13017,8 @@ ENDM
 	; Handle the health bar flashing at critical health.
 	;
 	ld   a, [wPlInfo_Pl2+iPlInfo_HealthVisual]
-	cp   $18				; VisualHealth >= $18?
-	jp   nc, .ret			; If so, skip
+	cp   PLAY_HEALTH_CRITICAL	; VisualHealth >= $18?
+	jp   nc, .ret				; If so, skip
 	; Every 4 frames...
 	ld   a, [wPlayTimer]
 	and  a, $04				; wPlayTimer % 4 != 0?	
@@ -12260,6 +13059,7 @@ ENDM
 	
 	; Move right from the lowest tile of the health bar, drawing completely filled tiles.
 	
+	ASSERT(PLAY_HEALTH_CRITICAL == $18)
 	;
 	; Lowest tile
 	;
@@ -13534,302 +14334,317 @@ Play_DrawTime:
 Play_NoDrawTime:
 	ret
 	
-L017E1A:;C
-	ld   hl, $9C6B
-	ld   a, [wPlInfo_Pl1+iPlInfo_HitComboRecv]
+; =============== Play_UpdateHUDHitCount ===============
+; Checks if the number of combo hits to the HUD should be updated.
+Play_UpdateHUDHitCount:
+
+	;
+	; Note that the hit counter is displayed to the OTHER player's side.
+	;
+	; This is because we want to display how many hits a player dishes out, however what
+	; the hit count variable actually tracks is how many hits the player *received*.
+	;
+	; ie: the iPlInfo_HitComboRecv field on 1P tracks 2P's combo.
+	;
+	
+	; Don't redraw the hit combo counter if the current value didn't change.
+	ld   hl, $9C6B									; HL = Ptr to tilemap (2P side)
+	ld   a, [wPlInfo_Pl1+iPlInfo_HitComboRecv]		; B = Previous hit count
 	ld   b, a
-	ld   a, [wPlInfo_Pl1+iPlInfo_HitComboRecvSet]
-	cp   a, b
-	jp   z, L017E31
+	ld   a, [wPlInfo_Pl1+iPlInfo_HitComboRecvSet]	; A = New hit count
+	cp   a, b										; Do they match?
+	jp   z, .noChg1P								; If so, jump
+.chg1P:
+	; Otherwise, update the tilemap.
 	ld   [wPlInfo_Pl1+iPlInfo_HitComboRecv], a
-	call L017E59
-	jp   L017E39
-L017E31:;J
-	cp   $02
-	jp   nc, L017E39
-	call L017E9C
-L017E39:;J
-	ld   hl, $9C65
-	ld   a, [wPlInfo_Pl2+iPlInfo_HitComboRecv]
-	ld   b, a
-	ld   a, [wPlInfo_Pl2+iPlInfo_HitComboRecvSet]
-	cp   a, b
-	jp   z, L017E50
+	call Play_DrawHitCountBG
+	jp   .chk2P
+.noChg1P:
+	; Weirdly, the check to clear the combo counter is done here,
+	; when HitComboRecv and HitComboRecvSet don't match.
+	; This causes it to execute and redraw the screen every time the hit counter is $02,
+	; instead of only doing it when HitComboRecvSet changes.
+	cp   $02					; NewCount >= $02?
+	jp   nc, .chk2P				; If so, jump
+	call Play_BlankHitCountBG	; Otherwise, wipe the hit counter.
+.chk2P:
+
+	;
+	; Same thing for Player 2
+	;
+	ld   hl, $9C65									; HL = Ptr to tilemap (1P side)
+	ld   a, [wPlInfo_Pl2+iPlInfo_HitComboRecv]		; B = Previous hit count
+	ld   b, a										
+	ld   a, [wPlInfo_Pl2+iPlInfo_HitComboRecvSet]	; A = New hit count
+	cp   a, b										; Do they match?
+	jp   z, .noChg2P								; If so, jump
+.chg2P:
+	; Otherwise, update the tilemap.
 	ld   [wPlInfo_Pl2+iPlInfo_HitComboRecv], a
-	call L017E59
-	jp   L017E58
-L017E50:;J
-	cp   $02
-	jp   nc, L017E58
-	call L017E9C
-L017E58:;J
+	call Play_DrawHitCountBG
+	jp   .end
+.noChg2P:
+	cp   $02					; NewCount >= $02?
+	jp   nc, .end				; If so, jump
+	call Play_BlankHitCountBG	; Otherwise, wipe the hit counter.
+.end:
 	ret
-L017E59:;C
+	
+; =============== Play_DrawHitCountBG ===============
+; Draws the hit count to the specified location, if possible.
+; This is in the format of "nnHIT".
+; IN
+; - HL: Destination ptr to tilemap
+; -  A: Hit count
+Play_DrawHitCountBG:
+	; Don't draw if the hit count is less than 2.
 	cp   $02
-	jp   c, L017E9B
-	push af
-	ld   de, $00D1
-	swap a
-	and  a, $0F
-	add  a, e
+	jp   c, .ret
+	
+	;
+	; Draw upper digit (high nybble)
+	;
+	push af	; Save full digit
+		; Separate the high nybble and use it as index
+		; to a table mapping numbers to tile IDs.
+		ld   de, Play_HUDTileIdTbl	; DE = Ptr to Tile ID table
+		swap a			; A = A >> 4
+		and  a, $0F
+		; Index the table
+		add  a, e		; DE += A
+		ld   e, a
+		di
+		mWaitForVBlankOrHBlank
+		ld   a, [de]	; Read tile ID from entry
+		ldi  [hl], a	; Write it over, move right in tilemap
+		ei
+	pop  af	; Restore full digit
+	
+	;
+	; Draw lower digit (low nybble)
+	;
+	ld   de, Play_HUDTileIdTbl	; DE = Ptr to Tile ID table
+	and  a, $0F					; A = A & $0F
+	add  a, e					; DE += A
 	ld   e, a
 	di
-L017E69:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017E69
-	ld   a, [de]
-	ldi  [hl], a
+	mWaitForVBlankOrHBlank
+	ld   a, [de]				; Read tile ID from entry
+	ldi  [hl], a				; Write it over, move right in tilemap
 	ei
-	pop  af
-	ld   de, $00D1
-	and  a, $0F
-	add  a, e
-	ld   e, a
+	
+	;
+	; Draw "HIT" (2 tiles)
+	;
+	ld   de, BG_Play_HUDHit		; DE = Ptr to BG
+	ld   b, $02					; B = BG Length
+.loop:
 	di
-L017E7C:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017E7C
-	ld   a, [de]
-	ldi  [hl], a
+	mWaitForVBlankOrHBlank
+	ld   a, [de]				; Read tile ID
+	ldi  [hl], a				; Write it over, move right in tilemap
 	ei
-	ld   de, $00DB
-	ld   b, $02
-L017E8B:;J
-	di
-L017E8C:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017E8C
-	ld   a, [de]
-	ldi  [hl], a
-	ei
-	inc  de
-	dec  b
-	jp   nz, L017E8B
-L017E9B:;J
+	inc  de						; Next tile ID
+	dec  b						; Are we done?
+	jp   nz, .loop				; If not, loop
+.ret:
 	ret
-L017E9C:;C
-	ld   a, $00
-	ld   b, $04
-L017EA0:;J
+; =============== Play_DrawHitCountBG ===============
+; Erases the hit count with black tiles from the specified location.
+; IN
+; - HL: Destination ptr to tilemap
+Play_BlankHitCountBG:
+	; Clear the bytes from HL to HL+3
+	ld   a, $00		; A = TileID of black tile
+	ld   b, $04		; B = Tiles to clear
+.loop:
 	push af
-	di
-L017EA2:;J
-	ldh  a, [rSTAT]
-	bit  1, a
-	jp   nz, L017EA2
+		di
+		mWaitForVBlankOrHBlank
 	pop  af
-	ldi  [hl], a
-	ei
-	dec  b
-	jp   nz, L017EA0
+	ldi  [hl], a				; Blank tile, move right in tilemap
+	ei	
+	dec  b						; Are we done?
+	jp   nz, .loop				; If not, loop
 	ret
-L017EB1:;C
+	
+; =============== Play_WriteKeysToBuffer ===============
+; Updates the input buffers for both players.
+Play_WriteKeysToBuffer:
+	; Human player only
 	ld   hl, wPlInfo_Pl1+iPlInfo_Status
-	bit  7, [hl]
-	jr   nz, L017EBE
-	call L017ECC
-	call L017F4C
-L017EBE:;R
+	bit  PSB_CPU, [hl]
+	jr   nz, .chk2P
+	call Play_WriteDirKeysToBuffer1P
+	call Play_WriteBtnKeysToBuffer1P
+.chk2P:
+	; Same thing for 2P
 	ld   hl, wPlInfo_Pl2+iPlInfo_Status
-	bit  7, [hl]
-	jr   nz, L017ECB
-L017EC5: db $CD;X
-L017EC6: db $0C;X
-L017EC7: db $7F;X
-L017EC8: db $CD;X
-L017EC9: db $7A;X
-L017ECA: db $7F;X
-L017ECB:;R
+	bit  PSB_CPU, [hl]
+	jr   nz, .ret
+	call Play_WriteDirKeysToBuffer2P
+	call Play_WriteBtnKeysToBuffer2P
+.ret:
 	ret
-L017ECC:;C
+	
+; =============== mWriteDirKeysToBuffer ===============
+; Generates code to write the held directional keys to its wPlInfo joypad buffer.
+; IN
+; - 1: Ptr to wPlInfo
+; - 2: Ptr to wOBJInfo
+mWriteDirKeysToBuffer: MACRO
+	; DE = Offset to buffer entry
+	;      This must be a multiple of 2 as each entry in this table
+	;      is 2 bytes long (key, timer)
 	ld   d, $00
-	ld   a, [$D94C]
+	ld   a, [\1+iPlInfo_JoyDirBufferOffset]
 	ld   e, a
-	ld   a, [$D945]
+	
+	; Write the directional keys only
+	; A = Held directional keys
+	ld   a, [\1+iPlInfo_JoyKeys]
 	and  a, $0F
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstFlags
-	bit  3, [hl]
-	jr   z, L017EE9
-	ld   b, a
-	and  a, $03
-	jr   z, L017EE8
-	ld   a, b
-	xor  $03
-	jr   L017EE9
-L017EE8:;R
-	ld   a, b
-L017EE9:;R
-	ld   hl, wJoyBuffer_Pl1
+	
+	;
+	; Invert the left/right inputs if we're (internally) facing right.
+	; For consistency with the sprite display, move inputs are stored relative to players facing left (on the 2P side).
+	; 
+	ld   hl, \2+iOBJInfo_OBJLstFlags
+	bit  SPRXB_PLDIR_R, [hl]	; Is 1P facing right?
+	jr   z, .writeToBuf			; If not, jump
+	
+	; Don't invert input bits if neither L nor R are held
+	ld   b, a					; Save orig inputs
+	and  a, KEY_LEFT|KEY_RIGHT	; Holding either left or right?
+	jr   z, .noLr				; If not, jump
+	ld   a, b					; Restore input bits
+	xor  KEY_LEFT|KEY_RIGHT		; Invert left/right inputs
+	jr   .writeToBuf
+.noLr:
+	ld   a, b					; Restore orig inputs as there's nothing to invert
+	
+.writeToBuf:
+	; Seek HL to the current buffer entry
+	ld   hl, \1+iPlInfo_JoyDirBuffer
+	add  hl, de			; HL = iPlInfo_JoyDirBuffer + iPlInfo_JoyDirBufferOffset
+	
+	; If the currently held d-pad keys are the same as what's in the buffer entry,
+	; continue increasing its timer.
+	cp   a, [hl]		; CurKeys == BufKeys?
+	jr   z, .incTimer	; If so, jump
+
+.newKey:	
+	;
+	; Seek to the next buffer entry.
+	;
+	
+	; Generate the new buffer offset from the ptr, looping back to $00 when it goes past the buffer.
+	; Index = (DE + 2) & $0F 
+	;
+	; This works due to the buffer being aligned to a specific address and for having a specific size.
+	inc  e			; DE += 2 (next entry)
+	inc  e
+	push af			; E &= $0F (force in range/loop to $00 if needed)
+		ld   a, e	
+		and  a, $0F
+		ld   e, a
+	pop  af
+	; Seek to the new offset 
+	ld   hl, \1+iPlInfo_JoyDirBuffer
 	add  hl, de
-	cp   a, [hl]
-	jr   z, L017F05
+	
+	; Write the new keys
+	ld   [hl], a
+	; Initialize the timer at 1
+	inc  hl
+	ld   [hl], $01
+	
+	; Save back the new buffer offset
+	ld   a, e
+	ld   [\1+iPlInfo_JoyDirBufferOffset], a
+	ret
+.incTimer:
+	; Increase timer, maxing out at $FF
+	inc  hl			; Seek to timer byte
+	ld   a, [hl]	
+	cp   $FF		; Timer == $FF?
+	ret  z			; If so, return
+	inc  [hl]		; Otherwise, Timer++
+	ret
+ENDM
+
+; =============== mWriteBtnKeysToBuffer ===============
+; Generates code to write the held button keys to its wPlInfo joypad buffer.
+; See also: mWriteDirKeysToBuffer
+; IN
+; - 1: Ptr to player struct
+mWriteBtnKeysToBuffer: MACRO
+
+	; This uses its own buffer, separate from the one with directional keys.
+
+	; DE = Offset to buffer entry
+	ld   d, $00
+	ld   a, [\1+iPlInfo_JoyBtnBufferOffset]
+	ld   e, a
+	; Write the directional keys only
+	ld   a, [\1+iPlInfo_JoyKeys]
+	and  a, KEY_A|KEY_B
+	
+	; (the buttons aren't afffected by facing left/right for obvious reasons, so direct skip to .writeToBuf)
+.writeToBuf:
+	; Seek HL to the current buffer entry
+	ld   hl, \1+iPlInfo_JoyBtnBuffer
+	add  hl, de
+	
+	; If the currently held buttons are the same as what's in the buffer entry,
+	; continue increasing its timer.
+	cp   a, [hl]		; CurKeys == BufKeys?
+	jr   z, .incTimer	; If so, jump
+	
+.newKey:	
+	;
+	; Seek to the next buffer entry, exactly like in the other function.
+	;
+	
+	; Index = (DE + 2) & $0F  
 	inc  e
 	inc  e
 	push af
-	ld   a, e
-	and  a, $0F
-	ld   e, a
+		ld   a, e
+		and  a, $0F
+		ld   e, a
 	pop  af
-	ld   hl, wJoyBuffer_Pl1
+	
+	; Seek to the new offset 
+	ld   hl, \1+iPlInfo_JoyBtnBuffer
 	add  hl, de
+	
+	; Write the new keys
 	ld   [hl], a
+	; Initialize the timer at 1
 	inc  hl
 	ld   [hl], $01
+	
+	; Save back the new buffer offset
 	ld   a, e
-	ld   [$D94C], a
+	ld   [\1+iPlInfo_JoyBtnBufferOffset], a
 	ret
-L017F05:;R
-	inc  hl
-	ld   a, [hl]
-	cp   $FF
-	ret  z
-	inc  [hl]
+.incTimer:
+	; Increase timer, maxing out at $FF
+	inc  hl			; Seek to timer byte
+	ld   a, [hl]	
+	cp   $FF		; Timer == $FF?
+	ret  z			; If so, return
+	inc  [hl]		; Otherwise, Timer++
 	ret
-L017F0C: db $16;X
-L017F0D: db $00;X
-L017F0E: db $FA;X
-L017F0F: db $4C;X
-L017F10: db $DA;X
-L017F11: db $5F;X
-L017F12: db $FA;X
-L017F13: db $45;X
-L017F14: db $DA;X
-L017F15: db $E6;X
-L017F16: db $0F;X
-L017F17: db $21;X
-L017F18: db $C1;X
-L017F19: db $D6;X
-L017F1A: db $CB;X
-L017F1B: db $5E;X
-L017F1C: db $28;X
-L017F1D: db $0B;X
-L017F1E: db $47;X
-L017F1F: db $E6;X
-L017F20: db $03;X
-L017F21: db $28;X
-L017F22: db $05;X
-L017F23: db $78;X
-L017F24: db $EE;X
-L017F25: db $03;X
-L017F26: db $18;X
-L017F27: db $01;X
-L017F28: db $78;X
-L017F29: db $21;X
-L017F2A: db $10;X
-L017F2B: db $DA;X
-L017F2C: db $19;X
-L017F2D: db $BE;X
-L017F2E: db $28;X
-L017F2F: db $15;X
-L017F30: db $1C;X
-L017F31: db $1C;X
-L017F32: db $F5;X
-L017F33: db $7B;X
-L017F34: db $E6;X
-L017F35: db $0F;X
-L017F36: db $5F;X
-L017F37: db $F1;X
-L017F38: db $21;X
-L017F39: db $10;X
-L017F3A: db $DA;X
-L017F3B: db $19;X
-L017F3C: db $77;X
-L017F3D: db $23;X
-L017F3E: db $36;X
-L017F3F: db $01;X
-L017F40: db $7B;X
-L017F41: db $EA;X
-L017F42: db $4C;X
-L017F43: db $DA;X
-L017F44: db $C9;X
-L017F45: db $23;X
-L017F46: db $7E;X
-L017F47: db $FE;X
-L017F48: db $FF;X
-L017F49: db $C8;X
-L017F4A: db $34;X
-L017F4B: db $C9;X
-L017F4C:;C
-	ld   d, $00
-	ld   a, [$D94D]
-	ld   e, a
-	ld   a, [$D945]
-	and  a, $30
-	ld   hl, wPlInfo_Pl1
-	add  hl, de
-	cp   a, [hl]
-	jr   z, L017F73
-	inc  e
-	inc  e
-	push af
-	ld   a, e
-	and  a, $0F
-	ld   e, a
-	pop  af
-	ld   hl, wPlInfo_Pl1
-	add  hl, de
-	ld   [hl], a
-	inc  hl
-	ld   [hl], $01
-	ld   a, e
-	ld   [$D94D], a
-	ret
-L017F73:;R
-	inc  hl
-	ld   a, [hl]
-	cp   $FF
-	ret  z
-	inc  [hl]
-	ret
-L017F7A: db $16;X
-L017F7B: db $00;X
-L017F7C: db $FA;X
-L017F7D: db $4D;X
-L017F7E: db $DA;X
-L017F7F: db $5F;X
-L017F80: db $FA;X
-L017F81: db $45;X
-L017F82: db $DA;X
-L017F83: db $E6;X
-L017F84: db $30;X
-L017F85: db $21;X
-L017F86: db $00;X
-L017F87: db $DA;X
-L017F88: db $19;X
-L017F89: db $BE;X
-L017F8A: db $28;X
-L017F8B: db $15;X
-L017F8C: db $1C;X
-L017F8D: db $1C;X
-L017F8E: db $F5;X
-L017F8F: db $7B;X
-L017F90: db $E6;X
-L017F91: db $0F;X
-L017F92: db $5F;X
-L017F93: db $F1;X
-L017F94: db $21;X
-L017F95: db $00;X
-L017F96: db $DA;X
-L017F97: db $19;X
-L017F98: db $77;X
-L017F99: db $23;X
-L017F9A: db $36;X
-L017F9B: db $01;X
-L017F9C: db $7B;X
-L017F9D: db $EA;X
-L017F9E: db $4D;X
-L017F9F: db $DA;X
-L017FA0: db $C9;X
-L017FA1: db $23;X
-L017FA2: db $7E;X
-L017FA3: db $FE;X
-L017FA4: db $FF;X
-L017FA5: db $C8;X
-L017FA6: db $34;X
-L017FA7: db $C9;X
+ENDM
+
+Play_WriteDirKeysToBuffer1P: mWriteDirKeysToBuffer wPlInfo_Pl1, wOBJInfo_Pl1
+Play_WriteDirKeysToBuffer2P: mWriteDirKeysToBuffer wPlInfo_Pl2, wOBJInfo_Pl2
+Play_WriteBtnKeysToBuffer1P: mWriteBtnKeysToBuffer wPlInfo_Pl1
+Play_WriteBtnKeysToBuffer2P: mWriteBtnKeysToBuffer wPlInfo_Pl2
+; =============== END OF BANK ===============
+; Junk area below with incomplete copies of the above subroutines.
 L017FA8: db $C8;X
 L017FA9: db $34;X
 L017FAA: db $C9;X

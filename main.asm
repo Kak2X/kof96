@@ -1,7 +1,7 @@
 ; Constants
 NO_SGB_SOUND EQU 0 ; Forces DMG-only sound playback. For emulators which don't implement SGB sound.
 CPU_USAGE EQU 0 ; Uses different code for VBlank waiting to make the CPU Usage bar in BGB work
-
+FIX_BUGS EQU 0 ; Self explainatory
 ; Include the basics
 INCLUDE "src/hardware.asm"
 INCLUDE "src/constants.asm"

@@ -79,8 +79,8 @@ for ($i = 0; $i < count($lines);) {
 		
 		$b = "{$label}:{$unused_marker}
 	db {$flags} ; iOBJLstHdrA_Flags
-	db \${$byte1} ; iOBJLstHdrA_Byte1
-	db \${$byte2} ; iOBJLstHdrA_Byte2
+	db \${$byte1} ; iOBJLstHdrA_ColiBoxId
+	db \${$byte2} ; iOBJLstHdrA_HitboxId
 	{$gfx_ptr} ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw {$data_ptr} ; iOBJLstHdrA_DataPtr
 	db \${$xoff} ; iOBJLstHdrA_XOffset

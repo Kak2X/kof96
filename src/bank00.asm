@@ -233,8 +233,9 @@ Play_HUDTileIdTbl:
 	db $F7 ; 8
 	db $F8 ; 9
 	
-	; Tile IDs for pause text
-L0000DB:
+; =============== BG_Play_HUDHit ===============
+; Tile IDs for the hit count.
+BG_Play_HUDHit:
 	db $D4
 	db $D5
 
@@ -961,6 +962,8 @@ Task_IndexTask:
 	
 ; =============== Task_SkipAllAndWaitVBlank ===============
 ; Waits for VBlank without executing any of the tasks or common code.
+; Generally used for "paused" frames, where the game should stop animating
+; sprites and playing music.
 Task_SkipAllAndWaitVBlank:
 	ld   a, $01
 	ld   [wVBlankNotDone], a
@@ -1289,23 +1292,23 @@ VBlank_ChkCopyPlTiles:
 	bit  MISCB_LAG_FRAME, a			; Is this a lag frame?
 	jp   nz, VBlank_SetInitialSect	; If so, don't update player gfx
 	ld   a, [wMisc_C025]
-	bit  MISCB_SERIAL_LAG, a			; Is everything frozen?
+	bit  MISCB_SERIAL_LAG, a		; Is everything frozen?
 	jp   nz, VBlank_SetInitialSect	; If so, also skip copying GFX
-	ld   a, [wPaused]
-	or   a							; Game is paused?
+	ld   a, [wNoCopyGFXBuf]
+	or   a							; Is the GFX copying outright disabled?
 	jp   nz, VBlank_SetInitialSect	; If so, skip
 	jp   VBlank_CopyPl1Tiles						
 
 ;--
 ; [TCRF] Unreferenced code.
 L0005A1:
-	ld   a, [wPlInfo_Pl1+iPlInfo_21]
-	bit  4, a
+	ld   a, [wPlInfo_Pl1+iPlInfo_21Flags]
+	bit  PI21B_COMBORECV, a
 	jp   nz, VBlank_CopyPl1Tiles
 	ld   a, [wPlInfo_Pl1+iPlInfo_22Flags]
-	bit  2, a
+	bit  PI21B_NOSPECSTART, a
 	jp   nz, VBlank_CopyPl1Tiles
-	ld   a, [$C172]
+	ld   a, [wPlayHitstop]
 	or   a
 	jp   nz, VBlank_CopyPl1Tiles.end
 ;--
@@ -1429,38 +1432,55 @@ VBlank_CopyPl1Tiles:
 	set  OSTB_BIT3, [hl]		; ??? does this do anything
 	
 	;--------
-	; ??? Very likely in the middle of the Player actor, related to gameplay
+	;
+	; Copy move-related fields such as the amount of damage when hitting the opponent.
+	;
+	; These fields are special as they come from the MoveAnimTbl table, meaning they are
+	; associated with a specific move animation.
+	; As the animation won't start until the graphics are loaded, wait for that first
+	; before copying the fields over from their pending slots.
+	; This avoids having the old frame visible with the new move settings.
+	;
 	
+	; TODO: Is this a bug or not? So far I haven't seen iPlInfo_MoveDamageValNext & others being updated mid-move.
+	; As these are set only when starting a new move, check for that:
+	; [BUG?] Incorrect comparison. It should have been "jp z" or not made to begin with (to allow mid-move setting changes).
 	ld   hl, wPlInfo_Pl1+iPlInfo_22Flags
-	bit  0, [hl]		; wPlInfo_Pl1+iPlInfo_22Flags bit 0 set?
-	jp   nz, .move1		; If so, skip
+	bit  PI22B_MOVESTART, [hl]		; Was a move started?
+	jp   nz, .copySetKey				; If *so*, skip
 	
-	; Copy $D93D-$D93F to $D93A-$D93C and clear the former range
-	; as long as they aren't 0 already.
-	ld   hl, wPlInfo_Pl1+iPlInfo_3D		; HL = Source
-	ld   de, wPlInfo_Pl1+iPlInfo_3A		; DE = Destination
+	;
+	; Copy the set of pending fields to the current ones, and clear the former range.
+	;
+	; This checks if the move damage was set to 0 before copying the data, likely as a way to "fix" the bug above.
+	; As iPlInfo_MoveDamageValNext is cleared after performing the copy, it will remain cleared until a new move
+	; is performed, meaning we're jumping to .copySetKey from the second time we get here.
+	;
+	
+	ld   hl, wPlInfo_Pl1+iPlInfo_MoveDamageValNext	; HL = Source
+	ld   de, wPlInfo_Pl1+iPlInfo_MoveDamageVal		; DE = Destination
 	ld   a, [hl]
-	or   a				; iPlInfo_3D == 0?
-	jp   z, .move1		; If so, skip
+	or   a				; iPlInfo_MoveDamageValNext == 0?
+	jp   z, .copySetKey	; If so, skip
 	
-.move0:
-	ld   [de], a		
-	ld   [hl], $00		
-	inc  de
-	inc  hl
+.copyMoveOpt:
+	ld   [de], a	; Copy iPlInfo_MoveDamageValNext to iPlInfo_MoveDamageVal	
+	ld   [hl], $00	; Clear iPlInfo_MoveDamageValNext
+	inc  de			; SrcPtr++
+	inc  hl			; DestPtr++
 	
-	ld   a, [hl]
-	ld   [de], a
-	ld   [hl], $00
-	inc  de
-	inc  hl
+	ld   a, [hl]	; A = iPlInfo_MoveDamageHitAnimIdNext
+	ld   [de], a	; Copy iPlInfo_MoveDamageHitAnimIdNext to iPlInfo_MoveDamageHitAnimId	
+	ld   [hl], $00	; Clear iPlInfo_MoveDamageHitAnimIdNext
+	inc  de			; SrcPtr++
+	inc  hl			; DestPtr++
 	
-	ld   a, [hl]
-	ld   [de], a
-	ld   [hl], $00
+	ld   a, [hl]	; A = iPlInfo_MoveDamageFlags3Next
+	ld   [de], a	; Copy iPlInfo_MoveDamageFlags3Next to iPlInfo_MoveDamageFlags3	
+	ld   [hl], $00	; Clear iPlInfo_MoveDamageFlags3Next
 	
 	;--------
-.move1:
+.copySetKey:
 	
 	; Copy over the unique identifier for the Set settings from iGFXBufInfo_SetKey to iGFXBufInfo_SetKeyOld.
 	; This tells the wGFXBufInfo init code which settings were the last to be completely applied.
@@ -1493,13 +1513,13 @@ ENDR
 ;--
 ; [TCRF] Unreferenced code
 L0006A7:
-	ld   a, [wPlInfo_Pl2+iPlInfo_21]
+	ld   a, [wPlInfo_Pl2+iPlInfo_21Flags]
 	bit  4, a
 	jp   nz, VBlank_CopyPl2Tiles
 	ld   a, [wPlInfo_Pl2+iPlInfo_22Flags]
 	bit  2, a
 	jp   nz, VBlank_CopyPl2Tiles
-	ld   a, [$C172]
+	ld   a, [wPlayHitstop]
 	or   a
 	jp   nz, VBlank_CopyPl2Tiles.end
 ;--
@@ -1585,8 +1605,8 @@ VBlank_CopyPl2Tiles:
 	bit  0, [hl]
 	jp   nz, .move1
 	
-	ld   hl, wPlInfo_Pl2+iPlInfo_3D
-	ld   de, wPlInfo_Pl2+iPlInfo_3A
+	ld   hl, wPlInfo_Pl2+iPlInfo_MoveDamageValNext
+	ld   de, wPlInfo_Pl2+iPlInfo_MoveDamageVal
 	ld   a, [hl]
 	or   a
 	jp   z, .move1
@@ -2278,21 +2298,21 @@ OBJLstS_DoOBJLstHeaderA:
 	ld   [wOBJLstTmpROMFlags], a
 	
 	;
-	; BYTE 1 - ???
+	; BYTE 1 - Collision Box ID
 	;
 	
 	; Copy over item1 to byte18
-	ldi  a, [hl]	; Read iOBJLstHdrA_Byte1
-	ld   [de], a	; Write to iOBJInfo_OBJLstByte1
+	ldi  a, [hl]	; Read iOBJLstHdrA_ColiBoxId
+	ld   [de], a	; Write to iOBJInfo_ColiBoxId
 	inc  de
 	
 	;
-	; BYTE 2 - ???
+	; BYTE 2 - Hitbox ID
 	;
 	
 	; Copy over item2 to byte19
-	ldi  a, [hl]	; Read iOBJLstHdrA_Byte2
-	ld   [de], a	; Write to iOBJInfo_OBJLstByte2
+	ldi  a, [hl]	; Read iOBJLstHdrA_HitBoxId
+	ld   [de], a	; Write to iOBJInfo_HitboxId
 	
 	; $03
 	inc  hl
@@ -3043,7 +3063,7 @@ OBJLstS_UpdateGFXBufInfo:
 				pop  hl
 				
 				; Seek to iOBJLstHdrA_GFXPtr_Low
-				inc  hl		; Seek to iOBJLstHdrA_Byte1
+				inc  hl		; Seek to iOBJLstHdrA_ColiBoxId
 				inc  hl     ; ...
 				inc  hl
 				
@@ -6158,7 +6178,7 @@ Pl_Unknown_InitBeforeStage:
 	ld   [wPlInfo_Pl2+iPlInfo_SingleWinCount], a
 	ld   [wPlInfo_Pl1+iPlInfo_HitComboRecvSet], a
 	ld   [wPlInfo_Pl2+iPlInfo_HitComboRecvSet], a
-	; ??? Set initial timer, used on the intro pose
+	; Set initial health values.
 	ld   a, $48
 	ld   [wPlInfo_Pl1+iPlInfo_Health], a
 	ld   [wPlInfo_Pl2+iPlInfo_Health], a
@@ -6303,13 +6323,13 @@ Module_Play:
 	or   a, I_VBLANK|I_STAT
 	ldh  [rIE], a
 	
-	; Create two separate tasks for handling players (animation only???)
+	; Create two separate tasks for handling player movement/animation.
 	ld   a, $02
-	ld   bc, L002458
+	ld   bc, Play_DoPl_1P
 	call Task_CreateAt
 	
 	ld   a, $03
-	ld   bc, L002464
+	ld   bc, Play_DoPl_2P
 	call Task_CreateAt
 	
 	; Set intro move for characters that don't start in their idle anim
@@ -6375,7 +6395,7 @@ Module_Play:
 	ld   a, $4C				; 2P palette
 	ldh  [rOBP1], a
 	ld   a, $1B				; BG palette
-	ld   [wStageBGP], a			
+	ld   [wStageBGP], a			; No flash
 	ldh  [rBGP], a				; BG palette for all sections
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect1BGP], a
@@ -6389,10 +6409,10 @@ Module_Play:
 	call Play_LoadProjectileOBJInfo
 	
 	; Start the main gameplay loop
-	ld   a, BANK(L016389) ; BANK $01
+	ld   a, BANK(Play_Main) ; BANK $01
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	jp   L016389
+	jp   Play_Main
 	
 ; =============== Play_InitRound ===============
 ; Initializes the round variables, including both players.
@@ -6408,11 +6428,11 @@ Play_InitRound:
 	
 	; Initialize other fields
 	xor  a
-	ld   [$C172], a
-	ld   [$C173], a
-	ld   [$C17A], a
-	ld   [$C17B], a
-	ld   [$C159], a
+	ld   [wPlayHitstop], a
+	ld   [wPlayPlThrowActId], a
+	ld   [wPlaySlowdownTimer], a
+	ld   [wPlaySlowdownSpeed], a
+	ld   [wScreenShakeY], a
 	ld   [wPlayMaxPowScroll1P], a
 	ld   [wPlayMaxPowScroll2P], a
 	
@@ -6430,103 +6450,99 @@ Play_InitRound:
 	and  a, PS_CPU
 	ld   [wPlInfo_Pl2+iPlInfo_Status], a
 	
+	; Initialize other player fields
 	xor  a
-	ld   [wPlInfo_Pl1+iPlInfo_21], a
+	ld   [wPlInfo_Pl1+iPlInfo_21Flags], a
 	ld   [wPlInfo_Pl1+iPlInfo_22Flags], a
-	ld   [wPlInfo_Pl1+iPlInfo_23], a
-	ld   [wPlInfo_Pl2+iPlInfo_21], a
+	ld   [wPlInfo_Pl1+iPlInfo_23Flags], a
+	ld   [wPlInfo_Pl2+iPlInfo_21Flags], a
 	ld   [wPlInfo_Pl2+iPlInfo_22Flags], a
-	ld   [wPlInfo_Pl2+iPlInfo_23], a
+	ld   [wPlInfo_Pl2+iPlInfo_23Flags], a
 	ld   [wPlInfo_Pl1+iPlInfo_MoveId], a
 	ld   [wPlInfo_Pl2+iPlInfo_MoveId], a
 	ld   [wPlInfo_Pl1+iPlInfo_IntroMoveId], a
 	ld   [wPlInfo_Pl2+iPlInfo_IntroMoveId], a
-	ld   [wPlInfo_Pl1+iPlInfo_63], a
-	ld   [wPlInfo_Pl2+iPlInfo_63], a
-	ld   [wPlInfo_Pl1+iPlInfo_64], a
-	ld   [wPlInfo_Pl2+iPlInfo_64], a
-	ld   [wPlInfo_Pl1+iPlInfo_59], a
-	ld   [wPlInfo_Pl2+iPlInfo_59], a
-	ld   [wPlInfo_Pl1+iPlInfo_58], a
-	ld   [wPlInfo_Pl2+iPlInfo_58], a
+	ld   [wPlInfo_Pl1+iPlInfo_ColiFlags], a
+	ld   [wPlInfo_Pl2+iPlInfo_ColiFlags], a
+	ld   [wPlInfo_Pl1+iPlInfo_Unk_ColiBoxOverlapX_A], a
+	ld   [wPlInfo_Pl2+iPlInfo_Unk_ColiBoxOverlapX_A], a
+	ld   [wPlInfo_Pl1+iPlInfo_DizzyTimeLeft], a
+	ld   [wPlInfo_Pl2+iPlInfo_DizzyTimeLeft], a
+	ld   [wPlInfo_Pl1+iPlInfo_Dizzy], a
+	ld   [wPlInfo_Pl2+iPlInfo_Dizzy], a
 	ld   [wPlInfo_Pl1+iPlInfo_HitComboRecvSet], a
 	ld   [wPlInfo_Pl2+iPlInfo_HitComboRecvSet], a
-	ld   [wPlInfo_Pl1+iPlInfo_60], a
-	ld   [wPlInfo_Pl2+iPlInfo_60], a
-	
-	; ???
+	ld   [wPlInfo_Pl1+iPlInfo_NoSpecialTimer], a
+	ld   [wPlInfo_Pl2+iPlInfo_NoSpecialTimer], a
 	ld   a, $FF
-	ld   [wPlInfo_Pl1+iPlInfo_61], a
-	ld   [wPlInfo_Pl2+iPlInfo_61], a
+	ld   [wPlInfo_Pl1+iPlInfo_PlDistance], a
+	ld   [wPlInfo_Pl2+iPlInfo_PlDistance], a
 	
-	; ???
+	; Initialize stun timers at their capped value.
 	ld   a, $67
-	ld   [wPlInfo_Pl1+iPlInfo_5A], a
-	ld   [wPlInfo_Pl2+iPlInfo_5A], a
-	ld   [wPlInfo_Pl1+iPlInfo_5B], a
-	ld   [wPlInfo_Pl2+iPlInfo_5B], a
-	ld   [wPlInfo_Pl1+iPlInfo_5C], a
-	ld   [wPlInfo_Pl2+iPlInfo_5C], a
-	ld   [wPlInfo_Pl1+iPlInfo_5D], a
-	ld   [wPlInfo_Pl2+iPlInfo_5D], a
+	ld   [wPlInfo_Pl1+iPlInfo_DizzyProg], a
+	ld   [wPlInfo_Pl2+iPlInfo_DizzyProg], a
+	ld   [wPlInfo_Pl1+iPlInfo_DizzyProgCap], a
+	ld   [wPlInfo_Pl2+iPlInfo_DizzyProgCap], a
+	ld   [wPlInfo_Pl1+iPlInfo_GuardBreakProg], a
+	ld   [wPlInfo_Pl2+iPlInfo_GuardBreakProg], a
+	ld   [wPlInfo_Pl1+iPlInfo_GuardBreakProgCap], a
+	ld   [wPlInfo_Pl2+iPlInfo_GuardBreakProgCap], a
 	
-	; ??? Make a backup of the active character IDs
+	; Give visibility to the other player's character id
 	ld   a, [wPlInfo_Pl1+iPlInfo_CharId]
-	ld   [wPlInfo_Pl2+iPlInfo_Unk_CharIdCopy], a
+	ld   [wPlInfo_Pl2+iPlInfo_CharIdOther], a
 	ld   a, [wPlInfo_Pl2+iPlInfo_CharId]
-	ld   [wPlInfo_Pl1+iPlInfo_Unk_CharIdCopy], a
+	ld   [wPlInfo_Pl1+iPlInfo_CharIdOther], a
 	
 	;##
 	
 	;
-	; Determine if this is the final round ("FINAL!!"), by checking if either:
-	; - In single mode, we are on the 4th round
-	; - In team mode, any team has all three members defeated.
-	; 
-	; In case of team mode, normally having all three characters defeated causes the game to show the win screen,
-	; but if we're still trying to start a new round, it means the last normal round (3rd 1P char, vs 3rd 2P char)
-	; ended in a draw.
-	; Draws cause both characters to be marked as defeated, and in the special case both teams have three defeated
-	; members, a final round starts.
+	; Determine two things here:
+	; - How much health to assign to players
+	; - If this is the final round ("FINAL!!")
 	;
-	
-.chkFinalRound:
+	; Both have different rules depending on which mode we're in (single or team).
+	;
+.chkHealth:
 	xor  a
 	ld   [wRoundFinal], a
 	call IsInTeamMode			; Are we in team mode?
-	jp   nc, .chkFinalSingle	; If not, jump
+	jp   nc, .chkHealthSingle	; If not, jump
 	
 	;--
-.chkLastWin1P:
+.chkHealthTeam:
 	;
-	; TODO: What's the point of setting the timer target? ???
-	;       By the time it finishes incrementing, the pre-round text is still there.
+	; TEAM MODE - HEALTH SETUP
 	;
-	; Logic for timer target values:
-	; - $48: Losing player, or normal round in single mode
-	; - $17: Final round
+	; At the end of a round, the winner got some health back.
+	; Here, at the start of the round, the loser gets his health completely refilled.
+	;
+	; Note that, before the first round starts, the initial health values are set in Pl_Unknown_InitBeforeStage.
+	; That's needed as wLastWinner doesn't get reset between stages.
 	;
 	
-	;
-	; The last winner has the timer target set to $48.
-	;
+	; If 1P didn't win last round
 	ld   a, [wLastWinner]
-	bit  PLB1, a			; Did 1P win the last round?
-	jp   nz, .chkLastWin2P	; If so, skip
-	ld   a, $48				; Otherwise, set timer
+	bit  PLB1, a				; Did 1P win the last round?
+	jp   nz, .chkLastWin2P		; If so, skip
+	ld   a, $48					; Otherwise, reset 1P health
 	ld   [wPlInfo_Pl1+iPlInfo_Health], a
 .chkLastWin2P:
 	ld   a, [wLastWinner]
-	bit  PLB2, a			; Did 2P win the last round?
-	jp   nz, .chkFinalTeam	; If so, skip
-	ld   a, $48				; Otherwise, set timer
+	bit  PLB2, a				; Did 2P win the last round?
+	jp   nz, .chkFinalTeam		; If so, skip
+	ld   a, $48					; Otherwise, reset 2P health
 	ld   [wPlInfo_Pl2+iPlInfo_Health], a
-	;--
 .chkFinalTeam:
 	
 	;
+	; TEAM MODE - FINAL ROUND CHECK
+	;
 	; If any team has 3 characters defeated, this is the final round.
-	; ??? Note that it's not necessary to check both -- if the first team 
+	;
+	
+	; Note that it's not necessary to check both -- if the first team 
 	; doesn't have 3 losses, the second one doesn't either.
 	;
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamLossCount]
@@ -6536,25 +6552,31 @@ Play_InitRound:
 	cp   $03					; Is 2P's team defeated?
 	jp   z, .setFinalRound		; If so, jump
 	jp   .end
-.chkFinalSingle:
+	
+.chkHealthSingle:
 
 	;
-	; If we're on the 4th round, this is the final round
+	; SINGLE MODE
+	;
+	; Rounds are isolated in single mode, so a FINAL!! round check is all that's needed.
+	;
+	; In Single mode, the final round is the 4th one.
 	;
 	ld   a, [wRoundNum]
 	cp   $03				; wRoundNum == $03? (4th)
 	jp   nz, .setNormRound	; If not, jump
+	
 .setFinalRound:
 	; Enable FINAL!! round
 	ld   a, $01
 	ld   [wRoundFinal], a
-	; Set timer to $17 for both players
+	; Set low health meter for both players
 	ld   a, $17
 	ld   [wPlInfo_Pl1+iPlInfo_Health], a
 	ld   [wPlInfo_Pl2+iPlInfo_Health], a
 	jp   .end
 .setNormRound:
-	; Set timer to $48 for both players
+	; Set max health for both players
 	ld   a, $48				
 	ld   [wPlInfo_Pl1+iPlInfo_Health], a
 	ld   [wPlInfo_Pl2+iPlInfo_Health], a
@@ -6570,8 +6592,8 @@ Play_InitRound:
 	ld   [wPlInfo_Pl2+iPlInfo_Pow], a
 	ld   [wPlInfo_Pl1+iPlInfo_PowVisual], a
 	ld   [wPlInfo_Pl2+iPlInfo_PowVisual], a
-	ld   [wPlInfo_Pl1+iPlInfo_52], a
-	ld   [wPlInfo_Pl2+iPlInfo_52], a
+	ld   [wPlInfo_Pl1+iPlInfo_MaxPowDecSpeed], a
+	ld   [wPlInfo_Pl2+iPlInfo_MaxPowDecSpeed], a
 	ld   [wPlInfo_Pl1+iPlInfo_MaxPow], a
 	ld   [wPlInfo_Pl2+iPlInfo_MaxPow], a
 	ld   [wPlInfo_Pl1+iPlInfo_MaxPowVisual], a
@@ -6655,13 +6677,13 @@ ENDR
 	pop  de
 	
 	; Load the settings two bytes at a time.
-	ld   hl, iPlInfo_Ptr24_Low	; byte0-1
+	ld   hl, iPlInfo_MoveAnimTblPtr_Low	; byte0-1
 	call .copyPtr
-	ld   hl, iPlInfo_MovePtrTable_Low	; byte2-3
+	ld   hl, iPlInfo_MoveCodePtrTable_Low	; byte2-3
 	call .copyPtr
-	ld   hl, iPlInfo_Ptr28_Low	; byte4-5
+	ld   hl, iPlInfo_MoveInputCodePtr_Low	; byte4-5
 	call .copyPtr
-	ld   hl, iPlInfo_Ptr28_Bank	; byte6
+	ld   hl, iPlInfo_MoveInputCodePtr_Bank	; byte6
 	call .copyByte
 	; [TCRF] The movement speed also comes from the table, but every character uses identical values.
 	;        This oddity is also in KOF95, but the feature is unfinished there as that game uses hardcoded speed values instead.
@@ -6719,9 +6741,9 @@ ENDR
 ; Parent table with character-specific settings.
 Play_CharHeaderTbl:
 	; CHAR_ID_KYO
-	dw L034000 ; iPlInfo_Ptr24
-	dw L0370A7 ; iPlInfo_MovePtrTable 
-	dp L064052 ; iPlInfo_Ptr28 | BANK $06
+	dw MoveAnimTbl_Kyo ; iPlInfo_MoveAnimTblPtr
+	dw MoveCodePtrTbl_Kyo ; iPlInfo_MoveCodePtrTable 
+	dp MoveInputReader_Kyo ; iPlInfo_MoveInputCodePtr | BANK $06
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6729,9 +6751,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_DAIMON
-	dw L034268 ; iPlInfo_Ptr24
-	dw L037107 ; iPlInfo_MovePtrTable 
-	dp L0578A0 ; iPlInfo_Ptr28 | BANK $05
+	dw L034268 ; iPlInfo_MoveAnimTblPtr
+	dw L037107 ; iPlInfo_MoveCodePtrTable 
+	dp L0578A0 ; iPlInfo_MoveInputCodePtr | BANK $05
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6739,9 +6761,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_TERRY
-	dw L0344D0 ; iPlInfo_Ptr24
-	dw L037587 ; iPlInfo_MovePtrTable 
-	dp L064CA4 ; iPlInfo_Ptr28 | BANK $06
+	dw L0344D0 ; iPlInfo_MoveAnimTblPtr
+	dw L037587 ; iPlInfo_MoveCodePtrTable 
+	dp L064CA4 ; iPlInfo_MoveInputCodePtr | BANK $06
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6749,9 +6771,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_ANDY
-	dw L034738 ; iPlInfo_Ptr24
-	dw L037167 ; iPlInfo_MovePtrTable 
-	dp L066A77 ; iPlInfo_Ptr28 | BANK $06
+	dw L034738 ; iPlInfo_MoveAnimTblPtr
+	dw L037167 ; iPlInfo_MoveCodePtrTable 
+	dp L066A77 ; iPlInfo_MoveInputCodePtr | BANK $06
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6759,9 +6781,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_RYO
-	dw L0349A0 ; iPlInfo_Ptr24
-	dw L037527 ; iPlInfo_MovePtrTable 
-	dp L0257D7 ; iPlInfo_Ptr28 | BANK $02
+	dw L0349A0 ; iPlInfo_MoveAnimTblPtr
+	dw L037527 ; iPlInfo_MoveCodePtrTable 
+	dp L0257D7 ; iPlInfo_MoveInputCodePtr | BANK $02
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6769,9 +6791,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_ROBERT
-	dw L034C08 ; iPlInfo_Ptr24
-	dw L0371C7 ; iPlInfo_MovePtrTable 
-	dp L025E5C ; iPlInfo_Ptr28 | BANK $02
+	dw L034C08 ; iPlInfo_MoveAnimTblPtr
+	dw L0371C7 ; iPlInfo_MoveCodePtrTable 
+	dp L025E5C ; iPlInfo_MoveInputCodePtr | BANK $02
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6779,9 +6801,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_ATHENA
-	dw L034E70 ; iPlInfo_Ptr24
-	dw L0375E7 ; iPlInfo_MovePtrTable 
-	dp L065B3A ; iPlInfo_Ptr28 | BANK $06
+	dw L034E70 ; iPlInfo_MoveAnimTblPtr
+	dw L0375E7 ; iPlInfo_MoveCodePtrTable 
+	dp L065B3A ; iPlInfo_MoveInputCodePtr | BANK $06
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6789,9 +6811,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_MAI
-	dw L0350D8 ; iPlInfo_Ptr24
-	dw L037647 ; iPlInfo_MovePtrTable 
-	dp L0652DF ; iPlInfo_Ptr28 | BANK $06
+	dw L0350D8 ; iPlInfo_MoveAnimTblPtr
+	dw L037647 ; iPlInfo_MoveCodePtrTable 
+	dp L0652DF ; iPlInfo_MoveInputCodePtr | BANK $06
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6799,9 +6821,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_LEONA
-	dw L035340 ; iPlInfo_Ptr24
-	dw L037227 ; iPlInfo_MovePtrTable 
-	dp L026846 ; iPlInfo_Ptr28 | BANK $02
+	dw L035340 ; iPlInfo_MoveAnimTblPtr
+	dw L037227 ; iPlInfo_MoveCodePtrTable 
+	dp L026846 ; iPlInfo_MoveInputCodePtr | BANK $02
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6809,9 +6831,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_GEESE
-	dw L035810 ; iPlInfo_Ptr24
-	dw L037287 ; iPlInfo_MovePtrTable 
-	dp L0677C0 ; iPlInfo_Ptr28 | BANK $06
+	dw L035810 ; iPlInfo_MoveAnimTblPtr
+	dw L037287 ; iPlInfo_MoveCodePtrTable 
+	dp L0677C0 ; iPlInfo_MoveInputCodePtr | BANK $06
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6819,9 +6841,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_KRAUSER
-	dw L035A78 ; iPlInfo_Ptr24
-	dw L0372E7 ; iPlInfo_MovePtrTable 
-	dp L0974E6 ; iPlInfo_Ptr28 | BANK $09
+	dw L035A78 ; iPlInfo_MoveAnimTblPtr
+	dw L0372E7 ; iPlInfo_MoveCodePtrTable 
+	dp L0974E6 ; iPlInfo_MoveInputCodePtr | BANK $09
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6829,9 +6851,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_MRBIG
-	dw L035CE0 ; iPlInfo_Ptr24
-	dw L037347 ; iPlInfo_MovePtrTable 
-	dp L0671EE ; iPlInfo_Ptr28 | BANK $06
+	dw L035CE0 ; iPlInfo_MoveAnimTblPtr
+	dw L037347 ; iPlInfo_MoveCodePtrTable 
+	dp L0671EE ; iPlInfo_MoveInputCodePtr | BANK $06
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6839,9 +6861,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_IORI
-	dw L035F48 ; iPlInfo_Ptr24
-	dw L0376A7 ; iPlInfo_MovePtrTable 
-	dp L055FF2 ; iPlInfo_Ptr28 | BANK $05
+	dw L035F48 ; iPlInfo_MoveAnimTblPtr
+	dw L0376A7 ; iPlInfo_MoveCodePtrTable 
+	dp L055FF2 ; iPlInfo_MoveInputCodePtr | BANK $05
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6849,9 +6871,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_MATURE
-	dw L0361B0 ; iPlInfo_Ptr24
-	dw L0373A7 ; iPlInfo_MovePtrTable 
-	dp L056C11 ; iPlInfo_Ptr28 | BANK $05
+	dw L0361B0 ; iPlInfo_MoveAnimTblPtr
+	dw L0373A7 ; iPlInfo_MoveCodePtrTable 
+	dp L056C11 ; iPlInfo_MoveInputCodePtr | BANK $05
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6859,9 +6881,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_CHIZURU
-	dw L036418 ; iPlInfo_Ptr24
-	dw L037407 ; iPlInfo_MovePtrTable 
-	dp L057362 ; iPlInfo_Ptr28 | BANK $05
+	dw L036418 ; iPlInfo_MoveAnimTblPtr
+	dw L037407 ; iPlInfo_MoveCodePtrTable 
+	dp L057362 ; iPlInfo_MoveInputCodePtr | BANK $05
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6869,9 +6891,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_GOENITZ
-	dw L0368E8 ; iPlInfo_Ptr24
-	dw L037467 ; iPlInfo_MovePtrTable 
-	dp L0A7373 ; iPlInfo_Ptr28 | BANK $0A
+	dw L0368E8 ; iPlInfo_MoveAnimTblPtr
+	dw L037467 ; iPlInfo_MoveCodePtrTable 
+	dp L0A7373 ; iPlInfo_MoveInputCodePtr | BANK $0A
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6879,9 +6901,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_MRKARATE
-	dw L036B50 ; iPlInfo_Ptr24
-	dw L0374C7 ; iPlInfo_MovePtrTable 
-	dp L027163 ; iPlInfo_Ptr28 | BANK $02
+	dw L036B50 ; iPlInfo_MoveAnimTblPtr
+	dw L0374C7 ; iPlInfo_MoveCodePtrTable 
+	dp L027163 ; iPlInfo_MoveInputCodePtr | BANK $02
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6889,9 +6911,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_OIORI
-	dw L036DB8 ; iPlInfo_Ptr24
-	dw L0376A7 ; iPlInfo_MovePtrTable 
-	dp L055FF2 ; iPlInfo_Ptr28 | BANK $05
+	dw L036DB8 ; iPlInfo_MoveAnimTblPtr
+	dw L0376A7 ; iPlInfo_MoveCodePtrTable 
+	dp L055FF2 ; iPlInfo_MoveInputCodePtr | BANK $05
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6899,9 +6921,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_OLEONA
-	dw L0355A8 ; iPlInfo_Ptr24
-	dw L037227 ; iPlInfo_MovePtrTable 
-	dp L026846 ; iPlInfo_Ptr28 | BANK $02
+	dw L0355A8 ; iPlInfo_MoveAnimTblPtr
+	dw L037227 ; iPlInfo_MoveCodePtrTable 
+	dp L026846 ; iPlInfo_MoveInputCodePtr | BANK $02
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6909,9 +6931,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_KAGURA
-	dw L036680 ; iPlInfo_Ptr24
-	dw L037407 ; iPlInfo_MovePtrTable 
-	dp L057368 ; iPlInfo_Ptr28 | BANK $05
+	dw L036680 ; iPlInfo_MoveAnimTblPtr
+	dw L037407 ; iPlInfo_MoveCodePtrTable 
+	dp L057368 ; iPlInfo_MoveInputCodePtr | BANK $05
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -7029,7 +7051,7 @@ Play_LoadProjectileGFXFromDef:
 	
 	; If the ptr is null, there's nothing to copy
 	ld   a, h
-	or   a, L
+	or   a, l
 	jp   z, .ret
 	
 	; The first 2 tiles are always empty.
@@ -7313,7 +7335,7 @@ Play_DrawCharIcons_Single:
 	;
 	; Determine what to draw in the box for the first round.
 	;
-	; Note that CopyByteIfSingleFinalRound is used, meaning that, on the final round,
+	; Note that CopyByteIfNotSingleFinalRound is used, meaning that, on the final round,
 	; none of the win markers show up.
 	;
 	; Which makes sense, considering who wins the round wins the stage.
@@ -7324,16 +7346,16 @@ Play_DrawCharIcons_Single:
 .okS1PWin1:
 	ld   hl, $9C42		; Otherwise, draw the filled box
 	ld   c, $74
-	call CopyByteIfSingleFinalRound
+	call CopyByteIfNotSingleFinalRound
 	jp   .chkS1PWin2
 .noS1PWin1:
 	ld   hl, $9C42
 	ld   c, $75
-	call CopyByteIfSingleFinalRound
+	call CopyByteIfNotSingleFinalRound
 	
 	;
 	; Determine what to draw in the box for the second round.
-	; Same CopyByteIfSingleFinalRound usage applies.
+	; Same CopyByteIfNotSingleFinalRound usage applies.
 	; [TCRF] It's impossible to draw a filled second box here, as 2 wins end the round.
 	;
 .chkS1PWin2:
@@ -7343,12 +7365,12 @@ Play_DrawCharIcons_Single:
 .unreachable_okS1PWin2:	
 	ld   hl, $9C43		; Otherwise, draw the filled box
 	ld   c, $74
-	call CopyByteIfSingleFinalRound
+	call CopyByteIfNotSingleFinalRound
 	jp   .s2P
 .noS1PWin2:
 	ld   hl, $9C43
 	ld   c, $75
-	call CopyByteIfSingleFinalRound
+	call CopyByteIfNotSingleFinalRound
 	
 	;
 	; PLAYER 2
@@ -7370,12 +7392,12 @@ Play_DrawCharIcons_Single:
 .okS2PWin1:
 	ld   hl, $9C51
 	ld   c, $74
-	call CopyByteIfSingleFinalRound
+	call CopyByteIfNotSingleFinalRound
 	jp   .chkS2PWin2
 .noS2PWin1:
 	ld   hl, $9C51
 	ld   c, $75
-	call CopyByteIfSingleFinalRound
+	call CopyByteIfNotSingleFinalRound
 	
 .chkS2PWin2:
 	ld   a, [wPlInfo_Pl2+iPlInfo_SingleWinCount]
@@ -7385,12 +7407,12 @@ Play_DrawCharIcons_Single:
 .unreachable_okS2PWin2:
 	ld   hl, $9C50
 	ld   c, $74
-	call CopyByteIfSingleFinalRound
+	call CopyByteIfNotSingleFinalRound
 	jp   .s1P_ret
 .noS2PWin2:
 	ld   hl, $9C50
 	ld   c, $75
-	call CopyByteIfSingleFinalRound
+	call CopyByteIfNotSingleFinalRound
 .s1P_ret:
 	jp   Play_DrawCharIcons_Ret
 	
@@ -7612,12 +7634,12 @@ IsInTeamMode:
 	scf		; C = 1
 	ret
 	
-; =============== CopyByteIfSingleFinalRound ===============
-; Copies the specified value to VRAM only if this is the final round.
+; =============== CopyByteIfNotSingleFinalRound ===============
+; Copies the specified value to VRAM only if this is *NOT* the final round.
 ; IN
 ; - C: Value to write
 ; - HL: Destination ptr to VRAM
-CopyByteIfSingleFinalRound:
+CopyByteIfNotSingleFinalRound:
 	; The check this uses is only applicable to Single mode.
 	ld   a, [wRoundNum]
 	cp   $03				; wRoundNum == 3? (4th round, the "final!!" round in single mode)
@@ -8381,7 +8403,7 @@ Play_LoadPreRoundTextAndIncRound:
 		; Load the sprite mapping
 		;
 		ld   hl, wOBJInfo3+iOBJInfo_Status
-		ld   de, OBJInfoInit_Play_PreRoundText
+		ld   de, OBJInfoInit_Play_RoundText
 		call OBJLstS_InitFrom
 	pop  af
 	ld   [MBC1RomBank], a
@@ -8665,8 +8687,8 @@ OBJInfoInit_Pl1:
 	db $00 ; iOBJInfo_YSub
 	db $00 ; iOBJInfo_SpeedX
 	db $00 ; iOBJInfo_SpeedXSub
-	db $00 ; iOBJInfo_Unknown_09
-	db $00 ; iOBJInfo_Unknown_0A
+	db $00 ; iOBJInfo_SpeedY
+	db $00 ; iOBJInfo_SpeedYSub
 	db $00 ; iOBJInfo_RelX (auto)
 	db $00 ; iOBJInfo_RelY (auto)
 	db $00 ; iOBJInfo_TileIDBase
@@ -8680,9 +8702,9 @@ OBJInfoInit_Pl1:
 	db LOW(OBJLstPtrTable_Terry_WinA) ; iOBJInfo_OBJLstPtrTbl_LowOld
 	db HIGH(OBJLstPtrTable_Terry_WinA) ; iOBJInfo_OBJLstPtrTbl_HighOld
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
-	db $00 ; iOBJInfo_OBJLstByte1 (auto)
-	db $00 ; iOBJInfo_OBJLstByte2 (auto)
-	db $00 ; iOBJInfo_Unknown_1A
+	db $00 ; iOBJInfo_ColiBoxId (auto)
+	db $00 ; iOBJInfo_HitboxId (auto)
+	db $00 ; iOBJInfo_ForceHitboxId
 	db $00 ; iOBJInfo_FrameLeft
 	db $00 ; iOBJInfo_FrameTotal
 	db LOW(wGFXBufInfo_Pl1) ; iOBJInfo_BufInfoPtr_Low
@@ -8698,8 +8720,8 @@ OBJInfoInit_Pl2:
 	db $00 ; iOBJInfo_YSub
 	db $00 ; iOBJInfo_SpeedX
 	db $00 ; iOBJInfo_SpeedXSub
-	db $00 ; iOBJInfo_Unknown_09
-	db $00 ; iOBJInfo_Unknown_0A
+	db $00 ; iOBJInfo_SpeedY
+	db $00 ; iOBJInfo_SpeedYSub
 	db $00 ; iOBJInfo_RelX (auto)
 	db $00 ; iOBJInfo_RelY (auto)
 	db $40 ; iOBJInfo_TileIDBase
@@ -8713,96 +8735,180 @@ OBJInfoInit_Pl2:
 	db LOW(L084000) ; iOBJInfo_OBJLstPtrTbl_LowOld
 	db HIGH(L084000) ; iOBJInfo_OBJLstPtrTbl_HighOld
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
-	db $00 ; iOBJInfo_OBJLstByte1 (auto)
-	db $00 ; iOBJInfo_OBJLstByte2 (auto)
-	db $00 ; iOBJInfo_Unknown_1A
+	db $00 ; iOBJInfo_ColiBoxId (auto)
+	db $00 ; iOBJInfo_HitboxId (auto)
+	db $00 ; iOBJInfo_ForceHitboxId
 	db $00 ; iOBJInfo_FrameLeft
 	db $00 ; iOBJInfo_FrameTotal
 	db LOW(wGFXBufInfo_Pl2) ; iOBJInfo_BufInfoPtr_Low
 	db HIGH(wGFXBufInfo_Pl2) ; iOBJInfo_BufInfoPtr_High
 	
-L002458:;I
+; =============== Play_DoPl_1P ===============
+; Task for handling Player 1.
+Play_DoPl_1P:
+	; Set unique stack pointer for 1P handler
 	ld   sp, $DE00
 	ei
+	; Set wPlInfo & wOBJInfo combination for 1P
 	ld   bc, wPlInfo_Pl1
-	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
-	jr   L00246E
-L002464:;I
+	ld   de, wOBJInfo_Pl1
+	jr   Play_DoPl
+	
+; =============== Play_DoPl_2P ===============
+; Task for handling Player 2.
+Play_DoPl_2P:
+	; Set unique stack pointer for 2P handler
 	ld   sp, $DF00
 	ei
+	; Set wPlInfo & wOBJInfo combination for 12P
 	ld   bc, wPlInfo_Pl2
-	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
-L00246E:;R
-	ld   a, $02
+	ld   de, wOBJInfo_Pl2
+	
+; =============== Play_DoPl ===============
+; Common task code for handling a player.
+; Mostly to run the move code.
+; IN
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+Play_DoPl:
+	ld   a, $02 ; BANK $02
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-L002475:;J
+.mainLoop:
+	; Preserve the parameters across calls, allowing this to be generic
 	push bc
-	push de
-	call L002482
-	pop  de
+		push de
+			call .go
+		pop  de
 	pop  bc
 	call Task_PassControlFar
-	jp   L002475
-L002482:;C
-	call L002D75
-	call L003A99
-	jp   c, L002497
-	call L002F1F
-	jp   c, L002494
-	call L002F4B
-L002494:;J
-	call L003CE7
-L002497:;J
+	jp   .mainLoop
+	
+.go:
+	; Create base inputs
+	call Play_Pl_CreateJoyKeysLH
+	; Apply opponent-induced effects (push speed, hitstop)
+	call Play_Pl_ChkHitStop				; Did we start a new move from here?
+	jp   c, .execMoveCode				; If so, jump
+	; Perform the special input reader check (character-specific)
+	call Play_Pl_ExecSpecMoveInputCode	; Did we start a new special/super?
+	jp   c, .chkHit						; If so, skip checking for normal movement
+	; Perform the standard input reader for basic moves
+	call Play_Pl_DoBasicMoveInput		; Check normal moves
+.chkHit:
+	call HomeCall_Play_Pl_DoHit			; Handle attacks that collided with us
+
+.execMoveCode:
+	;
+	; Execute the code for the currently set move.
+	; The move code primarily is used to perform actions when the move animation
+	; reaches a certain point. This can be anything from updating the player's movement speed,
+	; spawning a projectile, etc...
+	; Some moves also transition to a different move depending on the logic, sometimes at the beginning.
+	; This is how, for example, neutral jumps set by Play_Pl_DoBasicMoveInput can turn into forward jumps.
+	;
+	; The same move code can be reused for multiple moves across multiple characters,
+	; so labeling them can be tricky.
+	;
 	push de
-	ld   a, $03
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	ld   hl, $0026
-	add  hl, bc
-	ld   d, [hl]
-	inc  hl
-	ld   e, [hl]
-	push de
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	cp   $70
-	jp   nc, L0024BE
-	cp   $30
-	jp   nc, L0024C8
-	pop  de
-	ld   de, $7020
-	push de
-	jp   L0024CD
-L0024BE:;J
-	pop  de
-	ld   de, $7068
-	push de
-	sub  a, $70
-	jp   L0024CD
-L0024C8:;J
-	sub  a, $30
-	jp   L0024CD
-L0024CD:;J
-	ld   h, $00
-	ld   l, a
-	srl  a
-	add  a, l
-	ld   l, a
-	pop  de
-	add  hl, de
-	ld   e, [hl]
-	inc  hl
-	ld   d, [hl]
-	inc  hl
-	ld   a, [hl]
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	push de
-	pop  hl
-	pop  de
+	
+		; All of the move ptr tables are in BANK $03
+		ld   a, BANK(MoveCodePtrTbl_Shared_Base) ; BANK $03
+		ld   [MBC1RomBank], a
+		ldh  [hROMBank], a
+		
+		; Read out to DE the move pointer table for the current player.
+		; This will only be used for the character-specific moves (.grp01),
+		; as other groups will replace DE with an hardcoded value.
+		ld   hl, iPlInfo_MoveCodePtrTable_High
+		add  hl, bc		
+		ld   d, [hl]
+		inc  hl
+		ld   e, [hl]
+		push de
+		
+			;
+			; The move IDs are grouped in three different "ranges".
+			; 
+			; - Standard moves ($00-$2E)
+			;   (ie: idle, walking, crouch, win anims, ...)
+			;   These are shared with every character (every player uses the same move code).
+			; - Attacks ($30-$6E)
+			;   Both normals, specials and supers.
+			;   These are character-specific, but move codes may be reused between characters
+			;   for similar moves.
+			; - Attacked ($70-$98)
+			;   These are used when getting attacked (hit, thrown, ...)
+			;   Shared with every character.
+			;
+			; These groups vary across games on this engine.
+			; This grouping saves space and is new to 96 -- 95 had no such grouping, every move
+			; pointer table was character-specific and defined all of the moves.
+			;
+			ld   hl, iPlInfo_MoveId
+			add  hl, bc
+			ld   a, [hl]		; A = Move ID (*2)
+
+			cp   $70			; MoveId >= $70?
+			jp   nc, .grp02		; If so, jump
+			cp   $30			; MoveId >= $30?
+			jp   nc, .grp01		; If so, jump
+			
+		.grp00:
+		; Use fixed move table MoveCodePtrTbl_Shared_Base
+		pop  de				; Pop out useless value
+		ld   de, MoveCodePtrTbl_Shared_Base	; Set fixed ptr
+		push de				; Put it back in the stack
+			jp   .getMovePtr
+			
+		.grp02:
+		; Use fixed move table MoveCodePtrTbl_Shared_Hit
+		pop  de
+		ld   de, MoveCodePtrTbl_Shared_Hit
+		push de
+			; Subtract the base index for this group
+			sub  a, $70
+			jp   .getMovePtr
+		.grp01:
+			; Subtract the base index for this group
+			sub  a, $30
+			jp   .getMovePtr
+	.getMovePtr:
+			; Index the current move entry from the move ptr table.
+			; As each entry is 3 bytes long and move IDs are multiplied by 2 already
+			; (like character IDs), generate the table offset like this:
+			; DE = A + (A/2)
+			ld   h, $00		; HL = A
+			ld   l, a
+			srl  a			; L += A / 2
+			add  a, l
+			ld   l, a
+		pop  de
+		; Add the offset
+		add  hl, de
+		
+		; Read the table entry
+		
+		; DE = Move code ptr (bytes0-1)
+		ld   e, [hl]
+		inc  hl
+		ld   d, [hl]
+		inc  hl
+		; A = Bank number (byte2)
+		ld   a, [hl]
+		ld   [MBC1RomBank], a	; Switch bank
+		ldh  [hROMBank], a
+		push de
+		pop  hl					; Move ptr to HL
+	pop  de						; Restore ptr to wOBJInfo
+	
+	;
+	; Every move code (Move_*) uses these parameters:
+	; IN
+	; - BC: Ptr to wPlInfo structure
+	; - DE: Ptr to respective wOBJInfo structure
 	jp   hl
+	
 L0024E4:;C
 	ldh  a, [hROMBank]
 	push af
@@ -8837,40 +8943,61 @@ L002514:;J
 	ld   [hl], $A6
 L00251A:;J
 	ret
-L00251B:;C
+	
+; =============== OBJLstS_Overlap ===============
+; Moves an wBJInfo to exactly overlap another one.
+; This copies the coordinates and OBJLstFlags from the source (BC) to destination (DE).
+;
+; IN
+; - DE: Ptr to the wOBJInfo structure to be moved
+; - BC: Ptr to target wOBJInfo structure (the "other" one)
+OBJLstS_Overlap:
 	push bc
-	ld   hl, $0003
-	add  hl, bc
-	push hl
+		;
+		; Set up source and destination pointers
+		;
+		
+		; BC = Ptr to source iOBJInfo_X
+		ld   hl, iOBJInfo_X
+		add  hl, bc			; HL = BC + iOBJInfo_X
+		push hl
+		pop  bc				; Move back to BC
+		
+		; DE = Ptr to destination iOBJInfo_X
+		ld   hl, iOBJInfo_X
+		add  hl, de			; HL = DE + iOBJInfo_X
+		
+		;
+		; Copy the next 4 bytes over (iOBJInfo_X-iOBJInfo_YSub)
+		;
+REPT 4
+		ld   a, [bc]	; A = Source byte
+		inc  bc			; SrcPtr++
+		ldi  [hl], a	; Write to dest; DestPtr++
+ENDR
 	pop  bc
-	ld   hl, $0003
-	add  hl, de
-	ld   a, [bc]
-	inc  bc
-	ldi  [hl], a
-	ld   a, [bc]
-	inc  bc
-	ldi  [hl], a
-	ld   a, [bc]
-	inc  bc
-	ldi  [hl], a
-	ld   a, [bc]
-	inc  bc
-	ldi  [hl], a
-	pop  bc
-	ld   hl, $0001
+	
+	;
+	; Copy over the byte with sprite mapping flags
+	;
+	
+	; A = Source iOBJInfo_OBJLstFlags
+	ld   hl, iOBJInfo_OBJLstFlags
 	add  hl, bc
 	ld   a, [hl]
-	ld   hl, $0001
+	; HL = Ptr to dest iOBJInfo_OBJLstFlags
+	ld   hl, iOBJInfo_OBJLstFlags
 	add  hl, de
+	; Write it over
 	ld   [hl], a
 	ret
+	
 L00253E:;C
 	ld   a, $16
 	call HomeCall_Sound_ReqPlayExId
 	push bc
 	push de
-	ld   hl, $0050
+	ld   hl, iPlInfo_Pow
 	add  hl, bc
 	ld   a, [hl]
 	cp   $28
@@ -8911,11 +9038,11 @@ L002554:;J
 	ld   hl, $0027
 	add  hl, de
 	ld   [hl], $00
-	call L00251B
+	call OBJLstS_Overlap
 	ld   hl, $1000
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 	ld   hl, $F800
-	call L0034DD
+	call Play_OBJLstS_MoveV
 	pop  af
 	jp   nc, L0025A4
 	bit  1, a
@@ -8942,7 +9069,7 @@ L0025C1:;J
 	ld   [hl], $28
 	ld   hl, $0200
 L0025CA:;J
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	pop  de
 	pop  bc
 	ret
@@ -9020,21 +9147,21 @@ L00263B:;J
 	ld   [hl], $00
 	inc  hl
 	ld   [hl], $3C
-	call L00251B
+	call OBJLstS_Overlap
 	pop  af
 	cp   $10
 	jp   nz, L002665
 	ld   hl, $1000
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 	ld   hl, $F800
-	call L0034DD
+	call Play_OBJLstS_MoveV
 	jp   L002671
 L002665:;J
 	ld   hl, $1000
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 	ld   hl, $0005
 	add  hl, de
-	ld   [hl], $88
+	ld   [hl], PL_FLOOR_POS
 L002671:;J
 	pop  de
 	pop  bc
@@ -9044,7 +9171,7 @@ L002674:;C
 	call HomeCall_Sound_ReqPlayExId
 	push bc
 	push de
-	ld   hl, $0050
+	ld   hl, iPlInfo_Pow
 	add  hl, bc
 	ld   a, [hl]
 	cp   $28
@@ -9085,11 +9212,11 @@ L00268A:;J
 	ld   [hl], $00
 	inc  hl
 	ld   [hl], $00
-	call L00251B
+	call OBJLstS_Overlap
 	ld   hl, $1C00
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 	ld   hl, $FC00
-	call L0034DD
+	call Play_OBJLstS_MoveV
 	pop  af
 	jp   nc, L0026DA
 	bit  1, a
@@ -9107,7 +9234,7 @@ L0026E5:;J
 L0026EB:;J
 	ld   hl, $0500
 L0026EE:;J
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	pop  de
 	pop  bc
 	ret
@@ -9116,7 +9243,7 @@ L0026F4:;C
 	call HomeCall_Sound_ReqPlayExId
 	push bc
 	push de
-	ld   hl, $0050
+	ld   hl, iPlInfo_Pow
 	add  hl, bc
 	ld   a, [hl]
 	cp   $28
@@ -9151,7 +9278,7 @@ L00272D:;C
 	call HomeCall_Sound_ReqPlayExId
 	push bc
 	push de
-	ld   hl, $0050
+	ld   hl, iPlInfo_Pow
 	add  hl, bc
 	ld   a, [hl]
 	cp   $28
@@ -9194,11 +9321,11 @@ L002763:;J
 	ld   [hl], $00
 	inc  hl
 	ld   [hl], $00
-	call L00251B
+	call OBJLstS_Overlap
 	ld   hl, $1000
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 	ld   hl, $F800
-	call L0034DD
+	call Play_OBJLstS_MoveV
 	pop  af
 	jp   nc, L002793
 	bit  1, a
@@ -9216,7 +9343,7 @@ L00279E:;J
 L0027A4:;J
 	ld   hl, $0500
 L0027A7:;J
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	pop  de
 	pop  bc
 	ret
@@ -9225,7 +9352,7 @@ L0027AD:;C
 	call HomeCall_Sound_ReqPlayExId
 	push bc
 	push de
-	ld   hl, $0050
+	ld   hl, iPlInfo_Pow
 	add  hl, bc
 	ld   a, [hl]
 	cp   $28
@@ -9266,9 +9393,9 @@ L0027C3:;J
 	ld   hl, $0027
 	add  hl, de
 	ld   [hl], $00
-	call L00251B
+	call OBJLstS_Overlap
 	ld   hl, $0800
-	call L0034F7
+	call Play_OBJLstS_MoveH_ByXFlipR
 	pop  af
 	jp   nc, L00280D
 	bit  1, a
@@ -9286,7 +9413,7 @@ L002818:;J
 L00281E:;J
 	ld   hl, $0400
 L002821:;J
-	call L003569
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	pop  de
 	pop  bc
 	ret
@@ -9313,87 +9440,177 @@ L002842:;J
 	ld   [hl], a
 	pop  de
 	ret
-L002849:;C
+; =============== Pl_SetNewMove ===============
+; Shared code for updating the wPlInfo when starting a new move.
+; IN
+; - A: Move ID
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+Pl_SetNewMove:
 	push bc
-	push de
-	ld   hl, $0022
-	add  hl, bc
-	set  0, [hl]
-	ld   hl, $0033
-	add  hl, bc
-	ld   [hl], a
-	ld   hl, $0049
-	add  hl, bc
-	ld   [hl], $00
-	ld   hl, $0024
-	add  hl, bc
-	push hl
-	ld   hl, $0039
-	add  hl, bc
-	push hl
-	pop  bc
-	ld   hl, $0010
-	add  hl, de
-	push hl
-	pop  de
-	pop  hl
-	push de
-	push af
-	ld   a, $03
-	ld   [MBC1RomBank], a
-	pop  af
-	ld   d, [hl]
-	inc  hl
-	ld   e, [hl]
-	ld   h, $00
-	ld   l, a
-	add  hl, hl
-	add  hl, hl
-	add  hl, de
-	pop  de
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ldi  a, [hl]
-	ld   [bc], a
-	inc  bc
-	xor  a
-	ld   [de], a
-	inc  de
-	push hl
-	ld   hl, $0007
-	add  hl, de
-	push hl
-	pop  de
-	pop  hl
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ld   [de], a
-	xor  a
-	ld   [bc], a
-	inc  bc
-	ld   [bc], a
-	inc  bc
-	ld   [bc], a
-	inc  bc
-	ldi  a, [hl]
-	ld   [bc], a
-	inc  bc
-	ldi  a, [hl]
-	ld   [bc], a
-	inc  bc
-	ld   a, [hl]
-	ld   [bc], a
-	ldh  a, [hROMBank]
-	ld   [MBC1RomBank], a
-	pop  de
+		push de
+			; Set that we started a new move
+			ld   hl, iPlInfo_22Flags
+			add  hl, bc
+			set  PI22B_MOVESTART, [hl]
+			
+			; Set the new move ID
+			ld   hl, iPlInfo_MoveId
+			add  hl, bc
+			ld   [hl], a
+			
+			; Blank out iPlInfo_JoyMergedKeysLH because ??? in case other moves use MoveInputS_CheckPKTypeWithMergedLH for checking.
+			ld   hl, iPlInfo_JoyMergedKeysLH
+			add  hl, bc
+			ld   [hl], $00
+			
+			;
+			; Update the wOBJInfo fields depending on the move we selected.
+			;
+			; This will index iPlInfo_MoveAnimTblPtr by MoveId, and copy the valuses
+			; from there to the wOBJInfo and wPlInfo.
+			;
+			; Most importantly, the sprite mapping pointer gets updated among these.
+			;
+			
+			;--
+			;
+			; HL = Ptr to move animation table ptr
+			;
+			ld   hl, iPlInfo_MoveAnimTblPtr_High
+			add  hl, bc					
+			push hl	; Save HL
+			
+				;
+				; BC = Starting destination for wPlInfo fields
+				;
+				ld   hl, iPlInfo_39		
+				add  hl, bc				
+				push hl
+				pop  bc
+				
+				; DE = Starting destination for wOBJInfo fields
+				ld   hl, iOBJInfo_BankNum	
+				add  hl, de
+				push hl
+				pop  de
+			pop  hl
+			
+			push de ; Restore HL
+			
+				;
+				; Switch to BANK $03, as all move animation tables are stored there.
+				; [POI] Unsafe ROM bank switch, will break if VBLANK triggers here.
+				;
+				push af
+					ld   a, BANK(MoveAnimTbl_Marker) ; BANK $03
+					ld   [MBC1RomBank], a
+				pop  af
+			
+				;
+				; DE = Ptr to start of the move animation table for this player.
+				;
+				ld   d, [hl]	; D = iPlInfo_MoveAnimTblPtr_High
+				inc  hl
+				ld   e, [hl]	; E = iPlInfo_MoveAnimTblPtr_Low
+				
+				;
+				; Generate the offset to the table entry from the Move Id.
+				;
+				; Each entry in the table is 8 bytes long.
+				; Considering MoveId is already multiplied by 2 for easy indexing,
+				; this means we have to multiply it by 4.
+				;
+				ld   h, $00
+				ld   l, a		; HL = MoveId (*2)
+				add  hl, hl		; * 2
+				add  hl, hl		; * 2
+				
+				; HL = Ptr to table entry
+				add  hl, de		
+			pop  de
+			
+			; Copy the data over
+			
+			; byte0 -> iOBJInfo_BankNum
+			ldi  a, [hl]
+			ld   [de], a
+			inc  de
+			
+			; byte1 -> iOBJInfo_OBJLstPtrTbl_Low
+			ldi  a, [hl]
+			ld   [de], a
+			inc  de
+			
+			; byte2 -> iOBJInfo_OBJLstPtrTbl_High
+			ldi  a, [hl]
+			ld   [de], a
+			inc  de
+			
+			; byte3 -> iPlInfo_39
+			ldi  a, [hl]
+			ld   [bc], a	
+			inc  bc			; Seek to iPlInfo_MoveDamageVal
+			
+			; Always reset the animation from the beginning
+			xor  a
+			ld   [de], a	; iOBJInfo_OBJLstPtrTblOffset = 0
+			inc  de			; Seek to iOBJInfo_BankNumOld
+			
+			; Seek the wOBJInfo destination ptr (DE) to iOBJInfo_FrameLeft.
+			; As we're currently on iOBJInfo_BankNumOld...
+			push hl
+				ld   hl, iOBJInfo_FrameLeft-iOBJInfo_BankNumOld
+				add  hl, de		; HL = DE + 7
+				push hl
+				pop  de			; DE = HL
+			pop  hl
+			
+			
+			; Initialize animation speed
+			
+			; byte4 -> iOBJInfo_FrameLeft
+			ldi  a, [hl]
+			ld   [de], a
+			inc  de
+			
+			; byte4 -> iOBJInfo_FrameTotal
+			ld   [de], a
+			
+			
+			; Prepare the damage-related fields for the new move.
+			; While the graphics for the first anim frame load, prevent the existing move ("Old Set"),
+			; from dealing further damage to avoid visual inconsistencies.
+			
+			; Clear current damage fields
+			xor  a
+			ld   [bc], a	; iPlInfo_MoveDamageVal
+			inc  bc
+			ld   [bc], a	; iPlInfo_MoveDamageHitAnimId
+			inc  bc
+			ld   [bc], a	; iPlInfo_MoveDamageFlags3
+			inc  bc
+			
+			; Set pending damage fields
+	
+			; byte5 -> iPlInfo_MoveDamageValNext
+			ldi  a, [hl]
+			ld   [bc], a
+			inc  bc
+			
+			; byte5 -> iPlInfo_MoveDamageHitAnimIdNext
+			ldi  a, [hl]
+			ld   [bc], a
+			inc  bc
+			
+			; byte5 -> iPlInfo_MoveDamageFlags3Next
+			ld   a, [hl]
+			ld   [bc], a
+			
+			; Restore original ROM bank
+			ldh  a, [hROMBank]
+			ld   [MBC1RomBank], a
+		pop  de
 	pop  bc
 	ret
 L0028B2:;C
@@ -9536,15 +9753,19 @@ L00294D: db $10;X
 L00294E: db $D1;X
 L00294F: db $C1;X
 L002950: db $C9;X
-L002951:;JC
-	xor  a
-	ld   hl, $0000
-	add  hl, de
-	ld   [hl], a
+; =============== OBJLstS_Hide ===============
+; Hides/disables the specified sprite mapping.
+; IN
+; - DE: Ptr to wOBJInfo
+OBJLstS_Hide:
+	xor  a			
+	ld   hl, iOBJInfo_Status
+	add  hl, de		; Seek to status flags
+	ld   [hl], a	; Erase them to hide the sprite mapping
 	ret
 L002958:;I
 	call L00347B
-	call L002D8C
+	call Play_Pl_CreateJoyMergedKeysLH
 	call L0038B3
 	jp   c, L002B90
 	ld   hl, $0017
@@ -9557,7 +9778,7 @@ L002958:;I
 	ld   hl, $0005
 	add  hl, de
 	ld   a, [hl]
-	cp   $88
+	cp   PL_FLOOR_POS
 	jr   z, L0029C0
 	ld   hl, $0049
 	add  hl, bc
@@ -9648,26 +9869,26 @@ L0029F4:;J
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
 	ld   a, $46
-	call L003444
+	call Pl_Unk_SetNewMoveAndAnim
 	jp   L002B66
 L002A01:;J
-	call L002D9F
+	call Play_Pl_AreBothBtnHeld
 	jp   c, L0029F4
 	ld   a, $08
 	call HomeCall_Sound_ReqPlayExId
 	ld   a, $42
-	call L003444
+	call Pl_Unk_SetNewMoveAndAnim
 	jp   L002B66
 L002A14:;J
-	call L002D9F
+	call Play_Pl_AreBothBtnHeld
 	jp   c, L0029F4
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
 	ld   a, $44
-	call L003444
+	call Pl_Unk_SetNewMoveAndAnim
 	jp   L002B66
 L002A27:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L002B8D
 	inc  hl
 	ld   [hl], $FF
@@ -9688,22 +9909,22 @@ L002A33:;J
 	jr   nz, L002A97
 	jp   L002B09
 L002A51:;R
-	ld   hl, $0083
+	ld   hl, iPlInfo_RunningJump
 	add  hl, bc
 	ld   a, [hl]
 	or   a
 	jp   nz, L002A6B
-	ld   hl, $3EEB
-	call L002CA8
+	ld   hl, MoveInput_DU_Fast
+	call MoveInputS_ChkInputDir
 	jp   c, L002A6B
-	ld   hl, $0065
-	call L002B91
+	ld   hl, iPlInfo_SpeedX
+	call Pl_GetWord
 	jr   L002A7A
 L002A6B:;J
 	ld   a, $9C
 	call HomeCall_Sound_ReqPlayExId
-	ld   hl, $0065
-	call L002B91
+	ld   hl, iPlInfo_SpeedX
+	call Pl_GetWord
 	sla  l
 	rl   h
 L002A7A:;R
@@ -9717,7 +9938,7 @@ L002A7A:;R
 	jp   nz, L002A85
 	inc  h
 L002A85:;J
-	call L0035A1
+	call Play_OBJLstS_SetSpeedH
 	ld   a, $0E
 	ld   hl, $0001
 	add  hl, de
@@ -9726,26 +9947,26 @@ L002A85:;J
 	ld   a, $0C
 	jp   L002ACF
 L002A97:;R
-	ld   hl, $0083
+	ld   hl, iPlInfo_RunningJump
 	add  hl, bc
 	ld   a, [hl]
 	or   a
 	jp   nz, L002AB1
-	ld   hl, $3EEB
-	call L002CA8
+	ld   hl, MoveInput_DU_Fast
+	call MoveInputS_ChkInputDir
 	jp   c, L002AB1
-	ld   hl, $0065
-	call L002B91
+	ld   hl, iPlInfo_SpeedX
+	call Pl_GetWord
 	jr   L002AC0
 L002AB1:;J
 	ld   a, $9C
 	call HomeCall_Sound_ReqPlayExId
-	ld   hl, $0065
-	call L002B91
+	ld   hl, iPlInfo_SpeedX
+	call Pl_GetWord
 	sla  l
 	rl   h
 L002AC0:;R
-	call L0035A1
+	call Play_OBJLstS_SetSpeedH
 	ld   a, $0C
 	ld   hl, $0001
 	add  hl, de
@@ -9799,11 +10020,11 @@ L002ACF:;JR
 	ld   [MBC1RomBank], a
 	pop  de
 L002B09:;J
-	ld   hl, $0045
+	ld   hl, iPlInfo_JoyKeys
 	add  hl, bc
 	ld   a, [hl]
 	ld   hl, $0069
-	call L002B91
+	call Pl_GetWord
 	bit  2, a
 	jr   nz, L002B25
 	sra  h
@@ -9816,7 +10037,7 @@ L002B09:;J
 	add  hl, de
 	pop  de
 L002B25:;R
-	call L0035AD
+	call Play_OBJLstS_SetSpeedV
 	jp   L002B66
 L002B2B:;J
 	ld   a, $F9
@@ -9849,7 +10070,7 @@ L002B5D:;J
 	jp   L002B90
 L002B66:;J
 	ld   hl, $006B
-	call L002B91
+	call Pl_GetWord
 	call L003614
 	jp   nc, L002B8D
 	ld   hl, $0021
@@ -9860,23 +10081,31 @@ L002B66:;J
 	call L002DEC
 	jp   L002B90
 L002B82:;J
-	call L002DD9
+	call OBJLstS_IsFrameEnd
 	jp   nc, L002B8D
 	call L002EA2
 	jr   L002B90
 L002B8D:;J
-	jp   L002F0B
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L002B90:;JR
 	ret
-L002B91:;C
-	push de
-	add  hl, bc
-	ld   d, [hl]
-	inc  hl
-	ld   e, [hl]
-	push de
-	pop  hl
-	pop  de
+	
+; =============== Pl_GetWord ===============
+; Reads out a word value from the player struct.
+; IN
+; - BC: Ptr to wPlInfo structure
+; - HL: Index to 16bit number field (ie: iPlInfo_BackSpeedX)
+; OUT
+; - HL: Indexed value
+Pl_GetWord:
+	push de				; Save OBJInfo ptr
+		add  hl, bc		; Seek to the iPlInfo field
+		ld   d, [hl]	; Read out word value to DE
+		inc  hl
+		ld   e, [hl]
+		push de			; Move it to HL
+		pop  hl			
+	pop  de				; Restore OBJInfo ptr
 	ret
 L002B9A:;C
 	ld   hl, $002C
@@ -9895,7 +10124,7 @@ L002BAC:;J
 	jp   z, L002BE2
 	bit  7, a
 	jp   nz, L002BCE
-	ld   hl, $0045
+	ld   hl, iPlInfo_JoyKeys
 	add  hl, bc
 	bit  0, [hl]
 	jp   z, L002BE2
@@ -9905,7 +10134,7 @@ L002BAC:;J
 	res  1, [hl]
 	jp   L002BE5
 L002BCE:;J
-	ld   hl, $0045
+	ld   hl, iPlInfo_JoyKeys
 	add  hl, bc
 	bit  1, [hl]
 	jp   z, L002BE2
@@ -9929,413 +10158,889 @@ L002BF3:;J
 	res  5, [hl]
 L002BF5:;J
 	ld   a, $0A
-	call L00341B
+	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
 	scf
 	ret
-L002BFC:;C
+; =============== Play_ExecExOBJCode ===============
+; Executes the custom code for the four extra sprite mappings at slots 2-6.
+; These are for the two projectiles and sparkle effects on super moves.
+Play_ExecExOBJCode:
+	; The bank num will jump all over the place when doing this
 	ldh  a, [hROMBank]
 	push af
-	ld   bc, wPlInfo_Pl1
-	ld   de, wOBJInfo2+iOBJInfo_Status
-	ld   a, $04
-L002C07:;J
-	push af
-	ld   a, [de]
-	and  a, $80
-	jp   z, L002C22
-	xor  a
-	ld   hl, $0021
-	add  hl, de
-	push bc
-	ld   c, [hl]
-	inc  hl
-	ld   b, [hl]
-	push bc
-	pop  hl
-	pop  bc
-	or   a, L
-	jp   nz, L002C3A
-	or   a, h
-	jp   nz, L002C3A
-L002C22:;J
-	ld   hl, $0040
-	add  hl, de
-	push hl
-	pop  de
-	ld   hl, $0100
-	add  hl, bc
-	push hl
-	pop  bc
-	pop  af
-	dec  a
-	jp   nz, L002C07
+		
+		ld   bc, wPlInfo_Pl1							; BC = Ptr to starting player
+		ld   de, wOBJInfo_Pl1Projectile+iOBJInfo_Status	; DE = Ptr to respective OBJInfo
+		ld   a, $04										; A = Number of loops
+	.loop:
+		push af
+			; If the sprite mapping isn't visible, ignore this
+			ld   a, [de]		; Seek to status
+			and  a, OST_VISIBLE	; Is the visibility flag set?
+			jp   z, .nextObj	; If not, skip
+		.ok:
+			; Read out the code pointer.
+			; All of these expect the code pointer to be at the same location.
+			ASSERT(iOBJInfo_Proj_CodePtr_Low == iOBJInfo_SuperSparkle_CodePtr_Low)
+			
+			xor  a
+			; Read out ptr to HL
+			ld   hl, iOBJInfo_Proj_CodePtr_Low	
+			add  hl, de			; Seek to code ptr
+			push bc
+				ld   c, [hl]	; C = iOBJInfo_Proj_CodePtr_Low 
+				inc  hl
+				ld   b, [hl]	; B = iOBJInfo_Proj_CodePtr_High
+				push bc
+				pop  hl			; Move to HL
+			pop  bc
+			; Execute it if isn't null
+			or   a, l			; Low byte != 0?
+			jp   nz, .exec		; If so, execute it
+			or   a, h			; High byte != 0?
+			jp   nz, .exec		; If so, execute it
+			; Otherwise, it's a null pointer.
+			; Ignore it and move on.
+			
+		.nextObj:
+			; Seek to the next OBJInfo
+			; DE += OBJINFO_SIZE
+			ld   hl, OBJINFO_SIZE
+			add  hl, de
+			push hl
+			pop  de
+			; Seek to the next PlInfo.
+			; BC += PLINFO_SIZE
+			; Note this makes the wPlInfo ptr go out of range when moving to wOBJInfo_Pl1SuperSparkle (into a nonexisting wPlInfo_Pl3 at $DB00).
+			; The code that gets executed for the super sparkle offsets it anyway to seek back to the actual wPlInfo
+			; associated with the sparkle.
+			ld   hl, PLINFO_SIZE
+			add  hl, bc
+			push hl
+			pop  bc
+			
+		pop  af			; Restore left count
+		dec  a			; Processed all OBJInfo?
+		jp   nz, .loop	; If not, loop
+.end:
+	; Restore bank num
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-L002C3A:;J
+	.exec:
+		push bc			; Save wPlInfo
+			push de		; Save wOBJInfo
+				call .farJump
+			pop  de
+		pop  bc
+		jp   .nextObj
+; =============== .farJump ===============
+; Jumps to the specified code at bank iOBJInfo_Proj_CodeBank
+; IN
+; - HL: Code ptr
+; - DE: Ptr to wOBJInfo
+.farJump:
+	push hl		; Save code ptr
+		ld   hl, iOBJInfo_Proj_CodeBank
+		add  hl, de		; Seek to bank num
+		ld   a, [hl]	; Set it as current one
+		ld   [MBC1RomBank], a
+		ldh  [hROMBank], a
+	pop  hl		; Restore code ptr
+	jp   hl		; Execute it
+	ret ; We never get here
+	
+; =============== MoveInputS_ChkInputBtnStrict ===============
+; Handler for button input reading that provides no leeway.
+; (ie: unlike MoveInputS_ChkInputDir, blank inputs in the buffer aren't skipped)
+; See also: MoveInputS_ChkInputDir
+; IN
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+; - HL: Ptr to button move input list. (MoveInput_*)
+; OUT
+; - C flag: If set, the move input was triggered
+MoveInputS_ChkInputBtnStrict:
 	push bc
-	push de
-	call L002C44
-	pop  de
+		push de
+			push hl
+				; A = Button Buffer Offset ($00-$0F)
+				ld   hl, iPlInfo_JoyBtnBufferOffset
+				add  hl, bc
+				ld   a, [hl]
+				
+				; HL = Ptr to start of Button Buffer
+				ld   hl, iPlInfo_JoyBtnBuffer
+				add  hl, bc
+				
+				; Offset it by OR'ing the low nybble over
+				or   a, l
+				ld   l, a
+				
+				jp   MoveInputS_ChkInputStrict
+				
+; =============== MoveInputS_ChkInputDirStrict ===============
+; Alternate handler for d-pad input reading that provides no leeway.
+; (ie: unlike MoveInputS_ChkInputDir, blank inputs in the buffer aren't skipped)
+; See also: MoveInputS_ChkInputDir
+; IN
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+; - HL: Ptr to d-pad move input list. (MoveInput_*)
+; OUT
+; - C flag: If set, the move input was triggered
+MoveInputS_ChkInputDirStrict:
+	push bc
+		push de
+			push hl
+				; A = D-Pad Buffer Offset ($00-$0F)
+				ld   hl, iPlInfo_JoyDirBufferOffset
+				add  hl, bc
+				ld   a, [hl]
+				
+				; HL = Ptr to start of D-Pad Buffer
+				ld   hl, iPlInfo_JoyDirBuffer
+				add  hl, bc
+				; Offset it by OR'ing the low nybble over
+				or   a, l
+				ld   l, a
+				;--
+				; Fall-through
+				
+; =============== MoveInputS_ChkInputStrict ===============				
+; IN
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+; - HL: Ptr to d-pad move input list. (MoveInput_*)
+; OUT
+; - C flag: If set, the move input was triggered
+MoveInputS_ChkInputStrict:
+				; Save result to DE
+				push hl
+				pop  de
+			pop  hl
+			
+			;
+			; B = Number of separate inputs (iMoveInputItem_*) to check 
+			;
+			ldi  a, [hl]
+			ld   b, a		; B = iMoveInput_Length
+			
+			; As there's no skipping of blank inputs, the loop is much simpler
+			; and doesn't attempt to detect if we ran out of input buffer.
+		.chkKeyVal:
+			;
+			; KEY CHECK
+			;
+			; The input in the current buffer entry must match the one from the move
+			ld   a, [de]	; A = Held d-pad keys (KeyValue)
+			ld   c, [hl]	; C = Required d-pad keys (iMoveInputItem_JoyKeys)
+			inc  hl
+			and  a, [hl]	; A = A & iMoveInputItem_JoyMaskKeys
+			
+			; Check for an exact match between filtered input and required keypress
+			cp   a, c		; A == C?
+			jp   nz, .retNg
+			
+		.chkKeyLen:
+			;
+			; HELD TIMER CHECK
+			;
+			; The input must be held for a range of frames
+			inc  de			; Seek to buffer KeyTimer
+			ld   a, [de]	; A = KeyTimer
+			
+			; KeyTimer must be >= MinLength
+			inc  hl			; Seek to iMoveInputItem_MinLength
+			cp   a, [hl]	; KeyTimer < iMoveInputItem_MinLength?
+			jp   c, .retNg	; If so, return
+			
+			; KeyTimer must be <= MaxLength
+			inc  hl			; Seek to iMoveInputItem_MaxLength
+			cp   a, [hl]	
+			jp   z, .chkEnd	; KeyTimer == iMoveInput_MaxKeyLen? If so, continue
+			jp   nc, .retNg	; KeyTimer >= iMoveInput_MaxKeyLen? If so, return
+				
+		.chkEnd:
+			;
+			; Check if this is the end of the move input.
+			; If it isn't, prepare to check for the next input
+			; by seeking to the next iMoveInputItem and to the previous buffer entry.
+			;
+			
+			; Seek to iMoveInputItem_JoyKeys of the next MoveInputItem
+			inc  hl
+			
+			; Seek back to the previous buffer entry.
+			; As each entry is 2 bytes long, decrement the buffer ptr (DE) by 2 + 1 
+			; (as we're currently on the second byte of the current entry)
+			; and making sure to wrap the offset from $00 to $0E if needed.
+			ld   a, e
+			dec  a		; DE -= 3
+			dec  a
+			dec  a
+			; Force valid range, wrapping back from $00 to $0E if needed
+			and  a, $0F
+			
+			; Apply the new offset to DE.
+			push af
+				; Get rid of low nybble in E
+				ld   a, $F0	; E |= $F0
+				and  a, e
+				ld   e, a
+			pop  af
+			; And merge the new nybble over.
+			or   a, e
+			ld   e, a
+			;--
+			; DE now points at the start of the previous entry
+			
+			dec  b				; Did we process all iMoveInputItem?
+			jp   nz, .chkKeyVal	; If not, loop
+			
+		.retOk:
+			scf	; Set carry
+		pop  de
 	pop  bc
-	jp   L002C22
-L002C44:;C
+	ret
+		.retNg:
+			xor  a ; Clear carry
+		pop  de
+	pop  bc
+	ret
+	
+; =============== MoveInputS_ChkInputDir ===============
+; Checks if the directional keys for a move input were pressed correctly in order.
+; Most moves use this subroutine to check for d-pad input.
+;
+; This boils down to checking a list of inputs in order.
+;
+; The input lists in ROM are stored in backwards order (from last to first input), which simplifies the handling 
+; of the joypad buffer -- as we can directly start checking from the latest buffer entry and move down from there.
+;
+; Each input "item" checks:
+; - If the required keys were held
+; - How long they were held (must be between the checked range)
+;
+; Blank inputs in the buffer are skipped if they last less than a certain value.
+;
+; NOTE: The MoveInput* structs have the keys relative to a player facing left (on the 2P side).
+;       On the 1P side, the inputs are flipped as needed before writing them to iPlInfo_JoyDirBuffer.
+;
+; IN
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+; - HL: Ptr to d-pad move input list. (MoveInput_*)
+; OUT
+; - C flag: If set, the move input was triggered
+MoveInputS_ChkInputDir:
+	push bc
+		push de
+		
+			;
+			; DE = Ptr to current D-Pad buffer offset entry
+			;
+			push hl
+				; A = D-Pad Buffer Offset ($00-$0F)
+				ld   hl, iPlInfo_JoyDirBufferOffset
+				add  hl, bc
+				ld   a, [hl]
+				
+				; HL = Ptr to start of D-Pad Buffer
+				ld   hl, iPlInfo_JoyDirBuffer
+				add  hl, bc
+				; Offset it by OR'ing the low nybble over
+				or   a, l
+				ld   l, a
+				; Save result to DE
+				push hl
+				pop  de
+			pop  hl
+			
+			;
+			; B = Number of separate inputs (iMoveInputItem_*) to check 
+			;
+			ldi  a, [hl]
+			ld   b, a
+			
+			;
+			; Keep a count of the remaining buffer size before we "underflow"
+			; from the 8th (earliest) entry to the 1st one (lestest).
+			;
+			; This value can decrease when checking for moves that require
+			; a sequence of inputs (ie: DP motion) or when ignoring a bad input.
+			; If this reaches 0 and the move isn't complete, we return immediately
+			; and the move won't start.
+			;
+			
+			; [BUG] This value is intended to decrement twice every time we seek back to the previous iPlInfo_JoyDirBuffer entry.
+			;       It should keep a count of the remaining buffer size to avoid looping multiple times.
+			;		Problem is, most of the time this is decremented *once*.
+			ld   c, $10			; Size of buffer
+			
+			;--
+			;
+			; GET LATEST INPUT
+			;
+			; This rule (or its minor variation at .tryUseKeyNext) is used to determine the initial buffer entry to use.
+			; The latest possible iPlInfo_JoyDirBuffer entry is used, unless no keys were pressed.
+			; If no keys were pressed for more than $0E frames, we return immediately, otherwise
+			; we use the previous buffer entry.
+			;
+			; The variation in .tryUseKeyNext, used for inputs checked after this one, instead returns when no keys
+			; are pressed for more than $04 frames.
+			;
+		.tryUseLatestKey:
+			; Attempt to use the latest D-Pad entry if present.
+			ld   a, [de]		; A = Held d-pad keys
+			or   a				; Were any keys held?
+			jp   nz, .chkKeyValInitial	; If so, skip
+			
+			; If we didn't press any keys on the d-pad for $0F frames or more, return.
+			inc  de				; Seek to key length
+			ld   a, [de]		; A = Key length
+			cp   $0F			; A >= $0F?
+			jp   nc, .retNg		; If so, return
+			
+			; Otherwise, seek back to the previous buffer entry.
+			; As each entry is 2 bytes long, this requires:
+			; - Decreasing the bytes left (C) by 2
+			; - Decreasing the buffer ptr (DE) by 2 + 1 (as we're currently on the second byte of the current entry)
+			;   and making sure to wrap the offset from $00 to $0E if needed.
+			
+			; This is the only time C is decremented correctly.
+			; Even then, there's one "dec c" at the start and one at the end.
+			
+			dec  c				; Decrease buffer size remaining (1/2)
+			; Decrease buffer offset by 3
+			ld   a, e			; A = Key offset
+			dec  a				; -= 1, seek back to first byte of current entry
+			dec  a				; -= 2, seek to the start of the previous entry
+			dec  a				
+			; Force valid range, wrapping back from $00 to $0E if needed
+			and  a, $0F			
+			
+			; Apply the new offset to DE, the d-pad buffer ptr.
+			; This replaces the low nybble of E with the value currently in A,
+			; which works due to the buffer size ($10 bytes) and its alignment.
+			push af
+				; Get rid of low nybble in E
+				ld   a, $F0	; E |= $F0
+				and  a, e
+				ld   e, a
+			pop  af
+			; And merge the new nybble over.
+			or   a, e
+			ld   e, a
+			
+			; A = Buffer entry from previous frame
+			ld   a, [de]
+			dec  c				; Decrease buffer size remaining (2/2)
+			;--
+			
+		.chkKeyValInitial:
+		
+			;
+			; KEY CHECK (INITIAL)
+			;
+			; This initial input check verifies if the input from the buffer matches the last d-pad input for the move,
+			; therefore checking the first KEY_* bitmask in the MoveInput_* data.
+			;
+			; A very similar check is used in .chkKeyValNext for the other inputs.
+			;
+		
+			push bc
+				; C = Required d-pad keys
+				ld   c, [hl]	; C = iMoveInputItem_JoyKeys
+				inc  hl
+				
+				;
+				; Filter away inputs excluded from the check.
+				; The second byte ("include filter") dictates which inputs from the buffer can be compared
+				; with the required keys.
+				;
+				; [POI] In 96, this is almost always the same as the required keypress,
+				;       meaning it's equivalent of doing "and c".
+				;       This allows fat-fingering half/quarter-circles, since you don't have to 
+				;       press the exact key (ie: RIGHT can be successfully input by DOWN+RIGHT).
+				;       But it wasn't always the case! In 95, the code for this is identical,
+				;       but the filter wouldn't remove all of the extra keypresses.
+				;       This meant that, usually, if the game required pressing RIGHT, it wouldn't
+				;       accept DOWN+RIGHT, making them trickier to perform.
+				;
+				and  a, [hl]	; A = A & iMoveInputItem_JoyMaskKeys
+				
+				; Check for an exact match between filtered input and required keypress
+				cp   a, c		; A == C?
+			pop  bc
+			jp   z, .chkKeyLen		; If so, jump
+			
+			; Unlike .chkKeyValNext, if the last input isn't correct, return immediately.
+			jp   .retNg
+			
+		.tryUseKeyNext:
+			;
+			; GET NEXT INPUT
+			;
+			; See also .tryUseLatestKey
+			
+			; Attempt to use the current D-Pad entry if there's something here.
+			; (as we've just decremented it)
+			ld   a, [de]
+			or   a
+			jp   nz, .chkKeyValNext
+			
+			;--
+			
+			; If we didn't press any keys on the d-pad for *$05* frames or more, return.
+			inc  de
+			ld   a, [de]
+			cp   $05
+			jp   nc, .retNg
+			
+			; If we ran out of buffer, return
+			dec  c				; [BUG] Should be "dec c" twice
+			jp   z, .retNg
+			
+			; Otherwise, seek back to the previous buffer entry.
+			; Decrease buffer offset by 3
+			ld   a, e
+			dec  a
+			dec  a
+			dec  a
+			; Force valid range, wrapping back from $00 to $0E if needed
+			and  a, $0F
+			
+			; Replace low nybble of DE with it
+			push af
+				; Get rid of low nybble in E
+				ld   a, $F0	; E |= $F0
+				and  a, e
+				ld   e, a
+			pop  af
+			or   a, e	; Merge the new nybble over.
+			ld   e, a
+			;--
+			; DE now points at the start of the previous entry
+			
+			jp   .tryUseKeyNext
+			
+		.chkKeyValNext:
+			;
+			; KEY CHECK (NEXT)
+			;
+			; This verifies if the input (KeyValue) from the buffer matches the d-pad input for the move.
+			; The difference here compared to .chkKeyValInitial is that, if the input doesn't match,
+			; the previous buffer entry is always checked, until the buffer runs out.
+			;
+			; See also: .chkKeyValInitial
+			
+			push bc
+				; C = Required d-pad keys
+				ld   c, [hl]	; C = iMoveInputItem_JoyKeys
+				inc  hl			; Seek to iMoveInputItem_JoyMaskKeys (byte1)
+				
+				; Filter away inputs excluded from the check.
+				; [POI] Same note applies here.
+				and  a, [hl]	; A = A & iMoveInputItem_JoyMaskKeys
+				
+				; Check for an exact match between filtered input and required keypress
+				cp   a, c		; A == C?
+			pop  bc
+			jp   z, .chkKeyLen	; If so, jump
+			
+			;--
+			;
+			; Otherwise, decrease the buffer offset by 2, and move back the
+			; iMoveInfo offset to the start of the entry.
+			; See also: .chkEnd
+			;
+			
+			dec  hl				; Seek back to iMoveInputItem_JoyKeys (byte0)
+			dec  c				; [BUG] Should be "dec c" twice
+			jp   z, .retNg
+			
+			; Seek to previous input buffer entry.
+			; As we're currently on the first byte of the current entry, decrease it by 2.
+			ld   a, e
+			dec  a
+			dec  a
+			; Force valid range, wrapping back from $00 to $0E if needed
+			and  a, $0F
+			
+			; Replace low nybble of DE with it
+			push af
+				; Get rid of low nybble in E
+				ld   a, $F0	; E |= $F0
+				and  a, e
+				ld   e, a
+			pop  af
+			or   a, e	; Merge the new nybble over.
+			ld   e, a
+			;--
+			
+			jp   .tryUseKeyNext
+		.chkKeyLen:
+			
+			;
+			; HELD TIMER CHECK
+			;
+			; Each input in a move can be held for a specific range of frames.
+			; If it's outside this range, return.
+			;
+			; Note that moves tend to have the initial input (meaning the last one we check)
+			; with the upper limit set as $FF.
+			; This means that, assuming the move starts by pressing RIGHT, we could hold that
+			; button for an indefinite amount of time before continuing with the input.
+			;
+			inc  de			; Seek to buffer KeyTimer
+			ld   a, [de]	; A = KeyTimer
+			
+			; KeyTimer must be >= MinLength
+			inc  hl			; Seek to iMoveInputItem_MinLength
+			cp   a, [hl]	; KeyTimer < iMoveInputItem_MinLength?
+			jp   c, .retNg	; If so, return
+			
+			; KeyTimer must be <= MaxLength
+			inc  hl			; Seek to iMoveInputItem_MaxLength
+			cp   a, [hl]	
+			jp   z, .chkEnd	; KeyTimer == iMoveInput_MaxKeyLen? If so, continue
+			jp   nc, .retNg	; KeyTimer >= iMoveInput_MaxKeyLen? If so, return
+							
+		.chkEnd:
+			
+			;
+			; Check if this is the end of the input.
+			; Like last time, seek from the current entry to the previous one while
+			; we're currently on the second byte of the entry (requiring to seek back 3 bytes).
+			;
+			; For reference, the first time we get here, the current buffer entry may point
+			; to the latest one.
+			;
+		
+			; Seek to iMoveInputItem_JoyKeys of the next MoveInputItem
+			inc  hl			
+			
+			
+			; Seek back to the previous buffer entry, exactly like last time
+			dec  c			; [BUG] Should be "dec c" twice
+			jp   z, .retNg	; End of buffer? If so, return
+			
+			; Seek to previous input buffer entry.
+			ld   a, e
+			dec  a		; A = E - 3
+			dec  a
+			dec  a
+			; Force valid range, wrapping back from $00 to $0E if needed
+			and  a, $0F
+			
+			; Replace low nybble of DE with it
+			push af
+				; Get rid of low nybble in E
+				ld   a, $F0	; E |= $F0
+				and  a, e
+				ld   e, a
+			pop  af
+			or   a, e	; Merge the new nybble over.
+			ld   e, a
+			;--
+			; DE now points at the start of the previous entry
+			
+			dec  b					; Did we process all iMoveInputItem?
+			jp   nz, .tryUseKeyNext	; If not, loop
+		.retOk:
+			scf ; Set carry
+		pop  de
+	pop  bc
+	ret
+		.retNg:
+			xor  a ; Clear carry
+		pop  de
+	pop  bc
+	ret
+	
+; =============== Play_Pl_ClearJoyDirBuffer ===============
+; Clears the d-pad input buffer for the specified player.
+; Meant to be used after successfully completing a move input.
+; IN
+; - BC: Ptr to wPlInfo structure
+Play_Pl_ClearJoyDirBuffer:
 	push hl
-	ld   hl, $0020
-	add  hl, de
-	ld   a, [hl]
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
+		push bc
+			; Fill the $10 bytes of iPlInfo_JoyDirBuffer with $00
+			xor  a			; A = Overwrite with
+			ld   hl, iPlInfo_JoyDirBuffer
+			add  hl, bc		; Seek to d-pad buffer
+			ld   b, $10		; B = Bytes to clear
+		.loop:
+			ldi  [hl], a	; Write
+			dec  b			; Finished filling it?
+			jp   nz, .loop	; If not, loop
+		pop  bc
 	pop  hl
-	jp   hl
-L002C51: db $C9;X
-L002C52:;C
-	push bc
-	push de
-	push hl
-	ld   hl, $004D
-	add  hl, bc
-	ld   a, [hl]
-	ld   hl, $0000
-	add  hl, bc
-	or   a, L
-	ld   l, a
-	jp   L002C71
-L002C63:;C
-	push bc
-	push de
-	push hl
-	ld   hl, $004C
-	add  hl, bc
-	ld   a, [hl]
-	ld   hl, $0010
-	add  hl, bc
-	or   a, L
-	ld   l, a
-L002C71:;J
-	push hl
-	pop  de
-	pop  hl
-	ldi  a, [hl]
-	ld   b, a
-L002C76:;J
-	ld   a, [de]
-	ld   c, [hl]
-	inc  hl
-	and  a, [hl]
-	cp   a, c
-	jp   nz, L002CA4
-	inc  de
-	ld   a, [de]
-	inc  hl
-	cp   a, [hl]
-	jp   c, L002CA4
-	inc  hl
-	cp   a, [hl]
-	jp   z, L002C8D
-	jp   nc, L002CA4
-L002C8D:;J
-	inc  hl
-	ld   a, e
-	dec  a
-	dec  a
-	dec  a
-	and  a, $0F
-	push af
-	ld   a, $F0
-	and  a, e
-	ld   e, a
-	pop  af
-	or   a, e
-	ld   e, a
-	dec  b
-	jp   nz, L002C76
-	scf
-	pop  de
-	pop  bc
 	ret
-L002CA4:;J
-	xor  a
-	pop  de
-	pop  bc
-	ret
-L002CA8:;C
-	push bc
-	push de
+	
+; =============== Play_Pl_ClearJoyBtnBuffer ===============
+; Clears the button input buffer for the specified player.
+; Meant to be used after successfully completing a move input that uses MoveInputS_ChkInputBtnStrict.
+; (so, not many)
+; IN
+; - BC: Ptr to wPlInfo structure
+Play_Pl_ClearJoyBtnBuffer:
 	push hl
-	ld   hl, $004C
-	add  hl, bc
-	ld   a, [hl]
-	ld   hl, $0010
-	add  hl, bc
-	or   a, L
-	ld   l, a
-	push hl
-	pop  de
-	pop  hl
-	ldi  a, [hl]
-	ld   b, a
-	ld   c, $10
-	ld   a, [de]
-	or   a
-	jp   nz, L002CDA
-	inc  de
-	ld   a, [de]
-	cp   $0F
-	jp   nc, L002D4F
-	dec  c
-	ld   a, e
-	dec  a
-	dec  a
-	dec  a
-	and  a, $0F
-	push af
-	ld   a, $F0
-	and  a, e
-	ld   e, a
-	pop  af
-	or   a, e
-	ld   e, a
-	ld   a, [de]
-	dec  c
-L002CDA:;J
-	push bc
-	ld   c, [hl]
-	inc  hl
-	and  a, [hl]
-	cp   a, c
-	pop  bc
-	jp   z, L002D25
-	jp   L002D4F
-L002CE6:;J
-	ld   a, [de]
-	or   a
-	jp   nz, L002D07
-	inc  de
-	ld   a, [de]
-	cp   $05
-	jp   nc, L002D4F
-	dec  c
-	jp   z, L002D4F
-	ld   a, e
-	dec  a
-	dec  a
-	dec  a
-	and  a, $0F
-	push af
-	ld   a, $F0
-	and  a, e
-	ld   e, a
-	pop  af
-	or   a, e
-	ld   e, a
-	jp   L002CE6
-L002D07:;J
-	push bc
-	ld   c, [hl]
-	inc  hl
-	and  a, [hl]
-	cp   a, c
-	pop  bc
-	jp   z, L002D25
-	dec  hl
-	dec  c
-	jp   z, L002D4F
-	ld   a, e
-	dec  a
-	dec  a
-	and  a, $0F
-	push af
-	ld   a, $F0
-	and  a, e
-	ld   e, a
-	pop  af
-	or   a, e
-	ld   e, a
-	jp   L002CE6
-L002D25:;J
-	inc  de
-	ld   a, [de]
-	inc  hl
-	cp   a, [hl]
-	jp   c, L002D4F
-	inc  hl
-	cp   a, [hl]
-	jp   z, L002D34
-	jp   nc, L002D4F
-L002D34:;J
-	inc  hl
-	dec  c
-	jp   z, L002D4F
-	ld   a, e
-	dec  a
-	dec  a
-	dec  a
-	and  a, $0F
-	push af
-	ld   a, $F0
-	and  a, e
-	ld   e, a
-	pop  af
-	or   a, e
-	ld   e, a
-	dec  b
-	jp   nz, L002CE6
-	scf
-	pop  de
-	pop  bc
-	ret
-L002D4F:;J
-	xor  a
-	pop  de
-	pop  bc
-	ret
-L002D53:;C
-	push hl
-	push bc
-	xor  a
-	ld   hl, $0010
-	add  hl, bc
-	ld   b, $10
-L002D5C:;J
-	ldi  [hl], a
-	dec  b
-	jp   nz, L002D5C
-	pop  bc
+		push bc
+			; Fill the $10 bytes of iPlInfo_JoyBtnBuffer with $00
+			xor  a			; A = Overwrite with
+			ld   hl, iPlInfo_JoyBtnBuffer
+			add  hl, bc		; Seek to d-pad buffer
+			ld   b, $10		; B = Bytes to clear
+		.loop:
+			ldi  [hl], a	; Write
+			dec  b			; Finished filling it?
+			jp   nz, .loop	; If not, loop
+		pop  bc
 	pop  hl
 	ret
-L002D64:;C
-	push hl
+	
+; =============== Play_Pl_CreateJoyKeysLH ===============
+; Generates the field iPlInfo_JoyKeysLH for the specified player.
+; This merges the held directional keys from iPlInfo_JoyKeys with the light/heavy flags.
+;
+; The value generated is the main one used by the input readers to detect if a punch/kick button
+; was pressed, so it should be run before those.
+; 
+; IN
+; - BC: Ptr to wPlInfo structure
+Play_Pl_CreateJoyKeysLH:
+	; Seek to iPlInfo_JoyKeys
+	ld   hl, iPlInfo_JoyKeys
+	add  hl, bc			
 	push bc
-	xor  a
-	ld   hl, $0000
-	add  hl, bc
-	ld   b, $10
-L002D6D:;J
-	ldi  [hl], a
-	dec  b
-	jp   nz, L002D6D
+		; B = Currently held D-Pad keys
+		ldi  a, [hl]	
+		and  a, KEY_RIGHT|KEY_LEFT|KEY_UP|KEY_DOWN
+		ld   b, a
+		; A = Light/Heavy button info (mix of current and ???? set)
+		;    (iPlInfo_JoyNewKeysLH | iPlInfo_JoyMergedKeysLH) & $F0
+		ldi  a, [hl]	; A = iPlInfo_JoyNewKeysLH
+		inc  hl			; Seek to iPlInfo_JoyNewKeysLHPreJump
+		inc  hl			; Seek to iPlInfo_JoyMergedKeysLH
+		or   a, [hl]	
+		and  a, KEP_A_LIGHT|KEP_B_LIGHT|KEP_A_HEAVY|KEP_B_HEAVY ; Filter valid LK bits
+		or   b ; Merge both variables
 	pop  bc
-	pop  hl
-	ret
-L002D75:;C
-	ld   hl, $0045
-	add  hl, bc
-	push bc
-	ldi  a, [hl]
-	and  a, $0F
-	ld   b, a
-	ldi  a, [hl]
-	inc  hl
-	inc  hl
-	or   a, [hl]
-	and  a, $F0
-	or   b
-	pop  bc
-	ld   hl, $0043
+	; Store the result to iPlInfo_JoyKeysLH
+	ld   hl, iPlInfo_JoyKeysLH
 	add  hl, bc
 	ld   [hl], a
 	ret
-L002D8C:;C
-	ld   hl, $0046
-	add  hl, bc
+	
+; =============== Play_Pl_CreateJoyMergedKeysLH ===============
+; Merges the current light/heavy flags to iPlInfo_JoyMergedKeysLH.
+; IN
+; - BC: Ptr to wPlInfo structure
+; OUT
+; - C flag: If set, iPlInfo_JoyMergedKeysLH was updated
+Play_Pl_CreateJoyMergedKeysLH:
+	; Read flags
+	ld   hl, iPlInfo_JoyNewKeysLH
+	add  hl, bc		; Seek to iPlInfo_JoyNewKeysLH
+	ld   a, [hl]	; A = iPlInfo_JoyNewKeysLH
+	; If the updated flags are blank, keep the old ones 
+	and  a, KEP_A_LIGHT|KEP_B_LIGHT|KEP_A_HEAVY|KEP_B_HEAVY ; Filter valid LK bits
+	jr   z, .retClear
+.update:
+	; Otherwise, OR them over
+	; iPlInfo_JoyMergedKeysLH
+	ld   hl, iPlInfo_JoyMergedKeysLH
+	add  hl, bc		
+	or   a, [hl]	; A |= iPlInfo_JoyMergedKeysLH
+	ld   [hl], a	; Save it there
+.retSet:
+	scf				 
+	ret
+.retClear:
+	or   a
+	ret
+	
+; =============== Play_Pl_AreBothBtnHeld ===============
+; Checks if we're holding both the punch and kick buttons at the same time.
+; IN
+; - BC: Ptr to wPlInfo structure
+; OUT
+; - C flag: If set, we're holding A and B
+Play_Pl_AreBothBtnHeld:
+	ld   hl, iPlInfo_JoyKeys
+	add  hl, bc			; Seek to iPlInfo_JoyKeys
+	ld   l, [hl]		; L = Currently held keys
+	bit  KEYB_A, l		; Are we holding A?
+	jp   z, .retClear	; If not, jump
+	; We're holding A
+	bit  KEYB_B, l		; Are we also holding B?
+	jp   nz, .retSet	; If so, jump (success)
+	; If not, return 0
+.retClear:
+	or   a	; Clear carry
+	ret
+.retSet:
+	scf		; Set carry
+	ret
+	
+; =============== Play_Pl_GetDirKeys_ByXFlipR ===============
+; Gets the d-pad keys we're holding, relative to the current player *visually* facing right.
+; This means L/R are inverted on the 2P side.
+; IN
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+; OUT
+; - A: Held directions (KEY_*)
+; - C flag: If set, we're holding at least a directional button
+Play_Pl_GetDirKeys_ByXFlipR:
+	ld   hl, iPlInfo_JoyKeys
+	add  hl, bc		; Seek to iPlInfo_JoyKeys
+	
+	;
+	; A = D-Pad Direction keys
+	;
 	ld   a, [hl]
-	and  a, $F0
-	jr   z, L002D9D
-	ld   hl, $0049
-	add  hl, bc
-	or   a, [hl]
-	ld   [hl], a
-	scf
-	ret
-L002D9D:;R
-	or   a
-	ret
-L002D9F:;C
-	ld   hl, $0045
-	add  hl, bc
-	ld   l, [hl]
-	bit  4, L
-	jp   z, L002DAE
-	bit  5, L
-	jp   nz, L002DB0
-L002DAE:;J
-	or   a
-	ret
-L002DB0:;J
-	scf
-	ret
-L002DB2:;C
-	ld   hl, $0045
-	add  hl, bc
-	ld   a, [hl]
-	and  a, $0F
-	jp   z, L002DC9
-	ld   hl, $0001
+	and  a, KEY_RIGHT|KEY_LEFT|KEY_UP|KEY_DOWN		; Filter out non d-pad keys
+	jp   z, .retClear								; Holding any of them? If not, return
+	
+	;
+	; Invert the left/right inputs if we're visually facing left.
+	; This is because the returned keys are used with manual move input checks 
+	; (the ones that don't use MoveInput_* structs) but should still be affected by switching sides.
+	; 
+	ld   hl, iOBJInfo_OBJLstFlags
 	add  hl, de
-	bit  5, [hl]
-	jp   nz, L002DC7
-	xor  $03
-L002DC7:;J
-	scf
+	bit  SPRB_XFLIP, [hl]	; Is the player facing right?
+	jp   nz, .retSet		; If so, skip
+	xor  KEY_RIGHT|KEY_LEFT	; Otherwise, invert L/R inputs
+.retSet:
+	scf		; Set carry
 	ret
-L002DC9:;J
-	or   a
+.retClear:
+	or   a	; Clear carry
 	ret
-L002DCB:;C
-	ld   hl, $0000
+	
+; =============== OBJLST ANIMATION HELPERS ===============
+	
+; =============== OBJLstS_IsGFXLoadDone ===============
+; Determines if the graphics for the specified wOBJInfo have finished loading.
+; IN
+; - DE: Ptr to wOBJInfo 
+; OUT
+; - Z flag: If set, the graphics have loaded
+OBJLstS_IsGFXLoadDone:
+	ld   hl, iOBJInfo_Status
 	add  hl, de
-	bit  0, [hl]
+	bit  OSTB_GFXLOAD, [hl]	; Is the flag set?
 	ret
-L002DD2:;C
-	ld   hl, $0000
+	
+; =============== OBJLstS_Unk_ChkStatusBit3 ===============
+; Determines if the ????? bit3 status is set.
+; IN
+; - DE: Ptr to wOBJInfo
+; OUT
+; - Z flag: If set, OSTB_BIT3 is set ????
+OBJLstS_Unk_ChkStatusBit3:
+	ld   hl, iOBJInfo_Status
 	add  hl, de
-	bit  3, [hl]
+	bit  OSTB_BIT3, [hl]	; Is the flag set?
 	ret
-L002DD9:;C
-	call L002DCB
-	jp   nz, L002DEA
-	ld   hl, $001B
+	
+; =============== OBJLstS_IsFrameEnd ===============
+; Determines if the current animation frame is about to be changed.
+;
+; This shouldn't be used to check if the frame should be changed (the animation handler does it).
+; Rather, this is a very common subroutine used for move code, to syncronize certain
+; events (like spawning fireballs) to the animation switching between frames.
+; IN
+; - DE: Ptr to wOBJInfo
+; OUT
+; - C flag: If set, the animation frame will change by the end of the frame
+OBJLstS_IsFrameEnd:
+	; If the GFX aren't fully loaded yet, the animation can't continue
+	call OBJLstS_IsGFXLoadDone
+	jp   nz, .retClear
+	
+	; Otherwise, the frame switches when iOBJInfo_FrameLeft reaches 0. 
+	ld   hl, iOBJInfo_FrameLeft
 	add  hl, de
-	ld   a, [hl]
-	or   a
-	jp   nz, L002DEA
-	scf
+	ld   a, [hl]		; A = iOBJInfo_FrameLeft
+	or   a				; A != 0?
+	jp   nz, .retClear	; If so, jump
+.retSet:
+	scf		; Set carry (ending)
 	ret
-L002DEA:;J
-	xor  a
+.retClear:
+	xor  a	; Clear carry (not ending)
 	ret
+	
+; =============== Play_Pl_SetLandFromJumpAnim ===============
+; ??? Seems to be used when setting the animation/SFX after landing from a jump.
+; IN
+; - A: OBJLst Id
+; - H: Animation speed (iOBJInfo_FrameTotal)
+; - DE: Ptr to wOBJInfo
+; OUT
+; - Z flag: If set, the new animation frame wasn't set
 L002DEC:;C
 	push bc
-	ld   b, h
-	ld   hl, $0013
-	add  hl, de
-	cp   a, [hl]
-	jp   z, L002E18
-	ld   [hl], a
-	ld   hl, $001B
-	add  hl, de
-	ld   [hl], b
-	inc  hl
-	ld   [hl], b
-	call L002F15
-	ld   hl, $002C
-	add  hl, bc
-	ld   a, [hl]
-	cp   $02
-	jp   z, L002E10
-	ld   a, $9D
-	jp   L002E12
-L002E10: db $3E;X
-L002E11: db $A6;X
-L002E12:;J
-	call HomeCall_Sound_ReqPlayExId
-	ld   a, $01
-	or   a
-L002E18:;J
+		ld   b, h		; B = Animation speed
+		
+		; Only do this if we're requesting a different animation frame
+		ld   hl, iOBJInfo_OBJLstPtrTblOffset
+		add  hl, de		; Seek to OBJLstId
+		cp   a, [hl]	; A == OBJLstId?
+		jp   z, .end	; If so, return
+		
+		; Otherwise, write the new sprite mapping
+		ld   [hl], a
+		
+		; Reset the animation speed to the specified value
+		ld   hl, iOBJInfo_FrameLeft
+		add  hl, de		; Seek iOBJInfo_FrameLeft
+		ld   [hl], b	; Frames remaining before change
+		inc  hl			; Seek to iOBJInfo_FrameTotal
+		ld   [hl], b	; Total count when switching frames
+		
+		; Apply the changes
+		call OBJLstS_DoAnimTiming_Initial_by_DE
+		
+		;
+		; Play a sound effect whenever <????> happens.
+		; Daimon is supposed to use a special one, but...
+		; [BUG] ...BC isn't properly restored so it reads a garbage value instead of the CharId.
+		;       This ends up making the code unreachable.
+		;
+IF FIX_BUGS == 1
+		; The code after this, including HomeCall_Sound_ReqPlayExId, doesn't touch BC,
+		; but there's a check above inside the push...
+	pop  bc
+	push bc
+ENDC
+		ld   hl, iPlInfo_CharId
+		add  hl, bc		
+		ld   a, [hl]			; A = CharId
+		cp   CHAR_ID_DAIMON*2 	; Playing as DAIMON?
+		jp   z, .unused_daimon	; If so, jump
+	.norm:
+		ld   a, SFX_STEP		; A = Normal step SFX ID
+		jp   .playSFX
+	.unused_daimon:
+		ld   a, SND_ID_26		; A = Step SFX ID for DAIMON
+	.playSFX:
+		call HomeCall_Sound_ReqPlayExId
+		
+		; Return NZ
+		ld   a, $01
+		or   a		
+	.end:
 	pop  bc
 	ret
+	
 L002E1A:;C
 	push bc
 	ld   b, h
@@ -10349,9 +11054,9 @@ L002E1A:;C
 	ld   [hl], b
 	inc  hl
 	ld   [hl], b
-	call L002F15
+	call OBJLstS_DoAnimTiming_Initial_by_DE
 	pop  bc
-	call L003CAC
+	call Play_Pl_IsDizzy
 	jp   nz, L002E3E
 	ld   a, $9B
 	call HomeCall_Sound_ReqPlayExId
@@ -10379,7 +11084,7 @@ L002E49:;C
 	ld   [hl], b
 	inc  hl
 	ld   [hl], b
-	call L002F15
+	call OBJLstS_DoAnimTiming_Initial_by_DE
 	ld   a, $01
 	or   a
 L002E61:;J
@@ -10400,7 +11105,7 @@ L002E63:;C
 	jp   c, L002E78
 	jp   L002E89
 L002E78:;J
-	call L002DCB
+	call OBJLstS_IsGFXLoadDone
 	jp   nz, L002E89
 	ld   hl, $001B
 	add  hl, de
@@ -10414,25 +11119,39 @@ L002E89:;J
 	or   a
 	pop  bc
 	ret
-L002E8C:;C
-	ld   hl, $0020
-	add  hl, bc
-	bit  6, [hl]
-	jp   z, L002EA1
-	ld   hl, $0050
-	add  hl, bc
+	
+; =============== Play_Pl_EmptyPowOnSuperEnd ===============
+; Called at the end of most moves to empty the POW meter when a super move finishes.
+; IN:
+; - BC: Ptr to wPlInfo structure
+Play_Pl_EmptyPowOnSuperEnd:
+
+	; Super move required
+	ld   hl, iPlInfo_Status
+	add  hl, bc					; Seek to iPlInfo_Status
+	bit  PSB_SUPERMOVE, [hl]	; Were we just doing a super move?
+	jp   z, .ret				; If not, return
+	
+	; Max meter required
+	; It's very possible to have the MAX Power meter run out during
+	; the super move, which is why we must check this.
+	ld   hl, iPlInfo_Pow
+	add  hl, bc					; Seek to iPlInfo_Pow
 	ld   a, [hl]
-	cp   $28
-	jp   nz, L002EA1
-	ld   [hl], $00
-L002EA1:;J
+	cp   PLAY_POW_MAX			; Are we at max power?
+	jp   nz, .ret				; If not, return
+	
+	; All ok, empty the POW meter
+	ld   [hl], $00				
+.ret:
 	ret
+	
 L002EA2:;C
-	call L002E8C
+	call Play_Pl_EmptyPowOnSuperEnd
 	xor  a
 	ld   hl, $0005
 	add  hl, de
-	ld   [hl], $88
+	ld   [hl], PL_FLOOR_POS
 	inc  hl
 	ldi  [hl], a
 	ldi  [hl], a
@@ -10479,779 +11198,1273 @@ L002EC4:;J
 	add  hl, bc
 	ld   [hl], $00
 	ret
-L002EFA:;C
-	ld   hl, $0001
-	add  hl, de
-	bit  3, [hl]
-	jp   z, L002F08
-	set  5, [hl]
-	jp   L002F0A
-L002F08:;J
-	res  5, [hl]
-L002F0A:;J
+; =============== OBJLstS_SyncXFlip ===============
+; Syncronizes the sprite's visual X direction with the internal one.
+; IN
+; - DE: Ptr to wOBJInfo structure
+OBJLstS_SyncXFlip:
+	ld   hl, iOBJInfo_OBJLstFlags
+	add  hl, de					; Seek to flags
+	bit  SPRXB_PLDIR_R, [hl]	; Is the sprite mapping internally flipped?
+	jp   z, .noFlip				; If not, jump
+.flip:
+	set  SPRB_XFLIP, [hl]		; Flip the sprite
+	jp   .ret
+.noFlip:
+	res  SPRB_XFLIP, [hl]		; Visually unflip the sprite
+.ret:
 	ret
-L002F0B:;JC
+	
+; =============== OBJLstS_DoAnimTiming_Loop_by_DE ===============
+; Handles the timing for the current animation for the specified OBJInfo.
+; Wrapper for OBJLstS_DoAnimTiming_Loop.
+; IN
+; - DE: Ptr to wOBJInfo struct
+OBJLstS_DoAnimTiming_Loop_by_DE:
 	push bc
-	push de
-	push de
-	pop  hl
-	call OBJLstS_DoAnimTiming_Loop
-	pop  de
+		push de
+			push de	; HL = DE
+			pop  hl
+			call OBJLstS_DoAnimTiming_Loop
+		pop  de
 	pop  bc
 	ret
-L002F15:;C
+	
+; =============== OBJLstS_DoAnimTiming_Initial_by_DE ===============
+; Initializes the current animation frame.
+; Wrapper for OBJLstS_DoAnimTiming_Initial.
+; IN
+; - DE: Ptr to wOBJInfo struct
+OBJLstS_DoAnimTiming_Initial_by_DE:
 	push bc
-	push de
-	push de
-	pop  hl
-	call OBJLstS_DoAnimTiming_Initial
-	pop  de
+		push de
+			push de	; HL = DE
+			pop  hl
+			call OBJLstS_DoAnimTiming_Initial
+		pop  de
 	pop  bc
 	ret
-L002F1F:;C
-	ldh  a, [hROMBank]
+; =============== Play_Pl_ExecSpecMoveInputCode ===============
+; Executes the character-specific special move input reader code, as defined in iPlInfo_MoveInputCodePtr.
+; IN
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+; OUT
+; - C flag: If set, a move was started
+Play_Pl_ExecSpecMoveInputCode:
+	
+	ldh  a, [hROMBank]	; Save current bank
 	push af
-	call L002F38
-	jp   c, L002F30
+		call .exec		; Run the code. Was a new move started?
+		jp   c, .retSet	; If so, jump
+.retClear:
 	pop  af
-	ld   [MBC1RomBank], a
+	ld   [MBC1RomBank], a	; Restore bank
 	ldh  [hROMBank], a
-	xor  a
+	xor  a	; Clear carry
 	ret
-L002F30:;J
+.retSet:
 	pop  af
-	ld   [MBC1RomBank], a
+	ld   [MBC1RomBank], a	; Restore bank
 	ldh  [hROMBank], a
-	scf
+	scf		; Set carry
 	ret
-L002F38:;C
-	ld   hl, $0028
-	add  hl, bc
+.exec:
+	; Run the code for it
+	ld   hl, iPlInfo_MoveInputCodePtr_High
+	add  hl, bc			
 	push de
-	ld   d, [hl]
-	inc  hl
-	ld   e, [hl]
-	inc  hl
-	ld   a, [hl]
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	push de
-	pop  hl
+		; DE = Code ptr
+		ld   d, [hl]	; iPlInfo_MoveInputCodePtr_High
+		inc  hl			 
+		ld   e, [hl]	; iPlInfo_MoveInputCodePtr_Low
+		
+		; Switch to the bank for it
+		inc  hl			
+		ld   a, [hl]			; iPlInfo_MoveInputCodePtr_Bank
+		ld   [MBC1RomBank], a
+		ldh  [hROMBank], a
+		
+		push de			; Move code ptr to HL
+		pop  hl
 	pop  de
-	jp   hl
-L002F4B:;C
+	
+	;
+	; Every input reader code (MoveInputS_*) uses these parameters:
+	; IN
+	; - BC: Ptr to wPlInfo structure
+	; - DE: Ptr to respective wOBJInfo structure
+	; OUT
+	; - C flag: If set, a move was started
+	jp   hl				; Execute it
+	
+; =============== Play_Pl_DoBasicMoveInput ===============
+; Handles basic player movement, basic attacks, and setting moves
+; when getting attacked.
+; This updates player flags and can set a MOVE_SHARED_* move.
+; IN
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+Play_Pl_DoBasicMoveInput:
 	push bc
-	push de
-	call L00390D
-	jp   nc, L002F5D
-	cp   $00
-	jp   z, L00339A
-L002F58: db $FE;X
-L002F59: db $01;X
-L002F5A: db $CA;X
-L002F5B: db $F3;X
-L002F5C: db $33;X
-L002F5D:;J
-	ld   hl, $0043
-	add  hl, bc
-	ld   a, [hl]
-	bit  1, a
-	jp   nz, L002F6F
-	bit  0, a
-	jp   nz, L002F7B
-	jp   L002FBC
-L002F6F:;J
-	ld   hl, $0001
-	add  hl, de
-	bit  5, [hl]
-	jp   nz, L002F84
-	jp   L002FBC
-L002F7B:;J
-	ld   hl, $0001
-	add  hl, de
-	bit  5, [hl]
-	jp   nz, L002FBC
-L002F84:;J
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	cp   $0A
-	jp   z, L002F96
-	cp   $0E
-	jp   z, L002F96
-	jp   L002FBC
-L002F96:;J
-	ld   hl, $0005
-	add  hl, de
-	ld   a, [hl]
-	cp   $88
-	jp   z, L002FBC
-	ld   hl, $006D
-	add  hl, bc
-	bit  0, [hl]
-	jp   nz, L00317F
-	ld   hl, $0074
-	add  hl, bc
-	ld   a, [hl]
-	or   a
-	jp   z, L002FBC
-	ld   hl, $0081
-	add  hl, bc
-	ld   a, [hl]
-	cp   $88
-	jp   nz, L00317F
-L002FBC:;J
-	ld   hl, $0021
-	add  hl, bc
-	bit  0, [hl]
-	jp   nz, L003418
-	ld   hl, $0035
-	add  hl, bc
-	ld   a, [hl]
-	or   a
-	jp   nz, L003386
-	ld   hl, $0043
-	add  hl, bc
-	ld   a, [hl]
-	bit  2, a
-	jp   nz, L003125
-	bit  3, a
-	jp   nz, L003040
-	bit  4, a
-	jp   nz, L0031F7
-	bit  5, a
-	jp   nz, L0031B2
-	bit  6, a
-	jp   nz, L00320D
-	bit  7, a
-	jp   nz, L0031C8
-	bit  1, a
-	jp   nz, L003007
-	bit  0, a
-	jp   nz, L003013
-	ld   hl, $0044
-	add  hl, bc
-	bit  6, [hl]
-	jp   nz, L00334A
-	jp   L0030BC
-L003007:;J
-	ld   hl, $0001
-	add  hl, de
-	bit  5, [hl]
-	jp   nz, L00301C
-	jp   L0030D6
-L003013:;J
-	ld   hl, $0001
-	add  hl, de
-	bit  5, [hl]
-	jp   nz, L0030D6
-L00301C:;J
-	ld   hl, $0021
-	add  hl, bc
-	res  5, [hl]
-	ld   hl, $3EC9
-	call L002C63
-	jp   c, L003333
-	ld   hl, $006D
-	add  hl, bc
-	bit  0, [hl]
-	jp   nz, L00315A
-	ld   hl, $0074
-	add  hl, bc
-	ld   a, [hl]
-	or   a
-	jp   nz, L00315A
-	jp   L003102
-L003040:;J
-	ld   hl, $0050
-	add  hl, bc
-	push af
-	ld   a, $28
-	cp   a, [hl]
-	jp   z, L003055
-	pop  af
-	call L002D9F
-	jp   c, L003197
-	jp   L003056
-L003055:;J
-	pop  af
-L003056:;J
-	ld   hl, $0021
-	add  hl, bc
-	set  5, [hl]
-	bit  4, a
-	jp   nz, L003285
-	bit  5, a
-	jp   nz, L00323C
-	bit  6, a
-	jp   nz, L003299
-	bit  7, a
-	jp   nz, L00325E
-	bit  1, a
-	jp   nz, L00307D
-	bit  0, a
-	jp   nz, L003089
-	jp   L0030A4
-L00307D:;J
-	ld   hl, $0001
-	add  hl, de
-	bit  5, [hl]
-	jp   nz, L003092
-	jp   L0030A4
-L003089:;J
-	ld   hl, $0001
-	add  hl, de
-	bit  5, [hl]
-	jp   nz, L0030A4
-L003092:;J
-	ld   hl, $006D
-	add  hl, bc
-	bit  0, [hl]
-	jp   nz, L00315A
-	ld   hl, $0074
-	add  hl, bc
-	ld   a, [hl]
-	or   a
-	jp   nz, L00315A
-L0030A4:;J
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	cp   $08
-	jp   z, L003418
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	ld   a, $08
-	call L00341B
-	jp   L003418
-L0030BC:;J
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	cp   $02
-	jp   z, L003418
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	res  5, [hl]
-	ld   a, $02
-	call L00341B
-	jp   L003418
-L0030D6:;J
-	ld   hl, $3EDA
-	call L002C63
-	jp   c, L00330F
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	cp   $04
-	jp   z, L003418
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	res  5, [hl]
-	ld   a, $04
-	call L00341B
-	ld   hl, $0065
-	call L002B91
-	call L003569
-	jp   L003418
-L003102:;J
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	cp   $06
-	jp   z, L003418
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	res  5, [hl]
-	ld   a, $06
-	call L00341B
-	ld   hl, $0067
-	call L002B91
-	call L003569
-	jp   L003418
-L003125:;J
-	ld   hl, $0083
-	add  hl, bc
-	ld   [hl], $00
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	cp   $16
-	jp   nz, L00313B
-	ld   hl, $0083
-	add  hl, bc
-	ld   [hl], $01
-L00313B:;J
-	ld   hl, $0045
-	add  hl, bc
-	push de
-	ldi  a, [hl]
-	ld   d, [hl]
-	inc  hl
-	ldi  [hl], a
-	ld   [hl], d
-	pop  de
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	res  5, [hl]
-	set  0, [hl]
-	set  1, [hl]
-	ld   a, $0A
-	call L00341B
-	jp   L003418
-L00315A:;J
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	ld   hl, $0021
-	add  hl, bc
-	bit  5, [hl]
-	jr   nz, L003170
-	cp   $10
-	jp   z, L003418
-	ld   a, $10
-	jr   L003177
-L003170:;R
-	cp   $12
-	jp   z, L003418
-	ld   a, $12
-L003177:;R
-	set  3, [hl]
-	call L00341B
-	jp   L003418
-L00317F:;J
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	cp   $14
-	jp   z, L003418
-	ld   a, $14
-	ld   hl, $0021
-	add  hl, bc
-	set  3, [hl]
-	call L003444
-	jp   L003418
-L003197:;J
-	ld   a, $06
-	call HomeCall_Sound_ReqPlayExId
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	res  5, [hl]
-	set  0, [hl]
-	set  1, [hl]
-	set  2, [hl]
-	ld   a, $1A
-	call L00341B
-	jp   L003418
-L0031B2:;J
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	res  5, [hl]
-	set  0, [hl]
-	set  1, [hl]
-	set  2, [hl]
-	ld   a, $30
-	call L003431
-	jp   L003418
-L0031C8:;J
-	call L002D9F
-	jp   nc, L0031DC
-	call L002DB2
-	jp   nc, L0032F4
-	bit  0, a
-	jp   nz, L0032B2
-	jp   L0032D3
-L0031DC:;J
-	ld   a, $09
-	call HomeCall_Sound_ReqPlayExId
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	res  5, [hl]
-	set  0, [hl]
-	set  1, [hl]
-	set  2, [hl]
-	ld   a, $32
-	call L003431
-	jp   L003418
-L0031F7:;J
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	res  5, [hl]
-	set  0, [hl]
-	set  1, [hl]
-	set  2, [hl]
-	ld   a, $34
-	call L003431
-	jp   L003418
-L00320D:;J
-	call L002D9F
-	jp   nc, L003221
-	call L002DB2
-	jp   nc, L0032F4
-	bit  0, a
-	jp   nz, L0032B2
-	jp   L0032D3
-L003221:;J
-	ld   a, $09
-	call HomeCall_Sound_ReqPlayExId
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	res  5, [hl]
-	set  0, [hl]
-	set  1, [hl]
-	set  2, [hl]
-	ld   a, $36
-	call L003431
-	jp   L003418
-L00323C:;J
-	ld   a, [wDipSwitch]
-	bit  3, a
-	jp   z, L00324A
-	ld   hl, $0020
-	add  hl, bc
-	set  5, [hl]
-L00324A:;J
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	set  0, [hl]
-	set  1, [hl]
-	set  2, [hl]
-	ld   a, $38
-	call L003431
-	jp   L003418
-L00325E:;J
-	ld   a, $09
-	call HomeCall_Sound_ReqPlayExId
-	ld   a, [wDipSwitch]
-	bit  3, a
-	jp   z, L003271
-	ld   hl, $0020
-	add  hl, bc
-	set  4, [hl]
-L003271:;J
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	set  0, [hl]
-	set  1, [hl]
-	set  2, [hl]
-	ld   a, $3A
-	call L003431
-	jp   L003418
-L003285:;J
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	set  0, [hl]
-	set  1, [hl]
-	set  2, [hl]
-	ld   a, $3C
-	call L003431
-	jp   L003418
-L003299:;J
-	ld   a, $09
-	call HomeCall_Sound_ReqPlayExId
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	set  0, [hl]
-	set  1, [hl]
-	set  2, [hl]
-	ld   a, $3E
-	call L003431
-	jp   L003418
-L0032B2:;J
-	ld   hl, $0083
-	add  hl, bc
-	ld   [hl], $00
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	res  5, [hl]
-	set  0, [hl]
-	set  1, [hl]
-	set  2, [hl]
-	inc  hl
-	set  6, [hl]
-	set  7, [hl]
-	ld   a, $1E
-	call L00341B
-	jp   L003418
-L0032D3:;J
-	ld   hl, $0083
-	add  hl, bc
-	ld   [hl], $00
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	res  5, [hl]
-	set  0, [hl]
-	set  1, [hl]
-	set  2, [hl]
-	inc  hl
-	set  6, [hl]
-	set  7, [hl]
-	ld   a, $20
-	call L00341B
-	jp   L003418
-L0032F4:;J
-	ld   a, $09
-	call HomeCall_Sound_ReqPlayExId
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	res  5, [hl]
-	set  0, [hl]
-	set  1, [hl]
-	set  2, [hl]
-	ld   a, $40
-	call L00341B
-	jp   L003418
-L00330F:;J
-	call L002D53
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	res  5, [hl]
-	set  0, [hl]
-	set  1, [hl]
-	ld   a, $16
-	call L00341B
-	ld   hl, $0065
-	call L002B91
-	sla  l
-	rl   h
-	call L003569
-	jp   L003418
-L003333:;J
-	call L002D53
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	res  5, [hl]
-	set  0, [hl]
-	set  1, [hl]
-	ld   a, $18
-	call L00341B
-	jp   L003418
-L00334A:;J
-	ld   hl, $002C
-	add  hl, bc
-	ld   a, [hl]
-	srl  a
-	push de
-	ld   hl, $3372
-	ld   d, $00
-	ld   e, a
-	add  hl, de
-	pop  de
-	ld   a, [hl]
-	call HomeCall_Sound_ReqPlayExId
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	res  5, [hl]
-	set  0, [hl]
-	set  1, [hl]
-	ld   a, $1C
-	call L00341B
-	jp   L003418
-L003372: db $03
-L003373: db $02
-L003374: db $03
-L003375: db $03
-L003376: db $03
-L003377: db $03
-L003378: db $05
-L003379: db $05
-L00337A: db $04
-L00337B: db $02
-L00337C: db $02
-L00337D: db $02
-L00337E: db $03
-L00337F: db $05
-L003380: db $05
-L003381: db $02
-L003382: db $02
-L003383: db $02
-L003384: db $04
-L003385: db $04
-L003386:;J
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	res  5, [hl]
-	set  0, [hl]
-	set  1, [hl]
-	set  2, [hl]
-	call L00341B
-	jp   L003418
-L00339A:;J
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	res  5, [hl]
-	set  0, [hl]
-	res  1, [hl]
-	set  1, [hl]
-	set  2, [hl]
-	set  7, [hl]
-	ld   a, $6C
-	call L00341B
-	call Task_PassControlFar
-	ld   a, $03
-	ld   [$C173], a
-	call L00386A
-L0033BC:;J
-	ld   a, [$C173]
-	cp   $04
-	jp   z, L0033CF
-	cp   $03
-	jp   nz, L0033D7
-	call Task_PassControlFar
-	jp   L0033BC
-L0033CF:;J
-	ld   a, $03
-	ld   [$C173], a
-	jp   L003418
-L0033D7:;J
-	ld   a, $1C
-	call HomeCall_Sound_ReqPlayExId
-	ld   a, $72
-	call L003451
-	ld   a, $F0
-	ld   [wStageBGP], a
-	ld   hl, $0021
-	add  hl, bc
-	res  7, [hl]
-	inc  hl
-	inc  hl
-	set  0, [hl]
-	jp   L003418
-L0033F3: db $21;X
-L0033F4: db $21;X
-L0033F5: db $00;X
-L0033F6: db $09;X
-L0033F7: db $CB;X
-L0033F8: db $9E;X
-L0033F9: db $CB;X
-L0033FA: db $AE;X
-L0033FB: db $CB;X
-L0033FC: db $C6;X
-L0033FD: db $CB;X
-L0033FE: db $8E;X
-L0033FF: db $CB;X
-L003400: db $CE;X
-L003401: db $CB;X
-L003402: db $D6;X
-L003403: db $CB;X
-L003404: db $FE;X
-L003405: db $3E;X
-L003406: db $6E;X
-L003407: db $CD;X
-L003408: db $1B;X
-L003409: db $34;X
-L00340A: db $CD;X
-L00340B: db $FB;X
-L00340C: db $03;X
-L00340D: db $3E;X
-L00340E: db $03;X
-L00340F: db $EA;X
-L003410: db $73;X
-L003411: db $C1;X
-L003412: db $CD;X
-L003413: db $6A;X
-L003414: db $38;X
-L003415: db $C3;X
-L003416: db $18;X
-L003417: db $34;X
-L003418:;J
-	pop  de
+		push de
+		
+		;
+		; Handle starting throws
+		;
+		BasicInput_ChkThrowStart:
+
+			call Play_Pl_ChkThrowInput			; Started a throw?		
+			jp   nc, .end						; If not, jump
+			cp   PLAY_THROWOP_GROUND			; Ground throw?
+			jp   z, BasicInput_StartGroundThrow	; If so, jump
+			cp   PLAY_THROWOP_AIR				; Air throw?
+			jp   z, BasicInput_StartAirThrow	; If so, jump
+			; PLAY_THROWOP_UNUSED_BOTH not handled as a throw
+		.end:
+		
+		;
+		; Handle air block input.
+		; This is performed by holding back when doing neutral or backwards jumps.
+		;
+		BasicInput_ChkAirBlock:
+		
+			; Check if we're moving backwards.
+			; Moving backwards uses different keys depending on the side we're in.
+			
+			; Determine which key we're pressing first.
+			ld   hl, iPlInfo_JoyKeysLH
+			add  hl, bc
+			ld   a, [hl]			; A = Absolute held inputs
+			bit  KEYB_LEFT, a		; Moving left?
+			jp   nz, .chkMoveL		; If so, jump
+			bit  KEYB_RIGHT, a		; Moving right?
+			jp   nz, .chkMoveR		; If so, jump
+			jp   .end				; Otherwise, skip ahead
+		.chkMoveL:
+			; Left is backwards on the 1P side
+			ld   hl, iOBJInfo_OBJLstFlags
+			add  hl, de
+			bit  SPRB_XFLIP, [hl]	; Facing right / 1P side? (so L -> backward)
+			jp   nz, .chkJumpMove	; If so, jump
+			jp   .end				; Otherwise, skip ahead
+		.chkMoveR:
+			; Right is backwards on the 2P side
+			ld   hl, iOBJInfo_OBJLstFlags
+			add  hl, de
+			bit  SPRB_XFLIP, [hl]	; Facing right / 1P side? (so R -> forward)
+			jp   nz, .end			; If so, skip ahead
+			
+		.chkJumpMove:
+			; We must be doing a neutral or backwards jump.
+			ld   hl, iPlInfo_MoveId
+			add  hl, bc				
+			ld   a, [hl]			
+			cp   MOVE_SHARED_JUMP_N	; Doing a neutral jump?
+			jp   z, .chkAir			; If so, jump
+			cp   MOVE_SHARED_JUMP_B	; Doing a backwards jump?
+			jp   z, .chkAir			; If so, jump
+			jp   .end				; Otherwise, skip ahead
+			
+		.chkAir:
+			; Air blocking of course only works in the air
+			ld   hl, iOBJInfo_Y
+			add  hl, de
+			ld   a, [hl]
+			cp   PL_FLOOR_POS	; iOBJInfo_Y == PL_FLOOR_POS?
+			jp   z, .end		; If so, skip ahead
+			
+			; Projectiles can only be blocked in the air.
+			; So as long as the opponent's projectile is active, try to air block it.
+			ld   hl, iPlInfo_StatusOther
+			add  hl, bc
+			bit  PSB_PROJ, [hl]					; Does the other player have an active projectile?
+			jp   nz, BasicInput_StartAirBlock	; If so, jump
+			
+			; Ground-based attacks can't be blocked in the air.
+			ld   hl, iPlInfo_MoveDamageValOther
+			add  hl, bc
+			ld   a, [hl]
+			or   a				; Is the other player performing an attack?
+			jp   z, .end		; If not, skip ahead
+			
+			ld   hl, iPlInfo_OBJInfoYOther
+			add  hl, bc
+			ld   a, [hl]		
+			cp   PL_FLOOR_POS				; Is the other player on the floor?
+			jp   nz, BasicInput_StartAirBlock	; If not, jump
+		.end:
+		
+		BasicInput_ChkBaseInput:
+			; If basic input is disabled, return.
+			;
+			; This is important to prevent moves from being interrupted by
+			; the basic movement actions.
+			; ie: normally, the game returns to the idle move when nothing is pressed,
+			;     but that shouldn't happen while performing another move.
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			bit  PI21B_NOBASICINPUT, [hl]
+			jp   nz, BasicInput_End
+			
+			; If an intro/outro animation is playing, which is straight up a MoveId 
+			; overriding whatever we're doing, display that.
+			ld   hl, iPlInfo_IntroMoveId
+			add  hl, bc
+			ld   a, [hl]
+			or   a
+			jp   nz, BasicInput_StartIntroMove
+			
+			;
+			; Main input reader
+			;
+			
+			ld   hl, iPlInfo_JoyKeysLH
+			add  hl, bc
+			ld   a, [hl]
+			; Note: jumpkicks are handled by the jump move code, not here.
+			bit  KEYB_UP, a					; Holding up?
+			jp   nz, BasicInput_StartJump	; If so, jump
+			bit  KEYB_DOWN, a			; Holding down?
+			jp   nz, BasicInput_ChkDown	; If so, jump
+			; Normals (ground only)
+			bit  KEPB_A_LIGHT, a				; Light kick?
+			jp   nz, BasicInput_StartLightKick	; If so, jump
+			bit  KEPB_B_LIGHT, a				; Light punch?
+			jp   nz, BasicInput_StartLightPunch	; If so, jump
+			bit  KEPB_A_HEAVY, a				; Heavy kick?
+			jp   nz, BasicInput_ChkHeavyA	; If so, jump
+			bit  KEPB_B_HEAVY, a				; Heavy punch?
+			jp   nz, BasicInput_ChkHeavyB	; If so, jump
+			; Horizontal movement
+			bit  KEYB_LEFT, a	; Holding left?
+			jp   nz, .chkWalkL	; If so, jump
+			bit  KEYB_RIGHT, a	; Holding right?
+			jp   nz, .chkWalkR	; If so, jump
+			
+			; Taunt
+			ld   hl, iPlInfo_JoyNewKeys
+			add  hl, bc
+			bit  KEYB_SELECT, [hl]			; Did we press SELECT?
+			jp   nz, BasicInput_ChkTaunt	; If so, jump
+			
+			jp   BasicInput_StartIdle
+			
+			; Determine if we're walking forwards or backwards
+		.chkWalkL:
+			; Left is backwards on the 1P side
+			ld   hl, iOBJInfo_OBJLstFlags
+			add  hl, de
+			bit  SPRB_XFLIP, [hl]				; Facing right / 1P side? (so L -> backward)
+			jp   nz, BasicInput_ChkWalkBack		; If so, jump
+			jp   BasicInput_ChkWalkForward			; Otherwise, skip ahead
+		.chkWalkR:
+			; Right is backwards on the 2P side
+			ld   hl, iOBJInfo_OBJLstFlags
+			add  hl, de
+			bit  SPRB_XFLIP, [hl]				; Facing right / 1P side? (so R -> forward)
+			jp   nz, BasicInput_ChkWalkForward		; If so, skip ahead
+			
+		;
+		; Checks for moves triggered by walking backwards
+		;
+		BasicInput_ChkWalkBack:
+			; Walking back cancels the crouching state
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_CROUCH, [hl]
+			
+			; B+B -> Hop Back
+			ld   hl, MoveInput_BB
+			call MoveInputS_ChkInputDirStrict
+			jp   c, BasicInput_StartHopBack
+			
+			; If the other player is attacking, attempting to walk backwards will block instead.
+			ld   hl, iPlInfo_StatusOther
+			add  hl, bc
+			bit  PSB_PROJ, [hl]						; Is the other player throwing a projectile?
+			jp   nz, BasicInput_StartGroundBlock	; If so, jump	
+			ld   hl, iPlInfo_MoveDamageValOther
+			add  hl, bc
+			ld   a, [hl]
+			or   a									; Is the other player performing an attack?
+			jp   nz, BasicInput_StartGroundBlock	; If so, jump
+			
+			; Otherwise, just walk back
+			jp   BasicInput_StartWalkBack
+			
+		;
+		; Checks for moves triggered when holding down.
+		;
+		BasicInput_ChkDown:
+		
+			;
+			; D+PK -> Charge POW meter
+			;
+			
+			; Ignore if fully charged
+			ld   hl, iPlInfo_Pow
+			add  hl, bc
+			push af
+				ld   a, PLAY_POW_MAX
+				cp   a, [hl]			; Are we at max power?
+				jp   z, .noCharge		; If so, skip
+			pop  af
+			; Check for A+B input
+			call Play_Pl_AreBothBtnHeld			; Holding A+B?
+			jp   c, BasicInput_StartChargeMeter	; If so, jump
+			jp   .chkNormals
+			.noCharge:
+			pop  af
+			
+		.chkNormals:
+			; For everything else, holding down means crouching
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			set  PI21B_CROUCH, [hl]
+			
+			; Check normals
+			bit  KEPB_A_LIGHT, a
+			jp   nz, BasicInput_StartCrouchLightKick
+			bit  KEPB_B_LIGHT, a
+			jp   nz, BasicInput_StartCrouchLightPunch
+			bit  KEPB_A_HEAVY, a
+			jp   nz, BasicInput_StartCrouchHeavyKick
+			bit  KEPB_B_HEAVY, a
+			jp   nz, BasicInput_StartCrouchHeavyPunch
+			
+			; Check crouch block
+			bit  KEYB_LEFT, a	
+			jp   nz, .chkL
+			bit  KEYB_RIGHT, a
+			jp   nz, .chkR
+			
+			; D -> Idle crouching
+			jp   BasicInput_StartCrouchIdle
+			
+			
+			;
+			; Determine if we're holding forwards or backwards, depending on the side we're in.
+			;
+		.chkL:
+			; Left is backwards on the 1P side
+			ld   hl, iOBJInfo_OBJLstFlags
+			add  hl, de
+			bit  SPRB_XFLIP, [hl]				; Facing right / 1P side? (so L -> backward)
+			jp   nz, BasicInput_ChkCrouchBack	; If so, jump
+			
+			; In 95, this used to jump to somewhere different, as for a few characters,
+			; moving forwards while crouching allowed you to crouch walk.
+			; That code is gone in this game, so instead we jump to the idle code for crouching.
+			jp   BasicInput_StartCrouchIdle			; Otherwise, skip ahead
+		.chkR:
+			; Right is backwards on the 2P side
+			ld   hl, iOBJInfo_OBJLstFlags
+			add  hl, de
+			bit  SPRB_XFLIP, [hl]				; Facing right / 1P side? (so R -> forward)
+			jp   nz, BasicInput_StartCrouchIdle					; If so, skip ahead
+												; Otherwise, we're holding back
+		;
+		; Checks for blocking while crouching
+		;								
+		BasicInput_ChkCrouchBack:
+			; We can only block if the other player is attacking.
+			; Otherwise, fall-through into the idle crouch code.
+			ld   hl, iPlInfo_StatusOther
+			add  hl, bc
+			bit  PSB_PROJ, [hl]						; Is there an enemy projectile?
+			jp   nz, BasicInput_StartGroundBlock	; If so, block
+			
+			ld   hl, iPlInfo_MoveDamageValOther
+			add  hl, bc
+			ld   a, [hl]
+			or   a									; Is the other player attacking?
+			jp   nz, BasicInput_StartGroundBlock	; If so, block
+			
+		;
+		; Starts the crouch idle move.
+		;		
+		BasicInput_StartCrouchIdle:
+			; Don't start crouching if we're already doing so
+			ld   hl, iPlInfo_MoveId
+			add  hl, bc
+			ld   a, [hl]
+			cp   MOVE_SHARED_CROUCH		; iPlInfo_MoveId == MOVE_SHARED_CROUCH
+			jp   z, BasicInput_End		; If so, return
+			
+			; Set flags
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_GUARD, [hl]		; Don't guard
+										; PI21B_CROUCH got already set before
+			; New move
+			ld   a, MOVE_SHARED_CROUCH
+			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			jp   BasicInput_End
+			
+		;
+		; Starts the standing idle move.
+		;
+		BasicInput_StartIdle:
+			; Don't start idling if we're already doing so
+			ld   hl, iPlInfo_MoveId
+			add  hl, bc
+			ld   a, [hl]
+			cp   MOVE_SHARED_IDLE
+			jp   z, BasicInput_End
+			
+			; Set flags
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_GUARD, [hl]
+			res  PI21B_CROUCH, [hl]
+			
+			; New move
+			ld   a, MOVE_SHARED_IDLE
+			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			
+			jp   BasicInput_End
+
+		;
+		; Checks for moves triggered by pressing forwards.
+		;
+		BasicInput_ChkWalkForward:
+			; F+F -> Run forwards
+			ld   hl, MoveInput_FF
+			call MoveInputS_ChkInputDirStrict
+			jp   c, BasicInput_StartRun
+			; Fall-through
+			
+		;
+		; Starts walking forwards.
+		;
+		BasicInput_StartForward:
+			; Don't start if we're doing it already
+			ld   hl, iPlInfo_MoveId
+			add  hl, bc
+			ld   a, [hl]				; A = MoveId	
+			cp   MOVE_SHARED_WALK_F		; MoveId == forwards walking?
+			jp   z, BasicInput_End		; If so, return
+			
+			; Update flags
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_GUARD, [hl]		; Only set when switching to the actual block move
+			res  PI21B_CROUCH, [hl]		; Walking is not crouching
+			
+			; New move
+			ld   a, MOVE_SHARED_WALK_F
+			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			
+			; Apply continuous movement speed since we just nuked it
+			ld   hl, iPlInfo_SpeedX					; HL = Offset to walk speed for this char
+			call Pl_GetWord							; HL = Word value at iPlInfo_SpeedX
+			call Play_OBJLstS_SetSpeedH_ByXFlipR	; Move horizontally by that
+			jp   BasicInput_End
+			
+		;
+		; Starts walking backwards.
+		;
+		BasicInput_StartWalkBack:
+			; Don't start if we're doing it already
+			ld   hl, iPlInfo_MoveId
+			add  hl, bc
+			ld   a, [hl]				; A = MoveId	
+			cp   MOVE_SHARED_WALK_B		; MoveId == backwards walking?
+			jp   z, BasicInput_End		; If so, return
+			
+			; Update flags
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_GUARD, [hl]		; Only set when switching to the actual block move
+			res  PI21B_CROUCH, [hl]		; Walking is not crouching
+			
+			; New move
+			ld   a, MOVE_SHARED_WALK_B
+			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			
+			; Apply continuous movement speed since we just nuked it
+			ld   hl, iPlInfo_BackSpeedX				; HL = Offset to backwalk speed for this char
+			call Pl_GetWord							; HL = Word value at iPlInfo_BackSpeedX
+			call Play_OBJLstS_SetSpeedH_ByXFlipR	; Move horizontally by that
+			jp   BasicInput_End
+			
+		;
+		; Starts any kind of jump.
+		;
+		BasicInput_StartJump:
+		
+			;
+			; Update the running jump flag.
+			; While the resulting jump is the same as a forward hyper jump from crouching (see L002A97),
+			; this being a separate variables allows special moves to distinguish between the two.
+			;
+			ld   hl, iPlInfo_RunningJump
+			add  hl, bc
+			ld   [hl], $00				; iPlInfo_RunningJump = 0
+			
+			ld   hl, iPlInfo_MoveId
+			add  hl, bc
+			ld   a, [hl]
+			cp   MOVE_SHARED_DASH_F		; iPlInfo_MoveId == forward dash?
+			jp   nz, .start				; If not, skip
+			
+			ld   hl, iPlInfo_RunningJump
+			add  hl, bc
+			ld   [hl], $01
+			
+		.start:
+			; Backup the joypad info from before the jump to here.
+			; [TCRF?] Is this actually used?
+			ld   hl, iPlInfo_JoyKeys
+			add  hl, bc			; Seek to iPlInfo_JoyKeys
+			push de
+				ldi  a, [hl]	; A = iPlInfo_JoyKeys
+				ld   d, [hl]	; D = iPlInfo_JoyNewKeysLH
+				inc  hl			; Seek to iPlInfo_JoyKeysPreJump
+				ldi  [hl], a	; iPlInfo_JoyKeysPreJump = iPlInfo_JoyKeys
+				ld   [hl], d	; iPlInfo_JoyNewKeysLHPreJump = iPlInfo_JoyNewKeysLH
+			pop  de
+			
+			; Set standard flags except PI21B_NOSPECSTART, otherwise we
+			; couldn't start air specials.
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_GUARD, [hl]
+			res  PI21B_CROUCH, [hl]
+			set  PI21B_NOBASICINPUT, [hl]
+			set  PI21B_XFLIPLOCK, [hl]
+			
+			; Always start a neutral jump by default.
+			; The code for it will then detect if it should switch to
+			; either the backwards or forwards jumps.
+			ld   a, MOVE_SHARED_JUMP_N
+			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			jp   BasicInput_End
+			
+		;
+		; Starts a ground block if we weren't performing one already.
+		;
+		BasicInput_StartGroundBlock:
+			; Check if we're doing low/crouch or mid/standing block
+			ld   hl, iPlInfo_MoveId
+			add  hl, bc
+			ld   a, [hl]				; A = MoveId
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			bit  PI21B_CROUCH, [hl]		; Are we crouching?
+			jr   nz, .crouch			; If so, jump
+		.stand:
+			cp   MOVE_SHARED_BLOCK_G	; Are we mid blocking already?
+			jp   z, BasicInput_End		; If so, return
+			ld   a, MOVE_SHARED_BLOCK_G	; Otherwise, start the mid block
+			jr   .start
+		.crouch:
+			cp   MOVE_SHARED_BLOCK_C	; Are we low blocking already?
+			jp   z, BasicInput_End		; If so, return
+			ld   a, MOVE_SHARED_BLOCK_C	; Otherwise, start the low block
+		.start:
+			set  PI21B_GUARD, [hl]		; Reduce damage
+			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			jp   BasicInput_End
+			
+		;
+		; Starts air blocking.
+		;
+		BasicInput_StartAirBlock:
+			; If we're already air blocking, return
+			ld   hl, iPlInfo_MoveId
+			add  hl, bc
+			ld   a, [hl]
+			cp   MOVE_SHARED_BLOCK_A	; In the air block move?
+			jp   z, BasicInput_End		; If so, return
+			
+			; Otherwise, switch to it
+			ld   a, MOVE_SHARED_BLOCK_A	; A = Move to start
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			set  PI21B_GUARD, [hl]			; Guard against attacks
+			call Pl_Unk_SetNewMoveAndAnim	; Switch to move A
+			jp   BasicInput_End
+			
+		;
+		; Starts charging meter.
+		;
+		BasicInput_StartChargeMeter:
+			; Play SGB/DMG SFX
+			ld   a, SCT_CHARGEMETER
+			call HomeCall_Sound_ReqPlayExId
+			
+			; Set standard flags
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_GUARD, [hl]			; Player is vulnerable
+			res  PI21B_CROUCH, [hl]			; and standing
+			set  PI21B_NOBASICINPUT, [hl]	; Not cancellable by movement
+			set  PI21B_XFLIPLOCK, [hl]		; Doesn't turn if opponent jumps over
+			set  PI21B_NOSPECSTART, [hl]	; Not cancellable by specials
+			
+			; New move
+			ld   a, MOVE_SHARED_CHARGEMETER
+			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			jp   BasicInput_End
+			
+		;
+		; Starts a standing light punch.
+		;
+		BasicInput_StartLightPunch:
+			; Set flags
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_GUARD, [hl]	; Normals not guarded
+			res  PI21B_CROUCH, [hl]	; From standing
+			set  PI21B_NOBASICINPUT, [hl] 
+			set  PI21B_XFLIPLOCK, [hl]
+			; Normals can't be cancelled into specials.
+			; They can only be cancelled when hitting the opponent (PI21B_ALLOWHITCANCEL)
+			set  PI21B_NOSPECSTART, [hl] ; Can't cancel into special
+			
+			; New move
+			ld   a, MOVE_SHARED_PUNCH_L
+			call Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH
+			jp   BasicInput_End
+			
+		;
+		; Checks for input requiring an heavy punch.
+		;
+		BasicInput_ChkHeavyB:
+			call Play_Pl_AreBothBtnHeld				; Holding A+B?
+			jp   nc, BasicInput_StartHeavyPunch		; If not, skip
+			
+			; PK -> Heavy Attack
+			call Play_Pl_GetDirKeys_ByXFlipR		; Holding any d-pad key?
+			jp   nc, BasicInput_StartHeavyAttack	; If not, jump
+			; These are relative to the 1P side, so...
+			; F+PK -> Roll forwards 
+			bit  KEYB_RIGHT, a						; Holding forwards?
+			jp   nz, BasicInput_StartRollForward	; If so, jump
+			; B+PK -> Roll backwards 
+			jp   BasicInput_StartRollBackward		; Otherwise, assume holding backwards
+			
+		;
+		; Starts a standing heavy punch.
+		;
+		BasicInput_StartHeavyPunch:
+			; Play SGB/DMG SFX
+			ld   a, SCT_HEAVY
+			call HomeCall_Sound_ReqPlayExId
+			
+			; Set standard attack flags
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_GUARD, [hl]
+			res  PI21B_CROUCH, [hl]
+			set  PI21B_NOBASICINPUT, [hl]
+			set  PI21B_XFLIPLOCK, [hl]
+			set  PI21B_NOSPECSTART, [hl]
+			
+			; New move
+			ld   a, MOVE_SHARED_PUNCH_H
+			call Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH
+			jp   BasicInput_End
+			
+		;
+		; Starts a standing light kick.
+		;	
+		BasicInput_StartLightKick:
+			; Set standard attack flags
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_GUARD, [hl]
+			res  PI21B_CROUCH, [hl]
+			set  PI21B_NOBASICINPUT, [hl]
+			set  PI21B_XFLIPLOCK, [hl]
+			set  PI21B_NOSPECSTART, [hl]
+			
+			; New move
+			ld   a, MOVE_SHARED_KICK_L
+			call Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH
+			jp   BasicInput_End
+			
+		;
+		; Checks for input requiring an heavy kick.
+		; See also: BasicInput_ChkHeavyB
+		;
+		BasicInput_ChkHeavyA:
+			call Play_Pl_AreBothBtnHeld				; Holding A+B?
+			jp   nc, BasicInput_StartHeavyKick		; If not, skip
+			
+			; PK -> Heavy Attack
+			call Play_Pl_GetDirKeys_ByXFlipR		; Holding any d-pad key?
+			jp   nc, BasicInput_StartHeavyAttack	; If not, jump
+			; These are relative to the 1P side, so...
+			; F+PK -> Roll forwards 
+			bit  KEYB_RIGHT, a						; Holding forwards?
+			jp   nz, BasicInput_StartRollForward	; If so, jump
+			; B+PK -> Roll backwards 
+			jp   BasicInput_StartRollBackward		; Otherwise, assume holding backwards
+			
+		;
+		; Starts a standing heavy kick.
+		;
+		BasicInput_StartHeavyKick:
+			; Play SGB/DMG SFX
+			ld   a, SCT_HEAVY
+			call HomeCall_Sound_ReqPlayExId
+			
+			; Set standard attack flags
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_GUARD, [hl]
+			res  PI21B_CROUCH, [hl]
+			set  PI21B_NOBASICINPUT, [hl]
+			set  PI21B_XFLIPLOCK, [hl]
+			set  PI21B_NOSPECSTART, [hl]
+			
+			; New move
+			ld   a, MOVE_SHARED_KICK_H
+			call Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH
+			jp   BasicInput_End
+			
+		;
+		; Starts a crouching light punch.
+		;
+		BasicInput_StartCrouchLightPunch:
+			; [POI] If the autocharge cheat is enabled, crouching lps reflect projectiles.
+			ld   a, [wDipSwitch]
+			bit  DIPB_INFINITE_METER, a	; Is the cheat set?
+			jp   z, .go					; If not, skip
+			ld   hl, iPlInfo_Status
+			add  hl, bc					; Otherwise, make it reflect projectiles
+			set  PSB_PROJREFLECT, [hl]
+		.go:
+			; Set standard crouching attack flags.
+			; Same as normal, except without resetting PI21B_CROUCH.
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_GUARD, [hl]
+			set  PI21B_NOBASICINPUT, [hl]
+			set  PI21B_XFLIPLOCK, [hl]
+			set  PI21B_NOSPECSTART, [hl]
+			
+			; New move
+			ld   a, MOVE_SHARED_PUNCH_CL
+			call Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH
+			jp   BasicInput_End
+			
+		;
+		; Starts a crouching heavy punch.
+		;
+		BasicInput_StartCrouchHeavyPunch:
+			; Play SGB/DMG SFX
+			ld   a, SCT_HEAVY
+			call HomeCall_Sound_ReqPlayExId
+			
+			; [POI] If the autocharge cheat is enabled, crouching hps erase projectiles.
+			ld   a, [wDipSwitch]
+			bit  DIPB_INFINITE_METER, a	; Is the cheat set?
+			jp   z, .go					; If not, skip
+			ld   hl, iPlInfo_Status
+			add  hl, bc					; Otherwise, make it delete projectiles
+			set  PSB_PROJREM, [hl]
+		.go:
+		
+			; Set standard crouching attack flags.
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_GUARD, [hl]
+			set  PI21B_NOBASICINPUT, [hl]
+			set  PI21B_XFLIPLOCK, [hl]
+			set  PI21B_NOSPECSTART, [hl]
+			
+			; New move
+			ld   a, MOVE_SHARED_PUNCH_CH
+			call Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH
+			jp   BasicInput_End
+			
+		;
+		; Starts a crouching light kick.
+		;
+		BasicInput_StartCrouchLightKick:
+			; Set standard crouching attack flags.
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_GUARD, [hl]
+			set  PI21B_NOBASICINPUT, [hl]
+			set  PI21B_XFLIPLOCK, [hl]
+			set  PI21B_NOSPECSTART, [hl]
+			; New move
+			ld   a, MOVE_SHARED_KICK_CL
+			call Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH
+			jp   BasicInput_End
+			
+		;
+		; Starts a crouching heavy kick.
+		;
+		BasicInput_StartCrouchHeavyKick:
+			; Play SGB/DMG SFX
+			ld   a, SCT_HEAVY
+			call HomeCall_Sound_ReqPlayExId
+			
+			; Set standard crouching attack flags.
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_GUARD, [hl]
+			set  PI21B_NOBASICINPUT, [hl]
+			set  PI21B_XFLIPLOCK, [hl]
+			set  PI21B_NOSPECSTART, [hl]
+			
+			; New move
+			ld   a, MOVE_SHARED_KICK_CH
+			call Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH
+			jp   BasicInput_End
+			
+		;
+		; Starts a forwards roll.
+		;
+		BasicInput_StartRollForward:
+			; Can't hyper jump out of a normal roll
+			ld   hl, iPlInfo_RunningJump
+			add  hl, bc
+			ld   [hl], $00
+			
+			; Set standard flags
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_GUARD, [hl]
+			res  PI21B_CROUCH, [hl]
+			set  PI21B_NOBASICINPUT, [hl]
+			set  PI21B_XFLIPLOCK, [hl]
+			set  PI21B_NOSPECSTART, [hl]
+			
+			; Rolling is invulnerable to everything except throws (ie: moves that use iOBJInfo_ForceHitboxId)
+			inc  hl	; Seek to iPlInfo_22Flags
+			set  PI22B_NOHURTBOX, [hl]
+			set  PI22B_NOCOLIBOX, [hl]
+			
+			; New move
+			ld   a, MOVE_SHARED_ROLL_F
+			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			jp   BasicInput_End
+			
+		;
+		; Starts a backwards roll.
+		;
+		BasicInput_StartRollBackward:
+			; Can't hyper jump out of a normal roll
+			ld   hl, iPlInfo_RunningJump
+			add  hl, bc
+			ld   [hl], $00
+			
+			; Set standard flags
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_GUARD, [hl]
+			res  PI21B_CROUCH, [hl]
+			set  PI21B_NOBASICINPUT, [hl]
+			set  PI21B_XFLIPLOCK, [hl]
+			set  PI21B_NOSPECSTART, [hl]
+			
+			; Rolling is invulnerable to everything except throws (ie: moves that use iOBJInfo_ForceHitboxId)
+			inc  hl	; Seek to iPlInfo_22Flags
+			set  PI22B_NOHURTBOX, [hl]
+			set  PI22B_NOCOLIBOX, [hl]
+			
+			; New move
+			ld   a, MOVE_SHARED_ROLL_B
+			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			jp   BasicInput_End
+			
+		;
+		; Starts a standing "heavy attack" (the A+B one)
+		;
+		BasicInput_StartHeavyAttack:
+			; Play SGB/DMG SFX
+			ld   a, SCT_HEAVY
+			call HomeCall_Sound_ReqPlayExId
+			
+			; Set standard attack flags
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_GUARD, [hl]
+			res  PI21B_CROUCH, [hl]
+			set  PI21B_NOBASICINPUT, [hl]
+			set  PI21B_XFLIPLOCK, [hl]
+			set  PI21B_NOSPECSTART, [hl]
+			
+			; New move
+			ld   a, MOVE_SHARED_ATTACK_G
+			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			jp   BasicInput_End
+			
+		;
+		; Starts a forwards run (dash forwards).
+		;
+		BasicInput_StartRun:
+			; It's possible to cancel the run into a special move, so...
+			
+			; Clear input buffer so only newly pressed inputs count
+			; for starting a special in the middle of the run.
+			call Play_Pl_ClearJoyDirBuffer
+			
+			; Set standard flags except for PI21B_NOSPECSTART
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_GUARD, [hl]
+			res  PI21B_CROUCH, [hl]
+			set  PI21B_NOBASICINPUT, [hl]
+			set  PI21B_XFLIPLOCK, [hl]
+			
+			; New move
+			ld   a, MOVE_SHARED_DASH_F
+			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			
+			; Set continuous running speed
+			ld   hl, iPlInfo_SpeedX					; HL = Offset to walk speed for this char
+			call Pl_GetWord							; HL = Word value at iPlInfo_SpeedX
+			sla  l									; Run speed is double the walk speed
+			rl   h
+			call Play_OBJLstS_SetSpeedH_ByXFlipR	; Move horizontally by that
+			jp   BasicInput_End
+			
+		;
+		; Starts a backwards hop (dash backwards).
+		;
+		BasicInput_StartHopBack:
+			; Like with the forwards run
+			call Play_Pl_ClearJoyDirBuffer
+			
+			; Standard flags except for PI21B_NOSPECSTART, as it's possible
+			; to cancel the run into a special move.
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_GUARD, [hl]
+			res  PI21B_CROUCH, [hl]
+			set  PI21B_NOBASICINPUT, [hl]
+			set  PI21B_XFLIPLOCK, [hl]
+			
+			; New move
+			ld   a, MOVE_SHARED_DASH_B
+			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			jp   BasicInput_End
+			
+		;
+		; Starts a taunt, which reduces meter.
+		;
+		BasicInput_ChkTaunt:
+			; Play SGB/DMG SFX.
+			; Each character defines its own sound effect for the move.
+			; Some bootlegs with more characters don't change this list,
+			; causing an invalid command to be played (which kills the music until a new one starts).
+			ld   hl, iPlInfo_CharId
+			add  hl, bc
+			ld   a, [hl]	; A = CharId*2
+			srl  a			; /2 since it's a byte table
+			push de
+				ld   hl, .sndActTbl	; HL = Ptr to SCT table
+				ld   d, $00			; DE = Index
+				ld   e, a
+				add  hl, de			; Index the table
+			pop  de
+			ld   a, [hl]			; A = Sound command ID
+			call HomeCall_Sound_ReqPlayExId
+			
+			; Set standard flags except for PI21B_NOSPECSTART.
+			; It's possible to cancel it into a special, though unlike other
+			; versions the meter stops decreasing once that's done.
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_GUARD, [hl]
+			res  PI21B_CROUCH, [hl]
+			set  PI21B_NOBASICINPUT, [hl]
+			set  PI21B_XFLIPLOCK, [hl]
+			
+			; New move
+			ld   a, MOVE_SHARED_TAUNT
+			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			jp   BasicInput_End
+		.sndActTbl:
+			db SCT_TAUNT_B ; CHAR_ID_KYO     
+			db SCT_TAUNT_A ; CHAR_ID_DAIMON  
+			db SCT_TAUNT_B ; CHAR_ID_TERRY   
+			db SCT_TAUNT_B ; CHAR_ID_ANDY    
+			db SCT_TAUNT_B ; CHAR_ID_RYO     
+			db SCT_TAUNT_B ; CHAR_ID_ROBERT  
+			db SCT_TAUNT_D ; CHAR_ID_ATHENA  
+			db SCT_TAUNT_D ; CHAR_ID_MAI     
+			db SCT_TAUNT_C ; CHAR_ID_LEONA   
+			db SCT_TAUNT_A ; CHAR_ID_GEESE   
+			db SCT_TAUNT_A ; CHAR_ID_KRAUSER 
+			db SCT_TAUNT_A ; CHAR_ID_MRBIG   
+			db SCT_TAUNT_B ; CHAR_ID_IORI    
+			db SCT_TAUNT_D ; CHAR_ID_MATURE  
+			db SCT_TAUNT_D ; CHAR_ID_CHIZURU 
+			db SCT_TAUNT_A ; CHAR_ID_GOENITZ 
+			db SCT_TAUNT_A ; CHAR_ID_MRKARATE
+			db SCT_TAUNT_A ; CHAR_ID_OIORI   
+			db SCT_TAUNT_C ; CHAR_ID_OLEONA  
+			db SCT_TAUNT_C ; CHAR_ID_KAGURA  
+			
+		;
+		; Starts the intro/outro move to be executed/displayed over whatever
+		; we would normally display (the idle animation).
+		; IN
+		; - A: iPlInfo_IntroMoveId
+		;
+		BasicInput_StartIntroMove:
+			; Set standard flags
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_GUARD, [hl]
+			res  PI21B_CROUCH, [hl]
+			set  PI21B_NOBASICINPUT, [hl]
+			set  PI21B_XFLIPLOCK, [hl]
+			set  PI21B_NOSPECSTART, [hl]
+			
+			; New move
+			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			jp   BasicInput_End
+			
+		;
+		; Handles the second part of a ground throw (PLAY_THROWACT_NEXT02 & PLAY_THROWACT_NEXT03),
+		; when the opponent gets grabbed and before he starts rotating (PLAY_THROWACT_NEXT04).
+		; The opponent can throw tech during this mode.
+		;
+		BasicInput_StartGroundThrow:
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			; Set standard flags
+			res  PI21B_GUARD, [hl]
+			res  PI21B_CROUCH, [hl]
+			set  PI21B_NOBASICINPUT, [hl]
+			res  PI21B_XFLIPLOCK, [hl]	; What
+			set  PI21B_XFLIPLOCK, [hl]
+			set  PI21B_NOSPECSTART, [hl]
+			; Completely invulnerable while throwing
+			set  PI21B_INVULN, [hl]
+			
+			; New move
+			ld   a, MOVE_SHARED_THROW_6C
+			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			; Wait 1 frame
+			call Task_PassControlFar
+			; Switch to the next part of the throw.
+			ld   a, PLAY_THROWACT_NEXT03
+			ld   [wPlayPlThrowActId], a
+			; Show effects
+			call Play_StartThrowEffect
+			
+		.loop:
+			;
+			; Wait in this loop until the grab naturally ends, or if we get throw tech'd.
+			;
+			
+			; If we got into PLAY_THROWACT_NEXT04, the grab was confirmed.
+			; The opponent won't be able to cancel this anymore.
+			ld   a, [wPlayPlThrowActId]
+			cp   PLAY_THROWACT_NEXT04	; Did we proceed to the next part?
+			jp   z, .throwOk			; If so, jump
+			; If it's in anything other than PLAY_THROWACT_NEXT03, we got throw tech'd.
+			cp   PLAY_THROWACT_NEXT03	; Did we get throw 
+			jp   nz, .throwFail
+			
+			; We're still on PLAY_THROWACT_NEXT03, continue looping
+			call Task_PassControlFar
+			jp   .loop
+		.throwOk:
+			; Return to this to double the length of the "grab" portion of the throw.
+			; Visually, it looks as if it's possible to throw tech for half the time
+			; the grab mode is visible.
+			ld   a, PLAY_THROWACT_NEXT03
+			ld   [wPlayPlThrowActId], a
+			jp   BasicInput_End
+		.throwFail:
+			; Play the SFX
+			ld   a, SCT_THROWTECH
+			call HomeCall_Sound_ReqPlayExId
+			; We're on the receiving end of the throw tech.
+			; It should also reset the screen shake in case the throw was going to do one.
+			ld   a, MOVE_SHARED_THROWTECH_RECV
+			call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
+			; Flash the playfield (slightly differently) to signal that the throw got aborted
+			ld   a, $F0
+			ld   [wStageBGP], a
+			; We're not invulnerable anymore as the throw got aborted
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			res  PI21B_INVULN, [hl]
+			; Shake more before getting pushed back by the throw tech
+			inc  hl ; Seek to iPlInfo_22Flags
+			inc  hl ; Seek to iPlInfo_23Flags
+			set  PI23B_SHAKELONG, [hl]
+			jp   BasicInput_End
+			
+		;
+		; Handles the second part of an air throw.
+		;
+		BasicInput_StartAirThrow:
+			;
+			; Air throws are much simpler.
+			; They are immediately effective: the opponent rotates and there's no grab mode,
+			; so the opponent can't throw tech them.
+			; That's probably why the CPU can't be thrown with them.
+			;
+			ld   hl, iPlInfo_21Flags
+			add  hl, bc
+			; Set standard flags
+			res  PI21B_GUARD, [hl]
+			res  PI21B_CROUCH, [hl]
+			set  PI21B_NOBASICINPUT, [hl]
+			res  PI21B_XFLIPLOCK, [hl]	; What
+			set  PI21B_XFLIPLOCK, [hl]
+			set  PI21B_NOSPECSTART, [hl]
+			; Completely invulnerable while throwing
+			set  PI21B_INVULN, [hl]
+			
+			; New move
+			ld   a, MOVE_SHARED_THROW_6E
+			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			; Wait 1 frame
+			call Task_PassControlFar
+			; Switch to the next part of the throw.
+			ld   a, PLAY_THROWACT_NEXT03
+			ld   [wPlayPlThrowActId], a
+			; Show effects
+			call Play_StartThrowEffect
+			jp   BasicInput_End
+			
+		BasicInput_End:
+		pop  de
 	pop  bc
 	ret
-L00341B:;C
+	
+; =============== Pl_Unk_SetNewMoveAndAnim_* ===============
+; Set of subroutines that start a new move, initialize its animation, and optionally cause a specific effect.
+; Moves use one of these rather than directly calling Pl_SetNewMove.
+
+; =============== Pl_Unk_SetNewMoveAndAnim_StopSpeed ===============
+; Starts a new move and initializes its animation.
+; This is for continuous moves that kill the player momentum when used (ie: most of them).
+; IN
+; - A: Move ID
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+Pl_Unk_SetNewMoveAndAnim_StopSpeed:
 	push bc
-	push de
-	call L002849
-	ld   hl, $0007
-	add  hl, de
-	xor  a
-	ldi  [hl], a
-	ldi  [hl], a
-	ldi  [hl], a
-	ld   [hl], a
-	push de
-	pop  hl
-	call OBJLstS_DoAnimTiming_Initial
-	pop  de
+		push de
+			call Pl_SetNewMove
+			
+			; Reset player speed when starting the move
+			ld   hl, iOBJInfo_SpeedX
+			add  hl, de		; Seek to iOBJInfo_SpeedX
+			xor  a			; Clear...
+			ldi  [hl], a	; ...iOBJInfo_SpeedX
+			ldi  [hl], a	; ...iOBJInfo_SpeedXSub
+			ldi  [hl], a	; ...iOBJInfo_SpeedY
+			ld   [hl], a	; ...iOBJInfo_SpeedYSub
+			
+			; Set up initial GFX buffer info settings for the animation
+			push de
+			pop  hl
+			call OBJLstS_DoAnimTiming_Initial
+		pop  de
 	pop  bc
 	ret
-L003431:;C
+	
+; =============== Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH ===============
+; Starts a new move and initializes its animation.
+; This is for moves that clear iPlInfo_JoyNewKeysLH, which are short moves that shouldn't be continuous.
+; IN
+; - A: Move ID
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH:
 	push bc
-	push de
-	call L002849
-	ld   hl, $0046
-	add  hl, bc
+		push de
+			call Pl_SetNewMove
+			
+			; Reset iPlInfo_JoyNewKeysLH
+			ld   hl, iPlInfo_JoyNewKeysLH
+			add  hl, bc
+			ld   [hl], $00
+			
+			; Set up initial GFX buffer info settings for the animation
+			push de
+			pop  hl
+			call OBJLstS_DoAnimTiming_Initial
+		pop  de
+	pop  bc
+	ret
+	
+; =============== Pl_Unk_SetNewMoveAndAnim ===============	
+; Starts a new move and initializes its animation.
+; This has no special effect.
+; IN
+; - A: Move ID
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+Pl_Unk_SetNewMoveAndAnim:
+	push bc
+		push de
+			call Pl_SetNewMove
+			
+			; Set up initial GFX buffer info settings for the animation
+			push de
+			pop  hl
+			call OBJLstS_DoAnimTiming_Initial
+		pop  de
+	pop  bc
+	ret
+	
+; =============== Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset ===============
+; Starts a new move and initializes its animation.
+; Some of the moves that start an earthquake use this for ????
+; This also resets the ??? values at 3A 3D
+; IN
+; - A: Move ID
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset:
+	push bc
+		push de
+			call Pl_SetNewMove
+			
+			; Reset player speed when starting the move
+			ld   hl, iOBJInfo_SpeedX
+			add  hl, de		; Seek to iOBJInfo_SpeedX
+			xor  a			; Clear...
+			ldi  [hl], a	; ...iOBJInfo_SpeedX
+			ldi  [hl], a	; ...iOBJInfo_SpeedXSub
+			ldi  [hl], a	; ...iOBJInfo_SpeedY
+			ld   [hl], a	; ...iOBJInfo_SpeedYSub
+			
+			; Set up initial GFX buffer info settings for the animation
+			push de
+			pop  hl
+			call OBJLstS_DoAnimTiming_Initial
+		pop  de
+	pop  bc
+	
+	; Reset screen shake effect
+	ld   hl, wScreenShakeY
 	ld   [hl], $00
-	push de
-	pop  hl
-	call OBJLstS_DoAnimTiming_Initial
-	pop  de
-	pop  bc
-	ret
-L003444:;C
-	push bc
-	push de
-	call L002849
-	push de
-	pop  hl
-	call OBJLstS_DoAnimTiming_Initial
-	pop  de
-	pop  bc
-	ret
-L003451:;C
-	push bc
-	push de
-	call L002849
-	ld   hl, $0007
-	add  hl, de
-	xor  a
-	ldi  [hl], a
-	ldi  [hl], a
-	ldi  [hl], a
-	ld   [hl], a
-	push de
-	pop  hl
-	call OBJLstS_DoAnimTiming_Initial
-	pop  de
-	pop  bc
-	ld   hl, $C159
-	ld   [hl], $00
-	ld   hl, $003A
+	
+	; Reset all move damage fields that were just set by Pl_SetNewMove
+	ld   hl, iPlInfo_MoveDamageVal
 	add  hl, bc
-	xor  a
-	ldi  [hl], a
-	ldi  [hl], a
-	ld   [hl], a
-	ld   hl, $003D
+	xor  a			; Clear...
+	ldi  [hl], a	; ...iPlInfo_MoveDamageVal		
+	ldi  [hl], a	; ...iPlInfo_MoveDamageHitAnimId	
+	ld   [hl], a	; ...iPlInfo_MoveDamageFlags3	
+	ld   hl, iPlInfo_MoveDamageValNext
 	add  hl, bc
-	ldi  [hl], a
-	ldi  [hl], a
-	ld   [hl], a
+	ldi  [hl], a	; ...iPlInfo_MoveDamageValNext		
+	ldi  [hl], a	; ...iPlInfo_MoveDamageHitAnimIdNext	
+	ld   [hl], a	; ...iPlInfo_MoveDamageFlags3Next	
 	ret
+	
 L00347B:;C
-	ld   a, [$C173]
+	ld   a, [wPlayPlThrowActId]
 	or   a
 	ret  nz
 	push bc
@@ -11277,238 +12490,421 @@ L00347B:;C
 L00349D:;R
 	sra  h
 	rr   l
-	call L0034A6
+	call Play_OBJLstS_MoveH
 L0034A4:;R
 	pop  bc
 	ret
-L0034A6:;C
+	
+; =============== Play_OBJLstS_Move* ===============
+; Set of movement routines used by the move code.
+; There are also a few wrappers to the horizontal movement one that invert
+; the movement amount depending on a condition.
+	
+; =============== Play_OBJLstS_MoveH ===============
+; Moves the sprite mapping horizontally by the specified amount.
+; - DE: Ptr to wOBJInfo structure
+; - HL: Movement amount (pixels + subpixels), can be negative
+Play_OBJLstS_MoveH:
 	push bc
-	push de
-	push hl
-	pop  bc
-	ld   hl, $0003
-	add  hl, de
-	push hl
-	pop  de
-	push de
-	ld   a, [de]
-	ld   h, a
-	inc  de
-	ld   a, [de]
-	ld   l, a
-	bit  7, b
-	jp   nz, L0034C5
-	add  hl, bc
-	jp   nc, L0034D4
-	ld   hl, rJOYP
-	jp   L0034D4
-L0034C5:;J
-	ld   a, h
-	add  hl, bc
-	push af
-	ld   a, b
-	cpl
-	inc  a
-	ld   b, a
-	pop  af
-	sub  a, b
-	jp   nc, L0034D4
-	ld   hl, $0000
-L0034D4:;J
-	pop  de
-	ld   a, h
-	ld   [de], a
-	inc  de
-	ld   a, l
-	ld   [de], a
-	pop  de
+		push de
+			; BC = Movement amount
+			push hl
+			pop  bc
+			
+			; DE = Ptr to player X pos
+			ld   hl, iOBJInfo_X
+			add  hl, de
+			push hl
+			pop  de
+			
+			push de				; Save X pos ptr
+			
+				; H = iOBJInfo_X
+				ld   a, [de]
+				ld   h, a
+				inc  de
+				; L = iOBJInfo_XSub
+				ld   a, [de]
+				ld   l, a
+				
+				;
+				; Determine if we're moving left or right, as there are different cap checks between sides.
+				; 
+				bit  7, b			; MSB of high byte set? (BC < 0?)
+				jp   nz, .moveL		; If so, jump
+			.moveR:
+				; BC > 0
+				; XPos = MIN(XPos + BC, $FF00)
+				; The largest allowed value is at $FF pixels, $00 subpixels.
+				add  hl, bc			; HL += BC
+				jp   nc, .saveX		; Did it overflow? If not, jump
+				ld   hl, $FF00		; Otherwise, cap to $FF00
+				jp   .saveX
+			.moveL:
+				; BC < 0
+				; XPos = MAX(XPos + BC, $0000)		
+				
+				ld   a, h		; Save original iOBJInfo_X for underflow check
+				
+				; Move the OBJ left by BC
+				add  hl, bc		; HL +-= BC
+				
+				; The above instruction doesn't trigger the carry flag like we'd like since we're
+				; using it to subtract words.
+				; So we have to check for the underflow manually:
+				; If the original iOBJInfo_X value is less than the X movement amount, then
+				; we underflowed and should cap at $0000.
+				
+				push af			; Save orig iOBJInfo_X
+					; Force the negative movement speed to positive
+					ld   a, b	; XMove = -B
+					cpl
+					inc  a
+					ld   b, a
+				pop  af			; A = orig iOBJInfo_X
+				sub  a, b		; iOBJInfo_X >= XMoveAbs?
+				jp   nc, .saveX	; If so, skip (no underflow)
+				ld   hl, $0000	; Otherwise, cap to $0000
+				
+			.saveX:
+			
+			; Save back the updated X position
+			pop  de			; DE = Ptr to iOBJInfo_X
+			ld   a, h		
+			ld   [de], a	; Save pixel count
+			inc  de			; Seek to iOBJInfo_XSub
+			ld   a, l		
+			ld   [de], a	; Save subpixel count
+		pop  de
 	pop  bc
 	ret
-L0034DD:;C
+	
+; =============== Play_OBJLstS_MoveV ===============
+; Moves the sprite mapping vertically by the specified amount.
+; - DE: Ptr to wOBJInfo structure
+; - HL: Movement amount (pixels + subpixels), can be negative
+Play_OBJLstS_MoveV:
+	; This is similar to Play_OBJLstS_MoveH, except it performs no underflow/overflow checks at all.
+	
 	push bc
-	push de
-	push hl
-	pop  bc
-	ld   hl, $0005
-	add  hl, de
-	push hl
-	pop  de
-	push de
-	ld   a, [de]
-	ld   h, a
-	inc  de
-	ld   a, [de]
-	ld   l, a
-	add  hl, bc
-	pop  de
-	ld   a, h
-	ld   [de], a
-	inc  de
-	ld   a, l
-	ld   [de], a
-	pop  de
+		push de
+			; BC = Movement amount
+			push hl
+			pop  bc
+			
+			; DE = Ptr to player Y pos
+			ld   hl, iOBJInfo_Y
+			add  hl, de
+			push hl
+			pop  de
+			
+			push de				; Save Y pos ptr
+			
+				; H = iOBJInfo_Y
+				ld   a, [de]
+				ld   h, a
+				inc  de
+				; L = iOBJInfo_YSub
+				ld   a, [de]
+				ld   l, a
+				
+				; YPos += YMove
+				add  hl, bc
+				
+			; Save back the updated Y position
+			pop  de				; DE = Ptr to iOBJInfo_Y
+			
+			ld   a, h
+			ld   [de], a		; Save pixel count
+			inc  de				; Seek to iOBJInfo_YSub
+			ld   a, l
+			ld   [de], a		; Save subpixel count
+		pop  de
 	pop  bc
 	ret
-L0034F7:;C
+	
+; =============== Play_OBJLstS_MoveH_ByXFlipR ===============
+; Moves the specified sprite mapping horizontally, relative to the current player *visually* facing right.
+; If we're visually facing left, the movement amount is inverted.
+; Most moves use this for horizontal movement.
+; IN
+; - DE: Ptr to wOBJInfo structure
+; - HL: Movement amount (pixels + subpixels), can be negative
+Play_OBJLstS_MoveH_ByXFlipR:
 	push bc
-	push de
-	push hl
-	pop  bc
-	ld   hl, $0001
-	add  hl, de
-	bit  5, [hl]
-	jp   nz, L00350B
-	ld   a, b
-	cpl
-	ld   b, a
-	ld   a, c
-	cpl
-	ld   c, a
-	inc  bc
-L00350B:;J
-	push bc
-	pop  hl
-	call L0034A6
-	pop  de
+		push de
+			; BC = Movement amount
+			push hl	
+			pop  bc
+			
+			; Invert movement when facing left.
+			; Unlike the sprite display which uses the left-facing sprites as base value (SPRB_XFLIP clear),
+			; movement amounts use the right-facing sprites as base (SPRB_XFLIP set).
+			; (ie: if a move makes us move right, we'll go right when facing right)
+			; This is also the case for similar subroutines using related flags, like Play_OBJLstS_MoveH_ByXDirR.
+			ld   hl, iOBJInfo_OBJLstFlags
+			add  hl, de				; Seek to iOBJInfo_OBJLstFlags
+			bit  SPRB_XFLIP, [hl]	; Is the XFlip flag set? (visually facing right)
+			jp   nz, .moveH			; If so, jump
+			
+			; Otherwise, BC = -BC
+			ld   a, b	; Invert high byte
+			cpl
+			ld   b, a
+			ld   a, c	; Invert low byte
+			cpl
+			ld   c, a
+			inc  bc		; Account for cpl
+		.moveH:
+		
+			; HL = Updated movement amount
+			push bc
+			pop  hl
+			
+			; Perform the movement
+			call Play_OBJLstS_MoveH
+		pop  de
 	pop  bc
 	ret
-L003513:;C
+	
+; =============== Play_OBJLstS_MoveH_ByXDirR ===============
+; Moves the specified sprite mapping horizontally, relative to the current player *internally* facing right.
+; See also: Play_OBJLstS_MoveH_ByXFlipR
+; IN
+; - DE: Ptr to wOBJInfo structure
+; - HL: Movement amount (pixels + subpixels), can be negative
+Play_OBJLstS_MoveH_ByXDirR:
 	push bc
-	push de
-	push hl
-	pop  bc
-	ld   hl, $0001
-	add  hl, de
-	bit  3, [hl]
-	jp   nz, L003527
-	ld   a, b
-	cpl
-	ld   b, a
-	ld   a, c
-	cpl
-	ld   c, a
-	inc  bc
-L003527:;J
-	push bc
-	pop  hl
-	call L0034A6
-	pop  de
+		push de
+			; BC = Movement amount
+			push hl	
+			pop  bc
+			
+			; Invert movement when internally facing left.
+			ld   hl, iOBJInfo_OBJLstFlags
+			add  hl, de					; Seek to iOBJInfo_OBJLstFlags
+			bit  SPRXB_PLDIR_R, [hl]	; Is the R direction flag set? (internally facing right)
+			jp   nz, .moveH				; If so, jump
+			
+			; Otherwise, BC = -BC
+			ld   a, b	; Invert high byte
+			cpl
+			ld   b, a
+			ld   a, c	; Invert low byte
+			cpl
+			ld   c, a
+			inc  bc		; Account for cpl
+		.moveH:
+		
+			; HL = Updated movement amount
+			push bc
+			pop  hl
+			
+			; Perform the movement
+			call Play_OBJLstS_MoveH
+		pop  de
 	pop  bc
 	ret
-L00352F:;C
+	
+; =============== Play_OBJLstS_MoveH_ByOtherXFlipL ===============
+; Moves the specified sprite mapping horizontally, relative to the *other* player *visually* facing left.
+; See also: Play_OBJLstS_MoveH_ByXFlipR
+; IN
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+; - HL: Movement amount (pixels + subpixels), can be negative
+Play_OBJLstS_MoveH_ByOtherXFlipL:
 	push bc
-	push de
-	push hl
-	pop  de
-	ld   hl, $007F
-	add  hl, bc
-	bit  5, [hl]
-	jp   z, L003543
-	ld   a, d
-	cpl
-	ld   d, a
-	ld   a, e
-	cpl
-	ld   e, a
-	inc  de
-L003543:;J
-	push de
-	pop  hl
-	pop  de
-	push de
-	call L0034A6
-	pop  de
+		push de
+			; DE = Movement amount
+			push hl
+			pop  de
+			
+			; Since the other player is on the other side, the flag check is inverted.
+			
+			; Invert the movement speed when the other player faces right.
+			ld   hl, iPlInfo_OBJInfoFlagsOther
+			add  hl, bc				; Seek to iOBJInfo_OBJLstFlags for the other user
+			bit  SPRB_XFLIP, [hl]	; Is the XFlip flag cleared? (other player visually faces left)
+			jp   z, .moveH			; If so, jump
+			
+			; Otherwise, DE = -DE
+			ld   a, d
+			cpl
+			ld   d, a
+			ld   a, e
+			cpl
+			ld   e, a
+			inc  de
+		.moveH:
+			; HL = Updated movement amount
+			push de
+			pop  hl
+		pop  de
+		
+		push de
+			call Play_OBJLstS_MoveH
+		pop  de
 	pop  bc
 	ret
-L00354D:;C
+	
+; =============== Play_OBJLstS_MoveH_ByOtherProjOnR ===============
+; Moves the specified sprite mapping horizontally, relative to an enemy projectile being on the right.
+; See also: Play_OBJLstS_MoveH_ByXFlipR
+; IN
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+; - HL: Movement amount (pixels + subpixels), can be negative
+Play_OBJLstS_MoveH_ByOtherProjOnR:
 	push bc
-	push de
-	push hl
-	pop  bc
-	ld   hl, $0001
-	add  hl, de
-	bit  2, [hl]
-	jp   nz, L003561
-	ld   a, b
-	cpl
-	ld   b, a
-	ld   a, c
-	cpl
-	ld   c, a
-	inc  bc
-L003561:;J
-	push bc
-	pop  hl
-	call L0034A6
-	pop  de
+		push de
+			; BC = Movement amount
+			push hl
+			pop  bc
+			
+			; Invert the movement speed when the enemy projectile is on the left
+			ld   hl, iOBJInfo_OBJLstFlags
+			add  hl, de					; Seek to iOBJInfo_OBJLstFlags
+			bit  SPRXB_OTHERPROJR, [hl]	; Is the flag set? (Is an enemy projectile on the right?)
+			jp   nz, .moveH				; If so, jump
+			
+			; Otherwise, BC = -BC
+			ld   a, b
+			cpl
+			ld   b, a
+			ld   a, c
+			cpl
+			ld   c, a
+			inc  bc
+		.moveH:
+			; HL = Updated movement amount
+			push bc
+			pop  hl
+			
+			call Play_OBJLstS_MoveH
+		pop  de
 	pop  bc
 	ret
-L003569:;C
+	
+; =============== Play_OBJLstS_SetSpeed* ===============
+; Counterparts of Play_OBJLstS_Move* that, instead of moving the player immediately once,
+; they only write to the speed field in the OBJInfo, resulting in continuous speed across frames.
+; These subroutines follow the same set of rules when it comes to inverting the movement speed.
+
+
+; =============== Play_OBJLstS_SetSpeedH_ByXFlipR ===============
+; Sets the horizontal movement speed for the specified sprite mapping, relative to the current player *visually* facing right.
+; Most moves use this in their code.
+; IN
+; - DE: Ptr to wOBJInfo structure
+; - HL: Movement speed (pixels + subpixels), can be negative
+Play_OBJLstS_SetSpeedH_ByXFlipR:
 	push bc
-	push hl
-	pop  bc
-	ld   hl, $0001
-	add  hl, de
-	bit  5, [hl]
-	jp   nz, L00357C
-	ld   a, b
-	cpl
-	ld   b, a
-	ld   a, c
-	cpl
-	ld   c, a
-	inc  bc
-L00357C:;J
-	ld   hl, $0007
-	add  hl, de
-	ld   [hl], b
-	inc  hl
-	ld   [hl], c
+	
+		; Handle movement amount exactly like in Play_OBJLstS_MoveH_ByXFlipR
+	
+		; BC = Speed
+		push hl
+		pop  bc
+		
+		; Invert the speed when visually facing left.
+		ld   hl, iOBJInfo_OBJLstFlags
+		add  hl, de				; Seek to iOBJInfo_OBJLstFlags
+		bit  SPRB_XFLIP, [hl]	; Is the XFlip flag set? (visually facing right)
+		jp   nz, .setSpd		; If so, jump
+		
+		; Otherwise, BC = -BC
+		ld   a, b
+		cpl
+		ld   b, a
+		ld   a, c
+		cpl
+		ld   c, a
+		inc  bc
+		
+	.setSpd:
+		; Save updated speed value
+		ld   hl, iOBJInfo_SpeedX
+		add  hl, de		; Seek to X speed
+		ld   [hl], b	; Write iOBJInfo_SpeedX
+		inc  hl			; Seek to X subpixel speed
+		ld   [hl], c	; Write iOBJInfo_SpeedXSub
 	pop  bc
 	ret
-L003585:;C
+	
+; =============== Play_OBJLstS_SetSpeedH_ByXDirL ===============
+; Sets the horizontal movement speed for the specified sprite mapping, relative to the current player *internally* facing *left*.
+; See also: Play_OBJLstS_SetSpeedH_ByXFlipR
+; IN
+; - DE: Ptr to wOBJInfo structure
+; - HL: Movement speed (pixels + subpixels), can be negative
+Play_OBJLstS_SetSpeedH_ByXDirL:
 	push bc
-	push hl
-	pop  bc
-	ld   hl, $0001
-	add  hl, de
-	bit  3, [hl]
-	jp   z, L003598
-	ld   a, b
-	cpl
-	ld   b, a
-	ld   a, c
-	cpl
-	ld   c, a
-	inc  bc
-L003598:;J
-	ld   hl, $0007
-	add  hl, de
-	ld   [hl], b
-	inc  hl
-	ld   [hl], c
+		; BC = Speed
+		push hl
+		pop  bc
+		
+		; Invert the speed when internally facing right
+		ld   hl, iOBJInfo_OBJLstFlags
+		add  hl, de					; Seek to iOBJInfo_OBJLstFlags
+		bit  SPRXB_PLDIR_R, [hl]	; Is the R direction flag *clear*? (internally facing left)
+		jp   z, .setSpd				; If so, jump
+		
+		; Otherwise, BC = -BC
+		ld   a, b
+		cpl
+		ld   b, a
+		ld   a, c
+		cpl
+		ld   c, a
+		inc  bc
+		
+	.setSpd:
+		; Save updated speed value
+		ld   hl, iOBJInfo_SpeedX
+		add  hl, de
+		ld   [hl], b
+		inc  hl
+		ld   [hl], c
 	pop  bc
 	ret
-L0035A1:;C
+	
+; =============== Play_OBJLstS_SetSpeedH ===============
+; Sets the horizontal movement speed as-is for the specified sprite mapping.
+; IN
+; - DE: Ptr to wOBJInfo structure
+; - HL: Movement speed (pixels + subpixels), can be negative
+Play_OBJLstS_SetSpeedH:
 	push bc
-	push hl
-	pop  bc
-	ld   hl, $0007
-	add  hl, de
-	ld   [hl], b
-	inc  hl
-	ld   [hl], c
+		; BC = Speed
+		push hl
+		pop  bc
+		; Seek to iOBJInfo_SpeedX
+		ld   hl, iOBJInfo_SpeedX
+		add  hl, de
+		; Replace it
+		ld   [hl], b
+		inc  hl
+		ld   [hl], c
 	pop  bc
 	ret
-L0035AD:;C
+; =============== Play_OBJLstS_SetSpeedV ===============
+; Sets the vertical movement speed as-is for the specified sprite mapping.
+; IN
+; - DE: Ptr to wOBJInfo structure
+; - HL: Movement speed (pixels + subpixels), can be negative
+Play_OBJLstS_SetSpeedV:
 	push bc
-	push hl
-	pop  bc
-	ld   hl, $0009
-	add  hl, de
-	ld   [hl], b
-	inc  hl
-	ld   [hl], c
+		; BC = Speed
+		push hl
+		pop  bc
+		; Seek to iOBJInfo_SpeedY
+		ld   hl, iOBJInfo_SpeedY
+		add  hl, de
+		; Replace it
+		ld   [hl], b
+		inc  hl
+		ld   [hl], c
 	pop  bc
 	ret
 ; =============== OBJLstS_ApplyXSpeed ===============
@@ -11767,77 +13163,141 @@ L0036C7:;J
 	pop  bc
 	xor  a
 	ret
-L0036CB:;C
-	ld   hl, $0060
+; =============== MoveInputS_CanStartSpecialMove ===============
+; Validates if it's possible to perform a new special move.
+; This also returns if we're on the ground.
+; IN
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+; OUT
+; - C flag: If set, validation failed
+; - Z flag: If set, we're on the ground (only if validation passed)
+MoveInputS_CanStartSpecialMove:
+	
+	;
+	; If we got hit by Chizuru's super, we can only use normals.
+	;
+	ld   hl, iPlInfo_NoSpecialTimer
+	add  hl, bc			; Seek to iPlInfo_NoSpecialTimer
+	ld   a, [hl]
+	or   a				; FlashSpeedTimer != 0?
+	jp   nz, .retNoMove	; If so, return
+	
+	;
+	; If a special move is being executed already (PS_SPECMOVE set), don't allow executing a new one
+	;
+	ld   hl, iPlInfo_Status
+	add  hl, bc				; Seek to iPlInfo_Status
+	bit  PSB_SPECMOVE, [hl]	; Is the bit set?
+	jp   nz, .retNoMove		; If so, return
+	
+
+	; It's allowed to start a move when blocking
+	; 
+	; ??? What are the special cases?
+	;
+	ld   hl, iPlInfo_21Flags
+	add  hl, bc				; Seek to iPlInfo_21Flags
+	
+	
+	;
+	; If the player is dizzy or is getting combo'd, no special moves can be input...
+	; ...except when blockingm, as it's possible to cancel blockstun.
+	; Note that all of the guard cancel validation already happened
+	; by the time we get here.
+	;
+	bit  PI21B_GUARD, [hl]		; Is the player blocking? (checked here since PI21B_COMBORECV also applies when blocking)
+	jp   nz, .chkMoveId			; If so, jump
+	bit  PI21B_COMBORECV, [hl]	; Are we getting combo'd?
+	jp   nz, .retNoMove			; If so, return
+	call Play_Pl_IsDizzy		; Is the player dizzy?
+	jp   nz, .retNoMove			; If so, return
+	
+.chkMoveId:
+	
+	;
+	; Can't cancel throws into specials.
+	;
+	ld   hl, iPlInfo_MoveId
 	add  hl, bc
 	ld   a, [hl]
-	or   a
-	jp   nz, L003723
-	ld   hl, $0020
-	add  hl, bc
-	bit  1, [hl]
-	jp   nz, L003723
-	ld   hl, $0021
-	add  hl, bc
-	bit  3, [hl]
-	jp   nz, L0036F1
-	bit  4, [hl]
-	jp   nz, L003723
-	call L003CAC
-	jp   nz, L003723
-L0036F1:;J
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	cp   $6C
-	jp   z, L003723
-	cp   $6E
-	jp   z, L003723
-	ld   hl, $0021
-	add  hl, bc
-	bit  6, [hl]
-	jp   nz, L00370E
-	bit  2, [hl]
-	jp   nz, L003723
-L00370E:;J
-	xor  a
-	ld   hl, $0005
-	add  hl, de
-	ld   a, [hl]
-	cp   $88
-	jp   z, L00371E
-	ld   a, $01
-	jp   L00371F
-L00371E:;J
-	xor  a
-L00371F:;J
-	or   a
+	cp   MOVE_SHARED_THROW_6C
+	jp   z, .retNoMove
+	cp   MOVE_SHARED_THROW_6E
+	jp   z, .retNoMove
+	
+	;
+	; Can't cancel if we've been explicitly denied that.
+	;
+	ld   hl, iPlInfo_21Flags
+	add  hl, bc						; Seek to iPlInfo_21Flags
+	bit  PI21B_ALLOWHITCANCEL, [hl]		; Can we combo off the previous hit?
+	jp   nz, .moveOk				; If so, jump (skip check)
+	bit  PI21B_NOSPECSTART, [hl]	; Are we allowed to cancel the move into the special?
+	jp   nz, .retNoMove				; If not, return
+	
+.moveOk:
+
+	;
+	; If we got here, the validation passed.
+	; Determine if we're in the air or not, which is used by the code
+	; calling this.
+	;
+	xor  a					; Reset flag
+	ld   hl, iOBJInfo_Y
+	add  hl, de				
+	ld   a, [hl]			; A = Y pos
+	cp   PL_FLOOR_POS		; Are we at ground level? (A == $88)
+	jp   z, .retOkGround	; If so, jump
+.retOkAir:
+	ld   a, $01	; A = 1 (on air)
+	jp   .retOk
+.retOkGround:
+	xor  a		; A = 0 (on ground)
+.retOk:
+	or   a		; Update Z flag
 	scf
-	ccf
+	ccf			; Clear carry
 	ret
-L003723:;J
-	scf
+.retNoMove:
+	scf			; Set carry
 	ret
-L003725:;C
+	
+; =============== MoveInputS_CanStartSuperMove ===============
+; Validates if it's possible to perform a new super move.
+; This doesn't distinguish between super or desperation supers.
+; IN
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+; OUT
+; - C flag: If set, we can't start a super
+MoveInputS_CanStartSuperMove:
+	
+	; With "infinite" meter cheat, you have infinite supers
 	ld   a, [wDipSwitch]
-	bit  3, a
-	jp   nz, L003741
-	ld   hl, $0050
+	bit  DIPB_INFINITE_METER, a	; Is the flag set?
+	jp   nz, .retOk				; If so, return clear
+	
+	; If the POW bar is at the maximum value, we can start a super
+	ld   hl, iPlInfo_Pow
+	add  hl, bc
+	ld   a, [hl]		
+	cp   PLAY_POW_MAX			; iPlInfo_Pow == $28?
+	jp   z, .retOk				; If so, jump
+	
+	; When health reaches critical level (< $18), we can always start a super
+	ld   hl, iPlInfo_Health
 	add  hl, bc
 	ld   a, [hl]
-	cp   $28
-	jp   z, L003741
-	ld   hl, $004E
-	add  hl, bc
-	ld   a, [hl]
-	cp   $18
-	jp   nc, L003743
-L003741:;J
-	xor  a
+	cp   PLAY_HEALTH_CRITICAL	; iPlInfo_Health >= $18?
+	jp   nc, .retNg				; If so, we can't start a super
+.retOk:							; Otherwise, we can
+	xor  a	; Clear carry
 	ret
-L003743:;J
-	scf
+.retNg:
+	scf		; Set carry
 	ret
+	
 L003745:;C
 	ld   hl, $0063
 	add  hl, bc
@@ -11861,168 +13321,344 @@ L003763:;C
 	add  hl, bc
 	bit  0, [hl]
 	ret
-L00376A:;C
+	
+; =============== MoveInputS_CheckMoveLHVer ===============
+; Determines if the heavy version of the move should be started.
+;
+; This is used after successfully performing an input for a move and before
+; setting the Move ID, as the Light and Heavy versions of the same move
+; use separate Move IDs.
+;
+; IN
+; - BC: Ptr to wPlInfo structure
+; OUT
+; - C flag: If set, the "hidden heavy" version can be used.
+;           This is an heavy attack done at Max Power *WHEN* the infinite meter cheat is enabled.
+; - Z flag: If set, the attack is heavy
+MoveInputS_CheckMoveLHVer:
+
+	;
+	; Perform the two initial checks for the cheated heavy attack
+	;
 	ld   a, [wDipSwitch]
-	bit  3, a
-	jp   z, L00377C
-	ld   hl, $0050
+	bit  DIPB_INFINITE_METER, a	; Is the cheat set?
+	jp   z, .chkNorm			; If not, jump
+	
+	ld   hl, iPlInfo_Pow
 	add  hl, bc
 	ld   a, [hl]
-	cp   $28
-	jp   z, L003785
-L00377C:;J
-	ld   hl, $0022
-	add  hl, bc
-	bit  1, [hl]
+	cp   PLAY_POW_MAX			; At max power?
+	jp   z, .chkCheated			; If so, jump
+	
+.chkNorm:
+	;
+	; Perform the heavy flag check, as previously set by MoveInputS_CheckLHType.
+	; The updated result in the Z flag will be our return value.
+	;
+	ld   hl, iPlInfo_22Flags
+	add  hl, bc					; Seek to flags
+	bit  PI22B_HEAVY, [hl]		; Update Z flag
 	scf
-	ccf
+	ccf							; Clear carry
 	ret
-L003785:;J
-	ld   hl, $0022
+.chkCheated:
+	
+	;
+	; Perform the final one.
+	; There's no "hidden light", it just falls back to the normal check
+	;
+	ld   hl, iPlInfo_22Flags
 	add  hl, bc
-	bit  1, [hl]
-	jp   z, L00377C
-	scf
+	bit  PI22B_HEAVY, [hl]	; Heavy bit set?
+	jp   z, .chkNorm		; If not, jump
+	scf						; Set carry
 	ret
-L003790:;C
+	
+; =============== MoveInputS_CheckSuperDesperation ===============
+; Determines if the desperation version of the super move should be used.
+;
+; This is used after successfully performing an input for a super move,
+; and is the super move equivalent to the light/heavy check on MoveInputS_CheckMoveLHVer.
+;
+; IN
+; - BC: Ptr to wPlInfo structure
+; OUT
+; - C flag: If set, the desperation super is active
+; - Z flag: If set, the hidden desperation super is active, if present (only applicable if C is also set)
+MoveInputS_CheckSuperDesperation:
+
+	;
+	; Dsperation supers are triggered by pulling off a super at max meter with low health.
+	;
+	; When the "infinite" meter cheat is enabled, only max meter is required.
+	; [POI] If the low health requirement is still met, an hidden desperation is triggered,
+	;       though only one super move (L064D82) actually checks for it.
+	;       There is no way to trigger it without the cheat.
+	;
+
+	;
+	; The rules are slightly different if the "infinite" meter cheat is enabled.
+	;
 	ld   a, [wDipSwitch]
-	bit  3, a
-	jp   z, L0037AF
-	ld   hl, $0050
+	bit  DIPB_INFINITE_METER, a	; Is the cheat set?
+	jp   z, .chkNormal			; If not, jump
+	
+.chkCheat:
+	; Desperation supers require max meter as usual.
+	; This is the only requirement with the cheat enabled.
+	ld   hl, iPlInfo_Pow
 	add  hl, bc
 	ld   a, [hl]
-	cp   $28
-	jp   nz, L0037C6
-	ld   hl, $004E
+	cp   PLAY_POW_MAX			; Pow != MAX?
+	jp   nz, .retNorm			; If so, use normal super
+
+	; If we got here, there's a guaranteed desperation super.
+	; Getting into critical health anyway enables an hidden desperation super.
+	ld   hl, iPlInfo_Health
 	add  hl, bc
 	ld   a, [hl]
-	cp   $18
-	jp   nc, L0037C8
-	jp   L0037CD
-L0037AF:;J
-	ld   hl, $0050
+	cp   PLAY_HEALTH_CRITICAL	; Health >= CRITICAL?
+	jp   nc, .retDesp			; If so, use desperation
+	
+	jp   .retDespHidden			; Otherwise, use hidden desperation
+	
+.chkNormal:
+	
+	; Desperation supers require max meter.
+	ld   hl, iPlInfo_Pow
 	add  hl, bc
 	ld   a, [hl]
-	cp   $28
-	jp   nz, L0037C6
-	ld   hl, $004E
+	cp   PLAY_POW_MAX			; Pow != MAX?
+	jp   nz, .retNorm			; If so, use normal super
+	
+	; Desperation supers require critical health.
+	ld   hl, iPlInfo_Health
 	add  hl, bc
 	ld   a, [hl]
-	cp   $18
-	jp   nc, L0037C6
-L0037C3: db $C3;X
-L0037C4: db $C8;X
-L0037C5: db $37;X
-L0037C6:;J
-	xor  a
+	cp   PLAY_HEALTH_CRITICAL	; Health >= CRITICAL?
+	jp   nc, .retNorm			; If so, use normal super
+	
+	; Requirements ok
+	jp   .retDesp
+	
+.retNorm:
+	xor  a		; Z flag set, (C flag unusable)
 	ret
-L0037C8:;J
+.retDesp:
 	ld   a, $01
-	or   a
-	scf
+	or   a		; Z flag clear
+	scf			; C flag set
 	ret
-L0037CD:;J
-	xor  a
-	scf
+.retDespHidden:
+	xor  a		; Z flag set
+	scf			; C flag set
 	ret
-L0037D0:;C
-	call L002EFA
-	ld   hl, $0020
+; =============== MoveInputS_SetSpecMove_StopSpeed ===============
+; Makes the specified player start a new special or super move.
+; Most special moves use this subroutine to start them, and as a result
+; of using Pl_Unk_SetNewMoveAndAnim_StopSpeed, they cancel the player's momentum. 
+; IN
+; - A: Move ID
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+MoveInputS_SetSpecMove_StopSpeed:
+	; Force syncronize the player's direction before starting the move
+	call OBJLstS_SyncXFlip
+	
+	; HL = Ptr to status flag
+	ld   hl, iPlInfo_Status
 	add  hl, bc
-	cp   $64
-	jp   c, L0037E8
-	set  6, [hl]
+	
+	;
+	; If we're starting a super move, set its respective flag and
+	; display the super sparkle.
+	;
+	; This will affect moves $64-$6A.
+	;
+	; Note that moves higher than $6A do not get set through this subroutine,
+	; so it's safe to check < $64.
+	cp   MOVE_SPECIAL_START		; MoveId < $64?
+	jp   c, .setFlags			; If so, skip
+	set  PSB_SUPERMOVE, [hl]
 	push af
-	push hl
-	ld   hl, $0000
-	call L00381A
-	pop  hl
+		push hl
+			ld   hl, $0000
+			call Play_StartSuperSparkle
+		pop  hl
 	pop  af
-L0037E8:;J
-	set  1, [hl]
-	inc  hl
-	set  0, [hl]
-	set  1, [hl]
-	set  2, [hl]
-	res  3, [hl]
-	res  5, [hl]
-	res  7, [hl]
-	inc  hl
-	res  6, [hl]
-	res  7, [hl]
+	
+.setFlags:
+	;
+	; Set all of the default flags for starting a move.
+	;
+	
+	; iPlInfo_Status
+	; Mark that a special move is in progress.
+	set  PSB_SPECMOVE, [hl]
+	
+	inc  hl			; Seek to iPlInfo_21Flags
+	set  PI21B_NOBASICINPUT, [hl] 	; Special moves can't be cancelled by normal movement
+	set  PI21B_XFLIPLOCK, [hl] 		; Lock the player's direction until the move is over
+	set  PI21B_NOSPECSTART, [hl] 	; For consistency (PSB_SPECMOVE takes care of this already)
+	res  PI21B_GUARD, [hl]			; Receive full damage by default if hit out of the special
+	res  PI21B_CROUCH, [hl]			; Remove crouch flag in case we performed the move while crouching
+	res  PI21B_INVULN, [hl] 		; Disable invulnerability in case we got here from guard cancels
+	
+	;
+	; Remove any temporary invuln. effect on player
+	;
+	inc  hl			; Seek to iPlInfo_22Flags
+	res  PI22B_NOHURTBOX, [hl]
+	res  PI22B_NOCOLIBOX, [hl]
+	
+	;
+	; Actually start the move, stopping the player momentum
+	;
 	push hl
-	call L00341B
+		call Pl_Unk_SetNewMoveAndAnim_StopSpeed
 	pop  hl
-	dec  hl
-	bit  6, [hl]
-	jp   z, L003819
-	inc  hl
-	set  2, [hl]
-	ld   hl, $001B
-	add  hl, de
+	
+	;
+	; When starting a new special off another hit, flag that we're doing a combo
+	; and animate it much faster by removing the delay.
+	;
+	; This means the move animation will only wait for the player graphics to load
+	; before switching to the next frame.
+	;
+	dec  hl						; Seek to iPlInfo_21Flags
+	bit  PI21B_ALLOWHITCANCEL, [hl]	; Did we combo the move off a previous hit?
+	jp   z, .ret				; If not, return
+	; Set that we started a combo'd move
+	inc  hl						
+	set  PI22B_HITCOMBO, [hl]
+	; Note that Pl_Unk_SetNewMoveAndAnim_StopSpeed set us a new FrameLeft/FrameTotal value.
+	; In case of moves with slow animations (iOBJInfo_FrameLeft > $7F), don't remove the delay.
+	ld   hl, iOBJInfo_FrameLeft
+	add  hl, de		; Seek to iOBJInfo_FrameLeft
 	ld   a, [hl]
-	bit  7, a
-	jp   nz, L003819
-	ld   [hl], $00
-	inc  hl
-	ld   [hl], $00
-L003819:;J
+	bit  7, a		; iOBJInfo_FrameLeft > $7F? (MSB set)
+	jp   nz, .ret	; If so, return
+	ld   [hl], $00	; Otherwise, reset it
+	inc  hl			
+	ld   [hl], $00	; and reset iOBJInfo_FrameTotal
+.ret:
 	ret
-L00381A:;C
-	ld   a, $91
+	
+; =============== Play_StartSuperSparkle ===============
+; Starts the super sparkle animation over the specified sprite mapping.
+; Meant for special or super moves only.
+; IN
+; - A: Move ID
+; - DE: Ptr to wOBJInfo structure
+; - H: X Offset (always $00)
+; - L: Y Offset (always $00)
+Play_StartSuperSparkle:
+	; Play SFX associated with the sparkle effect
+	ld   a, SFX_SUPERMOVE
 	call HomeCall_Sound_ReqPlayExId
+	
 	push bc
-	push de
-	push hl
-	push de
-	pop  bc
-	ld   hl, $0100
-	add  hl, bc
-	push hl
-	pop  de
-	ld   [hl], $80
-	ld   hl, $0020
-	add  hl, de
-	ld   [hl], $02
-	inc  hl
-	ld   [hl], $D7
-	inc  hl
-	ld   [hl], $45
-	ld   hl, $0010
-	add  hl, de
-	ld   [hl], $01
-	inc  hl
-	ld   [hl], $6F
-	inc  hl
-	ld   [hl], $58
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $001B
-	add  hl, de
-	ld   [hl], $00
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $0028
-	add  hl, de
-	ld   [hl], $14
-	call L00251B
-	pop  hl
-	push hl
-	ld   l, $00
-	call L0034F7
-	pop  hl
-	ld   h, L
-	ld   l, $00
-	call L0034DD
-	pop  de
+		push de
+			push hl
+	
+				; BC = Ptr to wOBJInfo_Pl*
+				push de	
+				pop  bc
+				
+				;--
+				;
+				; DE = Ptr to the sparkle wOBJInfo.
+				;
+				; Because they are organized in a specific order, this is always $100 bytes (4 OBJInfo) after the
+				; wOBJInfo for the current player.
+				; This results in:
+				; wOBJInfo_Pl1 + $100 = wOBJInfo_Pl1SuperSparkle
+				; wOBJInfo_Pl2 + $100 = wOBJInfo_Pl2SuperSparkle
+				;
+				ld   hl, OBJINFO_SIZE*4 ; HL = BC + $100
+				add  hl, bc
+				
+				push hl	; DE = HL
+				pop  de
+				;--
+				;
+				; Set up all fields.
+				;
+				
+				; Display the sparkle
+				ld   [hl], OST_VISIBLE
+				
+				; Set the code pointer
+				ld   hl, iOBJInfo_SuperSparkle_CodeBank
+				add  hl, de
+				ld   [hl], BANK(ExOBJ_SuperSparkle) ; BANK $02
+				inc  hl			
+				ld   [hl], LOW(ExOBJ_SuperSparkle)	
+				inc  hl			
+				ld   [hl], HIGH(ExOBJ_SuperSparkle)
+				
+				; Set sprite mapping
+				ld   hl, iOBJInfo_BankNum
+				add  hl, de
+				ld   [hl], BANK(OBJLstPtrTable_SuperSparkle)	; BANK $01
+				inc  hl
+				ld   [hl], LOW(OBJLstPtrTable_SuperSparkle)
+				inc  hl
+				ld   [hl], HIGH(OBJLstPtrTable_SuperSparkle)
+
+				; Start anim from the beginning
+				inc  hl			
+				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset = 0
+				
+				; ??? Display each animation frame for a single frame each
+				ld   hl, iOBJInfo_FrameLeft
+				add  hl, de
+				ld   [hl], $00
+				inc  hl
+				ld   [hl], $00
+				
+				; Display for $14 frames
+				ld   hl, iOBJInfo_SuperSparkle_EnaTimer
+				add  hl, de
+				ld   [hl], $14
+				
+				; Display sparkle over the player.
+				; This will stay this original position, even if the player moves after.
+				
+				; BC = Source (wOBJInfo_Pl*)
+				; DE = Destination (wOBJInfo_Pl*SuperSparkle)
+				call OBJLstS_Overlap
+			pop  hl
+			
+			;--
+			; [POI] Offset the vertical and horizontal positions of the sprite mapping.
+			;       However... H and L are always $00, meaning this does nothing.
+			
+			; XPos += H
+			push hl
+				ld   l, $00 ; 0 subpixels, H pixels
+				call Play_OBJLstS_MoveH_ByXFlipR
+			pop  hl
+			
+			; YPos += L
+			ld   h, l	; L pixels
+			ld   l, $00 ; 0 subpixels
+			call Play_OBJLstS_MoveV
+			;--
+		pop  de
 	pop  bc
 	ret
-L00386A:;C
+; =============== Play_StartThrowEffect ===============
+; Sets the visual/audio effects triggered when throwing someone.
+Play_StartThrowEffect:
+	; Flash the playfield's palette
 	ld   a, $FF
 	ld   [wStageBGP], a
-	ld   a, $1B
+	; Play SFX
+	ld   a, SCT_THROW
 	call HomeCall_Sound_ReqPlayExId
 	ret
+	
 L003875:;C
 	ld   a, h
 	ld   [$C176], a
@@ -12143,176 +13779,278 @@ L003909:;R
 L00390B:;J
 	scf
 	ret
-L00390D:;C
-	ld   a, [$C173]
-	cp   $00
-	jp   nz, L003A26
-	ld   hl, $007A
+	
+; =============== Play_Pl_ChkThrowInput ===============
+; Handles the input for throwing the opponent.
+; IN
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+; OUT
+; - A: wPlayPlThrowOpMode value, if a throw was started
+; - C flag: If set, a throw was started
+Play_Pl_ChkThrowInput:
+
+	;--
+	;
+	; Validate if we can start the throw to begin with
+	;
+	
+	; Not applicable if we're getting thrown
+	ld   a, [wPlayPlThrowActId]
+	cp   PLAY_THROWACT_NONE		; ThrowActId == 0?
+	jp   nz, .retClear			; If not, return
+	
+	; ??? Not applicable when getting up
+	ld   hl, iPlInfo_TimerDec5EOther
 	add  hl, bc
 	ld   a, [hl]
-	or   a
-	jp   nz, L003A26
-	call L002D9F
-	jp   c, L003A26
-	call L002DB2
-	jp   nc, L003A26
+	or   a						; iPlInfo_TimerDec5EOther > 0?
+	jp   nz, .retClear			; If so, return
+	
+	;
+	; Check for the throw input.
+	; HP/HK + L/R
+	;
+	call Play_Pl_AreBothBtnHeld	; Holding A *and* B?
+	jp   c, .retClear			; If so, return
+	call Play_Pl_GetDirKeys_ByXFlipR	; Holding any directional key?
+	jp   nc, .retClear			; If not, return
+	
 	push de
-	ld   d, $C0
-	ld   hl, $0045
-	add  hl, bc
-	ld   a, [hl]
-	and  a, $03
-	jp   z, L00395C
-	ld   e, a
-	inc  hl
-	ld   a, [hl]
-	and  a, d
-	jp   z, L00395C
+		ld   d, KEP_A_HEAVY|KEP_B_HEAVY	; D = Filter for LH
+		ld   hl, iPlInfo_JoyKeys
+		add  hl, bc
+		
+		; Must be holding Left or Right
+		; E = iPlInfo_JoyKeys & (KEY_RIGHT|KEY_LEFT)
+		ld   a, [hl]		
+		and  a, KEY_RIGHT|KEY_LEFT ; Filter L/R keys
+		jp   z, .noPk		; Any of them held? If not, return
+		ld   e, a			; E = A
+		
+		; Must be an heavy attack
+		; A = iPlInfo_JoyNewKeysLH & (KEP_A_HEAVY|KEP_B_HEAVY)
+		inc  hl				; Seek to iPlInfo_JoyNewKeysLH
+		ld   a, [hl]		
+		and  a, d			; Filter out non-heavy flags
+		jp   z, .noPk		; Any heavy done? If not, return
 	pop  de
-	bit  6, a
-	jp   nz, L00394B
-	xor  a
-	ld   [$C175], a
-	jp   L003950
-L00394B:;J
-	ld   a, $01
-	ld   [$C175], a
-L003950:;J
-	ld   hl, $0020
+	;--
+	
+	; Success.
+	; We started the throw successfully, now determine its type.
+	
+	; Determine the throw's direction.
+	; Pressing B/Punch throws the opponent forwards.
+	; Pressing A/Kick, makes the players switch sides before throwing forwards (backwards throw in practice).
+	bit  KEPB_A_HEAVY, a	; Pressed A?
+	jp   nz, .setThrowBack	; If so, jump	
+.setThrowFwd:	
+	xor  a ; PLAY_THROWDIR_F
+	ld   [wPlayPlThrowDir], a
+	jp   .chkAir
+.setThrowBack:
+	ld   a, PLAY_THROWDIR_B
+	ld   [wPlayPlThrowDir], a
+.chkAir:
+
+	; Determine if we're in the air or not
+	ld   hl, iPlInfo_Status
 	add  hl, bc
-	bit  2, [hl]
-	jp   nz, L003974
-	jp   L003960
-L00395C:;J
+	bit  PSB_AIR, [hl]	; Are we in the air?
+	jp   nz, .air	; If so, jump
+	jp   .ground
+	
+	.noPk:
 	pop  de
-	jp   L003A26
-L003960:;J
-	inc  hl
-	bit  0, [hl]
-	jp   nz, L003A22
-	bit  5, [hl]
-	jp   nz, L003A22
-	xor  a
-	ld   [$C174], a
+	jp   .retClear
+	
+.ground:
+
+	; When crouching or performing moves not allowing basic movement, throwing will be ignored.
+	inc  hl							; Seek to iPlInfo_21Flags
+	bit  PI21B_NOBASICINPUT, [hl]	; Is basic input denied?
+	jp   nz, .noThrow				; If so, return
+	bit  PI21B_CROUCH, [hl] 		; Crouching?
+	jp   nz, .noThrow				; If so, return
+	
+.groundOk:
+	
+	; Set ground throw type
+	xor  a ; PLAY_THROWOP_GROUND
+	ld   [wPlayPlThrowOpMode], a
+	; Set temporary hitbox $04, overriding whatever hitbox is set by the visible frame.
 	ld   a, $04
-	jp   L0039AE
-L003974:;J
-	ld   hl, $0033
+	jp   .tryStart
+	
+.air:
+	; Only when performing a jump move
+	ld   hl, iPlInfo_MoveId
+	add  hl, bc			; Seek to iPlInfo_MoveId
+	ld   a, [hl]
+	cp   MOVE_SHARED_JUMP_N
+	jp   z, .airChkChar
+	cp   MOVE_SHARED_JUMP_F
+	jp   z, .airChkChar
+	cp   MOVE_SHARED_JUMP_B
+	jp   z, .airChkChar
+	jp   .noThrow
+.airChkChar:
+	; Only Athena, Mai and Leona can do air throws
+	ld   hl, iPlInfo_CharId
 	add  hl, bc
 	ld   a, [hl]
-	cp   $0A
-	jp   z, L00398B
-	cp   $0C
-	jp   z, L00398B
-	cp   $0E
-	jp   z, L00398B
-	jp   L003A22
-L00398B:;J
-	ld   hl, $002C
-	add  hl, bc
-	ld   a, [hl]
-	cp   $0C
-	jp   z, L0039A7
-	cp   $0E
-	jp   z, L0039A7
-	cp   $10
-	jp   z, L0039A7
-	cp   $24
-	jp   z, L0039A7
-	jp   L003A22
-L0039A7:;J
-	ld   a, $01
-	ld   [$C174], a
+	cp   CHAR_ID_ATHENA*2	; Playing as ATHENA?
+	jp   z, .airOk			; If so, jump
+	cp   CHAR_ID_MAI*2		; ...
+	jp   z, .airOk
+	cp   CHAR_ID_LEONA*2
+	jp   z, .airOk
+	cp   CHAR_ID_OLEONA*2
+	jp   z, .airOk
+	jp   .noThrow			; Otherwise, return
+.airOk:
+	; Set air throw type
+	ld   a, PLAY_THROWOP_AIR
+	ld   [wPlayPlThrowOpMode], a
+	; Set temporary hitbox $04, same as ground throws.
+	; [POI] Was this once different?
 	ld   a, $04
-L0039AE:;J
-	ld   hl, $001A
+	;--
+	
+.tryStart:
+
+	;
+	; Setup the throw, and see the opponent's response.
+	;
+
+	; Write the temporary hitbox, used to determine throw range.
+	; This will be active for exactly one frame (see below).
+	ld   hl, iOBJInfo_ForceHitboxId
 	add  hl, de
 	ld   [hl], a
-	ld   a, $01
-	ld   [$C173], a
-	ld   hl, $003A
+	
+	; Start the throw sequence, mandatory to let the other player know we're ready.
+	ld   a, PLAY_THROWACT_START
+	ld   [wPlayPlThrowActId], a
+	
+	; Set the amount of damage the opponent takes when he's thrown at the *end*.
+	; Meaning that if it gets aborted early, no damage is dealt.
+	ld   hl, iPlInfo_MoveDamageVal
 	add  hl, bc
-	ld   a, $0C
+	ld   a, $0C						; 12 lines of damage
 	ld   [hl], a
-	inc  hl
-	ld   a, $10
-	ld   [hl], a
-	ld   hl, $0045
+	
+	; If the grab occurres, the opponent will use hit animation HITANIM_THROW_START
+	inc  hl							; Seek to iPlInfo_MoveDamageHitAnimId
+	ld   a, HITANIM_THROW_START
+	ld   [hl], a					; Save value
+	
+	; Pass control once with the throw hitbox enabled (+ an extra one to disable it)
+	; and determine if the opponent got grabbed successfully (in range + passed validation).
+	;
+	; If it went all right, the opponent should have gone through Play_Pl_SetHitAnim.chkThrow
+	; (which required us to set wPlayPlThrowActId to PLAY_THROWACT_START first), which will
+	; cause in the second frame ???????? to update wPlayPlThrowActId to PLAY_THROWACT_NEXT02.
+	
+	; Preserve iPlInfo_JoyKeys and iPlInfo_JoyNewKeys while this happens
+	ld   hl, iPlInfo_JoyKeys
 	add  hl, bc
-	ldi  a, [hl]
-	push af
-	ld   a, [hl]
-	push af
-	push hl
-	call Task_PassControlFar
-	ld   hl, $001A
-	add  hl, de
-	xor  a
-	ld   [hl], a
-	call Task_PassControlFar
-	pop  hl
+	ldi  a, [hl]	
+	push af				; Save iPlInfo_JoyKeys
+		ld   a, [hl]	
+		push af			; Save iPlInfo_JoyNewKeys
+			push hl
+				;--
+				; Pass control, activating the temporary throw hitbox
+				call Task_PassControlFar
+				
+				; Disable the throw hitbox and save changes again
+				ld   hl, iOBJInfo_ForceHitboxId
+				add  hl, de
+				xor  a
+				ld   [hl], a
+				call Task_PassControlFar
+				;--
+			pop  hl
+		pop  af
+		ldd  [hl], a	; Restore iPlInfo_JoyNewKeys
 	pop  af
-	ldd  [hl], a
-	pop  af
-	ld   [hl], a
-	ld   a, [$C173]
-	cp   $02
-	jp   nz, L003A22
-	ld   a, [$C174]
-	or   a
-	jp   nz, L0039F4
-	ld   hl, $002C
+	ld   [hl], a	; Restore iPlInfo_JoyKeys
+	
+	; If the opponent didn't get grabbed, return
+	ld   a, [wPlayPlThrowActId]
+	cp   PLAY_THROWACT_NEXT02		; On the second part of the throw?
+	jp   nz, .noThrow				; If not, return
+	
+	;
+	; Determine if the throw direction gets inverted
+	;
+	
+	; Non-ground throws always get inverted
+	ld   a, [wPlayPlThrowOpMode]
+	or   a							; wPlayPlThrowOpMode != PLAY_THROWOP_GROUND?
+	jp   nz, .invThrow				; If so, jump
+	;--
+	; [POI] In 95, there was a list of character ID checks that would jump to .invThrow.
+	;       It appears wPlayPlThrowDir had a different purpose there though, and it's not applicable anymore.
+	ld   hl, iPlInfo_CharId
 	add  hl, bc
 	ld   a, [hl]
-	jp   L0039FC
-L0039F4: db $FA;X
-L0039F5: db $75;X
-L0039F6: db $C1;X
-L0039F7: db $EE;X
-L0039F8: db $01;X
-L0039F9: db $EA;X
-L0039FA: db $75;X
-L0039FB: db $C1;X
-L0039FC:;J
-	ld   a, [$C175]
-	or   a
-	jp   z, L003A1B
+	;--
+	; No inversion
+	jp   .chkDir
+.invThrow:
+	ld   a, [wPlayPlThrowDir]
+	xor  a, $01					; Switch PLAY_THROWDIR_F / PLAY_THROWDIR_B
+	ld   [wPlayPlThrowDir], a
+	
+.chkDir:
+	
+	; If the opponent is being thrown "backwards", first switch the player's positions
+	; before starting the normal throw.
+	ld   a, [wPlayPlThrowDir]
+	or   a 					; wPlayPlThrowDir == PLAY_THROWOP_GROUND
+	jp   z, .retSet			; If so, skip
+	; Switch X positions
 	push bc
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
-	ld   b, a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
-	ld   [wOBJInfo_Pl2+iOBJInfo_X], a
-	ld   a, b
-	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
+		ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
+		ld   b, a							; B = 2P X
+		ld   a, [wOBJInfo_Pl1+iOBJInfo_X]	; A = 1P X
+		ld   [wOBJInfo_Pl2+iOBJInfo_X], a	; 2P X = A
+		ld   a, b							; 1P X = B
+		ld   [wOBJInfo_Pl1+iOBJInfo_X], a
 	pop  bc
-	ld   hl, $0001
+	; Invert direction for current player only. It doesn't matter to the opponent.
+	ld   hl, iOBJInfo_OBJLstFlags
 	add  hl, de
 	ld   a, [hl]
-	xor  $20
+	xor  SPR_XFLIP
 	ld   [hl], a
-L003A1B:;J
-	ld   a, [$C174]
-	scf
-	jp   L003A27
-L003A22:;J
+.retSet:
+	ld   a, [wPlayPlThrowOpMode]
+	scf		; Set carry flag
+	jp   .ret
+.noThrow:
 	xor  a
-	ld   [$C173], a
-L003A26:;J
-	xor  a
-L003A27:;J
+	ld   [wPlayPlThrowActId], a
+.retClear:
+	xor  a	; Clear carry flag
+.ret:
 	ret
+	
 L003A28:;C
-	ld   a, [$C173]
+	ld   a, [wPlayPlThrowActId]
 	cp   $00
 	jp   nz, L003A94
 	xor  a
-	ld   [$C175], a
+	ld   [wPlayPlThrowDir], a
 	ld   a, $02
-	ld   [$C174], a
+	ld   [wPlayPlThrowOpMode], a
 	ld   a, $05
 	jp   L003A59
 L003A3E:;C
-	ld   a, [$C173]
+	ld   a, [wPlayPlThrowActId]
 	cp   $00
 	jp   nz, L003A94
 	ld   hl, $007A
@@ -12321,16 +14059,16 @@ L003A3E:;C
 	or   a
 	jp   nz, L003A94
 	xor  a
-	ld   [$C175], a
+	ld   [wPlayPlThrowDir], a
 	xor  a
-	ld   [$C174], a
+	ld   [wPlayPlThrowOpMode], a
 	ld   a, $04
 L003A59:;J
 	ld   hl, $001A
 	add  hl, de
 	ld   [hl], a
 	ld   a, $01
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 	ld   hl, $003A
 	add  hl, bc
 	ld   a, $0C
@@ -12338,7 +14076,7 @@ L003A59:;J
 	inc  hl
 	ld   a, $10
 	ld   [hl], a
-	ld   hl, $0045
+	ld   hl, iPlInfo_JoyKeys
 	add  hl, bc
 	ldi  a, [hl]
 	push af
@@ -12356,834 +14094,1458 @@ L003A59:;J
 	ldd  [hl], a
 	pop  af
 	ld   [hl], a
-	ld   a, [$C173]
+	ld   a, [wPlayPlThrowActId]
 	cp   $02
 	jp   nz, L003A94
 	scf
 	jp   L003A98
 L003A94:;J
 	xor  a
-	ld   [$C173], a
+	ld   [wPlayPlThrowActId], a
 L003A98:;J
 	ret
-L003A99:;C
-	ld   hl, $007E
+; =============== Play_Pl_ChkHitStop ===============
+; Applies hitstop if enabled, as well as other effects induced by the other player.
+;
+; IN:
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+; OUT
+; - C: If set, a new move was started (and interrupted hitstop early)
+Play_Pl_ChkHitStop:
+	
+	;
+	; Handle the horizontal push speed we received from the other player.
+	; Note that if we get into the hitstop loop, the movement gets delayed until
+	; the hitstop ends.
+	;
+
+	; By default, don't push the other player.
+	; The move code will take care of setting this as needed.
+	ld   hl, iPlInfo_PushSpeedHReq
 	add  hl, bc
 	xor  a
 	ld   [hl], a
-	ld   hl, $007D
+	
+	;
+	; If the other player requested us to move out of the way (ie: after a hit when cornered)
+	; do that accordingly.
+	;
+	ld   hl, iPlInfo_PushSpeedHRecv
 	add  hl, bc
-	ld   a, [hl]
-	or   a
-	jp   z, L003AAE
-	ld   h, a
+	ld   a, [hl]		; A = Received horz. push speed
+	or   a				; PushSpeed == 0?
+	jp   z, .chkHitstop	; If so, skip
+	; Otherwise, push horizontally by iPlInfo_PushSpeedHRecv
+	ld   h, a			; H = iPlInfo_PushSpeedHRecv
 	ld   l, $00
-	call L0034A6
-L003AAE:;J
-	ld   a, [$C172]
-	or   a
-	jp   z, L003AD1
-L003AB5:;J
-	call L002D8C
-	call L002D75
-	call L002F1F
-	jp   c, L003AD3
-	call L003CE7
-	jp   c, L003AD3
+	call Play_OBJLstS_MoveH
+	
+.chkHitstop:
+
+	;
+	; If hitstop is enabled, we get "frozen" until either:
+	; - Hitstop naturally ends (see below)
+	; - Getting guard cancelled
+	; - "Canceling" hitstop to another special move.
+	;   This also increases the combo counter in the opponent's Play_Pl_DoHit,
+	;   as the other player task won't manage to execute it at least once before getting hit again.
+	;   Note that Play_Pl_DoHit is part of the primary main loop (executed every frame) for player tasks
+	;   since it's what handles getting hit, but on the frame that happens it will execute the hit
+	;   animation code, which ends up calling hitstun/blockstun routines that take exclusive control,
+	;   meaning Play_Pl_DoHit won't be executed for a number of frames.
+	;
+	; We also don't change the hitstop flag directly -- this is done ONLY by the other player task when it gets hit.
+	; Specifically, the aforemented hitstuns/blockstun subroutines enable hitstop for the entire 
+	; duration of their shake effect (ie: see Play_Pl_DoBlockstun). Since they take exclusive control, only the
+	; player who attacked can get here while hitstop is enabled.
+	;
+	ld   a, [wPlayHitstop]
+	or   a				; Is hitstop enabled?
+	jp   z, .noStart	; If not, return
+.loop:
+	; Generate the light/heavy button info
+	call Play_Pl_CreateJoyMergedKeysLH
+	call Play_Pl_CreateJoyKeysLH
+	
+	; Check for special move inputs (character-specific)
+	call Play_Pl_ExecSpecMoveInputCode	; Was a special move started?
+	jp   c, .moveSet				; If so, return
+	; Guard cancel variant
+	; If we get attacked, Play_Pl_DoHit will call an HitAnim_* and take exclusive control for a bit.
+	; In case of blocking, we can start a new special move (or a roll) when guard canceling.
+	call HomeCall_Play_Pl_DoHit		; Did we get attacked and guard cancelled?
+	jp   c, .moveSet				; If so, return
+	
 	call Task_PassControlFar
-	ld   a, [$C172]
-	or   a
-	jp   nz, L003AB5
-L003AD1:;J
-	xor  a
+	
+	; If still locked, loop
+	ld   a, [wPlayHitstop]
+	or   a					; Is hitstop still enabled?
+	jp   nz, .loop			; If so, loop
+.noStart:
+	xor  a	; C flag was clear
 	ret
-L003AD3:;J
-	ret
-L003AD4:;C
-	ld   hl, $0020
+.moveSet:
+	ret		; C flag was set
+	
+; =============== Play_Pl_GiveKnockbackCornered ===============
+; Pushes the other player away when hit while cornered.
+;
+; This replaces any existing pushback from overlapping collision boxes, and it's what
+; causes players to get pushed away when hitting a cornered opponent.
+;
+; The reasoning behind this is that the game tries to push players away
+; by a certain distance when recovering from an attack.
+; Normally, the player that gets hit receives a knockback, but if cornered,
+; this subroutine gives that knockback to the other player.
+;
+; IN:
+; - BC: Ptr to wPlInfo for the player who got hit
+; - DE: Ptr to respective wOBJInfo structure
+Play_Pl_GiveKnockbackCornered:
+	
+	;
+	; Knockback transfer isn't applicable if we got hit by a projectile,
+	; as the player could be anywhere on the screen.
+	;
+	ld   hl, iPlInfo_Status
 	add  hl, bc
-	bit  3, [hl]
-	jp   nz, L003AE7
-	ld   hl, $001F
-	add  hl, de
-	ld   a, [hl]
-	ld   hl, $007E
+	bit  PSB_FARHIT, [hl]		; Is the flag set?
+	jp   nz, .ret				; If so, return
+	
+	; Copy iOBJInfo_RangeMoveAmount to iPlInfo_PushSpeedHReq.
+	;
+	; iOBJInfo_RangeMoveAmount is set when the knockback attempts to move us off-screen.
+	; The game doesn't want that, so we get pushed back to the visible screen range, and 
+	; how much we were moved is saved to iOBJInfo_RangeMoveAmount.
+	; That is essentially the knockback we would have received in the frame, and as we can't move
+	; any further, we instead push the other player by that amount.
+	ld   hl, iOBJInfo_RangeMoveAmount
+	add  hl, de						; Seek to iOBJInfo_RangeMoveAmount
+	ld   a, [hl]					; A = iOBJInfo_RangeMoveAmount
+	ld   hl, iPlInfo_PushSpeedHReq
+	add  hl, bc						; Seek to iPlInfo_PushSpeedHReq
+	ld   [hl], a					; iPlInfo_PushSpeedHReq = A
+.ret:
+	ret
+	
+; =============== Play_Unk_Pl_BlockstunNormal ===============
+; Blockstun handler that doesn't allow guard cancels.
+;
+; Handles the effect for the player shaking when coming in contact with an hit.
+; This happens regardless of the player blocking the attack or not.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo structure
+; OUT
+; - C flag: Always clear, as there's no guard cancel. 
+;           Return value required by Play_Pl_DoBlockstun jumping to here.
+Play_Unk_Pl_BlockstunNormal:
+
+	;
+	; If we haven't been hit by a projectile, mark that we received a physical hit
+	; and enable hitstop to the opponent.
+	;
+	ld   hl, iPlInfo_Status
+	add  hl, bc
+	bit  PSB_FARHIT, [hl]			; Did we get hit by a projectile?
+	jp   nz, .go					; If so, skip
+	; Enable opponent hitstop next frame
+	ld   a, $01								
+	ld   [wPlayHitstopSet], a
+	; Remove the physical damage source next frame.
+	ld   hl, iPlInfo_PhysHitRecv
 	add  hl, bc
 	ld   [hl], a
-L003AE7:;J
-	ret
-L003AE8:;JC
-	ld   hl, $0020
-	add  hl, bc
-	bit  3, [hl]
-	jp   nz, L003AFB
-	ld   a, $01
-	ld   [$C171], a
-	ld   hl, $007C
-	add  hl, bc
-	ld   [hl], a
-L003AFB:;J
-	ld   hl, $0021
+	
+.go:
+
+	;
+	; Shake the player by 1px for the required amount of frames.
+	; While this happens, the player is completely blocked and input is ignored.
+	;
+
+	; Save iPlInfo_21Flags value
+	ld   hl, iPlInfo_21Flags
 	add  hl, bc
 	ld   a, [hl]
 	push af
-	set  7, [hl]
-	call L003B42
-	call L003B15
+		;--
+		; Can't be hit during blockstun
+		set  PI21B_INVULN, [hl]
+		
+		call Play_Pl_GetShakeCount	; Determine for how many frames to do the effect
+		call Play_Pl_ShakeFor		; Do it
+		;--
 	pop  af
-	ld   hl, $0021
+	; Restore iPlInfo_21Flags and disable opponent hitstop
+	ld   hl, iPlInfo_21Flags
 	add  hl, bc
 	ld   [hl], a
 	ld   a, $00
-	ld   [$C171], a
+	ld   [wPlayHitstopSet], a
 	ret
-L003B15:;C
+	
+; =============== Play_Pl_ShakeFor ===============
+; Shakes the player sprite by 1px for the specified amount of frames,
+; by moving back and forth the sprite horizontally.
+;
+; This takes control for the entire duration of the normal blockstun.
+; As this ignores player input, it should't be used when the player
+; is allowed to guard cancel.
+; 
+; IN:
+; - A: Number of frames (*2) the effect is performed
+; - DE: Ptr to wOBJInfo for the player
+Play_Pl_ShakeFor:
 	push bc
-	ld   b, a
-	ld   hl, $0001
-	add  hl, de
-	ld   c, [hl]
-	ld   hl, $0003
-	add  hl, de
-	bit  5, c
-	jp   z, L003B34
-L003B25:;J
-	dec  [hl]
-	call Task_PassControlFar
-	inc  [hl]
-	call Task_PassControlFar
-	dec  b
-	jp   nz, L003B25
-	jp   L003B40
-L003B34:;J
-	inc  [hl]
-	call Task_PassControlFar
-	dec  [hl]
-	call Task_PassControlFar
-	dec  b
-	jp   nz, L003B34
-L003B40:;J
+		;
+		; Set up the variables
+		;
+		ld   b, a			; B = Loop count
+		ld   hl, iOBJInfo_OBJLstFlags
+		add  hl, de
+		ld   c, [hl]		; C = Flags
+		ld   hl, iOBJInfo_X
+		add  hl, de			; HL = Ptr to iOBJInfo_X
+		
+		;
+		; Even though it doesn't really matter (it's 2 pixels of difference at most), 
+		; the shake effect is done slightly differently depending on the direction the player is facing.
+		;
+		bit  SPRB_XFLIP, c	; Is the player visually facing right (1P side)?
+		jp   z, .shakeR		; If not, jump
+	.shakeL:
+		; 
+		; If the player is facing left (2P side, no SPRB_XFLIP),
+		; move the sprite 1px to the left, then move it back.
+		;
+		dec  [hl]					; Move left 1px
+		call Task_PassControlFar	; Wait next frame
+		inc  [hl]					; Move right 1px
+		call Task_PassControlFar	; Wait next frame
+		dec  b						; Are we done?
+		jp   nz, .shakeL			; If not, loop
+		jp   .end					; Otherwise, we're done
+	.shakeR:
+		; 
+		; If the player is facing right (1P side, with SPRB_XFLIP),
+		; move the sprite 1px to the right, then move it back.
+		;
+		inc  [hl]					; Move right 1px
+		call Task_PassControlFar	; Wait next frame
+		dec  [hl]					; Move left 1px
+		call Task_PassControlFar	; Wait next frame
+		dec  b						; Are we done?
+		jp   nz, .shakeR			; If not, loop
+									; Otherwise, we're done
+	.end:
 	pop  bc
 	ret
-L003B42:;C
-	ld   hl, $0020
+; =============== Play_Pl_GetShakeCount ===============
+; Determines how many times to shake the player after receiving/blocking an hit.
+; IN:
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo structure
+; OUT
+; - A: How many times to perform the effect.
+;      Multiply it by 2 to get the number of frames the shake lasts.
+Play_Pl_GetShakeCount:
+
+	;
+	; By default, shake the player 8 times.
+	; If we didn't get hit by a projectile, add 2 more.
+	;
+	ld   hl, iPlInfo_Status
 	add  hl, bc
-	bit  3, [hl]
-	jp   nz, L003B50
-	ld   a, $0A
-	jp   L003B52
-L003B50:;J
-	ld   a, $08
-L003B52:;J
-	ld   hl, $0023
+	bit  PSB_FARHIT, [hl]	; Did we get hit by a projectile?
+	jp   nz, .base08		; If so, jump
+.base0A:
+	ld   a, $08+$02			; ShakeCnt = $0A
+	jp   .chkDamageFlags
+.base08:
+	ld   a, $08				; ShakeCnt = $08
+	
+	
+.chkDamageFlags:
+	;
+	; The shake count can be affected by the move we got attacked with.
+	;
+	
+	ld   hl, iPlInfo_23Flags
 	add  hl, bc
-	bit  7, [hl]
-	jp   nz, L003B65
-	bit  0, [hl]
-	jp   nz, L003B67
-	srl  a
-	jp   L003B67
-L003B65:;J
-	ld   a, $01
-L003B67:;J
-	ld   hl, $004E
+	
+	; Some moves shake the player once
+	bit  PI23B_SHAKEONCE, [hl]	; Is the bit set?
+	jp   nz, .shakeOnce			; If so, jump
+	
+	; If this isn't set as a long shake, cut in half thw shake count
+	bit  PI23B_SHAKELONG, [hl]	; Is the bit set?
+	jp   nz, .chkHealth			; If so, jump
+.shakeHalf:
+	srl  a					; ShakeCnt = ShakeCnt / 2				
+	jp   .chkHealth
+.shakeOnce:
+	ld   a, $01				; ShakeCnt = 1
+	
+	
+.chkHealth:
+	;
+	; If the player has health left, multiply the result by 2 and cap it at $0B.
+	;
+	; Otherwise, we return immediately with the existing value of A.
+	; This is to cut in half the duration of the shake effect when a player is defeated, possibly
+	; to balance out how the game runs at half speed there. Meaning that, visually, they last as exactly as long.
+	;
+	
+	; Only if the player has some health left.
+	ld   hl, iPlInfo_Health
 	add  hl, bc
 	push af
-	ld   a, [hl]
-	or   a
-	jp   nz, L003B7E
+		ld   a, [hl]
+		or   a				; Health == 0?
+		jp   nz, .noChange	; If so, return
 	pop  af
-	sla  a
-	cp   $0B
-	jp   c, L003B7F
-	ld   a, $0B
-	jp   L003B7F
-L003B7E:;J
+	
+	; Multiply shake count by 2, capping it at $0B
+	sla  a					; A *= 2
+	cp   $0B				; A < $0B?
+	jp   c, .ret			; If so, jump
+	ld   a, $0B				; Otherwise, cap at $0B
+	; We're done
+	jp   .ret
+.noChange:
 	pop  af
-L003B7F:;J
+.ret:
 	ret
-L003B80:;C
+	
+; =============== Play_Unk_Pl_BlockstunNormalOnce ===============
+; Performs the normal hit shake effect once, for two frames.
+; For physical hits only.
+; IN:
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo structure
+Play_Unk_Pl_BlockstunNormalOnce:
+	; Enable hitstop to the opponent while this happens
 	ld   a, $01
-	ld   [$C171], a
-	ld   hl, $007C
+	ld   [wPlayHitstopSet], a
+	
+	; Mark that the other player attempted to hit us with a physical move,
+	; to remove the damage source next frame.
+	ld   hl, iPlInfo_PhysHitRecv
 	add  hl, bc
 	ld   [hl], a
-	ld   hl, $0021
+	
+	;
+	; Shake the player for 2 frames.
+	;
+	
+	; Save flags
+	ld   hl, iPlInfo_21Flags
 	add  hl, bc
 	ld   a, [hl]
 	push af
-	set  7, [hl]
-	ld   a, $01
-	call L003B15
+		; Can't be hit while this happens, as usual for blockstun
+		set  PI21B_INVULN, [hl]
+		; Perform effect
+		ld   a, $01				; 1(*2) frames
+		call Play_Pl_ShakeFor
 	pop  af
-	ld   hl, $0021
+	; Restore flags
+	ld   hl, iPlInfo_21Flags
 	add  hl, bc
 	ld   [hl], a
+	
+	; Disable opponent hitstop next frame
 	ld   a, $00
-	ld   [$C171], a
+	ld   [wPlayHitstopSet], a
 	ret
-L003BA3:;C
-	ld   hl, $0050
+	
+; =============== Play_Pl_DoBlockstun ===============
+; Main handler for blockstun.
+; IN:
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo structure
+; OUT:
+; - C flag: If set, blockstun ended early as a new move was started
+;           (ie: guard cancel happened)
+Play_Pl_DoBlockstun:
+	
+	;
+	; If not at max power, use the normal handler
+	;
+	ld   hl, iPlInfo_Pow
 	add  hl, bc
 	ld   a, [hl]
-	cp   $28
-	jp   nz, L003AE8
-	ld   hl, $0020
+	cp   PLAY_POW_MAX						; iPlInfo_Pow != $28?
+	jp   nz, Play_Unk_Pl_BlockstunNormal	; If so, jump
+	
+	;
+	; At max power, the player shakes more visibly during stunlock,
+	; and there's no movement difference between 1P and 2P sides (see XFlip check in )
+	; This causes the player to shake more visibly.
+	;
+	; At max power, it's also possible to guard cancel by performing a roll or inputing a special move.
+	;
+	
+	;
+	; If we haven't been hit by a projectile, mark that we received a physical hit
+	; and enable hitstop to the opponent from the next frame.
+	;
+	ld   hl, iPlInfo_Status
 	add  hl, bc
-	bit  3, [hl]
-	jp   nz, L003BC0
-	ld   a, $01
-	ld   [$C171], a
-	ld   hl, $007C
+	bit  PSB_FARHIT, [hl]					; Did we get hit by a projectile?
+	jp   nz, .setFlags21					; If so, skip
+	; Enable opponent hitstop next frame
+	ld   a, $01								
+	ld   [wPlayHitstopSet], a
+	; Remove the physical damage source next frame.
+	ld   hl, iPlInfo_PhysHitRecv
 	add  hl, bc
-	ld   [hl], a
-L003BC0:;J
-	ld   hl, $0021
+	ld   [hl], a							
+	
+.setFlags21:
+
+	; Save flags
+	ld   hl, iPlInfo_21Flags
 	add  hl, bc
 	ld   a, [hl]
 	push af
-	set  7, [hl]
-	call L003B42
-	ld   hl, $0003
+		; Can't be hit during blockstun
+		set  PI21B_INVULN, [hl]
+		
+		; A = Shake count
+		call Play_Pl_GetShakeCount		
+		
+		; HL = Ptr to player X position
+		ld   hl, iOBJInfo_X
+		add  hl, de
+		
+		;
+		; Shake 2px at a time for the required amount of frames (*2).
+		;
+		; While that happens, check if the player has performed a guard cancel,
+		; and if so, break out of the loop.
+		;
+	.loop:
+		push af
+			; Move left 2px
+			inc  [hl]
+			inc  [hl]
+			call Task_PassControlFar
+			
+			; Check for input
+			push hl
+				; Generate the light/heavy button info
+				call Play_Pl_CreateJoyKeysLH
+				call Play_Pl_ChkGuardCancelRoll	; Did we roll out of guard?
+				jp   c, .endEarly				; If so, return (we started a move)
+				call Play_Pl_ExecSpecMoveInputCode	; Performed any special move input?
+				jp   c, .endEarly				; If so, return (guard cancel to move)
+			pop  hl
+			
+			; Move right 2px
+			dec  [hl]
+			dec  [hl]
+			call Task_PassControlFar
+			
+			; Check for inputs like before
+			push hl
+				call Play_Pl_CreateJoyKeysLH
+				call Play_Pl_ChkGuardCancelRoll
+				jp   c, .endEarly
+				call Play_Pl_ExecSpecMoveInputCode
+				jp   c, .endEarly
+			pop  hl
+		pop  af
+		dec  a			; Done this all times?
+		jp   nz, .loop	; If not, loop
+.endNorm:
+	; Restore flags
+	pop  af
+	ld   hl, iPlInfo_21Flags
+	add  hl, bc
+	ld   [hl], a
+	; Disable opponent hitstop next frame
+	ld   a, $00
+	ld   [wPlayHitstopSet], a
+	xor  a		; C flag clear
+	ret
+			.endEarly:
+			; Restore regs
+			pop  hl
+		pop  af
+	pop  af
+	; Note that the flags aren't restored, as starting a new move
+	; set new values for many fields, including iPlInfo_21Flags.
+	
+	; Disable opponent hitstop next frame
+	ld   a, $00
+	ld   [wPlayHitstopSet], a
+	scf			; C flag set
+	ret
+	
+; =============== Play_Pl_ChkGuardCancelRollPlay_Pl_ChkGuardCancelRoll ===============
+; Checks if the player can roll out of blockstun and is performing the input for it.
+;
+; Note that this is not used as a general move check for rolls,
+; as that's handled by ?????.
+; IN:
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+; OUT:
+; - C flag: If set, the player started rolling
+Play_Pl_ChkGuardCancelRoll:
+
+	;
+	; Rolls require the player to be exactly on the ground.
+	;
+
+	; Don't allow in the air
+	ld   hl, iOBJInfo_Y
 	add  hl, de
-L003BCF:;J
-	push af
-	inc  [hl]
-	inc  [hl]
-	call Task_PassControlFar
-	push hl
-	call L002D75
-	call L003C18
-	jp   c, L003C0E
-	call L002F1F
-	jp   c, L003C0E
-	pop  hl
-	dec  [hl]
-	dec  [hl]
-	call Task_PassControlFar
-	push hl
-	call L002D75
-	call L003C18
-	jp   c, L003C0E
-	call L002F1F
-	jp   c, L003C0E
-	pop  hl
-	pop  af
-	dec  a
-	jp   nz, L003BCF
-	pop  af
-	ld   hl, $0021
-	add  hl, bc
-	ld   [hl], a
-	ld   a, $00
-	ld   [$C171], a
-	xor  a
-	ret
-L003C0E:;J
-	pop  hl
-	pop  af
-	pop  af
-	ld   a, $00
-	ld   [$C171], a
-	scf
-	ret
-L003C18:;C
-	ld   hl, $0005
-	add  hl, de
-	ldi  a, [hl]
-	cp   $88
-	jp   nz, L003C6B
+	ldi  a, [hl]		; A = iOBJInfo_Y, Seek to iOBJInfo_YSub
+	cp   PL_FLOOR_POS	; iOBJInfo_Y != $88?
+	jp   nz, .retClear	; If so, jump
+	
+	; Must be exactly aligned to the ground, even at subpixel level
 	ld   a, [hl]
-	or   a
-	jp   nz, L003C6B
-	call L002D9F
-	jp   nc, L003C6B
-	ld   hl, $0083
-	add  hl, bc
+	or   a				; iOBJInfo_YSub != 0?
+	jp   nz, .retClear	; If so, jump
+	
+	;
+	; And they require holding both buttons at the same timeù
+	;
+	call Play_Pl_AreBothBtnHeld		; Holding A and B?
+	jp   nc, .retClear				; If not, return
+	
+	;
+	; If we got here, the roll is guaranteed.
+	; Set a bunch of flags.
+	;
+	
+	
+	; Holding UP when the guard cancel roll ends should trigger an hyper jump.
+	ld   hl, iPlInfo_RunningJump
+	add  hl, bc			
 	ld   [hl], $01
-	ld   hl, $0020
-	add  hl, bc
-	set  6, [hl]
-	inc  hl
-	res  3, [hl]
-	res  5, [hl]
-	set  0, [hl]
-	set  1, [hl]
-	set  2, [hl]
-	inc  hl
-	set  6, [hl]
-	set  7, [hl]
-	inc  hl
-	res  1, [hl]
-	res  6, [hl]
-	call L002DB2
-	jp   nc, L003C61
-	bit  3, a
-	jp   nz, L003C5C
-	jp   L003C61
-L003C5C: db $3E;X
-L003C5D: db $20;X
-L003C5E: db $C3;X
-L003C5F: db $66;X
-L003C60: db $3C;X
-L003C61:;J
-	ld   a, $1E
-	jp   L003C66
-L003C66:;J
-	call L00341B
-	scf
+	
+	
+	ld   hl, iPlInfo_Status
+	add  hl, bc			; Seek to iPlInfo_Status
+	
+	; Pretend that the guard cancel roll is a super move.
+	; This has two effects:
+	; - The player flashes while rolling
+	; - Any normal fireball coming in contact with the player gets erased
+	set  PSB_SUPERMOVE, [hl]
+	
+	inc  hl				; Seek to iPlInfo_21Flags
+	res  PI21B_GUARD, [hl] ; Can't block when rolling (we are invulnerable instead)
+	res  PI21B_CROUCH, [hl] ; As rolling starts from crouching, remove the crouch flag
+	set  PI21B_NOBASICINPUT, [hl] ; Don't override with normal movement
+	set  PI21B_XFLIPLOCK, [hl] ; Lock player direction during the roll
+	set  PI21B_NOSPECSTART, [hl] ; Don't allow cancelling the roll into a special
+	
+	inc  hl				; Seek to iPlInfo_22Flags
+	
+	; Make player completely invulnerable while rolling.
+	; Disabling both hurtbox and hitbox causes every attack collision check to be ignored.
+	set  PI22B_NOHURTBOX, [hl]
+	set  PI22B_NOCOLIBOX, [hl]
+	
+	inc  hl				; Seek to iPlInfo_23Flags
+	; Remove these flash bits to let PSB_SUPERMOVE handle the flashing
+	res  PI23B_FLASH_B_SLOW, [hl]
+	res  PI23B_FLASH_B_FAST, [hl]
+	
+	;
+	; Determine if player should roll forwards or backwards depending on the held directional keys.
+	;
+	; (well nevermind as DOWN isn't a switched input)
+	; ??????? Possibly because it was intended As front/back changes depending on the player direction, use Play_Pl_GetDirKeys_ByXFlipR to check for input.
+	; ??????? Note that the inputs are relative to a player facing RIGHT (1P side).
+	;
+	; Not holding any key on the d-pad defaults it to a forward roll.
+	;
+	call Play_Pl_GetDirKeys_ByXFlipR	; Check d-pad keys
+	jp   nc, .setRollFront		; Were any keys held? If not, default to front
+	
+	; [POI/BUG?] Holding *DOWN* activates the back roll
+	bit  KEYB_DOWN, a			; Holding down?
+	jp   nz, .setRollBack		; If so, back roll
+	jp   .setRollFront			; Otherwise, front roll
+.setRollBack:
+	ld   a, MOVE_SHARED_ROLL_B
+	jp   .retSet
+.setRollFront:
+	ld   a, MOVE_SHARED_ROLL_F
+	jp   .retSet
+.retSet:
+	; Switch to the new move
+	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+	scf		; C flag set
 	ret
-L003C6B:;J
-	xor  a
+.retClear:
+	xor  a	; C flag clear
 	ret
-L003C6D:;C
-	call L002DCB
-	jp   nz, L003C7D
-	ld   hl, $001B
+	
+; =============== Play_Pl_DoGroundScreenShake ===============
+; Shakes the playfield vertically based on the specified OBJInfo animation timer.
+; The shaken player MUST be on the ground to use this, while
+; the other player is left unchanged and can be anywhere.
+;
+; This is mostly used to make an hitstun'd player and the screen shake when
+; being thrown on the ground by certain super moves (ie: Daimon's super throw).
+;
+; IN:
+; - DE: Ptr to wOBJInfo for player
+Play_Pl_DoGroundScreenShake:
+
+	;
+	; Don't do anything other than forcing the player at ground level if
+	; the player graphics are still being copied to VRAM, as iOBJInfo_FrameLeft
+	; won't decrease until that is done.
+	;
+	call OBJLstS_IsGFXLoadDone	; Loading finished?
+	jp   nz, .resetGround		; If not, skip
+	
+	;
+	; The shake effect uses a gradual offset that fades out over time:
+	; Offset = -(iOBJInfo_FrameLeft % $10)
+	;
+	; When the offset is decremented from 0, it returns to $0F.
+	;
+	; Alternating between every 2 frames, said offset gets added to one value,
+	; and the other gets reset to default.
+	; 
+	
+	; When (iOBJInfo_FrameLeft % $10) becomes 0, both values are essentially reset to default.
+	; Continue to .resetGround to save time and make sure both values are reset properly.
+	ld   hl, iOBJInfo_FrameLeft
 	add  hl, de
-	ld   a, [hl]
-	and  a, $0F
-	jp   nz, L003C8B
-L003C7D:;J
-	ld   hl, $C159
-	ld   [hl], $00
-	ld   hl, $0005
+	ld   a, [hl]		; A = iOBJInfo_FrameLeft
+	and  a, $0F			; FrameLeft & $0F == 0?
+	jp   nz, .setShake	; If not, jump
+	
+.resetGround:
+	; Reset the Y screen offset at normal levels
+	ld   hl, wScreenShakeY
+	ld   [hl], $00		; wScreenShakeY = 0
+	
+	; Reset player vertical position to ground
+	ld   hl, iOBJInfo_Y
 	add  hl, de
-	ld   [hl], $88
-	jp   L003CAB
-L003C8B:;J
-	ld   hl, $C159
-	bit  1, a
-	jp   nz, L003CA0
-	ld   [hl], $00
-	ld   hl, $0005
-	add  hl, de
-	cpl
+	ld   [hl], PL_FLOOR_POS		; iOBJInfo_Y = $88
+	jp   .ret
+.setShake:
+
+	;
+	; This will be called for at most $0F frames continuously.
+	; Alternate between offsetting/resetting wScreenShakeY and iOBJInfo_Y every 2 frames,
+	;
+	ld   hl, wScreenShakeY		; HL = iOBJInfo_FrameLeft
+	bit  1, a					; iOBJInfo_FrameLeft & $02 != 0?
+	jp   nz, .setShakeScrn		; If so, jump
+	
+.setShakeOBJ:
+	; Reset the screen scroll offset
+	; wScreenShakeY = $00
+	ld   [hl], $00		
+	
+	; Move player sprite up by A
+	; iOBJInfo_Y -= A
+	ld   hl, iOBJInfo_Y
+	add  hl, de		; HL = Ptr to iOBJInfo_Y
+	cpl				; A = -A
 	inc  a
-	add  a, [hl]
-	ld   [hl], a
-	jp   L003CAB
-L003CA0:;J
+	add  a, [hl]	; A += iOBJInfo_Y
+	ld   [hl], a	; Save it back
+	jp   .ret
+	
+.setShakeScrn:
+	
+	; Scroll screen up by A
+	; wScreenShakeY = -A
 	push af
-	cpl
-	inc  a
-	ld   [hl], a
+		cpl				; A = -A
+		inc  a
+		ld   [hl], a	; wScreenShakeY = A
 	pop  af
-	ld   hl, $0005
+	
+	; Reset player sprite to ground
+	ld   hl, iOBJInfo_Y
 	add  hl, de
-	ld   [hl], $88
-L003CAB:;J
+	ld   [hl], PL_FLOOR_POS
+.ret:
 	ret
-L003CAC:;C
-	ld   hl, $0058
-	add  hl, bc
-	ld   a, [hl]
-	or   a
+	
+; =============== Play_Pl_IsDizzy ===============
+; Determines if the specified player is dizzy.
+; IN
+; - BC: Ptr to wPlInfo
+; OUT
+; - Z flag: If set, the player isn't dizzy
+Play_Pl_IsDizzy:
+	; Z = iPlInfo_Dizzy == 0
+	ld   hl, iPlInfo_Dizzy
+	add  hl, bc		
+	ld   a, [hl]	; A = iPlInfo_Dizzy
+	or   a			; A != 0?
 	ret
+	
+; =============== L003CB3 ===============
+; Determines what happens when a player falls to the ground.
+; The player will either stay on the ground at zero health, or
+; get up otherwise.
+;
+; IN:
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
 L003CB3:;C
-	call L002E8C
-	ld   hl, $004E
+	; Empty Max POW is possible
+	call Play_Pl_EmptyPowOnSuperEnd
+	
+	;
+	; If the player has no health, stop player movement/animations by setting MOVE_SHARED_NONE.
+	;
+	ld   hl, iPlInfo_Health
 	add  hl, bc
 	ld   a, [hl]
-	or   a
-	jp   nz, L003CC8
-	ld   hl, $0033
+	or   a				; Health != 0?
+	jp   nz, .alive		; If so, jump
+.setDead:
+	; Otherwise, stop player movement / animations.
+	; The move ID won't be changed anymore from here.
+	ld   hl, iPlInfo_MoveId
 	add  hl, bc
-	ld   [hl], $00
-	jp   L003CE6
-L003CC8:;J
-	ld   hl, $005E
+	ld   [hl], MOVE_SHARED_NONE		; iPlInfo_MoveId = 0
+	jp   .ret
+	
+.alive:
+	; Wait $1E frames before getting up
+	ld   hl, iPlInfo_TimerDec5E
 	add  hl, bc
 	ld   [hl], $1E
-	ld   hl, $0020
+	
+	; Update flags
+	ld   hl, iPlInfo_Status
 	add  hl, bc
-	res  2, [hl]
-	res  3, [hl]
-	res  4, [hl]
-	res  5, [hl]
-	inc  hl
-	res  4, [hl]
-	res  6, [hl]
-	set  7, [hl]
-	ld   a, $22
-	call L00341B
-L003CE6:;J
+	; Player is on the ground if rolling
+	res  PSB_AIR, [hl]
+	
+	; Reset this for the next time we get hit
+	res  PSB_FARHIT, [hl]
+	; On the ground we can't attack indirectly
+	res  PSB_PROJREM, [hl]
+	res  PSB_PROJREFLECT, [hl]
+	
+	inc  hl							; Seek to iPlInfo_21Flags
+	res  PI21B_COMBORECV, [hl] 		; Falling to the ground ends the opponent's combo
+	res  PI21B_ALLOWHITCANCEL, [hl] ; For next time
+	; The player can't be hit on the ground
+	set  PI21B_INVULN, [hl]
+	
+	; Set move for getting up
+	ld   a, MOVE_SHARED_WAKEUP
+	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+.ret:
 	ret
-L003CE7:;C
+	
+; =============== HomeCall_Play_Pl_DoHit ===============
+; This used to be here in BANK $00 in KOF95.
+HomeCall_Play_Pl_DoHit:
 	ldh  a, [hROMBank]
 	push af
-	ld   a, $02
+	ld   a, BANK(Play_Pl_DoHit) ; BANK $02
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	call $45F3
+	call Play_Pl_DoHit
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-L003CFB:;C
-	ld   hl, $0043
+; =============== MoveInputS_CheckLHType ===============
+; Determines the type of attack triggered by the buttons.
+; IN
+; - BC: Ptr to wPlInfo structure
+; OUT
+; - C flag: If set, the punch or kick button was registered as being pressed.
+; - Z flag: If set, a punch was registered. Otherwise, it's a kick.
+; - iPlInfo_22Flags: If PI22B_HEAVY is set, an heavy was registered. Otherwise, it's a light.
+;                    This will be used when determining if the light or heavy move should start,
+;                    see MoveInputS_CheckMoveLHVer
+MoveInputS_CheckLHType:
+	; A = Held keys
+	ld   hl, iPlInfo_JoyKeysLH
 	add  hl, bc
-	ld   a, [hl]
-	ld   hl, $0022
-	add  hl, bc
-	bit  4, a
-	jr   nz, L003D17
-	bit  5, a
-	jr   nz, L003D22
-	bit  6, a
-	jr   nz, L003D1C
-	bit  7, a
-	jr   nz, L003D27
+	ld   a, [hl]		
+	
+	; HL = Ptr to flags
+	ld   hl, iPlInfo_22Flags
+	add  hl, bc			
+	
+	; Determine the combination of returned flags based on the light/heavy info.
+	bit  KEPB_A_LIGHT, a	; Light kick?
+	jr   nz, .lk			
+	bit  KEPB_B_LIGHT, a	; Light punch?
+	jr   nz, .lp
+	bit  KEPB_A_HEAVY, a	; Heavy kick?
+	jr   nz, .hk
+	bit  KEPB_B_HEAVY, a	; Heavy punch?
+	jr   nz, .hp
+.none:
 	scf
-	ccf
+	ccf		; Clear carry
 	ret
-L003D17:;R
-	res  1, [hl]
-	jp   L003D1E
-L003D1C:;R
-	set  1, [hl]
-L003D1E:;J
+	
+.lk:
+	res  PI22B_HEAVY, [hl]	; Not an heavy
+	jp   .k
+.hk:
+	set  PI22B_HEAVY, [hl]	; Is heavy
+.k:
 	xor  a
-	inc  a
-	scf
+	inc  a	; Clear zero
+	scf		; Set carry
 	ret
-L003D22:;R
-	res  1, [hl]
-	jp   L003D29
-L003D27:;R
-	set  1, [hl]
-L003D29:;J
-	xor  a
-	scf
+	
+.lp:
+	res  PI22B_HEAVY, [hl]	; Not an heavy
+	jp   .p
+.hp:
+	set  PI22B_HEAVY, [hl]	; Is heavy
+.p:
+	xor  a	; Set zero
+	scf		; Set carry
 	ret
-L003D2C:;C
-	ld   hl, $0049
+	
+; =============== Play_Pl_ClearJoyMergedKeysLH ===============
+; Blank out iPlInfo_JoyMergedKeysLH for the specified player.
+; IN
+; - BC: Ptr to wPlInfo structure
+Play_Pl_ClearJoyMergedKeysLH:
+	ld   hl, iPlInfo_JoyMergedKeysLH
 	add  hl, bc
 	ld   [hl], $00
 	ret
-L003D33:;C
-	ld   hl, $0049
+	
+; =============== MoveInputS_CheckPKTypeWithMergedLH ===============
+; Simplified version of MoveInputS_CheckLHType that only determines if the attack
+; triggered by the buttons is a light or a heavy.
+; This also uses iPlInfo_JoyMergedKeysLH instead of iPlInfo_JoyKeysLH.
+; IN
+; - BC: Ptr to wPlInfo structure
+; OUT
+; - C flag: If set, the punch or kick button was registered as being pressed.
+; - Z flag: If set, a punch was registered. Otherwise, it's a kick.
+MoveInputS_CheckPKTypeWithMergedLH:
+	; A = Held keys
+	ld   hl, iPlInfo_JoyMergedKeysLH
 	add  hl, bc
 	ld   a, [hl]
-	bit  4, a
-	jr   nz, L003D4B
-	bit  5, a
-	jr   nz, L003D4F
-	bit  6, a
-	jr   nz, L003D4B
-	bit  7, a
-	jr   nz, L003D4F
+	
+	; Determine the combination if it's a punch or kick
+	bit  KEPB_A_LIGHT, a	; Light kick?
+	jr   nz, .k
+	bit  KEPB_B_LIGHT, a	; Light punch?
+	jr   nz, .p
+	bit  KEPB_A_HEAVY, a	; Heavy kick?
+	jr   nz, .k
+	bit  KEPB_B_HEAVY, a	; Heavy punch?
+	jr   nz, .p
+.none:
 	scf
-	ccf
+	ccf		; Clear carry
 	ret
-L003D4B:;R
+.k:
 	xor  a
-	inc  a
-	scf
+	inc  a	; Clear zero
+	scf		; Set carry
 	ret
-L003D4F:;R
-	xor  a
-	scf
+.p:
+	xor  a	; Set zero
+	scf		; Set carry
 	ret
-L003D52:;C
+	
+; =============== MoveInputS_CheckEasyMoveKeys ===============
+; Checks if the player is holding a button combination used for the "Easy Moves" cheat.
+; These combinations are activated by holding exactly either:
+; - SELECT + A
+; - SELECT + B
+; And any character is assigned a move for each.
+;
+; IN
+; - BC: Ptr to wPlInfo structure
+; OUT
+; - Z flag: If set, SELECT + A was pressed
+; - C flag: If set, SELECT + B was pressed
+MoveInputS_CheckEasyMoveKeys:
+	; Only if the cheat is enabled
 	ld   a, [wDipSwitch]
-	bit  2, a
-	jp   z, L003D6E
-	ld   hl, $0045
-	add  hl, bc
-	ld   a, [hl]
-	and  a, $60
-	cp   $60
-	jp   z, L003D71
-	ld   a, [hl]
-	and  a, $50
-	cp   $50
-	jp   z, L003D75
-L003D6E:;J
-	xor  a
+	bit  DIPB_EASY_MOVES, a
+	jp   z, .none
+	
+	; Determine which key combination are holding
+	ld   hl, iPlInfo_JoyKeys
+	add  hl, bc					
+	
+	; SELECT + B
+	ld   a, [hl]				; A = Held player keys
+	and  a, KEY_SELECT|KEY_B	; Filter the required keys
+	cp   KEY_SELECT|KEY_B		; Are we holding exactly SELECT+B (and nothing else)?
+	jp   z, .selectB			; If so, jump
+	
+	; SELECT + A
+	ld   a, [hl]				; A = Held player keys
+	and  a, KEY_SELECT|KEY_A	; Filter the required keys
+	cp   KEY_SELECT|KEY_A		; Are we holding exactly SELECT+A (and nothing else)?
+	jp   z, .selectA			; If so, jump
+.none:							; Otherwise, there's nothing here
+	xor  a	; C flag clear, Z flag clear
 	inc  a
 	ret
-L003D71:;J
-	xor  a
+.selectB:
+	xor  a	; C flag set, Z flag clear
 	inc  a
 	scf
 	ret
-L003D75:;J
-	xor  a
+.selectA:;J
+	xor  a	; C flag clear, Z flag set
 	ret
-L003D77:;C
-	ld   hl, $002B
+	
+; =============== Play_Pl_TempPauseOtherAnim ===============
+; Temporarily pauses the opponent's animation by setting its iOBJInfo_FrameLeft to $FF.
+;
+; ??? Meant when the hitting the other player in a way that freezes it, like in throws.
+;
+; Though this iOBJInfo_FrameLeft should never elapse as another animation should interrupt it,
+; because it can, it prevents possible softlocks if a move were to break and not unfreeze the opponent.
+;
+; IN
+; - BC: Ptr to wPlInfo structure
+Play_Pl_TempPauseOtherAnim:
+	ld   hl, iPlInfo_PlId
 	add  hl, bc
 	ld   a, [hl]
-	or   a
-	jp   nz, L003D86
-	ld   hl, $D6DB
-	jp   L003D89
-L003D86:;J
-	ld   hl, $D69B
-L003D89:;J
+	or   a			; iPlInfo_PlId == PL1
+	jp   nz, .pl2	; If not, jump
+.pl1:
+	ld   hl, wOBJInfo_Pl2+iOBJInfo_FrameLeft
+	jp   .clear
+.pl2:
+	ld   hl, wOBJInfo_Pl1+iOBJInfo_FrameLeft
+.clear:
 	ld   [hl], $FF
 	ret
-L003D8C: db $02
-L003D8D: db $02
-L003D8E: db $02
-L003D8F: db $01
-L003D90: db $14
-L003D91: db $08
-L003D92: db $08
-L003D93: db $01
-L003D94: db $FF
-L003D95: db $02
-L003D96: db $01
-L003D97: db $01
-L003D98: db $01
-L003D99: db $14
-L003D9A: db $08
-L003D9B: db $08
-L003D9C: db $01
-L003D9D: db $FF
-L003D9E: db $02
-L003D9F: db $01
-L003DA0: db $01
-L003DA1: db $01
-L003DA2: db $14
-L003DA3: db $08
-L003DA4: db $08
-L003DA5: db $01
-L003DA6: db $FF
-L003DA7: db $02
-L003DA8: db $04
-L003DA9: db $04
-L003DAA: db $01
-L003DAB: db $14
-L003DAC: db $08
-L003DAD: db $08
-L003DAE: db $02
-L003DAF: db $FF
-L003DB0: db $04
-L003DB1: db $02
-L003DB2: db $02
-L003DB3: db $01
-L003DB4: db $14
-L003DB5: db $08
-L003DB6: db $08
-L003DB7: db $01
-L003DB8: db $0A
-L003DB9: db $01
-L003DBA: db $01
-L003DBB: db $01
-L003DBC: db $0A
-L003DBD: db $08
-L003DBE: db $08
-L003DBF: db $01
-L003DC0: db $FF
-L003DC1: db $04
-L003DC2: db $01
-L003DC3: db $01
-L003DC4: db $01
-L003DC5: db $14
-L003DC6: db $08
-L003DC7: db $08
-L003DC8: db $01
-L003DC9: db $0A
-L003DCA: db $01
-L003DCB: db $01
-L003DCC: db $01
-L003DCD: db $0A
-L003DCE: db $08
-L003DCF: db $08
-L003DD0: db $01
-L003DD1: db $FF
-L003DD2: db $04
-L003DD3: db $02
-L003DD4: db $02
-L003DD5: db $01
-L003DD6: db $14
-L003DD7: db $08
-L003DD8: db $08
-L003DD9: db $01
-L003DDA: db $0A
-L003DDB: db $02
-L003DDC: db $02
-L003DDD: db $01
-L003DDE: db $0A
-L003DDF: db $08
-L003DE0: db $08
-L003DE1: db $01
-L003DE2: db $FF
-L003DE3: db $04
-L003DE4: db $01
-L003DE5: db $01
-L003DE6: db $01
-L003DE7: db $14
-L003DE8: db $08
-L003DE9: db $08
-L003DEA: db $01
-L003DEB: db $0A
-L003DEC: db $02
-L003DED: db $02
-L003DEE: db $01
-L003DEF: db $0A
-L003DF0: db $08
-L003DF1: db $08
-L003DF2: db $01
-L003DF3: db $FF
-L003DF4: db $05
-L003DF5: db $08
-L003DF6: db $08
-L003DF7: db $01
-L003DF8: db $14
-L003DF9: db $01
-L003DFA: db $01
-L003DFB: db $01;X
-L003DFC: db $0A;X
-L003DFD: db $04;X
-L003DFE: db $04;X
-L003DFF: db $01;X
-L003E00: db $0A;X
-L003E01: db $02;X
-L003E02: db $02;X
-L003E03: db $01;X
-L003E04: db $0A;X
-L003E05: db $08;X
-L003E06: db $08;X
-L003E07: db $01;X
-L003E08: db $FF;X
-L003E09: db $03
-L003E0A: db $01
-L003E0B: db $01
-L003E0C: db $01
-L003E0D: db $14
-L003E0E: db $08
-L003E0F: db $08
-L003E10: db $01
-L003E11: db $0A
-L003E12: db $02
-L003E13: db $02
-L003E14: db $01
-L003E15: db $FF
-L003E16: db $04
-L003E17: db $02
-L003E18: db $02
-L003E19: db $01
-L003E1A: db $14
-L003E1B: db $08
-L003E1C: db $08
-L003E1D: db $01
-L003E1E: db $0A
-L003E1F: db $01
-L003E20: db $01
-L003E21: db $01
-L003E22: db $0A
-L003E23: db $02
-L003E24: db $02
-L003E25: db $01
-L003E26: db $FF
-L003E27: db $03
-L003E28: db $02
-L003E29: db $02
-L003E2A: db $01
-L003E2B: db $14
-L003E2C: db $08
-L003E2D: db $08
-L003E2E: db $01
-L003E2F: db $0A
-L003E30: db $02
-L003E31: db $02
-L003E32: db $01
-L003E33: db $FF
-L003E34: db $04
-L003E35: db $02
-L003E36: db $02
-L003E37: db $01
-L003E38: db $14
-L003E39: db $01
-L003E3A: db $01
-L003E3B: db $01
-L003E3C: db $0A
-L003E3D: db $08
-L003E3E: db $08
-L003E3F: db $01
-L003E40: db $0A
-L003E41: db $02
-L003E42: db $02
-L003E43: db $01
-L003E44: db $FF
-L003E45: db $06
-L003E46: db $01
-L003E47: db $01
-L003E48: db $01
-L003E49: db $0A
-L003E4A: db $08
-L003E4B: db $08
-L003E4C: db $01
-L003E4D: db $0A
-L003E4E: db $02
-L003E4F: db $02
-L003E50: db $01
-L003E51: db $0A
-L003E52: db $01
-L003E53: db $01
-L003E54: db $01
-L003E55: db $0A
-L003E56: db $08
-L003E57: db $08
-L003E58: db $01
-L003E59: db $0A
-L003E5A: db $02
-L003E5B: db $02
-L003E5C: db $01
-L003E5D: db $FF
-L003E5E: db $02
-L003E5F: db $02
-L003E60: db $02
-L003E61: db $01
-L003E62: db $14
-L003E63: db $01
-L003E64: db $01
-L003E65: db $02
-L003E66: db $FF
-L003E67: db $02
-L003E68: db $02
-L003E69: db $02
-L003E6A: db $01
-L003E6B: db $14
-L003E6C: db $01
-L003E6D: db $01
-L003E6E: db $01
-L003E6F: db $FF
-L003E70: db $03
-L003E71: db $02
-L003E72: db $02
-L003E73: db $01
-L003E74: db $14
-L003E75: db $08
-L003E76: db $08
-L003E77: db $01
-L003E78: db $0A
-L003E79: db $01
-L003E7A: db $01
-L003E7B: db $01
-L003E7C: db $FF
-L003E7D: db $04
-L003E7E: db $01
-L003E7F: db $01
-L003E80: db $01
-L003E81: db $14
-L003E82: db $08
-L003E83: db $08
-L003E84: db $01
-L003E85: db $0A
-L003E86: db $02
-L003E87: db $02
-L003E88: db $01
-L003E89: db $0A
-L003E8A: db $01
-L003E8B: db $01
-L003E8C: db $01
-L003E8D: db $FF
-L003E8E: db $03
-L003E8F: db $01
-L003E90: db $01
-L003E91: db $01
-L003E92: db $14
-L003E93: db $08
-L003E94: db $08
-L003E95: db $01
-L003E96: db $0A
-L003E97: db $01
-L003E98: db $01
-L003E99: db $01
-L003E9A: db $FF
-L003E9B: db $05
-L003E9C: db $02
-L003E9D: db $02
-L003E9E: db $01
-L003E9F: db $14
-L003EA0: db $01
-L003EA1: db $01
-L003EA2: db $01
-L003EA3: db $0A
-L003EA4: db $08
-L003EA5: db $08
-L003EA6: db $01
-L003EA7: db $0A
-L003EA8: db $02
-L003EA9: db $02
-L003EAA: db $01
-L003EAB: db $0A
-L003EAC: db $01
-L003EAD: db $01
-L003EAE: db $01
-L003EAF: db $FF
-L003EB0: db $06
-L003EB1: db $20
-L003EB2: db $20
-L003EB3: db $01
-L003EB4: db $08
-L003EB5: db $00
-L003EB6: db $20
-L003EB7: db $01
-L003EB8: db $08
-L003EB9: db $20
-L003EBA: db $20
-L003EBB: db $01
-L003EBC: db $08
-L003EBD: db $00
-L003EBE: db $20
-L003EBF: db $01
-L003EC0: db $08
-L003EC1: db $20
-L003EC2: db $20
-L003EC3: db $01
-L003EC4: db $08
-L003EC5: db $00
-L003EC6: db $20
-L003EC7: db $01
-L003EC8: db $08
-L003EC9: db $04
-L003ECA: db $01
-L003ECB: db $0F
-L003ECC: db $01
-L003ECD: db $08
-L003ECE: db $00
-L003ECF: db $0F
-L003ED0: db $01
-L003ED1: db $08
-L003ED2: db $01
-L003ED3: db $0F
-L003ED4: db $01
-L003ED5: db $08
-L003ED6: db $00
-L003ED7: db $0F
-L003ED8: db $01
-L003ED9: db $FF
-L003EDA: db $04
-L003EDB: db $02
-L003EDC: db $0F
-L003EDD: db $01
-L003EDE: db $08
-L003EDF: db $00
-L003EE0: db $0F
-L003EE1: db $01
-L003EE2: db $08
-L003EE3: db $02
-L003EE4: db $0F
-L003EE5: db $01
-L003EE6: db $08
-L003EE7: db $00
-L003EE8: db $0F
-L003EE9: db $01
-L003EEA: db $FF
-L003EEB: db $02
-L003EEC: db $04
-L003EED: db $04
-L003EEE: db $01
-L003EEF: db $14
-L003EF0: db $08
-L003EF1: db $08
-L003EF2: db $01
-L003EF3: db $FF
+	
+; Remember that these inputs are relative to the 2P side!
+
+; Down  -> D
+; Up    -> U
+; Left  -> F(front)
+; Right -> B(ack)
+; A     -> K(ick)
+; B     -> P(unch)
+; None  -> N
+;
+;
+
+MoveInput_DF:
+	db $02         ; Number of inputs
+.i2:
+	db KEY_LEFT    ; Key
+	db KEY_LEFT    ; Include
+	db $01         ; Min len
+	db $14         ; Max len
+.i1:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $FF         ; Max len
+	
+MoveInput_DB:
+	db $02         ; Number of inputs
+.i2:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT   ; Include
+	db $01         ; Min len
+	db $14         ; Max len
+.i1:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $FF         ; Max len
+	
+; (identical to MoveInput_DB)
+MoveInput_DB_Copy:
+	db $02         ; Number of inputs
+.i2:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT   ; Include
+	db $01         ; Min len
+	db $14         ; Max len
+.i1:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $FF         ; Max len
+	
+MoveInput_DU_Slow:
+	db $02         ; Number of inputs
+.i2:
+	db KEY_UP      ; Key
+	db KEY_UP      ; Include
+	db $01         ; Min len
+	db $14         ; Max len
+.i1:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $02         ; Min len
+	db $FF         ; Max len
+
+MoveInput_DBDF:
+	db $04         ; Number of inputs
+.i4:
+	db KEY_LEFT    ; Key
+	db KEY_LEFT    ; Include
+	db $01         ; Min len
+	db $14         ; Max len
+.i3:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i2:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT   ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i1:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $FF         ; Max len
+
+MoveInput_DBDB:
+	db $04         ; Number of inputs
+.i4:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT   ; Include
+	db $01         ; Min len
+	db $14         ; Max len
+.i3:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i2:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT   ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i1:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $FF         ; Max len
+	
+MoveInput_DFDF:
+	db $04         ; Number of inputs
+.i4:
+	db KEY_LEFT    ; Key
+	db KEY_LEFT    ; Include
+	db $01         ; Min len
+	db $14         ; Max len
+.i3:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i2:
+	db KEY_LEFT    ; Key
+	db KEY_LEFT    ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i1:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $FF         ; Max len
+	
+MoveInput_DFDB:
+	db $04         ; Number of inputs
+.i4:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT   ; Include
+	db $01         ; Min len
+	db $14         ; Max len
+.i3:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i2:
+	db KEY_LEFT    ; Key
+	db KEY_LEFT    ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i1:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $FF         ; Max len
+	
+MoveInput_DFURD:
+	db $05         ; Number of inputs
+.i5:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $14         ; Max len
+.i4:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT   ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i3:
+	db KEY_UP      ; Key
+	db KEY_UP      ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i2:
+	db KEY_LEFT    ; Key
+	db KEY_LEFT    ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i1:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $FF         ; Max len
+	
+MoveInput_FDB:
+	db $03         ; Number of inputs
+.i3:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT   ; Include
+	db $01         ; Min len
+	db $14         ; Max len
+.i2:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i1:
+	db KEY_LEFT    ; Key
+	db KEY_LEFT    ; Include
+	db $01         ; Min len
+	db $FF         ; Max len
+	
+MoveInput_FBDF:
+	db $04         ; Number of inputs
+.i4:
+	db KEY_LEFT    ; Key
+	db KEY_LEFT    ; Include
+	db $01         ; Min len
+	db $14         ; Max len
+.i3:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i2:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT   ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i1:
+	db KEY_LEFT    ; Key
+	db KEY_LEFT    ; Include
+	db $01         ; Min len
+	db $FF         ; Max len
+	
+MoveInput_FDF:
+	db $03         ; Number of inputs
+.i3:
+	db KEY_LEFT    ; Key
+	db KEY_LEFT    ; Include
+	db $01         ; Min len
+	db $14         ; Max len
+.i2:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i1:
+	db KEY_LEFT    ; Key
+	db KEY_LEFT    ; Include
+	db $01         ; Min len
+	db $FF         ; Max len
+	
+MoveInput_FDBF:
+	db $04         ; Number of inputs
+.i4:
+	db KEY_LEFT    ; Key
+	db KEY_LEFT    ; Include
+	db $01         ; Min len
+	db $14         ; Max len
+.i3:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT   ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i2:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i1:
+	db KEY_LEFT    ; Key
+	db KEY_LEFT    ; Include
+	db $01         ; Min len
+	db $FF         ; Max len
+	
+MoveInput_FDBFDB:
+	db $06         ; Number of inputs
+.i6:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT   ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i5:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i4:
+	db KEY_LEFT    ; Key
+	db KEY_LEFT    ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i3:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT   ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i2:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i1:
+	db KEY_LEFT    ; Key
+	db KEY_LEFT    ; Include
+	db $01         ; Min len
+	db $FF         ; Max len
+	
+MoveInput_BF_Slow:
+	db $02         ; Number of inputs
+.i2:
+	db KEY_LEFT    ; Key
+	db KEY_LEFT    ; Include
+	db $01         ; Min len
+	db $14         ; Max len
+.i1:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT   ; Include
+	db $02         ; Min len
+	db $FF         ; Max len
+	
+MoveInput_BF_Fast:
+	db $02         ; Number of inputs
+.i2:
+	db KEY_LEFT    ; Key
+	db KEY_LEFT    ; Include
+	db $01         ; Min len
+	db $14         ; Max len
+.i1:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT   ; Include
+	db $01         ; Min len
+	db $FF         ; Max len
+	
+MoveInput_BDF:
+	db $03         ; Number of inputs
+.i3:
+	db KEY_LEFT    ; Key
+	db KEY_LEFT    ; Include
+	db $01         ; Min len
+	db $14         ; Max len
+.i2:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i1:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT   ; Include
+	db $01         ; Min len
+	db $FF         ; Max len
+	
+MoveInput_BFDB:
+	db $04         ; Number of inputs
+.i4:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT   ; Include
+	db $01         ; Min len
+	db $14         ; Max len
+.i3:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i2:
+	db KEY_LEFT    ; Key
+	db KEY_LEFT    ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i1:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT   ; Include
+	db $01         ; Min len
+	db $FF         ; Max len
+	
+MoveInput_BDB:
+	db $03         ; Number of inputs
+.i3:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT   ; Include
+	db $01         ; Min len
+	db $14         ; Max len
+.i2:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i1:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT   ; Include
+	db $01         ; Min len
+	db $FF         ; Max len
+	
+MoveInput_BFDBF:
+	db $05         ; Number of inputs
+.i5:
+	db KEY_LEFT    ; Key
+	db KEY_LEFT    ; Include
+	db $01         ; Min len
+	db $14         ; Max len
+.i4:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT   ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i3:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i2:
+	db KEY_LEFT    ; Key
+	db KEY_LEFT    ; Include
+	db $01         ; Min len
+	db $0A         ; Max len
+.i1:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT   ; Include
+	db $01         ; Min len
+	db $FF         ; Max len
+	
+MoveInput_PPP:
+	db $06         ; Number of inputs
+.i6:
+	db KEY_B       ; Key
+	db KEY_B       ; Include
+	db $01         ; Min len
+	db $08         ; Max len
+.i5:
+	db KEY_NONE    ; Key
+	db KEY_B       ; Include
+	db $01         ; Min len
+	db $08         ; Max len
+.i4:
+	db KEY_B       ; Key
+	db KEY_B       ; Include
+	db $01         ; Min len
+	db $08        ; Max len
+.i3:
+	db KEY_NONE    ; Key
+	db KEY_B       ; Include
+	db $01         ; Min len
+	db $08         ; Max len
+.i2:
+	db KEY_B       ; Key
+	db KEY_B       ; Include
+	db $01         ; Min len
+	db $08         ; Max len
+.i1:
+	db KEY_NONE    ; Key
+	db KEY_B       ; Include
+	db $01         ; Min len
+	db $08         ; Max len
+	
+MoveInput_BB:
+	db $04         ; Number of inputs
+.i4:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT|KEY_LEFT|KEY_UP|KEY_DOWN ; Include
+	db $01         ; Min len
+	db $08         ; Max len
+.i3:
+	db KEY_NONE    ; Key
+	db KEY_RIGHT|KEY_LEFT|KEY_UP|KEY_DOWN ; Include
+	db $01         ; Min len
+	db $08         ; Max len
+.i2:
+	db KEY_RIGHT   ; Key
+	db KEY_RIGHT|KEY_LEFT|KEY_UP|KEY_DOWN ; Include
+	db $01         ; Min len
+	db $08         ; Max len
+.i1:
+	db KEY_NONE    ; Key
+	db KEY_RIGHT|KEY_LEFT|KEY_UP|KEY_DOWN ; Include
+	db $01         ; Min len
+	db $FF         ; Max len
+	
+MoveInput_FF:
+	db $04         ; Number of inputs
+.i4:
+	db KEY_LEFT    ; Key
+	db KEY_RIGHT|KEY_LEFT|KEY_UP|KEY_DOWN ; Include
+	db $01         ; Min len
+	db $08         ; Max len
+.i3:
+	db KEY_NONE    ; Key
+	db KEY_RIGHT|KEY_LEFT|KEY_UP|KEY_DOWN ; Include
+	db $01         ; Min len
+	db $08         ; Max len
+.i2:
+	db KEY_LEFT    ; Key
+	db KEY_RIGHT|KEY_LEFT|KEY_UP|KEY_DOWN ; Include
+	db $01         ; Min len
+	db $08         ; Max len
+.i1:
+	db KEY_NONE    ; Key
+	db KEY_RIGHT|KEY_LEFT|KEY_UP|KEY_DOWN ; Include
+	db $01         ; Min len
+	db $FF         ; Max len
+	
+MoveInput_DU_Fast:
+	db $02         ; Number of inputs
+.i2:
+	db KEY_UP      ; Key
+	db KEY_UP      ; Include
+	db $01         ; Min len
+	db $14         ; Max len
+.i1:
+	db KEY_DOWN    ; Key
+	db KEY_DOWN    ; Include
+	db $01         ; Min len
+	db $FF         ; Max len
+; =============== END OF BANK ===============
+; Junk area below.
 L003EF4: db $20;X
 L003EF5: db $01;X
 L003EF6: db $08;X

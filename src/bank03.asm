@@ -1,4 +1,20 @@
-L034000: db $4C;X
+MoveAnimTbl_Marker:
+; =============== MoveAnimTbl_* ===============
+; OBJInfo and PlInfo settings for every move (not just specials).
+; This primarily defines the move animations, which in turn define the frames, which have their own collision boxes.
+;
+; See also: Pl_SetNewMove
+;
+; FORMAT
+; Each entry is 8 bytes:
+; - 0: Sprite mapping bank number (iOBJInfo_BankNum)
+; - 1-2: Ptr to sprite mapping (iOBJInfo_OBJLstPtrTbl)
+; - 3: ??? iPlInfo_39
+; - 4: Animation speed. Higher values = slower animation (iOBJInfo_FrameLeft)
+; - 5: Damage amount (iPlInfo_MoveDamageValNext)
+; - 6: Animation ID used when getting hit. (HITANIM_*) (iPlInfo_MoveDamageHitAnimIdNext)
+; - 7: iPlInfo_23Flags applied when getting hit (iPlInfo_MoveDamageFlags3Next)
+MoveAnimTbl_Kyo: db $4C;X
 L034001: db $00;X
 L034002: db $00;X
 L034003: db $00;X
@@ -12318,7 +12334,7 @@ L03701C: db $3C;X
 L03701D: db $00;X
 L03701E: db $00;X
 L03701F: db $00;X
-L037020: db $00
+MoveCodePtrTbl_Shared_Base: db $00
 L037021: db $40
 L037022: db $02
 L037023: db $0F
@@ -12390,7 +12406,7 @@ L037064: db $02
 L037065: db $2C
 L037066: db $43
 L037067: db $02
-L037068: db $5B
+MoveCodePtrTbl_Shared_Hit: db $5B
 L037069: db $50
 L03706A: db $02
 L03706B: db $5B
@@ -12453,7 +12469,7 @@ L0370A3: db $02
 L0370A4: db $5B
 L0370A5: db $57
 L0370A6: db $02
-L0370A7: db $DD
+MoveCodePtrTbl_Kyo: db $DD
 L0370A8: db $41
 L0370A9: db $02
 L0370AA: db $56
@@ -14101,7 +14117,7 @@ L037713:;R
 	ldi  [hl], a
 	ldi  [hl], a
 	ldi  [hl], a
-	call L002D53
+	call Play_Pl_ClearJoyDirBuffer
 	ld   hl, $006D
 	add  hl, bc
 	bit  0, [hl]
@@ -14511,7 +14527,7 @@ L0379FC:;J
 	ld   a, [wTimer]
 	bit  4, a
 	jp   z, L037A0A
-	ld   hl, $3EEB
+	ld   hl, MoveInput_DU_Fast
 	call L037BAA
 L037A0A:;J
 	ld   hl, $0001
@@ -14640,7 +14656,7 @@ L037AC9:;J
 	call Rand
 	bit  7, a
 	jp   z, L037ADF
-	ld   hl, $3EC9
+	ld   hl, MoveInput_BB
 	call L037BAA
 L037ADF:;J
 	ld   hl, $0001
@@ -14675,7 +14691,7 @@ L037B0D:;J
 	call Rand
 	bit  7, a
 	jp   z, L037B23
-	ld   hl, $3EDA
+	ld   hl, MoveInput_FF
 	call L037BAA
 L037B23:;J
 	ld   hl, $0001
