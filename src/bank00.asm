@@ -1302,11 +1302,11 @@ VBlank_ChkCopyPlTiles:
 ;--
 ; [TCRF] Unreferenced code.
 L0005A1:
-	ld   a, [wPlInfo_Pl1+iPlInfo_21Flags]
-	bit  PI21B_COMBORECV, a
+	ld   a, [wPlInfo_Pl1+iPlInfo_Flags1]
+	bit  PF1B_COMBORECV, a
 	jp   nz, VBlank_CopyPl1Tiles
-	ld   a, [wPlInfo_Pl1+iPlInfo_22Flags]
-	bit  PI21B_NOSPECSTART, a
+	ld   a, [wPlInfo_Pl1+iPlInfo_Flags2]
+	bit  PF1B_NOSPECSTART, a
 	jp   nz, VBlank_CopyPl1Tiles
 	ld   a, [wPlayHitstop]
 	or   a
@@ -1445,8 +1445,8 @@ VBlank_CopyPl1Tiles:
 	; TODO: Is this a bug or not? So far I haven't seen iPlInfo_MoveDamageValNext & others being updated mid-move.
 	; As these are set only when starting a new move, check for that:
 	; [BUG?] Incorrect comparison. It should have been "jp z" or not made to begin with (to allow mid-move setting changes).
-	ld   hl, wPlInfo_Pl1+iPlInfo_22Flags
-	bit  PI22B_MOVESTART, [hl]		; Was a move started?
+	ld   hl, wPlInfo_Pl1+iPlInfo_Flags2
+	bit  PF2B_MOVESTART, [hl]		; Was a move started?
 	jp   nz, .copySetKey				; If *so*, skip
 	
 	;
@@ -1513,10 +1513,10 @@ ENDR
 ;--
 ; [TCRF] Unreferenced code
 L0006A7:
-	ld   a, [wPlInfo_Pl2+iPlInfo_21Flags]
+	ld   a, [wPlInfo_Pl2+iPlInfo_Flags1]
 	bit  4, a
 	jp   nz, VBlank_CopyPl2Tiles
-	ld   a, [wPlInfo_Pl2+iPlInfo_22Flags]
+	ld   a, [wPlInfo_Pl2+iPlInfo_Flags2]
 	bit  2, a
 	jp   nz, VBlank_CopyPl2Tiles
 	ld   a, [wPlayHitstop]
@@ -1601,7 +1601,7 @@ VBlank_CopyPl2Tiles:
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
 	res  OSTB_GFXLOAD, [hl]
 	set  OSTB_BIT3, [hl]
-	ld   hl, wPlInfo_Pl2+iPlInfo_22Flags
+	ld   hl, wPlInfo_Pl2+iPlInfo_Flags2
 	bit  0, [hl]
 	jp   nz, .move1
 	
@@ -6443,21 +6443,21 @@ Play_InitRound:
 	ld   [wPlInfo_Pl2+iPlInfo_PlId], a
 	
 	; Remove every status flag except for the CPU marker
-	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
-	and  a, PS_CPU
-	ld   [wPlInfo_Pl1+iPlInfo_Status], a
-	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
-	and  a, PS_CPU
-	ld   [wPlInfo_Pl2+iPlInfo_Status], a
+	ld   a, [wPlInfo_Pl1+iPlInfo_Flags0]
+	and  a, PF0_CPU
+	ld   [wPlInfo_Pl1+iPlInfo_Flags0], a
+	ld   a, [wPlInfo_Pl2+iPlInfo_Flags0]
+	and  a, PF0_CPU
+	ld   [wPlInfo_Pl2+iPlInfo_Flags0], a
 	
 	; Initialize other player fields
 	xor  a
-	ld   [wPlInfo_Pl1+iPlInfo_21Flags], a
-	ld   [wPlInfo_Pl1+iPlInfo_22Flags], a
-	ld   [wPlInfo_Pl1+iPlInfo_23Flags], a
-	ld   [wPlInfo_Pl2+iPlInfo_21Flags], a
-	ld   [wPlInfo_Pl2+iPlInfo_22Flags], a
-	ld   [wPlInfo_Pl2+iPlInfo_23Flags], a
+	ld   [wPlInfo_Pl1+iPlInfo_Flags1], a
+	ld   [wPlInfo_Pl1+iPlInfo_Flags2], a
+	ld   [wPlInfo_Pl1+iPlInfo_Flags3], a
+	ld   [wPlInfo_Pl2+iPlInfo_Flags1], a
+	ld   [wPlInfo_Pl2+iPlInfo_Flags2], a
+	ld   [wPlInfo_Pl2+iPlInfo_Flags3], a
 	ld   [wPlInfo_Pl1+iPlInfo_MoveId], a
 	ld   [wPlInfo_Pl2+iPlInfo_MoveId], a
 	ld   [wPlInfo_Pl1+iPlInfo_IntroMoveId], a
@@ -6679,7 +6679,7 @@ ENDR
 	; Load the settings two bytes at a time.
 	ld   hl, iPlInfo_MoveAnimTblPtr_Low	; byte0-1
 	call .copyPtr
-	ld   hl, iPlInfo_MoveCodePtrTable_Low	; byte2-3
+	ld   hl, iPlInfo_MoveCodePtrTbl_Low	; byte2-3
 	call .copyPtr
 	ld   hl, iPlInfo_MoveInputCodePtr_Low	; byte4-5
 	call .copyPtr
@@ -7264,8 +7264,8 @@ Play_DrawHUDBaseAndInitTimer:
 	; These are copied to the locations BG_Play_HUD_1PMarker and BG_Play_HUD_2PMarker expect them.
 	;
 .p1Draw:	
-	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
-	bit  PSB_CPU, a		; Is 1P a CPU player?
+	ld   a, [wPlInfo_Pl1+iPlInfo_Flags0]
+	bit  PF0B_CPU, a		; Is 1P a CPU player?
 	jp   nz, .p1CPU		; If so, jump
 .p1Pl:
 	; Copy 1P marker GFX
@@ -7280,8 +7280,8 @@ Play_DrawHUDBaseAndInitTimer:
 	call CopyTilesAutoNum
 	
 .p2Draw:
-	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
-	bit  PSB_CPU, a		; Is 2P a CPU player?
+	ld   a, [wPlInfo_Pl2+iPlInfo_Flags0]
+	bit  PF0B_CPU, a		; Is 2P a CPU player?
 	jp   nz, .p2CPU		; If so, jump
 .p2Pl
 	; Copy 2P marker GFX
@@ -8820,7 +8820,7 @@ Play_DoPl:
 		; Read out to DE the move pointer table for the current player.
 		; This will only be used for the character-specific moves (.grp01),
 		; as other groups will replace DE with an hardcoded value.
-		ld   hl, iPlInfo_MoveCodePtrTable_High
+		ld   hl, iPlInfo_MoveCodePtrTbl_High
 		add  hl, bc		
 		ld   d, [hl]
 		inc  hl
@@ -9450,9 +9450,9 @@ Pl_SetNewMove:
 	push bc
 		push de
 			; Set that we started a new move
-			ld   hl, iPlInfo_22Flags
+			ld   hl, iPlInfo_Flags2
 			add  hl, bc
-			set  PI22B_MOVESTART, [hl]
+			set  PF2B_MOVESTART, [hl]
 			
 			; Set the new move ID
 			ld   hl, iPlInfo_MoveId
@@ -11127,9 +11127,9 @@ L002E89:;J
 Play_Pl_EmptyPowOnSuperEnd:
 
 	; Super move required
-	ld   hl, iPlInfo_Status
-	add  hl, bc					; Seek to iPlInfo_Status
-	bit  PSB_SUPERMOVE, [hl]	; Were we just doing a super move?
+	ld   hl, iPlInfo_Flags0
+	add  hl, bc					; Seek to iPlInfo_Flags0
+	bit  PF0B_SUPERMOVE, [hl]	; Were we just doing a super move?
 	jp   z, .ret				; If not, return
 	
 	; Max meter required
@@ -11376,9 +11376,9 @@ Play_Pl_DoBasicMoveInput:
 			
 			; Projectiles can only be blocked in the air.
 			; So as long as the opponent's projectile is active, try to air block it.
-			ld   hl, iPlInfo_StatusOther
+			ld   hl, iPlInfo_Flags0Other
 			add  hl, bc
-			bit  PSB_PROJ, [hl]					; Does the other player have an active projectile?
+			bit  PF0B_PROJ, [hl]					; Does the other player have an active projectile?
 			jp   nz, BasicInput_StartAirBlock	; If so, jump
 			
 			; Ground-based attacks can't be blocked in the air.
@@ -11402,9 +11402,9 @@ Play_Pl_DoBasicMoveInput:
 			; the basic movement actions.
 			; ie: normally, the game returns to the idle move when nothing is pressed,
 			;     but that shouldn't happen while performing another move.
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			bit  PI21B_NOBASICINPUT, [hl]
+			bit  PF1B_NOBASICINPUT, [hl]
 			jp   nz, BasicInput_End
 			
 			; If an intro/outro animation is playing, which is straight up a MoveId 
@@ -11470,9 +11470,9 @@ Play_Pl_DoBasicMoveInput:
 		;
 		BasicInput_ChkWalkBack:
 			; Walking back cancels the crouching state
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_CROUCH, [hl]
+			res  PF1B_CROUCH, [hl]
 			
 			; B+B -> Hop Back
 			ld   hl, MoveInput_BB
@@ -11480,9 +11480,9 @@ Play_Pl_DoBasicMoveInput:
 			jp   c, BasicInput_StartHopBack
 			
 			; If the other player is attacking, attempting to walk backwards will block instead.
-			ld   hl, iPlInfo_StatusOther
+			ld   hl, iPlInfo_Flags0Other
 			add  hl, bc
-			bit  PSB_PROJ, [hl]						; Is the other player throwing a projectile?
+			bit  PF0B_PROJ, [hl]						; Is the other player throwing a projectile?
 			jp   nz, BasicInput_StartGroundBlock	; If so, jump	
 			ld   hl, iPlInfo_MoveDamageValOther
 			add  hl, bc
@@ -11519,9 +11519,9 @@ Play_Pl_DoBasicMoveInput:
 			
 		.chkNormals:
 			; For everything else, holding down means crouching
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			set  PI21B_CROUCH, [hl]
+			set  PF1B_CROUCH, [hl]
 			
 			; Check normals
 			bit  KEPB_A_LIGHT, a
@@ -11570,9 +11570,9 @@ Play_Pl_DoBasicMoveInput:
 		BasicInput_ChkCrouchBack:
 			; We can only block if the other player is attacking.
 			; Otherwise, fall-through into the idle crouch code.
-			ld   hl, iPlInfo_StatusOther
+			ld   hl, iPlInfo_Flags0Other
 			add  hl, bc
-			bit  PSB_PROJ, [hl]						; Is there an enemy projectile?
+			bit  PF0B_PROJ, [hl]						; Is there an enemy projectile?
 			jp   nz, BasicInput_StartGroundBlock	; If so, block
 			
 			ld   hl, iPlInfo_MoveDamageValOther
@@ -11593,10 +11593,10 @@ Play_Pl_DoBasicMoveInput:
 			jp   z, BasicInput_End		; If so, return
 			
 			; Set flags
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_GUARD, [hl]		; Don't guard
-										; PI21B_CROUCH got already set before
+			res  PF1B_GUARD, [hl]		; Don't guard
+										; PF1B_CROUCH got already set before
 			; New move
 			ld   a, MOVE_SHARED_CROUCH
 			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
@@ -11614,10 +11614,10 @@ Play_Pl_DoBasicMoveInput:
 			jp   z, BasicInput_End
 			
 			; Set flags
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_GUARD, [hl]
-			res  PI21B_CROUCH, [hl]
+			res  PF1B_GUARD, [hl]
+			res  PF1B_CROUCH, [hl]
 			
 			; New move
 			ld   a, MOVE_SHARED_IDLE
@@ -11647,10 +11647,10 @@ Play_Pl_DoBasicMoveInput:
 			jp   z, BasicInput_End		; If so, return
 			
 			; Update flags
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_GUARD, [hl]		; Only set when switching to the actual block move
-			res  PI21B_CROUCH, [hl]		; Walking is not crouching
+			res  PF1B_GUARD, [hl]		; Only set when switching to the actual block move
+			res  PF1B_CROUCH, [hl]		; Walking is not crouching
 			
 			; New move
 			ld   a, MOVE_SHARED_WALK_F
@@ -11674,10 +11674,10 @@ Play_Pl_DoBasicMoveInput:
 			jp   z, BasicInput_End		; If so, return
 			
 			; Update flags
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_GUARD, [hl]		; Only set when switching to the actual block move
-			res  PI21B_CROUCH, [hl]		; Walking is not crouching
+			res  PF1B_GUARD, [hl]		; Only set when switching to the actual block move
+			res  PF1B_CROUCH, [hl]		; Walking is not crouching
 			
 			; New move
 			ld   a, MOVE_SHARED_WALK_B
@@ -11726,14 +11726,14 @@ Play_Pl_DoBasicMoveInput:
 				ld   [hl], d	; iPlInfo_JoyNewKeysLHPreJump = iPlInfo_JoyNewKeysLH
 			pop  de
 			
-			; Set standard flags except PI21B_NOSPECSTART, otherwise we
+			; Set standard flags except PF1B_NOSPECSTART, otherwise we
 			; couldn't start air specials.
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_GUARD, [hl]
-			res  PI21B_CROUCH, [hl]
-			set  PI21B_NOBASICINPUT, [hl]
-			set  PI21B_XFLIPLOCK, [hl]
+			res  PF1B_GUARD, [hl]
+			res  PF1B_CROUCH, [hl]
+			set  PF1B_NOBASICINPUT, [hl]
+			set  PF1B_XFLIPLOCK, [hl]
 			
 			; Always start a neutral jump by default.
 			; The code for it will then detect if it should switch to
@@ -11750,9 +11750,9 @@ Play_Pl_DoBasicMoveInput:
 			ld   hl, iPlInfo_MoveId
 			add  hl, bc
 			ld   a, [hl]				; A = MoveId
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			bit  PI21B_CROUCH, [hl]		; Are we crouching?
+			bit  PF1B_CROUCH, [hl]		; Are we crouching?
 			jr   nz, .crouch			; If so, jump
 		.stand:
 			cp   MOVE_SHARED_BLOCK_G	; Are we mid blocking already?
@@ -11764,7 +11764,7 @@ Play_Pl_DoBasicMoveInput:
 			jp   z, BasicInput_End		; If so, return
 			ld   a, MOVE_SHARED_BLOCK_C	; Otherwise, start the low block
 		.start:
-			set  PI21B_GUARD, [hl]		; Reduce damage
+			set  PF1B_GUARD, [hl]		; Reduce damage
 			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
 			jp   BasicInput_End
 			
@@ -11781,9 +11781,9 @@ Play_Pl_DoBasicMoveInput:
 			
 			; Otherwise, switch to it
 			ld   a, MOVE_SHARED_BLOCK_A	; A = Move to start
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			set  PI21B_GUARD, [hl]			; Guard against attacks
+			set  PF1B_GUARD, [hl]			; Guard against attacks
 			call Pl_Unk_SetNewMoveAndAnim	; Switch to move A
 			jp   BasicInput_End
 			
@@ -11796,13 +11796,13 @@ Play_Pl_DoBasicMoveInput:
 			call HomeCall_Sound_ReqPlayExId
 			
 			; Set standard flags
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_GUARD, [hl]			; Player is vulnerable
-			res  PI21B_CROUCH, [hl]			; and standing
-			set  PI21B_NOBASICINPUT, [hl]	; Not cancellable by movement
-			set  PI21B_XFLIPLOCK, [hl]		; Doesn't turn if opponent jumps over
-			set  PI21B_NOSPECSTART, [hl]	; Not cancellable by specials
+			res  PF1B_GUARD, [hl]			; Player is vulnerable
+			res  PF1B_CROUCH, [hl]			; and standing
+			set  PF1B_NOBASICINPUT, [hl]	; Not cancellable by movement
+			set  PF1B_XFLIPLOCK, [hl]		; Doesn't turn if opponent jumps over
+			set  PF1B_NOSPECSTART, [hl]	; Not cancellable by specials
 			
 			; New move
 			ld   a, MOVE_SHARED_CHARGEMETER
@@ -11814,15 +11814,15 @@ Play_Pl_DoBasicMoveInput:
 		;
 		BasicInput_StartLightPunch:
 			; Set flags
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_GUARD, [hl]	; Normals not guarded
-			res  PI21B_CROUCH, [hl]	; From standing
-			set  PI21B_NOBASICINPUT, [hl] 
-			set  PI21B_XFLIPLOCK, [hl]
+			res  PF1B_GUARD, [hl]	; Normals not guarded
+			res  PF1B_CROUCH, [hl]	; From standing
+			set  PF1B_NOBASICINPUT, [hl] 
+			set  PF1B_XFLIPLOCK, [hl]
 			; Normals can't be cancelled into specials.
-			; They can only be cancelled when hitting the opponent (PI21B_ALLOWHITCANCEL)
-			set  PI21B_NOSPECSTART, [hl] ; Can't cancel into special
+			; They can only be cancelled when hitting the opponent (PF1B_ALLOWHITCANCEL)
+			set  PF1B_NOSPECSTART, [hl] ; Can't cancel into special
 			
 			; New move
 			ld   a, MOVE_SHARED_PUNCH_L
@@ -11855,13 +11855,13 @@ Play_Pl_DoBasicMoveInput:
 			call HomeCall_Sound_ReqPlayExId
 			
 			; Set standard attack flags
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_GUARD, [hl]
-			res  PI21B_CROUCH, [hl]
-			set  PI21B_NOBASICINPUT, [hl]
-			set  PI21B_XFLIPLOCK, [hl]
-			set  PI21B_NOSPECSTART, [hl]
+			res  PF1B_GUARD, [hl]
+			res  PF1B_CROUCH, [hl]
+			set  PF1B_NOBASICINPUT, [hl]
+			set  PF1B_XFLIPLOCK, [hl]
+			set  PF1B_NOSPECSTART, [hl]
 			
 			; New move
 			ld   a, MOVE_SHARED_PUNCH_H
@@ -11873,13 +11873,13 @@ Play_Pl_DoBasicMoveInput:
 		;	
 		BasicInput_StartLightKick:
 			; Set standard attack flags
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_GUARD, [hl]
-			res  PI21B_CROUCH, [hl]
-			set  PI21B_NOBASICINPUT, [hl]
-			set  PI21B_XFLIPLOCK, [hl]
-			set  PI21B_NOSPECSTART, [hl]
+			res  PF1B_GUARD, [hl]
+			res  PF1B_CROUCH, [hl]
+			set  PF1B_NOBASICINPUT, [hl]
+			set  PF1B_XFLIPLOCK, [hl]
+			set  PF1B_NOSPECSTART, [hl]
 			
 			; New move
 			ld   a, MOVE_SHARED_KICK_L
@@ -11913,13 +11913,13 @@ Play_Pl_DoBasicMoveInput:
 			call HomeCall_Sound_ReqPlayExId
 			
 			; Set standard attack flags
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_GUARD, [hl]
-			res  PI21B_CROUCH, [hl]
-			set  PI21B_NOBASICINPUT, [hl]
-			set  PI21B_XFLIPLOCK, [hl]
-			set  PI21B_NOSPECSTART, [hl]
+			res  PF1B_GUARD, [hl]
+			res  PF1B_CROUCH, [hl]
+			set  PF1B_NOBASICINPUT, [hl]
+			set  PF1B_XFLIPLOCK, [hl]
+			set  PF1B_NOSPECSTART, [hl]
 			
 			; New move
 			ld   a, MOVE_SHARED_KICK_H
@@ -11934,18 +11934,18 @@ Play_Pl_DoBasicMoveInput:
 			ld   a, [wDipSwitch]
 			bit  DIPB_INFINITE_METER, a	; Is the cheat set?
 			jp   z, .go					; If not, skip
-			ld   hl, iPlInfo_Status
+			ld   hl, iPlInfo_Flags0
 			add  hl, bc					; Otherwise, make it reflect projectiles
-			set  PSB_PROJREFLECT, [hl]
+			set  PF0B_PROJREFLECT, [hl]
 		.go:
 			; Set standard crouching attack flags.
-			; Same as normal, except without resetting PI21B_CROUCH.
-			ld   hl, iPlInfo_21Flags
+			; Same as normal, except without resetting PF1B_CROUCH.
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_GUARD, [hl]
-			set  PI21B_NOBASICINPUT, [hl]
-			set  PI21B_XFLIPLOCK, [hl]
-			set  PI21B_NOSPECSTART, [hl]
+			res  PF1B_GUARD, [hl]
+			set  PF1B_NOBASICINPUT, [hl]
+			set  PF1B_XFLIPLOCK, [hl]
+			set  PF1B_NOSPECSTART, [hl]
 			
 			; New move
 			ld   a, MOVE_SHARED_PUNCH_CL
@@ -11964,18 +11964,18 @@ Play_Pl_DoBasicMoveInput:
 			ld   a, [wDipSwitch]
 			bit  DIPB_INFINITE_METER, a	; Is the cheat set?
 			jp   z, .go					; If not, skip
-			ld   hl, iPlInfo_Status
+			ld   hl, iPlInfo_Flags0
 			add  hl, bc					; Otherwise, make it delete projectiles
-			set  PSB_PROJREM, [hl]
+			set  PF0B_PROJREM, [hl]
 		.go:
 		
 			; Set standard crouching attack flags.
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_GUARD, [hl]
-			set  PI21B_NOBASICINPUT, [hl]
-			set  PI21B_XFLIPLOCK, [hl]
-			set  PI21B_NOSPECSTART, [hl]
+			res  PF1B_GUARD, [hl]
+			set  PF1B_NOBASICINPUT, [hl]
+			set  PF1B_XFLIPLOCK, [hl]
+			set  PF1B_NOSPECSTART, [hl]
 			
 			; New move
 			ld   a, MOVE_SHARED_PUNCH_CH
@@ -11987,12 +11987,12 @@ Play_Pl_DoBasicMoveInput:
 		;
 		BasicInput_StartCrouchLightKick:
 			; Set standard crouching attack flags.
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_GUARD, [hl]
-			set  PI21B_NOBASICINPUT, [hl]
-			set  PI21B_XFLIPLOCK, [hl]
-			set  PI21B_NOSPECSTART, [hl]
+			res  PF1B_GUARD, [hl]
+			set  PF1B_NOBASICINPUT, [hl]
+			set  PF1B_XFLIPLOCK, [hl]
+			set  PF1B_NOSPECSTART, [hl]
 			; New move
 			ld   a, MOVE_SHARED_KICK_CL
 			call Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH
@@ -12007,12 +12007,12 @@ Play_Pl_DoBasicMoveInput:
 			call HomeCall_Sound_ReqPlayExId
 			
 			; Set standard crouching attack flags.
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_GUARD, [hl]
-			set  PI21B_NOBASICINPUT, [hl]
-			set  PI21B_XFLIPLOCK, [hl]
-			set  PI21B_NOSPECSTART, [hl]
+			res  PF1B_GUARD, [hl]
+			set  PF1B_NOBASICINPUT, [hl]
+			set  PF1B_XFLIPLOCK, [hl]
+			set  PF1B_NOSPECSTART, [hl]
 			
 			; New move
 			ld   a, MOVE_SHARED_KICK_CH
@@ -12029,18 +12029,18 @@ Play_Pl_DoBasicMoveInput:
 			ld   [hl], $00
 			
 			; Set standard flags
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_GUARD, [hl]
-			res  PI21B_CROUCH, [hl]
-			set  PI21B_NOBASICINPUT, [hl]
-			set  PI21B_XFLIPLOCK, [hl]
-			set  PI21B_NOSPECSTART, [hl]
+			res  PF1B_GUARD, [hl]
+			res  PF1B_CROUCH, [hl]
+			set  PF1B_NOBASICINPUT, [hl]
+			set  PF1B_XFLIPLOCK, [hl]
+			set  PF1B_NOSPECSTART, [hl]
 			
 			; Rolling is invulnerable to everything except throws (ie: moves that use iOBJInfo_ForceHitboxId)
-			inc  hl	; Seek to iPlInfo_22Flags
-			set  PI22B_NOHURTBOX, [hl]
-			set  PI22B_NOCOLIBOX, [hl]
+			inc  hl	; Seek to iPlInfo_Flags2
+			set  PF2B_NOHURTBOX, [hl]
+			set  PF2B_NOCOLIBOX, [hl]
 			
 			; New move
 			ld   a, MOVE_SHARED_ROLL_F
@@ -12057,18 +12057,18 @@ Play_Pl_DoBasicMoveInput:
 			ld   [hl], $00
 			
 			; Set standard flags
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_GUARD, [hl]
-			res  PI21B_CROUCH, [hl]
-			set  PI21B_NOBASICINPUT, [hl]
-			set  PI21B_XFLIPLOCK, [hl]
-			set  PI21B_NOSPECSTART, [hl]
+			res  PF1B_GUARD, [hl]
+			res  PF1B_CROUCH, [hl]
+			set  PF1B_NOBASICINPUT, [hl]
+			set  PF1B_XFLIPLOCK, [hl]
+			set  PF1B_NOSPECSTART, [hl]
 			
 			; Rolling is invulnerable to everything except throws (ie: moves that use iOBJInfo_ForceHitboxId)
-			inc  hl	; Seek to iPlInfo_22Flags
-			set  PI22B_NOHURTBOX, [hl]
-			set  PI22B_NOCOLIBOX, [hl]
+			inc  hl	; Seek to iPlInfo_Flags2
+			set  PF2B_NOHURTBOX, [hl]
+			set  PF2B_NOCOLIBOX, [hl]
 			
 			; New move
 			ld   a, MOVE_SHARED_ROLL_B
@@ -12084,13 +12084,13 @@ Play_Pl_DoBasicMoveInput:
 			call HomeCall_Sound_ReqPlayExId
 			
 			; Set standard attack flags
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_GUARD, [hl]
-			res  PI21B_CROUCH, [hl]
-			set  PI21B_NOBASICINPUT, [hl]
-			set  PI21B_XFLIPLOCK, [hl]
-			set  PI21B_NOSPECSTART, [hl]
+			res  PF1B_GUARD, [hl]
+			res  PF1B_CROUCH, [hl]
+			set  PF1B_NOBASICINPUT, [hl]
+			set  PF1B_XFLIPLOCK, [hl]
+			set  PF1B_NOSPECSTART, [hl]
 			
 			; New move
 			ld   a, MOVE_SHARED_ATTACK_G
@@ -12107,13 +12107,13 @@ Play_Pl_DoBasicMoveInput:
 			; for starting a special in the middle of the run.
 			call Play_Pl_ClearJoyDirBuffer
 			
-			; Set standard flags except for PI21B_NOSPECSTART
-			ld   hl, iPlInfo_21Flags
+			; Set standard flags except for PF1B_NOSPECSTART
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_GUARD, [hl]
-			res  PI21B_CROUCH, [hl]
-			set  PI21B_NOBASICINPUT, [hl]
-			set  PI21B_XFLIPLOCK, [hl]
+			res  PF1B_GUARD, [hl]
+			res  PF1B_CROUCH, [hl]
+			set  PF1B_NOBASICINPUT, [hl]
+			set  PF1B_XFLIPLOCK, [hl]
 			
 			; New move
 			ld   a, MOVE_SHARED_DASH_F
@@ -12134,14 +12134,14 @@ Play_Pl_DoBasicMoveInput:
 			; Like with the forwards run
 			call Play_Pl_ClearJoyDirBuffer
 			
-			; Standard flags except for PI21B_NOSPECSTART, as it's possible
+			; Standard flags except for PF1B_NOSPECSTART, as it's possible
 			; to cancel the run into a special move.
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_GUARD, [hl]
-			res  PI21B_CROUCH, [hl]
-			set  PI21B_NOBASICINPUT, [hl]
-			set  PI21B_XFLIPLOCK, [hl]
+			res  PF1B_GUARD, [hl]
+			res  PF1B_CROUCH, [hl]
+			set  PF1B_NOBASICINPUT, [hl]
+			set  PF1B_XFLIPLOCK, [hl]
 			
 			; New move
 			ld   a, MOVE_SHARED_DASH_B
@@ -12169,15 +12169,15 @@ Play_Pl_DoBasicMoveInput:
 			ld   a, [hl]			; A = Sound command ID
 			call HomeCall_Sound_ReqPlayExId
 			
-			; Set standard flags except for PI21B_NOSPECSTART.
+			; Set standard flags except for PF1B_NOSPECSTART.
 			; It's possible to cancel it into a special, though unlike other
 			; versions the meter stops decreasing once that's done.
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_GUARD, [hl]
-			res  PI21B_CROUCH, [hl]
-			set  PI21B_NOBASICINPUT, [hl]
-			set  PI21B_XFLIPLOCK, [hl]
+			res  PF1B_GUARD, [hl]
+			res  PF1B_CROUCH, [hl]
+			set  PF1B_NOBASICINPUT, [hl]
+			set  PF1B_XFLIPLOCK, [hl]
 			
 			; New move
 			ld   a, MOVE_SHARED_TAUNT
@@ -12213,13 +12213,13 @@ Play_Pl_DoBasicMoveInput:
 		;
 		BasicInput_StartIntroMove:
 			; Set standard flags
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_GUARD, [hl]
-			res  PI21B_CROUCH, [hl]
-			set  PI21B_NOBASICINPUT, [hl]
-			set  PI21B_XFLIPLOCK, [hl]
-			set  PI21B_NOSPECSTART, [hl]
+			res  PF1B_GUARD, [hl]
+			res  PF1B_CROUCH, [hl]
+			set  PF1B_NOBASICINPUT, [hl]
+			set  PF1B_XFLIPLOCK, [hl]
+			set  PF1B_NOSPECSTART, [hl]
 			
 			; New move
 			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
@@ -12231,17 +12231,17 @@ Play_Pl_DoBasicMoveInput:
 		; The opponent can throw tech during this mode.
 		;
 		BasicInput_StartGroundThrow:
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
 			; Set standard flags
-			res  PI21B_GUARD, [hl]
-			res  PI21B_CROUCH, [hl]
-			set  PI21B_NOBASICINPUT, [hl]
-			res  PI21B_XFLIPLOCK, [hl]	; What
-			set  PI21B_XFLIPLOCK, [hl]
-			set  PI21B_NOSPECSTART, [hl]
+			res  PF1B_GUARD, [hl]
+			res  PF1B_CROUCH, [hl]
+			set  PF1B_NOBASICINPUT, [hl]
+			res  PF1B_XFLIPLOCK, [hl]	; What
+			set  PF1B_XFLIPLOCK, [hl]
+			set  PF1B_NOSPECSTART, [hl]
 			; Completely invulnerable while throwing
-			set  PI21B_INVULN, [hl]
+			set  PF1B_INVULN, [hl]
 			
 			; New move
 			ld   a, MOVE_SHARED_THROW_6C
@@ -12290,13 +12290,13 @@ Play_Pl_DoBasicMoveInput:
 			ld   a, $F0
 			ld   [wStageBGP], a
 			; We're not invulnerable anymore as the throw got aborted
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			res  PI21B_INVULN, [hl]
+			res  PF1B_INVULN, [hl]
 			; Shake more before getting pushed back by the throw tech
-			inc  hl ; Seek to iPlInfo_22Flags
-			inc  hl ; Seek to iPlInfo_23Flags
-			set  PI23B_SHAKELONG, [hl]
+			inc  hl ; Seek to iPlInfo_Flags2
+			inc  hl ; Seek to iPlInfo_Flags3
+			set  PF3B_SHAKELONG, [hl]
 			jp   BasicInput_End
 			
 		;
@@ -12309,17 +12309,17 @@ Play_Pl_DoBasicMoveInput:
 			; so the opponent can't throw tech them.
 			; That's probably why the CPU can't be thrown with them.
 			;
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
 			; Set standard flags
-			res  PI21B_GUARD, [hl]
-			res  PI21B_CROUCH, [hl]
-			set  PI21B_NOBASICINPUT, [hl]
-			res  PI21B_XFLIPLOCK, [hl]	; What
-			set  PI21B_XFLIPLOCK, [hl]
-			set  PI21B_NOSPECSTART, [hl]
+			res  PF1B_GUARD, [hl]
+			res  PF1B_CROUCH, [hl]
+			set  PF1B_NOBASICINPUT, [hl]
+			res  PF1B_XFLIPLOCK, [hl]	; What
+			set  PF1B_XFLIPLOCK, [hl]
+			set  PF1B_NOSPECSTART, [hl]
 			; Completely invulnerable while throwing
-			set  PI21B_INVULN, [hl]
+			set  PF1B_INVULN, [hl]
 			
 			; New move
 			ld   a, MOVE_SHARED_THROW_6E
@@ -13184,11 +13184,11 @@ MoveInputS_CanStartSpecialMove:
 	jp   nz, .retNoMove	; If so, return
 	
 	;
-	; If a special move is being executed already (PS_SPECMOVE set), don't allow executing a new one
+	; If a special move is being executed already (PF0_SPECMOVE set), don't allow executing a new one
 	;
-	ld   hl, iPlInfo_Status
-	add  hl, bc				; Seek to iPlInfo_Status
-	bit  PSB_SPECMOVE, [hl]	; Is the bit set?
+	ld   hl, iPlInfo_Flags0
+	add  hl, bc				; Seek to iPlInfo_Flags0
+	bit  PF0B_SPECMOVE, [hl]	; Is the bit set?
 	jp   nz, .retNoMove		; If so, return
 	
 
@@ -13196,8 +13196,8 @@ MoveInputS_CanStartSpecialMove:
 	; 
 	; ??? What are the special cases?
 	;
-	ld   hl, iPlInfo_21Flags
-	add  hl, bc				; Seek to iPlInfo_21Flags
+	ld   hl, iPlInfo_Flags1
+	add  hl, bc				; Seek to iPlInfo_Flags1
 	
 	
 	;
@@ -13206,9 +13206,9 @@ MoveInputS_CanStartSpecialMove:
 	; Note that all of the guard cancel validation already happened
 	; by the time we get here.
 	;
-	bit  PI21B_GUARD, [hl]		; Is the player blocking? (checked here since PI21B_COMBORECV also applies when blocking)
+	bit  PF1B_GUARD, [hl]		; Is the player blocking? (checked here since PF1B_COMBORECV also applies when blocking)
 	jp   nz, .chkMoveId			; If so, jump
-	bit  PI21B_COMBORECV, [hl]	; Are we getting combo'd?
+	bit  PF1B_COMBORECV, [hl]	; Are we getting combo'd?
 	jp   nz, .retNoMove			; If so, return
 	call Play_Pl_IsDizzy		; Is the player dizzy?
 	jp   nz, .retNoMove			; If so, return
@@ -13229,11 +13229,11 @@ MoveInputS_CanStartSpecialMove:
 	;
 	; Can't cancel if we've been explicitly denied that.
 	;
-	ld   hl, iPlInfo_21Flags
-	add  hl, bc						; Seek to iPlInfo_21Flags
-	bit  PI21B_ALLOWHITCANCEL, [hl]		; Can we combo off the previous hit?
+	ld   hl, iPlInfo_Flags1
+	add  hl, bc						; Seek to iPlInfo_Flags1
+	bit  PF1B_ALLOWHITCANCEL, [hl]		; Can we combo off the previous hit?
 	jp   nz, .moveOk				; If so, jump (skip check)
-	bit  PI21B_NOSPECSTART, [hl]	; Are we allowed to cancel the move into the special?
+	bit  PF1B_NOSPECSTART, [hl]	; Are we allowed to cancel the move into the special?
 	jp   nz, .retNoMove				; If not, return
 	
 .moveOk:
@@ -13355,9 +13355,9 @@ MoveInputS_CheckMoveLHVer:
 	; Perform the heavy flag check, as previously set by MoveInputS_CheckLHType.
 	; The updated result in the Z flag will be our return value.
 	;
-	ld   hl, iPlInfo_22Flags
+	ld   hl, iPlInfo_Flags2
 	add  hl, bc					; Seek to flags
-	bit  PI22B_HEAVY, [hl]		; Update Z flag
+	bit  PF2B_HEAVY, [hl]		; Update Z flag
 	scf
 	ccf							; Clear carry
 	ret
@@ -13367,9 +13367,9 @@ MoveInputS_CheckMoveLHVer:
 	; Perform the final one.
 	; There's no "hidden light", it just falls back to the normal check
 	;
-	ld   hl, iPlInfo_22Flags
+	ld   hl, iPlInfo_Flags2
 	add  hl, bc
-	bit  PI22B_HEAVY, [hl]	; Heavy bit set?
+	bit  PF2B_HEAVY, [hl]	; Heavy bit set?
 	jp   z, .chkNorm		; If not, jump
 	scf						; Set carry
 	ret
@@ -13466,7 +13466,7 @@ MoveInputS_SetSpecMove_StopSpeed:
 	call OBJLstS_SyncXFlip
 	
 	; HL = Ptr to status flag
-	ld   hl, iPlInfo_Status
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
 	
 	;
@@ -13479,7 +13479,7 @@ MoveInputS_SetSpecMove_StopSpeed:
 	; so it's safe to check < $64.
 	cp   MOVE_SPECIAL_START		; MoveId < $64?
 	jp   c, .setFlags			; If so, skip
-	set  PSB_SUPERMOVE, [hl]
+	set  PF0B_SUPERMOVE, [hl]
 	push af
 		push hl
 			ld   hl, $0000
@@ -13492,24 +13492,24 @@ MoveInputS_SetSpecMove_StopSpeed:
 	; Set all of the default flags for starting a move.
 	;
 	
-	; iPlInfo_Status
+	; iPlInfo_Flags0
 	; Mark that a special move is in progress.
-	set  PSB_SPECMOVE, [hl]
+	set  PF0B_SPECMOVE, [hl]
 	
-	inc  hl			; Seek to iPlInfo_21Flags
-	set  PI21B_NOBASICINPUT, [hl] 	; Special moves can't be cancelled by normal movement
-	set  PI21B_XFLIPLOCK, [hl] 		; Lock the player's direction until the move is over
-	set  PI21B_NOSPECSTART, [hl] 	; For consistency (PSB_SPECMOVE takes care of this already)
-	res  PI21B_GUARD, [hl]			; Receive full damage by default if hit out of the special
-	res  PI21B_CROUCH, [hl]			; Remove crouch flag in case we performed the move while crouching
-	res  PI21B_INVULN, [hl] 		; Disable invulnerability in case we got here from guard cancels
+	inc  hl			; Seek to iPlInfo_Flags1
+	set  PF1B_NOBASICINPUT, [hl] 	; Special moves can't be cancelled by normal movement
+	set  PF1B_XFLIPLOCK, [hl] 		; Lock the player's direction until the move is over
+	set  PF1B_NOSPECSTART, [hl] 	; For consistency (PF0B_SPECMOVE takes care of this already)
+	res  PF1B_GUARD, [hl]			; Receive full damage by default if hit out of the special
+	res  PF1B_CROUCH, [hl]			; Remove crouch flag in case we performed the move while crouching
+	res  PF1B_INVULN, [hl] 		; Disable invulnerability in case we got here from guard cancels
 	
 	;
 	; Remove any temporary invuln. effect on player
 	;
-	inc  hl			; Seek to iPlInfo_22Flags
-	res  PI22B_NOHURTBOX, [hl]
-	res  PI22B_NOCOLIBOX, [hl]
+	inc  hl			; Seek to iPlInfo_Flags2
+	res  PF2B_NOHURTBOX, [hl]
+	res  PF2B_NOCOLIBOX, [hl]
 	
 	;
 	; Actually start the move, stopping the player momentum
@@ -13525,12 +13525,12 @@ MoveInputS_SetSpecMove_StopSpeed:
 	; This means the move animation will only wait for the player graphics to load
 	; before switching to the next frame.
 	;
-	dec  hl						; Seek to iPlInfo_21Flags
-	bit  PI21B_ALLOWHITCANCEL, [hl]	; Did we combo the move off a previous hit?
+	dec  hl						; Seek to iPlInfo_Flags1
+	bit  PF1B_ALLOWHITCANCEL, [hl]	; Did we combo the move off a previous hit?
 	jp   z, .ret				; If not, return
 	; Set that we started a combo'd move
 	inc  hl						
-	set  PI22B_HITCOMBO, [hl]
+	set  PF2B_HITCOMBO, [hl]
 	; Note that Pl_Unk_SetNewMoveAndAnim_StopSpeed set us a new FrameLeft/FrameTotal value.
 	; In case of moves with slow animations (iOBJInfo_FrameLeft > $7F), don't remove the delay.
 	ld   hl, iOBJInfo_FrameLeft
@@ -13855,9 +13855,9 @@ Play_Pl_ChkThrowInput:
 .chkAir:
 
 	; Determine if we're in the air or not
-	ld   hl, iPlInfo_Status
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	bit  PSB_AIR, [hl]	; Are we in the air?
+	bit  PF0B_AIR, [hl]	; Are we in the air?
 	jp   nz, .air	; If so, jump
 	jp   .ground
 	
@@ -13868,10 +13868,10 @@ Play_Pl_ChkThrowInput:
 .ground:
 
 	; When crouching or performing moves not allowing basic movement, throwing will be ignored.
-	inc  hl							; Seek to iPlInfo_21Flags
-	bit  PI21B_NOBASICINPUT, [hl]	; Is basic input denied?
+	inc  hl							; Seek to iPlInfo_Flags1
+	bit  PF1B_NOBASICINPUT, [hl]	; Is basic input denied?
 	jp   nz, .noThrow				; If so, return
-	bit  PI21B_CROUCH, [hl] 		; Crouching?
+	bit  PF1B_CROUCH, [hl] 		; Crouching?
 	jp   nz, .noThrow				; If so, return
 	
 .groundOk:
@@ -14209,9 +14209,9 @@ Play_Pl_GiveKnockbackCornered:
 	; Knockback transfer isn't applicable if we got hit by a projectile,
 	; as the player could be anywhere on the screen.
 	;
-	ld   hl, iPlInfo_Status
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	bit  PSB_FARHIT, [hl]		; Is the flag set?
+	bit  PF0B_FARHIT, [hl]		; Is the flag set?
 	jp   nz, .ret				; If so, return
 	
 	; Copy iOBJInfo_RangeMoveAmount to iPlInfo_PushSpeedHReq.
@@ -14247,9 +14247,9 @@ Play_Unk_Pl_BlockstunNormal:
 	; If we haven't been hit by a projectile, mark that we received a physical hit
 	; and enable hitstop to the opponent.
 	;
-	ld   hl, iPlInfo_Status
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	bit  PSB_FARHIT, [hl]			; Did we get hit by a projectile?
+	bit  PF0B_FARHIT, [hl]			; Did we get hit by a projectile?
 	jp   nz, .go					; If so, skip
 	; Enable opponent hitstop next frame
 	ld   a, $01								
@@ -14266,21 +14266,21 @@ Play_Unk_Pl_BlockstunNormal:
 	; While this happens, the player is completely blocked and input is ignored.
 	;
 
-	; Save iPlInfo_21Flags value
-	ld   hl, iPlInfo_21Flags
+	; Save iPlInfo_Flags1 value
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
 	ld   a, [hl]
 	push af
 		;--
 		; Can't be hit during blockstun
-		set  PI21B_INVULN, [hl]
+		set  PF1B_INVULN, [hl]
 		
 		call Play_Pl_GetShakeCount	; Determine for how many frames to do the effect
 		call Play_Pl_ShakeFor		; Do it
 		;--
 	pop  af
-	; Restore iPlInfo_21Flags and disable opponent hitstop
-	ld   hl, iPlInfo_21Flags
+	; Restore iPlInfo_Flags1 and disable opponent hitstop
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
 	ld   [hl], a
 	ld   a, $00
@@ -14357,9 +14357,9 @@ Play_Pl_GetShakeCount:
 	; By default, shake the player 8 times.
 	; If we didn't get hit by a projectile, add 2 more.
 	;
-	ld   hl, iPlInfo_Status
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	bit  PSB_FARHIT, [hl]	; Did we get hit by a projectile?
+	bit  PF0B_FARHIT, [hl]	; Did we get hit by a projectile?
 	jp   nz, .base08		; If so, jump
 .base0A:
 	ld   a, $08+$02			; ShakeCnt = $0A
@@ -14373,15 +14373,15 @@ Play_Pl_GetShakeCount:
 	; The shake count can be affected by the move we got attacked with.
 	;
 	
-	ld   hl, iPlInfo_23Flags
+	ld   hl, iPlInfo_Flags3
 	add  hl, bc
 	
 	; Some moves shake the player once
-	bit  PI23B_SHAKEONCE, [hl]	; Is the bit set?
+	bit  PF3B_SHAKEONCE, [hl]	; Is the bit set?
 	jp   nz, .shakeOnce			; If so, jump
 	
 	; If this isn't set as a long shake, cut in half thw shake count
-	bit  PI23B_SHAKELONG, [hl]	; Is the bit set?
+	bit  PF3B_SHAKELONG, [hl]	; Is the bit set?
 	jp   nz, .chkHealth			; If so, jump
 .shakeHalf:
 	srl  a					; ShakeCnt = ShakeCnt / 2				
@@ -14442,18 +14442,18 @@ Play_Unk_Pl_BlockstunNormalOnce:
 	;
 	
 	; Save flags
-	ld   hl, iPlInfo_21Flags
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
 	ld   a, [hl]
 	push af
 		; Can't be hit while this happens, as usual for blockstun
-		set  PI21B_INVULN, [hl]
+		set  PF1B_INVULN, [hl]
 		; Perform effect
 		ld   a, $01				; 1(*2) frames
 		call Play_Pl_ShakeFor
 	pop  af
 	; Restore flags
-	ld   hl, iPlInfo_21Flags
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
 	ld   [hl], a
 	
@@ -14493,9 +14493,9 @@ Play_Pl_DoBlockstun:
 	; If we haven't been hit by a projectile, mark that we received a physical hit
 	; and enable hitstop to the opponent from the next frame.
 	;
-	ld   hl, iPlInfo_Status
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	bit  PSB_FARHIT, [hl]					; Did we get hit by a projectile?
+	bit  PF0B_FARHIT, [hl]					; Did we get hit by a projectile?
 	jp   nz, .setFlags21					; If so, skip
 	; Enable opponent hitstop next frame
 	ld   a, $01								
@@ -14508,12 +14508,12 @@ Play_Pl_DoBlockstun:
 .setFlags21:
 
 	; Save flags
-	ld   hl, iPlInfo_21Flags
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
 	ld   a, [hl]
 	push af
 		; Can't be hit during blockstun
-		set  PI21B_INVULN, [hl]
+		set  PF1B_INVULN, [hl]
 		
 		; A = Shake count
 		call Play_Pl_GetShakeCount		
@@ -14564,7 +14564,7 @@ Play_Pl_DoBlockstun:
 .endNorm:
 	; Restore flags
 	pop  af
-	ld   hl, iPlInfo_21Flags
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
 	ld   [hl], a
 	; Disable opponent hitstop next frame
@@ -14578,7 +14578,7 @@ Play_Pl_DoBlockstun:
 		pop  af
 	pop  af
 	; Note that the flags aren't restored, as starting a new move
-	; set new values for many fields, including iPlInfo_21Flags.
+	; set new values for many fields, including iPlInfo_Flags1.
 	
 	; Disable opponent hitstop next frame
 	ld   a, $00
@@ -14632,33 +14632,33 @@ Play_Pl_ChkGuardCancelRoll:
 	ld   [hl], $01
 	
 	
-	ld   hl, iPlInfo_Status
-	add  hl, bc			; Seek to iPlInfo_Status
+	ld   hl, iPlInfo_Flags0
+	add  hl, bc			; Seek to iPlInfo_Flags0
 	
 	; Pretend that the guard cancel roll is a super move.
 	; This has two effects:
 	; - The player flashes while rolling
 	; - Any normal fireball coming in contact with the player gets erased
-	set  PSB_SUPERMOVE, [hl]
+	set  PF0B_SUPERMOVE, [hl]
 	
-	inc  hl				; Seek to iPlInfo_21Flags
-	res  PI21B_GUARD, [hl] ; Can't block when rolling (we are invulnerable instead)
-	res  PI21B_CROUCH, [hl] ; As rolling starts from crouching, remove the crouch flag
-	set  PI21B_NOBASICINPUT, [hl] ; Don't override with normal movement
-	set  PI21B_XFLIPLOCK, [hl] ; Lock player direction during the roll
-	set  PI21B_NOSPECSTART, [hl] ; Don't allow cancelling the roll into a special
+	inc  hl				; Seek to iPlInfo_Flags1
+	res  PF1B_GUARD, [hl] ; Can't block when rolling (we are invulnerable instead)
+	res  PF1B_CROUCH, [hl] ; As rolling starts from crouching, remove the crouch flag
+	set  PF1B_NOBASICINPUT, [hl] ; Don't override with normal movement
+	set  PF1B_XFLIPLOCK, [hl] ; Lock player direction during the roll
+	set  PF1B_NOSPECSTART, [hl] ; Don't allow cancelling the roll into a special
 	
-	inc  hl				; Seek to iPlInfo_22Flags
+	inc  hl				; Seek to iPlInfo_Flags2
 	
 	; Make player completely invulnerable while rolling.
 	; Disabling both hurtbox and hitbox causes every attack collision check to be ignored.
-	set  PI22B_NOHURTBOX, [hl]
-	set  PI22B_NOCOLIBOX, [hl]
+	set  PF2B_NOHURTBOX, [hl]
+	set  PF2B_NOCOLIBOX, [hl]
 	
-	inc  hl				; Seek to iPlInfo_23Flags
-	; Remove these flash bits to let PSB_SUPERMOVE handle the flashing
-	res  PI23B_FLASH_B_SLOW, [hl]
-	res  PI23B_FLASH_B_FAST, [hl]
+	inc  hl				; Seek to iPlInfo_Flags3
+	; Remove these flash bits to let PF0B_SUPERMOVE handle the flashing
+	res  PF3B_FLASH_B_SLOW, [hl]
+	res  PF3B_FLASH_B_FAST, [hl]
 	
 	;
 	; Determine if player should roll forwards or backwards depending on the held directional keys.
@@ -14830,22 +14830,22 @@ L003CB3:;C
 	ld   [hl], $1E
 	
 	; Update flags
-	ld   hl, iPlInfo_Status
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
 	; Player is on the ground if rolling
-	res  PSB_AIR, [hl]
+	res  PF0B_AIR, [hl]
 	
 	; Reset this for the next time we get hit
-	res  PSB_FARHIT, [hl]
+	res  PF0B_FARHIT, [hl]
 	; On the ground we can't attack indirectly
-	res  PSB_PROJREM, [hl]
-	res  PSB_PROJREFLECT, [hl]
+	res  PF0B_PROJREM, [hl]
+	res  PF0B_PROJREFLECT, [hl]
 	
-	inc  hl							; Seek to iPlInfo_21Flags
-	res  PI21B_COMBORECV, [hl] 		; Falling to the ground ends the opponent's combo
-	res  PI21B_ALLOWHITCANCEL, [hl] ; For next time
+	inc  hl							; Seek to iPlInfo_Flags1
+	res  PF1B_COMBORECV, [hl] 		; Falling to the ground ends the opponent's combo
+	res  PF1B_ALLOWHITCANCEL, [hl] ; For next time
 	; The player can't be hit on the ground
-	set  PI21B_INVULN, [hl]
+	set  PF1B_INVULN, [hl]
 	
 	; Set move for getting up
 	ld   a, MOVE_SHARED_WAKEUP
@@ -14873,7 +14873,7 @@ HomeCall_Play_Pl_DoHit:
 ; OUT
 ; - C flag: If set, the punch or kick button was registered as being pressed.
 ; - Z flag: If set, a punch was registered. Otherwise, it's a kick.
-; - iPlInfo_22Flags: If PI22B_HEAVY is set, an heavy was registered. Otherwise, it's a light.
+; - iPlInfo_Flags2: If PF2B_HEAVY is set, an heavy was registered. Otherwise, it's a light.
 ;                    This will be used when determining if the light or heavy move should start,
 ;                    see MoveInputS_CheckMoveLHVer
 MoveInputS_CheckLHType:
@@ -14883,7 +14883,7 @@ MoveInputS_CheckLHType:
 	ld   a, [hl]		
 	
 	; HL = Ptr to flags
-	ld   hl, iPlInfo_22Flags
+	ld   hl, iPlInfo_Flags2
 	add  hl, bc			
 	
 	; Determine the combination of returned flags based on the light/heavy info.
@@ -14901,10 +14901,10 @@ MoveInputS_CheckLHType:
 	ret
 	
 .lk:
-	res  PI22B_HEAVY, [hl]	; Not an heavy
+	res  PF2B_HEAVY, [hl]	; Not an heavy
 	jp   .k
 .hk:
-	set  PI22B_HEAVY, [hl]	; Is heavy
+	set  PF2B_HEAVY, [hl]	; Is heavy
 .k:
 	xor  a
 	inc  a	; Clear zero
@@ -14912,10 +14912,10 @@ MoveInputS_CheckLHType:
 	ret
 	
 .lp:
-	res  PI22B_HEAVY, [hl]	; Not an heavy
+	res  PF2B_HEAVY, [hl]	; Not an heavy
 	jp   .p
 .hp:
-	set  PI22B_HEAVY, [hl]	; Is heavy
+	set  PF2B_HEAVY, [hl]	; Is heavy
 .p:
 	xor  a	; Set zero
 	scf		; Set carry

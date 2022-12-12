@@ -9136,8 +9136,8 @@ Play_DoPlInput:
 	; CPU inputs are handled separately.
 	; This part handles only inputs read from the joypad (so, for human players).
 	;
-	ld   hl, wPlInfo_Pl1+iPlInfo_Status
-	bit  PSB_CPU, [hl]		; Is 1P CPU controlled?
+	ld   hl, wPlInfo_Pl1+iPlInfo_Flags0
+	bit  PF0B_CPU, [hl]		; Is 1P CPU controlled?
 	jp   nz, .cpu1P		; If so, skip ahead
 	
 	;
@@ -9269,8 +9269,8 @@ Play_DoPlInput:
 	; Do the same.
 	;
 	
-	ld   hl, wPlInfo_Pl2+iPlInfo_Status
-	bit  PSB_CPU, [hl]		; Is 2P CPU controlled?
+	ld   hl, wPlInfo_Pl2+iPlInfo_Flags0
+	bit  PF0B_CPU, [hl]		; Is 2P CPU controlled?
 	jp   nz, .cpu2P			; If so, skip ahead
 	
 	;
@@ -9616,10 +9616,10 @@ Play_DoUnkChain:
 ; - 11: Set B, Id 3 color
 mFlashPlPal: MACRO
 	; If any of these bits is set, it uses an alternate palette cycle (Set B)
-	ld   a, [\1+iPlInfo_23Flags]
-	bit  PI23B_FLASH_B_SLOW, a	; bit1 set?	
+	ld   a, [\1+iPlInfo_Flags3]
+	bit  PF3B_FLASH_B_SLOW, a	; bit1 set?	
 	jp   nz, .flashSlowB		; If so, jump
-	bit  PI23B_FLASH_B_FAST, a	; bit6 set?	
+	bit  PF3B_FLASH_B_FAST, a	; bit6 set?	
 	jp   nz, .flashMaxB			; If so, jump
 	
 	;
@@ -9730,8 +9730,8 @@ mFlashPlPal: MACRO
 	;
 	; PalId = wPlayTimer % 4
 	; 
-	ld   a, [\1+iPlInfo_Status]
-	bit  PSB_SUPERMOVE, a		; Is the super move bit set?
+	ld   a, [\1+iPlInfo_Flags0]
+	bit  PF0B_SUPERMOVE, a		; Is the super move bit set?
 	jp   z, .useNormPal			; If not, force the normal palette
 	ld   a, [wPlayTimer]
 	and  a, $03
@@ -9802,8 +9802,8 @@ Play_DoUnkChain_SetPlProjFlag:
 	; This flag will be used as a shortcut to avoid checking two different fields every time
 	;
 	
-	ld   hl, wPlInfo_Pl1+iPlInfo_Status
-	res  PSB_PROJ, [hl]		; Reset the flag to zero
+	ld   hl, wPlInfo_Pl1+iPlInfo_Flags0
+	res  PF0B_PROJ, [hl]		; Reset the flag to zero
 	
 	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_Status]
 	and  a, OST_VISIBLE		; Is the projectile visible?
@@ -9812,12 +9812,12 @@ Play_DoUnkChain_SetPlProjFlag:
 	or   a					; Is there a penalty assigned to it (ie: it was thrown)?
 	jr   z, .do2P			; If not, skip
 	
-	set  PSB_PROJ, [hl] 	; Otherwise, don
+	set  PF0B_PROJ, [hl] 	; Otherwise, don
 	
 .do2P:
 	; Do the same for 2P
-	ld   hl, wPlInfo_Pl2+iPlInfo_Status
-	res  PSB_PROJ, [hl]
+	ld   hl, wPlInfo_Pl2+iPlInfo_Flags0
+	res  PF0B_PROJ, [hl]
 	
 	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Status]
 	and  a, OST_VISIBLE
@@ -9825,7 +9825,7 @@ Play_DoUnkChain_SetPlProjFlag:
 	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_DamageVal]
 	or   a
 	jr   z, .end
-	set  PSB_PROJ, [hl]
+	set  PF0B_PROJ, [hl]
 .end:
 	
 Play_DoUnkChain_ShareVars:
@@ -9833,22 +9833,22 @@ Play_DoUnkChain_ShareVars:
 	; This gives functions receiving the player struct known locations
 	; to read data for the other player without having to do manual offset checks.
 	
-	ld   a, [wPlInfo_Pl1+iPlInfo_Status]		; Copy 1P status...
-	ld   [wPlInfo_Pl2+iPlInfo_StatusOther], a	; ...to 2P player's struct
-	ld   a, [wPlInfo_Pl1+iPlInfo_21Flags]			; And so on
-	ld   [wPlInfo_Pl2+iPlInfo_21FlagsOther], a
-	ld   a, [wPlInfo_Pl1+iPlInfo_22Flags]
-	ld   [wPlInfo_Pl2+iPlInfo_22FlagsOther], a
-	ld   a, [wPlInfo_Pl1+iPlInfo_23Flags]
-	ld   [wPlInfo_Pl2+iPlInfo_23FlagsOther], a
-	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
-	ld   [wPlInfo_Pl1+iPlInfo_StatusOther], a
-	ld   a, [wPlInfo_Pl2+iPlInfo_21Flags]
-	ld   [wPlInfo_Pl1+iPlInfo_21FlagsOther], a
-	ld   a, [wPlInfo_Pl2+iPlInfo_22Flags]
-	ld   [wPlInfo_Pl1+iPlInfo_22FlagsOther], a
-	ld   a, [wPlInfo_Pl2+iPlInfo_23Flags]
-	ld   [wPlInfo_Pl1+iPlInfo_23FlagsOther], a
+	ld   a, [wPlInfo_Pl1+iPlInfo_Flags0]		; Copy 1P status...
+	ld   [wPlInfo_Pl2+iPlInfo_Flags0Other], a	; ...to 2P player's struct
+	ld   a, [wPlInfo_Pl1+iPlInfo_Flags1]			; And so on
+	ld   [wPlInfo_Pl2+iPlInfo_Flags1Other], a
+	ld   a, [wPlInfo_Pl1+iPlInfo_Flags2]
+	ld   [wPlInfo_Pl2+iPlInfo_Flags2Other], a
+	ld   a, [wPlInfo_Pl1+iPlInfo_Flags3]
+	ld   [wPlInfo_Pl2+iPlInfo_Flags3Other], a
+	ld   a, [wPlInfo_Pl2+iPlInfo_Flags0]
+	ld   [wPlInfo_Pl1+iPlInfo_Flags0Other], a
+	ld   a, [wPlInfo_Pl2+iPlInfo_Flags1]
+	ld   [wPlInfo_Pl1+iPlInfo_Flags1Other], a
+	ld   a, [wPlInfo_Pl2+iPlInfo_Flags2]
+	ld   [wPlInfo_Pl1+iPlInfo_Flags2Other], a
+	ld   a, [wPlInfo_Pl2+iPlInfo_Flags3]
+	ld   [wPlInfo_Pl1+iPlInfo_Flags3Other], a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlags]
 	ld   [wPlInfo_Pl2+iPlInfo_OBJInfoFlagsOther], a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlags]
@@ -9888,10 +9888,10 @@ Play_DoUnkChain_ResetDamage:
 	xor  a
 	ld   [wPlInfo_Pl2+iPlInfo_MoveDamageVal], a	; Prevent the move from dealing further damage
 	ld   [wPlInfo_Pl1+iPlInfo_PhysHitRecv], a	; Unmark damage received flag
-	ld   hl, wPlInfo_Pl2+iPlInfo_21Flags
-	set  PI21B_ALLOWHITCANCEL, [hl] 			; Allow the opponent to start a new special off the hit
+	ld   hl, wPlInfo_Pl2+iPlInfo_Flags1
+	set  PF1B_ALLOWHITCANCEL, [hl] 			; Allow the opponent to start a new special off the hit
 	inc  hl
-	res  PI22B_HITCOMBO, [hl]					; Unmark the combo flag for the next time we hit cancel
+	res  PF2B_HITCOMBO, [hl]					; Unmark the combo flag for the next time we hit cancel
 	
 .chkHit2P:
 	; Same for the 2P side
@@ -9901,10 +9901,10 @@ Play_DoUnkChain_ResetDamage:
 	xor  a
 	ld   [wPlInfo_Pl1+iPlInfo_MoveDamageVal], a
 	ld   [wPlInfo_Pl2+iPlInfo_PhysHitRecv], a
-	ld   hl, wPlInfo_Pl1+iPlInfo_21Flags
-	set  PI21B_ALLOWHITCANCEL, [hl]
+	ld   hl, wPlInfo_Pl1+iPlInfo_Flags1
+	set  PF1B_ALLOWHITCANCEL, [hl]
 	inc  hl
-	res  PI22B_HITCOMBO, [hl]
+	res  PF2B_HITCOMBO, [hl]
 	
 .copyDamageVars:
 	; Give visibility to the player-yo-player push request
@@ -10205,8 +10205,8 @@ Play_CalcPlDistanceAndXFlip:
 		
 		; Sometimes, the horizontal flip flag may get locked.
 		; ie: when jumping over another player, we don't want to change direction
-		ld   a, [wPlInfo_Pl1+iPlInfo_21Flags]
-		bit  PI21B_XFLIPLOCK, a	; X Flip lock flag set?
+		ld   a, [wPlInfo_Pl1+iPlInfo_Flags1]
+		bit  PF1B_XFLIPLOCK, a	; X Flip lock flag set?
 		jp   nz, .onLeftChk2P	; If so, skip
 		
 		; Like the icons, character sprites face left by default.
@@ -10233,8 +10233,8 @@ Play_CalcPlDistanceAndXFlip:
 		res  SPRXB_PLDIR_R, [hl]
 		
 		; Don't make the character face left if the direction is locked
-		ld   a, [wPlInfo_Pl2+iPlInfo_21Flags]
-		bit  PI21B_XFLIPLOCK, a
+		ld   a, [wPlInfo_Pl2+iPlInfo_Flags1]
+		bit  PF1B_XFLIPLOCK, a
 		jr   nz, .onLeftChkEnd
 		
 		; Make 2P face left
@@ -10271,8 +10271,8 @@ Play_CalcPlDistanceAndXFlip:
 		res  SPRXB_PLDIR_R, [hl]
 		
 		; Don't make the character face left if the direction is locked
-		ld   a, [wPlInfo_Pl1+iPlInfo_21Flags]
-		bit  PI21B_XFLIPLOCK, a		; X Flip lock flag set?
+		ld   a, [wPlInfo_Pl1+iPlInfo_Flags1]
+		bit  PF1B_XFLIPLOCK, a		; X Flip lock flag set?
 		jr   nz, .onRightChk2P		; If so, skip
 		;--
 		; ???
@@ -10297,8 +10297,8 @@ Play_CalcPlDistanceAndXFlip:
 		set  SPRXB_PLDIR_R, [hl]
 		
 		; Don't make the character face right if the direction is locked
-		ld   a, [wPlInfo_Pl2+iPlInfo_21Flags]
-		bit  PI21B_XFLIPLOCK, a
+		ld   a, [wPlInfo_Pl2+iPlInfo_Flags1]
+		bit  PF1B_XFLIPLOCK, a
 		jr   nz, .onRightChkEnd
 		;--
 		; ???
@@ -10388,7 +10388,7 @@ Play_CalcPlDistanceAndXFlip:
 ; Handles collision detection between players/projectile combinations.
 ; This subroutine sets up the flags/fields which tell if the player are overlapping
 ; with something and with what.
-; How this is actually used is something that the move code ??? decides.
+; How this is actually used is something that the hit code (Pl_DoHit) ??? decides.
 Play_DoPlColi:
 	; Start by clearing out the collision flags from the last frame
 	xor  a
@@ -10415,11 +10415,11 @@ Play_DoPlColi_1PChar2PChar:
 
 
 	; If any of the players has the "no hurtbox" flag get, skip this
-	ld   a, [wPlInfo_Pl1+iPlInfo_22Flags]
-	bit  PI22B_NOCOLIBOX, a
+	ld   a, [wPlInfo_Pl1+iPlInfo_Flags2]
+	bit  PF2B_NOCOLIBOX, a
 	jp   nz, .end
-	ld   a, [wPlInfo_Pl2+iPlInfo_22Flags]
-	bit  PI22B_NOCOLIBOX, a
+	ld   a, [wPlInfo_Pl2+iPlInfo_Flags2]
+	bit  PF2B_NOCOLIBOX, a
 	jp   nz, .end
 	
 	;
@@ -10471,14 +10471,14 @@ Play_DoPlColi_1PChar2PChar:
 	; send and receive the outwards push.
 		
 	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
-	set  PCF_SENDPUSH, [hl]
-	set  PCF_RECVPUSH, [hl]
+	set  PCF_PUSHED, [hl]
+	set  PCF_PUSHEDOTHER, [hl]
 	inc  hl			; Seek to iPlInfo_Unk_ColiBoxOverlapX_A
 	ld   [hl], b	; And save how much we're horz inside the other player's collision box
 	
 	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
-	set  PCF_SENDPUSH, [hl]
-	set  PCF_RECVPUSH, [hl]
+	set  PCF_PUSHED, [hl]
+	set  PCF_PUSHEDOTHER, [hl]
 	inc  hl			
 	ld   [hl], b
 .end:
@@ -10495,8 +10495,8 @@ Play_DoPlColi_1PCharHitbox2PChar:
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_ForceHitboxId]
 	or   a					; Is there a forced hitbox overriding the other two checks?
 	jr   nz, .check			; If so, jump	
-	ld   a, [wPlInfo_Pl2+iPlInfo_22Flags]
-	bit  PI22B_NOHURTBOX, a	; Can the other player be hit?
+	ld   a, [wPlInfo_Pl2+iPlInfo_Flags2]
+	bit  PF2B_NOHURTBOX, a	; Can the other player be hit?
 	jp   nz, .end			; If not, skip
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_HitboxId]
 	or   a					; Is there an actual hitbox defined?
@@ -10536,20 +10536,18 @@ Play_DoPlColi_1PCharHitbox2PChar:
 	call Play_CheckColi
 	jr   nc, .end
 .coliOk:
+	; A common detail across these hit handlers is that when a player is hit, it receives knockback (PCF_PUSHED).
+	; It's also mandatory when receiving physical damage, as both PCF_PUSHED and PCF_HIT must be set.
 	
 	; Signal that 1P has hit the other player.	
-	
-	; A common detail across these hit handles is that when a player sends a hit,
-	; it tries to push out the other player if too close.
-	
 	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
-	set  PCF_SENDHIT, [hl]
-	set  PCF_RECVPUSH, [hl]
+	set  PCF_HITOTHER, [hl]
+	set  PCF_PUSHEDOTHER, [hl]
 	
-	; Signal that 2P has received a hit and try to push the other out.
+	; Signal that 2P has received a hit and is being pushed out.
 	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
-	set  PCF_SENDPUSH, [hl]
-	set  PCF_RECVHIT, [hl]
+	set  PCF_PUSHED, [hl]
+	set  PCF_HIT, [hl]
 .end:
 
 Play_DoPlColi_1PChar2PCharHitbox:
@@ -10561,8 +10559,8 @@ Play_DoPlColi_1PChar2PCharHitbox:
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_ForceHitboxId]
 	or   a					; Is there a forced hitbox overriding the other two checks?
 	jr   nz, .check			; If so, jump	
-	ld   a, [wPlInfo_Pl1+iPlInfo_22Flags]
-	bit  PI22B_NOHURTBOX, a	; Can the other player be hit?
+	ld   a, [wPlInfo_Pl1+iPlInfo_Flags2]
+	bit  PF2B_NOHURTBOX, a	; Can the other player be hit?
 	jp   nz, .end			; If not, skip
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_HitboxId]
 	or   a					; Is there an actual hitbox defined?
@@ -10604,13 +10602,13 @@ Play_DoPlColi_1PChar2PCharHitbox:
 
 	; Signal that 1P has received a hit
 	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
-	set  PCF_SENDPUSH, [hl]
-	set  PCF_RECVHIT, [hl]
+	set  PCF_PUSHED, [hl]
+	set  PCF_HIT, [hl]
 	
 	; Signal that 2P has hit the other player
 	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
-	set  PCF_SENDHIT, [hl]
-	set  PCF_RECVPUSH, [hl]
+	set  PCF_HITOTHER, [hl]
+	set  PCF_PUSHEDOTHER, [hl]
 .end:
 
 Play_DoPlColi_1PProj2PChar:
@@ -10618,11 +10616,11 @@ Play_DoPlColi_1PProj2PChar:
 	; 1P Projectile Hitbox - 2P Character Hurtbox
 	;
 	
-	ld   a, [wPlInfo_Pl2+iPlInfo_21Flags]
-	bit  PI21B_INVULN, a	; Is the other player invulnerable?
+	ld   a, [wPlInfo_Pl2+iPlInfo_Flags1]
+	bit  PF1B_INVULN, a	; Is the other player invulnerable?
 	jp   nz, .end			; If so, skip
-	ld   a, [wPlInfo_Pl2+iPlInfo_22Flags]
-	bit  PI22B_NOHURTBOX, a	; Can the other player be hit in general?
+	ld   a, [wPlInfo_Pl2+iPlInfo_Flags2]
+	bit  PF2B_NOHURTBOX, a	; Can the other player be hit in general?
 	jp   nz, .end			; If not, skip
 	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_Status]
 	bit  OSTB_VISIBLE, a	; Is the projectile visible?
@@ -10665,28 +10663,28 @@ Play_DoPlColi_1PProj2PChar:
 	call Play_CheckColi
 	jr   nc, .end
 .coliOk:
-	; 1P projectile hit the other player
+	; 1P projectile hit the other player, so remove it
 	ld   a, PHM_REMOVE
 	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_HitMode], a
 	; 1P hit the other player with a projectile
 	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
-	set  PCF_SENDPROJHIT, [hl]
-	set  PCF_RECVPUSH, [hl]
+	set  PCF_PROJHITOTHER, [hl]
+	set  PCF_PUSHEDOTHER, [hl]
 	; 2P received a hit by a projectile
 	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
-	set  PCF_SENDPUSH, [hl]
-	set  PCF_RECVPROJHIT, [hl]
+	set  PCF_PUSHED, [hl]
+	set  PCF_PROJHIT, [hl]
 .end:
 
 Play_DoPlColi_1PChar2PProj:
 	;
 	; 2P Projectile Hitbox - 1P Character Hurtbox
 	;
-	ld   a, [wPlInfo_Pl1+iPlInfo_21Flags]
-	bit  PI21B_INVULN, a	; Is the other player invulnerable?
+	ld   a, [wPlInfo_Pl1+iPlInfo_Flags1]
+	bit  PF1B_INVULN, a	; Is the other player invulnerable?
 	jp   nz, .end			; If so, skip
-	ld   a, [wPlInfo_Pl1+iPlInfo_22Flags]
-	bit  PI22B_NOHURTBOX, a	; Can the other player be hit in general?
+	ld   a, [wPlInfo_Pl1+iPlInfo_Flags2]
+	bit  PF2B_NOHURTBOX, a	; Can the other player be hit in general?
 	jp   nz, .end			; If not, skip
 	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Status]
 	bit  OSTB_VISIBLE, a	; Is the projectile visible?
@@ -10728,17 +10726,17 @@ Play_DoPlColi_1PChar2PProj:
 	call Play_CheckColi
 	jr   nc, .end
 .coliOk:
-	; 2P projectile hit the other player
+	; 2P projectile hit the other player, so remove it
 	ld   a, PHM_REMOVE
 	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_HitMode], a
 	; 2P hit the other player with a projectile
 	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
-	set  PCF_SENDPROJHIT, [hl]
-	set  PCF_RECVPUSH, [hl]
+	set  PCF_PROJHITOTHER, [hl]
+	set  PCF_PUSHEDOTHER, [hl]
 	; 1P received a hit by a projectile
 	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
-	set  PCF_SENDPUSH, [hl]
-	set  PCF_RECVPROJHIT, [hl]
+	set  PCF_PUSHED, [hl]
+	set  PCF_PROJHIT, [hl]
 .end:
 
 Play_DoPlColi_1PProj2PCharHitbox:
@@ -10747,14 +10745,14 @@ Play_DoPlColi_1PProj2PCharHitbox:
 	;
 	; This is used when a move from 2P with an hitbox that can influence a projectile thrown by 1P.
 	; 
-	; Moves can set the player status bit PS_PROJREM or PS_PROJREFLECT, and this happens:
-	; - PS_PROJREM -> The projectile is deleted (as if it hit the target)
-	; - PS_PROJREFLECT -> The projectile is reflected
+	; Moves can set the player status bit PF0_PROJREM or PF0_PROJREFLECT, and this happens:
+	; - PF0_PROJREM -> The projectile is deleted (as if it hit the target)
+	; - PF0_PROJREFLECT -> The projectile is reflected
 	;
 
 	; If neiher of those bits is set, this collision check is skipped.
-	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
-	and  a, PS_PROJREM|PS_PROJREFLECT		; Is 2P currently able to reflect projectiles?
+	ld   a, [wPlInfo_Pl2+iPlInfo_Flags0]
+	and  a, PF0_PROJREM|PF0_PROJREFLECT		; Is 2P currently able to reflect projectiles?
 	jp   z, .end							; If not, skip
 	
 	; If there's no active projectile, skip
@@ -10799,14 +10797,14 @@ Play_DoPlColi_1PProj2PCharHitbox:
 	;
 	
 	; If 2P can reflect projectiles, do just that.
-	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
-	bit  PSB_PROJREFLECT, a		; Is the flag set?
+	ld   a, [wPlInfo_Pl2+iPlInfo_Flags0]
+	bit  PF0B_PROJREFLECT, a		; Is the flag set?
 	jp   nz, .reflectProj		; If so, jump
 	
 	; If 2P is performing a super move that can remove projectiles (ie: Chizuru's),
 	; any type of projectile can be erased, even from super moves.
-	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
-	bit  PSB_SUPERMOVE, a		; Flashing at max speed?
+	ld   a, [wPlInfo_Pl2+iPlInfo_Flags0]
+	bit  PF0B_SUPERMOVE, a		; Flashing at max speed?
 	jp   nz, .removeProj		; If so, jump
 	
 	; Otherwise, don't allow erasing projectiles with high priority.
@@ -10823,14 +10821,15 @@ Play_DoPlColi_1PProj2PCharHitbox:
 	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_HitMode], a
 .setFlags:
 	; Sets the flag for both players
-	; ??? what's up with PCF_RECVHIT / PCF_SENDHIT ???
+	; [POI] Notice the reuse of PCF_HIT/PCF_HITOTHER, probably to fit this collision type into the 8 bit limit.
+	;       ??? The combination of these two flags is what needs to be checked when handling the reflection.
 	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
-	set  PCF_RECVPROJREM, [hl]
-	set  PCF_RECVHIT, [hl]
+	set  PCF_PROJREMOTHER, [hl]
+	set  PCF_HIT, [hl]
 	
 	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
-	set  PCF_SENDHIT, [hl]
-	set  PCF_SENDPROJREM, [hl]
+	set  PCF_HITOTHER, [hl]
+	set  PCF_PROJREM, [hl]
 .end:
 
 Play_DoPlColi_1PCharHitbox2PProj:
@@ -10839,8 +10838,8 @@ Play_DoPlColi_1PCharHitbox2PProj:
 	;
 	; Same thing, but for the other player
 	
-	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
-	and  a, PS_PROJREM|PS_PROJREFLECT
+	ld   a, [wPlInfo_Pl1+iPlInfo_Flags0]
+	and  a, PF0_PROJREM|PF0_PROJREFLECT
 	jp   z, .end
 	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Status]
 	bit  OSTB_VISIBLE, a
@@ -10881,11 +10880,11 @@ Play_DoPlColi_1PCharHitbox2PProj:
 	;
 	; Determine what to do if the hitbox and projectile collide
 	;
-	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
-	bit  PSB_PROJREFLECT, a
+	ld   a, [wPlInfo_Pl1+iPlInfo_Flags0]
+	bit  PF0B_PROJREFLECT, a
 	jp   nz, .reflectProj
-	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
-	bit  PSB_SUPERMOVE, a
+	ld   a, [wPlInfo_Pl1+iPlInfo_Flags0]
+	bit  PF0B_SUPERMOVE, a
 	jp   nz, .removeProj
 	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_Priority]
 	or   a
@@ -10899,11 +10898,11 @@ Play_DoPlColi_1PCharHitbox2PProj:
 	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_HitMode], a
 .setFlags:
 	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
-	set  PCF_RECVPROJREM, [hl]
-	set  PCF_RECVHIT, [hl]
+	set  PCF_PROJREMOTHER, [hl]
+	set  PCF_HIT, [hl]
 	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
-	set  PCF_SENDHIT, [hl]
-	set  PCF_SENDPROJREM, [hl]
+	set  PCF_HITOTHER, [hl]
+	set  PCF_PROJREM, [hl]
 .end:
 
 Play_DoPlColi_1PProj2PProj:
@@ -14472,15 +14471,15 @@ Play_BlankHitCountBG:
 ; Updates the input buffers for both players.
 Play_WriteKeysToBuffer:
 	; Human player only
-	ld   hl, wPlInfo_Pl1+iPlInfo_Status
-	bit  PSB_CPU, [hl]
+	ld   hl, wPlInfo_Pl1+iPlInfo_Flags0
+	bit  PF0B_CPU, [hl]
 	jr   nz, .chk2P
 	call Play_WriteDirKeysToBuffer1P
 	call Play_WriteBtnKeysToBuffer1P
 .chk2P:
 	; Same thing for 2P
-	ld   hl, wPlInfo_Pl2+iPlInfo_Status
-	bit  PSB_CPU, [hl]
+	ld   hl, wPlInfo_Pl2+iPlInfo_Flags0
+	bit  PF0B_CPU, [hl]
 	jr   nz, .ret
 	call Play_WriteDirKeysToBuffer2P
 	call Play_WriteBtnKeysToBuffer2P

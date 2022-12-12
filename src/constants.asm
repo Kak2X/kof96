@@ -202,62 +202,55 @@ TASK_EXEC_TODO EQU $04 ; Not executed yet, but was executed previously already. 
 TASK_EXEC_NEW  EQU $08 ; Never executed before. Likely init code which will set a new task. Jump HL type.
 
 PLINFO_SIZE EQU $100
-; iPlInfo_Status flags
-PSB_PROJ         EQU 0 ; If set, a projectile is active on-screen (ie: a new one can't be thrown)
-PSB_SPECMOVE     EQU 1 ; If set, the player is performing a special move
-PSB_AIR          EQU 2 ; If set, the player is in the air
-PSB_FARHIT       EQU 3 ; If set, the player got hit without physical contact from the other player (ie: by a projectile)
-PSB_PROJREM      EQU 4 ; If set, the player can currently remove projectiles with its hitbox
-PSB_PROJREFLECT  EQU 5 ; If set, the player can currently reflect projectiles with its hitbox
-PSB_SUPERMOVE    EQU 6 ; If set, the player is performing a super move
-PSB_CPU          EQU 7 ; If set, the player is CPU-controlled (1P mode) or autopicks characters (VS mode)
 
+; iPlInfo_Flags0 flags
+PF0B_PROJ         EQU 0 ; If set, a projectile is active on-screen (ie: a new one can't be thrown)
+PF0B_SPECMOVE     EQU 1 ; If set, the player is performing a special move
+PF0B_AIR          EQU 2 ; If set, the player is in the air
+PF0B_FARHIT       EQU 3 ; If set, the player got hit without physical contact from the other player (ie: by a projectile)
+PF0B_PROJREM      EQU 4 ; If set, the player can currently remove projectiles with its hitbox
+PF0B_PROJREFLECT  EQU 5 ; If set, the player can currently reflect projectiles with its hitbox
+PF0B_SUPERMOVE    EQU 6 ; If set, the player is performing a super move
+PF0B_CPU          EQU 7 ; If set, the player is CPU-controlled (1P mode) or autopicks characters (VS mode)
+PF0_SPECMOVE    EQU 1 << PF0B_SPECMOVE
+PF0_PROJREM     EQU 1 << PF0B_PROJREM
+PF0_PROJREFLECT EQU 1 << PF0B_PROJREFLECT
+PF0_SUPERMOVE   EQU 1 << PF0B_SUPERMOVE
+PF0_CPU         EQU 1 << PF0B_CPU
 
-PS_PROJ        EQU 1 << PSB_PROJ
-PS_SPECMOVE    EQU 1 << PSB_SPECMOVE
-PS_PROJREM     EQU 1 << PSB_PROJREM
-PS_PROJREFLECT EQU 1 << PSB_PROJREFLECT
-PS_SUPERMOVE   EQU 1 << PSB_SUPERMOVE
-PS_CPU         EQU 1 << PSB_CPU
-
-
-
-; iPlInfo_21Flags flags
-PI21B_NOBASICINPUT   EQU 0 ; Prevents basic input from being handled. See also: BasicInput_ChkDDDDDDDDD
-PI21B_XFLIPLOCK      EQU 1 ; Locks the direction the player is facing
-PI21B_NOSPECSTART    EQU 2 ; If set, the current move can't be cancelled into a new special.
-                           ; Primarily used to prevent starting new specials during certain non-special moves (rolling, taking damage, ...)+
-                           ; though starting specials also sets this for consistency.
-                           ; Overridden by PI21B_ALLOWHITCANCEL.
-PI21B_GUARD          EQU 3 ; If set, the player is guarding, and will receive less damage on hit.
-                           ; Primarily set when blocking, but some special moves set this as well to have the same effects as blocking when getting hit out of them.
-PI21B_COMBORECV      EQU 4 ; If set, the player is on the receiving end of a damage string.
-                           ; This is set when the player is attacked at least once (hit or blocked), and
-                           ; resets on its own if not cancelling the attack into one that hits.
-PI21B_CROUCH         EQU 5 ; If set, the player is crouching
-PI21B_ALLOWHITCANCEL EQU 6 ; If set, it's possible to cancel the move into a new special, usually after hitting the opponent. This still needs to pass the special cancelling check,
-PI21B_INVULN         EQU 7 ; If set, the player is completely invulnerable. 
-						   ; This value isn't always checked during collision -- phyisical hurtbox collisions pass,
-						   ; but they are blocked before they can deal damage.
-
-; iPlInfo_22Flags flags
-PI22B_MOVESTART      EQU 0 ; Marks that a new move has been set
-PI22B_HEAVY          EQU 1 ; Used to distinguish between light/heavy when starting an attack ?????
-PI22B_HITCOMBO       EQU 2 ; If set, the current move was combo'd from another.
-PI22B_AUTOGUARDDONE  EQU 3 ; If set, the autoguard triggered on this frame
-PI22B_AUTOGUARDLOW   EQU 4 ; If set, the move automatically blocks lows
-PI22B_AUTOGUARDMID   EQU 5 ; If set, the move automatically blocks mids
-PI22B_NOHURTBOX      EQU 6 ; If set, the player has no hurtbox (this separate from the collision box only here)
-PI22B_NOCOLIBOX      EQU 7 ; If set, the player has no collision box
-
-
-; Flags for iPlInfo_23Flags, related to the move we got attacked with
-PI23B_SHAKELONG     EQU 0 ; Getting attacked shakes the player longer (doesn't cut the shake count in half)
-PI23B_FLASH_B_SLOW  EQU 1 ; Getting hit causes the player to flash slowly
-PI23B_HITMID        EQU 2 ; The attack hits medium (must block standing)
-PI23B_HITLOW        EQU 3 ; The attack hits low (must block crouching)
-PI23B_FLASH_B_FAST  EQU 6 ; Getting hit causes the player to flash fast
-PI23B_SHAKEONCE     EQU 7 ; Getting attacked shakes the player once
+; iPlInfo_Flags1 flags
+PF1B_NOBASICINPUT   EQU 0 ; Prevents basic input from being handled. See also: BasicInput_ChkDDDDDDDDD
+PF1B_XFLIPLOCK      EQU 1 ; Locks the direction the player is facing
+PF1B_NOSPECSTART    EQU 2 ; If set, the current move can't be cancelled into a new special.
+                          ; Primarily used to prevent starting new specials during certain non-special moves (rolling, taking damage, ...)+
+                          ; though starting specials also sets this for consistency.
+                          ; Overridden by PF1B_ALLOWHITCANCEL.
+PF1B_GUARD          EQU 3 ; If set, the player is guarding, and will receive less damage on hit.
+                          ; Primarily set when blocking, but some special moves set this as well to have the same effects as blocking when getting hit out of them.
+PF1B_COMBORECV      EQU 4 ; If set, the player is on the receiving end of a damage string.
+                          ; This is set when the player is attacked at least once (hit or blocked), and
+                          ; resets on its own if not cancelling the attack into one that hits.
+PF1B_CROUCH         EQU 5 ; If set, the player is crouching
+PF1B_ALLOWHITCANCEL EQU 6 ; If set, it's possible to cancel the move into a new special, usually after hitting the opponent. This still needs to pass the special cancelling check,
+PF1B_INVULN         EQU 7 ; If set, the player is completely invulnerable. 
+						  ; This value isn't always checked during collision -- phyisical hurtbox collisions pass,
+						  ; but they are blocked before they can deal damage.
+; iPlInfo_Flags2 flags
+PF2B_MOVESTART      EQU 0 ; Marks that a new move has been set
+PF2B_HEAVY          EQU 1 ; Used to distinguish between light/heavy when starting an attack ?????
+PF2B_HITCOMBO       EQU 2 ; If set, the current move was combo'd from another.
+PF2B_AUTOGUARDDONE  EQU 3 ; If set, the autoguard triggered on this frame
+PF2B_AUTOGUARDLOW   EQU 4 ; If set, the move automatically blocks lows
+PF2B_AUTOGUARDMID   EQU 5 ; If set, the move automatically blocks mids
+PF2B_NOHURTBOX      EQU 6 ; If set, the player has no hurtbox (this separate from the collision box only here)
+PF2B_NOCOLIBOX      EQU 7 ; If set, the player has no collision box
+; iPlInfo_Flags3, related to the move we got attacked with
+PF3B_SHAKELONG     EQU 0 ; Getting attacked shakes the player longer (doesn't cut the shake count in half)
+PF3B_FLASH_B_SLOW  EQU 1 ; Getting hit causes the player to flash slowly
+PF3B_HITMID        EQU 2 ; The attack hits medium (must block standing)
+PF3B_HITLOW        EQU 3 ; The attack hits low (must block crouching)
+PF3B_FLASH_B_FAST  EQU 6 ; Getting hit causes the player to flash fast
+PF3B_SHAKEONCE     EQU 7 ; Getting attacked shakes the player once
 
 ; Flags for iPlInfo_JoyNewKeysLH in the upper nybble
 ; (low nybble is the same as KEYB_*)
@@ -273,15 +266,14 @@ KEP_B_HEAVY EQU 1 << KEPB_B_HEAVY
 ; Flags for iPlInfo_ColiFlags
 ; One half is for our collision status, the other is for the opponent.
 
-; TODO: RECV / SEND -> "" / OTHER
-PCF_SENDPUSH    EQU 0 ; Player pushed another
-PCF_SENDHIT     EQU 1 ; Player hit the other
-PCF_SENDPROJHIT EQU 2 ; Player hit the other with a projectile
-PCF_RECVPROJREM EQU 3 ; Player has its projectile removed/reflected by the other player
-PCF_RECVPUSH    EQU 4 ; Player is being pushed
-PCF_RECVHIT     EQU 5 ; Player is hit
-PCF_RECVPROJHIT EQU 6 ; Player is by a projectile
-PCF_SENDPROJREM EQU 7 ; Player removes/reflect the other player's projectile
+PCF_PUSHED       EQU 0 ; Player is being pushed 
+PCF_HITOTHER     EQU 1 ; The other player got hit
+PCF_PROJHITOTHER EQU 2 ; The other player got hit by a projectile
+PCF_PROJREMOTHER EQU 3 ; The other player removed/reflected a projectile
+PCF_PUSHEDOTHER  EQU 4 ; The other player is being pushed
+PCF_HIT          EQU 5 ; Player is hit by a physical attack
+PCF_PROJHIT      EQU 6 ; Player is by a projectile
+PCF_PROJREM      EQU 7 ; Player removed/reflected a projectile
 
 
 

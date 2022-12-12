@@ -800,16 +800,16 @@ ExOBJ_SuperSparkle:
 	;
 	; Give invulnerability while the sparkle is active.
 	;
-	; This is accomplished by setting PI21B_INVULN to the iPlInfo_21Flags field of the
+	; This is accomplished by setting PF1B_INVULN to the iPlInfo_Flags1 field of the
 	; wPlInfo structure associated with the sparkle.
 	;
 	; As a side effect of the subroutine that calls this one,
 	; when we get here, BC is pointing to an invalid wPlInfo structure.
 	; This is always $200 bytes past the wPlInfo for the player side we want, so...
 	; 
-	ld   hl, -$200+iPlInfo_21Flags
+	ld   hl, -$200+iPlInfo_Flags1
 	add  hl, bc
-	set  PI21B_INVULN, [hl]	; Set proj. invul flag
+	set  PF1B_INVULN, [hl]	; Set proj. invul flag
 	
 	; Animate sparkle
 	call OBJLstS_DoAnimTiming_Loop_by_DE
@@ -818,9 +818,9 @@ ExOBJ_SuperSparkle:
 	;
 	; Make it disappear when it gets to 0, and disable invulnerability.
 	;
-	ld   hl, -$200+iPlInfo_21Flags
+	ld   hl, -$200+iPlInfo_Flags1
 	add  hl, bc
-	res  PI21B_INVULN, [hl]	; Clear proj.
+	res  PF1B_INVULN, [hl]	; Clear proj.
 	
 	; Hide sparkle
 	call OBJLstS_Hide
@@ -859,9 +859,9 @@ Play_Pl_DoHit:
 		;
 		; If we got hit, increment the combo counter shown on the opponent's side.
 		;
-		ld   hl, iPlInfo_21Flags
+		ld   hl, iPlInfo_Flags1
 		add  hl, bc
-		bit  PI21B_GUARD, [hl]	; Did we block the hit?
+		bit  PF1B_GUARD, [hl]	; Did we block the hit?
 		jp   nz, .noComboInc	; If so, skip
 		ld   hl, iPlInfo_HitComboRecvSet
 		add  hl, bc				
@@ -878,32 +878,32 @@ Play_Pl_DoHit:
 	;
 	; If we didn't block the hit, we're definitely not doing a special or super move.
 	;
-	ld   hl, iPlInfo_21Flags
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	bit  PI21B_GUARD, [hl]		; Did we block the hit?
+	bit  PF1B_GUARD, [hl]		; Did we block the hit?
 	jp   nz, .updateFlags1		; If so, skip
-	ld   hl, iPlInfo_Status		; Otherwise, clear move type flags
+	ld   hl, iPlInfo_Flags0		; Otherwise, clear move type flags
 	add  hl, bc
-	res  PSB_SPECMOVE, [hl]		
-	res  PSB_SUPERMOVE, [hl]
+	res  PF0B_SPECMOVE, [hl]		
+	res  PF0B_SUPERMOVE, [hl]
 	inc  hl
 	
 .updateFlags1:
 	; Don't override hitstun/blockstun with basic moves/normals
-	set  PI21B_NOBASICINPUT, [hl]
+	set  PF1B_NOBASICINPUT, [hl]
 	; Prevent the player from autoswitching direction during hitstun or blockstun
-	set  PI21B_XFLIPLOCK, [hl]	
+	set  PF1B_XFLIPLOCK, [hl]	
 	; Mark that the opponent's attack made contact.
 	; This a few effects, like making any next hit in the combo deal less penalty to the dizzy or guard break counters.
-	set  PI21B_COMBORECV, [hl]
+	set  PF1B_COMBORECV, [hl]
 	
 	;
 	; Prevent cancelling out of hitstun.
-	; (though there's a special override in PI21B_ALLOWHITCANCEL)
+	; (though there's a special override in PF1B_ALLOWHITCANCEL)
 	;
 	cp   HITANIM_BLOCKED			; Are we in the blockstun anim?
 	jp   z, .execCode				; If so, skip
-	set  PI21B_NOSPECSTART, [hl]	; Otherwise, we got hit. Prevent specials from starting.
+	set  PF1B_NOSPECSTART, [hl]	; Otherwise, we got hit. Prevent specials from starting.
 .execCode:
 	;
 	; Execute the code for the currently set Hit Animation.
@@ -930,9 +930,9 @@ Play_Pl_DoHit:
 	; When the opponent's attack didn't come in contact and we're out of "combo mode",
 	; hide the combo counter that's displayed on the opponent side.
 	;
-	ld   hl, iPlInfo_21Flags
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	bit  PI21B_COMBORECV, [hl]			; Is the combo mode enabled?
+	bit  PF1B_COMBORECV, [hl]			; Is the combo mode enabled?
 	jp   nz, .end						; If so, skip
 	ld   hl, iPlInfo_HitComboRecvSet	; Otherwise, reset hit counter
 	add  hl, bc
@@ -1708,15 +1708,15 @@ Play_Pl_SetHitAnim:
 			ld   hl, iOBJInfo_Y
 			add  hl, de
 			ld   a, [hl]		; A = iOBJInfo_Y
-			ld   hl, iPlInfo_Status
-			add  hl, bc			; HL = Ptr to iPlInfo_Status
+			ld   hl, iPlInfo_Flags0
+			add  hl, bc			; HL = Ptr to iPlInfo_Flags0
 			cp   PL_FLOOR_POS	; Are we on the ground?
-			jp   nz, .setAir	; If not, set PSB_AIR
+			jp   nz, .setAir	; If not, set PF0B_AIR
 		.setGround:
-			res  PSB_AIR, [hl]	; Otherwise, reset it
+			res  PF0B_AIR, [hl]	; Otherwise, reset it
 			jp   .end
 		.setAir:
-			set  PSB_AIR, [hl]
+			set  PF0B_AIR, [hl]
 		.end:
 		
 		;--------------------------------
@@ -1724,22 +1724,19 @@ Play_Pl_SetHitAnim:
 		; Start by dividing between projectile hits and physical hits.
 		; 
 		; There are significant differences between the handling of those, though the code paths later
-		; converge back at Play_Pl_SetHitAnim_ChkGuardBypass (but not before setting the PSB_FARHIT flag)
+		; converge back at Play_Pl_SetHitAnim_ChkGuardBypass (but not before setting the PF0B_FARHIT flag)
 		; when it comes to applying the damage and hit animation.
 		;
-		Play_Pl_SetHitAnim_ChkHitType:
-
-			
+		Play_Pl_SetHitAnim_ChkHitType:		
 			; The flags checked here were previously set this frame during collision detection by the main task.
 			ld   hl, iPlInfo_ColiFlags
 			add  hl, bc
-			bit  PCF_RECVPROJHIT, [hl]			; Were we hit by a projectile?
+			bit  PCF_PROJHIT, [hl]				; Were we hit by a projectile?
 			jp   nz, .proj						; If so, jump
-			; [POI] We should be checking if we got hit by a non-projectile attack (PCF_RECVHIT),
-			;       but, bizzarrely, we're checking for the generic push flag.
-			;       This is pointless to do, especially when the first thing .phys does
-			;       is checking the actual PCF_RECVHIT flag.
-			bit  PCF_SENDPUSH, [hl]				; Did we get knockback'd or pushed by the other player?			
+			; Both PCF_PUSHED and PCF_HIT must be set for it to count as a physical hit.
+			; Checking PCF_HIT isn't enough, because PCF_HIT is also used alongside PCF_PROJREMOTHER
+			; when the opponent reflects/removes a projectile.
+			bit  PCF_PUSHED, [hl]				; Did we get knockback'd or pushed by the other player?			
 			jp   nz, .phys						; If so, jump
 			
 			; Otherwise, we definitely didn't get hit. Return.
@@ -1758,9 +1755,9 @@ Play_Pl_SetHitAnim:
 			; Curiously, of all code in the subroutine for checking collision, the projectile checks
 			; are the only ones that check this flag beforehand, making the check here pointless.
 			;
-			ld   hl, iPlInfo_21Flags
-			add  hl, bc							; Seek to iPlInfo_21Flags
-			bit  PI21B_INVULN, [hl]				; Can we get hit?
+			ld   hl, iPlInfo_Flags1
+			add  hl, bc							; Seek to iPlInfo_Flags1
+			bit  PF1B_INVULN, [hl]				; Can we get hit?
 			jp   nz, Play_Pl_SetHitAnim_RetClear	; If not, return
 			
 			;
@@ -1774,15 +1771,15 @@ Play_Pl_SetHitAnim:
 			jp   z, .getProjDamage				; If not, jump
 			
 			;
-			; [POI] This check is pointless, as if a throw is in progress PCF_SENDPUSH is always set
+			; [POI] This check is pointless, as if a throw is in progress PCF_PUSHED is always set
 			;       for the duration of the throw until we are actually thrown.
 			;
 			ld   hl, iPlInfo_ColiFlags
 			add  hl, bc							; Seek to iPlInfo_ColiFlags
-			bit  PCF_SENDPUSH, [hl]				; Did we push another player?	
-			jp   nz, .phys	; If so, jump (always happens)
+			bit  PCF_PUSHED, [hl]				; Did we push another player?	
+			jp   nz, .phys						; If so, jump (always happens)
 			
-			jp   Play_Pl_SetHitAnim_RetClear		; We never get here
+			jp   Play_Pl_SetHitAnim_RetClear	; We never get here
 			
 		.getProjDamage:
 		
@@ -1800,7 +1797,7 @@ Play_Pl_SetHitAnim:
 			ld   hl, wOBJInfo_Pl1Projectile+iOBJInfo_Proj_DamageVal		
 		.chkProjDamage:
 			; 
-			; Just like the PI21B_INVULN check, this was checked beforehand in the box check code.
+			; Just like the PF1B_INVULN check, this was checked beforehand in the box check code.
 			; This is structured like the code checking iPlInfo_MoveDamageValOther in .phys,
 			; but the damage check in there has a real purpose.
 			;
@@ -1818,21 +1815,21 @@ Play_Pl_SetHitAnim:
 			ld   a, [hl]	; A = iOBJInfo_Proj_DamageFlags3
 			
 			; Set that we were hit by a projectile
-			ld   hl, iPlInfo_Status
-			add  hl, bc							; Seek to iPlInfo_Status
-			set  PSB_FARHIT, [hl]
+			ld   hl, iPlInfo_Flags0
+			add  hl, bc							; Seek to iPlInfo_Flags0
+			set  PF0B_FARHIT, [hl]
 			
-			inc  hl								; Seek to iPlInfo_21Flags
-			inc  hl								; Seek to iPlInfo_22Flags
+			inc  hl								; Seek to iPlInfo_Flags1
+			inc  hl								; Seek to iPlInfo_Flags2
 			; Projectiles bypass autoguard
-			res  PI22B_AUTOGUARDLOW, [hl]
-			res  PI22B_AUTOGUARDMID, [hl]
+			res  PF2B_AUTOGUARDLOW, [hl]
+			res  PF2B_AUTOGUARDMID, [hl]
 			; Since it should be possible to combo off a projectile hit, restore collision boxes.
-			res  PI22B_NOHURTBOX, [hl]
-			res  PI22B_NOCOLIBOX, [hl]
+			res  PF2B_NOHURTBOX, [hl]
+			res  PF2B_NOCOLIBOX, [hl]
 			
 			; Apply the opponent's iOBJInfo_Proj_DamageFlags3
-			inc  hl								; Seek to iPlInfo_23Flags
+			inc  hl								; Seek to iPlInfo_Flags3
 			ld   [hl], a						; Copy iOBJInfo_Proj_DamageFlags3 there
 			
 			; There's nothing else to check here, skip to the shared code
@@ -1850,7 +1847,7 @@ Play_Pl_SetHitAnim:
 			;
 			ld   hl, iPlInfo_ColiFlags
 			add  hl, bc							
-			bit  PCF_RECVHIT, [hl]				; Did we get hit?
+			bit  PCF_HIT, [hl]					; Did we get hit?
 			jp   z, Play_Pl_SetHitAnim_RetClear	; If not, return
 			
 			;
@@ -1882,19 +1879,19 @@ Play_Pl_SetHitAnim:
 			ld   a, [hl]				; A = iPlInfo_MoveDamageFlags3Other
 			
 			; Set that we weren't hit by a projectile
-			ld   hl, iPlInfo_Status
-			add  hl, bc					; Seek to iPlInfo_Status
-			res  PSB_FARHIT, [hl]
+			ld   hl, iPlInfo_Flags0
+			add  hl, bc					; Seek to iPlInfo_Flags0
+			res  PF0B_FARHIT, [hl]
 			
-			inc  hl						; Seek to iPlInfo_21Flags
-			inc  hl						; Seek to iPlInfo_22Flags
+			inc  hl						; Seek to iPlInfo_Flags1
+			inc  hl						; Seek to iPlInfo_Flags2
 			
 			; Restore collision boxes to allow combo hits.
-			res  PI22B_NOHURTBOX, [hl]
-			res  PI22B_NOCOLIBOX, [hl]
+			res  PF2B_NOHURTBOX, [hl]
+			res  PF2B_NOCOLIBOX, [hl]
 			
-			; Copy the opponent's iPlInfo_MoveDamageFlags3Other to our iPlInfo_23Flags value
-			inc  hl						; Seek to iPlInfo_23Flags
+			; Copy the opponent's iPlInfo_MoveDamageFlags3Other to our iPlInfo_Flags3 value
+			inc  hl						; Seek to iPlInfo_Flags3
 			ld   [hl], a				
 			
 			ld   a, e		; A = HitAnimId
@@ -1942,11 +1939,11 @@ Play_Pl_SetHitAnim:
 			
 			;
 			; If we got thrown by a special move (ie: not a normal throw), always allow the throw to start.
-			; The air/ground and invulnerability checks (PI21B_INVULN) get ignored.
+			; The air/ground and invulnerability checks (PF1B_INVULN) get ignored.
 			;
-			ld   hl, iPlInfo_StatusOther
-			add  hl, bc					; Seek to iPlInfo_StatusOther
-			bit  PSB_SPECMOVE, [hl]		; Is PSB_SPECMOVE set?
+			ld   hl, iPlInfo_Flags0Other
+			add  hl, bc					; Seek to iPlInfo_Flags0Other
+			bit  PF0B_SPECMOVE, [hl]		; Is PF0B_SPECMOVE set?
 			jp   nz, .setThrowFlags		; If so, jump
 			
 			;
@@ -1963,8 +1960,8 @@ Play_Pl_SetHitAnim:
 		.chkThrow_Unused_ForBoth:
 			; [BUG] Broken indexing. "add  hl, bc" is missing, so it reads garbage value at address $0021.
 			;       This is $FF, causing the check to always return.
-			ld   hl, iPlInfo_21Flags
-			bit  PI21B_INVULN, [hl]		; Are we invulnerable against throws?
+			ld   hl, iPlInfo_Flags1
+			bit  PF1B_INVULN, [hl]		; Are we invulnerable against throws?
 			jp   nz, Play_Pl_SetHitAnim_RetClear	; If so, return
 			jp   .setThrowFlags			; Otherwise, jump
 			
@@ -1973,16 +1970,16 @@ Play_Pl_SetHitAnim:
 			;
 			; We must be on the ground for the throw to start.
 			;
-			ld   hl, iPlInfo_Status
+			ld   hl, iPlInfo_Flags0
 			add  hl, bc					
-			bit  PSB_AIR, [hl]					; Are we in the air?
+			bit  PF0B_AIR, [hl]					; Are we in the air?
 			jp   nz, Play_Pl_SetHitAnim_RetClear	; If so, return
 			
 			;
 			; Standard invulnerability check.
 			;
-			inc  hl								; Seek to iPlInfo_21Flags
-			bit  PI21B_INVULN, [hl]				; Are we invulnerable?
+			inc  hl								; Seek to iPlInfo_Flags1
+			bit  PF1B_INVULN, [hl]				; Are we invulnerable?
 			jp   nz, Play_Pl_SetHitAnim_RetClear	; If so, return
 			
 			; OK
@@ -1993,15 +1990,15 @@ Play_Pl_SetHitAnim:
 			;
 			; We must be in the air for the throw to start.
 			;
-			ld   hl, iPlInfo_Status
-			add  hl, bc							; Seek to iPlInfo_Status
-			bit  PSB_AIR, [hl]					; Are we in the air?
+			ld   hl, iPlInfo_Flags0
+			add  hl, bc							; Seek to iPlInfo_Flags0
+			bit  PF0B_AIR, [hl]					; Are we in the air?
 			jp   z, Play_Pl_SetHitAnim_RetClear	; If not, return
 			
 			;
 			; [POI] The CPU can't be thrown in the air.
 			;
-			bit  PSB_CPU, [hl]					; Are we a CPU player?
+			bit  PF0B_CPU, [hl]					; Are we a CPU player?
 			jp   nz, Play_Pl_SetHitAnim_RetClear	; If so, return
 			
 		.setThrowFlags:
@@ -2009,13 +2006,13 @@ Play_Pl_SetHitAnim:
 			; When the throw is confirmed, we can't block the hit at all
 			; to reduce the damage.
 			;
-			ld   hl, iPlInfo_21Flags
-			add  hl, bc				; Seek to iPlInfo_21Flags
-			res  PI21B_GUARD, [hl]	; Clear main guard flag
-			inc  hl					; Seek to iPlInfo_22Flags
-			res  PI22B_AUTOGUARDDONE, [hl] ; Clear autoguard flags
-			res  PI22B_AUTOGUARDLOW, [hl]
-			res  PI22B_AUTOGUARDMID, [hl]
+			ld   hl, iPlInfo_Flags1
+			add  hl, bc				; Seek to iPlInfo_Flags1
+			res  PF1B_GUARD, [hl]	; Clear main guard flag
+			inc  hl					; Seek to iPlInfo_Flags2
+			res  PF2B_AUTOGUARDDONE, [hl] ; Clear autoguard flags
+			res  PF2B_AUTOGUARDLOW, [hl]
+			res  PF2B_AUTOGUARDMID, [hl]
 			
 			; Throws don't cause damage directly.
 			; Just set the updated hit animation ID from E and return.
@@ -2029,18 +2026,18 @@ Play_Pl_SetHitAnim:
 			;
 			; If we're invulnerable we can't get damaged.
 			; This also clears out the damage flashing effect, in case it was enabled when
-			; the opponent's iPlInfo_MoveDamageFlags3Other was copied over to our iPlInfo_23Flags.
+			; the opponent's iPlInfo_MoveDamageFlags3Other was copied over to our iPlInfo_Flags3.
 			;
-			ld   hl, iPlInfo_21Flags
-			add  hl, bc					; Seek to iPlInfo_21Flags
-			bit  PI21B_INVULN, [hl]		; Are we fully invulnerable?
+			ld   hl, iPlInfo_Flags1
+			add  hl, bc					; Seek to iPlInfo_Flags1
+			bit  PF1B_INVULN, [hl]		; Are we fully invulnerable?
 			jp   z, .chkAutoguard		; If not, jump
 			
-			inc  hl			; Seek to iPlInfo_22Flags
-			inc  hl			; Seek to iPlInfo_23Flags
+			inc  hl			; Seek to iPlInfo_Flags2
+			inc  hl			; Seek to iPlInfo_Flags3
 			; Stop flashing 
-			res  PI23B_FLASH_B_SLOW, [hl]
-			res  PI23B_FLASH_B_FAST, [hl]
+			res  PF3B_FLASH_B_SLOW, [hl]
+			res  PF3B_FLASH_B_FAST, [hl]
 			; Exit hit state
 			jp   Play_Pl_SetHitAnim_RetClear
 			;--
@@ -2048,29 +2045,29 @@ Play_Pl_SetHitAnim:
 		.chkAutoguard:
 			;
 			; By default, it's impossible to guard while performing a special move,
-			; though some special moves may use PI21B_GUARD to reduce the damage received.
+			; though some special moves may use PF1B_GUARD to reduce the damage received.
 			;
 			; If one of the autoguard flags are set, however, special moves can be
 			; set to either block lows or highs automatically.
 			; Unlike with normal blocks, blocking the hit prevents *any* damage from 
 			; being received (read: we return).
 			;
-			ld   hl, iPlInfo_22Flags
-			add  hl, bc						; Seek to iPlInfo_22Flags
-			bit  PI22B_AUTOGUARDLOW, [hl]	; Guarding low?
+			ld   hl, iPlInfo_Flags2
+			add  hl, bc						; Seek to iPlInfo_Flags2
+			bit  PF2B_AUTOGUARDLOW, [hl]	; Guarding low?
 			jp   nz, .onAutoguardLow		; If so, jump
-			bit  PI22B_AUTOGUARDMID, [hl]	; Guarding mid?
+			bit  PF2B_AUTOGUARDMID, [hl]	; Guarding mid?
 			jp   nz, .onAutoguardMid		; If so, jump
 			
 			; Otherwise, reset the autoguard indicator
-			res  PI22B_AUTOGUARDDONE, [hl]			; Clear result flag
+			res  PF2B_AUTOGUARDDONE, [hl]			; Clear result flag
 			jp   Play_Pl_SetHitAnim_ChkGuardBypass	; Skip to the common block
 			
 		.onAutoguardLow:
 			; If the attack hits mid, we got hit
-			ld   hl, iPlInfo_23Flags
+			ld   hl, iPlInfo_Flags3
 			add  hl, bc									
-			bit  PI23B_HITMID, [hl]					; Does the attack hit mid?
+			bit  PF3B_HITMID, [hl]					; Does the attack hit mid?
 			jp   nz, Play_Pl_SetHitAnim_BlockBypass	; If so, we got hit
 			
 			; When playing as KYO, autoguarding lows only works against normals.
@@ -2086,29 +2083,29 @@ Play_Pl_SetHitAnim:
 			
 		.onAutoguardMid:
 			; If the attack hits low, we got hit
-			ld   hl, iPlInfo_23Flags
+			ld   hl, iPlInfo_Flags3
 			add  hl, bc		 		
-			bit  PI23B_HITLOW, [hl]					; Does the attack hit low?
+			bit  PF3B_HITLOW, [hl]					; Does the attack hit low?
 			jp   nz, Play_Pl_SetHitAnim_BlockBypass	; If so, we got hit
 			
 		.chkSpecial:
 			; Autoguarding mids only works against normals in general.
-			ld   hl, iPlInfo_StatusOther
+			ld   hl, iPlInfo_Flags0Other
 			add  hl, bc
 			ld   a, [hl]
-			and  a, PS_SUPERMOVE|PS_SPECMOVE			; Did we get hit by a special move?
+			and  a, PF0_SUPERMOVE|PF0_SPECMOVE			; Did we get hit by a special move?
 			jp   nz, Play_Pl_SetHitAnim_BlockBypass		; If so, jump
 		.autoguardOk:
 			
-			ld   hl, iPlInfo_22Flags
-			add  hl, bc				; Seek to iPlInfo_22Flags
+			ld   hl, iPlInfo_Flags2
+			add  hl, bc				; Seek to iPlInfo_Flags2
 			
 			; Flag that we guarded it this way
-			set  PI22B_AUTOGUARDDONE, [hl]
-			inc  hl					; Seek to iPlInfo_23Flags
+			set  PF2B_AUTOGUARDDONE, [hl]
+			inc  hl					; Seek to iPlInfo_Flags3
 			; Stop flashing
-			res  PI23B_FLASH_B_SLOW, [hl]
-			res  PI23B_FLASH_B_FAST, [hl]
+			res  PF3B_FLASH_B_SLOW, [hl]
+			res  PF3B_FLASH_B_FAST, [hl]
 			jp   Play_Pl_SetHitAnim_RetClear
 			;###
 			
@@ -2122,22 +2119,22 @@ Play_Pl_SetHitAnim:
 			; If so, the guard is removed and we take full damage.
 			; ie: blocking overheads while crouching
 			;
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc									
-			bit  PI21B_GUARD, [hl]					; Were we blocking the attack?
+			bit  PF1B_GUARD, [hl]					; Were we blocking the attack?
 			jp   z, Play_Pl_SetHitAnim_ApplyDamage	; If not, skip ahead
-			bit  PI21B_CROUCH, [hl]					; Did we block low?
+			bit  PF1B_CROUCH, [hl]					; Did we block low?
 			jp   z, .onBlockLow						; If not, jump
 		.onBlockMid:
-			ld   hl, iPlInfo_23Flags
-			add  hl, bc								; Seek to iPlInfo_23Flags
-			bit  PI23B_HITLOW, [hl]					; Does the attack hit low?
+			ld   hl, iPlInfo_Flags3
+			add  hl, bc								; Seek to iPlInfo_Flags3
+			bit  PF3B_HITLOW, [hl]					; Does the attack hit low?
 			jp   nz, Play_Pl_SetHitAnim_BlockBypass	; If so, we got hit
 			jp   Play_Pl_SetHitAnim_Blocked			; Otherwise, we blocked it
 		.onBlockLow:
-			ld   hl, iPlInfo_23Flags
-			add  hl, bc								; Seek to iPlInfo_23Flags
-			bit  PI23B_HITMID, [hl]					; Does the attack hit mid?
+			ld   hl, iPlInfo_Flags3
+			add  hl, bc								; Seek to iPlInfo_Flags3
+			bit  PF3B_HITMID, [hl]					; Does the attack hit mid?
 			jp   nz, Play_Pl_SetHitAnim_BlockBypass	; If so, we got hit
 			jp   Play_Pl_SetHitAnim_Blocked			; Otherwise, we blocked it
 			
@@ -2151,14 +2148,14 @@ Play_Pl_SetHitAnim:
 			; We didn't guard the attack correctly.
 			; This counts as a standard hit.
 			
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
 			; Stop blocking the attack
-			res  PI21B_GUARD, [hl]	
+			res  PF1B_GUARD, [hl]	
 			inc  hl
-			res  PI22B_AUTOGUARDDONE, [hl]
-			res  PI22B_AUTOGUARDLOW, [hl]
-			res  PI22B_AUTOGUARDMID, [hl]
+			res  PF2B_AUTOGUARDDONE, [hl]
+			res  PF2B_AUTOGUARDLOW, [hl]
+			res  PF2B_AUTOGUARDMID, [hl]
 			
 		;--------------------------------
 		;
@@ -2207,9 +2204,9 @@ Play_Pl_SetHitAnim:
 			or   a						; Do we have any health left?
 			jp   nz, .notDead			; If so, jump
 			
-			ld   hl, iPlInfo_21Flags
-			add  hl, bc					; Seek to our iPlInfo_21Flags
-			res  PI21B_GUARD, [hl]		; Disable blocking
+			ld   hl, iPlInfo_Flags1
+			add  hl, bc					; Seek to our iPlInfo_Flags1
+			res  PF1B_GUARD, [hl]		; Disable blocking
 			
 			; E = HitAnimId (Opponent)
 			ld   hl, iPlInfo_MoveDamageHitAnimIdOther
@@ -2225,9 +2222,9 @@ Play_Pl_SetHitAnim:
 		.deadHit:
 			; Getting KO'd by a normal always sets HITANIM_DROP_MD.
 			; For specials there's a whitelist.
-			ld   hl, iPlInfo_StatusOther
+			ld   hl, iPlInfo_Flags0Other
 			add  hl, bc					; Seek to opponent's status
-			bit  PSB_SPECMOVE, [hl]		; Did we get killed by a special move?
+			bit  PF0B_SPECMOVE, [hl]		; Did we get killed by a special move?
 			jp   nz, .deadSpecHit		; If so, jump
 			jp   .useStdDrop				; Otherwise, use HITANIM_DROP_MD
 		.deadThrown:
@@ -2299,9 +2296,9 @@ Play_Pl_SetHitAnim:
 		
 			; Air and ground use different validations
 			ld   a, e
-			ld   hl, iPlInfo_Status
+			ld   hl, iPlInfo_Flags0
 			add  hl, bc
-			bit  PSB_AIR, [hl]		; Are we in the air?
+			bit  PF0B_AIR, [hl]		; Are we in the air?
 			jp   z, .noAir			; If not, jump
 			
 			;##
@@ -2315,16 +2312,16 @@ Play_Pl_SetHitAnim:
 			; When getting hit by a normal in the air, the player recovers before touching the ground.
 			; Otherwise, it's an hard drop.
 			;
-			bit  PSB_FARHIT, [hl]	; Did we get hit by a projectile?
+			bit  PF0B_FARHIT, [hl]	; Did we get hit by a projectile?
 			jp   nz, .airSpec		; If so, jump
-			ld   hl, iPlInfo_StatusOther
+			ld   hl, iPlInfo_Flags0Other
 			add  hl, bc				
-			bit  PSB_SPECMOVE, [hl]	; Did we get hit by a special move?
+			bit  PF0B_SPECMOVE, [hl]	; Did we get hit by a special move?
 			jp   nz, .airSpec		; If so, jump
 		.airNorm:
 			;--
 			; [POI] This is the same between .noAirNoSpec and .noAirSpec.
-			;       It could have been moved before the PSB_FARHIT check.
+			;       It could have been moved before the PF0B_FARHIT check.
 			cp   HITANIM_DROP_SPEC_0C
 			jp   z, .useDrop0C
 			cp   HITANIM_DROP_SPEC_0F
@@ -2349,11 +2346,11 @@ Play_Pl_SetHitAnim:
 			; every HitAnim value is valid as long as it doesn't get replaced
 			; by the crouching checks.
 			;
-			bit  PSB_FARHIT, [hl]	; Did we get hit by a projectile?
+			bit  PF0B_FARHIT, [hl]	; Did we get hit by a projectile?
 			jp   nz, .noAirSpec		; If so, jump
-			ld   hl, iPlInfo_StatusOther
+			ld   hl, iPlInfo_Flags0Other
 			add  hl, bc				
-			bit  PSB_SPECMOVE, [hl]	; Did we get hit by a special move?
+			bit  PF0B_SPECMOVE, [hl]	; Did we get hit by a special move?
 			jp   nz, .noAirSpec		; If so, jump
 		.noAirNorm:
 			; HITANIM_DROP_SM is always allowed
@@ -2361,9 +2358,9 @@ Play_Pl_SetHitAnim:
 			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
 			
 			; If we got hit by a normal while crouching, force use HITANIM_HIT_LOW
-			ld   hl, iPlInfo_21Flags
+			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			bit  PI21B_CROUCH, [hl]		; Are we crouching?
+			bit  PF1B_CROUCH, [hl]		; Are we crouching?
 			jp   nz, .useHitLow			; If so, jump
 			
 			; Otherwise, use the existing value
@@ -2383,18 +2380,18 @@ Play_Pl_SetHitAnim:
 		.useDrop0C:
 			; If we're not in the air, replace HITANIM_DROP_SPEC_0C with its ground version,
 			; which is a shortened version without the downwards movement.
-			ld   hl, iPlInfo_Status
+			ld   hl, iPlInfo_Flags0
 			add  hl, bc
-			bit  PSB_AIR, [hl]						; Are we in the air?
+			bit  PF0B_AIR, [hl]						; Are we in the air?
 			jp   nz, Play_Pl_SetHitAnim_SetHitAnimId			; If so, confirm the air ver
 			ld   e, HITANIM_DROP_SPEC_0C_GROUND		; Otherwise, replace it with the ground ver
 			jp   Play_Pl_SetHitAnim_SetHitAnimId
 			
 		.useGuardBreak:
 			; Like .useDrop0C, but for the guard break.
-			ld   hl, iPlInfo_Status
+			ld   hl, iPlInfo_Flags0
 			add  hl, bc						
-			bit  PSB_AIR, [hl]				; Are we in the air?
+			bit  PF0B_AIR, [hl]				; Are we in the air?
 			jp   z, .useGuardBreakGround	; If not, jump
 		.useGuardBreakAir:
 			ld   e, HITANIM_GUARDBREAK_AIR
@@ -2463,9 +2460,9 @@ Play_Pl_ApplyDamageToStats:
 	; - Otherwise, use the damage from the opponent we were given visibility to.
 	;
 
-	ld   hl, iPlInfo_Status
-	add  hl, bc					; Seek to iPlInfo_Status
-	bit  PSB_FARHIT, [hl]		; Did we get hit by a projectile?
+	ld   hl, iPlInfo_Flags0
+	add  hl, bc					; Seek to iPlInfo_Flags0
+	bit  PF0B_FARHIT, [hl]		; Did we get hit by a projectile?
 	jr   nz, .chkDamageProj		; If so, jump
 	
 .getDamagePl:
@@ -2546,19 +2543,19 @@ Play_Pl_ApplyDamageToStats:
 	;
 	
 	; Not applicable if we didn't block it
-	ld   hl, iPlInfo_21Flags
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	bit  PI21B_GUARD, [hl]	; Did we block the attack?
+	bit  PF1B_GUARD, [hl]	; Did we block the attack?
 	jp   z, .chkPow			; If not, skip
 	
 	; Blocking a projectile, special or super move divides the damage by 8.
-	ld   hl, iPlInfo_Status
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	bit  PSB_FARHIT, [hl]	; Were we hit by a projectile?
+	bit  PF0B_FARHIT, [hl]	; Were we hit by a projectile?
 	jr   nz, .damageDiv8	; If so, jump
-	ld   hl, iPlInfo_StatusOther
+	ld   hl, iPlInfo_Flags0Other
 	add  hl, bc
-	bit  PSB_SPECMOVE, [hl]	; Were we hit by a special or super move?
+	bit  PF0B_SPECMOVE, [hl]	; Were we hit by a special or super move?
 	jp   nz, .damageDiv8	; If so, jump
 	
 	; Otherwise, we got hit by a normal.
@@ -2634,9 +2631,9 @@ Play_Pl_ChkSetHitEffect_NoSpecial:
 	;
 
 	; If we blocked the hit, return
-	ld   hl, iPlInfo_21Flags
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	bit  PI21B_GUARD, [hl]
+	bit  PF1B_GUARD, [hl]
 	ret  nz
 	
 .chkChar:
@@ -2738,11 +2735,11 @@ Play_Pl_DecStunTimer:
 		
 		;
 		; First, check if we're in a state that allows blocking attacks.
-		; If the player is blocking, it must have the guard flag set (PI21B_GUARD).
+		; If the player is blocking, it must have the guard flag set (PF1B_GUARD).
 		;
-		ld   hl, iPlInfo_21Flags
-		add  hl, bc						; Seek to iPlInfo_21Flags
-		bit  PI21B_GUARD, [hl]	; Is the flag set?
+		ld   hl, iPlInfo_Flags1
+		add  hl, bc						; Seek to iPlInfo_Flags1
+		bit  PF1B_GUARD, [hl]	; Is the flag set?
 		jp   nz, .chkGuard				; If so, jump
 		
 	.noGuard:
@@ -2756,7 +2753,7 @@ Play_Pl_DecStunTimer:
 		;
 		; Halve the penalty with hits received after the first one in a combo string.
 		;
-		bit  PI21B_COMBORECV, [hl]	; Were we hit at least once in the combo string?
+		bit  PF1B_COMBORECV, [hl]	; Were we hit at least once in the combo string?
 		jp   z, .noGuard_chkOther	; If not, jump
 		srl  a						; Otherwise, Penalty /= 2
 	.noGuard_chkOther:
@@ -2769,25 +2766,25 @@ Play_Pl_DecStunTimer:
 		;
 		; Getting hit by a super move doesn't add any penalty (return)
 		;
-		ld   hl, iPlInfo_StatusOther
+		ld   hl, iPlInfo_Flags0Other
 		add  hl, bc
-		bit  PSB_SUPERMOVE, [hl]	; Were we hit by a super?
+		bit  PF0B_SUPERMOVE, [hl]	; Were we hit by a super?
 		jp   nz, .ret				; If so, return
 		
 		;
 		; Getting hit by special moves adds one extra point of penalty.
 		;
 		
-		bit  PSB_SPECMOVE, [hl]		; Were we hit by a special move?
+		bit  PF0B_SPECMOVE, [hl]		; Were we hit by a special move?
 		jp   nz, .noGuard_add1		; If so, jump
 		; Projectiles require their own check since they can hit the opponent
 		; independently from the player's action.
 		; [POI] This check only works properly because it has the same penalty as special moves
 		;       -- if the penalties were different and we were hit by a projectile while the opponent
-		;       was in the middle of an unrelated special move, the PSB_SPECMOVE check would jump.
-		ld   hl, iPlInfo_Status
+		;       was in the middle of an unrelated special move, the PF0B_SPECMOVE check would jump.
+		ld   hl, iPlInfo_Flags0
 		add  hl, bc
-		bit  PSB_FARHIT, [hl]	; Were we hit by a projectile? (special move)
+		bit  PF0B_FARHIT, [hl]	; Were we hit by a projectile? (special move)
 		jp   nz, .noGuard_add1	; If so, jump
 		
 		;
@@ -2827,7 +2824,7 @@ Play_Pl_DecStunTimer:
 		ld   a, d	; Not necessary
 		
 		;
-		; We got here by having PI21B_GUARD set.
+		; We got here by having PF1B_GUARD set.
 		;
 		; However, some special moves set that flag as well to reduce the damage 
 		; received when getting hit out of them.
@@ -2835,11 +2832,11 @@ Play_Pl_DecStunTimer:
 		; The player isn't explicitly blocking in that case, so if we're in the middle
 		; of a special or super move, return immediately to leave the guard break timer unchanged.
 		;
-		ld   hl, iPlInfo_Status
+		ld   hl, iPlInfo_Flags0
 		add  hl, bc
-		bit  PSB_SPECMOVE, [hl]
+		bit  PF0B_SPECMOVE, [hl]
 		jp   nz, .ret
-		bit  PSB_SUPERMOVE, [hl]
+		bit  PF0B_SUPERMOVE, [hl]
 		jp   nz, .ret
 		
 	.guard:
@@ -2853,8 +2850,8 @@ Play_Pl_DecStunTimer:
 		;
 		; Halve the penalty if needed, like with dizzies.
 		;
-		inc  hl						; Seek to iPlInfo_21Flags
-		bit  PI21B_COMBORECV, [hl]	; Were we hit at least once in the combo string?
+		inc  hl						; Seek to iPlInfo_Flags1
+		bit  PF1B_COMBORECV, [hl]	; Were we hit at least once in the combo string?
 		jp   z, .guard_chkOther		; If not, jump
 		srl  a						; Otherwise, Penalty /= 2
 	.guard_chkOther:
@@ -2863,19 +2860,19 @@ Play_Pl_DecStunTimer:
 		; Blocking a special or super move essentially halves the penalty.
 		; The result is also incremented by one, likely to make sure the penalty doesn't become 0.
 		;
-		ld   hl, iPlInfo_StatusOther
+		ld   hl, iPlInfo_Flags0Other
 		add  hl, bc
-		bit  PSB_SUPERMOVE, [hl]	
+		bit  PF0B_SUPERMOVE, [hl]	
 		jp   nz, .guard_half
-		bit  PSB_SPECMOVE, [hl]
+		bit  PF0B_SPECMOVE, [hl]
 		jp   nz, .guard_half
 		
 		;
 		; The same happens if we got hit by a projectile
 		;
-		ld   hl, iPlInfo_Status
+		ld   hl, iPlInfo_Flags0
 		add  hl, bc
-		bit  PSB_FARHIT, [hl]
+		bit  PF0B_FARHIT, [hl]
 		jp   nz, .guard_half
 		
 		;
@@ -2934,9 +2931,9 @@ Play_Pl_DoGuardBreak:
 	; The guard is removed (as if the player stopped blocking), giving a few
 	; frames to the opponent to start a new attack that won't get blocked.
 	;
-	ld   hl, iPlInfo_21Flags
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	res  PI21B_GUARD, [hl]		; Remove guard flag
+	res  PF1B_GUARD, [hl]		; Remove guard flag
 	
 	;
 	; Every time guard breaks, the cap is increased by 8.

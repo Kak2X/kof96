@@ -124,10 +124,10 @@ MoveInit_Kyo_ShikiAraKami:
 .setMove:
 	call MoveInputS_SetSpecMove_StopSpeed
 	
-	ld   hl, iPlInfo_21Flags
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	set  PI21B_GUARD, [hl]		; Reduce damage when getting hit out of this
-	res  PI21B_CROUCH, [hl]		; Not crouching
+	set  PF1B_GUARD, [hl]		; Reduce damage when getting hit out of this
+	res  PF1B_CROUCH, [hl]		; Not crouching
 	jp   MoveInputReader_Kyo_MoveSet
 	
 ; =============== MoveInit_Kyo_ShikiOniyaki ===============	
@@ -142,10 +142,10 @@ MoveInit_Kyo_ShikiOniyaki:
 	ld   a, MOVE_KYO_SHIKI_ONIYAKI_H
 .setMove:
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, iPlInfo_21Flags
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	set  PI21B_GUARD, [hl]
-	res  PI21B_CROUCH, [hl]
+	set  PF1B_GUARD, [hl]
+	res  PF1B_CROUCH, [hl]
 	jp   MoveInputReader_Kyo_MoveSet
 	
 ; =============== MoveInit_Kyo_RedKick ===============	
@@ -204,9 +204,9 @@ MoveInit_Kyo_ShikiNueTumi:
 	ld   a, MOVE_KYO_SHIKI_NUE_TUMI_H
 .setMove:
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, iPlInfo_22Flags
+	ld   hl, iPlInfo_Flags2
 	add  hl, bc
-	set  PI22B_AUTOGUARDMID, [hl]
+	set  PF2B_AUTOGUARDMID, [hl]
 	jp   MoveInputReader_Kyo_MoveSet
 ; =============== MoveInit_Kyo_UraShikiOrochinagi ===============
 MoveInit_Kyo_UraShikiOrochinagi:
@@ -221,9 +221,9 @@ MoveInit_Kyo_UraShikiOrochinagi:
 .setMove:
 	call MoveInputS_SetSpecMove_StopSpeed
 	; This super move removes projectiles
-	ld   hl, iPlInfo_Status
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	set  PSB_PROJREM, [hl]
+	set  PF0B_PROJREM, [hl]
 	jp   MoveInputReader_Kyo_MoveSet
 	
 ; =============== MoveInputReader_Kyo_MoveSet ===============

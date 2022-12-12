@@ -13,7 +13,7 @@ MoveAnimTbl_Marker:
 ; - 4: Animation speed. Higher values = slower animation (iOBJInfo_FrameLeft)
 ; - 5: Damage amount (iPlInfo_MoveDamageValNext)
 ; - 6: Animation ID used when getting hit. (HITANIM_*) (iPlInfo_MoveDamageHitAnimIdNext)
-; - 7: iPlInfo_23Flags applied when getting hit (iPlInfo_MoveDamageFlags3Next)
+; - 7: iPlInfo_Flags3 applied when getting hit (iPlInfo_MoveDamageFlags3Next)
 MoveAnimTbl_Kyo: db $4C;X
 L034001: db $00;X
 L034002: db $00;X

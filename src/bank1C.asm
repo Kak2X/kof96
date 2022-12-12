@@ -1547,27 +1547,27 @@ ModeSelect_PrepSingle:
 	jp   nz, .pl2			; If not, jump
 .pl1:
 	; P1: Player, P2: CPU
-	ld   hl, wPlInfo_Pl1+iPlInfo_Status
-	res  PSB_CPU, [hl]
-	ld   hl, wPlInfo_Pl2+iPlInfo_Status
-	set  PSB_CPU, [hl]
+	ld   hl, wPlInfo_Pl1+iPlInfo_Flags0
+	res  PF0B_CPU, [hl]
+	ld   hl, wPlInfo_Pl2+iPlInfo_Flags0
+	set  PF0B_CPU, [hl]
 	call ModeSelect_MakeRoundSeq
 	jp   ModeSelect_SwitchToCharSelect
 .pl2:
 	; P1: CPU, P2: Player
-	ld   hl, wPlInfo_Pl1+iPlInfo_Status
-	set  PSB_CPU, [hl]
-	ld   hl, wPlInfo_Pl2+iPlInfo_Status
-	res  PSB_CPU, [hl]
+	ld   hl, wPlInfo_Pl1+iPlInfo_Flags0
+	set  PF0B_CPU, [hl]
+	ld   hl, wPlInfo_Pl2+iPlInfo_Flags0
+	res  PF0B_CPU, [hl]
 	call ModeSelect_MakeRoundSeq
 	jp   ModeSelect_SwitchToCharSelect
 	
 ModeSelect_PrepVS:
 	; P1: Player, P2: Player
-	ld   hl, wPlInfo_Pl1+iPlInfo_Status
-	res  PSB_CPU, [hl]
-	ld   hl, wPlInfo_Pl2+iPlInfo_Status
-	res  PSB_CPU, [hl]
+	ld   hl, wPlInfo_Pl1+iPlInfo_Flags0
+	res  PF0B_CPU, [hl]
+	ld   hl, wPlInfo_Pl2+iPlInfo_Flags0
+	res  PF0B_CPU, [hl]
 	; No round sequence in 2P mode
 	ld   hl, wRoundSeqId
 	ld   [hl], $00
@@ -1577,10 +1577,10 @@ ModeSelect_PrepVS:
 ;        Sets up a CPU vs CPU battle in VS mode, which is normally restricted to 1P modes.
 ModeSelect_Unused_PrepVSCPU:
 	; P1: CPU, P2: CPU
-	ld   hl, wPlInfo_Pl1+iPlInfo_Status
-	set  PSB_CPU, [hl]
-	ld   hl, wPlInfo_Pl2+iPlInfo_Status
-	set  PSB_CPU, [hl]
+	ld   hl, wPlInfo_Pl1+iPlInfo_Flags0
+	set  PF0B_CPU, [hl]
+	ld   hl, wPlInfo_Pl2+iPlInfo_Flags0
+	set  PF0B_CPU, [hl]
 	; No round sequence in 2P mode
 	ld   hl, wRoundSeqId
 	ld   [hl], $00
@@ -2631,14 +2631,14 @@ ModeSelect_CheckCPUvsCPU:
 	ldh  a, [hJoyKeys]
 	bit  KEYB_B, a					; Holding B on controller 1?
 	jp   z, .chkPl2					; If not, jump
-	ld   hl, wPlInfo_Pl1+iPlInfo_Status
-	set  PSB_CPU, [hl]				; Otherwise, set P1 as CPU
+	ld   hl, wPlInfo_Pl1+iPlInfo_Flags0
+	set  PF0B_CPU, [hl]				; Otherwise, set P1 as CPU
 .chkPl2:
 	ldh  a, [hJoyKeys2]
 	bit  KEYB_B, a					; Holding B on controller 2?
 	jp   z, .ret					; If not, jump
-	ld   hl, wPlInfo_Pl2+iPlInfo_Status
-	set  PSB_CPU, [hl]				; Otherwise, set P2 as CPU
+	ld   hl, wPlInfo_Pl2+iPlInfo_Flags0
+	set  PF0B_CPU, [hl]				; Otherwise, set P2 as CPU
 .ret:
 	ret
 	

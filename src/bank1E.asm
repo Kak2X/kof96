@@ -490,8 +490,8 @@ chkInitialModeP2:
 	ld   de, wOBJInfo_Pl1+iOBJInfo_CharSel_CursorOBJId
 	
 	; Set the correct sprites for the normal/wide versions
-	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
-	bit  PSB_CPU, a			; Is this character a CPU?
+	ld   a, [wPlInfo_Pl1+iPlInfo_Flags0]
+	bit  PF0B_CPU, a			; Is this character a CPU?
 	jp   nz, .cursorCPU_1P	; If so, jump
 	
 .cursorPl_1P:
@@ -539,8 +539,8 @@ chkInitialModeP2:
 	ld   de, wOBJInfo_Pl2+iOBJInfo_CharSel_CursorOBJId
 	
 	; Set the correct sprites for the normal/wide versions
-	ld   a, [wPlInfo_Pl2+iPlInfo_Status]
-	bit  PSB_CPU, a			; Is this character a CPU?
+	ld   a, [wPlInfo_Pl2+iPlInfo_Flags0]
+	bit  PF0B_CPU, a			; Is this character a CPU?
 	jp   nz, .cursorCPU_2P	; If so, jump
 	
 .cursorPl_2P:
@@ -3136,11 +3136,11 @@ CharSel_IsUnusedVsModeCpuVsCpu:
 	bit  MODEB_VS, a						; Are we in VS mode?
 	jp   z, .retClear						; If not, jump
 	; Unreachable code
-	ld   a, [wPlInfo_Pl1+iPlInfo_Status]
+	ld   a, [wPlInfo_Pl1+iPlInfo_Flags0]
 	ld   b, a								; B = P1 status
-	ld   a, [wPlInfo_Pl2+iPlInfo_Status]	; A = P2 status
+	ld   a, [wPlInfo_Pl2+iPlInfo_Flags0]	; A = P2 status
 	and  b									; Merge them
-	and  a, PS_CPU							; Is the CPU flag set on both?
+	and  a, PF0_CPU							; Is the CPU flag set on both?
 	jr   z, .retClear						; If not, jump
 .retSet:
 	scf  ; C flag set

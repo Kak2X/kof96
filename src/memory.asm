@@ -457,7 +457,7 @@ iOBJInfo_Proj_CodePtr_High EQU iOBJInfo_Custom+$02 ; Custom code for projectile 
 
 iOBJInfo_Proj_DamageVal EQU iOBJInfo_Custom+$03 ; Damage given the projectile hits the opponent.
 iOBJInfo_Proj_DamageHitAnimId EQU iOBJInfo_Custom+$04 ; Animation playing when the projectile hits the opponent (HITANIM_*)
-iOBJInfo_Proj_DamageFlags3 EQU iOBJInfo_Custom+$05 ; Damage flags applied when the opponent gets hit (they get copied to iPlInfo_23Flags)
+iOBJInfo_Proj_DamageFlags3 EQU iOBJInfo_Custom+$05 ; Damage flags applied when the opponent gets hit (they get copied to iPlInfo_Flags3)
 iOBJInfo_Proj_HitMode EQU iOBJInfo_Custom+$06 ; If set, marks what happens when the projectile hits a target
 iOBJInfo_Proj_Priority EQU iOBJInfo_Custom+$07 ; Higher priority projectiles erase others
 
@@ -512,17 +512,17 @@ iOBJ_TileIDAndFlags EQU $02
 ;                                                      iPlInfo_JoyMergedKeysLH --o
 iPlInfo_JoyBtnBuffer EQU $00 ; A/B buttons
 iPlInfo_JoyDirBuffer EQU $10 ; Directional keys
-iPlInfo_Status EQU $20 ; iPlInfo_Flags0 Player flags (byte 0)
-iPlInfo_21Flags EQU $21 ; iPlInfo_Flags1 Player flags (byte 1)
-iPlInfo_22Flags EQU $22 ; iPlInfo_Flags2 Player flags (byte 2)
-iPlInfo_23Flags EQU $23 ; iPlInfo_Flags3 Player flags (byte 3 - related to damage)
+iPlInfo_Flags0 EQU $20 ; Player flags (byte 0)
+iPlInfo_Flags1 EQU $21 ; Player flags (byte 1)
+iPlInfo_Flags2 EQU $22 ; Player flags (byte 2)
+iPlInfo_Flags3 EQU $23 ; Player flags (byte 3 - related to damage)
 ;-- 
 ; from master tbl
 ;
 iPlInfo_MoveAnimTblPtr_High EQU $24 ; Ptr to move anim data ptr table (high byte) [BANK $03]
 iPlInfo_MoveAnimTblPtr_Low EQU $25 ; Ptr to move anim data ptr table (low byte) [BANK $03]
-iPlInfo_MoveCodePtrTable_High EQU $26 ; Ptr to move code ptr table (high byte) [BANK $03]
-iPlInfo_MoveCodePtrTable_Low EQU $27 ; Ptr to move code ptr table (low byte) [BANK $03]
+iPlInfo_MoveCodePtrTbl_High EQU $26 ; Ptr to move code ptr table (high byte) [BANK $03]
+iPlInfo_MoveCodePtrTbl_Low EQU $27 ; Ptr to move code ptr table (low byte) [BANK $03]
 iPlInfo_MoveInputCodePtr_High EQU $28 ; Ptr to special move reader code (high byte)
 iPlInfo_MoveInputCodePtr_Low EQU $29 ; Ptr to special move reader code (low byte)
 iPlInfo_MoveInputCodePtr_Bank EQU $2A ; Bank num for special move reader code
@@ -545,7 +545,7 @@ iPlInfo_39 EQU $39 ;
 ; Move damage fields - current
 iPlInfo_MoveDamageVal EQU $3A ; Damage given when hitting the opponent directly
 iPlInfo_MoveDamageHitAnimId EQU $3B ; Animation playing when getting hit (HITANIM_*)
-iPlInfo_MoveDamageFlags3 EQU $3C ; Source damage flags applied when getting hit (they get copied to iPlInfo_23Flags)
+iPlInfo_MoveDamageFlags3 EQU $3C ; Source damage flags applied when getting hit (they get copied to iPlInfo_Flags3)
 ; Move damage fields - pending (for currently loading frame)
 iPlInfo_MoveDamageValNext EQU $3D
 iPlInfo_MoveDamageHitAnimIdNext EQU $3E
@@ -615,10 +615,10 @@ iPlInfo_Gravity_Sub EQU $6C ; Gravity applied when jumping (subpixels).
 
 ; All of those marked as "Other" are copied of data from the other player.
 ; Additionally, those marked as "OBJInfo" come from the respective wOBJInfo struct.
-iPlInfo_StatusOther EQU $6D
-iPlInfo_21FlagsOther EQU $6E
-iPlInfo_22FlagsOther EQU $6F
-iPlInfo_23FlagsOther EQU $70
+iPlInfo_Flags0Other EQU $6D
+iPlInfo_Flags1Other EQU $6E
+iPlInfo_Flags2Other EQU $6F
+iPlInfo_Flags3Other EQU $70
 
 ;--
 iPlInfo_CharIdOther EQU $71 ; Copy of iPlInfo_CharId
