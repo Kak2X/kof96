@@ -47,18 +47,18 @@ L064051:;JR
 ; - C flag: If set, a move was started
 MoveInputReader_Kyo:
 	; Standard validation
-	call MoveInputS_CanStartSpecialMove	; Can we start a new special/super?
-	jp   c, MoveInputReader_Kyo_NoMove						; If not, return
+	call MoveInputS_CanStartSpecialMove		; Can we start a new special/super?
+	jp   c, MoveInputReader_Kyo_NoMove		; If not, return
 	
 	; KYO has no air specials
-	jp   z, .chkGround 				; Are we on the ground? If so, jump
-	jp   MoveInputReader_Kyo_NoMove					; Otherwise, return
+	jp   z, .chkGround 						; Are we on the ground? If so, jump
+	jp   MoveInputReader_Kyo_NoMove			; Otherwise, return
 .chkGround:
 	
 	; Easy move cheat check
 	call MoveInputS_CheckEasyMoveKeys
 	jp   c, MoveInit_Kyo_UraShikiOrochinagi	; SELECT + B pressed? If so, jump
-	jp   z, MoveInit_Kyo_ShikiNueTumi 			; SELECT + A pressed? If so, jump
+	jp   z, MoveInit_Kyo_ShikiNueTumi 		; SELECT + A pressed? If so, jump
 	
 	; Otherwise, determine the attack type/strength.
 	; This narrows down the list of special moves to check.

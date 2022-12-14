@@ -9987,7 +9987,7 @@ Play_DoUnkChain_DecMaxPow2P: mDecMaxPow wPlInfo_Pl2
 	
 ; =============== mIncPlPow ===============
 ; Generates code to increment the normal POW meter if possible.
-; This also handles the cheat for "infinite" meter (or rather, automatic charge).
+; This also handles the cheat for the meter autocharge.
 ; If that cheat is enabled, the meters increment automatically and increments/decrements slower.
 ;
 ; IN
@@ -10005,7 +10005,7 @@ mIncPlPow: MACRO
 	
 	; If meter charges up automatically, do it at a slower rate (0.1px/frame)
 	ld   a, [wDipSwitch]
-	bit  DIPB_INFINITE_METER, a	; Infinite super cheat enabled?
+	bit  DIPB_AUTO_CHARGE, a	; Autocharge cheat enabled?
 	jp   z, .end				; If not, jump 
 .autoSpeed:
 	ld   b, $0F		; B = Speed mask, slow (see also: mDecMaxPow)
@@ -10030,7 +10030,7 @@ mIncPlPow: MACRO
 	; If meter charged up automatically, decrement the meter at a slower rate
 	ld   hl, \1+iPlInfo_MaxPowDecSpeed
 	ld   a, [wDipSwitch]
-	bit  DIPB_INFINITE_METER, a	; Infinite super cheat enabled?
+	bit  DIPB_AUTO_CHARGE, a	; Autocharge cheat enabled?
 	jp   nz, .decSlow			; If not, jump
 .decFast:
 	ld   [hl], $1F				; Write speed to iPlInfo_MaxPowDecSpeed

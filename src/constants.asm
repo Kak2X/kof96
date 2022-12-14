@@ -98,7 +98,7 @@ OBJLSTPTR_ENTRYSIZE EQU 4 ; Size of each OBJLstPtrTable entry (pair of OBJLstHdr
 
 ; FLAGS
 DIPB_EASY_MOVES       EQU 2 ; SELECT + A/B for easy super moves
-DIPB_INFINITE_METER   EQU 3 ; POW Meter grows on its own + Unlimited super moves (TODO: rename to DIPB_AUTO_CHARGE)
+DIPB_AUTO_CHARGE      EQU 3 ; POW Meter grows on its own + Unlimited super moves
 DIPB_SGB_SOUND_TEST   EQU 4 ; Adds SGB S.E TEST to the options menu
 DIPB_TEAM_DUPL        EQU 5 ; Allow duplicate characters in a team
 DIPB_UNLOCK_GOENITZ   EQU 6 ; Unlock Goenitz

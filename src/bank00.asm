@@ -11810,7 +11810,7 @@ Play_Pl_DoBasicMoveInput:
 		BasicInput_StartCrouchLightPunch:
 			; [POI] If the autocharge cheat is enabled, crouching lps reflect projectiles.
 			ld   a, [wDipSwitch]
-			bit  DIPB_INFINITE_METER, a	; Is the cheat set?
+			bit  DIPB_AUTO_CHARGE, a	; Is the cheat set?
 			jp   z, .go					; If not, skip
 			ld   hl, iPlInfo_Flags0
 			add  hl, bc					; Otherwise, make it reflect projectiles
@@ -11840,7 +11840,7 @@ Play_Pl_DoBasicMoveInput:
 			
 			; [POI] If the autocharge cheat is enabled, crouching hps erase projectiles.
 			ld   a, [wDipSwitch]
-			bit  DIPB_INFINITE_METER, a	; Is the cheat set?
+			bit  DIPB_AUTO_CHARGE, a	; Is the cheat set?
 			jp   z, .go					; If not, skip
 			ld   hl, iPlInfo_Flags0
 			add  hl, bc					; Otherwise, make it delete projectiles
@@ -13151,9 +13151,9 @@ MoveInputS_CanStartSpecialMove:
 ; - C flag: If set, we can't start a super
 MoveInputS_CanStartSuperMove:
 	
-	; With "infinite" meter cheat, you have infinite supers
+	; With the meter autocharge cheat, you have infinite supers
 	ld   a, [wDipSwitch]
-	bit  DIPB_INFINITE_METER, a	; Is the flag set?
+	bit  DIPB_AUTO_CHARGE, a	; Is the flag set?
 	jp   nz, .retOk				; If so, return clear
 	
 	; If the POW bar is at the maximum value, we can start a super
@@ -13211,7 +13211,7 @@ L003763:;C
 ; - BC: Ptr to wPlInfo structure
 ; OUT
 ; - C flag: If set, the "hidden heavy" version can be used.
-;           This is an heavy attack done at Max Power *WHEN* the infinite meter cheat is enabled.
+;           This is an heavy attack done at Max Power *WHEN* the meter autocharge cheat is enabled.
 ; - Z flag: If set, the attack is heavy
 MoveInputS_CheckMoveLHVer:
 
@@ -13219,7 +13219,7 @@ MoveInputS_CheckMoveLHVer:
 	; Perform the two initial checks for the cheated heavy attack
 	;
 	ld   a, [wDipSwitch]
-	bit  DIPB_INFINITE_METER, a	; Is the cheat set?
+	bit  DIPB_AUTO_CHARGE, a	; Is the cheat set?
 	jp   z, .chkNorm			; If not, jump
 	
 	ld   hl, iPlInfo_Pow
@@ -13268,17 +13268,17 @@ MoveInputS_CheckSuperDesperation:
 	;
 	; Dsperation supers are triggered by pulling off a super at max meter with low health.
 	;
-	; When the "infinite" meter cheat is enabled, only max meter is required.
+	; When the meter autocharge cheat is enabled, only max meter is required.
 	; [POI] If the low health requirement is still met, an hidden desperation is triggered,
 	;       though only one super move (L064D82) actually checks for it.
 	;       There is no way to trigger it without the cheat.
 	;
 
 	;
-	; The rules are slightly different if the "infinite" meter cheat is enabled.
+	; The rules are slightly different if the meter autocharge cheat is enabled.
 	;
 	ld   a, [wDipSwitch]
-	bit  DIPB_INFINITE_METER, a	; Is the cheat set?
+	bit  DIPB_AUTO_CHARGE, a	; Is the cheat set?
 	jp   z, .chkNormal			; If not, jump
 	
 .chkCheat:

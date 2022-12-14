@@ -12204,7 +12204,7 @@ TakaraLogo_Do:
 	ldi  [hl], a
 	ld   a, 20		; wCheatAllCharKeysLeft
 	ldi  [hl], a
-	ld   a, 25		; wCheat_Unused_KeysLeft [TCRF] Not used, may have been for DIPB_TEAM_DUPL and DIPB_INFINITE_METER
+	ld   a, 25		; wCheat_Unused_KeysLeft [TCRF] Not used, may have been for DIPB_TEAM_DUPL and DIPB_AUTO_CHARGE
 	ldi  [hl], a
 	ld   a, 30		; wCheatEasyMovesKeysLeft
 	ldi  [hl], a
@@ -12244,7 +12244,7 @@ TakaraLogo_CheckCheat:
 	
 .chkTeamDupeInfMeter:
 	;
-	; Duplicate chars in team + Infinite Meter
+	; Duplicate chars in team + Autocharge POW meter
 	; Hold A + B + SELECT
 	;
 	bit  KEYB_SELECT, e					; Pressed SELECT?
@@ -12257,7 +12257,7 @@ TakaraLogo_CheckCheat:
 	jp   nz, .chkGoenitz				; If not, skip
 	; Set cheats
 	set  DIPB_TEAM_DUPL, [hl]
-	set  DIPB_INFINITE_METER, [hl]
+	set  DIPB_AUTO_CHARGE, [hl]
 	; Play SGB sound
 	push hl
 		ld   hl, (SGB_SND_A_CUPBREAK << 8)|$01
