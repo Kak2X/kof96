@@ -206,7 +206,7 @@ MoveInit_Kyo_ShikiNueTumi:
 	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, iPlInfo_Flags2
 	add  hl, bc
-	set  PF2B_AUTOGUARDMID, [hl]
+	set  PF2B_AUTOGUARDLOW, [hl]
 	jp   MoveInputReader_Kyo_MoveSet
 ; =============== MoveInit_Kyo_UraShikiOrochinagi ===============
 MoveInit_Kyo_UraShikiOrochinagi:
@@ -1613,7 +1613,7 @@ L064CA0:;J
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 L064CA3:;J
 	ret
-L064CA4:;I
+MoveInputReader_Terry:;I
 	call MoveInputS_CanStartSpecialMove
 	jp   c, L064DA8
 	jp   z, L064CB0
@@ -2473,7 +2473,7 @@ L0652D5:;J
 	jp   nc, L0652D1
 	call OBJLstS_Hide
 	ret
-L0652DF:;I
+MoveInputReader_Mai:;I
 	call MoveInputS_CanStartSpecialMove
 	jp   c, L06541D
 	jp   z, L06530F
@@ -3538,7 +3538,7 @@ L065B34:;J
 	pop  de
 	pop  bc
 	ret
-L065B3A:;I
+MoveInputReader_Athena:;I
 	call MoveInputS_CanStartSpecialMove
 	jp   c, L065CBD
 	jp   z, L065B93
@@ -6005,7 +6005,7 @@ L066A73:;J
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L066A76:;J
 	ret
-L066A77:;I
+MoveInputReader_Andy:;I
 	call MoveInputS_CanStartSpecialMove
 	jp   c, L066BA1
 	jp   z, L066A9B
@@ -6890,7 +6890,7 @@ L0671EA:;J
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 L0671ED:;JR
 	ret
-L0671EE:;I
+MoveInputReader_MrBig:;I
 	call MoveInputS_CanStartSpecialMove
 	jp   c, L0672DB
 	jp   z, L0671FA
@@ -7640,7 +7640,7 @@ L0677B8:;J
 L0677BC:;J
 	call OBJLstS_Hide
 	ret
-L0677C0:;I
+MoveInputReader_Geese:;I
 	call MoveInputS_CanStartSpecialMove
 	jp   c, L0678F6
 	jp   z, L0677ED

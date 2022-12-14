@@ -5143,7 +5143,7 @@ OBJLstHdrA_Terry_WinA0:
 	db $00 ; iOBJLstHdrA_Flags
 	db $01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitBoxId
-	dp L0D5A60 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr L0D5A60 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $F8 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
@@ -5157,7 +5157,7 @@ OBJLstHdrA_Terry_WinA0:
 
 OBJLstHdrB_Terry_WinA0:
 	db $00 ; iOBJLstHdrB_Flags
-	dp L0D5AE0 ; iOBJLstHdrB_GFXPtr + iOBJLstHdrB_GFXBank
+	dpr L0D5AE0 ; iOBJLstHdrB_GFXPtr + iOBJLstHdrB_GFXBank
 	dw .bin ; iOBJLstHdrB_DataPtr
 	db $F8 ; iOBJLstHdrB_XOffset
 	db $00 ; iOBJLstHdrB_YOffset
@@ -13584,7 +13584,7 @@ L0974E2: db $0A
 L0974E3: db $30
 L0974E4: db $00
 L0974E5: db $0C
-L0974E6:;I
+MoveInputReader_Krauser:;I
 	call MoveInputS_CanStartSpecialMove
 	jp   c, L097625
 	jp   z, L0974F2

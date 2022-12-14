@@ -1,5 +1,7 @@
 <?php
 
+require "defines.php";
+
 chdir("..");
 
 function get_label($line) {
@@ -37,6 +39,39 @@ function generate_const_label($strdb, $map) {
 	if (!$res)
 		return "\$00";
 	return $res;
+}
+
+function get_move_table($base_label) {
+	// Determine initial running ID
+	if (strpos($base_label, "Shared") !== false) {
+		if (strpos($base_label, "Base") !== false) {
+			return [MOVEGROUP_BASE_START, null];
+		} else if (strpos($base_label, "Hit") !== false) {
+			return [MOVEGROUP_HIT_START, null];
+		}
+	} else {
+		$id = MOVEGROUP_ATTACK_START;
+		
+		// Determine character table
+		$charname = strtoupper(explode("_", $base_label, 2)[1]);
+		print $charname."\r\n";
+		$charid = array_search($charname, CHAR_NAMES, true);
+		if ($charid === false)
+			die("not found! $charname");
+		$spectbl = MOVES_CHAR[$charid];
+		
+		return [$id, $spectbl];
+	}
+}
+
+function get_move_name_from_tbl($id, $spectbl) {
+	if ($id >= MOVEGROUP_ATTACKSPEC_START && $id < MOVEGROUP_ATTACKSPEC_END) {
+		// character-specific
+		return $spectbl[$id-MOVEGROUP_ATTACKSPEC_START];
+	} else {
+		// common
+		return MOVES_GLOBAL[$id];
+	}
 }
 
 function fmthexnum($dec) {

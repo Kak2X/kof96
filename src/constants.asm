@@ -237,20 +237,31 @@ PF1B_INVULN         EQU 7 ; If set, the player is completely invulnerable.
 						  ; but they are blocked before they can deal damage.
 ; iPlInfo_Flags2 flags
 PF2B_MOVESTART      EQU 0 ; Marks that a new move has been set
-PF2B_HEAVY          EQU 1 ; Used to distinguish between light/heavy when starting an attack ?????
+PF2B_HEAVY          EQU 1 ; To distinguish between light/heavy when starting an attack
 PF2B_HITCOMBO       EQU 2 ; If set, the current move was combo'd from another.
 PF2B_AUTOGUARDDONE  EQU 3 ; If set, the autoguard triggered on this frame
-PF2B_AUTOGUARDLOW   EQU 4 ; If set, the move automatically blocks lows
-PF2B_AUTOGUARDMID   EQU 5 ; If set, the move automatically blocks mids
+PF2B_AUTOGUARDMID   EQU 4 ; If set, the move automatically blocks lows
+PF2B_AUTOGUARDLOW   EQU 5 ; If set, the move automatically blocks mids
 PF2B_NOHURTBOX      EQU 6 ; If set, the player has no hurtbox (this separate from the collision box only here)
 PF2B_NOCOLIBOX      EQU 7 ; If set, the player has no collision box
 ; iPlInfo_Flags3, related to the move we got attacked with
-PF3B_SHAKELONG     EQU 0 ; Getting attacked shakes the player longer (doesn't cut the shake count in half)
-PF3B_FLASH_B_SLOW  EQU 1 ; Getting hit causes the player to flash slowly
-PF3B_HITMID        EQU 2 ; The attack hits medium (must block standing)
-PF3B_HITLOW        EQU 3 ; The attack hits low (must block crouching)
-PF3B_FLASH_B_FAST  EQU 6 ; Getting hit causes the player to flash fast
-PF3B_SHAKEONCE     EQU 7 ; Getting attacked shakes the player once
+PF3B_SHAKELONG      EQU 0 ; Getting attacked shakes the player longer (doesn't cut the shake count in half)
+PF3B_FLASH_B_SLOW   EQU 1 ; Getting hit causes the player to flash slowly
+PF3B_HITLOW         EQU 2 ; The attack hits low (must block crouching)
+PF3B_OVERHEAD       EQU 3 ; The attack is an overhead (must block standing)
+PF3B_BIT4           EQU 4 ; ???
+PF3B_BIT5           EQU 5 ; ???
+PF3B_FLASH_B_FAST   EQU 6 ; Getting hit causes the player to flash fast
+PF3B_SHAKEONCE      EQU 7 ; Getting attacked shakes the player once
+
+PF3_SHAKELONG       EQU 1 << PF3B_SHAKELONG   
+PF3_FLASH_B_SLOW    EQU 1 << PF3B_FLASH_B_SLOW
+PF3_HITLOW          EQU 1 << PF3B_HITLOW      
+PF3_OVERHEAD        EQU 1 << PF3B_OVERHEAD      
+PF3_BIT4            EQU 1 << PF3B_BIT4        
+PF3_BIT5            EQU 1 << PF3B_BIT5        
+PF3_FLASH_B_FAST    EQU 1 << PF3B_FLASH_B_FAST
+PF3_SHAKEONCE       EQU 1 << PF3B_SHAKEONCE   
 
 ; Flags for iPlInfo_JoyNewKeysLH in the upper nybble
 ; (low nybble is the same as KEYB_*)
@@ -603,98 +614,441 @@ ORDSEL_SELDONE EQU $03
 ; ============================================================
 ; GAMEPLAY
 
-MOVE_SHARED_NONE EQU $00
-MOVE_SHARED_IDLE EQU $02 ; Stand
-MOVE_SHARED_WALK_F EQU $04 ; Walk forward
-MOVE_SHARED_WALK_B EQU $06 ; Walk back
-MOVE_SHARED_CROUCH EQU $08 ; Crouch
-MOVE_SHARED_JUMP_N EQU $0A ; Neutral jump
-MOVE_SHARED_JUMP_F EQU $0C ; forward jump
-MOVE_SHARED_JUMP_B EQU $0E ; Backwards jump
-MOVE_SHARED_BLOCK_G EQU $10 ; Ground block / mid
-MOVE_SHARED_BLOCK_C EQU $12 ; Crouch block / low
-MOVE_SHARED_BLOCK_A EQU $14 ; Air block
-MOVE_SHARED_DASH_F EQU $16 ; Run forward
-MOVE_SHARED_DASH_B EQU $18 ; Hop back
-MOVE_SHARED_CHARGEMETER EQU $1A ; Charge meter
-MOVE_SHARED_TAUNT EQU $1C ; Taunt
-MOVE_SHARED_ROLL_F EQU $1E ; Roll forward
-MOVE_SHARED_ROLL_B EQU $20 ; Roll back
-MOVE_SHARED_WAKEUP EQU $22 ; Get up
-MOVE_SHARED_DIZZY EQU $24 ; Dizzy
-MOVE_SHARED_WIN_NORM EQU $26
-MOVE_SHARED_WIN_ALT EQU $28
-MOVE_SHARED_LOST_TIMEOVER EQU $2A
-MOVE_SHARED_INTRO EQU $2C
-MOVE_SHARED_INTRO_SPEC EQU $2E
-
+MOVE_SHARED_NONE           EQU $00
+MOVE_SHARED_IDLE           EQU $02 ; Stand
+MOVE_SHARED_WALK_F         EQU $04 ; Walk forward
+MOVE_SHARED_WALK_B         EQU $06 ; Walk back
+MOVE_SHARED_CROUCH         EQU $08 ; Crouch
+MOVE_SHARED_JUMP_N         EQU $0A ; Neutral jump
+MOVE_SHARED_JUMP_F         EQU $0C ; forward jump
+MOVE_SHARED_JUMP_B         EQU $0E ; Backwards jump
+MOVE_SHARED_BLOCK_G        EQU $10 ; Ground block / mid
+MOVE_SHARED_BLOCK_C        EQU $12 ; Crouch block / low
+MOVE_SHARED_BLOCK_A        EQU $14 ; Air block
+MOVE_SHARED_DASH_F         EQU $16 ; Run forward
+MOVE_SHARED_DASH_B         EQU $18 ; Hop back
+MOVE_SHARED_CHARGEMETER    EQU $1A ; Charge meter
+MOVE_SHARED_TAUNT          EQU $1C ; Taunt
+MOVE_SHARED_ROLL_F         EQU $1E ; Roll forward
+MOVE_SHARED_ROLL_B         EQU $20 ; Roll back
+MOVE_SHARED_WAKEUP         EQU $22 ; Get up
+MOVE_SHARED_DIZZY          EQU $24 ; Dizzy
+MOVE_SHARED_WIN_NORM       EQU $26 ; Win (1st)
+MOVE_SHARED_WIN_ALT        EQU $28 ; Win (2nd+)
+MOVE_SHARED_LOST_TIMEOVER  EQU $2A ; Time over
+MOVE_SHARED_INTRO          EQU $2C ; Intro
+MOVE_SHARED_INTRO_SPEC     EQU $2E ; Special intro
 ; Basic attacks
-MOVE_SHARED_PUNCH_L EQU $30 ; Light punch
-MOVE_SHARED_PUNCH_H EQU $32 ; Heavy punch
-MOVE_SHARED_KICK_L EQU $34 ; Light kick
-MOVE_SHARED_KICK_H EQU $36 ; Heavy kick
-MOVE_SHARED_PUNCH_CL EQU $38 ; Crouch punch light
-MOVE_SHARED_PUNCH_CH EQU $3A ; Crouch punch heavy
-MOVE_SHARED_KICK_CL EQU $3C ; Crouch kick light
-MOVE_SHARED_KICK_CH EQU $3E ; Crouch kick heavy
-MOVE_SHARED_ATTACK_G EQU $40 ; Ground A + B 
-MOVE_SHARED_PUNCH_A EQU $34 ; Air punch
-MOVE_SHARED_KICK_A EQU $36 ; Air kick
-MOVE_SHARED_ATTACK_A EQU $40 ; Air A + B
-
-MOVE_SPECIAL_START EQU $64
-
-MOVE_SHARED_THROW_6C EQU $6C
-MOVE_SHARED_THROW_6E EQU $6E
+MOVE_SHARED_PUNCH_L        EQU $30 ; Light punch
+MOVE_SHARED_PUNCH_H        EQU $32 ; Heavy punch
+MOVE_SHARED_KICK_L         EQU $34 ; Light kick
+MOVE_SHARED_KICK_H         EQU $36 ; Heavy kick
+MOVE_SHARED_PUNCH_CL       EQU $38 ; Crouch punch light
+MOVE_SHARED_PUNCH_CH       EQU $3A ; Crouch punch heavy
+MOVE_SHARED_KICK_CL        EQU $3C ; Crouch kick light
+MOVE_SHARED_KICK_CH        EQU $3E ; Crouch kick heavy
+MOVE_SHARED_ATTACK_G       EQU $40 ; Ground A + B 
+MOVE_SHARED_PUNCH_A        EQU $42 ; Air punch
+MOVE_SHARED_KICK_A         EQU $44 ; Air kick
+MOVE_SHARED_ATTACK_A       EQU $46 ; Air A + B
+; Specials (placeholders)
+MOVE_SPEC_0_L              EQU $48
+MOVE_SPEC_0_H              EQU $4A
+MOVE_SPEC_1_L              EQU $4C
+MOVE_SPEC_1_H              EQU $4E
+MOVE_SPEC_2_L              EQU $50
+MOVE_SPEC_2_H              EQU $52
+MOVE_SPEC_3_L              EQU $54
+MOVE_SPEC_3_H              EQU $56
+MOVE_SPEC_4_L              EQU $58
+MOVE_SPEC_4_H              EQU $5A
+MOVE_SPEC_5_L              EQU $5C
+MOVE_SPEC_5_H              EQU $5E
+MOVE_SUPER_START           EQU $64
+MOVE_SUPER_0_S             EQU $64
+MOVE_SUPER_0_D             EQU $66
+MOVE_SUPER_1_S             EQU $68
+MOVE_SUPER_1_D             EQU $6A
+; Throws
+MOVE_SHARED_THROW_G        EQU $6C ; Ground throw
+MOVE_SHARED_THROW_A        EQU $6E ; Air throw
+; Attacked
+MOVE_SHARED_HIT_70         EQU $70
 MOVE_SHARED_THROWTECH_RECV EQU $72
+MOVE_SHARED_HIT_74         EQU $74
+MOVE_SHARED_HIT_76         EQU $76
+MOVE_SHARED_HIT_78         EQU $78
+MOVE_SHARED_HIT_7A         EQU $7A
+MOVE_SHARED_HIT_7C         EQU $7C
+MOVE_SHARED_HIT_7E         EQU $7E
+MOVE_SHARED_HIT_80         EQU $80
+MOVE_SHARED_HIT_82         EQU $82
+MOVE_SHARED_HIT_84         EQU $84
+MOVE_SHARED_HIT_86         EQU $86
+MOVE_SHARED_HIT_88         EQU $88
+MOVE_SHARED_HIT_8A         EQU $8A
+MOVE_SHARED_HIT_8C         EQU $8C
+MOVE_SHARED_HIT_8E         EQU $8E
+MOVE_SHARED_HIT_90         EQU $90
+MOVE_SHARED_HIT_92         EQU $92
+MOVE_SHARED_HIT_94         EQU $94
+MOVE_SHARED_HIT_96         EQU $96
+MOVE_SHARED_HIT_98         EQU $98
+MOVE_SHARED_HIT_9A         EQU $9A
+MOVE_SHARED_HIT_9C         EQU $9C
+MOVE_FF                    EQU $FF
 
 ; Character-specific
-MOVE_KYO_SHIKI_ARA_KAMI_L EQU $48
-MOVE_KYO_SHIKI_ARA_KAMI_H EQU $4A
-MOVE_KYO_SHIKI_ONIYAKI_L  EQU $4C
-MOVE_KYO_SHIKI_ONIYAKI_H  EQU $4E
-MOVE_KYO_RED_KICK_L EQU $50
-MOVE_KYO_RED_KICK_H EQU $52
-MOVE_KYO_SHIKI_KOTOTSUKI_YOU_L EQU $54
-MOVE_KYO_SHIKI_KOTOTSUKI_YOU_H EQU $56
-MOVE_KYO_SHIKI_KAI_L EQU $58
-MOVE_KYO_SHIKI_KAI_H EQU $5A
-MOVE_KYO_SHIKI_NUE_TUMI_L EQU $5C
-MOVE_KYO_SHIKI_NUE_TUMI_H EQU $5E
+MOVE_KYO_SHIKI_ARA_KAMI_L       EQU $48
+MOVE_KYO_SHIKI_ARA_KAMI_H       EQU $4A
+MOVE_KYO_SHIKI_ONIYAKI_L        EQU $4C
+MOVE_KYO_SHIKI_ONIYAKI_H        EQU $4E
+MOVE_KYO_RED_KICK_L             EQU $50
+MOVE_KYO_RED_KICK_H             EQU $52
+MOVE_KYO_SHIKI_KOTOTSUKI_YOU_L  EQU $54
+MOVE_KYO_SHIKI_KOTOTSUKI_YOU_H  EQU $56
+MOVE_KYO_SHIKI_KAI_L            EQU $58
+MOVE_KYO_SHIKI_KAI_H            EQU $5A
+MOVE_KYO_SHIKI_NUE_TUMI_L       EQU $5C
+MOVE_KYO_SHIKI_NUE_TUMI_H       EQU $5E
+MOVE_KYO_SUPER_0_S              EQU $60
+MOVE_KYO_SUPER_0_D              EQU $62
 MOVE_KYO_URA_SHIKI_OROCHINAGI_S EQU $64 ; Super
 MOVE_KYO_URA_SHIKI_OROCHINAGI_D EQU $66 ; Desperation super
 
+MOVE_DAIMON_SPEC_0_L            EQU $48
+MOVE_DAIMON_SPEC_0_H            EQU $4A
+MOVE_DAIMON_SPEC_1_L            EQU $4C
+MOVE_DAIMON_SPEC_1_H            EQU $4E
+MOVE_DAIMON_SPEC_2_L            EQU $50
+MOVE_DAIMON_SPEC_2_H            EQU $52
+MOVE_DAIMON_SPEC_3_L            EQU $54
+MOVE_DAIMON_SPEC_3_H            EQU $56
+MOVE_DAIMON_SPEC_4_L            EQU $58
+MOVE_DAIMON_SPEC_4_H            EQU $5A
+MOVE_DAIMON_SPEC_5_L            EQU $5C
+MOVE_DAIMON_SPEC_5_H            EQU $5E
+MOVE_DAIMON_SUPER_0_S           EQU $60
+MOVE_DAIMON_SUPER_0_D           EQU $62
+MOVE_DAIMON_SUPER_1_S           EQU $64
+MOVE_DAIMON_SUPER_1_D           EQU $66
 
-MOVE_CHIZURU_64 EQU $64 ; Super
-MOVE_CHIZURU_66 EQU $66 ; Desperation super
+MOVE_TERRY_SPEC_0_L             EQU $48
+MOVE_TERRY_SPEC_0_H             EQU $4A
+MOVE_TERRY_SPEC_1_L             EQU $4C
+MOVE_TERRY_SPEC_1_H             EQU $4E
+MOVE_TERRY_SPEC_2_L             EQU $50
+MOVE_TERRY_SPEC_2_H             EQU $52
+MOVE_TERRY_SPEC_3_L             EQU $54
+MOVE_TERRY_SPEC_3_H             EQU $56
+MOVE_TERRY_SPEC_4_L             EQU $58
+MOVE_TERRY_SPEC_4_H             EQU $5A
+MOVE_TERRY_SPEC_5_L             EQU $5C
+MOVE_TERRY_SPEC_5_H             EQU $5E
+MOVE_TERRY_SUPER_0_S            EQU $60
+MOVE_TERRY_SUPER_0_D            EQU $62
+MOVE_TERRY_SUPER_1_S            EQU $64
+MOVE_TERRY_SUPER_1_D            EQU $66
 
-MOVE_FF EQU $FF
+MOVE_ANDY_SPEC_0_L              EQU $48
+MOVE_ANDY_SPEC_0_H              EQU $4A
+MOVE_ANDY_SPEC_1_L              EQU $4C
+MOVE_ANDY_SPEC_1_H              EQU $4E
+MOVE_ANDY_SPEC_2_L              EQU $50
+MOVE_ANDY_SPEC_2_H              EQU $52
+MOVE_ANDY_SPEC_3_L              EQU $54
+MOVE_ANDY_SPEC_3_H              EQU $56
+MOVE_ANDY_SPEC_4_L              EQU $58
+MOVE_ANDY_SPEC_4_H              EQU $5A
+MOVE_ANDY_SPEC_5_L              EQU $5C
+MOVE_ANDY_SPEC_5_H              EQU $5E
+MOVE_ANDY_SUPER_0_S             EQU $60
+MOVE_ANDY_SUPER_0_D             EQU $62
+MOVE_ANDY_SUPER_1_S             EQU $64
+MOVE_ANDY_SUPER_1_D             EQU $66
 
+MOVE_RYO_SPEC_0_L               EQU $48
+MOVE_RYO_SPEC_0_H               EQU $4A
+MOVE_RYO_SPEC_1_L               EQU $4C
+MOVE_RYO_SPEC_1_H               EQU $4E
+MOVE_RYO_SPEC_2_L               EQU $50
+MOVE_RYO_SPEC_2_H               EQU $52
+MOVE_RYO_SPEC_3_L               EQU $54
+MOVE_RYO_SPEC_3_H               EQU $56
+MOVE_RYO_SPEC_4_L               EQU $58
+MOVE_RYO_SPEC_4_H               EQU $5A
+MOVE_RYO_SPEC_5_L               EQU $5C
+MOVE_RYO_SPEC_5_H               EQU $5E
+MOVE_RYO_SUPER_0_S              EQU $60
+MOVE_RYO_SUPER_0_D              EQU $62
+MOVE_RYO_SUPER_1_S              EQU $64
+MOVE_RYO_SUPER_1_D              EQU $66
 
-HITANIM_BLOCKED EQU $00 ; Nothing happens
-HITANIM_GUARDBREAK_GROUND EQU $01
-HITANIM_GUARDBREAK_AIR EQU $02
-HITANIM_HIT0_MID EQU $03 ; Punch
-HITANIM_HIT1_MID EQU $04 ; Kick... but some punches too
-HITANIM_HIT_LOW EQU $05 ; Punched or kicked while crouching
-HITANIM_DROP_SM EQU $06 ; Small drop
-HITANIM_DROP_SM_REC EQU $07 ; Small drop with recovery (Air only?)
-HITANIM_DROP_MD EQU $08 ; Standard drop without recovery
+MOVE_ROBERT_SPEC_0_L            EQU $48
+MOVE_ROBERT_SPEC_0_H            EQU $4A
+MOVE_ROBERT_SPEC_1_L            EQU $4C
+MOVE_ROBERT_SPEC_1_H            EQU $4E
+MOVE_ROBERT_SPEC_2_L            EQU $50
+MOVE_ROBERT_SPEC_2_H            EQU $52
+MOVE_ROBERT_SPEC_3_L            EQU $54
+MOVE_ROBERT_SPEC_3_H            EQU $56
+MOVE_ROBERT_SPEC_4_L            EQU $58
+MOVE_ROBERT_SPEC_4_H            EQU $5A
+MOVE_ROBERT_SPEC_5_L            EQU $5C
+MOVE_ROBERT_SPEC_5_H            EQU $5E
+MOVE_ROBERT_SUPER_0_S           EQU $60
+MOVE_ROBERT_SUPER_0_D           EQU $62
+MOVE_ROBERT_SUPER_1_S           EQU $64
+MOVE_ROBERT_SUPER_1_D           EQU $66
+
+MOVE_ATHENA_SPEC_0_L            EQU $48
+MOVE_ATHENA_SPEC_0_H            EQU $4A
+MOVE_ATHENA_SPEC_1_L            EQU $4C
+MOVE_ATHENA_SPEC_1_H            EQU $4E
+MOVE_ATHENA_SPEC_2_L            EQU $50
+MOVE_ATHENA_SPEC_2_H            EQU $52
+MOVE_ATHENA_SPEC_3_L            EQU $54
+MOVE_ATHENA_SPEC_3_H            EQU $56
+MOVE_ATHENA_SPEC_4_L            EQU $58
+MOVE_ATHENA_SPEC_4_H            EQU $5A
+MOVE_ATHENA_SPEC_5_L            EQU $5C
+MOVE_ATHENA_SPEC_5_H            EQU $5E
+MOVE_ATHENA_SUPER_0_S           EQU $60
+MOVE_ATHENA_SUPER_0_D           EQU $62
+MOVE_ATHENA_SUPER_1_S           EQU $64
+MOVE_ATHENA_SUPER_1_D           EQU $66
+
+MOVE_MAI_SPEC_0_L               EQU $48
+MOVE_MAI_SPEC_0_H               EQU $4A
+MOVE_MAI_SPEC_1_L               EQU $4C
+MOVE_MAI_SPEC_1_H               EQU $4E
+MOVE_MAI_SPEC_2_L               EQU $50
+MOVE_MAI_SPEC_2_H               EQU $52
+MOVE_MAI_SPEC_3_L               EQU $54
+MOVE_MAI_SPEC_3_H               EQU $56
+MOVE_MAI_SPEC_4_L               EQU $58
+MOVE_MAI_SPEC_4_H               EQU $5A
+MOVE_MAI_SPEC_5_L               EQU $5C
+MOVE_MAI_SPEC_5_H               EQU $5E
+MOVE_MAI_SUPER_0_S              EQU $60
+MOVE_MAI_SUPER_0_D              EQU $62
+MOVE_MAI_SUPER_1_S              EQU $64
+MOVE_MAI_SUPER_1_D              EQU $66
+
+MOVE_LEONA_SPEC_0_L             EQU $48
+MOVE_LEONA_SPEC_0_H             EQU $4A
+MOVE_LEONA_SPEC_1_L             EQU $4C
+MOVE_LEONA_SPEC_1_H             EQU $4E
+MOVE_LEONA_SPEC_2_L             EQU $50
+MOVE_LEONA_SPEC_2_H             EQU $52
+MOVE_LEONA_SPEC_3_L             EQU $54
+MOVE_LEONA_SPEC_3_H             EQU $56
+MOVE_LEONA_SPEC_4_L             EQU $58
+MOVE_LEONA_SPEC_4_H             EQU $5A
+MOVE_LEONA_SPEC_5_L             EQU $5C
+MOVE_LEONA_SPEC_5_H             EQU $5E
+MOVE_LEONA_SUPER_0_S            EQU $60
+MOVE_LEONA_SUPER_0_D            EQU $62
+MOVE_LEONA_SUPER_1_S            EQU $64
+MOVE_LEONA_SUPER_1_D            EQU $66
+
+MOVE_GEESE_SPEC_0_L             EQU $48
+MOVE_GEESE_SPEC_0_H             EQU $4A
+MOVE_GEESE_SPEC_1_L             EQU $4C
+MOVE_GEESE_SPEC_1_H             EQU $4E
+MOVE_GEESE_SPEC_2_L             EQU $50
+MOVE_GEESE_SPEC_2_H             EQU $52
+MOVE_GEESE_SPEC_3_L             EQU $54
+MOVE_GEESE_SPEC_3_H             EQU $56
+MOVE_GEESE_SPEC_4_L             EQU $58
+MOVE_GEESE_SPEC_4_H             EQU $5A
+MOVE_GEESE_SPEC_5_L             EQU $5C
+MOVE_GEESE_SPEC_5_H             EQU $5E
+MOVE_GEESE_SUPER_0_S            EQU $60
+MOVE_GEESE_SUPER_0_D            EQU $62
+MOVE_GEESE_SUPER_1_S            EQU $64
+MOVE_GEESE_SUPER_1_D            EQU $66
+
+MOVE_KRAUSER_SPEC_0_L           EQU $48
+MOVE_KRAUSER_SPEC_0_H           EQU $4A
+MOVE_KRAUSER_SPEC_1_L           EQU $4C
+MOVE_KRAUSER_SPEC_1_H           EQU $4E
+MOVE_KRAUSER_SPEC_2_L           EQU $50
+MOVE_KRAUSER_SPEC_2_H           EQU $52
+MOVE_KRAUSER_SPEC_3_L           EQU $54
+MOVE_KRAUSER_SPEC_3_H           EQU $56
+MOVE_KRAUSER_SPEC_4_L           EQU $58
+MOVE_KRAUSER_SPEC_4_H           EQU $5A
+MOVE_KRAUSER_SPEC_5_L           EQU $5C
+MOVE_KRAUSER_SPEC_5_H           EQU $5E
+MOVE_KRAUSER_SUPER_0_S          EQU $60
+MOVE_KRAUSER_SUPER_0_D          EQU $62
+MOVE_KRAUSER_SUPER_1_S          EQU $64
+MOVE_KRAUSER_SUPER_1_D          EQU $66
+
+MOVE_MRBIG_SPEC_0_L             EQU $48
+MOVE_MRBIG_SPEC_0_H             EQU $4A
+MOVE_MRBIG_SPEC_1_L             EQU $4C
+MOVE_MRBIG_SPEC_1_H             EQU $4E
+MOVE_MRBIG_SPEC_2_L             EQU $50
+MOVE_MRBIG_SPEC_2_H             EQU $52
+MOVE_MRBIG_SPEC_3_L             EQU $54
+MOVE_MRBIG_SPEC_3_H             EQU $56
+MOVE_MRBIG_SPEC_4_L             EQU $58
+MOVE_MRBIG_SPEC_4_H             EQU $5A
+MOVE_MRBIG_SPEC_5_L             EQU $5C
+MOVE_MRBIG_SPEC_5_H             EQU $5E
+MOVE_MRBIG_SUPER_0_S            EQU $60
+MOVE_MRBIG_SUPER_0_D            EQU $62
+MOVE_MRBIG_SUPER_1_S            EQU $64
+MOVE_MRBIG_SUPER_1_D            EQU $66
+
+MOVE_IORI_SPEC_0_L              EQU $48
+MOVE_IORI_SPEC_0_H              EQU $4A
+MOVE_IORI_SPEC_1_L              EQU $4C
+MOVE_IORI_SPEC_1_H              EQU $4E
+MOVE_IORI_SPEC_2_L              EQU $50
+MOVE_IORI_SPEC_2_H              EQU $52
+MOVE_IORI_SPEC_3_L              EQU $54
+MOVE_IORI_SPEC_3_H              EQU $56
+MOVE_IORI_SPEC_4_L              EQU $58
+MOVE_IORI_SPEC_4_H              EQU $5A
+MOVE_IORI_SPEC_5_L              EQU $5C
+MOVE_IORI_SPEC_5_H              EQU $5E
+MOVE_IORI_SUPER_0_S             EQU $60
+MOVE_IORI_SUPER_0_D             EQU $62
+MOVE_IORI_SUPER_1_S             EQU $64
+MOVE_IORI_SUPER_1_D             EQU $66
+
+MOVE_MATURE_SPEC_0_L            EQU $48
+MOVE_MATURE_SPEC_0_H            EQU $4A
+MOVE_MATURE_SPEC_1_L            EQU $4C
+MOVE_MATURE_SPEC_1_H            EQU $4E
+MOVE_MATURE_SPEC_2_L            EQU $50
+MOVE_MATURE_SPEC_2_H            EQU $52
+MOVE_MATURE_SPEC_3_L            EQU $54
+MOVE_MATURE_SPEC_3_H            EQU $56
+MOVE_MATURE_SPEC_4_L            EQU $58
+MOVE_MATURE_SPEC_4_H            EQU $5A
+MOVE_MATURE_SPEC_5_L            EQU $5C
+MOVE_MATURE_SPEC_5_H            EQU $5E
+MOVE_MATURE_SUPER_0_S           EQU $60
+MOVE_MATURE_SUPER_0_D           EQU $62
+MOVE_MATURE_SUPER_1_S           EQU $64
+MOVE_MATURE_SUPER_1_D           EQU $66
+
+MOVE_CHIZURU_SPEC_0_L           EQU $48
+MOVE_CHIZURU_SPEC_0_H           EQU $4A
+MOVE_CHIZURU_SPEC_1_L           EQU $4C
+MOVE_CHIZURU_SPEC_1_H           EQU $4E
+MOVE_CHIZURU_SPEC_2_L           EQU $50
+MOVE_CHIZURU_SPEC_2_H           EQU $52
+MOVE_CHIZURU_SPEC_3_L           EQU $54
+MOVE_CHIZURU_SPEC_3_H           EQU $56
+MOVE_CHIZURU_SPEC_4_L           EQU $58
+MOVE_CHIZURU_SPEC_4_H           EQU $5A
+MOVE_CHIZURU_SPEC_5_L           EQU $5C
+MOVE_CHIZURU_SPEC_5_H           EQU $5E
+MOVE_CHIZURU_SUPER_0_S          EQU $60
+MOVE_CHIZURU_SUPER_0_D          EQU $62
+MOVE_CHIZURU_SUPER_1_S          EQU $64
+MOVE_CHIZURU_SUPER_1_D          EQU $66
+
+MOVE_GOENITZ_SPEC_0_L           EQU $48
+MOVE_GOENITZ_SPEC_0_H           EQU $4A
+MOVE_GOENITZ_SPEC_1_L           EQU $4C
+MOVE_GOENITZ_SPEC_1_H           EQU $4E
+MOVE_GOENITZ_SPEC_2_L           EQU $50
+MOVE_GOENITZ_SPEC_2_H           EQU $52
+MOVE_GOENITZ_SPEC_3_L           EQU $54
+MOVE_GOENITZ_SPEC_3_H           EQU $56
+MOVE_GOENITZ_SPEC_4_L           EQU $58
+MOVE_GOENITZ_SPEC_4_H           EQU $5A
+MOVE_GOENITZ_SPEC_5_L           EQU $5C
+MOVE_GOENITZ_SPEC_5_H           EQU $5E
+MOVE_GOENITZ_SUPER_0_S          EQU $60
+MOVE_GOENITZ_SUPER_0_D          EQU $62
+MOVE_GOENITZ_SUPER_1_S          EQU $64
+MOVE_GOENITZ_SUPER_1_D          EQU $66
+
+MOVE_MRKARATE_SPEC_0_L          EQU $48
+MOVE_MRKARATE_SPEC_0_H          EQU $4A
+MOVE_MRKARATE_SPEC_1_L          EQU $4C
+MOVE_MRKARATE_SPEC_1_H          EQU $4E
+MOVE_MRKARATE_SPEC_2_L          EQU $50
+MOVE_MRKARATE_SPEC_2_H          EQU $52
+MOVE_MRKARATE_SPEC_3_L          EQU $54
+MOVE_MRKARATE_SPEC_3_H          EQU $56
+MOVE_MRKARATE_SPEC_4_L          EQU $58
+MOVE_MRKARATE_SPEC_4_H          EQU $5A
+MOVE_MRKARATE_SPEC_5_L          EQU $5C
+MOVE_MRKARATE_SPEC_5_H          EQU $5E
+MOVE_MRKARATE_SUPER_0_S         EQU $60
+MOVE_MRKARATE_SUPER_0_D         EQU $62
+MOVE_MRKARATE_SUPER_1_S         EQU $64
+MOVE_MRKARATE_SUPER_1_D         EQU $66
+
+MOVE_OIORI_SPEC_0_L             EQU $48
+MOVE_OIORI_SPEC_0_H             EQU $4A
+MOVE_OIORI_SPEC_1_L             EQU $4C
+MOVE_OIORI_SPEC_1_H             EQU $4E
+MOVE_OIORI_SPEC_2_L             EQU $50
+MOVE_OIORI_SPEC_2_H             EQU $52
+MOVE_OIORI_SPEC_3_L             EQU $54
+MOVE_OIORI_SPEC_3_H             EQU $56
+MOVE_OIORI_SPEC_4_L             EQU $58
+MOVE_OIORI_SPEC_4_H             EQU $5A
+MOVE_OIORI_SPEC_5_L             EQU $5C
+MOVE_OIORI_SPEC_5_H             EQU $5E
+MOVE_OIORI_SUPER_0_S            EQU $60
+MOVE_OIORI_SUPER_0_D            EQU $62
+MOVE_OIORI_SUPER_1_S            EQU $64
+MOVE_OIORI_SUPER_1_D            EQU $66
+
+MOVE_OLEONA_SPEC_0_L            EQU $48
+MOVE_OLEONA_SPEC_0_H            EQU $4A
+MOVE_OLEONA_SPEC_1_L            EQU $4C
+MOVE_OLEONA_SPEC_1_H            EQU $4E
+MOVE_OLEONA_SPEC_2_L            EQU $50
+MOVE_OLEONA_SPEC_2_H            EQU $52
+MOVE_OLEONA_SPEC_3_L            EQU $54
+MOVE_OLEONA_SPEC_3_H            EQU $56
+MOVE_OLEONA_SPEC_4_L            EQU $58
+MOVE_OLEONA_SPEC_4_H            EQU $5A
+MOVE_OLEONA_SPEC_5_L            EQU $5C
+MOVE_OLEONA_SPEC_5_H            EQU $5E
+MOVE_OLEONA_SUPER_0_S           EQU $60
+MOVE_OLEONA_SUPER_0_D           EQU $62
+MOVE_OLEONA_SUPER_1_S           EQU $64
+MOVE_OLEONA_SUPER_1_D           EQU $66
+
+HITANIM_BLOCKED             EQU $00 ; Nothing happens
+HITANIM_GUARDBREAK_GROUND   EQU $01
+HITANIM_GUARDBREAK_AIR      EQU $02
+HITANIM_HIT0_MID            EQU $03 ; Punch
+HITANIM_HIT1_MID            EQU $04 ; Kick... but some punches too
+HITANIM_HIT_LOW             EQU $05 ; Punched or kicked while crouching
+HITANIM_DROP_SM             EQU $06 ; Small drop
+HITANIM_DROP_SM_REC         EQU $07 ; Small drop with recovery (Air only?)
+HITANIM_DROP_MD             EQU $08 ; Standard drop without recovery
 
 ; Used by certain special moves
-HITANIM_HIT_SPEC_09 EQU $09
-HITANIM_HIT_SPEC_0A EQU $0A
-HITANIM_HIT_SPEC_0B EQU $0B
-HITANIM_DROP_SPEC_0C EQU $0C ; Air throw directly to ground?
+HITANIM_HIT_SPEC_09         EQU $09
+HITANIM_HIT_SPEC_0A         EQU $0A
+HITANIM_HIT_SPEC_0B         EQU $0B
+HITANIM_DROP_SPEC_0C        EQU $0C ; Air throw directly to ground?
 HITANIM_DROP_SPEC_0C_GROUND EQU $0D ; Drop to ground with shake
-HITANIM_DROP_SPEC_AIR_0E EQU $0E ; Jump up then drop to ground with shake (Air throw?)
+HITANIM_DROP_SPEC_AIR_0E    EQU $0E ; Jump up then drop to ground with shake (Air throw?)
 
-HITANIM_DROP_SPEC_0F EQU $0F ; Large drop which causes the ground to shake. Used as end of the throw??
-HITANIM_THROW_START EQU $10 ; Start of the throw anim
-HITANIM_THROW_ROTU EQU $11 ; Throw rotation frame, head up
-HITANIM_THROW_ROTL EQU $12 ; Throw rotation frame, head left
-HITANIM_THROW_ROTD EQU $13 ; Throw rotation frame, head down
-HITANIM_THROW_ROTR EQU $14 ; Throw rotation frame, head right
+HITANIM_DROP_SPEC_0F        EQU $0F ; Large drop which causes the ground to shake. Used as end of the throw??
+HITANIM_THROW_START         EQU $10 ; Start of the throw anim
+HITANIM_THROW_ROTU          EQU $11 ; Throw rotation frame, head up
+HITANIM_THROW_ROTL          EQU $12 ; Throw rotation frame, head left
+HITANIM_THROW_ROTD          EQU $13 ; Throw rotation frame, head down
+HITANIM_THROW_ROTR          EQU $14 ; Throw rotation frame, head right
+
+HITANIM_DUMMY               EQU $81 ; Placeholder used for some empty slots in the special move entries
+
 
 ; wPlayPlThrowActId
 PLAY_THROWACT_NONE EQU $00

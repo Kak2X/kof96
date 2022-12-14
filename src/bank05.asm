@@ -8176,7 +8176,7 @@ L055FEE: db $0A
 L055FEF: db $3B
 L055FF0: db $0B
 L055FF1: db $0C
-L055FF2:;I
+MoveInputReader_Iori:;I
 	call MoveInputS_CanStartSpecialMove
 	jp   c, L056140
 	jp   z, L055FFE
@@ -9638,7 +9638,7 @@ L056C0D:;J
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 L056C10:;J
 	ret
-L056C11:;I
+MoveInputReader_Mature:;I
 	call MoveInputS_CanStartSpecialMove
 	jp   c, L056CDA
 	jp   z, L056C1D
@@ -10522,10 +10522,10 @@ L057352:;I
 L05735E:;J
 	call OBJLstS_Hide
 	ret
-L057362:;I
+MoveInputReader_Chizuru:;I
 	call L003763
 	jp   nz, L057497
-L057368:;I
+MoveInputReader_Kagura:;I
 	call MoveInputS_CanStartSpecialMove
 	jp   c, L057497
 	jp   z, L057374
@@ -11175,7 +11175,7 @@ L057898:;J
 L05789C:;J
 	call OBJLstS_Hide
 	ret
-L0578A0:;I
+MoveInputReader_Daimon:;I
 	call MoveInputS_CanStartSpecialMove
 	jp   c, L0579B5
 	jp   z, L0578AC

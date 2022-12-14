@@ -12351,7 +12351,7 @@ BG_TakaraLogo: INCBIN "data/bg/takaralogo.bin"
 ; =============== END OF MODULE TakaraLogo ===============
 ;
 
-L0A7373:;I
+MoveInputReader_Goenitz:;I
 	call MoveInputS_CanStartSpecialMove
 	jp   c, L0A74E8
 	jp   z, L0A73BB

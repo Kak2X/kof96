@@ -66,7 +66,7 @@ for ($i = 0; $i < count($lines);) {
 		
 		$gfx_ptr = ($gfx_bank == "FF" && $gfx_high == "FF" && $gfx_low == "FF") 
 			? "db \$FF,\$FF,\$FF"
-			: "dp L{$gfx_bank}{$gfx_high}{$gfx_low}";
+			: "dpr L{$gfx_bank}{$gfx_high}{$gfx_low}";
 		
 		$data_ptr = "L{$banknum}{$data_high}{$data_low}";
 		if (get_label($lines[$i]) == $data_ptr) {
@@ -104,7 +104,7 @@ for ($i = 0; $i < count($lines);) {
 		
 		$gfx_ptr = ($gfx_bank == "FF" && $gfx_high == "FF" && $gfx_low == "FF") 
 			? "db \$FF,\$FF,\$FF"
-			: "dp L{$gfx_bank}{$gfx_high}{$gfx_low}";
+			: "dpr L{$gfx_bank}{$gfx_high}{$gfx_low}";
 		
 		$data_ptr = "L{$banknum}{$data_high}{$data_low}";
 		

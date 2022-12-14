@@ -541,7 +541,9 @@ iPlInfo_IntroMoveId EQU $35 ; Intro/outro move ID. When set, iPlInfo_MoveId shou
 iPlInfo_SingleWinCount EQU $36 ; Single mode - Win count. If it reaches 2 the stage ends.
 iPlInfo_HitComboRecvSet EQU $37 ; Sets the combo count of received hits (shown on the other player side)
 iPlInfo_HitComboRecv EQU $38 ; Copy of the above
-iPlInfo_39 EQU $39 ; 
+iPlInfo_OBJLstPtrTblOffsetMoveEnd EQU $39 ; iOBJInfo_OBJLstPtrTblOffset must match this for the move to end. 
+                                      ; Must be less or equal to the animation/OBJLstPtrTable's length. 
+                                      ; This is mostly to reuse truncated animations.
 ; Move damage fields - current
 iPlInfo_MoveDamageVal EQU $3A ; Damage given when hitting the opponent directly
 iPlInfo_MoveDamageHitAnimId EQU $3B ; Animation playing when getting hit (HITANIM_*)

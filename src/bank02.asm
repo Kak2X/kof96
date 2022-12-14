@@ -1822,8 +1822,8 @@ Play_Pl_SetHitAnim:
 			inc  hl								; Seek to iPlInfo_Flags1
 			inc  hl								; Seek to iPlInfo_Flags2
 			; Projectiles bypass autoguard
-			res  PF2B_AUTOGUARDLOW, [hl]
 			res  PF2B_AUTOGUARDMID, [hl]
+			res  PF2B_AUTOGUARDLOW, [hl]
 			; Since it should be possible to combo off a projectile hit, restore collision boxes.
 			res  PF2B_NOHURTBOX, [hl]
 			res  PF2B_NOCOLIBOX, [hl]
@@ -2011,8 +2011,8 @@ Play_Pl_SetHitAnim:
 			res  PF1B_GUARD, [hl]	; Clear main guard flag
 			inc  hl					; Seek to iPlInfo_Flags2
 			res  PF2B_AUTOGUARDDONE, [hl] ; Clear autoguard flags
-			res  PF2B_AUTOGUARDLOW, [hl]
 			res  PF2B_AUTOGUARDMID, [hl]
+			res  PF2B_AUTOGUARDLOW, [hl]
 			
 			; Throws don't cause damage directly.
 			; Just set the updated hit animation ID from E and return.
@@ -2054,25 +2054,25 @@ Play_Pl_SetHitAnim:
 			;
 			ld   hl, iPlInfo_Flags2
 			add  hl, bc						; Seek to iPlInfo_Flags2
-			bit  PF2B_AUTOGUARDLOW, [hl]	; Guarding low?
-			jp   nz, .onAutoguardLow		; If so, jump
 			bit  PF2B_AUTOGUARDMID, [hl]	; Guarding mid?
 			jp   nz, .onAutoguardMid		; If so, jump
+			bit  PF2B_AUTOGUARDLOW, [hl]	; Guarding low?
+			jp   nz, .onAutoguardLow		; If so, jump
 			
 			; Otherwise, reset the autoguard indicator
 			res  PF2B_AUTOGUARDDONE, [hl]			; Clear result flag
 			jp   Play_Pl_SetHitAnim_ChkGuardBypass	; Skip to the common block
 			
-		.onAutoguardLow:
-			; If the attack hits mid, we got hit
+		.onAutoguardMid:
+			; If the attack hits low, we got hit
 			ld   hl, iPlInfo_Flags3
 			add  hl, bc									
-			bit  PF3B_HITMID, [hl]					; Does the attack hit mid?
-			jp   nz, Play_Pl_SetHitAnim_BlockBypass	; If so, we got hit
+			bit  PF3B_HITLOW, [hl]
+			jp   nz, Play_Pl_SetHitAnim_BlockBypass
 			
-			; When playing as KYO, autoguarding lows only works against normals.
+			; When playing as KYO, autoguarding overheads only works against normals.
 			; [BUG?] Suspicious. Was this meant to check if the opponent is KYO (iPlInfo_CharIdOther)?
-			;        It makes more sense if KYO's low autoguards were unblockable.
+			;        It makes more sense if KYO's overheads autoguards were unblockable.
 			ld   hl, iPlInfo_CharId
 			add  hl, bc				
 			ld   a, [hl]
@@ -2081,15 +2081,15 @@ Play_Pl_SetHitAnim:
 			
 			jp   .autoguardOk		; autoguard ok!
 			
-		.onAutoguardMid:
-			; If the attack hits low, we got hit
+		.onAutoguardLow:
+			; If the attack is an overhead, we got hit
 			ld   hl, iPlInfo_Flags3
 			add  hl, bc		 		
-			bit  PF3B_HITLOW, [hl]					; Does the attack hit low?
-			jp   nz, Play_Pl_SetHitAnim_BlockBypass	; If so, we got hit
+			bit  PF3B_OVERHEAD, [hl]
+			jp   nz, Play_Pl_SetHitAnim_BlockBypass
 			
 		.chkSpecial:
-			; Autoguarding mids only works against normals in general.
+			; Autoguarding lows only works against normals in general.
 			ld   hl, iPlInfo_Flags0Other
 			add  hl, bc
 			ld   a, [hl]
@@ -2111,30 +2111,34 @@ Play_Pl_SetHitAnim:
 			
 		;--------------------------------
 		;
-		; SHARED - Guard Bypass Check.
+		; SHARED - Block Check.
 		;
 		Play_Pl_SetHitAnim_ChkGuardBypass:
 			;
-			; If we're blocking, determine if the attack bypassed the guard.
-			; If so, the guard is removed and we take full damage.
+			; If we're blocking, determine if the attack was properly blocked.
+			; If not, the guard is removed and we take full damage.
 			; ie: blocking overheads while crouching
+			;
+			; Moves can be set to either require blocking low (PF3B_HITLOW) or to be overheads (PF3B_OVERHEAD).
+			; Most moves don't set either flag, meaning they can be blocked in both ways.
+			; The few unblockables have both PF3B_OVERHEAD and PF3B_HITLOW set at the same time.
 			;
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc									
 			bit  PF1B_GUARD, [hl]					; Were we blocking the attack?
 			jp   z, Play_Pl_SetHitAnim_ApplyDamage	; If not, skip ahead
 			bit  PF1B_CROUCH, [hl]					; Did we block low?
-			jp   z, .onBlockLow						; If not, jump
-		.onBlockMid:
-			ld   hl, iPlInfo_Flags3
-			add  hl, bc								; Seek to iPlInfo_Flags3
-			bit  PF3B_HITLOW, [hl]					; Does the attack hit low?
-			jp   nz, Play_Pl_SetHitAnim_BlockBypass	; If so, we got hit
-			jp   Play_Pl_SetHitAnim_Blocked			; Otherwise, we blocked it
+			jp   z, .onBlockMid						; If not, jump
 		.onBlockLow:
 			ld   hl, iPlInfo_Flags3
 			add  hl, bc								; Seek to iPlInfo_Flags3
-			bit  PF3B_HITMID, [hl]					; Does the attack hit mid?
+			bit  PF3B_OVERHEAD, [hl]				; Is this an overhead?
+			jp   nz, Play_Pl_SetHitAnim_BlockBypass	; If so, we got hit
+			jp   Play_Pl_SetHitAnim_Blocked			; Otherwise, we blocked it
+		.onBlockMid:
+			ld   hl, iPlInfo_Flags3
+			add  hl, bc								; Seek to iPlInfo_Flags3
+			bit  PF3B_HITLOW, [hl]					; Does the attack require blocking low?
 			jp   nz, Play_Pl_SetHitAnim_BlockBypass	; If so, we got hit
 			jp   Play_Pl_SetHitAnim_Blocked			; Otherwise, we blocked it
 			
@@ -2154,8 +2158,8 @@ Play_Pl_SetHitAnim:
 			res  PF1B_GUARD, [hl]	
 			inc  hl
 			res  PF2B_AUTOGUARDDONE, [hl]
-			res  PF2B_AUTOGUARDLOW, [hl]
 			res  PF2B_AUTOGUARDMID, [hl]
+			res  PF2B_AUTOGUARDLOW, [hl]
 			
 		;--------------------------------
 		;
@@ -2651,9 +2655,9 @@ Play_Pl_ChkSetHitEffect_NoSpecial:
 	ld   hl, iPlInfo_MoveIdOther
 	add  hl, bc
 	ld   a, [hl]			; A = Opponent Move ID
-	cp   MOVE_CHIZURU_64	; Were we hit by the super?
+	cp   MOVE_CHIZURU_SUPER_1_S	; Were we hit by the super?
 	jp   z, .setEffect		; If so, jump
-	cp   MOVE_CHIZURU_66	; Were we hit by its desperation variant?
+	cp   MOVE_CHIZURU_SUPER_1_D	; Were we hit by its desperation variant?
 	ret  nz					; If not, return
 	
 .setEffect:
@@ -4063,7 +4067,7 @@ L0257D3:;J
 	ret
 L0257D4:;J
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L0257D7:;I
+MoveInputReader_Ryo:;I
 	call MoveInputS_CanStartSpecialMove
 	jp   c, L025939
 	jp   z, L0257FB
@@ -4858,7 +4862,7 @@ L025E58:;J
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 L025E5B:;J
 	ret
-L025E5C:;I
+MoveInputReader_Robert:;I
 	call MoveInputS_CanStartSpecialMove
 	jp   c, L025FB9
 	jp   z, L025E8C
@@ -6082,7 +6086,7 @@ L026842:;J
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L026845:;J
 	ret
-L026846:;I
+MoveInputReader_Leona:;I
 	call MoveInputS_CanStartSpecialMove
 	jp   c, L02698E
 	jp   z, L02687C
@@ -7192,7 +7196,7 @@ L027147:;I
 L02715F:;J
 	call OBJLstS_Hide
 	ret
-L027163:;I
+MoveInputReader_MrKarate:;I
 	call MoveInputS_CanStartSpecialMove
 	jp   c, L02729D
 	jp   z, L027187

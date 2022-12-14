@@ -1299,20 +1299,6 @@ VBlank_ChkCopyPlTiles:
 	jp   nz, VBlank_SetInitialSect	; If so, skip
 	jp   VBlank_CopyPl1Tiles						
 
-;--
-; [TCRF] Unreferenced code.
-L0005A1:
-	ld   a, [wPlInfo_Pl1+iPlInfo_Flags1]
-	bit  PF1B_COMBORECV, a
-	jp   nz, VBlank_CopyPl1Tiles
-	ld   a, [wPlInfo_Pl1+iPlInfo_Flags2]
-	bit  PF1B_NOSPECSTART, a
-	jp   nz, VBlank_CopyPl1Tiles
-	ld   a, [wPlayHitstop]
-	or   a
-	jp   nz, VBlank_CopyPl1Tiles.end
-;--
-
 ; =============== VBlank_CopyPl*Tiles ===============
 ; Set of subroutines for copying the player graphics across multiple frames during VBLANK.
 ;
@@ -1328,19 +1314,16 @@ L0005A1:
 MAX_TILE_BUFFER_COPY EQU $03
 
 ; =============== mVBlank_CopyPlTiles ===============
+; Generates code to copy a player's graphics to VRAM.
 ; IN
-; - 1: Ptr to wGFXBufInfo structure
+; - 1: Ptr to wPlInfo structure
+; - 2: Ptr to wOBJInfo structure
+; - 3: Ptr to wGFXBufInfo structure
 mVBlank_CopyPlTiles: MACRO
-	; TODO
-ENDM
-
-; =============== VBlank_CopyPl1Tiles ===============
-; Copies the player 1 graphics to VRAM.
-VBlank_CopyPl1Tiles:
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftA]
+	ld   a, [\3+iGFXBufInfo_TilesLeftA]
 	or   a					; Any tiles left to transfer to buffer 0?
 	jp   nz, .copyTo0		; If so, jump
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftB]
+	ld   a, [\3+iGFXBufInfo_TilesLeftB]
 	or   a					; Any tiles left to transfer to buffer 1?
 	jp   nz, .copyTo1		; If so, jump
 	jp   .end				; If there's nothing, we're done
@@ -1357,30 +1340,30 @@ VBlank_CopyPl1Tiles:
 	ld   b, a						; Otherwise, B = TilesLeft
 									; Reaching this means this is the last set of tiles
 .notLast0:
-	sub  a, b							; TilesLeft -= TilesToCopy
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftA], a		; Update stat
+	sub  a, b								; TilesLeft -= TilesToCopy
+	ld   [\3+iGFXBufInfo_TilesLeftA], a		; Update stat
 	
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_Low]		; DE = Destination Ptr
+	ld   a, [\3+iGFXBufInfo_DestPtr_Low]	; DE = Destination Ptr
 	ld   e, a
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_High]
+	ld   a, [\3+iGFXBufInfo_DestPtr_High]
 	ld   d, a
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtrA_Low]		; HL = Source unc. gfx ptr
+	ld   a, [\3+iGFXBufInfo_SrcPtrA_Low]	; HL = Source unc. gfx ptr
 	ld   l, a
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtrA_High]
+	ld   a, [\3+iGFXBufInfo_SrcPtrA_High]
 	ld   h, a
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_BankA]				; A = Bank number the graphics are in
+	ld   a, [\3+iGFXBufInfo_BankA]			; A = Bank number the graphics are in
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	call CopyTiles
 	; Save the updated stats back, to resume next time
 	ld   a, e
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_Low], a
+	ld   [\3+iGFXBufInfo_DestPtr_Low], a
 	ld   a, d
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_High], a
+	ld   [\3+iGFXBufInfo_DestPtr_High], a
 	ld   a, l
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtrA_Low], a
+	ld   [\3+iGFXBufInfo_SrcPtrA_Low], a
 	ld   a, h
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtrA_High], a
+	ld   [\3+iGFXBufInfo_SrcPtrA_High], a
 	jp   .chkCopyEnd
 	
 .copyTo1:
@@ -1391,43 +1374,43 @@ VBlank_CopyPl1Tiles:
 	ld   b, a
 .notLast1:
 	sub  a, b
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftB], a
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_Low]
+	ld   [\3+iGFXBufInfo_TilesLeftB], a
+	ld   a, [\3+iGFXBufInfo_DestPtr_Low]
 	ld   e, a
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_High]
+	ld   a, [\3+iGFXBufInfo_DestPtr_High]
 	ld   d, a
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtrB_Low]
+	ld   a, [\3+iGFXBufInfo_SrcPtrB_Low]
 	ld   l, a
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtrB_High]
+	ld   a, [\3+iGFXBufInfo_SrcPtrB_High]
 	ld   h, a
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_BankB]
+	ld   a, [\3+iGFXBufInfo_BankB]
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	call CopyTiles
 	ld   a, e
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_Low], a
+	ld   [\3+iGFXBufInfo_DestPtr_Low], a
 	ld   a, d
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_DestPtr_High], a
+	ld   [\3+iGFXBufInfo_DestPtr_High], a
 	ld   a, l
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtrB_Low], a
+	ld   [\3+iGFXBufInfo_SrcPtrB_Low], a
 	ld   a, h
-	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_SrcPtrB_High], a
+	ld   [\3+iGFXBufInfo_SrcPtrB_High], a
 	
 .chkCopyEnd:
 
 	; If there aren't any tiles left to copy in the buffer,
 	; flag the copy as done so the game can actually decrement the frame timer.
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftA]
+	ld   a, [\3+iGFXBufInfo_TilesLeftA]
 	or   a								; TilesLeft != 0?
 	jp   nz, .end						; If so, skip
-	ld   a, [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftB]
+	ld   a, [\3+iGFXBufInfo_TilesLeftB]
 	or   a								; TilesLeft != 0?
 	jp   nz, .end						; If so, skip
 	
 .flagEnd:
 
 	; Mark that the buffer operation is complete
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
+	ld   hl, \2+iOBJInfo_Status
 	res  OSTB_GFXLOAD, [hl]		; Buffer copied
 	set  OSTB_BIT3, [hl]		; ??? does this do anything
 	
@@ -1445,9 +1428,9 @@ VBlank_CopyPl1Tiles:
 	; TODO: Is this a bug or not? So far I haven't seen iPlInfo_MoveDamageValNext & others being updated mid-move.
 	; As these are set only when starting a new move, check for that:
 	; [BUG?] Incorrect comparison. It should have been "jp z" or not made to begin with (to allow mid-move setting changes).
-	ld   hl, wPlInfo_Pl1+iPlInfo_Flags2
+	ld   hl, \1+iPlInfo_Flags2
 	bit  PF2B_MOVESTART, [hl]		; Was a move started?
-	jp   nz, .copySetKey				; If *so*, skip
+	jp   nz, .copySetKey			; If *so*, skip
 	
 	;
 	; Copy the set of pending fields to the current ones, and clear the former range.
@@ -1457,8 +1440,8 @@ VBlank_CopyPl1Tiles:
 	; is performed, meaning we're jumping to .copySetKey from the second time we get here.
 	;
 	
-	ld   hl, wPlInfo_Pl1+iPlInfo_MoveDamageValNext	; HL = Source
-	ld   de, wPlInfo_Pl1+iPlInfo_MoveDamageVal		; DE = Destination
+	ld   hl, \1+iPlInfo_MoveDamageValNext	; HL = Source
+	ld   de, \1+iPlInfo_MoveDamageVal		; DE = Destination
 	ld   a, [hl]
 	or   a				; iPlInfo_MoveDamageValNext == 0?
 	jp   z, .copySetKey	; If so, skip
@@ -1484,8 +1467,8 @@ VBlank_CopyPl1Tiles:
 	
 	; Copy over the unique identifier for the Set settings from iGFXBufInfo_SetKey to iGFXBufInfo_SetKeyOld.
 	; This tells the wGFXBufInfo init code which settings were the last to be completely applied.
-	ld   hl, wGFXBufInfo_Pl1+iGFXBufInfo_SetKey 		; HL = Source
-	ld   de, wGFXBufInfo_Pl1+iGFXBufInfo_SetKeyOld 	; DE = Destination
+	ld   hl, \3+iGFXBufInfo_SetKey 		; HL = Source
+	ld   de, \3+iGFXBufInfo_SetKeyOld 	; DE = Destination
 	
 REPT 5
 	ldi  a, [hl]
@@ -1497,164 +1480,58 @@ ENDR
 	
 	; Additionally, copy over the settings to the old set, to make sure this sprite gets displayed
 	; when new graphics on this OBJInfo slot will load.
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlags]
-	ld   [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsOld], a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_BankNum]
-	ld   [wOBJInfo_Pl1+iOBJInfo_BankNumOld], a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTbl_Low]
-	ld   [wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTbl_LowOld], a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTbl_High]
-	ld   [wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTbl_HighOld], a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset]
-	ld   [wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffsetOld], a
+	ld   a, [\2+iOBJInfo_OBJLstFlags]
+	ld   [\2+iOBJInfo_OBJLstFlagsOld], a
+	ld   a, [\2+iOBJInfo_BankNum]
+	ld   [\2+iOBJInfo_BankNumOld], a
+	ld   a, [\2+iOBJInfo_OBJLstPtrTbl_Low]
+	ld   [\2+iOBJInfo_OBJLstPtrTbl_LowOld], a
+	ld   a, [\2+iOBJInfo_OBJLstPtrTbl_High]
+	ld   [\2+iOBJInfo_OBJLstPtrTbl_HighOld], a
+	ld   a, [\2+iOBJInfo_OBJLstPtrTblOffset]
+	ld   [\2+iOBJInfo_OBJLstPtrTblOffsetOld], a
 .end:
+ENDM
+
+
+;
+; 1P
+;
+;--
+; [TCRF] Unreferenced code.
+VBlank_Unused_Pl1Checks:
+	ld   a, [wPlInfo_Pl1+iPlInfo_Flags1]
+	bit  PF1B_COMBORECV, a
+	jp   nz, VBlank_CopyPl1Tiles
+	ld   a, [wPlInfo_Pl1+iPlInfo_Flags2]
+	bit  PF2B_HITCOMBO, a
+	jp   nz, VBlank_CopyPl1Tiles
+	ld   a, [wPlayHitstop]
+	or   a
+	jp   nz, VBlank_CopyPl1Tiles.end
+;--
+VBlank_CopyPl1Tiles:
+	mVBlank_CopyPlTiles wPlInfo_Pl1, wOBJInfo_Pl1, wGFXBufInfo_Pl1
 	jp   VBlank_CopyPl2Tiles
-	
+
+;
+; 2P
+;
 ;--
 ; [TCRF] Unreferenced code
-L0006A7:
+VBlank_Unused_Pl2Checks:
 	ld   a, [wPlInfo_Pl2+iPlInfo_Flags1]
-	bit  4, a
+	bit  PF1B_COMBORECV, a
 	jp   nz, VBlank_CopyPl2Tiles
 	ld   a, [wPlInfo_Pl2+iPlInfo_Flags2]
-	bit  2, a
+	bit  PF2B_HITCOMBO, a
 	jp   nz, VBlank_CopyPl2Tiles
 	ld   a, [wPlayHitstop]
 	or   a
 	jp   nz, VBlank_CopyPl2Tiles.end
 ;--
-; =============== VBlank_CopyPl2Tiles ===============
-; Copies the player 2 graphics to VRAM.
 VBlank_CopyPl2Tiles:
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftA]
-	or   a
-	jp   nz, .copyTo0
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftB]
-	or   a
-	jp   nz, .copyTo1
-	jp   .end
-.copyTo0:
-	ld   b, MAX_TILE_BUFFER_COPY
-	cp   a, b
-	jp   nc, .notLast0
-	ld   b, a
-.notLast0:
-	sub  a, b
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftA], a
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_Low]
-	ld   e, a
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_High]
-	ld   d, a
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtrA_Low]
-	ld   l, a
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtrA_High]
-	ld   h, a
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_BankA]
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	call CopyTiles
-	ld   a, e
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_Low], a
-	ld   a, d
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_High], a
-	ld   a, l
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtrA_Low], a
-	ld   a, h
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtrA_High], a
-	jp   .chkCopyEnd
-.copyTo1:
-	ld   b, MAX_TILE_BUFFER_COPY
-	cp   a, b
-	jp   nc, .notLast1
-	ld   b, a
-.notLast1:
-	sub  a, b
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftB], a
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_Low]
-	ld   e, a
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_High]
-	ld   d, a
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtrB_Low]
-	ld   l, a
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtrB_High]
-	ld   h, a
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_BankB]
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	call CopyTiles
-	ld   a, e
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_Low], a
-	ld   a, d
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_DestPtr_High], a
-	ld   a, l
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtrB_Low], a
-	ld   a, h
-	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_SrcPtrB_High], a
-.chkCopyEnd:
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftA]
-	or   a
-	jp   nz, .end
-	ld   a, [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftB]
-	or   a
-	jp   nz, .end
-.flagEnd:
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
-	res  OSTB_GFXLOAD, [hl]
-	set  OSTB_BIT3, [hl]
-	ld   hl, wPlInfo_Pl2+iPlInfo_Flags2
-	bit  0, [hl]
-	jp   nz, .move1
-	
-	ld   hl, wPlInfo_Pl2+iPlInfo_MoveDamageValNext
-	ld   de, wPlInfo_Pl2+iPlInfo_MoveDamageVal
-	ld   a, [hl]
-	or   a
-	jp   z, .move1
-.move0:
-	ld   [de], a
-	ld   [hl], $00
-	inc  de
-	inc  hl
-	ld   a, [hl]
-	ld   [de], a
-	ld   [hl], $00
-	inc  de
-	inc  hl
-	ld   a, [hl]
-	ld   [de], a
-	ld   [hl], $00
-.move1:
-
-	ld   hl, wGFXBufInfo_Pl2+iGFXBufInfo_SetKey
-	ld   de, wGFXBufInfo_Pl2+iGFXBufInfo_SetKeyOld
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ld   a, [hl]
-	ld   [de], a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlags]
-	ld   [wOBJInfo_Pl2+iOBJInfo_OBJLstFlagsOld], a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_BankNum]
-	ld   [wOBJInfo_Pl2+iOBJInfo_BankNumOld], a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTbl_Low]
-	ld   [wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTbl_LowOld], a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTbl_High]
-	ld   [wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTbl_HighOld], a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffset]
-	ld   [wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffsetOld], a
-.end:
+	mVBlank_CopyPlTiles wPlInfo_Pl2, wOBJInfo_Pl2, wGFXBufInfo_Pl2
 
 ; =============== VBlank_SetInitialSect ===============
 ; Initializes the topmost screen section (which starts at LY $00), which may
@@ -3331,10 +3208,10 @@ ENDR
 	ret
 
 ; =============== OBJLstS_CopyFarPtr ===============
-; Copies a "dp" far pointer.
+; Copies a "dpr" far pointer.
 ; IN
-; - HL: Source dp
-; - DE: Destination dp
+; - HL: Source dpr
+; - DE: Destination dpr
 OBJLstS_CopyFarPtr:
 REPT 3
 	ldi  a, [hl]	; Read from HL
@@ -6743,7 +6620,7 @@ Play_CharHeaderTbl:
 	; CHAR_ID_KYO
 	dw MoveAnimTbl_Kyo ; iPlInfo_MoveAnimTblPtr
 	dw MoveCodePtrTbl_Kyo ; iPlInfo_MoveCodePtrTable 
-	dp MoveInputReader_Kyo ; iPlInfo_MoveInputCodePtr | BANK $06
+	dpr MoveInputReader_Kyo ; iPlInfo_MoveInputCodePtr | BANK $06
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6751,9 +6628,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_DAIMON
-	dw L034268 ; iPlInfo_MoveAnimTblPtr
-	dw L037107 ; iPlInfo_MoveCodePtrTable 
-	dp L0578A0 ; iPlInfo_MoveInputCodePtr | BANK $05
+	dw MoveAnimTbl_Daimon ; iPlInfo_MoveAnimTblPtr
+	dw MoveCodePtrTbl_Daimon ; iPlInfo_MoveCodePtrTable 
+	dpr MoveInputReader_Daimon ; iPlInfo_MoveInputCodePtr | BANK $05
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6761,9 +6638,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_TERRY
-	dw L0344D0 ; iPlInfo_MoveAnimTblPtr
-	dw L037587 ; iPlInfo_MoveCodePtrTable 
-	dp L064CA4 ; iPlInfo_MoveInputCodePtr | BANK $06
+	dw MoveAnimTbl_Terry ; iPlInfo_MoveAnimTblPtr
+	dw MoveCodePtrTbl_Terry ; iPlInfo_MoveCodePtrTable 
+	dpr MoveInputReader_Terry ; iPlInfo_MoveInputCodePtr | BANK $06
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6771,9 +6648,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_ANDY
-	dw L034738 ; iPlInfo_MoveAnimTblPtr
-	dw L037167 ; iPlInfo_MoveCodePtrTable 
-	dp L066A77 ; iPlInfo_MoveInputCodePtr | BANK $06
+	dw MoveAnimTbl_Andy ; iPlInfo_MoveAnimTblPtr
+	dw MoveCodePtrTbl_Andy ; iPlInfo_MoveCodePtrTable 
+	dpr MoveInputReader_Andy ; iPlInfo_MoveInputCodePtr | BANK $06
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6781,9 +6658,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_RYO
-	dw L0349A0 ; iPlInfo_MoveAnimTblPtr
-	dw L037527 ; iPlInfo_MoveCodePtrTable 
-	dp L0257D7 ; iPlInfo_MoveInputCodePtr | BANK $02
+	dw MoveAnimTbl_Ryo ; iPlInfo_MoveAnimTblPtr
+	dw MoveCodePtrTbl_Ryo ; iPlInfo_MoveCodePtrTable 
+	dpr MoveInputReader_Ryo ; iPlInfo_MoveInputCodePtr | BANK $02
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6791,9 +6668,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_ROBERT
-	dw L034C08 ; iPlInfo_MoveAnimTblPtr
-	dw L0371C7 ; iPlInfo_MoveCodePtrTable 
-	dp L025E5C ; iPlInfo_MoveInputCodePtr | BANK $02
+	dw MoveAnimTbl_Robert ; iPlInfo_MoveAnimTblPtr
+	dw MoveCodePtrTbl_Robert ; iPlInfo_MoveCodePtrTable 
+	dpr MoveInputReader_Robert ; iPlInfo_MoveInputCodePtr | BANK $02
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6801,9 +6678,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_ATHENA
-	dw L034E70 ; iPlInfo_MoveAnimTblPtr
-	dw L0375E7 ; iPlInfo_MoveCodePtrTable 
-	dp L065B3A ; iPlInfo_MoveInputCodePtr | BANK $06
+	dw MoveAnimTbl_Athena ; iPlInfo_MoveAnimTblPtr
+	dw MoveCodePtrTbl_Athena ; iPlInfo_MoveCodePtrTable 
+	dpr MoveInputReader_Athena ; iPlInfo_MoveInputCodePtr | BANK $06
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6811,9 +6688,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_MAI
-	dw L0350D8 ; iPlInfo_MoveAnimTblPtr
-	dw L037647 ; iPlInfo_MoveCodePtrTable 
-	dp L0652DF ; iPlInfo_MoveInputCodePtr | BANK $06
+	dw MoveAnimTbl_Mai ; iPlInfo_MoveAnimTblPtr
+	dw MoveCodePtrTbl_Mai ; iPlInfo_MoveCodePtrTable 
+	dpr MoveInputReader_Mai ; iPlInfo_MoveInputCodePtr | BANK $06
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6821,9 +6698,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_LEONA
-	dw L035340 ; iPlInfo_MoveAnimTblPtr
-	dw L037227 ; iPlInfo_MoveCodePtrTable 
-	dp L026846 ; iPlInfo_MoveInputCodePtr | BANK $02
+	dw MoveAnimTbl_Leona ; iPlInfo_MoveAnimTblPtr
+	dw MoveCodePtrTbl_Leona ; iPlInfo_MoveCodePtrTable 
+	dpr MoveInputReader_Leona ; iPlInfo_MoveInputCodePtr | BANK $02
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6831,9 +6708,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_GEESE
-	dw L035810 ; iPlInfo_MoveAnimTblPtr
-	dw L037287 ; iPlInfo_MoveCodePtrTable 
-	dp L0677C0 ; iPlInfo_MoveInputCodePtr | BANK $06
+	dw MoveAnimTbl_Geese ; iPlInfo_MoveAnimTblPtr
+	dw MoveCodePtrTbl_Geese ; iPlInfo_MoveCodePtrTable 
+	dpr MoveInputReader_Geese ; iPlInfo_MoveInputCodePtr | BANK $06
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6841,9 +6718,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_KRAUSER
-	dw L035A78 ; iPlInfo_MoveAnimTblPtr
-	dw L0372E7 ; iPlInfo_MoveCodePtrTable 
-	dp L0974E6 ; iPlInfo_MoveInputCodePtr | BANK $09
+	dw MoveAnimTbl_Krauser ; iPlInfo_MoveAnimTblPtr
+	dw MoveCodePtrTbl_Krauser ; iPlInfo_MoveCodePtrTable 
+	dpr MoveInputReader_Krauser ; iPlInfo_MoveInputCodePtr | BANK $09
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6851,9 +6728,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_MRBIG
-	dw L035CE0 ; iPlInfo_MoveAnimTblPtr
-	dw L037347 ; iPlInfo_MoveCodePtrTable 
-	dp L0671EE ; iPlInfo_MoveInputCodePtr | BANK $06
+	dw MoveAnimTbl_MrBig ; iPlInfo_MoveAnimTblPtr
+	dw MoveCodePtrTbl_MrBig ; iPlInfo_MoveCodePtrTable 
+	dpr MoveInputReader_MrBig ; iPlInfo_MoveInputCodePtr | BANK $06
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6861,9 +6738,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_IORI
-	dw L035F48 ; iPlInfo_MoveAnimTblPtr
-	dw L0376A7 ; iPlInfo_MoveCodePtrTable 
-	dp L055FF2 ; iPlInfo_MoveInputCodePtr | BANK $05
+	dw MoveAnimTbl_Iori ; iPlInfo_MoveAnimTblPtr
+	dw MoveCodePtrTbl_Iori ; iPlInfo_MoveCodePtrTable 
+	dpr MoveInputReader_Iori ; iPlInfo_MoveInputCodePtr | BANK $05
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6871,9 +6748,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_MATURE
-	dw L0361B0 ; iPlInfo_MoveAnimTblPtr
-	dw L0373A7 ; iPlInfo_MoveCodePtrTable 
-	dp L056C11 ; iPlInfo_MoveInputCodePtr | BANK $05
+	dw MoveAnimTbl_Mature ; iPlInfo_MoveAnimTblPtr
+	dw MoveCodePtrTbl_Mature ; iPlInfo_MoveCodePtrTable 
+	dpr MoveInputReader_Mature ; iPlInfo_MoveInputCodePtr | BANK $05
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6881,9 +6758,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_CHIZURU
-	dw L036418 ; iPlInfo_MoveAnimTblPtr
-	dw L037407 ; iPlInfo_MoveCodePtrTable 
-	dp L057362 ; iPlInfo_MoveInputCodePtr | BANK $05
+	dw MoveAnimTbl_Chizuru ; iPlInfo_MoveAnimTblPtr
+	dw MoveCodePtrTbl_Chizuru ; iPlInfo_MoveCodePtrTable 
+	dpr MoveInputReader_Chizuru ; iPlInfo_MoveInputCodePtr | BANK $05
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6891,9 +6768,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_GOENITZ
-	dw L0368E8 ; iPlInfo_MoveAnimTblPtr
-	dw L037467 ; iPlInfo_MoveCodePtrTable 
-	dp L0A7373 ; iPlInfo_MoveInputCodePtr | BANK $0A
+	dw MoveAnimTbl_Goenitz ; iPlInfo_MoveAnimTblPtr
+	dw MoveCodePtrTbl_Goenitz ; iPlInfo_MoveCodePtrTable 
+	dpr MoveInputReader_Goenitz ; iPlInfo_MoveInputCodePtr | BANK $0A
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6901,9 +6778,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_MRKARATE
-	dw L036B50 ; iPlInfo_MoveAnimTblPtr
-	dw L0374C7 ; iPlInfo_MoveCodePtrTable 
-	dp L027163 ; iPlInfo_MoveInputCodePtr | BANK $02
+	dw MoveAnimTbl_MrKarate ; iPlInfo_MoveAnimTblPtr
+	dw MoveCodePtrTbl_MrKarate ; iPlInfo_MoveCodePtrTable 
+	dpr MoveInputReader_MrKarate ; iPlInfo_MoveInputCodePtr | BANK $02
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6911,9 +6788,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_OIORI
-	dw L036DB8 ; iPlInfo_MoveAnimTblPtr
-	dw L0376A7 ; iPlInfo_MoveCodePtrTable 
-	dp L055FF2 ; iPlInfo_MoveInputCodePtr | BANK $05
+	dw MoveAnimTbl_OIori ; iPlInfo_MoveAnimTblPtr
+	dw MoveCodePtrTbl_Iori ; iPlInfo_MoveCodePtrTable 
+	dpr MoveInputReader_Iori ; iPlInfo_MoveInputCodePtr | BANK $05
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6921,9 +6798,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_OLEONA
-	dw L0355A8 ; iPlInfo_MoveAnimTblPtr
-	dw L037227 ; iPlInfo_MoveCodePtrTable 
-	dp L026846 ; iPlInfo_MoveInputCodePtr | BANK $02
+	dw MoveAnimTbl_OLeona ; iPlInfo_MoveAnimTblPtr
+	dw MoveCodePtrTbl_Leona ; iPlInfo_MoveCodePtrTable 
+	dpr MoveInputReader_Leona ; iPlInfo_MoveInputCodePtr | BANK $02
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -6931,9 +6808,9 @@ Play_CharHeaderTbl:
 	dw +$0060 ; iPlInfo_Gravity
 	
 	; CHAR_ID_KAGURA
-	dw L036680 ; iPlInfo_MoveAnimTblPtr
-	dw L037407 ; iPlInfo_MoveCodePtrTable 
-	dp L057368 ; iPlInfo_MoveInputCodePtr | BANK $05
+	dw MoveAnimTbl_Kagura ; iPlInfo_MoveAnimTblPtr
+	dw MoveCodePtrTbl_Chizuru ; iPlInfo_MoveCodePtrTable 
+	dpr MoveInputReader_Kagura ; iPlInfo_MoveInputCodePtr | BANK $05
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
@@ -8840,6 +8717,7 @@ Play_DoPl:
 			; - Attacked ($70-$98)
 			;   These are used when getting attacked (hit, thrown, ...)
 			;   Shared with every character.
+			; + an extra pair of moves with only animations defined at $9A-$9C for ???
 			;
 			; These groups vary across games on this engine.
 			; This grouping saves space and is new to 96 -- 95 had no such grouping, every move
@@ -9484,7 +9362,7 @@ Pl_SetNewMove:
 				;
 				; BC = Starting destination for wPlInfo fields
 				;
-				ld   hl, iPlInfo_39		
+				ld   hl, iPlInfo_OBJLstPtrTblOffsetMoveEnd		
 				add  hl, bc				
 				push hl
 				pop  bc
@@ -9547,7 +9425,7 @@ Pl_SetNewMove:
 			ld   [de], a
 			inc  de
 			
-			; byte3 -> iPlInfo_39
+			; byte3 -> iPlInfo_OBJLstPtrTblOffsetMoveEnd
 			ldi  a, [hl]
 			ld   [bc], a	
 			inc  bc			; Seek to iPlInfo_MoveDamageVal
@@ -12244,7 +12122,7 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_INVULN, [hl]
 			
 			; New move
-			ld   a, MOVE_SHARED_THROW_6C
+			ld   a, MOVE_SHARED_THROW_G
 			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
 			; Wait 1 frame
 			call Task_PassControlFar
@@ -12322,7 +12200,7 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_INVULN, [hl]
 			
 			; New move
-			ld   a, MOVE_SHARED_THROW_6E
+			ld   a, MOVE_SHARED_THROW_A
 			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
 			; Wait 1 frame
 			call Task_PassControlFar
@@ -13221,9 +13099,9 @@ MoveInputS_CanStartSpecialMove:
 	ld   hl, iPlInfo_MoveId
 	add  hl, bc
 	ld   a, [hl]
-	cp   MOVE_SHARED_THROW_6C
+	cp   MOVE_SHARED_THROW_G
 	jp   z, .retNoMove
-	cp   MOVE_SHARED_THROW_6E
+	cp   MOVE_SHARED_THROW_A
 	jp   z, .retNoMove
 	
 	;
@@ -13477,7 +13355,7 @@ MoveInputS_SetSpecMove_StopSpeed:
 	;
 	; Note that moves higher than $6A do not get set through this subroutine,
 	; so it's safe to check < $64.
-	cp   MOVE_SPECIAL_START		; MoveId < $64?
+	cp   MOVE_SUPER_START		; MoveId < $64?
 	jp   c, .setFlags			; If so, skip
 	set  PF0B_SUPERMOVE, [hl]
 	push af

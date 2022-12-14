@@ -55,8 +55,14 @@ mBinDef: MACRO
 ENDM
 
 ; =============== dp ===============
-; Shorthand for far pointers.
+; Shorthand for far pointers in standard order.
 dp: MACRO
+	db BANK(\1)
+	dw \1
+ENDM
+; =============== dpr ===============
+; Shorthand for far pointers in reverse order.
+dpr: MACRO
 	dw \1
 	db BANK(\1)
 ENDM
