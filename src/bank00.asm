@@ -8717,7 +8717,6 @@ Play_DoPl:
 			; - Attacked ($70-$98)
 			;   These are used when getting attacked (hit, thrown, ...)
 			;   Shared with every character.
-			; + an extra pair of moves with only animations defined at $9A-$9C for ???
 			;
 			; These groups vary across games on this engine.
 			; This grouping saves space and is new to 96 -- 95 had no such grouping, every move
@@ -9476,12 +9475,12 @@ Pl_SetNewMove:
 			ld   [bc], a
 			inc  bc
 			
-			; byte5 -> iPlInfo_MoveDamageHitAnimIdNext
+			; byte6 -> iPlInfo_MoveDamageHitAnimIdNext
 			ldi  a, [hl]
 			ld   [bc], a
 			inc  bc
 			
-			; byte5 -> iPlInfo_MoveDamageFlags3Next
+			; byte7 -> iPlInfo_MoveDamageFlags3Next
 			ld   a, [hl]
 			ld   [bc], a
 			
@@ -9792,9 +9791,7 @@ L002A51:;R
 	ld   a, [hl]
 	or   a
 	jp   nz, L002A6B
-	ld   hl, MoveInput_DU_Fast
-	call MoveInputS_ChkInputDir
-	jp   c, L002A6B
+	mMvIn_ChkDir MoveInput_DU_Fast, L002A6B
 	ld   hl, iPlInfo_SpeedX
 	call Pl_GetWord
 	jr   L002A7A
@@ -9830,9 +9827,7 @@ L002A97:;R
 	ld   a, [hl]
 	or   a
 	jp   nz, L002AB1
-	ld   hl, MoveInput_DU_Fast
-	call MoveInputS_ChkInputDir
-	jp   c, L002AB1
+	mMvIn_ChkDir MoveInput_DU_Fast, L002AB1
 	ld   hl, iPlInfo_SpeedX
 	call Pl_GetWord
 	jr   L002AC0
@@ -11353,9 +11348,7 @@ Play_Pl_DoBasicMoveInput:
 			res  PF1B_CROUCH, [hl]
 			
 			; B+B -> Hop Back
-			ld   hl, MoveInput_BB
-			call MoveInputS_ChkInputDirStrict
-			jp   c, BasicInput_StartHopBack
+			mMvIn_ChkDirStrict MoveInput_BB, BasicInput_StartHopBack
 			
 			; If the other player is attacking, attempting to walk backwards will block instead.
 			ld   hl, iPlInfo_Flags0Other
@@ -11508,9 +11501,7 @@ Play_Pl_DoBasicMoveInput:
 		;
 		BasicInput_ChkWalkForward:
 			; F+F -> Run forwards
-			ld   hl, MoveInput_FF
-			call MoveInputS_ChkInputDirStrict
-			jp   c, BasicInput_StartRun
+			mMvIn_ChkDirStrict MoveInput_FF, BasicInput_StartRun
 			; Fall-through
 			
 		;
@@ -13194,11 +13185,18 @@ L003760:;J
 	scf
 	ccf
 	ret
-L003763:;C
-	ld   hl, $0020
+	
+; =============== MoveInputS_CanStartProjMove ===============
+; Determines if it's possible to start a special move that throws a projectile.
+; IN
+; - BC: Ptr to wPlInfo structure
+; OUT
+; - Z flag: If set, we can start the move
+MoveInputS_CanStartProjMove:
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	bit  0, [hl]
-	ret
+	bit  PF0B_PROJ, [hl]	; Is the projectile for this player still active?
+	ret						; (if so, don't start the move)
 	
 ; =============== MoveInputS_CheckMoveLHVer ===============
 ; Determines if the heavy version of the move should be started.
@@ -13226,11 +13224,11 @@ MoveInputS_CheckMoveLHVer:
 	add  hl, bc
 	ld   a, [hl]
 	cp   PLAY_POW_MAX			; At max power?
-	jp   z, .chkCheated			; If so, jump
+	jp   z, .chkHidden			; If so, jump
 	
 .chkNorm:
 	;
-	; Perform the heavy flag check, as previously set by MoveInputS_CheckLHType.
+	; Perform the heavy flag check, as previously set by MoveInputS_CheckGAType.
 	; The updated result in the Z flag will be our return value.
 	;
 	ld   hl, iPlInfo_Flags2
@@ -13239,11 +13237,11 @@ MoveInputS_CheckMoveLHVer:
 	scf
 	ccf							; Clear carry
 	ret
-.chkCheated:
+.chkHidden:
 	
 	;
-	; Perform the final one.
-	; There's no "hidden light", it just falls back to the normal check
+	; Don't allow "hidden light" attacks (even though they exist...),
+	; so fall back to the normal check if we're not doing an heavy.
 	;
 	ld   hl, iPlInfo_Flags2
 	add  hl, bc
@@ -13428,8 +13426,8 @@ MoveInputS_SetSpecMove_StopSpeed:
 ; IN
 ; - A: Move ID
 ; - DE: Ptr to wOBJInfo structure
-; - H: X Offset (always $00)
-; - L: Y Offset (always $00)
+; - H: X Offset
+; - L: Y Offset
 Play_StartSuperSparkle:
 	; Play SFX associated with the sparkle effect
 	ld   a, SFX_SUPERMOVE
@@ -13510,7 +13508,8 @@ Play_StartSuperSparkle:
 			
 			;--
 			; [POI] Offset the vertical and horizontal positions of the sprite mapping.
-			;       However... H and L are always $00, meaning this does nothing.
+			;       This is normally 0 by default, but there are manual calls to this
+			;       with HL != 0.
 			
 			; XPos += H
 			push hl
@@ -13571,22 +13570,46 @@ L003890:;C
 	ld   [hl], a
 	pop  de
 	ret
-L00389E:;C
+; =============== Play_Proj_CopyMoveDamageFromPl ===============
+; Copies the move damage fields from the current player over to its respective projectile.
+;
+; This is called for moves where the projectile is what deals damage --
+; which includes actual projectiles and special effects that are animated independently from the player (see: Power Geyser).
+;
+; This is needed because the game only copies the damage info from MoveAnimTbl_* to
+; the player when starting a new move, even when it's meant for projectiles.
+; Moves that call this use animation frames/sprite mappings for the player that don't
+; have an hitbox set, preventing the same damage from being also dealt physically.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+Play_Proj_CopyMoveDamageFromPl:
 	push bc
-	ld   hl, $003D
-	add  hl, bc
-	push hl
-	pop  bc
-	ld   hl, $00A3
-	add  hl, de
-	ld   a, [bc]
-	inc  bc
-	ldi  [hl], a
-	ld   a, [bc]
-	inc  bc
-	ldi  [hl], a
-	ld   a, [bc]
-	ld   [hl], a
+		; Copy over the three bytes.
+		; This works because the move damage fields are stored contiguously
+		; in the same order between player and projectile info.
+		
+		; BC = Ptr to source
+		ld   hl, iPlInfo_MoveDamageValNext
+		add  hl, bc
+		push hl
+		pop  bc
+		
+		; DE = Ptr to destination
+		; The OBJInfo for the projectile is always 2 slots ahead
+		; of one used by its respective player.
+		ld   hl, (OBJINFO_SIZE*2)+iOBJInfo_Proj_DamageVal
+		add  hl, de
+		
+		; Copy the data over
+		ld   a, [bc]	; Read iPlInfo_MoveDamageValNext
+		inc  bc
+		ldi  [hl], a	; Copy to iOBJInfo_Proj_DamageVal
+		ld   a, [bc]	; Read iPlInfo_MoveDamageHitAnimIdNext
+		inc  bc
+		ldi  [hl], a	; Copy to iOBJInfo_Proj_DamageHitAnimId
+		ld   a, [bc]	; Read iPlInfo_MoveDamageFlags3Next
+		ld   [hl], a	; Copy to iOBJInfo_Proj_DamageFlags3
 	pop  bc
 	ret
 L0038B3:;C
@@ -13812,8 +13835,10 @@ Play_Pl_ChkThrowInput:
 	ld   a, PLAY_THROWACT_START
 	ld   [wPlayPlThrowActId], a
 	
-	; Set the amount of damage the opponent takes when he's thrown at the *end*.
+	; All throws do $0C lines of damage.
+	; The damage is taken when the opponent gets thrown at the *end*.
 	; Meaning that if it gets aborted early, no damage is dealt.
+	; Note that, in the MoveAnimTbl_* entries, the damage fields are all $00 anyway.
 	ld   hl, iPlInfo_MoveDamageVal
 	add  hl, bc
 	ld   a, $0C						; 12 lines of damage
@@ -13917,70 +13942,162 @@ Play_Pl_ChkThrowInput:
 .ret:
 	ret
 	
-L003A28:;C
+; =============== MoveInputS_TryStartCommandThrow_Unk_Coli05 ===============
+; Attempts to start a command throw that:
+; - Uses collision box $05 as throw range
+;
+; This is the command grab equivalent to Play_Pl_ChkThrowInput, except
+; that input was checked beforehand as it depends on the special move.
+;
+; Just like Play_Pl_ChkThrowInput, this performs some validation, then tries grab the opponent.
+;
+; See also: Play_Pl_ChkThrowInput
+;
+; IN
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+; OUT
+; - C: If set, the command throw can start
+MoveInputS_TryStartCommandThrow_Unk_Coli05:
+	; If a throw is already in progress, return
 	ld   a, [wPlayPlThrowActId]
-	cp   $00
-	jp   nz, L003A94
-	xor  a
+	cp   PLAY_THROWACT_NONE
+	jp   nz, MoveInputS_TryStartCommandThrow.noThrow
+	
+	; Throw forward
+	xor  a ; PLAY_THROWDIR_F
 	ld   [wPlayPlThrowDir], a
-	ld   a, $02
+	; [POI] Doesn't matter. This is ignored for command throws
+	ld   a, PLAY_THROWOP_UNUSED_BOTH
 	ld   [wPlayPlThrowOpMode], a
+	
+	; Use hitbox $05
 	ld   a, $05
-	jp   L003A59
-L003A3E:;C
+	jp   MoveInputS_TryStartCommandThrow
+	
+; =============== MoveInputS_TryStartCommandThrow_Unk_Coli04 ===============
+; Attempts to start a command throw that:
+; - Uses collision box $04 as throw range
+; - Can't be done if the opponent is getting up
+;
+; See also: MoveInputS_TryStartCommandThrow_Coli05
+;
+; IN
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+; OUT
+; - C: If set, the command throw can start
+MoveInputS_TryStartCommandThrow_Unk_Coli04:
+	; If a throw is in progress, return
 	ld   a, [wPlayPlThrowActId]
-	cp   $00
-	jp   nz, L003A94
-	ld   hl, $007A
+	cp   PLAY_THROWACT_NONE								; ThrowActId != NONE?
+	jp   nz, MoveInputS_TryStartCommandThrow.noThrow	; If so, jump
+	
+	; If the opponent is getting up, return
+	ld   hl, iPlInfo_TimerDec5EOther
 	add  hl, bc
 	ld   a, [hl]
-	or   a
-	jp   nz, L003A94
-	xor  a
+	or   a												; iPlInfo_TimerDec5EOther != 0?
+	jp   nz, MoveInputS_TryStartCommandThrow.noThrow	; If so, return
+	
+	; Throw forward
+	xor  a ; PLAY_THROWDIR_F
 	ld   [wPlayPlThrowDir], a
-	xor  a
+	; [POI] Doesn't matter. This is ignored for command throws
+	xor  a ; PLAY_THROWOP_GROUND
 	ld   [wPlayPlThrowOpMode], a
+	
+	; Use hitbox $04
 	ld   a, $04
-L003A59:;J
-	ld   hl, $001A
+	; Fall-through
+	
+; =============== MoveInputS_TryStartCommandThrow ===============
+; Attempts to starts a command throw.
+; The code for this is identical to Play_Pl_ChkThrowInput.tryStart.
+; IN
+; - A: Collision box ID for throw range
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+; OUT
+; - C: If set, the command throw can start
+MoveInputS_TryStartCommandThrow:
+	
+	;
+	; Setup the throw, and see the opponent's response.
+	;
+
+	; Write the temporary hitbox, used to determine throw range.
+	; This will be active for exactly one frame (see below).
+	ld   hl, iOBJInfo_ForceHitboxId
 	add  hl, de
 	ld   [hl], a
-	ld   a, $01
+	
+	; Start the throw sequence, mandatory to let the other player know we're ready.
+	ld   a, PLAY_THROWACT_START
 	ld   [wPlayPlThrowActId], a
-	ld   hl, $003A
+	
+	; All command throws do $0C lines of damage, like normal throws.
+	; The damage is taken when the opponent gets thrown at the *end*.
+	; Meaning that if it gets aborted early, no damage is dealt.
+	; Note that, in the MoveAnimTbl_* entries, the damage fields are all $00 anyway.
+	ld   hl, iPlInfo_MoveDamageVal
 	add  hl, bc
-	ld   a, $0C
+	ld   a, $0C						; 12 lines of damage
 	ld   [hl], a
-	inc  hl
-	ld   a, $10
-	ld   [hl], a
+	
+	; If the grab occurres, the opponent will use hit animation HITANIM_THROW_START
+	inc  hl							; Seek to iPlInfo_MoveDamageHitAnimId
+	ld   a, HITANIM_THROW_START
+	ld   [hl], a					; Save value
+	
+	; Pass control once with the throw hitbox enabled (+ an extra one to disable it)
+	; and determine if the opponent got grabbed successfully (in range + passed validation).
+	;
+	; If it went all right, the opponent should have gone through Play_Pl_SetHitAnim.chkThrow
+	; (which required us to set wPlayPlThrowActId to PLAY_THROWACT_START first), which will
+	; cause in the second frame ???????? to update wPlayPlThrowActId to PLAY_THROWACT_NEXT02.
+	
+	; Preserve iPlInfo_JoyKeys and iPlInfo_JoyNewKeys while this happens
 	ld   hl, iPlInfo_JoyKeys
 	add  hl, bc
-	ldi  a, [hl]
-	push af
-	ld   a, [hl]
-	push af
-	push hl
-	call Task_PassControlFar
-	ld   hl, $001A
-	add  hl, de
-	xor  a
-	ld   [hl], a
-	call Task_PassControlFar
-	pop  hl
+	ldi  a, [hl]	
+	push af				; Save iPlInfo_JoyKeys
+		ld   a, [hl]	
+		push af			; Save iPlInfo_JoyNewKeys
+			push hl
+				;--
+				; Pass control, activating the temporary throw hitbox
+				call Task_PassControlFar
+				
+				; Disable the throw hitbox and save changes again
+				ld   hl, iOBJInfo_ForceHitboxId
+				add  hl, de
+				xor  a
+				ld   [hl], a
+				call Task_PassControlFar
+				;--
+			pop  hl
+		pop  af
+		ldd  [hl], a	; Restore iPlInfo_JoyNewKeys
 	pop  af
-	ldd  [hl], a
-	pop  af
-	ld   [hl], a
+	ld   [hl], a	; Restore iPlInfo_JoyKeys
+	
+	; If the opponent didn't get grabbed, return
 	ld   a, [wPlayPlThrowActId]
-	cp   $02
-	jp   nz, L003A94
-	scf
-	jp   L003A98
-L003A94:;J
+	cp   PLAY_THROWACT_NEXT02		; On the second part of the throw?
+	jp   nz, .noThrow				; If not, return
+	
+	;##
+	
+	; The move can start
+	scf			; C flag set
+	jp   .ret
+.noThrow:
+	; Can't start move
+	; Also force the current throw to end
 	xor  a
 	ld   [wPlayPlThrowActId], a
-L003A98:;J
+.ret:
 	ret
 ; =============== Play_Pl_ChkHitStop ===============
 ; Applies hitstop if enabled, as well as other effects induced by the other player.
@@ -14744,7 +14861,7 @@ HomeCall_Play_Pl_DoHit:
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-; =============== MoveInputS_CheckLHType ===============
+; =============== MoveInputS_CheckGAType ===============
 ; Determines the type of attack triggered by the buttons.
 ; IN
 ; - BC: Ptr to wPlInfo structure
@@ -14754,7 +14871,7 @@ HomeCall_Play_Pl_DoHit:
 ; - iPlInfo_Flags2: If PF2B_HEAVY is set, an heavy was registered. Otherwise, it's a light.
 ;                    This will be used when determining if the light or heavy move should start,
 ;                    see MoveInputS_CheckMoveLHVer
-MoveInputS_CheckLHType:
+MoveInputS_CheckGAType:
 	; A = Held keys
 	ld   hl, iPlInfo_JoyKeysLH
 	add  hl, bc
@@ -14810,7 +14927,7 @@ Play_Pl_ClearJoyMergedKeysLH:
 	ret
 	
 ; =============== MoveInputS_CheckPKTypeWithMergedLH ===============
-; Simplified version of MoveInputS_CheckLHType that only determines if the attack
+; Simplified version of MoveInputS_CheckGAType that only determines if the attack
 ; triggered by the buttons is a light or a heavy.
 ; This also uses iPlInfo_JoyMergedKeysLH instead of iPlInfo_JoyKeysLH.
 ; IN

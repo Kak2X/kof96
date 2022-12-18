@@ -86,6 +86,286 @@ ads: MACRO
 	db (\1)|(\1 << 2)|(\1 << 4)
 ENDM
 
+; =============== Special move list definition macros ===============
+; For MoveInputReader_*
+
+; =============== mMvIn_Validate ===============
+; Performs initial validation at the start of an input reader,
+; and determines if we should go to the air or ground list.
+; IN
+; - 1: Char key
+mMvIn_Validate: MACRO
+	call MoveInputS_CanStartSpecialMove	; Can we start a new special/super?
+	jp   c, MoveInputReader_\<1>_NoMove	; If not, return
+	jp   z, .chkGround					; Are we on the ground? If so, jump
+ENDM									; Otherwise, assume air
+
+
+; =============== mMvIn_ChkEasy ===============
+; Checks for move shortcuts (requires the easy moves cheat).
+; IN
+; - 1: Move key for SELECT + B
+; - 2: Move key for SELECT + A
+mMvIn_ChkEasy: MACRO
+	call MoveInputS_CheckEasyMoveKeys
+	jp   c, \1 ; SELECT + B pressed? If so, jump
+	jp   z, \2 ; SELECT + A pressed? If so, jump
+ENDM
+
+; =============== mMvIn_ChkGA ===============
+; Determines if the punch or kick move inputs should be checked.
+; IN
+; - 1: Char key
+; - 2: Label to punch list
+; - 3: Label to kick list
+mMvIn_ChkGA: MACRO
+	; Determine the attack type/strength.
+	; This narrows down the list of special moves to check.
+	call MoveInputS_CheckGAType
+	jp   nc, MoveInputReader_\<1>_NoMove	; Was an attack button pressed? If not, return
+	jp   z, \2	; Was the punch button pressed? If so, jump
+	jp   nz, \3	; Was the kick button pressed? If so, jump
+	jp   MoveInputReader_\<1>_NoMove ; We never get here
+ENDM
+
+; =============== mMvIn_ValidateSuper ===============
+; Guards against checking super move inputs if we can't start super moves.
+; IN
+; - 1: Label to skip the super move inputs
+mMvIn_ValidateSuper: MACRO
+	call MoveInputS_CanStartSuperMove	; Can we start a super?
+	jp   c, \1							; If not, skip
+ENDM
+
+; =============== mMvIn_ValidateProjActive ===============
+; Guards against starting moves that spawn projectiles if another
+; projectile associated to the same player is still active.
+; IN
+; - 1: Char Key or Label to skip the input
+mMvIn_ValidateProjActive: MACRO
+	call MoveInputS_CanStartProjMove			; Can we start this move?
+	IF DEF(MoveInputReader_\<1>_NoMove)
+		jp   nz, MoveInputReader_\<1>_NoMove	; If not, skip
+	ELSE
+		jp   nz, \<1>							; If not, skip
+	ENDC
+ENDM
+
+; =============== mMvIn_ValidateProjVisible ===============
+; Guards against starting moves that spawn projectiles if another
+; projectile associated to the same player is still *visible*.
+; IN
+; - 1: Char Key
+mMvIn_ValidateProjVisible: MACRO
+	; Seek to the status field of the projectile associated to this player.
+	; This is always 2 slots after the one for the current player.
+	ld   hl, (OBJINFO_SIZE * 2)+iOBJInfo_Status
+	add  hl, de	
+	; If the sprite mapping is visible, don't start the move
+	bit  OSTB_VISIBLE, [hl]	
+	jp   nz, MoveInputReader_\<1>_NoMove
+ENDM
+
+; =============== mMvIn_ValidateClose ===============
+; Verifies that the move is performed close to the opponent.
+; IN
+; - 1: Label to skip the input
+mMvIn_ValidateClose: MACRO
+	; The move must be done within $18px of the other player
+	ld   hl, iPlInfo_PlDistance
+	add  hl, bc
+	ld   a, [hl]
+	cp   $18		; iPlInfo_PlDistance >= $18?
+	jp   nc, \1		; If so, jump
+	; If we got here, we can continue
+ENDM
+
+; =============== mMvIn_ValidateDipAutoCharge ===============
+; Guards against checking move inputs if they require the autocharge cheat
+; IN
+; - 1: Label to skip the move inputs
+mMvIn_ValidateDipAutoCharge: MACRO
+	ld   a, [wDipSwitch]
+	bit  DIPB_AUTO_CHARGE, a	; Is the cheat enabled?
+	jp   z, \1					; If not, skip
+ENDM
+
+; =============== mMvIn_ValSkipWithChar ===============
+; Prevents the move input from being checked when playing as the specified character.
+; Used to prevent characters from starting moves exclusive to their alternate form,
+; since both forms reuse the same MoveInputReader_* code (ie: Iori/O.Iori)
+; IN
+; - 1: Character ID that can't use the move
+; - 1: Label to skip the move inputs
+mMvIn_ValSkipWithChar: MACRO
+	ld   hl, iPlInfo_CharId
+	add  hl, bc
+	ld   a, [hl]
+	cp   \1*2	; Playing as this character?
+	jp   z, \2	; If so, skip
+ENDM
+
+; =============== mMvIn_ValStartCmdThrow04 ===============
+; Verifies that the command throw grabbed the opponent successfully.
+; This will take a few frames to complete.
+; IN
+; - 1: Char Key
+mMvIn_ValStartCmdThrow04: MACRO
+	; Throw validation / try to start it
+	call MoveInputS_TryStartCommandThrow_Unk_Coli04	; Did the command throw grab the other player successfully?
+	jp   nc, MoveInputReader_\<1>_NoMove			; If not, jump
+	call Task_PassControlFar
+	ld   a, PLAY_THROWACT_NEXT03					; Otherwise, the command throw is confirmed
+	ld   [wPlayPlThrowActId], a
+ENDM
+
+; =============== mMvIn_ValStartCmdThrow04 ===============
+; Jumps to the specified location if the command throw grabbed the opponent successfully.
+; IN
+; - 1: Ptr to target
+mMvIn_JpIfStartCmdThrow04: MACRO
+	call MoveInputS_TryStartCommandThrow_Unk_Coli04	; Did we grab the opponent?
+	jp   c, \1										; If so, jump
+ENDM
+
+; =============== mMvIn_ChkDir ===============
+; Checks for a directional button-based move input.
+; Almost every super move uses this.
+; IN
+; - 1: Ptr to MoveInput_*
+; - 2: Ptr to MoveInit_* 
+mMvIn_ChkDir: MACRO
+	ld   hl, \1					; HL = Ptr to move input
+	call MoveInputS_ChkInputDir	; Did we press it?
+	jp   c, \2					; If so, jump
+ENDM
+
+; =============== mMvIn_ChkDirNot ===============
+; Checks if we did *NOT* input the specified directional button-based move input.
+; IN
+; - 1: Ptr to MoveInput_*
+; - 2: Label to skip to the next input
+mMvIn_ChkDirNot: MACRO
+	ld   hl, \1					; HL = Ptr to move input
+	call MoveInputS_ChkInputDir	; Did we press it?
+	jp   nc, \2					; If not, jump
+ENDM
+
+; =============== mMvIn_ChkDirStrict ===============
+; Checks for a directional button-based move input that allows no input leeway.
+; IN
+; - 1: Ptr to MoveInput_*
+; - 2: Ptr to MoveInit_* 
+mMvIn_ChkDirStrict: MACRO
+	ld   hl, \1							; HL = Ptr to move input
+	call MoveInputS_ChkInputDirStrict	; Did we press it?
+	jp   c, \2							; If so, jump
+ENDM
+
+; =============== mMvIn_ChkBtnStrict ===============
+; Checks for a punch/kick button-based move input that allows no input leeway.
+; IN
+; - 1: Ptr to MoveInput_*
+; - 2: Ptr to MoveInit_* 
+mMvIn_ChkBtnStrict: MACRO
+	ld   hl, \1							; HL = Ptr to move input
+	call MoveInputS_ChkInputBtnStrict	; Did we press it?
+	jp   c, \2							; If so, jump
+ENDM
+
+; =============== mMvIn_GetLH ===============
+; Gets a move ID depending on the attack being light or heavy.
+; IN
+; - 1: Move ID for Light
+; - 2: Move ID for Heavy
+; OUT
+; - A: Move ID to use
+mMvIn_GetLH: MACRO
+	call MoveInputS_CheckMoveLHVer
+	jr   nz, .heavy		; Heavy version? If so, jump
+.light:
+	ld   a, \1
+	jp   .setMove
+.heavy:
+	ld   a, \2
+.setMove:
+ENDM
+
+; =============== mMvIn_GetLHE ===============
+; Gets a move ID depending on the attack being light, heavy, or hidden.
+; IN
+; - 1: Move ID for Light
+; - 2: Move ID for Heavy
+; - 3: Ptr to MoveInit_* code for the hidden version.
+; OUT
+; - A: Move ID to use (if not jumped to \3)
+mMvIn_GetLHE: MACRO
+	call MoveInputS_CheckMoveLHVer
+	jr   c, \3			; Is the the hidden super triggered? If so, jump
+	jr   nz, .heavy		; Is the heavy triggered? If so, jump
+.light:					; Otherwise, use the light
+	ld   a, \1
+	jp   .setMove
+.heavy:
+	ld   a, \2
+.setMove:
+ENDM
+
+; =============== mMvIn_GetSD ===============
+; Gets a move ID depending on the attack being normal super or a desperation super.
+; IN
+; - 1: Move ID for Super
+; - 2: Move ID for Desperation Super
+; OUT
+; - A: Move ID to use
+mMvIn_GetSD: MACRO
+	call MoveInputS_CheckSuperDesperation
+	jp   c, .desperation
+.normal:
+	ld   a, \1
+	jp   .setMove
+.desperation:
+	ld   a, \2
+.setMove:
+ENDM
+
+; =============== mMvIn_GetSDE ===============
+; Gets a move ID depending on the attack being normal super, a desperation super, or an hidden desperation.
+; IN
+; - 1: Move ID for Super
+; - 2: Move ID for Desperation Super
+; - 3: Move ID for Hidden Desperation Super
+; OUT
+; - A: Move ID to use
+mMvIn_GetSDE: MACRO
+	call MoveInputS_CheckSuperDesperation
+	jp   nc, .normal		; Was a super desperation *NOT* triggered? If so, jump
+	jp   nz, .desperation	; Was the hidden desperation *NOT* triggered? If so, jump
+	jp   .hidden			; Otherwise, jump
+.normal:
+	ld   a, \1
+	jp   .setMove
+.desperation:
+	ld   a, \2
+	jp   .setMove
+.hidden:
+	ld   a, \3
+.setMove:
+ENDM
+
+; =============== mMvIn_JpSD ===============
+; Jumps to a MoveInit_* target depending on the attack being normal super or a desperation super.
+; IN
+; - 1: Ptr to MoveInit_* for Super
+; - 2: Ptr to MoveInit_* for Desperation Super
+; OUT
+; - A: Move ID to use
+mMvIn_JpSD: MACRO
+	call MoveInputS_CheckSuperDesperation
+	jp   c, \2	; Was a super desperation triggered? If so, jump
+	jp   \1 	; Otherwise, jump to the normal version
+ENDM
+
 ; =============== Sound driver macros ===============
 ; For command IDs, their code will be specified in a comment.
 

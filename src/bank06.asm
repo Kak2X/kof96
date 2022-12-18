@@ -46,82 +46,46 @@ L064051:;JR
 ; OUT
 ; - C flag: If set, a move was started
 MoveInputReader_Kyo:
-	; Standard validation
-	call MoveInputS_CanStartSpecialMove		; Can we start a new special/super?
-	jp   c, MoveInputReader_Kyo_NoMove		; If not, return
+	mMvIn_Validate Kyo
 	
-	; KYO has no air specials
-	jp   z, .chkGround 						; Are we on the ground? If so, jump
-	jp   MoveInputReader_Kyo_NoMove			; Otherwise, return
+; AIR SPECIALS
+.chkAir:
+	jp   MoveInputReader_Kyo_NoMove
+	
+; GROUND SPECIALS
 .chkGround:
+	;             SELECT + B                       SELECT + A
+	mMvIn_ChkEasy MoveInit_Kyo_UraShikiOrochinagi, MoveInit_Kyo_ShikiNueTumi
+	mMvIn_ChkGA Kyo, .chkPunch, .chkKick
 	
-	; Easy move cheat check
-	call MoveInputS_CheckEasyMoveKeys
-	jp   c, MoveInit_Kyo_UraShikiOrochinagi	; SELECT + B pressed? If so, jump
-	jp   z, MoveInit_Kyo_ShikiNueTumi 		; SELECT + A pressed? If so, jump
-	
-	; Otherwise, determine the attack type/strength.
-	; This narrows down the list of special moves to check.
-	call MoveInputS_CheckLHType
-	jp   nc, MoveInputReader_Kyo_NoMove	; Was an attack button pressed? If not, return
-	jp   z, .chkPunch	; Was the punch button pressed? If so, jump
-	jp   nz, .chkKick	; Was the kick button pressed? If so, jump
-	jp   MoveInputReader_Kyo_NoMove ; We never get here
 .chkPunch:
-	
-	; Super move check
-	call MoveInputS_CanStartSuperMove		; Can we start a super?
-	jp   c, .chkPunchNoSuper				; If not, skip
-	
+	mMvIn_ValidateSuper .chkPunchNoSuper
 	; DBDF+P -> Ura 108 Shiki Orochinagi
-	ld   hl, MoveInput_DBDF					; HL = Ptr to move input
-	call MoveInputS_ChkInputDir				; Did we press it?
-	jp   c, MoveInit_Kyo_UraShikiOrochinagi	; If so, jump
-	
+	mMvIn_ChkDir MoveInput_DBDF, MoveInit_Kyo_UraShikiOrochinagi
 .chkPunchNoSuper:
 	; FDF+P -> 100 Shiki Oniyaki
-	ld   hl, MoveInput_FDF
-	call MoveInputS_ChkInputDir
-	jp   c, MoveInit_Kyo_ShikiOniyaki
-	; DF+P -> 114 Shiki Ara Kami (*)
-	ld   hl, MoveInput_DF
-	call MoveInputS_ChkInputDir
-	jp   c, MoveInit_Kyo_ShikiAraKami
+	mMvIn_ChkDir MoveInput_FDF, MoveInit_Kyo_ShikiOniyaki
+	; DF+P -> 114 Shiki Ara Kami
+	mMvIn_ChkDir MoveInput_DF, MoveInit_Kyo_ShikiAraKami
 	; DB+P -> 910 Shiki Nue Tumi
-	ld   hl, MoveInput_DB
-	call MoveInputS_ChkInputDir
-	jp   c, MoveInit_Kyo_ShikiNueTumi
+	mMvIn_ChkDir MoveInput_DB, MoveInit_Kyo_ShikiNueTumi
 	; End
 	jp   MoveInputReader_Kyo_NoMove
+	
 .chkKick:
 	; FDB+K -> 212 Shiki Kototsuki You 
-	ld   hl, MoveInput_FDB
-	call MoveInputS_ChkInputDir
-	jp   c, MoveInit_Kyo_ShikiKototsukiYou
-	
+	mMvIn_ChkDir MoveInput_FDB, MoveInit_Kyo_ShikiKototsukiYou
 	; BDB+K -> R.E.D. Kick
-	ld   hl, MoveInput_BDB
-	call MoveInputS_ChkInputDir
-	jp   c, MoveInit_Kyo_RedKick
-	
+	mMvIn_ChkDir MoveInput_BDB, MoveInit_Kyo_RedKick
 	; DF+K -> 75 Shiki Kai
-	ld   hl, MoveInput_DF
-	call MoveInputS_ChkInputDir
-	jp   c, MoveInit_Kyo_ShikiKai
+	mMvIn_ChkDir MoveInput_DF, MoveInit_Kyo_ShikiKai
 	; End
 	jp   MoveInputReader_Kyo_NoMove
 	
 ; =============== MoveInit_Kyo_ShikiAraKami ===============
 MoveInit_Kyo_ShikiAraKami:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, .heavy						; Heavy version? If so, jump
-.light:
-	ld   a, MOVE_KYO_SHIKI_ARA_KAMI_L
-	jp   .setMove
-.heavy:
-	ld   a, MOVE_KYO_SHIKI_ARA_KAMI_H
-.setMove:
+	mMvIn_GetLH MOVE_KYO_SHIKI_ARA_KAMI_L, MOVE_KYO_SHIKI_ARA_KAMI_H
 	call MoveInputS_SetSpecMove_StopSpeed
 	
 	ld   hl, iPlInfo_Flags1
@@ -133,15 +97,9 @@ MoveInit_Kyo_ShikiAraKami:
 ; =============== MoveInit_Kyo_ShikiOniyaki ===============	
 MoveInit_Kyo_ShikiOniyaki:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, .heavy
-.light:
-	ld   a, MOVE_KYO_SHIKI_ONIYAKI_L
-	jp   .setMove
-.heavy:
-	ld   a, MOVE_KYO_SHIKI_ONIYAKI_H
-.setMove:
+	mMvIn_GetLH MOVE_KYO_SHIKI_ONIYAKI_L, MOVE_KYO_SHIKI_ONIYAKI_H
 	call MoveInputS_SetSpecMove_StopSpeed
+	
 	ld   hl, iPlInfo_Flags1
 	add  hl, bc
 	set  PF1B_GUARD, [hl]
@@ -151,42 +109,24 @@ MoveInit_Kyo_ShikiOniyaki:
 ; =============== MoveInit_Kyo_RedKick ===============	
 MoveInit_Kyo_RedKick:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, .heavy
-.light:
-	ld   a, MOVE_KYO_RED_KICK_L
-	jp   .setMove
-.heavy:
-	ld   a, MOVE_KYO_RED_KICK_H
-.setMove:
+	mMvIn_GetLH MOVE_KYO_RED_KICK_L, MOVE_KYO_RED_KICK_H
 	call MoveInputS_SetSpecMove_StopSpeed
 	jp   MoveInputReader_Kyo_MoveSet
+	
 ; =============== MoveInit_Kyo_ShikiKototsukiYou ===============	
 MoveInit_Kyo_ShikiKototsukiYou:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, .heavy
-.light:
-	ld   a, MOVE_KYO_SHIKI_KOTOTSUKI_YOU_L
-	jp   .setMove
-.heavy:
-	ld   a, MOVE_KYO_SHIKI_KOTOTSUKI_YOU_H
-.setMove:
+	mMvIn_GetLH MOVE_KYO_SHIKI_KOTOTSUKI_YOU_L, MOVE_KYO_SHIKI_KOTOTSUKI_YOU_H
 	call MoveInputS_SetSpecMove_StopSpeed
 	jp   MoveInputReader_Kyo_MoveSet
+	
 ; =============== MoveInit_Kyo_ShikiKai ===============	
 MoveInit_Kyo_ShikiKai:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, .heavy
-.light:
-	ld   a, MOVE_KYO_SHIKI_KAI_L
-	jp   .setMove
-.heavy:
-	ld   a, MOVE_KYO_SHIKI_KAI_H
-.setMove:
+	mMvIn_GetLH MOVE_KYO_SHIKI_KAI_L, MOVE_KYO_SHIKI_KAI_H
 	call MoveInputS_SetSpecMove_StopSpeed
 	jp   MoveInputReader_Kyo_MoveSet
+	
 ; =============== MoveInit_Kyo_ShikiNueTumi ===============	
 MoveInit_Kyo_ShikiNueTumi:
 	; Clear flag because ???
@@ -195,32 +135,20 @@ MoveInit_Kyo_ShikiNueTumi:
 	ld   [hl], $00
 	
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, .heavy
-.light:
-	ld   a, MOVE_KYO_SHIKI_NUE_TUMI_L
-	jp   .setMove
-.heavy:
-	ld   a, MOVE_KYO_SHIKI_NUE_TUMI_H
-.setMove:
+	mMvIn_GetLH MOVE_KYO_SHIKI_NUE_TUMI_L, MOVE_KYO_SHIKI_NUE_TUMI_H
 	call MoveInputS_SetSpecMove_StopSpeed
+	
 	ld   hl, iPlInfo_Flags2
 	add  hl, bc
 	set  PF2B_AUTOGUARDLOW, [hl]
 	jp   MoveInputReader_Kyo_MoveSet
+	
 ; =============== MoveInit_Kyo_UraShikiOrochinagi ===============
 MoveInit_Kyo_UraShikiOrochinagi:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckSuperDesperation
-	jp   c, .desperation
-.normal:
-	ld   a, MOVE_KYO_URA_SHIKI_OROCHINAGI_S
-	jp   .setMove
-.desperation:
-	ld   a, MOVE_KYO_URA_SHIKI_OROCHINAGI_D
-.setMove:
+	mMvIn_GetSD MOVE_KYO_URA_SHIKI_OROCHINAGI_S, MOVE_KYO_URA_SHIKI_OROCHINAGI_D
 	call MoveInputS_SetSpecMove_StopSpeed
-	; This super move removes projectiles
+	
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
 	set  PF0B_PROJREM, [hl]
@@ -329,12 +257,8 @@ L064237:;J
 	jr   nz, L064242
 	jr   L064254
 L064242:;R
-	ld   hl, MoveInput_FDB
-	call MoveInputS_ChkInputDir
-	jp   c, L0643FD
-	ld   hl, MoveInput_DF
-	call MoveInputS_ChkInputDir
-	jp   c, L0643E6
+	mMvIn_ChkDir MoveInput_FDB, L0643FD
+	mMvIn_ChkDir MoveInput_DF, L0643E6
 L064254:;R
 	jp   L06446E
 L064257:;J
@@ -345,12 +269,8 @@ L064257:;J
 	jr   nz, L064262
 	jr   L064274
 L064262:;R
-	ld   hl, MoveInput_FDB
-	call MoveInputS_ChkInputDir
-	jp   c, L0643FD
-	ld   hl, MoveInput_DF
-	call MoveInputS_ChkInputDir
-	jp   c, L0643E6
+	mMvIn_ChkDir MoveInput_FDB, L0643FD
+	mMvIn_ChkDir MoveInput_DF, L0643E6
 L064274:;R
 	call OBJLstS_IsFrameEnd
 	jp   nc, L06446E
@@ -931,9 +851,7 @@ L0646C2:;J
 	add  hl, bc
 	set  0, [hl]
 L0646D2:;J
-	ld   hl, MoveInput_DB_Copy
-	call MoveInputS_ChkInputDir
-	jp   nc, L0646EA
+	mMvIn_ChkDirNot MoveInput_DB_Copy, L0646EA
 	ld   hl, $0083
 	add  hl, bc
 	set  1, [hl]
@@ -1613,133 +1531,100 @@ L064CA0:;J
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 L064CA3:;J
 	ret
-MoveInputReader_Terry:;I
-	call MoveInputS_CanStartSpecialMove
-	jp   c, L064DA8
-	jp   z, L064CB0
-	jp   L064DA8
-L064CB0:;J
-	call MoveInputS_CheckEasyMoveKeys
-	jp   c, L064D82
-	jp   z, L064D4C
-	call MoveInputS_CheckLHType
-	jp   nc, L064DA8
-	jp   z, L064CC8
-	jp   nz, L064CF5
-L064CC5: db $C3;X
-L064CC6: db $A8;X
-L064CC7: db $4D;X
-L064CC8:;J
-	call MoveInputS_CanStartSuperMove
-	jp   c, L064CD7
-	ld   hl, MoveInput_DBDF
-	call MoveInputS_ChkInputDir
-	jp   c, L064D82
-L064CD7:;J
-	ld   hl, MoveInput_FDF
-	call MoveInputS_ChkInputDir
-	jp   c, L064D4C
-	ld   hl, MoveInput_DF
-	call MoveInputS_ChkInputDir
-	jp   c, L064D0A
-	ld   hl, MoveInput_DB
-	call MoveInputS_ChkInputDir
-	jp   c, L064D22
-	jp   L064DA8
-L064CF5:;J
-	ld   hl, MoveInput_DB
-	call MoveInputS_ChkInputDir
-	jp   c, L064D37
-	ld   hl, MoveInput_FDF
-	call MoveInputS_ChkInputDir
-	jp   c, L064D69
-	jp   L064DA8
-L064D0A:;J
+; =============== MoveInputReader_Terry ===============
+; Special move input checker for TERRY.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+; OUT
+; - C flag: If set, a move was started
+MoveInputReader_Terry:
+	mMvIn_Validate Terry
+	
+.chkAir:
+	jp   MoveInputReader_Terry_NoMove
+	
+.chkGround:
+	;             SELECT + B                  SELECT + A
+	mMvIn_ChkEasy MoveInit_Terry_PowerGeyser, MoveInit_Terry_RisingTackle
+	mMvIn_ChkGA Terry, .chkPunch, .chkKick
+	
+.chkPunch:
+	mMvIn_ValidateSuper .chkPunchNoSuper
+	
+	; DBDF+P -> Power Geyser
+	mMvIn_ChkDir MoveInput_DBDF, MoveInit_Terry_PowerGeyser
+.chkPunchNoSuper:
+	; FDF+P -> Rising Tackle
+	mMvIn_ChkDir MoveInput_FDF, MoveInit_Terry_RisingTackle
+	; DF+P -> Power Wave
+	mMvIn_ChkDir MoveInput_DF, MoveInit_Terry_PowerWave
+	; DB+P -> Burn Knuckle
+	mMvIn_ChkDir MoveInput_DB, MoveInit_Terry_BurnKnuckle
+	; End
+	jp   MoveInputReader_Terry_NoMove
+.chkKick:
+	; DB+K -> Crack Shot
+	mMvIn_ChkDir MoveInput_DB, MoveInit_Terry_CrackShot
+	; FDF+K -> Power Dunk
+	mMvIn_ChkDir MoveInput_FDF, MoveInit_Terry_PowerDunk
+	; End
+	jp   MoveInputReader_Terry_NoMove
+; =============== MoveInit_Terry_PowerWave ===============
+MoveInit_Terry_PowerWave:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L064D17
-	ld   a, $48
-	jp   L064D19
-L064D17:;R
-	ld   a, $4A
-L064D19:;J
+	mMvIn_GetLH MOVE_TERRY_POWER_WAVE_L, MOVE_TERRY_POWER_WAVE_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	call L00389E
-	jp   L064DA6
-L064D22:;J
+	call Play_Proj_CopyMoveDamageFromPl
+	jp   MoveInputReader_Terry_MoveSet
+; =============== MoveInit_Terry_BurnKnuckle ===============
+MoveInit_Terry_BurnKnuckle:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L064D2F
-	ld   a, $4C
-	jp   L064D31
-L064D2F:;R
-	ld   a, $4E
-L064D31:;J
+	mMvIn_GetLH MOVE_TERRY_BURN_KNUCKLE_L, MOVE_TERRY_BURN_KNUCKLE_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	jp   L064DA6
-L064D37:;J
+	jp   MoveInputReader_Terry_MoveSet
+; =============== MoveInit_Terry_CrackShot ===============
+MoveInit_Terry_CrackShot:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L064D44
-	ld   a, $50
-	jp   L064D46
-L064D44:;R
-	ld   a, $52
-L064D46:;J
+	mMvIn_GetLH MOVE_TERRY_CRACK_SHOT_L, MOVE_TERRY_CRACK_SHOT_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	jp   L064DA6
-L064D4C:;J
+	jp   MoveInputReader_Terry_MoveSet
+; =============== MoveInit_Terry_RisingTackle ===============
+MoveInit_Terry_RisingTackle:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L064D59
-	ld   a, $54
-	jp   L064D5B
-L064D59:;R
-	ld   a, $56
-L064D5B:;J
+	mMvIn_GetLH MOVE_TERRY_RISING_TACKLE_L, MOVE_TERRY_RISING_TACKLE_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0021
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	set  3, [hl]
-	res  5, [hl]
-	jp   L064DA6
-L064D69:;J
+	set  PF1B_GUARD, [hl] ; Take less damage if we're hit out of this
+	res  PF1B_CROUCH, [hl] ; [POI] Not necessary, already done by MoveInputS_SetSpecMove_StopSpeed
+	jp   MoveInputReader_Terry_MoveSet
+; =============== MoveInit_Terry_PowerDunk ===============
+MoveInit_Terry_PowerDunk:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L064D76
-	ld   a, $58
-	jp   L064D78
-L064D76:;R
-	ld   a, $5A
-L064D78:;J
+	mMvIn_GetLH MOVE_TERRY_POWER_DUNK_L, MOVE_TERRY_POWER_DUNK_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0021
+	;--
+	; [POI] What
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	jp   L064DA6
-L064D82:;J
+	;--
+	jp   MoveInputReader_Terry_MoveSet
+; =============== MoveInit_Terry_PowerGeyser ===============
+MoveInit_Terry_PowerGeyser:
 	; [POI] Power Geyser is the only move with an hidden desperation super.
 	;       See: MoveInputS_CheckSuperDesperation
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckSuperDesperation
-	jp   nc, L064D91	; Was a super desperation *NOT* triggered? If so, jump
-	jp   nz, L064D96	; Was the hidden desperation *NOT* triggered? If so, jump
-	jp   L064D9B		; Otherwise, jump
-L064D91:;J
-	ld   a, $64
-	jp   L064D9D
-L064D96:;J
-	ld   a, $66
-	jp   L064D9D
-L064D9B:
-	ld   a, $68
-L064D9D:;J
+	mMvIn_GetSDE MOVE_TERRY_POWER_GEYSER_S, MOVE_TERRY_POWER_GEYSER_D, MOVE_TERRY_POWER_GEYSER_E
 	call MoveInputS_SetSpecMove_StopSpeed
-	call L00389E
-	jp   L064DA6
-L064DA6:;J
+	call Play_Proj_CopyMoveDamageFromPl ; The geyser does the damage, not the player
+	jp   MoveInputReader_Terry_MoveSet
+; =============== MoveInputReader_Terry_MoveSet ===============
+MoveInputReader_Terry_MoveSet:
 	scf
 	ret
-L064DA8:;J
+; =============== MoveInputReader_Terry_NoMove ===============
+MoveInputReader_Terry_NoMove:
 	or   a
 	ret
 L064DAA:;I
@@ -2473,161 +2358,115 @@ L0652D5:;J
 	jp   nc, L0652D1
 	call OBJLstS_Hide
 	ret
-MoveInputReader_Mai:;I
-	call MoveInputS_CanStartSpecialMove
-	jp   c, L06541D
-	jp   z, L06530F
-	call MoveInputS_CheckEasyMoveKeys
-	jp   c, L065401
-	jp   z, L0653EC
-	call MoveInputS_CheckLHType
-	jp   nc, L06541D
-	jp   z, L065303
-	jp   nz, L065300
-L0652FD: db $C3;X
-L0652FE: db $1D;X
-L0652FF: db $54;X
-L065300:;J
-	jp   L06541D
-L065303:;J
-	ld   hl, MoveInput_DB
-	call MoveInputS_ChkInputDir
-	jp   c, L0653EC
-	jp   L06541D
-L06530F:;J
-	call MoveInputS_CheckEasyMoveKeys
-	jp   c, L065401
-	jp   z, L0653B7
-	call MoveInputS_CheckLHType
-	jp   nc, L06541D
-	jp   z, L065327
-	jp   nz, L06534B
-L065324: db $C3;X
-L065325: db $1D;X
-L065326: db $54;X
-L065327:;J
-	ld   hl, MoveInput_FDB
-	call MoveInputS_ChkInputDir
-	jp   c, L0653D3
-	call L003763
-	jp   nz, L06533F
-	ld   hl, MoveInput_DF
-	call MoveInputS_ChkInputDir
-	jp   c, L06536F
-L06533F:
-	ld   hl, MoveInput_DB
-	call MoveInputS_ChkInputDir
-	jp   c, L06539C
-	jp   L06541D
-L06534B:;J
-	call MoveInputS_CanStartSuperMove
-	jp   c, L06535A
-	ld   hl, MoveInput_DBDF
-	call MoveInputS_ChkInputDir
-	jp   c, L065401
-L06535A:;J
-	ld   hl, MoveInput_BDF
-	call MoveInputS_ChkInputDir
-	jp   c, L065387
-	ld   hl, MoveInput_FDF
-	call MoveInputS_ChkInputDir
-	jp   c, L0653B7
-	jp   L06541D
-L06536F:;J
+; =============== MoveInputReader_Mai ===============
+; Special move input checker for MAI.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+; OUT
+; - C flag: If set, a move was started
+MoveInputReader_Mai:
+	mMvIn_Validate Mai
+	
+.chkAir:
+	;             SELECT + B                            SELECT + A
+	mMvIn_ChkEasy MoveInit_Mai_ChoHissatsuShinobibachi, MoveInit_Mai_KuuchuuMusasabiMai
+	mMvIn_ChkGA Mai, .chkAirPunch, .chkAirKick
+.chkAirKick:
+	jp   MoveInputReader_Mai_NoMove
+.chkAirPunch:
+	; DB+P (Air) -> Kuuchuu Musasabi no Mai
+	mMvIn_ChkDir MoveInput_DB, MoveInit_Mai_KuuchuuMusasabiMai
+	jp   MoveInputReader_Mai_NoMove
+	
+.chkGround:
+	;             SELECT + B                            SELECT + A
+	mMvIn_ChkEasy MoveInit_Mai_ChoHissatsuShinobibachi, MoveInit_Mai_HishoRyuEnJin
+	mMvIn_ChkGA Mai, .chkPunch, .chkKick
+.chkPunch:
+	; FDB+P -> Chijou Musasabi no Mai 
+	mMvIn_ChkDir MoveInput_FDB, MoveInit_Mai_ChijouMusasabiMai
+	; DF+P -> Ka Cho Sen
+	mMvIn_ValidateProjActive .chkPunchNoProj
+	mMvIn_ChkDir MoveInput_DF, MoveInit_Mai_KaChoSen
+.chkPunchNoProj:
+	; DB+P -> Ryu En Bu
+	mMvIn_ChkDir MoveInput_DB, MoveInit_Mai_RyuEnBu
+	jp   MoveInputReader_Mai_NoMove
+.chkKick:
+	; DBDF+K -> Cho Hissatsu Shinobibachi
+	mMvIn_ValidateSuper .chkKickNoSuper
+	mMvIn_ChkDir MoveInput_DBDF, MoveInit_Mai_ChoHissatsuShinobibachi
+.chkKickNoSuper:
+	; BDF+K -> Hissatsu Shinobibachi
+	mMvIn_ChkDir MoveInput_BDF, MoveInit_Mai_HissatsuShinobibachi
+	; FDF+K -> Hisho Ryu En Jin
+	mMvIn_ChkDir MoveInput_FDF, MoveInit_Mai_HishoRyuEnJin
+	jp   MoveInputReader_Mai_NoMove
+; =============== MoveInit_Mai_KaChoSen ===============	
+MoveInit_Mai_KaChoSen:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L06537C
-	ld   a, $48
-	jp   L06537E
-L06537C:;R
-	ld   a, $4A
-L06537E:;J
+	mMvIn_GetLH MOVE_MAI_KA_CHO_SEN_L, MOVE_MAI_KA_CHO_SEN_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	call L00389E
-	jp   L06541B
-L065387:;J
+	call Play_Proj_CopyMoveDamageFromPl
+	jp   MoveInputReader_Mai_SetMove
+; =============== MoveInit_Mai_HissatsuShinobibachi ===============
+MoveInit_Mai_HissatsuShinobibachi:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L065394
-	ld   a, $4C
-	jp   L065396
-L065394:;R
-	ld   a, $4E
-L065396:;J
+	mMvIn_GetLH MOVE_MAI_HISSATSU_SHINOBIBACHI_L, MOVE_MAI_HISSATSU_SHINOBIBACHI_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	jp   L06541B
-L06539C:;J
+	jp   MoveInputReader_Mai_SetMove
+; =============== MoveInit_Mai_RyuEnBu ===============
+MoveInit_Mai_RyuEnBu:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L0653A9
-	ld   a, $50
-	jp   L0653AB
-L0653A9:;R
-	ld   a, $52
-L0653AB:;J
+	mMvIn_GetLH MOVE_MAI_RYU_EN_BU_L, MOVE_MAI_RYU_EN_BU_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0020
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	set  4, [hl]
-	jp   L06541B
-L0653B7:;J
+	set  PF0B_PROJREM, [hl]
+	jp   MoveInputReader_Mai_SetMove
+; =============== MoveInit_Mai_HishoRyuEnJin ===============
+MoveInit_Mai_HishoRyuEnJin:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L0653C4
-	ld   a, $54
-	jp   L0653C6
-L0653C4:;R
-	ld   a, $56
-L0653C6:;J
+	mMvIn_GetLH MOVE_MAI_HISHO_RYU_EN_JIN_L, MOVE_MAI_HISHO_RYU_EN_JIN_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0020
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	set  4, [hl]
+	set  PF0B_PROJREM, [hl]
 	inc  hl
-	jp   L06541B
-L0653D3:;J
+	jp   MoveInputReader_Mai_SetMove
+; =============== MoveInit_Mai_ChijouMusasabiMai ===============
+MoveInit_Mai_ChijouMusasabiMai:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L0653E0
-	ld   a, $58
-	jp   L0653E2
-L0653E0:;R
-	ld   a, $5A
-L0653E2:;J
+	mMvIn_GetLH MOVE_MAI_CHIJOU_MUSASABI_MAI_L, MOVE_MAI_CHIJOU_MUSASABI_MAI_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0021
+	;--
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	jp   L06541B
-L0653EC:;J
+	;--
+	jp   MoveInputReader_Mai_SetMove
+; =============== MoveInit_Mai_KuuchuuMusasabiMai ===============
+MoveInit_Mai_KuuchuuMusasabiMai:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L0653F9
-L0653F4: db $3E;X
-L0653F5: db $5C;X
-L0653F6: db $C3;X
-L0653F7: db $FB;X
-L0653F8: db $53;X
-L0653F9:;R
-	ld   a, $5E
+	mMvIn_GetLH MOVE_MAI_KUUCHUU_MUSASABI_MAI_L, MOVE_MAI_KUUCHUU_MUSASABI_MAI_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	jp   L06541B
-L065401:;J
+	jp   MoveInputReader_Mai_SetMove
+; =============== MoveInit_Mai_ChoHissatsuShinobibachi ===============
+MoveInit_Mai_ChoHissatsuShinobibachi:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckSuperDesperation
-	jp   c, L06540F
-	ld   a, $64
-	jp   L065411
-L06540F:;J
-	ld   a, $66
-L065411:;J
+	mMvIn_GetSD MOVE_MAI_CHO_HISSATSU_SHINOBIBACHI_S, MOVE_MAI_CHO_HISSATSU_SHINOBIBACHI_D
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0021
+	;--
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	jp   L06541B
-L06541B:;J
+	;--
+	jp   MoveInputReader_Mai_SetMove
+; =============== MoveInputReader_Mai_SetMove ===============
+MoveInputReader_Mai_SetMove:
 	scf
 	ret
-L06541D:;J
+; =============== MoveInputReader_Mai_NoMove ===============
+MoveInputReader_Mai_NoMove:
 	or   a
 	ret
 L06541F:;I
@@ -3538,184 +3377,129 @@ L065B34:;J
 	pop  de
 	pop  bc
 	ret
-MoveInputReader_Athena:;I
-	call MoveInputS_CanStartSpecialMove
-	jp   c, L065CBD
-	jp   z, L065B93
-	call MoveInputS_CheckEasyMoveKeys
-	jp   c, L065C93
-	jp   z, L065C02
-	call MoveInputS_CheckLHType
-	jp   nc, L065CBD
-	jp   z, L065B5B
-	jp   nz, L065B7F
-L065B58: db $C3;X
-L065B59: db $BD;X
-L065B5A: db $5C;X
-L065B5B:;J
-	call MoveInputS_CanStartSuperMove
-	jp   c, L065B6A
-	ld   hl, MoveInput_BFDB
-	call MoveInputS_ChkInputDir
-	jp   c, L065C93
-L065B6A:;J
-	ld   hl, MoveInput_FDF
-	call MoveInputS_ChkInputDir
-	jp   c, L065C32
-	ld   hl, MoveInput_DB
-	call MoveInputS_ChkInputDir
-	jp   c, L065C02
-	jp   L065CBD
-L065B7F:;J
-	ld   a, [wDipSwitch]
-	bit  3, a
-	jp   z, L065CBD
-	ld   hl, MoveInput_DF
-	call MoveInputS_ChkInputDir
-	jp   c, L065C4D
-	jp   L065CBD
-L065B93:;J
-	call MoveInputS_CheckEasyMoveKeys
-	jp   c, L065C6B
-	jp   z, L065C17
-	call MoveInputS_CheckLHType
-	jp   nc, L065CBD
-	jp   z, L065BAB
-	jp   nz, L065BCF
-L065BA8: db $C3;X
-L065BA9: db $BD;X
-L065BAA: db $5C;X
-L065BAB:;J
-	call MoveInputS_CanStartSuperMove
-	jp   c, L065BBA
-	ld   hl, MoveInput_BFDB
-	call MoveInputS_ChkInputDir
-	jp   c, L065C6B
-L065BBA:;J
-	ld   hl, MoveInput_FDF
-	call MoveInputS_ChkInputDir
-	jp   c, L065C32
-	ld   hl, MoveInput_DB
-	call MoveInputS_ChkInputDir
-	jp   c, L065BE4
-	jp   L065CBD
-L065BCF:;J
-	ld   hl, MoveInput_FDB
-	call MoveInputS_ChkInputDir
-	jp   c, L065C17
-	ld   hl, MoveInput_DF
-	call MoveInputS_ChkInputDir
-	jp   c, L065C4D
-	jp   L065CBD
-L065BE4:;J
-	call L003763
-	jp   nz, L065CBD
+; =============== MoveInputReader_Athena ===============
+; Special move input checker for ATHENA.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+; OUT
+; - C flag: If set, a move was started
+MoveInputReader_Athena:
+	mMvIn_Validate Athena
+	
+.chkAir:
+	;             SELECT + B                            SELECT + A
+	mMvIn_ChkEasy MoveInit_Athena_ShiningCrystalBitAir, MoveInit_Athena_PhoenixArrow
+	mMvIn_ChkGA Athena, .chkAirPunch, .chkAirKick
+.chkAirPunch:
+	mMvIn_ValidateSuper .chkAirPunchNoSuper
+	; BFDB+P (air) -> Shining Crystal Bit
+	mMvIn_ChkDir MoveInput_BFDB, MoveInit_Athena_ShiningCrystalBitAir
+.chkAirPunchNoSuper:
+	; FDF+P (air) -> Psycho Sword
+	mMvIn_ChkDir MoveInput_FDF, MoveInit_Athena_PsychoSword
+	; DB+P (air) -> Phoenix Arrow
+	mMvIn_ChkDir MoveInput_DB, MoveInit_Athena_PhoenixArrow
+	; End
+	jp   MoveInputReader_Athena_NoMove
+.chkAirKick:
+	; DF+K (air) -> Psycho Teleport
+	; [POI] With the autocharge cheat enabled, this move can be pulled off mid-air.
+	;       Though since it wasn't designed for this, as soon as the move ends Athena snaps to the ground.
+	mMvIn_ValidateDipAutoCharge MoveInputReader_Athena_NoMove
+	mMvIn_ChkDir MoveInput_DF, MoveInit_Athena_PsychoTeleport
+	; End
+	jp   MoveInputReader_Athena_NoMove
+	
+.chkGround:
+	;             SELECT + B                               SELECT + A
+	mMvIn_ChkEasy MoveInit_Athena_ShiningCrystalBitGround, MoveInit_Athena_PsychoReflector
+	mMvIn_ChkGA Athena, .chkPunch, .chkKick
+.chkPunch:
+	mMvIn_ValidateSuper .chkPunchNoSuper
+	; BFDB+P -> Shining Crystal Bit
+	mMvIn_ChkDir MoveInput_BFDB, MoveInit_Athena_ShiningCrystalBitGround
+.chkPunchNoSuper:
+	; FDF+P -> Psycho Sword
+	mMvIn_ChkDir MoveInput_FDF, MoveInit_Athena_PsychoSword
+	; DB+P -> Psycho Ball
+	mMvIn_ChkDir MoveInput_DB, MoveInit_Athena_PsychoBall
+	; End
+	jp   MoveInputReader_Athena_NoMove
+.chkKick:
+	; FDB+K -> Psycho Reflector
+	mMvIn_ChkDir MoveInput_FDB, MoveInit_Athena_PsychoReflector
+	; DF+K -> Psycho Teleport
+	mMvIn_ChkDir MoveInput_DF, MoveInit_Athena_PsychoTeleport
+	; End
+	jp   MoveInputReader_Athena_NoMove
+; =============== MoveInit_Athena_PsychoBall ===============	
+MoveInit_Athena_PsychoBall:
+	mMvIn_ValidateProjActive Athena
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L065BF7
-	ld   a, $48
-	jp   L065BF9
-L065BF7:;R
-	ld   a, $4A
-L065BF9:;J
+	mMvIn_GetLH MOVE_ATHENA_PSYCHO_BALL_L, MOVE_ATHENA_PSYCHO_BALL_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	call L00389E
-	jp   L065CBB
-L065C02:;J
+	call Play_Proj_CopyMoveDamageFromPl
+	jp   MoveInputReader_Athena_SetMove
+; =============== MoveInit_Athena_PhoenixArrow ===============
+MoveInit_Athena_PhoenixArrow:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L065C0F
-	ld   a, $4C
-	jp   L065C11
-L065C0F:;R
-	ld   a, $4E
-L065C11:;J
+	mMvIn_GetLH MOVE_ATHENA_PHOENIX_ARROW_L, MOVE_ATHENA_PHOENIX_ARROW_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	jp   L065CBB
-L065C17:;J
+	jp   MoveInputReader_Athena_SetMove
+; =============== MoveInit_Athena_PsychoReflector ===============
+MoveInit_Athena_PsychoReflector:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L065C24
-	ld   a, $50
-	jp   L065C26
-L065C24:;R
-	ld   a, $52
-L065C26:;J
+	mMvIn_GetLH MOVE_ATHENA_PSYCHO_REFLECTOR_L, MOVE_ATHENA_PSYCHO_REFLECTOR_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0020
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	set  5, [hl]
-	jp   L065CBB
-L065C32:;J
+	set  PF0B_PROJREFLECT, [hl]
+	jp   MoveInputReader_Athena_SetMove
+; =============== MoveInit_Athena_PsychoSword ===============
+MoveInit_Athena_PsychoSword:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L065C3F
-	ld   a, $54
-	jp   L065C41
-L065C3F:;R
-	ld   a, $56
-L065C41:;J
+	mMvIn_GetLH MOVE_ATHENA_PSYCHO_SWORD_L, MOVE_ATHENA_PSYCHO_SWORD_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0021
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	set  7, [hl]
-	jp   L065CBB
-L065C4D:;J
+	set  PF1B_INVULN, [hl]
+	jp   MoveInputReader_Athena_SetMove
+; =============== MoveInit_Athena_PsychoTeleport ===============
+MoveInit_Athena_PsychoTeleport:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L065C5A
-	ld   a, $58
-	jp   L065C5C
-L065C5A:;R
-	ld   a, $5A
-L065C5C:;J
+	mMvIn_GetLH MOVE_ATHENA_PSYCHO_TELEPORT_L, MOVE_ATHENA_PSYCHO_TELEPORT_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0021
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	set  7, [hl]
+	set  PF1B_INVULN, [hl]
 	inc  hl
-	set  7, [hl]
-	jp   L065CBB
-L065C6B:;J
-	call L003763
-	jp   nz, L065CBD
-	ld   hl, $0080
-	add  hl, de
-	bit  7, [hl]
-	jp   nz, L065CBD
+	set  PF2B_NOCOLIBOX, [hl]
+	jp   MoveInputReader_Athena_SetMove
+; =============== MoveInit_Athena_ShiningCrystalBitGround ===============
+MoveInit_Athena_ShiningCrystalBitGround:
+	mMvIn_ValidateProjActive Athena
+	mMvIn_ValidateProjVisible Athena
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckSuperDesperation
-	jp   c, L065C88
-	ld   a, $64
-	jp   L065C8A
-L065C88:;J
-	ld   a, $66
-L065C8A:;J
+	mMvIn_GetSD SHINING_CRYSTAL_BIT_GS, SHINING_CRYSTAL_BIT_GD
 	call MoveInputS_SetSpecMove_StopSpeed
-	call L00389E
-	jp   L065CBB
-L065C93:;J
-	call L003763
-	jp   nz, L065CBD
-	ld   hl, $0080
-	add  hl, de
-	bit  7, [hl]
-	jp   nz, L065CBD
+	call Play_Proj_CopyMoveDamageFromPl
+	jp   MoveInputReader_Athena_SetMove
+; =============== MoveInit_Athena_ShiningCrystalBitAir ===============
+MoveInit_Athena_ShiningCrystalBitAir:
+	mMvIn_ValidateProjActive Athena
+	mMvIn_ValidateProjVisible Athena
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckSuperDesperation
-	jp   c, L065CB0
-	ld   a, $68
-	jp   L065CB2
-L065CB0:;J
-	ld   a, $6A
-L065CB2:;J
+	mMvIn_GetSD SHINING_CRYSTAL_BIT_AS, SHINING_CRYSTAL_BIT_AD
 	call MoveInputS_SetSpecMove_StopSpeed
-	call L00389E
-	jp   L065CBB
-L065CBB:;J
+	call Play_Proj_CopyMoveDamageFromPl
+	jp   MoveInputReader_Athena_SetMove
+; =============== MoveInputReader_Athena_SetMove ===============
+MoveInputReader_Athena_SetMove:
 	scf
 	ret
-L065CBD:;J
+; =============== MoveInputReader_Athena_NoMove ===============
+MoveInputReader_Athena_NoMove:
 	or   a
 	ret
 L065CBF:;I
@@ -4159,7 +3943,7 @@ L06605A: db $C3;X
 L06605B: db $E2;X
 L06605C: db $60;X
 L06605D:;J
-	call MoveInputS_CheckLHType
+	call MoveInputS_CheckGAType
 	jp   nc, L06607B
 	jp   z, L066069
 	jp   L06607B
@@ -4208,17 +3992,13 @@ L066097: db $C3;X
 L066098: db $E2;X
 L066099: db $60;X
 L06609A:;J
-	call MoveInputS_CheckLHType
+	call MoveInputS_CheckGAType
 	jp   nc, L0660B8
 	jp   z, L0660A6
 	jp   L0660B8
 L0660A6:;J
-	ld   hl, MoveInput_DF
-	call MoveInputS_ChkInputDir
-	jp   c, L0660D9
-	ld   hl, MoveInput_DB
-	call MoveInputS_ChkInputDir
-	jp   c, L0660E2
+	mMvIn_ChkDir MoveInput_DF, L0660D9
+	mMvIn_ChkDir MoveInput_DB, L0660E2
 L0660B8:;J
 	call OBJLstS_IsFrameEnd
 	jp   nc, L06628F
@@ -4326,9 +4106,7 @@ L066178: db $C3;X
 L066179: db $D5;X
 L06617A: db $61;X
 L06617B:;J
-	ld   hl, MoveInput_DFURD
-	call MoveInputS_ChkInputDir
-	jp   nc, L0661D5
+	mMvIn_ChkDirNot MoveInput_DFURD, L0661D5
 L066184: db $21;X
 L066185: db $84;X
 L066186: db $00;X
@@ -4482,7 +4260,7 @@ L066233: db $3E;X
 L066234: db $D0;X
 L066235:;J
 	call L003890
-	call L00389E
+	call Play_Proj_CopyMoveDamageFromPl
 	call L066368
 L06623E:;J
 	call OBJLstS_IsFrameEnd
@@ -4530,7 +4308,7 @@ L066293:;C
 	call HomeCall_Sound_ReqPlayExId
 	push bc
 	push de
-	call L003763
+	call MoveInputS_CanStartProjMove
 	jp   nz, L0662E5
 	call L0024F8
 	ld   hl, $0020
@@ -6005,155 +5783,114 @@ L066A73:;J
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L066A76:;J
 	ret
-MoveInputReader_Andy:;I
-	call MoveInputS_CanStartSpecialMove
-	jp   c, L066BA1
-	jp   z, L066A9B
-	call MoveInputS_CheckLHType
-	jp   nc, L066BA1
-	jp   z, L066A98
-	jp   nz, L066A8F
-L066A8C: db $C3;X
-L066A8D: db $A1;X
-L066A8E: db $6B;X
-L066A8F:;J
-	ld   hl, MoveInput_DF
-	call MoveInputS_ChkInputDir
-	jp   c, L066B6C
-L066A98:;J
-	jp   L066BA1
-L066A9B:;J
-	call MoveInputS_CheckEasyMoveKeys
-	jp   c, L066B81
-	jp   z, L066AFF
-	call MoveInputS_CheckLHType
-	jp   nc, L066BA1
-	jp   z, L066AB3
-	jp   nz, L066AE4
-L066AB0: db $C3;X
-L066AB1: db $A1;X
-L066AB2: db $6B;X
-L066AB3:;J
-	ld   hl, $0061
+; =============== MoveInputReader_Andy ===============
+; Special move input checker for ANDY.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+; OUT
+; - C flag: If set, a move was started
+MoveInputReader_Andy:
+	mMvIn_Validate Andy
+	
+.chkAir:
+	mMvIn_ChkGA Andy, .chkAirPunch, .chkAirKick
+.chkAirKick:
+	; DF+K (air) -> Genei Shiranui
+	mMvIn_ChkDir MoveInput_DF, MoveInit_Andy_GeneiShiranui
+.chkAirPunch:
+	; End
+	jp   MoveInputReader_Andy_NoMove
+	
+.chkGround:
+	;             SELECT + B                 SELECT + A
+	mMvIn_ChkEasy MoveInit_Andy_ChoReppaDan, MoveInit_Andy_HiShoKen
+	mMvIn_ChkGA Andy, .chkPunch, .chkKick
+
+.chkPunch:
+	; BDF+P (close) -> Geki Heki Hai Sui Sho
+	mMvIn_ValidateClose .chkPunchNoClose
+	mMvIn_ChkDir MoveInput_BDF, MoveInit_Andy_GekiHekiHaiSuiSho
+.chkPunchNoClose:
+	; BF+P -> Zan Ei Ken
+	mMvIn_ChkDir MoveInput_BF_Fast, MoveInit_Andy_ZanEiKen
+	; FDF+P -> Sho Ryu Dan
+	mMvIn_ChkDir MoveInput_FDF, MoveInit_Andy_ShoRyuDan
+	; DB+P -> Hi Sho Ken
+	mMvIn_ChkDir MoveInput_DB, MoveInit_Andy_HiShoKen
+	; End
+	jp   MoveInputReader_Andy_NoMove
+.chkKick:
+	mMvIn_ValidateSuper .chkKickNoSuper
+	; DBDF+K -> Cho Reppa Dan
+	mMvIn_ChkDir MoveInput_DBDF, MoveInit_Andy_ChoReppaDan
+.chkKickNoSuper:
+	; BDF+K -> Ku Ha Dan 
+	mMvIn_ChkDir MoveInput_BDF, MoveInit_Andy_KuHaDan 
+	; End
+	jp   MoveInputReader_Andy_NoMove
+; =============== MoveInit_Andy_HiShoKen ===============
+MoveInit_Andy_HiShoKen:
+	call Play_Pl_ClearJoyDirBuffer
+	mMvIn_GetLH MOVE_ANDY_HI_SHO_KEN_L, MOVE_ANDY_HI_SHO_KEN_H
+	call MoveInputS_SetSpecMove_StopSpeed
+	;--
+	; What
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	ld   a, [hl]
-	cp   $18
-	jp   nc, L066AC6
-	ld   hl, MoveInput_BDF
-	call MoveInputS_ChkInputDir
-	jp   c, L066B57
-L066AC6:;J
-	ld   hl, MoveInput_BF_Fast
-	call MoveInputS_ChkInputDir
-	jp   c, L066B18
-	ld   hl, MoveInput_FDF
-	call MoveInputS_ChkInputDir
-	jp   c, L066B42
-	ld   hl, MoveInput_DB
-	call MoveInputS_ChkInputDir
-	jp   c, L066AFF
-	jp   L066BA1
-L066AE4:;J
-	call MoveInputS_CanStartSuperMove
-	jp   c, L066AF3
-	ld   hl, MoveInput_DBDF
-	call MoveInputS_ChkInputDir
-	jp   c, L066B81
-L066AF3:;J
-	ld   hl, MoveInput_BDF
-	call MoveInputS_ChkInputDir
-	jp   c, L066B2D
-	jp   L066BA1
-L066AFF:;J
+	;--
+	jp   MoveInputReader_Andy_SetMove
+; =============== MoveInit_Andy_ZanEiKen ===============
+MoveInit_Andy_ZanEiKen:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L066B0C
-	ld   a, $48
-	jp   L066B0E
-L066B0C:;R
-	ld   a, $4A
-L066B0E:;J
+	mMvIn_GetLH MOVE_ANDY_ZAN_EI_KEN_L, MOVE_ANDY_ZAN_EI_KEN_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0021
+	jp   MoveInputReader_Andy_SetMove
+; =============== MoveInit_Andy_KuHaDan ===============
+MoveInit_Andy_KuHaDan:
+	call Play_Pl_ClearJoyDirBuffer
+	mMvIn_GetLH MOVE_ANDY_KU_HA_DAN_L, MOVE_ANDY_KU_HA_DAN_H
+	call MoveInputS_SetSpecMove_StopSpeed
+	jp   MoveInputReader_Andy_SetMove
+; =============== MoveInit_Andy_ShoRyuDan ===============
+MoveInit_Andy_ShoRyuDan:
+	call Play_Pl_ClearJoyDirBuffer
+	mMvIn_GetLH MOVE_ANDY_SHO_RYU_DAN_L, MOVE_ANDY_SHO_RYU_DAN_H
+	call MoveInputS_SetSpecMove_StopSpeed
+	jp   MoveInputReader_Andy_SetMove
+; =============== MoveInit_Andy_GekiHekiHaiSuiSho ===============
+MoveInit_Andy_GekiHekiHaiSuiSho:
+	call Play_Pl_ClearJoyDirBuffer
+	mMvIn_GetLH MOVE_ANDY_GEKI_HEKI_HAI_SUI_SHO_L, MOVE_ANDY_GEKI_HEKI_HAI_SUI_SHO_H
+	call MoveInputS_SetSpecMove_StopSpeed
+	jp   MoveInputReader_Andy_SetMove
+; =============== MoveInit_Andy_GeneiShiranui ===============
+MoveInit_Andy_GeneiShiranui:
+	call Play_Pl_ClearJoyDirBuffer
+	mMvIn_GetLH MOVE_ANDY_GENEI_SHIRANUI_L, MOVE_ANDY_GENEI_SHIRANUI_H
+	call MoveInputS_SetSpecMove_StopSpeed
+	jp   MoveInputReader_Andy_SetMove
+; =============== MoveInit_Andy_ChoReppaDan ===============
+MoveInit_Andy_ChoReppaDan:
+	call Play_Pl_ClearJoyDirBuffer
+	mMvIn_GetSD MOVE_ANDY_CHO_REPPA_DAN_S, MOVE_ANDY_CHO_REPPA_DAN_D
+	call MoveInputS_SetSpecMove_StopSpeed
+	; This super removes projectiles
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	jp   L066B9F
-L066B18:;J
-	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L066B25
-	ld   a, $4C
-	jp   L066B27
-L066B25:;R
-	ld   a, $4E
-L066B27:;J
-	call MoveInputS_SetSpecMove_StopSpeed
-	jp   L066B9F
-L066B2D:;J
-	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L066B3A
-	ld   a, $50
-	jp   L066B3C
-L066B3A:;R
-	ld   a, $52
-L066B3C:;J
-	call MoveInputS_SetSpecMove_StopSpeed
-	jp   L066B9F
-L066B42:;J
-	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L066B4F
-	ld   a, $54
-	jp   L066B51
-L066B4F:;R
-	ld   a, $56
-L066B51:;J
-	call MoveInputS_SetSpecMove_StopSpeed
-	jp   L066B9F
-L066B57:;J
-	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L066B64
-	ld   a, $58
-	jp   L066B66
-L066B64:;R
-	ld   a, $5A
-L066B66:;J
-	call MoveInputS_SetSpecMove_StopSpeed
-	jp   L066B9F
-L066B6C:;J
-	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L066B79
-	ld   a, $5C
-	jp   L066B7B
-L066B79:;R
-	ld   a, $5E
-L066B7B:;J
-	call MoveInputS_SetSpecMove_StopSpeed
-	jp   L066B9F
-L066B81:;J
-	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckSuperDesperation
-	jp   c, L066B8F
-	ld   a, $64
-	jp   L066B91
-L066B8F:;J
-	ld   a, $66
-L066B91:;J
-	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0020
-	add  hl, bc
-	set  4, [hl]
+	set  PF0B_PROJREM, [hl]
 	inc  hl
 	inc  hl
-	jp   L066B9F
-L066B9F:;J
+	jp   MoveInputReader_Andy_SetMove
+; =============== MoveInputReader_Andy_SetMove ===============
+MoveInputReader_Andy_SetMove:
 	scf
 	ret
-L066BA1:;J
+; =============== MoveInputReader_Andy_NoMove ===============
+MoveInputReader_Andy_NoMove:
 	or   a
 	ret
+	
 L066BA3:;I
 	call L00347B
 	call L0038B3
@@ -6890,119 +6627,86 @@ L0671EA:;J
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 L0671ED:;JR
 	ret
-MoveInputReader_MrBig:;I
-	call MoveInputS_CanStartSpecialMove
-	jp   c, L0672DB
-	jp   z, L0671FA
-	jp   L0672DB
-L0671FA:;J
-	call MoveInputS_CheckEasyMoveKeys
-	jp   c, L0672C0
-	jp   z, L0672AB
-	call MoveInputS_CheckLHType
-	jp   nc, L0672DB
-	jp   z, L067212
-	jp   nz, L067248
-L06720F: db $C3;X
-L067210: db $DB;X
-L067211: db $72;X
-L067212:;J
-	call MoveInputS_CanStartSuperMove
-	jp   c, L067221
-	ld   hl, MoveInput_DFDF
-	call MoveInputS_ChkInputDir
-	jp   c, L0672C0
-L067221:;J
-	ld   hl, MoveInput_FDF
-	call MoveInputS_ChkInputDir
-	jp   c, L067296
-	ld   hl, MoveInput_FDB
-	call MoveInputS_ChkInputDir
-	jp   c, L06726C
-	ld   hl, MoveInput_DF
-	call MoveInputS_ChkInputDir
-	jp   c, L067254
-	ld   hl, MoveInput_PPP
-	call MoveInputS_ChkInputBtnStrict
-	jp   c, L0672AB
-	jp   L0672DB
-L067248:;J
-	ld   hl, MoveInput_FDB
-	call MoveInputS_ChkInputDir
-	jp   c, L067281
-	jp   L0672DB
-L067254:;J
+; =============== MoveInputReader_MrBig ===============
+; Special move input checker for MRBIG.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+; OUT
+; - C flag: If set, a move was started
+MoveInputReader_MrBig:
+	mMvIn_Validate MrBig
+	
+.chkAir:
+	jp   MoveInputReader_MrBig_NoMove
+	
+.chkGround:
+	;             SELECT + B                               SELECT + A
+	mMvIn_ChkEasy MoveInit_MrBig_BlasterWave, MoveInit_MrBig_DrumShot
+	mMvIn_ChkGA MrBig, .chkPunch, .chkKick
+.chkPunch:
+	; DFDF+P -> Blaster Wave
+	mMvIn_ValidateSuper .chkPunchNoSuper
+	mMvIn_ChkDir MoveInput_DFDF, MoveInit_MrBig_BlasterWave
+.chkPunchNoSuper:
+	; FDF+P -> California Romance
+	mMvIn_ChkDir MoveInput_FDF, MoveInit_MrBig_CaliforniaRomance
+	; FDB+P -> Cross Diving
+	mMvIn_ChkDir MoveInput_FDB, MoveInit_MrBig_CrossDiving
+	; DF+P -> Ground Blaster
+	mMvIn_ChkDir MoveInput_DF, MoveInit_MrBig_GroundBlaster
+	; Px3 -> Crazy Drum Dram
+	mMvIn_ChkBtnStrict MoveInput_PPP, MoveInit_MrBig_DrumShot
+	jp   MoveInputReader_MrBig_NoMove
+.chkKick:
+	; FDB+K -> Spinning Lancer
+	mMvIn_ChkDir MoveInput_FDB, MoveInit_MrBig_SpinningLancer
+	jp   MoveInputReader_MrBig_NoMove
+	
+; =============== MoveInit_MrBig_GroundBlaster ===============
+MoveInit_MrBig_GroundBlaster:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L067261
-	ld   a, $48
-	jp   L067263
-L067261:;R
-	ld   a, $4A
-L067263:;J
+	mMvIn_GetLH MOVE_MRBIG_GROUND_BLASTER_L, MOVE_MRBIG_GROUND_BLASTER_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	call L00389E
-	jp   L0672D9
-L06726C:;J
+	call Play_Proj_CopyMoveDamageFromPl
+	jp   MoveInputReader_MrBig_SetMove
+; =============== MoveInit_MrBig_CrossDiving ===============
+MoveInit_MrBig_CrossDiving:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L067279
-	ld   a, $4C
-	jp   L06727B
-L067279:;R
-	ld   a, $4E
-L06727B:;J
+	mMvIn_GetLH MOVE_MRBIG_CROSS_DIVING_L, MOVE_MRBIG_CROSS_DIVING_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	jp   L0672D9
-L067281:;J
+	jp   MoveInputReader_MrBig_SetMove
+; =============== MoveInit_MrBig_SpinningLancer ===============
+MoveInit_MrBig_SpinningLancer:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L06728E
-	ld   a, $50
-	jp   L067290
-L06728E:;R
-	ld   a, $52
-L067290:;J
+	mMvIn_GetLH MOVE_MRBIG_SPINNING_LANCER_L, MOVE_MRBIG_SPINNING_LANCER_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	jp   L0672D9
-L067296:;J
+	jp   MoveInputReader_MrBig_SetMove
+; =============== MoveInit_MrBig_CaliforniaRomance ===============
+MoveInit_MrBig_CaliforniaRomance:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L0672A3
-	ld   a, $54
-	jp   L0672A5
-L0672A3:;R
-	ld   a, $56
-L0672A5:;J
+	mMvIn_GetLH MOVE_MRBIG_CALIFORNIA_ROMANCE_L, MOVE_MRBIG_CALIFORNIA_ROMANCE_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	jp   L0672D9
-L0672AB:;J
+	jp   MoveInputReader_MrBig_SetMove
+; =============== MoveInit_MrBig_DrumShot ===============
+MoveInit_MrBig_DrumShot:
 	call Play_Pl_ClearJoyBtnBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L0672B8
-	ld   a, $58
-	jp   L0672BA
-L0672B8:;R
-	ld   a, $5A
-L0672BA:;J
+	mMvIn_GetLH MOVE_MRBIG_DRUM_SHOT_L, MOVE_MRBIG_DRUM_SHOT_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	jp   L0672D9
-L0672C0:;J
+	jp   MoveInputReader_MrBig_SetMove
+; =============== MoveInit_MrBig_BlasterWave ===============
+MoveInit_MrBig_BlasterWave:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckSuperDesperation
-	jp   c, L0672CE
-	ld   a, $64
-	jp   L0672D0
-L0672CE:;J
-	ld   a, $66
-L0672D0:;J
+	mMvIn_GetSD MOVE_MRBIG_BLASTER_WAVE_S, MOVE_MRBIG_BLASTER_WAVE_D
 	call MoveInputS_SetSpecMove_StopSpeed
-	call L00389E
-	jp   L0672D9
-L0672D9:;J
+	call Play_Proj_CopyMoveDamageFromPl
+	jp   MoveInputReader_MrBig_SetMove
+; =============== MoveInputReader_MrBig_SetMove ===============
+MoveInputReader_MrBig_SetMove:
 	scf
 	ret
-L0672DB:;J
+; =============== MoveInputReader_MrBig_NoMove ===============
+MoveInputReader_MrBig_NoMove:
 	or   a
 	ret
 L0672DD:;I
@@ -7640,163 +7344,136 @@ L0677B8:;J
 L0677BC:;J
 	call OBJLstS_Hide
 	ret
-MoveInputReader_Geese:;I
-	call MoveInputS_CanStartSpecialMove
-	jp   c, L0678F6
-	jp   z, L0677ED
-	call MoveInputS_CheckEasyMoveKeys
-	jp   c, L06786E
-	jp   z, L067883
-	call MoveInputS_CheckLHType
-	jp   nc, L0678F6
-	jp   z, L0677E1
-	jp   nz, L0677EA
-L0677DE: db $C3;X
-L0677DF: db $F6;X
-L0677E0: db $78;X
-L0677E1:;J
-	ld   hl, MoveInput_DB
-	call MoveInputS_ChkInputDir
-	jp   c, L067883
-L0677EA:;J
-	jp   L0678F6
-L0677ED:;J
-	call MoveInputS_CheckEasyMoveKeys
-	jp   c, L0678DB
-	jp   z, L0678B1
-	call MoveInputS_CheckLHType
-	jp   nc, L0678F6
-	jp   z, L067805
-	jp   nz, L067832
-L067802: db $C3;X
-L067803: db $F6;X
-L067804: db $78;X
-L067805:;J
-	call MoveInputS_CanStartSuperMove
-	jp   c, L067814
-	ld   hl, MoveInput_BFDBF
-	call MoveInputS_ChkInputDir
-	jp   c, L0678DB
-L067814:;J
-	ld   hl, MoveInput_FDF
-	call MoveInputS_ChkInputDir
-	jp   c, L06786E
-	ld   hl, MoveInput_FDB
-	call MoveInputS_ChkInputDir
-	jp   c, L067859
-	ld   hl, MoveInput_DF
-	call MoveInputS_ChkInputDir
-	jp   c, L06783E
-	jp   L0678F6
-L067832:;J
-	ld   hl, MoveInput_BDF
-	call MoveInputS_ChkInputDir
-	jp   c, L0678B1
-	jp   L0678F6
-L06783E:;J
+; =============== MoveInputReader_Geese ===============
+; Special move input checker for GEESE.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+; OUT
+; - C flag: If set, a move was started
+MoveInputReader_Geese:
+	mMvIn_Validate Geese
+	
+.chkAir:
+	;             SELECT + B                        SELECT + A
+	mMvIn_ChkEasy MoveInit_Geese_HishouNichirinZan, MoveInit_Geese_ShippuKen
+	mMvIn_ChkGA Geese, .chkAirPunch, .chkAirKick
+.chkAirPunch:
+	; DB+P (air) -> Shippu Ken
+	mMvIn_ChkDir MoveInput_DB, MoveInit_Geese_ShippuKen
+.chkAirKick:
+	jp   MoveInputReader_Geese_NoMove
+	
+.chkGround:
+	;             SELECT + B                  SELECT + A
+	mMvIn_ChkEasy MoveInit_Geese_RagingStorm, MoveInit_Geese_AtemiNage
+	mMvIn_ChkGA Geese, .chkPunch, .chkKick
+.chkPunch:
+	mMvIn_ValidateSuper .chkPunchNoSuper
+	; BFDBF+P -> Raging Storm
+	mMvIn_ChkDir MoveInput_BFDBF, MoveInit_Geese_RagingStorm
+.chkPunchNoSuper:
+	; FDF+P -> Hishou Nichirin Zan
+	mMvIn_ChkDir MoveInput_FDF, MoveInit_Geese_HishouNichirinZan
+	; FDB+P -> Ja ei ken
+	mMvIn_ChkDir MoveInput_FDB, MoveInit_Geese_JaEiKen
+	; DF+P -> Reppuken
+	mMvIn_ChkDir MoveInput_DF, MoveInit_Geese_Reppuken
+	jp   MoveInputReader_Geese_NoMove
+.chkKick:
+	; BDF+K -> Atemi Nage
+	mMvIn_ChkDir MoveInput_BDF, MoveInit_Geese_AtemiNage
+	jp   MoveInputReader_Geese_NoMove
+; =============== MoveInit_Geese_Reppuken ===============	
+MoveInit_Geese_Reppuken:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L06784B
-	ld   a, $48
-	jp   L06784D
-L06784B:;R
-	ld   a, $4A
-L06784D:;J
+	mMvIn_GetLH MOVE_GEESE_REPPUKEN_L, MOVE_GEESE_REPPUKEN_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0020
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	set  4, [hl]
-	jp   L0678F4
-L067859:;J
+	set  PF0B_PROJREM, [hl]
+	jp   MoveInputReader_Geese_SetMove
+; =============== MoveInit_Geese_JaEiKen ===============	
+MoveInit_Geese_JaEiKen:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L067866
-	ld   a, $4C
-	jp   L067868
-L067866:;R
-	ld   a, $4E
-L067868:;J
+	mMvIn_GetLH MOVE_GEESE_JA_EI_KEN_L, MOVE_GEESE_JA_EI_KEN_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	jp   L0678F4
-L06786E:;J
+	jp   MoveInputReader_Geese_SetMove
+; =============== MoveInit_Geese_HishouNichirinZan ===============	
+MoveInit_Geese_HishouNichirinZan:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L06787B
-	ld   a, $50
-	jp   L06787D
-L06787B:;R
-	ld   a, $52
-L06787D:;J
+	mMvIn_GetLH MOVE_GEESE_HISHOU_NICHIRIN_ZAN_L, MOVE_GEESE_HISHOU_NICHIRIN_ZAN_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	jp   L0678F4
-L067883:;J
+	jp   MoveInputReader_Geese_SetMove
+; =============== MoveInit_Geese_ShippuKen ===============	
+MoveInit_Geese_ShippuKen:
 	call Play_Pl_ClearJoyDirBuffer
-	ld   hl, $0007
+	
+	; Preserve the player's momentum when starting the move
+	ld   hl, iOBJInfo_SpeedX
 	add  hl, de
-	ldi  a, [hl]
-	push af
-	ldi  a, [hl]
-	push af
-	ldi  a, [hl]
-	push af
-	ld   a, [hl]
-	push af
-	push hl
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L06789D
-	ld   a, $54
-	jp   L06789F
-L06789D:;R
-	ld   a, $56
-L06789F:;J
-	call MoveInputS_SetSpecMove_StopSpeed
-	call L00389E
-	pop  hl
+	ldi  a, [hl]	
+	push af				; Save iOBJInfo_SpeedX
+		ldi  a, [hl]
+		push af				; Save iOBJInfo_SpeedXSub
+			ldi  a, [hl]
+			push af				; Save iOBJInfo_SpeedY
+				ld   a, [hl]
+				push af				; Save iOBJInfo_SpeedYSub
+					push hl				; Save OBJInfo ptr
+						mMvIn_GetLH MOVE_GEESE_SHIPPU_KEN_L, MOVE_GEESE_SHIPPU_KEN_H
+						call MoveInputS_SetSpecMove_StopSpeed
+						call Play_Proj_CopyMoveDamageFromPl
+					pop  hl				; Restore OBJInfo ptr
+				pop  af
+				ldd  [hl], a		; Restore iOBJInfo_SpeedYSub
+			pop  af
+			ldd  [hl], a		; Restore iOBJInfo_SpeedY
+		pop  af
+		ldd  [hl], a		; Restore iOBJInfo_SpeedXSub
 	pop  af
-	ldd  [hl], a
-	pop  af
-	ldd  [hl], a
-	pop  af
-	ldd  [hl], a
-	pop  af
-	ld   [hl], a
-	jp   L0678F4
-L0678B1:;J
-	ld   hl, $0083
+	ld   [hl], a		; Restore iOBJInfo_SpeedX
+	
+	jp   MoveInputReader_Geese_SetMove
+; =============== MoveInit_Geese_AtemiNage ===============	
+MoveInit_Geese_AtemiNage:
+	; Reset running jump because ???
+	ld   hl, iPlInfo_RunningJump
 	add  hl, bc
 	ld   [hl], $00
+	
 	call Play_Pl_ClearJoyDirBuffer
+	
+	; The two versions autoguard in different points.
 	call MoveInputS_CheckMoveLHVer
-	jr   nz, L0678CD
-	ld   a, $58
+	jr   nz, .heavy
+.light:
+	ld   a, MOVE_GEESE_ATEMI_NAGE_L
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0022
+	ld   hl, iPlInfo_Flags2
 	add  hl, bc
-	set  4, [hl]
-	jp   L0678F4
-L0678CD:;R
-	ld   a, $5A
+	set  PF2B_AUTOGUARDMID, [hl]
+	jp   MoveInputReader_Geese_SetMove
+.heavy:
+	ld   a, MOVE_GEESE_ATEMI_NAGE_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0022
+	ld   hl, iPlInfo_Flags2
 	add  hl, bc
-	set  5, [hl]
-	jp   L0678F4
-L0678DB:;J
+	set  PF2B_AUTOGUARDLOW, [hl]
+	jp   MoveInputReader_Geese_SetMove
+; =============== MoveInit_Geese_RagingStorm ===============	
+MoveInit_Geese_RagingStorm:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckSuperDesperation
-	jp   c, L0678E9
-	ld   a, $64
-	jp   L0678EB
-L0678E9:;J
-	ld   a, $66
-L0678EB:;J
+	mMvIn_GetSD MOVE_GEESE_RAGING_STORM_S, MOVE_GEESE_RAGING_STORM_D
 	call MoveInputS_SetSpecMove_StopSpeed
-	call L00389E
-	jp   L0678F4
-L0678F4:;J
+	call Play_Proj_CopyMoveDamageFromPl
+	jp   MoveInputReader_Geese_SetMove
+; =============== MoveInputReader_Geese_SetMove ===============	
+MoveInputReader_Geese_SetMove:
 	scf
 	ret
-L0678F6:;J
+; =============== MoveInputReader_Geese_NoMove ===============	
+MoveInputReader_Geese_NoMove:
 	or   a
 	ret
 L0678F8:;I
@@ -8175,7 +7852,7 @@ L067C02:;J
 	add  hl, bc
 	ld   [hl], $01
 L067C2F:;J
-	call L003A28
+	call MoveInputS_TryStartCommandThrow_Unk_Coli05
 	jp   nc, L067B71
 	call Task_PassControlFar
 	ld   a, $03

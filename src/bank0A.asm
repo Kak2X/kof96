@@ -12351,186 +12351,135 @@ BG_TakaraLogo: INCBIN "data/bg/takaralogo.bin"
 ; =============== END OF MODULE TakaraLogo ===============
 ;
 
-MoveInputReader_Goenitz:;I
-	call MoveInputS_CanStartSpecialMove
-	jp   c, L0A74E8
-	jp   z, L0A73BB
-	call MoveInputS_CheckEasyMoveKeys
-	jp   c, L0A73A3
-	jp   z, L0A745B
-	call MoveInputS_CheckLHType
-	jp   nc, L0A74E8
-	jp   z, L0A7394
-	jp   nz, L0A73AF
-L0A7391: db $C3;X
-L0A7392: db $E8;X
-L0A7393: db $74;X
-L0A7394:;J
-	call MoveInputS_CanStartSuperMove
-	jp   c, L0A73AC
-	ld   hl, MoveInput_DBDF
-	call MoveInputS_ChkInputDir
-	jp   nc, L0A73AC
-L0A73A3: db $CD;X
-L0A73A4: db $90;X
-L0A73A5: db $37;X
-L0A73A6: db $DA;X
-L0A73A7: db $D8;X
-L0A73A8: db $74;X
-L0A73A9: db $C3;X
-L0A73AA: db $C3;X
-L0A73AB: db $74;X
-L0A73AC:;J
-	jp   L0A74E8
-L0A73AF:;J
-	ld   hl, MoveInput_DB
-	call MoveInputS_ChkInputDir
-	jp   c, L0A745B
-	jp   L0A74E8
-L0A73BB:;J
-	call MoveInputS_CheckEasyMoveKeys
-	jp   c, L0A73E2
-	jp   z, L0A7484
-	call MoveInputS_CheckLHType
-	jp   nc, L0A74E8
-	jp   z, L0A73D3
-	jp   nz, L0A7409
-L0A73D0: db $C3;X
-L0A73D1: db $E8;X
-L0A73D2: db $74;X
-L0A73D3:;J
-	call MoveInputS_CanStartSuperMove
-	jp   c, L0A73EB
-	ld   hl, MoveInput_DBDF
-	call MoveInputS_ChkInputDir
-	jp   nc, L0A73EB
-L0A73E2:;J
-	call MoveInputS_CheckSuperDesperation
-	jp   c, L0A74CB
-	jp   L0A74B6
-L0A73EB:;J
-	ld   hl, MoveInput_FDBFDB
-	call MoveInputS_ChkInputDir
-	jp   c, L0A7484
-	ld   hl, MoveInput_BDF
-	call MoveInputS_ChkInputDir
-	jp   c, L0A741E
-	ld   hl, MoveInput_DB
-	call MoveInputS_ChkInputDir
-	jp   c, L0A746C
-	jp   L0A74E8
-L0A7409:;J
-	ld   hl, MoveInput_BDF
-	call MoveInputS_ChkInputDir
-	jp   c, L0A7436
-	ld   hl, MoveInput_DB
-	call MoveInputS_ChkInputDir
-	jp   c, L0A744E
-	jp   L0A74E8
-L0A741E:;J
+; =============== MoveInputReader_Goenitz ===============
+; Special move input checker for GOENITZ.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+; OUT
+; - C flag: If set, a move was started
+MoveInputReader_Goenitz:
+	mMvIn_Validate Goenitz
+	
+	; This character handles the super desperations differently.
+	; Both the normal and desperation supers have light/heavy variations,
+	; which is why it's using mMvIn_JpSD to then jump to the light/heavy check.
+	
+.chkAir:
+	;             SELECT + B                            SELECT + A
+	mMvIn_ChkEasy .startAirPunchSuper, MoveInit_Goenitz_Hyouga.heavy
+	mMvIn_ChkGA Goenitz, .chkAirPunch, .chkAirKick
+.chkAirPunch:
+	; DBDF+P (air) -> Shinyaotome Mizuchi / Shinyaotome Jissoukoku  (always heavy)
+	mMvIn_ValidateSuper .chkAirPunchNoSuper
+	mMvIn_ChkDirNot MoveInput_DBDF, .chkAirPunchNoSuper
+.startAirPunchSuper:
+	mMvIn_JpSD MoveInit_Goenitz_ShinyaotomeMizuchi.heavy, MoveInit_Goenitz_ShinyaotomeJissoukoku.heavy
+.chkAirPunchNoSuper:
+	jp   MoveInputReader_Goenitz_NoMove
+.chkAirKick:
+	; DB+K (air) -> Wanpyou Tokobuse
+	mMvIn_ChkDir MoveInput_DB, MoveInit_Goenitz_Hyouga.heavy
+	jp   MoveInputReader_Goenitz_NoMove
+	
+.chkGround:
+	;             SELECT + B                               SELECT + A
+	mMvIn_ChkEasy .startPunchSuper, MoveInit_Goenitz_Yamidoukoku
+	mMvIn_ChkGA Goenitz, .chkPunch, .chkKick
+.chkPunch:
+	; DBDF+P -> Shinyaotome Mizuchi / Shinyaotome Jissoukoku 
+	mMvIn_ValidateSuper .chkPunchNoSuper
+	mMvIn_ChkDirNot MoveInput_DBDF, .chkPunchNoSuper
+.startPunchSuper:
+	mMvIn_JpSD MoveInit_Goenitz_ShinyaotomeMizuchi, MoveInit_Goenitz_ShinyaotomeJissoukoku
+.chkPunchNoSuper:
+	; FDBx2+P -> Yamidoukoku (Other super move)
+	mMvIn_ChkDir MoveInput_FDBFDB, MoveInit_Goenitz_Yamidoukoku
+	; BDF+P -> Yonokaze (Near)
+	mMvIn_ChkDir MoveInput_BDF, MoveInit_Goenitz_YonokazeNear
+	; DB+P -> Wanpyou Tokobuse
+	mMvIn_ChkDir MoveInput_DB, MoveInit_Goenitz_WanpyouTokobuse
+	jp   MoveInputReader_Goenitz_NoMove
+.chkKick:
+	; BDF+K -> Yonokaze (Far)
+	mMvIn_ChkDir MoveInput_BDF, MoveInit_Goenitz_YonokazeFar
+	; DB+K -> Hyouga
+	mMvIn_ChkDir MoveInput_DB, MoveInit_Goenitz_Hyouga
+	jp   MoveInputReader_Goenitz_NoMove
+	
+; =============== MoveInit_Goenitz_YonokazeNear ===============
+MoveInit_Goenitz_YonokazeNear:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L0A742B
-	ld   a, $48
-	jp   L0A742D
-L0A742B:;R
-	ld   a, $4A
-L0A742D:;J
+	mMvIn_GetLH MOVE_GOENITZ_YONOKAZE1, MOVE_GOENITZ_YONOKAZE2
 	call MoveInputS_SetSpecMove_StopSpeed
-	call L00389E
-	jp   L0A74E6
-L0A7436:;J
+	call Play_Proj_CopyMoveDamageFromPl
+	jp   MoveInputReader_Goenitz_SetMove
+; =============== MoveInit_Goenitz_YonokazeFar ===============
+MoveInit_Goenitz_YonokazeFar:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L0A7443
-	ld   a, $4C
-	jp   L0A7445
-L0A7443:;R
-	ld   a, $4E
-L0A7445:;J
+	mMvIn_GetLH MOVE_GOENITZ_YONOKAZE3, MOVE_GOENITZ_YONOKAZE4
 	call MoveInputS_SetSpecMove_StopSpeed
-	call L00389E
-	jp   L0A74E6
-L0A744E:;J
+	call Play_Proj_CopyMoveDamageFromPl
+	jp   MoveInputReader_Goenitz_SetMove
+; =============== MoveInit_Goenitz_Hyouga ===============
+MoveInit_Goenitz_Hyouga:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L0A745B
-	ld   a, $50
-	jp   L0A745D
-L0A745B:;R
-	ld   a, $52
-L0A745D:;J
+	mMvIn_GetLH MOVE_GOENITZ_HYOUGA_L, MOVE_GOENITZ_HYOUGA_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0021
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	set  7, [hl]
+	set  PF1B_INVULN, [hl]
 	inc  hl
-	set  7, [hl]
-	jp   L0A74E6
-L0A746C:;J
+	set  PF2B_NOCOLIBOX, [hl]
+	jp   MoveInputReader_Goenitz_SetMove
+; =============== MoveInit_Goenitz_WanpyouTokobuse ===============
+MoveInit_Goenitz_WanpyouTokobuse:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L0A7479
-	ld   a, $54
-	jp   L0A747B
-L0A7479:;R
-	ld   a, $56
-L0A747B:;J
+	mMvIn_GetLH MOVE_GOENITZ_WANPYOU_TOKOBUSE_L, MOVE_GOENITZ_WANPYOU_TOKOBUSE_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	call L00389E
-	jp   L0A74E6
-L0A7484:;J
+	call Play_Proj_CopyMoveDamageFromPl
+	jp   MoveInputReader_Goenitz_SetMove
+; =============== MoveInit_Goenitz_Yamidoukoku ===============
+; Extra super move.
+MoveInit_Goenitz_Yamidoukoku:
 	call Play_Pl_ClearJoyDirBuffer
-	call L003A3E
-	jp   nc, L0A74E8
-	call Task_PassControlFar
-	ld   a, $03
-	ld   [wPlayPlThrowActId], a
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L0A749F
-	ld   a, $58
-	jp   L0A74A1
-L0A749F:;R
-	ld   a, $5A
-L0A74A1:;J
+	mMvIn_ValStartCmdThrow04 Goenitz
+	mMvIn_GetLH MOVE_GOENITZ_YAMIDOUKOKU_SL, MOVE_GOENITZ_YAMIDOUKOKU_SH
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0020
+	; We want this to be a super move, even though it's not in a slot reserved for one.
+	; So we've got to set it up manually.
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	set  6, [hl]
+	set  PF0B_SUPERMOVE, [hl]
 	inc  hl
-	set  7, [hl]
+	set  PF1B_INVULN, [hl]
+	; The super sparkle is offset, unlike the normal one
 	ld   hl, $08F0
 	call Play_StartSuperSparkle
-	jp   L0A74E6
-L0A74B6:;J
+	jp   MoveInputReader_Goenitz_SetMove
+; =============== MoveInit_Goenitz_ShinyaotomeMizuchi ===============
+; Super move.
+MoveInit_Goenitz_ShinyaotomeMizuchi:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L0A74C3
-	ld   a, $64
-	jp   L0A74C5
-L0A74C3:;R
-	ld   a, $66
-L0A74C5:;J
+	mMvIn_GetLH MOVE_GOENITZ_SHINYAOTOME_MIZUCHI_SL, MOVE_GOENITZ_SHINYAOTOME_MIZUCHI_SH
 	call MoveInputS_SetSpecMove_StopSpeed
-	jp   L0A74E6
-L0A74CB:;J
+	jp   MoveInputReader_Goenitz_SetMove
+; =============== MoveInit_Goenitz_ShinyaotomeJissoukoku ===============
+; Desperation super.
+MoveInit_Goenitz_ShinyaotomeJissoukoku:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L0A74D8
-	ld   a, $68
-	jp   L0A74DA
-L0A74D8:;R
-	ld   a, $6A
-L0A74DA:;J
+	mMvIn_GetLH MOVE_GOENITZ_SHINYAOTOME_JISSOUKOKU_DL, MOVE_GOENITZ_SHINYAOTOME_JISSOUKOKU_DH
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0021
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	set  7, [hl]
-	jp   L0A74E6
-L0A74E6:;J
+	set  PF1B_INVULN, [hl]
+	jp   MoveInputReader_Goenitz_SetMove
+; =============== MoveInputReader_Goenitz_SetMove ===============
+MoveInputReader_Goenitz_SetMove:
 	scf
 	ret
-L0A74E8:;J
+; =============== MoveInputReader_Goenitz_NoMove ===============
+MoveInputReader_Goenitz_NoMove:
 	or   a
 	ret
 L0A74EA:;I
@@ -12883,7 +12832,7 @@ L0A7795:;J
 	ld   hl, $020E
 	ld   a, $01
 	call L003890
-	call L00389E
+	call Play_Proj_CopyMoveDamageFromPl
 	call L0A7E1D
 L0A77A9:;J
 	call OBJLstS_IsFrameEnd
@@ -13178,7 +13127,7 @@ L0A7A36:;J
 	call OBJLstS_ApplyXSpeed
 	call OBJLstS_IsFrameEnd
 	jp   nc, L0A7A92
-	call L003A28
+	call MoveInputS_TryStartCommandThrow_Unk_Coli05
 	jp   nc, L0A7A95
 	call Task_PassControlFar
 	ld   a, $03

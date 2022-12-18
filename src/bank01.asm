@@ -11426,7 +11426,7 @@ Play_ChkEnd_KO:
 .chkWaitPost:
 	; Execute main loop
 	ld   b, $01
-	call Play_MainLoopAlt_756D
+	call Play_MainLoop_PostRoundTextNoDisplay
 .chkWaitPost1P:
 	; Players must be either in the idle move (winner/draw) or have no move (lost).
 	; This is to allow any currently executing move to finish.
@@ -11894,7 +11894,7 @@ Play_LoadPostRoundText0:
 
 	; Execute once a cut down version of the gameplay loop ??? without the move reader.
 	ld   b, $01
-	call Play_MainLoopAlt_756D
+	call Play_MainLoop_PostRoundTextNoDisplay
 	
 .chkWait1P:
 	; Players must be either in the idle move (winner/draw) or have no move (lost).
@@ -11929,7 +11929,7 @@ Play_LoadPostRoundText0:
 	
 	; Wait for 2 more frames
 	ld   b, $02
-	call Play_MainLoopAlt_756D
+	call Play_MainLoop_PostRoundTextNoDisplay
 	
 .loadGFX:
 
@@ -11952,7 +11952,7 @@ Play_LoadPostRoundText0:
 	ld   [wNoCopyGFXBuf], a
 	call Task_PassControlFar
 	ld   b, $01
-	call Play_MainLoopAlt_756D
+	call Play_MainLoop_PostRoundTextNoDisplay
 	
 	; Copy the first set of graphics over during HBlank
 	ld   hl, wLZSS_Buffer+$1E	; HL = Source ptr
@@ -11973,7 +11973,7 @@ Play_LoadPostRoundText0:
 	inc  hl
 	ld   [hl], HIGH(OBJLstPtrTable_PostRoundText0)
 	ld   b, $01
-	call Play_MainLoopAlt_756D
+	call Play_MainLoop_PostRoundTextNoDisplay
 	
 	;
 	; Load the OBJInfo for both crosses.
@@ -11986,14 +11986,14 @@ Play_LoadPostRoundText0:
 	ld   de, OBJInfoInit_Play_CharCross
 	call OBJLstS_InitFrom
 	ld   b, $01
-	call Play_MainLoopAlt_756D
+	call Play_MainLoop_PostRoundTextNoDisplay
 	
 	; Over 1P's side
 	ld   hl, wOBJInfo_Pl1Cross+iOBJInfo_Status
 	ld   de, OBJInfoInit_Play_CharCross
 	call OBJLstS_InitFrom
 	ld   b, $01
-	call Play_MainLoopAlt_756D
+	call Play_MainLoop_PostRoundTextNoDisplay
 	
 	ret
 	
@@ -12020,7 +12020,7 @@ Play_CopyPostRoundGFXToVRAM:
 		push de
 			push hl
 				ld   b, $01
-				call Play_MainLoopAlt_756D
+				call Play_MainLoop_PostRoundTextNoDisplay
 			pop  hl
 		pop  de
 	pop  bc
@@ -12405,10 +12405,10 @@ Play_SetDraw:
 	call Play_MainLoop_PostRoundTextDisplay
 	ret
 ; =============== Play_MainLoop_PostRoundTextNoDisplay ===============
-; ??? Version of the main loop used post-round when the text isn't visible.
+; Version of the main loop used post-round when the text isn't visible.
 ; IN
 ; - B: Frames of execution (usually short)
-Play_MainLoopAlt_756D:
+Play_MainLoop_PostRoundTextNoDisplay:
 	push bc
 		call Play_DoPlInput
 		call Play_DoHUD
@@ -12419,8 +12419,8 @@ Play_MainLoopAlt_756D:
 		call Play_ExecExOBJCode
 		call Task_PassControlFar
 	pop  bc
-	dec  b							; Done all frames?	
-	jp   nz, Play_MainLoopAlt_756D	; If not, loop
+	dec  b											; Done all frames?	
+	jp   nz, Play_MainLoop_PostRoundTextNoDisplay	; If not, loop
 	ret
 ; =============== Play_MainLoop_PostRoundTextDisplay ===============
 ; Version of the main loop used when displaying post-round text.

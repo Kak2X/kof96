@@ -13584,159 +13584,115 @@ L0974E2: db $0A
 L0974E3: db $30
 L0974E4: db $00
 L0974E5: db $0C
-MoveInputReader_Krauser:;I
-	call MoveInputS_CanStartSpecialMove
-	jp   c, L097625
-	jp   z, L0974F2
-	jp   L097625
-L0974F2:;J
-	call MoveInputS_CheckEasyMoveKeys
-	jp   c, L097604
-	jp   z, L0975B7
-	call MoveInputS_CheckLHType
-	jp   nc, L097625
-	jp   z, L09750A
-	jp   nz, L097534
-L097507: db $C3;X
-L097508: db $25;X
-L097509: db $76;X
-L09750A:;J
-	ld   hl, MoveInput_FDBF
-	call MoveInputS_ChkInputDir
-	jp   nc, L097519
-	call L003A3E
-	jp   c, L0975E1
-L097519:;J
-	call MoveInputS_CanStartSuperMove
-	jp   c, L097528
-	ld   hl, MoveInput_FBDF
-	call MoveInputS_ChkInputDir
-	jp   c, L097604
-L097528:;J
-	ld   hl, MoveInput_DB
-	call MoveInputS_ChkInputDir
-	jp   c, L09755B
-	jp   L097625
-L097534:;J
-	ld   hl, MoveInput_FDF
-	call MoveInputS_ChkInputDir
-	jp   c, L0975B7
-	ld   hl, MoveInput_BDF
-	call MoveInputS_ChkInputDir
-	jp   c, L0975CC
-	ld   hl, MoveInput_DB
-	call MoveInputS_ChkInputDir
-	jp   c, L097579
-	ld   hl, MoveInput_DF
-	call MoveInputS_ChkInputDir
-	jp   c, L097597
-	jp   L097625
-L09755B:;J
-	call L003763
-	jp   nz, L097625
+
+; =============== MoveInputReader_Krauser ===============
+; Special move input checker for KRAUSER.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+; OUT
+; - C flag: If set, a move was started
+MoveInputReader_Krauser:
+	mMvIn_Validate Krauser
+.chkAir:
+	jp   MoveInputReader_Krauser_NoMove
+	
+.chkGround:
+	;             SELECT + B                   SELECT + A
+	mMvIn_ChkEasy MoveInit_Krauser_KaiserWave, MoveInit_Krauser_KaiserKick
+	mMvIn_ChkGA Krauser, .chkPunch, .chkKick
+.chkPunch:
+	; FDBF+P (close) -> Kaiser Suplex
+	; "Not" check for this command throw, since it uses the same input as the next one.
+	mMvIn_ChkDirNot MoveInput_FDBF, .chkPunchSuper
+	mMvIn_JpIfStartCmdThrow04 MoveInit_Krauser_KaiserSuplex ; Jump here on success
+.chkPunchSuper:
+	; FBDF+P -> Kaiser Wave
+	mMvIn_ValidateSuper .chkPunchNoSuper
+	mMvIn_ChkDir MoveInput_FBDF, MoveInit_Krauser_KaiserWave
+.chkPunchNoSuper:
+	; DB+P -> High Blitz Ball
+	mMvIn_ChkDir MoveInput_DB, MoveInit_Krauser_HighBlitzBall
+	jp   MoveInputReader_Krauser_NoMove
+.chkKick:
+	; FDF+K -> Kaiser Kick
+	mMvIn_ChkDir MoveInput_FDF, MoveInit_Krauser_KaiserKick
+	; BDF+K -> Kaiser Duel Sobat
+	mMvIn_ChkDir MoveInput_BDF, MoveInit_Krauser_KaiserDuelSobat
+	; DB+K -> Low Blitz Ball
+	mMvIn_ChkDir MoveInput_DB, MoveInit_Krauser_LowBlitzBall
+	; DF+K -> Leg Tomahawk
+	mMvIn_ChkDir MoveInput_DF, MoveInit_Krauser_LegTomahawk
+	jp   MoveInputReader_Krauser_NoMove
+	
+; =============== MoveInit_Krauser_HighBlitzBall ===============	
+MoveInit_Krauser_HighBlitzBall:
+	mMvIn_ValidateProjActive Krauser
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L09756E
-	ld   a, $48
-	jp   L097570
-L09756E:;R
-	ld   a, $4A
-L097570:;J
+	mMvIn_GetLH MOVE_KRAUSER_HIGH_BLITZ_BALL_L, MOVE_KRAUSER_HIGH_BLITZ_BALL_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	call L00389E
-	jp   L097623
-L097579:;J
-	call L003763
-	jp   nz, L097625
+	call Play_Proj_CopyMoveDamageFromPl
+	jp   MoveInputReader_Krauser_SetMove
+; =============== MoveInit_Krauser_LowBlitzBall ===============	
+MoveInit_Krauser_LowBlitzBall:
+	mMvIn_ValidateProjActive Krauser
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L09758C
-	ld   a, $4C
-	jp   L09758E
-L09758C:;R
-	ld   a, $4E
-L09758E:;J
+	mMvIn_GetLH MOVE_KRAUSER_LOW_BLITZ_BALL_L, MOVE_KRAUSER_LOW_BLITZ_BALL_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	call L00389E
-	jp   L097623
-L097597:;J
+	call Play_Proj_CopyMoveDamageFromPl
+	jp   MoveInputReader_Krauser_SetMove
+; =============== MoveInit_Krauser_LegTomahawk ===============	
+MoveInit_Krauser_LegTomahawk:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L0975A4
-	ld   a, $50
-	jp   L0975A6
-L0975A4:;R
-	ld   a, $52
-L0975A6:;J
+	mMvIn_GetLH MOVE_KRAUSER_LEG_TOMAHAWK_L, MOVE_KRAUSER_LEG_TOMAHAWK_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	call MoveInputS_CheckMoveLHVer
-	jr   nc, L097623
-L0975AE: db $21;X
-L0975AF: db $21;X
-L0975B0: db $00;X
-L0975B1: db $09;X
-L0975B2: db $CB;X
-L0975B3: db $FE;X
-L0975B4: db $C3;X
-L0975B5: db $23;X
-L0975B6: db $76;X
-L0975B7:;J
+	; [POI] There's a hidden heavy version with the autocharge enabled.
+	;       This version is invulnerable compared to the normal heavy.
+	call MoveInputS_CheckMoveLHVer				; Recheck LH status
+	jr   nc, MoveInputReader_Krauser_SetMove	; Did we start an hidden heavy? If not, return
+	ld   hl, iPlInfo_Flags1
+	add  hl, bc
+	set  PF1B_INVULN, [hl]
+	jp   MoveInputReader_Krauser_SetMove
+; =============== MoveInit_Krauser_KaiserKick ===============	
+MoveInit_Krauser_KaiserKick:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L0975C4
-	ld   a, $54
-	jp   L0975C6
-L0975C4:;R
-	ld   a, $56
-L0975C6:;J
+	mMvIn_GetLH MOVE_KRAUSER_KAISER_KICK_L, MOVE_KRAUSER_KAISER_KICK_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	jp   L097623
-L0975CC:;J
+	jp   MoveInputReader_Krauser_SetMove
+; =============== MoveInit_Krauser_KaiserDuelSobat ===============	
+MoveInit_Krauser_KaiserDuelSobat:
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L0975D9
-	ld   a, $58
-	jp   L0975DB
-L0975D9:;R
-	ld   a, $5A
-L0975DB:;J
+	mMvIn_GetLH MOVE_KRAUSER_KAISER_DUEL_SOBAT_L, MOVE_KRAUSER_KAISER_DUEL_SOBAT_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	jp   L097623
-L0975E1:;J
+	jp   MoveInputReader_Krauser_SetMove
+; =============== MoveInit_Krauser_KaiserSuplex ===============	
+MoveInit_Krauser_KaiserSuplex:
 	call Play_Pl_ClearJoyDirBuffer
 	call Task_PassControlFar
-	ld   a, $03
+	; Set the second "unthrowtechable" half of the grab mode, like for normal throws.
+	ld   a, PLAY_THROWACT_NEXT03
 	ld   [wPlayPlThrowActId], a
-	call MoveInputS_CheckMoveLHVer
-	jr   nz, L0975F6
-	ld   a, $5C
-	jp   L0975F8
-L0975F6:;R
-	ld   a, $5E
-L0975F8:;J
+	mMvIn_GetLH MOVE_KRAUSER_KAISER_SUPLEX_L, MOVE_KRAUSER_KAISER_SUPLEX_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0021
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	set  7, [hl]
-	jp   L097623
-L097604:;J
-	call L003763
-	jp   nz, L097625
+	set  PF1B_INVULN, [hl]
+	jp   MoveInputReader_Krauser_SetMove
+; =============== MoveInit_Krauser_KaiserWave ===============	
+MoveInit_Krauser_KaiserWave:
+	mMvIn_ValidateProjActive Krauser
 	call Play_Pl_ClearJoyDirBuffer
-	call MoveInputS_CheckSuperDesperation
-	jp   c, L097618
-	ld   a, $64
-	jp   L09761A
-L097618:;J
-	ld   a, $66
-L09761A:;J
+	mMvIn_GetSD MOVE_KRAUSER_KAISER_WAVE_S, MOVE_KRAUSER_KAISER_WAVE_D
 	call MoveInputS_SetSpecMove_StopSpeed
-	call L00389E
-	jp   L097623
-L097623:;JR
+	call Play_Proj_CopyMoveDamageFromPl
+	jp   MoveInputReader_Krauser_SetMove
+; =============== MoveInputReader_Krauser_SetMove ===============
+MoveInputReader_Krauser_SetMove:
 	scf
 	ret
-L097625:;J
+; =============== MoveInputReader_Krauser_NoMove ===============
+MoveInputReader_Krauser_NoMove:
 	or   a
 	ret
 L097627:;I
