@@ -12483,8 +12483,8 @@ MoveInputReader_Goenitz_NoMove:
 	or   a
 	ret
 L0A74EA:;I
-	call L00347B
-	call L0038B3
+	call Play_Pl_MoveByColiBoxOverlapX
+	call Play_Pl_IsMoveLoading
 	jp   c, L0A755A
 	ld   hl, $0017
 	add  hl, de
@@ -12532,15 +12532,15 @@ L0A7548:;J
 L0A754B:;J
 	call OBJLstS_IsFrameEnd
 	jp   nc, L0A7557
-	call L002EA2
+	call Play_Pl_EndMove
 	jp   L0A755A
 L0A7557:;J
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L0A755A:;J
 	ret
 L0A755B:;I
-	call L00347B
-	call L0038B3
+	call Play_Pl_MoveByColiBoxOverlapX
+	call Play_Pl_IsMoveLoading
 	jp   c, L0A75FA
 	ld   hl, $0017
 	add  hl, de
@@ -12620,15 +12620,15 @@ L0A75EC:;J
 	call OBJLstS_ApplyXSpeed
 	jp   L0A75F7
 L0A75F2:;J
-	call L002EA2
+	call Play_Pl_EndMove
 	jr   L0A75FA
 L0A75F7:;J
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L0A75FA:;JR
 	ret
 L0A75FB:;I
-	call L00347B
-	call L0038B3
+	call Play_Pl_MoveByColiBoxOverlapX
+	call Play_Pl_IsMoveLoading
 	jp   c, L0A76A8
 	ld   hl, $0017
 	add  hl, de
@@ -12714,15 +12714,15 @@ L0A7687:;J
 L0A769A:;J
 	call OBJLstS_IsFrameEnd
 	jp   nc, L0A76A5
-	call L002EA2
+	call Play_Pl_EndMove
 	jr   L0A76A8
 L0A76A5:;J
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 L0A76A8:;JR
 	ret
 L0A76A9:;I
-	call L00347B
-	call L0038B3
+	call Play_Pl_MoveByColiBoxOverlapX
+	call Play_Pl_IsMoveLoading
 	jp   c, L0A7713
 	ld   hl, $0017
 	add  hl, de
@@ -12765,15 +12765,15 @@ L0A76F8:;J
 L0A7704:;J
 	call OBJLstS_IsFrameEnd
 	jp   nc, L0A7710
-	call L002EA2
+	call Play_Pl_EndMove
 	jp   L0A7713
 L0A7710:;J
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 L0A7713:;J
 	ret
 L0A7714:;I
-	call L00347B
-	call L0038B3
+	call Play_Pl_MoveByColiBoxOverlapX
+	call Play_Pl_IsMoveLoading
 	jp   c, L0A77C9
 	ld   hl, $0017
 	add  hl, de
@@ -12794,7 +12794,7 @@ L0A773E:;J
 	jp   z, L0A7752
 	ld   hl, $0611
 	ld   a, $01
-	call L003882
+	call Play_Pl_SetMoveDamage
 	ld   hl, $F0F0
 	call L003875
 L0A7752:;J
@@ -12808,7 +12808,7 @@ L0A775E:;J
 	jp   z, L0A77C6
 	ld   hl, $0611
 	ld   a, $01
-	call L003882
+	call Play_Pl_SetMoveDamage
 	ld   hl, $F0EF
 	call L003875
 	jp   L0A77C6
@@ -12817,7 +12817,7 @@ L0A7775:;J
 	jp   z, L0A7789
 	ld   hl, $0611
 	ld   a, $01
-	call L003882
+	call Play_Pl_SetMoveDamage
 	ld   hl, $F0EE
 	call L003875
 L0A7789:;J
@@ -12831,7 +12831,7 @@ L0A7795:;J
 	jp   z, L0A77A9
 	ld   hl, $020E
 	ld   a, $01
-	call L003890
+	call Play_Pl_SetMoveDamageNext
 	call Play_Proj_CopyMoveDamageFromPl
 	call L0A7E1D
 L0A77A9:;J
@@ -12843,7 +12843,7 @@ L0A77A9:;J
 L0A77B5:;J
 	call OBJLstS_IsFrameEnd
 	jp   nc, L0A77C6
-	call L002EA2
+	call Play_Pl_EndMove
 	ld   a, $00
 	ld   [wPlayPlThrowActId], a
 	jp   L0A77C9
@@ -12852,8 +12852,8 @@ L0A77C6:;J
 L0A77C9:;J
 	ret
 L0A77CA:;I
-	call L00347B
-	call L0038B3
+	call Play_Pl_MoveByColiBoxOverlapX
+	call Play_Pl_IsMoveLoading
 	jp   c, L0A7892
 	ld   hl, $0017
 	add  hl, de
@@ -12884,7 +12884,7 @@ L0A7805:;J
 	jp   z, L0A788F
 	ld   hl, $0611
 	ld   a, $01
-	call L003882
+	call Play_Pl_SetMoveDamage
 	ld   hl, $F0F0
 	call L003875
 	jp   L0A788F
@@ -12893,7 +12893,7 @@ L0A781C:;J
 	jp   z, L0A788F
 	ld   hl, $0611
 	ld   a, $01
-	call L003882
+	call Play_Pl_SetMoveDamage
 	ld   hl, $F3F0
 	call L003875
 	jp   L0A788F
@@ -12902,7 +12902,7 @@ L0A7833:;J
 	jp   z, L0A788F
 	ld   hl, $0612
 	ld   a, $01
-	call L003882
+	call Play_Pl_SetMoveDamage
 	ld   hl, $0CE0
 	call L003875
 	jp   L0A788F
@@ -12911,7 +12911,7 @@ L0A784A:;J
 	jp   z, L0A7861
 	ld   hl, $0613
 	ld   a, $01
-	call L003882
+	call Play_Pl_SetMoveDamage
 	ld   hl, $10FC
 	call L003875
 	jp   L0A788F
@@ -12926,12 +12926,12 @@ L0A786D:;J
 	jp   z, L0A787E
 	ld   hl, $0A0C
 	ld   a, $01
-	call L003882
+	call Play_Pl_SetMoveDamage
 	jp   L0A788F
 L0A787E:;J
 	call OBJLstS_IsFrameEnd
 	jp   nc, L0A788F
-	call L002EA2
+	call Play_Pl_EndMove
 	ld   a, $00
 	ld   [wPlayPlThrowActId], a
 	jp   L0A7892
@@ -12940,8 +12940,8 @@ L0A788F:;J
 L0A7892:;J
 	ret
 L0A7893:;I
-	call L00347B
-	call L0038B3
+	call Play_Pl_MoveByColiBoxOverlapX
+	call Play_Pl_IsMoveLoading
 	jp   c, L0A79A9
 	ld   hl, $0017
 	add  hl, de
@@ -12974,7 +12974,7 @@ L0A78D3:;J
 	jp   z, L0A79A6
 	ld   hl, $0611
 	ld   a, $01
-	call L003882
+	call Play_Pl_SetMoveDamage
 	ld   hl, $F0F0
 	call L003875
 	jp   L0A79A6
@@ -12983,7 +12983,7 @@ L0A78EA:;J
 	jp   z, L0A7901
 	ld   hl, $0611
 	ld   a, $01
-	call L003882
+	call Play_Pl_SetMoveDamage
 	ld   hl, $F3F0
 	call L003875
 	jp   L0A79A6
@@ -13004,7 +13004,7 @@ L0A790D:;J
 	call Play_OBJLstS_SetSpeedV
 	ld   hl, $0611
 	ld   a, $01
-	call L003882
+	call Play_Pl_SetMoveDamage
 	ld   hl, $F3F0
 	call L003875
 	ld   a, $01
@@ -13020,7 +13020,7 @@ L0A7944:;J
 	jp   z, L0A795D
 	ld   hl, $0613
 	ld   a, $01
-	call L003882
+	call Play_Pl_SetMoveDamage
 	ld   hl, $04E8
 	call L003875
 	ld   a, $01
@@ -13032,7 +13032,7 @@ L0A7960:;J
 	jp   z, L0A7977
 	ld   hl, $0A0C
 	ld   a, $01
-	call L003882
+	call Play_Pl_SetMoveDamage
 	call OBJLstS_IsFrameEnd
 	jp   nc, L0A79A6
 L0A7974: db $23;X
@@ -13049,12 +13049,12 @@ L0A797A:;J
 	call L002DEC
 	ld   hl, $0A0C
 	ld   a, $01
-	call L003890
+	call Play_Pl_SetMoveDamageNext
 	jp   L0A79A9
 L0A7995:;J
 	call OBJLstS_IsFrameEnd
 	jp   nc, L0A79A6
-	call L002EA2
+	call Play_Pl_EndMove
 	ld   a, $00
 	ld   [wPlayPlThrowActId], a
 	jp   L0A79A9
@@ -13063,8 +13063,8 @@ L0A79A6:;J
 L0A79A9:;J
 	ret
 L0A79AA:;I
-	call L00347B
-	call L0038B3
+	call Play_Pl_MoveByColiBoxOverlapX
+	call Play_Pl_IsMoveLoading
 	jp   c, L0A7A95
 	ld   hl, $0017
 	add  hl, de
@@ -13093,7 +13093,7 @@ L0A79E0:;J
 	jp   nc, L0A7A92
 	ld   hl, $010A
 	ld   a, $10
-	call L003890
+	call Play_Pl_SetMoveDamageNext
 	jp   L0A7A75
 L0A79F4:;J
 	call OBJLstS_ApplyXSpeed
@@ -13101,7 +13101,7 @@ L0A79F4:;J
 	jp   nc, L0A7A92
 	ld   hl, $010A
 	ld   a, $10
-	call L003890
+	call Play_Pl_SetMoveDamageNext
 	jp   L0A7A75
 L0A7A08:;J
 	call OBJLstS_ApplyXSpeed
@@ -13113,7 +13113,7 @@ L0A7A08:;J
 	jp   z, L0A7A2B
 	ld   hl, $0109
 	ld   a, $10
-	call L003890
+	call Play_Pl_SetMoveDamageNext
 	ld   a, $00
 	ld   h, $00
 	call L002E49
@@ -13121,7 +13121,7 @@ L0A7A08:;J
 L0A7A2B:;J
 	ld   hl, $010A
 	ld   a, $10
-	call L003890
+	call Play_Pl_SetMoveDamageNext
 	jp   L0A7A75
 L0A7A36:;J
 	call OBJLstS_ApplyXSpeed
@@ -13149,7 +13149,7 @@ L0A7A65:;J
 L0A7A6A:;J
 	ld   hl, $010A
 	ld   a, $10
-	call L003890
+	call Play_Pl_SetMoveDamageNext
 	jp   L0A7A95
 L0A7A75:;J
 	ld   hl, $0073
@@ -13178,8 +13178,8 @@ L0A7A92:;J
 L0A7A95:;J
 	ret
 L0A7A96:;I
-	call L00347B
-	call L0038B3
+	call Play_Pl_MoveByColiBoxOverlapX
+	call Play_Pl_IsMoveLoading
 	jp   c, L0A7B4B
 	ld   hl, $0017
 	add  hl, de
@@ -13290,8 +13290,8 @@ L0A7B48:;J
 L0A7B4B:;J
 	ret
 L0A7B4C:;I
-	call L00347B
-	call L0038B3
+	call Play_Pl_MoveByColiBoxOverlapX
+	call Play_Pl_IsMoveLoading
 	jp   c, L0A7C40
 	ld   hl, $0017
 	add  hl, de
@@ -13449,8 +13449,8 @@ L0A7C3D:;J
 L0A7C40:;J
 	ret
 L0A7C41:;I
-	call L00347B
-	call L0038B3
+	call Play_Pl_MoveByColiBoxOverlapX
+	call Play_Pl_IsMoveLoading
 	jp   c, L0A7CED
 	ld   hl, $0017
 	add  hl, de
@@ -13549,8 +13549,8 @@ L0A7CEA:;J
 L0A7CED:;J
 	ret
 L0A7CEE:;I
-	call L00347B
-	call L0038B3
+	call Play_Pl_MoveByColiBoxOverlapX
+	call Play_Pl_IsMoveLoading
 	jp   c, L0A7DC0
 	ld   hl, $0017
 	add  hl, de
@@ -13645,7 +13645,7 @@ L0A7D9E:;J
 L0A7DB1:;J
 	call OBJLstS_IsFrameEnd
 	jp   nc, L0A7DBD
-	call L002EA2
+	call Play_Pl_EndMove
 	jp   L0A7DC0
 L0A7DBD:;J
 	call OBJLstS_DoAnimTiming_Loop_by_DE

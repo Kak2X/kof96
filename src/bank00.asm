@@ -1415,31 +1415,26 @@ mVBlank_CopyPlTiles: MACRO
 	set  OSTB_BIT3, [hl]		; ??? does this do anything
 	
 	;--------
+	; 
+	; Used in conjunction with Play_Pl_SetMoveDamageNext to update the move damage settings mid-move,
+	; syncronized to when the visible frame updates.
 	;
-	; Copy move-related fields such as the amount of damage when hitting the opponent.
+	; Note that this is *NOT* used to update the damage values when a new move starts.
+	; That's instead handled by Play_Pl_IsMoveLoading, which if needed has to be called manually at the start
+	; of a move (MoveC_*).
+	; Why isn't this also handling the "new move" handler? Probably related to its special cases ???
 	;
-	; These fields are special as they come from the MoveAnimTbl table, meaning they are
-	; associated with a specific move animation.
-	; As the animation won't start until the graphics are loaded, wait for that first
-	; before copying the fields over from their pending slots.
-	; This avoids having the old frame visible with the new move settings.
-	;
-	
-	; TODO: Is this a bug or not? So far I haven't seen iPlInfo_MoveDamageValNext & others being updated mid-move.
-	; As these are set only when starting a new move, check for that:
-	; [BUG?] Incorrect comparison. It should have been "jp z" or not made to begin with (to allow mid-move setting changes).
 	ld   hl, \1+iPlInfo_Flags2
 	bit  PF2B_MOVESTART, [hl]		; Was a move started?
-	jp   nz, .copySetKey			; If *so*, skip
+	jp   nz, .copySetKey			; If so, skip
 	
 	;
-	; Copy the set of pending fields to the current ones, and clear the former range.
+	; Copy the set of pending fields to the current ones if we were told to, and clear the former range.
 	;
-	; This checks if the move damage was set to 0 before copying the data, likely as a way to "fix" the bug above.
-	; As iPlInfo_MoveDamageValNext is cleared after performing the copy, it will remain cleared until a new move
-	; is performed, meaning we're jumping to .copySetKey from the second time we get here.
-	;
-	
+	; As long as iPlInfo_MoveDamageValNext is != 0, it means there are new values to copy over.
+	; Any time the pending move damage fields are copied to the current set they get cleared,
+	; so if they are still 0 it means no new value was set.
+	; 
 	ld   hl, \1+iPlInfo_MoveDamageValNext	; HL = Source
 	ld   de, \1+iPlInfo_MoveDamageVal		; DE = Destination
 	ld   a, [hl]
@@ -6341,8 +6336,8 @@ Play_InitRound:
 	ld   [wPlInfo_Pl2+iPlInfo_IntroMoveId], a
 	ld   [wPlInfo_Pl1+iPlInfo_ColiFlags], a
 	ld   [wPlInfo_Pl2+iPlInfo_ColiFlags], a
-	ld   [wPlInfo_Pl1+iPlInfo_Unk_ColiBoxOverlapX_A], a
-	ld   [wPlInfo_Pl2+iPlInfo_Unk_ColiBoxOverlapX_A], a
+	ld   [wPlInfo_Pl1+iPlInfo_ColiBoxOverlapX], a
+	ld   [wPlInfo_Pl2+iPlInfo_ColiBoxOverlapX], a
 	ld   [wPlInfo_Pl1+iPlInfo_DizzyTimeLeft], a
 	ld   [wPlInfo_Pl2+iPlInfo_DizzyTimeLeft], a
 	ld   [wPlInfo_Pl1+iPlInfo_Dizzy], a
@@ -9458,6 +9453,8 @@ Pl_SetNewMove:
 			; Prepare the damage-related fields for the new move.
 			; While the graphics for the first anim frame load, prevent the existing move ("Old Set"),
 			; from dealing further damage to avoid visual inconsistencies.
+			; The move code (MoveC_*) may decide to manually call Play_Pl_IsMoveLoading to copy over
+			; the pending damage fields to the current set when it's ready.
 			
 			; Clear current damage fields
 			xor  a
@@ -9640,12 +9637,16 @@ OBJLstS_Hide:
 	add  hl, de		; Seek to status flags
 	ld   [hl], a	; Erase them to hide the sprite mapping
 	ret
+	
+; =============== MoveC_Base_Jump ===============
+; Move code handler for the jump types.
 L002958:;I
-	call L00347B
+	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_CreateJoyMergedKeysLH
-	call L0038B3
+	call Play_Pl_IsMoveLoading
 	jp   c, L002B90
-	ld   hl, $0017
+	
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetOld
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -9956,7 +9957,7 @@ L002B66:;J
 L002B82:;J
 	call OBJLstS_IsFrameEnd
 	jp   nc, L002B8D
-	call L002EA2
+	call Play_Pl_EndMove
 	jr   L002B90
 L002B8D:;J
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
@@ -10824,11 +10825,15 @@ OBJLstS_Unk_ChkStatusBit3:
 	ret
 	
 ; =============== OBJLstS_IsFrameEnd ===============
-; Determines if the current animation frame is about to be changed.
+; Determines if the current sprite mapping ID is about to be updated later on this frame.
 ;
-; This shouldn't be used to check if the frame should be changed (the animation handler does it).
-; Rather, this is a very common subroutine used for move code, to syncronize certain
-; events (like spawning fireballs) to the animation switching between frames.
+; The purpose of this is to syncronize certain actions in the move code, like spawning projectiles
+; or checking if the move should autorestart, to the animation *internally* switching between
+; frames when the move code manually calls OBJLstS_DoAnimTiming_Loop*.
+;
+; *Internally* emphasized, as the graphics for the new frame of course have to load,
+; making the last frame visually linger for a bit.
+;
 ; IN
 ; - DE: Ptr to wOBJInfo
 ; OUT
@@ -10995,7 +11000,7 @@ L002E89:;J
 	
 ; =============== Play_Pl_EmptyPowOnSuperEnd ===============
 ; Called at the end of most moves to empty the POW meter when a super move finishes.
-; IN:
+; IN
 ; - BC: Ptr to wPlInfo structure
 Play_Pl_EmptyPowOnSuperEnd:
 
@@ -11019,58 +11024,90 @@ Play_Pl_EmptyPowOnSuperEnd:
 .ret:
 	ret
 	
-L002EA2:;C
+; =============== Play_Pl_EndMove ===============
+; Handles what happens when any move with fixed length ends.
+; Note this needs to be manually called by the move code.
+; IN
+; - BC: Ptr to wPlInfo structure
+; - DE: Ptr to respective wOBJInfo structure
+Play_Pl_EndMove:
+	; In case we ended a super move
 	call Play_Pl_EmptyPowOnSuperEnd
 	xor  a
-	ld   hl, $0005
+	
+	; Force align player to floor
+	ld   hl, iOBJInfo_Y
 	add  hl, de
 	ld   [hl], PL_FLOOR_POS
 	inc  hl
-	ldi  [hl], a
-	ldi  [hl], a
-	ldi  [hl], a
-	ldi  [hl], a
-	ld   [hl], a
-	ld   hl, $0020
+	ldi  [hl], a	; Clear Y subpixels
+	
+	; Reset speed
+	ldi  [hl], a	; iOBJInfo_SpeedX
+	ldi  [hl], a	; iOBJInfo_SpeedXSub
+	ldi  [hl], a	; iOBJInfo_SpeedY
+	ld   [hl], a	; iOBJInfo_SpeedYSub
+	
+	; If we were performing a special move, clear iPlInfo_JoyMergedKeysLH
+	; This causes ???
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	ld   a, [hl]
-	and  a, $42
-	jp   z, L002EC4
+	ld   a, [hl]		; A = Flags
+	and  a, PF0_SUPERMOVE|PF0_SPECMOVE	; Doing a special or super?
+	jp   z, .clearFlags						; If not, skip
 	push hl
-	ld   hl, $0049
-	add  hl, bc
-	ld   [hl], $00
+		ld   hl, iPlInfo_JoyMergedKeysLH
+		add  hl, bc
+		ld   [hl], $00
 	pop  hl
-L002EC4:;J
-	res  1, [hl]
-	res  2, [hl]
-	res  3, [hl]
-	res  4, [hl]
-	res  5, [hl]
-	res  6, [hl]
-	inc  hl
-	res  0, [hl]
-	res  1, [hl]
-	res  2, [hl]
-	res  4, [hl]
-	res  6, [hl]
-	res  7, [hl]
-	inc  hl
-	res  2, [hl]
-	res  3, [hl]
-	res  4, [hl]
-	res  5, [hl]
-	res  6, [hl]
-	res  7, [hl]
-	inc  hl
+	
+.clearFlags:
+	; Reset everything from the flags except:
+	; - PF0B_PROJ: It's independent from the player
+	; - PF0B_CPU: Fixed
+	; - PF1B_GUARD: Preserve to avoid "holes" in the guard when changing moves.
+	; - PF1B_CROUCH: In case we ended crouch-based attacks
+	; - PF2B_MOVESTART: ???
+	; - PF2B_HEAVY: ???
+	res  PF0B_SPECMOVE, [hl]
+	res  PF0B_AIR, [hl]
+	res  PF0B_FARHIT, [hl]
+	res  PF0B_PROJREM, [hl]
+	res  PF0B_PROJREFLECT, [hl]
+	res  PF0B_SUPERMOVE, [hl]
+	inc  hl	; Seek to iPlInfo_Flags1
+	res  PF1B_NOBASICINPUT, [hl] ; Since we're resetting to MOVE_SHARED_NONE
+	res  PF1B_XFLIPLOCK, [hl]
+	res  PF1B_NOSPECSTART, [hl]
+	res  PF1B_COMBORECV, [hl]
+	res  PF1B_ALLOWHITCANCEL, [hl]
+	res  PF1B_INVULN, [hl]
+	inc  hl	; Seek to iPlInfo_Flags2
+	res  PF2B_HITCOMBO, [hl]
+	res  PF2B_AUTOGUARDDONE, [hl]
+	res  PF2B_AUTOGUARDMID, [hl]
+	res  PF2B_AUTOGUARDLOW, [hl]
+	res  PF2B_NOHURTBOX, [hl]
+	res  PF2B_NOCOLIBOX, [hl]
+	
+	; Clear damage flags
+	inc  hl	; Seek to iPlInfo_Flags3
 	ld   [hl], $00
-	ld   hl, $0033
+	
+	; Reset the current move to MOVE_SHARED_NONE.
+	; In practice, since PF1B_NOBASICINPUT just got cleared, the basic move handler
+	; will replace it with something else (ie: MOVE_SHARED_IDLE).
+	; Of course this won't happen at the end of the match, where the player tasks get removed
+	; right after this returns.
+	ld   hl, iPlInfo_MoveId
 	add  hl, bc
-	ld   [hl], $00
-	ld   hl, $0035
+	ld   [hl], MOVE_SHARED_NONE
+	; In case the intro/outro move ended, reset this too.
+	ld   hl, iPlInfo_IntroMoveId
 	add  hl, bc
-	ld   [hl], $00
+	ld   [hl], MOVE_SHARED_NONE
 	ret
+	
 ; =============== OBJLstS_SyncXFlip ===============
 ; Syncronizes the sprite's visual X direction with the internal one.
 ; IN
@@ -12332,35 +12369,59 @@ Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset:
 	ld   [hl], a	; ...iPlInfo_MoveDamageFlags3Next	
 	ret
 	
-L00347B:;C
+	
+; =============== Play_Pl_MoveByColiBoxOverlapX ===============	
+; Pushes the player backwards when the collision box overlaps with the opponent's.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+Play_Pl_MoveByColiBoxOverlapX:
+	; If we're being thrown, ignore this
 	ld   a, [wPlayPlThrowActId]
 	or   a
 	ret  nz
+	
+	; When the main task processed the collision boxes earlier this frame,
+	; it set iPlInfo_ColiBoxOverlapX with the amount we're inside the opponent.
+	
+	; We get pushed backwards by half that amount.
+	; This means the movement gradually slows down over time as we get moved out further.
+	
 	push bc
-	ld   hl, $0064
-	add  hl, bc
-	ld   a, [hl]
-	cp   $00
-	jr   z, L0034A4
-	ld   hl, $0001
-	add  hl, de
-	ld   b, [hl]
-	ld   h, a
-	ld   l, $00
-	bit  3, b
-	jr   z, L00349D
-	ld   a, h
-	cpl
-	ld   h, a
-	ld   a, l
-	cpl
-	ld   l, a
-	inc  hl
-L00349D:;R
-	sra  h
-	rr   l
-	call Play_OBJLstS_MoveH
-L0034A4:;R
+		; A = Overlap amount
+		ld   hl, iPlInfo_ColiBoxOverlapX
+		add  hl, bc
+		ld   a, [hl]
+		; If there's no overlap, return
+		cp   $00
+		jr   z, .end
+		
+		; The overlap amount is an absolute (positive) number.
+		; That would cause us to move right -- and if we are facing left (2P side), that's correct.
+		; If we're facing right however (1P side) we want to be pushed left instead.
+		;
+		; So, if we're facing left invert the number.
+		
+		ld   hl, iOBJInfo_OBJLstFlags
+		add  hl, de
+		ld   b, [hl]		; B = iOBJInfo_OBJLstFlags
+		ld   h, a			; HL = iPlInfo_ColiBoxOverlapX
+		ld   l, $00
+		bit  SPRXB_PLDIR_R, b	; Is the player internally facing right?
+		jr   z, .move			; If not, skip
+		; Otherwise, invert HL
+		ld   a, h	; H = -H
+		cpl
+		ld   h, a
+		ld   a, l	; L = -L
+		cpl
+		ld   l, a
+		inc  hl		; Account for bitflip
+	.move:
+		sra  h		; HL = HL / 2
+		rr   l
+		call Play_OBJLstS_MoveH
+	.end:
 	pop  bc
 	ret
 	
@@ -13536,6 +13597,10 @@ Play_StartThrowEffect:
 	call HomeCall_Sound_ReqPlayExId
 	ret
 	
+; =============== L003875 ===============
+; IN
+; - H: Value for $C176
+; - L: Value for $C177
 L003875:;C
 	ld   a, h
 	ld   [$C176], a
@@ -13544,32 +13609,69 @@ L003875:;C
 	xor  a
 	ld   [$C178], a
 	ret
-L003882:;C
+	
+; =============== Play_Pl_SetMoveDamage ===============
+; Instantly changes the damage values, without waiting for the next frame to display.
+; This is meant to be used to update the damage mid-animation, not when the move starts
+; as that's handled by Pl_SetNewMove.
+; IN
+; - H: Damage amount
+; - L: Hit animation ID (HITANIM_*)
+; - A: Damage flags
+Play_Pl_SetMoveDamage:
 	push de
-	push hl
-	pop  de
-	ld   hl, $003A
-	add  hl, bc
-	ld   [hl], d
-	inc  hl
-	ld   [hl], e
-	inc  hl
-	ld   [hl], a
+		; DE = HL
+		push hl
+		pop  de
+		; BC = Ptr to start of current move damage info
+		ld   hl, iPlInfo_MoveDamageVal
+		add  hl, bc
+		; Copy the data over
+		ld   [hl], d	; iPlInfo_MoveDamageVal = D
+		inc  hl
+		ld   [hl], e	; iPlInfo_MoveDamageHitAnimId = E
+		inc  hl
+		ld   [hl], a	; iPlInfo_MoveDamageFlags3 = A
 	pop  de
 	ret
-L003890:;C
+	
+; =============== Play_Pl_SetMoveDamageNext ===============
+; Updates the pending damage values, which get applied when the next frame is displayed.
+; This works in conjunction with the VBlank Handler, since that's what copies the
+; iPlInfo_MoveDamage*Next fields to iPlInfo_MoveDamage*.
+;
+; Because iPlInfo_MoveDamageValNext gets cleared when it gets applied, and the VBlank Handler
+; detects if there's any pending value by checking iPlInfo_MoveDamageValNext != 0, the
+; amount of damage specified *MUST* be > 0.
+; To erase the damage, either call Play_Pl_SetMoveDamage manually or wait for
+; a new move to be set, since Pl_SetNewMove zeroes out all damage-related fields
+; in preparation of the move code setting new ones through Play_Pl_IsMoveLoading.
+
+; fields to the current ones. if iPlInfo_MoveDamageValNext is set,
+; it will copy over the values to iPlInfo_MoveDamageValNext
+;
+; This is meant to be used to update the damage mid-animation, not when the move starts
+; as that's handled by Pl_SetNewMove.
+;
+; This is one of the two subroutines used to update the damage mid-animation,
+; and by using this one VBlankHandler will apply the changes.
+Play_Pl_SetMoveDamageNext:
 	push de
-	push hl
-	pop  de
-	ld   hl, $003D
-	add  hl, bc
-	ld   [hl], d
-	inc  hl
-	ld   [hl], e
-	inc  hl
-	ld   [hl], a
+		; DE = HL
+		push hl
+		pop  de
+		; BC = Ptr to start of pending move damage info
+		ld   hl, iPlInfo_MoveDamageValNext
+		add  hl, bc
+		; Copy the data over
+		ld   [hl], d	; iPlInfo_MoveDamageValNext = D
+		inc  hl
+		ld   [hl], e	; iPlInfo_MoveDamageHitAnimIdNext = E
+		inc  hl
+		ld   [hl], a	; iPlInfo_MoveDamageFlags3Next = A
 	pop  de
 	ret
+	
 ; =============== Play_Proj_CopyMoveDamageFromPl ===============
 ; Copies the move damage fields from the current player over to its respective projectile.
 ;
@@ -13612,73 +13714,139 @@ Play_Proj_CopyMoveDamageFromPl:
 		ld   [hl], a	; Copy to iOBJInfo_Proj_DamageFlags3
 	pop  bc
 	ret
-L0038B3:;C
+	
+; =============== Play_Pl_IsMoveLoading ===============
+; Checks if the move is "ready", which is when move-specific code is allowed to run (as checked manually in many MoveC_*).
+;
+; This also has the secondary purpose to update the move damage field as soon as the move
+; is detected to be ready. It will only happen once, the first frame the move is ready.
+;
+; See also: VBlankHandler, which does the same thing only if a move *wasn't* started this frame.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+; OUT
+; - C flag: If set, move isn't ready yet.
+Play_Pl_IsMoveLoading:
+
+	;--
+	;
+	; Verify that the old and new sprite mapping table pointers are identical.
+	; If they aren't, the move isn't ready, since it means the move animation 
+	; was recently changed (ie: new move) but the graphics for them haven't been 
+	; fully loaded yet.
+	;
+	; This is the equivalent of checking (PF2B_MOVESTART && !OSTB_GFXLOAD),
+	; so why wasn't it done that way?
+	;
 	push de
-	push bc
-	ld   hl, $0010
-	add  hl, de
-	ld   b, [hl]
-	inc  hl
-	ld   c, [hl]
-	inc  hl
-	ld   d, [hl]
-	inc  hl
-	inc  hl
-	ldi  a, [hl]
-	cp   a, b
-	jr   nz, L003909
-	ldi  a, [hl]
-	cp   a, c
-	jr   nz, L003909
-	ldi  a, [hl]
-	cp   a, d
-	jr   nz, L003909
-	pop  bc
+		push bc
+			ld   hl, iOBJInfo_BankNum
+			add  hl, de
+			ld   b, [hl]		; B = iOBJInfo_BankNum
+			inc  hl
+			ld   c, [hl]		; C = iOBJInfo_OBJLstPtrTbl_Low
+			inc  hl
+			ld   d, [hl]		; D = iOBJInfo_OBJLstPtrTbl_High
+			inc  hl				; Seek to iOBJInfo_OBJLstPtrTblOffset
+			inc  hl				; Seek to iOBJInfo_BankNumOld
+			ldi  a, [hl]	
+			cp   a, b			; iOBJInfo_BankNumOld == iOBJInfo_BankNum?
+			jr   nz, .retNotReadyPop	; If not, return
+			ldi  a, [hl]
+			cp   a, c			; iOBJInfo_OBJLstPtrTbl_LowOld == iOBJInfo_OBJLstPtrTbl_Low?
+			jr   nz, .retNotReadyPop	; If not, return
+			ldi  a, [hl]
+			cp   a, d			; iOBJInfo_OBJLstPtrTbl_HighOld == iOBJInfo_OBJLstPtrTbl_High?
+			jr   nz, .retNotReadyPop	; If not, return
+		pop  bc
 	pop  de
-	ld   hl, $0022
+	;--
+	
+	; If we didn't start a new move and the above check passed, then it means we're ready
+	; but we shouldn't update the move damage info since we've already done it.
+	ld   hl, iPlInfo_Flags2
 	add  hl, bc
-	bit  0, [hl]
-	jr   z, L003907
-	ld   hl, $0000
+	bit  PF2B_MOVESTART, [hl]
+	jr   z, .retReady
+	
+	; If the graphics are loading and all previous validations passed, it means the first
+	; frame is still loading, therefore the move isn't ready yet.
+	ld   hl, iOBJInfo_Status
 	add  hl, de
-	bit  0, [hl]
-	jp   nz, L00390B
-	ld   hl, $0022
+	bit  OSTB_GFXLOAD, [hl]
+	jp   nz, .retNotReady
+	
+	;--
+	
+	; If we got here, the first frame has just loaded, so we can update the move damage fields
+	; as long as they've been set.
+	;
+	; The previous validation is all there because the move damage fields come from the MoveAnimTbl table,
+	; meaning they are associated with a specific move animation.
+	; As the animation won't start until the graphics for the first frame are loaded,
+	; (it will wait on the last visible frame), wait for that first before copying the
+	; fields over from their pending slots.
+	; This avoids having the old frame visible with the new damage settings applied.
+	
+	;--
+	
+	; Unmark that we're starting a new move.
+	; This allows the VBlank Handler to perform mid-move damage changes between frames,
+	; and cuts off getting here another time until another move is started.
+	ld   hl, iPlInfo_Flags2
 	add  hl, bc
-	res  0, [hl]
-	ld   hl, $003D
-	add  hl, bc
-	ld   a, [hl]
-	or   a
-	jp   z, L003907
+	res  PF2B_MOVESTART, [hl]
+	
+	;
+	; Copy the set of pending fields to the current ones, and clear the former range.
+	;
+	; This avoids updating the move damage when set to 0, as there's no point to update
+	; the fields when damage was already initialized to 0 when we went though Pl_SetNewMove.
+	;
+	
+	; HL = Source
+	ld   hl, iPlInfo_MoveDamageValNext
+	add  hl, bc			
+	ld   a, [hl]		; A = iPlInfo_MoveDamageValNext
+	or   a				; iPlInfo_MoveDamageValNext == 0?
+	jp   z, .retReady	; If so, skip
+	
+	;
+	; Copy over the pending move damage info to the current one.
+	;
 	push de
-	push hl
-	ld   hl, $003A
-	add  hl, bc
-	push hl
+		; DE = Destination
+		push hl
+			ld   hl, iPlInfo_MoveDamageVal
+			add  hl, bc
+			push hl
+			pop  de
+		pop  hl
+		
+		ld   [de], a	; Copy iPlInfo_MoveDamageValNext to iPlInfo_MoveDamageVal	
+		ld   [hl], $00	; Clear iPlInfo_MoveDamageValNext
+		inc  de			; SrcPtr++
+		inc  hl			; DestPtr++
+		
+		ld   a, [hl]	; A = iPlInfo_MoveDamageHitAnimIdNext
+		ld   [de], a	; Copy iPlInfo_MoveDamageHitAnimIdNext to iPlInfo_MoveDamageHitAnimId	
+		ld   [hl], $00	; Clear iPlInfo_MoveDamageHitAnimIdNext
+		inc  de			; SrcPtr++
+		inc  hl			; DestPtr++
+		
+		ld   a, [hl]	; A = iPlInfo_MoveDamageFlags3Next
+		ld   [de], a	; Copy iPlInfo_MoveDamageFlags3Next to iPlInfo_MoveDamageFlags3	
+		ld   [hl], $00	; Clear iPlInfo_MoveDamageFlags3Next
 	pop  de
-	pop  hl
-	ld   [de], a
-	ld   [hl], $00
-	inc  de
-	inc  hl
-	ld   a, [hl]
-	ld   [de], a
-	ld   [hl], $00
-	inc  de
-	inc  hl
-	ld   a, [hl]
-	ld   [de], a
-	ld   [hl], $00
-	pop  de
-L003907:;JR
-	or   a
+.retReady:
+	or   a	; C flag clear
 	ret
-L003909:;R
-	pop  bc
+		.retNotReadyPop:
+		pop  bc
 	pop  de
-L00390B:;J
-	scf
+.retNotReady:
+	scf		; C flag set
 	ret
 	
 ; =============== Play_Pl_ChkThrowInput ===============

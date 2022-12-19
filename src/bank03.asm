@@ -22,7 +22,7 @@ MoveAnimTbl_Marker:
 ; Each entry is 8 bytes:
 ; - 0: Bank number for the animation table (iOBJInfo_BankNum)
 ; - 1-2: Ptr to animation table (iOBJInfo_OBJLstPtrTbl)
-; - 3: Sprite Mapping ID target, at which the move ends. (iPlInfo_OBJLstPtrTblOffsetMoveEnd)
+; - 3: Sprite Mapping ID target, when this is reached something happens (usually checking if the move can end). (iPlInfo_OBJLstPtrTblOffsetMoveEnd)
 ; - 4: Animation speed. Higher values = slower animation (iOBJInfo_FrameLeft)
 ; - 5: Damage dealt to the opponent (iPlInfo_MoveDamageValNext)
 ; - 6: Hit Animation ID delivered to the opponent if hit by the move. (HITANIM_*) (iPlInfo_MoveDamageHitAnimIdNext)
@@ -1609,11 +1609,11 @@ MoveAnimTbl_OIori:
 ; Code pointers assigned to every move.
 ; These follow the groups mentioned in Play_DoPl.execMoveCode.
 MoveCodePtrTbl_Shared_Base:
-	dpr L024000 ; BANK $02 ; MOVE_SHARED_NONE         
-	dpr L02400F ; BANK $02 ; MOVE_SHARED_IDLE         
-	dpr L024016 ; BANK $02 ; MOVE_SHARED_WALK_F       
-	dpr L024016 ; BANK $02 ; MOVE_SHARED_WALK_B       
-	dpr L02401F ; BANK $02 ; MOVE_SHARED_CROUCH       
+	dpr MoveC_Base_None ; BANK $02 ; MOVE_SHARED_NONE         
+	dpr MoveC_Base_Std ; BANK $02 ; MOVE_SHARED_IDLE         
+	dpr MoveC_Base_WalkH ; BANK $02 ; MOVE_SHARED_WALK_F       
+	dpr MoveC_Base_WalkH ; BANK $02 ; MOVE_SHARED_WALK_B       
+	dpr MoveC_Base_NoAnim ; BANK $02 ; MOVE_SHARED_CROUCH       
 	; Improper bank number defined for these
 	dw L002958 ; BANK $00 ; MOVE_SHARED_JUMP_N     
 	db $02	
@@ -1621,12 +1621,12 @@ MoveCodePtrTbl_Shared_Base:
 	db $02
 	dw L002958 ; BANK $00 ; MOVE_SHARED_JUMP_B
 	db $02
-	dpr L02401F ; BANK $02 ; MOVE_SHARED_BLOCK_G      
-	dpr L02401F ; BANK $02 ; MOVE_SHARED_BLOCK_C      
+	dpr MoveC_Base_NoAnim ; BANK $02 ; MOVE_SHARED_BLOCK_G      
+	dpr MoveC_Base_NoAnim ; BANK $02 ; MOVE_SHARED_BLOCK_C      
 	dpr L02419A ; BANK $02 ; MOVE_SHARED_BLOCK_A      
 	dpr L024061 ; BANK $02 ; MOVE_SHARED_DASH_F       
 	dpr L0240BC ; BANK $02 ; MOVE_SHARED_DASH_B       
-	dpr L024023 ; BANK $02 ; MOVE_SHARED_CHARGEMETER  
+	dpr MoveC_Base_ChargeMeter ; BANK $02 ; MOVE_SHARED_CHARGEMETER  
 	dpr L024256 ; BANK $02 ; MOVE_SHARED_TAUNT        
 	dpr L02427A ; BANK $02 ; MOVE_SHARED_ROLL_F       
 	dpr L02427A ; BANK $02 ; MOVE_SHARED_ROLL_B       
@@ -1691,7 +1691,7 @@ MoveCodePtrTbl_Kyo:
 	dpr L064BC3 ;X ; BANK $06 ; MOVE_KYO_SUPER_1_S
 	dpr L064BC3 ;X ; BANK $06 ; MOVE_KYO_SUPER_1_D
 	dpr L02790A ; BANK $02 ; MOVE_SHARED_THROW_G
-	dpr L02400F ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	dpr MoveC_Base_Std ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Daimon:
 	dpr L0241DD ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	dpr L024256 ; BANK $02 ; MOVE_SHARED_PUNCH_H
@@ -1724,7 +1724,7 @@ MoveCodePtrTbl_Daimon:
 	dpr L057CDC ;X ; BANK $05 ; MOVE_DAIMON_SUPER_1_S
 	dpr L057CDC ;X ; BANK $05 ; MOVE_DAIMON_SUPER_1_D
 	dpr L027949 ; BANK $02 ; MOVE_SHARED_THROW_G
-	dpr L02400F ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	dpr MoveC_Base_Std ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Andy:
 	dpr L0241DD ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	dpr L1C7D6F ; BANK $1C ; MOVE_SHARED_PUNCH_H
@@ -1757,7 +1757,7 @@ MoveCodePtrTbl_Andy:
 	dpr L0670E6 ;X ; BANK $06 ; MOVE_ANDY_SUPER_1_S
 	dpr L0670E6 ;X ; BANK $06 ; MOVE_ANDY_SUPER_1_D
 	dpr L0279FF ; BANK $02 ; MOVE_SHARED_THROW_G
-	dpr L02400F ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	dpr MoveC_Base_Std ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Robert:
 	dpr L0241DD ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	dpr L024256 ; BANK $02 ; MOVE_SHARED_PUNCH_H
@@ -1790,7 +1790,7 @@ MoveCodePtrTbl_Robert:
 	dpr L0267E5 ; BANK $02 ; MOVE_ROBERT_HAOH_SHOKOH_KEN_S
 	dpr L0267E5 ; BANK $02 ; MOVE_ROBERT_HAOH_SHOKOH_KEN_D
 	dpr L027B4B ; BANK $02 ; MOVE_SHARED_THROW_G
-	dpr L02400F ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	dpr MoveC_Base_Std ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Leona:
 	dpr L0241DD ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	dpr L1C7D6F ; BANK $1C ; MOVE_SHARED_PUNCH_H
@@ -1856,7 +1856,7 @@ MoveCodePtrTbl_Geese:
 	dpr L067CC1 ;X ; BANK $06 ; MOVE_GEESE_SUPER_1_S
 	dpr L067CC1 ;X ; BANK $06 ; MOVE_GEESE_SUPER_1_D
 	dpr L097B94 ; BANK $09 ; MOVE_SHARED_THROW_G
-	dpr L02400F ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	dpr MoveC_Base_Std ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Krauser:
 	dpr L0241DD ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	dpr L024256 ; BANK $02 ; MOVE_SHARED_PUNCH_H
@@ -1889,7 +1889,7 @@ MoveCodePtrTbl_Krauser:
 	dpr L097A1E ;X ; BANK $09 ; MOVE_KRAUSER_SUPER_1_S
 	dpr L097A1E ;X ; BANK $09 ; MOVE_KRAUSER_SUPER_1_D
 	dpr L097C08 ; BANK $09 ; MOVE_SHARED_THROW_G
-	dpr L02400F ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	dpr MoveC_Base_Std ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_MrBig:
 	dpr L0241DD ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	dpr L1C7DAD ; BANK $1C ; MOVE_SHARED_PUNCH_H
@@ -1922,7 +1922,7 @@ MoveCodePtrTbl_MrBig:
 	dpr L0676C9 ;X ; BANK $06 ; MOVE_MRBIG_SUPER_1_S
 	dpr L0676C9 ;X ; BANK $06 ; MOVE_MRBIG_SUPER_1_D
 	dpr L097CA6 ; BANK $09 ; MOVE_SHARED_THROW_G
-	dpr L02400F ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	dpr MoveC_Base_Std ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Mature:
 	dpr L0241DD ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	dpr L1C7E0B ; BANK $1C ; MOVE_SHARED_PUNCH_H
@@ -1955,7 +1955,7 @@ MoveCodePtrTbl_Mature:
 	dpr L0570F2 ;X ; BANK $05 ; MOVE_MATURE_SUPER_1_S
 	dpr L0570F2 ;X ; BANK $05 ; MOVE_MATURE_SUPER_1_D
 	dpr L097D54 ; BANK $09 ; MOVE_SHARED_THROW_G
-	dpr L02400F ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	dpr MoveC_Base_Std ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Chizuru:
 	dpr L0241DD ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	dpr L024256 ; BANK $02 ; MOVE_SHARED_PUNCH_H
@@ -1988,7 +1988,7 @@ MoveCodePtrTbl_Chizuru:
 	dpr L0577F4 ; BANK $05 ; MOVE_CHIZURU_REIGI_ISHIZUE_S
 	dpr L0577F4 ; BANK $05 ; MOVE_CHIZURU_REIGI_ISHIZUE_D
 	dpr L097DC0 ; BANK $09 ; MOVE_SHARED_THROW_G
-	dpr L02400F ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	dpr MoveC_Base_Std ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Goenitz:
 	dpr L0241DD ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	dpr L1C7E6F ; BANK $1C ; MOVE_SHARED_PUNCH_H
@@ -2021,7 +2021,7 @@ MoveCodePtrTbl_Goenitz:
 	dpr L0A7B4C ; BANK $0A ; MOVE_GOENITZ_SHINYAOTOME_JISSOUKOKU_DL
 	dpr L0A7CEE ; BANK $0A ; MOVE_GOENITZ_SHINYAOTOME_JISSOUKOKU_DH
 	dpr L0A77CA ; BANK $0A ; MOVE_SHARED_THROW_G
-	dpr L02400F ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	dpr MoveC_Base_Std ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_MrKarate:
 	dpr L0241DD ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	dpr L024256 ; BANK $02 ; MOVE_SHARED_PUNCH_H
@@ -2054,7 +2054,7 @@ MoveCodePtrTbl_MrKarate:
 	dpr L0267E5 ; BANK $02 ; MOVE_MRKARATE_HAOH_SHO_KOH_KEN_S
 	dpr L0267E5 ; BANK $02 ; MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D
 	dpr L027AD7 ; BANK $02 ; MOVE_SHARED_THROW_G
-	dpr L02400F ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	dpr MoveC_Base_Std ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Ryo:
 	dpr L0241DD ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	dpr L024256 ; BANK $02 ; MOVE_SHARED_PUNCH_H
@@ -2087,7 +2087,7 @@ MoveCodePtrTbl_Ryo:
 	dpr L0267E5 ; BANK $02 ; MOVE_RYO_HAOH_SHOKOH_KEN_S
 	dpr L0267E5 ; BANK $02 ; MOVE_RYO_HAOH_SHOKOH_KEN_D
 	dpr L027AD7 ; BANK $02 ; MOVE_SHARED_THROW_G
-	dpr L02400F ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	dpr MoveC_Base_Std ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Terry:
 	dpr L0241DD ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	dpr L1C7D31 ; BANK $1C ; MOVE_SHARED_PUNCH_H
@@ -2120,7 +2120,7 @@ MoveCodePtrTbl_Terry:
 	dpr L064E9F ;X ; BANK $06 ; MOVE_TERRY_POWER_GEYSER_E
 	dpr L064E0E ;X ; BANK $06 ; MOVE_TERRY_SUPER_1_D
 	dpr L0279C0 ; BANK $02 ; MOVE_SHARED_THROW_G
-	dpr L02400F ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	dpr MoveC_Base_Std ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Athena:
 	dpr L0241DD ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	dpr L024256 ; BANK $02 ; MOVE_SHARED_PUNCH_H
@@ -2219,7 +2219,7 @@ MoveCodePtrTbl_Iori:
 	dpr L056A53 ; BANK $05 ; MOVE_OIORI_KIN_YA_OTOME_S
 	dpr L056A53 ; BANK $05 ; MOVE_OIORI_KIN_YA_OTOME_D
 	dpr L097D18 ; BANK $09 ; MOVE_SHARED_THROW_G
-	dpr L02400F ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	dpr MoveC_Base_Std ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 	
 L037707:;C
 	ld   hl, $0089

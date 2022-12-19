@@ -9929,16 +9929,15 @@ Play_DoUnkChain_ResetDamage:
 	
 ; =============== mDecMaxPow ===============
 ; Generates code to automatically decrement the Max Power meter over time.
-; This part works in conjunction with Play_UpdatePowBars, to make sure the Max Pow settings are
-; only cleared after the visual indicator stops being in Max Power mode.
-;
 ; IN
 ; - 1: Ptr to player struct
 mDecMaxPow: MACRO
 	; Pass the gauntlet of checks before checking if the bar should be decremented.
 	ld   a, [\1+iPlInfo_Pow]
 	
-	; Once Play_UpdatePowBars acknowledges that the bar is empty (by clearing this), disable the autodec.
+	; If our POW Meter got zeroed out, immediately disable MAX Power mode.
+	; This is because elsewhere, the points where MAX Mode is set to end
+	; only zero out iPlInfo_Pow but not the others.
 	cp   $00			; iPlInfo_Pow == 0?
 	jp   z, .powEmpty	; If so, jump
 	; The bar must be full, otherwise this can't be MAX Power mode.
@@ -10394,8 +10393,8 @@ Play_DoPlColi:
 	xor  a
 	ld   [wPlInfo_Pl1+iPlInfo_ColiFlags], a
 	ld   [wPlInfo_Pl2+iPlInfo_ColiFlags], a
-	ld   [wPlInfo_Pl1+iPlInfo_Unk_ColiBoxOverlapX_A], a
-	ld   [wPlInfo_Pl2+iPlInfo_Unk_ColiBoxOverlapX_A], a
+	ld   [wPlInfo_Pl1+iPlInfo_ColiBoxOverlapX], a
+	ld   [wPlInfo_Pl2+iPlInfo_ColiBoxOverlapX], a
 	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_HitMode], a
 	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_HitMode], a
 
@@ -10469,12 +10468,17 @@ Play_DoPlColi_1PChar2PChar:
 .coliOk:
 	; Make both players push each other, by having both
 	; send and receive the outwards push.
+	
+	; This also saves the the amount of how much the collision boxes overlap horizontally.
+	; How this is actually used depends on the move code. 
+	; The various MoveC_* subroutines may optionally decide to call Play_Pl_MoveByColiBoxOverlapX
+	; to push the player out based on it.
 		
 	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
 	set  PCF_PUSHED, [hl]
 	set  PCF_PUSHEDOTHER, [hl]
-	inc  hl			; Seek to iPlInfo_Unk_ColiBoxOverlapX_A
-	ld   [hl], b	; And save how much we're horz inside the other player's collision box
+	inc  hl			; Seek to iPlInfo_ColiBoxOverlapX
+	ld   [hl], b	; Save overlap amount
 	
 	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
 	set  PCF_PUSHED, [hl]
@@ -11794,9 +11798,9 @@ Play_SetWinLoseMoves:
 	or   a					; iPlInfo_Health != 0?
 	jr   nz, .loseTimeOver	; If so, jump
 .loseNorm:
-	; Otherwise, set a dummy value which gets ignored.
-	; Note that if we get here, it means the losing player is using the move MOVE_SHARED_NONE,
-	; and it should not transition to anything else.
+	; Otherwise, set a dummy value which gets ignored since the player tasks
+	; for dead players get destroyed.
+	; This really could have returned instead of setting this.
 	ld   a, MOVE_FF						; A = Move ID to use
 	jr   .setLoseMove
 .loseTimeOver:
@@ -11892,7 +11896,7 @@ Play_LoadPostRoundText0:
 	;            get "stuck", the game softlocks.
 	;
 
-	; Execute once a cut down version of the gameplay loop ??? without the move reader.
+	; Execute once a cut down version of the gameplay loop without the joypad reader.
 	ld   b, $01
 	call Play_MainLoop_PostRoundTextNoDisplay
 	

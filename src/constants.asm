@@ -174,8 +174,7 @@ SPRXB_PLDIR_R EQU 3 ; If set, the player is internally facing right (nonvisual e
 
 ; OBJLST / SPRITE MAPPINGS FLAGS from ROM
 ; These are almost the same as the iOBJInfo_OBJLstFlags* bits.
-; item0
-
+; iOBJLstHdrA_Flags / iOBJLstHdrB_Flags
 OLFB_USETILEFLAGS EQU 4 ; If set, in the OBJ data, the upper two bits of a tile ID count as X/Y flip flags
 OLFB_XFLIP        EQU 5 ; User-controlled
 OLFB_YFLIP        EQU 6
