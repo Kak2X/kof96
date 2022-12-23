@@ -43,11 +43,9 @@ MoveC_Base_ChargeMeter:
 .main:
 
 	;
-	; Force the player to charge until reaching the target animation frame.
-	; Note that moves always use the Old set, since with player sprites
-	; that's guaranteed to always be what's currently visible on screen.
+	; Force the player to charge until visibly reaching the target animation frame.
 	;
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetOld
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]	; A = Sprite mapping ID
 	ld   hl, iPlInfo_OBJLstPtrTblOffsetMoveEnd

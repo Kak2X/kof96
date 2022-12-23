@@ -3281,7 +3281,7 @@ GFX_CharSel_Cross_Mask: INCBIN "data/gfx/charsel_cross_mask.bin"
 OBJInfoInit_CharSel_Cursor:
 	db OST_VISIBLE ; iOBJInfo_Status
 	db $00 ; iOBJInfo_OBJLstFlags
-	db $00 ; iOBJInfo_OBJLstFlagsOld
+	db $00 ; iOBJInfo_OBJLstFlagsView
 	db $28 ; iOBJInfo_X
 	db $00 ; iOBJInfo_XSub
 	db $40 ; iOBJInfo_Y
@@ -3299,9 +3299,9 @@ OBJInfoInit_CharSel_Cursor:
 	db LOW(OBJLstPtrTable_CharSel_Cursor) ; iOBJInfo_OBJLstPtrTbl_Low
 	db HIGH(OBJLstPtrTable_CharSel_Cursor) ; iOBJInfo_OBJLstPtrTbl_High
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
-	db $00 ; iOBJInfo_BankNumOld (N/A)
-	db LOW(OBJLstPtrTable_CharSel_Cursor) ; iOBJInfo_OBJLstPtrTbl_LowOld
-	db HIGH(OBJLstPtrTable_CharSel_Cursor) ; iOBJInfo_OBJLstPtrTbl_HighOld
+	db $00 ; iOBJInfo_BankNumView (N/A)
+	db LOW(OBJLstPtrTable_CharSel_Cursor) ; iOBJInfo_OBJLstPtrTbl_LowView
+	db HIGH(OBJLstPtrTable_CharSel_Cursor) ; iOBJInfo_OBJLstPtrTbl_HighView
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
 	db $00 ; iOBJInfo_ColiBoxId (auto)
 	db $00 ; iOBJInfo_HitboxId (auto)

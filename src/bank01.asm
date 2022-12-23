@@ -2214,7 +2214,7 @@ L0148A3: db $69
 OBJInfoInit_Play_CharCross:
 	db $00 ; iOBJInfo_Status
 	db $10 ; iOBJInfo_OBJLstFlags
-	db $00 ; iOBJInfo_OBJLstFlagsOld
+	db $00 ; iOBJInfo_OBJLstFlagsView
 	db $60 ; iOBJInfo_X
 	db $00 ; iOBJInfo_XSub
 	db $68 ; iOBJInfo_Y
@@ -2246,7 +2246,7 @@ OBJInfoInit_Play_CharCross:
 OBJInfoInit_Play_RoundText:
 	db $00 ; iOBJInfo_Status
 	db $10 ; iOBJInfo_OBJLstFlags
-	db $00 ; iOBJInfo_OBJLstFlagsOld
+	db $00 ; iOBJInfo_OBJLstFlagsView
 	db $80 ; iOBJInfo_X
 	db $00 ; iOBJInfo_XSub
 	db $60 ; iOBJInfo_Y
@@ -9065,7 +9065,7 @@ L016369: db $20
 OBJInfoInit_Projectile:
 	db $00 ; iOBJInfo_Status
 	db $00 ; iOBJInfo_OBJLstFlags
-	db $00 ; iOBJInfo_OBJLstFlagsOld
+	db $00 ; iOBJInfo_OBJLstFlagsView
 	db $60 ; iOBJInfo_X
 	db $00 ; iOBJInfo_XSub
 	db $88 ; iOBJInfo_Y
@@ -10213,9 +10213,9 @@ Play_CalcPlDistanceAndXFlip:
 		set  SPRB_XFLIP, [hl]
 		
 		;
-		; Save the settings to iOBJInfo_OBJLstFlagsOld as well, if possible.
+		; Save the settings to iOBJInfo_OBJLstFlagsView as well, if possible.
 		; This can be done only after the GFX finish loading (which also copies
-		; iOBJInfo_OBJLstFlags to iOBJInfo_OBJLstFlagsOld, but as we updated it just now, we resave it again)
+		; iOBJInfo_OBJLstFlags to iOBJInfo_OBJLstFlagsView, but as we updated it just now, we resave it again)
 		;
 		ld   a, [wOBJInfo_Pl1+iOBJInfo_Status]
 		bit  OSTB_GFXLOAD, a		; Are the GFX loading for this character?
@@ -10224,7 +10224,7 @@ Play_CalcPlDistanceAndXFlip:
 		or   a						; Is there a move ID defined?
 		jp   z, .onLeftChk2P		; If not, skip
 		ldi  a, [hl]				; Read iOBJInfo_OBJLstFlags
-		ld   [hl], a				; Write to iOBJInfo_OBJLstFlagsOld
+		ld   [hl], a				; Write to iOBJInfo_OBJLstFlagsView
 		
 	.onLeftChk2P:
 		; The other player (1P) internally faces left
@@ -10239,7 +10239,7 @@ Play_CalcPlDistanceAndXFlip:
 		; Make 2P face left
 		res  SPRB_XFLIP, [hl]
 		
-		; Save the settings to the old set, if possible.
+		; Save the settings to the visible set, if possible.
 		ld   a, [wOBJInfo_Pl2+iOBJInfo_Status]
 		bit  OSTB_GFXLOAD, a		; Are the GFX loading for this character?
 		jp   nz, .onLeftChkEnd		; If so, skip
@@ -10247,7 +10247,7 @@ Play_CalcPlDistanceAndXFlip:
 		or   a						; Is there a move ID defined?
 		jp   z, .onLeftChkEnd		; If not, skip
 		ldi  a, [hl]				; Read iOBJInfo_OBJLstFlags
-		ld   [hl], a				; Write to iOBJInfo_OBJLstFlagsOld
+		ld   [hl], a				; Write to iOBJInfo_OBJLstFlagsView
 	.onLeftChkEnd:
 	
 	pop  af		; Restore distance
@@ -10281,7 +10281,7 @@ Play_CalcPlDistanceAndXFlip:
 		; Make 1P face left
 		res  SPRB_XFLIP, [hl]
 		
-		; Save the settings to the old set, if possible.
+		; Save the settings to the visible set, if possible.
 		ld   a, [wOBJInfo_Pl1+iOBJInfo_Status]
 		bit  OSTB_GFXLOAD, a		; Are the GFX loading for this character?
 		jp   nz, .onRightChk2P		; If so, skip
@@ -10289,7 +10289,7 @@ Play_CalcPlDistanceAndXFlip:
 		or   a						; Is there a move ID defined?
 		jp   z, .onRightChk2P		; If not, skip
 		ldi  a, [hl]				; Read iOBJInfo_OBJLstFlags
-		ld   [hl], a				; Write to iOBJInfo_OBJLstFlagsOld
+		ld   [hl], a				; Write to iOBJInfo_OBJLstFlagsView
 	.onRightChk2P:
 		; The other player (1P) internally faces right
 		ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstFlags
@@ -10307,7 +10307,7 @@ Play_CalcPlDistanceAndXFlip:
 		; Make 2P face right
 		set  SPRB_XFLIP, [hl]
 		
-		; Save the settings to the old set, if possible.
+		; Save the settings to the visible set, if possible.
 		ld   a, [wOBJInfo_Pl2+iOBJInfo_Status]
 		bit  OSTB_GFXLOAD, a		; Are the GFX loading for this character?
 		jp   nz, .onRightChkEnd		; If so, skip
@@ -10315,7 +10315,7 @@ Play_CalcPlDistanceAndXFlip:
 		or   a						; Is there a move ID defined?
 		jp   z, .onRightChkEnd		; If not, skip
 		ldi  a, [hl]				; Read iOBJInfo_OBJLstFlags
-		ld   [hl], a				; Write to iOBJInfo_OBJLstFlagsOld
+		ld   [hl], a				; Write to iOBJInfo_OBJLstFlagsView
 	.onRightChkEnd:
 	pop  af
 	
@@ -10437,7 +10437,7 @@ Play_DoPlColi_1PChar2PChar:
 	ld   b, a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]	; C = 1P Y position
 	ld   c, a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsOld]	; wPlayTmpColiA_OBJLstFlags = 1P Flags
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsView]	; wPlayTmpColiA_OBJLstFlags = 1P Flags
 	ld   [wPlayTmpColiA_OBJLstFlags], a				; Not enough registers to hold this
 	
 	;
@@ -10456,7 +10456,7 @@ Play_DoPlColi_1PChar2PChar:
 	ld   d, a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_Y]	; E = 2P Y position
 	ld   e, a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlagsOld]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlagsView]
 	ld   [wPlayTmpColiB_OBJLstFlags], a	; wPlayTmpColiA_OBJLstFlags = 1P Flags
 	
 	; 
@@ -10516,7 +10516,7 @@ Play_DoPlColi_1PCharHitbox2PChar:
 	ld   b, a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
 	ld   c, a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsOld]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsView]
 	ld   [wPlayTmpColiA_OBJLstFlags], a
 	
 	;
@@ -10531,7 +10531,7 @@ Play_DoPlColi_1PCharHitbox2PChar:
 	ld   d, a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_Y]
 	ld   e, a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlagsOld]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlagsView]
 	ld   [wPlayTmpColiB_OBJLstFlags], a
 	
 	;
@@ -10579,7 +10579,7 @@ Play_DoPlColi_1PChar2PCharHitbox:
 	ld   b, a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_Y]
 	ld   c, a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlagsOld]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlagsView]
 	ld   [wPlayTmpColiA_OBJLstFlags], a
 	
 	;
@@ -10594,7 +10594,7 @@ Play_DoPlColi_1PChar2PCharHitbox:
 	ld   d, a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
 	ld   e, a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsOld]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsView]
 	ld   [wPlayTmpColiB_OBJLstFlags], a
 	
 	;
@@ -10658,7 +10658,7 @@ Play_DoPlColi_1PProj2PChar:
 	ld   d, a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_Y]
 	ld   e, a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlagsOld]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlagsView]
 	ld   [wPlayTmpColiB_OBJLstFlags], a
 	
 	;
@@ -10721,7 +10721,7 @@ Play_DoPlColi_1PChar2PProj:
 	ld   d, a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
 	ld   e, a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsOld]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsView]
 	ld   [wPlayTmpColiB_OBJLstFlags], a
 	
 	;
@@ -10791,7 +10791,7 @@ Play_DoPlColi_1PProj2PCharHitbox:
 	ld   d, a
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_Y]
 	ld   e, a
-	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlagsOld]
+	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstFlagsView]
 	ld   [wPlayTmpColiB_OBJLstFlags], a
 	call Play_CheckColi
 	jr   nc, .end
@@ -10876,7 +10876,7 @@ Play_DoPlColi_1PCharHitbox2PProj:
 	ld   d, a
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_Y]
 	ld   e, a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsOld]
+	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstFlagsView]
 	ld   [wPlayTmpColiB_OBJLstFlags], a
 	call Play_CheckColi
 	jr   nc, .end

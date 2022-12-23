@@ -2914,7 +2914,7 @@ ModeSelect_MakeRoundSeq:
 OBJInfoInit_Title:
 	db OST_VISIBLE
 	db $00 ; iOBJInfo_OBJLstFlags
-	db $00 ; iOBJInfo_OBJLstFlagsOld
+	db $00 ; iOBJInfo_OBJLstFlagsView
 	db $28 ; iOBJInfo_X
 	db $00 ; iOBJInfo_XSub
 	db $40 ; iOBJInfo_Y
@@ -2932,9 +2932,9 @@ OBJInfoInit_Title:
 	db LOW(OBJLstPtrTable_Title)
 	db HIGH(OBJLstPtrTable_Title)
 	db TITLE_OBJ_PUSHSTART*OBJLSTPTR_ENTRYSIZE ; iOBJInfo_OBJLstPtrTblOffset
-	db $00 ; iOBJInfo_BankNumOld
-	db LOW(OBJLstPtrTable_Title) ; iOBJInfo_OBJLstPtrTbl_LowOld
-	db HIGH(OBJLstPtrTable_Title) ; iOBJInfo_OBJLstPtrTbl_HighOld
+	db $00 ; iOBJInfo_BankNumView
+	db LOW(OBJLstPtrTable_Title) ; iOBJInfo_OBJLstPtrTbl_LowView
+	db HIGH(OBJLstPtrTable_Title) ; iOBJInfo_OBJLstPtrTbl_HighView
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
 	db $00 ; iOBJInfo_ColiBoxId (auto)
 	db $00 ; iOBJInfo_HitboxId (auto)
@@ -5218,7 +5218,7 @@ TextDef_Intro3:
 OBJInfoInit_Intro_Iori:
 	db OST_VISIBLE ; iOBJInfo_Status
 	db $80 ; iOBJInfo_OBJLstFlags
-	db $00 ; iOBJInfo_OBJLstFlagsOld
+	db $00 ; iOBJInfo_OBJLstFlagsView
 	db $18 ; iOBJInfo_X
 	db $00 ; iOBJInfo_XSub
 	db $50 ; iOBJInfo_Y
@@ -5236,9 +5236,9 @@ OBJInfoInit_Intro_Iori:
 	db LOW(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_Low
 	db HIGH(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_High
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
-	db $00 ; iOBJInfo_BankNumOld
-	db LOW(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_LowOld
-	db HIGH(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_HighOld
+	db $00 ; iOBJInfo_BankNumView
+	db LOW(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_LowView
+	db HIGH(OBJLstPtrTable_Intro_Iori) ; iOBJInfo_OBJLstPtrTbl_HighView
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
 	db $00 ; iOBJInfo_ColiBoxId (auto)
 	db $00 ; iOBJInfo_HitboxId (auto)

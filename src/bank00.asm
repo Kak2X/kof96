@@ -1460,10 +1460,17 @@ mVBlank_CopyPlTiles: MACRO
 	;--------
 .copySetKey:
 	
-	; Copy over the unique identifier for the Set settings from iGFXBufInfo_SetKey to iGFXBufInfo_SetKeyOld.
-	; This tells the wGFXBufInfo init code which settings were the last to be completely applied.
+	;
+	; Sync the sprite mapping settings and unique identifier from the current/pending to displayed fields.
+	;
+	
+	; Set key.
+	; This unique identifier tells the wGFXBufInfo init code which settings were the last to be completely applied.
+	; There's a special case there if we're switching to a new sprite mapping that's the same as
+	; the last one we've loaded (read: it will skip the loading part).
+	;
 	ld   hl, \3+iGFXBufInfo_SetKey 		; HL = Source
-	ld   de, \3+iGFXBufInfo_SetKeyOld 	; DE = Destination
+	ld   de, \3+iGFXBufInfo_SetKeyView 	; DE = Destination
 	
 REPT 5
 	ldi  a, [hl]
@@ -1473,18 +1480,21 @@ ENDR
 	ld   a, [hl]
 	ld   [de], a
 	
-	; Additionally, copy over the settings to the old set, to make sure this sprite gets displayed
-	; when new graphics on this OBJInfo slot will load.
+	; Sprite mapping settings.
+	; This isn't necessary for the routine to draw sprite mappings, since it stops using the "*View" fields
+	; when the graphics finish loading.
+	; However, it is important for the move code since it tends to execute specific code depending on
+	; the sprite mapping ID that's currently *visible*.
 	ld   a, [\2+iOBJInfo_OBJLstFlags]
-	ld   [\2+iOBJInfo_OBJLstFlagsOld], a
+	ld   [\2+iOBJInfo_OBJLstFlagsView], a
 	ld   a, [\2+iOBJInfo_BankNum]
-	ld   [\2+iOBJInfo_BankNumOld], a
+	ld   [\2+iOBJInfo_BankNumView], a
 	ld   a, [\2+iOBJInfo_OBJLstPtrTbl_Low]
-	ld   [\2+iOBJInfo_OBJLstPtrTbl_LowOld], a
+	ld   [\2+iOBJInfo_OBJLstPtrTbl_LowView], a
 	ld   a, [\2+iOBJInfo_OBJLstPtrTbl_High]
-	ld   [\2+iOBJInfo_OBJLstPtrTbl_HighOld], a
+	ld   [\2+iOBJInfo_OBJLstPtrTbl_HighView], a
 	ld   a, [\2+iOBJInfo_OBJLstPtrTblOffset]
-	ld   [\2+iOBJInfo_OBJLstPtrTblOffsetOld], a
+	ld   [\2+iOBJInfo_OBJLstPtrTblOffsetView], a
 .end:
 ENDM
 
@@ -1908,7 +1918,7 @@ OBJLstS_DoOBJInfoSlot:
 	jp   .calcRelX
 .useOldStatus:
 	inc  hl
-	ldi  a, [hl]				; Read iOBJInfo_OBJLstFlagsOld, seek to iOBJInfo_X
+	ldi  a, [hl]				; Read iOBJInfo_OBJLstFlagsView, seek to iOBJInfo_X
 	ld   [wOBJLstOrigFlags], a
 
 .calcRelX:
@@ -2018,8 +2028,8 @@ OBJLstS_DoOBJInfoSlot:
 	;--
 	; If GFX are still loading display the old sprite mapping.
 	;
-	; Note that the sprite mapping offset (iOBJInfo_OBJLstPtrTblOffset*) is always a multiple of $04.
-	; This is because each entry in the table has space for 2 sprite mapping pointers (parts A and B).
+	; The sprite mapping offset (iOBJInfo_OBJLstPtrTblOffset*) is always a multiple of $04,
+	; because each entry in the table has space for 2 sprite mapping pointers (parts A and B).
 	;
 	; Note that, even though the Current set gets copied to the Old one, the check with
 	; OSTB_GFXLOAD still needs to be made, as *NOT* all sprite mappings load their graphics dynamically.
@@ -2062,17 +2072,17 @@ OBJLstS_DoOBJInfoSlot:
 		inc  hl
 		inc  hl
 		; $14
-		ldi  a, [hl]			; Read iOBJInfo_BankNumOld
+		ldi  a, [hl]			; Read iOBJInfo_BankNumView
 		ld   [MBC1RomBank], a
 		ldh  [hROMBank], a
 		; $15
-		ld   e, [hl]			; Read iOBJInfo_OBJLstPtrTbl_LowOld
+		ld   e, [hl]			; Read iOBJInfo_OBJLstPtrTbl_LowView
 		inc  hl
 		; $16
-		ld   d, [hl]			; Read iOBJInfo_OBJLstPtrTbl_HighOld
+		ld   d, [hl]			; Read iOBJInfo_OBJLstPtrTbl_HighView
 		inc  hl
 		; $17
-		ld   c, [hl]			; Read iOBJInfo_OBJLstPtrTblOffsetOld
+		ld   c, [hl]			; Read iOBJInfo_OBJLstPtrTblOffsetView
 		inc  hl
 		; $18
 		
@@ -3069,8 +3079,8 @@ OBJLstS_UpdateGFXBufInfo:
 			push hl
 			pop  bc
 			
-			; DE = Ptr to iGFXBufInfo_SetKeyOld
-			ld   hl, iGFXBufInfo_SetKeyOld
+			; DE = Ptr to iGFXBufInfo_SetKeyView
+			ld   hl, iGFXBufInfo_SetKeyView
 			add  hl, bc
 			push hl
 			pop  de
@@ -3080,9 +3090,9 @@ OBJLstS_UpdateGFXBufInfo:
 			add  hl, bc
 			
 			; Check if these match:
-			; - iGFXBufInfo_SrcPtrA_Low  with iGFXBufInfo_SetKeyOld
-			; - iGFXBufInfo_SrcPtrA_High with iGFXBufInfo_SetKeyOld+1
-			; - iGFXBufInfo_BankA        with iGFXBufInfo_SetKeyOld+2
+			; - iGFXBufInfo_SrcPtrA_Low  with iGFXBufInfo_SetKeyView
+			; - iGFXBufInfo_SrcPtrA_High with iGFXBufInfo_SetKeyView+1
+			; - iGFXBufInfo_BankA        with iGFXBufInfo_SetKeyView+2
 			; If they don't take the jump
 REPT 3
 			ld   a, [de]		; A = CompInfo byte
@@ -3094,9 +3104,9 @@ ENDR
 			inc  hl				; Skip comparing iGFXBufInfo_TilesLeftA
 			
 			; Check if these match:
-			; - iGFXBufInfo_SrcPtrB_Low  with iGFXBufInfo_SetKeyOld+3
-			; - iGFXBufInfo_SrcPtrB_High with iGFXBufInfo_SetKeyOld+4
-			; - iGFXBufInfo_BankB        with iGFXBufInfo_SetKeyOld+5
+			; - iGFXBufInfo_SrcPtrB_Low  with iGFXBufInfo_SetKeyView+3
+			; - iGFXBufInfo_SrcPtrB_High with iGFXBufInfo_SetKeyView+4
+			; - iGFXBufInfo_BankB        with iGFXBufInfo_SetKeyView+5
 			; If they don't take the jump			
 REPT 2
 			ld   a, [de]		; A = CompInfo byte
@@ -3105,7 +3115,7 @@ REPT 2
 			inc  de
 			inc  hl
 ENDR
-			ld   a, [de]		; A = iGFXBufInfo_SetKeyOld+5
+			ld   a, [de]		; A = iGFXBufInfo_SetKeyView+5
 			cp   a, [hl]		; Does it match with iGFXBufInfo_BankB?
 			jp   nz, .different	; If not, jump
 			
@@ -3145,7 +3155,7 @@ ENDR
 		
 		; Copy over the current wOBJInfo slot info to the old one
 		
-		; Copy iOBJInfo_OBJLstFlags to iOBJInfo_OBJLstFlagsOld
+		; Copy iOBJInfo_OBJLstFlags to iOBJInfo_OBJLstFlagsView
 		ld   hl, iOBJInfo_OBJLstFlags
 		add  hl, bc
 		ldi  a, [hl]
@@ -3156,7 +3166,7 @@ ENDR
 		add  hl, bc					
 		push hl
 		pop  de
-		ld   hl, iOBJInfo_BankNumOld	; BC = iOBJInfo_BankNumOld
+		ld   hl, iOBJInfo_BankNumView	; BC = iOBJInfo_BankNumView
 		add  hl, bc
 REPT 4
 		ld   a, [de]				; Read from current data
@@ -8557,7 +8567,7 @@ HomeCall_Play_DrawTime:
 OBJInfoInit_Pl1:
 	db OST_VISIBLE ; iOBJInfo_Status
 	db SPR_XFLIP ; iOBJInfo_OBJLstFlags
-	db SPR_XFLIP ; iOBJInfo_OBJLstFlagsOld
+	db SPR_XFLIP ; iOBJInfo_OBJLstFlagsView
 	db $60 ; iOBJInfo_X
 	db $00 ; iOBJInfo_XSub
 	db $88 ; iOBJInfo_Y
@@ -8575,9 +8585,9 @@ OBJInfoInit_Pl1:
 	db LOW(OBJLstPtrTable_Terry_WinA) ; iOBJInfo_OBJLstPtrTbl_Low
 	db HIGH(OBJLstPtrTable_Terry_WinA) ; iOBJInfo_OBJLstPtrTbl_High
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
-	db BANK(OBJLstPtrTable_Terry_WinA) ; iOBJInfo_BankNumOld (BANK $09)
-	db LOW(OBJLstPtrTable_Terry_WinA) ; iOBJInfo_OBJLstPtrTbl_LowOld
-	db HIGH(OBJLstPtrTable_Terry_WinA) ; iOBJInfo_OBJLstPtrTbl_HighOld
+	db BANK(OBJLstPtrTable_Terry_WinA) ; iOBJInfo_BankNumView (BANK $09)
+	db LOW(OBJLstPtrTable_Terry_WinA) ; iOBJInfo_OBJLstPtrTbl_LowView
+	db HIGH(OBJLstPtrTable_Terry_WinA) ; iOBJInfo_OBJLstPtrTbl_HighView
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
 	db $00 ; iOBJInfo_ColiBoxId (auto)
 	db $00 ; iOBJInfo_HitboxId (auto)
@@ -8590,7 +8600,7 @@ OBJInfoInit_Pl1:
 OBJInfoInit_Pl2:
 	db OST_VISIBLE ; iOBJInfo_Status
 	db SPR_OBP1 ; iOBJInfo_OBJLstFlags
-	db SPR_OBP1 ; iOBJInfo_OBJLstFlagsOld
+	db SPR_OBP1 ; iOBJInfo_OBJLstFlagsView
 	db $A0 ; iOBJInfo_X
 	db $00 ; iOBJInfo_XSub
 	db $88 ; iOBJInfo_Y
@@ -8608,9 +8618,9 @@ OBJInfoInit_Pl2:
 	db LOW(L084000) ; iOBJInfo_OBJLstPtrTbl_Low
 	db HIGH(L084000) ; iOBJInfo_OBJLstPtrTbl_High
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
-	db BANK(L084000) ; iOBJInfo_BankNumOld (BANK $08)
-	db LOW(L084000) ; iOBJInfo_OBJLstPtrTbl_LowOld
-	db HIGH(L084000) ; iOBJInfo_OBJLstPtrTbl_HighOld
+	db BANK(L084000) ; iOBJInfo_BankNumView (BANK $08)
+	db LOW(L084000) ; iOBJInfo_OBJLstPtrTbl_LowView
+	db HIGH(L084000) ; iOBJInfo_OBJLstPtrTbl_HighView
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
 	db $00 ; iOBJInfo_ColiBoxId (auto)
 	db $00 ; iOBJInfo_HitboxId (auto)
@@ -9336,7 +9346,7 @@ Pl_SetNewMove:
 			add  hl, bc
 			ld   [hl], a
 			
-			; Blank out iPlInfo_JoyMergedKeysLH because ??? in case other moves use MoveInputS_CheckPKTypeWithMergedLH for checking.
+			; Blank out iPlInfo_JoyMergedKeysLH in case it was used to check for inputs
 			ld   hl, iPlInfo_JoyMergedKeysLH
 			add  hl, bc
 			ld   [hl], $00
@@ -9430,12 +9440,12 @@ Pl_SetNewMove:
 			; Always reset the animation from the beginning
 			xor  a
 			ld   [de], a	; iOBJInfo_OBJLstPtrTblOffset = 0
-			inc  de			; Seek to iOBJInfo_BankNumOld
+			inc  de			; Seek to iOBJInfo_BankNumView
 			
 			; Seek the wOBJInfo destination ptr (DE) to iOBJInfo_FrameLeft.
-			; As we're currently on iOBJInfo_BankNumOld...
+			; As we're currently on iOBJInfo_BankNumView...
 			push hl
-				ld   hl, iOBJInfo_FrameLeft-iOBJInfo_BankNumOld
+				ld   hl, iOBJInfo_FrameLeft-iOBJInfo_BankNumView
 				add  hl, de		; HL = DE + 7
 				push hl
 				pop  de			; DE = HL
@@ -9454,10 +9464,10 @@ Pl_SetNewMove:
 			
 			
 			; Prepare the damage-related fields for the new move.
-			; While the graphics for the first anim frame load, prevent the existing move ("Old Set"),
-			; from dealing further damage to avoid visual inconsistencies.
-			; The move code (MoveC_*) may decide to manually call Play_Pl_IsMoveLoading to copy over
-			; the pending damage fields to the current set when it's ready.
+			; While the graphics for the first sprite mapping in the animation load, prevent the visible
+			; one ("Old Set"), from dealing further damage to avoid inconsistencies.
+			; The move code (MoveC_*) may decide to manually call Play_Pl_IsMoveLoading to check
+			; and copy over the pending damage fields to the visible set when it's ready.
 			
 			; Clear current damage fields
 			xor  a
@@ -9649,7 +9659,7 @@ OBJLstS_Hide:
 ; so rather than wasting space with different animations, the frames advance only
 ; when the player's Y Speed becomes > some value.
 ;
-; To do this, the game checks which frame of the animation we're on (iOBJInfo_OBJLstPtrTblOffsetOld)
+; To do this, the game checks which frame of the animation we're on (iOBJInfo_OBJLstPtrTblOffsetView)
 ; and jumps to the appropriate ".obj*". Each of these defines its own target
 ; speed to check, calling OBJLstS_ReqAnimOnGtYSpeed to request advancing the animation once.
 MoveC_Base_Jump:
@@ -9658,7 +9668,7 @@ MoveC_Base_Jump:
 	call Play_Pl_IsMoveLoading
 	jp   c, .ret
 	
-	; Moves use iOBJInfo_OBJLstPtrTblOffsetOld to always execute code relevant to the visible frame.
+	; Moves use iOBJInfo_OBJLstPtrTblOffsetView to always execute code relevant to the visible frame.
 	; This has the nice result of OSTB_GFXNEWLOAD being only set the very first time we
 	; execute the code for any given .onOBJ*, allowing an easy way to execute code code once.
 	;
@@ -9666,7 +9676,7 @@ MoveC_Base_Jump:
 	; to switch frames since it goes off the *internal* frame ID.	
 	
 	; Don't allow executing normals when displaying the first and last frame.
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetOld
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00*OBJLSTPTR_ENTRYSIZE	; OBJLstId == 0?		
@@ -9743,7 +9753,7 @@ MoveC_Base_Jump:
 	
 .chkAct:
 	
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetOld
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $01*OBJLSTPTR_ENTRYSIZE
@@ -10016,10 +10026,10 @@ MoveC_Base_Jump:
 		ld   [de], a
 		inc  de		; Seek to iOBJInfo_OBJLstPtrTbl_High
 		
-		; byte1 -> iOBJInfo_OBJLstPtrTbl_LowOld
+		; byte1 -> iOBJInfo_OBJLstPtrTbl_LowView
 		inc  de		; Seek to iOBJInfo_OBJLstPtrTblOffset
-		inc  de		; ...iOBJInfo_BankNumOld
-		inc  de		; ...iOBJInfo_OBJLstPtrTbl_LowOld
+		inc  de		; ...iOBJInfo_BankNumView
+		inc  de		; ...iOBJInfo_OBJLstPtrTbl_LowView
 		ld   [de], a
 		dec  de		; and back
 		dec  de
@@ -10029,9 +10039,9 @@ MoveC_Base_Jump:
 		ldi  a, [hl]
 		ld   [de], a
 		inc  de		; Seek to iOBJInfo_OBJLstPtrTblOffset
-		inc  de		; ...iOBJInfo_BankNumOld
-		inc  de		; ...iOBJInfo_OBJLstPtrTbl_LowOld
-		inc  de		; ...iOBJInfo_OBJLstPtrTbl_HighOld
+		inc  de		; ...iOBJInfo_BankNumView
+		inc  de		; ...iOBJInfo_OBJLstPtrTbl_LowView
+		inc  de		; ...iOBJInfo_OBJLstPtrTbl_HighView
 		ld   [de], a
 		
 		; Restore original bank number
@@ -10931,6 +10941,8 @@ Play_Pl_CreateJoyKeysLH:
 	
 ; =============== Play_Pl_CreateJoyMergedKeysLH ===============
 ; Merges the current light/heavy flags to iPlInfo_JoyMergedKeysLH.
+; This is only called when a move uses iPlInfo_JoyMergedKeysLH to 
+; check inputs. TODO: Purpose over iPlInfo_JoyNewKeysLH directly ???
 ; IN
 ; - BC: Ptr to wPlInfo structure
 ; OUT
@@ -10941,7 +10953,7 @@ Play_Pl_CreateJoyMergedKeysLH:
 	add  hl, bc		; Seek to iPlInfo_JoyNewKeysLH
 	ld   a, [hl]	; A = iPlInfo_JoyNewKeysLH
 	; If the updated flags are blank, keep the old ones 
-	and  a, KEP_A_LIGHT|KEP_B_LIGHT|KEP_A_HEAVY|KEP_B_HEAVY ; Filter valid LK bits
+	and  a, KEP_A_LIGHT|KEP_B_LIGHT|KEP_A_HEAVY|KEP_B_HEAVY ; Filter valid LH bits
 	jr   z, .retClear
 .update:
 	; Otherwise, OR them over
@@ -14060,7 +14072,7 @@ Play_Pl_IsMoveLoading:
 
 	;--
 	;
-	; Verify that the old and new sprite mapping table pointers are identical.
+	; Verify that the visible and pending sprite mapping table pointers are identical.
 	; If they aren't, the move isn't ready, since it means the move animation 
 	; was recently changed (ie: new move) but the graphics for them haven't been 
 	; fully loaded yet.
@@ -14078,15 +14090,15 @@ Play_Pl_IsMoveLoading:
 			inc  hl
 			ld   d, [hl]		; D = iOBJInfo_OBJLstPtrTbl_High
 			inc  hl				; Seek to iOBJInfo_OBJLstPtrTblOffset
-			inc  hl				; Seek to iOBJInfo_BankNumOld
+			inc  hl				; Seek to iOBJInfo_BankNumView
 			ldi  a, [hl]	
-			cp   a, b			; iOBJInfo_BankNumOld == iOBJInfo_BankNum?
+			cp   a, b			; iOBJInfo_BankNumView == iOBJInfo_BankNum?
 			jr   nz, .retNotReadyPop	; If not, return
 			ldi  a, [hl]
-			cp   a, c			; iOBJInfo_OBJLstPtrTbl_LowOld == iOBJInfo_OBJLstPtrTbl_Low?
+			cp   a, c			; iOBJInfo_OBJLstPtrTbl_LowView == iOBJInfo_OBJLstPtrTbl_Low?
 			jr   nz, .retNotReadyPop	; If not, return
 			ldi  a, [hl]
-			cp   a, d			; iOBJInfo_OBJLstPtrTbl_HighOld == iOBJInfo_OBJLstPtrTbl_High?
+			cp   a, d			; iOBJInfo_OBJLstPtrTbl_HighView == iOBJInfo_OBJLstPtrTbl_High?
 			jr   nz, .retNotReadyPop	; If not, return
 		pop  bc
 	pop  de

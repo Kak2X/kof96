@@ -402,16 +402,25 @@ iGFXBufInfo_SrcPtrB_High EQU $07
 iGFXBufInfo_BankB        EQU $08 ; Set B - Source GFX bank
 iGFXBufInfo_TilesLeftB   EQU $09 ; Set B - (8x8) Tiles remaining
 iGFXBufInfo_SetKey       EQU $0A ; 5 bytes. Current set "Id". Combination of Set A settings.
-iGFXBufInfo_SetKeyOld    EQU $10 ; 5 bytes. Last completed set "id".
+iGFXBufInfo_SetKeyView   EQU $10 ; 5 bytes. Last completed set "id".
 
-; Elements in the wOBJInfo struct
-; TODO?: Rename the sets to iOBJInfo_OBJLstFlags(Cur?), iOBJInfo_OBJLstFlagsView
-; Current -> Current data. Also the pending data when loading new graphics.
-; Old -> Old data, used only when loading new graphics. Guaranteed to be what's shown on screen for player characters.
-; These are unrelated to the "Set A" and "Set B" of wGFXBufInfo.
+; Some of the fields that have the "View" suffix also have a field without it.
+; They are used to help with double buffering, and are completely unrelated to the "Set A" and "Set B" of wGFXBufInfo.
+;
+; ie:
+; - iOBJInfo_OBJLstFlags: Flags for the *internal* current sprite mapping.
+;                         When loading new graphics, this is treated as the pending value.
+; - iOBJInfo_OBJLstFlagsView: Flags for the *visible* current sprite mapping.
+;                             When a sprite mapping uses the GFX buffer system, this is guaranteed to always
+;                             match what's visible on screen, even if the internal value is what gets used.
+;
+; The "View" fields however are only used when graphics are loading on the pending buffer, so they
+; are referred to as the "Old" set. This is for compatibility with sprite mappings that don't load
+; dynamic graphics -- because of how the data/system was set up, those don't have valid entries in the "Old" set.
+; As those don't load graphics, they'll always use the internal fields.
 iOBJInfo_Status EQU $00 ; Both sets - OBJInfo flags + X/Y OBJLst flip flags (OR'd over ROM flags)
 iOBJInfo_OBJLstFlags EQU $01 ; Current - HW OBJ flags used for the entire OBJLst (XOR'd over ROM flags after above)
-iOBJInfo_OBJLstFlagsOld EQU $02 ; Old - See above
+iOBJInfo_OBJLstFlagsView EQU $02 ; Old - See above
 iOBJInfo_X EQU $03 ; X Position
 iOBJInfo_XSub EQU $04 ; X Subpixel Position
 iOBJInfo_Y EQU $05 ; Y Position
@@ -429,10 +438,10 @@ iOBJInfo_BankNum EQU $10 ; Current - Bank number for OBJLstPtrTable (animation t
 iOBJInfo_OBJLstPtrTbl_Low EQU $11 ; Current - Ptr to OBJLstPtrTable (low byte)
 iOBJInfo_OBJLstPtrTbl_High EQU $12 ; Current - Ptr to OBJLstPtrTable (high byte)
 iOBJInfo_OBJLstPtrTblOffset EQU $13 ; Current - Table offset (multiple of $04)
-iOBJInfo_BankNumOld EQU $14 ; Old - Bank number for OBJLstPtrTable (animation table)
-iOBJInfo_OBJLstPtrTbl_LowOld EQU $15 ; Old - Ptr to OBJLstPtrTable (low byte)
-iOBJInfo_OBJLstPtrTbl_HighOld EQU $16 ; Old - Ptr to OBJLstPtrTable (high byte)
-iOBJInfo_OBJLstPtrTblOffsetOld EQU $17 ; Old - Table offset (multiple of $04)
+iOBJInfo_BankNumView EQU $14 ; Old - Bank number for OBJLstPtrTable (animation table)
+iOBJInfo_OBJLstPtrTbl_LowView EQU $15 ; Old - Ptr to OBJLstPtrTable (low byte)
+iOBJInfo_OBJLstPtrTbl_HighView EQU $16 ; Old - Ptr to OBJLstPtrTable (high byte)
+iOBJInfo_OBJLstPtrTblOffsetView EQU $17 ; Old - Table offset (multiple of $04)
 iOBJInfo_ColiBoxId EQU $18 ; Hurtbox/Collision box ID (copied from iOBJLstHdrA_ColiBoxId)
 iOBJInfo_HitboxId EQU $19 ; Hitbox ID (copied from iOBJLstHdrA_HitBoxId)
 iOBJInfo_ForceHitboxId EQU $1A ; If set, overrides the specified Hitbox ID (ignores iOBJInfo_HitboxId and the flags disabling the hitbox). Not for unblockables, as the guard check is still made. Used for temporary throw hitboxes. 
