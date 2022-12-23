@@ -94,7 +94,9 @@ C_NL EQU $FF ; Newline character in strings
 
 OBJ_OFFSET_X        EQU $08 ; Standard offset used when sprite positions are compared to the screen/scroll
 OBJLSTPTR_NONE      EQU $FFFF ; Placeholder pointer that marks the lack of a secondary sprite mapping and the end separator
-OBJLSTPTR_ENTRYSIZE EQU 4 ; Size of each OBJLstPtrTable entry (pair of OBJLstHdrA_* and OBJLstHdrB_* pointers)
+OBJLSTPTR_ENTRYSIZE EQU $04 ; Size of each OBJLstPtrTable entry (pair of OBJLstHdrA_* and OBJLstHdrB_* pointers)
+ANIMSPEED_INSTANT   EQU $00 ; Close enough
+ANIMSPEED_NONE      EQU $FF ; Slowest possible animation speed, set when we want manual control over the animation since it will always be done quicker than 255 frames.
 
 ; FLAGS
 DIPB_EASY_MOVES       EQU 2 ; SELECT + A/B for easy super moves
@@ -146,23 +148,23 @@ OBJINFO_SIZE EQU $40 ; wOBJInfo size
 GFXBUF_TILECOUNT EQU $20 ; Number of tiles in a GFX buffer
 
 ; iOBJInfo_Status bits
-OSTB_GFXLOAD EQU 0 ; If set, the graphics are still being copied to the *opposite* buffer than the current one at OSTB_GFXBUF2
-OSTB_PL      EQU 0 ; ??? If the sprite mapping doesn't use the GFX buffer (ie: projectiles), it instead marks the player who spawned it (PLB1 or PLB2).
-OSTB_GFXBUF2 EQU 1 ; If set, the second GFX buffer is used for the *current* frame
-OSTB_BIT3    EQU 3 ; 
-OSTB_ANIMEND EQU 4 ; Animation has ended, repeat last frame indefinitely
-OSTB_XFLIP   EQU 5 ; Horizontal flip
-OSTB_YFLIP   EQU 6 ; Vertical flip
-OSTB_VISIBLE EQU 7 ; If not set, the sprite mapping is hidden
+OSTB_GFXLOAD    EQU 0 ; If set, the graphics are still being copied to the *opposite* buffer than the current one at OSTB_GFXBUF2
+OSTB_PL         EQU 0 ; ??? If the sprite mapping doesn't use the GFX buffer (ie: projectiles), it instead marks the player who spawned it (PLB1 or PLB2).
+OSTB_GFXBUF2    EQU 1 ; If set, the second GFX buffer is used for the *current* frame
+OSTB_GFXNEWLOAD EQU 3 ; If set, the graphics have just finished loading. Effectively valid for 1 frame only, since the animation routines resets it.
+OSTB_ANIMEND    EQU 4 ; Animation has ended, repeat last frame indefinitely
+OSTB_XFLIP      EQU 5 ; Horizontal flip
+OSTB_YFLIP      EQU 6 ; Vertical flip
+OSTB_VISIBLE    EQU 7 ; If not set, the sprite mapping is hidden
 
-OST_GFXLOAD EQU 1 << OSTB_GFXLOAD
-OST_PL      EQU 1 << OSTB_PL
-OST_GFXBUF2 EQU 1 << OSTB_GFXBUF2
-OST_BIT3    EQU 1 << OSTB_BIT3
-OST_ANIMEND EQU 1 << OSTB_ANIMEND
-OST_XFLIP   EQU 1 << OSTB_XFLIP
-OST_YFLIP   EQU 1 << OSTB_YFLIP
-OST_VISIBLE EQU 1 << OSTB_VISIBLE
+OST_GFXLOAD     EQU 1 << OSTB_GFXLOAD
+OST_PL          EQU 1 << OSTB_PL
+OST_GFXBUF2     EQU 1 << OSTB_GFXBUF2
+OST_GFXNEWLOAD  EQU 1 << OSTB_GFXNEWLOAD
+OST_ANIMEND     EQU 1 << OSTB_ANIMEND
+OST_XFLIP       EQU 1 << OSTB_XFLIP
+OST_YFLIP       EQU 1 << OSTB_YFLIP
+OST_VISIBLE     EQU 1 << OSTB_VISIBLE
 
 ; Additional iOBJInfo_OBJLstFlags for internal purposes.
 ; These aren't related to the hardware flags.
@@ -1060,6 +1062,9 @@ HITANIM_THROW_ROTD          EQU $13 ; Throw rotation frame, head down
 HITANIM_THROW_ROTR          EQU $14 ; Throw rotation frame, head right
 
 HITANIM_DUMMY               EQU $81 ; Placeholder used for some empty slots in the special move entries
+
+
+COLIBOX_00 EQU $00
 
 
 ; wPlayPlThrowActId

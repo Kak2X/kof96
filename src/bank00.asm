@@ -1412,7 +1412,7 @@ mVBlank_CopyPlTiles: MACRO
 	; Mark that the buffer operation is complete
 	ld   hl, \2+iOBJInfo_Status
 	res  OSTB_GFXLOAD, [hl]		; Buffer copied
-	set  OSTB_BIT3, [hl]		; ??? does this do anything
+	set  OSTB_GFXNEWLOAD, [hl]	; It got loaded this frame (gets reset when calling animation func)
 	
 	;--------
 	; 
@@ -2021,6 +2021,11 @@ OBJLstS_DoOBJInfoSlot:
 	; Note that the sprite mapping offset (iOBJInfo_OBJLstPtrTblOffset*) is always a multiple of $04.
 	; This is because each entry in the table has space for 2 sprite mapping pointers (parts A and B).
 	;
+	; Note that, even though the Current set gets copied to the Old one, the check with
+	; OSTB_GFXLOAD still needs to be made, as *NOT* all sprite mappings load their graphics dynamically.
+	; Some of those that don't (and therefore, never have OSTB_GFXLOAD set), only have
+	; the current set info specified, while having unusable garbage in the old set.
+	;
 ;----------
 	; $10 
 	push bc
@@ -2624,7 +2629,7 @@ OBJLstS_Draw_WriteCommon:
 OBJLstS_DoAnimTiming_Initial:
 	ldh  a, [hROMBank]					; Save current bank
 	push af
-		res  OSTB_BIT3, [hl]			; Reset OSTB_BIT3
+		res  OSTB_GFXNEWLOAD, [hl]		; Reset when processing
 		push hl
 			; Switch to the bank number
 			ld   de, iOBJInfo_BankNum
@@ -2659,7 +2664,7 @@ OBJLstS_DoAnimTiming_Initial:
 OBJLstS_DoAnimTiming_NoLoop:
 	ldh  a, [hROMBank]
 	push af
-		res  OSTB_BIT3, [hl]			; Reset OSTB_BIT3
+		res  OSTB_GFXNEWLOAD, [hl]			; Reset when processing
 			
 		;
 		; If the animation is marked as ended or GFX are still being copied to the other buffer,
@@ -2766,7 +2771,7 @@ OBJLstS_DoAnimTiming_NoLoop:
 OBJLstS_DoAnimTiming_Loop:
 	ldh  a, [hROMBank]
 	push af
-		res  OSTB_BIT3, [hl]			; Reset OSTB_BIT3
+		res  OSTB_GFXNEWLOAD, [hl]			; Reset when processing
 			
 		;
 		; If the animation is marked as ended or GFX are still being copied to the other buffer,
@@ -2774,7 +2779,7 @@ OBJLstS_DoAnimTiming_Loop:
 		;
 		ld   a, [hl]
 		and  a, OST_ANIMEND|OST_GFXLOAD		; Any of the two bits set?
-		jp   nz, OBJLstS_CommonAnim_End				; If so, return immediately
+		jp   nz, OBJLstS_CommonAnim_End		; If so, return immediately
 		
 		;
 		; Continue showing the current animation frame until iOBJInfo_FrameLeft elapses.
@@ -2788,7 +2793,7 @@ OBJLstS_DoAnimTiming_Loop:
 			dec  a							; Otherwise, decrement the timer		
 			ld   [hl], a					; And save it back
 		pop  hl								; HL = Ptr to wOBJInfo
-		jp   OBJLstS_CommonAnim_End					; We're done for now
+		jp   OBJLstS_CommonAnim_End			; We're done for now
 		
 		.setNextFrame:
 			;
@@ -3130,7 +3135,7 @@ ENDR
 		; Reload old copy of iOBJInfo_Status with old OSTB_GFXBUF2 flag.
 		ld   a, [wOBJLstTmpStatusOld]	; Get copy of iOBJInfo_Status
 		res  OSTB_GFXLOAD, a			; Mark GFX as already loaded
-		set  OSTB_BIT3, a			
+		set  OSTB_GFXNEWLOAD, a				
 		ld   [bc], a
 		
 		;
@@ -9353,9 +9358,7 @@ Pl_SetNewMove:
 			add  hl, bc					
 			push hl	; Save HL
 			
-				;
 				; BC = Starting destination for wPlInfo fields
-				;
 				ld   hl, iPlInfo_OBJLstPtrTblOffsetMoveEnd		
 				add  hl, bc				
 				push hl
@@ -9639,329 +9642,510 @@ OBJLstS_Hide:
 	ret
 	
 ; =============== MoveC_Base_Jump ===============
-; Move code handler for the jump types.
-L002958:;I
+; Move code handler for all jump types.
+;
+; This move is one of the many that takes manual control of its animation timing.
+; In this case, it's done because there are several ways to influence the jump,
+; so rather than wasting space with different animations, the frames advance only
+; when the player's Y Speed becomes > some value.
+;
+; To do this, the game checks which frame of the animation we're on (iOBJInfo_OBJLstPtrTblOffsetOld)
+; and jumps to the appropriate ".obj*". Each of these defines its own target
+; speed to check, calling OBJLstS_ReqAnimOnGtYSpeed to request advancing the animation once.
+MoveC_Base_Jump:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_CreateJoyMergedKeysLH
 	call Play_Pl_IsMoveLoading
-	jp   c, L002B90
+	jp   c, .ret
+	
+	; Moves use iOBJInfo_OBJLstPtrTblOffsetOld to always execute code relevant to the visible frame.
+	; This has the nice result of OSTB_GFXNEWLOAD being only set the very first time we
+	; execute the code for any given .onOBJ*, allowing an easy way to execute code code once.
+	;
+	; For the same reason, OBJLstS_IsFrameEnd can't be used to determine if we're about
+	; to switch frames since it goes off the *internal* frame ID.	
+	
+	; Don't allow executing normals when displaying the first and last frame.
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetOld
+	add  hl, de
+	ld   a, [hl]
+	cp   $00*OBJLSTPTR_ENTRYSIZE	; OBJLstId == 0?		
+	jp   z, .obj0_init	; If so, jump
+	cp   $07*OBJLSTPTR_ENTRYSIZE	; OBJLstId == 7?
+	jp   z, .obj7_landed	; If so, jump
+	
+	;
+	; Move Input Reader
+	;
+	
+	; If we've landed, skip this
+	ld   hl, iOBJInfo_Y
+	add  hl, de
+	ld   a, [hl]
+	cp   PL_FLOOR_POS	; iOBJInfo_Y == PL_FLOOR_POS?
+	jr   z, .chkAct		; If so, skip
+	
+	; Check if we're starting normals in the middle of the jump
+	ld   hl, iPlInfo_JoyMergedKeysLH
+	add  hl, bc
+	; Normals (air)
+	bit  KEPB_A_LIGHT, [hl]				; Light kick?
+	jp   nz, .startAirKick	; If so, jump
+	bit  KEPB_B_LIGHT, [hl]				; Light punch?
+	jp   nz, .startAirPunch	; If so, jump
+	bit  KEPB_A_HEAVY, [hl]				; Heavy kick?
+	jp   nz, .startAirKick	; If so, jump
+	bit  KEPB_B_HEAVY, [hl]				; Heavy punch?
+	jp   nz, .startAirPunch	; If so, jump
+	
+	; Otherwise, skip ahead
+	jp   .chkAct
+
+;	
+; [TCRF] Unreferenced code to start an air block.
+;        This code is essentially equivalent to BasicInput_ChkAirBlock, except
+;        that there's no input check for holding back.
+;
+;        If this code were used, any attack while doing neutral or backwards
+;        jumps would try to be automatically blocked.
+;
+;        Note that air blocking is new to 96. Neither this nor BasicInput_ChkAirBlock
+;        existed in that game.
+;
+.unused_chkAirBlock:
+    ; Can't air block when jumping forwards
+	ld   hl, iPlInfo_MoveId
+	add  hl, bc
+	ld   a, [hl]
+	cp   a, MOVE_SHARED_JUMP_F
+	jp   z, .chkAct
+	
+	; Projectiles can only be blocked in the air.
+	; So as long as the opponent's projectile is active, try to air block it.
+	ld   hl, iPlInfo_Flags0Other
+	add  hl, bc
+	bit  PF0B_PROJ, [hl]			; Does the other player have an active projectile?
+	jp   nz, .unused_startAirBlock	; If so, jump
+		
+	; Ground-based attacks can't be blocked in the air.
+	ld   hl, iPlInfo_MoveDamageValOther
+	add  hl, bc
+	ld   a, [hl]
+	or   a							; Is the other player performing an attack?
+	jp   z, .chkAct					; If not, skip ahead
+	
+	ld   hl, iPlInfo_OBJInfoYOther
+	add  hl, bc
+	ld   a, [hl]		
+	cp   PL_FLOOR_POS				; Is the other player on the floor?
+	jp   z, .chkAct					; If so, skip ahead
+	jp   .unused_startAirBlock
+	
+.chkAct:
 	
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetOld
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L002A27
-	cp   $1C
-	jp   z, L002B82
-	ld   hl, $0005
-	add  hl, de
-	ld   a, [hl]
-	cp   PL_FLOOR_POS
-	jr   z, L0029C0
-	ld   hl, $0049
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1_setJumpType
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2_air
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3_air
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj4_air
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj5_air
+	cp   $06*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkWallJump
+	jp   .move ; We never get here
+
+;
+; Air-based attack/guard moves.
+; These don't have light/heavy variations.
+;
+
+; [TCRF] Unused code to start an air block, equivalent to BasicInput_StartAirBlock
+.unused_startAirBlock:
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	bit  4, [hl]
-	jp   nz, L002A14
-	bit  5, [hl]
-	jp   nz, L002A01
-	bit  6, [hl]
-	jp   nz, L002A14
-	bit  7, [hl]
-	jp   nz, L002A01
-	jp   L0029C0
-L002997: db $21;X
-L002998: db $33;X
-L002999: db $00;X
-L00299A: db $09;X
-L00299B: db $7E;X
-L00299C: db $FE;X
-L00299D: db $0C;X
-L00299E: db $CA;X
-L00299F: db $C0;X
-L0029A0: db $29;X
-L0029A1: db $21;X
-L0029A2: db $6D;X
-L0029A3: db $00;X
-L0029A4: db $09;X
-L0029A5: db $CB;X
-L0029A6: db $46;X
-L0029A7: db $C2;X
-L0029A8: db $E6;X
-L0029A9: db $29;X
-L0029AA: db $21;X
-L0029AB: db $74;X
-L0029AC: db $00;X
-L0029AD: db $09;X
-L0029AE: db $7E;X
-L0029AF: db $B7;X
-L0029B0: db $CA;X
-L0029B1: db $C0;X
-L0029B2: db $29;X
-L0029B3: db $21;X
-L0029B4: db $81;X
-L0029B5: db $00;X
-L0029B6: db $09;X
-L0029B7: db $7E;X
-L0029B8: db $FE;X
-L0029B9: db $88;X
-L0029BA: db $CA;X
-L0029BB: db $C0;X
-L0029BC: db $29;X
-L0029BD: db $C3;X
-L0029BE: db $E6;X
-L0029BF: db $29;X
-L0029C0:;JR
-	ld   hl, $0017
-	add  hl, de
-	ld   a, [hl]
-	cp   $04
-	jp   z, L002A33
-	cp   $08
-	jp   z, L002B35
-	cp   $0C
-	jp   z, L002B3F
-	cp   $10
-	jp   z, L002B49
-	cp   $14
-	jp   z, L002B53
-	cp   $18
-	jp   z, L002B5D
-L0029E3: db $C3;X
-L0029E4: db $66;X
-L0029E5: db $2B;X
-L0029E6: db $21;X
-L0029E7: db $21;X
-L0029E8: db $00;X
-L0029E9: db $09;X
-L0029EA: db $CB;X
-L0029EB: db $DE;X
-L0029EC: db $3E;X
-L0029ED: db $14;X
-L0029EE: db $CD;X
-L0029EF: db $44;X
-L0029F0: db $34;X
-L0029F1: db $C3;X
-L0029F2: db $66;X
-L0029F3: db $2B;X
-L0029F4:;J
-	ld   a, $09
-	call HomeCall_Sound_ReqPlayExId
-	ld   a, $46
+	set  PF1B_GUARD, [hl]			
+	ld   a, MOVE_SHARED_BLOCK_A
 	call Pl_Unk_SetNewMoveAndAnim
-	jp   L002B66
-L002A01:;J
+	jp   .move
+	
+; Starts the A+B air attack.
+.startAirAttack:
+	ld   a, SCT_HEAVY
+	call HomeCall_Sound_ReqPlayExId
+	ld   a, MOVE_SHARED_ATTACK_A
+	call Pl_Unk_SetNewMoveAndAnim
+	jp   .move
+	
+; Starts an air punch.
+.startAirPunch:
+	; If A+B are held, start that attack instead
 	call Play_Pl_AreBothBtnHeld
-	jp   c, L0029F4
-	ld   a, $08
+	jp   c, .startAirAttack
+	; New move
+	ld   a, SCT_07
 	call HomeCall_Sound_ReqPlayExId
-	ld   a, $42
+	ld   a, MOVE_SHARED_PUNCH_A
 	call Pl_Unk_SetNewMoveAndAnim
-	jp   L002B66
-L002A14:;J
+	jp   .move
+	
+;
+; Starts an air kick.
+;
+.startAirKick:
+	; If A+B are held, start that attack instead
 	call Play_Pl_AreBothBtnHeld
-	jp   c, L0029F4
-	ld   a, $09
+	jp   c, .startAirAttack
+	; New move
+	ld   a, SCT_HEAVY
 	call HomeCall_Sound_ReqPlayExId
-	ld   a, $44
+	ld   a, MOVE_SHARED_KICK_A
 	call Pl_Unk_SetNewMoveAndAnim
-	jp   L002B66
-L002A27:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L002B8D
-	inc  hl
-	ld   [hl], $FF
-	jp   L002B8D
-L002A33:;J
-	ld   hl, $0000
+	jp   .move
+	
+;
+; Frame 0: Preparing to jump.
+; Get manual control of the animation timing as soon as the internal frame
+; is about to change (iOBJInfo_FrameLeft == 0, as checked by OBJLstS_IsFrameEnd).
+; Since the graphics for the new frame have to load, this will still be called a few times after that.
+; 
+.obj0_init:
+	call OBJLstS_IsFrameEnd			; HL = iOBJInfo_FrameLeft
+	jp   nc, .anim
+	inc  hl							; Seek to iOBJInfo_FrameTotal
+	ld   [hl], ANIMSPEED_NONE		; iOBJInfo_FrameTotal = $FF
+	jp   .anim
+	
+;
+; Frame 1: Starting the jump, and determines its "type".
+;
+; Jump "types" don't really exist though.
+; What actually happens is that, through a series of checks that mostly depend
+; on player input, the vertical and horizontal speed are updated, then the movement physics do the rest.
+; 
+.obj1_setJumpType:
+	
+	; Set the jump settings only the first time we get here.
+	; Every time after, jump to .obj1_chkEnd to check if we're done.
+	ld   hl, iOBJInfo_Status
 	add  hl, de
-	bit  3, [hl]
-	jp   z, L002B2B
-	ld   hl, $0020
+	bit  OSTB_GFXNEWLOAD, [hl]
+	jp   z, .obj1_chkEnd
+	
+.chkSettings:
+	; We're in the air now
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	set  2, [hl]
-	ld   hl, $0047
+	set  PF0B_AIR, [hl]
+	
+	;
+	; JUMP DIRECTION
+	;
+	
+	; Decide the jump direction depending on the input we were holding right before starting the jump move.
+	ld   hl, iPlInfo_JoyKeysPreJump
 	add  hl, bc
-	bit  1, [hl]
-	jr   nz, L002A51
-	bit  0, [hl]
-	jr   nz, L002A97
-	jp   L002B09
-L002A51:;R
+	bit  KEYB_LEFT, [hl]	; Did we hold left?
+	jr   nz, .chkJumpL		; If so, jump
+	bit  KEYB_RIGHT, [hl]	; Did we hold right?	
+	jr   nz, .chkJumpR		; If so, jump
+	
+	; Otherwise, it's neutral, and we can skip ahead.
+	; The movement speed and move ID (MOVE_SHARED_JUMP_N) we currently have set
+	; are already correct, as it's not possible to do fast neutral jumps.
+	jp   .neutral			
+	;--
+.chkJumpL:
+	;
+	; HORIZONTAL JUMP SPEED
+	; By default the horizontal speed is read from a player-specific constant in iPlInfo_SpeedX.
+	; With running jumps or when jumping while crouching, that speed is doubled.
+	;
+	
+	; Running jumps give hyper hops
 	ld   hl, iPlInfo_RunningJump
 	add  hl, bc
 	ld   a, [hl]
 	or   a
-	jp   nz, L002A6B
-	mMvIn_ChkDir MoveInput_DU_Fast, L002A6B
+	jp   nz, .fastL
+	
+	; Otherwise, check for the standard move input.
+	; DU + L -> Hyper hop
+	mMvIn_ChkDir MoveInput_DU_Fast, .fastL
+	
+.normalL:
+	; HL = iPlInfo_SpeedX
 	ld   hl, iPlInfo_SpeedX
 	call Pl_GetWord
-	jr   L002A7A
-L002A6B:;J
-	ld   a, $9C
+	jr   .invSpeedL
+.fastL:
+	; Play SFX for it
+	ld   a, SFX_SUPERJUMP
 	call HomeCall_Sound_ReqPlayExId
+	; HL = iPlInfo_SpeedX * 2
 	ld   hl, iPlInfo_SpeedX
 	call Pl_GetWord
 	sla  l
 	rl   h
-L002A7A:;R
-	ld   a, h
+	
+.invSpeedL:
+	; Since we're moving left, SpeedX = -SpeedX
+	ld   a, h	; Invert high byte
 	cpl
 	ld   h, a
-	ld   a, l
+	ld   a, l	; Invert low byte
 	cpl
 	ld   l, a
-	inc  l
-	jp   nz, L002A85
-	inc  h
-L002A85:;J
+	inc  l		; HL++ to account for bitflip
+	jp   nz, .setSpeedL
+	inc  h		
+.setSpeedL:
+	; Set the jump speed
 	call Play_OBJLstS_SetSpeedH
-	ld   a, $0E
-	ld   hl, $0001
-	add  hl, de
-	bit  5, [hl]
-	jr   nz, L002ACF
-	ld   a, $0C
-	jp   L002ACF
-L002A97:;R
+	
+	; Pick the appropriate jump move depending on the direction we're facing.
+	ld   a, MOVE_SHARED_JUMP_B		; A = Default with backwards jump
+	ld   hl, iOBJInfo_OBJLstFlags
+	add  hl, de						; Seek to flags
+	bit  OSTB_XFLIP, [hl]			; Are we visually facing left (1P side)?
+	jr   nz, .setDiagJump				; If so, jump (L is backwards on 1P side)
+	ld   a, MOVE_SHARED_JUMP_F		; While it's forwards on 2P side
+	jp   .setDiagJump
+	;--
+.chkJumpR:
+	; Just like .chkJumpL, except without inverting the jump speed
+	; and with move IDs the other way around.
 	ld   hl, iPlInfo_RunningJump
 	add  hl, bc
 	ld   a, [hl]
 	or   a
-	jp   nz, L002AB1
-	mMvIn_ChkDir MoveInput_DU_Fast, L002AB1
+	jp   nz, .fastR
+	mMvIn_ChkDir MoveInput_DU_Fast, .fastR
+.normalR:
 	ld   hl, iPlInfo_SpeedX
 	call Pl_GetWord
-	jr   L002AC0
-L002AB1:;J
-	ld   a, $9C
+	jr   .setSpeedR
+.fastR:
+	ld   a, SFX_SUPERJUMP
 	call HomeCall_Sound_ReqPlayExId
 	ld   hl, iPlInfo_SpeedX
 	call Pl_GetWord
 	sla  l
 	rl   h
-L002AC0:;R
+.setSpeedR:
 	call Play_OBJLstS_SetSpeedH
-	ld   a, $0C
-	ld   hl, $0001
+	ld   a, MOVE_SHARED_JUMP_F
+	ld   hl, iOBJInfo_OBJLstFlags
 	add  hl, de
-	bit  5, [hl]
-	jr   nz, L002ACF
-	ld   a, $0E
-L002ACF:;JR
-	ld   hl, $0033
+	bit  OSTB_XFLIP, [hl]
+	jr   nz, .setDiagJump
+	ld   a, MOVE_SHARED_JUMP_B
+	;--
+.setDiagJump:
+
+	;
+	; Update the move ID
+	;
+	ld   hl, iPlInfo_MoveId
 	add  hl, bc
 	ld   [hl], a
+	
+	;
+	; Update the ptr for this animation, reading it from the MoveAnimTbl_* similarly to Pl_SetNewMove.
+	;
 	push de
-	ld   hl, $0011
-	add  hl, de
-	push hl
+		; DE = Ptr to destination iOBJInfo_OBJLstPtrTbl_Low
+		ld   hl, iOBJInfo_OBJLstPtrTbl_Low
+		add  hl, de
+		push hl
+		pop  de
+		
+		push de
+			;
+			; Switch to BANK $03, as all move animation tables are stored there.
+			; [POI] Unsafe ROM bank switch, will break if VBLANK triggers here.
+			;
+			push af
+				ld   a, BANK(MoveAnimTbl_Marker) ; BANK $03
+				ld   [MBC1RomBank], a
+			pop  af
+			
+			;
+			; DE = Ptr to start of the move animation table for this player.
+			;
+			ld   hl, iPlInfo_MoveAnimTblPtr_High
+			add  hl, bc
+			ld   d, [hl]	; D = iPlInfo_MoveAnimTblPtr_High
+			inc  hl
+			ld   e, [hl]	; E = iPlInfo_MoveAnimTblPtr_Low
+			
+			;
+			; Generate the offset to the table entry from the Move Id.
+			;
+			; Each entry in the table is 8 bytes long.
+			; Considering MoveId is already multiplied by 2 for easy indexing,
+			; this means we have to multiply it by 4.
+			;
+			ld   h, $00
+			ld   l, a		; HL = MoveId (*2)
+			add  hl, hl		; * 2
+			add  hl, hl		; * 2
+			
+			; HL = Ptr to table entry
+			add  hl, de		
+		pop  de
+		
+		;
+		; Update both sets of iOBJInfo_OBJLstPtrTbl.
+		;
+		
+		; Since the bank number iOBJInfo_BankNum isn't updated, it means
+		; the sprite mappings for the three jump moves must be in the same bank.
+		; In practice, all sprite mappings for any given character are stored in the same bank anyway.
+		
+		; byte0 -> (skipped)
+		inc  hl		; Seek to byte1 
+		
+		; byte1 -> iOBJInfo_OBJLstPtrTbl_Low
+		ldi  a, [hl]
+		ld   [de], a
+		inc  de		; Seek to iOBJInfo_OBJLstPtrTbl_High
+		
+		; byte1 -> iOBJInfo_OBJLstPtrTbl_LowOld
+		inc  de		; Seek to iOBJInfo_OBJLstPtrTblOffset
+		inc  de		; ...iOBJInfo_BankNumOld
+		inc  de		; ...iOBJInfo_OBJLstPtrTbl_LowOld
+		ld   [de], a
+		dec  de		; and back
+		dec  de
+		dec  de
+		
+		; byte2 -> iOBJInfo_OBJLstPtrTbl_High
+		ldi  a, [hl]
+		ld   [de], a
+		inc  de		; Seek to iOBJInfo_OBJLstPtrTblOffset
+		inc  de		; ...iOBJInfo_BankNumOld
+		inc  de		; ...iOBJInfo_OBJLstPtrTbl_LowOld
+		inc  de		; ...iOBJInfo_OBJLstPtrTbl_HighOld
+		ld   [de], a
+		
+		; Restore original bank number
+		ldh  a, [hROMBank]
+		ld   [MBC1RomBank], a
 	pop  de
-	push de
-	push af
-	ld   a, $03
-	ld   [MBC1RomBank], a
-	pop  af
-	ld   hl, $0024
-	add  hl, bc
-	ld   d, [hl]
-	inc  hl
-	ld   e, [hl]
-	ld   h, $00
-	ld   l, a
-	add  hl, hl
-	add  hl, hl
-	add  hl, de
-	pop  de
-	inc  hl
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	inc  de
-	inc  de
-	inc  de
-	ld   [de], a
-	dec  de
-	dec  de
-	dec  de
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	inc  de
-	inc  de
-	inc  de
-	ld   [de], a
-	ldh  a, [hROMBank]
-	ld   [MBC1RomBank], a
-	pop  de
-L002B09:;J
+	
+.neutral:
+
+	;
+	; VERTICAL JUMP SPEED
+	;
+	; By default, the initial vertical speed is the same as iPlInfo_JumpSpeed.
+	; If we've stopped holding UP by the time we got here, we performed a hop.
+	; With hops, VSpeed = iPlInfo_JumpSpeed / 0.75
+	;
+	
 	ld   hl, iPlInfo_JoyKeys
 	add  hl, bc
-	ld   a, [hl]
-	ld   hl, $0069
+	ld   a, [hl]				; A = Currently held keys
+	ld   hl, iPlInfo_JumpSpeed	; HL = Default VSpeed
 	call Pl_GetWord
-	bit  2, a
-	jr   nz, L002B25
-	sra  h
+	bit  KEYB_UP, a				; Are we still pressing UP?
+	jr   nz, .setSpeedV			; If so, skip
+	; Otherwise, HL /= 0.75
+	sra  h			; HL /= 2
 	rr   l
 	push de
-	push hl
+		push hl		; DE = HL
+		pop  de
+		sra  d		; DE /= 2
+		rr   e
+		add  hl, de	; HL += DE
 	pop  de
-	sra  d
-	rr   e
-	add  hl, de
-	pop  de
-L002B25:;R
+.setSpeedV:
 	call Play_OBJLstS_SetSpeedV
-	jp   L002B66
-L002B2B:;J
-	ld   a, $F9
-	ld   h, $FF
-	call L002E63
-	jp   L002B5D
-L002B35:;J
-	ld   a, $FB
-	ld   h, $FF
-	call L002E63
-	jp   L002B5D
-L002B3F:;J
-	ld   a, $FD
-	ld   h, $FF
-	call L002E63
-	jp   L002B5D
-L002B49:;J
-	ld   a, $FF
-	ld   h, $FF
-	call L002E63
-	jp   L002B5D
-L002B53:;J
-	ld   a, $01
-	ld   h, $FF
-	call L002E63
-	jp   L002B5D
-L002B5D:;J
-	call L002B9A
-	jp   nc, L002B66
-	jp   L002B90
-L002B66:;J
-	ld   hl, $006B
-	call Pl_GetWord
-	call L003614
-	jp   nc, L002B8D
-	ld   hl, $0021
+	jp   .move
+.obj1_chkEnd:
+	; Advance to frame#2 when reaching YSpeed > -7
+	ld   a, -$07
+	ld   h, ANIMSPEED_NONE	
+	call OBJLstS_ReqAnimOnGtYSpeed
+	jp   .chkWallJump
+	
+;
+; Frames 2-5: Advance to the next frame when reaching the targets.
+;
+.obj2_air:
+	ld   a, -$05			; Target Y Speed
+	ld   h, ANIMSPEED_NONE	; Continue manual control
+	call OBJLstS_ReqAnimOnGtYSpeed
+	jp   .chkWallJump
+.obj3_air:
+	ld   a, -$03
+	ld   h, ANIMSPEED_NONE
+	call OBJLstS_ReqAnimOnGtYSpeed
+	jp   .chkWallJump
+.obj4_air:
+	ld   a, -$01
+	ld   h, ANIMSPEED_NONE
+	call OBJLstS_ReqAnimOnGtYSpeed
+	jp   .chkWallJump
+.obj5_air:
+	ld   a, +$01
+	ld   h, ANIMSPEED_NONE
+	call OBJLstS_ReqAnimOnGtYSpeed
+	jp   .chkWallJump
+	
+;
+; Handle the wall jump.
+; This is allowed for any of the sprite mappings used when we're in the air (#2-6)
+;
+.chkWallJump:
+	call Play_Pl_ChkWallJumpInput	; Did we start a wall jump?
+	jp   nc, .move					; If not, jump
+	; Otherwise, return immediately to avoid moving/animating the player.
+	; This is because when a wall jump starts it starts a new jump move,
+	; so don't touch anything about it.
+	jp   .ret
+	
+;
+; Move the player in the air, applying gravity.
+;
+.move:
+	; Move the player in the air
+	ld   hl, iPlInfo_Gravity				; HL = Ptr to gravity
+	call Pl_GetWord							; Read it out to HL
+	call OBJLstS_ApplyGravity				; Apply it
+	jp   nc, .anim			; Did we touch the ground? If not, skip
+	; Otherwise, switch to the landing act.
+	; During this time, starting specials is allowed, making it
+	; possible to start an input while jumping, and end it when landing.
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	res  2, [hl]
-	ld   a, $1C
-	ld   h, $00
-	call L002DEC
-	jp   L002B90
-L002B82:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L002B8D
-	call Play_Pl_EndMove
-	jr   L002B90
-L002B8D:;J
+	res  PF1B_NOSPECSTART, [hl]			; Allow starting specials when landing
+	; Switch to the landing phase.
+	ld   a, $07*OBJLSTPTR_ENTRYSIZE		; Act
+	ld   h, ANIMSPEED_INSTANT			; End it as soon as possible
+	call Play_Pl_SetJumpLandAnimFrame
+	jp   .ret
+	
+;
+; Frame 7: Landing frame
+;          Just waits for the frame to end before ending the move.
+;
+.obj7_landed:
+	call OBJLstS_IsFrameEnd			; Is the frame about to finish?
+	jp   nc, .anim	; If not, continue
+	call Play_Pl_EndMove			; Otherwise, we're done
+	jr   .ret
+	
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L002B90:;JR
+.ret:
 	ret
 	
 ; =============== Pl_GetWord ===============
@@ -9981,60 +10165,95 @@ Pl_GetWord:
 		pop  hl			
 	pop  de				; Restore OBJInfo ptr
 	ret
-L002B9A:;C
-	ld   hl, $002C
+	
+; =============== Play_Pl_ChkWallJumpInput ===============
+; Handles the input for performing a wall jump.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+; OUT
+; - C flag: If set, a new jump was started
+Play_Pl_ChkWallJumpInput:
+
+	; Only Mai and Athena can wall jump.
+	; The bootleg 97 neglected to change this, so characters that could double
+	; jump in 95 lost that ability.
+	ld   hl, iPlInfo_CharId
 	add  hl, bc
 	ld   a, [hl]
-	cp   $0E
-	jp   z, L002BAC
-	cp   $0C
-	jp   z, L002BAC
-	jp   L002BE2
-L002BAC:;J
-	ld   hl, $001F
+	cp   CHAR_ID_MAI*2		; Playing as Mai?
+	jp   z, .chkEdge		; If so, jump
+	cp   CHAR_ID_ATHENA*2	; ...
+	jp   z, .chkEdge
+	jp   .retClear			; Otherwise, return
+	
+.chkEdge:
+	; The player must be on the edge of the screen.
+	; If iOBJInfo_RangeMoveAmount
+	ld   hl, iOBJInfo_RangeMoveAmount
 	add  hl, de
 	ld   a, [hl]
-	or   a
-	jp   z, L002BE2
-	bit  7, a
-	jp   nz, L002BCE
+	or   a				; RangeMoveAmount == 0?
+	jp   z, .retClear	; If so, return
+	
+	; Check if we held the direction towards the wall.
+	; This changes depending the side of the screen, and RangeMoveAmount can be used to determine it.
+	; If RangeMoveAmount < 0, it means we got pushed to the left when hugging the right border.
+	bit  7, a			; RangeMoveAmount < 0?
+	jp   nz, .chkRWall	; If so, jump
+.chkLWall:
+	; Must hold right if we're on the left wall
 	ld   hl, iPlInfo_JoyKeys
 	add  hl, bc
-	bit  0, [hl]
-	jp   z, L002BE2
-	ld   hl, $0047
+	bit  KEYB_RIGHT, [hl]
+	jp   z, .retClear
+	
+	; OK - Jump can start
+	
+	; The jump should move us to the right
+	ld   hl, iPlInfo_JoyKeysPreJump
 	add  hl, bc
-	set  0, [hl]
-	res  1, [hl]
-	jp   L002BE5
-L002BCE:;J
+	set  KEYB_RIGHT, [hl]
+	res  KEYB_LEFT, [hl]
+	jp   .turn
+.chkRWall:
+	; Must hold left if we're on the left wall
 	ld   hl, iPlInfo_JoyKeys
 	add  hl, bc
-	bit  1, [hl]
-	jp   z, L002BE2
-	ld   hl, $0047
+	bit  KEYB_LEFT, [hl]
+	jp   z, .retClear
+	
+	; OK - Jump can start
+	
+	; The jump should move us to the left
+	ld   hl, iPlInfo_JoyKeysPreJump
 	add  hl, bc
-	set  1, [hl]
-	res  0, [hl]
-	jp   L002BE5
-L002BE2:;J
+	set  KEYB_LEFT, [hl]
+	res  KEYB_RIGHT, [hl]
+	jp   .turn
+.retClear:
 	scf
-	ccf
+	ccf		; C flag cleared
 	ret
-L002BE5:;J
-	ld   hl, $0001
+	
+.turn:
+	; Flip the player sprite horizontally to jump the other way
+	ld   hl, iOBJInfo_OBJLstFlags
 	add  hl, de
-	bit  3, [hl]
-	jp   z, L002BF3
-	set  5, [hl]
-	jp   L002BF5
-L002BF3:;J
-	res  5, [hl]
-L002BF5:;J
-	ld   a, $0A
+	bit  SPRXB_PLDIR_R, [hl]	; Internally facing right?
+	jp   z, .turnR				; If not, jump
+.turnL:
+	set  SPRB_XFLIP, [hl]	; Face left
+	jp   .jumpOk
+.turnR:
+	res  SPRB_XFLIP, [hl]	; Face right
+.jumpOk:
+	; Restart the jump sequence by starting a new one.
+	ld   a, MOVE_SHARED_JUMP_N
 	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
-	scf
+	scf		; C flag set
 	ret
+	
 ; =============== Play_ExecExOBJCode ===============
 ; Executes the custom code for the four extra sprite mappings at slots 2-6.
 ; These are for the two projectiles and sparkle effects on super moves.
@@ -10812,16 +11031,17 @@ OBJLstS_IsGFXLoadDone:
 	bit  OSTB_GFXLOAD, [hl]	; Is the flag set?
 	ret
 	
-; =============== OBJLstS_Unk_ChkStatusBit3 ===============
-; Determines if the ????? bit3 status is set.
+; =============== OBJLstS_IsFrameNewLoad ===============
+; Determines if the graphics for the sprite mapping have just finished loading
+; at the end of the previous frame during VBlank.
 ; IN
 ; - DE: Ptr to wOBJInfo
 ; OUT
-; - Z flag: If set, OSTB_BIT3 is set ????
-OBJLstS_Unk_ChkStatusBit3:
+; - Z flag: If set, the graphics have newly loaded
+OBJLstS_IsFrameNewLoad:
 	ld   hl, iOBJInfo_Status
 	add  hl, de
-	bit  OSTB_BIT3, [hl]	; Is the flag set?
+	bit  OSTB_GFXNEWLOAD, [hl]	; Is the flag set?
 	ret
 	
 ; =============== OBJLstS_IsFrameEnd ===============
@@ -10837,6 +11057,8 @@ OBJLstS_Unk_ChkStatusBit3:
 ; IN
 ; - DE: Ptr to wOBJInfo
 ; OUT
+; - HL: Ptr to iOBJInfo_FrameLeft
+;       Code actually relies on this.
 ; - C flag: If set, the animation frame will change by the end of the frame
 OBJLstS_IsFrameEnd:
 	; If the GFX aren't fully loaded yet, the animation can't continue
@@ -10856,15 +11078,16 @@ OBJLstS_IsFrameEnd:
 	xor  a	; Clear carry (not ending)
 	ret
 	
-; =============== Play_Pl_SetLandFromJumpAnim ===============
-; ??? Seems to be used when setting the animation/SFX after landing from a jump.
+; =============== Play_Pl_SetJumpLandAnimFrame ===============
+; Sets the animation frame/SFX for landing on the ground.
+; This is meant to be used when landing on the ground during an air move.
 ; IN
 ; - A: OBJLst Id
 ; - H: Animation speed (iOBJInfo_FrameTotal)
 ; - DE: Ptr to wOBJInfo
 ; OUT
 ; - Z flag: If set, the new animation frame wasn't set
-L002DEC:;C
+Play_Pl_SetJumpLandAnimFrame:
 	push bc
 		ld   b, h		; B = Animation speed
 		
@@ -10888,7 +11111,7 @@ L002DEC:;C
 		call OBJLstS_DoAnimTiming_Initial_by_DE
 		
 		;
-		; Play a sound effect whenever <????> happens.
+		; Play a sound effect whenever we land on the ground.
 		; Daimon is supposed to use a special one, but...
 		; [BUG] ...BC isn't properly restored so it reads a garbage value instead of the CharId.
 		;       This ends up making the code unreachable.
@@ -10968,33 +11191,75 @@ L002E49:;C
 L002E61:;J
 	pop  bc
 	ret
-L002E63:;C
+	
+; =============== OBJLstS_ReqAnimOnGtYSpeed ===============
+; Requests a switch to the next animation frame when passing the Y speed threshold.
+;
+; This also sets a new animation speed (iOBJInfo_FrameTotal), but since this is mostly used
+; to have manual control of the animation during jump-like moves, it almost always gets set
+; to ANIMSPEED_NONE.
+;
+; It may also be set to ANIMSPEED_INSTANT or some other value when
+; ending manual control of the animation.
+; 
+; For an example, the basic jumps use this subroutine, meaning the animation
+; switches to the next sprite mapping (+$04) only when the player reaches a specific Y speed.
+; The sprite mapping ID itself determines the "submode"/"act" of the jump, where
+; each one is set to have own threshold before switching.
+;
+; IN
+; - A: Y Speed Threshold
+; - H: Animation speed to set
+; - DE: Ptr to wOBJInfo
+; OUT
+; - C flag: If set, the request was successful.
+;           That means calling the animation routine will switch to the next sprite mapping ID in the animation.
+OBJLstS_ReqAnimOnGtYSpeed:
 	push bc
-	ld   b, h
-	add  a, $40
-	push af
-	ld   hl, $0009
-	add  hl, de
-	ld   a, [hl]
-	add  a, $40
-	ld   c, a
-	pop  af
-	cp   a, c
-	jp   c, L002E78
-	jp   L002E89
-L002E78:;J
-	call OBJLstS_IsGFXLoadDone
-	jp   nz, L002E89
-	ld   hl, $001B
-	add  hl, de
-	ld   [hl], $00
-	inc  hl
-	ld   [hl], b
-	scf
+		; Save this for later
+		ld   b, h		; B = AnimSpeed
+		
+		;
+		; The current Y Speed must be larger than the threshold.
+		;
+		
+		; Add $40 to both of them to avoid unintented results with the
+		; unsigned comparison on signed values that tend to be close to 0.
+		DEF PADVAL = $40
+		add  a, PADVAL	; A = YSpeedNew + Pad
+		push af
+			; C = YSpeedCur + Pad
+			ld   hl, iOBJInfo_SpeedY
+			add  hl, de
+			ld   a, [hl]
+			add  a, PADVAL
+			ld   c, a
+		pop  af
+		
+		cp   a, c			; YSpeedCur > YSpeedNew?
+		jp   c, .chkChange	; If so, jump
+		jp   .retClear		; Otherwise, return
+		
+	.chkChange:
+		; The animation routine waits for the graphics to load before deciding when to switch frames (read: iOBJInfo_FrameLeft == 0).
+		; Since this subroutine has a return value, don't tell lies to whoever's using it.
+		; Note that said animation routine should only be called by the move code after this.
+		call OBJLstS_IsGFXLoadDone	; Have the frame graphics loaded?
+		jp   nz, .retClear			; If not, return
+		
+		; Set iOBJInfo_FrameLeft to 0 to force advance the animation once
+		ld   hl, iOBJInfo_FrameLeft
+		add  hl, de
+		ld   [hl], $00	; iOBJInfo_FrameLeft = 0
+		; Set the new animation speed
+		inc  hl
+		ld   [hl], b	; iOBJInfo_FrameTotal = B
+	.retSet:
+		scf		; C flag set
 	pop  bc
 	ret
-L002E89:;J
-	or   a
+	.retClear:
+		or   a	; C flag clear
 	pop  bc
 	ret
 	
@@ -11230,12 +11495,14 @@ Play_Pl_DoBasicMoveInput:
 			jp   z, BasicInput_StartGroundThrow	; If so, jump
 			cp   PLAY_THROWOP_AIR				; Air throw?
 			jp   z, BasicInput_StartAirThrow	; If so, jump
-			; PLAY_THROWOP_UNUSED_BOTH not handled as a throw
+			; PLAY_THROWOP_UNUSED_BOTH not handled as a throw, it's for command throws only.
 		.end:
 		
 		;
 		; Handle air block input.
 		; This is performed by holding back when doing neutral or backwards jumps.
+		;
+		; This is new to 96, originally it went straight to BasicInput_ChkBaseInput.
 		;
 		BasicInput_ChkAirBlock:
 		
@@ -11602,7 +11869,7 @@ Play_Pl_DoBasicMoveInput:
 		
 			;
 			; Update the running jump flag.
-			; While the resulting jump is the same as a forward hyper jump from crouching (see L002A97),
+			; While the resulting jump is the same as a forward hyper jump from crouching (see .chkJumpR),
 			; this being a separate variables allows special moves to distinguish between the two.
 			;
 			ld   hl, iPlInfo_RunningJump
@@ -11621,7 +11888,7 @@ Play_Pl_DoBasicMoveInput:
 			
 		.start:
 			; Backup the joypad info from before the jump to here.
-			; [TCRF?] Is this actually used?
+			; It will be used during the jump when deciding which direction/speed to use.
 			ld   hl, iPlInfo_JoyKeys
 			add  hl, bc			; Seek to iPlInfo_JoyKeys
 			push de
@@ -12938,85 +13205,147 @@ L00360D:;J
 	call OBJLstS_ApplyXSpeed
 	or   a
 	ret
-L003614:;C
+	
+; =============== OBJLstS_ApplyGravity ===============
+; Moves the sprite horizontally and vertically while under the effect of gravity.
+;
+; Gravity is just a fixed value that gets added to the player's speed.
+; This causes the speed to gradually increase, making it go from negative (moving up)
+; to positive (moving down), and since the speed dictates how much the player moves,
+; the player will move slower at the peak of the jump.
+;
+; IN
+; - HL: Gravity value
+; - DE: Ptr to wOBJInfo
+; OUT
+; - C flag: If set, we touched the ground.
+OBJLstS_ApplyGravity:
 	push bc
-	push hl
+		; BC = Gravity value
+		push hl
+		pop  bc
+		
+		push de
+		
+			;
+			; Update the vertical movement speed.
+			;
+		
+			; DE = HL = Ptr to Y speed
+			ld   hl, iOBJInfo_SpeedY
+			add  hl, de
+			push hl
+			pop  de
+			
+			; HL = SpeedY + Gravity
+			push de
+				ld   a, [de]	; H = iOBJInfo_SpeedY
+				ld   h, a
+				inc  de
+				ld   a, [de]	; L = iOBJInfo_SpeedYSub
+				ld   l, a
+				add  hl, bc		; += Gravity
+			pop  de
+			
+			; Write back the updated speed
+			push de
+				ld   a, h		; iOBJInfo_SpeedY = H
+				ld   [de], a
+				inc  de
+				ld   a, l		; iOBJInfo_SpeedYSub = L
+				ld   [de], a
+			pop  de
+			
+			;
+			; Apply the newly updated speed to the player's Y position.
+			;
+			
+			push hl	; Save Y Speed
+				; DE = Ptr to Y Position
+				dec  de		; iOBJInfo_SpeedXSub
+				dec  de		; iOBJInfo_SpeedX
+				dec  de		; iOBJInfo_YSub
+				dec  de		; iOBJInfo_Y
+				
+				; Y += SpeedY
+				push de
+					ld   a, [de]	; B = iOBJInfo_Y
+					ld   b, a
+					inc  de
+					ld   a, [de]	; C = iOBJInfo_YSub
+					ld   c, a
+					add  hl, bc		; += SpeedY
+				pop  de
+				
+				; Write back the updated Y position
+				ld   a, h		; iOBJInfo_Y = H
+				ld   [de], a
+				inc  de			; Seek to iOBJInfo_YSub
+				ld   a, l		; iOBJInfo_YSub = L
+				ld   [de], a
+			pop  hl	; Restore Y Speed
+			
+			;
+			; Validate the new Y position.
+			; We always want to be above the ground, and not underflow it.
+			;
+			
+			bit  7, h				; MSB set? (YSpeed < 0)
+			jp   z, .chkMoveDown	; If not, jump
+		.chkMoveUp:
+			; 
+			; When moving up, prevent underflowing the Y position.
+			; If it did, snap it back to the topmost position.
+			;
+			; For some reason, this is done by comparing it with PL_FLOOR_POS, which works
+			; because we're always above the ground until we underflow it.
+			;
+			dec  de				; Seek back to iOBJInfo_Y
+			ld   a, [de]
+			cp   PL_FLOOR_POS	; iOBJInfo_Y < $88?
+			jp   c, .moveOk		; If so, jump (we're above the ground)
+			; Otherwise, force it back to $0000
+			xor  a
+			ld   [de], a		; iOBJInfo_Y = 0
+			inc  de
+			ld   [de], a		; iOBJInfo_YSub = 0
+			jp   .moveOk
+		.chkMoveDown:
+			;
+			; When moving down, prevent moving below the floor.
+			; If we are, snap back to it and signal that we've touched the ground.
+			;
+			dec  de
+			ld   a, [de]
+			cp   PL_FLOOR_POS	; iOBJInfo_Y < $88?
+			jp   c, .moveOk		; If so, jump (we're above the ground)
+			
+		.jumpEnd:
+		pop  de
 	pop  bc
-	push de
-	ld   hl, $0009
+	; Otherwise, force the player to be on the ground
+	ld   hl, iOBJInfo_Y
 	add  hl, de
-	push hl
-	pop  de
-	push de
-	ld   a, [de]
-	ld   h, a
-	inc  de
-	ld   a, [de]
-	ld   l, a
-	add  hl, bc
-	pop  de
-	push de
-	ld   a, h
-	ld   [de], a
-	inc  de
-	ld   a, l
-	ld   [de], a
-	pop  de
-	push hl
-	dec  de
-	dec  de
-	dec  de
-	dec  de
-	push de
-	ld   a, [de]
-	ld   b, a
-	inc  de
-	ld   a, [de]
-	ld   c, a
-	add  hl, bc
-	pop  de
-	ld   a, h
-	ld   [de], a
-	inc  de
-	ld   a, l
-	ld   [de], a
-	pop  hl
-	bit  7, h
-	jp   z, L003653
-	dec  de
-	ld   a, [de]
-	cp   $88
-	jp   c, L00366B
-	xor  a
-	ld   [de], a
-	inc  de
-	ld   [de], a
-	jp   L00366B
-L003653:;J
-	dec  de
-	ld   a, [de]
-	cp   $88
-	jp   c, L00366B
-	pop  de
-	pop  bc
-	ld   hl, $0005
-	add  hl, de
-	ld   [hl], $88
+	ld   [hl], PL_FLOOR_POS	; iOBJInfo_Y = $88
 	inc  hl
-	xor  a
+	xor  a			; iOBJInfo_YSub = 0
 	ldi  [hl], a
+	; And reset the Y speed
 	inc  hl
 	inc  hl
-	ldi  [hl], a
-	ldi  [hl], a
-	scf
+	ldi  [hl], a	; iOBJInfo_SpeedY = 0
+	ldi  [hl], a	; iOBJInfo_SpeedYSub = 0
+	scf			; C flag set
 	ret
-L00366B:;J
-	pop  de
+	
+		.moveOk:
+		pop  de
 	pop  bc
+	; Move horizontally as well
 	call OBJLstS_ApplyXSpeed
-	xor  a
+	xor  a		; C flag clear
 	ret
+	
 L003672:;C
 	push bc
 	push hl
@@ -13869,11 +14198,11 @@ Play_Pl_ChkThrowInput:
 	cp   PLAY_THROWACT_NONE		; ThrowActId == 0?
 	jp   nz, .retClear			; If not, return
 	
-	; ??? Not applicable when getting up
-	ld   hl, iPlInfo_TimerDec5EOther
+	; Not applicable when the opponent is waking up
+	ld   hl, iPlInfo_WakeUpTimerOther
 	add  hl, bc
 	ld   a, [hl]
-	or   a						; iPlInfo_TimerDec5EOther > 0?
+	or   a						; iPlInfo_WakeUpTimerOther > 0?
 	jp   nz, .retClear			; If so, return
 	
 	;
@@ -14161,11 +14490,11 @@ MoveInputS_TryStartCommandThrow_Unk_Coli04:
 	cp   PLAY_THROWACT_NONE								; ThrowActId != NONE?
 	jp   nz, MoveInputS_TryStartCommandThrow.noThrow	; If so, jump
 	
-	; If the opponent is getting up, return
-	ld   hl, iPlInfo_TimerDec5EOther
+	; If the opponent is waking up, return
+	ld   hl, iPlInfo_WakeUpTimerOther
 	add  hl, bc
 	ld   a, [hl]
-	or   a												; iPlInfo_TimerDec5EOther != 0?
+	or   a												; iPlInfo_WakeUpTimerOther != 0?
 	jp   nz, MoveInputS_TryStartCommandThrow.noThrow	; If so, return
 	
 	; Throw forward
@@ -14987,8 +15316,8 @@ L003CB3:;C
 	jp   .ret
 	
 .alive:
-	; Wait $1E frames before getting up
-	ld   hl, iPlInfo_TimerDec5E
+	; Wait $1E frames before fully waking up
+	ld   hl, iPlInfo_WakeUpTimer
 	add  hl, bc
 	ld   [hl], $1E
 	

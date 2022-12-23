@@ -79,7 +79,7 @@ for ($i = 0; $i < count($lines);) {
 		
 		$b = "{$label}:{$unused_marker}
 	db {$flags} ; iOBJLstHdrA_Flags
-	db \${$byte1} ; iOBJLstHdrA_ColiBoxId
+	db COLIBOX_{$byte1} ; iOBJLstHdrA_ColiBoxId
 	db \${$byte2} ; iOBJLstHdrA_HitboxId
 	{$gfx_ptr} ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw {$data_ptr} ; iOBJLstHdrA_DataPtr

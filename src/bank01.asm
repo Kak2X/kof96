@@ -10126,28 +10126,28 @@ Play_DoUnkChain_IncCustomTimer:
 	ret
 	
 Play_DoUnkChain_DoMiscTimers:
-	; Decrement iPlInfo_TimerDec5E if it's not 0 already
-	; iPlInfo_TimerDec5E = MAX(iPlInfo_TimerDec5E - 1, 0)
-	ld   a, [wPlInfo_Pl1+iPlInfo_TimerDec5E]
+	; Decrement the wake up timer if it's not 0 already
+	; iPlInfo_WakeUpTimer = MAX(iPlInfo_WakeUpTimer - 1, 0)
+	ld   a, [wPlInfo_Pl1+iPlInfo_WakeUpTimer]
 	or   a				; Timer == 0?
 	jr   z, .chk2P		; If so, jump
-	ld   hl, wPlInfo_Pl1+iPlInfo_TimerDec5E
+	ld   hl, wPlInfo_Pl1+iPlInfo_WakeUpTimer
 	dec  [hl]
 .chk2P:
 	; Do the same for 2P
-	ld   a, [wPlInfo_Pl2+iPlInfo_TimerDec5E]
+	ld   a, [wPlInfo_Pl2+iPlInfo_WakeUpTimer]
 	or   a
 	jr   z, .end
-	ld   hl, wPlInfo_Pl2+iPlInfo_TimerDec5E
+	ld   hl, wPlInfo_Pl2+iPlInfo_WakeUpTimer
 	dec  [hl]
 .end:
 
 Play_DoUnkChain_ShareVars2:
 	; Give visibility to these variables too
-	ld   a, [wPlInfo_Pl1+iPlInfo_TimerDec5E]
-	ld   [wPlInfo_Pl2+iPlInfo_TimerDec5EOther], a
-	ld   a, [wPlInfo_Pl2+iPlInfo_TimerDec5E]
-	ld   [wPlInfo_Pl1+iPlInfo_TimerDec5EOther], a
+	ld   a, [wPlInfo_Pl1+iPlInfo_WakeUpTimer]
+	ld   [wPlInfo_Pl2+iPlInfo_WakeUpTimerOther], a
+	ld   a, [wPlInfo_Pl2+iPlInfo_WakeUpTimer]
+	ld   [wPlInfo_Pl1+iPlInfo_WakeUpTimerOther], a
 	ld   a, [wPlInfo_Pl1+iPlInfo_5F]
 	ld   [wPlInfo_Pl2+iPlInfo_5FOther], a
 	ld   a, [wPlInfo_Pl2+iPlInfo_5F]

@@ -1615,11 +1615,11 @@ MoveCodePtrTbl_Shared_Base:
 	dpr MoveC_Base_WalkH ; BANK $02 ; MOVE_SHARED_WALK_B       
 	dpr MoveC_Base_NoAnim ; BANK $02 ; MOVE_SHARED_CROUCH       
 	; Improper bank number defined for these
-	dw L002958 ; BANK $00 ; MOVE_SHARED_JUMP_N     
+	dw MoveC_Base_Jump ; BANK $00 ; MOVE_SHARED_JUMP_N     
 	db $02	
-	dw L002958 ; BANK $00 ; MOVE_SHARED_JUMP_F       
+	dw MoveC_Base_Jump ; BANK $00 ; MOVE_SHARED_JUMP_F       
 	db $02
-	dw L002958 ; BANK $00 ; MOVE_SHARED_JUMP_B
+	dw MoveC_Base_Jump ; BANK $00 ; MOVE_SHARED_JUMP_B
 	db $02
 	dpr MoveC_Base_NoAnim ; BANK $02 ; MOVE_SHARED_BLOCK_G      
 	dpr MoveC_Base_NoAnim ; BANK $02 ; MOVE_SHARED_BLOCK_C      

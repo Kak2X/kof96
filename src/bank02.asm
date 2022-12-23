@@ -44,6 +44,8 @@ MoveC_Base_ChargeMeter:
 
 	;
 	; Force the player to charge until reaching the target animation frame.
+	; Note that moves always use the Old set, since with player sprites
+	; that's guaranteed to always be what's currently visible on screen.
 	;
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetOld
 	add  hl, de
@@ -174,15 +176,15 @@ L0240E5:;J
 L0240FD:;J
 	ld   a, $FD
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   L024107
 L024107:;J
 	ld   hl, $0060
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L024125
 	ld   a, $08
 	ld   h, $00
-	call L002DEC
+	call Play_Pl_SetJumpLandAnimFrame
 	jp   L024128
 L02411A:;J
 	call OBJLstS_IsFrameEnd
@@ -229,14 +231,14 @@ L024166:;J
 	jp   L024172
 L024172:;J
 	ld   hl, $0060
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L024196
 	ld   hl, $0021
 	add  hl, bc
 	res  2, [hl]
 	ld   a, $10
 	ld   h, $00
-	call L002DEC
+	call Play_Pl_SetJumpLandAnimFrame
 	jp   L024199
 L02418B:;J
 	call OBJLstS_IsFrameEnd
@@ -263,11 +265,11 @@ L0241B3: db $B5;X
 L0241B4: db $41;X
 L0241B5:;J
 	ld   hl, $0060
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L0241D9
 	ld   a, $04
 	ld   h, $00
-	call L002DEC
+	call Play_Pl_SetJumpLandAnimFrame
 	ld   hl, $0021
 	add  hl, bc
 	res  3, [hl]
@@ -1433,7 +1435,7 @@ L024973:;J
 	ld   hl, $0000
 	call Play_OBJLstS_SetSpeedH_ByXDirL
 	ld   hl, OAM_Begin
-	call L003614
+	call OBJLstS_ApplyGravity
 L02497F:;J
 	scf
 	ret
@@ -3152,7 +3154,7 @@ L02510C:;J
 	ld   hl, rJOYP
 	call Play_OBJLstS_MoveV
 	ld   hl, $0000
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   L0251EE
 L02511B:;J
 	ld   hl, $0000
@@ -3192,7 +3194,7 @@ L02515D:;J
 	jp   L0251CF
 L025160:;J
 	ld   hl, $0060
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L0251EE
 	call Play_Pl_IsDizzy
 	jp   nz, L02517E
@@ -3247,7 +3249,7 @@ L0251C9:;J
 	jp   L0251F1
 L0251CF:;J
 	ld   hl, $0060
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L0251EE
 	ld   a, $10
 	ld   h, $05
@@ -3336,7 +3338,7 @@ L02527C:;J
 	jp   L0252A8
 L02527F:;J
 	ld   hl, $0060
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L0252C7
 	ld   a, $04
 	ld   h, $09
@@ -3354,7 +3356,7 @@ L02527F:;J
 	jp   L0252CA
 L0252A8:;J
 	ld   hl, $0060
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L0252C7
 	ld   a, $0C
 	ld   h, $05
@@ -3566,7 +3568,7 @@ L025437:;J
 	add  hl, bc
 	ld   [hl], a
 	pop  hl
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L025492
 	ld   a, $10
 	ld   h, $0B
@@ -3590,7 +3592,7 @@ L025468:;J
 	jp   L025495
 L025473:;J
 	ld   hl, $0060
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L025492
 	ld   a, $18
 	ld   h, $05
@@ -3631,7 +3633,7 @@ L0254C2:;J
 	jp   L0254C5
 L0254C5:;J
 	ld   hl, $0060
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L0254EC
 	ld   a, $08
 	ld   h, $05
@@ -3680,30 +3682,30 @@ L025521:;J
 L02552D:;J
 	ld   a, $F9
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   L025555
 L025537:;J
 	ld   a, $FB
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   L025555
 L025541:;J
 	ld   a, $FF
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   L025555
 L02554B:;J
 	ld   a, $01
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   L025555
 L025555:;J
 	ld   hl, $0060
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L025573
 	ld   a, $18
 	ld   h, $00
-	call L002DEC
+	call Play_Pl_SetJumpLandAnimFrame
 	jp   L025576
 L025568:;J
 	call OBJLstS_IsFrameEnd
@@ -4245,7 +4247,7 @@ L02593B:;I
 	jp   z, L025990
 	jp   L02599C
 L02595B:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L02596D
 	call MoveInputS_CheckMoveLHVer
 	jp   z, L02596D
@@ -4258,7 +4260,7 @@ L02596D:;J
 	call HomeCall_Sound_ReqPlayExId
 	jp   L02599C
 L02597B:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L025987
 	call MoveInputS_CheckMoveLHVer
 	jp   z, L025987
@@ -4304,7 +4306,7 @@ L0259CF:;J
 	ld   [hl], $02
 	jp   L025A63
 L0259DB:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L025A12
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
@@ -4394,7 +4396,7 @@ L025A96:;J
 	ld   [hl], $03
 	jp   L025B34
 L025AA2:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L025AE3
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
@@ -4455,11 +4457,11 @@ L025B01:;J
 	jp   L025B15
 L025B15:;J
 	ld   hl, $0030
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L025B34
 	ld   a, $14
 	ld   h, $05
-	call L002DEC
+	call Play_Pl_SetJumpLandAnimFrame
 	jp   L025B37
 L025B28:;J
 	call OBJLstS_IsFrameEnd
@@ -4509,7 +4511,7 @@ L025B38:;I
 	jp   z, L025C9F
 	jp   L025C43
 L025B94:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L025B9A
 L025B9A:;J
 	call OBJLstS_IsFrameEnd
@@ -4518,7 +4520,7 @@ L025B9A:;J
 	ld   [hl], $FF
 	jp   L025CAB
 L025BA6:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L025BD5
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
@@ -4567,14 +4569,14 @@ L025C15:;J
 	jp   L025C8C
 L025C18:;J
 	call OBJLstS_ApplyXSpeed
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L025CAB
 	ld   hl, $010A
 	ld   a, $10
 	call Play_Pl_SetMoveDamageNext
 	jp   L025C54
 L025C2C:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L025CAB
 	ld   hl, $0109
 	ld   a, $10
@@ -4584,7 +4586,7 @@ L025C2C:;J
 	jp   L025CAB
 L025C43:;J
 	call OBJLstS_ApplyXSpeed
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L025CAB
 	ld   hl, $0109
 	ld   a, $10
@@ -4622,11 +4624,11 @@ L025C7E:;J
 	jp   L025CAE
 L025C8C:;J
 	ld   hl, $0030
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L025CAB
 	ld   a, $58
 	ld   h, $07
-	call L002DEC
+	call Play_Pl_SetJumpLandAnimFrame
 	jp   L025CAE
 L025C9F:;J
 	call OBJLstS_IsFrameEnd
@@ -4706,7 +4708,7 @@ L025D47:;J
 	ld   [hl], $FF
 	jp   L025E58
 L025D53:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L025D82
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
@@ -4758,14 +4760,14 @@ L025DC2:;J
 	jp   L025E39
 L025DC5:;J
 	call OBJLstS_ApplyXSpeed
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L025E58
 	ld   hl, $010A
 	ld   a, $10
 	call Play_Pl_SetMoveDamageNext
 	jp   L025E01
 L025DD9:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L025E58
 	ld   hl, $0109
 	ld   a, $10
@@ -4775,7 +4777,7 @@ L025DD9:;J
 	jp   L025E58
 L025DF0:;J
 	call OBJLstS_ApplyXSpeed
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L025E58
 	ld   hl, $0109
 	ld   a, $10
@@ -4813,7 +4815,7 @@ L025E2B:;J
 	jp   L025E5B
 L025E39:;J
 	ld   hl, $0030
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L025E58
 L025E42: db $3E;X
 L025E43: db $B4;X
@@ -4973,7 +4975,7 @@ L025FBB:;I
 	jp   z, L026016
 	jp   L026022
 L025FDB:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L025FED
 	call MoveInputS_CheckMoveLHVer
 	jp   z, L025FED
@@ -4986,7 +4988,7 @@ L025FED:;J
 	call HomeCall_Sound_ReqPlayExId
 	jp   L026022
 L025FFB:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L02600D
 	call MoveInputS_CheckMoveLHVer
 	jp   z, L02600D
@@ -5033,7 +5035,7 @@ L026057:;J
 	ld   [hl], $00
 	jp   L026100
 L026063:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L0260A1
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
@@ -5087,11 +5089,11 @@ L0260D3:;J
 	jp   L0260E2
 L0260E2:;J
 	ld   hl, $0018
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L026100
 	ld   a, $18
 	ld   h, $08
-	call L002DEC
+	call Play_Pl_SetJumpLandAnimFrame
 	jp   L026103
 L0260F5:;J
 	call OBJLstS_IsFrameEnd
@@ -5160,7 +5162,7 @@ L026147:;J
 	ld   [hl], $FF
 	jp   L02623B
 L026153:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L026194
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
@@ -5231,11 +5233,11 @@ L0261C3:;J
 	jp   L0261C6
 L0261C6:;J
 	ld   hl, $0018
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L02623B
 	ld   a, $08
 	ld   h, $08
-	call L002DEC
+	call Play_Pl_SetJumpLandAnimFrame
 	jp   L02623E
 L0261D9: db $CD;X
 L0261DA: db $D2;X
@@ -5377,7 +5379,7 @@ L026298:;J
 	call Play_Pl_SetMoveDamageNext
 	jp   L02632D
 L0262A3:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L0262EC
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
@@ -5409,7 +5411,7 @@ L0262E9:;J
 L0262EC:;J
 	ld   a, $FA
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   nc, L02630F
 	jp   L02630F
 L0262F9:;J
@@ -5417,18 +5419,18 @@ L0262F9:;J
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   a, $01
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   L02630F
 L026309:;J
 	ld   hl, $0040
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L02630F:;J
 	ld   hl, $0060
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L02632D
 	ld   a, $14
 	ld   h, $03
-	call L002DEC
+	call Play_Pl_SetJumpLandAnimFrame
 	jp   L026330
 L026322:;J
 	call OBJLstS_IsFrameEnd
@@ -5474,7 +5476,7 @@ L026367:;J
 	call Play_Pl_SetMoveDamageNext
 	jp   L02644F
 L026380:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L0263CB
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
@@ -5517,7 +5519,7 @@ L0263D6:;J
 	jp   nc, L026431
 	ld   a, $FD
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   nc, L026431
 	ld   hl, $0013
 	add  hl, de
@@ -5531,7 +5533,7 @@ L0263F7:;J
 	jp   nc, L026431
 	ld   a, $FD
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   nc, L026412
 	jp   L026431
 L026412:;J
@@ -5544,18 +5546,18 @@ L02641B:;J
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   a, $00
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   L026431
 L02642B:;J
 	ld   hl, $0040
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L026431:;J
 	ld   hl, $0060
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L02644F
 	ld   a, $1C
 	ld   h, $08
-	call L002DEC
+	call Play_Pl_SetJumpLandAnimFrame
 	jp   L026452
 L026444:;J
 	call OBJLstS_IsFrameEnd
@@ -5583,7 +5585,7 @@ L026453:;I
 	jp   z, L0264DE
 	jp   L0264E9
 L026478:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L026484
 	ld   hl, $0400
 	call Play_OBJLstS_MoveH_ByXFlipR
@@ -5597,7 +5599,7 @@ L026484:;J
 	call HomeCall_Sound_ReqPlayExId
 	jp   L0264E9
 L02649A:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L0264A6
 	ld   hl, $0200
 	call Play_OBJLstS_MoveH_ByXFlipR
@@ -5611,7 +5613,7 @@ L0264A6:;J
 	call HomeCall_Sound_ReqPlayExId
 	jp   L0264E9
 L0264BC:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L0264C8
 	ld   hl, $0600
 	call Play_OBJLstS_MoveH_ByXFlipR
@@ -5666,7 +5668,7 @@ L0264ED:;I
 	jp   z, L026645
 	jp   L0265E9
 L02653A:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L026540
 L026540:;J
 	call OBJLstS_IsFrameEnd
@@ -5675,7 +5677,7 @@ L026540:;J
 	ld   [hl], $FF
 	jp   L026651
 L02654C:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L02657B
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
@@ -5724,14 +5726,14 @@ L0265BB:;J
 	jp   L026632
 L0265BE:;J
 	call OBJLstS_ApplyXSpeed
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L026651
 	ld   hl, $010A
 	ld   a, $10
 	call Play_Pl_SetMoveDamageNext
 	jp   L0265FA
 L0265D2:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L026651
 	ld   hl, $0109
 	ld   a, $10
@@ -5741,7 +5743,7 @@ L0265D2:;J
 	jp   L026651
 L0265E9:;J
 	call OBJLstS_ApplyXSpeed
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L026651
 	ld   hl, $0109
 	ld   a, $10
@@ -5779,11 +5781,11 @@ L026624:;J
 	jp   L026654
 L026632:;J
 	ld   hl, $0030
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L026651
 	ld   a, $44
 	ld   h, $07
-	call L002DEC
+	call Play_Pl_SetJumpLandAnimFrame
 	jp   L026654
 L026645:;J
 	call OBJLstS_IsFrameEnd
@@ -5843,7 +5845,7 @@ L026655:;I
 	jp   z, L0267D5
 	jp   L026779
 L0266CA:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L0266D0
 L0266D0:;J
 	call OBJLstS_IsFrameEnd
@@ -5852,7 +5854,7 @@ L0266D0:;J
 	ld   [hl], $FF
 	jp   L0267E1
 L0266DC:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L02670B
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
@@ -5901,14 +5903,14 @@ L02674B:;J
 	jp   L0267C2
 L02674E:;J
 	call OBJLstS_ApplyXSpeed
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L0267E1
 	ld   hl, $010A
 	ld   a, $10
 	call Play_Pl_SetMoveDamageNext
 	jp   L02678A
 L026762:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L0267E1
 	ld   hl, $0109
 	ld   a, $10
@@ -5918,7 +5920,7 @@ L026762:;J
 	jp   L0267E1
 L026779:;J
 	call OBJLstS_ApplyXSpeed
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L0267E1
 	ld   hl, $0109
 	ld   a, $10
@@ -5951,11 +5953,11 @@ L0267B4:;J
 	jp   L0267E4
 L0267C2:;J
 	ld   hl, $0030
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L0267E1
 	ld   a, $84
 	ld   h, $07
-	call L002DEC
+	call Play_Pl_SetJumpLandAnimFrame
 	jp   L0267E4
 L0267D5:;J
 	call OBJLstS_IsFrameEnd
@@ -5987,7 +5989,7 @@ L026805:;J
 	ld   [hl], $1E
 	jp   L026842
 L026811:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L02682A
 	ld   hl, $0033
 	add  hl, bc
@@ -6138,7 +6140,7 @@ L0269B0:;J
 	ld   [hl], $00
 	jp   L0269DF
 L0269BC:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L0269C8
 	call L00253E
 	jp   L0269DF
@@ -6185,7 +6187,7 @@ L026A08:;J
 	ld   [hl], $FF
 	jp   L026A70
 L026A14:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L026A45
 	call L00253E
 	ld   hl, $0050
@@ -6207,16 +6209,16 @@ L026A36:;J
 L026A45:;J
 	ld   a, $FE
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   nc, L026A52
 	jp   L026A52
 L026A52:;J
 	ld   hl, $0060
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L026A70
 	ld   a, $0C
 	ld   h, $08
-	call L002DEC
+	call Play_Pl_SetJumpLandAnimFrame
 	jp   L026A73
 L026A65:;J
 	call OBJLstS_IsFrameEnd
@@ -6276,7 +6278,7 @@ L026AD5:;J
 	ld   [hl], $01
 	jp   L026B44
 L026AE1:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L026B10
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
@@ -6297,7 +6299,7 @@ L026B07:;J
 L026B10:;J
 	jp   L026B44
 L026B13:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L026B44
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
@@ -6374,7 +6376,7 @@ L026B79:;J
 	call L002E49
 	jp   L026C1E
 L026BA6:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L026BD4
 	ld   hl, $0050
 	add  hl, bc
@@ -6395,30 +6397,30 @@ L026BC5:;J
 L026BD4:;J
 	ld   a, $FC
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   L026BFC
 L026BDE:;J
 	ld   a, $FE
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   L026BFC
 L026BE8:;J
 	ld   a, $FF
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   L026BFC
 L026BF2:;J
 	ld   a, $00
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   L026BFC
 L026BFC:;J
 	ld   hl, $0060
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L026C1B
 	ld   a, $3C
 	ld   h, $08
-	call L002DEC
+	call Play_Pl_SetJumpLandAnimFrame
 	jp   L026C1E
 L026C0F:;J
 	call OBJLstS_IsFrameEnd
@@ -6468,7 +6470,7 @@ L026C67:;J
 L026C6F:;J
 	jp   L026D22
 L026C72:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L026CA5
 	ld   hl, $F900
 	call Play_OBJLstS_SetSpeedV
@@ -6497,17 +6499,17 @@ L026C9F:;J
 L026CA5:;J
 	ld   a, $F6
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   L026CF7
 L026CAF:;J
 	ld   a, $FA
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   L026CF7
 L026CB9:;J
 	ld   a, $FD
 	ld   h, $00
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   L026CF7
 L026CC3:;J
 	call MoveInputS_CheckMoveLHVer
@@ -6535,11 +6537,11 @@ L026CE8:;J
 	jp   L026CF7
 L026CF7:;J
 	ld   hl, $0060
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L026D22
 	ld   a, $18
 	ld   h, $02
-	call L002DEC
+	call Play_Pl_SetJumpLandAnimFrame
 	jp   L026D25
 L026D0A:;J
 	call OBJLstS_IsFrameEnd
@@ -6590,14 +6592,14 @@ L026D4D:;J
 	call Play_Pl_SetMoveDamageNext
 	jp   L026DBD
 L026D70:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L026D7C
 	ld   hl, $0400
 	call Play_OBJLstS_MoveH_ByXFlipR
 L026D7C:;J
 	jp   L026D8B
 L026D7F:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L026D8B
 	ld   hl, $0400
 	call Play_OBJLstS_MoveH_ByXFlipR
@@ -6740,7 +6742,7 @@ L026EA0:;J
 	ld   [hl], $FF
 	jp   L026FC0
 L026EAC:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L026ED6
 	call MoveInputS_CheckMoveLHVer
 	jp   nz, L026EC7
@@ -6787,7 +6789,7 @@ L026F0D:;J
 	call Play_Proj_CopyMoveDamageFromPl
 	jp   L026FC0
 L026F1B:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L026F48
 	call L0025D0
 	call MoveInputS_CheckMoveLHVer
@@ -6806,11 +6808,11 @@ L026F39:;J
 L026F48:;J
 	ld   a, $FE
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   L026F9B
 L026F52:;J
 	ld   hl, $0000
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L026FC0
 	call L003745
 	jp   nc, L026F71
@@ -6833,7 +6835,7 @@ L026F70: db $6F;X
 L026F71:;J
 	ld   a, $18
 	ld   h, $02
-	call L002DEC
+	call Play_Pl_SetJumpLandAnimFrame
 	jp   L026FC3
 L026F7B:;J
 	ld   hl, $0005
@@ -6844,22 +6846,22 @@ L026F7B:;J
 	cp   a, [hl]
 	jp   nc, L026F91
 	ld   hl, $0000
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L026FC0
 L026F91:;J
 	ld   a, $0C
 	ld   h, $02
-	call L002DEC
+	call Play_Pl_SetJumpLandAnimFrame
 	jp   L026FC3
 L026F9B:;J
 	ld   hl, $0040
 	call L0035D9
 	ld   hl, $0060
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L026FC0
 	ld   a, $18
 	ld   h, $02
-	call L002DEC
+	call Play_Pl_SetJumpLandAnimFrame
 	jp   L026FC3
 L026FB4:;J
 	call OBJLstS_IsFrameEnd
@@ -6910,7 +6912,7 @@ L02700C:;J
 	ld   [hl], $08
 	jp   L027143
 L02701E:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027030
 	ld   hl, $0021
 	add  hl, bc
@@ -6993,7 +6995,7 @@ L0270CF: db $C3;X
 L0270D0: db $46;X
 L0270D1: db $71;X
 L0270D2:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L0270E7
 	ld   hl, $FD00
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
@@ -7003,30 +7005,30 @@ L0270D2:;J
 L0270E7:;J
 	ld   a, $FC
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   L02710F
 L0270F1:;J
 	ld   a, $FE
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   L02710F
 L0270FB:;J
 	ld   a, $FF
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   L02710F
 L027105:;J
 	ld   a, $00
 	ld   h, $FF
-	call L002E63
+	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   L02710F
 L02710F:;J
 	ld   hl, $0060
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L027143
 	ld   a, $30
 	ld   h, $08
-	call L002DEC
+	call Play_Pl_SetJumpLandAnimFrame
 	jp   L027146
 L027122:;J
 	call OBJLstS_IsFrameEnd
@@ -7217,7 +7219,7 @@ L0272E6: db $C3;X
 L0272E7: db $FE;X
 L0272E8: db $72;X
 L0272E9:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L0272F2
 	call L002674
 L0272F2:;J
@@ -7254,7 +7256,7 @@ L027333: db $C3;X
 L027334: db $06;X
 L027335: db $74;X
 L027336:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027362
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
@@ -7377,7 +7379,7 @@ L02743E:;J
 	ld   [hl], $03
 	jp   L0274FB
 L02744A:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027496
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
@@ -7445,11 +7447,11 @@ L0274C8:;J
 	jp   L0274DC
 L0274DC:;J
 	ld   hl, $0030
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L0274FB
 	ld   a, $18
 	ld   h, $01
-	call L002DEC
+	call Play_Pl_SetJumpLandAnimFrame
 	jp   L0274FE
 L0274EF:;J
 	call OBJLstS_IsFrameEnd
@@ -7604,7 +7606,7 @@ L0275EF:;I
 	jp   z, L027754
 	jp   L0276F5
 L027646:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L02764C
 L02764C:;J
 	call OBJLstS_IsFrameEnd
@@ -7613,7 +7615,7 @@ L02764C:;J
 	ld   [hl], $FF
 	jp   L027760
 L027658:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027687
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
@@ -7662,14 +7664,14 @@ L0276C7:;J
 	jp   L02773E
 L0276CA:;J
 	call OBJLstS_ApplyXSpeed
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027760
 	ld   hl, $010A
 	ld   a, $10
 	call Play_Pl_SetMoveDamageNext
 	jp   L027706
 L0276DE:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027760
 	ld   hl, $0109
 	ld   a, $10
@@ -7679,7 +7681,7 @@ L0276DE:;J
 	jp   L027760
 L0276F5:;J
 	call OBJLstS_ApplyXSpeed
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027760
 	ld   hl, $0109
 	ld   a, $10
@@ -7717,7 +7719,7 @@ L027730:;J
 	jp   L027763
 L02773E:;J
 	ld   hl, $0030
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L027760
 	jp   L02775A
 L02774A: db $3E;X
@@ -8216,7 +8218,7 @@ L02796B: db $C3;X
 L02796C: db $BC;X
 L02796D: db $79;X
 L02796E:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027982
 	ld   hl, $0611
 	ld   a, $01
@@ -8226,7 +8228,7 @@ L02796E:;J
 L027982:;J
 	jp   L0279BC
 L027985:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027999
 	ld   hl, $0612
 	ld   a, $01
@@ -8236,7 +8238,7 @@ L027985:;J
 L027999:;J
 	jp   L0279BC
 L02799C:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L0279AA
 	ld   hl, $060C
 	ld   a, $01
@@ -8305,7 +8307,7 @@ L027A23: db $C3;X
 L027A24: db $D3;X
 L027A25: db $7A;X
 L027A26:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027A3A
 	ld   hl, $0612
 	ld   a, $01
@@ -8319,7 +8321,7 @@ L027A3A:;J
 	ld   [hl], $FF
 	jp   L027AD3
 L027A46:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027A70
 	ld   a, $12
 	call HomeCall_Sound_ReqPlayExId
@@ -8338,14 +8340,14 @@ L027A70:;J
 	jp   L027A73
 L027A73:;J
 	ld   hl, $0060
-	call L003614
+	call OBJLstS_ApplyGravity
 	jp   nc, L027AD3
 	ld   a, $08
 	ld   h, $0A
-	call L002DEC
+	call Play_Pl_SetJumpLandAnimFrame
 	jp   L027AD6
 L027A86:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027AD3
 	ld   hl, $0614
 	ld   a, $01
@@ -8354,7 +8356,7 @@ L027A86:;J
 	call L003875
 	jp   L027AD3
 L027A9D:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027AD3
 	ld   hl, $0614
 	ld   a, $01
@@ -8363,7 +8365,7 @@ L027A9D:;J
 	call L003875
 	jp   L027AD3
 L027AB4:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027AC2
 	ld   hl, $0608
 	ld   a, $01
@@ -8397,7 +8399,7 @@ L027AF6: db $C3;X
 L027AF7: db $47;X
 L027AF8: db $7B;X
 L027AF9:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027B47
 	ld   hl, $0611
 	ld   a, $01
@@ -8406,7 +8408,7 @@ L027AF9:;J
 	call L003875
 	jp   L027B47
 L027B10:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027B47
 	ld   hl, $0612
 	ld   a, $01
@@ -8415,7 +8417,7 @@ L027B10:;J
 	call L003875
 	jp   L027B47
 L027B27:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027B47
 	ld   hl, $060F
 	ld   a, $01
@@ -8486,7 +8488,7 @@ L027B95:;I
 	jp   z, L027C2E
 	jp   L027C3D
 L027BC1:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027C3D
 	ld   hl, $0612
 	ld   a, $01
@@ -8495,7 +8497,7 @@ L027BC1:;J
 	call L003875
 	jp   L027C3D
 L027BD8:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027C3D
 	ld   hl, $0613
 	ld   a, $01
@@ -8504,7 +8506,7 @@ L027BD8:;J
 	call L003875
 	jp   L027C3D
 L027BEF:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027C3D
 	ld   hl, $0614
 	ld   a, $01
@@ -8513,7 +8515,7 @@ L027BEF:;J
 	call L003875
 	jp   L027C3D
 L027C06:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027C3D
 	ld   hl, $0611
 	ld   a, $01
@@ -8522,7 +8524,7 @@ L027C06:;J
 	call L003875
 	jp   L027C3D
 L027C1D:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027C3D
 	ld   hl, $060F
 	ld   a, $01
@@ -8722,7 +8724,7 @@ L027D0B: db $C3;X
 L027D0C: db $A8;X
 L027D0D: db $7D;X
 L027D0E:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027DA8
 	ld   hl, $0000
 	call Play_OBJLstS_MoveH_ByXFlipR
@@ -8733,7 +8735,7 @@ L027D0E:;J
 	call L003875
 	jp   L027DA8
 L027D2B:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027DA8
 	ld   hl, $F800
 	call Play_OBJLstS_MoveH_ByXFlipR
@@ -8744,7 +8746,7 @@ L027D2B:;J
 	call L003875
 	jp   L027DA8
 L027D48:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027DA8
 	ld   hl, $1000
 	call Play_OBJLstS_MoveH_ByXFlipR
@@ -8755,7 +8757,7 @@ L027D48:;J
 	call L003875
 	jp   L027DA8
 L027D65:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027DA8
 	ld   hl, $0800
 	call Play_OBJLstS_MoveH_ByXFlipR
@@ -8766,7 +8768,7 @@ L027D65:;J
 	call L003875
 	jp   L027DA8
 L027D82:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L027DA8
 	ld   hl, $0000
 	call Play_OBJLstS_MoveH_ByXFlipR

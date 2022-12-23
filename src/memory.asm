@@ -405,8 +405,9 @@ iGFXBufInfo_SetKey       EQU $0A ; 5 bytes. Current set "Id". Combination of Set
 iGFXBufInfo_SetKeyOld    EQU $10 ; 5 bytes. Last completed set "id".
 
 ; Elements in the wOBJInfo struct
-; Current -> Current data
-; Old -> Old data, used only when loading new graphics.
+; TODO?: Rename the sets to iOBJInfo_OBJLstFlags(Cur?), iOBJInfo_OBJLstFlagsView
+; Current -> Current data. Also the pending data when loading new graphics.
+; Old -> Old data, used only when loading new graphics. Guaranteed to be what's shown on screen for player characters.
 ; These are unrelated to the "Set A" and "Set B" of wGFXBufInfo.
 iOBJInfo_Status EQU $00 ; Both sets - OBJInfo flags + X/Y OBJLst flip flags (OR'd over ROM flags)
 iOBJInfo_OBJLstFlags EQU $01 ; Current - HW OBJ flags used for the entire OBJLst (XOR'd over ROM flags after above)
@@ -588,7 +589,7 @@ iPlInfo_DizzyProgCap EQU $5B ; Caps iPlInfo_DizzyProg to this value. As a result
 iPlInfo_GuardBreakProg EQU $5C ; Guard break progression timer. It increments on its own, and blocking subtracts a value from here. When it reaches 0, guard temporarily breaks.
 iPlInfo_GuardBreakProgCap EQU $5D ; Caps iPlInfo_GuardBreakProg to this value. As a result, the higher it is, the more hits it takes to guard break.
 ;--
-iPlInfo_TimerDec5E EQU $5E ; (Generic?) Move timer that decrements until it reaches 0. Used only for wake up?
+iPlInfo_WakeUpTimer EQU $5E ; Wake up timer set when a player drops on the ground. Prevents getting thrown.
 iPlInfo_5F EQU $5F
 iPlInfo_NoSpecialTimer EQU $60 ; Until it elapses, the player flashes and can only use normals
 iPlInfo_PlDistance EQU $61 ; Distance between players (the same across players)
@@ -632,7 +633,7 @@ iPlInfo_MoveDamageFlags3Other EQU $76
 iPlInfo_MoveDamageValNextOther EQU $77
 iPlInfo_MoveDamageHitAnimIdNextOther EQU $78
 iPlInfo_MoveDamageFlags3NextOther EQU $79
-iPlInfo_TimerDec5EOther EQU $7A
+iPlInfo_WakeUpTimerOther EQU $7A
 iPlInfo_5FOther EQU $7B
 iPlInfo_PhysHitRecv EQU $7C ; If set, marks that we've been directly hit by the other player (ie: not from a projectile)
 

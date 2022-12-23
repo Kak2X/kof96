@@ -8047,13 +8047,13 @@ L1C7DAD:;I
 	jp   z, L1C7DFC
 	jp   L1C7E07
 L1C7DD0:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L1C7E07
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 	jp   L1C7E07
 L1C7DDF:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L1C7DEB
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
@@ -8090,7 +8090,7 @@ L1C7E0B:;I
 	jp   z, L1C7E60
 	jp   L1C7E6B
 L1C7E2E:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L1C7E3A
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
@@ -8099,7 +8099,7 @@ L1C7E3A:;J
 	jp   nc, L1C7E6B
 	jp   L1C7E60
 L1C7E43:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L1C7E4F
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
@@ -8138,7 +8138,7 @@ L1C7E6F:;I
 	jp   z, L1C7EE0
 	jp   L1C7EEB
 L1C7E97:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L1C7EA3
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
@@ -8150,7 +8150,7 @@ L1C7EA3:;J
 	call Play_Pl_SetMoveDamageNext
 	jp   L1C7EEB
 L1C7EB4:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L1C7EC0
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
@@ -8162,7 +8162,7 @@ L1C7EC0:;J
 	call Play_Pl_SetMoveDamageNext
 	jp   L1C7EEB
 L1C7ED1:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L1C7EEB
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
@@ -8193,13 +8193,13 @@ L1C7EEF:;I
 	jp   z, L1C7F3E
 	jp   L1C7F49
 L1C7F12:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L1C7F49
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 	jp   L1C7F49
 L1C7F21:;J
-	call OBJLstS_Unk_ChkStatusBit3
+	call OBJLstS_IsFrameNewLoad
 	jp   z, L1C7F2D
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
