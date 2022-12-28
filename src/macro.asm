@@ -201,7 +201,7 @@ mMvIn_ValSkipWithChar: MACRO
 	ld   hl, iPlInfo_CharId
 	add  hl, bc
 	ld   a, [hl]
-	cp   \1*2	; Playing as this character?
+	cp   \1		; Playing as this character?
 	jp   z, \2	; If so, skip
 ENDM
 
@@ -364,6 +364,58 @@ mMvIn_JpSD: MACRO
 	call MoveInputS_CheckSuperDesperation
 	jp   c, \2	; Was a super desperation triggered? If so, jump
 	jp   \1 	; Otherwise, jump to the normal version
+ENDM
+
+; =============== mMvC_SetSpeedOnInternalFrameEnd ===============
+; Generates code to update the animation speed when switching frames internally.
+; IN
+; - 1: Animation speed
+; - 2: Label to target when exiting the block
+mMvC_SetSpeedOnInternalFrameEnd: MACRO
+	call OBJLstS_IsInternalFrameAboutToEnd	; About to switch frames? 
+	jp   nc, \2			; If not, skip
+	; The above subroutine set HL = Ptr to iOBJInfo_FrameLeft
+	inc  hl				; Seek to iOBJInfo_FrameTotal
+	ld   [hl], \1		; Set new anim speed
+	jp   \2
+ENDM
+
+
+; =============== mMvC_EndMoveOnInternalFrameEnd ===============
+; Generates code to sync the end of the move to the end of the animation frame.
+; IN
+; - 1: Label to animation code (usually .anim)
+; - 2: Label to return code (usually .ret)
+mMvC_EndMoveOnInternalFrameEnd: MACRO
+	call OBJLstS_IsInternalFrameAboutToEnd	; About to switch frames?
+	jp   nc, \1				; If not, continue animating
+	call Play_Pl_EndMove	; Otherwise, end the move
+	jr   \2					; And return
+ENDM
+
+; =============== mMvC_EndOnTargetOBJLst ===============
+; Generates code to call the "end of move" check when the target sprite in the animation  is reached.
+; IN
+; - 1: Label to animation code (usually .anim)
+; - 2: Label to return check code (usually .chkEnd)
+; - A: Current OBJLst ID (either internal or visible)
+mMvC_EndOnTargetOBJLst: MACRO
+	ld   hl, iPlInfo_OBJLstPtrTblOffsetMoveEnd
+	add  hl, bc		; HL = Ptr to target OBJLst ID
+	cp   a, [hl]	; Do they match?
+	jp   z, \2		; If so, end the move when the animation advances
+	jp   \1			; Otherwise, continue animating
+ENDM
+
+; =============== mkhl ===============
+; Generates a generic HL parameter.
+; IN
+; - 1: H
+; - 2: L
+; OUT
+; - CHL: Calculated result
+mkhl: MACRO
+CHL = (LOW(\1) << 8)|LOW(\2)
 ENDM
 
 ; =============== Sound driver macros ===============

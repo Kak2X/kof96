@@ -2281,7 +2281,7 @@ L0148E4: db $FF
 L0148E5: db $FF
 L0148E6: db $FF;X
 L0148E7: db $FF;X
-L0148E8: db $39
+OBJLstPtrTable_TerryHat: db $39
 L0148E9: db $49
 L0148EA: db $FF
 L0148EB: db $FF
@@ -10127,27 +10127,27 @@ Play_DoUnkChain_IncCustomTimer:
 	
 Play_DoUnkChain_DoMiscTimers:
 	; Decrement the wake up timer if it's not 0 already
-	; iPlInfo_WakeUpTimer = MAX(iPlInfo_WakeUpTimer - 1, 0)
-	ld   a, [wPlInfo_Pl1+iPlInfo_WakeUpTimer]
+	; iPlInfo_NoThrowTimer = MAX(iPlInfo_NoThrowTimer - 1, 0)
+	ld   a, [wPlInfo_Pl1+iPlInfo_NoThrowTimer]
 	or   a				; Timer == 0?
 	jr   z, .chk2P		; If so, jump
-	ld   hl, wPlInfo_Pl1+iPlInfo_WakeUpTimer
+	ld   hl, wPlInfo_Pl1+iPlInfo_NoThrowTimer
 	dec  [hl]
 .chk2P:
 	; Do the same for 2P
-	ld   a, [wPlInfo_Pl2+iPlInfo_WakeUpTimer]
+	ld   a, [wPlInfo_Pl2+iPlInfo_NoThrowTimer]
 	or   a
 	jr   z, .end
-	ld   hl, wPlInfo_Pl2+iPlInfo_WakeUpTimer
+	ld   hl, wPlInfo_Pl2+iPlInfo_NoThrowTimer
 	dec  [hl]
 .end:
 
 Play_DoUnkChain_ShareVars2:
 	; Give visibility to these variables too
-	ld   a, [wPlInfo_Pl1+iPlInfo_WakeUpTimer]
-	ld   [wPlInfo_Pl2+iPlInfo_WakeUpTimerOther], a
-	ld   a, [wPlInfo_Pl2+iPlInfo_WakeUpTimer]
-	ld   [wPlInfo_Pl1+iPlInfo_WakeUpTimerOther], a
+	ld   a, [wPlInfo_Pl1+iPlInfo_NoThrowTimer]
+	ld   [wPlInfo_Pl2+iPlInfo_NoThrowTimerOther], a
+	ld   a, [wPlInfo_Pl2+iPlInfo_NoThrowTimer]
+	ld   [wPlInfo_Pl1+iPlInfo_NoThrowTimerOther], a
 	ld   a, [wPlInfo_Pl1+iPlInfo_5F]
 	ld   [wPlInfo_Pl2+iPlInfo_5FOther], a
 	ld   a, [wPlInfo_Pl2+iPlInfo_5F]

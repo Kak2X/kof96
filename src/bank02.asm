@@ -13,14 +13,14 @@ MoveC_Base_None:
 .ret:
 	ret
 	
-; =============== MoveC_Base_Std ===============
+; =============== MoveC_Base_Idle ===============
 ; Simple move code handler that doesn't allow box overlapping.
-MoveC_Base_Std:
+MoveC_Base_Idle:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 	ret
 ; =============== MoveC_Base_WalkH ===============
-; Like MoveC_Base_Std, but allowing horizontal movement.
+; Like MoveC_Base_Idle, but allowing horizontal movement.
 ; Used for walking horizontally.
 MoveC_Base_WalkH:
 	call Play_Pl_MoveByColiBoxOverlapX
@@ -28,14 +28,14 @@ MoveC_Base_WalkH:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 	
 ; =============== MoveC_Base_NoAnim ===============
-; Like MoveC_Base_Std, but without animating the player.
+; Like MoveC_Base_Idle, but without animating the player.
 ; Used when crouching or blocking, which don't animate the player.
 MoveC_Base_NoAnim:
 	call Play_Pl_MoveByColiBoxOverlapX
 	ret
 	
 ; =============== MoveC_Base_ChargeMeter ===============
-; Custom code for MOVE_BASE_CHARGEMETER.
+; Custom code for charging meter (MOVE_BASE_CHARGEMETER).
 MoveC_Base_ChargeMeter:
 	call Play_Pl_MoveByColiBoxOverlapX	; Prevent box overlap
 	call Play_Pl_IsMoveLoading			; Is the move still loading?
@@ -62,7 +62,7 @@ MoveC_Base_ChargeMeter:
 	;
 	
 	; Syncronize to end of anim frame
-	call OBJLstS_IsFrameEnd		; Is the frame about to change?
+	call OBJLstS_IsInternalFrameAboutToEnd		; Is the frame about to change?
 	jp   nc, .continue			; If not, continue animating it
 	
 	; If we reached Max Power, we can't charge anymore.
@@ -91,733 +91,1012 @@ MoveC_Base_ChargeMeter:
 .ret:
 	ret
 	
-L024061:;I
+; =============== MoveC_Base_RunF ===============
+; Custom code for running forwards (MOVE_SHARED_RUN_F).
+MoveC_Base_RunF:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_IsMoveLoading
-	jp   c, L0240BB
-	call OBJLstS_IsFrameEnd
-	jp   nc, L024093
-	ld   hl, $0017
+	jp   c, .ret
+	
+	;
+	; Play the step SFX once every couple of frames.
+	; Which means, when about to increase the sprite mapping ID.
+	;
+.chkPlaySFX:	
+	call OBJLstS_IsInternalFrameAboutToEnd	; About to switch frames?
+	jp   nc, .chkEnd						; If not, skip
+
+	; Only when starting frame #1
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L024093
-	cp   $08
-	jp   z, L024093
-	ld   hl, $002C
+	cp   $00*OBJLSTPTR_ENTRYSIZE	; About to display #0?
+	jp   z, .chkEnd					; If so, skip
+	cp   $02*OBJLSTPTR_ENTRYSIZE	; About to display #2?
+	jp   z, .chkEnd					; If so, skip
+
+	; Daimon uses its own SFX when running.
+	ld   hl, iPlInfo_CharId
 	add  hl, bc
 	ld   a, [hl]
-	cp   $02
-	jp   z, L02408E
-	ld   a, $9D
-	jp   L024090
-L02408E:;J
-	ld   a, $A6
-L024090:;J
-	call HomeCall_Sound_ReqPlayExId
-L024093:;J
-	call Play_Pl_CreateJoyMergedKeysLH
-	jp   c, L0240A9
-	call Play_Pl_GetDirKeys_ByXFlipR
-	jp   nc, L0240A9
-	bit  2, a
-	jp   nz, L0240A9
-	bit  0, a
-	jp   nz, L0240B5
-L0240A9:;J
+	cp   CHAR_ID_DAIMON		; iPlInfo_CharId == CHAR_ID_DAIMON?
+	jp   z, .daimon			; If so, jump
+.norm:
+	ld   a, SFX_STEP		; A = Default step SFX
+	jp   .playSFX
+.daimon:
+	ld   a, SND_ID_26		; A = Step SFX for Daimon
+.playSFX:
+	call HomeCall_Sound_ReqPlayExId	; Play that
+	
+.chkEnd:
+	;
+	; The player needs to hold forward to continue running.
+	; Use Play_Pl_GetDirKeys_ByXFlipR to get d-pad keys relative to the 1P side.
+	;
+	call Play_Pl_CreateJoyMergedKeysLH	; Did we just press A or B?
+	jp   c, .end						; If so, stop running
+	call Play_Pl_GetDirKeys_ByXFlipR	; Holding any key in the d-pad?
+	jp   nc, .end						; If not, stop running
+	bit  KEYB_UP, a						; Starting a running jump?
+	jp   nz, .end						; If so, stop running
+	bit  KEYB_RIGHT, a					; Holding forward?
+	jp   nz, .continue					; If so, continue running. 
+.end:
+	; We're done running
 	call Play_Pl_EndMove
-	ld   hl, $0033
+	
+	;--
+	; iPlInfo_MoveId is set back to MOVE_SHARED_RUN_F to potentially notify 
+	; BasicInput_StartJump that we just ended running (a jump was input while running, causing the run to end).
+	;
+	; When we originally get here, basic inputs are disabled, so execution can't get to BasicInput_StartJump.
+	; After calling Play_Pl_EndMove, that is no longer the case. If the next frame we're still holding up,
+	; execution will reach BasicInput_StartJump.
+	; Other than that, setting iPlInfo_MoveId to anything after calling Play_Pl_EndMove doesn't matter,
+	; since the basic input handler will always set a new move ID.
+	ld   hl, iPlInfo_MoveId
 	add  hl, bc
-	ld   a, $16
+	ld   a, MOVE_SHARED_RUN_F
 	ld   [hl], a
-	jr   L0240BB
-L0240B5:;J
+	;--
+	jr   .ret
+.continue:
+	; Continue running forward
 	call OBJLstS_ApplyXSpeed
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L0240BB:;JR
+.ret:
 	ret
-L0240BC:;I
+	
+; =============== MoveC_Base_DashB ===============
+; Custom code for dashing backwards (MOVE_SHARED_DASH_B).
+MoveC_Base_DashB:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_IsMoveLoading
-	jp   c, L024128
-	ld   hl, $0017
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L0240E5
-	cp   $04
-	jp   z, L024107
-	cp   $08
-	jp   z, L02411A
-L0240D9: db $C3;X
-L0240DA: db $07;X
-L0240DB: db $41;X
-L0240DC: db $21;X
-L0240DD: db $1C;X
-L0240DE: db $00;X
-L0240DF: db $19;X
-L0240E0: db $36;X
-L0240E1: db $FF;X
-L0240E2: db $C3;X
-L0240E3: db $25;X
-L0240E4: db $41;X
-L0240E5:;J
-	ld   hl, $0000
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .initJump
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .moveDown
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .moveDown ; We never get here
+	
+; [TCRF] Unreferenced code to enable manual control.
+;        Not needed, since the move animation for the dash already has that set.
+.unused_setManualCtrl:
+	ld   hl, iOBJInfo_FrameTotal
 	add  hl, de
-	bit  3, [hl]
-	jp   z, L0240FD
-	ld   hl, $FD00
+	ld   [hl], ANIMSPEED_NONE
+	jp   .anim
+	
+;
+; In practice:
+; - The first time we get here, we initialize the jump speed
+; - The second we request a switch to the next frame
+; - From the third we do the same thing, waiting until the graphics are loaded.
+;   Once they are, the second frame is set to skip directly to the gravity code.
+;
+; Gravity is always applied every time.
+;
+; --------------- frame #0 ---------------
+.initJump:
+	; Initialize the jump speed the first time we get here.
+	; From the next, only perform the check to switch to the next frame.
+	ld   hl, iOBJInfo_Status
+	add  hl, de
+	bit  OSTB_GFXNEWLOAD, [hl]	; Is this the first time we get here?
+	jp   z, .waitUp				; If not, jump
+.firstInit:
+	; Set jump left 3px/frame
+	ld   hl, -$0300				
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	ld   hl, $FD00
+	; Set jump up 3px/frame 
+	ld   hl, -$0300
 	call Play_OBJLstS_SetSpeedV
-	jp   L024107
-L0240FD:;J
-	ld   a, $FD
-	ld   h, $FF
+	; Already start applying gravity, which will cause OBJLstS_ReqAnimOnGtYSpeed to immediately
+	; request a frame switch as we'll already be moving > -3px/frame.
+	jp   .moveDown
+.waitUp:
+	ld   a, -$03	; Next frame on YSpeed > -3px/frame
+	ld   h, ANIMSPEED_NONE
 	call OBJLstS_ReqAnimOnGtYSpeed
-	jp   L024107
-L024107:;J
+	; Apply gravity
+	jp   .moveDown
+; --------------- common frames #0-1 ---------------
+.moveDown:
+	; Move down 0.6px/frame
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
-	jp   nc, L024125
-	ld   a, $08
-	ld   h, $00
+	call OBJLstS_ApplyGravityVAndMoveHV	; Did we touch the ground?
+	jp   nc, .anim				; If not, jump
+	; Otherwise, request the next frame to load as soon as possible
+	ld   a, $02*OBJLSTPTR_ENTRYSIZE
+	ld   h, ANIMSPEED_INSTANT
 	call Play_Pl_SetJumpLandAnimFrame
-	jp   L024128
-L02411A:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L024125
-	call Play_Pl_EndMove
-	jr   L024128
-L024125:;J
+	jp   .ret
+; --------------- frame #2 ---------------
+.chkEnd:
+	mMvC_EndMoveOnInternalFrameEnd .anim, .ret
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L024128:;JR
+.ret:
 	ret
-L024129:;I
+	
+; =============== MoveC_Base_NormA ===============
+; Custom code for most air normals. Most characters use this for air punches, air kicks and air A+Bs.
+MoveC_Base_NormA:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_IsMoveLoading
-	jp   c, L024172
-	ld   hl, $0017
+	jp   c, .move
+	
+	;
+	; Moves using this have a timing sequence where the first frames have different anim speed values.
+	; The game then stays on frame #3 until landing on the ground, where it will jump to the landing frame (#4).
+	;
+	; Since the first frames also execute code for #3, if the player lands on the ground even before
+	; reaching frame #3, it will skip directly to #4.
+	;
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L02414E
-	cp   $04
-	jp   z, L02415A
-	cp   $08
-	jp   z, L024166
-	cp   $10
-	jp   z, L02418B
-	jp   L024172
-L02414E:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L024172
-	inc  hl
-	ld   [hl], $12
-	jp   L024172
-L02415A:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L024172
-	inc  hl
-	ld   [hl], $03
-	jp   L024172
-L024166:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L024172
-	inc  hl
-	ld   [hl], $FF
-	jp   L024172
-L024172:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .move
+	
+; Update speed for every frame
+; --------------- frame #0 ---------------
+.obj0: mMvC_SetSpeedOnInternalFrameEnd $12, .move
+; --------------- frame #1 ---------------
+.obj1: mMvC_SetSpeedOnInternalFrameEnd $03, .move
+; --------------- frame #2 ---------------
+; Manual control for #3, as it ends only when touching the ground
+.obj2: mMvC_SetSpeedOnInternalFrameEnd ANIMSPEED_NONE, .move
+; --------------- common frames #0-3 ---------------
+.move:
+	; Gradually decrease the vertical speed originally set by the jump move
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
-	jp   nc, L024196
-	ld   hl, $0021
+	call OBJLstS_ApplyGravityVAndMoveHV	; Did we touch the ground?
+	jp   nc, .anim						; If not, jump
+	
+	; Otherwise, switch to the landing frame.
+	
+	; Like with the jump move, allow starting specials when landing
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	res  2, [hl]
-	ld   a, $10
-	ld   h, $00
+	res  PF1B_NOSPECSTART, [hl]
+	
+	; Switch to #4 and stay there for the least possible time
+	ld   a, $04*OBJLSTPTR_ENTRYSIZE
+	ld   h, ANIMSPEED_INSTANT
 	call Play_Pl_SetJumpLandAnimFrame
-	jp   L024199
-L02418B:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L024196
+	jp   .ret
+	
+; --------------- frame #4 ---------------
+; Wait for the animation to advance before ending the move.
+.chkEnd:
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
 	call Play_Pl_EndMove
-	jr   L024199
-L024196:;J
+	jr   .ret
+; --------------- common ---------------
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L024199:;JR
+.ret:
 	ret
-L02419A:;I
-	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L0241B5
-	ld   hl, $0017
+	
+; =============== MoveC_Base_BlockA ===============
+; Custom code for air blocking (MOVE_SHARED_BLOCK_A).
+; This move starts out with manual control.
+MoveC_Base_BlockA:
+	call Play_Pl_MoveByColiBoxOverlapX	; Prevent box overlap
+	call Play_Pl_IsMoveLoading			; Is the move still loading?
+	jp   c, .move						; If so, jump
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L0241B5
-	cp   $04
-	jp   z, L0241CE
-L0241B2: db $C3;X
-L0241B3: db $B5;X
-L0241B4: db $41;X
-L0241B5:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE	; Use the first frame in the air
+	jp   z, .move
+	cp   $01*OBJLSTPTR_ENTRYSIZE	; Use the second when landing
+	jp   z, .landed
+	jp   .move ; We never get here
+	
+; --------------- frame #0 ---------------
+.move:
+	; Continue jump arc
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
-	jp   nc, L0241D9
-	ld   a, $04
-	ld   h, $00
+	call OBJLstS_ApplyGravityVAndMoveHV
+	jp   nc, .anim				; Did we land? If not, jump
+	
+	; Switch to the next frame
+	ld   a, $01*OBJLSTPTR_ENTRYSIZE
+	ld   h, ANIMSPEED_INSTANT
 	call Play_Pl_SetJumpLandAnimFrame
-	ld   hl, $0021
+	
+	; We're not guarding anymore once we land
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	res  3, [hl]
-	jp   L0241DC
-L0241CE:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L0241D9
-	call Play_Pl_EndMove
-	jr   L0241DC
-L0241D9:;J
+	res  PF1B_GUARD, [hl]
+	jp   .ret
+
+; --------------- frame #1 ---------------
+.landed:
+	mMvC_EndMoveOnInternalFrameEnd .anim, .ret
+; --------------- common ---------------
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L0241DC:;JR
+.ret:;
 	ret
-L0241DD:;I
+	
+; =============== MoveC_Base_NormL ===============
+; Generic move code used for most light normals.
+MoveC_Base_NormL:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_IsMoveLoading
-	jp   c, L024255
-	call Play_Pl_CreateJoyMergedKeysLH
-	jp   nc, L0241F5
-	ld   hl, $001B
+	jp   c, .ret
+	
+	;
+	; If we're pressing/holding a new attack key, speed up
+	; the rest of the animation as much as possible.
+	; This is to allow "interrupting" the light attack with something else (another normal, or special).
+	;
+	; Something similar also happens in .obj1, except it
+	; also makes the animation immediately jump to its last frame.
+	;
+	call Play_Pl_CreateJoyMergedKeysLH	; Pressed any new LH button?
+	jp   nc, .chkAnim					; If not, skip
+	ld   hl, iOBJInfo_FrameLeft
 	add  hl, de
 	ld   [hl], $00
-	inc  hl
-	ld   [hl], $00
-L0241F5:;J
+	inc  hl	; Seek to iOBJInfo_FrameTotal
+	ld   [hl], ANIMSPEED_INSTANT
+	
+.chkAnim:
+	;--
+	; [POI] We already checked this
 	call Play_Pl_IsMoveLoading
-	jp   c, L024255
-	ld   hl, $0017
+	jp   c, .ret
+	;--
+	
+	; Depending on the visible sprite...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L024213
-	cp   $04
-	jp   z, L024221
-	ld   hl, $0039
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+; --------------- frames #2-(end) ---------------
+.obj2x:
+	ld   hl, iPlInfo_OBJLstPtrTblOffsetMoveEnd
 	add  hl, bc
 	cp   a, [hl]
-	jr   z, L024247
-L024211: db $18;X
-L024212: db $3F;X
-L024213:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L024252
-	ld   a, $08
+	jr   z, .chkEnd
+	jr   .anim
+; --------------- frame #0 ---------------
+; Play a SGB/DMG SFX when switching to #1.
+.obj0:
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
+	ld   a, SCT_LIGHT
 	call HomeCall_Sound_ReqPlayExId
-	jp   L024252
-L024221:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L024252
-	ld   hl, $0049
+	jp   .anim
+; --------------- frame #1 ---------------
+; When switching to frame #2, check if we're pressing any punch/kick button.
+; If so, make the animation immediately jump to its last frame.
+.obj1:
+
+	; If not switching yet, continue
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
+	
+	; If we aren't pressing a punch/kick button, continue
+	ld   hl, iPlInfo_JoyMergedKeysLH
 	add  hl, bc
 	ld   a, [hl]
-	and  a, $F0
-	jr   z, L024252
-	ld   hl, $001B
+	and  a, KEP_A_LIGHT|KEP_B_LIGHT|KEP_A_HEAVY|KEP_B_HEAVY
+	jr   z, .anim
+		
+	; Speed up the rest of the anim as much as possible
+	; and make the next frame start immediately.
+	ld   hl, iOBJInfo_FrameLeft
 	add  hl, de
 	ld   [hl], $00
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $0039
+	inc  hl	; Seek to iOBJInfo_FrameTotal
+	ld   [hl], ANIMSPEED_INSTANT
+	
+	; iOBJInfo_OBJLstPtrTblOffset = iPlInfo_OBJLstPtrTblOffsetMoveEnd - 4.
+	; Because iOBJInfo_FrameLeft was just set to $00, the animation function
+	; will advance iOBJInfo_OBJLstPtrTblOffset by 4, making it reach the target sprite.
+	; Of course the graphics still have to load for .chkEnd to be reached.
+	ld   hl, iPlInfo_OBJLstPtrTblOffsetMoveEnd
 	add  hl, bc
-	ld   a, [hl]
-	sub  a, $04
-	ld   hl, $0013
-	add  hl, de
-	ld   [hl], a
-	jr   L024252
-L024247:;R
-	call OBJLstS_IsFrameEnd
-	jp   nc, L024252
-	call Play_Pl_EndMove
-	jr   L024255
-L024252:;JR
+	ld   a, [hl]						; A = iPlInfo_OBJLstPtrTblOffsetMoveEnd - 4
+	sub  a, $01*OBJLSTPTR_ENTRYSIZE
+	ld   hl, iOBJInfo_OBJLstPtrTblOffset
+	add  hl, de							
+	ld   [hl], a						; iOBJInfo_OBJLstPtrTblOffset = A
+	jr   .anim
+; --------------- common ---------------
+.chkEnd:
+	mMvC_EndMoveOnInternalFrameEnd .anim, .ret
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L024255:;JR
+.ret:
 	ret
-L024256:;I
+	
+; =============== MoveC_Base_NormH ===============
+; Generic move code used for most heavy normals & taunting.
+; Like MoveC_Base_Idle, except it ends the move (early) when the target frame is reached.
+MoveC_Base_NormH:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_IsMoveLoading
-	jp   c, L024279
-	call OBJLstS_IsFrameEnd
-	jp   nc, L024276
-	ld   hl, $0013
-	add  hl, de
-	ld   a, [hl]
-	ld   hl, $0039
-	add  hl, bc
-	cp   a, [hl]
-	jr   nz, L024276
+	jp   c, .ret
+	
+	; Only check when the frame is about to switch, before the
+	; graphics for the next one start loading.
+	call OBJLstS_IsInternalFrameAboutToEnd	; About to advance the sprite mapping ID?
+	jp   nc, .anim							; If not, jump
+	ld   hl, iOBJInfo_OBJLstPtrTblOffset
+	add  hl, de			
+	ld   a, [hl]							; A = Internal frame ID
+	ld   hl, iPlInfo_OBJLstPtrTblOffsetMoveEnd
+	add  hl, bc								; HP = Ptr to target frame ID
+	cp   a, [hl]							; Do they match?
+	jr   nz, .anim							; If not, jump
+	; Otherwise, we're done
 	call Play_Pl_EndMove
-	jr   L024279
-L024276:;JR
+	jr   .ret
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L024279:;JR
+.ret:
 	ret
-L02427A:;I
+; =============== MoveC_Base_Roll ===============
+; Custom code for rolling. (MOVE_SHARED_ROLL_F, MOVE_SHARED_ROLL_B)
+MoveC_Base_Roll:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_IsMoveLoading
-	jp   c, L02432B
-	ld   hl, $0017
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L02429A
-	cp   $0C
-	jp   z, L0242E2
-	cp   $10
-	jp   z, L0242EE
-	jp   L024325
-L02429A:;J
-	ld   hl, $0000
+	cp   $00*OBJLSTPTR_ENTRYSIZE	; Init
+	jp   z, .obj0
+	cp   $03*OBJLSTPTR_ENTRYSIZE	; Switch to recover
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE	; Recovery/end
+	jp   z, .obj4
+	; Just continue moving in frames #1 & #2
+	jp   .move
+	
+; --------------- frame #0 ---------------
+.obj0:
+	; Determine the roll direction/speed the first time we get here.
+	; From the second time on, just continue moving.
+	ld   hl, iOBJInfo_Status
 	add  hl, de
-	bit  3, [hl]
-	jp   z, L0242DF
-	ld   hl, $0033
+	bit  OSTB_GFXNEWLOAD, [hl]	; First time?
+	jp   z, .obj0_move			; If not, skip ahead
+.chkDir:
+	; Check roll direction depending on the move we're in
+	ld   hl, iPlInfo_MoveId
 	add  hl, bc
-	ld   a, [hl]
-	cp   $1E
-	jp   z, L0242B2
-	cp   $20
-	jp   z, L0242C7
-L0242B2:;J
-	ld   hl, $0083
+	ld   a, [hl]			
+	cp   MOVE_SHARED_ROLL_F	; Rolling forwards?
+	jp   z, .initRollF		; If so, jump
+	cp   MOVE_SHARED_ROLL_B	; Rolling backwards?
+	jp   z, .initRollB		; If so, jump
+.initRollF:
+	; Determine how much speed we're getting.
+	; Normal rolls (iPlInfo_RunningJump == 0) move you at 2px/frame.
+	; Guard cancel rolls (iPlInfo_RunningJump == 1) move you at 2.5px/frame.
+	ld   hl, iPlInfo_RunningJump
+	add  hl, bc
+	ld   a, [hl]			; A = iPlInfo_RunningJump
+	or   a					; A != 0?
+	jp   nz, .initRollFGc	; If so, jump
+.initRollFNorm:
+	ld   hl, $0200 ; 2px/frame forward
+	jp   .setInitialSpeed
+.initRollFGc:
+	ld   hl, $0280 ; 2.5px/frame forward
+	jp   .setInitialSpeed
+.initRollB:
+	; Like with the forward roll, but with negative speed to move left (relative to the 1P side).
+	ld   hl, iPlInfo_RunningJump
 	add  hl, bc
 	ld   a, [hl]
 	or   a
-	jp   nz, L0242C1
-	ld   hl, $0200
-	jp   L0242DC
-L0242C1:;J
-	ld   hl, $0280
-	jp   L0242DC
-L0242C7:;J
-	ld   hl, $0083
-	add  hl, bc
-	ld   a, [hl]
-	or   a
-	jp   nz, L0242D6
-	ld   hl, OAM_Begin
-	jp   L0242DC
-L0242D6: db $21;X
-L0242D7: db $80;X
-L0242D8: db $FD;X
-L0242D9: db $C3;X
-L0242DA: db $DC;X
-L0242DB: db $42;X
-L0242DC:;J
+	jp   nz, .initRollBGc
+.initRollBNorm:
+	ld   hl, -$0200 ; 2px/frame backwards
+	jp   .setInitialSpeed
+.initRollBGc: 
+	ld   hl, -$0280 ; 2.5px/frame backwards
+	jp   .setInitialSpeed
+.setInitialSpeed:
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
-L0242DF:;J
-	jp   L024325
-L0242E2:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L024325
-	inc  hl
-	ld   [hl], $04
-	jp   L024325
-L0242EE:;J
-	ld   hl, $0000
+.obj0_move:
+	jp   .move
+	
+; --------------- frame #3 ---------------
+; Switch to recovery.
+.obj3:
+	; Slow down the animation speed from 2 to 4 when about to recover from the roll.
+	mMvC_SetSpeedOnInternalFrameEnd $04, .move
+	
+; --------------- frame #4 ---------------
+; Recovery.
+.obj4:
+	; The first time we get here determine 
+	ld   hl, iOBJInfo_Status
 	add  hl, de
-	bit  3, [hl]
-	jp   z, L02431A
-	ld   hl, $0083
+	bit  OSTB_GFXNEWLOAD, [hl]	; First time?
+	jp   z, .chkEnd				; If not, skip ahead
+	
+	; Since we're ending the roll,
+	; reset different flags depending on its type
+	ld   hl, iPlInfo_RunningJump
 	add  hl, bc
 	ld   a, [hl]
-	or   a
-	jp   z, L02430C
-	ld   hl, $0020
+	or   a					; Did a guard cancel roll?
+	jp   z, .obj4_noRunJump	; If not, jump
+.obj4_runJump:
+	; Guard cancel roll.
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	res  6, [hl]
-	inc  hl
-	res  2, [hl]
-	jp   L024314
-L02430C:;J
-	ld   hl, $0022
+	res  PF0B_SUPERMOVE, [hl]	; Stop flashing
+	inc  hl						; Seek to iPlInfo_Flags1
+	res  PF1B_NOSPECSTART, [hl]	; Allow starting specials again
+	; Note this doesn't clear PF2B_NOHURTBOX or PF2B_NOCOLIBOX.
+	; This makes the guard cancel roll invulnerable even during its recovery.
+	jp   .resetHSpeed
+.obj4_noRunJump:
+	; While in a standard roll, the player can be hit out of that.
+	ld   hl, iPlInfo_Flags2
 	add  hl, bc
-	res  6, [hl]
-	res  7, [hl]
-L024314:;J
+	res  PF2B_NOHURTBOX, [hl]
+	res  PF2B_NOCOLIBOX, [hl]
+.resetHSpeed:
+	; Stop horizontal movement
 	ld   hl, $0000
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
-L02431A:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L024328
-	call Play_Pl_EndMove
-	jr   L02432B
-L024325:;J
+.chkEnd:
+	; Wait for the sprite mapping ID to advance before ending the move
+	mMvC_EndMoveOnInternalFrameEnd .anim, .ret
+	
+; --------------- common ---------------
+.move:
 	call OBJLstS_ApplyXSpeed
-L024328:;J
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L02432B:;JR
+.ret:
 	ret
-L02432C:;I
-	ld   hl, $002C
+	
+; =============== MoveC_Base_RoundStart ===============
+; Custom code for moves used when the round starts (MOVE_SHARED_INTRO, MOVE_SHARED_INTRO_SPEC).
+MoveC_Base_RoundStart:
+	; MAI has her own timing sequence
+	ld   hl, iPlInfo_CharId
 	add  hl, bc
 	ld   a, [hl]
-	cp   $0E
-	jp   z, L0243A3
+	cp   CHAR_ID_MAI
+	jp   z, MoveC_Base_RoundStart_Mai
+
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_IsMoveLoading
-	jp   c, L0243A2
-	ld   hl, $0017
-	add  hl, de
-	ld   a, [hl]
-	cp   $00
-	jp   z, L024354
-	ld   hl, $0039
+	jp   c, .ret
+	
+	; Depending on the visible sprite...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+	add  hl, de		
+	ld   a, [hl]	; A = Visible sprite mapping ID
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .initAnimSpeed
+	
+; --------------- frames #1-(end) ---------------	
+	; Check if we can end the move when the target ID is reached
+	ld   hl, iPlInfo_OBJLstPtrTblOffsetMoveEnd
+	add  hl, bc		; HL = Ptr to target sprite mapping ID
+	cp   a, [hl]	; ID == Target?
+	jp   z, .chkEnd	; If so, jump
+	jp   .anim		; Otherwise, just animate normally
+	
+; --------------- frame #0 ---------------
+.initAnimSpeed:
+	; Set the animation speed when about to switch to frame #1
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
+	
+	; These characters use speed $02 from the second frame.
+	; Everyone else keeps their existing speed settings.
+	ld   hl, iPlInfo_CharId
 	add  hl, bc
-	cp   a, [hl]
-	jp   z, L024394
-	jp   L02439F
-L024354:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L02439F
-	ld   hl, $002C
-	add  hl, bc
 	ld   a, [hl]
-	cp   $0C
-	jp   z, L024385
-	cp   $10
-	jp   z, L024385
-	cp   $24
-	jp   z, L024385
-	cp   $18
-	jp   z, L024385
-	cp   $22
-	jp   z, L024385
-	cp   $14
-	jp   z, L024385
-	cp   $20
-	jp   z, L024385
-	jp   L02439F
-L024385:;J
-	ld   a, $02
-	jp   L02438C
-L02438A: db $3E;X
-L02438B: db $03;X
-L02438C:;J
-	ld   hl, $001C
+	cp   CHAR_ID_ATHENA
+	jp   z, .spdFast
+	cp   CHAR_ID_LEONA
+	jp   z, .spdFast
+	cp   CHAR_ID_OLEONA
+	jp   z, .spdFast
+	cp   CHAR_ID_IORI
+	jp   z, .spdFast
+	cp   CHAR_ID_OIORI
+	jp   z, .spdFast
+	cp   CHAR_ID_KRAUSER
+	jp   z, .spdFast
+	cp   CHAR_ID_MRKARATE
+	jp   z, .spdFast
+	jp   .anim
+.spdFast:
+	ld   a, $02		; A = Anim speed
+	jp   .setSpeed
+; [TCRF] Unreferenced speed setting.
+.unused_spdSlow:
+	ld   a, $03		; A = Anim speed
+.setSpeed:
+	ld   hl, iOBJInfo_FrameTotal
 	add  hl, de
-	ld   [hl], a
-	jp   L02439F
-L024394:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L02439F
-	call Play_Pl_EndMove
-	jr   L0243A2
-L02439F:;J
+	ld   [hl], a	; Save it
+	jp   .anim
+; --------------- end ---------------	
+.chkEnd:
+	; End the move when the animation advances
+	mMvC_EndMoveOnInternalFrameEnd .anim, .ret
+; --------------- common ---------------	
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L0243A2:;JR
+.ret:
 	ret
-L0243A3:;J
+	
+; =============== MoveC_Base_RoundStart_Mai ===============
+; Mai's intro animation changes speed several times,
+; which isn't handled by the normal move code.
+MoveC_Base_RoundStart_Mai:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_IsMoveLoading
-	jp   c, L02441F
-	ld   hl, $0017
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L0243D5
-	cp   $04
-	jp   z, L0243E1
-	cp   $08
-	jp   z, L0243ED
-	cp   $18
-	jp   z, L0243F9
-	cp   $1C
-	jp   z, L024405
-	ld   hl, $0039
-	add  hl, bc
-	cp   a, [hl]
-	jp   z, L024411
-	jp   L02441C
-L0243D5:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L02441C
-	inc  hl
-	ld   [hl], $1E
-	jp   L02441C
-L0243E1:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L02441C
-	inc  hl
-	ld   [hl], $14
-	jp   L02441C
-L0243ED:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L02441C
-	inc  hl
-	ld   [hl], $00
-	jp   L02441C
-L0243F9:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L02441C
-	inc  hl
-	ld   [hl], $28
-	jp   L02441C
-L024405:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L02441C
-	inc  hl
-	ld   [hl], $0A
-	jp   L02441C
-L024411:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L02441C
-	call Play_Pl_EndMove
-	jr   L02441F
-L02441C:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $06*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj6
+	cp   $07*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj7
+.cmpTarget:
+	; Check if we can end the move when the target ID is reached
+	ld   hl, iPlInfo_OBJLstPtrTblOffsetMoveEnd
+	add  hl, bc		; HL = Ptr to target sprite mapping ID
+	cp   a, [hl]	; ID == Target?
+	jp   z, .chkEnd	; If so, jump
+	jp   .anim		; Otherwise, just animate normally
+; --------------- main ---------------	
+.obj0: mMvC_SetSpeedOnInternalFrameEnd $1E, .anim
+.obj1: mMvC_SetSpeedOnInternalFrameEnd $14, .anim
+.obj2: mMvC_SetSpeedOnInternalFrameEnd ANIMSPEED_INSTANT, .anim
+.obj6: mMvC_SetSpeedOnInternalFrameEnd $28, .anim
+.obj7: mMvC_SetSpeedOnInternalFrameEnd $0A, .anim
+; --------------- end ---------------	
+.chkEnd:
+	; End the move when the animation advances
+	mMvC_EndMoveOnInternalFrameEnd .anim, .ret
+; --------------- common ---------------	
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L02441F:;JR
+.ret:
 	ret
-L024420:;I
+	
+; =============== MoveC_Base_WakeUp ===============
+; Custom code for waking up (MOVE_SHARED_WAKEUP).
+MoveC_Base_WakeUp:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_IsMoveLoading
-	jp   c, L024454
-	ld   hl, $0017
+	jp   c, .ret
+	
+	; The move ends at the end of the second frame
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $04
-	jp   z, L024445
-	ld   hl, $0000
+	cp   $01*OBJLSTPTR_ENTRYSIZE	; OBJLstId == 1?
+	jp   z, .chkEnd					; If so, jump
+	
+; --------------- frame #0 ---------------
+.obj0:
+	ld   hl, iOBJInfo_Status
 	add  hl, de
-	bit  3, [hl]
-	jp   z, L024442
-	ld   hl, $0021
+	bit  OSTB_GFXNEWLOAD, [hl]	; First time we get here?
+	jp   z, .notFirst			; If not, skip
+	; Allow cancelling wakeup into special
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	res  2, [hl]
-L024442:;J
-	jp   L024451
-L024445:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L024451
-	call L024455
-	jp   L024454
-L024451:;J
+	res  PF1B_NOSPECSTART, [hl]
+.notFirst:
+	jp   .anim
+; --------------- frame #1 ---------------	
+.chkEnd:
+	; Special version of mMvC_EndMoveOnInternalFrameEnd here
+	call OBJLstS_IsInternalFrameAboutToEnd	; About to switch frames?
+	jp   nc, .anim				; If not, continue animating
+	call MoveC_Base_WakeUp_End	; Otherwise, end the move
+	jp   .ret					; And return
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L024454:;J
+.ret:
 	ret
-L024455:;C
-	call Play_Pl_IsDizzy
-	jp   z, L02448F
-	ld   hl, $005B
-	add  hl, bc
-	ld   a, [hl]
+; =============== MoveC_Base_WakeUp_End ===============
+; Ends the wake up animation, handling the switch to the dizzy state if needed.
+MoveC_Base_WakeUp_End:
+	call Play_Pl_IsDizzyNext	; Are we supposed to get dizzy when waking up?
+	jp   z, .noDizzy			; If not, just end the wakeup move
+.dizzy:							; Otherwise, setup dizzy move
+
+	; Every time we get dizzy, increase its timer cap by 8.
+	; This means the opponent needs to deal more damage to dizzy us again.
+	; Also reset the dizzy progression timer to its cap.
+	ld   hl, iPlInfo_DizzyProgCap
+	add  hl, bc			; HL = Ptr to iPlInfo_DizzyProgCap
+	ld   a, [hl]		; A = iPlInfo_DizzyProgCap + 8
 	add  a, $08
-	jp   nc, L024467
-L024465: db $3E;X
-L024466: db $FF;X
-L024467:;J
-	ldd  [hl], a
-	ldd  [hl], a
+	jp   nc, .setCap	; Did we overflow? If not, skip
+	ld   a, $FF			; Otherwise, cap the timer at $FF, just in case (this can never happen though)
+.setCap:
+	ldd  [hl], a		; Save back updated cap, seek to iPlInfo_DizzyProg
+	ldd  [hl], a		; Reset the dizzy timer as well, seek to iPlInfo_DizzyTimeLeft
+	
+	
+	; Reset the countdown timer for exiting the dizzy state to $FF
 	ld   a, $FF
-	ldd  [hl], a
-	ld   [hl], $00
-	ld   hl, $005E
+	ldd  [hl], a		; iPlInfo_DizzyTimeLeft = 0, seel tp iPlInfo_Dizzy
+	; Don't dizzy on the next drop to ground
+	ld   [hl], $00		; iPlInfo_DizzyNext = 0
+	
+	; We can be throw immediately in the dizzy state
+	ld   hl, iPlInfo_NoThrowTimer
 	add  hl, bc
 	ld   [hl], $00
-	ld   hl, $0020
+	
+	; Clear various flags
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	res  2, [hl]
-	res  3, [hl]
-	res  4, [hl]
-	res  5, [hl]
-	inc  hl
-	set  2, [hl]
-	res  4, [hl]
-	res  6, [hl]
-	res  7, [hl]
-	ld   a, $24
+	res  PF0B_AIR, [hl] ; Grounded while dizzy
+	res  PF0B_PROJHIT, [hl] ; Remove the three projectile flags
+	res  PF0B_PROJREM, [hl]
+	res  PF0B_PROJREFLECT, [hl]
+	inc  hl		; Seek to iPlInfo_Flags1
+	set  PF1B_NOSPECSTART, [hl] ; Can't cancel dizzies into specials (and since the dizzy state is a move, can't start normals either)
+	res  PF1B_COMBORECV, [hl] ; Damage string ended, next hit deals full damage
+	res  PF1B_ALLOWHITCANCEL, [hl] ; Disable override
+	res  PF1B_INVULN, [hl] ; Not invulnerable
+	; New move
+	ld   a, MOVE_SHARED_DIZZY
 	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
 	ret
-L02448F:;J
+.noDizzy:
 	call Play_Pl_EndMove
 	ret
-L024493:;I
+	
+; =============== MoveC_Base_Dizzy ===============
+; Custom code for the dizzy state (MOVE_SHARED_DIZZY).
+MoveC_Base_Dizzy:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_IsMoveLoading
-	jp   c, L0244BE
-	call L0244BF
-	ld   hl, $0059
+	jp   c, .ret
+	
+	; Decrement the dizzy countdown
+	call Play_Pl_DecDizzyTime
+	
+	; End the move when the dizzy countdown timer elapses
+	ld   hl, iPlInfo_DizzyTimeLeft
 	add  hl, bc
 	ld   a, [hl]
-	or   a
-	jp   z, L0244B6
-	call OBJLstS_IsFrameEnd
-	jp   nc, L0244BB
-	ld   a, $01
+	or   a			; iPlInfo_DizzyTimeLeft == 0?
+	jp   z, .end	; If so, jump
+
+	; Play a SFX every time the animation internally switches to the next frame
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
+	ld   a, SCT_DIZZY
 	call HomeCall_Sound_ReqPlayExId
-	jp   L0244BB
-L0244B6:;J
+	jp   .anim
+.end:
 	call Play_Pl_EndMove
-	jr   L0244BE
-L0244BB:;J
+	jr   .ret
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L0244BE:;JR
+.ret:
 	ret
-L0244BF:;C
+	
+; =============== Play_Pl_DecDizzyTime ===============
+; Decrements the dizzy countdown timer.
+; This slowly decrements on its own, but it's possible to speed it up
+; by mashing buttons ????
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+Play_Pl_DecDizzyTime:
+
+	; On time over, the dizzy state ends abruptly
 	ld   a, [wRoundTime]
-	or   a
-	jp   nz, L0244CF
-	xor  a
-	ld   hl, $0059
+	or   a				; Is there time left?
+	jp   nz, .chkCpu	; If so, jump
+	; Otherwise, clear the countdown, which will end the move (see above)
+	xor  a				
+	ld   hl, iPlInfo_DizzyTimeLeft
 	add  hl, bc
-	ld   [hl], a
-	jp   L024528
-L0244CF:;J
-	ld   hl, $0020
-	add  hl, bc
-	bit  7, [hl]
-	jp   z, L024506
+	ld   [hl], a		; iPlInfo_DizzyTimeLeft = 0
+	jp   .ret
+	
+; --------------- start cpu check ---------------		
+.chkCpu:
+	; The CPU has its own logic for decrementing the countdown
+	ld   hl, iPlInfo_Flags0
+	add  hl, bc			; Seek to iPlInfo_Flags0
+	bit  PF0B_CPU, [hl]	; Is this player a CPU?
+	jp   z, .isHuman	; If not, jump
+; --------------- .isCpu ---------------	
+.isCpu:
+	; The higher the difficulty is, the faster the CPU "mashes" buttons.
+	;
+	; Essentially, the game treats the CPU has having pressed a button when (wTimer & Mask != 0).
+	; The logic is the same across all difficulties, but the mask isn't.
+	; When the mask has more bits set, it increases the chance of decreasing
+	; the dizzy countdown timer by 8 (.decTimerFast) instead of just 1 (.decTimerSlow).
 	ld   a, [wDifficulty]
-	cp   $00
-	jp   z, L0244FB
-	cp   $01
-	jp   z, L0244F0
+	cp   DIFFICULTY_EASY
+	jp   z, .easy
+	cp   DIFFICULTY_NORMAL
+	jp   z, .normal
+.hard:
+	; On HARD, it's like NORMAL, except it's much more likely for the dizzy
+	; to last 31 ($1F) frames since the bits for the upper nybble are all set.
 	ld   a, [wTimer]
-	and  a, $F0
-	jp   nz, L02451C
-	jp   L024510
-L0244F0:;J
+	and  a, $F0				; wTimer & $F0 != 0?
+	jp   nz, .decTimerFast	; If so, jump
+	jp   .decTimerSlow
+.normal:
+	; On NORMAL, dizzies may last anywhere between 31 ($1F) and 45 ($2D) frames.
 	ld   a, [wTimer]
-	and  a, $30
-	jp   nz, L02451C
-	jp   L024510
-L0244FB:;J
+	and  a, $30				; wTimer & $30 != 0?
+	jp   nz, .decTimerFast	; If so, jump
+	jp   .decTimerSlow
+.easy:
+	; On EASY, the CPU doesn't mash buttons, since the result will always be 0.
+	; The dizzy will last the full 4.2 or so seconds ($FF frames).
 	ld   a, [wTimer]
-	and  a, $00
-	jp   nz, L02451C
-	jp   L024510
-L024506:;J
-	ld   hl, $0044
+	and  a, $00				; wTimer & $00 != 0?
+	jp   nz, .decTimerFast	; If so, jump (impossible)
+	jp   .decTimerSlow
+; --------------- .isHuman ---------------	
+.isHuman:
+	; When the player is human-controlled, this is all under the player's control.
+	; Any time a new key is pressed, the timer decrements by 8.
+	; Otherwise, it's just by 1.
+	ld   hl, iPlInfo_JoyNewKeys
 	add  hl, bc
-	ld   a, [hl]
-	and  a, $7F
-	jp   nz, L02451C
-L024510:;J
-	ld   hl, $0059
+	ld   a, [hl]			; A = Newly pressed keys
+	and  a, $FF^KEY_START	; Pressed anything except START?
+	jp   nz, .decTimerFast	; If so, jump
+	
+; --------------- end cpu check ---------------	
+
+.decTimerSlow:
+	; On its own, decrement the timer once
+	ld   hl, iPlInfo_DizzyTimeLeft
 	add  hl, bc
-	dec  [hl]
-	jp   nc, L024519
-L024518: db $AF;X
-L024519:;J
-	jp   L024528
-L02451C:;J
-	ld   hl, $0059
+	dec  [hl]	; iPlInfo_DizzyTimeLeft--
+	;--
+	; [POI] Not applicable, since we're using dec [hl] here
+	jp   nc, .copypaste
+	xor  a ; We never get here
+.copypaste:
+	;--
+	jp   .ret
+	
+.decTimerFast:
+	; Decrement the countdown by 8
+	ld   hl, iPlInfo_DizzyTimeLeft
 	add  hl, bc
-	ld   a, [hl]
-	sub  a, $08
-	jp   nc, L024527
-	xor  a
-L024527:;J
-	ld   [hl], a
-L024528:;J
+	ld   a, [hl]		; A = iPlInfo_DizzyTimeLeft
+	sub  a, $08			; A -= 8
+	jp   nc, .saveTimer	; Did we underflow?
+	xor  a				; If so, force it back to 0
+.saveTimer:
+	ld   [hl], a		; Save it back
+.ret:
 	ret
-L024529:;I
+	
+; =============== MoveC_Base_RoundEnd ===============
+; Custom code for moves used when the round ends (MOVE_SHARED_WIN_NORM, MOVE_SHARED_WIN_ALT, MOVE_SHARED_LOST_TIMEOVER).
+MoveC_Base_RoundEnd:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_IsMoveLoading
-	jp   c, L024564
-	call OBJLstS_IsFrameEnd
-	jp   nc, L024561
-	ld   hl, $0013
+	jp   c, .ret
+	
+	; Ignore if not switching frames
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
+	
+	; Continue animating until we reach the target frame
+	ld   hl, iOBJInfo_OBJLstPtrTblOffset
 	add  hl, de
 	ld   a, [hl]
-	ld   hl, $0039
+	ld   hl, iPlInfo_OBJLstPtrTblOffsetMoveEnd
 	add  hl, bc
 	cp   a, [hl]
-	jr   nz, L024561
-	ld   hl, $0033
+	jr   nz, .anim
+	
+	;
+	; Terry's second win animation involves him throwing his hat.
+	; Spawn the hat before killing the player task, if appropriate.
+	;
+	ld   hl, iPlInfo_MoveId
 	add  hl, bc
 	ld   a, [hl]
-	cp   $28
-	jr   nz, L024559
-	ld   hl, $002C
+	cp   MOVE_SHARED_WIN_ALT	; Using the second win anim?
+	jr   nz, .killTask			; If not, return
+	ld   hl, iPlInfo_CharId
 	add  hl, bc
 	ld   a, [hl]
-	cp   $04
-	jr   nz, L024559
-	call L024565
-L024559:;R
+	cp   CHAR_ID_TERRY			; Playing as Terry?
+	jr   nz, .killTask			; If not, jump
+	
+	call Play_SpawnTerryHat		; All OK, spawn the hat
+.killTask:
+	; End the move as normal, and kill its task.
+	; This prevents the player from animating any further.
 	call Play_Pl_EndMove
 	call Task_RemoveCurAndPassControl
-L02455F: db $18;X
-L024560: db $03;X
-L024561:;JR
+	jr   .ret ; We never get here, since the player task got destroyed
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L024564:;J
+.ret:
 	ret
-L024565:;C
+	
+; =============== Play_SpawnTerryHat ===============
+; Spawns Terry's hat for his second win animation.
+; IN
+; - DE: Ptr to the player wOBJInfo
+Play_SpawnTerryHat:
 	push bc
-	push de
-	push de
-	pop  bc
-	ld   de, wOBJInfo2+iOBJInfo_Status
-	ld   hl, $0000
-	add  hl, de
-	ld   [hl], $80
-	ld   hl, $000D
-	add  hl, de
-	ld   [hl], $80
-	ld   hl, $0020
-	add  hl, de
-	ld   [hl], $02
-	inc  hl
-	ld   [hl], $BA
-	inc  hl
-	ld   [hl], $45
-	ld   hl, $0010
-	add  hl, de
-	ld   [hl], $01
-	inc  hl
-	ld   [hl], $E8
-	inc  hl
-	ld   [hl], $48
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $001B
-	add  hl, de
-	ld   [hl], $08
-	inc  hl
-	ld   [hl], $08
-	call OBJLstS_Overlap
-	ld   hl, $1000
-	call Play_OBJLstS_MoveH_ByXFlipR
-	ld   hl, $D000
-	call Play_OBJLstS_MoveV
-	ld   hl, $0100
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	ld   hl, $FD00
-	call Play_OBJLstS_SetSpeedV
-	pop  de
+		push de
+		
+			; The hat is spawned relative to the player's location through OBJLstS_Overlap.
+			; That subroutine wants the source (player wOBJInfo) to BC.
+			push de
+			pop  bc
+			
+			; DE = Ptr to wOBJInfo_TerryHat
+			ld   de, wOBJInfo_TerryHat
+			
+			; Display the sprite
+			ld   hl, iOBJInfo_Status
+			add  hl, de
+			ld   [hl], OST_VISIBLE
+			
+			; Use $80 as fixed tile ID base.
+			; The hat tiles use IDs $84-$87 (represented as $04 & $06) in the sprite mapping.
+			ld   hl, iOBJInfo_TileIDBase
+			add  hl, de
+			ld   [hl], $80
+			
+			; Set the code ptr for handling its animation
+			ld   hl, iOBJInfo_Proj_CodeBank
+			add  hl, de	; Seek to iOBJInfo_Proj_CodeBank
+			ld   [hl], BANK(ExOBJ_TerryHat) ; BANK $02
+			inc  hl	; Seek to iOBJInfo_Proj_CodePtr_Low
+			ld   [hl], LOW(ExOBJ_TerryHat)
+			inc  hl	; Seek to iOBJInfo_Proj_CodePtr_Low
+			ld   [hl], HIGH(ExOBJ_TerryHat)
+			
+			; Set animation table
+			ld   hl, iOBJInfo_BankNum
+			add  hl, de
+			ld   [hl], BANK(OBJLstPtrTable_TerryHat) ; BANK $01
+			inc  hl	; Seek to iOBJInfo_OBJLstPtrTbl_Low
+			ld   [hl], LOW(OBJLstPtrTable_TerryHat)
+			inc  hl	; Seek to iOBJInfo_OBJLstPtrTbl_High
+			ld   [hl], HIGH(OBJLstPtrTable_TerryHat)
+			inc  hl	; Seek to iOBJInfo_OBJLstPtrTblOffset
+			ld   [hl], $00	; Start from first sprite
+			
+			; Animate every 8 frames
+			ld   hl, iOBJInfo_FrameLeft
+			add  hl, de
+			ld   [hl], $08
+			inc  hl	; Seek to iOBJInfo_FrameTotal
+			ld   [hl], $08
+			
+			; Set the hat's position relative to the player:
+			; - $10px right
+			; - $30px above
+			call OBJLstS_Overlap		; Move on top of player
+			ld   hl, +$1000				; Move $10px forward
+			call Play_OBJLstS_MoveH_ByXFlipR
+			ld   hl, -$3000				; Move $30px up
+			call Play_OBJLstS_MoveV
+			
+			; Set throw speed arc:
+			; - $10px forward
+			; - $03px up
+			ld   hl, +$0100
+			call Play_OBJLstS_SetSpeedH_ByXFlipR
+			ld   hl, -$0300
+			call Play_OBJLstS_SetSpeedV
+		pop  de
 	pop  bc
 	ret
-L0245BA:;I
-	call L0028B2
-	ld   hl, $0030
-	call L003672
-	jp   c, L0245CA
+	
+; =============== ExOBJ_TerryHat ===============
+; Animation code for Terry's hat.
+; IN
+; - DE: Ptr to wOBJInfo_TerryHat
+ExOBJ_TerryHat:
+	; Move horizontally
+	call ExOBJS_Play_ChkHitModeAndMoveH
+	; Move vertically
+	ld   hl, $0030	; 30 subpixels/frame gravity
+	call OBJLstS_ApplyGravityVAndMoveV	; Did it touch the ground?
+	jp   c, .onFloor					; If so, jump
+	; Continue spinning in the air
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 	ret
-L0245CA:;J
+.onFloor:
+	; Stop movement and animation on the ground
 	ld   hl, $0000
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	ld   hl, $0000
 	call Play_OBJLstS_SetSpeedV
 	ret
+	
 ; =============== ExOBJ_SuperSparkle ===============
 ; Animation code for the sparkle effect shown at the start of a move.
 ; IN
 ; - DE: Ptr to wOBJInfo_Pl*SuperSparkle
-; - BC: Ptr to wOBJInfo_Pl*+$200
+; - BC: Ptr to wPlInfo*+$200
 ExOBJ_SuperSparkle:
 
 	;
@@ -1433,7 +1712,7 @@ L024973:;J
 	ld   hl, $0000
 	call Play_OBJLstS_SetSpeedH_ByXDirL
 	ld   hl, OAM_Begin
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 L02497F:;J
 	scf
 	ret
@@ -1692,24 +1971,24 @@ L024B37: db $AF;X
 L024B38: db $C9;X
 HitAnim_ThrowRotU:;I
 	ld   a, $92
-	jp   L024B4D
+	jp   HitAnim_ThrowRotCustom
 HitAnim_ThrowRotL:;I
 	ld   a, $94
-	jp   L024B4D
+	jp   HitAnim_ThrowRotCustom
 HitAnim_ThrowRotD:;I
 	ld   a, $96
-	jp   L024B4D
+	jp   HitAnim_ThrowRotCustom
 HitAnim_ThrowRotR:;I
 	ld   a, $98
-	jp   L024B4D
-L024B4D:;J
+	jp   HitAnim_ThrowRotCustom
+HitAnim_ThrowRotCustom:;J
 	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
 	call L024AC1
-	ld   a, [$C176]
+	ld   a, [wPlayPlThrowRotMoveH]
 	ld   h, a
 	ld   l, $00
 	call Play_OBJLstS_MoveH_ByOtherXFlipL
-	ld   a, [$C177]
+	ld   a, [wPlayPlThrowRotMoveV]
 	ld   h, a
 	ld   l, $00
 	call Play_OBJLstS_MoveV
@@ -1761,7 +2040,7 @@ Play_Pl_SetHitAnim:
 		; Start by dividing between projectile hits and physical hits.
 		; 
 		; There are significant differences between the handling of those, though the code paths later
-		; converge back at Play_Pl_SetHitAnim_ChkGuardBypass (but not before setting the PF0B_FARHIT flag)
+		; converge back at Play_Pl_SetHitAnim_ChkGuardBypass (but not before setting the PF0B_PROJHIT flag)
 		; when it comes to applying the damage and hit animation.
 		;
 		Play_Pl_SetHitAnim_ChkHitType:		
@@ -1854,7 +2133,7 @@ Play_Pl_SetHitAnim:
 			; Set that we were hit by a projectile
 			ld   hl, iPlInfo_Flags0
 			add  hl, bc							; Seek to iPlInfo_Flags0
-			set  PF0B_FARHIT, [hl]
+			set  PF0B_PROJHIT, [hl]
 			
 			inc  hl								; Seek to iPlInfo_Flags1
 			inc  hl								; Seek to iPlInfo_Flags2
@@ -1918,7 +2197,7 @@ Play_Pl_SetHitAnim:
 			; Set that we weren't hit by a projectile
 			ld   hl, iPlInfo_Flags0
 			add  hl, bc					; Seek to iPlInfo_Flags0
-			res  PF0B_FARHIT, [hl]
+			res  PF0B_PROJHIT, [hl]
 			
 			inc  hl						; Seek to iPlInfo_Flags1
 			inc  hl						; Seek to iPlInfo_Flags2
@@ -2314,7 +2593,7 @@ Play_Pl_SetHitAnim:
 			jp   Play_Pl_SetHitAnim_SetHitAnimId	; Otherwise, confirm HITANIM_BLOCKED
 			
 		.noBlock:
-			call Play_Pl_IsDizzy		; Did we get dizzy? 
+			call Play_Pl_IsDizzyNext	; Are we supposed to get dizzy on this hit?
 			jp   z, .noDizzy			; If not, jump
 		.dizzy:
 			; Handle the animation whitelist when getting hit "right before getting" dizzy.
@@ -2354,7 +2633,7 @@ Play_Pl_SetHitAnim:
 			; When getting hit by a normal in the air, the player recovers before touching the ground.
 			; Otherwise, it's an hard drop.
 			;
-			bit  PF0B_FARHIT, [hl]	; Did we get hit by a projectile?
+			bit  PF0B_PROJHIT, [hl]	; Did we get hit by a projectile?
 			jp   nz, .airSpec		; If so, jump
 			ld   hl, iPlInfo_Flags0Other
 			add  hl, bc				
@@ -2363,7 +2642,7 @@ Play_Pl_SetHitAnim:
 		.airNorm:
 			;--
 			; [POI] This is the same between .noAirNoSpec and .noAirSpec.
-			;       It could have been moved before the PF0B_FARHIT check.
+			;       It could have been moved before the PF0B_PROJHIT check.
 			cp   HITANIM_DROP_SPEC_0C
 			jp   z, .useDrop0C
 			cp   HITANIM_DROP_SPEC_0F
@@ -2388,7 +2667,7 @@ Play_Pl_SetHitAnim:
 			; every HitAnim value is valid as long as it doesn't get replaced
 			; by the crouching checks.
 			;
-			bit  PF0B_FARHIT, [hl]	; Did we get hit by a projectile?
+			bit  PF0B_PROJHIT, [hl]	; Did we get hit by a projectile?
 			jp   nz, .noAirSpec		; If so, jump
 			ld   hl, iPlInfo_Flags0Other
 			add  hl, bc				
@@ -2504,7 +2783,7 @@ Play_Pl_ApplyDamageToStats:
 
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc					; Seek to iPlInfo_Flags0
-	bit  PF0B_FARHIT, [hl]		; Did we get hit by a projectile?
+	bit  PF0B_PROJHIT, [hl]		; Did we get hit by a projectile?
 	jr   nz, .chkDamageProj		; If so, jump
 	
 .getDamagePl:
@@ -2593,7 +2872,7 @@ Play_Pl_ApplyDamageToStats:
 	; Blocking a projectile, special or super move divides the damage by 8.
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	bit  PF0B_FARHIT, [hl]	; Were we hit by a projectile?
+	bit  PF0B_PROJHIT, [hl]	; Were we hit by a projectile?
 	jr   nz, .damageDiv8	; If so, jump
 	ld   hl, iPlInfo_Flags0Other
 	add  hl, bc
@@ -2683,9 +2962,9 @@ Play_Pl_ChkSetHitEffect_NoSpecial:
 	ld   hl, iPlInfo_CharIdOther
 	add  hl, bc
 	ld   a, [hl]			; A = Character ID of opponent
-	cp   CHAR_ID_CHIZURU*2	; Playing as normal Chizuru?
+	cp   CHAR_ID_CHIZURU	; Playing as normal Chizuru?
 	jp   z, .chkMove		; If so, jump
-	cp   CHAR_ID_KAGURA*2	; Playing as boss Chizuru?
+	cp   CHAR_ID_KAGURA		; Playing as boss Chizuru?
 	ret  nz					; If not, return
 	
 .chkMove:
@@ -2826,7 +3105,7 @@ Play_Pl_DecStunTimer:
 		;       was in the middle of an unrelated special move, the PF0B_SPECMOVE check would jump.
 		ld   hl, iPlInfo_Flags0
 		add  hl, bc
-		bit  PF0B_FARHIT, [hl]	; Were we hit by a projectile? (special move)
+		bit  PF0B_PROJHIT, [hl]	; Were we hit by a projectile? (special move)
 		jp   nz, .noGuard_add1	; If so, jump
 		
 		;
@@ -2853,8 +3132,8 @@ Play_Pl_DecStunTimer:
 		jp   nc, .saveDizzyPenalty	; Did we underflow? If not, skip
 		; Otherwise...
 		xor  a						; Force it back to 0
-		push hl						; Set the dizzy marker
-			ld   hl, iPlInfo_Dizzy
+		push hl						; Request dizzy on hit
+			ld   hl, iPlInfo_DizzyNext
 			add  hl, bc
 			ld   [hl], $01
 		pop  hl
@@ -2914,7 +3193,7 @@ Play_Pl_DecStunTimer:
 		;
 		ld   hl, iPlInfo_Flags0
 		add  hl, bc
-		bit  PF0B_FARHIT, [hl]
+		bit  PF0B_PROJHIT, [hl]
 		jp   nz, .guard_half
 		
 		;
@@ -3092,7 +3371,7 @@ L02508A:;J
 	jp   L02509C
 L025090:;J
 	ld   hl, $0040
-	call L0035D9
+	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   nc, L02509C
 	call Play_Pl_EndMove
 L02509C:;J
@@ -3124,13 +3403,13 @@ L0250CA:;J
 	add  hl, bc
 	bit  7, [hl]
 	jp   nz, L0250DF
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025160
 	inc  hl
 	ld   [hl], $FF
 	jp   L025160
 L0250DF:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0251EE
 	inc  hl
 	ld   [hl], $FF
@@ -3152,7 +3431,7 @@ L02510C:;J
 	ld   hl, rJOYP
 	call Play_OBJLstS_MoveV
 	ld   hl, $0000
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   L0251EE
 L02511B:;J
 	ld   hl, $0000
@@ -3163,7 +3442,7 @@ L02511B:;J
 	call Play_OBJLstS_MoveV
 	jp   L025160
 L02512D:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0251EE
 	inc  hl
 	ld   [hl], $FF
@@ -3192,9 +3471,9 @@ L02515D:;J
 	jp   L0251CF
 L025160:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L0251EE
-	call Play_Pl_IsDizzy
+	call Play_Pl_IsDizzyNext
 	jp   nz, L02517E
 	ld   hl, $004E
 	add  hl, bc
@@ -3247,14 +3526,14 @@ L0251C9:;J
 	jp   L0251F1
 L0251CF:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L0251EE
 	ld   a, $10
 	ld   h, $05
 	call L002E1A
 	jp   L0251F1
 L0251E2:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0251EE
 	call L003CB3
 	jp   L0251F1
@@ -3305,7 +3584,7 @@ L025242:;J
 	jp   L02527F
 L025245:;J
 	call Play_Pl_DoGroundScreenShake
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0252C7
 	inc  hl
 	ld   [hl], $FF
@@ -3336,7 +3615,7 @@ L02527C:;J
 	jp   L0252A8
 L02527F:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L0252C7
 	ld   a, $04
 	ld   h, $09
@@ -3354,14 +3633,14 @@ L02527F:;J
 	jp   L0252CA
 L0252A8:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L0252C7
 	ld   a, $0C
 	ld   h, $05
 	call L002E1A
 	jp   L0252CA
 L0252BB:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0252C7
 	call L003CB3
 	jp   L0252CA
@@ -3386,7 +3665,7 @@ L0252E8: db $C3;X
 L0252E9: db $23;X
 L0252EA: db $53;X
 L0252EB:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025323
 	inc  hl
 	ld   [hl], $05
@@ -3395,7 +3674,7 @@ L0252EB:;J
 	jp   L025323
 L0252FC:;J
 	call Play_Pl_DoGroundScreenShake
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025323
 	inc  hl
 	ld   [hl], $10
@@ -3407,7 +3686,7 @@ L0252FC:;J
 	res  6, [hl]
 	jp   L025323
 L025317:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025323
 	call L003CB3
 	jp   L025326
@@ -3460,7 +3739,7 @@ L02536E:;J
 	ld   [hl], $08
 	jp   L025424
 L025381:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L02541B
 	ld   hl, $0071
 	add  hl, bc
@@ -3499,7 +3778,7 @@ L0253BB:;J
 	add  hl, bc
 	res  7, [hl]
 L0253CB:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025424
 	ld   hl, $0013
 	add  hl, de
@@ -3507,7 +3786,7 @@ L0253CB:;J
 	jp   L025424
 L0253DA:;J
 	call Play_Pl_DoGroundScreenShake
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025492
 	inc  hl
 	ld   [hl], $FF
@@ -3566,7 +3845,7 @@ L025437:;J
 	add  hl, bc
 	ld   [hl], a
 	pop  hl
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L025492
 	ld   a, $10
 	ld   h, $0B
@@ -3590,14 +3869,14 @@ L025468:;J
 	jp   L025495
 L025473:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L025492
 	ld   a, $18
 	ld   h, $05
 	call L002E1A
 	jp   L025495
 L025486:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025492
 	call L003CB3
 	jp   L025495
@@ -3622,7 +3901,7 @@ L0254B3: db $C3;X
 L0254B4: db $EC;X
 L0254B5: db $54;X
 L0254B6:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0254C5
 	inc  hl
 	ld   [hl], $FF
@@ -3631,7 +3910,7 @@ L0254C2:;J
 	jp   L0254C5
 L0254C5:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L0254EC
 	ld   a, $08
 	ld   h, $05
@@ -3642,7 +3921,7 @@ L0254C5:;J
 	res  6, [hl]
 	jp   L0254EF
 L0254E0:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0254EC
 	call L003CB3
 	jp   L0254EF
@@ -3672,7 +3951,7 @@ L0254F0:;I
 	cp   $18
 	jp   z, L025568
 L025521:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025555
 	inc  hl
 	ld   [hl], $FF
@@ -3699,14 +3978,14 @@ L02554B:;J
 	jp   L025555
 L025555:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L025573
 	ld   a, $18
 	ld   h, $00
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L025576
 L025568:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025573
 	call Play_Pl_EndMove
 	jr   L025576
@@ -3806,7 +4085,7 @@ L0255E6:;J
 	jp   L02561B
 L0255F6:;J
 	ld   hl, $0040
-	call L0035D9
+	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   nc, L02561B
 	ld   hl, $004E
 	add  hl, bc
@@ -3840,13 +4119,13 @@ L02561F:;I
 	cp   $04
 	jp   z, L025643
 L025637:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025650
 	inc  hl
 	ld   [hl], $FF
 	jp   L025650
 L025643:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025650
 L025649: db $CD;X
 L02564A: db $B3;X
@@ -4040,15 +4319,15 @@ L02575B:;I
 	cp   $01
 	jp   z, L025792
 L025773:;J
-	ld   a, [$C178]
+	ld   a, [wPlayPlThrowRot_Unk_UseInMove]
 	or   a
 	jp   z, L0257D4
 	call L024AC1
-	ld   a, [$C176]
+	ld   a, [wPlayPlThrowRotMoveH]
 	ld   h, a
 	ld   l, $00
 	call Play_OBJLstS_MoveH_ByOtherXFlipL
-	ld   a, [$C177]
+	ld   a, [wPlayPlThrowRotMoveV]
 	ld   h, a
 	ld   l, $00
 	call Play_OBJLstS_MoveV
@@ -4252,7 +4531,7 @@ L02595B:;J
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 L02596D:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L02599C
 	ld   a, $16
 	call HomeCall_Sound_ReqPlayExId
@@ -4263,11 +4542,11 @@ L02597B:;J
 	call MoveInputS_CheckMoveLHVer
 	jp   z, L025987
 L025987:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L02599C
 	jp   L02599C
 L025990:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L02599C
 	call Play_Pl_EndMove
 	jp   L02599F
@@ -4298,7 +4577,7 @@ L0259CC: db $C3;X
 L0259CD: db $63;X
 L0259CE: db $5A;X
 L0259CF:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025A63
 	inc  hl
 	ld   [hl], $02
@@ -4327,37 +4606,37 @@ L025A09:;J
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L025A40
 L025A12:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025A40
 	ld   hl, $0404
 	ld   a, $10
 	call Play_Pl_SetMoveDamageNext
 	jp   L025A40
 L025A23:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025A40
 	ld   hl, $0408
 	ld   a, $10
 	call Play_Pl_SetMoveDamageNext
 	jp   L025A40
 L025A34:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025A40
 	inc  hl
 	ld   [hl], $08
 	jp   L025A40
 L025A40:;J
 	ld   hl, $0040
-	call L0035D9
+	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   L025A63
 L025A49:;J
 	ld   hl, $0080
-	call L0035D9
+	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   L025A63
 L025A52:;J
 	ld   hl, $0080
-	call L0035D9
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_ApplyFrictionHAndMoveH
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025A63
 	call Play_Pl_EndMove
 	jr   L025A66
@@ -4388,7 +4667,7 @@ L025A93: db $C3;X
 L025A94: db $15;X
 L025A95: db $5B;X
 L025A96:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025B34
 	inc  hl
 	ld   [hl], $03
@@ -4428,7 +4707,7 @@ L025AE0: db $C3;X
 L025AE1: db $15;X
 L025AE2: db $5B;X
 L025AE3:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025B15
 	inc  hl
 	push hl
@@ -4445,7 +4724,7 @@ L025AFB:;J
 	ld   [hl], $03
 	jp   L025B15
 L025B01:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025B15
 	inc  hl
 	ld   [hl], $FF
@@ -4455,14 +4734,14 @@ L025B01:;J
 	jp   L025B15
 L025B15:;J
 	ld   hl, $0030
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L025B34
 	ld   a, $14
 	ld   h, $05
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L025B37
 L025B28:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025B34
 	call Play_Pl_EndMove
 	jp   L025B37
@@ -4512,7 +4791,7 @@ L025B94:;J
 	call OBJLstS_IsFrameNewLoad
 	jp   z, L025B9A
 L025B9A:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025CAB
 	inc  hl
 	ld   [hl], $FF
@@ -4606,7 +4885,7 @@ L025C68: db $C3;X
 L025C69: db $AE;X
 L025C6A: db $5C;X
 L025C6B:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025CAB
 	call MoveInputS_CheckMoveLHVer
 	jp   nz, L025C7C
@@ -4622,14 +4901,14 @@ L025C7E:;J
 	jp   L025CAE
 L025C8C:;J
 	ld   hl, $0030
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L025CAB
 	ld   a, $58
 	ld   h, $07
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L025CAE
 L025C9F:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025CAB
 	call Play_Pl_EndMove
 	jp   L025CAE
@@ -4700,7 +4979,7 @@ L025CAF:;I
 	jp   z, L025E4C
 	jp   L025DF0
 L025D47:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025E58
 	inc  hl
 	ld   [hl], $FF
@@ -4797,7 +5076,7 @@ L025E15: db $C3;X
 L025E16: db $5B;X
 L025E17: db $5E;X
 L025E18:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L025E58
 	call MoveInputS_CheckMoveLHVer
 	jp   nz, L025E29
@@ -4813,7 +5092,7 @@ L025E2B:;J
 	jp   L025E5B
 L025E39:;J
 	ld   hl, $0030
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L025E58
 L025E42: db $3E;X
 L025E43: db $B4;X
@@ -4980,7 +5259,7 @@ L025FDB:;J
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 L025FED:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026022
 	ld   a, $16
 	call HomeCall_Sound_ReqPlayExId
@@ -4993,11 +5272,11 @@ L025FFB:;J
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 L02600D:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026022
 	jp   L026022
 L026016:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026022
 	call Play_Pl_EndMove
 	jp   L026025
@@ -5027,7 +5306,7 @@ L026026:;I
 	cp   $18
 	jp   z, L0260F5
 L026057:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026100
 	inc  hl
 	ld   [hl], $00
@@ -5059,7 +5338,7 @@ L026095:;J
 L0260A1:;J
 	jp   L0260E2
 L0260A4:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0260E2
 	ld   hl, $0404
 	ld   a, $10
@@ -5070,7 +5349,7 @@ L0260A4:;J
 L0260BA:;J
 	jp   L0260E2
 L0260BD:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0260E2
 	ld   hl, $0403
 	ld   a, $10
@@ -5079,7 +5358,7 @@ L0260BD:;J
 	call HomeCall_Sound_ReqPlayExId
 	jp   L0260E2
 L0260D3:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0260E2
 	ld   hl, $0013
 	add  hl, de
@@ -5087,14 +5366,14 @@ L0260D3:;J
 	jp   L0260E2
 L0260E2:;J
 	ld   hl, $0018
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L026100
 	ld   a, $18
 	ld   h, $08
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L026103
 L0260F5:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026100
 	call Play_Pl_EndMove
 	jr   L026103
@@ -5154,7 +5433,7 @@ L026144: db $C3;X
 L026145: db $3B;X
 L026146: db $62;X
 L026147:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L02623B
 	inc  hl
 	ld   [hl], $FF
@@ -5231,7 +5510,7 @@ L0261C3:;J
 	jp   L0261C6
 L0261C6:;J
 	ld   hl, $0018
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L02623B
 	ld   a, $08
 	ld   h, $08
@@ -5325,7 +5604,7 @@ L02622D: db $C3;X
 L02622E: db $3E;X
 L02622F: db $62;X
 L026230:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L02623B
 	call Play_Pl_EndMove
 	jr   L02623E
@@ -5353,7 +5632,7 @@ L02623F:;I
 	cp   $14
 	jp   z, L026322
 L02626B:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L02632D
 	inc  hl
 	ld   [hl], $FF
@@ -5424,14 +5703,14 @@ L026309:;J
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L02630F:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L02632D
 	ld   a, $14
 	ld   h, $03
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L026330
 L026322:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L02632D
 	call Play_Pl_EndMove
 	jr   L026330
@@ -5463,7 +5742,7 @@ L026331:;I
 	cp   $1C
 	jp   z, L026444
 L026367:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L02644F
 	inc  hl
 	ld   [hl], $00
@@ -5513,7 +5792,7 @@ L0263D6:;J
 	ld   hl, $0208
 	ld   a, $10
 	call Play_Pl_SetMoveDamage
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026431
 	ld   a, $FD
 	ld   h, $FF
@@ -5527,7 +5806,7 @@ L0263F7:;J
 	ld   hl, $0208
 	ld   a, $10
 	call Play_Pl_SetMoveDamage
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026431
 	ld   a, $FD
 	ld   h, $FF
@@ -5551,14 +5830,14 @@ L02642B:;J
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L026431:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L02644F
 	ld   a, $1C
 	ld   h, $08
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L026452
 L026444:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L02644F
 	call Play_Pl_EndMove
 	jr   L026452
@@ -5588,7 +5867,7 @@ L026478:;J
 	ld   hl, $0400
 	call Play_OBJLstS_MoveH_ByXFlipR
 L026484:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0264E9
 	ld   hl, $0403
 	ld   a, $10
@@ -5602,7 +5881,7 @@ L02649A:;J
 	ld   hl, $0200
 	call Play_OBJLstS_MoveH_ByXFlipR
 L0264A6:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0264E9
 	ld   hl, $0404
 	ld   a, $10
@@ -5616,7 +5895,7 @@ L0264BC:;J
 	ld   hl, $0600
 	call Play_OBJLstS_MoveH_ByXFlipR
 L0264C8:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0264E9
 	ld   hl, $0408
 	ld   a, $11
@@ -5625,7 +5904,7 @@ L0264C8:;J
 	call HomeCall_Sound_ReqPlayExId
 	jp   L0264E9
 L0264DE:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0264E9
 	call Play_Pl_EndMove
 	jr   L0264EC
@@ -5669,7 +5948,7 @@ L02653A:;J
 	call OBJLstS_IsFrameNewLoad
 	jp   z, L026540
 L026540:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026651
 	inc  hl
 	ld   [hl], $FF
@@ -5763,7 +6042,7 @@ L02660E: db $C3;X
 L02660F: db $54;X
 L026610: db $66;X
 L026611:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026651
 	call MoveInputS_CheckMoveLHVer
 	jp   nz, L026622
@@ -5779,14 +6058,14 @@ L026624:;J
 	jp   L026654
 L026632:;J
 	ld   hl, $0030
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L026651
 	ld   a, $44
 	ld   h, $07
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L026654
 L026645:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026651
 	call Play_Pl_EndMove
 	jp   L026654
@@ -5846,7 +6125,7 @@ L0266CA:;J
 	call OBJLstS_IsFrameNewLoad
 	jp   z, L0266D0
 L0266D0:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0267E1
 	inc  hl
 	ld   [hl], $FF
@@ -5935,7 +6214,7 @@ L02678A:;J
 	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
 	jp   L0267E4
 L0267A1:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0267E1
 	call MoveInputS_CheckMoveLHVer
 	jp   nz, L0267B2
@@ -5951,14 +6230,14 @@ L0267B4:;J
 	jp   L0267E4
 L0267C2:;J
 	ld   hl, $0030
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L0267E1
 	ld   a, $84
 	ld   h, $07
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L0267E4
 L0267D5:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0267E1
 	call Play_Pl_EndMove
 	jp   L0267E4
@@ -5981,7 +6260,7 @@ L0267E5:;I
 	jp   z, L026836
 	jp   L026842
 L026805:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026842
 	inc  hl
 	ld   [hl], $1E
@@ -5999,13 +6278,13 @@ L026811:;J
 L026827:;J
 	call L00272D
 L02682A:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026842
 	inc  hl
 	ld   [hl], $04
 	jp   L026842
 L026836:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026842
 	call Play_Pl_EndMove
 	jp   L026845
@@ -6132,7 +6411,7 @@ L026990:;I
 	jp   z, L0269D4
 	jp   L0269DF
 L0269B0:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0269DF
 	inc  hl
 	ld   [hl], $00
@@ -6143,7 +6422,7 @@ L0269BC:;J
 	call L00253E
 	jp   L0269DF
 L0269C8:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0269DF
 L0269CE: db $23;X
 L0269CF: db $36;X
@@ -6152,7 +6431,7 @@ L0269D1: db $C3;X
 L0269D2: db $DF;X
 L0269D3: db $69;X
 L0269D4:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0269DF
 	call Play_Pl_EndMove
 	jr   L0269E2
@@ -6179,7 +6458,7 @@ L026A05: db $C3;X
 L026A06: db $70;X
 L026A07: db $6A;X
 L026A08:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026A70
 	inc  hl
 	ld   [hl], $FF
@@ -6212,14 +6491,14 @@ L026A45:;J
 	jp   L026A52
 L026A52:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L026A70
 	ld   a, $0C
 	ld   h, $08
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L026A73
 L026A65:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026A70
 	call Play_Pl_EndMove
 	jr   L026A73
@@ -6270,7 +6549,7 @@ L026AD2: db $C3;X
 L026AD3: db $1B;X
 L026AD4: db $6C;X
 L026AD5:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026B44
 	inc  hl
 	ld   [hl], $01
@@ -6327,7 +6606,7 @@ L026B36: db $5B;X
 L026B37: db $6B;X
 L026B38:;J
 	ld   hl, $0100
-	call L0035D9
+	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   nc, L026C1E
 	jp   L026C15
 L026B44:;J
@@ -6346,12 +6625,12 @@ L026B5B:;J
 	jp   L026C1B
 L026B61:;J
 	ld   hl, $0080
-	call L0035D9
+	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   L026B79
 L026B6A:;J
 	ld   hl, $0080
-	call L0035D9
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_ApplyFrictionHAndMoveH
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026C1B
 	jp   L026C15
 L026B79:;J
@@ -6414,14 +6693,14 @@ L026BF2:;J
 	jp   L026BFC
 L026BFC:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L026C1B
 	ld   a, $3C
 	ld   h, $08
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L026C1E
 L026C0F:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026C1B
 L026C15:;J
 	call Play_Pl_EndMove
@@ -6454,7 +6733,7 @@ L026C1F:;I
 	cp   $1C
 	jp   z, L026D16
 L026C55:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026D22
 	inc  hl
 	ld   [hl], $FF
@@ -6527,7 +6806,7 @@ L026CE0:;J
 	ld   a, $92
 	call Play_Pl_SetMoveDamage
 L026CE8:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026CF7
 	ld   hl, $0013
 	add  hl, de
@@ -6535,20 +6814,20 @@ L026CE8:;J
 	jp   L026CF7
 L026CF7:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L026D22
 	ld   a, $18
 	ld   h, $02
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L026D25
 L026D0A:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026D22
 	inc  hl
 	ld   [hl], $0A
 	jp   L026D22
 L026D16:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026D22
 	call Play_Pl_EndMove
 	jp   L026D25
@@ -6574,7 +6853,7 @@ L026D26:;I
 	cp   $10
 	jp   z, L026DB2
 L026D4D:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026DBD
 	inc  hl
 	ld   [hl], $00
@@ -6602,7 +6881,7 @@ L026D7F:;J
 	ld   hl, $0400
 	call Play_OBJLstS_MoveH_ByXFlipR
 L026D8B:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026DBD
 	ld   hl, $0050
 	add  hl, bc
@@ -6614,13 +6893,13 @@ L026D8B:;J
 	call Play_Pl_SetMoveDamageNext
 	jp   L026DBD
 L026DA6:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026DBD
 	inc  hl
 	ld   [hl], $08
 	jp   L026DBD
 L026DB2:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026DBD
 	call Play_Pl_EndMove
 	jr   L026DC0
@@ -6651,7 +6930,7 @@ L026DED: db $C3;X
 L026DEE: db $6B;X
 L026DEF: db $6E;X
 L026DF0:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026E6B
 	inc  hl
 	ld   [hl], $01
@@ -6663,14 +6942,14 @@ L026DF0:;J
 	call Play_Pl_SetMoveDamageNext
 	jp   L026E6B
 L026E0A:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026E6B
 	ld   hl, $010A
 	ld   a, $C0
 	call Play_Pl_SetMoveDamageNext
 	jp   L026E43
 L026E1B:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026E6B
 	ld   hl, $0083
 	add  hl, bc
@@ -6698,11 +6977,11 @@ L026E43:;J
 L026E4E:;J
 	jp   L026E6B
 L026E51:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026E6B
 	jp   L026E6B
 L026E5A:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026E6B
 	call Play_Pl_EndMove
 	ld   a, $00
@@ -6734,7 +7013,7 @@ L026E6F:;I
 	cp   $18
 	jp   z, L026FB4
 L026EA0:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026FC0
 	inc  hl
 	ld   [hl], $FF
@@ -6767,7 +7046,7 @@ L026ED6:;J
 L026EEC:;J
 	jp   L026F7B
 L026EEF:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026FC0
 	inc  hl
 	ld   [hl], $FF
@@ -6810,7 +7089,7 @@ L026F48:;J
 	jp   L026F9B
 L026F52:;J
 	ld   hl, $0000
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L026FC0
 	call L003745
 	jp   nc, L026F71
@@ -6844,7 +7123,7 @@ L026F7B:;J
 	cp   a, [hl]
 	jp   nc, L026F91
 	ld   hl, $0000
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L026FC0
 L026F91:;J
 	ld   a, $0C
@@ -6853,16 +7132,16 @@ L026F91:;J
 	jp   L026FC3
 L026F9B:;J
 	ld   hl, $0040
-	call L0035D9
+	call OBJLstS_ApplyFrictionHAndMoveH
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L026FC0
 	ld   a, $18
 	ld   h, $02
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L026FC3
 L026FB4:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L026FC0
 	call Play_Pl_EndMove
 	jp   L026FC3
@@ -6901,7 +7180,7 @@ L026FC4:;I
 	jp   z, L027122
 	jp   L027143
 L02700C:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L027143
 	inc  hl
 	ld   [hl], $10
@@ -6934,12 +7213,12 @@ L027051:;J
 	ld   hl, $0000
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L027057:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L02712B
 	jp   L02713D
 L027060:;J
 	call OBJLstS_ApplyXSpeed
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L027143
 	ld   hl, $010A
 	ld   a, $C0
@@ -6947,7 +7226,7 @@ L027060:;J
 	jp   L0270BB
 L027074:;J
 	call OBJLstS_ApplyXSpeed
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L027143
 	ld   hl, $0109
 	ld   a, $C0
@@ -6955,7 +7234,7 @@ L027074:;J
 	jp   L0270BB
 L027088:;J
 	call OBJLstS_ApplyXSpeed
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L027143
 	ld   hl, $0083
 	add  hl, bc
@@ -7022,14 +7301,14 @@ L027105:;J
 	jp   L02710F
 L02710F:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L027143
 	ld   a, $30
 	ld   h, $08
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L027146
 L027122:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L027143
 	jp   L02713D
 L02712B:;J
@@ -7063,7 +7342,7 @@ L027147:;I
 	add  hl, bc
 	bit  4, [hl]
 	jp   nz, L02715F
-	call L0028B2
+	call ExOBJS_Play_ChkHitModeAndMoveH
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 	ret
 L02715F:;J
@@ -7191,7 +7470,7 @@ L0272BF:;J
 	ld   hl, $0108
 	ld   a, $90
 	call Play_Pl_SetMoveDamage
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0272FE
 	ld   a, $16
 	call HomeCall_Sound_ReqPlayExId
@@ -7221,7 +7500,7 @@ L0272E9:;J
 	jp   z, L0272F2
 	call L002674
 L0272F2:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0272FE
 	call Play_Pl_EndMove
 	jp   L027301
@@ -7290,7 +7569,7 @@ L027383:;J
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L027389:;J
 	call OBJLstS_ApplyXSpeed
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L027406
 	ld   hl, $0017
 	add  hl, de
@@ -7302,21 +7581,21 @@ L027389:;J
 	call L002E49
 	jp   L027409
 L0273A6:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L027406
 	ld   hl, $010A
 	ld   a, $10
 	call Play_Pl_SetMoveDamageNext
 	jp   L027406
 L0273B7:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L027406
 	ld   hl, $0109
 	ld   a, $10
 	call Play_Pl_SetMoveDamageNext
 	jp   L027406
 L0273C8:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L027406
 	ld   hl, $0083
 	add  hl, bc
@@ -7338,7 +7617,7 @@ L0273E7:;J
 	call Play_OBJLstS_SetSpeedV
 	jp   L027409
 L0273FB:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L027406
 	call Play_Pl_EndMove
 	jr   L027409
@@ -7371,7 +7650,7 @@ L02743B: db $C3;X
 L02743C: db $DC;X
 L02743D: db $74;X
 L02743E:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0274FB
 	inc  hl
 	ld   [hl], $03
@@ -7409,7 +7688,7 @@ L027487:;J
 	call Play_OBJLstS_SetSpeedV
 	jp   L0274DC
 L027496:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0274DC
 	inc  hl
 	push hl
@@ -7426,7 +7705,7 @@ L0274AE:;J
 	ld   [hl], $00
 	jp   L0274DC
 L0274B4:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0274DC
 	inc  hl
 	ld   [hl], $00
@@ -7435,7 +7714,7 @@ L0274B4:;J
 	call Play_Pl_SetMoveDamageNext
 	jp   L0274DC
 L0274C8:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0274DC
 	inc  hl
 	ld   [hl], $FF
@@ -7445,14 +7724,14 @@ L0274C8:;J
 	jp   L0274DC
 L0274DC:;J
 	ld   hl, $0030
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L0274FB
 	ld   a, $18
 	ld   h, $01
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L0274FE
 L0274EF:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0274FB
 	call Play_Pl_EndMove
 	jp   L0274FE
@@ -7488,7 +7767,7 @@ L027538:;J
 	ld   hl, $0109
 	ld   a, $90
 	call Play_Pl_SetMoveDamage
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0275EB
 	inc  hl
 	ld   [hl], $00
@@ -7507,7 +7786,7 @@ L027562:;J
 	ld   hl, $0109
 	ld   a, $90
 	call Play_Pl_SetMoveDamage
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0275EB
 	ld   a, $A8
 	call HomeCall_Sound_ReqPlayExId
@@ -7528,21 +7807,21 @@ L02758E:;J
 	call Play_Pl_SetMoveDamageNext
 	jp   L0275EB
 L027599:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0275EB
 	ld   hl, $0109
 	ld   a, $10
 	call Play_Pl_SetMoveDamageNext
 	jp   L0275EB
 L0275AA:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0275EB
 	ld   hl, $010A
 	ld   a, $10
 	call Play_Pl_SetMoveDamageNext
 	jp   L0275EB
 L0275BB:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0275EB
 	inc  hl
 	ld   [hl], $1E
@@ -7553,13 +7832,13 @@ L0275BB:;J
 	call Play_Pl_SetMoveDamageNext
 	jp   L0275EB
 L0275D4:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0275EB
 	inc  hl
 	ld   [hl], $08
 	jp   L0275EB
 L0275E0:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0275EB
 	call Play_Pl_EndMove
 	jr   L0275EE
@@ -7607,7 +7886,7 @@ L027646:;J
 	call OBJLstS_IsFrameNewLoad
 	jp   z, L02764C
 L02764C:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L027760
 	inc  hl
 	ld   [hl], $FF
@@ -7701,7 +7980,7 @@ L02771A: db $C3;X
 L02771B: db $63;X
 L02771C: db $77;X
 L02771D:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L027760
 	call MoveInputS_CheckMoveLHVer
 	jp   nz, L02772E
@@ -7717,7 +7996,7 @@ L027730:;J
 	jp   L027763
 L02773E:;J
 	ld   hl, $0030
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L027760
 	jp   L02775A
 L02774A: db $3E;X
@@ -8165,858 +8444,959 @@ L027906: db $CD;X
 L027907: db $0B;X
 L027908: db $2F;X
 L027909: db $C9;X
-L02790A:;I
+
+; =============== MoveC_*_ThrowG ===============
+; Move code for ground throws, character-specific.
+;
+; These are only executed when the throw is *confirmed*, with wPlayPlThrowActId
+; being initially set to PLAY_THROWACT_NEXT03 as done by BasicInput_StartGroundThrow.
+;
+; As the opponent is "stuck" in the grab mode waiting to get hit, it's important
+; to deal damage to him at some point before he gets automatically unstuck (ANIMSPEED_NONE isn't infinite).
+; Hits caused by throws should deal more damage and cause the opponent to drop to the ground.
+
+; =============== MoveC_Kyo_ThrowG ===============
+; Move code for Kyo's throw (MOVE_SHARED_THROW_G).
+MoveC_Kyo_ThrowG:
 	call Play_Pl_IsMoveLoading
-	jp   c, L027948
-	ld   hl, $0017
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $04
-	jp   z, L027925
-	ld   hl, $0039
-	add  hl, bc
-	cp   a, [hl]
-	jp   z, L027936
-	jp   L027945
-L027925:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L027945
-	ld   hl, $0608
-	ld   a, $01
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+; --------------- frame #0,#1-(end) ---------------
+	mMvC_EndOnTargetOBJLst .anim, .chkEnd
+; --------------- frame #1 ---------------
+; When visually switching to #2, hit the opponent.
+.obj1:
+	call OBJLstS_IsInternalFrameAboutToEnd	; About to advance the anim?
+	jp   nc, .anim							; If not, jump
+	mkhl $06, HITANIM_DROP_MD				; 6 lines of damage on hit, make opponent drop on ground
+	ld   hl, CHL							
+	ld   a, PF3_SHAKELONG 					; Shake for long
 	call Play_Pl_SetMoveDamageNext
-	jp   L027945
-L027936:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L027945
+	jp   .anim
+; --------------- common ---------------
+.chkEnd:
+	; Wait for the animation to advance before ending the move
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
+	call Play_Pl_EndMove
+	; And when it does, also reset the throw sequence
+	xor  a
+	ld   [wPlayPlThrowActId], a
+	jr   .ret
+.anim:
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
+.ret:
+	ret
+	
+; =============== MoveC_Daimon_ThrowG ===============
+; Move code for Daimon's throw (MOVE_SHARED_THROW_G).	
+MoveC_Daimon_ThrowG:
+	call Play_Pl_IsMoveLoading
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+	add  hl, de
+	ld   a, [hl]
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .rotU
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .rotL
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .hit
+; --------------- frame #3-(end) ---------------
+	mMvC_EndOnTargetOBJLst .anim, .chkEnd
+; --------------- frame #0 ---------------
+; Set U rotation frame to opponent the first time we get here.
+.rotU:
+	call OBJLstS_IsFrameNewLoad
+	jp   z, .rotU_anim
+	mkhl $06, HITANIM_THROW_ROTU				; Damage ignored in this hitanim
+	ld   hl, CHL		
+	ld   a, PF3_SHAKELONG
+	call Play_Pl_SetMoveDamage					; Set new hit anim
+	mkhl -$08, $00								; Move left 8px
+	ld   hl, CHL			
+	call Play_Pl_MoveRotThrown
+.rotU_anim:
+	jp   .anim
+; --------------- frame #1 ---------------
+; Set L rotation frame to opponent the first time we get here.
+.rotL:
+	call OBJLstS_IsFrameNewLoad
+	jp   z, .rotL_anim
+	mkhl $06, HITANIM_THROW_ROTL				; Damage ignored in this hitanim
+	ld   hl, CHL		
+	ld   a, PF3_SHAKELONG
+	call Play_Pl_SetMoveDamage					; Set new hit anim
+	mkhl +$08, -$08								; Move right 8px (reset), up 8px
+	ld   hl, CHL		
+	call Play_Pl_MoveRotThrown
+.rotL_anim:
+	jp   .anim
+; --------------- frame #2 ---------------
+; Deal damage the first time we get here.
+.hit:
+	call OBJLstS_IsFrameNewLoad
+	jp   z, .obj2_anim
+	mkhl $06, HITANIM_DROP_SPEC_0C				; 6 lines of damage on hit
+	ld   hl, CHL	
+	ld   a, PF3_SHAKELONG
+	call Play_Pl_SetMoveDamage
+.obj2_anim:
+	jp   .anim
+; --------------- common ---------------
+.chkEnd:
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
 	call Play_Pl_EndMove
 	xor  a
 	ld   [wPlayPlThrowActId], a
-	jr   L027948
-L027945:;J
+	jr   .ret
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L027948:;R
+.ret:
 	ret
-L027949:;I
+	
+; =============== MoveC_Terry_ThrowG ===============
+; Move code for Terry's throw (MOVE_SHARED_THROW_G).
+MoveC_Terry_ThrowG:
 	call Play_Pl_IsMoveLoading
-	jp   c, L0279BF
-	ld   hl, $0017
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L02796E
-	cp   $04
-	jp   z, L027985
-	cp   $08
-	jp   z, L02799C
-	ld   hl, $0039
-	add  hl, bc
-	cp   a, [hl]
-	jp   z, L0279AD
-L02796B: db $C3;X
-L02796C: db $BC;X
-L02796D: db $79;X
-L02796E:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L027982
-	ld   hl, $0611
-	ld   a, $01
-	call Play_Pl_SetMoveDamage
-	ld   hl, $F800
-	call L003875
-L027982:;J
-	jp   L0279BC
-L027985:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L027999
-	ld   hl, $0612
-	ld   a, $01
-	call Play_Pl_SetMoveDamage
-	ld   hl, $08F8
-	call L003875
-L027999:;J
-	jp   L0279BC
-L02799C:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L0279AA
-	ld   hl, $060C
-	ld   a, $01
-	call Play_Pl_SetMoveDamage
-L0279AA:;J
-	jp   L0279BC
-L0279AD:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L0279BC
-	call Play_Pl_EndMove
-	xor  a
-	ld   [wPlayPlThrowActId], a
-	jr   L0279BF
-L0279BC:;J
-	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L0279BF:;R
-	ret
-L0279C0:;I
-	call Play_Pl_IsMoveLoading
-	jp   c, L0279FE
-	ld   hl, $0017
-	add  hl, de
-	ld   a, [hl]
-	cp   $00
-	jp   z, L0279DB
-	ld   hl, $0039
-	add  hl, bc
-	cp   a, [hl]
-	jp   z, L0279EC
-	jp   L0279FB
-L0279DB:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L0279FB
-	ld   hl, $0608
-	ld   a, $01
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage
+; --------------- frames #1-(end) ---------------
+	mMvC_EndOnTargetOBJLst .anim, .chkEnd
+; --------------- frame #0 ---------------
+.setDamage:
+	; When switching to #1, deal damage to the opponent
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
+	
+	mkhl $06, HITANIM_DROP_MD
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamageNext
-	jp   L0279FB
-L0279EC:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L0279FB
+	jp   .anim
+; --------------- common ---------------
+.chkEnd:
+	; End the move when the anim advances
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
 	call Play_Pl_EndMove
-	xor  a
+	xor  a ; PLAY_THROWACT_NONE
 	ld   [wPlayPlThrowActId], a
-	jr   L0279FE
-L0279FB:;J
+	jr   .ret
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L0279FE:;R
+.ret:
 	ret
-L0279FF:;I
+; =============== MoveC_Andy_ThrowG ===============
+; Move code for Andy's throw (MOVE_SHARED_THROW_G).
+MoveC_Andy_ThrowG:
 	call Play_Pl_IsMoveLoading
-	jp   c, L027AD6
-	ld   hl, $0017
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L027A26
-	cp   $04
-	jp   z, L027A46
-	cp   $08
-	jp   z, L027A86
-	cp   $0C
-	jp   z, L027A9D
-	cp   $10
-	jp   z, L027AB4
-L027A23: db $C3;X
-L027A24: db $D3;X
-L027A25: db $7A;X
-L027A26:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj4
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------
+.obj0:
+	; The first time we get here...
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L027A3A
-	ld   hl, $0612
-	ld   a, $01
+	jp   z, .obj0_waitManCtrl
+	
+	; Set damage rotation frame
+	mkhl $06, HITANIM_THROW_ROTL
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	ld   hl, $FEE0
-	call L003875
-L027A3A:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L0279FB
-	inc  hl
-	ld   [hl], $FF
-	jp   L027AD3
-L027A46:;J
+	; Move opponent left 2px, up 20px
+	mkhl -$02, -$20
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	
+.obj0_waitManCtrl:
+	; [POI] This accidentally points to the .anim from another move code.
+	;       It does the same thing at least.
+IF FIX_BUGS == 1 
+	mMvC_SetSpeedOnInternalFrameEnd ANIMSPEED_NONE, .anim
+ELSE
+	call OBJLstS_IsInternalFrameAboutToEnd	; About to switch frames? 
+	jp   nc, MoveC_Terry_ThrowG.anim		; If not, skip
+	; The above subroutine set HL = Ptr to iOBJInfo_FrameLeft
+	inc  hl							; Seek to iOBJInfo_FrameTotal
+	ld   [hl], ANIMSPEED_NONE		; Set new anim speed
+	jp   .anim
+ENDC
+
+	
+; --------------- frame #1 ---------------
+.obj1:
+	; The first time we get here, init the jump settings.
+	; From the second time, skip to the gravity code.
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L027A70
-	ld   a, $12
+	jp   z, .obj1_move
+	
+	; Play SGB/DMG SFX
+	ld   a, SCT_11
 	call HomeCall_Sound_ReqPlayExId
-	ld   hl, $0000
+	
+	; Start neutral jump
+	ld   hl, $0000	; No h movement
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	ld   hl, $FA00
+	ld   hl, -$0600	; 6px/frame up
 	call Play_OBJLstS_SetSpeedV
-	ld   hl, $0614
-	ld   a, $01
+	
+	; Set new rotation frame
+	mkhl $06, HITANIM_THROW_ROTR
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	ld   hl, $FEF0
-	call L003875
+	; Move opponent left 2px, up 10px
+	mkhl -$02, -$10
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	; Allow the move code for getting damaged to set this once.
 	ld   a, $01
-	ld   [$C178], a
-L027A70:;J
-	jp   L027A73
-L027A73:;J
+	ld   [wPlayPlThrowRot_Unk_UseInMove], a
+.obj1_move:
+	jp   .uhok
+.uhok:
+	; Fall to the ground at $00.60px/frame
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
-	jp   nc, L027AD3
-	ld   a, $08
-	ld   h, $0A
+	call OBJLstS_ApplyGravityVAndMoveHV
+	jp   nc, .anim
+	; Once we touched the ground, switch to the next frame
+	ld   a, $02*OBJLSTPTR_ENTRYSIZE
+	ld   h, $0A ; Speed
 	call Play_Pl_SetJumpLandAnimFrame
-	jp   L027AD6
-L027A86:;J
+	jp   .ret
+	
+; --------------- frame #2 ---------------
+.obj2:
+	; The first time we get here...
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L027AD3
-	ld   hl, $0614
-	ld   a, $01
+	jp   z, .anim
+	; Set new rotation frame
+	mkhl $06, HITANIM_THROW_ROTR
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	ld   hl, OAM_Begin
-	call L003875
-	jp   L027AD3
-L027A9D:;J
+	; Move opponent left 2px
+	mkhl -$02, +$00
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	jp   .anim
+; --------------- frame #3 ---------------
+.obj3:
+	; The first time we get here...
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L027AD3
-	ld   hl, $0614
-	ld   a, $01
+	jp   z, .anim
+	; Set new rotation frame
+	mkhl $06, HITANIM_THROW_ROTR
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	ld   hl, OAM_Begin
-	call L003875
-	jp   L027AD3
-L027AB4:;J
+	; Move opponent left 2px
+	mkhl -$02, +$00
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	jp   .anim
+; --------------- frame #4 ---------------
+.obj4:
+	; The first time we get here, damage the player
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L027AC2
-	ld   hl, $0608
-	ld   a, $01
+	jp   z, .chkEnd
+	mkhl $06, HITANIM_DROP_MD	; 6 lines of damage
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-L027AC2:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L027AD3
+.chkEnd:
+	; End the move when the anim advances
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
 	call Play_Pl_EndMove
-	ld   a, $00
+	ld   a, PLAY_THROWACT_NONE
 	ld   [wPlayPlThrowActId], a
-	jp   L027AD6
-L027AD3:;J
+	jp   .ret
+; --------------- common ---------------
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L027AD6:;J
+.ret:
 	ret
-L027AD7:;I
+	
+; =============== MoveC_Ryo_ThrowG ===============
+; Move code for Ryo's and Mr.Karate's throw (MOVE_SHARED_THROW_G).
+MoveC_Ryo_ThrowG:
 	call Play_Pl_IsMoveLoading
-	jp   c, L027B4A
-	ld   hl, $0017
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L027AF9
-	cp   $04
-	jp   z, L027B10
-	cp   $08
-	jp   z, L027B27
-	cp   $0C
-	jp   z, L027B38
-L027AF6: db $C3;X
-L027AF7: db $47;X
-L027AF8: db $7B;X
-L027AF9:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .rotU
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .rotL
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------
+.rotU:
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L027B47
-	ld   hl, $0611
-	ld   a, $01
+	jp   z, .anim
+	
+	mkhl $06, HITANIM_THROW_ROTU
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	ld   hl, $F800
-	call L003875
-	jp   L027B47
-L027B10:;J
+	
+	mkhl -$08, +$00
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	jp   .anim
+; --------------- frame #1 ---------------
+.rotL:
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L027B47
-	ld   hl, $0612
-	ld   a, $01
+	jp   z, .anim
+	
+	mkhl $06, HITANIM_THROW_ROTL
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	ld   hl, $01F0
-	call L003875
-	jp   L027B47
-L027B27:;J
+	
+	mkhl +$01, -$10
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	jp   .anim
+; --------------- frame #2 ---------------
+.setDamage:
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L027B47
-	ld   hl, $060F
-	ld   a, $01
+	jp   z, .anim
+	
+	mkhl $06, HITANIM_DROP_SPEC_0F
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	jp   L027B47
-L027B38:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L027B47
+	jp   .anim
+; --------------- frame #3 ---------------
+.chkEnd:
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
 	call Play_Pl_EndMove
-	xor  a
+	xor  a ; PLAY_THROWACT_NONE
 	ld   [wPlayPlThrowActId], a
-	jr   L027B4A
-L027B47:;J
+	jr   .ret
+; --------------- common ---------------
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L027B4A:;R
+.ret:
 	ret
-L027B4B:;I
+	
+; =============== MoveC_Robert_ThrowG ===============
+; Move code for Robert's throw (MOVE_SHARED_THROW_G).
+MoveC_Robert_ThrowG:
 	call Play_Pl_IsMoveLoading
-	jp   c, L027B94
-	ld   hl, $0017
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $04
-	jp   z, L027B63
-	cp   $08
-	jp   z, L027B74
-	jp   L027B91
-L027B63:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L027B91
-	ld   hl, $0608
-	ld   a, $01
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim
+; --------------- frame #1 ---------------
+; Damages the player when switching to #2.
+.setDamage:
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
+	mkhl $06, HITANIM_DROP_MD
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamageNext
-	jp   L027B91
-L027B74:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L027B91
-	ld   a, $86
+	jp   .anim
+; --------------- frame #2 ---------------
+; When switching to #3, make Robert jump back.
+.chkEnd:
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
+	; Set a new move to do the jump.
+	ld   a, MOVE_SHARED_HIT_86
 	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
-	ld   hl, $FD00
+	; Initialize jump settings
+	ld   hl, -$0300	; 3px/frame backwards
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	ld   hl, $FB00
+	ld   hl, -$0500	; 5px/frame up
 	call Play_OBJLstS_SetSpeedV
+	; End throw
 	xor  a
 	ld   [wPlayPlThrowActId], a
-	jr   L027B94
-L027B91:;J
+	jr   .ret
+; --------------- common ---------------
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L027B94:;R
+.ret:
 	ret
-L027B95:;I
+	
+; =============== MoveC_Athena_ThrowG ===============
+; Move code for Athena's throw (MOVE_SHARED_THROW_G).	
+MoveC_Athena_ThrowG:
 	call Play_Pl_IsMoveLoading
-	jp   c, L027C40
-	ld   hl, $0017
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $04
-	jp   z, L027BC1
-	cp   $08
-	jp   z, L027BD8
-	cp   $0C
-	jp   z, L027BEF
-	cp   $10
-	jp   z, L027C06
-	cp   $14
-	jp   z, L027C1D
-	cp   $18
-	jp   z, L027C2E
-	jp   L027C3D
-L027BC1:;J
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .rotL
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .rotD
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .rotR
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .rotU
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage
+	cp   $06*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+; --------------- frame #0 ---------------
+	jp   .anim
+; --------------- frame #1 ---------------
+.rotL:
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L027C3D
-	ld   hl, $0612
-	ld   a, $01
+	jp   z, .anim
+	
+	mkhl $06, HITANIM_THROW_ROTL
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	ld   hl, $01F8
-	call L003875
-	jp   L027C3D
-L027BD8:;J
+	
+	mkhl +$01, -$08
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	jp   .anim
+; --------------- frame #2 ---------------
+.rotD:
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L027C3D
-	ld   hl, $0613
-	ld   a, $01
+	jp   z, .anim
+	
+	mkhl $06, HITANIM_THROW_ROTD
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	ld   hl, $FEF8
-	call L003875
-	jp   L027C3D
-L027BEF:;J
+	
+	mkhl -$02, -$08
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	jp   .anim
+; --------------- frame #3 ---------------
+.rotR:
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L027C3D
-	ld   hl, $0614
-	ld   a, $01
+	jp   z, .anim
+	
+	mkhl $06, HITANIM_THROW_ROTR
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	ld   hl, $01F8
-	call L003875
-	jp   L027C3D
-L027C06:;J
+	
+	mkhl +$01, -$08
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	jp   .anim
+; --------------- frame #4 ---------------
+.rotU:
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L027C3D
-	ld   hl, $0611
-	ld   a, $01
+	jp   z, .anim
+	
+	mkhl $06, HITANIM_THROW_ROTU
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	ld   hl, $FEF8
-	call L003875
-	jp   L027C3D
-L027C1D:;J
+	
+	mkhl -$02, -$08
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	jp   .anim
+; --------------- frame #5 ---------------
+.setDamage:
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L027C3D
-	ld   hl, $060F
-	ld   a, $01
+	jp   z, .anim
+	
+	mkhl $06, HITANIM_DROP_SPEC_0F
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	jp   L027C3D
-L027C2E:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L027C3D
+	jp   .anim
+; --------------- frame #6 ---------------
+.chkEnd:
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
 	call Play_Pl_EndMove
-	xor  a
+	xor  a ; PLAY_THROWACT_NONE
 	ld   [wPlayPlThrowActId], a
-	jr   L027C40
-L027C3D:;J
+	jr   .ret
+; --------------- common ---------------
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L027C40:;R
+.ret:
 	ret
-L027C41: db $CD;X
-L027C42: db $B3;X
-L027C43: db $38;X
-L027C44: db $DA;X
-L027C45: db $E1;X
-L027C46: db $7C;X
-L027C47: db $21;X
-L027C48: db $17;X
-L027C49: db $00;X
-L027C4A: db $19;X
-L027C4B: db $7E;X
-L027C4C: db $FE;X
-L027C4D: db $00;X
-L027C4E: db $CA;X
-L027C4F: db $68;X
-L027C50: db $7C;X
-L027C51: db $FE;X
-L027C52: db $04;X
-L027C53: db $CA;X
-L027C54: db $7F;X
-L027C55: db $7C;X
-L027C56: db $FE;X
-L027C57: db $08;X
-L027C58: db $CA;X
-L027C59: db $96;X
-L027C5A: db $7C;X
-L027C5B: db $FE;X
-L027C5C: db $0C;X
-L027C5D: db $CA;X
-L027C5E: db $BC;X
-L027C5F: db $7C;X
-L027C60: db $FE;X
-L027C61: db $10;X
-L027C62: db $CA;X
-L027C63: db $CF;X
-L027C64: db $7C;X
-L027C65: db $C3;X
-L027C66: db $DE;X
-L027C67: db $7C;X
-L027C68: db $CD;X
-L027C69: db $D2;X
-L027C6A: db $2D;X
-L027C6B: db $CA;X
-L027C6C: db $DE;X
-L027C6D: db $7C;X
-L027C6E: db $21;X
-L027C6F: db $12;X
-L027C70: db $06;X
-L027C71: db $3E;X
-L027C72: db $01;X
-L027C73: db $CD;X
-L027C74: db $82;X
-L027C75: db $38;X
-L027C76: db $21;X
-L027C77: db $F8;X
-L027C78: db $F8;X
-L027C79: db $CD;X
-L027C7A: db $75;X
-L027C7B: db $38;X
-L027C7C: db $C3;X
-L027C7D: db $DE;X
-L027C7E: db $7C;X
-L027C7F: db $CD;X
-L027C80: db $D2;X
-L027C81: db $2D;X
-L027C82: db $CA;X
-L027C83: db $DE;X
-L027C84: db $7C;X
-L027C85: db $21;X
-L027C86: db $13;X
-L027C87: db $06;X
-L027C88: db $3E;X
-L027C89: db $01;X
-L027C8A: db $CD;X
-L027C8B: db $82;X
-L027C8C: db $38;X
-L027C8D: db $21;X
-L027C8E: db $F8;X
-L027C8F: db $F8;X
-L027C90: db $CD;X
-L027C91: db $75;X
-L027C92: db $38;X
-L027C93: db $C3;X
-L027C94: db $DE;X
-L027C95: db $7C;X
-L027C96: db $CD;X
-L027C97: db $D2;X
-L027C98: db $2D;X
-L027C99: db $CA;X
-L027C9A: db $B0;X
-L027C9B: db $7C;X
-L027C9C: db $21;X
-L027C9D: db $0C;X
-L027C9E: db $06;X
-L027C9F: db $3E;X
-L027CA0: db $01;X
-L027CA1: db $CD;X
-L027CA2: db $82;X
-L027CA3: db $38;X
-L027CA4: db $21;X
-L027CA5: db $00;X
-L027CA6: db $FE;X
-L027CA7: db $CD;X
-L027CA8: db $69;X
-L027CA9: db $35;X
-L027CAA: db $21;X
-L027CAB: db $00;X
-L027CAC: db $FE;X
-L027CAD: db $CD;X
-L027CAE: db $AD;X
-L027CAF: db $35;X
-L027CB0: db $CD;X
-L027CB1: db $D9;X
-L027CB2: db $2D;X
-L027CB3: db $D2;X
-L027CB4: db $BC;X
-L027CB5: db $7C;X
-L027CB6: db $23;X
-L027CB7: db $36;X
-L027CB8: db $FF;X
-L027CB9: db $C3;X
-L027CBA: db $BC;X
-L027CBB: db $7C;X
-L027CBC: db $21;X
-L027CBD: db $60;X
-L027CBE: db $00;X
-L027CBF: db $CD;X
-L027CC0: db $14;X
-L027CC1: db $36;X
-L027CC2: db $D2;X
-L027CC3: db $DE;X
-L027CC4: db $7C;X
-L027CC5: db $3E;X
-L027CC6: db $10;X
-L027CC7: db $26;X
-L027CC8: db $04;X
-L027CC9: db $CD;X
-L027CCA: db $EC;X
-L027CCB: db $2D;X
-L027CCC: db $C3;X
-L027CCD: db $E1;X
-L027CCE: db $7C;X
-L027CCF: db $CD;X
-L027CD0: db $D9;X
-L027CD1: db $2D;X
-L027CD2: db $D2;X
-L027CD3: db $DE;X
-L027CD4: db $7C;X
-L027CD5: db $CD;X
-L027CD6: db $A2;X
-L027CD7: db $2E;X
-L027CD8: db $AF;X
-L027CD9: db $EA;X
-L027CDA: db $73;X
-L027CDB: db $C1;X
-L027CDC: db $18;X
-L027CDD: db $03;X
-L027CDE: db $C3;X
-L027CDF: db $0B;X
-L027CE0: db $2F;X
-L027CE1: db $C9;X
-L027CE2:;I
+	
+; =============== MoveC_Base_ThrowA_DiagF ===============
+; Move code for air throws that launch the opponent forwards, diagonally down.
+; Used for Leona and Athena's air throws (MOVE_SHARED_THROW_A).
+MoveC_Base_ThrowA_DiagF:
 	call Play_Pl_IsMoveLoading
-	jp   c, L027DAB
-	ld   hl, $0017
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L027D0E
-	cp   $04
-	jp   z, L027D2B
-	cp   $08
-	jp   z, L027D48
-	cp   $0C
-	jp   z, L027D65
-	cp   $10
-	jp   z, L027D82
-	cp   $14
-	jp   z, L027D99
-L027D0B: db $C3;X
-L027D0C: db $A8;X
-L027D0D: db $7D;X
-L027D0E:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim
+; --------------- frame #0 ---------------
+.obj0:
+	; The first time we get here...
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L027DA8
+	jp   z, .anim
+	
+	mkhl $06, HITANIM_THROW_ROTL
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
+	call Play_Pl_SetMoveDamage
+	
+	mkhl -$08, -$08 ; 8px left, 8px up
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	jp   .anim
+; --------------- frame #1 ---------------
+.obj1:
+	; The first time we get here...
+	call OBJLstS_IsFrameNewLoad
+	jp   z, .anim
+	
+	mkhl $06, HITANIM_THROW_ROTD
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
+	call Play_Pl_SetMoveDamage
+	
+	mkhl -$08, -$08 ; 8px left, 8px up
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	jp   .anim
+; --------------- frame #2 ---------------
+.obj2:
+	; The first time we get here...
+	call OBJLstS_IsFrameNewLoad
+	jp   z, .obj2_setManCtrl
+	
+	; Throw opponent forward, diagonally down
+	mkhl $06, HITANIM_DROP_SPEC_0C ; Damage player for 6 lines
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
+	call Play_Pl_SetMoveDamage
+	
+	; Move us 2px back, 2px up
+	ld   hl, -$0200
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	ld   hl, -$0200
+	call Play_OBJLstS_SetSpeedV
+.obj2_setManCtrl:
+	; When about to advance to #3, get manual ctrl
+	mMvC_SetSpeedOnInternalFrameEnd ANIMSPEED_NONE, .obj3
+; --------------- frame #2-3 ---------------
+.obj3:
+	; If at any point while #2 or #3 are displayed, the player touches the ground,
+	; switch directly to the landing sprite.
+	ld   hl, $0060		; $00.60px/frame down
+	call OBJLstS_ApplyGravityVAndMoveHV	; Touched the ground?
+	jp   nc, .anim		; If not, skip
+	ld   a, $04*OBJLSTPTR_ENTRYSIZE ; Sprite
+	ld   h, $04 ; 4 frames of extra delay
+	call Play_Pl_SetJumpLandAnimFrame
+	jp   .ret
+; --------------- frame #4 ---------------
+.chkEnd:
+	; End the move when trying to switch to #5
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
+	call Play_Pl_EndMove
+	xor  a ; PLAY_THROWACT_NONE
+	ld   [wPlayPlThrowActId], a
+	jr   .ret
+; --------------- common ---------------
+.anim:
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
+.ret:
+	ret
+	
+; =============== MoveC_Mai_ThrowG ===============
+; Move code for Mai's throw (MOVE_SHARED_THROW_G).
+MoveC_Mai_ThrowG:
+	call Play_Pl_IsMoveLoading
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+	add  hl, de
+	ld   a, [hl]
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------
+.obj0:
+	call OBJLstS_IsFrameNewLoad
+	jp   z, .anim
+	
+	;--
+	; [POI] (nothing)
 	ld   hl, $0000
 	call Play_OBJLstS_MoveH_ByXFlipR
-	ld   hl, $0611
-	ld   a, $01
+	;--
+	
+	; Set rotation frame
+	mkhl $06, HITANIM_THROW_ROTU
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	ld   hl, $F800
-	call L003875
-	jp   L027DA8
-L027D2B:;J
+	
+	; Move thrown player left 8px
+	mkhl -$08, +$00
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	jp   .anim
+; --------------- frame #1 ---------------
+.obj1:
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L027DA8
-	ld   hl, $F800
+	jp   z, .anim
+	
+	; Move player left 8px
+	ld   hl, -$0800
 	call Play_OBJLstS_MoveH_ByXFlipR
-	ld   hl, $0611
-	ld   a, $01
+	
+	; Set rotation frame again to apply Play_Pl_MoveRotThrown
+	mkhl $06, HITANIM_THROW_ROTU
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	ld   hl, $F000
-	call L003875
-	jp   L027DA8
-L027D48:;J
+	
+	; Move opponent left $10px
+	mkhl -$10, +$00
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	jp   .anim
+; --------------- frame #2 ---------------
+.obj2:
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L027DA8
+	jp   z, .anim
+	
+	; Move player left $10px
 	ld   hl, $1000
 	call Play_OBJLstS_MoveH_ByXFlipR
-	ld   hl, $0611
-	ld   a, $01
+	
+	;--
+	; [POI] Not needed
+	
+	; Set rotation frame again to apply Play_Pl_MoveRotThrown
+	mkhl $06, HITANIM_THROW_ROTU
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	ld   hl, $0000
-	call L003875
-	jp   L027DA8
-L027D65:;J
+	
+	; (nothing)
+	mkhl +$00, +$00
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	;--
+	jp   .anim
+; --------------- frame #3 ---------------
+.obj3:
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L027DA8
+	jp   z, .anim
+	
+	; Move player right $08px
 	ld   hl, $0800
 	call Play_OBJLstS_MoveH_ByXFlipR
-	ld   hl, $0611
-	ld   a, $01
+	
+	; Set rotation frame again to apply Play_Pl_MoveRotThrown
+	mkhl $06, HITANIM_THROW_ROTU
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	ld   hl, $1000
-	call L003875
-	jp   L027DA8
-L027D82:;J
+	
+	; Move opponent right $10px (reset)
+	mkhl +$10, +$00
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	jp   .anim
+; --------------- frame #4 ---------------
+.setDamage:
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L027DA8
+	jp   z, .anim
+	
+	;--
+	; [POI] (nothing)
 	ld   hl, $0000
 	call Play_OBJLstS_MoveH_ByXFlipR
-	ld   hl, $060F
-	ld   a, $01
+	;--
+	
+	mkhl $06, HITANIM_DROP_SPEC_0F
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	jp   L027DA8
-L027D99:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L027DA8
+	jp   .anim
+; --------------- frame #5 ---------------
+.chkEnd:
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
 	call Play_Pl_EndMove
-	xor  a
+	xor  a ; PLAY_THROWACT_NONE
 	ld   [wPlayPlThrowActId], a
-	jr   L027DAB
-L027DA8:;J
+	jr   .ret
+; --------------- common ---------------
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L027DAB:;R
+.ret:
 	ret
-L027DAC: db $CD;X
-L027DAD: db $B3;X
-L027DAE: db $38;X
-L027DAF: db $DA;X
-L027DB0: db $6B;X
-L027DB1: db $7E;X
-L027DB2: db $21;X
-L027DB3: db $17;X
-L027DB4: db $00;X
-L027DB5: db $19;X
-L027DB6: db $7E;X
-L027DB7: db $FE;X
-L027DB8: db $00;X
-L027DB9: db $CA;X
-L027DBA: db $C9;X
-L027DBB: db $7D;X
-L027DBC: db $FE;X
-L027DBD: db $04;X
-L027DBE: db $CA;X
-L027DBF: db $E9;X
-L027DC0: db $7D;X
-L027DC1: db $FE;X
-L027DC2: db $08;X
-L027DC3: db $CA;X
-L027DC4: db $3C;X
-L027DC5: db $7E;X
-L027DC6: db $C3;X
-L027DC7: db $68;X
-L027DC8: db $7E;X
-L027DC9: db $CD;X
-L027DCA: db $D2;X
-L027DCB: db $2D;X
-L027DCC: db $CA;X
-L027DCD: db $DD;X
-L027DCE: db $7D;X
-L027DCF: db $21;X
-L027DD0: db $14;X
-L027DD1: db $06;X
-L027DD2: db $3E;X
-L027DD3: db $01;X
-L027DD4: db $CD;X
-L027DD5: db $82;X
-L027DD6: db $38;X
-L027DD7: db $21;X
-L027DD8: db $FF;X
-L027DD9: db $FE;X
-L027DDA: db $CD;X
-L027DDB: db $75;X
-L027DDC: db $38;X
-L027DDD: db $CD;X
-L027DDE: db $D9;X
-L027DDF: db $2D;X
-L027DE0: db $D2;X
-L027DE1: db $A8;X
-L027DE2: db $7D;X
-L027DE3: db $23;X
-L027DE4: db $36;X
-L027DE5: db $FF;X
-L027DE6: db $C3;X
-L027DE7: db $D3;X
-L027DE8: db $7A;X
-L027DE9: db $CD;X
-L027DEA: db $D2;X
-L027DEB: db $2D;X
-L027DEC: db $CA;X
-L027DED: db $13;X
-L027DEE: db $7E;X
-L027DEF: db $3E;X
-L027DF0: db $12;X
-L027DF1: db $CD;X
-L027DF2: db $16;X
-L027DF3: db $10;X
-L027DF4: db $21;X
-L027DF5: db $00;X
-L027DF6: db $00;X
-L027DF7: db $CD;X
-L027DF8: db $69;X
-L027DF9: db $35;X
-L027DFA: db $21;X
-L027DFB: db $00;X
-L027DFC: db $FF;X
-L027DFD: db $CD;X
-L027DFE: db $AD;X
-L027DFF: db $35;X
-L027E00: db $21;X
-L027E01: db $14;X
-L027E02: db $06;X
-L027E03: db $3E;X
-L027E04: db $01;X
-L027E05: db $CD;X
-L027E06: db $82;X
-L027E07: db $38;X
-L027E08: db $21;X
-L027E09: db $FF;X
-L027E0A: db $FE;X
-L027E0B: db $CD;X
-L027E0C: db $75;X
-L027E0D: db $38;X
-L027E0E: db $3E;X
-L027E0F: db $01;X
-L027E10: db $EA;X
-L027E11: db $78;X
-L027E12: db $C1;X
-L027E13: db $C3;X
-L027E14: db $16;X
-L027E15: db $7E;X
-L027E16: db $21;X
-L027E17: db $60;X
-L027E18: db $00;X
-L027E19: db $CD;X
-L027E1A: db $14;X
-L027E1B: db $36;X
-L027E1C: db $D2;X
-L027E1D: db $68;X
-L027E1E: db $7E;X
-L027E1F: db $3E;X
-L027E20: db $08;X
-L027E21: db $26;X
-L027E22: db $02;X
-L027E23: db $CD;X
-L027E24: db $EC;X
-L027E25: db $2D;X
-L027E26: db $21;X
-L027E27: db $14;X
-L027E28: db $06;X
-L027E29: db $3E;X
-L027E2A: db $01;X
-L027E2B: db $CD;X
-L027E2C: db $82;X
-L027E2D: db $38;X
-L027E2E: db $21;X
-L027E2F: db $FF;X
-L027E30: db $FE;X
-L027E31: db $CD;X
-L027E32: db $75;X
-L027E33: db $38;X
-L027E34: db $3E;X
-L027E35: db $00;X
-L027E36: db $EA;X
-L027E37: db $78;X
-L027E38: db $C1;X
-L027E39: db $C3;X
-L027E3A: db $6B;X
-L027E3B: db $7E;X
-L027E3C: db $CD;X
-L027E3D: db $D2;X
-L027E3E: db $2D;X
-L027E3F: db $CA;X
-L027E40: db $4A;X
-L027E41: db $7E;X
-L027E42: db $21;X
-L027E43: db $0C;X
-L027E44: db $06;X
-L027E45: db $3E;X
-L027E46: db $01;X
-L027E47: db $CD;X
-L027E48: db $82;X
-L027E49: db $38;X
-L027E4A: db $CD;X
-L027E4B: db $D9;X
-L027E4C: db $2D;X
-L027E4D: db $D2;X
-L027E4E: db $A8;X
-L027E4F: db $7D;X
-L027E50: db $3E;X
-L027E51: db $86;X
-L027E52: db $CD;X
-L027E53: db $1B;X
-L027E54: db $34;X
-L027E55: db $21;X
-L027E56: db $00;X
-L027E57: db $FD;X
-L027E58: db $CD;X
-L027E59: db $69;X
-L027E5A: db $35;X
-L027E5B: db $21;X
-L027E5C: db $00;X
-L027E5D: db $FB;X
-L027E5E: db $CD;X
-L027E5F: db $AD;X
-L027E60: db $35;X
-L027E61: db $AF;X
-L027E62: db $EA;X
-L027E63: db $73;X
-L027E64: db $C1;X
-L027E65: db $C3;X
-L027E66: db $6B;X
-L027E67: db $7E;X
-L027E68: db $C3;X
-L027E69: db $0B;X
-L027E6A: db $2F;X
-L027E6B: db $C9;X
-L027E6C:;I
+	
+; =============== MoveC_Base_ThrowA_DirD ===============
+; Move code for air throws that launch the opponent straight down.
+; Used for Mai's air throw (MOVE_SHARED_THROW_A).
+MoveC_Base_ThrowA_DirD:
 	call Play_Pl_IsMoveLoading
-	jp   c, L027EBE
-	ld   hl, $0017
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L027E89
-	cp   $04
-	jp   z, L027E9A
-	cp   $08
-	jp   z, L027E9D
-L027E86: db $C3;X
-L027E87: db $BB;X
-L027E88: db $7E;X
-L027E89:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L027EBB
-	ld   hl, $0608
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
-	jp   L027EBB
-L027E9A:;J
-	jp   L027EBB
-L027E9D:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L027EBB
-	ld   a, $86
-	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
-	ld   hl, $FD00
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------
+.obj0:
+	; The first time we get here...
+	call OBJLstS_IsFrameNewLoad
+	jp   z, .obj0_setManCtrl
+	
+	; Set damage rotation frame
+	mkhl $06, HITANIM_THROW_ROTR
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
+	call Play_Pl_SetMoveDamage
+	; Move opponent left 2px, up 1px
+	mkhl -$02, -$01
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	
+.obj0_setManCtrl:
+	; When switching to #1, get manual control of the animation
+	; [POI] copy/pasting wins
+IF FIX_BUGS == 1
+	mMvC_SetSpeedOnInternalFrameEnd ANIMSPEED_NONE, .anim
+ELSE
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, MoveC_Mai_ThrowG.anim
+	inc  hl
+	ld   [hl], ANIMSPEED_NONE
+	jp   MoveC_Andy_ThrowG.anim
+ENDC
+; --------------- frame #1 ---------------
+.obj1:
+	; The first time we get here...
+	call OBJLstS_IsFrameNewLoad
+	jp   z, .obj1_move
+	
+	; Play SGB/DMG SFX
+	ld   a, SCT_11
+	call HomeCall_Sound_ReqPlayExId
+	
+	; (nothing)
+	ld   hl, $0000
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	ld   hl, $FB00
+	; Move player 1px up
+	ld   hl, -$0100
 	call Play_OBJLstS_SetSpeedV
-	xor  a
+	
+	; Move opponent left 2px, up 1px
+	mkhl $06, HITANIM_THROW_ROTR	; Same as before, to enable Play_Pl_MoveRotThrown
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
+	call Play_Pl_SetMoveDamage
+	mkhl -$02, -$01
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	
+	; Enable move to use moverot values for ???
+	ld   a, $01
+	ld   [wPlayPlThrowRot_Unk_UseInMove], a
+.obj1_move:
+	jp   .uhok
+.uhok:
+	; Move down $00.60px/frame until we touch the ground.
+	; Switch to the landing frame when that happens.
+	ld   hl, $0060
+	call OBJLstS_ApplyGravityVAndMoveHV	; Touched the ground?
+	jp   nc, .anim						; If not, jump
+	
+	; Once the ground is touched, switch to #2
+	ld   a, $02*OBJLSTPTR_ENTRYSIZE
+	ld   h, $02 ; 2 frames of extra delay
+	call Play_Pl_SetJumpLandAnimFrame
+	
+	; Move opponent left 2px, up 1px
+	mkhl $06, HITANIM_THROW_ROTR	; Same as before, to enable Play_Pl_MoveRotThrown
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
+	call Play_Pl_SetMoveDamage
+	mkhl -$02, -$01
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	
+	;--
+	; Not necessary, already done by Play_Pl_MoveRotThrown
+	ld   a, $00
+	ld   [wPlayPlThrowRot_Unk_UseInMove], a
+	;--
+	jp   .ret
+; --------------- frame #2 ---------------
+.obj2:
+	; The first time we get here, make the throw deal damage
+	call OBJLstS_IsFrameNewLoad
+	jp   z, .chkEnd
+	mkhl $06, HITANIM_DROP_SPEC_0C
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
+	call Play_Pl_SetMoveDamage
+.chkEnd:
+	; Start backjump when switching to #3.
+	
+	; [POI] copy/pasting won here too
+	call OBJLstS_IsInternalFrameAboutToEnd
+IF FIX_BUGS == 1
+	jp   nc, .anim
+ELSE
+	jp   nc, MoveC_Mai_ThrowG.anim
+ENDC
+	ld   a, MOVE_SHARED_HIT_86
+	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+	ld   hl, -$0300 ; 3px/frame back
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	ld   hl, -$0500 ; 5px/frame up
+	call Play_OBJLstS_SetSpeedV
+	xor  a ; PLAY_THROWACT_NONE
 	ld   [wPlayPlThrowActId], a
-	jp   L027EBE
-L027EBB:;J
+	jp   .ret
+; --------------- common ---------------
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L027EBE:;J
+.ret:
+	ret  
+
+; =============== MoveC_Leona_ThrowG ===============
+; Move code for Leona's throw (MOVE_SHARED_THROW_G).
+MoveC_Leona_ThrowG:
+	call Play_Pl_IsMoveLoading
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+	add  hl, de
+	ld   a, [hl]
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------
+; Damage player when switching to #1.
+.setDamage:
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
+	mkhl $06, HITANIM_DROP_MD
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
+	call Play_Pl_SetMoveDamageNext
+	jp   .anim
+; --------------- frame #1 ---------------
+.obj1:
+	jp   .anim ; huh ok
+; --------------- frame #2 ---------------
+; Start backjump when switching to #3.
+.chkEnd:
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
+	ld   a, MOVE_SHARED_HIT_86
+	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+	ld   hl, -$0300 ; 3px/frame back
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	ld   hl, -$0500 ; 5px/frame up
+	call Play_OBJLstS_SetSpeedV
+	xor  a ; PLAY_THROWACT_NONE
+	ld   [wPlayPlThrowActId], a
+	jp   .ret
+; --------------- common ---------------
+.anim:
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
+.ret:
 	ret
+	
 L027EBF: db $00;X
 L027EC0: db $FB;X
 L027EC1: db $CD;X

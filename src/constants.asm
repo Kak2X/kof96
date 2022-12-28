@@ -53,25 +53,25 @@ LASTWIN_PL2 EQU 1
 ; Character IDs
 ; [POI] These are grouped by team, not like it matters.
 CHAR_ID_KYO      EQU $00
-CHAR_ID_DAIMON   EQU $01
-CHAR_ID_TERRY    EQU $02
-CHAR_ID_ANDY     EQU $03
-CHAR_ID_RYO      EQU $04
-CHAR_ID_ROBERT   EQU $05
-CHAR_ID_ATHENA   EQU $06
-CHAR_ID_MAI      EQU $07
-CHAR_ID_LEONA    EQU $08
-CHAR_ID_GEESE    EQU $09
-CHAR_ID_KRAUSER  EQU $0A
-CHAR_ID_MRBIG    EQU $0B
-CHAR_ID_IORI     EQU $0C
-CHAR_ID_MATURE   EQU $0D
-CHAR_ID_CHIZURU  EQU $0E
-CHAR_ID_GOENITZ  EQU $0F
-CHAR_ID_MRKARATE EQU $10
-CHAR_ID_OIORI    EQU $11
-CHAR_ID_OLEONA   EQU $12
-CHAR_ID_KAGURA   EQU $13
+CHAR_ID_DAIMON   EQU $02
+CHAR_ID_TERRY    EQU $04
+CHAR_ID_ANDY     EQU $06
+CHAR_ID_RYO      EQU $08
+CHAR_ID_ROBERT   EQU $0A
+CHAR_ID_ATHENA   EQU $0C
+CHAR_ID_MAI      EQU $0E
+CHAR_ID_LEONA    EQU $10
+CHAR_ID_GEESE    EQU $12
+CHAR_ID_KRAUSER  EQU $14
+CHAR_ID_MRBIG    EQU $16
+CHAR_ID_IORI     EQU $18
+CHAR_ID_MATURE   EQU $1A
+CHAR_ID_CHIZURU  EQU $1C
+CHAR_ID_GOENITZ  EQU $1E
+CHAR_ID_MRKARATE EQU $20
+CHAR_ID_OIORI    EQU $22
+CHAR_ID_OLEONA   EQU $24
+CHAR_ID_KAGURA   EQU $26
 CHAR_ID_NONE     EQU $FF
 
 STAGE_ID_HERO             EQU $00
@@ -208,7 +208,7 @@ PLINFO_SIZE EQU $100
 PF0B_PROJ         EQU 0 ; If set, a projectile is active on-screen (ie: a new one can't be thrown)
 PF0B_SPECMOVE     EQU 1 ; If set, the player is performing a special move
 PF0B_AIR          EQU 2 ; If set, the player is in the air
-PF0B_FARHIT       EQU 3 ; If set, the player got hit without physical contact from the other player (ie: by a projectile)
+PF0B_PROJHIT      EQU 3 ; If set, the player got hit by a projectile
 PF0B_PROJREM      EQU 4 ; If set, the player can currently remove projectiles with its hitbox
 PF0B_PROJREFLECT  EQU 5 ; If set, the player can currently reflect projectiles with its hitbox
 PF0B_SUPERMOVE    EQU 6 ; If set, the player is performing a super move
@@ -246,7 +246,7 @@ PF2B_AUTOGUARDLOW   EQU 5 ; If set, the move automatically blocks mids
 PF2B_NOHURTBOX      EQU 6 ; If set, the player has no hurtbox (this separate from the collision box only here)
 PF2B_NOCOLIBOX      EQU 7 ; If set, the player has no collision box
 ; iPlInfo_Flags3, related to the move we got attacked with
-PF3B_SHAKELONG      EQU 0 ; Getting attacked shakes the player longer (doesn't cut the shake count in half)
+PF3B_SHAKELONG      EQU 0 ; Getting attacked shakes the player longer (doesn't cut the shake count in half).
 PF3B_FLASH_B_SLOW   EQU 1 ; Getting hit causes the player to flash slowly
 PF3B_HITLOW         EQU 2 ; The attack hits low (must block crouching)
 PF3B_OVERHEAD       EQU 3 ; The attack is an overhead (must block standing)
@@ -375,24 +375,24 @@ SFX_GAMEOVER          EQU SND_BASE+$31
 SND_LAST_VALID        EQU SND_BASE+$45 ; Dunno why this late
 
 ; Sound Action List (offset by 1, since $00 is handled as SND_NONE) 
-SCT_00                EQU $01
-SCT_TAUNT_A                EQU $02
-SCT_TAUNT_B                EQU $03
-SCT_TAUNT_C                EQU $04
-SCT_TAUNT_D                EQU $05
-SCT_CHARGEMETER                EQU $06
+SCT_DIZZY             EQU $01
+SCT_TAUNT_A           EQU $02
+SCT_TAUNT_B           EQU $03
+SCT_TAUNT_C           EQU $04
+SCT_TAUNT_D           EQU $05
+SCT_CHARGEMETER       EQU $06
 SCT_MAXPOWSTART       EQU $07
-SCT_07                EQU $08
-SCT_HEAVY                EQU $09
+SCT_LIGHT             EQU $08
+SCT_HEAVY             EQU $09
 SCT_09                EQU $0A
 SCT_0A                EQU $0B
 SCT_0B                EQU $0C
 SCT_0C                EQU $0D
 SCT_0D                EQU $0E
-SCT_0E                EQU $0F
+SCT_REFLECT           EQU $0F
 SCT_0F                EQU $10
-SCT_10                EQU $11
-SCT_11                EQU $12
+SCT_ATTACKG           EQU $11
+SCT_11                EQU $12 ; Andy Throw, Mai air throw
 SCT_12                EQU $13
 SCT_13                EQU $14
 SCT_14                EQU $15
@@ -401,8 +401,8 @@ SCT_16                EQU $17
 SCT_17                EQU $18
 SCT_18                EQU $19
 SCT_19                EQU $1A
-SCT_THROW                EQU $1B
-SCT_THROWTECH                EQU $1C
+SCT_THROW             EQU $1B
+SCT_THROWTECH         EQU $1C
 SCT_1C                EQU $1D
 
 ; Screen Palette IDs, passed to SGB_ApplyScreenPalSet 
@@ -639,7 +639,7 @@ MOVE_SHARED_JUMP_B         EQU $0E ; Backwards jump
 MOVE_SHARED_BLOCK_G        EQU $10 ; Ground block / mid
 MOVE_SHARED_BLOCK_C        EQU $12 ; Crouch block / low
 MOVE_SHARED_BLOCK_A        EQU $14 ; Air block
-MOVE_SHARED_DASH_F         EQU $16 ; Run forward
+MOVE_SHARED_RUN_F          EQU $16 ; Run forward
 MOVE_SHARED_DASH_B         EQU $18 ; Hop back
 MOVE_SHARED_CHARGEMETER    EQU $1A ; Charge meter
 MOVE_SHARED_TAUNT          EQU $1C ; Taunt
@@ -1064,7 +1064,7 @@ HITANIM_THROW_ROTR          EQU $14 ; Throw rotation frame, head right
 HITANIM_DUMMY               EQU $81 ; Placeholder used for some empty slots in the special move entries
 
 
-COLIBOX_00 EQU $00
+COLIBOX_00 EQU $00 ; None
 
 
 ; wPlayPlThrowActId

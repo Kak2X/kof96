@@ -2902,13 +2902,13 @@ ModeSelect_MakeRoundSeq:
 	; These are raw character IDs as they don't go through the char select screen.
 	;
 	ld   hl, wRoundSeqTbl+$0F
-	ld   [hl], CHAR_ID_KAGURA
+	ld   [hl], CHAR_ID_KAGURA/2
 	inc  hl
-	ld   [hl], CHAR_ID_GOENITZ
+	ld   [hl], CHAR_ID_GOENITZ/2
 	inc  hl
 	ld   [hl], $00 ; Placeholder for bonus fight, team-specific.
 	inc  hl
-	ld   [hl], CHAR_ID_MRKARATE
+	ld   [hl], CHAR_ID_MRKARATE/2
 	ret
 	
 OBJInfoInit_Title:
@@ -7970,255 +7970,329 @@ L1C7D2D: db $CF
 L1C7D2E: db $BD
 L1C7D2F: db $A1
 L1C7D30: db $FF
-L1C7D31:;I
+
+; =============== MoveC_Base_NormL_2Hit_D06_A03 ===============
+; Generic move code used for light normals that hit twice.
+; See also: MoveC_Base_NormH_2Hit_D06_A04
+MoveC_Base_NormL_2Hit_D06_A03:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_IsMoveLoading
-	jp   c, L1C7D6E
-	ld   hl, $0017
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
-	ld   a, [hl]
-	cp   $00
-	jp   z, L1C7D4F
-	ld   hl, $0039
-	add  hl, bc
-	cp   a, [hl]
-	jp   z, L1C7D60
-	jp   L1C7D6B
-L1C7D4F:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L1C7D6B
-	ld   hl, $0603
-	ld   a, $01
+	ld   a, [hl]		; A = OBJLst ID
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+; --------------- frame #1-(end) ---------------
+	mMvC_EndOnTargetOBJLst .anim, .chkEnd
+; --------------- frame #0 ---------------
+; When visually switching to #1, use new damage info.
+.obj0:
+	call OBJLstS_IsInternalFrameAboutToEnd	; About to advance the anim?
+	jp   nc, .anim							; If not, jump
+	; Otherwise, request new damage fields to apply when visually switching frames
+	mkhl $06, HITANIM_HIT0_MID				; 6 lines of damage on hit
+	ld   hl, CHL	
+	ld   a, PF3_SHAKELONG 					; Shake for long
 	call Play_Pl_SetMoveDamageNext
-	jp   L1C7D6B
-L1C7D60:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L1C7D6B
-	call Play_Pl_EndMove
-	jr   L1C7D6E
-L1C7D6B:;J
+	jp   .anim
+; --------------- common ---------------
+.chkEnd:
+	mMvC_EndMoveOnInternalFrameEnd .anim, .ret
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L1C7D6E:;JR
+.ret:
 	ret
-L1C7D6F:;I
+	
+; =============== MoveC_Base_NormH_2Hit_D06_A04 ===============
+; Generic move code used for heavy normals that hit twice.
+MoveC_Base_NormH_2Hit_D06_A04:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_IsMoveLoading
-	jp   c, L1C7DAC
-	ld   hl, $0017
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
-	ld   a, [hl]
-	cp   $04
-	jp   z, L1C7D8D
-	ld   hl, $0039
-	add  hl, bc
-	cp   a, [hl]
-	jp   z, L1C7D9E
-	jp   L1C7DA9
-L1C7D8D:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L1C7DA9
-	ld   hl, $0604
-	ld   a, $01
+	ld   a, [hl]		; A = OBJLst ID
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+; --------------- frame #0,2-(end) ---------------
+	mMvC_EndOnTargetOBJLst .anim, .chkEnd
+; --------------- frame #1 ---------------
+; When visually switching to #2, use new damage info.
+; Doing this allows the move to hit twice, since hitting the opponent removes
+; the damage value for the move, to avoid multiple hits.
+; So, if we hit the opponent before the the new damage gets applied (ie: pretty much always)
+; the move will hit twice.
+.obj1:
+	call OBJLstS_IsInternalFrameAboutToEnd	; About to advance the anim?
+	jp   nc, .anim							; If not, jump
+	; Otherwise, request new damage fields to apply when visually switching frames
+	mkhl $06, HITANIM_HIT1_MID				; 6 lines of damage on hit
+	ld   hl, CHL	
+	ld   a, PF3_SHAKELONG 					; Shake for long
 	call Play_Pl_SetMoveDamageNext
-	jp   L1C7DA9
-L1C7D9E:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L1C7DA9
-	call Play_Pl_EndMove
-	jr   L1C7DAC
-L1C7DA9:;J
+	jp   .anim
+; --------------- common ---------------
+.chkEnd:
+	mMvC_EndMoveOnInternalFrameEnd .anim, .ret
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L1C7DAC:;JR
+.ret:
 	ret
-L1C7DAD:;I
+	
+; =============== MoveC_MrBig_PunchH ===============
+; Move code used for Mr.Big's heavy punch. 
+; This is like MoveC_Base_NormH_2Hit_D06_A04, except the player moves
+; forward 7px at the start of #0 and #1.
+MoveC_MrBig_PunchH:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_IsMoveLoading
-	jp   c, L1C7E0A
-	ld   hl, $0017
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
-	ld   a, [hl]
-	cp   $00
-	jp   z, L1C7DD0
-	cp   $04
-	jp   z, L1C7DDF
-	ld   hl, $0039
-	add  hl, bc
-	cp   a, [hl]
-	jp   z, L1C7DFC
-	jp   L1C7E07
-L1C7DD0:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L1C7E07
+	ld   a, [hl]		; A = OBJLst ID
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+; --------------- frame #2-(end) ---------------
+	mMvC_EndOnTargetOBJLst .anim, .chkEnd
+; --------------- frame #0 ---------------
+; The first time we get here, move 7px forward.
+.obj0:
+	call OBJLstS_IsFrameNewLoad		; First time we get here?
+	jp   z, .anim					; If not, jump
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
-	jp   L1C7E07
-L1C7DDF:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L1C7DEB
+	jp   .anim
+; --------------- frame #1 ---------------
+.obj1:
+	;
+	; The first time we get here, move 7px forward.
+	;
+	call OBJLstS_IsFrameNewLoad		; First time we get here?
+	jp   z, .obj1_chkAdv			; If not, jump
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
-L1C7DEB:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L1C7E07
-	ld   hl, $0604
-	ld   a, $01
+.obj1_chkAdv:
+	;
+	; When visually switching to #2, use new damage info.
+	;
+	call OBJLstS_IsInternalFrameAboutToEnd	; About to advance the anim?
+	jp   nc, .anim							; If not, jump
+	; Otherwise, request new damage fields to apply when visually switching frames
+	mkhl $06, HITANIM_HIT1_MID				; 6 lines of damage on hit
+	ld   hl, CHL	
+	ld   a, PF3_SHAKELONG 					; Shake for long
 	call Play_Pl_SetMoveDamageNext
-	jp   L1C7E07
-L1C7DFC:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L1C7E07
-	call Play_Pl_EndMove
-	jr   L1C7E0A
-L1C7E07:;J
+	jp   .anim
+; --------------- common ---------------	
+.chkEnd:
+	mMvC_EndMoveOnInternalFrameEnd .anim, .ret
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L1C7E0A:;JR
+.ret:
 	ret
-L1C7E0B:;I
+	
+; =============== MoveC_Mature_PunchH ===============
+; Move code used for Mature's heavy punch, this is almost the same
+; as the one for Mr.Big's heavy punch, except for the logic of #0 being moved to #3,
+; and different code to account for it.
+;
+; See also: MoveC_MrBig_PunchH
+MoveC_Mature_PunchH:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_IsMoveLoading
-	jp   c, L1C7E6E
-	ld   hl, $0017
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $04
-	jp   z, L1C7E43
-	cp   $0C
-	jp   z, L1C7E2E
-	ld   hl, $0039
-	add  hl, bc
-	cp   a, [hl]
-	jp   z, L1C7E60
-	jp   L1C7E6B
-L1C7E2E:;J
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	
+; --------------- frame #0,#2 ---------------
+	; [POI] Could have been just "jp .anim". We get to .chkEnd anyway in #3
+	mMvC_EndOnTargetOBJLst .anim, .chkEnd
+; --------------- frame #3 ---------------
+; The first time we get here, move 7px forward.
+; When attempting to visually switch to #4, end the move instead.
+.obj3:
+	call OBJLstS_IsFrameNewLoad	; First time we get here?
+	jp   z, .obj3_chkAdv		; If not, jump
+	ld   hl, $0700				; Otherwise move forward
+	call Play_OBJLstS_MoveH_ByXFlipR
+.obj3_chkAdv:
+	;--
+	; [POI] This is pointless, as .chkEnd checks it anyway.
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
+	;--
+	jp   .chkEnd
+; --------------- frame #1 ---------------
+.obj1:
+	;
+	; The first time we get here, move 7px forward.
+	;
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L1C7E3A
+	jp   z, .obj1_chkAdv
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
-L1C7E3A:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L1C7E6B
-	jp   L1C7E60
-L1C7E43:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L1C7E4F
-	ld   hl, $0700
-	call Play_OBJLstS_MoveH_ByXFlipR
-L1C7E4F:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L1C7E6B
-	ld   hl, $0604
-	ld   a, $01
+.obj1_chkAdv:
+	;
+	; When visually switching to #2, use new damage info.
+	;
+	call OBJLstS_IsInternalFrameAboutToEnd	; About to advance the anim?
+	jp   nc, .anim							; If not, jump
+	; Otherwise, request new damage fields to apply when visually switching frames
+	mkhl $06, HITANIM_HIT1_MID				; 6 lines of damage on hit
+	ld   hl, CHL	
+	ld   a, PF3_SHAKELONG 					; Shake for long
 	call Play_Pl_SetMoveDamageNext
-	jp   L1C7E6B
-L1C7E60:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L1C7E6B
-	call Play_Pl_EndMove
-	jr   L1C7E6E
-L1C7E6B:;J
+	jp   .anim
+; --------------- common ---------------	
+.chkEnd:
+	mMvC_EndMoveOnInternalFrameEnd .anim, .ret
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L1C7E6E:;JR
+.ret:
 	ret
-L1C7E6F:;I
+	
+; =============== MoveC_Goenitz_PunchH ===============
+; Move code used for Goenitz's heavy punch, which hits 3 times.
+;
+; This is like Mature's heavy punch except for the extra hit on #4.
+;
+; See also: MoveC_Mature_PunchH	
+MoveC_Goenitz_PunchH:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_IsMoveLoading
-	jp   c, L1C7EEE
-	ld   hl, $0017
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $04
-	jp   z, L1C7E97
-	cp   $0C
-	jp   z, L1C7EB4
-	cp   $10
-	jp   z, L1C7ED1
-	ld   hl, $0039
-	add  hl, bc
-	cp   a, [hl]
-	jp   z, L1C7EE0
-	jp   L1C7EEB
-L1C7E97:;J
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj4
+; --------------- frame #0,#2,#5-(end) ---------------
+	mMvC_EndOnTargetOBJLst .anim, .chkEnd
+; --------------- frame #1 ---------------
+.obj1:
+	; The first time we get here, move 7px forward.
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L1C7EA3
+	jp   z, .obj1_chkAdv
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
-L1C7EA3:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L1C7EEB
-	ld   hl, $0604
+.obj1_chkAdv:
+	; When visually switching to #2, use new damage info.
+	call OBJLstS_IsInternalFrameAboutToEnd	; About to advance the anim?
+	jp   nc, .anim							; If not, jump
+	; Otherwise, request new damage fields to apply when visually switching frames
+	mkhl $06, HITANIM_HIT1_MID				; 6 lines of damage on hit
+	ld   hl, CHL	
 	ld   a, $00
 	call Play_Pl_SetMoveDamageNext
-	jp   L1C7EEB
-L1C7EB4:;J
+	jp   .anim
+; --------------- frame #3 ---------------
+.obj3:
+	; The first time we get here, move 7px forward.
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L1C7EC0
+	jp   z, .obj3_chkAdv
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
-L1C7EC0:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L1C7EEB
-	ld   hl, $0603
-	ld   a, $01
+.obj3_chkAdv:
+	; When visually switching to #2, use new damage info.
+	call OBJLstS_IsInternalFrameAboutToEnd	; About to advance the anim?
+	jp   nc, .anim							; If not, jump
+	; Otherwise, request new damage fields to apply when visually switching frames
+	mkhl $06, HITANIM_HIT0_MID				; 6 lines of damage on hit
+	ld   hl, CHL	
+	ld   a, PF3_SHAKELONG 					; Shake for long
 	call Play_Pl_SetMoveDamageNext
-	jp   L1C7EEB
-L1C7ED1:;J
+	jp   .anim
+; --------------- frame #4 ---------------
+.obj4:
+	; The first time we get here, move 7px forward.
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L1C7EEB
+	jp   z, .anim
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
-	jp   L1C7EEB
-L1C7EE0:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L1C7EEB
-	call Play_Pl_EndMove
-	jr   L1C7EEE
-L1C7EEB:;J
+	jp   .anim
+; --------------- common ---------------
+.chkEnd:
+	mMvC_EndMoveOnInternalFrameEnd .anim, .ret
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L1C7EEE:;JR
+.ret:
 	ret
-L1C7EEF:;I
+	
+; =============== MoveC_Goenitz_PunchH ===============
+; Move code used for Goenitz's heavy kick, which hits 2 times.	
+MoveC_Goenitz_KickH:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_IsMoveLoading
-	jp   c, L1C7F4C
-	ld   hl, $0017
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $04
-	jp   z, L1C7F12
-	cp   $08
-	jp   z, L1C7F21
-	ld   hl, $0039
-	add  hl, bc
-	cp   a, [hl]
-	jp   z, L1C7F3E
-	jp   L1C7F49
-L1C7F12:;J
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+; --------------- frame #0,#3-(end) ---------------
+	mMvC_EndOnTargetOBJLst .anim, .chkEnd
+; --------------- frame #1 ---------------
+.obj1:
+	; The first time we get here, move 7px forward.
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L1C7F49
+	jp   z, .anim
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
-	jp   L1C7F49
-L1C7F21:;J
+	jp   .anim
+; --------------- frame #2 ---------------
+.obj2:
+	; The first time we get here, move 7px forward.
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L1C7F2D
+	jp   z, .obj2_chkAdv
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
-L1C7F2D:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L1C7F49
-	ld   hl, $0604
-	ld   a, $01
+.obj2_chkAdv:
+	call OBJLstS_IsInternalFrameAboutToEnd	; About to advance the anim?
+	jp   nc, .anim							; If not, jump
+	; Otherwise, request new damage fields to apply when visually switching frames
+	mkhl $06, HITANIM_HIT1_MID				; 6 lines of damage on hit
+	ld   hl, CHL	
+	ld   a, PF3_SHAKELONG 					; Shake for long
 	call Play_Pl_SetMoveDamageNext
-	jp   L1C7F49
-L1C7F3E:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L1C7F49
+	jp   .anim
+; --------------- common ---------------
+.chkEnd:
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
 	call Play_Pl_EndMove
-	jr   L1C7F4C
-L1C7F49:;J
+	jr   .ret
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L1C7F4C:;JR
+.ret:
 	ret
+; =============== END OF BANK ===============
+; Junk area below.
 L1C7F4D: db $24;X
 L1C7F4E: db $59;X
 L1C7F4F: db $6F;X

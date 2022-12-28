@@ -6355,8 +6355,8 @@ Play_InitRound:
 	ld   [wPlInfo_Pl2+iPlInfo_ColiBoxOverlapX], a
 	ld   [wPlInfo_Pl1+iPlInfo_DizzyTimeLeft], a
 	ld   [wPlInfo_Pl2+iPlInfo_DizzyTimeLeft], a
-	ld   [wPlInfo_Pl1+iPlInfo_Dizzy], a
-	ld   [wPlInfo_Pl2+iPlInfo_Dizzy], a
+	ld   [wPlInfo_Pl1+iPlInfo_DizzyNext], a
+	ld   [wPlInfo_Pl2+iPlInfo_DizzyNext], a
 	ld   [wPlInfo_Pl1+iPlInfo_HitComboRecvSet], a
 	ld   [wPlInfo_Pl2+iPlInfo_HitComboRecvSet], a
 	ld   [wPlInfo_Pl1+iPlInfo_NoSpecialTimer], a
@@ -8400,21 +8400,21 @@ Play_Char_SetIntroAnimInstant:
 	ld   hl, iPlInfo_CharId
 	add  hl, bc
 	ld   a, [hl]					; A = Current
-	cp   CHAR_ID_MAI*2				; Playing as Athena?
+	cp   CHAR_ID_MAI				; Playing as Athena?
 	jp   z, Play_Char_SetIntroAnim	; If so, jump
-	cp   CHAR_ID_ATHENA*2			; ...
+	cp   CHAR_ID_ATHENA				; ...
 	jp   z, Play_Char_SetIntroAnim
-	cp   CHAR_ID_LEONA*2
+	cp   CHAR_ID_LEONA
 	jp   z, Play_Char_SetIntroAnim
-	cp   CHAR_ID_OLEONA*2
+	cp   CHAR_ID_OLEONA
 	jp   z, Play_Char_SetIntroAnim
-	cp   CHAR_ID_IORI*2
+	cp   CHAR_ID_IORI
 	jp   z, Play_Char_SetIntroAnim
-	cp   CHAR_ID_OIORI*2
+	cp   CHAR_ID_OIORI
 	jp   z, Play_Char_SetIntroAnim
-	cp   CHAR_ID_KRAUSER*2
+	cp   CHAR_ID_KRAUSER
 	jp   z, Play_Char_SetIntroAnim
-	cp   CHAR_ID_MRKARATE*2
+	cp   CHAR_ID_MRKARATE
 	jp   z, Play_Char_SetIntroAnim
 	
 	; Otherwise, don't set the anim yet.
@@ -8438,11 +8438,11 @@ Play_Char_SetIntroAnim:
 	ld   hl, iPlInfo_CharId
 	add  hl, bc
 	ld   a, [hl]
-	cp   CHAR_ID_KYO*2		; Playing as Kyo?
+	cp   CHAR_ID_KYO		; Playing as Kyo?
 	jr   z, .chkKyo			; If so, jump
-	cp   CHAR_ID_IORI*2		; Playing as Iori?
+	cp   CHAR_ID_IORI		; Playing as Iori?
 	jr   z, .chkIori		; If so, jump
-	cp   CHAR_ID_GEESE*2	; Playing as Geese?
+	cp   CHAR_ID_GEESE		; Playing as Geese?
 	jr   z, .chkGeese		; If so, jump
 	
 	; Everyone else uses the normal intro animation.
@@ -8452,9 +8452,9 @@ Play_Char_SetIntroAnim:
 	ld   hl, iPlInfo_CharId
 	add  hl, de
 	ld   a, [hl]
-	cp   CHAR_ID_IORI*2		; KYO vs IORI?
+	cp   CHAR_ID_IORI		; KYO vs IORI?
 	jr   z, .isSpec			; If so, jump
-	cp   CHAR_ID_OIORI*2	; KYO vs IORI'?
+	cp   CHAR_ID_OIORI		; KYO vs IORI'?
 	jr   z, .isSpec			; If so, jump
 	jr   .noSpec			; Otherwise, nothing here
 .chkIori:
@@ -8462,7 +8462,7 @@ Play_Char_SetIntroAnim:
 	ld   hl, iPlInfo_CharId
 	add  hl, de
 	ld   a, [hl]
-	cp   CHAR_ID_KYO*2		; IORI vs KYO?
+	cp   CHAR_ID_KYO		; IORI vs KYO?
 	jr   z, .isSpec			; If so, jump
 	jr   .noSpec			; Otherwise, nothing here
 .chkGeese:
@@ -8470,7 +8470,7 @@ Play_Char_SetIntroAnim:
 	ld   hl, iPlInfo_CharId
 	add  hl, de
 	ld   a, [hl]
-	cp   CHAR_ID_TERRY*2	; GEESE vs TERRY?
+	cp   CHAR_ID_TERRY		; GEESE vs TERRY?
 	jr   z, .isSpec
 	jr   .noSpec
 .noSpec:
@@ -8514,21 +8514,21 @@ Play_Char_SetIntroAnimDelayed:
 	
 	; For all of these characters, we have already set the intro move in Play_Char_SetIntroAnimInstant,
 	; so leave the move value intact.
-	cp   CHAR_ID_ATHENA*2
+	cp   CHAR_ID_ATHENA
 	jp   z, .ret
-	cp   CHAR_ID_MAI*2
+	cp   CHAR_ID_MAI
 	jp   z, .ret
-	cp   CHAR_ID_LEONA*2
+	cp   CHAR_ID_LEONA
 	jp   z, .ret
-	cp   CHAR_ID_OLEONA*2
+	cp   CHAR_ID_OLEONA
 	jp   z, .ret
-	cp   CHAR_ID_IORI*2
+	cp   CHAR_ID_IORI
 	jp   z, .ret
-	cp   CHAR_ID_OIORI*2
+	cp   CHAR_ID_OIORI
 	jp   z, .ret
-	cp   CHAR_ID_KRAUSER*2
+	cp   CHAR_ID_KRAUSER
 	jp   z, .ret
-	cp   CHAR_ID_MRKARATE*2
+	cp   CHAR_ID_MRKARATE
 	jp   z, .ret
 	
 	; Ok, can set the move ID
@@ -8724,7 +8724,7 @@ Play_DoPl:
 			;   Both normals, specials and supers.
 			;   These are character-specific, but move codes may be reused between characters
 			;   for similar moves.
-			; - Attacked ($70-$98)
+			; - Attacked ($70-$98) ??? Autojump arcs ($70-$98)
 			;   These are used when getting attacked (hit, thrown, ...)
 			;   Shared with every character.
 			;
@@ -9500,146 +9500,183 @@ Pl_SetNewMove:
 		pop  de
 	pop  bc
 	ret
-L0028B2:;C
-	ld   hl, $000B
+	
+; =============== ExOBJS_Play_ChkHitModeAndMoveH ===============
+; IN
+; - DE: Ptr to wOBJInfo
+; OUT
+; - C flag; If set, the OBJInfo can be despawned
+ExOBJS_Play_ChkHitModeAndMoveH:
+
+	;
+	; If the sprite goes past the edges of the screen, it can be despawned.
+	;
+	ld   hl, iOBJInfo_RelX
 	add  hl, de
 	ld   a, [hl]
-	cp   $08
-	jp   c, L0028DF
-	cp   $A8
-	jp   nc, L0028DF
-	ld   hl, $0026
+	cp   OBJ_OFFSET_X+$00		; A < 0?
+	jp   c, .retSet				; If so, jump
+	cp   OBJ_OFFSET_X+SCREEN_H	; A >= screen width?
+	jp   nc, .retSet			; If so, jump
+	
+	;
+	; Handle sprite hit modes, applicable to projectiles only.
+	;
+	ld   hl, iOBJInfo_Proj_HitMode
 	add  hl, de
 	ld   a, [hl]
-	cp   $01
-	jp   z, L0028D5
-	cp   $02
-	jp   z, L0028E1
-L0028D0:;J
+	cp   PHM_REMOVE		; Did it get removed? (ie: projectile hit the target)
+	jp   z, .chkRemove	; If so, jump
+	cp   PHM_REFLECT	; Did it get reflected?
+	jp   z, .chkReflect	; If so, jump
+	
+	; Otherwise, just move the sprite horizontally
+.move:
 	call OBJLstS_ApplyXSpeed
-	xor  a
+.retClear:
+	xor  a	; C flag clear
 	ret
-L0028D5:;J
-	ld   hl, $0027
+	
+.chkRemove:
+	; Despawn the projectiles only if it has its priority value < $03.
+	; [TCRF?] Are there actually any?
+	;         In 95, the priority check was before the hit mode one
+	;         and it would skip it outright if iOBJInfo_Proj_Priority == $02.
+	ld   hl, iOBJInfo_Proj_Priority
 	add  hl, de
 	ld   a, [hl]
-	cp   $03
-	jp   nc, L0028D0
-L0028DF:;J
-	scf
+	cp   $03		; iOBJInfo_Proj_Priority >= $03?
+	jp   nc, .move	; If so, jump
+.retSet:
+	scf		; C flag set
 	ret
-L0028E1: db $7B;X
-L0028E2: db $FE;X
-L0028E3: db $40;X
-L0028E4: db $CA;X
-L0028E5: db $FF;X
-L0028E6: db $28;X
-L0028E7: db $21;X
-L0028E8: db $40;X
-L0028E9: db $D7;X
-L0028EA: db $CB;X
-L0028EB: db $7E;X
-L0028EC: db $C2;X
-L0028ED: db $D3;X
-L0028EE: db $28;X
-L0028EF: db $CD;X
-L0028F0: db $17;X
-L0028F1: db $29;X
-L0028F2: db $21;X
-L0028F3: db $00;X
-L0028F4: db $D7;X
-L0028F5: db $CB;X
-L0028F6: db $BE;X
-L0028F7: db $21;X
-L0028F8: db $19;X
-L0028F9: db $D7;X
-L0028FA: db $36;X
-L0028FB: db $00;X
-L0028FC: db $C3;X
-L0028FD: db $D3;X
-L0028FE: db $28;X
-L0028FF: db $21;X
-L002900: db $00;X
-L002901: db $D7;X
-L002902: db $CB;X
-L002903: db $7E;X
-L002904: db $C2;X
-L002905: db $D3;X
-L002906: db $28;X
-L002907: db $CD;X
-L002908: db $17;X
-L002909: db $29;X
-L00290A: db $21;X
-L00290B: db $40;X
-L00290C: db $D7;X
-L00290D: db $CB;X
-L00290E: db $BE;X
-L00290F: db $21;X
-L002910: db $59;X
-L002911: db $D7;X
-L002912: db $36;X
-L002913: db $00;X
-L002914: db $C3;X
-L002915: db $D3;X
-L002916: db $28;X
-L002917: db $C5;X
-L002918: db $D5;X
-L002919: db $E5;X
-L00291A: db $06;X
-L00291B: db $40;X
-L00291C: db $1A;X
-L00291D: db $22;X
-L00291E: db $13;X
-L00291F: db $05;X
-L002920: db $C2;X
-L002921: db $1C;X
-L002922: db $29;X
-L002923: db $C1;X
-L002924: db $21;X
-L002925: db $26;X
-L002926: db $00;X
-L002927: db $09;X
-L002928: db $36;X
-L002929: db $00;X
-L00292A: db $21;X
-L00292B: db $01;X
-L00292C: db $00;X
-L00292D: db $09;X
-L00292E: db $7E;X
-L00292F: db $EE;X
-L002930: db $30;X
-L002931: db $77;X
-L002932: db $D5;X
-L002933: db $21;X
-L002934: db $07;X
-L002935: db $00;X
-L002936: db $09;X
-L002937: db $56;X
-L002938: db $23;X
-L002939: db $5E;X
-L00293A: db $7A;X
-L00293B: db $2F;X
-L00293C: db $57;X
-L00293D: db $7B;X
-L00293E: db $2F;X
-L00293F: db $5F;X
-L002940: db $1C;X
-L002941: db $C2;X
-L002942: db $45;X
-L002943: db $29;X
-L002944: db $14;X
-L002945: db $73;X
-L002946: db $2B;X
-L002947: db $72;X
-L002948: db $D1;X
-L002949: db $3E;X
-L00294A: db $0F;X
-L00294B: db $CD;X
-L00294C: db $16;X
-L00294D: db $10;X
-L00294E: db $D1;X
-L00294F: db $C1;X
-L002950: db $C9;X
+.chkReflect:
+	; 
+	; Reflecting projectiles moves their OBJInfo to the opponent's slot,
+	; effectively turning it into the opponent's projectile.
+	;
+	; This is due to several hardcoded assumptions with the projectile slots.
+	; For example, wOBJInfo_Pl1Projectile is always "owned" by 1P can only ever hit wOBJInfo_Pl2
+	; and wOBJInfo_Pl2Projectile is always 2P's can only ever hit wOBJInfo_Pl1,
+	; so if 2P were to reflect 1P's projectile, the only way to make it work
+	; would be to move wOBJInfo_Pl1Projectile over to wOBJInfo_Pl2Projectile
+	; and changing some of its fields.
+	;
+	
+	; Detect which projectile slot got reflected, depending on the wOBJInfo address.
+	ld   a, e
+	cp   a, LOW(wOBJInfo_Pl2Projectile)	; Are we 2P's projectile?
+	jp   z, .reflect2P					; If so, jump
+.reflect1P:
+	; 
+	; 2P reflected 1P's projectile.
+	;
+	
+	; Don't reflect the projectile if there's 2P's projectile is visible.
+	; Otherwise the one on screen would visibly disappear.
+	; ??? In that case, the projectile will just be removed instead, since when
+	; reflecting or removing projetiles, PCF_PROJREM is always set.
+	ld   hl, wOBJInfo_Pl2Projectile+iOBJInfo_Status	; HL = Ptr to target projectile
+	bit  OSTB_VISIBLE, [hl]		; Is 2P's projectile already visible?
+	jp   nz, .retClear			; If so, ignore
+	
+	; Reflect it
+	call Play_Proj_Reflect
+	
+	; Hide 1P's projectile
+	ld   hl, wOBJInfo_Pl1Projectile+iOBJInfo_Status
+	res  OSTB_VISIBLE, [hl]
+	; And disable its hitbox
+	ld   hl, wOBJInfo_Pl1Projectile+iOBJInfo_HitboxId
+	ld   [hl], COLIBOX_00
+	jp   .retClear
+.reflect2P:
+	; 
+	; 1P reflected 2P's projectile.
+	;
+	
+	; Don't reflect if 1P's slot is already used
+	ld   hl, wOBJInfo_Pl1Projectile+iOBJInfo_Status	; HL = Ptr to target projectile
+	bit  OSTB_VISIBLE, [hl]
+	jp   nz, .retClear
+	
+	; Reflect it
+	call Play_Proj_Reflect
+	
+	; Hide 2P's projectile
+	ld   hl, wOBJInfo_Pl2Projectile+iOBJInfo_Status
+	res  OSTB_VISIBLE, [hl]
+	; And disable its hitbox
+	ld   hl, wOBJInfo_Pl2Projectile+iOBJInfo_HitboxId
+	ld   [hl], COLIBOX_00
+	jp   .retClear
+	
+; =============== Play_Proj_Reflect ===============
+; Reflects a projectile.
+; See .chkReflect from the subroutine above.
+; IN
+; - DE: Ptr to source wOBJInfo (projectile that got reflected)
+; - HL: Ptr to destination wOBJInfo (whereto copy it over)
+Play_Proj_Reflect:
+	push bc
+		push de
+		
+			;
+			; Copy the full wOBJInfo to the opponent's slot
+			;
+			push hl
+				ld   b, OBJINFO_SIZE	; B = Bytes to copy
+			.cpLoop:
+				ld   a, [de]			
+				ldi  [hl], a			
+				inc  de
+				dec  b					; Are we done?
+				jp   nz, .cpLoop		; If not, loop
+			pop  bc	; BC = Ptr to destination slot
+			
+			; Reset its hit mode, so it won't try to reflect it again
+			ld   hl, iOBJInfo_Proj_HitMode
+			add  hl, bc
+			ld   [hl], PHM_NONE
+			
+			; Flip it horizontally and switch its palette (1P & 2P have different palettes)
+			ld   hl, iOBJInfo_OBJLstFlags
+			add  hl, bc
+			ld   a, [hl]
+			xor  a, SPR_OBP1|SPR_XFLIP
+			ld   [hl], a
+			
+			;
+			; Invert its horizontal speed to make it return back.
+			;
+			push de
+				ld   hl, iOBJInfo_SpeedX
+				add  hl, bc		
+				ld   d, [hl]	; D = iOBJInfo_SpeedX
+				inc  hl
+				ld   e, [hl]	; E = iOBJInfo_SpeedXSub
+				ld   a, d		; Invert high byte
+				cpl  
+				ld   d, a
+				ld   a, e		; Invert low byte	
+				cpl  
+				ld   e, a
+				inc  e			; Account for bitflip
+				jp   nz, .saveSpd
+				inc  d
+			.saveSpd:
+				ld   [hl], e	; Save it back
+				dec  hl
+				ld   [hl], d
+			pop  de
+			
+			; Play SGB/DMG SFX
+			ld   a, SCT_REFLECT
+			call HomeCall_Sound_ReqPlayExId
+		pop  de
+	pop  bc
+	ret
+	
 ; =============== OBJLstS_Hide ===============
 ; Hides/disables the specified sprite mapping.
 ; IN
@@ -9672,7 +9709,7 @@ MoveC_Base_Jump:
 	; This has the nice result of OSTB_GFXNEWLOAD being only set the very first time we
 	; execute the code for any given .onOBJ*, allowing an easy way to execute code code once.
 	;
-	; For the same reason, OBJLstS_IsFrameEnd can't be used to determine if we're about
+	; For the same reason, OBJLstS_IsInternalFrameAboutToEnd can't be used to determine if we're about
 	; to switch frames since it goes off the *internal* frame ID.	
 	
 	; Don't allow executing normals when displaying the first and last frame.
@@ -9680,9 +9717,9 @@ MoveC_Base_Jump:
 	add  hl, de
 	ld   a, [hl]
 	cp   $00*OBJLSTPTR_ENTRYSIZE	; OBJLstId == 0?		
-	jp   z, .obj0_init	; If so, jump
+	jp   z, .obj0_init				; If so, jump
 	cp   $07*OBJLSTPTR_ENTRYSIZE	; OBJLstId == 7?
-	jp   z, .obj7_landed	; If so, jump
+	jp   z, .obj7_landed			; If so, jump
 	
 	;
 	; Move Input Reader
@@ -9699,13 +9736,13 @@ MoveC_Base_Jump:
 	ld   hl, iPlInfo_JoyMergedKeysLH
 	add  hl, bc
 	; Normals (air)
-	bit  KEPB_A_LIGHT, [hl]				; Light kick?
+	bit  KEPB_A_LIGHT, [hl]	; Light kick?
 	jp   nz, .startAirKick	; If so, jump
-	bit  KEPB_B_LIGHT, [hl]				; Light punch?
+	bit  KEPB_B_LIGHT, [hl]	; Light punch?
 	jp   nz, .startAirPunch	; If so, jump
-	bit  KEPB_A_HEAVY, [hl]				; Heavy kick?
+	bit  KEPB_A_HEAVY, [hl]	; Heavy kick?
 	jp   nz, .startAirKick	; If so, jump
-	bit  KEPB_B_HEAVY, [hl]				; Heavy punch?
+	bit  KEPB_B_HEAVY, [hl]	; Heavy punch?
 	jp   nz, .startAirPunch	; If so, jump
 	
 	; Otherwise, skip ahead
@@ -9798,7 +9835,7 @@ MoveC_Base_Jump:
 	call Play_Pl_AreBothBtnHeld
 	jp   c, .startAirAttack
 	; New move
-	ld   a, SCT_07
+	ld   a, SCT_LIGHT
 	call HomeCall_Sound_ReqPlayExId
 	ld   a, MOVE_SHARED_PUNCH_A
 	call Pl_Unk_SetNewMoveAndAnim
@@ -9817,22 +9854,18 @@ MoveC_Base_Jump:
 	ld   a, MOVE_SHARED_KICK_A
 	call Pl_Unk_SetNewMoveAndAnim
 	jp   .move
-	
+
+; --------------- frame #0 ---------------	
+; Preparing to jump.
 ;
-; Frame 0: Preparing to jump.
 ; Get manual control of the animation timing as soon as the internal frame
-; is about to change (iOBJInfo_FrameLeft == 0, as checked by OBJLstS_IsFrameEnd).
+; is about to change (iOBJInfo_FrameLeft == 0, as checked by OBJLstS_IsInternalFrameAboutToEnd).
 ; Since the graphics for the new frame have to load, this will still be called a few times after that.
-; 
 .obj0_init:
-	call OBJLstS_IsFrameEnd			; HL = iOBJInfo_FrameLeft
-	jp   nc, .anim
-	inc  hl							; Seek to iOBJInfo_FrameTotal
-	ld   [hl], ANIMSPEED_NONE		; iOBJInfo_FrameTotal = $FF
-	jp   .anim
-	
-;
-; Frame 1: Starting the jump, and determines its "type".
+	mMvC_SetSpeedOnInternalFrameEnd ANIMSPEED_NONE, .anim
+
+; --------------- frame #1 ---------------	
+; Starting the jump, and determines its "type".
 ;
 ; Jump "types" don't really exist though.
 ; What actually happens is that, through a series of checks that mostly depend
@@ -10085,10 +10118,9 @@ MoveC_Base_Jump:
 	ld   h, ANIMSPEED_NONE	
 	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   .chkWallJump
-	
-;
-; Frames 2-5: Advance to the next frame when reaching the targets.
-;
+
+; --------------- frames #2-5 ---------------	
+; Advance to the next frame when reaching the targets.
 .obj2_air:
 	ld   a, -$05			; Target Y Speed
 	ld   h, ANIMSPEED_NONE	; Continue manual control
@@ -10109,11 +10141,11 @@ MoveC_Base_Jump:
 	ld   h, ANIMSPEED_NONE
 	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   .chkWallJump
-	
-;
+
+; --------------- common frames #2-6 ---------------	
 ; Handle the wall jump.
-; This is allowed for any of the sprite mappings used when we're in the air (#2-6)
 ;
+; This is allowed for any of the sprite mappings used when we're in the air (#2-6)
 .chkWallJump:
 	call Play_Pl_ChkWallJumpInput	; Did we start a wall jump?
 	jp   nc, .move					; If not, jump
@@ -10122,14 +10154,13 @@ MoveC_Base_Jump:
 	; so don't touch anything about it.
 	jp   .ret
 	
-;
+; --------------- common frames #1-6 ---------------
 ; Move the player in the air, applying gravity.
-;
 .move:
 	; Move the player in the air
 	ld   hl, iPlInfo_Gravity				; HL = Ptr to gravity
 	call Pl_GetWord							; Read it out to HL
-	call OBJLstS_ApplyGravity				; Apply it
+	call OBJLstS_ApplyGravityVAndMoveHV				; Apply it
 	jp   nc, .anim			; Did we touch the ground? If not, skip
 	; Otherwise, switch to the landing act.
 	; During this time, starting specials is allowed, making it
@@ -10143,16 +10174,16 @@ MoveC_Base_Jump:
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   .ret
 	
+; --------------- frame #7 ---------------
+; Landing frame
 ;
-; Frame 7: Landing frame
-;          Just waits for the frame to end before ending the move.
-;
+; Just waits for the frame to end before ending the move.
 .obj7_landed:
-	call OBJLstS_IsFrameEnd			; Is the frame about to finish?
-	jp   nc, .anim	; If not, continue
-	call Play_Pl_EndMove			; Otherwise, we're done
+	call OBJLstS_IsInternalFrameAboutToEnd	; Is the frame about to finish?
+	jp   nc, .anim							; If not, continue
+	call Play_Pl_EndMove					; Otherwise, we're done
 	jr   .ret
-	
+; --------------- common ---------------	
 .anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 .ret:
@@ -10191,9 +10222,9 @@ Play_Pl_ChkWallJumpInput:
 	ld   hl, iPlInfo_CharId
 	add  hl, bc
 	ld   a, [hl]
-	cp   CHAR_ID_MAI*2		; Playing as Mai?
+	cp   CHAR_ID_MAI		; Playing as Mai?
 	jp   z, .chkEdge		; If so, jump
-	cp   CHAR_ID_ATHENA*2	; ...
+	cp   CHAR_ID_ATHENA		; ...
 	jp   z, .chkEdge
 	jp   .retClear			; Otherwise, return
 	
@@ -11056,7 +11087,7 @@ OBJLstS_IsFrameNewLoad:
 	bit  OSTB_GFXNEWLOAD, [hl]	; Is the flag set?
 	ret
 	
-; =============== OBJLstS_IsFrameEnd ===============
+; =============== OBJLstS_IsInternalFrameAboutToEnd ===============
 ; Determines if the current sprite mapping ID is about to be updated later on this frame.
 ;
 ; The purpose of this is to syncronize certain actions in the move code, like spawning projectiles
@@ -11072,7 +11103,7 @@ OBJLstS_IsFrameNewLoad:
 ; - HL: Ptr to iOBJInfo_FrameLeft
 ;       Code actually relies on this.
 ; - C flag: If set, the animation frame will change by the end of the frame
-OBJLstS_IsFrameEnd:
+OBJLstS_IsInternalFrameAboutToEnd:
 	; If the GFX aren't fully loaded yet, the animation can't continue
 	call OBJLstS_IsGFXLoadDone
 	jp   nz, .retClear
@@ -11137,7 +11168,7 @@ ENDC
 		ld   hl, iPlInfo_CharId
 		add  hl, bc		
 		ld   a, [hl]			; A = CharId
-		cp   CHAR_ID_DAIMON*2 	; Playing as DAIMON?
+		cp   CHAR_ID_DAIMON 	; Playing as DAIMON?
 		jp   z, .unused_daimon	; If so, jump
 	.norm:
 		ld   a, SFX_STEP		; A = Normal step SFX ID
@@ -11169,7 +11200,7 @@ L002E1A:;C
 	ld   [hl], b
 	call OBJLstS_DoAnimTiming_Initial_by_DE
 	pop  bc
-	call Play_Pl_IsDizzy
+	call Play_Pl_IsDizzyNext
 	jp   nz, L002E3E
 	ld   a, $9B
 	call HomeCall_Sound_ReqPlayExId
@@ -11253,9 +11284,9 @@ OBJLstS_ReqAnimOnGtYSpeed:
 		jp   .retClear		; Otherwise, return
 		
 	.chkChange:
-		; The animation routine waits for the graphics to load before deciding when to switch frames (read: iOBJInfo_FrameLeft == 0).
-		; Since this subroutine has a return value, don't tell lies to whoever's using it.
-		; Note that said animation routine should only be called by the move code after this.
+		; As a side effect of the move code going off the visible frame, this will get called multiple times
+		; even after we successfully request the frame to advance.
+		; Avoid accidentally erasing iOBJInfo_FrameLeft on next calls to this while the same frame is visible.
 		call OBJLstS_IsGFXLoadDone	; Have the frame graphics loaded?
 		jp   nz, .retClear			; If not, return
 		
@@ -11348,7 +11379,7 @@ Play_Pl_EndMove:
 	; - PF2B_HEAVY: ???
 	res  PF0B_SPECMOVE, [hl]
 	res  PF0B_AIR, [hl]
-	res  PF0B_FARHIT, [hl]
+	res  PF0B_PROJHIT, [hl]
 	res  PF0B_PROJREM, [hl]
 	res  PF0B_PROJREFLECT, [hl]
 	res  PF0B_SUPERMOVE, [hl]
@@ -11888,10 +11919,12 @@ Play_Pl_DoBasicMoveInput:
 			add  hl, bc
 			ld   [hl], $00				; iPlInfo_RunningJump = 0
 			
+			; MoveC_Base_RunF sets iPlInfo_MoveId to MOVE_SHARED_RUN_F when we stop running.
+			; If we got here, it's because we stopped running by pressing the jump button during a run.
 			ld   hl, iPlInfo_MoveId
 			add  hl, bc
 			ld   a, [hl]
-			cp   MOVE_SHARED_DASH_F		; iPlInfo_MoveId == forward dash?
+			cp   MOVE_SHARED_RUN_F		; iPlInfo_MoveId == forward dash?
 			jp   nz, .start				; If not, skip
 			
 			ld   hl, iPlInfo_RunningJump
@@ -12301,7 +12334,7 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_XFLIPLOCK, [hl]
 			
 			; New move
-			ld   a, MOVE_SHARED_DASH_F
+			ld   a, MOVE_SHARED_RUN_F
 			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
 			
 			; Set continuous running speed
@@ -12558,7 +12591,12 @@ Pl_Unk_SetNewMoveAndAnim_StopSpeed:
 	
 ; =============== Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH ===============
 ; Starts a new move and initializes its animation.
-; This is for moves that clear iPlInfo_JoyNewKeysLH, which are short moves that shouldn't be continuous.
+; This is used for starting basic moves (BasicInput_ChkBaseInput) that depend on the light/heavy status.
+;
+; These basic inputs don't kill the player's momentum, but do unmark any other newly pressed key,
+; in case we're starting a move that calls Play_Pl_CreateJoyMergedKeysLH to do something 
+; (ie: start chained move, end the move early, ...)
+;
 ; IN
 ; - A: Move ID
 ; - BC: Ptr to wPlInfo structure
@@ -13166,60 +13204,104 @@ OBJLstS_ApplyXSpeed:
 		pop  de
 	pop  bc
 	ret
-	
-L0035D9:;C
+
+; =============== OBJLstS_ApplyFrictionHAndMoveH ===============
+; Moves the sprite horizontally while under the effect of horizontal friction.
+;
+; Friction is just a fixed value that gets either added 
+; or subtracted to the player's speed, depending on the direction he's moving.
+;
+; This causes the horizontal speed to gradually reach 0.
+;
+; It's very similar to the subroutines for applying vertical gravity, and it follows
+; the same structure, but those are "uncapped" and only end when touching the ground.
+;
+; IN
+; - HL: Friction value, always positive.
+; - DE: Ptr to wOBJInfo
+; OUT
+; - C flag: If set, our horz. speed was 0 already.
+;           As long as we get here with iOBJInfo_SpeedX > 0, this will be cleared.
+OBJLstS_ApplyFrictionHAndMoveH:
 	push bc
-	push de
-	push hl
+		push de
+		
+			; BC = Friction value
+			push hl
+			pop  bc
+			
+			;
+			; If our speed is already 0, we don't need to do anything.
+			;
+			ld   hl, iOBJInfo_SpeedX
+			add  hl, de
+			ld   a, [hl]		; A = iOBJInfo_SpeedX
+			or   a				; SpeedX == 0?
+			jp   z, .moveEnd	; If so, return
+			
+			;
+			; If our speed is positive (we're moving right), invert the friction
+			; from positive to negative, otherwise we'd be increasing the speed.
+			;
+			bit  7, a			; SpeedX < 0? (MSB set)
+			jp   nz, .saveSpeed	; If so, skip
+			; Otherwise, BC = -BC
+			ld   a, b			; Invert high byte
+			cpl
+			ld   b, a
+			ld   a, c			; Invert low byte
+			cpl
+			ld   c, a
+			inc  bc				; Account for bitflip
+			
+		.saveSpeed:
+		
+			;
+			; Update the horizontal movement speed.
+			;
+			push hl	; Save ptr to iOBJInfo_SpeedX
+				; DE = X Speed
+				ld   d, [hl]	; D = iOBJInfo_SpeedX
+				inc  hl
+				ld   e, [hl]	; E = iOBJInfo_SpeedXSub
+				
+				; Add the friction over to reduce it
+				; DE += Friction
+				push de			; HL = DE
+				pop  hl
+				add  hl, bc		; HL += BC
+				push hl			; DE = HL
+				pop  de
+			pop  hl	; Restore ptr to iOBJInfo_SpeedX
+			
+			; Write back the updated speed
+			ld   [hl], d	; iOBJInfo_SpeedX = D
+			inc  hl
+			ld   [hl], e	; iOBJInfo_SpeedXSub = E
+			jp   .moveOk
+			
+		.moveEnd:
+		pop  de
 	pop  bc
-	ld   hl, $0007
-	add  hl, de
-	ld   a, [hl]
-	or   a
-	jp   z, L003602
-	bit  7, a
-	jp   nz, L0035F2
-	ld   a, b
-	cpl
-	ld   b, a
-	ld   a, c
-	cpl
-	ld   c, a
-	inc  bc
-L0035F2:;J
-	push hl
-	ld   d, [hl]
-	inc  hl
-	ld   e, [hl]
-	push de
-	pop  hl
-	add  hl, bc
-	push hl
-	pop  de
-	pop  hl
-	ld   [hl], d
-	inc  hl
-	ld   [hl], e
-	jp   L00360D
-L003602:;J
-	pop  de
-	pop  bc
-	ld   hl, $0007
+	
+	; Force reset pixel and subpixel speed values
+	ld   hl, iOBJInfo_SpeedX
 	add  hl, de
 	xor  a
-	ldi  [hl], a
-	ld   [hl], a
-	scf
+	ldi  [hl], a	; iOBJInfo_SpeedX = 0
+	ld   [hl], a	; iOBJInfo_SpeedXSub = 0
+	scf				; C flag set
 	ret
-L00360D:;J
-	pop  de
+		.moveOk:
+		pop  de
 	pop  bc
+	; Move horizontally with the recently updated speed value
 	call OBJLstS_ApplyXSpeed
-	or   a
+	or   a			; C flag clear
 	ret
 	
-; =============== OBJLstS_ApplyGravity ===============
-; Moves the sprite horizontally and vertically while under the effect of gravity.
+; =============== OBJLstS_ApplyGravityVAndMoveHV ===============
+; Moves the sprite horizontally and vertically while under the effect of vertical gravity.
 ;
 ; Gravity is just a fixed value that gets added to the player's speed.
 ; This causes the speed to gradually increase, making it go from negative (moving up)
@@ -13231,7 +13313,7 @@ L00360D:;J
 ; - DE: Ptr to wOBJInfo
 ; OUT
 ; - C flag: If set, we touched the ground.
-OBJLstS_ApplyGravity:
+OBJLstS_ApplyGravityVAndMoveHV:
 	push bc
 		; BC = Gravity value
 		push hl
@@ -13358,81 +13440,137 @@ OBJLstS_ApplyGravity:
 	xor  a		; C flag clear
 	ret
 	
-L003672:;C
+; =============== OBJLstS_ApplyGravityVAndMoveV ===============
+; Moves the sprite vertically while under the effect of vertical gravity.
+;
+; Exactly like OBJLstS_ApplyGravityVAndMoveHV, but without moving horizontally.
+; 
+; IN
+; - HL: Gravity value
+; - DE: Ptr to wOBJInfo
+; OUT
+; - C flag: If set, we touched the ground.
+OBJLstS_ApplyGravityVAndMoveV:
 	push bc
-	push hl
+		; BC = Gravity value
+		push hl
+		pop  bc
+		
+		push de
+		
+			;
+			; Update the vertical movement speed.
+			;
+		
+			; DE = HL = Ptr to Y speed
+			ld   hl, iOBJInfo_SpeedY
+			add  hl, de
+			push hl
+			pop  de
+			
+			; HL = SpeedY + Gravity
+			push de
+				ld   a, [de]	; H = iOBJInfo_SpeedY
+				ld   h, a
+				inc  de
+				ld   a, [de]	; L = iOBJInfo_SpeedYSub
+				ld   l, a
+				add  hl, bc		; += Gravity
+			pop  de
+			
+			; Write back the updated speed
+			push de
+				ld   a, h		; iOBJInfo_SpeedY = H
+				ld   [de], a
+				inc  de
+				ld   a, l		; iOBJInfo_SpeedYSub = L
+				ld   [de], a
+			pop  de
+			
+			;
+			; Apply the newly updated speed to the player's Y position.
+			;
+			
+			push hl	; Save Y Speed
+				; DE = Ptr to Y Position
+				dec  de		; iOBJInfo_SpeedXSub
+				dec  de		; iOBJInfo_SpeedX
+				dec  de		; iOBJInfo_YSub
+				dec  de		; iOBJInfo_Y
+				
+				; Y += SpeedY
+				push de
+					ld   a, [de]	; B = iOBJInfo_Y
+					ld   b, a
+					inc  de
+					ld   a, [de]	; C = iOBJInfo_YSub
+					ld   c, a
+					add  hl, bc		; += SpeedY
+				pop  de
+				
+				; Write back the updated Y position
+				ld   a, h		; iOBJInfo_Y = H
+				ld   [de], a
+				inc  de			; Seek to iOBJInfo_YSub
+				ld   a, l		; iOBJInfo_YSub = L
+				ld   [de], a
+			pop  hl	; Restore Y Speed
+			
+			;
+			; Validate the new Y position.
+			; We always want to be above the ground, and not underflow it.
+			;
+			
+			bit  7, h				; MSB set? (YSpeed < 0)
+			jp   z, .chkMoveDown	; If not, jump
+		.chkMoveUp:
+			; 
+			; When moving up, prevent underflowing the Y position.
+			; If it did, snap it back to the topmost position.
+			;
+			; For some reason, this is done by comparing it with PL_FLOOR_POS, which works
+			; because we're always above the ground until we underflow it.
+			;
+			dec  de				; Seek back to iOBJInfo_Y
+			ld   a, [de]
+			cp   PL_FLOOR_POS	; iOBJInfo_Y < $88?
+			jp   c, .moveOk		; If so, jump (we're above the ground)
+			; Otherwise, force it back to $0000
+			xor  a
+			ld   [de], a		; iOBJInfo_Y = 0
+			inc  de
+			ld   [de], a		; iOBJInfo_YSub = 0
+			jp   .moveOk
+		.chkMoveDown:
+			;
+			; When moving down, prevent moving below the floor.
+			; If we are, snap back to it and signal that we've touched the ground.
+			;
+			dec  de
+			ld   a, [de]
+			cp   PL_FLOOR_POS	; iOBJInfo_Y < $88?
+			jp   c, .moveOk		; If so, jump (we're above the ground)
+			
+		.jumpEnd:
+		pop  de
 	pop  bc
-	push de
-	ld   hl, $0009
+	; Otherwise, force the player to be on the ground
+	ld   hl, iOBJInfo_Y
 	add  hl, de
-	push hl
-	pop  de
-	push de
-	ld   a, [de]
-	ld   h, a
-	inc  de
-	ld   a, [de]
-	ld   l, a
-	add  hl, bc
-	pop  de
-	push de
-	ld   a, h
-	ld   [de], a
-	inc  de
-	ld   a, l
-	ld   [de], a
-	pop  de
-	push hl
-	dec  de
-	dec  de
-	dec  de
-	dec  de
-	push de
-	ld   a, [de]
-	ld   b, a
-	inc  de
-	ld   a, [de]
-	ld   c, a
-	add  hl, bc
-	pop  de
-	ld   a, h
-	ld   [de], a
-	inc  de
-	ld   a, l
-	ld   [de], a
-	pop  hl
-	bit  7, h
-	jp   z, L0036B1
-	dec  de
-	ld   a, [de]
-	cp   $88
-	jp   c, L0036C7
-	xor  a
-	ld   [de], a
-	inc  de
-	ld   [de], a
-	jp   L0036C7
-L0036B1:;J
-	dec  de
-	ld   a, [de]
-	cp   $88
-	jp   c, L0036C7
-	pop  de
-	pop  bc
-	ld   hl, $0005
-	add  hl, de
-	ld   [hl], $88
+	ld   [hl], PL_FLOOR_POS	; iOBJInfo_Y = $88
 	inc  hl
-	xor  a
+	xor  a			; iOBJInfo_YSub = 0
 	ldi  [hl], a
+	; [POI] And reset the Y speed (if they didn't delete the lines to do so...)
 	inc  hl
 	inc  hl
-	scf
+	scf			; C flag set
 	ret
-L0036C7:;J
-	pop  de
+	
+		.moveOk:
+		pop  de
 	pop  bc
-	xor  a
+	xor  a		; C flag clear
 	ret
 ; =============== MoveInputS_CanStartSpecialMove ===============
 ; Validates if it's possible to perform a new special move.
@@ -13462,18 +13600,13 @@ MoveInputS_CanStartSpecialMove:
 	bit  PF0B_SPECMOVE, [hl]	; Is the bit set?
 	jp   nz, .retNoMove		; If so, return
 	
-
-	; It's allowed to start a move when blocking
-	; 
-	; ??? What are the special cases?
-	;
+	
 	ld   hl, iPlInfo_Flags1
-	add  hl, bc				; Seek to iPlInfo_Flags1
-	
+	add  hl, bc				; Seek to iPlInfo_Flags1	
 	
 	;
-	; If the player is dizzy or is getting combo'd, no special moves can be input...
-	; ...except when blockingm, as it's possible to cancel blockstun.
+	; If the player is about to get dizzy or is getting combo'd, no special moves can be input...
+	; ...except when blocking, as it's possible to cancel blockstun.
 	; Note that all of the guard cancel validation already happened
 	; by the time we get here.
 	;
@@ -13481,7 +13614,7 @@ MoveInputS_CanStartSpecialMove:
 	jp   nz, .chkMoveId			; If so, jump
 	bit  PF1B_COMBORECV, [hl]	; Are we getting combo'd?
 	jp   nz, .retNoMove			; If so, return
-	call Play_Pl_IsDizzy		; Is the player dizzy?
+	call Play_Pl_IsDizzyNext	; Is the player about to get dizzy?
 	jp   nz, .retNoMove			; If so, return
 	
 .chkMoveId:
@@ -13938,17 +14071,22 @@ Play_StartThrowEffect:
 	call HomeCall_Sound_ReqPlayExId
 	ret
 	
-; =============== L003875 ===============
+; =============== Play_Pl_MoveRotThrown ===============
+; Moves the position of the thrown opponent during its rotation frames, relative to the *other* player *visually* facing left (2P side).
+; This is expected to be applied only once, and generally requires a call to Play_Pl_SetMoveDamage
+; setting a rotation frame to work properly (those are only valid for 1 frame, so "repeated" calls with the same rot may be needed)
 ; IN
-; - H: Value for $C176
-; - L: Value for $C177
-L003875:;C
+; - H: Horizontal movement
+; - L: Vertical position
+Play_Pl_MoveRotThrown:
 	ld   a, h
-	ld   [$C176], a
+	ld   [wPlayPlThrowRotMoveH], a
 	ld   a, l
-	ld   [$C177], a
+	ld   [wPlayPlThrowRotMoveV], a
+	; ??? By default only use it in the HitAnim code for rotation frames.
+	;     If it needs to be used in the move code as well, it should be manually set after calling this.
 	xor  a
-	ld   [$C178], a
+	ld   [wPlayPlThrowRot_Unk_UseInMove], a
 	ret
 	
 ; =============== Play_Pl_SetMoveDamage ===============
@@ -13959,6 +14097,7 @@ L003875:;C
 ; - H: Damage amount
 ; - L: Hit animation ID (HITANIM_*)
 ; - A: Damage flags
+; - BC: Ptr to wPlInfo
 Play_Pl_SetMoveDamage:
 	push de
 		; DE = HL
@@ -13987,15 +14126,17 @@ Play_Pl_SetMoveDamage:
 ; To erase the damage, either call Play_Pl_SetMoveDamage manually or wait for
 ; a new move to be set, since Pl_SetNewMove zeroes out all damage-related fields
 ; in preparation of the move code setting new ones through Play_Pl_IsMoveLoading.
-
-; fields to the current ones. if iPlInfo_MoveDamageValNext is set,
-; it will copy over the values to iPlInfo_MoveDamageValNext
 ;
 ; This is meant to be used to update the damage mid-animation, not when the move starts
 ; as that's handled by Pl_SetNewMove.
 ;
 ; This is one of the two subroutines used to update the damage mid-animation,
 ; and by using this one VBlankHandler will apply the changes.
+; IN
+; - H: Damage amount
+; - L: Hit animation ID (HITANIM_*)
+; - A: Damage flags
+; - BC: Ptr to wPlInfo
 Play_Pl_SetMoveDamageNext:
 	push de
 		; DE = HL
@@ -14059,7 +14200,7 @@ Play_Proj_CopyMoveDamageFromPl:
 ; =============== Play_Pl_IsMoveLoading ===============
 ; Checks if the move is "ready", which is when move-specific code is allowed to run (as checked manually in many MoveC_*).
 ;
-; This also has the secondary purpose to update the move damage field as soon as the move
+; This also has the secondary purpose of updating the move damage field as soon as the move
 ; is detected to be ready. It will only happen once, the first frame the move is ready.
 ;
 ; See also: VBlankHandler, which does the same thing only if a move *wasn't* started this frame.
@@ -14211,10 +14352,10 @@ Play_Pl_ChkThrowInput:
 	jp   nz, .retClear			; If not, return
 	
 	; Not applicable when the opponent is waking up
-	ld   hl, iPlInfo_WakeUpTimerOther
+	ld   hl, iPlInfo_NoThrowTimerOther
 	add  hl, bc
 	ld   a, [hl]
-	or   a						; iPlInfo_WakeUpTimerOther > 0?
+	or   a						; iPlInfo_NoThrowTimerOther > 0?
 	jp   nz, .retClear			; If so, return
 	
 	;
@@ -14310,13 +14451,13 @@ Play_Pl_ChkThrowInput:
 	ld   hl, iPlInfo_CharId
 	add  hl, bc
 	ld   a, [hl]
-	cp   CHAR_ID_ATHENA*2	; Playing as ATHENA?
+	cp   CHAR_ID_ATHENA		; Playing as ATHENA?
 	jp   z, .airOk			; If so, jump
-	cp   CHAR_ID_MAI*2		; ...
+	cp   CHAR_ID_MAI		; ...
 	jp   z, .airOk
-	cp   CHAR_ID_LEONA*2
+	cp   CHAR_ID_LEONA
 	jp   z, .airOk
-	cp   CHAR_ID_OLEONA*2
+	cp   CHAR_ID_OLEONA
 	jp   z, .airOk
 	jp   .noThrow			; Otherwise, return
 .airOk:
@@ -14503,10 +14644,10 @@ MoveInputS_TryStartCommandThrow_Unk_Coli04:
 	jp   nz, MoveInputS_TryStartCommandThrow.noThrow	; If so, jump
 	
 	; If the opponent is waking up, return
-	ld   hl, iPlInfo_WakeUpTimerOther
+	ld   hl, iPlInfo_NoThrowTimerOther
 	add  hl, bc
 	ld   a, [hl]
-	or   a												; iPlInfo_WakeUpTimerOther != 0?
+	or   a												; iPlInfo_NoThrowTimerOther != 0?
 	jp   nz, MoveInputS_TryStartCommandThrow.noThrow	; If so, return
 	
 	; Throw forward
@@ -14715,7 +14856,7 @@ Play_Pl_GiveKnockbackCornered:
 	;
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	bit  PF0B_FARHIT, [hl]		; Is the flag set?
+	bit  PF0B_PROJHIT, [hl]		; Is the flag set?
 	jp   nz, .ret				; If so, return
 	
 	; Copy iOBJInfo_RangeMoveAmount to iPlInfo_PushSpeedHReq.
@@ -14753,7 +14894,7 @@ Play_Unk_Pl_BlockstunNormal:
 	;
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	bit  PF0B_FARHIT, [hl]			; Did we get hit by a projectile?
+	bit  PF0B_PROJHIT, [hl]			; Did we get hit by a projectile?
 	jp   nz, .go					; If so, skip
 	; Enable opponent hitstop next frame
 	ld   a, $01								
@@ -14863,7 +15004,7 @@ Play_Pl_GetShakeCount:
 	;
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	bit  PF0B_FARHIT, [hl]	; Did we get hit by a projectile?
+	bit  PF0B_PROJHIT, [hl]	; Did we get hit by a projectile?
 	jp   nz, .base08		; If so, jump
 .base0A:
 	ld   a, $08+$02			; ShakeCnt = $0A
@@ -14884,14 +15025,14 @@ Play_Pl_GetShakeCount:
 	bit  PF3B_SHAKEONCE, [hl]	; Is the bit set?
 	jp   nz, .shakeOnce			; If so, jump
 	
-	; If this isn't set as a long shake, cut in half thw shake count
+	; If this isn't set as a long shake, cut in half the shake count
 	bit  PF3B_SHAKELONG, [hl]	; Is the bit set?
 	jp   nz, .chkHealth			; If so, jump
 .shakeHalf:
-	srl  a					; ShakeCnt = ShakeCnt / 2				
+	srl  a						; ShakeCnt = ShakeCnt / 2				
 	jp   .chkHealth
 .shakeOnce:
-	ld   a, $01				; ShakeCnt = 1
+	ld   a, $01					; ShakeCnt = 1
 	
 	
 .chkHealth:
@@ -14999,7 +15140,7 @@ Play_Pl_DoBlockstun:
 	;
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	bit  PF0B_FARHIT, [hl]					; Did we get hit by a projectile?
+	bit  PF0B_PROJHIT, [hl]					; Did we get hit by a projectile?
 	jp   nz, .setFlags21					; If so, skip
 	; Enable opponent hitstop next frame
 	ld   a, $01								
@@ -15090,11 +15231,11 @@ Play_Pl_DoBlockstun:
 	scf			; C flag set
 	ret
 	
-; =============== Play_Pl_ChkGuardCancelRollPlay_Pl_ChkGuardCancelRoll ===============
+; =============== Play_Pl_ChkGuardCancelRoll ===============
 ; Checks if the player can roll out of blockstun and is performing the input for it.
 ;
 ; Note that this is not used as a general move check for rolls,
-; as that's handled by ?????.
+; as that's handled by the basic input handler.
 ; IN:
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
@@ -15285,17 +15426,17 @@ Play_Pl_DoGroundScreenShake:
 .ret:
 	ret
 	
-; =============== Play_Pl_IsDizzy ===============
-; Determines if the specified player is dizzy.
+; =============== Play_Pl_IsDizzyNext ===============
+; Determines if the specified player was requested to get dizzy.
 ; IN
 ; - BC: Ptr to wPlInfo
 ; OUT
 ; - Z flag: If set, the player isn't dizzy
-Play_Pl_IsDizzy:
-	; Z = iPlInfo_Dizzy == 0
-	ld   hl, iPlInfo_Dizzy
+Play_Pl_IsDizzyNext:
+	; Z = iPlInfo_DizzyNext == 0
+	ld   hl, iPlInfo_DizzyNext
 	add  hl, bc		
-	ld   a, [hl]	; A = iPlInfo_Dizzy
+	ld   a, [hl]	; A = iPlInfo_DizzyNext
 	or   a			; A != 0?
 	ret
 	
@@ -15329,7 +15470,7 @@ L003CB3:;C
 	
 .alive:
 	; Wait $1E frames before fully waking up
-	ld   hl, iPlInfo_WakeUpTimer
+	ld   hl, iPlInfo_NoThrowTimer
 	add  hl, bc
 	ld   [hl], $1E
 	
@@ -15340,7 +15481,7 @@ L003CB3:;C
 	res  PF0B_AIR, [hl]
 	
 	; Reset this for the next time we get hit
-	res  PF0B_FARHIT, [hl]
+	res  PF0B_PROJHIT, [hl]
 	; On the ground we can't attack indirectly
 	res  PF0B_PROJREM, [hl]
 	res  PF0B_PROJREFLECT, [hl]

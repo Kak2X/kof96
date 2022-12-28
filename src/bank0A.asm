@@ -12530,7 +12530,7 @@ L0A7544:;J
 L0A7548:;J
 	jp   L0A7557
 L0A754B:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A7557
 	call Play_Pl_EndMove
 	jp   L0A755A
@@ -12555,7 +12555,7 @@ L0A755B:;I
 	jp   z, L0A75DD
 	jp   L0A75F7
 L0A7580:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A75F7
 	inc  hl
 	ld   [hl], $05
@@ -12612,8 +12612,8 @@ L0A75DB: db $EC;X
 L0A75DC: db $75;X
 L0A75DD:;J
 	ld   hl, $0080
-	call L0035D9
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_ApplyFrictionHAndMoveH
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A75F7
 	jp   L0A75F2
 L0A75EC:;J
@@ -12641,7 +12641,7 @@ L0A75FB:;I
 	jp   z, L0A769A
 	jp   L0A76A5
 L0A761B:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A76A5
 	inc  hl
 	ld   [hl], $FF
@@ -12705,14 +12705,14 @@ L0A7676:;J
 	jp   L0A7687
 L0A7687:;J
 	ld   hl, $0018
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L0A76A5
 	ld   a, $0C
 	ld   h, $03
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L0A76A8
 L0A769A:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A76A5
 	call Play_Pl_EndMove
 	jr   L0A76A8
@@ -12740,7 +12740,7 @@ L0A76C9:;J
 	ld   a, $1B
 	call HomeCall_Sound_ReqPlayExId
 L0A76D4:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A7710
 	inc  hl
 	ld   [hl], $1E
@@ -12757,13 +12757,13 @@ L0A76F2:;J
 L0A76F5:;J
 	call L0A7E68
 L0A76F8:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A7710
 	inc  hl
 	ld   [hl], $02
 	jp   L0A7710
 L0A7704:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A7710
 	call Play_Pl_EndMove
 	jp   L0A7713
@@ -12796,9 +12796,9 @@ L0A773E:;J
 	ld   a, $01
 	call Play_Pl_SetMoveDamage
 	ld   hl, $F0F0
-	call L003875
+	call Play_Pl_MoveRotThrown
 L0A7752:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A77C6
 	inc  hl
 	ld   [hl], $06
@@ -12810,7 +12810,7 @@ L0A775E:;J
 	ld   a, $01
 	call Play_Pl_SetMoveDamage
 	ld   hl, $F0EF
-	call L003875
+	call Play_Pl_MoveRotThrown
 	jp   L0A77C6
 L0A7775:;J
 	call OBJLstS_IsFrameNewLoad
@@ -12819,9 +12819,9 @@ L0A7775:;J
 	ld   a, $01
 	call Play_Pl_SetMoveDamage
 	ld   hl, $F0EE
-	call L003875
+	call Play_Pl_MoveRotThrown
 L0A7789:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A77C6
 	inc  hl
 	ld   [hl], $1E
@@ -12835,13 +12835,13 @@ L0A7795:;J
 	call Play_Proj_CopyMoveDamageFromPl
 	call L0A7E1D
 L0A77A9:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A77C6
 	inc  hl
 	ld   [hl], $06
 	jp   L0A77C6
 L0A77B5:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A77C6
 	call Play_Pl_EndMove
 	ld   a, $00
@@ -12851,94 +12851,117 @@ L0A77C6:;J
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 L0A77C9:;J
 	ret
-L0A77CA:;I
+; =============== MoveC_Goenitz_ThrowG ===============
+; Move code for Goenitz's throw (MOVE_SHARED_THROW_G).
+; ??? and also MOVE_GOENITZ_SPEC_5_L
+MoveC_Goenitz_ThrowG:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_IsMoveLoading
-	jp   c, L0A7892
-	ld   hl, $0017
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L0A77F9
-	cp   $04
-	jp   z, L0A7805
-	cp   $08
-	jp   z, L0A781C
-	cp   $0C
-	jp   z, L0A7833
-	cp   $10
-	jp   z, L0A784A
-	cp   $14
-	jp   z, L0A786D
-L0A77F6: db $C3;X
-L0A77F7: db $8F;X
-L0A77F8: db $78;X
-L0A77F9:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L0A788F
-	inc  hl
-	ld   [hl], $06
-	jp   L0A788F
-L0A7805:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setSpeed06
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .rotU1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .rotU2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .rotL
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .rotD
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------
+.setSpeed06:
+	mMvC_SetSpeedOnInternalFrameEnd $06, .anim
+; --------------- frame #1 ---------------
+.rotU1:
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L0A788F
-	ld   hl, $0611
-	ld   a, $01
+	jp   z, .anim
+	
+	mkhl $06, HITANIM_THROW_ROTU
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	ld   hl, $F0F0
-	call L003875
-	jp   L0A788F
-L0A781C:;J
+	
+	mkhl -$10, -$10
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	jp   .anim
+; --------------- frame #2 ---------------
+.rotU2:
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L0A788F
-	ld   hl, $0611
-	ld   a, $01
+	jp   z, .anim
+	
+	mkhl $06, HITANIM_THROW_ROTU
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	ld   hl, $F3F0
-	call L003875
-	jp   L0A788F
-L0A7833:;J
+	
+	mkhl -$0D, -$10
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	jp   .anim
+; --------------- frame #3 ---------------
+.rotL:
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L0A788F
-	ld   hl, $0612
-	ld   a, $01
+	jp   z, .anim
+	
+	mkhl $06, HITANIM_THROW_ROTL
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	ld   hl, $0CE0
-	call L003875
-	jp   L0A788F
-L0A784A:;J
+	
+	mkhl +$0C, -$20
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	jp   .anim
+; --------------- frame #4 ---------------
+.rotD:
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L0A7861
-	ld   hl, $0613
-	ld   a, $01
+	jp   z, .rotD_setSpeed14
+	
+	mkhl $06, HITANIM_THROW_ROTD
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	ld   hl, $10FC
-	call L003875
-	jp   L0A788F
-L0A7861:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L0A788F
-	inc  hl
-	ld   [hl], $14
-	jp   L0A788F
-L0A786D:;J
+	
+	mkhl +$10, -$04
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+	jp   .anim
+.rotD_setSpeed14:
+	mMvC_SetSpeedOnInternalFrameEnd $14, .anim
+; --------------- frame #5 ---------------
+.setDamage:
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L0A787E
-	ld   hl, $0A0C
-	ld   a, $01
+	jp   z, .chkEnd
+	
+	; Goenitz's throw deals almost double the damage of other character's throws.
+	mkhl $0A, HITANIM_DROP_SPEC_0C
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	call Play_Pl_SetMoveDamage
-	jp   L0A788F
-L0A787E:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L0A788F
+	
+	jp   .anim
+.chkEnd:
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
 	call Play_Pl_EndMove
-	ld   a, $00
+	ld   a, PLAY_THROWACT_NONE
 	ld   [wPlayPlThrowActId], a
-	jp   L0A7892
-L0A788F:;J
+	jp   .ret
+; --------------- common ---------------
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L0A7892:;J
+.ret:
 	ret
+	
 L0A7893:;I
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_IsMoveLoading
@@ -12964,7 +12987,7 @@ L0A78C4: db $C3;X
 L0A78C5: db $A6;X
 L0A78C6: db $79;X
 L0A78C7:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A79A6
 	inc  hl
 	ld   [hl], $06
@@ -12976,7 +12999,7 @@ L0A78D3:;J
 	ld   a, $01
 	call Play_Pl_SetMoveDamage
 	ld   hl, $F0F0
-	call L003875
+	call Play_Pl_MoveRotThrown
 	jp   L0A79A6
 L0A78EA:;J
 	call OBJLstS_IsFrameNewLoad
@@ -12985,10 +13008,10 @@ L0A78EA:;J
 	ld   a, $01
 	call Play_Pl_SetMoveDamage
 	ld   hl, $F3F0
-	call L003875
+	call Play_Pl_MoveRotThrown
 	jp   L0A79A6
 L0A7901:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A79A6
 	inc  hl
 	ld   [hl], $FF
@@ -13006,9 +13029,9 @@ L0A790D:;J
 	ld   a, $01
 	call Play_Pl_SetMoveDamage
 	ld   hl, $F3F0
-	call L003875
+	call Play_Pl_MoveRotThrown
 	ld   a, $01
-	ld   [$C178], a
+	ld   [wPlayPlThrowRot_Unk_UseInMove], a
 L0A7937:;J
 	ld   a, $FC
 	ld   h, $FF
@@ -13022,9 +13045,9 @@ L0A7944:;J
 	ld   a, $01
 	call Play_Pl_SetMoveDamage
 	ld   hl, $04E8
-	call L003875
+	call Play_Pl_MoveRotThrown
 	ld   a, $01
-	ld   [$C178], a
+	ld   [wPlayPlThrowRot_Unk_UseInMove], a
 L0A795D:;J
 	jp   L0A797A
 L0A7960:;J
@@ -13033,7 +13056,7 @@ L0A7960:;J
 	ld   hl, $0A0C
 	ld   a, $01
 	call Play_Pl_SetMoveDamage
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A79A6
 L0A7974: db $23;X
 L0A7975: db $36;X
@@ -13042,7 +13065,7 @@ L0A7977:;J
 	jp   L0A79A6
 L0A797A:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L0A79A6
 	ld   a, $14
 	ld   h, $04
@@ -13052,7 +13075,7 @@ L0A797A:;J
 	call Play_Pl_SetMoveDamageNext
 	jp   L0A79A9
 L0A7995:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A79A6
 	call Play_Pl_EndMove
 	ld   a, $00
@@ -13089,7 +13112,7 @@ L0A79D4:;J
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L0A79E0:;J
 	call OBJLstS_ApplyXSpeed
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A7A92
 	ld   hl, $010A
 	ld   a, $10
@@ -13097,7 +13120,7 @@ L0A79E0:;J
 	jp   L0A7A75
 L0A79F4:;J
 	call OBJLstS_ApplyXSpeed
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A7A92
 	ld   hl, $010A
 	ld   a, $10
@@ -13105,7 +13128,7 @@ L0A79F4:;J
 	jp   L0A7A75
 L0A7A08:;J
 	call OBJLstS_ApplyXSpeed
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A7A92
 	ld   hl, $0083
 	add  hl, bc
@@ -13125,7 +13148,7 @@ L0A7A2B:;J
 	jp   L0A7A75
 L0A7A36:;J
 	call OBJLstS_ApplyXSpeed
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A7A92
 	call MoveInputS_TryStartCommandThrow_Unk_Coli05
 	jp   nc, L0A7A95
@@ -13204,7 +13227,7 @@ L0A7ABB:;J
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
 L0A7AC6:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A7B48
 	inc  hl
 	ld   [hl], $02
@@ -13231,7 +13254,7 @@ L0A7AF8: db $CD;X
 L0A7AF9: db $69;X
 L0A7AFA: db $35;X
 L0A7AFB:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A7B30
 	inc  hl
 	ld   [hl], $0A
@@ -13316,7 +13339,7 @@ L0A7B76:;J
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
 L0A7B87:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A7C3D
 	inc  hl
 	ld   [hl], $00
@@ -13325,7 +13348,7 @@ L0A7B93:;J
 	ld   hl, $0021
 	add  hl, bc
 	set  7, [hl]
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A7C3D
 	inc  hl
 	ld   [hl], $02
@@ -13363,7 +13386,7 @@ L0A7BDF: db $CD;X
 L0A7BE0: db $69;X
 L0A7BE1: db $35;X
 L0A7BE2:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A7C25
 	inc  hl
 	ld   [hl], $0A
@@ -13475,7 +13498,7 @@ L0A7C66:;J
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
 L0A7C71:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A7CEA
 	inc  hl
 	ld   [hl], $FF
@@ -13520,7 +13543,7 @@ L0A7CC8:;J
 	jp   L0A7CCB
 L0A7CCB:;J
 	ld   hl, $0020
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L0A7CEA
 L0A7CD4: db $3E;X
 L0A7CD5: db $0C;X
@@ -13573,7 +13596,7 @@ L0A7D13:;J
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
 L0A7D24:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A7DBD
 	inc  hl
 	ld   [hl], $00
@@ -13582,7 +13605,7 @@ L0A7D30:;J
 	ld   hl, $0021
 	add  hl, bc
 	set  7, [hl]
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A7DBD
 	inc  hl
 	ld   [hl], $FF
@@ -13636,14 +13659,14 @@ L0A7D9B:;J
 	jp   L0A7D9E
 L0A7D9E:;J
 	ld   hl, $0018
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L0A7DBD
 	ld   a, $10
 	ld   h, $06
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L0A7DC0
 L0A7DB1:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A7DBD
 	call Play_Pl_EndMove
 	jp   L0A7DC0
@@ -13805,7 +13828,7 @@ L0A7E68:;C
 	pop  bc
 	ret
 L0A7ECA:;I
-	call L0028B2
+	call ExOBJS_Play_ChkHitModeAndMoveH
 	jp   c, L0A7EDC
 	ld   hl, $0028
 	add  hl, de
@@ -13825,7 +13848,7 @@ L0A7EE0:;I
 	add  hl, de
 	dec  [hl]
 	jp   z, L0A7F54
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0A7F50
 	ld   hl, $0013
 	add  hl, de

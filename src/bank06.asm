@@ -1,43 +1,55 @@
-L064000:;I
+; =============== MoveC_Base_AttackG_SF04M0040 ===============
+; Generic move code used for A+B ground attacks that move the player forward at 4px/frame,
+; which slowly decreases by 40 subpixels every frame.
+MoveC_Base_AttackG_SF04M0040:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_IsMoveLoading
-	jp   c, L064051
-	ld   hl, $0017
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L06404E
-	cp   $04
-	jp   z, L064020
-	cp   $08
-	jp   z, L06402C
-L06401D: db $C3;X
-L06401E: db $4E;X
-L06401F: db $40;X
-L064020:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L06404E
-	inc  hl
-	ld   [hl], $FF
-	jp   L06404E
-L06402C:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .anim					; Do nothing special on #0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim ; We never get here
+; --------------- frame #1 ---------------
+; When switching to frame #2, get manual control of the animation.
+.obj1:
+	mMvC_SetSpeedOnInternalFrameEnd ANIMSPEED_NONE, .anim
+; --------------- frame #2 ---------------	
+.chkEnd:
+	; A+B attacks move the player forward at 4px/frame, which slowly decreases by 40 subpixels every frame.
+	; The move ends when we stop moving completely.
+	
+	
+	; The first time we get here, set the initial speed
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L064040
-	ld   a, $11
+	jp   z, .tryEnd
+	; Play SFX for it
+	ld   a, SCT_ATTACKG
 	call HomeCall_Sound_ReqPlayExId
+	; Move 4px/frame forward
 	ld   hl, $0400
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	jp   L06404E
-L064040:;J
-	ld   hl, $0040
-	call L0035D9
-	jp   nc, L06404E
-	call Play_Pl_EndMove
-	jr   L064051
-L06404E:;J
+	jp   .anim
+.tryEnd:
+	; From the second time, decrease the speed until we stop moving.
+	ld   hl, $0040						; Decrease by $00.40px/frame
+	call OBJLstS_ApplyFrictionHAndMoveH	; Is our X speed already 0?
+	jp   nc, .anim						; If not, continue
+	call Play_Pl_EndMove				; Otherwise, we're done
+	jr   .ret
+; --------------- common ---------------	
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L064051:;JR
+.ret:
 	ret
+	
 ; =============== MoveInputReader_Kyo ===============
 ; Special move input checker for KYO.
 ; IN
@@ -232,7 +244,7 @@ L064202:;J
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 L06420E:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06446E
 	ld   a, $A8
 	call HomeCall_Sound_ReqPlayExId
@@ -246,7 +258,7 @@ L06421C:;J
 	add  hl, bc
 	res  3, [hl]
 L06422E:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06446E
 	jp   L06446E
 L064237:;J
@@ -272,7 +284,7 @@ L064262:;R
 	mMvIn_ChkDir MoveInput_FDB, L0643FD
 	mMvIn_ChkDir MoveInput_DF, L0643E6
 L064274:;R
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06446E
 	jp   L064459
 L06427D:;J
@@ -281,7 +293,7 @@ L06427D:;J
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 L064289:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06446E
 	jp   L06446E
 L064292:;J
@@ -356,7 +368,7 @@ L0642EE: db $C3;X
 L0642EF: db $42;X
 L0642F0: db $44;X
 L0642F1:;R
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06446E
 	jp   L064459
 L0642FA:;J
@@ -365,7 +377,7 @@ L0642FA:;J
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 L064306:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06446E
 	jp   L06446E
 L06430F:;J
@@ -442,7 +454,7 @@ L06436B: db $C3;X
 L06436C: db $42;X
 L06436D: db $44;X
 L06436E:;R
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06446E
 	jp   L064459
 L064377:;J
@@ -451,13 +463,13 @@ L064377:;J
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 L064383:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06446E
 	jp   L06446E
 L06438C:;J
 	jp   L06446E
 L06438F:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06446E
 	jp   L064459
 L064398:;J
@@ -466,13 +478,13 @@ L064398:;J
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 L0643A4:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06446E
 	jp   L06446E
 L0643AD:;J
 	jp   L06446E
 L0643B0:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06446E
 	jp   L064459
 L0643B9:;J
@@ -481,7 +493,7 @@ L0643B9:;J
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 L0643C5:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06446E
 	inc  hl
 	ld   [hl], $08
@@ -492,7 +504,7 @@ L0643D1:;J
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 L0643DD:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06446E
 	jp   L064459
 L0643E6:;J
@@ -551,7 +563,7 @@ L064459:;J
 	call L002E49
 	jp   L064471
 L064463:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06446E
 	call Play_Pl_EndMove
 	jr   L064471
@@ -606,7 +618,7 @@ L0644C7:;J
 	ld   [hl], $00
 L0644D9:;J
 	call L0646B1
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0646AD
 	ld   a, $A8
 	call HomeCall_Sound_ReqPlayExId
@@ -621,7 +633,7 @@ L0644EA:;J
 	add  hl, bc
 	res  3, [hl]
 L0644FF:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0646AD
 	jp   L0646AD
 L064508:;J
@@ -672,7 +684,7 @@ L064548:;J
 	jp   z, L06455D
 	jp   L064658
 L06455D:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0646AD
 	jp   L064698
 L064566:;J
@@ -682,7 +694,7 @@ L064566:;J
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 L064575:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0646AD
 	jp   L0646AD
 L06457E:;J
@@ -726,7 +738,7 @@ L0645B6:;J
 	ld   a, [hl]
 	bit  2, a
 	jp   nz, L064678
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0646AD
 	jp   L064698
 L0645CC:;J
@@ -735,7 +747,7 @@ L0645CC:;J
 	ld   hl, $0400
 	call Play_OBJLstS_MoveH_ByXFlipR
 L0645D8:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0646AD
 	inc  hl
 	ld   [hl], $FF
@@ -780,14 +792,14 @@ L064630:;J
 	jp   L06463A
 L06463A:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L0646AD
 	ld   a, $2C
 	ld   h, $08
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L0646B0
 L06464D:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0646AD
 	call Play_Pl_EndMove
 	jr   L0646B0
@@ -825,7 +837,7 @@ L064698:;J
 	call L002E49
 	jp   L0646B0
 L0646A2:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0646AD
 	call Play_Pl_EndMove
 	jr   L0646B0
@@ -914,7 +926,7 @@ L06474C:;J
 	ld   hl, $0400
 	call Play_OBJLstS_MoveH_ByXFlipR
 L064758:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06482B
 	inc  hl
 	ld   [hl], $FF
@@ -992,14 +1004,14 @@ L0647FD:;J
 	jp   L06480D
 L06480D:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L06482B
 	ld   a, $18
 	ld   h, $0A
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L06482E
 L064820:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06482B
 	call Play_Pl_EndMove
 	jr   L06482E
@@ -1030,7 +1042,7 @@ L06485B:;J
 	call OBJLstS_IsFrameNewLoad
 	jp   z, L064861
 L064861:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L064903
 	inc  hl
 	ld   [hl], $FF
@@ -1087,14 +1099,14 @@ L0648D8:;J
 	jp   L0648E5
 L0648E5:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L064903
 	ld   a, $14
 	ld   h, $08
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L064906
 L0648F8:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L064903
 	call Play_Pl_EndMove
 	jr   L064906
@@ -1127,7 +1139,7 @@ L064938: db $C3;X
 L064939: db $06;X
 L06493A: db $4A;X
 L06493B:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0649AA
 	inc  hl
 	ld   [hl], $01
@@ -1165,14 +1177,14 @@ L064987:;J
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
 L064992:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0649AA
 	inc  hl
 	ld   [hl], $FF
 	jp   L0649C1
 L06499E:;J
 	ld   hl, $0100
-	call L0035D9
+	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   nc, L064A09
 	jp   L064A00
 L0649AA:;J
@@ -1191,7 +1203,7 @@ L0649C1:;J
 	jp   L064A06
 L0649C7:;J
 	ld   hl, $0080
-	call L0035D9
+	call OBJLstS_ApplyFrictionHAndMoveH
 	ld   hl, $0063
 	add  hl, bc
 	bit  1, [hl]
@@ -1201,7 +1213,7 @@ L0649C7:;J
 	bit  7, [hl]
 	jp   z, L0649E8
 L0649DF:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L064A06
 	jp   L064A00
 L0649E8:;J
@@ -1213,7 +1225,7 @@ L0649E8:;J
 	call L002E49
 	jp   L064A09
 L0649FA:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L064A06
 L064A00:;J
 	call Play_Pl_EndMove
@@ -1248,7 +1260,7 @@ L064A36:;J
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L064A42:;J
 	ld   hl, $0070
-	call L0035D9
+	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   nc, L064ACD
 	ld   hl, $001B
 	add  hl, de
@@ -1279,7 +1291,7 @@ L064A81:;J
 L064A84:;J
 	jp   L064AAF
 L064A87:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L064AAF
 	ld   hl, $0808
 	ld   a, $11
@@ -1288,7 +1300,7 @@ L064A87:;J
 	call HomeCall_Sound_ReqPlayExId
 	jp   L064AAF
 L064A9D:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L064AAF
 	inc  hl
 	ld   [hl], $FF
@@ -1297,14 +1309,14 @@ L064A9D:;J
 	jp   L064AAF
 L064AAF:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L064ACD
 	ld   a, $14
 	ld   h, $08
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L064AD0
 L064AC2:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L064ACD
 	call Play_Pl_EndMove
 	jr   L064AD0
@@ -1361,7 +1373,7 @@ L064B2A:;J
 	call Play_Pl_SetMoveDamageNext
 	jp   L064BC2
 L064B3C:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L064BBF
 	ld   hl, $0083
 	add  hl, bc
@@ -1400,7 +1412,7 @@ L064B7D:;J
 	call Play_Pl_SetMoveDamageNext
 	jp   L064BC2
 L064B8F:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L064BBF
 	ld   hl, $0083
 	add  hl, bc
@@ -1417,7 +1429,7 @@ L064BA6:;J
 	call HomeCall_Sound_ReqPlayExId
 	jp   L064BBF
 L064BB4:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L064BBF
 	call Play_Pl_EndMove
 	jr   L064BC2
@@ -1448,14 +1460,14 @@ L064BC3:;I
 	jp   z, L064C94
 	jp   L064CA0
 L064BF7:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L064CA0
 	ld   hl, $0083
 	add  hl, bc
 	ld   [hl], $14
 	jp   L064CA0
 L064C06:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L064CA0
 	ld   hl, $0045
 	add  hl, bc
@@ -1474,7 +1486,7 @@ L064C06:;J
 	call Play_Pl_SetMoveDamageNext
 	jp   L064CA3
 L064C30:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L064CA0
 	inc  hl
 	ld   [hl], $00
@@ -1494,7 +1506,7 @@ L064C4A:;J
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L064C76
 L064C5E:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L064C76
 L064C64: db $23;X
 L064C65: db $36;X
@@ -1503,18 +1515,18 @@ L064C67: db $C3;X
 L064C68: db $76;X
 L064C69: db $4C;X
 L064C6A:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L064C76
 	inc  hl
 	ld   [hl], $FF
 	jp   L064C76
 L064C76:;J
 	ld   hl, $0060
-	call L0035D9
+	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   L064CA0
 L064C7F:;J
 	ld   hl, $0080
-	call L0035D9
+	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   nc, L064CA3
 	ld   hl, $001B
 	add  hl, de
@@ -1523,7 +1535,7 @@ L064C7F:;J
 	ld   [hl], $05
 	jp   L064CA0
 L064C94:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L064CA0
 	call Play_Pl_EndMove
 	jp   L064CA3
@@ -1668,7 +1680,7 @@ L064DF0:;J
 	ld   [hl], $28
 	jp   L064E0A
 L064DFF:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L064E0A
 	call Play_Pl_EndMove
 	jr   L064E0D
@@ -1699,7 +1711,7 @@ L064E0E:;I
 	jp   z, L064E90
 	jp   L064E9B
 L064E42:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L064E9B
 	inc  hl
 	ld   [hl], $14
@@ -1717,7 +1729,7 @@ L064E5D:;J
 	call L06525F
 	jp   L064E6C
 L064E6C:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L064E9B
 	inc  hl
 	ld   [hl], $02
@@ -1728,13 +1740,13 @@ L064E78:;J
 	ld   hl, $6800
 	call L06525F
 L064E84:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L064E9B
 	inc  hl
 	ld   [hl], $32
 	jp   L064E9B
 L064E90:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L064E9B
 	call Play_Pl_EndMove
 	jr   L064E9E
@@ -1947,7 +1959,7 @@ L064F56:;I
 	cp   $18
 	jp   z, L065020
 L064F87:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06502B
 	inc  hl
 	ld   [hl], $00
@@ -1997,7 +2009,7 @@ L064FF0:;J
 	ld   a, $92
 	call Play_Pl_SetMoveDamage
 L064FFE:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06500D
 	ld   hl, $0013
 	add  hl, de
@@ -2005,14 +2017,14 @@ L064FFE:;J
 	jp   L06500D
 L06500D:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L06502B
 	ld   a, $18
 	ld   h, $06
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L06502E
 L065020:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06502B
 	call Play_Pl_EndMove
 	jr   L06502E
@@ -2043,7 +2055,7 @@ L065056:;J
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 L065062:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0650F7
 	inc  hl
 	ld   [hl], $FF
@@ -2094,14 +2106,14 @@ L0650C4:;J
 	jp   L0650D9
 L0650D9:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L0650F7
 	ld   a, $10
 	ld   h, $0A
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L0650FA
 L0650EC:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0650F7
 	call Play_Pl_EndMove
 	jr   L0650FA
@@ -2131,7 +2143,7 @@ L0650FB:;I
 	cp   $18
 	jp   z, L0651D6
 L06512C:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0651E1
 	inc  hl
 	ld   [hl], $FF
@@ -2172,7 +2184,7 @@ L065180:;J
 	call OBJLstS_ReqAnimOnGtYSpeed
 	jp   L0651C3
 L06518A:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0651C3
 	inc  hl
 	ld   [hl], $00
@@ -2192,21 +2204,21 @@ L0651A9:;J
 L0651B4:;J
 	jp   L0651C3
 L0651B7:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0651C3
 	inc  hl
 	ld   [hl], $FF
 	jp   L0651C3
 L0651C3:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L0651E1
 	ld   a, $18
 	ld   h, $0A
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L0651E4
 L0651D6:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0651E1
 	call Play_Pl_EndMove
 	jr   L0651E4
@@ -2322,7 +2334,7 @@ L06525F:;C
 	pop  bc
 	ret
 L06529E:;I
-	call L0028B2
+	call ExOBJS_Play_ChkHitModeAndMoveH
 	jp   c, L0652A8
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 	ret
@@ -2330,7 +2342,7 @@ L0652A8:;J
 	call OBJLstS_Hide
 	ret
 L0652AC:;I
-	call L0028B2
+	call ExOBJS_Play_ChkHitModeAndMoveH
 	ld   hl, $0013
 	add  hl, de
 	ld   a, [hl]
@@ -2340,7 +2352,7 @@ L0652B9:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 	ret
 L0652BD:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0652B9
 	call OBJLstS_Hide
 	ret
@@ -2354,7 +2366,7 @@ L0652D1:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 	ret
 L0652D5:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0652D1
 	call OBJLstS_Hide
 	ret
@@ -2486,13 +2498,13 @@ L06543A:;J
 	jp   z, L065443
 	call L065AC0
 L065443:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06545A
 	inc  hl
 	ld   [hl], $07
 	jp   L06545A
 L06544F:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06545A
 	call Play_Pl_EndMove
 	jr   L06545D
@@ -2529,7 +2541,7 @@ L065485:;J
 	call Play_Pl_SetMoveDamageNext
 	jp   L0654CD
 L0654A1:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0654CD
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
@@ -2538,7 +2550,7 @@ L0654A1:;J
 	call Play_Pl_SetMoveDamageNext
 	jp   L0654CD
 L0654B7:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0654CD
 	inc  hl
 	ld   [hl], $FF
@@ -2587,14 +2599,14 @@ L065514:;J
 	jp   L065517
 L065517:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L065535
 	ld   a, $10
 	ld   h, $07
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L065538
 L06552A:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065535
 	call Play_Pl_EndMove
 	jr   L065538
@@ -2623,7 +2635,7 @@ L065560: db $C3;X
 L065561: db $C8;X
 L065562: db $55;X
 L065563:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0655C8
 	ld   a, $15
 	call HomeCall_Sound_ReqPlayExId
@@ -2637,7 +2649,7 @@ L065579:;J
 	ld   hl, $0400
 	call Play_OBJLstS_MoveH_ByXFlipR
 L065585:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0655C8
 	jp   L0655C8
 L06558E:;J
@@ -2648,20 +2660,20 @@ L06558E:;J
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 L0655A0:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0655C8
 	ld   hl, $0908
 	ld   a, $23
 	call Play_Pl_SetMoveDamageNext
 	jp   L0655C8
 L0655B1:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0655C8
 	inc  hl
 	ld   [hl], $08
 	jp   L0655C8
 L0655BD:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0655C8
 	call Play_Pl_EndMove
 	jr   L0655CB
@@ -2698,7 +2710,7 @@ L0655FB:;J
 	ld   hl, rJOYP
 	call Play_OBJLstS_MoveV
 L06560D:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0656B2
 	inc  hl
 	ld   [hl], $FF
@@ -2747,7 +2759,7 @@ L065669:;J
 	ld   a, $F8
 	ld   h, $FF
 	call OBJLstS_ReqAnimOnGtYSpeed
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065694
 	ld   hl, $0808
 	ld   a, $23
@@ -2763,14 +2775,14 @@ L065681:;J
 	jp   L065694
 L065694:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L0656B2
 	ld   a, $14
 	ld   h, $08
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L0656B5
 L0656A7:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0656B2
 	call Play_Pl_EndMove
 	jr   L0656B5
@@ -2806,7 +2818,7 @@ L0656B6:;I
 	cp   $24
 	jp   z, L065799
 L0656F6:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0657EF
 	inc  hl
 	ld   [hl], $02
@@ -2863,7 +2875,7 @@ L065760:;J
 L065766:;J
 	jp   L0657D1
 L065769:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0657D1
 	ld   a, $08
 	call HomeCall_Sound_ReqPlayExId
@@ -2895,7 +2907,7 @@ L06578F:;J
 	call L002E49
 	jp   L0657F2
 L065799:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0657EF
 	ld   hl, $0045
 	add  hl, bc
@@ -2927,7 +2939,7 @@ L0657C9:;J
 	jp   L0657F2
 L0657D1:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L0657EF
 L0657DA: db $3E;X
 L0657DB: db $20;X
@@ -2971,7 +2983,7 @@ L065810: db $C3;X
 L065811: db $7E;X
 L065812: db $58;X
 L065813:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06587E
 	inc  hl
 	ld   [hl], $FF
@@ -3011,14 +3023,14 @@ L06585D:;J
 	jp   L065860
 L065860:;J
 	ld   hl, $0018
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L06587E
 	ld   a, $08
 	ld   h, $08
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L065881
 L065873:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06587E
 	call Play_Pl_EndMove
 	jr   L065881
@@ -3058,7 +3070,7 @@ L0658B3:;J
 	ld   hl, $0300
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L0658CA:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065907
 	ld   hl, $0203
 	ld   a, $10
@@ -3087,7 +3099,7 @@ L0658EE: db $C3;X
 L0658EF: db $07;X
 L0658F0: db $59;X
 L0658F1:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065907
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
@@ -3113,7 +3125,7 @@ L06590D:;J
 	call Play_OBJLstS_SetSpeedV
 	jp   L065967
 L06592E:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065967
 L065934: db $21;X
 L065935: db $08;X
@@ -3127,14 +3139,14 @@ L06593C: db $C3;X
 L06593D: db $67;X
 L06593E: db $59;X
 L06593F:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065967
 	ld   hl, $0208
 	ld   a, $12
 	call Play_Pl_SetMoveDamageNext
 	jp   L065967
 L065950:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065967
 	ld   hl, $0013
 	add  hl, de
@@ -3145,14 +3157,14 @@ L065950:;J
 	jp   L065967
 L065967:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L065985
 	ld   a, $18
 	ld   h, $0F
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L065988
 L06597A:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065985
 	call Play_Pl_EndMove
 	jr   L065988
@@ -3190,14 +3202,14 @@ L065989:;I
 	cp   $28
 	jp   z, L065AB1
 L0659CE:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065ABC
 	ld   hl, $0203
 	ld   a, $10
 	call Play_Pl_SetMoveDamageNext
 	jp   L065ABC
 L0659DF:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065ABC
 	ld   hl, $0204
 	ld   a, $10
@@ -3214,7 +3226,7 @@ L0659F0:;J
 	ld   hl, $0300
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L065A07:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065A44
 	ld   hl, $0203
 	ld   a, $10
@@ -3243,7 +3255,7 @@ L065A2B: db $C3;X
 L065A2C: db $44;X
 L065A2D: db $5A;X
 L065A2E:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065A44
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
@@ -3277,14 +3289,14 @@ L065A76:;J
 	ld   hl, $0208
 	ld   a, $92
 	call Play_Pl_SetMoveDamage
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065A9E
 	jp   L065A9E
 L065A87:;J
 	ld   hl, $0208
 	ld   a, $92
 	call Play_Pl_SetMoveDamage
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065A9E
 	ld   hl, $0013
 	add  hl, de
@@ -3292,14 +3304,14 @@ L065A87:;J
 	jp   L065A9E
 L065A9E:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L065ABC
 	ld   a, $28
 	ld   h, $12
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L065ABF
 L065AB1:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065ABC
 	call Play_Pl_EndMove
 	jr   L065ABF
@@ -3516,7 +3528,7 @@ L065CBF:;I
 	cp   $08
 	jp   z, L065CFD
 L065CDC:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065D09
 	inc  hl
 	ld   [hl], $10
@@ -3526,13 +3538,13 @@ L065CE8:;J
 	jp   z, L065CF1
 	call L0662E8
 L065CF1:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065D09
 	inc  hl
 	ld   [hl], $03
 	jp   L065D09
 L065CFD:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065D09
 	call Play_Pl_EndMove
 	jp   L065D0C
@@ -3565,7 +3577,7 @@ L065D3E: db $C3;X
 L065D3F: db $1F;X
 L065D40: db $5E;X
 L065D41:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065E1F
 	inc  hl
 	ld   [hl], $00
@@ -3595,21 +3607,21 @@ L065D7F:;J
 	ld   hl, $0000
 	call Play_OBJLstS_SetSpeedV
 L065D8B:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065DC4
 	ld   hl, $0103
 	ld   a, $10
 	call Play_Pl_SetMoveDamageNext
 	jp   L065DC4
 L065D9C:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065DC4
 	ld   hl, $0104
 	ld   a, $10
 	call Play_Pl_SetMoveDamageNext
 	jp   L065DC4
 L065DAD:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065DC4
 	ld   hl, $0103
 	ld   a, $10
@@ -3620,7 +3632,7 @@ L065DAD:;J
 	jp   L065DC4
 L065DC4:;J
 	ld   hl, $0018
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L065E1F
 	ld   hl, $0033
 	add  hl, bc
@@ -3641,7 +3653,7 @@ L065DEB:;J
 	jp   z, L065DF4
 	call OBJLstS_SyncXFlip
 L065DF4:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065E1F
 	inc  hl
 	ld   [hl], $10
@@ -3662,7 +3674,7 @@ L065E11: db $C3;X
 L065E12: db $1F;X
 L065E13: db $5E;X
 L065E14:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065E1F
 	call Play_Pl_EndMove
 	jr   L065E22
@@ -3695,7 +3707,7 @@ L065E54: db $C3;X
 L065E55: db $30;X
 L065E56: db $5F;X
 L065E57:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065F30
 	ld   hl, $0033
 	add  hl, bc
@@ -3739,7 +3751,7 @@ L065EB5:;J
 	jp   L065EB8
 L065EB8:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L065F30
 	ld   a, $08
 	ld   h, $00
@@ -3751,7 +3763,7 @@ L065ED0:;J
 	ld   hl, $0108
 	ld   a, $90
 	call Play_Pl_SetMoveDamage
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065F30
 	call MoveInputS_CheckMoveLHVer
 	jp   nz, L065EED
@@ -3773,20 +3785,20 @@ L065F01:;J
 	ld   hl, $0108
 	ld   a, $90
 	call Play_Pl_SetMoveDamage
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065F30
 	ld   hl, $001C
 	add  hl, de
 	ld   [hl], $0A
 	jp   L065F30
 L065F18:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065F30
 	inc  hl
 	ld   [hl], $08
 	jp   L065F30
 L065F24:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065F30
 	call Play_Pl_EndMove
 	jp   L065F33
@@ -3810,13 +3822,13 @@ L065F34:;I
 	cp   $0C
 	jp   z, L065FBD
 L065F56:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065FDC
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
 	jp   L065FDC
 L065F64:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065FDC
 	inc  hl
 	ld   [hl], $0C
@@ -3851,7 +3863,7 @@ L065FA0:;J
 	res  7, [hl]
 L065FAE:;J
 	call OBJLstS_ApplyXSpeed
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065FDC
 	inc  hl
 	ld   [hl], $00
@@ -3859,7 +3871,7 @@ L065FAE:;J
 L065FBD:;J
 	ld   hl, $0000
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L065FDC
 	ld   hl, $0005
 	add  hl, de
@@ -3902,7 +3914,7 @@ L065FE0:;I
 	cp   $20
 	jp   z, L066284
 L06601B:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06628F
 	inc  hl
 	ld   [hl], $01
@@ -4000,7 +4012,7 @@ L0660A6:;J
 	mMvIn_ChkDir MoveInput_DF, L0660D9
 	mMvIn_ChkDir MoveInput_DB, L0660E2
 L0660B8:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06628F
 	ld   hl, $0083
 	add  hl, bc
@@ -4042,7 +4054,7 @@ L066104:;J
 	call Task_PassControlFar
 	jp   L06624A
 L06610A:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06628F
 	ld   hl, $0045
 	add  hl, bc
@@ -4059,7 +4071,7 @@ L06610A:;J
 	call Play_StartSuperSparkle
 	jp   L06628F
 L066131:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06628F
 	inc  hl
 	ld   [hl], $28
@@ -4263,13 +4275,13 @@ L066235:;J
 	call Play_Proj_CopyMoveDamageFromPl
 	call L066368
 L06623E:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06628F
 	inc  hl
 	ld   [hl], $03
 	jp   L06628F
 L06624A:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06628F
 	ld   hl, $0033
 	add  hl, bc
@@ -4288,14 +4300,14 @@ L066264:;J
 	jp   L066292
 L066271:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L06628F
 	ld   a, $20
 	ld   h, $03
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L066292
 L066284:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06628F
 	call Play_Pl_EndMove
 	jr   L066292
@@ -4587,7 +4599,7 @@ L066474:;J
 	pop  bc
 	ret
 L066477:;I
-	call L0028B2
+	call ExOBJS_Play_ChkHitModeAndMoveH
 	jp   c, L066549
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 	ld   hl, $0028
@@ -4682,7 +4694,7 @@ L0664ED: db $48;X
 L0664EE: db $65;X
 L0664EF:;J
 	ld   hl, $FFA0
-	call L003672
+	call OBJLstS_ApplyGravityVAndMoveV
 	jp   L066548
 L0664F8:;J
 	ld   hl, $0027
@@ -4750,7 +4762,7 @@ L06653A: db $48;X
 L06653B: db $65;X
 L06653C:;J
 	ld   hl, $0000
-	call L003672
+	call OBJLstS_ApplyGravityVAndMoveV
 	jp   c, L066549
 	jp   L066548
 L066548:;J
@@ -5753,36 +5765,49 @@ L066A36: db $DC
 L066A37: db $FC
 L066A38: db $6E
 L066A39: db $FE
-L066A3A:;I
+
+; =============== MoveC_Base_AttackG_MF07 ===============
+; Generic move code used for A+B ground attacks that move the player 7px forwards once.
+MoveC_Base_AttackG_MF07:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_IsMoveLoading
-	jp   c, L066A76
-	ld   hl, $0017
+	jp   c, .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
-	ld   a, [hl]
-	cp   $00
-	jp   z, L066A58
-	ld   hl, $0039
-	add  hl, bc
-	cp   a, [hl]
-	jp   z, L066A67
-	jp   L066A73
-L066A58:;J
+	ld   a, [hl]	; A = OBJLst ID
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	
+; --------------- frames #1-(end) ---------------	
+.chkMatch:
+	ld   hl, iPlInfo_OBJLstPtrTblOffsetMoveEnd
+	add  hl, bc		; HL = Ptr to OBJLst ID target
+	cp   a, [hl]	; Do they match?
+	jp   z, .chkEnd	; If so, end the move when this frame finishes
+	jp   .anim
+	
+; --------------- frame #0 ---------------
+; Move the player forwards by 7px when switching to frame #1.
+.obj0:
 	call OBJLstS_IsFrameNewLoad
-	jp   z, L066A64
-	ld   hl, $0700
-	call Play_OBJLstS_MoveH_ByXFlipR
-L066A64:;J
-	jp   L066A73
-L066A67:;J
-	call OBJLstS_IsFrameEnd
-	jp   nc, L066A73
+	jp   z, .obj0_anim
+	ld   hl, $0700						; 7px forwards
+	call Play_OBJLstS_MoveH_ByXFlipR	; Do the move
+.obj0_anim:
+	jp   .anim
+; --------------- common ---------------
+.chkEnd:
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, .anim
 	call Play_Pl_EndMove
-	jp   L066A76
-L066A73:;J
+	jp   .ret
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L066A76:;J
+.ret:
 	ret
+	
 ; =============== MoveInputReader_Andy ===============
 ; Special move input checker for ANDY.
 ; IN
@@ -5917,7 +5942,7 @@ L066BC8:;J
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 L066BDA:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L066C1A
 	ld   a, $1A
 	call HomeCall_Sound_ReqPlayExId
@@ -5930,17 +5955,17 @@ L066BE8:;J
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 L066BFA:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L066C1A
 	jp   L066C1A
 L066C03:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L066C1A
 	inc  hl
 	ld   [hl], $06
 	jp   L066C1A
 L066C0F:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L066C1A
 	call Play_Pl_EndMove
 	jr   L066C1D
@@ -5972,7 +5997,7 @@ L066C4D: db $C3;X
 L066C4E: db $F6;X
 L066C4F: db $6C;X
 L066C50:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L066CF6
 	inc  hl
 	ld   [hl], $05
@@ -6001,7 +6026,7 @@ L066C88:;J
 	jp   L066C9E
 L066C8B:;J
 	ld   hl, $0100
-	call L0035D9
+	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   nc, L066C9E
 	ld   a, $0C
 	ld   h, $0A
@@ -6035,15 +6060,15 @@ L066CAD:;J
 	jp   L066CF9
 L066CD5:;J
 	ld   hl, $0080
-	call L0035D9
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_ApplyFrictionHAndMoveH
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L066CE4
 	jp   L066CF6
 L066CE4:;J
 	call OBJLstS_ApplyXSpeed
 	jp   L066CF6
 L066CEA:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L066CF6
 	call Play_Pl_EndMove
 	jp   L066CF9
@@ -6076,7 +6101,7 @@ L066D26:;J
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 L066D32:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L066DF2
 	ld   hl, $0404
 	ld   a, $11
@@ -6088,7 +6113,7 @@ L066D43:;J
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 L066D4F:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L066DF2
 	inc  hl
 	ld   [hl], $FF
@@ -6144,14 +6169,14 @@ L066DBF:;J
 	jp   L066DD4
 L066DD4:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L066DF2
 	ld   a, $14
 	ld   h, $06
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L066DF5
 L066DE7:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L066DF2
 	call Play_Pl_EndMove
 	jr   L066DF5
@@ -6185,7 +6210,7 @@ L066DF6:;I
 	cp   $20
 	jp   z, L066F09
 L066E31:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L066F14
 	inc  hl
 	ld   [hl], $00
@@ -6234,7 +6259,7 @@ L066E9E:;J
 	ld   hl, $0208
 	ld   a, $10
 	call Play_Pl_SetMoveDamage
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L066EF6
 	ld   a, $FD
 	ld   h, $FF
@@ -6248,7 +6273,7 @@ L066EBF:;J
 	ld   hl, $0208
 	ld   a, $10
 	call Play_Pl_SetMoveDamage
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L066EF6
 	ld   a, $FD
 	ld   h, $FF
@@ -6270,14 +6295,14 @@ L066EF0:;J
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L066EF6:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L066F14
 	ld   a, $20
 	ld   h, $08
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L066F17
 L066F09:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L066F14
 	call Play_Pl_EndMove
 	jr   L066F17
@@ -6318,7 +6343,7 @@ L066F53:;J
 L066F5F:;J
 	jp   L066FD0
 L066F62:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L066FD0
 	ld   hl, $0803
 	ld   a, $10
@@ -6334,7 +6359,7 @@ L066F78:;J
 L066F84:;J
 	jp   L066FD0
 L066F87:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L066FD0
 	ld   hl, $0804
 	ld   a, $10
@@ -6350,7 +6375,7 @@ L066F9D:;J
 L066FA9:;J
 	jp   L066FD0
 L066FAC:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L066FD0
 	inc  hl
 	ld   [hl], $03
@@ -6361,7 +6386,7 @@ L066FAC:;J
 	call HomeCall_Sound_ReqPlayExId
 	jp   L066FD0
 L066FC5:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L066FD0
 	call Play_Pl_EndMove
 	jr   L066FD3
@@ -6422,7 +6447,7 @@ L067037:;J
 	jp   L06703A
 L06703A:;J
 	ld   hl, $0018
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L0670B3
 	call MoveInputS_CheckMoveLHVer
 	jp   nz, L067053
@@ -6475,7 +6500,7 @@ L067096:;J
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
 	jp   L0670B6
 L0670A5:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0670B0
 	call Play_Pl_EndMove
 	jr   L0670B6
@@ -6497,10 +6522,10 @@ L0670B7:;I
 	cp   a, [hl]
 	jp   z, L0670D6
 	ld   hl, $0040
-	call L0035D9
+	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   L0670E2
 L0670D6:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0670E2
 	call Play_Pl_EndMove
 	jp   L0670E5
@@ -6533,7 +6558,7 @@ L067112:;J
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 L06711E:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0671EA
 	ld   hl, $0208
 	ld   a, $10
@@ -6545,7 +6570,7 @@ L06712F:;J
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 L06713B:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0671EA
 	inc  hl
 	ld   [hl], $FF
@@ -6612,14 +6637,14 @@ L0671BC:;J
 L0671CC:;J
 	ld   hl, $0030
 L0671CF:;J
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L0671EA
 	ld   a, $14
 	ld   h, $12
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L0671ED
 L0671DF:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0671EA
 	call Play_Pl_EndMove
 	jr   L0671ED
@@ -6722,7 +6747,7 @@ L0672DD:;I
 	jp   z, L067312
 	jp   L067326
 L0672F8:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067326
 	inc  hl
 	push hl
@@ -6740,7 +6765,7 @@ L067312:;J
 	jp   z, L06731B
 	call L0651E5
 L06731B:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067326
 	call Play_Pl_EndMove
 	jr   L067329
@@ -6775,7 +6800,7 @@ L067360: db $C3;X
 L067361: db $42;X
 L067362: db $74;X
 L067363:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067442
 	inc  hl
 	ld   [hl], $00
@@ -6818,7 +6843,7 @@ L0673AF: db $CD;X
 L0673B0: db $69;X
 L0673B1: db $35;X
 L0673B2:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067436
 	call MoveInputS_CheckMoveLHVer
 	jp   c, L0673C7
@@ -6838,7 +6863,7 @@ L0673CF: db $C3;X
 L0673D0: db $36;X
 L0673D1: db $74;X
 L0673D2:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067436
 	call MoveInputS_CheckMoveLHVer
 	jp   c, L0673E7
@@ -6858,7 +6883,7 @@ L0673EF: db $C3;X
 L0673F0: db $36;X
 L0673F1: db $74;X
 L0673F2:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067436
 	call MoveInputS_CheckMoveLHVer
 	jp   c, L067407
@@ -6878,19 +6903,19 @@ L06740F: db $C3;X
 L067410: db $36;X
 L067411: db $74;X
 L067412:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067436
 	inc  hl
 	ld   [hl], $03
 	jp   L067436
 L06741E:;J
 	ld   hl, $0040
-	call L0035D9
+	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   L067442
 L067427:;J
 	ld   hl, $0080
-	call L0035D9
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_ApplyFrictionHAndMoveH
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067442
 	jp   L06743C
 L067436:;J
@@ -6930,7 +6955,7 @@ L06747C: db $C3;X
 L06747D: db $44;X
 L06747E: db $75;X
 L06747F:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067544
 	inc  hl
 	ld   [hl], $00
@@ -6973,19 +6998,19 @@ L0674D0: db $CD;X
 L0674D1: db $69;X
 L0674D2: db $35;X
 L0674D3:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067538
 	ld   a, $93
 	call HomeCall_Sound_ReqPlayExId
 	jp   L0676A8
 L0674E1:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067538
 	ld   a, $93
 	call HomeCall_Sound_ReqPlayExId
 	jp   L0676A2
 L0674EF:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067538
 	ld   hl, $0083
 	add  hl, bc
@@ -6997,12 +7022,12 @@ L0674EF:;J
 	jp   L0676A2
 L067506:;J
 	ld   hl, $0040
-	call L0035D9
+	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   L067544
 L06750F:;J
 	ld   hl, $0040
-	call L0035D9
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_ApplyFrictionHAndMoveH
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067544
 	inc  hl
 	ld   [hl], $1E
@@ -7012,8 +7037,8 @@ L06750F:;J
 	jp   L067544
 L067529:;J
 	ld   hl, $0040
-	call L0035D9
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_ApplyFrictionHAndMoveH
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067544
 	jp   L06753E
 L067538:;J
@@ -7075,19 +7100,19 @@ L06759A:;J
 	add  hl, bc
 	ld   [hl], a
 L06759F:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0675E7
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
 	jp   L0676A8
 L0675AD:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0675E7
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
 	jp   L0676A2
 L0675BB:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0675E7
 	ld   hl, $0083
 	add  hl, bc
@@ -7169,19 +7194,19 @@ L06765C:;J
 	add  hl, bc
 	ld   [hl], a
 L067661:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0676B0
 	ld   a, $93
 	call HomeCall_Sound_ReqPlayExId
 	jp   L0676A8
 L06766F:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0676B0
 	ld   a, $93
 	call HomeCall_Sound_ReqPlayExId
 	jp   L0676A2
 L06767D:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0676B0
 	ld   a, $93
 	call HomeCall_Sound_ReqPlayExId
@@ -7210,7 +7235,7 @@ L0676B0:;J
 	call OBJLstS_ApplyXSpeed
 	jp   L0676C5
 L0676B6:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L0676C5
 	call Play_Pl_ClearJoyBtnBuffer
 	call Play_Pl_EndMove
@@ -7232,7 +7257,7 @@ L0676C9:;I
 	jp   z, L0676F0
 	jp   L067707
 L0676E4:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067707
 	inc  hl
 	ld   [hl], $64
@@ -7243,7 +7268,7 @@ L0676F0:;J
 	ld   hl, MBC1RomBank
 	call L06770B
 L0676FC:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067707
 	call Play_Pl_EndMove
 	jr   L06770A
@@ -7491,19 +7516,19 @@ L0678F8:;I
 	jp   z, L067932
 	jp   L06793D
 L067918:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06793D
 	ld   a, $A8
 	call HomeCall_Sound_ReqPlayExId
 	jp   L06793D
 L067926:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06793D
 	inc  hl
 	ld   [hl], $1E
 	jp   L06793D
 L067932:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06793D
 	call Play_Pl_EndMove
 	jr   L067940
@@ -7533,7 +7558,7 @@ L067966:;J
 	ld   hl, $0700
 	call Play_OBJLstS_MoveH_ByXFlipR
 L067972:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06799F
 	ld   a, $A8
 	call HomeCall_Sound_ReqPlayExId
@@ -7542,13 +7567,13 @@ L067972:;J
 	call Play_Pl_SetMoveDamageNext
 	jp   L06799F
 L067988:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06799F
 	inc  hl
 	ld   [hl], $1E
 	jp   L06799F
 L067994:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L06799F
 	call Play_Pl_EndMove
 	jr   L0679A2
@@ -7575,7 +7600,7 @@ L0679C5: db $C3;X
 L0679C6: db $84;X
 L0679C7: db $7A;X
 L0679C8:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067A84
 	inc  hl
 	ld   [hl], $FF
@@ -7617,7 +7642,7 @@ L067A00:;J
 	jp   L067A87
 L067A27:;J
 	ld   hl, $0080
-	call L0035D9
+	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   nc, L067A84
 	jp   L067A7E
 L067A33:;J
@@ -7628,7 +7653,7 @@ L067A33:;J
 	ld   hl, $0500
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L067A44:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067A75
 	inc  hl
 	ld   [hl], $0A
@@ -7645,12 +7670,12 @@ L067A58:;J
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
 L067A69:;J
 	ld   hl, $0080
-	call L0035D9
+	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   nc, L067A84
 	jp   L067A7E
 L067A75:;J
 	ld   hl, $0080
-	call L0035D9
+	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   L067A84
 L067A7E:;J
 	call Play_Pl_EndMove
@@ -7694,7 +7719,7 @@ L067ACB:;J
 	ld   hl, $0400
 	call Play_OBJLstS_MoveH_ByXFlipR
 L067AD7:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067B71
 	inc  hl
 	ld   [hl], $FF
@@ -7748,14 +7773,14 @@ L067B46:;J
 	jp   L067B53
 L067B53:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L067B71
 	ld   a, $18
 	ld   h, $06
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L067B74
 L067B66:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067B71
 	call Play_Pl_EndMove
 	jr   L067B74
@@ -7778,7 +7803,7 @@ L067B75:;I
 	jp   z, L067BC9
 	jp   L067BB6
 L067B95:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067BB6
 	inc  hl
 	ld   [hl], $0A
@@ -7788,21 +7813,21 @@ L067BA1:;J
 	jp   z, L067BAA
 	call L067D27
 L067BAA:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067BB6
 	inc  hl
 	ld   [hl], $FF
 	jp   L067BB6
 L067BB6:;J
 	ld   hl, $0060
-	call OBJLstS_ApplyGravity
+	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, L067BD4
 	ld   a, $0C
 	ld   h, $00
 	call Play_Pl_SetJumpLandAnimFrame
 	jp   L067BD7
 L067BC9:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067BD4
 	call Play_Pl_EndMove
 	jr   L067BD7
@@ -7865,13 +7890,13 @@ L067C2F:;J
 	call L002E49
 	jp   L067CC0
 L067C4D:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067CBD
 	inc  hl
 	ld   [hl], $0F
 	jp   L067CBD
 L067C59:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067CBD
 	jp   L067CB3
 L067C62:;J
@@ -7881,7 +7906,7 @@ L067C62:;J
 	ld   a, $01
 	call Play_Pl_SetMoveDamage
 	ld   hl, $08D8
-	call L003875
+	call Play_Pl_MoveRotThrown
 	jp   L067CBD
 L067C79:;J
 	call OBJLstS_IsFrameNewLoad
@@ -7890,10 +7915,10 @@ L067C79:;J
 	ld   a, $01
 	call Play_Pl_SetMoveDamage
 	ld   hl, $18FC
-	call L003875
+	call Play_Pl_MoveRotThrown
 	jp   L067CBD
 L067C90:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067CBD
 	inc  hl
 	ld   [hl], $14
@@ -7906,7 +7931,7 @@ L067C9C:;J
 	call Play_Pl_SetMoveDamage
 	jp   L067CBD
 L067CAD:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067CBD
 L067CB3:;J
 	call Play_Pl_EndMove
@@ -7934,13 +7959,13 @@ L067CDE: db $C3;X
 L067CDF: db $23;X
 L067CE0: db $7D;X
 L067CE1:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067D23
 	inc  hl
 	ld   [hl], $00
 	jp   L067D23
 L067CED:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067D23
 	inc  hl
 	ld   [hl], $3C
@@ -7960,7 +7985,7 @@ L067D12:;J
 	ld   hl, $0000
 	call L067DEF
 L067D18:;J
-	call OBJLstS_IsFrameEnd
+	call OBJLstS_IsInternalFrameAboutToEnd
 	jp   nc, L067D23
 	call Play_Pl_EndMove
 	jr   L067D26
@@ -8122,11 +8147,11 @@ L067DEF:;C
 	pop  bc
 	ret
 L067E31:;I
-	call L0028B2
+	call ExOBJS_Play_ChkHitModeAndMoveH
 	jp   c, L067E44
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 	ld   hl, $0000
-	call L003672
+	call OBJLstS_ApplyGravityVAndMoveV
 	jp   c, L067E44
 	ret
 L067E44:;J

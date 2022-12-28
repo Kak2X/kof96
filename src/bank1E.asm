@@ -1274,9 +1274,9 @@ CharSel_StartPortraitFlip_CheckChar:
 ; - 2: Normal character id (CHAR_ID_*)
 ; - 3: Normal portrait id (CHARSEL_ID_*)
 ; - 4: Normal tile id base
-; - 5: Alternate char id
-; - 6: Alternate character id (CHAR_ID_*)
-; - 7: Alternate portrait id (CHARSEL_ID_*)
+; - 5: Alternate char id (CHAR_ID_*)
+; - 6: Alternate portrait id (CHARSEL_ID_*)
+; - 7: Alternate tile id base
 mStartFlipPortrait: MACRO
 
 	; Not applicable if this tile flip is in progress already.
@@ -1294,7 +1294,7 @@ mStartFlipPortrait: MACRO
 	
 	
 	; Toggle between original and alterate depending on the currently active character.
-	cp   \2	; Is normal character selectable?
+	cp   \2/2	; Is normal character selectable?
 	jr   z, .setAlt_\@	; If so, jump (switch to alternate)
 .setNorm_\@:
 	;
@@ -1302,7 +1302,7 @@ mStartFlipPortrait: MACRO
 	;
 	
 	; Set normal character ID (ie: CHAR_ID_IORI) to wCharSelIdMapTbl entry
-	ld   [hl], \2		
+	ld   [hl], \2/2		
 	
 	; Display and start tile flipping anim (alt to norm)
 	ld   de, \1
@@ -1321,7 +1321,7 @@ mStartFlipPortrait: MACRO
 	;
 	
 	; Set alternate character ID (ie: CHAR_ID_OIORI) to wCharSelIdMapTbl entry
-	ld   [hl], \5
+	ld   [hl], \5/2
 	
 	; Display and start tile flipping anim (norm to alt)
 	ld   de, \1
@@ -1336,8 +1336,8 @@ ENDM
 	
 
 .iori:
-	;                 | OBJINFO          | NORMAL                                         | ALT
-	;                 |                  | CHAR ID            PORTRAIT ID         TILE ID | CHAR ID         PORTRAIT ID             TILE ID
+	;                 | OBJINFO            | NORMAL                                       | ALT
+	;                 |                    | CHAR ID          PORTRAIT ID         TILE ID | CHAR ID         PORTRAIT ID             TILE ID
 	mStartFlipPortrait wOBJInfo_IoriFlip   , CHAR_ID_IORI   , CHARSEL_ID_IORI   , $2D     , CHAR_ID_OIORI , CHARSEL_ID_SPEC_OIORI , $A2
 	jp   .retOk
 .leona:
@@ -3249,15 +3249,15 @@ CharSelect_IsLastWinner:
 ; CHARSEL_ID_* -> CHAR_ID_* mapping table.
 ; The chars declarations below are organized like how they appear in the character select screen.
 CharSel_IdMapTbl:
-	db CHAR_ID_KYO,    CHAR_ID_ANDY,    CHAR_ID_TERRY,    CHAR_ID_RYO,      CHAR_ID_ROBERT,  CHAR_ID_IORI
-	db CHAR_ID_DAIMON, CHAR_ID_MAI,     CHAR_ID_GEESE,    CHAR_ID_MRBIG,    CHAR_ID_KRAUSER, CHAR_ID_MATURE
-	db CHAR_ID_ATHENA, CHAR_ID_CHIZURU, CHAR_ID_MRKARATE, CHAR_ID_MRKARATE, CHAR_ID_GOENITZ, CHAR_ID_LEONA
+	db CHAR_ID_KYO/2,    CHAR_ID_ANDY/2,    CHAR_ID_TERRY/2,    CHAR_ID_RYO/2,      CHAR_ID_ROBERT/2,  CHAR_ID_IORI/2
+	db CHAR_ID_DAIMON/2, CHAR_ID_MAI/2,     CHAR_ID_GEESE/2,    CHAR_ID_MRBIG/2,    CHAR_ID_KRAUSER/2, CHAR_ID_MATURE/2
+	db CHAR_ID_ATHENA/2, CHAR_ID_CHIZURU/2, CHAR_ID_MRKARATE/2, CHAR_ID_MRKARATE/2, CHAR_ID_GOENITZ/2, CHAR_ID_LEONA/2
 	; [TCRF] Unused entries in the list. Not used by tile flipping since it switches between hardcoded char IDs.
 	;        These may have been used before the tile flipping was implemented, and still work properly.
 	;        They all work as intended as they also have (unused) CharSel_CursorPosTable entries.
-	db CHAR_ID_OIORI
-	db CHAR_ID_OLEONA
-	db CHAR_ID_KAGURA
+	db CHAR_ID_OIORI/2
+	db CHAR_ID_OLEONA/2
+	db CHAR_ID_KAGURA/2
 .end:
 ; Relative tile IDs for portraits
 BG_CharSel_Portrait: INCBIN "data/bg/charsel_portrait.bin"

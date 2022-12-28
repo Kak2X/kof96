@@ -132,6 +132,14 @@ wPlayHitstop EQU $C172 ; If set, hitstop is applied. Due to how tasks are carefu
 wPlayPlThrowActId EQU $C173 ; Act ID for a throw. This is global since two throws can't be active at once.
 wPlayPlThrowOpMode EQU $C174 ; PLAY_THROWOP_*
 wPlayPlThrowDir EQU $C175 ; Sets the throw's direction. If 0, the opponent is thrown ???back or fwd??
+;--
+; Movement amounts set by Play_Pl_MoveRotThrown, used to move the opponent at fixed relative positions,
+; mostly during the "rotation frames" before the throw arc starts.
+; This avoids having to define the offsets in the sprite mapping itself.
+wPlayPlThrowRotMoveH EQU $C176 ; Relative X position
+wPlayPlThrowRotMoveV EQU $C177 ; Relative Y position
+wPlayPlThrowRot_Unk_UseInMove EQU $C178 ; If set, allows few moves in the "attacked" group to use the above two
+;--
 
 wPlaySlowdownTimer EQU $C17A ; Countdown timer. When it's > 0, slowdown is enabled during gameplay. When it reaches 0, the slowdown stops.
 wPlaySlowdownSpeed EQU $C17B ; Determines how much the game should slow down. Execution is 1 every (wPlaySlowdownSpeed) frames.
@@ -315,7 +323,7 @@ wOBJInfo_Pl1Projectile EQU wOBJInfo2
 wOBJInfo_Pl2Projectile EQU wOBJInfo3
 wOBJInfo_Pl1SuperSparkle EQU wOBJInfo4
 wOBJInfo_Pl2SuperSparkle EQU wOBJInfo5
-
+wOBJInfo_TerryHat EQU wOBJInfo2
 
 wGFXBufInfo_Pl1 EQU $D8C0
 wGFXBufInfo_Pl2 EQU $D8E0
@@ -461,21 +469,24 @@ iOBJInfo_CharSelFlip_PortraitId EQU iOBJInfo_Custom+$07
 iOBJInfo_CharSelFlip_BaseTileId EQU iOBJInfo_Custom+$08
 iOBJInfo_CharSelFlip_OBJIdTarget EQU iOBJInfo_Custom+$09
 
+; TODO: Rename to iOBJInfo_Play_CodeBank and merge with SuperSparkle ones? It's used by multiple OBJInfo...
+; $00-$07 seem fixed
 iOBJInfo_Proj_CodeBank EQU iOBJInfo_Custom+$00 ; Bank number for the CodePtr
 iOBJInfo_Proj_CodePtr_Low EQU iOBJInfo_Custom+$01 ; Custom code for projectile (low byte)
 iOBJInfo_Proj_CodePtr_High EQU iOBJInfo_Custom+$02 ; Custom code for projectile (high byte)
-
 iOBJInfo_Proj_DamageVal EQU iOBJInfo_Custom+$03 ; Damage given the projectile hits the opponent.
 iOBJInfo_Proj_DamageHitAnimId EQU iOBJInfo_Custom+$04 ; Animation playing when the projectile hits the opponent (HITANIM_*)
 iOBJInfo_Proj_DamageFlags3 EQU iOBJInfo_Custom+$05 ; Damage flags applied when the opponent gets hit (they get copied to iPlInfo_Flags3)
 iOBJInfo_Proj_HitMode EQU iOBJInfo_Custom+$06 ; If set, marks what happens when the projectile hits a target
 iOBJInfo_Proj_Priority EQU iOBJInfo_Custom+$07 ; Higher priority projectiles erase others
+;--
 
 ; Must be at same location of iOBJInfo_Proj_CodePtr
 iOBJInfo_SuperSparkle_CodeBank EQU iOBJInfo_Custom+$00 ; Bank number for the CodePtr
 iOBJInfo_SuperSparkle_CodePtr_Low EQU iOBJInfo_Custom+$01 ; Custom code for sparkle (low byte)
 iOBJInfo_SuperSparkle_CodePtr_High EQU iOBJInfo_Custom+$02 ; Custom code for sparkle (high byte)
 iOBJInfo_SuperSparkle_EnaTimer EQU iOBJInfo_Custom+$08 ; Visibility timer. When it elapses, the sparkle disappears.
+
 
 ; Sprite mapping fields.
 
@@ -589,7 +600,7 @@ iPlInfo_MaxPowExtraLen EQU $55 ; Determines the length of the MAX Power meter. I
 iPlInfo_MaxPowBGPtr_High EQU $56 ; Ptr to the leftmost tile of MAX Power meter. *NOT* used when scrolling it on/offscreen. (high byte)
 iPlInfo_MaxPowBGPtr_Low EQU $57 ; Ptr to the leftmost tile of MAX Power meter. *NOT* used when scrolling it on/offscreen. (low byte)
 
-iPlInfo_Dizzy EQU $58 ; If set, the player get knocked down on the next hit and becomes dizzy.
+iPlInfo_DizzyNext EQU $58 ; If set, the player get knocked down on the next hit and becomes dizzy.
 iPlInfo_DizzyTimeLeft EQU $59 ; Countdown timer with number of frames before the player snaps out of the dizzy state.
 ;--
 ; Stun timers
@@ -598,7 +609,7 @@ iPlInfo_DizzyProgCap EQU $5B ; Caps iPlInfo_DizzyProg to this value. As a result
 iPlInfo_GuardBreakProg EQU $5C ; Guard break progression timer. It increments on its own, and blocking subtracts a value from here. When it reaches 0, guard temporarily breaks.
 iPlInfo_GuardBreakProgCap EQU $5D ; Caps iPlInfo_GuardBreakProg to this value. As a result, the higher it is, the more hits it takes to guard break.
 ;--
-iPlInfo_WakeUpTimer EQU $5E ; Wake up timer set when a player drops on the ground. Prevents getting thrown.
+iPlInfo_NoThrowTimer EQU $5E ; Wake up timer set when a player drops on the ground. Prevents getting thrown.
 iPlInfo_5F EQU $5F
 iPlInfo_NoSpecialTimer EQU $60 ; Until it elapses, the player flashes and can only use normals
 iPlInfo_PlDistance EQU $61 ; Distance between players (the same across players)
@@ -642,7 +653,7 @@ iPlInfo_MoveDamageFlags3Other EQU $76
 iPlInfo_MoveDamageValNextOther EQU $77
 iPlInfo_MoveDamageHitAnimIdNextOther EQU $78
 iPlInfo_MoveDamageFlags3NextOther EQU $79
-iPlInfo_WakeUpTimerOther EQU $7A
+iPlInfo_NoThrowTimerOther EQU $7A
 iPlInfo_5FOther EQU $7B
 iPlInfo_PhysHitRecv EQU $7C ; If set, marks that we've been directly hit by the other player (ie: not from a projectile)
 
@@ -653,7 +664,7 @@ iPlInfo_OBJInfoFlagsOther EQU $7F ; Copy of iOBJInfo_OBJLstFlags
 iPlInfo_OBJInfoXOther EQU $80 ; Copy of iOBJInfo_X
 iPlInfo_OBJInfoYOther EQU $81 ; Copy of iOBJInfo_Y
 iPlInfo_PowOther EQU $82
-iPlInfo_RunningJump EQU $83 ; If set, the last jump was started during a forward run (move MOVE_SHARED_DASH_F)
+iPlInfo_RunningJump EQU $83 ; If set, the last jump was started during a forward run (move MOVE_SHARED_RUN_F)
 
 
 
