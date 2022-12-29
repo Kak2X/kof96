@@ -74,6 +74,6 @@ function get_move_name_from_tbl($id, $spectbl) {
 	}
 }
 
-function fmthexnum($dec) {
-	return str_pad(strtoupper(dechex($dec)), 2, "0", STR_PAD_LEFT);
+function fmthexnum($dec, $digits = 2) {
+	return str_pad(strtoupper(dechex($dec)), $digits, "0", STR_PAD_LEFT);
 }
