@@ -8926,10 +8926,8 @@ L002554:;J
 	add  hl, de
 	ld   [hl], $00
 	call OBJLstS_Overlap
-	ld   hl, $1000
-	call Play_OBJLstS_MoveH_ByXFlipR
-	ld   hl, $F800
-	call Play_OBJLstS_MoveV
+	mMvC_SetMoveH $1000
+	mMvC_SetMoveV $F800
 	pop  af
 	jp   nc, L0025A4
 	bit  1, a
@@ -9038,14 +9036,11 @@ L00263B:;J
 	pop  af
 	cp   $10
 	jp   nz, L002665
-	ld   hl, $1000
-	call Play_OBJLstS_MoveH_ByXFlipR
-	ld   hl, $F800
-	call Play_OBJLstS_MoveV
+	mMvC_SetMoveH $1000
+	mMvC_SetMoveV $F800
 	jp   L002671
 L002665:;J
-	ld   hl, $1000
-	call Play_OBJLstS_MoveH_ByXFlipR
+	mMvC_SetMoveH $1000
 	ld   hl, $0005
 	add  hl, de
 	ld   [hl], PL_FLOOR_POS
@@ -9100,10 +9095,8 @@ L00268A:;J
 	inc  hl
 	ld   [hl], $00
 	call OBJLstS_Overlap
-	ld   hl, $1C00
-	call Play_OBJLstS_MoveH_ByXFlipR
-	ld   hl, $FC00
-	call Play_OBJLstS_MoveV
+	mMvC_SetMoveH $1C00
+	mMvC_SetMoveV $FC00
 	pop  af
 	jp   nc, L0026DA
 	bit  1, a
@@ -9209,10 +9202,8 @@ L002763:;J
 	inc  hl
 	ld   [hl], $00
 	call OBJLstS_Overlap
-	ld   hl, $1000
-	call Play_OBJLstS_MoveH_ByXFlipR
-	ld   hl, $F800
-	call Play_OBJLstS_MoveV
+	mMvC_SetMoveH $1000
+	mMvC_SetMoveV $F800
 	pop  af
 	jp   nc, L002793
 	bit  1, a
@@ -9281,8 +9272,7 @@ L0027C3:;J
 	add  hl, de
 	ld   [hl], $00
 	call OBJLstS_Overlap
-	ld   hl, $0800
-	call Play_OBJLstS_MoveH_ByXFlipR
+	mMvC_SetMoveH $0800
 	pop  af
 	jp   nc, L00280D
 	bit  1, a
@@ -9702,8 +9692,7 @@ OBJLstS_Hide:
 MoveC_Base_Jump:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_CreateJoyMergedKeysLH
-	call Play_Pl_IsMoveLoading
-	jp   c, .ret
+	mMvC_ValLoaded .ret
 	
 	; Moves use iOBJInfo_OBJLstPtrTblOffsetView to always execute code relevant to the visible frame.
 	; This has the nice result of OSTB_GFXNEWLOAD being only set the very first time we
@@ -9862,7 +9851,9 @@ MoveC_Base_Jump:
 ; is about to change (iOBJInfo_FrameLeft == 0, as checked by OBJLstS_IsInternalFrameAboutToEnd).
 ; Since the graphics for the new frame have to load, this will still be called a few times after that.
 .obj0_init:
-	mMvC_SetSpeedOnInternalFrameEnd ANIMSPEED_NONE, .anim
+	mMvC_ValFrameEnd .anim
+	mMvC_SetAnimSpeed ANIMSPEED_NONE
+	jp   .anim
 
 ; --------------- frame #1 ---------------	
 ; Starting the jump, and determines its "type".
@@ -10114,32 +10105,22 @@ MoveC_Base_Jump:
 	jp   .move
 .obj1_chkEnd:
 	; Advance to frame#2 when reaching YSpeed > -7
-	ld   a, -$07
-	ld   h, ANIMSPEED_NONE	
-	call OBJLstS_ReqAnimOnGtYSpeed
+	mMvC_NextFrameOnGtYSpeed -$07, ANIMSPEED_NONE
 	jp   .chkWallJump
 
 ; --------------- frames #2-5 ---------------	
 ; Advance to the next frame when reaching the targets.
 .obj2_air:
-	ld   a, -$05			; Target Y Speed
-	ld   h, ANIMSPEED_NONE	; Continue manual control
-	call OBJLstS_ReqAnimOnGtYSpeed
+	mMvC_NextFrameOnGtYSpeed -$05, ANIMSPEED_NONE
 	jp   .chkWallJump
 .obj3_air:
-	ld   a, -$03
-	ld   h, ANIMSPEED_NONE
-	call OBJLstS_ReqAnimOnGtYSpeed
+	mMvC_NextFrameOnGtYSpeed -$03, ANIMSPEED_NONE
 	jp   .chkWallJump
 .obj4_air:
-	ld   a, -$01
-	ld   h, ANIMSPEED_NONE
-	call OBJLstS_ReqAnimOnGtYSpeed
+	mMvC_NextFrameOnGtYSpeed -$01, ANIMSPEED_NONE
 	jp   .chkWallJump
 .obj5_air:
-	ld   a, +$01
-	ld   h, ANIMSPEED_NONE
-	call OBJLstS_ReqAnimOnGtYSpeed
+	mMvC_NextFrameOnGtYSpeed +$01, ANIMSPEED_NONE
 	jp   .chkWallJump
 
 ; --------------- common frames #2-6 ---------------	
@@ -10160,7 +10141,7 @@ MoveC_Base_Jump:
 	; Move the player in the air
 	ld   hl, iPlInfo_Gravity				; HL = Ptr to gravity
 	call Pl_GetWord							; Read it out to HL
-	call OBJLstS_ApplyGravityVAndMoveHV				; Apply it
+	call OBJLstS_ApplyGravityVAndMoveHV		; Apply it
 	jp   nc, .anim			; Did we touch the ground? If not, skip
 	; Otherwise, switch to the landing act.
 	; During this time, starting specials is allowed, making it
@@ -10169,9 +10150,7 @@ MoveC_Base_Jump:
 	add  hl, bc
 	res  PF1B_NOSPECSTART, [hl]			; Allow starting specials when landing
 	; Switch to the landing phase.
-	ld   a, $07*OBJLSTPTR_ENTRYSIZE		; Act
-	ld   h, ANIMSPEED_INSTANT			; End it as soon as possible
-	call Play_Pl_SetJumpLandAnimFrame
+	mMvC_SetLandFrame $07*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
 	jp   .ret
 	
 ; --------------- frame #7 ---------------
@@ -10179,9 +10158,8 @@ MoveC_Base_Jump:
 ;
 ; Just waits for the frame to end before ending the move.
 .obj7_landed:
-	call OBJLstS_IsInternalFrameAboutToEnd	; Is the frame about to finish?
-	jp   nc, .anim							; If not, continue
-	call Play_Pl_EndMove					; Otherwise, we're done
+	mMvC_ValFrameEnd .anim				; Is the frame about to finish? ; If not, continue				
+	call Play_Pl_EndMove				; Otherwise, we're done
 	jr   .ret
 ; --------------- common ---------------	
 .anim:

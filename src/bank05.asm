@@ -8288,11 +8288,11 @@ MoveInputReader_Iori_NoMove:
 	ret
 L056142:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L056174
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056171
-	ld   hl, $0017
+	mMvC_ValLoaded L056174
+	mMvC_ValFrameEnd L056171
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	ld   hl, $0039
@@ -8319,9 +8319,10 @@ L056175:;I
 	cp   $22
 	jp   z, L056277
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L056276
-	ld   hl, $0017
+	mMvC_ValLoaded L056276
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -8337,88 +8338,56 @@ L056175:;I
 	cp   $14
 	jp   z, L056268
 L0561AB:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L0561B7
-	ld   hl, $0400
-	call Play_OBJLstS_MoveH_ByXFlipR
+	mMvC_ValFrameStart L0561B7
+	mMvC_SetMoveH $0400
 L0561B7:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056273
-	ld   hl, $0403
-	ld   a, $02
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameEnd L056273
+	mMvC_SetDamageNext $04,HITANIM_HIT0_MID, PF3_FLASH_B_SLOW
 	jp   L056273
 L0561C8:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L0561D4
-	ld   hl, $0800
-	call Play_OBJLstS_MoveH_ByXFlipR
+	mMvC_ValFrameStart L0561D4
+	mMvC_SetMoveH $0800
 L0561D4:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056273
-	inc  hl
-	ld   [hl], $FF
-	ld   hl, $0408
-	ld   a, $03
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameEnd L056273
+	mMvC_SetAnimSpeed ANIMSPEED_NONE
+	mMvC_SetDamageNext $04, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW
 	jp   L056273
 L0561E8:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056230
+	mMvC_ValFrameStart L056230
 	ld   a, $A8
 	call HomeCall_Sound_ReqPlayExId
 	ld   hl, $0020
 	add  hl, bc
 	inc  hl
 	res  7, [hl]
-	call MoveInputS_CheckMoveLHVer
-	jp   c, L056221
-	jp   nz, L056212
-	ld   hl, $0080
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	ld   hl, $FA00
-	call Play_OBJLstS_SetSpeedV
+	mMvIn_ChkLHE L056212, L056221
+	mMvC_SetSpeedH $0080
+	mMvC_SetSpeedV $FA00
 	jp   L05622D
 L056212:;J
-	ld   hl, $0100
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	ld   hl, $F900
-	call Play_OBJLstS_SetSpeedV
+	mMvC_SetSpeedH $0100
+	mMvC_SetSpeedV $F900
 	jp   L05622D
 L056221:;J
-	ld   hl, $0200
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	ld   hl, $F800
-	call Play_OBJLstS_SetSpeedV
+	mMvC_SetSpeedH $0200
+	mMvC_SetSpeedV $F800
 L05622D:;J
 	jp   L056255
 L056230:;J
-	ld   a, $F7
-	ld   h, $FF
-	call OBJLstS_ReqAnimOnGtYSpeed
+	mMvC_NextFrameOnGtYSpeed $F7, $FF
 	jp   nc, L056255
-	ld   hl, $0408
-	ld   a, $03
-	call Play_Pl_SetMoveDamageNext
+	mMvC_SetDamageNext $04, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW
 	jp   L056255
 L056245:;J
-	ld   a, $FE
-	ld   h, $FF
-	call OBJLstS_ReqAnimOnGtYSpeed
-	ld   hl, $0040
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_NextFrameOnGtYSpeed $FE, $FF
+	mMvC_SetSpeedH $0040
 	jp   L056255
 L056255:;J
-	ld   hl, $0060
-	call OBJLstS_ApplyGravityVAndMoveHV
-	jp   nc, L056273
-	ld   a, $14
-	ld   h, $06
-	call Play_Pl_SetJumpLandAnimFrame
+	mMvC_ChkGravityHV $0060, L056273
+	mMvC_SetLandFrame $14, $06
 	jp   L056276
 L056268:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056273
+	mMvC_ValFrameEnd L056273
 	call Play_Pl_EndMove
 	jr   L056276
 L056273:;J
@@ -8427,9 +8396,10 @@ L056276:;JR
 	ret
 L056277:;J
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L05637E
-	ld   hl, $0017
+	mMvC_ValLoaded L05637E
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -8447,93 +8417,60 @@ L056277:;J
 	cp   $18
 	jp   z, L056370
 L0562A8:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L0562B4
-	ld   hl, $0400
-	call Play_OBJLstS_MoveH_ByXFlipR
+	mMvC_ValFrameStart L0562B4
+	mMvC_SetMoveH $0400
 L0562B4:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L05637B
-	ld   hl, $0403
-	ld   a, $12
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameEnd L05637B
+	mMvC_SetDamageNext $04,HITANIM_HIT0_MID, PF3_FLASH_B_SLOW|PF3_BIT4
 	jp   L05637B
 L0562C5:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L0562D1
-	ld   hl, $0800
-	call Play_OBJLstS_MoveH_ByXFlipR
+	mMvC_ValFrameStart L0562D1
+	mMvC_SetMoveH $0800
 L0562D1:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L05637B
-	inc  hl
-	ld   [hl], $01
-	ld   hl, $0408
-	ld   a, $13
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameEnd L05637B
+	mMvC_SetAnimSpeed $01
+	mMvC_SetDamageNext $04, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_BIT4
 	jp   L05637B
 L0562E5:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L05632D
+	mMvC_ValFrameStart L05632D
 	ld   a, $A8
 	call HomeCall_Sound_ReqPlayExId
 	ld   hl, $0020
 	add  hl, bc
 	inc  hl
 	res  7, [hl]
-	call MoveInputS_CheckMoveLHVer
-	jp   c, L05631E
-	jp   nz, L05630F
-	ld   hl, $0100
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	ld   hl, $FA00
-	call Play_OBJLstS_SetSpeedV
+	mMvIn_ChkLHE L05630F, L05631E
+	mMvC_SetSpeedH $0100
+	mMvC_SetSpeedV $FA00
 	jp   L05632A
 L05630F:;J
-	ld   hl, $0200
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	ld   hl, $F900
-	call Play_OBJLstS_SetSpeedV
+	mMvC_SetSpeedH $0200
+	mMvC_SetSpeedV $F900
 	jp   L05632A
 L05631E:;J
-	ld   hl, $0300
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	ld   hl, $F800
-	call Play_OBJLstS_SetSpeedV
+	mMvC_SetSpeedH $0300
+	mMvC_SetSpeedV $F800
 L05632A:;J
 	jp   L05635D
 L05632D:;J
-	ld   a, $F7
-	ld   h, $00
-	call OBJLstS_ReqAnimOnGtYSpeed
+	mMvC_NextFrameOnGtYSpeed $F7, $00
 	jp   nc, L05635D
 	jp   L05635D
 L05633A:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L05635D
-	ld   hl, $040C
-	ld   a, $13
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameEnd L05635D
+	mMvC_SetDamageNext $04, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_BIT4
 	jp   L05635D
 L05634B:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L05635D
-	inc  hl
-	ld   [hl], $FF
-	ld   hl, $0040
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_ValFrameEnd L05635D
+	mMvC_SetAnimSpeed ANIMSPEED_NONE
+	mMvC_SetSpeedH $0040
 	jp   L05635D
 L05635D:;J
-	ld   hl, $0060
-	call OBJLstS_ApplyGravityVAndMoveHV
-	jp   nc, L05637B
-	ld   a, $18
-	ld   h, $06
-	call Play_Pl_SetJumpLandAnimFrame
+	mMvC_ChkGravityHV $0060, L05637B
+	mMvC_SetLandFrame $18, $06
 	jp   L05637E
 L056370:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L05637B
+	mMvC_ValFrameEnd L05637B
 	call Play_Pl_EndMove
 	jr   L05637E
 L05637B:;J
@@ -8542,9 +8479,10 @@ L05637E:;JR
 	ret
 L05637F:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L056475
-	ld   hl, $0017
+	mMvC_ValLoaded L056475
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -8560,20 +8498,15 @@ L05637F:;I
 	cp   $14
 	jp   z, L056467
 L0563AB:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L0563BC
-	ld   hl, $0400
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_ValFrameStart L0563BC
+	mMvC_SetSpeedH $0400
 	ld   a, $08
 	call HomeCall_Sound_ReqPlayExId
 L0563BC:;J
 	jp   L05640F
 L0563BF:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L05640F
-	ld   hl, $0808
-	ld   a, $10
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameEnd L05640F
+	mMvC_SetDamageNext $08, HITANIM_DROP_MD, PF3_BIT4
 	ld   hl, $0033
 	add  hl, bc
 	ld   a, [hl]
@@ -8582,15 +8515,11 @@ L0563BF:;J
 	ld   hl, $001C
 	add  hl, de
 	ld   [hl], $FF
-	ld   hl, $0808
-	ld   a, $11
-	call Play_Pl_SetMoveDamageNext
+	mMvC_SetDamageNext $08, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_BIT4
 	jp   L05640F
 L0563E8:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L0563F9
-	ld   hl, $0400
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_ValFrameStart L0563F9
+	mMvC_SetSpeedH $0400
 	ld   a, $08
 	call HomeCall_Sound_ReqPlayExId
 L0563F9:;J
@@ -8608,12 +8537,9 @@ L05640F:;J
 	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   L056472
 L056418:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056432
-	ld   hl, $0200
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	ld   hl, OAM_Begin
-	call Play_OBJLstS_SetSpeedV
+	mMvC_ValFrameStart L056432
+	mMvC_SetSpeedH $0200
+	mMvC_SetSpeedV -$0200
 	jp   L056454
 L05642D: db $3E;X
 L05642E: db $9C;X
@@ -8621,31 +8547,21 @@ L05642F: db $CD;X
 L056430: db $16;X
 L056431: db $10;X
 L056432:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056454
-	inc  hl
-	ld   [hl], $FF
-	ld   hl, $080C
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameEnd L056454
+	mMvC_SetAnimSpeed ANIMSPEED_NONE
+	mMvC_SetDamageNext $08, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
 	jp   L056454
 L056446:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056454
+	mMvC_ValFrameStart L056454
 	ld   a, $08
 	call HomeCall_Sound_ReqPlayExId
 	jp   L056454
 L056454:;J
-	ld   hl, $0030
-	call OBJLstS_ApplyGravityVAndMoveHV
-	jp   nc, L056472
-	ld   a, $14
-	ld   h, $03
-	call Play_Pl_SetJumpLandAnimFrame
+	mMvC_ChkGravityHV $0030, L056472
+	mMvC_SetLandFrame $14, $03
 	jp   L056475
 L056467:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056472
+	mMvC_ValFrameEnd L056472
 L05646D:;J
 	call Play_Pl_EndMove
 	jr   L056475
@@ -8655,9 +8571,10 @@ L056475:;JR
 	ret
 L056476:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L05659E
-	ld   hl, $0017
+	mMvC_ValLoaded L05659E
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -8680,25 +8597,18 @@ L0564AC: db $C3;X
 L0564AD: db $9B;X
 L0564AE: db $65;X
 L0564AF:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L05651E
-	inc  hl
-	ld   [hl], $01
+	mMvC_ValFrameEnd L05651E
+	mMvC_SetAnimSpeed $01
 	jp   L05651E
 L0564BB:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L0564EA
+	mMvC_ValFrameStart L0564EA
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
-	call MoveInputS_CheckMoveLHVer
-	jp   c, L0564E1
-	jp   nz, L0564D8
-	ld   hl, $0400
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvIn_ChkLHE L0564D8, L0564E1
+	mMvC_SetSpeedH $0400
 	jp   L056535
 L0564D8:;J
-	ld   hl, $0580
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_SetSpeedH $0580
 	jp   L056535
 L0564E1: db $21;X
 L0564E2: db $00;X
@@ -8712,21 +8622,17 @@ L0564E9: db $65;X
 L0564EA:;J
 	jp   L05651E
 L0564ED:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L05651E
+	mMvC_ValFrameStart L05651E
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
 	jp   L05651E
 L0564FB:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056506
+	mMvC_ValFrameStart L056506
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
 L056506:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L05651E
-	inc  hl
-	ld   [hl], $FF
+	mMvC_ValFrameEnd L05651E
+	mMvC_SetAnimSpeed ANIMSPEED_NONE
 	jp   L056535
 L056512:;J
 	ld   hl, $0100
@@ -8759,8 +8665,7 @@ L05653B:;J
 	bit  7, [hl]
 	jp   z, L05655C
 L056553:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L05659B
+	mMvC_ValFrameEnd L05659B
 	jp   L056595
 L05655C:;J
 	ld   a, $18
@@ -8771,24 +8676,17 @@ L05655C:;J
 	ld   a, [hl]
 	cp   $22
 	jp   z, L056578
-	ld   hl, $080C
-	ld   a, $03
-	call Play_Pl_SetMoveDamageNext
+	mMvC_SetDamageNext $08, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG|PF3_FLASH_B_SLOW
 	jp   L05659E
 L056578:;J
-	ld   hl, $0808
-	ld   a, $13
-	call Play_Pl_SetMoveDamageNext
+	mMvC_SetDamageNext $08, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_BIT4
 	jp   L05659E
 L056583:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L05659B
-	inc  hl
-	ld   [hl], $0A
+	mMvC_ValFrameEnd L05659B
+	mMvC_SetAnimSpeed $0A
 	jp   L05659B
 L05658F:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L05659B
+	mMvC_ValFrameEnd L05659B
 L056595:;J
 	call Play_Pl_EndMove
 	jp   L05659E
@@ -8798,9 +8696,10 @@ L05659E:;J
 	ret
 L05659F:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L056617
-	ld   hl, $0017
+	mMvC_ValLoaded L056617
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -8813,36 +8712,22 @@ L05659F:;I
 	jp   z, L056603
 	jp   L056614
 L0565C4:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056614
-	ld   hl, $0611
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
-	ld   hl, $F800
-	call Play_Pl_MoveRotThrown
+	mMvC_ValFrameEnd L056614
+	mMvC_SetDamageNext $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+	mMvC_MoveThrowOp -$08, +$00 ; Move back 8px
 	jp   L056614
 L0565DB:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056614
-	ld   hl, $0611
-	ld   a, $11
-	call Play_Pl_SetMoveDamageNext
-	ld   hl, $0400
-	call Play_Pl_MoveRotThrown
+	mMvC_ValFrameEnd L056614
+	mMvC_SetDamageNext $06, HITANIM_THROW_ROTU, PF3_SHAKELONG|PF3_BIT4
+	mMvC_MoveThrowOp +$04, +$00 ; Move fwd 4px
 	jp   L056614
 L0565F2:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056614
-	ld   hl, $0109
-	ld   a, $11
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameEnd L056614
+	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_SHAKELONG|PF3_BIT4
 	jp   L056614
 L056603:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056614
-	call Play_Pl_EndMove
-	ld   a, $00
-	ld   [wPlayPlThrowActId], a
+	mMvC_ValFrameEnd L056614
+	mMvC_EndThrow_Slow
 	jp   L056617
 L056614:;J
 	call OBJLstS_DoAnimTiming_Loop_by_DE
@@ -8850,9 +8735,10 @@ L056617:;J
 	ret
 L056618:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L056766
-	ld   hl, $0017
+	mMvC_ValLoaded L056766
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -8899,20 +8785,15 @@ L056618:;I
 	jp   z, L056757
 	jp   L056763
 L056692:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056763
-	inc  hl
-	ld   [hl], $1E
+	mMvC_ValFrameEnd L056763
+	mMvC_SetAnimSpeed $1E
 	jp   L056763
 L05669E:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056763
-	inc  hl
-	ld   [hl], $28
+	mMvC_ValFrameEnd L056763
+	mMvC_SetAnimSpeed $28
 	jp   L056763
 L0566AA:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L0566BF
+	mMvC_ValFrameStart L0566BF
 	ld   hl, $0001
 	add  hl, de
 	ld   a, [hl]
@@ -8923,40 +8804,29 @@ L0566AA:;J
 	add  hl, bc
 	ld   [hl], a
 L0566BF:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056763
-	inc  hl
-	ld   [hl], $04
+	mMvC_ValFrameEnd L056763
+	mMvC_SetAnimSpeed $04
 	ld   a, $01
 	call HomeCall_Sound_ReqPlayExId
 	jp   L056763
 L0566D0:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056763
-	inc  hl
-	ld   [hl], $08
+	mMvC_ValFrameEnd L056763
+	mMvC_SetAnimSpeed $08
 	jp   L056763
 L0566DC:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056763
-	inc  hl
-	ld   [hl], $10
+	mMvC_ValFrameEnd L056763
+	mMvC_SetAnimSpeed $10
 	jp   L056763
 L0566E8:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056763
-	inc  hl
-	ld   [hl], $32
+	mMvC_ValFrameEnd L056763
+	mMvC_SetAnimSpeed $32
 	jp   L056763
 L0566F4:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056763
-	inc  hl
-	ld   [hl], $24
+	mMvC_ValFrameEnd L056763
+	mMvC_SetAnimSpeed $24
 	jp   L056763
 L056700:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056711
+	mMvC_ValFrameStart L056711
 	ld   hl, $0083
 	add  hl, bc
 	ld   a, [hl]
@@ -8965,40 +8835,27 @@ L056700:;J
 	ldi  [hl], a
 	ld   [hl], a
 L056711:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056763
-	inc  hl
-	ld   [hl], $00
+	mMvC_ValFrameEnd L056763
+	mMvC_SetAnimSpeed ANIMSPEED_INSTANT
 	jp   L056763
 L05671D:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056763
-	ld   hl, $010B
-	ld   a, $00
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameEnd L056763
+	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0B, $00
 	jp   L056763
 L05672E:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056763
-	ld   hl, $0108
-	ld   a, $00
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameEnd L056763
+	mMvC_SetDamageNext $01, HITANIM_DROP_MD, $00
 	jp   L056763
 L05673F:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056763
-	inc  hl
-	ld   [hl], $28
+	mMvC_ValFrameEnd L056763
+	mMvC_SetAnimSpeed $28
 	jp   L056763
 L05674B:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056763
-	inc  hl
-	ld   [hl], $06
+	mMvC_ValFrameEnd L056763
+	mMvC_SetAnimSpeed $06
 	jp   L056763
 L056757:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056763
+	mMvC_ValFrameEnd L056763
 	call Play_Pl_EndMove
 	jp   L056766
 L056763:;J
@@ -9007,9 +8864,10 @@ L056766:;J
 	ret
 L056767:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L0568AB
-	ld   hl, $0017
+	mMvC_ValLoaded L0568AB
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -9044,25 +8902,19 @@ L056767:;I
 	jp   z, L05689C
 	jp   L05684F
 L0567C3:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L0567CE
+	mMvC_ValFrameStart L0567CE
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
 L0567CE:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L0568A8
-	inc  hl
-	ld   [hl], $12
+	mMvC_ValFrameEnd L0568A8
+	mMvC_SetAnimSpeed $12
 	jp   L0568A8
 L0567DA:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L0567E9
-	ld   hl, $0700
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_ValFrameStart L0567E9
+	mMvC_SetSpeedH $0700
 	jp   L056896
 L0567E9:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L0567F2
+	mMvC_ValFrameEnd L0567F2
 	jp   L0568A2
 L0567F2:;J
 	ld   hl, $0063
@@ -9077,9 +8929,7 @@ L0567F2:;J
 	jp   z, L056820
 	bit  3, [hl]
 	jp   nz, L056823
-	ld   hl, $010A
-	ld   a, $02
-	call Play_Pl_SetMoveDamageNext
+	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_FLASH_B_SLOW
 	ld   a, $08
 	ld   h, $01
 	call L002E49
@@ -9097,32 +8947,20 @@ L05682A: db $C3;X
 L05682B: db $AB;X
 L05682C: db $68;X
 L05682D:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L0568A8
-	ld   hl, $010A
-	ld   a, $02
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameStart L0568A8
+	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_FLASH_B_SLOW
 	jp   L05686E
 L05683E:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L0568A8
-	ld   hl, $0109
-	ld   a, $02
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameStart L0568A8
+	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_FLASH_B_SLOW
 	jp   L0568A8
 L05684F:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L0568A8
-	ld   hl, $0109
-	ld   a, $02
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameStart L0568A8
+	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_FLASH_B_SLOW
 	jp   L05686E
 L056860:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L0568A8
-	ld   hl, $010A
-	ld   a, $00
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameStart L0568A8
+	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, $00
 L05686E:;J
 	ld   hl, $0073
 	add  hl, bc
@@ -9140,18 +8978,14 @@ L056882: db $C3;X
 L056883: db $AB;X
 L056884: db $68;X
 L056885:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L0568A8
-	ld   hl, $1008
-	ld   a, $03
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameStart L0568A8
+	mMvC_SetDamageNext $10, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW
 	jp   L0568A8
 L056896:;J
 	call OBJLstS_ApplyXSpeed
 	jp   L0568A8
 L05689C:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L0568A8
+	mMvC_ValFrameEnd L0568A8
 L0568A2:;J
 	call Play_Pl_EndMove
 	jp   L0568AB
@@ -9161,9 +8995,10 @@ L0568AB:;J
 	ret
 L0568AC:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L056A52
-	ld   hl, $0017
+	mMvC_ValLoaded L056A52
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -9204,25 +9039,19 @@ L0568AC:;I
 	jp   z, L056A43
 	jp   L056A4F
 L056917:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056922
+	mMvC_ValFrameStart L056922
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
 L056922:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056A4F
-	inc  hl
-	ld   [hl], $12
+	mMvC_ValFrameEnd L056A4F
+	mMvC_SetAnimSpeed $12
 	jp   L056A4F
 L05692E:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L05693D
-	ld   hl, $0700
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_ValFrameStart L05693D
+	mMvC_SetSpeedH $0700
 	jp   L056A31
 L05693D:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056946
+	mMvC_ValFrameEnd L056946
 	jp   L056A49
 L056946:;J
 	ld   hl, $0063
@@ -9237,9 +9066,7 @@ L056946:;J
 	jp   z, L056974
 	bit  3, [hl]
 	jp   nz, L056977
-	ld   hl, $010A
-	ld   a, $02
-	call Play_Pl_SetMoveDamageNext
+	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_FLASH_B_SLOW
 	ld   a, $08
 	ld   h, $01
 	call L002E49
@@ -9261,9 +9088,7 @@ L056981:;J
 	jp   nz, L05698A
 	jp   L056A4F
 L05698A:;J
-	ld   hl, $010B
-	ld   a, $00
-	call Play_Pl_SetMoveDamageNext
+	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0B, $00
 	push de
 	ld   hl, $0001
 	add  hl, de
@@ -9287,29 +9112,21 @@ L0569AD:;J
 	pop  de
 	jp   L056A4F
 L0569B6:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056A4F
-	inc  hl
-	ld   [hl], $0A
+	mMvC_ValFrameEnd L056A4F
+	mMvC_SetAnimSpeed $0A
 	jp   L056A4F
 L0569C2:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056A4F
-	inc  hl
-	ld   [hl], $1E
+	mMvC_ValFrameEnd L056A4F
+	mMvC_SetAnimSpeed $1E
 	jp   L056A4F
 L0569CE:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056A4F
+	mMvC_ValFrameEnd L056A4F
 	ld   a, $01
 	call HomeCall_Sound_ReqPlayExId
 	jp   L056A4F
 L0569DC:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056A4F
-	ld   hl, $050B
-	ld   a, $00
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameEnd L056A4F
+	mMvC_SetDamageNext $05, HITANIM_HIT_SPEC_0B, $00
 	jp   L0569ED
 L0569ED:;J
 	ld   hl, $0073
@@ -9343,28 +9160,21 @@ L056A13: db $6A;X
 L056A14:;J
 	call OBJLstS_IsFrameNewLoad
 	jp   nz, L056A26
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056A4F
-	inc  hl
-	ld   [hl], $3C
+	mMvC_ValFrameEnd L056A4F
+	mMvC_SetAnimSpeed $3C
 	jp   L056A4F
 L056A26:;J
-	ld   hl, $1008
-	ld   a, $03
-	call Play_Pl_SetMoveDamageNext
+	mMvC_SetDamageNext $10, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW
 	jp   L056A4F
 L056A31:;J
 	call OBJLstS_ApplyXSpeed
 	jp   L056A4F
 L056A37:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056A4F
-	inc  hl
-	ld   [hl], $02
+	mMvC_ValFrameEnd L056A4F
+	mMvC_SetAnimSpeed $02
 	jp   L056A4F
 L056A43:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056A4F
+	mMvC_ValFrameEnd L056A4F
 L056A49:;J
 	call Play_Pl_EndMove
 	jp   L056A52
@@ -9374,9 +9184,10 @@ L056A52:;J
 	ret
 L056A53:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L056C10
-	ld   hl, $0017
+	mMvC_ValLoaded L056C10
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -9418,25 +9229,19 @@ L056AB1: db $C3;X
 L056AB2: db $0D;X
 L056AB3: db $6C;X
 L056AB4:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056ABF
+	mMvC_ValFrameStart L056ABF
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
 L056ABF:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056C0D
-	inc  hl
-	ld   [hl], $14
+	mMvC_ValFrameEnd L056C0D
+	mMvC_SetAnimSpeed $14
 	jp   L056C0D
 L056ACB:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056ADA
-	ld   hl, $0780
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_ValFrameStart L056ADA
+	mMvC_SetSpeedH $0780
 	jp   L056BFB
 L056ADA:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056AE3
+	mMvC_ValFrameEnd L056AE3
 	jp   L056C07
 L056AE3:;J
 	ld   hl, $0063
@@ -9451,9 +9256,7 @@ L056AE3:;J
 	jp   z, L056B17
 	bit  3, [hl]
 	jp   nz, L056B1A
-	ld   hl, $010A
-	ld   a, $82
-	call Play_Pl_SetMoveDamageNext
+	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_FLASH_B_SLOW|PF3_SHAKEONCE
 	ld   a, $08
 	ld   h, $00
 	call L002E49
@@ -9474,22 +9277,15 @@ L056B21: db $C3;X
 L056B22: db $10;X
 L056B23: db $6C;X
 L056B24:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056C0D
-	ld   hl, $010A
-	ld   a, $02
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameStart L056C0D
+	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_FLASH_B_SLOW
 	jp   L056BDF
 L056B35:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056C0D
-	ld   hl, $0109
-	ld   a, $02
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameStart L056C0D
+	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_FLASH_B_SLOW
 	jp   L056BDF
 L056B46:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056C0D
+	mMvC_ValFrameStart L056C0D
 	ld   hl, $0083
 	add  hl, bc
 	dec  [hl]
@@ -9498,30 +9294,21 @@ L056B46:;J
 	add  hl, de
 	ld   [hl], $04
 L056B5A:;J
-	ld   hl, $0109
-	ld   a, $02
-	call Play_Pl_SetMoveDamageNext
+	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_FLASH_B_SLOW
 	jp   L056BDF
 L056B65:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056C0D
+	mMvC_ValFrameStart L056C0D
 	ld   hl, $0083
 	add  hl, bc
 	ld   [hl], $04
-	ld   hl, $010B
-	ld   a, $02
-	call Play_Pl_SetMoveDamageNext
+	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0B, PF3_FLASH_B_SLOW
 	jp   L056BDF
 L056B7C:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056C0D
-	ld   hl, $010B
-	ld   a, $02
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameStart L056C0D
+	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0B, PF3_FLASH_B_SLOW
 	jp   L056BDF
 L056B8D:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056C0D
+	mMvC_ValFrameStart L056C0D
 	ld   hl, $0083
 	add  hl, bc
 	dec  [hl]
@@ -9530,30 +9317,19 @@ L056B8D:;J
 	add  hl, de
 	ld   [hl], $1C
 L056BA1:;J
-	ld   hl, $010B
-	ld   a, $02
-	call Play_Pl_SetMoveDamageNext
+	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0B, PF3_FLASH_B_SLOW
 	jp   L056BDF
 L056BAC:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056C0D
-	ld   hl, $0109
-	ld   a, $80
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameStart L056C0D
+	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_SHAKEONCE
 	jp   L056BDF
 L056BBD:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056C0D
-	ld   hl, $010A
-	ld   a, $80
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameStart L056C0D
+	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_SHAKEONCE
 	jp   L056BDF
 L056BCE:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056C0D
-	ld   hl, $0108
-	ld   a, $03
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameStart L056C0D
+	mMvC_SetDamageNext $01, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW
 	jp   L056C0D
 L056BDF:;J
 	ld   hl, $0073
@@ -9577,8 +9353,7 @@ L056BFB:;J
 	call OBJLstS_ApplyXSpeed
 	jp   L056C0D
 L056C01:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056C0D
+	mMvC_ValFrameEnd L056C0D
 L056C07:;J
 	call Play_Pl_EndMove
 	jp   L056C10
@@ -9658,9 +9433,10 @@ MoveInputReader_Mature_NoMove:
 	ret
 L056CDC:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L056DDA
-	ld   hl, $0017
+	mMvC_ValLoaded L056DDA
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -9677,44 +9453,33 @@ L056CDC:;I
 	jp   z, L056DC7
 	jp   L056DD7
 L056D0B:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056DD7
-	inc  hl
-	ld   [hl], $06
+	mMvC_ValFrameEnd L056DD7
+	mMvC_SetAnimSpeed $06
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
 	jp   L056DD7
 L056D1C:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056D43
-	call MoveInputS_CheckMoveLHVer
-	jp   c, L056D3D
-	jp   nz, L056D34
-	ld   hl, $0100
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_ValFrameStart L056D43
+	mMvIn_ChkLHE L056D34, L056D3D
+	mMvC_SetSpeedH $0100
 	jp   L056D43
 L056D34:;J
-	ld   hl, $0300
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_SetSpeedH $0300
 	jp   L056D43
 L056D3D:;J
-	ld   hl, $0500
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_SetSpeedH $0500
 L056D43:;J
 	ld   hl, $0040
 	call OBJLstS_ApplyFrictionHAndMoveH
 	call L056D6A
 	jp   c, L056DDA
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056DD7
-	inc  hl
-	ld   [hl], $14
+	mMvC_ValFrameEnd L056DD7
+	mMvC_SetAnimSpeed $14
 	jp   L056DD7
 L056D5B:;J
 	ld   hl, $0040
 	call OBJLstS_ApplyFrictionHAndMoveH
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056DD7
+	mMvC_ValFrameEnd L056DD7
 	jp   L056DCD
 L056D6A:;C
 	ld   hl, $0063
@@ -9743,24 +9508,16 @@ L056D9D:;J
 	xor  a
 	ret
 L056D9F:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056DD7
-	ld   hl, $0412
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
-	ld   hl, $F8E8
-	call Play_Pl_MoveRotThrown
+	mMvC_ValFrameEnd L056DD7
+	mMvC_SetDamageNext $04, HITANIM_THROW_ROTL, PF3_SHAKELONG
+	mMvC_MoveThrowOp -$08, -$18 ; Move opponent back 8px, up $18px
 	jp   L056DD7
 L056DB6:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056DD7
-	ld   hl, $040F
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameEnd L056DD7
+	mMvC_SetDamageNext $04, HITANIM_DROP_SPEC_0F, PF3_SHAKELONG
 	jp   L056DD7
 L056DC7:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056DD7
+	mMvC_ValFrameEnd L056DD7
 L056DCD:;J
 	ld   a, $00
 	ld   [wPlayPlThrowActId], a
@@ -9772,9 +9529,10 @@ L056DDA:;JR
 	ret
 L056DDB:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L056EC2
-	ld   hl, $0017
+	mMvC_ValLoaded L056EC2
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -9791,39 +9549,29 @@ L056DDB:;I
 	jp   z, L056EAD
 	jp   L056E82
 L056E0A:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056E31
-	call MoveInputS_CheckMoveLHVer
-	jp   c, L056E2B
-	jp   nz, L056E22
-	ld   hl, $0500
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_ValFrameStart L056E31
+	mMvIn_ChkLHE L056E22, L056E2B
+	mMvC_SetSpeedH $0500
 	jp   L056E31
 L056E22:;J
-	ld   hl, $0600
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_SetSpeedH $0600
 	jp   L056E31
 L056E2B:;J
-	ld   hl, $0700
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_SetSpeedH $0700
 L056E31:;J
 	jp   L056E65
 L056E34:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056E65
+	mMvC_ValFrameStart L056E65
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
 	jp   L056E65
 L056E42:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056E4D
+	mMvC_ValFrameStart L056E4D
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
 L056E4D:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056E65
-	inc  hl
-	ld   [hl], $FF
+	mMvC_ValFrameEnd L056E65
+	mMvC_SetAnimSpeed ANIMSPEED_NONE
 	jp   L056E7C
 L056E59:;J
 	ld   hl, $0100
@@ -9845,28 +9593,21 @@ L056E7C:;J
 	call OBJLstS_ApplyXSpeed
 	jp   L056EBF
 L056E82:;J
-	ld   hl, $0103
-	ld   a, $80
-	call Play_Pl_SetMoveDamage
+	mMvC_SetDamage $01, HITANIM_HIT0_MID, PF3_SHAKEONCE
 	ld   hl, $0040
 	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   L056EBF
 L056E93:;J
-	ld   hl, $0103
-	ld   a, $80
-	call Play_Pl_SetMoveDamage
+	mMvC_SetDamage $01, HITANIM_HIT0_MID, PF3_SHAKEONCE
 	ld   hl, $0080
 	call OBJLstS_ApplyFrictionHAndMoveH
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056EBF
-	inc  hl
-	ld   [hl], $14
+	mMvC_ValFrameEnd L056EBF
+	mMvC_SetAnimSpeed $14
 	jp   L056EBF
 L056EAD:;J
 	ld   hl, $0080
 	call OBJLstS_ApplyFrictionHAndMoveH
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056EBF
+	mMvC_ValFrameEnd L056EBF
 L056EB9:;J
 	call Play_Pl_EndMove
 	jp   L056EC2
@@ -9877,9 +9618,10 @@ L056EC2:;J
 L056EC3:;I
 	call Play_Pl_CreateJoyMergedKeysLH
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L057030
-	ld   hl, $0017
+	mMvC_ValLoaded L057030
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -9908,8 +9650,7 @@ L056F0B: db $C3;X
 L056F0C: db $2D;X
 L056F0D: db $70;X
 L056F0E:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L056F46
+	mMvC_ValFrameStart L056F46
 	ld   a, $A8
 	call HomeCall_Sound_ReqPlayExId
 	call Play_Pl_ClearJoyDirBuffer
@@ -9917,38 +9658,27 @@ L056F0E:;J
 	ld   hl, $0083
 	add  hl, bc
 	ld   [hl], $00
-	call MoveInputS_CheckMoveLHVer
-	jp   c, L056F40
-	jp   nz, L056F37
-	ld   hl, $0300
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvIn_ChkLHE L056F37, L056F40
+	mMvC_SetSpeedH $0300
 	jp   L056F46
 L056F37:;J
-	ld   hl, $0400
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_SetSpeedH $0400
 	jp   L056F46
 L056F40:;J
-	ld   hl, $0500
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_SetSpeedH $0500
 L056F46:;J
 	call L056FD0
 	ld   hl, $0040
 	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   L05702D
 L056F52:;J
-	ld   hl, $0303
-	ld   a, $90
-	call Play_Pl_SetMoveDamage
+	mMvC_SetDamage $03, HITANIM_HIT0_MID, PF3_BIT4|PF3_SHAKEONCE
 	jp   L056F73
 L056F5D:;J
-	ld   hl, $0304
-	ld   a, $90
-	call Play_Pl_SetMoveDamage
+	mMvC_SetDamage $03, HITANIM_HIT1_MID, PF3_BIT4|PF3_SHAKEONCE
 	jp   L056F73
 L056F68:;J
-	ld   hl, $0308
-	ld   a, $90
-	call Play_Pl_SetMoveDamage
+	mMvC_SetDamage $03, HITANIM_DROP_MD, PF3_BIT4|PF3_SHAKEONCE
 	jp   L056F73
 L056F73:;J
 	call L056FD0
@@ -9956,28 +9686,23 @@ L056F73:;J
 	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   L05702D
 L056F7F:;J
-	ld   hl, $0103
-	ld   a, $80
-	call Play_Pl_SetMoveDamage
+	mMvC_SetDamage $01, HITANIM_HIT0_MID, PF3_SHAKEONCE
 	jp   L056FA0
 L056F8A:;J
-	ld   hl, $0104
-	ld   a, $80
-	call Play_Pl_SetMoveDamage
+	mMvC_SetDamage $01, HITANIM_HIT1_MID, PF3_SHAKEONCE
 	jp   L056FA0
 L056F95:;J
-	ld   hl, $0108
-	ld   a, $81
-	call Play_Pl_SetMoveDamage
+	mMvC_SetDamage $01, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_SHAKEONCE
 	jp   L056FA0
 L056FA0:;J
 	ld   hl, $0040
 	call OBJLstS_ApplyFrictionHAndMoveH
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L056EBF
+	mMvC_ValFrameEnd L056EBF
 	call L056FEA
 	jp   nz, L05702D
-	ld   hl, $0017
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $18
@@ -10007,7 +9732,9 @@ L056FD0:;C
 	set  0, [hl]
 	ret
 L056FEA:;C
-	ld   hl, $0017
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $18
@@ -10030,14 +9757,12 @@ L057005:;J
 L05700C:;J
 	ld   hl, $0040
 	call OBJLstS_ApplyFrictionHAndMoveH
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L05702D
+	mMvC_ValFrameEnd L05702D
 	jp   L057027
 L05701B:;J
 	ld   hl, $0040
 	call OBJLstS_ApplyFrictionHAndMoveH
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L05702D
+	mMvC_ValFrameEnd L05702D
 L057027:;J
 	call Play_Pl_EndMove
 	jp   L057030
@@ -10047,9 +9772,10 @@ L057030:;J
 	ret
 L057031:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L0570F1
-	ld   hl, $0017
+	mMvC_ValLoaded L0570F1
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -10064,66 +9790,44 @@ L057031:;I
 	jp   z, L0570E3
 	jp   L0570EE
 L05705B:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L0570EE
-	inc  hl
-	ld   [hl], $FF
+	mMvC_ValFrameEnd L0570EE
+	mMvC_SetAnimSpeed ANIMSPEED_NONE
 	jp   L0570EE
 L057067:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L0570A8
+	mMvC_ValFrameStart L0570A8
 	ld   a, $12
 	call HomeCall_Sound_ReqPlayExId
-	call MoveInputS_CheckMoveLHVer
-	jp   c, L057099
-	jp   nz, L05708A
-	ld   hl, $0300
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	ld   hl, $FC00
-	call Play_OBJLstS_SetSpeedV
+	mMvIn_ChkLHE L05708A, L057099
+	mMvC_SetSpeedH $0300
+	mMvC_SetSpeedV $FC00
 	jp   L0570A5
 L05708A:;J
-	ld   hl, $0400
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	ld   hl, $FB80
-	call Play_OBJLstS_SetSpeedV
+	mMvC_SetSpeedH $0400
+	mMvC_SetSpeedV $FB80
 	jp   L0570A5
 L057099:;J
-	ld   hl, $0580
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	ld   hl, $FC00
-	call Play_OBJLstS_SetSpeedV
+	mMvC_SetSpeedH $0580
+	mMvC_SetSpeedV $FC00
 L0570A5:;J
 	jp   L0570D0
 L0570A8:;J
-	ld   a, $FA
-	ld   h, $FF
-	call OBJLstS_ReqAnimOnGtYSpeed
+	mMvC_NextFrameOnGtYSpeed $FA, $FF
 	jp   nc, L0570D0
 	jp   L0570D0
 L0570B5:;J
 	call MoveInputS_CheckMoveLHVer
 	jp   nc, L0570C3
-	ld   hl, $0203
-	ld   a, $90
-	call Play_Pl_SetMoveDamage
+	mMvC_SetDamage $02, HITANIM_HIT0_MID, PF3_BIT4|PF3_SHAKEONCE
 L0570C3:;J
-	ld   a, $FF
-	ld   h, $FF
-	call OBJLstS_ReqAnimOnGtYSpeed
+	mMvC_NextFrameOnGtYSpeed $FF, $FF
 	jp   nc, L0570D0
 	jp   L0570D0
 L0570D0:;J
-	ld   hl, $0060
-	call OBJLstS_ApplyGravityVAndMoveHV
-	jp   nc, L0570EE
-	ld   a, $10
-	ld   h, $02
-	call Play_Pl_SetJumpLandAnimFrame
+	mMvC_ChkGravityHV $0060, L0570EE
+	mMvC_SetLandFrame $10, $02
 	jp   L0570F1
 L0570E3:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L0570EE
+	mMvC_ValFrameEnd L0570EE
 	call Play_Pl_EndMove
 	jr   L0570F1
 L0570EE:;J
@@ -10132,9 +9836,10 @@ L0570F1:;JR
 	ret
 L0570F2:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L0572A2
-	ld   hl, $0017
+	mMvC_ValLoaded L0572A2
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -10155,10 +9860,8 @@ L057123: db $C3;X
 L057124: db $9F;X
 L057125: db $72;X
 L057126:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L05729F
-	inc  hl
-	ld   [hl], $04
+	mMvC_ValFrameEnd L05729F
+	mMvC_SetAnimSpeed $04
 	jp   L05729F
 L057132:;J
 	ld   hl, $0000
@@ -10167,19 +9870,14 @@ L057132:;J
 	jp   z, L057161
 	ld   a, $11
 	call HomeCall_Sound_ReqPlayExId
-	call MoveInputS_CheckMoveLHVer
-	jp   c, L05715B
-	jp   nz, L057152
-	ld   hl, $0500
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvIn_ChkLHE L057152, L05715B
+	mMvC_SetSpeedH $0500
 	jp   L057161
 L057152:;J
-	ld   hl, $0600
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_SetSpeedH $0600
 	jp   L057161
 L05715B:;J
-	ld   hl, $0700
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_SetSpeedH $0700
 L057161:;J
 	call L057188
 	jp   c, L0572A2
@@ -10189,10 +9887,8 @@ L05716D:;J
 	call L057188
 	jp   c, L0572A2
 	jp   z, L057270
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L05727D
-	inc  hl
-	ld   [hl], $FF
+	mMvC_ValFrameEnd L05727D
+	mMvC_SetAnimSpeed ANIMSPEED_NONE
 	ld   hl, $0013
 	add  hl, de
 	ld   [hl], $14
@@ -10215,14 +9911,9 @@ L057188:;C
 	call L002E49
 	ld   a, $03
 	ld   [wPlayPlThrowActId], a
-	ld   hl, $0111
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
-	ld   hl, $0111
-	ld   a, $01
-	call Play_Pl_SetMoveDamage
-	ld   hl, $F800
-	call Play_Pl_MoveRotThrown
+	mMvC_SetDamageNext $01, HITANIM_THROW_ROTU, PF3_SHAKELONG
+	mMvC_SetDamage $01, HITANIM_THROW_ROTU, PF3_SHAKELONG
+	mMvC_MoveThrowOp -$08, +$00 ; Move back 8px
 	ld   a, $01
 	ld   [wPlayPlThrowRot_Unk_UseInMove], a
 	call OBJLstS_ApplyXSpeed
@@ -10276,34 +9967,30 @@ L057217:;J
 	ld   a, [hl]
 	cp   $66
 	jp   z, L057233
-	ld   hl, $1408
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
+	mMvC_SetDamageNext $14, HITANIM_DROP_MD, PF3_SHAKELONG
 	jp   L0572A2
 L057233:;J
-	ld   hl, $0C08
-	ld   a, $11
-	call Play_Pl_SetMoveDamageNext
+	mMvC_SetDamageNext $0C, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_BIT4
 	jp   L0572A2
 L05723E:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L05724A
-	ld   hl, $F900
-	call Play_OBJLstS_MoveH_ByXFlipR
+	mMvC_ValFrameStart L05724A
+	mMvC_SetMoveH $F900
 L05724A:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L05729F
+	mMvC_ValFrameEnd L05729F
 	ld   hl, $0033
 	add  hl, bc
 	ld   a, [hl]
 	cp   $66
 	jp   z, L057262
-	ld   hl, $000E
-	ld   a, $01
+	
+	mkhl $00, HITANIM_DROP_SPEC_AIR_0E
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 	jp   L057267
 L057262:;J
-	ld   hl, $010E
-	ld   a, $01
+	mkhl $01, HITANIM_DROP_SPEC_AIR_0E
+	ld   hl, CHL
+	ld   a, PF3_SHAKELONG
 L057267:;J
 	call Play_Pl_SetMoveDamageNext
 	call Play_Proj_CopyMoveDamageFromPl
@@ -10324,9 +10011,7 @@ L057283:;J
 	ld   hl, $0080
 	call OBJLstS_ApplyFrictionHAndMoveH
 	jp   nc, L05729F
-	call Play_Pl_EndMove
-	ld   a, $00
-	ld   [wPlayPlThrowActId], a
+	mMvC_EndThrow_Slow
 	jr   L0572A2
 L05729F:;J
 	call OBJLstS_DoAnimTiming_Loop_by_DE
@@ -10370,10 +10055,8 @@ L0572A3:;C
 	pop  af
 	ld   [hl], $32
 	call OBJLstS_Overlap
-	ld   hl, $0000
-	call Play_OBJLstS_MoveH_ByXFlipR
-	ld   hl, $0000
-	call Play_OBJLstS_MoveV
+	mMvC_SetMoveH $0000
+	mMvC_SetMoveV $0000
 	pop  de
 	pop  bc
 	ret
@@ -10424,10 +10107,8 @@ L0572F3:;C
 	pop  af
 	ld   [hl], $05
 	call OBJLstS_Overlap
-	ld   hl, $0000
-	call Play_OBJLstS_MoveH_ByXFlipR
-	ld   hl, $0000
-	call Play_OBJLstS_MoveV
+	mMvC_SetMoveH $0000
+	mMvC_SetMoveV $0000
 	pop  de
 	pop  bc
 	ret
@@ -10563,9 +10244,10 @@ MoveInputReader_Chizuru_NoMove:
 L057499:;I
 	call Play_Pl_CreateJoyMergedKeysLH
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L057623
-	ld   hl, $0017
+	mMvC_ValLoaded L057623
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -10581,25 +10263,19 @@ L057499:;I
 	cp   $14
 	jp   z, L057605
 L0574C8:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L0574F8
+	mMvC_ValFrameStart L0574F8
 	call Play_Pl_ClearJoyMergedKeysLH
 	ld   hl, $0083
 	add  hl, bc
 	ld   [hl], $00
-	call MoveInputS_CheckMoveLHVer
-	jp   c, L0574F2
-	jp   nz, L0574E9
-	ld   hl, $0500
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvIn_ChkLHE L0574E9, L0574F2
+	mMvC_SetSpeedH $0500
 	jp   L0574F8
 L0574E9:;J
-	ld   hl, $0600
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_SetSpeedH $0600
 	jp   L0574F8
 L0574F2:;J
-	ld   hl, $0700
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_SetSpeedH $0700
 L0574F8:;J
 	call L057556
 	jp   z, L057614
@@ -10617,8 +10293,7 @@ L05750B:;J
 	call OBJLstS_ApplyXSpeed
 	jp   L057623
 L05751E:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L057614
+	mMvC_ValFrameStart L057614
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
 	jp   L057614
@@ -10631,15 +10306,12 @@ L05752C:;J
 	call OBJLstS_ApplyXSpeed
 	jp   L057623
 L05753F:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L05754A
+	mMvC_ValFrameStart L05754A
 	ld   a, $9D
 	call HomeCall_Sound_ReqPlayExId
 L05754A:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057614
-	inc  hl
-	ld   [hl], $00
+	mMvC_ValFrameEnd L057614
+	mMvC_SetAnimSpeed ANIMSPEED_INSTANT
 	jp   L057614
 L057556:;C
 	call L0575A2
@@ -10683,8 +10355,7 @@ L0575A2:;C
 	or   a
 	ret
 L0575A9:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L0575B4
+	mMvC_ValFrameStart L0575B4
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
 L0575B4:;J
@@ -10696,10 +10367,8 @@ L0575C0:;J
 	call L057556
 	ld   hl, $0080
 	call OBJLstS_ApplyFrictionHAndMoveH
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057620
-	inc  hl
-	ld   [hl], $14
+	mMvC_ValFrameEnd L057620
+	mMvC_SetAnimSpeed $14
 	call L0575A2
 	jp   z, L057620
 	bit  0, a
@@ -10712,22 +10381,17 @@ L0575E4: db $76;X
 L0575E5:;J
 	ld   a, $54
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0208
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
+	mMvC_SetDamageNext $02, HITANIM_DROP_MD, PF3_SHAKELONG
 	jp   L057623
 L0575F5:;J
 	ld   a, $56
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $020C
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
+	mMvC_SetDamageNext $02, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
 	jp   L057623
 L057605:;J
 	ld   hl, $0080
 	call OBJLstS_ApplyFrictionHAndMoveH
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057620
+	mMvC_ValFrameEnd L057620
 	jp   L05761A
 L057614:;J
 	call OBJLstS_ApplyXSpeed
@@ -10741,9 +10405,10 @@ L057623:;J
 	ret
 L057624:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L05769C
-	ld   hl, $0017
+	mMvC_ValLoaded L05769C
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -10756,38 +10421,26 @@ L057641: db $C3;X
 L057642: db $99;X
 L057643: db $76;X
 L057644:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L05766E
+	mMvC_ValFrameStart L05766E
 	call MoveInputS_CheckMoveLHVer
 	jp   c, L05765F
-	ld   hl, $0100
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	ld   hl, $FC00
-	call Play_OBJLstS_SetSpeedV
+	mMvC_SetSpeedH $0100
+	mMvC_SetSpeedV $FC00
 	jp   L05767B
 L05765F:;J
-	ld   hl, $0200
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	ld   hl, $FC00
-	call Play_OBJLstS_SetSpeedV
+	mMvC_SetSpeedH $0200
+	mMvC_SetSpeedV $FC00
 	jp   L05767B
 L05766E:;J
-	ld   a, $FE
-	ld   h, $FF
-	call OBJLstS_ReqAnimOnGtYSpeed
+	mMvC_NextFrameOnGtYSpeed $FE, $FF
 	jp   nc, L05767B
 	jp   L05767B
 L05767B:;J
-	ld   hl, $0060
-	call OBJLstS_ApplyGravityVAndMoveHV
-	jp   nc, L057699
-	ld   a, $08
-	ld   h, $05
-	call Play_Pl_SetJumpLandAnimFrame
+	mMvC_ChkGravityHV $0060, L057699
+	mMvC_SetLandFrame $08, $05
 	jp   L05769C
 L05768E:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057699
+	mMvC_ValFrameEnd L057699
 	call Play_Pl_EndMove
 	jr   L05769C
 L057699:;J
@@ -10796,17 +10449,17 @@ L05769C:;JR
 	ret
 L05769D:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L0576C1
-	ld   hl, $0017
+	mMvC_ValLoaded L0576C1
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $08
 	jp   z, L0576B3
 	jp   L0576BE
 L0576B3:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L0576BE
+	mMvC_ValFrameEnd L0576BE
 	call Play_Pl_EndMove
 	jr   L0576C1
 L0576BE:;J
@@ -10815,9 +10468,10 @@ L0576C1:;JR
 	ret
 L0576C2:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L0576F4
-	ld   hl, $0017
+	mMvC_ValLoaded L0576F4
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $10
@@ -10838,8 +10492,7 @@ L0576E3: db $C3;X
 L0576E4: db $F1;X
 L0576E5: db $76;X
 L0576E6:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L0576F1
+	mMvC_ValFrameEnd L0576F1
 	call Play_Pl_EndMove
 	jr   L0576F4
 L0576F1:;J
@@ -10848,9 +10501,10 @@ L0576F4:;JR
 	ret
 L0576F5:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L05776D
-	ld   hl, $0017
+	mMvC_ValLoaded L05776D
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -10865,14 +10519,12 @@ L0576F5:;I
 	jp   z, L05775F
 	jp   L05776A
 L05771F:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L057742
+	mMvC_ValFrameStart L057742
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
 	call MoveInputS_CheckMoveLHVer
 	jp   c, L057739
-	ld   hl, $0080
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_SetSpeedH $0080
 	jp   L057742
 L057739: db $21;X
 L05773A: db $00;X
@@ -10886,8 +10538,7 @@ L057741: db $77;X
 L057742:;J
 	jp   L057759
 L057745:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057759
+	mMvC_ValFrameEnd L057759
 	ld   hl, $0021
 	add  hl, bc
 	res  7, [hl]
@@ -10898,8 +10549,7 @@ L057759:;J
 	call OBJLstS_ApplyXSpeed
 	jp   L05776A
 L05775F:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L05776A
+	mMvC_ValFrameEnd L05776A
 	call Play_Pl_EndMove
 	jr   L05776D
 L05776A:;J
@@ -10908,9 +10558,10 @@ L05776D:;JR
 	ret
 L05776E:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L0577F3
-	ld   hl, $0017
+	mMvC_ValLoaded L0577F3
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $0C
@@ -10921,45 +10572,34 @@ L05776E:;I
 	jp   z, L0577DE
 	jp   L0577F0
 L05778E:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L0577F0
-	inc  hl
-	ld   [hl], $14
+	mMvC_ValFrameEnd L0577F0
+	mMvC_SetAnimSpeed $14
 	jp   L0577F0
 L05779A:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L0577CC
+	mMvC_ValFrameStart L0577CC
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
 	ld   hl, $0083
 	add  hl, bc
 	ld   [hl], $00
-	call MoveInputS_CheckMoveLHVer
-	jp   c, L0577C6
-	jp   nz, L0577BD
-	ld   hl, $0400
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvIn_ChkLHE L0577BD, L0577C6
+	mMvC_SetSpeedH $0400
 	jp   L0577CC
 L0577BD:;J
-	ld   hl, $0500
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_SetSpeedH $0500
 	jp   L0577CC
 L0577C6:;J
-	ld   hl, $0600
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_SetSpeedH $0600
 L0577CC:;J
 	ld   hl, $0040
 	call OBJLstS_ApplyFrictionHAndMoveH
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L0577F0
-	inc  hl
-	ld   [hl], $0A
+	mMvC_ValFrameEnd L0577F0
+	mMvC_SetAnimSpeed $0A
 	jp   L0577F0
 L0577DE:;J
 	ld   hl, $0080
 	call OBJLstS_ApplyFrictionHAndMoveH
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L0577F0
+	mMvC_ValFrameEnd L0577F0
 	call Play_Pl_EndMove
 	jp   L0577F3
 L0577F0:;J
@@ -10968,9 +10608,10 @@ L0577F3:;J
 	ret
 L0577F4:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L057827
-	ld   hl, $0017
+	mMvC_ValLoaded L057827
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -10979,14 +10620,12 @@ L057807: db $C3;X
 L057808: db $24;X
 L057809: db $78;X
 L05780A:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L057818
+	mMvC_ValFrameStart L057818
 	call L057828
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
 L057818:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057824
+	mMvC_ValFrameEnd L057824
 	call Play_Pl_EndMove
 	jp   L057827
 L057824:;J
@@ -11037,8 +10676,7 @@ L05786E:;J
 	ld   [hl], $FF
 L057870:;J
 	call OBJLstS_Overlap
-	ld   hl, $0080
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_SetSpeedH $0080
 	pop  de
 	pop  bc
 	ret
@@ -11165,9 +10803,10 @@ MoveInputReader_Daimon_NoMove:
 	
 L0579B7:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L057A26
-	ld   hl, $0017
+	mMvC_ValLoaded L057A26
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -11182,16 +10821,13 @@ L0579D9: db $C3;X
 L0579DA: db $23;X
 L0579DB: db $7A;X
 L0579DC:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057A23
+	mMvC_ValFrameEnd L057A23
 	ld   a, $09
 	call HomeCall_Sound_ReqPlayExId
 	jp   L057A23
 L0579EA:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057A23
-	inc  hl
-	ld   [hl], $0A
+	mMvC_ValFrameEnd L057A23
+	mMvC_SetAnimSpeed $0A
 	ld   hl, $0033
 	add  hl, bc
 	ld   a, [hl]
@@ -11202,16 +10838,13 @@ L0579EA:;J
 	jp   L057A23
 L057A05:;J
 	call Play_Pl_DoGroundScreenShake
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057A23
-	inc  hl
-	ld   [hl], $10
+	mMvC_ValFrameEnd L057A23
+	mMvC_SetAnimSpeed $10
 	xor  a
 	ld   [wScreenShakeY], a
 	jp   L057A23
 L057A18:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057A23
+	mMvC_ValFrameEnd L057A23
 L057A1E:;J
 	call Play_Pl_EndMove
 	jr   L057A26
@@ -11221,9 +10854,10 @@ L057A26:;JR
 	ret
 L057A27:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L057ABA
-	ld   hl, $0017
+	mMvC_ValLoaded L057ABA
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -11235,30 +10869,22 @@ L057A27:;I
 	cp   $0C
 	jp   z, L057AAB
 L057A49:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   z, L057A75
+	mMvC_ValFrameStart L057A75
 	ld   a, $93
 	call HomeCall_Sound_ReqPlayExId
-	call MoveInputS_CheckMoveLHVer
-	jp   c, L057A6F
-	jp   nz, L057A66
-	ld   hl, $0100
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvIn_ChkLHE L057A66, L057A6F
+	mMvC_SetSpeedH $0100
 	jp   L057A75
 L057A66:;J
-	ld   hl, $0200
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_SetSpeedH $0200
 	jp   L057A75
 L057A6F:;J
-	ld   hl, $0300
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
+	mMvC_SetSpeedH $0300
 L057A75:;J
 	jp   L057A89
 L057A78:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057A89
-	inc  hl
-	ld   [hl], $04
+	mMvC_ValFrameEnd L057A89
+	mMvC_SetAnimSpeed $04
 	ld   a, $9B
 	call HomeCall_Sound_ReqPlayExId
 	jp   L057A89
@@ -11267,10 +10893,8 @@ L057A89:;J
 	jp   L057AB7
 L057A8F:;J
 	call Play_Pl_DoGroundScreenShake
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057A23
-	inc  hl
-	ld   [hl], $02
+	mMvC_ValFrameEnd L057A23
+	mMvC_SetAnimSpeed $02
 	xor  a
 	ld   [wScreenShakeY], a
 	ld   hl, $0020
@@ -11280,8 +10904,7 @@ L057A8F:;J
 	res  2, [hl]
 	jp   L057AB7
 L057AAB:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057AB7
+	mMvC_ValFrameEnd L057AB7
 	call Play_Pl_EndMove
 	jp   L057ABA
 L057AB7:;J
@@ -11290,9 +10913,10 @@ L057ABA:;J
 	ret
 L057ABB:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L057BDF
-	ld   hl, $0017
+	mMvC_ValLoaded L057BDF
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -11342,79 +10966,62 @@ L057AFC:;J
 	ld   a, $10
 	ld   h, $01
 	call L002E49
-	ld   hl, $0612
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
-	ld   hl, $F0E8
-	call Play_Pl_MoveRotThrown
+	mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
+	mMvC_MoveThrowOp -$10, -$18
 	jp   L057BDF
 L057B44:;J
 	jp   L057BDC
 L057B47:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057BDC
-	ld   hl, $0612
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
-	ld   hl, $F8E8
-	call Play_Pl_MoveRotThrown
+	mMvC_ValFrameEnd L057BDC
+	mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
+	mMvC_MoveThrowOp -$08, -$18 ; Move opponent back 8px, up $18px
 	ld   hl, $0033
 	add  hl, bc
 	ld   a, [hl]
 	cp   $54
 	jp   nc, L057BDC
 	call L002827
-	ld   hl, $F0E8
-	call Play_Pl_MoveRotThrown
+	mMvC_MoveThrowOp -$10, -$18
 	jp   L057BDC
 L057B71:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057BDC
-	ld   hl, $0613
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameEnd L057BDC
+	mMvC_SetDamageNext $06, HITANIM_THROW_ROTD, PF3_SHAKELONG
 	ld   hl, $0033
 	add  hl, bc
 	ld   a, [hl]
 	cp   $54
 	jp   nc, L057B92
-	ld   hl, $F0F0
-	call Play_Pl_MoveRotThrown
+	mMvC_MoveThrowOp -$10, -$10
 	jp   L057BDC
 L057B92:;J
-	ld   hl, $10F8
-	call Play_Pl_MoveRotThrown
+	mMvC_MoveThrowOp +$10, -$08
 	jp   L057BDC
 L057B9B:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057BDC
+	mMvC_ValFrameEnd L057BDC
 	ld   hl, $0033
 	add  hl, bc
 	ld   a, [hl]
 	cp   $54
 	jp   nc, L057BB1
-	ld   hl, $060C
+	mkhl $06, HITANIM_DROP_SPEC_0C
+	ld   hl, CHL
 	jp   L057BB4
 L057BB1:;J
-	ld   hl, $060F
+	mkhl $06, HITANIM_DROP_SPEC_0F
+	ld   hl, CHL
 L057BB4:;J
 	ld   a, $00
 	call Play_Pl_SetMoveDamageNext
 	jp   L057BDC
 L057BBC:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057BDC
-	inc  hl
-	ld   [hl], $0A
+	mMvC_ValFrameEnd L057BDC
+	mMvC_SetAnimSpeed $0A
 	jp   L057BDC
 L057BC8:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057BDC
+	mMvC_ValFrameEnd L057BDC
 	jp   L057BD1
 L057BD1:;J
-	call Play_Pl_EndMove
-	ld   a, $00
-	ld   [wPlayPlThrowActId], a
+	mMvC_EndThrow_Slow
 	jp   L057BDF
 L057BDC:;J
 	call OBJLstS_DoAnimTiming_Loop_by_DE
@@ -11422,9 +11029,10 @@ L057BDF:;J
 	ret
 L057BE0:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L057CDB
-	ld   hl, $0017
+	mMvC_ValLoaded L057CDB
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -11451,39 +11059,25 @@ L057C20: db $C3;X
 L057C21: db $D8;X
 L057C22: db $7C;X
 L057C23:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057CD8
-	ld   hl, $0612
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
-	ld   hl, $F0E8
-	call Play_Pl_MoveRotThrown
+	mMvC_ValFrameEnd L057CD8
+	mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
+	mMvC_MoveThrowOp -$10, -$18
 	jp   L057CD8
 L057C3A:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057CD8
-	inc  hl
-	ld   [hl], $05
+	mMvC_ValFrameEnd L057CD8
+	mMvC_SetAnimSpeed $05
 	jp   L057CD8
 L057C46:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057CD8
-	ld   hl, $0612
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
-	ld   hl, $08E0
-	call Play_Pl_MoveRotThrown
+	mMvC_ValFrameEnd L057CD8
+	mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
+	mMvC_MoveThrowOp +$08, -$20
 	jp   L057CD8
 L057C5D:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057CD8
-	ld   hl, $060B
-	ld   a, $90
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameEnd L057CD8
+	mMvC_SetDamageNext $06, HITANIM_HIT_SPEC_0B, PF3_BIT4|PF3_SHAKEONCE
 	jp   L057CD8
 L057C6E:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057CD8
+	mMvC_ValFrameEnd L057CD8
 	call MoveInputS_TryStartCommandThrow_Unk_Coli05
 	jp   nc, L057CDB
 	call Task_PassControlFar
@@ -11491,38 +11085,23 @@ L057C6E:;J
 	ld   [wPlayPlThrowActId], a
 	jp   L057CD8
 L057C85:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057CD8
-	ld   hl, $0612
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
-	ld   hl, $F0E0
-	call Play_Pl_MoveRotThrown
+	mMvC_ValFrameEnd L057CD8
+	mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
+	mMvC_MoveThrowOp -$10, -$20
 	jp   L057CD8
 L057C9C:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057CD8
-	ld   hl, $0612
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
-	ld   hl, $04E8
-	call Play_Pl_MoveRotThrown
+	mMvC_ValFrameEnd L057CD8
+	mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
+	mMvC_MoveThrowOp +$04, -$18
 	jp   L057CD8
 L057CB3:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057CD8
-	inc  hl
-	ld   [hl], $1E
-	ld   hl, $060E
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameEnd L057CD8 ; test 
+	mMvC_SetAnimSpeed $1E
+	mMvC_SetDamageNext $06, HITANIM_DROP_SPEC_AIR_0E, PF3_SHAKELONG
 	jp   L057CD8
 L057CC7:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057CD8
-	call Play_Pl_EndMove
-	ld   a, $00
-	ld   [wPlayPlThrowActId], a
+	mMvC_ValFrameEnd L057CD8
+	mMvC_EndThrow_Slow
 	jp   L057CDB
 L057CD8:;J
 	call OBJLstS_DoAnimTiming_Loop_by_DE
@@ -11530,9 +11109,10 @@ L057CDB:;J
 	ret
 L057CDC:;I
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, L057ED1
-	ld   hl, $0017
+	mMvC_ValLoaded L057ED1
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
@@ -11577,13 +11157,9 @@ L057D49: db $C3;X
 L057D4A: db $CE;X
 L057D4B: db $7E;X
 L057D4C:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057ECE
-	inc  hl
-	ld   [hl], $05
-	ld   hl, $0612
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameEnd L057ECE
+	mMvC_SetAnimSpeed $05
+	mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
 	ld   hl, $0033
 	add  hl, bc
 	ld   a, [hl]
@@ -11598,37 +11174,24 @@ L057D6D:;J
 	add  hl, bc
 	ld   [hl], a
 	call L002827
-	ld   hl, $F8F0
-	call Play_Pl_MoveRotThrown
+	mMvC_MoveThrowOp -$08, -$10
 	jp   L057ECE
 L057D7E:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057ECE
-	ld   hl, $0612
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
-	ld   hl, $F4F0
-	call Play_Pl_MoveRotThrown
+	mMvC_ValFrameEnd L057ECE
+	mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
+	mMvC_MoveThrowOp -$0C, -$10
 	jp   L057ECE
 L057D95:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057ECE
-	ld   hl, $0613
-	ld   a, $90
-	call Play_Pl_SetMoveDamageNext
-	ld   hl, $F0F8
-	call Play_Pl_MoveRotThrown
+	mMvC_ValFrameEnd L057ECE
+	mMvC_SetDamageNext $06, HITANIM_THROW_ROTD, PF3_BIT4|PF3_SHAKEONCE
+	mMvC_MoveThrowOp -$10, -$08
 	jp   L057ECE
 L057DAC:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057ECE
-	ld   hl, $060B
-	ld   a, $90
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameEnd L057ECE
+	mMvC_SetDamageNext $06, HITANIM_HIT_SPEC_0B, PF3_BIT4|PF3_SHAKEONCE
 	jp   L057ECE
 L057DBD:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057ECE
+	mMvC_ValFrameEnd L057ECE
 	push hl
 	ld   hl, $0083
 	add  hl, bc
@@ -11639,32 +11202,23 @@ L057DBD:;J
 	ld   [hl], a
 	jp   L057ECE
 L057DD1:;J
-	ld   hl, $F8E8
-	call Play_Pl_MoveRotThrown
+	mMvC_MoveThrowOp -$08, -$18 ; Move opponent back 8px, up $18px
 	jp   L057DE0
 L057DDA:;J
-	ld   hl, $08E8
-	call Play_Pl_MoveRotThrown
+	mMvC_MoveThrowOp +$08, -$18
 L057DE0:;J
-	ld   hl, $0612
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
+	mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
 	jp   L057ECE
 L057DEB:;J
-	ld   hl, $F0EC
-	call Play_Pl_MoveRotThrown
+	mMvC_MoveThrowOp -$10, -$14
 	jp   L057DFA
 L057DF4:;J
-	ld   hl, $10EC
-	call Play_Pl_MoveRotThrown
+	mMvC_MoveThrowOp +$10, -$14
 L057DFA:;J
-	ld   hl, $0613
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
+	mMvC_SetDamageNext $06, HITANIM_THROW_ROTD, PF3_SHAKELONG
 	jp   L057ECE
 L057E05:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057ECE
+	mMvC_ValFrameEnd L057ECE
 	call MoveInputS_TryStartCommandThrow_Unk_Coli05
 	jp   nc, L057ED1
 	call Task_PassControlFar
@@ -11672,8 +11226,7 @@ L057E05:;J
 	ld   [wPlayPlThrowActId], a
 	jp   L057DD1
 L057E1C:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057ECE
+	mMvC_ValFrameEnd L057ECE
 	call MoveInputS_TryStartCommandThrow_Unk_Coli05
 	jp   nc, L057ED1
 	call Task_PassControlFar
@@ -11681,38 +11234,27 @@ L057E1C:;J
 	ld   [wPlayPlThrowActId], a
 	jp   L057DDA
 L057E33:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057ECE
+	mMvC_ValFrameEnd L057ECE
 	jp   L057DF4
 L057E3C:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057ECE
+	mMvC_ValFrameEnd L057ECE
 	jp   L057DEB
 L057E45:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057ECE
-	ld   hl, $060B
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameEnd L057ECE
+	mMvC_SetDamageNext $06, HITANIM_HIT_SPEC_0B, PF3_SHAKELONG
 	jp   L057ECE
 L057E56:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057ECE
-	inc  hl
-	ld   [hl], $0A
-	ld   hl, $060E
-	ld   a, $01
-	call Play_Pl_SetMoveDamageNext
+	mMvC_ValFrameEnd L057ECE
+	mMvC_SetAnimSpeed $0A
+	mMvC_SetDamageNext $06, HITANIM_DROP_SPEC_AIR_0E, PF3_SHAKELONG
 	jp   L057ECE
 L057E6A:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057ECE
+	mMvC_ValFrameEnd L057ECE
 	inc  hl
 	dec  [hl]
 	jp   L057ECE
 L057E75:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057ECE
+	mMvC_ValFrameEnd L057ECE
 	inc  hl
 	dec  [hl]
 	push hl
@@ -11732,14 +11274,11 @@ L057E90:;J
 L057E96:;J
 	jp   L057ECE
 L057E99:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057ECE
-	inc  hl
-	ld   [hl], $64
+	mMvC_ValFrameEnd L057ECE
+	mMvC_SetAnimSpeed $64
 	jp   L057ECE
 L057EA5:;J
-	call OBJLstS_IsInternalFrameAboutToEnd
-	jp   nc, L057ECE
+	mMvC_ValFrameEnd L057ECE
 	ld   a, $00
 	ld   [wPlayPlThrowActId], a
 	ld   hl, $0033
@@ -11753,9 +11292,7 @@ L057EBE:;R
 	ld   a, $48
 L057EC0:;J
 	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0808
-	ld   a, $83
-	call Play_Pl_SetMoveDamageNext
+	mMvC_SetDamageNext $08, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_SHAKEONCE
 	jp   L057ED1
 L057ECE:;J
 	call OBJLstS_DoAnimTiming_Loop_by_DE

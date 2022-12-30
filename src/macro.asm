@@ -86,6 +86,17 @@ ads: MACRO
 	db (\1)|(\1 << 2)|(\1 << 4)
 ENDM
 
+; =============== mkhl ===============
+; Generates a generic HL parameter.
+; IN
+; - 1: H
+; - 2: L
+; OUT
+; - CHL: Calculated result
+mkhl: MACRO
+CHL = (LOW(\1) << 8)|LOW(\2)
+ENDM
+
 ; =============== Special move list definition macros ===============
 ; For MoveInputReader_*
 
@@ -273,6 +284,18 @@ mMvIn_ChkBtnStrict: MACRO
 	jp   c, \2							; If so, jump
 ENDM
 
+
+; =============== mMvIn_ChkLH ===============
+; Checks if the attack is a light or heavy.
+; IN
+; - 1: Ptr to code for the heavy version.
+mMvIn_ChkLH: MACRO
+	call MoveInputS_CheckMoveLHVer
+	jp   nz, \1			; Is the heavy triggered? If so, jump
+						; Otherwise, use the light
+ENDM
+
+
 ; =============== mMvIn_GetLH ===============
 ; Gets a move ID depending on the attack being light or heavy.
 ; IN
@@ -289,6 +312,18 @@ mMvIn_GetLH: MACRO
 .heavy:
 	ld   a, \2
 .setMove:
+ENDM
+
+; =============== mMvIn_ChkLHE ===============
+; Checks if the attack is a light, heavy, or hidden.
+; IN
+; - 1: Ptr to code for the heavy version.
+; - 2: Ptr to code for the hidden version.
+mMvIn_ChkLHE: MACRO
+	call MoveInputS_CheckMoveLHVer
+	jp   c, \2			; Is the the hidden super triggered? If so, jump
+	jp   nz, \1			; Is the heavy triggered? If so, jump
+						; Otherwise, use the light
 ENDM
 
 ; =============== mMvIn_GetLHE ===============
@@ -366,56 +401,227 @@ mMvIn_JpSD: MACRO
 	jp   \1 	; Otherwise, jump to the normal version
 ENDM
 
-; =============== mMvC_SetSpeedOnInternalFrameEnd ===============
-; Generates code to update the animation speed when switching frames internally.
+; =============== Move code macros (new?) ===============
+; For MoveC_*
+;
+; For all of these:
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+;
+
+; =============== mMvC_SetMoveH ===============
+; Moves the player horizontally, relative to the 1P side (negative values move backwards).
+; IN
+; - 1: Horizontal movement (pixels + subpixels)
+mMvC_SetMoveH: MACRO
+	ld   hl, \1
+	call Play_OBJLstS_MoveH_ByXFlipR
+ENDM
+
+; =============== mMvC_SetMoveV ===============
+; Moves the player vertically.
+; IN
+; - 1: Vertical movement (pixels + subpixels)
+mMvC_SetMoveV: MACRO
+	ld   hl, \1
+	call Play_OBJLstS_MoveV
+ENDM
+
+; =============== mMvC_SetSpeedH ===============
+; Sets the horizontal movement speed for (usually) the current player,
+; relative to the 1P side (negative values move backwards).
+; If something else was set to DE, that OBJInfo will get its speed set.
+; IN
+; - 1: Speed value (pixels + subpixels), as px/frame
+mMvC_SetSpeedH: MACRO
+	ld   hl, \1
+	call Play_OBJLstS_SetSpeedH_ByXFlipR
+ENDM
+
+; =============== mMvC_SetSpeedV ===============
+; Sets the vertical movement speed for (usually) the current player.
+; If something else was set to DE, that OBJInfo will get its speed set.
+; IN
+; - 1: Player speed (pixels + subpixels), as px/frame
+mMvC_SetSpeedV: MACRO
+	ld   hl, \1
+	call Play_OBJLstS_SetSpeedV
+ENDM
+
+; =============== mMvC_SetAnimSpeed ===============
+; Sets the animation speed.
+; Generally done before the animation advances internally. 
 ; IN
 ; - 1: Animation speed
-; - 2: Label to target when exiting the block
-mMvC_SetSpeedOnInternalFrameEnd: MACRO
-	call OBJLstS_IsInternalFrameAboutToEnd	; About to switch frames? 
-	jp   nc, \2			; If not, skip
-	; The above subroutine set HL = Ptr to iOBJInfo_FrameLeft
-	inc  hl				; Seek to iOBJInfo_FrameTotal
-	ld   [hl], \1		; Set new anim speed
-	jp   \2
+; - HL: Ptr to iOBJInfo_FrameLeft. Done automatically when calling mMvC_ValFrameEnd.
+; OUT
+; - HL: Ptr to iOBJInfo_FrameTotal
+mMvC_SetAnimSpeed: MACRO
+	inc  hl			; Seek to iOBJInfo_FrameTotal
+	ld   [hl], \1	; Set new anim speed
 ENDM
 
-
-; =============== mMvC_EndMoveOnInternalFrameEnd ===============
-; Generates code to sync the end of the move to the end of the animation frame.
+; =============== mMvC_NextFrameOnGtYSpeed ===============
+; Advances the animation if the YSpeed is > than the specified threshold.
+; Used when manual control is enabled, so \2 is generally ANIMSPEED_NONE to continue the manual control.
 ; IN
-; - 1: Label to animation code (usually .anim)
-; - 2: Label to return code (usually .ret)
-mMvC_EndMoveOnInternalFrameEnd: MACRO
-	call OBJLstS_IsInternalFrameAboutToEnd	; About to switch frames?
-	jp   nc, \1				; If not, continue animating
-	call Play_Pl_EndMove	; Otherwise, end the move
-	jr   \2					; And return
+; - 1: Y Speed threshold
+; - 2: Animation speed for next frame
+mMvC_NextFrameOnGtYSpeed: MACRO
+	ld   a, \1
+	ld   h, \2
+	call OBJLstS_ReqAnimOnGtYSpeed
 ENDM
 
-; =============== mMvC_EndOnTargetOBJLst ===============
-; Generates code to call the "end of move" check when the target sprite in the animation  is reached.
+; =============== mMvC_NextFrameOnGtYSpeed ===============
+; Sets the animation frame used when landing on the ground (typically the last one).
 ; IN
-; - 1: Label to animation code (usually .anim)
-; - 2: Label to return check code (usually .chkEnd)
+; - 1: Sprite mapping ID
+; - 2: Animation speed (iOBJInfo_FrameTotal)
+mMvC_SetLandFrame: MACRO
+	ld   a, \1
+	ld   h, \2
+	call Play_Pl_SetJumpLandAnimFrame
+ENDM
+
+; =============== mMvC_SetDamageNext ===============
+; Sets the pending move damage values, which get applied when the graphics for the next frame are loaded.
+; These take effect on the opponent side if it gets successfully hit (not blocked).
+; IN
+; - 1: Damage dealt (iPlInfo_MoveDamageValNext)
+; - 2: Hit animation (iPlInfo_MoveDamageHitAnimIdNext)
+; - 3: Hit flags (iPlInfo_MoveDamageFlags3Next)
+mMvC_SetDamageNext: MACRO
+	mkhl \1, \2
+	ld   hl, CHL	
+	ld   a, \3
+	call Play_Pl_SetMoveDamageNext
+ENDM
+
+; =============== mMvC_SetDamage ===============
+; Sets the current move damage values, which take effect immediately.
+; Generally used the first time logic for an animation frame is executed, for consistency (OBJLstS_IsFrameNewLoad).
+; These take effect on the opponent side if it gets successfully hit (not blocked).
+; IN
+; - 1: Damage dealt (iPlInfo_MoveDamageVal)
+; - 2: Hit animation (iPlInfo_MoveDamageHitAnimId)
+; - 3: Hit flags (iPlInfo_MoveDamageFlags3)
+mMvC_SetDamage: MACRO
+	mkhl \1, \2
+	ld   hl, CHL	
+	ld   a, \3
+	call Play_Pl_SetMoveDamage
+ENDM
+
+; =============== mMvC_MoveThrowOp ===============
+; Moves the grabbed opponent relative to the current location.
+; By default, this only is applied if the the player is set in a rotation frame (mMvC_SetDamage with HITANIM_THROW_ROT*)
+; IN
+; - 1: Horz. Movement (relative to the 1P side, negative values move backwards)
+; - 2: Vert. Movement
+mMvC_MoveThrowOp: MACRO
+	mkhl \1, \2
+	ld   hl, CHL
+	call Play_Pl_MoveRotThrown
+ENDM
+
+; =============== mMvC_ChkTarget ===============
+; Executes the specified code when the target animation frame is reached.
+; IN
+; - 1: Ptr to where to jump
 ; - A: Current OBJLst ID (either internal or visible)
-mMvC_EndOnTargetOBJLst: MACRO
+mMvC_ChkTarget: MACRO
 	ld   hl, iPlInfo_OBJLstPtrTblOffsetMoveEnd
 	add  hl, bc		; HL = Ptr to target OBJLst ID
 	cp   a, [hl]	; Do they match?
-	jp   z, \2		; If so, end the move when the animation advances
-	jp   \1			; Otherwise, continue animating
+	jp   z, \1		; If so, jump
 ENDM
 
-; =============== mkhl ===============
-; Generates a generic HL parameter.
+; =============== mMvC_ChkTarget_jr ===============
+; Executes the specified code when the target animation frame is reached.
 ; IN
-; - 1: H
-; - 2: L
+; - 1: Ptr to where to jump
+; - A: Current OBJLst ID (either internal or visible)
+mMvC_ChkTarget_jr: MACRO
+	ld   hl, iPlInfo_OBJLstPtrTblOffsetMoveEnd
+	add  hl, bc		; HL = Ptr to target OBJLst ID
+	cp   a, [hl]	; Do they match?
+	jr   z, \1		; If so, jump
+ENDM
+
+; =============== mMvC_ChkGravityV ===============
+; Handles gravity.
+; The player is moved only vertically until the ground is reached.
+; IN
+; - 1: Gravity value
+; - 2: Where to jump if we *touched* ground
+mMvC_ChkGravityV: MACRO
+	ld   hl, \1
+	call OBJLstS_ApplyGravityVAndMoveV
+	jp   c, \2
+ENDM
+
+; =============== mMvC_ChkGravityHV ===============
+; Handles gravity.
+; The player is moved both horizontally and vertically until the ground is reached.
+; IN
+; - 1: Gravity value
+; - 2: Where to jump if we did *not* touch ground yet
+mMvC_ChkGravityHV: MACRO
+	ld   hl, \1
+	call OBJLstS_ApplyGravityVAndMoveHV
+	jp   nc, \2
+ENDM
+
+; =============== mMvC_ValLoaded ===============
+; Executes the code below only if the graphics for the first animation frame finished loading.
+; This prevents problems when displaying frames from the previous move animation.
+; IN
+; - 1: Where to jump if validation fails
+mMvC_ValLoaded: MACRO
+	call Play_Pl_IsMoveLoading
+	jp   c, \1
+ENDM
+
+; =============== mMvC_ValFrameStart ===============
+; Executes the code below only when the graphics for the frame have just finished loading
+; (animation frame visible for the first time).
+; When code for a move is executed depending on the visible frame, it's used to execute
+; code once, only the first time we get there.
+; IN
+; - 1: Where to jump if validation fails
+mMvC_ValFrameStart: MACRO
+	call OBJLstS_IsFrameNewLoad
+	jp   z, \1
+ENDM
+
+; =============== mMvC_ValFrameEnd ===============
+; Executes the code below only if the internal sprite mapping ID is about to change.
+; For code to be executed once, near the end of the animation frame.
+; IN
+; - 1: Where to jump if validation fails
 ; OUT
-; - CHL: Calculated result
-mkhl: MACRO
-CHL = (LOW(\1) << 8)|LOW(\2)
+; - HL: Ptr to iOBJInfo_FrameLeft
+mMvC_ValFrameEnd: MACRO
+	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, \1
+ENDM
+
+; =============== mMvC_EndThrow ===============
+; Ends a throw move.
+mMvC_EndThrow: MACRO
+	call Play_Pl_EndMove
+	xor  a ; PLAY_THROWACT_NONE
+	ld   [wPlayPlThrowActId], a
+ENDM
+
+; =============== mMvC_EndThrow_Slow ===============
+; Ends a throw move. Do not use.
+mMvC_EndThrow_Slow: MACRO
+	call Play_Pl_EndMove
+	ld   a, PLAY_THROWACT_NONE
+	ld   [wPlayPlThrowActId], a
 ENDM
 
 ; =============== Sound driver macros ===============
