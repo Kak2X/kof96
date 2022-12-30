@@ -7,6 +7,24 @@ const MOVEGROUP_ATTACKSPEC_START = 0x48/2;
 const MOVEGROUP_ATTACKSPEC_END = 0x6C/2;
 const MOVEGROUP_HIT_START = 0x70/2;
 
+
+const OLF_USETILEFLAGS = 1 << 4;
+const OBJLST_FLAGS = [
+	0 => "OLF_BIT0",
+	1 => "OLF_BIT1",
+	2 => "OLF_BIT2",
+	3 => "OLF_BIT3",
+	4 => "OLF_USETILEFLAGS",
+	5 => "OLF_XFLIP",
+	6 => "OLF_YFLIP",
+	7 => "OLF_NOBUF",
+];
+
+const OBJLST_ROMFLAGS = [
+	6 => "OLR_XFLIP",
+	7 => "OLR_YFLIP",
+];
+
 const PLFLAGS3 = [
 	0 => "PF3_SHAKELONG",
 	1 => "PF3_FLASH_B_SLOW",

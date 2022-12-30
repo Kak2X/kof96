@@ -3336,7 +3336,7 @@ OBJLstHdrA_CharSel_CursorPl1P:
 	db $28,$0B,$00 ; $00
 	db $28,$13,$04 ; $01
 	db $28,$08,$0C ; $02
-	db $30,$18,$CC ; $03
+	db $30,$18,$0C|OLR_XFLIP|OLR_YFLIP ; $03
 		
 OBJLstHdrA_CharSel_CursorPl1PWide:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
@@ -3352,7 +3352,7 @@ OBJLstHdrA_CharSel_CursorPl1PWide:
 	db $28,$17,$00 ; $00
 	db $28,$1F,$04 ; $01
 	db $28,$08,$0C ; $02
-	db $30,$30,$CC ; $03
+	db $30,$30,$0C|OLR_XFLIP|OLR_YFLIP ; $03
 		
 OBJLstHdrA_CharSel_CursorPl2P:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
@@ -3367,8 +3367,8 @@ OBJLstHdrA_CharSel_CursorPl2P:
 	;    Y   X  ID+FLAG
 	db $38,$0C,$02 ; $00
 	db $38,$14,$04 ; $01
-	db $28,$18,$4C ; $02
-	db $30,$08,$8C ; $03
+	db $28,$18,$0C|OLR_XFLIP ; $02
+	db $30,$08,$0C|OLR_YFLIP ; $03
 		
 OBJLstHdrA_CharSel_CursorPl2PWide:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
@@ -3383,8 +3383,8 @@ OBJLstHdrA_CharSel_CursorPl2PWide:
 	;    Y   X  ID+FLAG
 	db $38,$18,$02 ; $00
 	db $38,$20,$04 ; $01
-	db $28,$30,$4C ; $02
-	db $30,$08,$8C ; $03
+	db $28,$30,$0C|OLR_XFLIP ; $02
+	db $30,$08,$0C|OLR_YFLIP ; $03
 	
 OBJLstHdrA_CharSel_CursorCPU1P:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
@@ -3401,7 +3401,7 @@ OBJLstHdrA_CharSel_CursorCPU1P:
 	db $29,$10,$08 ; $01
 	db $29,$18,$0A ; $02
 	db $28,$08,$0C ; $03
-	db $30,$18,$CC ; $04
+	db $30,$18,$0C|OLR_XFLIP|OLR_YFLIP ; $04
 		
 OBJLstHdrA_CharSel_CursorCPU1PWide:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
@@ -3418,7 +3418,7 @@ OBJLstHdrA_CharSel_CursorCPU1PWide:
 	db $29,$1C,$08 ; $01
 	db $29,$24,$0A ; $02
 	db $28,$08,$0C ; $03
-	db $30,$30,$CC ; $04
+	db $30,$30,$0C|OLR_XFLIP|OLR_YFLIP ; $04
 	
 OBJLstHdrA_CharSel_CursorCPU2P:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
@@ -3434,8 +3434,8 @@ OBJLstHdrA_CharSel_CursorCPU2P:
 	db $37,$08,$06 ; $00
 	db $37,$10,$08 ; $01
 	db $37,$18,$0A ; $02
-	db $28,$18,$4C ; $03
-	db $30,$08,$8C ; $04
+	db $28,$18,$0C|OLR_XFLIP ; $03
+	db $30,$08,$0C|OLR_YFLIP ; $04
 		
 OBJLstHdrA_CharSel_CursorCPU2PWide:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
@@ -3448,11 +3448,11 @@ OBJLstHdrA_CharSel_CursorCPU2PWide:
 .bin:
 	db $05 ; OBJ Count
 	;    Y   X  ID+FLAG
-	db $37,$14,$06 ; $00
-	db $37,$1C,$08 ; $01
-	db $37,$24,$0A ; $02
-	db $28,$30,$4C ; $03
-	db $30,$08,$8C ; $04
+	db $37,$14,$06|$00 ; $00
+	db $37,$1C,$08|$00 ; $01
+	db $37,$24,$0A|$00 ; $02
+	db $28,$30,$0C|OLR_XFLIP ; $03
+	db $30,$08,$0C|OLR_YFLIP ; $04
 		
 OBJLstPtrTable_CharSel_Flip:
 	dw OBJLstHdrA_CharSel_FlipP0, OBJLSTPTR_NONE

@@ -9062,6 +9062,8 @@ L016367: db $30
 L016368: db $03
 L016369: db $20
 
+; This uses a placeholder OBJLstPtrTbl that's not pointing to a real OBJLstPtrTable.
+; Those fields gets properly set when "spawning" a projectile. (MoveC_*)
 OBJInfoInit_Projectile:
 	db $00 ; iOBJInfo_Status
 	db $00 ; iOBJInfo_OBJLstFlags
@@ -9079,9 +9081,9 @@ OBJInfoInit_Projectile:
 	db $80 ; iOBJInfo_TileIDBase
 	db LOW($8800) ; iOBJInfo_VRAMPtr_Low
 	db HIGH($8800) ; iOBJInfo_VRAMPtr_High
-	db BANK(OBJLstPtrTable_Projectile) ; iOBJInfo_BankNum (BANK $09)
-	db LOW(OBJLstPtrTable_Projectile) ; iOBJInfo_OBJLstPtrTbl_Low
-	db HIGH(OBJLstPtrTable_Projectile) ; iOBJInfo_OBJLstPtrTbl_High
+	db BANK(L0958D7) ; iOBJInfo_BankNum (BANK $09)
+	db LOW(L0958D7) ; iOBJInfo_OBJLstPtrTbl_Low
+	db HIGH(L0958D7) ; iOBJInfo_OBJLstPtrTbl_High
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
 	db $00 ; iOBJInfo_BankNum [N/A]
 	db $00 ; iOBJInfo_OBJLstPtrTbl_Low

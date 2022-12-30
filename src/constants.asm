@@ -187,6 +187,10 @@ OLF_XFLIP        EQU 1 << OLFB_XFLIP ; $20
 OLF_YFLIP        EQU 1 << OLFB_YFLIP ; $40
 OLF_NOBUF        EQU 1 << OLFB_NOBUF
 
+; Raw versions from inside the ROM, which are shifted up before getting converted
+OLR_XFLIP EQU OLF_XFLIP << 1
+OLR_YFLIP EQU OLF_YFLIP << 1
+
 ; iOBJInfo_Proj_HitMode
 PHM_NONE EQU $00
 PHM_REMOVE EQU $01

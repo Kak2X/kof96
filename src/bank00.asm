@@ -6842,7 +6842,7 @@ Play_LoadProjectileOBJInfo:
 		
 		;
 		; The sprite mappings for these don't use dynamic buffered graphics.
-		; Instad, they are all loaded to VRAM at the start of the round, loading
+		; Instead, they are all loaded to VRAM at the start of the round, loading
 		; over the pre-round text.
 		;
 		

@@ -11,17 +11,6 @@ if (!file_exists("tempconv.txt")) {
 //const DELIM = "L";
 //const DELIMN = 0;
 
-$objlst_flags = [
-	0 => "OLF_BIT0",
-	1 => "OLF_BIT1",
-	2 => "OLF_BIT2",
-	3 => "OLF_BIT3",
-	4 => "OLF_USETILEFLAGS",
-	5 => "OLF_XFLIP",
-	6 => "OLF_YFLIP",
-	7 => "OLF_NOBUF",
-];
-
 print "Converting data...".PHP_EOL;
 
 $h = fopen("tempconv.asm", 'w');
@@ -34,6 +23,7 @@ if (count($lines) > 0)
 $objlst_a = [];
 $objlst_b = [];
 $objdata = [];
+$objdata_flags = [];
 
 
 for ($i = 0; $i < count($lines);) {
@@ -47,13 +37,15 @@ for ($i = 0; $i < count($lines);) {
 	$base_label = get_label($lines[$i]);
 	if (in_array($base_label, $objdata)) {
 		print "O hit: $base_label\r\n";
-		$b = objdata_parse($base_label, $lines, $i);
+		$b = objdata_parse($base_label, $lines, $i, $objdata_flags[$data_ptr]);
 	} else if (in_array($base_label, $objlst_a)) {
 		print "A hit: $base_label\r\n";
 		$unused_marker = strpos($lines[$i], ";X") !== false ? " ;X" : "";
 		$label = "OBJLstHdrA_".$base_label;
 		
-		$flags = generate_const_label(get_db($lines[$i++]), $objlst_flags);
+		$flags_numeric = get_db($lines[$i++]);
+		$usexy = $flags_numeric & OLF_USETILEFLAGS;
+		$flags = generate_const_label($flags_numeric, OBJLST_FLAGS);
 		$byte1 = get_db($lines[$i++]);
 		$byte2 = get_db($lines[$i++]);
 		$gfx_low = get_db($lines[$i++]);
@@ -71,10 +63,11 @@ for ($i = 0; $i < count($lines);) {
 		$data_ptr = "L{$banknum}{$data_high}{$data_low}";
 		if (get_label($lines[$i]) == $data_ptr) {
 			$data_ptr = ".bin";
-			$objinfo = objdata_parse($data_ptr, $lines, $i);
+			$objinfo = objdata_parse($data_ptr, $lines, $i, mkflags($usexy));
 		} else {
 			$objinfo = "";
 			$objdata[] = $data_ptr;
+			$objdata_flags[$data_ptr] = mkflags($usexy);
 		}
 		
 		$b = "{$label}:{$unused_marker}
@@ -93,7 +86,9 @@ for ($i = 0; $i < count($lines);) {
 		$unused_marker = strpos($lines[$i], ";X") !== false ? " ;X" : "";
 		$label = "OBJLstHdrB_".$base_label;
 		
-		$flags = generate_const_label(get_db($lines[$i++]), $objlst_flags);
+		$flags_numeric = get_db($lines[$i++]);
+		$usexy = $flags_numeric & OLF_USETILEFLAGS;
+		$flags = generate_const_label($flags_numeric, OBJLST_FLAGS);
 		$gfx_low = get_db($lines[$i++]);
 		$gfx_high = get_db($lines[$i++]);
 		$gfx_bank = get_db($lines[$i++]);
@@ -110,10 +105,11 @@ for ($i = 0; $i < count($lines);) {
 		
 		if (get_label($lines[$i]) == $data_ptr) {
 			$data_ptr = ".bin";
-			$objinfo = objdata_parse($data_ptr, $lines, $i);
+			$objinfo = objdata_parse($data_ptr, $lines, $i, mkflags($usexy));
 		} else {
 			$objinfo = "";
 			$objdata[] = $data_ptr;
+			$objdata_flags[$data_ptr] = mkflags($usexy);
 		}
 		
 		$b = "{$label}:{$unused_marker}
@@ -182,18 +178,31 @@ for ($i = 0; $i < count($lines);) {
 }
 fclose($h);
 
-function objdata_parse($data_ptr, $lines, &$i) {
+function mkflags($usexy) {
+	return ['usexy' => $usexy];
+}
+
+function objdata_parse($data_ptr, $lines, &$i, $flags) {
 	$unused_marker = strpos($lines[$i], ";X") !== false ? " ;X" : "";
 	$objcount = get_db($lines[$i++]);
 			
 	$objinfo = "{$data_ptr}:{$unused_marker}
 	db \${$objcount} ; OBJ Count
-	;    Y   X  ID+FLAG";
+	;    Y   X  ID".($flags['usexy'] ? "+FLAG" : "");
 			
 	for ($j = 0, $max = hexdec($objcount); $j < $max; $j++) {
 		$y = get_db($lines[$i++]);
 		$x = get_db($lines[$i++]);
 		$f = get_db($lines[$i++]);
+		
+		// If xy flags are used, get them from the upper bits
+		if ($flags['usexy']) {
+			$fnum = hexdec($f);
+			$flags = ($fnum & 0xC0);
+			$tileid = dechex($fnum & 0x3F);
+			$f = $tileid."|".generate_const_label($flags, OBJLST_ROMFLAGS);
+		}
+		
 		$objinfo .= "
 	db \${$y},\${$x},\${$f} ; \$".fmthexnum($j);
 	}
