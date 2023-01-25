@@ -1008,12 +1008,12 @@ Play_SpawnTerryHat:
 			ld   [hl], $80
 			
 			; Set the code ptr for handling its animation
-			ld   hl, iOBJInfo_Proj_CodeBank
-			add  hl, de	; Seek to iOBJInfo_Proj_CodeBank
+			ld   hl, iOBJInfo_Play_CodeBank
+			add  hl, de	; Seek to iOBJInfo_Play_CodeBank
 			ld   [hl], BANK(ExOBJ_TerryHat) ; BANK $02
-			inc  hl	; Seek to iOBJInfo_Proj_CodePtr_Low
+			inc  hl	; Seek to iOBJInfo_Play_CodePtr_Low
 			ld   [hl], LOW(ExOBJ_TerryHat)
-			inc  hl	; Seek to iOBJInfo_Proj_CodePtr_Low
+			inc  hl	; Seek to iOBJInfo_Play_CodePtr_Low
 			ld   [hl], HIGH(ExOBJ_TerryHat)
 			
 			; Set animation table
@@ -1088,7 +1088,7 @@ ExOBJ_SuperSparkle:
 	; especially if a guard cancel was performed.
 	;
 	
-	ld   hl, iOBJInfo_SuperSparkle_EnaTimer
+	ld   hl, iOBJInfo_Play_EnaTimer
 	add  hl, de			; Seek to timer
 	dec  [hl]			; Timer--
 	jp   z, .hide		; Did it reach 0? If so, jump
@@ -2071,10 +2071,10 @@ Play_Pl_SetHitAnim:
 			bit  0, [hl]						; iPlInfo_PlId == PL2? ($01)
 			jp   nz, .useProj1P					; If so, use 1P's projectile damage value
 		.useProj2P:							
-			ld   hl, wOBJInfo_Pl2Projectile+iOBJInfo_Proj_DamageVal		 
+			ld   hl, wOBJInfo_Pl2Projectile+iOBJInfo_Play_DamageVal		 
 			jp   .chkProjDamage
 		.useProj1P:
-			ld   hl, wOBJInfo_Pl1Projectile+iOBJInfo_Proj_DamageVal		
+			ld   hl, wOBJInfo_Pl1Projectile+iOBJInfo_Play_DamageVal		
 		.chkProjDamage:
 			; 
 			; Just like the PF1B_INVULN check, this was checked beforehand in the box check code.
@@ -2088,11 +2088,11 @@ Play_Pl_SetHitAnim:
 			;
 			; Retrieve the move damage fields from the projectile.
 			;
-			ld   d, [hl]	; D = iOBJInfo_Proj_DamageVal
+			ld   d, [hl]	; D = iOBJInfo_Play_DamageVal
 			inc  hl
-			ld   e, [hl]	; E = iOBJInfo_Proj_DamageHitAnimId
+			ld   e, [hl]	; E = iOBJInfo_Play_DamageHitAnimId
 			inc  hl
-			ld   a, [hl]	; A = iOBJInfo_Proj_DamageFlags3
+			ld   a, [hl]	; A = iOBJInfo_Play_DamageFlags3
 			
 			; Set that we were hit by a projectile
 			ld   hl, iPlInfo_Flags0
@@ -2108,9 +2108,9 @@ Play_Pl_SetHitAnim:
 			res  PF2B_NOHURTBOX, [hl]
 			res  PF2B_NOCOLIBOX, [hl]
 			
-			; Apply the opponent's iOBJInfo_Proj_DamageFlags3
+			; Apply the opponent's iOBJInfo_Play_DamageFlags3
 			inc  hl								; Seek to iPlInfo_Flags3
-			ld   [hl], a						; Copy iOBJInfo_Proj_DamageFlags3 there
+			ld   [hl], a						; Copy iOBJInfo_Play_DamageFlags3 there
 			
 			; There's nothing else to check here, skip to the shared code
 			jp   Play_Pl_SetHitAnim_ChkGuardBypass
@@ -2771,18 +2771,18 @@ Play_Pl_ApplyDamageToStats:
 	
 .chkDamageProj:
 	; We got hit by a projectile.
-	; Determine which wOBJInfo_Pl*Projectile struct to use, and use iOBJInfo_Proj_DamageVal from there.
+	; Determine which wOBJInfo_Pl*Projectile struct to use, and use iOBJInfo_Play_DamageVal from there.
 	ld   hl, iPlInfo_PlId
 	add  hl, bc					; Seek to iPlInfo_PlId
 	bit  0, [hl]				; wPlInfo_Pl == 2P?
 	jp   nz, .use1P				; If so, 1P is the opponent. Use 1P's projectile's damage
 .use2P:							; Otherwise, use 2P's one
-	ld   hl, wOBJInfo_Pl2Projectile+iOBJInfo_Proj_DamageVal		 
+	ld   hl, wOBJInfo_Pl2Projectile+iOBJInfo_Play_DamageVal		 
 	jp   .getDamageProj
 .use1P:
-	ld   hl, wOBJInfo_Pl1Projectile+iOBJInfo_Proj_DamageVal		
+	ld   hl, wOBJInfo_Pl1Projectile+iOBJInfo_Play_DamageVal		
 .getDamageProj:
-	ld   d, [hl]				; D = iOBJInfo_Proj_DamageVal
+	ld   d, [hl]				; D = iOBJInfo_Play_DamageVal
 	;--
 	
 .applyDamage:
@@ -7036,7 +7036,7 @@ MoveC_OLeona_SuperMoonSlasher:
 ProjC_Leona_BalticLauncher:
 
 	; Handle the despawn timer
-	ld   hl, iOBJInfo_Proj_EnaTimer
+	ld   hl, iOBJInfo_Play_EnaTimer
 	add  hl, de
 	dec  [hl]			; DespawnTimer--
 	jp   z, .despawn	; Did it reach 0? If so, jump

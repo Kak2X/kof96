@@ -9810,7 +9810,7 @@ Play_DoUnkChain_SetPlProjFlag:
 	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_Status]
 	and  a, OST_VISIBLE		; Is the projectile visible?
 	jr   z, .do2P			; If not, skip
-	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_DamageVal]
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_Play_DamageVal]
 	or   a					; Is there a penalty assigned to it (ie: it was thrown)?
 	jr   z, .do2P			; If not, skip
 	
@@ -9824,7 +9824,7 @@ Play_DoUnkChain_SetPlProjFlag:
 	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Status]
 	and  a, OST_VISIBLE
 	jr   z, .end
-	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_DamageVal]
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Play_DamageVal]
 	or   a
 	jr   z, .end
 	set  PF0B_PROJ, [hl]
@@ -10397,8 +10397,8 @@ Play_DoPlColi:
 	ld   [wPlInfo_Pl2+iPlInfo_ColiFlags], a
 	ld   [wPlInfo_Pl1+iPlInfo_ColiBoxOverlapX], a
 	ld   [wPlInfo_Pl2+iPlInfo_ColiBoxOverlapX], a
-	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_HitMode], a
-	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_HitMode], a
+	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Play_HitMode], a
+	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Play_HitMode], a
 
 	;
 	; Handle collision detection between players.
@@ -10671,7 +10671,7 @@ Play_DoPlColi_1PProj2PChar:
 .coliOk:
 	; 1P projectile hit the other player, so remove it
 	ld   a, PHM_REMOVE
-	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_HitMode], a
+	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Play_HitMode], a
 	; 1P hit the other player with a projectile
 	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
 	set  PCF_PROJHITOTHER, [hl]
@@ -10734,7 +10734,7 @@ Play_DoPlColi_1PChar2PProj:
 .coliOk:
 	; 2P projectile hit the other player, so remove it
 	ld   a, PHM_REMOVE
-	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_HitMode], a
+	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Play_HitMode], a
 	; 2P hit the other player with a projectile
 	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
 	set  PCF_PROJHITOTHER, [hl]
@@ -10815,16 +10815,16 @@ Play_DoPlColi_1PProj2PCharHitbox:
 	
 	; Otherwise, don't allow erasing projectiles with high priority.
 	; (ie: 1P did one in his super)
-	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_Priority]
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_Play_Priority]
 	or   a						; Does the projectile have high priority?
 	jp   nz, .end				; If so, skip
 .removeProj:
 	ld   a, PHM_REMOVE
-	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_HitMode], a
+	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Play_HitMode], a
 	jp   .setFlags
 .reflectProj:
 	ld   a, PHM_REFLECT
-	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_HitMode], a
+	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Play_HitMode], a
 .setFlags:
 	; Sets the flag for both players
 	; [POI] Notice the reuse of PCF_HIT/PCF_HITOTHER, probably to fit this collision type into the 8 bit limit.
@@ -10892,16 +10892,16 @@ Play_DoPlColi_1PCharHitbox2PProj:
 	ld   a, [wPlInfo_Pl1+iPlInfo_Flags0]
 	bit  PF0B_SUPERMOVE, a
 	jp   nz, .removeProj
-	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_Priority]
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Play_Priority]
 	or   a
 	jp   nz, .end
 .removeProj:
 	ld   a, PHM_REMOVE
-	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_HitMode], a
+	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Play_HitMode], a
 	jp   .setFlags
 .reflectProj:
 	ld   a, PHM_REFLECT
-	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_HitMode], a
+	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Play_HitMode], a
 .setFlags:
 	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
 	set  PCF_PROJREMOTHER, [hl]
@@ -10960,9 +10960,9 @@ Play_DoPlColi_1PProj2PProj:
 	; The one with higher priority value erases the other, or both cancel each
 	; other out when they have same priority.
 	; Note that, generally, super move projectiles have the higher priority.
-	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_Priority]
+	ld   a, [wOBJInfo_Pl2Projectile+iOBJInfo_Play_Priority]
 	ld   b, a												; B = 2P Projectile Priority
-	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_Priority]	; A = 1P Projectile Priority
+	ld   a, [wOBJInfo_Pl1Projectile+iOBJInfo_Play_Priority]	; A = 1P Projectile Priority
 	cp   b				
 	jp   z, .remAllProj	; 1P == 2P? If so, jump
 	jp   c, .remProj1P	; 1P < 2P? If so, jump
@@ -10970,22 +10970,22 @@ Play_DoPlColi_1PProj2PProj:
 	; Otherwise, 1P > 2P.
 	; 1P Projectile stays, 2P removed
 	ld   a, PHM_NONE
-	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_HitMode], a
+	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Play_HitMode], a
 	ld   a, PHM_REMOVE
-	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_HitMode], a
+	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Play_HitMode], a
 	jp   .end
 .remProj1P:
 	; 2P Projectile stays, 1P removed
 	ld   a, PHM_NONE
-	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_HitMode], a
+	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Play_HitMode], a
 	ld   a, PHM_REMOVE
-	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_HitMode], a
+	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Play_HitMode], a
 	jp   .end
 .remAllProj:
 	; Both projectiles removed
 	ld   a, PHM_REMOVE
-	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Proj_HitMode], a
-	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Proj_HitMode], a
+	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Play_HitMode], a
+	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Play_HitMode], a
 .end:
 	ret 
 	

@@ -2232,13 +2232,13 @@ ProjInit_Terry_PowerWave:
 				; --------------- main ---------------
 			
 				; Set code pointer
-				ld   hl, iOBJInfo_Proj_CodeBank
+				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
-				ld   [hl], BANK(ProjC_Terry_PowerWave)	; BANK $06 ; iOBJInfo_Proj_CodeBank
+				ld   [hl], BANK(ProjC_Terry_PowerWave)	; BANK $06 ; iOBJInfo_Play_CodeBank
 				inc  hl
-				ld   [hl], LOW(ProjC_Terry_PowerWave)	; iOBJInfo_Proj_CodePtr_Low
+				ld   [hl], LOW(ProjC_Terry_PowerWave)	; iOBJInfo_Play_CodePtr_Low
 				inc  hl
-				ld   [hl], HIGH(ProjC_Terry_PowerWave)	; iOBJInfo_Proj_CodePtr_High
+				ld   [hl], HIGH(ProjC_Terry_PowerWave)	; iOBJInfo_Play_CodePtr_High
 				
 				; Write sprite mapping ptr for this projectile.
 				ld   hl, iOBJInfo_BankNum
@@ -2259,7 +2259,7 @@ ProjInit_Terry_PowerWave:
 				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
 				
 				; Set priority value
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $00
 				
@@ -2311,13 +2311,13 @@ ProjInit_Terry_PowerGeyser:
 				call ProjInitS_InitAndGetOBJInfo
 				
 				; Set code pointer
-				ld   hl, iOBJInfo_Proj_CodeBank
+				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
-				ld   [hl], BANK(ProjC_Terry_PowerGeyser)	; BANK $06 ; iOBJInfo_Proj_CodeBank
+				ld   [hl], BANK(ProjC_Terry_PowerGeyser)	; BANK $06 ; iOBJInfo_Play_CodeBank
 				inc  hl
-				ld   [hl], LOW(ProjC_Terry_PowerGeyser)		; iOBJInfo_Proj_CodePtr_Low
+				ld   [hl], LOW(ProjC_Terry_PowerGeyser)		; iOBJInfo_Play_CodePtr_Low
 				inc  hl
-				ld   [hl], HIGH(ProjC_Terry_PowerGeyser)	; iOBJInfo_Proj_CodePtr_High
+				ld   [hl], HIGH(ProjC_Terry_PowerGeyser)	; iOBJInfo_Play_CodePtr_High
 				
 				
 				; Write sprite mapping ptr for this projectile.
@@ -2339,7 +2339,7 @@ ProjInit_Terry_PowerGeyser:
 				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
 				
 				; Set priority value
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $02
 				
@@ -3295,13 +3295,13 @@ ProjInit_Mai_KaChoSen:
 				; --------------- main ---------------
 			
 				; Set code pointer
-				ld   hl, iOBJInfo_Proj_CodeBank
+				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
-				ld   [hl], BANK(ProjC_Horz)	; BANK $06 ; iOBJInfo_Proj_CodeBank
+				ld   [hl], BANK(ProjC_Horz)	; BANK $06 ; iOBJInfo_Play_CodeBank
 				inc  hl
-				ld   [hl], LOW(ProjC_Horz)	; iOBJInfo_Proj_CodePtr_Low
+				ld   [hl], LOW(ProjC_Horz)	; iOBJInfo_Play_CodePtr_Low
 				inc  hl
-				ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Proj_CodePtr_High
+				ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Play_CodePtr_High
 				
 				; Write sprite mapping ptr for this projectile.
 				ld   hl, iOBJInfo_BankNum
@@ -3322,7 +3322,7 @@ ProjInit_Mai_KaChoSen:
 				ld   [hl], $03	; iOBJInfo_FrameTotal
 				
 				; Set priority value
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $00
 				
@@ -4317,13 +4317,13 @@ ProjInit_Athena_PsychoTeleport:
 			call ProjInitS_InitAndGetOBJInfo	; DE = Ptr to wOBJInfo_Pl*Projectile
 		
 			; Set code pointer
-			ld   hl, iOBJInfo_Proj_CodeBank
+			ld   hl, iOBJInfo_Play_CodeBank
 			add  hl, de
-			ld   [hl], BANK(ProjC_NoMove)	; BANK $05 ; iOBJInfo_Proj_CodeBank
+			ld   [hl], BANK(ProjC_NoMove)	; BANK $05 ; iOBJInfo_Play_CodeBank
 			inc  hl
-			ld   [hl], LOW(ProjC_NoMove)	; iOBJInfo_Proj_CodePtr_Low
+			ld   [hl], LOW(ProjC_NoMove)	; iOBJInfo_Play_CodePtr_Low
 			inc  hl
-			ld   [hl], HIGH(ProjC_NoMove)	; iOBJInfo_Proj_CodePtr_High
+			ld   [hl], HIGH(ProjC_NoMove)	; iOBJInfo_Play_CodePtr_High
 			
 			; Write sprite mapping ptr for this projectile.
 			ld   hl, iOBJInfo_BankNum
@@ -4344,11 +4344,11 @@ ProjInit_Athena_PsychoTeleport:
 			ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
 			
 			; Set priority value and despawn timer
-			ld   hl, iOBJInfo_Proj_Priority
+			ld   hl, iOBJInfo_Play_Priority
 			add  hl, de
-			ld   [hl], $00	; iOBJInfo_Proj_Priority
+			ld   [hl], $00	; iOBJInfo_Play_Priority
 			inc  hl
-			ld   [hl], $0B	; iOBJInfo_Proj_EnaTimer
+			ld   [hl], $0B	; iOBJInfo_Play_EnaTimer
 			
 			; Place on the current player's position and stay there
 			call OBJLstS_Overlap
@@ -4401,13 +4401,13 @@ ProjInit_Athena_PsychoBall:
 				; --------------- main ---------------
 			
 				; Set code pointer
-				ld   hl, iOBJInfo_Proj_CodeBank
+				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
-				ld   [hl], BANK(ProjC_Horz)	; BANK $06 ; iOBJInfo_Proj_CodeBank
+				ld   [hl], BANK(ProjC_Horz)	; BANK $06 ; iOBJInfo_Play_CodeBank
 				inc  hl
-				ld   [hl], LOW(ProjC_Horz)	; iOBJInfo_Proj_CodePtr_Low
+				ld   [hl], LOW(ProjC_Horz)	; iOBJInfo_Play_CodePtr_Low
 				inc  hl
-				ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Proj_CodePtr_High
+				ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Play_CodePtr_High
 				
 				; Write sprite mapping ptr for this projectile.
 				ld   hl, iOBJInfo_BankNum
@@ -4428,7 +4428,7 @@ ProjInit_Athena_PsychoBall:
 				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
 				
 				; Set priority value
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $00
 				
@@ -4506,13 +4506,13 @@ ProjInit_Athena_ShCrystThrown:
 						call ProjInitS_InitAndGetOBJInfo	; DE = Ptr to wOBJInfo_Pl*Projectile
 						
 						; Set code pointer
-						ld   hl, iOBJInfo_Proj_CodeBank
+						ld   hl, iOBJInfo_Play_CodeBank
 						add  hl, de
-						ld   [hl], BANK(ProjC_Athena_ShCrystThrown)	; BANK $06 ; iOBJInfo_Proj_CodeBank
+						ld   [hl], BANK(ProjC_Athena_ShCrystThrown)	; BANK $06 ; iOBJInfo_Play_CodeBank
 						inc  hl
-						ld   [hl], LOW(ProjC_Athena_ShCrystThrown)	; iOBJInfo_Proj_CodePtr_Low
+						ld   [hl], LOW(ProjC_Athena_ShCrystThrown)	; iOBJInfo_Play_CodePtr_Low
 						inc  hl
-						ld   [hl], HIGH(ProjC_Athena_ShCrystThrown)	; iOBJInfo_Proj_CodePtr_High
+						ld   [hl], HIGH(ProjC_Athena_ShCrystThrown)	; iOBJInfo_Play_CodePtr_High
 					pop  af
 					
 					push bc
@@ -4558,7 +4558,7 @@ ProjInit_Athena_ShCrystThrown:
 					.setOBJLst:
 					
 						; Set priority value
-						ld   hl, iOBJInfo_Proj_Priority
+						ld   hl, iOBJInfo_Play_Priority
 						add  hl, de
 						ld   [hl], a
 						
@@ -4699,7 +4699,7 @@ ProjC_Athena_ShCrystThrown:
 ; --------------- GROUND - LIGHT ---------------
 .typeGL:
 	; Don't do anything if Priority != $04
-	ld   hl, iOBJInfo_Proj_Priority
+	ld   hl, iOBJInfo_Play_Priority
 	add  hl, de
 	ld   a, [hl]
 	cp   PROJ_PRIORITY_ALTSPEED	; Priority != $04?
@@ -4707,7 +4707,7 @@ ProjC_Athena_ShCrystThrown:
 	
 	; If the projectile didn't collide, move it at 3px/frame.
 	; Otherwise, move it at 0.5px/frame.
-	ld   hl, iOBJInfo_Proj_HitMode
+	ld   hl, iOBJInfo_Play_HitMode
 	add  hl, de
 	ld   a, [hl]
 	cp   a, PHM_NONE			; Did the projectile collide with the opponent?
@@ -4724,7 +4724,7 @@ ProjC_Athena_ShCrystThrown:
 ; --------------- GROUND/AIR - HEAVY ---------------
 .typeH:
 	; Only handle gravity if Priority != $04
-	ld   hl, iOBJInfo_Proj_Priority
+	ld   hl, iOBJInfo_Play_Priority
 	add  hl, de
 	ld   a, [hl]
 	cp   PROJ_PRIORITY_ALTSPEED	; Priority != $04?
@@ -4733,7 +4733,7 @@ ProjC_Athena_ShCrystThrown:
 	; If the projectile didn't collide, move it at 4px/frame.
 	; Otherwise, move it at 0.5px/frame and set its gravity to 2px/frame down.
 	; This has the effect of these "heavy" projectiles that normally curve up to switch direction.
-	ld   hl, iOBJInfo_Proj_HitMode
+	ld   hl, iOBJInfo_Play_HitMode
 	add  hl, de
 	ld   a, [hl]
 	cp   a, PHM_NONE			; Did the projectile collide with the opponent?
@@ -4753,7 +4753,7 @@ ProjC_Athena_ShCrystThrown:
 ; --------------- AIR - LIGHT ---------------
 .typeAL:
 	; Only handle downwards movement if Priority != $04
-	ld   hl, iOBJInfo_Proj_Priority
+	ld   hl, iOBJInfo_Play_Priority
 	add  hl, de
 	ld   a, [hl]
 	cp   PROJ_PRIORITY_ALTSPEED	; Priority != $04?
@@ -4761,7 +4761,7 @@ ProjC_Athena_ShCrystThrown:
 
 	; If the projectile didn't collide, move it at 3px/frame forward, 2px/frame down.
 	; Otherwise, move it at 0.5px/frame forward, and at 2px/frame *up*.
-	ld   hl, iOBJInfo_Proj_HitMode
+	ld   hl, iOBJInfo_Play_HitMode
 	add  hl, de
 	ld   a, [hl]
 	cp   a, PHM_NONE			; Did the projectile collide with the opponent?
@@ -4799,13 +4799,13 @@ ProjInit_Athena_ShCrystCharge:
 			call ProjInitS_InitAndGetOBJInfo
 			
 			; Set code pointer
-			ld   hl, iOBJInfo_Proj_CodeBank
+			ld   hl, iOBJInfo_Play_CodeBank
 			add  hl, de
-			ld   [hl], BANK(ProjC_Athena_ShCrystCharge)	; BANK $06 ; iOBJInfo_Proj_CodeBank
+			ld   [hl], BANK(ProjC_Athena_ShCrystCharge)	; BANK $06 ; iOBJInfo_Play_CodeBank
 			inc  hl
-			ld   [hl], LOW(ProjC_Athena_ShCrystCharge)	; iOBJInfo_Proj_CodePtr_Low
+			ld   [hl], LOW(ProjC_Athena_ShCrystCharge)	; iOBJInfo_Play_CodePtr_Low
 			inc  hl
-			ld   [hl], HIGH(ProjC_Athena_ShCrystCharge)	; iOBJInfo_Proj_CodePtr_High
+			ld   [hl], HIGH(ProjC_Athena_ShCrystCharge)	; iOBJInfo_Play_CodePtr_High
 			
 			; Write sprite mapping ptr for this projectile.
 			; We start out in dual swirl mode.
@@ -4855,7 +4855,7 @@ ProjInit_Athena_ShCrystCharge:
 			pop  bc
 			
 			; Set priority value
-			ld   hl, iOBJInfo_Proj_Priority
+			ld   hl, iOBJInfo_Play_Priority
 			add  hl, de
 			ld   [hl], $02
 				
@@ -4986,21 +4986,21 @@ ProjC_Athena_ShCrystCharge:
 	ld   [hl], $40	; iOBJInfo_Proj_ShCrystCharge_YPosId ($4000, rightmost value, so first to move left)
 	
 	; Move deals no damage
-	ld   hl, iOBJInfo_Proj_DamageVal
+	ld   hl, iOBJInfo_Play_DamageVal
 	add  hl, de
 	xor  a
-	ldi  [hl], a	; iOBJInfo_Proj_DamageVal
-	ldi  [hl], a	; iOBJInfo_Proj_DamageHitAnimId
-	ld   [hl], a	; iOBJInfo_Proj_DamageFlags3
+	ldi  [hl], a	; iOBJInfo_Play_DamageVal
+	ldi  [hl], a	; iOBJInfo_Play_DamageHitAnimId
+	ld   [hl], a	; iOBJInfo_Play_DamageFlags3
 	
 	; Set a new code pointer
-	ld   hl, iOBJInfo_Proj_CodeBank
+	ld   hl, iOBJInfo_Play_CodeBank
 	add  hl, de
-	ld   [hl], BANK(ProjC_Athena_ShCrystCharge_Spiral) 	; BANK $06 ; iOBJInfo_Proj_CodeBank
+	ld   [hl], BANK(ProjC_Athena_ShCrystCharge_Spiral) 	; BANK $06 ; iOBJInfo_Play_CodeBank
 	inc  hl
-	ld   [hl], LOW(ProjC_Athena_ShCrystCharge_Spiral)	; iOBJInfo_Proj_CodePtr_Low
+	ld   [hl], LOW(ProjC_Athena_ShCrystCharge_Spiral)	; iOBJInfo_Play_CodePtr_Low
 	inc  hl
-	ld   [hl], HIGH(ProjC_Athena_ShCrystCharge_Spiral)	; iOBJInfo_Proj_CodePtr_High
+	ld   [hl], HIGH(ProjC_Athena_ShCrystCharge_Spiral)	; iOBJInfo_Play_CodePtr_High
 	
 	; Base multiplier is large
 	ld   hl, iOBJInfo_Proj_ShCrystCharge_XPosMul
@@ -5367,12 +5367,12 @@ ProjC_Athena_ShCrystCharge_Spiral:
 	ret  c
 	
 	; Not necessary, already done by .switchToSpiral
-	ld   hl, iOBJInfo_Proj_DamageVal
+	ld   hl, iOBJInfo_Play_DamageVal
 	add  hl, de
 	xor  a
-	ldi  [hl], a	; iOBJInfo_Proj_DamageVal
-	ldi  [hl], a	; iOBJInfo_Proj_DamageHitAnimId
-	ld   [hl], a	; iOBJInfo_Proj_DamageFlags3
+	ldi  [hl], a	; iOBJInfo_Play_DamageVal
+	ldi  [hl], a	; iOBJInfo_Play_DamageHitAnimId
+	ld   [hl], a	; iOBJInfo_Play_DamageFlags3
 	
 	; Despawn the projectile when the timer expires
 	ld   hl, iOBJInfo_Proj_ShCrystCharge_DespawnTimer
@@ -7414,13 +7414,13 @@ ProjInit_MrBig_BlasterWave:
 				call ProjInitS_InitAndGetOBJInfo
 				
 				; Set code pointer
-				ld   hl, iOBJInfo_Proj_CodeBank
+				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
-				ld   [hl], BANK(ProjC_MrBig_BlasterWave)	; BANK $06 ; iOBJInfo_Proj_CodeBank
+				ld   [hl], BANK(ProjC_MrBig_BlasterWave)	; BANK $06 ; iOBJInfo_Play_CodeBank
 				inc  hl
-				ld   [hl], LOW(ProjC_MrBig_BlasterWave)		; iOBJInfo_Proj_CodePtr_Low
+				ld   [hl], LOW(ProjC_MrBig_BlasterWave)		; iOBJInfo_Play_CodePtr_Low
 				inc  hl
-				ld   [hl], HIGH(ProjC_MrBig_BlasterWave)	; iOBJInfo_Proj_CodePtr_High
+				ld   [hl], HIGH(ProjC_MrBig_BlasterWave)	; iOBJInfo_Play_CodePtr_High
 				
 				; Write sprite mapping ptr for this projectile.
 				ld   hl, iOBJInfo_BankNum
@@ -7441,7 +7441,7 @@ ProjInit_MrBig_BlasterWave:
 				ld   [hl], $03	; iOBJInfo_FrameTotal
 				
 				; Set priority value
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $02
 				
@@ -7452,10 +7452,10 @@ ProjInit_MrBig_BlasterWave:
 			cp   MOVE_MRBIG_BLASTER_WAVE_S	; Using the normal version of the move?
 			jp   nz, .setTimerD				; If not, jump
 		.setTimerS:
-			ld   [hl], $28 ; iOBJInfo_Proj_EnaTimer
+			ld   [hl], $28 ; iOBJInfo_Play_EnaTimer
 			jp   .setPos
 		.setTimerD:
-			ld   [hl], $50 ; iOBJInfo_Proj_EnaTimer
+			ld   [hl], $50 ; iOBJInfo_Play_EnaTimer
 			
 		.setPos:
 			; Set initial position relative to the player's origin
@@ -7477,14 +7477,14 @@ ProjC_MrBig_BlasterWave:
 	jp   nz, .despawn
 	
 	; Handle despawn timer
-	ld   hl, iOBJInfo_Proj_EnaTimer
+	ld   hl, iOBJInfo_Play_EnaTimer
 	add  hl, de
 	dec  [hl]
 	jp   z, .despawn
 	
 	; Alternate between moving the projectile up and down, while moving forward.
 	; This goes off the despawn timer, so higher the value, the earlier it is triggered.
-	ld   a, [hl]		; A = iOBJInfo_Proj_EnaTimer
+	ld   a, [hl]		; A = iOBJInfo_Play_EnaTimer
 	cp   $46
 	jp   z, .moveU
 	cp   $3C
@@ -8178,13 +8178,13 @@ ProjInit_Geese_ShippuKen:
 				; --------------- main ---------------
 			
 				; Set code pointer
-				ld   hl, iOBJInfo_Proj_CodeBank
+				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
-				ld   [hl], BANK(ProjC_Geese_ShippuKen)	; BANK $06 ; iOBJInfo_Proj_CodeBank
+				ld   [hl], BANK(ProjC_Geese_ShippuKen)	; BANK $06 ; iOBJInfo_Play_CodeBank
 				inc  hl
-				ld   [hl], LOW(ProjC_Geese_ShippuKen)	; iOBJInfo_Proj_CodePtr_Low
+				ld   [hl], LOW(ProjC_Geese_ShippuKen)	; iOBJInfo_Play_CodePtr_Low
 				inc  hl
-				ld   [hl], HIGH(ProjC_Geese_ShippuKen)	; iOBJInfo_Proj_CodePtr_High
+				ld   [hl], HIGH(ProjC_Geese_ShippuKen)	; iOBJInfo_Play_CodePtr_High
 				
 				; Write sprite mapping ptr for this projectile.
 				ld   hl, iOBJInfo_BankNum
@@ -8205,7 +8205,7 @@ ProjInit_Geese_ShippuKen:
 				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
 				
 				; Set priority value
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $00
 				
@@ -8254,13 +8254,13 @@ ProjInit_Geese_RagingStormS:
 				call ProjInitS_InitAndGetOBJInfo
 				
 				; Set code pointer
-				ld   hl, iOBJInfo_Proj_CodeBank
+				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
-				ld   [hl], BANK(ProjC_Geese_RagingStorm)	; BANK $06 ; iOBJInfo_Proj_CodeBank
+				ld   [hl], BANK(ProjC_Geese_RagingStorm)	; BANK $06 ; iOBJInfo_Play_CodeBank
 				inc  hl
-				ld   [hl], LOW(ProjC_Geese_RagingStorm)		; iOBJInfo_Proj_CodePtr_Low
+				ld   [hl], LOW(ProjC_Geese_RagingStorm)		; iOBJInfo_Play_CodePtr_Low
 				inc  hl
-				ld   [hl], HIGH(ProjC_Geese_RagingStorm)	; iOBJInfo_Proj_CodePtr_High
+				ld   [hl], HIGH(ProjC_Geese_RagingStorm)	; iOBJInfo_Play_CodePtr_High
 				
 				; Write sprite mapping ptr for this projectile.
 				ld   hl, iOBJInfo_BankNum
@@ -8281,13 +8281,13 @@ ProjInit_Geese_RagingStormS:
 				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
 				
 				; Set priority value
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $02
 				
 				; Set despawn timer
 				inc  hl
-				ld   [hl], $3C ; iOBJInfo_Proj_EnaTimer
+				ld   [hl], $3C ; iOBJInfo_Play_EnaTimer
 				
 				call OBJLstS_Overlap
 			pop  hl
@@ -8309,13 +8309,13 @@ ProjInit_Geese_RagingStormD:
 				call ProjInitS_InitAndGetOBJInfo
 				
 				; Set code pointer
-				ld   hl, iOBJInfo_Proj_CodeBank
+				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
-				ld   [hl], BANK(ProjC_Geese_RagingStorm)	; BANK $06 ; iOBJInfo_Proj_CodeBank
+				ld   [hl], BANK(ProjC_Geese_RagingStorm)	; BANK $06 ; iOBJInfo_Play_CodeBank
 				inc  hl
-				ld   [hl], LOW(ProjC_Geese_RagingStorm)		; iOBJInfo_Proj_CodePtr_Low
+				ld   [hl], LOW(ProjC_Geese_RagingStorm)		; iOBJInfo_Play_CodePtr_Low
 				inc  hl
-				ld   [hl], HIGH(ProjC_Geese_RagingStorm)	; iOBJInfo_Proj_CodePtr_High
+				ld   [hl], HIGH(ProjC_Geese_RagingStorm)	; iOBJInfo_Play_CodePtr_High
 				
 				; Write sprite mapping ptr for this projectile.
 				ld   hl, iOBJInfo_BankNum
@@ -8336,13 +8336,13 @@ ProjInit_Geese_RagingStormD:
 				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
 				
 				; Set priority value
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $02
 				
 				; Set despawn timer
 				inc  hl
-				ld   [hl], $5A ; iOBJInfo_Proj_EnaTimer
+				ld   [hl], $5A ; iOBJInfo_Play_EnaTimer
 				
 				call OBJLstS_Overlap
 				
@@ -8374,7 +8374,7 @@ ProjC_Geese_ShippuKen:
 ProjC_Geese_RagingStorm:
 
 	; Handle the despawn timer
-	ld   hl, iOBJInfo_Proj_EnaTimer
+	ld   hl, iOBJInfo_Play_EnaTimer
 	add  hl, de
 	dec  [hl]
 	jp   z, .despawn
@@ -8382,7 +8382,7 @@ ProjC_Geese_RagingStorm:
 	; Slow down a tiny bit the animation over time, based on the despawn timer.
 	; Initially, it's set to $00.
 	; Once it goes below $10, set it to $01.
-	ld   a, [hl]	; A = iOBJInfo_Proj_EnaTimer
+	ld   a, [hl]	; A = iOBJInfo_Play_EnaTimer
 	cp   $08		; A < $08?
 	jp   c, .setSpeed2	; If so, jump
 	cp   $10		; A < $10?

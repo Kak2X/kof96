@@ -13582,13 +13582,13 @@ ProjInit_Goenitz_Yonokaze:
 				call ProjInitS_InitAndGetOBJInfo	; DE = Ptr to wOBJInfo_Pl*Projectile
 				
 				; Set code pointer
-				ld   hl, iOBJInfo_Proj_CodeBank
+				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
-				ld   [hl], BANK(ProjC_Goenitz_Yonokaze)	; BANK $0A ; iOBJInfo_Proj_CodeBank
+				ld   [hl], BANK(ProjC_Goenitz_Yonokaze)	; BANK $0A ; iOBJInfo_Play_CodeBank
 				inc  hl
-				ld   [hl], LOW(ProjC_Goenitz_Yonokaze)	; iOBJInfo_Proj_CodePtr_Low
+				ld   [hl], LOW(ProjC_Goenitz_Yonokaze)	; iOBJInfo_Play_CodePtr_Low
 				inc  hl
-				ld   [hl], HIGH(ProjC_Goenitz_Yonokaze)	; iOBJInfo_Proj_CodePtr_High
+				ld   [hl], HIGH(ProjC_Goenitz_Yonokaze)	; iOBJInfo_Play_CodePtr_High
 				
 				; Write sprite mapping ptr for this projectile.
 				ld   hl, iOBJInfo_BankNum
@@ -13609,13 +13609,13 @@ ProjInit_Goenitz_Yonokaze:
 				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
 				
 				; Set priority value
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $02
 				
 				; Set despawn timer
 				inc  hl
-				ld   [hl], $28 ; iOBJInfo_Proj_EnaTimer
+				ld   [hl], $28 ; iOBJInfo_Play_EnaTimer
 				
 				; Set initial position relative to the player's origin
 				call OBJLstS_Overlap
@@ -13652,13 +13652,13 @@ ProjInit_Goenitz_Yamidoukoku:
 				call ProjInitS_InitAndGetOBJInfo	; DE = Ptr to wOBJInfo_Pl*Projectile
 				
 				; Set code pointer
-				ld   hl, iOBJInfo_Proj_CodeBank
+				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
-				ld   [hl], BANK(ProjC_Goenitz_Yonokaze)	; BANK $0A ; iOBJInfo_Proj_CodeBank
+				ld   [hl], BANK(ProjC_Goenitz_Yonokaze)	; BANK $0A ; iOBJInfo_Play_CodeBank
 				inc  hl
-				ld   [hl], LOW(ProjC_Goenitz_Yonokaze)	; iOBJInfo_Proj_CodePtr_Low
+				ld   [hl], LOW(ProjC_Goenitz_Yonokaze)	; iOBJInfo_Play_CodePtr_Low
 				inc  hl
-				ld   [hl], HIGH(ProjC_Goenitz_Yonokaze)	; iOBJInfo_Proj_CodePtr_High
+				ld   [hl], HIGH(ProjC_Goenitz_Yonokaze)	; iOBJInfo_Play_CodePtr_High
 				
 				; Write sprite mapping ptr for this projectile.
 				ld   hl, iOBJInfo_BankNum
@@ -13679,13 +13679,13 @@ ProjInit_Goenitz_Yamidoukoku:
 				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
 				
 				; Set priority value
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $05 ; Highest priority value!
 				
 				; Set despawn timer
 				inc  hl
-				ld   [hl], $78 ; iOBJInfo_Proj_EnaTimer
+				ld   [hl], $78 ; iOBJInfo_Play_EnaTimer
 				
 				; Set initial position relative to the player's origin
 				call OBJLstS_Overlap
@@ -13710,13 +13710,13 @@ ProjInit_Goenitz_WanpyouTokobuse:
 				call ProjInitS_InitAndGetOBJInfo	; DE = Ptr to wOBJInfo_Pl*Projectile
 				
 				; Set code pointer
-				ld   hl, iOBJInfo_Proj_CodeBank
+				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
-				ld   [hl], BANK(ProjC_Goenitz_WanpyouTokobuse)	; BANK $0A ; iOBJInfo_Proj_CodeBank
+				ld   [hl], BANK(ProjC_Goenitz_WanpyouTokobuse)	; BANK $0A ; iOBJInfo_Play_CodeBank
 				inc  hl
-				ld   [hl], LOW(ProjC_Goenitz_WanpyouTokobuse)	; iOBJInfo_Proj_CodePtr_Low
+				ld   [hl], LOW(ProjC_Goenitz_WanpyouTokobuse)	; iOBJInfo_Play_CodePtr_Low
 				inc  hl
-				ld   [hl], HIGH(ProjC_Goenitz_WanpyouTokobuse)	; iOBJInfo_Proj_CodePtr_High
+				ld   [hl], HIGH(ProjC_Goenitz_WanpyouTokobuse)	; iOBJInfo_Play_CodePtr_High
 				
 				; Write sprite mapping ptr for this projectile.
 				ld   hl, iOBJInfo_BankNum
@@ -13737,13 +13737,13 @@ ProjInit_Goenitz_WanpyouTokobuse:
 				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
 				
 				; Set priority value
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $00
 				
 				; Set despawn timer
 				inc  hl
-				ld   [hl], $1E ; iOBJInfo_Proj_EnaTimer
+				ld   [hl], $1E ; iOBJInfo_Play_EnaTimer
 				
 				
 				; Set initial position relative to the player's origin
@@ -13791,7 +13791,7 @@ ProjC_Goenitz_Yonokaze:
 	jp   c, .despawn						; If so, jump
 	
 	; Handle despawn timer
-	ld   hl, iOBJInfo_Proj_EnaTimer
+	ld   hl, iOBJInfo_Play_EnaTimer
 	add  hl, de
 	dec  [hl]
 	jp   z, .despawn
@@ -13812,7 +13812,7 @@ ProjC_Goenitz_WanpyouTokobuse:
 	jp   nz, .despawn
 	
 	; Handle the despawn timer
-	ld   hl, iOBJInfo_Proj_EnaTimer
+	ld   hl, iOBJInfo_Play_EnaTimer
 	add  hl, de
 	dec  [hl]
 	jp   z, .despawn

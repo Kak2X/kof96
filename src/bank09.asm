@@ -14182,13 +14182,13 @@ ProjInit_Krauser_BlitzBall:
 					; --------------- main ---------------
 				
 					; Set code pointer
-					ld   hl, iOBJInfo_Proj_CodeBank
+					ld   hl, iOBJInfo_Play_CodeBank
 					add  hl, de
-					ld   [hl], BANK(ProjC_Horz)	; BANK $06 ; iOBJInfo_Proj_CodeBank
+					ld   [hl], BANK(ProjC_Horz)	; BANK $06 ; iOBJInfo_Play_CodeBank
 					inc  hl
-					ld   [hl], LOW(ProjC_Horz)		; iOBJInfo_Proj_CodePtr_Low
+					ld   [hl], LOW(ProjC_Horz)		; iOBJInfo_Play_CodePtr_Low
 					inc  hl
-					ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Proj_CodePtr_High
+					ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Play_CodePtr_High
 					
 					; Write sprite mapping ptr for this projectile.
 					ld   hl, iOBJInfo_BankNum
@@ -14209,7 +14209,7 @@ ProjInit_Krauser_BlitzBall:
 					ld   [hl], $05	; iOBJInfo_FrameTotal
 					
 					; Set priority value
-					ld   hl, iOBJInfo_Proj_Priority
+					ld   hl, iOBJInfo_Play_Priority
 					add  hl, de
 					ld   [hl], $00
 					
@@ -14312,7 +14312,7 @@ ProjInit_Krauser_KaiserWave:
 				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
 				
 				; Set priority value
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $02
 				
@@ -14331,19 +14331,19 @@ ProjInit_Krauser_KaiserWave:
 				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
 				
 				; Set priority value
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $04
 				
 			.setCodePtr:
 				; Set code pointer
-				ld   hl, iOBJInfo_Proj_CodeBank
+				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
-				ld   [hl], BANK(ProjC_Horz)	; BANK $06 ; iOBJInfo_Proj_CodeBank
+				ld   [hl], BANK(ProjC_Horz)	; BANK $06 ; iOBJInfo_Play_CodeBank
 				inc  hl
-				ld   [hl], LOW(ProjC_Horz)		; iOBJInfo_Proj_CodePtr_Low
+				ld   [hl], LOW(ProjC_Horz)		; iOBJInfo_Play_CodePtr_Low
 				inc  hl
-				ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Proj_CodePtr_High
+				ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Play_CodePtr_High
 				
 				; Set animation speed.
 				ld   hl, iOBJInfo_FrameLeft

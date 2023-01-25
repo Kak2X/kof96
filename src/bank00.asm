@@ -8947,13 +8947,13 @@ ProjInit_Leona_BalticLauncher:
 				call ProjInitS_InitAndGetOBJInfo	; DE = Ptr to wOBJInfo_Pl*Projectile
 				
 				; Set code pointer
-				ld   hl, iOBJInfo_Proj_CodeBank
+				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
-				ld   [hl], BANK(ProjC_Leona_BalticLauncher)	; BANK $02 ; iOBJInfo_Proj_CodeBank
+				ld   [hl], BANK(ProjC_Leona_BalticLauncher)	; BANK $02 ; iOBJInfo_Play_CodeBank
 				inc  hl
-				ld   [hl], LOW(ProjC_Leona_BalticLauncher)	; iOBJInfo_Proj_CodePtr_Low
+				ld   [hl], LOW(ProjC_Leona_BalticLauncher)	; iOBJInfo_Play_CodePtr_Low
 				inc  hl
-				ld   [hl], HIGH(ProjC_Leona_BalticLauncher)	; iOBJInfo_Proj_CodePtr_High
+				ld   [hl], HIGH(ProjC_Leona_BalticLauncher)	; iOBJInfo_Play_CodePtr_High
 
 				; Write sprite mapping ptr for this projectile.
 				ld   hl, iOBJInfo_BankNum
@@ -8974,7 +8974,7 @@ ProjInit_Leona_BalticLauncher:
 				ld   [hl], $01	; iOBJInfo_FrameTotal
 				
 				; Set priority value
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $00
 				
@@ -8998,19 +8998,19 @@ ProjInit_Leona_BalticLauncher:
 			jp   nz, .fldHeavy			; If so, jump
 			
 		.fldLight:
-			ld   hl, iOBJInfo_Proj_EnaTimer
+			ld   hl, iOBJInfo_Play_EnaTimer
 			add  hl, de
 			ld   [hl], $1E ; Frames before despawn
 			ld   hl, $0000 ; H Speed (no movement)
 			jp   .setSpeed
 		.fldHeavy:
-			ld   hl, iOBJInfo_Proj_EnaTimer
+			ld   hl, iOBJInfo_Play_EnaTimer
 			add  hl, de
 			ld   [hl], $23 ; Frames before despawn
 			ld   hl, $0100 ; H Speed (1px/frame)
 			jp   .setSpeed
 		.fldHeavyMaxPow:
-			ld   hl, iOBJInfo_Proj_EnaTimer
+			ld   hl, iOBJInfo_Play_EnaTimer
 			add  hl, de
 			ld   [hl], $28 ; Frames before despawn
 			ld   hl, $0200 ; H Speed (1px/frame)
@@ -9046,13 +9046,13 @@ ProjInit_Leona_VSlasher:
 						call ProjInitS_InitAndGetOBJInfo
 						
 						; Set code pointer
-						ld   hl, iOBJInfo_Proj_CodeBank
+						ld   hl, iOBJInfo_Play_CodeBank
 						add  hl, de
-						ld   [hl], BANK(ProjC_NoMove)	; BANK $05 ; iOBJInfo_Proj_CodeBank
+						ld   [hl], BANK(ProjC_NoMove)	; BANK $05 ; iOBJInfo_Play_CodeBank
 						inc  hl
-						ld   [hl], LOW(ProjC_NoMove)	; iOBJInfo_Proj_CodePtr_Low
+						ld   [hl], LOW(ProjC_NoMove)	; iOBJInfo_Play_CodePtr_Low
 						inc  hl
-						ld   [hl], HIGH(ProjC_NoMove)	; iOBJInfo_Proj_CodePtr_High
+						ld   [hl], HIGH(ProjC_NoMove)	; iOBJInfo_Play_CodePtr_High
 						
 					;--
 					;
@@ -9128,11 +9128,11 @@ ProjInit_Leona_VSlasher:
 				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
 				
 				; Set priority and despawn timer
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
-				ld   [hl], $00	; iOBJInfo_Proj_Priority
+				ld   [hl], $00	; iOBJInfo_Play_Priority
 				inc  hl
-				ld   [hl], 60	; iOBJInfo_Proj_EnaTimer
+				ld   [hl], 60	; iOBJInfo_Play_EnaTimer
 				
 				; Set initial position relative to the player's origin
 				call OBJLstS_Overlap
@@ -9210,18 +9210,18 @@ ProjInit_MrKarate_KoOuKen:
 				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
 				
 				; Set priority value
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $00
 			
 				; Set code pointer
-				ld   hl, iOBJInfo_Proj_CodeBank
+				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
-				ld   [hl], BANK(ProjC_Horz)	; BANK $06 ; iOBJInfo_Proj_CodeBank
+				ld   [hl], BANK(ProjC_Horz)	; BANK $06 ; iOBJInfo_Play_CodeBank
 				inc  hl
-				ld   [hl], LOW(ProjC_Horz)	; iOBJInfo_Proj_CodePtr_Low
+				ld   [hl], LOW(ProjC_Horz)	; iOBJInfo_Play_CodePtr_Low
 				inc  hl
-				ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Proj_CodePtr_High
+				ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Play_CodePtr_High
 				
 				; Set animation speed.
 				ld   hl, iOBJInfo_FrameLeft
@@ -9314,7 +9314,7 @@ ProjInit_HaohShokohKenS:
 				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
 				
 				; Set priority value
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $01
 				
@@ -9373,7 +9373,7 @@ ProjInit_HaohShokohKenD:
 				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
 				
 				; Set priority value
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $02
 
@@ -9381,13 +9381,13 @@ ProjInit_HaohShokohKenD:
 			.initShared:
 			
 				; Set code pointer
-				ld   hl, iOBJInfo_Proj_CodeBank
+				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
-				ld   [hl], BANK(ProjC_Horz)	; BANK $06 ; iOBJInfo_Proj_CodeBank
+				ld   [hl], BANK(ProjC_Horz)	; BANK $06 ; iOBJInfo_Play_CodeBank
 				inc  hl
-				ld   [hl], LOW(ProjC_Horz)	; iOBJInfo_Proj_CodePtr_Low
+				ld   [hl], LOW(ProjC_Horz)	; iOBJInfo_Play_CodePtr_Low
 				inc  hl
-				ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Proj_CodePtr_High
+				ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Play_CodePtr_High
 				
 				; Set animation speed.
 				; Since these don't use the GFX buffer, using ANIMSPEED_INSTANT will animate the projectile every frame.
@@ -9472,13 +9472,13 @@ ProjInit_Iori_YamiBarai:
 				; --------------- main ---------------
 			
 				; Set code pointer
-				ld   hl, iOBJInfo_Proj_CodeBank
+				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
-				ld   [hl], BANK(ProjC_Horz)	; BANK $06 ; iOBJInfo_Proj_CodeBank
+				ld   [hl], BANK(ProjC_Horz)	; BANK $06 ; iOBJInfo_Play_CodeBank
 				inc  hl
-				ld   [hl], LOW(ProjC_Horz)	; iOBJInfo_Proj_CodePtr_Low
+				ld   [hl], LOW(ProjC_Horz)	; iOBJInfo_Play_CodePtr_Low
 				inc  hl
-				ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Proj_CodePtr_High
+				ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Play_CodePtr_High
 				
 				; Write sprite mapping ptr for this projectile.
 				ld   hl, iOBJInfo_BankNum
@@ -9500,7 +9500,7 @@ ProjInit_Iori_YamiBarai:
 				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
 				
 				; Set priority value
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $00
 				
@@ -9768,7 +9768,7 @@ ExOBJS_Play_ChkHitModeAndMoveH:
 	; Handle sprite hit modes, applicable to projectiles only.
 	; These are related to the collision detection against the opponent.
 	;
-	ld   hl, iOBJInfo_Proj_HitMode
+	ld   hl, iOBJInfo_Play_HitMode
 	add  hl, de
 	ld   a, [hl]
 	cp   PHM_REMOVE		; Did it get removed? (ie: projectile hit the target)
@@ -9786,10 +9786,10 @@ ExOBJS_Play_ChkHitModeAndMoveH:
 .chkRemove:
 	; Despawn the projectiles only if it has its priority value < $03.
 	; Undespawnable projectiles that deal continuous damage or those for special effects use this value.
-	ld   hl, iOBJInfo_Proj_Priority
+	ld   hl, iOBJInfo_Play_Priority
 	add  hl, de
 	ld   a, [hl]
-	cp   PROJ_PRIORITY_NODESPAWN		; iOBJInfo_Proj_Priority >= $03?
+	cp   PROJ_PRIORITY_NODESPAWN		; iOBJInfo_Play_Priority >= $03?
 	jp   nc, .move	; If so, jump
 .retSet:
 	scf		; C flag set
@@ -9879,7 +9879,7 @@ Play_Proj_Reflect:
 			pop  bc	; BC = Ptr to destination slot
 			
 			; Reset its hit mode, so it won't try to reflect it again
-			ld   hl, iOBJInfo_Proj_HitMode
+			ld   hl, iOBJInfo_Play_HitMode
 			add  hl, bc
 			ld   [hl], PHM_NONE
 			
@@ -10547,16 +10547,16 @@ Play_ExecExOBJCode:
 		.ok:
 			; Read out the code pointer.
 			; All of these expect the code pointer to be at the same location.
-			ASSERT(iOBJInfo_Proj_CodePtr_Low == iOBJInfo_SuperSparkle_CodePtr_Low)
+			ASSERT(iOBJInfo_Play_CodePtr_Low == iOBJInfo_Play_CodePtr_Low)
 			
 			xor  a
 			; Read out ptr to HL
-			ld   hl, iOBJInfo_Proj_CodePtr_Low	
+			ld   hl, iOBJInfo_Play_CodePtr_Low	
 			add  hl, de			; Seek to code ptr
 			push bc
-				ld   c, [hl]	; C = iOBJInfo_Proj_CodePtr_Low 
+				ld   c, [hl]	; C = iOBJInfo_Play_CodePtr_Low 
 				inc  hl
-				ld   b, [hl]	; B = iOBJInfo_Proj_CodePtr_High
+				ld   b, [hl]	; B = iOBJInfo_Play_CodePtr_High
 				push bc
 				pop  hl			; Move to HL
 			pop  bc
@@ -10602,13 +10602,13 @@ Play_ExecExOBJCode:
 		pop  bc
 		jp   .nextObj
 ; =============== .farJump ===============
-; Jumps to the specified code at bank iOBJInfo_Proj_CodeBank
+; Jumps to the specified code at bank iOBJInfo_Play_CodeBank
 ; IN
 ; - HL: Code ptr
 ; - DE: Ptr to wOBJInfo
 .farJump:
 	push hl		; Save code ptr
-		ld   hl, iOBJInfo_Proj_CodeBank
+		ld   hl, iOBJInfo_Play_CodeBank
 		add  hl, de		; Seek to bank num
 		ld   a, [hl]	; Set it as current one
 		ld   [MBC1RomBank], a
@@ -14286,7 +14286,7 @@ Play_StartSuperSparkle:
 				ld   [hl], OST_VISIBLE
 				
 				; Set the code pointer
-				ld   hl, iOBJInfo_SuperSparkle_CodeBank
+				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
 				ld   [hl], BANK(ExOBJ_SuperSparkle) ; BANK $02
 				inc  hl			
@@ -14315,7 +14315,7 @@ Play_StartSuperSparkle:
 				ld   [hl], $00
 				
 				; Display for $14 frames
-				ld   hl, iOBJInfo_SuperSparkle_EnaTimer
+				ld   hl, iOBJInfo_Play_EnaTimer
 				add  hl, de
 				ld   [hl], $14
 				
@@ -14469,18 +14469,18 @@ Play_Proj_CopyMoveDamageFromPl:
 		; DE = Ptr to destination
 		; The OBJInfo for the projectile is always 2 slots ahead
 		; of one used by its respective player.
-		ld   hl, (OBJINFO_SIZE*2)+iOBJInfo_Proj_DamageVal
+		ld   hl, (OBJINFO_SIZE*2)+iOBJInfo_Play_DamageVal
 		add  hl, de
 		
 		; Copy the data over
 		ld   a, [bc]	; Read iPlInfo_MoveDamageValNext
 		inc  bc
-		ldi  [hl], a	; Copy to iOBJInfo_Proj_DamageVal
+		ldi  [hl], a	; Copy to iOBJInfo_Play_DamageVal
 		ld   a, [bc]	; Read iPlInfo_MoveDamageHitAnimIdNext
 		inc  bc
-		ldi  [hl], a	; Copy to iOBJInfo_Proj_DamageHitAnimId
+		ldi  [hl], a	; Copy to iOBJInfo_Play_DamageHitAnimId
 		ld   a, [bc]	; Read iPlInfo_MoveDamageFlags3Next
-		ld   [hl], a	; Copy to iOBJInfo_Proj_DamageFlags3
+		ld   [hl], a	; Copy to iOBJInfo_Play_DamageFlags3
 	pop  bc
 	ret
 	

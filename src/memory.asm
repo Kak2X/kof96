@@ -470,16 +470,17 @@ iOBJInfo_CharSelFlip_BaseTileId EQU iOBJInfo_Custom+$08
 iOBJInfo_CharSelFlip_OBJIdTarget EQU iOBJInfo_Custom+$09
 
 ; TODO: Rename to iOBJInfo_Play_CodeBank and merge with SuperSparkle ones? It's used by multiple OBJInfo...
-; $00-$08 seem fixed
-iOBJInfo_Proj_CodeBank EQU iOBJInfo_Custom+$00 ; Bank number for the CodePtr
-iOBJInfo_Proj_CodePtr_Low EQU iOBJInfo_Custom+$01 ; Custom code for projectile (low byte)
-iOBJInfo_Proj_CodePtr_High EQU iOBJInfo_Custom+$02 ; Custom code for projectile (high byte)
-iOBJInfo_Proj_DamageVal EQU iOBJInfo_Custom+$03 ; Damage given the projectile hits the opponent.
-iOBJInfo_Proj_DamageHitAnimId EQU iOBJInfo_Custom+$04 ; Animation playing when the projectile hits the opponent (HITANIM_*)
-iOBJInfo_Proj_DamageFlags3 EQU iOBJInfo_Custom+$05 ; Damage flags applied when the opponent gets hit (they get copied to iPlInfo_Flags3)
-iOBJInfo_Proj_HitMode EQU iOBJInfo_Custom+$06 ; If set, marks what happens when the projectile hits a target
-iOBJInfo_Proj_Priority EQU iOBJInfo_Custom+$07 ; Higher priority projectiles erase others
-iOBJInfo_Proj_EnaTimer EQU iOBJInfo_Custom+$08 ; Visibility timer. When it elapses, the projectile disappears.
+; Default custom values used by multiple ExOBJ, mostly by projectiles.
+; Some of these, in practice, are *only* used by those, like the damage flags.
+iOBJInfo_Play_CodeBank EQU iOBJInfo_Custom+$00 ; Bank number for the CodePtr
+iOBJInfo_Play_CodePtr_Low EQU iOBJInfo_Custom+$01 ; Custom code for ExOBJ (low byte)
+iOBJInfo_Play_CodePtr_High EQU iOBJInfo_Custom+$02 ; Custom code for ExOBJ (high byte)
+iOBJInfo_Play_DamageVal EQU iOBJInfo_Custom+$03 ; Damage given the ExOBJ hits the opponent.
+iOBJInfo_Play_DamageHitAnimId EQU iOBJInfo_Custom+$04 ; Animation playing when the projectile hits the opponent (HITANIM_*)
+iOBJInfo_Play_DamageFlags3 EQU iOBJInfo_Custom+$05 ; Damage flags applied when the opponent gets hit (they get copied to iPlInfo_Flags3)
+iOBJInfo_Play_HitMode EQU iOBJInfo_Custom+$06 ; If set, marks what happens when the projectile hits a target
+iOBJInfo_Play_Priority EQU iOBJInfo_Custom+$07 ; Higher priority projectiles erase others
+iOBJInfo_Play_EnaTimer EQU iOBJInfo_Custom+$08 ; Visibility timer. When it elapses, the ExOBJ disappears.
 ;--
 ; For Athena's Shining Crystal Bit (before throw)
 iOBJInfo_Proj_ShCrystCharge_OrigX EQU iOBJInfo_Custom+$08 ; X Origin for the projectile. The small spheres are positioned relative to this.
@@ -494,24 +495,12 @@ iOBJInfo_Proj_ShCrystCharge_OrbitMode EQU iOBJInfo_Custom+$10 ; Projectile movem
 iOBJInfo_Proj_ShCrystCharge_OrigMoveLeft EQU iOBJInfo_Custom+$11 ; Origin UB movements left. When it elapses, we switch to Hold mode.
 iOBJInfo_Proj_ShCrystCharge_DespawnTimer EQU iOBJInfo_Custom+$11 ; In spiral mode
 iOBJInfo_Proj_ShCrystCharge_OrigMoveTimer EQU iOBJInfo_Custom+$12 ; Incrementing timer to time the origin movements.
-
 ; For Athena's Shining Crystal Bit (after throw, so a standard proj)
 iOBJInfo_Proj_ShCrystThrow_TypeId EQU iOBJInfo_Custom+$08 ; ID of the LH/SD combination
 ; For Goenitz's Wanpyou Tokobuse
 iOBJInfo_Proj_WanToko_OrigX EQU iOBJInfo_Custom+$09 ; X Origin for the projectile. The small spheres are positioned relative to this.
 iOBJInfo_Proj_WanToko_OrigY EQU iOBJInfo_Custom+$0A ; Y Origin for the projectile.
 iOBJInfo_Proj_WanToko_MoveSpeed EQU iOBJInfo_Custom+$0B ; Base movement speed for a single projectile frame (0-3) 
-
-
-
-
-
-; Must be at same location of iOBJInfo_Proj_CodePtr
-iOBJInfo_SuperSparkle_CodeBank EQU iOBJInfo_Proj_CodeBank ; Bank number for the CodePtr
-iOBJInfo_SuperSparkle_CodePtr_Low EQU iOBJInfo_Proj_CodePtr_Low ; Custom code for sparkle (low byte)
-iOBJInfo_SuperSparkle_CodePtr_High EQU iOBJInfo_Proj_CodePtr_High ; Custom code for sparkle (high byte)
-iOBJInfo_SuperSparkle_EnaTimer EQU iOBJInfo_Proj_EnaTimer ; Visibility timer. When it elapses, the sparkle disappears.
-
 
 ; Sprite mapping fields.
 

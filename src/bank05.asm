@@ -10430,13 +10430,13 @@ ProjInit_Mature_HeavensGateS:
 				call ProjInitS_InitAndGetOBJInfo
 				
 				; Set code pointer
-				ld   hl, iOBJInfo_Proj_CodeBank
+				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
-				ld   [hl], BANK(ProjC_NoMove)	; BANK $05 ; iOBJInfo_Proj_CodeBank
+				ld   [hl], BANK(ProjC_NoMove)	; BANK $05 ; iOBJInfo_Play_CodeBank
 				inc  hl
-				ld   [hl], LOW(ProjC_NoMove)	; iOBJInfo_Proj_CodePtr_Low
+				ld   [hl], LOW(ProjC_NoMove)	; iOBJInfo_Play_CodePtr_Low
 				inc  hl
-				ld   [hl], HIGH(ProjC_NoMove)	; iOBJInfo_Proj_CodePtr_High
+				ld   [hl], HIGH(ProjC_NoMove)	; iOBJInfo_Play_CodePtr_High
 				
 				; Write sprite mapping ptr for this projectile.
 				ld   hl, iOBJInfo_BankNum
@@ -10457,14 +10457,14 @@ ProjInit_Mature_HeavensGateS:
 				ld   [hl], $01	; iOBJInfo_FrameTotal
 				
 				; Set priority value
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], PROJ_PRIORITY_NODESPAWN
 				inc  hl
 			pop  af
 			
 			; Set despawn timer
-			ld   [hl], $32 ; iOBJInfo_Proj_EnaTimer
+			ld   [hl], $32 ; iOBJInfo_Play_EnaTimer
 			
 			; Set initial position relative to the player's origin
 			call OBJLstS_Overlap
@@ -10506,13 +10506,13 @@ ProjInit_Mature_HeavensGateD:
 				call ProjInitS_InitAndGetOBJInfo
 				
 				; Set code pointer
-				ld   hl, iOBJInfo_Proj_CodeBank
+				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
-				ld   [hl], BANK(ProjC_NoMove)	; BANK $05 ; iOBJInfo_Proj_CodeBank
+				ld   [hl], BANK(ProjC_NoMove)	; BANK $05 ; iOBJInfo_Play_CodeBank
 				inc  hl
-				ld   [hl], LOW(ProjC_NoMove)	; iOBJInfo_Proj_CodePtr_Low
+				ld   [hl], LOW(ProjC_NoMove)	; iOBJInfo_Play_CodePtr_Low
 				inc  hl
-				ld   [hl], HIGH(ProjC_NoMove)	; iOBJInfo_Proj_CodePtr_High
+				ld   [hl], HIGH(ProjC_NoMove)	; iOBJInfo_Play_CodePtr_High
 				
 				; Write sprite mapping ptr for this projectile.
 				ld   hl, iOBJInfo_BankNum
@@ -10533,14 +10533,14 @@ ProjInit_Mature_HeavensGateD:
 				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
 				
 				; Set priority value
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], PROJ_PRIORITY_NODESPAWN
 				inc  hl
 			pop  af
 			
 			; Set despawn timer
-			ld   [hl], $05 ; iOBJInfo_Proj_EnaTimer
+			ld   [hl], $05 ; iOBJInfo_Play_EnaTimer
 			
 			; Set initial position relative to the player's origin
 			call OBJLstS_Overlap
@@ -10555,7 +10555,7 @@ ProjInit_Mature_HeavensGateD:
 ; Getting hit by this won't make it disappear, so if it's set to deal damage it will deal it continuously.
 ProjC_NoMove:
 	; Handle despawn timer.
-	ld   hl, iOBJInfo_Proj_EnaTimer
+	ld   hl, iOBJInfo_Play_EnaTimer
 	add  hl, de
 	dec  [hl]
 	jp   z, .despawn
@@ -11163,13 +11163,13 @@ ProjInit_Chizuru_ReigiIshizue:
 				call ProjInitS_InitAndGetOBJInfo
 				
 				; Set code pointer
-				ld   hl, iOBJInfo_Proj_CodeBank
+				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
-				ld   [hl], BANK(ProjC_Chizuru_ReigiIshizue)	; BANK $05 ; iOBJInfo_Proj_CodeBank
+				ld   [hl], BANK(ProjC_Chizuru_ReigiIshizue)	; BANK $05 ; iOBJInfo_Play_CodeBank
 				inc  hl
-				ld   [hl], LOW(ProjC_Chizuru_ReigiIshizue)	; iOBJInfo_Proj_CodePtr_Low
+				ld   [hl], LOW(ProjC_Chizuru_ReigiIshizue)	; iOBJInfo_Play_CodePtr_Low
 				inc  hl
-				ld   [hl], HIGH(ProjC_Chizuru_ReigiIshizue)	; iOBJInfo_Proj_CodePtr_High
+				ld   [hl], HIGH(ProjC_Chizuru_ReigiIshizue)	; iOBJInfo_Play_CodePtr_High
 				
 				; Write sprite mapping ptr for this projectile.
 				ld   hl, iOBJInfo_BankNum
@@ -11190,7 +11190,7 @@ ProjInit_Chizuru_ReigiIshizue:
 				ld   [hl], $06	; iOBJInfo_FrameTotal
 				
 				; Set priority value
-				ld   hl, iOBJInfo_Proj_Priority
+				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], PROJ_PRIORITY_NODESPAWN
 				
@@ -11198,7 +11198,7 @@ ProjInit_Chizuru_ReigiIshizue:
 				; Determine how long to display it.
 				;
 				
-				inc  hl	; Seek to iOBJInfo_Proj_EnaTimer
+				inc  hl	; Seek to iOBJInfo_Play_EnaTimer
 				
 			pop  af ; A = MoveId
 			
@@ -11234,7 +11234,7 @@ ProjC_Chizuru_ReigiIshizue:
 	jp   nz, .despawn					; If so, despawn it
 	
 	; Decrement despawn timer only if it's not $FF (like the desperation super)
-	ld   hl, iOBJInfo_Proj_EnaTimer
+	ld   hl, iOBJInfo_Play_EnaTimer
 	add  hl, de
 	bit  7, [hl]		; Is the despawn timer $FF? (>= $80)
 	jp   nz, .anim		; If so, don't decrement it
