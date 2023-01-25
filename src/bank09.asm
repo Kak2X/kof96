@@ -13695,564 +13695,692 @@ MoveInputReader_Krauser_SetMove:
 MoveInputReader_Krauser_NoMove:
 	or   a
 	ret
-L097627:;I
+
+; =============== MoveC_Krauser_BlitzBall ===============
+; Move code for Krauser's Blitz Ball, both low and high versions:
+; - MOVE_KRAUSER_LOW_BLITZ_BALL_L
+; - MOVE_KRAUSER_LOW_BLITZ_BALL_H
+; - MOVE_KRAUSER_HIGH_BLITZ_BALL_L
+; - MOVE_KRAUSER_HIGH_BLITZ_BALL_H
+MoveC_Krauser_BlitzBall:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L097688
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $04
-	jp   z, L097642
-	cp   $08
-	jp   z, L09765C
-	jp   L097685
-L097642:;J
-	mMvC_ValFrameEnd L097685
-	inc  hl
-	push hl
-	mMvIn_ChkLH L097656
-	pop  hl
-	ld   [hl], $0C
-	jp   L097685
-L097656:;J
-	pop  hl
-	ld   [hl], $18
-	jp   L097685
-L09765C:;J
-	mMvC_ValFrameStart L09767A
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	ld   hl, $EF00
-	cp   $48
-	jp   z, L097677
-	cp   $4A
-	jp   z, L097677
-	ld   hl, $0000
-L097677:;J
-	call L097A71
-L09767A:;J
-	mMvC_ValFrameEnd L097685
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	jp   .anim
+; --------------- frame #1 ---------------
+.obj1:
+	mMvC_ValFrameEnd .anim
+		; Different animation speed between light and heavy versions.
+		inc  hl	; Seek to iOBJInfo_FrameTotal
+		push hl
+		mMvIn_ChkLH .obj1_setAnimSpeedH
+	.obj1_setAnimSpeedL:
+		pop  hl		; HL = Ptr to iOBJInfo_FrameTotal
+		ld   [hl], $0C
+		jp   .anim
+	.obj1_setAnimSpeedH:
+		pop  hl		; HL = Ptr to iOBJInfo_FrameTotal
+		ld   [hl], $18
+		jp   .anim
+; --------------- frame #2 ---------------
+.obj2:
+	mMvC_ValFrameStart .chkEnd
+		; Distinguish between low and high Blitz Ball.
+		; The high version is $11px above the low one.
+		ld   hl, iPlInfo_MoveId
+		add  hl, bc
+		ld   a, [hl]
+		ld   hl, -$1100
+		cp   MOVE_KRAUSER_HIGH_BLITZ_BALL_L	; Using high ver?
+		jp   z, .obj2_initProj				; If so, jump
+		cp   MOVE_KRAUSER_HIGH_BLITZ_BALL_H	; Using high ver?
+		jp   z, .obj2_initProj				; If so, jump
+		ld   hl, +$0000
+	.obj2_initProj:
+		call ProjInit_Krauser_BlitzBall
+.chkEnd:
+	mMvC_ValFrameEnd .anim
 	call Play_Pl_EndMove
-	jr   L097688
-L097685:;J
+	jr   .ret
+; --------------- common ---------------
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L097688:;JR
+.ret:
 	ret
-L097689:;I
+	
+; =============== MoveC_Krauser_LegTomahawk ===============
+; Move code for Krauser's Leg Tomahawk (MOVE_KRAUSER_LEG_TOMAHAWK_L, MOVE_KRAUSER_LEG_TOMAHAWK_H).
+MoveC_Krauser_LegTomahawk:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L097773
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L0976B3
-	cp   $04
-	jp   z, L0976D9
-	cp   $08
-	jp   z, L09772F
-	cp   $0C
-	jp   z, L09774A
-	cp   $18
-	jp   z, L097765
-	jp   L097770
-L0976B3:;J
-	mMvC_ValFrameStart L0976B9
-L0976B9:;J
-	mMvC_ValFrameEnd L097770
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	mMvIn_ChkLHE L0976CB, L0976CE
-L0976CB:;J
-	jp   L097770
-L0976CE: db $21;X
-L0976CF: db $04;X
-L0976D0: db $04;X
-L0976D1: db $3E;X
-L0976D2: db $11;X
-L0976D3: db $CD;X
-L0976D4: db $90;X
-L0976D5: db $38;X
-L0976D6: db $C3;X
-L0976D7: db $70;X
-L0976D8: db $77;X
-L0976D9:;J
-	mMvC_ValFrameStart L09771A
-	ld   a, $12
-	call HomeCall_Sound_ReqPlayExId
-	mMvIn_ChkLHE L0976FC, L09770B
-	mMvC_SetSpeedH $0300
-	mMvC_SetSpeedV $FC00
-	jp   L097717
-L0976FC:;J
-	mMvC_SetSpeedH $0400
-	mMvC_SetSpeedV $FB80
-	jp   L097717
-L09770B: db $21;X
-L09770C: db $80;X
-L09770D: db $05;X
-L09770E: db $CD;X
-L09770F: db $69;X
-L097710: db $35;X
-L097711: db $21;X
-L097712: db $00;X
-L097713: db $FC;X
-L097714: db $CD;X
-L097715: db $AD;X
-L097716: db $35;X
-L097717:;J
-	jp   L09774A
-L09771A:;J
-	mMvC_NextFrameOnGtYSpeed $FA, $FF
-	jp   nc, L09774A
-	mMvC_SetDamageNext $08, HITANIM_HIT0_MID, PF3_SHAKELONG|PF3_BIT4
-	jp   L09774A
-L09772F:;J
-	mMvC_NextFrameOnGtYSpeed $FE, $FF
-	jp   nc, L09774A
-	ld   hl, $0021
-	add  hl, bc
-	res  7, [hl]
-	mMvC_SetDamageNext $08, HITANIM_DROP_SPEC_0C, PF3_BIT4
-	jp   L09774A
-L09774A:;J
-	mMvC_ChkGravityHV $0060, L097770
-	mMvC_SetLandFrame $10, $06
-	mMvC_SetDamageNext $08, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
-	jp   L097773
-L097765:;J
-	mMvC_ValFrameEnd L097770
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .doGravity
+	cp   $06*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim
+; --------------- frame #0 ---------------
+.obj0:
+	;--
+	mMvC_ValFrameStart .obj0_cont
+.obj0_cont:
+	;--
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		; [POI] Hidden heavy version of the move deals a hit on #2
+		mMvIn_ChkLHE .obj0_noDamage, .obj0_setDamage
+	.obj0_noDamage:
+		jp   .anim
+	.obj0_setDamage:
+		mMvC_SetDamageNext $04, HITANIM_HIT1_MID, PF3_SHAKELONG|PF3_BIT4
+		jp   .anim
+; --------------- frame #1 ---------------
+.obj1:
+	mMvC_ValFrameStart .obj1_cont
+		mMvC_PlaySound SCT_11
+		mMvIn_ChkLHE .setJumpH, .setJumpE
+	.setJumpL: ; Light
+		mMvC_SetSpeedH +$0300
+		mMvC_SetSpeedV -$0400
+		jp   .obj1_doGravity
+	.setJumpH: ; Heavy
+		mMvC_SetSpeedH +$0400
+		mMvC_SetSpeedV -$0480
+		jp   .obj1_doGravity
+	.setJumpE: ; [POI] Hidden Heavy
+		mMvC_SetSpeedH +$0580
+		mMvC_SetSpeedV -$0400
+	.obj1_doGravity:
+		jp   .doGravity
+.obj1_cont:
+	; Switch to #2 when YSpeed > -$06 (immediately) and then set its damage
+	mMvC_NextFrameOnGtYSpeed -$06, ANIMSPEED_NONE
+	jp   nc, .doGravity
+		mMvC_SetDamageNext $08, HITANIM_HIT0_MID, PF3_SHAKELONG|PF3_BIT4
+		jp   .doGravity
+; --------------- frame #2 ---------------
+.obj2:
+	mMvC_NextFrameOnGtYSpeed -$02, ANIMSPEED_NONE
+	jp   nc, .doGravity
+		ld   hl, iPlInfo_Flags1
+		add  hl, bc
+		res  PF1B_INVULN, [hl]
+		mMvC_SetDamageNext $08, HITANIM_DROP_SPEC_0C, PF3_BIT4
+		jp   .doGravity
+; --------------- frames #1-2 / common gravity check ---------------
+.doGravity:
+	mMvC_ChkGravityHV $0060, .anim
+		mMvC_SetLandFrame $04*OBJLSTPTR_ENTRYSIZE, $06
+		mMvC_SetDamageNext $08, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
+		jp   .ret
+; --------------- frame #6 ---------------
+.chkEnd:;J
+	mMvC_ValFrameEnd .anim
 	call Play_Pl_EndMove
-	jr   L097773
-L097770:;J
+	jr   .ret
+; --------------- common ---------------
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L097773:;JR
+.ret:
 	ret
-L097774:;I
+	
+; =============== MoveC_Krauser_KaiserKick ===============
+; Move code for Krauser's Kaiser Kick (MOVE_KRAUSER_KAISER_KICK_L, MOVE_KRAUSER_KAISER_KICK_H).
+MoveC_Krauser_KaiserKick:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L09781F
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L097799
-	cp   $04
-	jp   z, L0977AB
-	cp   $08
-	jp   z, L097801
-	cp   $0C
-	jp   z, L097811
-L097796: db $C3;X
-L097797: db $1C;X
-L097798: db $78;X
-L097799:;J
-	mMvC_ValFrameStart L09779F
-L09779F:;J
-	mMvC_ValFrameEnd L09781C
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	jp   L09781C
-L0977AB:;J
-	mMvC_ValFrameStart L0977E9
-	ld   a, $12
-	call HomeCall_Sound_ReqPlayExId
-	mMvIn_ChkLHE L0977CE, L0977DD
-	mMvC_SetSpeedH $0400
-	mMvC_SetSpeedV $FC80
-	jp   L0977E9
-L0977CE:;J
-	mMvC_SetSpeedH $0500
-	mMvC_SetSpeedV $FC00
-	jp   L0977E9
-L0977DD:;J
-	mMvC_SetSpeedH $0600
-	mMvC_SetSpeedV $FB80
-L0977E9:;J
-	mMvC_ChkGravityHV $0060, L09781C
-	ld   a, $08
-	ld   h, $0A
-	call L002E49
-	ld   a, $9B
-	call HomeCall_Sound_ReqPlayExId
-	jp   L09781F
-L097801:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------
+.obj0:
+	mMvC_ValFrameStart .obj0_cont
+.obj0_cont:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		jp   .anim
+; --------------- frame #1 ---------------
+.obj1:
+	mMvC_ValFrameStart .obj1_cont
+		mMvC_PlaySound SCT_11
+		mMvIn_ChkLHE .setJumpH, .setJumpE
+	.setJumpL: ; Light
+		mMvC_SetSpeedH +$0400
+		mMvC_SetSpeedV -$0380
+		jp   .obj1_cont
+	.setJumpH: ; Heavy
+		mMvC_SetSpeedH +$0500
+		mMvC_SetSpeedV -$0400
+		jp   .obj1_cont
+	.setJumpE: ; [POI] Hidden Heavy
+		mMvC_SetSpeedH +$0600
+		mMvC_SetSpeedV -$0480
+.obj1_cont:
+	mMvC_ChkGravityHV $0060, .anim
+		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $0A
+		mMvC_PlaySound SFX_DROP
+		jp   .ret
+; --------------- frame #2 ---------------
+; Performs a earthquake until the frame is over.
+.obj2:
 	call Play_Pl_DoGroundScreenShake
-	mMvC_ValFrameEnd L09781C
-	xor  a
-	ld   [wScreenShakeY], a
-	jp   L09781C
-L097811:;J
-	mMvC_ValFrameEnd L09781C
-	call Play_Pl_EndMove
-	jr   L09781F
-L09781C:;J
+	mMvC_ValFrameEnd .anim
+		xor  a
+		ld   [wScreenShakeY], a
+		jp   .anim
+; --------------- frame #3 ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jr   .ret
+; --------------- common ---------------
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L09781F:;JR
+.ret:
 	ret
-L097820:;I
+	
+; =============== MoveC_Krauser_KaiserDuelSobat ===============
+; Move code for Krauser's Kaiser Duel Sobat (MOVE_KRAUSER_KAISER_DUEL_SOBAT_L, MOVE_KRAUSER_KAISER_DUEL_SOBAT_H).
+MoveC_Krauser_KaiserDuelSobat:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L0978B3
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L097840
-	cp   $08
-	jp   z, L097891
-	cp   $0C
-	jp   z, L0978A5
-	jp   L0978B0
-L097840:;J
-	mMvC_ValFrameStart L09787E
-	ld   a, $12
-	call HomeCall_Sound_ReqPlayExId
-	mMvIn_ChkLHE L097863, L097872
-	mMvC_SetSpeedH $0400
-	mMvC_SetSpeedV $FD00
-	jp   L09787E
-L097863:;J
-	mMvC_SetSpeedH $0500
-	mMvC_SetSpeedV $FD00
-	jp   L09787E
-L097872: db $21;X
-L097873: db $00;X
-L097874: db $06;X
-L097875: db $CD;X
-L097876: db $69;X
-L097877: db $35;X
-L097878: db $21;X
-L097879: db $00;X
-L09787A: db $FD;X
-L09787B: db $CD;X
-L09787C: db $AD;X
-L09787D: db $35;X
-L09787E:;J
-	mMvC_ChkGravityHV $0060, L0978B0
-	mMvC_SetLandFrame $04, $00
-	jp   L0978B3
-L097891:;J
-	mMvC_ValFrameEnd L0978B0
-	mMvC_SetAnimSpeed $10
-	mMvC_SetDamageNext $04, HITANIM_DROP_MD, PF3_SHAKELONG
-	jp   L0978B0
-L0978A5:;J
-	mMvC_ValFrameEnd L0978B0
-	call Play_Pl_EndMove
-	jr   L0978B3
-L0978B0:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim
+; --------------- frame #0 ---------------
+.obj0:
+	mMvC_ValFrameStart .obj0_cont
+		mMvC_PlaySound SCT_11
+		mMvIn_ChkLHE .setJumpH, .setJumpE
+	.setJumpL: ; Light
+		mMvC_SetSpeedH +$0400
+		mMvC_SetSpeedV -$0300
+		jp   .obj0_cont
+	.setJumpH: ; Heavy
+		mMvC_SetSpeedH +$0500
+		mMvC_SetSpeedV -$0300
+		jp   .obj0_cont
+	.setJumpE: ; [POI] Hidden Heavy
+		mMvC_SetSpeedH +$0600
+		mMvC_SetSpeedV -$0300
+.obj0_cont:
+	mMvC_ChkGravityHV $0060, .anim
+		mMvC_SetLandFrame $01*OBJLSTPTR_ENTRYSIZE, $00
+		jp   .ret
+; --------------- frame #2 ---------------
+.obj2:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $10
+		mMvC_SetDamageNext $04, HITANIM_DROP_MD, PF3_SHAKELONG
+		jp   .anim
+; --------------- frame #3 ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jr   .ret
+; --------------- common ---------------
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L0978B3:;JR
+.ret:
 	ret
-L0978B4:;I
+	
+; =============== MoveC_Krauser_KaiserSuplex ===============
+; Move code for Krauser's Kaiser Suplex (MOVE_KRAUSER_KAISER_SUPLEX_L, MOVE_KRAUSER_KAISER_SUPLEX_H).
+; Command throw.
+MoveC_Krauser_KaiserSuplex:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L097A1D
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L0978F7
-	cp   $04
-	jp   z, L09790E
-	cp   $08
-	jp   z, L097925
-	cp   $0C
-	jp   z, L097945
-	cp   $10
-	jp   z, L09797C
-	cp   $14
-	jp   z, L097998
-	cp   $18
-	jp   z, L0979AC
-	cp   $1C
-	jp   z, L0979CB
-	cp   $20
-	jp   z, L0979D8
-	cp   $24
-	jp   z, L097A09
-L0978F4: db $C3;X
-L0978F5: db $1A;X
-L0978F6: db $7A;X
-L0978F7:;J
-	mMvC_ValFrameStart L097A1A
-	mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
-	mMvC_MoveThrowOp +$08, +$00
-	jp   L097A1A
-L09790E:;J
-	mMvC_ValFrameStart L097A1A
-	mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
-	mMvC_MoveThrowOp +$08, -$04
-	jp   L097A1A
-L097925:;J
-	mMvC_ValFrameStart L097939
-	mMvC_SetDamage $06, HITANIM_THROW_ROTR, PF3_SHAKELONG
-	mMvC_MoveThrowOp +$08, -$18
-L097939:;J
-	mMvC_ValFrameEnd L097A1A
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	jp   L097A1A
-L097945:;J
-	mMvC_ValFrameStart L09796F
-	ld   a, $12
-	call HomeCall_Sound_ReqPlayExId
-	mMvC_SetSpeedH $0400
-	mMvC_SetSpeedV $FC00
-	mMvC_SetDamage $06, HITANIM_THROW_ROTR, PF3_SHAKELONG
-	mMvC_MoveThrowOp -$08, -$18 ; Move opponent back 8px, up $18px
-	ld   a, $01
-	ld   [wPlayPlThrowRot_Unk_UseInMove], a
-L09796F:;J
-	mMvC_NextFrameOnGtYSpeed $FC, $FF
-	jp   nc, L0979DB
-	jp   L0979DB
-L09797C:;J
-	mMvC_ValFrameStart L097995
-	mMvC_SetDamage $06, HITANIM_THROW_ROTD, PF3_SHAKELONG
-	mMvC_MoveThrowOp -$10, -$04
-	ld   a, $01
-	ld   [wPlayPlThrowRot_Unk_UseInMove], a
-L097995:;J
-	jp   L0979DB
-L097998:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj4
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj5
+	cp   $06*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj6
+	cp   $07*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj7
+	cp   $08*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj8
+	cp   $09*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------
+; Rotation frame 1.
+.obj0:
+	mMvC_ValFrameStart .anim
+		mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+		mMvC_MoveThrowOp +$08, +$00
+		jp   .anim
+; --------------- frame #1 ---------------
+; Rotation frame 2.
+.obj1:
+	mMvC_ValFrameStart .anim
+		mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+		mMvC_MoveThrowOp +$08, -$04
+		jp   .anim
+; --------------- frame #2 ---------------
+; Rotation frame 3.
+.obj2:
+	mMvC_ValFrameStart .obj2_cont
+		mMvC_SetDamage $06, HITANIM_THROW_ROTR, PF3_SHAKELONG
+		mMvC_MoveThrowOp +$08, -$18
+.obj2_cont:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		jp   .anim
+; --------------- frame #3 ---------------
+; Player jumps holding the opponent.
+.obj3:
+	mMvC_ValFrameStart .obj3_cont
+		mMvC_PlaySound SCT_11
+		mMvC_SetSpeedH +$0400
+		mMvC_SetSpeedV -$0400
+		mMvC_SetDamage $06, HITANIM_THROW_ROTR, PF3_SHAKELONG
+		mMvC_MoveThrowOp -$08, -$18 ; Move opponent back 8px, up $18px
+		; ???
+		ld   a, $01					
+		ld   [wPlayPlThrowRot_Unk_AlwaysSync], a
+.obj3_cont:
+	; Switch to next frame as soon as the speed decrements once (it's -$04 at first)
+	mMvC_NextFrameOnGtYSpeed -$04, ANIMSPEED_NONE
+	jp   nc, .doGravityDamage
+	jp   .doGravityDamage
+; --------------- frame #4 ---------------
+; Second part of the jump, changing rotation frame.
+; This lasts until .doGravityDamage switches us to #5.
+.obj4:
+	mMvC_ValFrameStart .obj4_cont
+		mMvC_SetDamage $06, HITANIM_THROW_ROTD, PF3_SHAKELONG
+		mMvC_MoveThrowOp -$10, -$04
+		ld   a, $01					; ???
+		ld   [wPlayPlThrowRot_Unk_AlwaysSync], a
+.obj4_cont:
+	jp   .doGravityDamage
+; --------------- frame #5 ---------------
+; Deal large amounts of damage once, releasing the opponent with HITANIM_DROP_SPEC_0C.
+.obj5:
 	mMvC_SetDamage $0A, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
-	mMvC_ValFrameEnd L097A1A
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	jp   L097A1A
-L0979AC:;J
-	mMvC_ValFrameStart L0979BE
-	mMvC_SetSpeedH $FD80
-	mMvC_SetSpeedV $FC00
-L0979BE:;J
-	mMvC_NextFrameOnGtYSpeed $FA, $FF
-	jp   nc, L0979F6
-	jp   L0979F6
-L0979CB:;J
-	mMvC_NextFrameOnGtYSpeed $00, $FF
-	jp   nc, L0979F6
-	jp   L0979F6
-L0979D8:;J
-	jp   L0979F6
-L0979DB:;J
-	mMvC_ChkGravityHV $0060, L097A1A
-	mMvC_SetLandFrame $14, $03
-	mMvC_SetDamageNext $0A, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
-	jp   L097A1D
-L0979F6:;J
-	mMvC_ChkGravityHV $0060, L097A1A
-	mMvC_SetLandFrame $24, $06
-	jp   L097A1D
-L097A09:;J
-	mMvC_ValFrameEnd L097A1A
-	mMvC_EndThrow_Slow
-	jp   L097A1D
-L097A1A:;J
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		jp   .anim
+; --------------- frame #6 ---------------
+; Start backjump when the throw ends.
+.obj6:
+	mMvC_ValFrameStart .obj6_cont
+		mMvC_SetSpeedH -$0280
+		mMvC_SetSpeedV -$0400
+.obj6_cont:
+	mMvC_NextFrameOnGtYSpeed -$06, ANIMSPEED_NONE
+	jp   nc, .doGravity
+	jp   .doGravity
+; --------------- frame #7 ---------------
+; Backjump until peak.
+.obj7:
+	mMvC_NextFrameOnGtYSpeed +$00, ANIMSPEED_NONE
+	jp   nc, .doGravity
+	jp   .doGravity
+; --------------- frame #8 ---------------
+; Handles rest of backjump until we land.
+.obj8:
+	jp   .doGravity
+; --------------- frames #3-4 / gravity check with damage on land ---------------
+.doGravityDamage:
+	mMvC_ChkGravityHV $0060, .anim
+		mMvC_SetLandFrame $05*OBJLSTPTR_ENTRYSIZE, $03
+		mMvC_SetDamageNext $0A, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
+		jp   .ret
+; --------------- frames #6-8 / gravity check ---------------
+.doGravity:
+	mMvC_ChkGravityHV $0060, .anim
+		mMvC_SetLandFrame $09*OBJLSTPTR_ENTRYSIZE, $06
+		jp   .ret
+; --------------- frame #9 ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		mMvC_EndThrow_Slow
+		jp   .ret
+; --------------- common ---------------
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L097A1D:;J
+.ret:
 	ret
-L097A1E:;I
+	
+; =============== MoveC_Krauser_KaiserWave ===============
+; Move code for Krauser's Kaiser Wave (MOVE_KRAUSER_KAISER_WAVE_S, MOVE_KRAUSER_KAISER_WAVE_D).
+MoveC_Krauser_KaiserWave:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L097A70
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $0C
-	jp   z, L097A3E
-	cp   $10
-	jp   z, L097A56
-	cp   $14
-	jp   z, L097A62
-	jp   L097A6D
-L097A3E:;J
-	mMvC_ValFrameStart L097A4A
-	ld   hl, MBC1RomBank
-	call L097AF0
-L097A4A:;J
-	mMvC_ValFrameEnd L097A6D
-	mMvC_SetAnimSpeed $0A
-	jp   L097A6D
-L097A56:;J
-	mMvC_ValFrameEnd L097A6D
-	mMvC_SetAnimSpeed $02
-	jp   L097A6D
-L097A62:;J
-	mMvC_ValFrameEnd L097A6D
-	call Play_Pl_EndMove
-	jr   L097A70
-L097A6D:;J
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj4
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim
+; --------------- frame #3 ---------------
+.obj3:
+	mMvC_ValFrameStart .obj3_cont
+		ld   hl, $2000
+		call ProjInit_Krauser_KaiserWave
+.obj3_cont:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $0A
+		jp   .anim
+; --------------- frame #4 ---------------
+.obj4:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $02
+		jp   .anim
+; --------------- frame #5 ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jr   .ret
+; --------------- common ---------------
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L097A70:;JR
+.ret:
 	ret
-L097A71:;C
+	
+; =============== ProjInit_Krauser_BlitzBall ===============
+; Initializes the projectile for Krauser's Blitz Ball (both low and high)
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+; - HL: Vertical offset, relative to the player's origin.
+;       This is what distinguishes the low and high versions.
+ProjInit_Krauser_BlitzBall:
 	push bc
-	push de
-	push hl
-	ld   a, $15
-	call HomeCall_Sound_ReqPlayExId
-	ld   hl, $0050
-	add  hl, bc
-	ld   a, [hl]
-	cp   $28
-	jp   z, L097A87
-	xor  a
-	jp   L097A88
-L097A87:;J
-	scf
-L097A88:;J
-	ld   hl, $0022
-	push af
-	add  hl, bc
-	pop  af
-	ld   a, [hl]
-	push af
-	call L0024F8
-	ld   hl, $0020
-	add  hl, de
-	ld   [hl], $06
-	inc  hl
-	ld   [hl], $9E
-	inc  hl
-	ld   [hl], $52
-	ld   hl, $0010
-	add  hl, de
-	ld   [hl], $01
-	inc  hl
-	ld   [hl], $1D
-	inc  hl
-	ld   [hl], $5A
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $001B
-	add  hl, de
-	ld   [hl], $05
-	inc  hl
-	ld   [hl], $05
-	ld   hl, $0027
-	add  hl, de
-	ld   [hl], $00
-	call OBJLstS_Overlap
-	pop  af
-	jp   nc, L097ACC
-	bit  1, a
-	jp   nz, L097ADD
-	jp   L097AD1
-L097ACC:;J
-	bit  1, a
-	jp   nz, L097AD7
-L097AD1:;J
-	ld   hl, $0100
-	jp   L097AE0
-L097AD7:;J
-	ld   hl, $0200
-	jp   L097AE0
-L097ADD:;J
-	ld   hl, $0400
-L097AE0:;J
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	pop  hl
-	call Play_OBJLstS_MoveV
-	mMvC_SetMoveH $1000
-	pop  de
+		push de
+			push hl	; Save vertical offset
+	
+				mMvC_PlaySound SCT_14
+	
+				; --------------- common projectile init code ---------------
+				
+				;
+				; C flag = If set, we're at max power
+				;
+				ld   hl, iPlInfo_Pow
+				add  hl, bc
+				ld   a, [hl]		; A = Pow meter
+				cp   PLAY_POW_MAX	; Are we at max power?
+				jp   z, .initMaxPow	; If so, jump
+				xor  a				; C flag clear
+				jp   .getFlags2
+			.initMaxPow:
+				scf					; C flag set
+			.getFlags2:
+				;
+				; A = iPlInfo_Flags2
+				;
+				ld   hl, iPlInfo_Flags2
+				push af				; Preserve C flag for this
+					add  hl, bc		; Seek to iPlInfo_Flags2
+				pop  af
+				ld   a, [hl]		; Read out to A
+				
+				push af ; Save A & C flag
+					
+					call ProjInitS_InitAndGetOBJInfo	; DE = Ptr to wOBJInfo_Pl*Projectile
+					
+					; --------------- main ---------------
+				
+					; Set code pointer
+					ld   hl, iOBJInfo_Proj_CodeBank
+					add  hl, de
+					ld   [hl], BANK(ProjC_Horz)	; BANK $06 ; iOBJInfo_Proj_CodeBank
+					inc  hl
+					ld   [hl], LOW(ProjC_Horz)		; iOBJInfo_Proj_CodePtr_Low
+					inc  hl
+					ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Proj_CodePtr_High
+					
+					; Write sprite mapping ptr for this projectile.
+					ld   hl, iOBJInfo_BankNum
+					add  hl, de
+					ld   [hl], BANK(OBJLstPtrTable_Proj_Krauser_BlitzBall)	; BANK $01 ; iOBJInfo_BankNum
+					inc  hl
+					ld   [hl], LOW(OBJLstPtrTable_Proj_Krauser_BlitzBall)	; iOBJInfo_OBJLstPtrTbl_Low
+					inc  hl
+					ld   [hl], HIGH(OBJLstPtrTable_Proj_Krauser_BlitzBall)	; iOBJInfo_OBJLstPtrTbl_High
+					inc  hl
+					ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
+
+					; Set animation speed.
+					ld   hl, iOBJInfo_FrameLeft
+					add  hl, de
+					ld   [hl], $05	; iOBJInfo_FrameLeft
+					inc  hl
+					ld   [hl], $05	; iOBJInfo_FrameTotal
+					
+					; Set priority value
+					ld   hl, iOBJInfo_Proj_Priority
+					add  hl, de
+					ld   [hl], $00
+					
+					; Set initial position relative to the player's origin
+					call OBJLstS_Overlap
+					
+				;
+				; Determine projectile horizontal speed.
+				;
+			
+				pop  af						; Restore A & C flag
+				jp   nc, .fldNoMaxPow		; Are we at max power? If not, jump
+			.fldMaxPow:
+				bit  PF2B_HEAVY, a			; Was this an heavy attack?
+				jp   nz, .fldHeavyMaxPow	; If so, jump
+				jp   .fldLight
+			.fldNoMaxPow:
+				bit  PF2B_HEAVY, a			; Was this an heavy attack?
+				jp   nz, .fldHeavy			; If so, jump
+			.fldLight:
+				ld   hl, +$0100
+				jp   .setSpeed
+			.fldHeavy:
+				ld   hl, +$0200
+				jp   .setSpeed
+			.fldHeavyMaxPow:
+				ld   hl, +$0400
+			.setSpeed:
+				call Play_OBJLstS_SetSpeedH_ByXFlipR
+				
+			; Adjust the vertical position of the projectile
+			pop  hl 				; HL = Y Offset
+			call Play_OBJLstS_MoveV	; Move it vertically by that
+			
+			; Also, move the projectile $10px forward
+			mMvC_SetMoveH +$1000	
+		pop  de
 	pop  bc
 	ret
-L097AF0:;C
-	ld   a, $16
-	call HomeCall_Sound_ReqPlayExId
+	
+; =============== ProjInit_Krauser_KaiserWave ===============
+; Initializes the projectile for Krauser's Kaiser Wave.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+ProjInit_Krauser_KaiserWave:
+	mMvC_PlaySound SCT_15
 	push bc
-	push de
-	ld   hl, $0050
-	add  hl, bc
-	ld   a, [hl]
-	cp   $28
-	jp   z, L097B05
-	xor  a
-	jp   L097B06
-L097B05:;J
-	scf
-L097B06:;J
-	ld   hl, $0022
-	push af
-	add  hl, bc
-	pop  af
-	ld   a, [hl]
-	push af
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	push af
-	call L0024F8
-	pop  af
-	cp   $66
-	jp   z, L097B35
-	ld   hl, $0010
-	add  hl, de
-	ld   [hl], $01
-	inc  hl
-	ld   [hl], $2F
-	inc  hl
-	ld   [hl], $5A
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $0027
-	add  hl, de
-	ld   [hl], $02
-	jp   L097B4A
-L097B35:;J
-	ld   hl, $0010
-	add  hl, de
-	ld   [hl], $01
-	inc  hl
-	ld   [hl], $39
-	inc  hl
-	ld   [hl], $5A
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $0027
-	add  hl, de
-	ld   [hl], $04
-L097B4A:;J
-	ld   hl, $0020
-	add  hl, de
-	ld   [hl], $06
-	inc  hl
-	ld   [hl], $9E
-	inc  hl
-	ld   [hl], $52
-	ld   hl, $001B
-	add  hl, de
-	ld   [hl], $00
-	inc  hl
-	ld   [hl], $00
-	call OBJLstS_Overlap
-	mMvC_SetMoveH $1000
-	mMvC_SetMoveV $F800
-	pop  af
-	jp   nc, L097B7A
-	bit  1, a
-	jp   nz, L097B8B
-	jp   L097B7F
-L097B7A:;J
-	bit  1, a
-	jp   nz, L097B85
-L097B7F:;J
-	ld   hl, $0180
-	jp   L097B8E
-L097B85:;J
-	ld   hl, $0300
-	jp   L097B8E
-L097B8B:;J
-	ld   hl, $0500
-L097B8E:;J
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	pop  de
+		push de
+		
+			; --------------- common projectile init code ---------------
+			
+			;
+			; C flag = If set, we're at max power
+			;
+			ld   hl, iPlInfo_Pow
+			add  hl, bc
+			ld   a, [hl]		; A = Pow meter
+			cp   PLAY_POW_MAX	; Are we at max power?
+			jp   z, .initMaxPow	; If so, jump
+			xor  a				; C flag clear
+			jp   .getFlags2
+		.initMaxPow:
+			scf					; C flag set
+		.getFlags2:
+			;
+			; A = iPlInfo_Flags2
+			;
+			ld   hl, iPlInfo_Flags2
+			push af				; Preserve C flag for this
+				add  hl, bc		; Seek to iPlInfo_Flags2
+			pop  af
+			ld   a, [hl]		; Read out to A
+			push af
+				; A = MoveId
+				ld   hl, iPlInfo_MoveId
+				add  hl, bc
+				ld   a, [hl]
+				
+				; DE = Ptr to wOBJInfo_Pl*Projectile
+				push af
+					call ProjInitS_InitAndGetOBJInfo
+				pop  af
+				
+				; Write sprite mapping ptr and priority for this projectile.
+				; This is different between super and desperation.
+				cp   MOVE_KRAUSER_KAISER_WAVE_D	; Using the desperation version?
+				jp   z, .objLstD				; If so, jump
+			.objLstS:
+				
+				; Write sprite mapping ptr for this projectile.
+				ld   hl, iOBJInfo_BankNum
+				add  hl, de
+				ld   [hl], BANK(OBJLstPtrTable_Proj_Krauser_KaiserWaveS)	; BANK $01 ; iOBJInfo_BankNum
+				inc  hl
+				ld   [hl], LOW(OBJLstPtrTable_Proj_Krauser_KaiserWaveS)		; iOBJInfo_OBJLstPtrTbl_Low
+				inc  hl
+				ld   [hl], HIGH(OBJLstPtrTable_Proj_Krauser_KaiserWaveS)	; iOBJInfo_OBJLstPtrTbl_High
+				inc  hl
+				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
+				
+				; Set priority value
+				ld   hl, iOBJInfo_Proj_Priority
+				add  hl, de
+				ld   [hl], $02
+				
+				jp   .setCodePtr
+				
+			.objLstD:
+				; Write sprite mapping ptr for this projectile.
+				ld   hl, iOBJInfo_BankNum
+				add  hl, de
+				ld   [hl], BANK(OBJLstPtrTable_Proj_Krauser_KaiserWaveD)	; BANK $01 ; iOBJInfo_BankNum
+				inc  hl
+				ld   [hl], LOW(OBJLstPtrTable_Proj_Krauser_KaiserWaveD)		; iOBJInfo_OBJLstPtrTbl_Low
+				inc  hl
+				ld   [hl], HIGH(OBJLstPtrTable_Proj_Krauser_KaiserWaveD)	; iOBJInfo_OBJLstPtrTbl_High
+				inc  hl
+				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
+				
+				; Set priority value
+				ld   hl, iOBJInfo_Proj_Priority
+				add  hl, de
+				ld   [hl], $04
+				
+			.setCodePtr:
+				; Set code pointer
+				ld   hl, iOBJInfo_Proj_CodeBank
+				add  hl, de
+				ld   [hl], BANK(ProjC_Horz)	; BANK $06 ; iOBJInfo_Proj_CodeBank
+				inc  hl
+				ld   [hl], LOW(ProjC_Horz)		; iOBJInfo_Proj_CodePtr_Low
+				inc  hl
+				ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Proj_CodePtr_High
+				
+				; Set animation speed.
+				ld   hl, iOBJInfo_FrameLeft
+				add  hl, de
+				ld   [hl], $00	; iOBJInfo_FrameLeft
+				inc  hl
+				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
+				
+				; Set initial position relative to the player's origin
+				call OBJLstS_Overlap
+				mMvC_SetMoveH +$1000
+				mMvC_SetMoveV -$0800
+				
+			;
+			; Determine projectile horizontal speed.
+			;
+		
+			pop  af						; Restore A & C flag
+			jp   nc, .fldNoMaxPow		; Are we at max power? If not, jump
+		.fldMaxPow:
+			bit  PF2B_HEAVY, a			; Was this an heavy attack?
+			jp   nz, .fldHeavyMaxPow	; If so, jump
+			jp   .fldLight
+		.fldNoMaxPow:
+			bit  PF2B_HEAVY, a			; Was this an heavy attack?
+			jp   nz, .fldHeavy			; If so, jump
+		.fldLight:
+			ld   hl, +$0180
+			jp   .setSpeed
+		.fldHeavy:
+			ld   hl, +$0300
+			jp   .setSpeed
+		.fldHeavyMaxPow:
+			ld   hl, +$0500
+		.setSpeed:
+			call Play_OBJLstS_SetSpeedH_ByXFlipR
+		pop  de
 	pop  bc
 	ret
 	

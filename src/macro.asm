@@ -181,12 +181,17 @@ ENDM
 ; Verifies that the move is performed close to the opponent.
 ; IN
 ; - 1: Label to skip the input
+; - 2: [OPTIONAL] Player distance threshold. By default, it's $18
 mMvIn_ValidateClose: MACRO
 	; The move must be done within $18px of the other player
 	ld   hl, iPlInfo_PlDistance
 	add  hl, bc
 	ld   a, [hl]
+IF _NARG > 1
+	cp   \2			; iPlInfo_PlDistance >= \2?
+ELSE
 	cp   $18		; iPlInfo_PlDistance >= $18?
+ENDC
 	jp   nc, \1		; If so, jump
 	; If we got here, we can continue
 ENDM
@@ -284,6 +289,14 @@ mMvIn_ChkBtnStrict: MACRO
 	jp   c, \2							; If so, jump
 ENDM
 
+; =============== mMvIn_ChkL ===============
+; Checks if the attack is a light.
+; IN
+; - 1: Ptr to code for the light version.
+mMvIn_ChkL: MACRO
+	call MoveInputS_CheckMoveLHVer
+	jp   z, \1			; Is the light triggered? If so, jump
+ENDM
 
 ; =============== mMvIn_ChkLH ===============
 ; Checks if the attack is a light or heavy.
@@ -321,9 +334,28 @@ ENDM
 ; - 2: Ptr to code for the hidden version.
 mMvIn_ChkLHE: MACRO
 	call MoveInputS_CheckMoveLHVer
-	jp   c, \2			; Is the the hidden super triggered? If so, jump
+	jp   c, \2			; Is the the hidden heavy triggered? If so, jump
 	jp   nz, \1			; Is the heavy triggered? If so, jump
 						; Otherwise, use the light
+ENDM
+
+; =============== mMvIn_ChkE ===============
+; Checks if the attack is a an hidden heavy.
+; IN
+; - 1: Ptr to code for the hidden version.
+mMvIn_ChkE: MACRO
+	call MoveInputS_CheckMoveLHVer
+	jp   c, \1			; Is the the hidden heavy triggered? If so, jump
+						; Otherwise, use the light/heavy
+ENDM
+
+; =============== mMvIn_ChkE ===============
+; Checks if the attack is a not an hidden heavy.
+; IN
+; - 1: Ptr to code for the light/heavy version.
+mMvIn_ChkNotE: MACRO
+	call MoveInputS_CheckMoveLHVer
+	jp   nc, \1			; Is the the hidden heavy triggered? If not, jump
 ENDM
 
 ; =============== mMvIn_GetLHE ===============
@@ -468,21 +500,55 @@ ENDM
 ; IN
 ; - 1: Y Speed threshold
 ; - 2: Animation speed for next frame
+; OUT
+; - C flag: If set, the request was successful.
 mMvC_NextFrameOnGtYSpeed: MACRO
 	ld   a, \1
 	ld   h, \2
 	call OBJLstS_ReqAnimOnGtYSpeed
 ENDM
 
-; =============== mMvC_NextFrameOnGtYSpeed ===============
+; =============== mMvC_SetLandFrame ===============
 ; Sets the animation frame used when landing on the ground (typically the last one).
 ; IN
 ; - 1: Sprite mapping ID
 ; - 2: Animation speed (iOBJInfo_FrameTotal)
+; OUT
+; - Z flag: If set, the new animation frame wasn't set
 mMvC_SetLandFrame: MACRO
 	ld   a, \1
 	ld   h, \2
 	call Play_Pl_SetJumpLandAnimFrame
+ENDM
+
+; =============== mMvC_SetDropFrame ===============
+; Sets the animation frame used when dropping on the ground (after getting hit).
+; IN
+; - 1: Sprite mapping ID
+; - 2: Animation speed (iOBJInfo_FrameTotal)
+; OUT
+; - Z flag: If set, the new animation frame wasn't set
+mMvC_SetDropFrame: MACRO
+	ld   a, \1
+	ld   h, \2
+	call Play_Pl_SetDropAnimFrame
+ENDM
+
+; =============== mMvC_SetFrame ===============
+; Sets a custom animation frame.
+; Calling this also calls the animation routine, so the changes get applied.
+; This means that, if the frame is set and the move code executes code depending
+; on the visible frame, it's possible to skip calling the animation function for
+; the rest of that frame.
+; IN
+; - 1: Sprite mapping ID
+; - 2: Animation speed (iOBJInfo_FrameTotal)
+; OUT
+; - Z flag: If set, the new animation frame wasn't set
+mMvC_SetFrame: MACRO
+	ld   a, \1
+	ld   h, \2
+	call Play_Pl_SetAnimFrame
 ENDM
 
 ; =============== mMvC_SetDamageNext ===============
@@ -512,6 +578,15 @@ mMvC_SetDamage: MACRO
 	ld   hl, CHL	
 	ld   a, \3
 	call Play_Pl_SetMoveDamage
+ENDM
+
+; =============== mMvC_PlaySound ===============
+; Plays a sound effect.
+; IN
+; - 1: Sound ID
+mMvC_PlaySound: MACRO
+	ld   a, \1
+	call HomeCall_Sound_ReqPlayExId
 ENDM
 
 ; =============== mMvC_MoveThrowOp ===============
@@ -574,6 +649,65 @@ mMvC_ChkGravityHV: MACRO
 	jp   nc, \2
 ENDM
 
+; =============== mMvC_DoGravityV ===============
+; Handles gravity and moves the OBJInfo vertically
+; IN
+; - 1: Gravity value
+mMvC_DoGravityV: MACRO
+	ld   hl, \1
+	call OBJLstS_ApplyGravityVAndMoveV
+ENDM
+
+; =============== mMvC_DoFrictionH ===============
+; Handles friction and moves the player horizontally.
+; IN
+; - 1: Friction value
+; OUT
+; - C: If set, the h speed was 0 already
+mMvC_DoFrictionH: MACRO
+	ld   hl, \1
+	call OBJLstS_ApplyFrictionHAndMoveH
+ENDM
+
+; =============== mMvC_ChkMaxPow ===============
+; Executes the specified code when the player is at max power.
+; IN
+; - 1: Where to jump if we're at max power
+mMvC_ChkMaxPow: MACRO
+	ld   hl, iPlInfo_Pow
+	add  hl, bc
+	ld   a, [hl]		; A = Pow
+	cp   PLAY_POW_MAX	; Pow == MAX?
+	jp   z, \1			; If so, jump
+ENDM
+
+; =============== mMvC_ChkNotMaxPow ===============
+; Executes the specified code when the player is *NOT* at max power.
+; IN
+; - 1: Where to jump if we're not at max power
+mMvC_ChkNotMaxPow: MACRO
+	ld   hl, iPlInfo_Pow
+	add  hl, bc
+	ld   a, [hl]		; A = Pow
+	cp   PLAY_POW_MAX	; Pow != MAX?
+	jp   nz, \1			; If so, jump
+ENDM
+
+
+; =============== mMvC_ValHit ===============
+; Executes code below only if the opponent got hit already in the damage string.
+; This can happen in two ways:
+; - The move was combo'd from something else (ie: jumpkick cancel)
+; - The move hits multiple times (so it gets used for executing code from the second hit)
+; IN
+; - 1: Ptr to code for not hitting yet
+; - 2: Ptr to code for the opponent blocking the attack
+mMvC_ValHit: MACRO
+	call Play_Pl_IsMoveHit	; Perform check
+	jp   nc, \1	; Did the opponent get hit yet? If not, jump
+	jp   nz, \2 ; Did the opponent block it? If so, jump
+ENDM
+
 ; =============== mMvC_ValLoaded ===============
 ; Executes the code below only if the graphics for the first animation frame finished loading.
 ; This prevents problems when displaying frames from the previous move animation.
@@ -594,6 +728,15 @@ ENDM
 mMvC_ValFrameStart: MACRO
 	call OBJLstS_IsFrameNewLoad
 	jp   z, \1
+ENDM
+
+; =============== mMvC_ValFrameNotStart ===============
+; Opposite of mMvC_ValFrameStart.
+; IN
+; - 1: Where to jump if validation fails
+mMvC_ValFrameNotStart: MACRO
+	call OBJLstS_IsFrameNewLoad
+	jp   nz, \1
 ENDM
 
 ; =============== mMvC_ValFrameEnd ===============

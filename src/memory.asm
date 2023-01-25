@@ -138,7 +138,7 @@ wPlayPlThrowDir EQU $C175 ; Sets the throw's direction. If 0, the opponent is th
 ; This avoids having to define the offsets in the sprite mapping itself.
 wPlayPlThrowRotMoveH EQU $C176 ; Relative X position
 wPlayPlThrowRotMoveV EQU $C177 ; Relative Y position
-wPlayPlThrowRot_Unk_UseInMove EQU $C178 ; If set, allows few moves in the "attacked" group to use the above two
+wPlayPlThrowRot_Unk_AlwaysSync EQU $C178 ; If set, allows few moves in the "attacked" group to use the above two
 ;--
 
 wPlaySlowdownTimer EQU $C17A ; Countdown timer. When it's > 0, slowdown is enabled during gameplay. When it reaches 0, the slowdown stops.
@@ -470,7 +470,7 @@ iOBJInfo_CharSelFlip_BaseTileId EQU iOBJInfo_Custom+$08
 iOBJInfo_CharSelFlip_OBJIdTarget EQU iOBJInfo_Custom+$09
 
 ; TODO: Rename to iOBJInfo_Play_CodeBank and merge with SuperSparkle ones? It's used by multiple OBJInfo...
-; $00-$07 seem fixed
+; $00-$08 seem fixed
 iOBJInfo_Proj_CodeBank EQU iOBJInfo_Custom+$00 ; Bank number for the CodePtr
 iOBJInfo_Proj_CodePtr_Low EQU iOBJInfo_Custom+$01 ; Custom code for projectile (low byte)
 iOBJInfo_Proj_CodePtr_High EQU iOBJInfo_Custom+$02 ; Custom code for projectile (high byte)
@@ -479,13 +479,38 @@ iOBJInfo_Proj_DamageHitAnimId EQU iOBJInfo_Custom+$04 ; Animation playing when t
 iOBJInfo_Proj_DamageFlags3 EQU iOBJInfo_Custom+$05 ; Damage flags applied when the opponent gets hit (they get copied to iPlInfo_Flags3)
 iOBJInfo_Proj_HitMode EQU iOBJInfo_Custom+$06 ; If set, marks what happens when the projectile hits a target
 iOBJInfo_Proj_Priority EQU iOBJInfo_Custom+$07 ; Higher priority projectiles erase others
+iOBJInfo_Proj_EnaTimer EQU iOBJInfo_Custom+$08 ; Visibility timer. When it elapses, the projectile disappears.
 ;--
+; For Athena's Shining Crystal Bit (before throw)
+iOBJInfo_Proj_ShCrystCharge_OrigX EQU iOBJInfo_Custom+$08 ; X Origin for the projectile. The small spheres are positioned relative to this.
+iOBJInfo_Proj_ShCrystCharge_OrigY EQU iOBJInfo_Custom+$09 ; Y Origin for the projectile.
+iOBJInfo_Proj_ShCrystCharge_XPosId EQU iOBJInfo_Custom+$0A ; Coords table index for X position
+iOBJInfo_Proj_ShCrystCharge_YPosId EQU iOBJInfo_Custom+$0B ; Coords table index for Y position
+iOBJInfo_Proj_ShCrystCharge_XPosMul EQU iOBJInfo_Custom+$0C ; Exponential multiplier for X position
+iOBJInfo_Proj_ShCrystCharge_YPosMul EQU iOBJInfo_Custom+$0D ; Exponential multiplier for Y position
+iOBJInfo_Proj_ShCrystCharge_XPosMulUpdTimer EQU iOBJInfo_Custom+$0E ; Timer for incrementing/decrementing XPosMul
+iOBJInfo_Proj_ShCrystCharge_YPosMulUpdTimer EQU iOBJInfo_Custom+$0F ; Timer for incrementing/decrementing YPosMul
+iOBJInfo_Proj_ShCrystCharge_OrbitMode EQU iOBJInfo_Custom+$10 ; Projectile movement mode
+iOBJInfo_Proj_ShCrystCharge_OrigMoveLeft EQU iOBJInfo_Custom+$11 ; Origin UB movements left. When it elapses, we switch to Hold mode.
+iOBJInfo_Proj_ShCrystCharge_DespawnTimer EQU iOBJInfo_Custom+$11 ; In spiral mode
+iOBJInfo_Proj_ShCrystCharge_OrigMoveTimer EQU iOBJInfo_Custom+$12 ; Incrementing timer to time the origin movements.
+
+; For Athena's Shining Crystal Bit (after throw, so a standard proj)
+iOBJInfo_Proj_ShCrystThrow_TypeId EQU iOBJInfo_Custom+$08 ; ID of the LH/SD combination
+; For Goenitz's Wanpyou Tokobuse
+iOBJInfo_Proj_WanToko_OrigX EQU iOBJInfo_Custom+$09 ; X Origin for the projectile. The small spheres are positioned relative to this.
+iOBJInfo_Proj_WanToko_OrigY EQU iOBJInfo_Custom+$0A ; Y Origin for the projectile.
+iOBJInfo_Proj_WanToko_MoveSpeed EQU iOBJInfo_Custom+$0B ; Base movement speed for a single projectile frame (0-3) 
+
+
+
+
 
 ; Must be at same location of iOBJInfo_Proj_CodePtr
-iOBJInfo_SuperSparkle_CodeBank EQU iOBJInfo_Custom+$00 ; Bank number for the CodePtr
-iOBJInfo_SuperSparkle_CodePtr_Low EQU iOBJInfo_Custom+$01 ; Custom code for sparkle (low byte)
-iOBJInfo_SuperSparkle_CodePtr_High EQU iOBJInfo_Custom+$02 ; Custom code for sparkle (high byte)
-iOBJInfo_SuperSparkle_EnaTimer EQU iOBJInfo_Custom+$08 ; Visibility timer. When it elapses, the sparkle disappears.
+iOBJInfo_SuperSparkle_CodeBank EQU iOBJInfo_Proj_CodeBank ; Bank number for the CodePtr
+iOBJInfo_SuperSparkle_CodePtr_Low EQU iOBJInfo_Proj_CodePtr_Low ; Custom code for sparkle (low byte)
+iOBJInfo_SuperSparkle_CodePtr_High EQU iOBJInfo_Proj_CodePtr_High ; Custom code for sparkle (high byte)
+iOBJInfo_SuperSparkle_EnaTimer EQU iOBJInfo_Proj_EnaTimer ; Visibility timer. When it elapses, the sparkle disappears.
 
 
 ; Sprite mapping fields.
@@ -549,7 +574,7 @@ iPlInfo_MoveInputCodePtr_Low EQU $29 ; Ptr to special move reader code (low byte
 iPlInfo_MoveInputCodePtr_Bank EQU $2A ; Bank num for special move reader code
 ;--
 iPlInfo_PlId EQU $2B ; Player number (PL1 or PL2), fixed per side
-iPlInfo_CharId EQU $2C ; Character ID (*2)
+iPlInfo_CharId EQU $2C ; Character ID
 iPlInfo_TeamLossCount EQU $2D ; Team Mode - Loss count. If it reaches 3 the stage ends.
 iPlInfo_TeamCharId0 EQU $2E ; 1st team member ID (*2)
 iPlInfo_TeamCharId1 EQU $2F ; 2nd team member ID (*2)
@@ -664,9 +689,34 @@ iPlInfo_OBJInfoFlagsOther EQU $7F ; Copy of iOBJInfo_OBJLstFlags
 iPlInfo_OBJInfoXOther EQU $80 ; Copy of iOBJInfo_X
 iPlInfo_OBJInfoYOther EQU $81 ; Copy of iOBJInfo_Y
 iPlInfo_PowOther EQU $82
+; Custom, move-specific
 iPlInfo_RunningJump EQU $83 ; If set, the last jump was started during a forward run (move MOVE_SHARED_RUN_F)
-
-
+iPlInfo_Kyo_AraKami_SubInputMask EQU $83 ; Flags which inputs were performed for the submoves
+iPlInfo_Kyo_NueTumi_AutoguardShakeDone EQU $83 ; Marks if the autocharge hitstop was done. Seems pointless.
+iPlInfo_Kyo_UraOrochiNagi_ChargeTimer EQU $83 ; Animation loop limit when charging the move.
+iPlInfo_Daimon_HeavenHellDrop_GrabLoopsLeft EQU $83 ; How many 180 grab loops are performed
+iPlInfo_Andy_ZanEiKen_OtherHit EQU $83 ; Marks if the opponent got hit.
+iPlInfo_OLeona_StormBringer_LoopTimer EQU $83 ; Hit loop
+iPlInfo_OLeona_SuperMoonSlasher_LoopTimer EQU $83 ; Hit loop
+iPlInfo_Geese_AtemiNage_AutoguardShakeDone EQU $83 ; Marks if the autocharge hitstop was done.
+iPlInfo_MrBig_SpinningLancer_LoopTimer EQU $83 ; Movement loop
+iPlInfo_MrBig_CaliforniaRomance_LoopTimer EQU $83 ; Movement loop
+iPlInfo_MrBig_DrumShot_LoopTimer EQU $83 ; Movement loop
+iPlInfo_Mature_DeathRow_Repeat EQU $83 ; If set, the move can repeat
+iPlInfo_Chizuru_ShinsokuNoroti_ChainedMove EQU $83 ; Bitmask with the chained move to start
+iPlInfo_Chizuru_SanRaiFuiJin_83 EQU $83
+iPlInfo_Goenitz_Hyouga_InvulnTimer EQU $83 ; When this elapses, the player isn't invulnerable anymore
+iPlInfo_Goenitz_Shinyaotome_LoopTimer EQU $83 ; Attack loop for all supers
+iPlInfo_Goenitz_Jissoukoku_InvulnTimer EQU $83 ; When this elapses, the player isn't invulnerable anymore
+iPlInfo_MrKarate_ShouranKyaku_LoopCount EQU $83
+iPlInfo_MrKarate_Zenretsuken_LoopCount EQU $83
+iPlInfo_Terry_PowerGeyserE_LastXPos EQU $83 ; Last random X position generated for a projectile
+iPlInfo_Athena_PsychoTeleport_InvulnTimer EQU $83 ; When this elapses, the player isn't invulnerable anymore
+iPlInfo_Athena_ShCryst_LoopTimer EQU $83 ; Phase 1 loop timer
+iPlInfo_Athena_ShCryst_ReleaseTimer EQU $83 ; Phase 2 release timer
+iPlInfo_Athena_ShCryst_ProjSize EQU $84 ; Projectile size, increases with more 360s ($00-$04)
+iPlInfo_Iori_Mystery_OBJLstFlagsOrig EQU $83 ; Untouched copy of iOBJInfo_OBJLstFlags to restore later
+iPlInfo_OIori_KinYaOtome_LoopCount EQU $83
 
 ; D-Pad Move input (MoveInput_*)
 ; Format: <iMoveInput_Length>[<iMoveInputItem*> last, <iMoveInputItem*> last-1, ...]		

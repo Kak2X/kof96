@@ -8191,7 +8191,7 @@ MoveInputReader_Iori:
 	
 .chkGround:
 	;             SELECT + B                SELECT + A
-	mMvIn_ChkEasy MoveInit_Iori_KinYaOtome, MoveInit_Iori_Mystery
+	mMvIn_ChkEasy MoveInit_Iori_KinYaOtome, MoveInit_Iori_KinYaOtomeEscapeD
 	mMvIn_ChkGA Iori, .chkPunch, .chkKick
 .chkPunch:
 	; DBDF+P -> Kin 1201 Shiki Ya Otome
@@ -8258,12 +8258,12 @@ MoveInit_Iori_ScumGale:
 	add  hl, bc
 	set  PF1B_INVULN, [hl]
 	jp   MoveInputReader_Iori_SetMove
-; =============== MoveInit_Iori_Mystery ===============
-; [POI] This joke move is only accessible by SELECT+A. 
-;       It also occupies slot 6, leaving the 5th one empty. 
-MoveInit_Iori_Mystery:
+; =============== MoveInit_Iori_KinYaOtomeEscapeD ===============
+; [POI] Part of MoveInit_Iori_KinYaOtomeD used as failsafe, that may be inaccessible by normal means.
+;       No move also ever transitions to MOVE_IORI_KIN_YA_OTOME_ESCAPE_H.
+MoveInit_Iori_KinYaOtomeEscapeD:
 	call Play_Pl_ClearJoyDirBuffer
-	mMvIn_GetLH MOVE_IORI_MYSTERY_L, MOVE_IORI_MYSTERY_H
+	mMvIn_GetLH MOVE_IORI_KIN_YA_OTOME_ESCAPE_L, MOVE_IORI_KIN_YA_OTOME_ESCAPE_H
 	call MoveInputS_SetSpecMove_StopSpeed
 	jp   MoveInputReader_Iori_SetMove
 ; =============== MoveInit_Iori_KinYaOtome ===============
@@ -8286,1081 +8286,1281 @@ MoveInputReader_Iori_SetMove:
 MoveInputReader_Iori_NoMove:
 	or   a
 	ret
-L056142:;I
-	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L056174
-	mMvC_ValFrameEnd L056171
 	
-	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	ld   hl, $0039
-	add  hl, bc
-	cp   a, [hl]
-	jp   z, L05616C
-	cp   $08
-	jp   z, L056166
-	jp   L056171
-L056166:;J
-	call L0027AD
-	jp   L056171
-L05616C:;J
+; =============== MoveC_Iori_YamiBarai ===============
+; Move code for Iori's 108 Shiki Yami Barai (MOVE_IORI_YAMI_BARAI_L, MOVE_IORI_YAMI_BARAI_H).
+MoveC_Iori_YamiBarai:
+	call Play_Pl_MoveByColiBoxOverlapX
+	mMvC_ValLoaded .ret
+	
+	mMvC_ValFrameEnd .anim
+		; Depending on the visible frame...
+		ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+		add  hl, de
+		ld   a, [hl]
+		mMvC_ChkTarget .end
+		cp   $02*OBJLSTPTR_ENTRYSIZE
+		jp   z, .spawnProj
+		jp   .anim
+; --------------- frame #2 ---------------
+.spawnProj:
+	call ProjInit_Iori_YamiBarai
+	jp   .anim
+; --------------- common ---------------
+.end:
 	call Play_Pl_EndMove
-	jr   L056174
-L056171:;J
+	jr   .ret
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L056174:;JR
+.ret:
 	ret
-L056175:;I
-	ld   hl, $002C
+	
+; =============== MoveC_Iori_OniYaki ===============
+; Move code for Iori's 100 Shiki Oni Yaki (MOVE_IORI_ONI_YAKI_L, MOVE_IORI_ONI_YAKI_H).
+MoveC_Iori_OniYaki:
+
+	; Orochi Iori has its own version with the opponent getting thrown directly on the ground.
+	ld   hl, iPlInfo_CharId
 	add  hl, bc
 	ld   a, [hl]
-	cp   $22
-	jp   z, L056277
+	cp   CHAR_ID_OIORI				; Playing as Orochi Iori?
+	jp   z, MoveC_OIori_OniYaki		; If so, jump
+	
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L056276
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L0561AB
-	cp   $04
-	jp   z, L0561C8
-	cp   $08
-	jp   z, L0561E8
-	cp   $0C
-	jp   z, L056245
-	cp   $10
-	jp   z, L056255
-	cp   $14
-	jp   z, L056268
-L0561AB:;J
-	mMvC_ValFrameStart L0561B7
-	mMvC_SetMoveH $0400
-L0561B7:;J
-	mMvC_ValFrameEnd L056273
-	mMvC_SetDamageNext $04,HITANIM_HIT0_MID, PF3_FLASH_B_SLOW
-	jp   L056273
-L0561C8:;J
-	mMvC_ValFrameStart L0561D4
-	mMvC_SetMoveH $0800
-L0561D4:;J
-	mMvC_ValFrameEnd L056273
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	mMvC_SetDamageNext $04, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW
-	jp   L056273
-L0561E8:;J
-	mMvC_ValFrameStart L056230
-	ld   a, $A8
-	call HomeCall_Sound_ReqPlayExId
-	ld   hl, $0020
-	add  hl, bc
-	inc  hl
-	res  7, [hl]
-	mMvIn_ChkLHE L056212, L056221
-	mMvC_SetSpeedH $0080
-	mMvC_SetSpeedV $FA00
-	jp   L05622D
-L056212:;J
-	mMvC_SetSpeedH $0100
-	mMvC_SetSpeedV $F900
-	jp   L05622D
-L056221:;J
-	mMvC_SetSpeedH $0200
-	mMvC_SetSpeedV $F800
-L05622D:;J
-	jp   L056255
-L056230:;J
-	mMvC_NextFrameOnGtYSpeed $F7, $FF
-	jp   nc, L056255
-	mMvC_SetDamageNext $04, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW
-	jp   L056255
-L056245:;J
-	mMvC_NextFrameOnGtYSpeed $FE, $FF
-	mMvC_SetSpeedH $0040
-	jp   L056255
-L056255:;J
-	mMvC_ChkGravityHV $0060, L056273
-	mMvC_SetLandFrame $14, $06
-	jp   L056276
-L056268:;J
-	mMvC_ValFrameEnd L056273
-	call Play_Pl_EndMove
-	jr   L056276
-L056273:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .doGravity
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+; --------------- frame #0 ---------------
+.obj0:
+	; Move 4px forward
+	mMvC_ValFrameStart .obj0_cont
+		mMvC_SetMoveH +$0400
+.obj0_cont:
+	; 4 lines of damage at the end
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $04, HITANIM_HIT0_MID, PF3_FLASH_B_SLOW
+		jp   .anim
+; --------------- frame #1 ---------------
+.obj1:
+	; Move 8px forward
+	mMvC_ValFrameStart .obj1_cont
+		mMvC_SetMoveH +$0800
+.obj1_cont:
+	; 4 lines of damage at the end
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		mMvC_SetDamageNext $04, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+		jp   .anim
+; --------------- frame #2 ---------------
+; Jump setup.
+.obj2:
+	mMvC_ValFrameStart .obj2_cont
+		mMvC_PlaySound SND_ID_28
+		ld   hl, iPlInfo_Flags0
+		add  hl, bc
+		inc  hl	; Seek to iPlInfo_Flags1
+		res  PF1B_INVULN, [hl]
+		; Set jump settings depending on the move strength
+		mMvIn_ChkLHE .obj2_setJumpH, .obj2_setJumpE
+	.obj2_setJumpL: ; Light
+		mMvC_SetSpeedH +$0080
+		mMvC_SetSpeedV -$0600
+		jp   .obj2_doGravity
+	.obj2_setJumpH: ; Heavy
+		mMvC_SetSpeedH +$0100
+		mMvC_SetSpeedV -$0700
+		jp   .obj2_doGravity
+	.obj2_setJumpE: ; [POI] Hidden Heavy
+		mMvC_SetSpeedH +$0200
+		mMvC_SetSpeedV -$0800
+	.obj2_doGravity:
+		jp   .doGravity
+.obj2_cont:
+	; Immediately switch to the next frame (YSpeed always > -$09)
+	mMvC_NextFrameOnGtYSpeed -$09, ANIMSPEED_NONE
+	jp   nc, .doGravity
+		mMvC_SetDamageNext $04, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+		jp   .doGravity
+; --------------- frame #3 ---------------
+.obj3:
+	; Switch to #4 when YSpeed > -$02
+	mMvC_NextFrameOnGtYSpeed -$02, ANIMSPEED_NONE
+		mMvC_SetSpeedH +$0040
+		jp   .doGravity
+; --------------- frames #2-4 / common gravity check ---------------
+.doGravity:
+	; Switch to #5 when we touch the ground
+	mMvC_ChkGravityHV $0060, .anim
+		mMvC_SetLandFrame $05*OBJLSTPTR_ENTRYSIZE, $06
+		jp   .ret
+; --------------- frame #5 ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jr   .ret
+; --------------- common ---------------
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L056276:;JR
+.ret:
 	ret
-L056277:;J
+	
+; =============== MoveC_Iori_OniYaki ===============
+; Move code for Orochi Iori's 100 Shiki Oni Yaki (MOVE_IORI_ONI_YAKI_L, MOVE_IORI_ONI_YAKI_H).
+MoveC_OIori_OniYaki:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L05637E
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L0562A8
-	cp   $04
-	jp   z, L0562C5
-	cp   $08
-	jp   z, L0562E5
-	cp   $0C
-	jp   z, L05633A
-	cp   $10
-	jp   z, L05634B
-	cp   $14
-	jp   z, L05635D
-	cp   $18
-	jp   z, L056370
-L0562A8:;J
-	mMvC_ValFrameStart L0562B4
-	mMvC_SetMoveH $0400
-L0562B4:;J
-	mMvC_ValFrameEnd L05637B
-	mMvC_SetDamageNext $04,HITANIM_HIT0_MID, PF3_FLASH_B_SLOW|PF3_BIT4
-	jp   L05637B
-L0562C5:;J
-	mMvC_ValFrameStart L0562D1
-	mMvC_SetMoveH $0800
-L0562D1:;J
-	mMvC_ValFrameEnd L05637B
-	mMvC_SetAnimSpeed $01
-	mMvC_SetDamageNext $04, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_BIT4
-	jp   L05637B
-L0562E5:;J
-	mMvC_ValFrameStart L05632D
-	ld   a, $A8
-	call HomeCall_Sound_ReqPlayExId
-	ld   hl, $0020
-	add  hl, bc
-	inc  hl
-	res  7, [hl]
-	mMvIn_ChkLHE L05630F, L05631E
-	mMvC_SetSpeedH $0100
-	mMvC_SetSpeedV $FA00
-	jp   L05632A
-L05630F:;J
-	mMvC_SetSpeedH $0200
-	mMvC_SetSpeedV $F900
-	jp   L05632A
-L05631E:;J
-	mMvC_SetSpeedH $0300
-	mMvC_SetSpeedV $F800
-L05632A:;J
-	jp   L05635D
-L05632D:;J
-	mMvC_NextFrameOnGtYSpeed $F7, $00
-	jp   nc, L05635D
-	jp   L05635D
-L05633A:;J
-	mMvC_ValFrameEnd L05635D
-	mMvC_SetDamageNext $04, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_BIT4
-	jp   L05635D
-L05634B:;J
-	mMvC_ValFrameEnd L05635D
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	mMvC_SetSpeedH $0040
-	jp   L05635D
-L05635D:;J
-	mMvC_ChkGravityHV $0060, L05637B
-	mMvC_SetLandFrame $18, $06
-	jp   L05637E
-L056370:;J
-	mMvC_ValFrameEnd L05637B
-	call Play_Pl_EndMove
-	jr   L05637E
-L05637B:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj4
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .doGravity
+	cp   $06*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+; --------------- frame #0 ---------------
+.obj0:
+	; Move 4px forward
+	mMvC_ValFrameStart .obj0_cont
+		mMvC_SetMoveH +$0400
+.obj0_cont:
+	; 4 lines of damage at the end
+	mMvC_ValFrameEnd .anim
+		; Different hit flags compared to normal version
+		mMvC_SetDamageNext $04, HITANIM_HIT0_MID, PF3_FLASH_B_SLOW|PF3_BIT4
+		jp   .anim
+; --------------- frame #1 ---------------
+.obj1:
+	; Move 8px forward
+	mMvC_ValFrameStart .obj1_cont
+		mMvC_SetMoveH +$0800
+.obj1_cont:
+	; 4 lines of damage at the end
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $01 ; No manual control, unlike normal version
+		mMvC_SetDamageNext $04, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_BIT4
+		jp   .anim
+; --------------- frame #2 ---------------
+; Jump setup.
+.obj2:
+	mMvC_ValFrameStart .obj2_cont
+		mMvC_PlaySound SND_ID_28
+		ld   hl, iPlInfo_Flags0
+		add  hl, bc
+		inc  hl	; Seek to iPlInfo_Flags1
+		res  PF1B_INVULN, [hl]
+		; Set jump settings depending on the move strength.
+		; These are move fowards further than the normal version.
+		mMvIn_ChkLHE .obj2_setJumpH, .obj2_setJumpE
+	.obj2_setJumpL: ; Light
+		mMvC_SetSpeedH +$0100
+		mMvC_SetSpeedV -$0600
+		jp   .obj2_doGravity
+	.obj2_setJumpH: ; Heavy
+		mMvC_SetSpeedH +$0200
+		mMvC_SetSpeedV -$0700
+		jp   .obj2_doGravity
+	.obj2_setJumpE: ; [POI] Hidden Heavy
+		mMvC_SetSpeedH +$0300
+		mMvC_SetSpeedV -$0800
+	.obj2_doGravity:
+		jp   .doGravity
+.obj2_cont:
+	; Immediately switch to the next frame (YSpeed always > -$09)
+	mMvC_NextFrameOnGtYSpeed -$09, ANIMSPEED_INSTANT
+	; No damage dealt here, unlike the normal version.
+	jp   nc, .doGravity
+	jp   .doGravity
+; --------------- frame #3 ---------------
+; Launches the opponent on the ground, unique to this version.
+.obj3:
+	mMvC_ValFrameEnd .doGravity
+		mMvC_SetDamageNext $04, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_BIT4
+		jp   .doGravity
+; --------------- frame #4 ---------------
+.obj4:
+	mMvC_ValFrameEnd .doGravity
+		; Fall down very slightly forwards while landing from the jump here.
+		; Also enable manual control to stay on #5 until touching the ground.
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		mMvC_SetSpeedH $0040
+		jp   .doGravity
+; --------------- frames #2-5 / common gravity check ---------------
+.doGravity:
+	; Switch to #6 when we touch the ground
+	mMvC_ChkGravityHV $0060, .anim
+		mMvC_SetLandFrame $06*OBJLSTPTR_ENTRYSIZE, $06
+		jp   .ret
+; --------------- frame #6 ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jr   .ret
+; --------------- common ---------------
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L05637E:;JR
+.ret:
 	ret
-L05637F:;I
+	
+; =============== MoveC_Iori_AoiHana ===============
+; Move code for Iori's 127 Aoi Hana (MOVE_IORI_AOI_HANA_L, MOVE_IORI_AOI_HANA_H).
+; Three-part dash that ends early in the second for the light version. 
+MoveC_Iori_AoiHana:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L056475
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L0563AB
-	cp   $04
-	jp   z, L0563BF
-	cp   $08
-	jp   z, L0563E8
-	cp   $0C
-	jp   z, L056418
-	cp   $10
-	jp   z, L056446
-	cp   $14
-	jp   z, L056467
-L0563AB:;J
-	mMvC_ValFrameStart L0563BC
-	mMvC_SetSpeedH $0400
-	ld   a, $08
-	call HomeCall_Sound_ReqPlayExId
-L0563BC:;J
-	jp   L05640F
-L0563BF:;J
-	mMvC_ValFrameEnd L05640F
-	mMvC_SetDamageNext $08, HITANIM_DROP_MD, PF3_BIT4
-	ld   hl, $0033
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj4
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+; --------------- frame #0 ---------------
+; Forward dash #1.
+.obj0:
+	mMvC_ValFrameStart .obj0_cont
+		mMvC_SetSpeedH +$0400
+		mMvC_PlaySound SCT_LIGHT
+.obj0_cont:
+	jp   .moveH
+; --------------- frame #1 ---------------
+; Set damage for dash #2.
+.obj1:
+	mMvC_ValFrameEnd .moveH
+	
+		;
+		; Set the damage for the next frame.
+		;
+		; The light version of the move enables manual control, preventing it from advancing from #2 to #3.
+		; This means only the heavy version does the third part of the move (the small jump).
+		;
+		
+		; Set damage for heavy version initially
+		mMvC_SetDamageNext $08, HITANIM_DROP_MD, PF3_BIT4
+		
+		ld   hl, iPlInfo_MoveId
+		add  hl, bc
+		ld   a, [hl]				
+		cp   MOVE_IORI_AOI_HANA_H	; Using the heavy version?
+		jp   z, .moveH				; If so, skip
+	.obj1_setDamageL:
+		; Otherwise, enable manual control
+		ld   hl, iOBJInfo_FrameTotal
+		add  hl, de
+		ld   [hl], ANIMSPEED_NONE
+		; And shake the opponent for longer
+		mMvC_SetDamageNext $08, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_BIT4
+		jp   .moveH
+; --------------- frame #2 ---------------
+; Forward dash #2.
+.obj2:
+	; Move 4px/frame forward
+	mMvC_ValFrameStart .obj2_cont
+		mMvC_SetSpeedH +$0400
+		mMvC_PlaySound SCT_LIGHT
+.obj2_cont:
+
+	; If we aren't doing the heavy version, slow down at $00.50px/frame.
+	; The move ends if when we stop moving.
+	ld   hl, iPlInfo_MoveId
 	add  hl, bc
 	ld   a, [hl]
-	cp   $52
-	jp   z, L05640F
-	ld   hl, $001C
-	add  hl, de
-	ld   [hl], $FF
-	mMvC_SetDamageNext $08, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_BIT4
-	jp   L05640F
-L0563E8:;J
-	mMvC_ValFrameStart L0563F9
-	mMvC_SetSpeedH $0400
-	ld   a, $08
-	call HomeCall_Sound_ReqPlayExId
-L0563F9:;J
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	cp   $52
-	jp   z, L05640F
-	ld   hl, $0050
-	call OBJLstS_ApplyFrictionHAndMoveH
-	jp   nc, L056472
-	jp   L05646D
-L05640F:;J
-	ld   hl, $0050
-	call OBJLstS_ApplyFrictionHAndMoveH
-	jp   L056472
-L056418:;J
-	mMvC_ValFrameStart L056432
-	mMvC_SetSpeedH $0200
-	mMvC_SetSpeedV -$0200
-	jp   L056454
-L05642D: db $3E;X
-L05642E: db $9C;X
-L05642F: db $CD;X
-L056430: db $16;X
-L056431: db $10;X
-L056432:;J
-	mMvC_ValFrameEnd L056454
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	mMvC_SetDamageNext $08, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
-	jp   L056454
-L056446:;J
-	mMvC_ValFrameStart L056454
-	ld   a, $08
-	call HomeCall_Sound_ReqPlayExId
-	jp   L056454
-L056454:;J
-	mMvC_ChkGravityHV $0030, L056472
-	mMvC_SetLandFrame $14, $03
-	jp   L056475
-L056467:;J
-	mMvC_ValFrameEnd L056472
-L05646D:;J
+	cp   MOVE_IORI_AOI_HANA_H	; Using the heavy version?
+	jp   z, .moveH				; If so, jump
+	
+	; This counts as our recovery for the light version, since it takes a bit to stop.
+	mMvC_DoFrictionH +$0050
+	jp   nc, .anim
+		jp   .end
+; --------------- frames #0-2 / common horizontal movement ---------------
+.moveH:
+	mMvC_DoFrictionH +$0050
+	jp   .anim
+; --------------- frame #3 ---------------
+; Small jump start. Heavy version only.
+.obj3:
+	
+	mMvC_ValFrameStart .obj3_cont
+		; Set forward jump speed
+		mMvC_SetSpeedH +$0200
+		mMvC_SetSpeedV -$0200
+		jp   .doGravity
+.unused_obj3_playJumpSFX:
+	; [TCRF] Unreferenced sound playback command.
+	;        Likely used to be above the .doGravity call, since we're starting a jump after all.
+	mMvC_PlaySound SFX_SUPERJUMP
+.obj3_cont:
+	; Deal 8 lines of damage and drop the opponent on the ground when switchcing to #4.
+	; This pretty much ends the combo string, so it's better to perform the light version instead.
+	mMvC_ValFrameEnd .doGravity
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		mMvC_SetDamageNext $08, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
+		jp   .doGravity
+; --------------- frame #4 ---------------
+; Small jump, mid-jump. Heavy version only.
+.obj4:
+	mMvC_ValFrameStart .doGravity
+		mMvC_PlaySound SCT_LIGHT
+		jp   .doGravity
+; --------------- frames #3-4 / common gravity check ---------------
+; Switch to #5 when touching the ground.
+.doGravity:
+	mMvC_ChkGravityHV $0030, .anim
+		mMvC_SetLandFrame $05*OBJLSTPTR_ENTRYSIZE, $03
+		jp   .ret
+; --------------- frame #5 ---------------
+; Recovery after the jump.
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+; --------------- common ---------------
+.end:
 	call Play_Pl_EndMove
-	jr   L056475
-L056472:;J
+	jr   .ret
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L056475:;JR
+.ret:
 	ret
-L056476:;I
+	
+; =============== MoveC_Iori_KotoTsukiIn ===============
+; Move code for Iori's 212 Shiki Koto Tsuki In (MOVE_IORI_KOTO_TSUKI_IN_L, MOVE_IORI_KOTO_TSUKI_IN_H).
+MoveC_Iori_KotoTsukiIn:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L05659E
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L0564AF
-	cp   $04
-	jp   z, L0564BB
-	cp   $08
-	jp   z, L0564ED
-	cp   $0C
-	jp   z, L0564FB
-	cp   $10
-	jp   z, L056512
-	cp   $14
-	jp   z, L05653B
-	cp   $18
-	jp   z, L056583
-	cp   $1C
-	jp   z, L05658F
-L0564AC: db $C3;X
-L0564AD: db $9B;X
-L0564AE: db $65;X
-L0564AF:;J
-	mMvC_ValFrameEnd L05651E
-	mMvC_SetAnimSpeed $01
-	jp   L05651E
-L0564BB:;J
-	mMvC_ValFrameStart L0564EA
-	ld   a, $9D
-	call HomeCall_Sound_ReqPlayExId
-	mMvIn_ChkLHE L0564D8, L0564E1
-	mMvC_SetSpeedH $0400
-	jp   L056535
-L0564D8:;J
-	mMvC_SetSpeedH $0580
-	jp   L056535
-L0564E1: db $21;X
-L0564E2: db $00;X
-L0564E3: db $07;X
-L0564E4: db $CD;X
-L0564E5: db $69;X
-L0564E6: db $35;X
-L0564E7: db $C3;X
-L0564E8: db $35;X
-L0564E9: db $65;X
-L0564EA:;J
-	jp   L05651E
-L0564ED:;J
-	mMvC_ValFrameStart L05651E
-	ld   a, $9D
-	call HomeCall_Sound_ReqPlayExId
-	jp   L05651E
-L0564FB:;J
-	mMvC_ValFrameStart L056506
-	ld   a, $9D
-	call HomeCall_Sound_ReqPlayExId
-L056506:;J
-	mMvC_ValFrameEnd L05651E
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	jp   L056535
-L056512:;J
-	ld   hl, $0100
-	call OBJLstS_ApplyFrictionHAndMoveH
-	jp   nc, L05659E
-	jp   L056595
-L05651E:;J
-	ld   hl, $0061
-	add  hl, bc
-	ld   a, [hl]
-	cp   $18
-	jp   nc, L056535
-	ld   a, $14
-	ld   h, $01
-	call L002E49
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj4
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj5
+	cp   $06*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj6
+	cp   $07*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------
+; Startup.
+.obj0:
+	mMvC_ValFrameEnd .chkNear
+		mMvC_SetAnimSpeed $01
+		jp   .chkNear
+; --------------- frame #1 ---------------
+; Run towards the opponent.
+.obj1:
+	mMvC_ValFrameStart .obj1_cont
+		; Play step SFX at the start of this, as well as the other frames
+		; for the run sequence.
+		mMvC_PlaySound SFX_STEP
+		; Set run speed
+		mMvIn_ChkLHE .obj1_setDashH, .obj1_setDashE
+	.obj1_setDashL: ; Light
+		mMvC_SetSpeedH +$0400
+		jp   .moveH
+	.obj1_setDashH: ; Heavy
+		mMvC_SetSpeedH +$0580
+		jp   .moveH
+	.obj1_setDashE: ; [POI] Hidden Heavy
+		mMvC_SetSpeedH +$0700
+		jp   .moveH
+.obj1_cont:
+	jp   .chkNear
+; --------------- frame #2 ---------------
+; Run towards the opponent.
+.obj2:
+	mMvC_ValFrameStart .chkNear
+		mMvC_PlaySound SFX_STEP
+		jp   .chkNear
+; --------------- frame #3 ---------------
+; Run towards the opponent.
+.obj3:
+	mMvC_ValFrameStart .obj3_cont
+		mMvC_PlaySound SFX_STEP
+.obj3_cont:
+	mMvC_ValFrameEnd .chkNear
+		; Disable timing for #4
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		jp   .moveH
+; --------------- frame #4 ---------------
+; If we got here, we didn't get close enough to the opponent.
+; Slow down at 1px/frame, and end the move when we stop moving.
+.obj4:
+	mMvC_DoFrictionH $0100
+		jp   nc, .ret
+		jp   .end
+; --------------- frames #0-3 / player distance check ---------------
+.chkNear:
+	; Advances to #5 if we get near
+	mMvIn_ValidateClose .moveH
+		mMvC_SetFrame $05*OBJLSTPTR_ENTRYSIZE, $01
+		call OBJLstS_ApplyXSpeed
+		jp   .ret
+; --------------- frames #0-4 / common run movement ---------------
+.moveH:
 	call OBJLstS_ApplyXSpeed
-	jp   L05659E
-L056535:;J
-	call OBJLstS_ApplyXSpeed
-	jp   L05659B
-L05653B:;J
-	ld   hl, $0080
-	call OBJLstS_ApplyFrictionHAndMoveH
-	ld   hl, $0063
+	jp   .anim
+	
+; --------------- frame #5 ---------------	
+;
+.obj5:
+	; Slow down at 0.5px/frame while doing this
+	mMvC_DoFrictionH $0080
+	
+	
+	;
+	; Don't continue to #6 until we collided with the opponent.
+	;
+	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  1, [hl]
-	jp   z, L056553
-	ld   hl, $006E
+	bit  PCF_HITOTHER, [hl]				; Did we reach?
+	jp   z, .obj5_chkEnd				; If not, jump
+	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
-	bit  7, [hl]
-	jp   z, L05655C
-L056553:;J
-	mMvC_ValFrameEnd L05659B
-	jp   L056595
-L05655C:;J
-	ld   a, $18
-	ld   h, $02
-	call L002E49
-	ld   hl, $002C
+	bit  PF1B_INVULN, [hl]				; Is the opponent invulnerable?
+	jp   z, .obj5_setDamage				; If not, jump
+.obj5_chkEnd:
+	mMvC_ValFrameEnd .anim
+		jp   .end
+.obj5_setDamage:
+	; Switch to #6
+	mMvC_SetFrame $06*OBJLSTPTR_ENTRYSIZE, $02
+	; Deal more damage the next frame.
+	; The drop type and PF3_BIT4 differ between Iori and O.Iori, but damage is the same.
+	ld   hl, iPlInfo_CharId
 	add  hl, bc
 	ld   a, [hl]
-	cp   $22
-	jp   z, L056578
+	cp   CHAR_ID_OIORI				; Playing as IORI'?
+	jp   z, .obj5_setDamageOIori	; If so, jump
+.obj5_setDamageIori:
 	mMvC_SetDamageNext $08, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG|PF3_FLASH_B_SLOW
-	jp   L05659E
-L056578:;J
+	jp   .ret
+.obj5_setDamageOIori:
 	mMvC_SetDamageNext $08, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_BIT4
-	jp   L05659E
-L056583:;J
-	mMvC_ValFrameEnd L05659B
-	mMvC_SetAnimSpeed $0A
-	jp   L05659B
-L05658F:;J
-	mMvC_ValFrameEnd L05659B
-L056595:;J
+	jp   .ret
+; --------------- frame #6 ---------------
+; Delay after the hit.
+.obj6:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $0A
+		jp   .anim
+; --------------- frame #7 ---------------
+; Recovery.
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+; --------------- common ---------------
+.end:
 	call Play_Pl_EndMove
-	jp   L05659E
-L05659B:;J
+	jp   .ret
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L05659E:;J
+.ret:
 	ret
-L05659F:;I
+	
+; =============== MoveC_Iori_ScumGale ===============
+; Move code for Iori's Scum Gale (MOVE_IORI_SCUM_GALE_L, MOVE_IORI_SCUM_GALE_H).
+; Command throw.
+MoveC_Iori_ScumGale:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L056617
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L0565C4
-	cp   $04
-	jp   z, L0565DB
-	cp   $08
-	jp   z, L0565F2
-	cp   $10
-	jp   z, L056603
-	jp   L056614
-L0565C4:;J
-	mMvC_ValFrameEnd L056614
-	mMvC_SetDamageNext $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
-	mMvC_MoveThrowOp -$08, +$00 ; Move back 8px
-	jp   L056614
-L0565DB:;J
-	mMvC_ValFrameEnd L056614
-	mMvC_SetDamageNext $06, HITANIM_THROW_ROTU, PF3_SHAKELONG|PF3_BIT4
-	mMvC_MoveThrowOp +$04, +$00 ; Move fwd 4px
-	jp   L056614
-L0565F2:;J
-	mMvC_ValFrameEnd L056614
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_SHAKELONG|PF3_BIT4
-	jp   L056614
-L056603:;J
-	mMvC_ValFrameEnd L056614
-	mMvC_EndThrow_Slow
-	jp   L056617
-L056614:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim
+; --------------- frame #0 ---------------
+.obj0:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+		mMvC_MoveThrowOp -$08, +$00 ; Move back 8px
+		jp   .anim
+; --------------- frame #1 ---------------
+.obj1:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $06, HITANIM_THROW_ROTU, PF3_SHAKELONG|PF3_BIT4
+		mMvC_MoveThrowOp +$04, +$00 ; Move fwd 4px
+		jp   .anim
+; --------------- frame #2 ---------------
+.obj2:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_SHAKELONG|PF3_BIT4
+		jp   .anim
+; --------------- frame #3 ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		mMvC_EndThrow_Slow
+		jp   .ret
+; --------------- common ---------------
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L056617:;J
+.ret:
 	ret
-L056618:;I
+	
+; =============== MoveC_Iori_KinYaOtomeEscapeD ===============
+; [POI] Move code for an alternate continuation of the desperation version of Iori's Kin 1201 Shiki Ya Otome (MOVE_IORI_KIN_YA_OTOME_ESCAPE_L, MOVE_IORI_KIN_YA_OTOME_ESCAPE_H).
+;       This is only triggered if the opponent somehow escapes during the move (though it's also included in the move shortcuts)
+MoveC_Iori_KinYaOtomeEscapeD:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L056766
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L056692
-	cp   $04
-	jp   z, L05669E
-	cp   $08
-	jp   z, L0566AA
-	cp   $0C
-	jp   z, L0566D0
-	cp   $10
-	jp   z, L0566DC
-	cp   $14
-	jp   z, L0566E8
-	cp   $18
-	jp   z, L0566F4
-	cp   $1C
-	jp   z, L056700
-	cp   $20
-	jp   z, L05671D
-	cp   $28
-	jp   z, L05671D
-	cp   $30
-	jp   z, L05671D
-	cp   $38
-	jp   z, L05671D
-	cp   $40
-	jp   z, L05671D
-	cp   $48
-	jp   z, L05671D
-	cp   $50
-	jp   z, L05671D
-	cp   $58
-	jp   z, L05671D
-	cp   $60
-	jp   z, L05671D
-	cp   $68
-	jp   z, L05672E
-	cp   $6C
-	jp   z, L05673F
-	cp   $70
-	jp   z, L05674B
-	cp   $74
-	jp   z, L056757
-	jp   L056763
-L056692:;J
-	mMvC_ValFrameEnd L056763
-	mMvC_SetAnimSpeed $1E
-	jp   L056763
-L05669E:;J
-	mMvC_ValFrameEnd L056763
-	mMvC_SetAnimSpeed $28
-	jp   L056763
-L0566AA:;J
-	mMvC_ValFrameStart L0566BF
-	ld   hl, $0001
-	add  hl, de
-	ld   a, [hl]
-	res  5, [hl]
-	inc  hl
-	res  5, [hl]
-	ld   hl, $0083
-	add  hl, bc
-	ld   [hl], a
-L0566BF:;J
-	mMvC_ValFrameEnd L056763
-	mMvC_SetAnimSpeed $04
-	ld   a, $01
-	call HomeCall_Sound_ReqPlayExId
-	jp   L056763
-L0566D0:;J
-	mMvC_ValFrameEnd L056763
-	mMvC_SetAnimSpeed $08
-	jp   L056763
-L0566DC:;J
-	mMvC_ValFrameEnd L056763
-	mMvC_SetAnimSpeed $10
-	jp   L056763
-L0566E8:;J
-	mMvC_ValFrameEnd L056763
-	mMvC_SetAnimSpeed $32
-	jp   L056763
-L0566F4:;J
-	mMvC_ValFrameEnd L056763
-	mMvC_SetAnimSpeed $24
-	jp   L056763
-L056700:;J
-	mMvC_ValFrameStart L056711
-	ld   hl, $0083
-	add  hl, bc
-	ld   a, [hl]
-	ld   hl, $0001
-	add  hl, de
-	ldi  [hl], a
-	ld   [hl], a
-L056711:;J
-	mMvC_ValFrameEnd L056763
-	mMvC_SetAnimSpeed ANIMSPEED_INSTANT
-	jp   L056763
-L05671D:;J
-	mMvC_ValFrameEnd L056763
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0B, $00
-	jp   L056763
-L05672E:;J
-	mMvC_ValFrameEnd L056763
-	mMvC_SetDamageNext $01, HITANIM_DROP_MD, $00
-	jp   L056763
-L05673F:;J
-	mMvC_ValFrameEnd L056763
-	mMvC_SetAnimSpeed $28
-	jp   L056763
-L05674B:;J
-	mMvC_ValFrameEnd L056763
-	mMvC_SetAnimSpeed $06
-	jp   L056763
-L056757:;J
-	mMvC_ValFrameEnd L056763
-	call Play_Pl_EndMove
-	jp   L056766
-L056763:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setSpeed1E
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setSpeed28
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .flipX
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setSpeed08
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setSpeed10
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setSpeed32
+	cp   $06*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setSpeed24
+	cp   $07*OBJLSTPTR_ENTRYSIZE
+	jp   z, .resetFlipX
+	cp   $08*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamageLine
+	cp   $0A*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamageLine
+	cp   $0C*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamageLine
+	cp   $0E*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamageLine
+	cp   $10*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamageLine
+	cp   $12*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamageLine
+	cp   $14*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamageLine
+	cp   $16*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamageLine
+	cp   $18*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamageLine
+	cp   $1A*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamageDrop
+	cp   $1B*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setAnimSpeed28_2
+	cp   $1C*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setAnimSpeed06
+	cp   $1D*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim
+; --------------- frame #0 ---------------
+.setSpeed1E:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $1E
+		jp   .anim
+; --------------- frame #1 ---------------
+.setSpeed28:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $28
+		jp   .anim
+; --------------- frame #2 ---------------
+.flipX:
+	mMvC_ValFrameStart .setSpeed04
+		; Horiziontally flip Iori, and save the original flags elsewhere
+		ld   hl, iOBJInfo_OBJLstFlags
+		add  hl, de
+		ld   a, [hl]
+		res  SPRB_XFLIP, [hl]
+		inc  hl			; Seek to iOBJInfo_OBJLstFlagsView
+		res  SPRB_XFLIP, [hl]
+		ld   hl, iPlInfo_Iori_Mystery_OBJLstFlagsOrig
+		add  hl, bc
+		ld   [hl], a
+.setSpeed04:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $04
+		mMvC_PlaySound SCT_DIZZY
+		jp   .anim
+; --------------- frame #3 ---------------
+.setSpeed08:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $08
+		jp   .anim
+; --------------- frame #4 ---------------
+.setSpeed10:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $10
+		jp   .anim
+; --------------- frame #5 ---------------
+.setSpeed32:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $32
+		jp   .anim
+; --------------- frame #6 ---------------
+.setSpeed24:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $24
+		jp   .anim
+; --------------- frame #7 ---------------
+.resetFlipX:
+	mMvC_ValFrameStart .setSpeed00
+		; Flip Iori back by restoring the original flags
+		ld   hl, iPlInfo_Iori_Mystery_OBJLstFlagsOrig
+		add  hl, bc
+		ld   a, [hl]
+		ld   hl, iOBJInfo_OBJLstFlags
+		add  hl, de
+		ldi  [hl], a	; Restore iOBJInfo_OBJLstFlags
+		ld   [hl], a	; Restore iOBJInfo_OBJLstFlagsView
+.setSpeed00:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
+		jp   .anim
+; --------------- even frames #8,A,C,E,10,12,14,16,18 ---------------
+; Single punches that deal a single line of damage each.
+.setDamageLine:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0B, $00
+		jp   .anim
+; --------------- frame #1A ---------------
+; Finisher, opponent launched with a backwards jump.
+.setDamageDrop:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $01, HITANIM_DROP_MD, $00
+		jp   .anim
+; --------------- frame #1B ---------------
+.setAnimSpeed28_2:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $28
+		jp   .anim
+; --------------- frame #1C ---------------
+.setAnimSpeed06:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $06
+		jp   .anim
+; --------------- frame #1D ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jp   .ret
+; --------------- common ---------------
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L056766:;J
+.ret:
 	ret
-L056767:;I
+	
+; =============== MoveC_Iori_KinYaOtomeS ===============
+; Move code for the super version of Iori's Kin 1201 Shiki Ya Otome (MOVE_IORI_KIN_YA_OTOME_S).
+MoveC_Iori_KinYaOtomeS:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L0568AB
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L0567C3
-	cp   $04
-	jp   z, L0567DA
-	cp   $08
-	jp   z, L05683E
-	cp   $0C
-	jp   z, L05682D
-	cp   $14
-	jp   z, L05682D
-	cp   $1C
-	jp   z, L05682D
-	cp   $24
-	jp   z, L05682D
-	cp   $2C
-	jp   z, L05682D
-	cp   $34
-	jp   z, L05682D
-	cp   $3C
-	jp   z, L05682D
-	cp   $40
-	jp   z, L056860
-	cp   $44
-	jp   z, L056860
-	cp   $48
-	jp   z, L056885
-	cp   $4C
-	jp   z, L05689C
-	cp   $50
-	jp   z, L05689C
-	jp   L05684F
-L0567C3:;J
-	mMvC_ValFrameStart L0567CE
-	ld   a, $09
-	call HomeCall_Sound_ReqPlayExId
-L0567CE:;J
-	mMvC_ValFrameEnd L0568A8
-	mMvC_SetAnimSpeed $12
-	jp   L0568A8
-L0567DA:;J
-	mMvC_ValFrameStart L0567E9
-	mMvC_SetSpeedH $0700
-	jp   L056896
-L0567E9:;J
-	mMvC_ValFrameEnd L0567F2
-	jp   L0568A2
-L0567F2:;J
-	ld   hl, $0063
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage0
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage1
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage1
+	cp   $07*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage1
+	cp   $09*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage1
+	cp   $0B*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage1
+	cp   $0D*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage1
+	cp   $0F*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage1
+	cp   $10*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage1_chkOtherBlock
+	cp   $11*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage1_chkOtherBlock
+	cp   $12*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamageFinisher
+	cp   $13*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	cp   $14*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .setDamage0_chkOtherBlock
+; --------------- frame #0 ---------------
+; Startup.
+.obj0:
+	mMvC_ValFrameStart .obj0_cont
+		mMvC_PlaySound SCT_HEAVY
+.obj0_cont:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $12
+		jp   .anim
+; --------------- frame #1 ---------------
+; Run towards the opponent.
+; We have $12 frames to hit the opponent, otherwise the move ends.
+.obj1:
+	mMvC_ValFrameStart .obj1_cont
+		; Move forward 7px/frame at the start
+		mMvC_SetSpeedH +$0700
+		jp   .moveH
+.obj1_cont:
+	mMvC_ValFrameEnd .obj1_chkGuard
+		jp   .end
+.obj1_chkGuard:
+	;
+	; Continue moving forwards until we collided (last frame) with the opponent.
+	; If the opponent blocked the hit, switch to #14. Otherwise, continue to #2.
+	;
+	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  1, [hl]
-	jp   z, L056820
-	ld   hl, $006E
+	bit  PCF_HITOTHER, [hl]			; Did we reach?
+	jp   z, .obj1_chkGuard_noHit	; If not, skip
+	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
-	bit  7, [hl]
-	jp   nz, L056820
-	bit  4, [hl]
-	jp   z, L056820
-	bit  3, [hl]
-	jp   nz, L056823
+	bit  PF1B_INVULN, [hl]			; Is the opponent invulnerable?
+	jp   nz, .obj1_chkGuard_noHit	; If so, skip
+	bit  PF1B_HITRECV, [hl]			; Did the opponent get hit?
+	jp   z, .obj1_chkGuard_noHit	; If not, skip
+	bit  PF1B_GUARD, [hl]			; Is the opponent blocking?
+	jp   nz, .obj1_chkGuard_guard	; If so, jump
+.obj1_chkGuard_noGuard:
 	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_FLASH_B_SLOW
-	ld   a, $08
-	ld   h, $01
-	call L002E49
-	jp   L0568AB
-L056820:;J
-	jp   L056896
-L056823: db $3E;X
-L056824: db $50;X
-L056825: db $26;X
-L056826: db $0A;X
-L056827: db $CD;X
-L056828: db $49;X
-L056829: db $2E;X
-L05682A: db $C3;X
-L05682B: db $AB;X
-L05682C: db $68;X
-L05682D:;J
-	mMvC_ValFrameStart L0568A8
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_FLASH_B_SLOW
-	jp   L05686E
-L05683E:;J
-	mMvC_ValFrameStart L0568A8
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_FLASH_B_SLOW
-	jp   L0568A8
-L05684F:;J
-	mMvC_ValFrameStart L0568A8
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_FLASH_B_SLOW
-	jp   L05686E
-L056860:;J
-	mMvC_ValFrameStart L0568A8
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, $00
-L05686E:;J
-	ld   hl, $0073
-	add  hl, bc
-	ld   a, [hl]
-	cp   $09
-	jp   z, L0568A8
-	cp   $0A
-	jp   z, L0568A8
-L05687D: db $3E;X
-L05687E: db $18;X
-L05687F: db $CD;X
-L056880: db $1B;X
-L056881: db $34;X
-L056882: db $C3;X
-L056883: db $AB;X
-L056884: db $68;X
-L056885:;J
-	mMvC_ValFrameStart L0568A8
-	mMvC_SetDamageNext $10, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW
-	jp   L0568A8
-L056896:;J
+	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
+	jp   .ret
+.obj1_chkGuard_noHit:
+	jp   .moveH
+.obj1_chkGuard_guard:
+	mMvC_SetFrame $14*OBJLSTPTR_ENTRYSIZE, $0A
+	jp   .ret
+	
+; --------------- odd frames #3,5,7,9,B,D,F - line damage + block check ---------------
+.setDamage1:
+	mMvC_ValFrameStart .anim
+		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_FLASH_B_SLOW
+		jp   .chkOtherEscape
+; --------------- frame #2 ---------------
+.setDamage0:
+	mMvC_ValFrameStart .anim
+		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_FLASH_B_SLOW
+		jp   .anim
+; --------------- even frames - line damage ---------------
+.setDamage0_chkOtherBlock:
+	mMvC_ValFrameStart .anim
+		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_FLASH_B_SLOW
+		jp   .chkOtherEscape
+; --------------- frames #10,11 - line damage + block check ---------------		
+.setDamage1_chkOtherBlock:
+	mMvC_ValFrameStart .anim
+		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, $00
+; --------------- common escape check ---------------
+; Done at the start of about half of the frames.
+	.chkOtherEscape:
+		;
+		; [TCRF] If the opponent somehow isn't in one of the hit animations 
+		;        this move sets, hop back instead of continuing.
+		;        This should never happen.
+		;
+		ld   hl, iPlInfo_HitAnimIdOther
+		add  hl, bc
+		ld   a, [hl]
+		cp   HITANIM_HIT_SPEC_09	; A == HITANIM_HIT_SPEC_09?
+		jp   z, .anim				; If so, skip
+		cp   HITANIM_HIT_SPEC_0A	; A == HITANIM_HIT_SPEC_0A?
+		jp   z, .anim				; If so, skip
+		ld   a, MOVE_SHARED_HOP_B
+		call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+		jp   .ret
+; --------------- frame #12 ---------------
+; Deals the big boy damage.
+.setDamageFinisher:
+	mMvC_ValFrameStart .anim
+		mMvC_SetDamageNext $10, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+		jp   .anim
+; --------------- common horizontal movement ---------------
+.moveH:
 	call OBJLstS_ApplyXSpeed
-	jp   L0568A8
-L05689C:;J
-	mMvC_ValFrameEnd L0568A8
-L0568A2:;J
+	jp   .anim
+; --------------- frame #13,#14 ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+; --------------- common ---------------
+.end:
 	call Play_Pl_EndMove
-	jp   L0568AB
-L0568A8:;J
+	jp   .ret
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L0568AB:;J
+.ret:
 	ret
-L0568AC:;I
+
+; =============== MoveC_Iori_KinYaOtomeD ===============
+; Move code for the desperation version of Iori's Kin 1201 Shiki Ya Otome (MOVE_IORI_KIN_YA_OTOME_D).
+MoveC_Iori_KinYaOtomeD:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L056A52
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L056917
-	cp   $04
-	jp   z, L05692E
-	cp   $08
-	jp   z, L056981
-	cp   $0C
-	jp   z, L0569B6
-	cp   $10
-	jp   z, L0569DC
-	cp   $18
-	jp   z, L0569DC
-	cp   $20
-	jp   z, L0569DC
-	cp   $28
-	jp   z, L0569DC
-	cp   $30
-	jp   z, L0569DC
-	cp   $38
-	jp   z, L0569DC
-	cp   $40
-	jp   z, L0569C2
-	cp   $44
-	jp   z, L0569CE
-	cp   $48
-	jp   z, L0569B6
-	cp   $50
-	jp   z, L0569DC
-	cp   $58
-	jp   z, L0569DC
-	cp   $64
-	jp   z, L056A14
-	cp   $68
-	jp   z, L056A37
-	cp   $6C
-	jp   z, L056A43
-	jp   L056A4F
-L056917:;J
-	mMvC_ValFrameStart L056922
-	ld   a, $09
-	call HomeCall_Sound_ReqPlayExId
-L056922:;J
-	mMvC_ValFrameEnd L056A4F
-	mMvC_SetAnimSpeed $12
-	jp   L056A4F
-L05692E:;J
-	mMvC_ValFrameStart L05693D
-	mMvC_SetSpeedH $0700
-	jp   L056A31
-L05693D:;J
-	mMvC_ValFrameEnd L056946
-	jp   L056A49
-L056946:;J
-	ld   hl, $0063
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setSpeed0A
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage05
+	cp   $06*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage05
+	cp   $08*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage05
+	cp   $0A*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage05
+	cp   $0C*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage05
+	cp   $0E*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage05
+	cp   $10*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setSpeed0E
+	cp   $11*OBJLSTPTR_ENTRYSIZE
+	jp   z, .playDizzySFX
+	cp   $12*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setSpeed0A
+	cp   $14*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage05
+	cp   $16*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage05
+	cp   $19*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setLongDelay
+	cp   $1A*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setSpeed02
+	cp   $1B*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim
+; --------------- frame #0 ---------------
+.obj0:
+	mMvC_ValFrameStart .obj0_cont
+		mMvC_PlaySound SCT_HEAVY
+.obj0_cont:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $12
+		jp   .anim
+; --------------- frame #1 ---------------
+.obj1:
+	mMvC_ValFrameStart .obj1_cont
+		mMvC_SetSpeedH $0700
+		jp   .moveH
+.obj1_cont:
+	mMvC_ValFrameEnd .obj1_chkGuard
+		jp   .end
+.obj1_chkGuard:
+	;
+	; Continue moving forwards until we collided (last frame) with the opponent.
+	; If the opponent blocked the hit, switch to #1B. Otherwise, continue to #2.
+	;
+	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  1, [hl]
-	jp   z, L056974
-	ld   hl, $006E
+	bit  PCF_HITOTHER, [hl]			; Did we reach?
+	jp   z, .obj1_chkGuard_noHit	; If not, skip
+	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
-	bit  7, [hl]
-	jp   nz, L056974
-	bit  4, [hl]
-	jp   z, L056974
-	bit  3, [hl]
-	jp   nz, L056977
+	bit  PF1B_INVULN, [hl]			; Is the opponent invulnerable?
+	jp   nz, .obj1_chkGuard_noHit	; If so, skip
+	bit  PF1B_HITRECV, [hl]			; Did the opponent get hit?
+	jp   z, .obj1_chkGuard_noHit	; If not, skip
+	bit  PF1B_GUARD, [hl]			; Is the opponent blocking?
+	jp   nz, .obj1_chkGuard_guard	; If so, jump
+.obj1_chkGuard_noGuard:
+	; Damage confirmed, switch to #2
 	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_FLASH_B_SLOW
-	ld   a, $08
-	ld   h, $01
-	call L002E49
-	jp   L056A52
-L056974:;J
-	jp   L056A31
-L056977: db $3E;X
-L056978: db $6C;X
-L056979: db $26;X
-L05697A: db $0A;X
-L05697B: db $CD;X
-L05697C: db $49;X
-L05697D: db $2E;X
-L05697E: db $C3;X
-L05697F: db $52;X
-L056980: db $6A;X
-L056981:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   nz, L05698A
-	jp   L056A4F
-L05698A:;J
+	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
+	jp   .ret
+.obj1_chkGuard_noHit:
+	; Not hit yet, continue moving
+	jp   .moveH
+.obj1_chkGuard_guard:
+	; Blocked, jump to #1B
+	mMvC_SetFrame $1B*OBJLSTPTR_ENTRYSIZE, $0A
+	jp   .ret
+; --------------- frame #2 ---------------
+.obj2:
+	;
+	; Force the opponent to face the same direction outsid of the first frame.
+	;
+	mMvC_ValFrameNotStart .obj2_setDamage
+		jp   .anim
+.obj2_setDamage:
 	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0B, $00
+	;--
+	; This is exactly the same as the code in Pl_CopyXFlipToOther.
 	push de
-	ld   hl, $0001
-	add  hl, de
-	ld   a, [hl]
-	and  a, $20
-	ld   d, a
-	ld   hl, $002B
-	add  hl, bc
-	ld   a, [hl]
-	or   a
-	jp   nz, L0569AA
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstFlags
-	jp   L0569AD
-L0569AA:;J
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstFlags
-L0569AD:;J
-	ld   a, [hl]
-	and  a, $DF
-	or   a, d
-	ld   [hl], a
+		; D = SPR_XFLIP flag for current player
+		ld   hl, iOBJInfo_OBJLstFlags
+		add  hl, de
+		ld   a, [hl]
+		and  a, SPR_XFLIP
+		ld   d, a
+		
+		; HL = Ptr to opponent's OBJLst flags
+		ld   hl, iPlInfo_PlId
+		add  hl, bc
+		ld   a, [hl]		; A = iPlInfo_PlId
+		or   a				; A != PL1?
+		jp   nz, .pl2		; If so, jump
+	.pl1:
+		; 1P gets 2P's flags
+		ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstFlags
+		jp   .sync
+	.pl2:
+		; 2P gets 1P's flags
+		ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstFlags
+	.sync:
+	
+		; Replace the opponent's SPR_XFLIP flag with ours
+		ld   a, [hl]			; A = Opponent's OBJLst flags
+		and  a, $FF^SPR_XFLIP	; Remove SPR_XFLIP flag
+		or   a, d				; Copy over ours
+		ld   [hl], a			; Save back updated value
 	pop  de
-	jp   L056A4F
-L0569B6:;J
-	mMvC_ValFrameEnd L056A4F
-	mMvC_SetAnimSpeed $0A
-	jp   L056A4F
-L0569C2:;J
-	mMvC_ValFrameEnd L056A4F
-	mMvC_SetAnimSpeed $1E
-	jp   L056A4F
-L0569CE:;J
-	mMvC_ValFrameEnd L056A4F
-	ld   a, $01
-	call HomeCall_Sound_ReqPlayExId
-	jp   L056A4F
-L0569DC:;J
-	mMvC_ValFrameEnd L056A4F
-	mMvC_SetDamageNext $05, HITANIM_HIT_SPEC_0B, $00
-	jp   L0569ED
-L0569ED:;J
-	ld   hl, $0073
-	add  hl, bc
-	ld   a, [hl]
-	cp   $09
-	jp   z, L056A4F
-	cp   $0A
-	jp   z, L056A4F
-	cp   $0B
-	jp   z, L056A4F
-L056A01: db $CD;X
-L056A02: db $8C;X
-L056A03: db $2E;X
-L056A04: db $21;X
-L056A05: db $20;X
-L056A06: db $00;X
-L056A07: db $09;X
-L056A08: db $CB;X
-L056A09: db $8E;X
-L056A0A: db $CB;X
-L056A0B: db $B6;X
-L056A0C: db $3E;X
-L056A0D: db $60;X
-L056A0E: db $CD;X
-L056A0F: db $1B;X
-L056A10: db $34;X
-L056A11: db $C3;X
-L056A12: db $52;X
-L056A13: db $6A;X
-L056A14:;J
-	call OBJLstS_IsFrameNewLoad
-	jp   nz, L056A26
-	mMvC_ValFrameEnd L056A4F
-	mMvC_SetAnimSpeed $3C
-	jp   L056A4F
-L056A26:;J
+	;--
+	jp   .anim
+; --------------- frames #3,#12 ---------------
+.setSpeed0A:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $0A
+		jp   .anim
+; --------------- frame #10 ---------------
+.setSpeed0E:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $1E
+		jp   .anim
+; --------------- frame #11 ---------------
+.playDizzySFX:
+	mMvC_ValFrameEnd .anim
+		mMvC_PlaySound SCT_DIZZY
+		jp   .anim
+; --------------- frames #4,6,8,A,C,E,14,16 ---------------
+.setDamage05:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $05, HITANIM_HIT_SPEC_0B, $00
+		jp   .chkOtherEscape
+	.chkOtherEscape:
+		;
+		; [TCRF] If the opponent somehow isn't in one of the hit animations 
+		;        this move sets, switch to an alternate version of the move.
+		;        This should never happen.
+		;
+		ld   hl, iPlInfo_HitAnimIdOther
+		add  hl, bc
+		ld   a, [hl]
+		cp   HITANIM_HIT_SPEC_09	; A == HITANIM_HIT_SPEC_09?
+		jp   z, .anim				; If so, skip
+		cp   HITANIM_HIT_SPEC_0A	; A == HITANIM_HIT_SPEC_0A?
+		jp   z, .anim				; If so, skip
+		cp   HITANIM_HIT_SPEC_0B	; A == HITANIM_HIT_SPEC_0B?
+		jp   z, .anim				; If so, skip
+		call Play_Pl_EmptyPowOnSuperEnd
+		ld   hl, iPlInfo_Flags0
+		add  hl, bc
+		res  PF0B_SPECMOVE, [hl]
+		res  PF0B_SUPERMOVE, [hl]
+		ld   a, MOVE_IORI_KIN_YA_OTOME_ESCAPE_L
+		call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+		jp   .ret
+; --------------- frame #19 ---------------
+.setLongDelay:
+	; The first time get here, set big boy damage
+	mMvC_ValFrameNotStart .setDamageFinish
+		; Set a long delay for the next frame (recovery)
+		mMvC_ValFrameEnd .anim
+			mMvC_SetAnimSpeed $3C
+			jp   .anim
+.setDamageFinish:
 	mMvC_SetDamageNext $10, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW
-	jp   L056A4F
-L056A31:;J
+	jp   .anim
+; --------------- common horizontal movement ---------------
+.moveH:
 	call OBJLstS_ApplyXSpeed
-	jp   L056A4F
-L056A37:;J
-	mMvC_ValFrameEnd L056A4F
-	mMvC_SetAnimSpeed $02
-	jp   L056A4F
-L056A43:;J
-	mMvC_ValFrameEnd L056A4F
-L056A49:;J
+	jp   .anim
+; --------------- frame #1A ---------------
+.setSpeed02:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $02
+		jp   .anim
+; --------------- frame #1B ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+; --------------- common ---------------
+.end:
 	call Play_Pl_EndMove
-	jp   L056A52
-L056A4F:;J
+	jp   .ret
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L056A52:;J
+.ret:
 	ret
-L056A53:;I
+	
+; =============== MoveC_OIori_KinYaOtome ===============
+; Move code for Orochi Iori's version of Kin 1201 Shiki Ya Otome (MOVE_OIORI_KIN_YA_OTOME_S, MOVE_OIORI_KIN_YA_OTOME_D).
+MoveC_OIori_KinYaOtome:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L056C10
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L056AB4
-	cp   $04
-	jp   z, L056ACB
-	cp   $08
-	jp   z, L056B24
-	cp   $0C
-	jp   z, L056B35
-	cp   $10
-	jp   z, L056B24
-	cp   $14
-	jp   z, L056B46
-	cp   $18
-	jp   z, L056B24
-	cp   $1C
-	jp   z, L056B65
-	cp   $20
-	jp   z, L056B7C
-	cp   $24
-	jp   z, L056B8D
-	cp   $28
-	jp   z, L056BAC
-	cp   $2C
-	jp   z, L056BBD
-	cp   $30
-	jp   z, L056BCE
-	cp   $34
-	jp   z, L056BCE
-	cp   $38
-	jp   z, L056C01
-L056AAC: db $FE;X
-L056AAD: db $3C;X
-L056AAE: db $CA;X
-L056AAF: db $01;X
-L056AB0: db $6C;X
-L056AB1: db $C3;X
-L056AB2: db $0D;X
-L056AB3: db $6C;X
-L056AB4:;J
-	mMvC_ValFrameStart L056ABF
-	ld   a, $09
-	call HomeCall_Sound_ReqPlayExId
-L056ABF:;J
-	mMvC_ValFrameEnd L056C0D
-	mMvC_SetAnimSpeed $14
-	jp   L056C0D
-L056ACB:;J
-	mMvC_ValFrameStart L056ADA
-	mMvC_SetSpeedH $0780
-	jp   L056BFB
-L056ADA:;J
-	mMvC_ValFrameEnd L056AE3
-	jp   L056C07
-L056AE3:;J
-	ld   hl, $0063
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage1
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage0
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage1
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkLoop0
+	cp   $06*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage1
+	cp   $07*OBJLSTPTR_ENTRYSIZE
+	jp   z, .startLoop1
+	cp   $08*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage2
+	cp   $09*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkLoop1
+	cp   $0A*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage0_seq2
+	cp   $0B*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage1_seq2
+	cp   $0C*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage2_seq2
+	cp   $0D*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage2_seq2
+	cp   $0E*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	cp   $0F*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------
+; Startup.
+.obj0:
+	mMvC_ValFrameStart .obj0_cont
+		mMvC_PlaySound SCT_HEAVY
+.obj0_cont:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $14
+		jp   .anim
+; --------------- frame #1 ---------------
+; Very fast forward dash.
+.obj1:
+	mMvC_ValFrameStart .obj1_cont
+		mMvC_SetSpeedH +$0780
+		jp   .moveH
+.obj1_cont:
+	; End the move if we didn't collide with the opponent by the end of the frame
+	mMvC_ValFrameEnd .obj1_chkGuard
+		jp   .end
+.obj1_chkGuard:
+
+	;
+	; Continue moving forwards until we collided (last frame) with the opponent.
+	; If the opponent blocked the hit, switch to #F. Otherwise, continue to #2.
+	;
+	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  1, [hl]
-	jp   z, L056B17
-	ld   hl, $006E
+	bit  PCF_HITOTHER, [hl]			; Did we reach?
+	jp   z, .obj1_chkGuard_noHit	; If not, skip
+	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
-	bit  7, [hl]
-	jp   nz, L056B17
-	bit  4, [hl]
-	jp   z, L056B17
-	bit  3, [hl]
-	jp   nz, L056B1A
+	bit  PF1B_INVULN, [hl]			; Is the opponent invulnerable?
+	jp   nz, .obj1_chkGuard_noHit	; If so, skip
+	bit  PF1B_HITRECV, [hl]			; Did the opponent get hit?
+	jp   z, .obj1_chkGuard_noHit	; If not, skip
+	bit  PF1B_GUARD, [hl]			; Is the opponent blocking?
+	jp   nz, .obj1_chkGuard_guard	; If so, jump
+.obj1_chkGuard_noGuard:
+	; Damage confirmed, switch to #2
 	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_FLASH_B_SLOW|PF3_SHAKEONCE
-	ld   a, $08
-	ld   h, $00
-	call L002E49
-	ld   hl, $0083
+	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $00
+	
+	; Loop the damage frames (#2-#5) 4 times
+	ld   hl, iPlInfo_OIori_KinYaOtome_LoopCount
 	add  hl, bc
 	ld   [hl], $04
-	jp   L056C10
-L056B17:;J
-	jp   L056BFB
-L056B1A: db $3E;X
-L056B1B: db $3C;X
-L056B1C: db $26;X
-L056B1D: db $0A;X
-L056B1E: db $CD;X
-L056B1F: db $49;X
-L056B20: db $2E;X
-L056B21: db $C3;X
-L056B22: db $10;X
-L056B23: db $6C;X
-L056B24:;J
-	mMvC_ValFrameStart L056C0D
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_FLASH_B_SLOW
-	jp   L056BDF
-L056B35:;J
-	mMvC_ValFrameStart L056C0D
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_FLASH_B_SLOW
-	jp   L056BDF
-L056B46:;J
-	mMvC_ValFrameStart L056C0D
-	ld   hl, $0083
-	add  hl, bc
-	dec  [hl]
-	jp   z, L056B5A
-	ld   hl, $0013
-	add  hl, de
-	ld   [hl], $04
-L056B5A:;J
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_FLASH_B_SLOW
-	jp   L056BDF
-L056B65:;J
-	mMvC_ValFrameStart L056C0D
-	ld   hl, $0083
-	add  hl, bc
-	ld   [hl], $04
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0B, PF3_FLASH_B_SLOW
-	jp   L056BDF
-L056B7C:;J
-	mMvC_ValFrameStart L056C0D
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0B, PF3_FLASH_B_SLOW
-	jp   L056BDF
-L056B8D:;J
-	mMvC_ValFrameStart L056C0D
-	ld   hl, $0083
-	add  hl, bc
-	dec  [hl]
-	jp   z, L056BA1
-	ld   hl, $0013
-	add  hl, de
-	ld   [hl], $1C
-L056BA1:;J
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0B, PF3_FLASH_B_SLOW
-	jp   L056BDF
-L056BAC:;J
-	mMvC_ValFrameStart L056C0D
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_SHAKEONCE
-	jp   L056BDF
-L056BBD:;J
-	mMvC_ValFrameStart L056C0D
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_SHAKEONCE
-	jp   L056BDF
-L056BCE:;J
-	mMvC_ValFrameStart L056C0D
-	mMvC_SetDamageNext $01, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW
-	jp   L056C0D
-L056BDF:;J
-	ld   hl, $0073
-	add  hl, bc
-	ld   a, [hl]
-	cp   $09
-	jp   z, L056C0D
-	cp   $0A
-	jp   z, L056C0D
-	cp   $0B
-	jp   z, L056C0D
-L056BF3: db $3E;X
-L056BF4: db $18;X
-L056BF5: db $CD;X
-L056BF6: db $1B;X
-L056BF7: db $34;X
-L056BF8: db $C3;X
-L056BF9: db $10;X
-L056BFA: db $6C;X
-L056BFB:;J
+	jp   .ret
+.obj1_chkGuard_noHit:
+	; Nothing hit yet, continue moving
+	jp   .moveH
+.obj1_chkGuard_guard:
+	; Blocked, switch to #F, the recovery frame when the opponent blocked it
+	mMvC_SetFrame $0F*OBJLSTPTR_ENTRYSIZE, $0A
+	jp   .ret
+	
+; --------------- frames #2,#4,#6 ---------------
+; Frame used during multiple damage loops/sequences.
+.setDamage1:
+	mMvC_ValFrameStart .anim
+		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_FLASH_B_SLOW
+		jp   .chkOtherEscape
+; --------------- frame #3 ---------------
+; For damage loop 0.
+.setDamage0:
+	mMvC_ValFrameStart .anim
+		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_FLASH_B_SLOW
+		jp   .chkOtherEscape
+; --------------- frame #5 ---------------
+; Loop back to #2 until the counter elapses
+.chkLoop0:
+	mMvC_ValFrameStart .anim
+		ld   hl, iPlInfo_OIori_KinYaOtome_LoopCount
+		add  hl, bc
+		dec  [hl]
+		jp   z, .chkLoop0_noLoop
+		ld   hl, iOBJInfo_OBJLstPtrTblOffset
+		add  hl, de
+		ld   [hl], $01*OBJLSTPTR_ENTRYSIZE ; offset by -1
+	.chkLoop0_noLoop:
+		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_FLASH_B_SLOW
+		jp   .chkOtherEscape
+; --------------- frame #7 ---------------
+.startLoop1:
+	mMvC_ValFrameStart .anim
+		; Loop the second set of damage frames (#8-9) 4 times
+		ld   hl, iPlInfo_OIori_KinYaOtome_LoopCount
+		add  hl, bc
+		ld   [hl], $04
+		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0B, PF3_FLASH_B_SLOW
+		jp   .chkOtherEscape
+; --------------- frame #8 ---------------
+; For damage loop 1.
+.setDamage2:
+	mMvC_ValFrameStart .anim
+		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0B, PF3_FLASH_B_SLOW
+		jp   .chkOtherEscape
+; --------------- frame #9 ---------------
+; Loop back to #8 until the counter elapses
+.chkLoop1:
+	mMvC_ValFrameStart .anim
+		ld   hl, iPlInfo_OIori_KinYaOtome_LoopCount
+		add  hl, bc
+		dec  [hl]
+		jp   z, .chkLoop1_noLoop
+		ld   hl, iOBJInfo_OBJLstPtrTblOffset
+		add  hl, de
+		ld   [hl], $07*OBJLSTPTR_ENTRYSIZE ; offset by -1
+	.chkLoop1_noLoop:
+		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0B, PF3_FLASH_B_SLOW
+		jp   .chkOtherEscape
+; --------------- frame #A ---------------
+; Damage sequence 2 (no loop). Hit 1.
+.setDamage0_seq2:;J
+	mMvC_ValFrameStart .anim
+		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_SHAKEONCE
+		jp   .chkOtherEscape
+; --------------- frame #B ---------------
+; Damage sequence 2 (no loop). Hit 2.
+.setDamage1_seq2:
+	mMvC_ValFrameStart .anim
+		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_SHAKEONCE
+		jp   .chkOtherEscape
+; --------------- frames #C,#D ---------------
+; Damage sequence 2 (no loop). Hits 3,4.
+.setDamage2_seq2:
+	mMvC_ValFrameStart .anim
+		mMvC_SetDamageNext $01, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+		jp   .anim
+	; --------------- common escape check ---------------
+	.chkOtherEscape:
+		;
+		; [TCRF] If the opponent somehow isn't in one of the hit animations 
+		;        this move sets, hop back instead of continuing.
+		;        This should never happen.
+		;
+		ld   hl, iPlInfo_HitAnimIdOther
+		add  hl, bc
+		ld   a, [hl]
+		cp   HITANIM_HIT_SPEC_09	; A == HITANIM_HIT_SPEC_09?
+		jp   z, .anim				; If so, skip
+		cp   HITANIM_HIT_SPEC_0A	; A == HITANIM_HIT_SPEC_0A?
+		jp   z, .anim				; If so, skip
+		cp   HITANIM_HIT_SPEC_0B	; A == HITANIM_HIT_SPEC_0B?
+		jp   z, .anim				; If so, skip
+		ld   a, MOVE_SHARED_HOP_B
+		call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+		jp   .ret
+; --------------- common horizontal movement ---------------
+.moveH:
 	call OBJLstS_ApplyXSpeed
-	jp   L056C0D
-L056C01:;J
-	mMvC_ValFrameEnd L056C0D
-L056C07:;J
+	jp   .anim
+; --------------- frames #E,#F ---------------
+; Recovery.
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+; --------------- common ---------------
+.end:
 	call Play_Pl_EndMove
-	jp   L056C10
-L056C0D:;J
+	jp   .ret
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L056C10:;J
+.ret:
 	ret
+	
 ; =============== MoveInputReader_Mature ===============
 ; Special move input checker for MATURE.
 ; IN
@@ -9386,7 +9586,7 @@ MoveInputReader_Mature:
 	mMvIn_ChkDir MoveInput_DF, MoveInit_Mature_Despair
 	jp   MoveInputReader_Mature_NoMove
 .chkKick:
-	; DBDF+K -> Heavens Gate
+	; DBDF+K -> Heaven's Gate
 	mMvIn_ValidateSuper .chkKickNoSuper
 	mMvIn_ChkDir MoveInput_DBDF, MoveInit_Mature_HeavensGate
 .chkKickNoSuper:
@@ -9431,695 +9631,938 @@ MoveInputReader_Mature_SetMove:
 MoveInputReader_Mature_NoMove:
 	or   a
 	ret
-L056CDC:;I
+	
+; =============== MoveC_Mature_Decide ===============
+; Move code for Mature's Decide (MOVE_MATURE_DECIDE_L, MOVE_MATURE_DECIDE_H).
+MoveC_Mature_Decide:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L056DDA
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L056D0B
-	cp   $04
-	jp   z, L056D1C
-	cp   $08
-	jp   z, L056D5B
-	cp   $0C
-	jp   z, L056D9F
-	cp   $10
-	jp   z, L056DB6
-	cp   $1C
-	jp   z, L056DC7
-	jp   L056DD7
-L056D0B:;J
-	mMvC_ValFrameEnd L056DD7
-	mMvC_SetAnimSpeed $06
-	ld   a, $09
-	call HomeCall_Sound_ReqPlayExId
-	jp   L056DD7
-L056D1C:;J
-	mMvC_ValFrameStart L056D43
-	mMvIn_ChkLHE L056D34, L056D3D
-	mMvC_SetSpeedH $0100
-	jp   L056D43
-L056D34:;J
-	mMvC_SetSpeedH $0300
-	jp   L056D43
-L056D3D:;J
-	mMvC_SetSpeedH $0500
-L056D43:;J
-	ld   hl, $0040
-	call OBJLstS_ApplyFrictionHAndMoveH
-	call L056D6A
-	jp   c, L056DDA
-	mMvC_ValFrameEnd L056DD7
-	mMvC_SetAnimSpeed $14
-	jp   L056DD7
-L056D5B:;J
-	ld   hl, $0040
-	call OBJLstS_ApplyFrictionHAndMoveH
-	mMvC_ValFrameEnd L056DD7
-	jp   L056DCD
-L056D6A:;C
-	ld   hl, $0063
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj4
+	cp   $07*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim
+; --------------- frame #0 ---------------
+.obj0:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $06
+		mMvC_PlaySound SCT_HEAVY
+		jp   .anim
+; --------------- frame #1 ---------------
+.obj1:
+	mMvC_ValFrameStart .obj1_cont
+		mMvIn_ChkLHE .obj1_setDashH, .obj1_setDashE
+	.obj1_setDashL: ; Light
+		mMvC_SetSpeedH $0100
+		jp   .obj1_cont
+	.obj1_setDashH: ; Heavy
+		mMvC_SetSpeedH $0300
+		jp   .obj1_cont
+	.obj1_setDashE: ; [POI] Hidden Heavy
+		mMvC_SetSpeedH $0500
+.obj1_cont:
+	mMvC_DoFrictionH $0040
+	; If we didn't start the throw by the end of the frame, continue to #2
+	; where the move end early.
+	call .canStartThrow		; Was the throw started?
+	jp   c, .ret			; If so, wait without doing anything
+		mMvC_ValFrameEnd .anim
+			mMvC_SetAnimSpeed $14
+			jp   .anim
+; --------------- frame #2 ---------------
+; Early abort.
+.obj2:
+	mMvC_DoFrictionH $0040
+	mMvC_ValFrameEnd .anim
+		jp   .end
+		
+; =============== .canStartThrow ===============
+; Start the command throw only if the opponent didn't block the hit.
+; This works because the move is set to deal damage on contact, so after the first hit PF1B_HITRECV will be set.
+;
+; See also: Play_Pl_IsMoveHit
+; OUT
+; - C flag: If set, the throw was started
+.canStartThrow:
+	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  1, [hl]
-	jp   z, L056D9D
-	ld   hl, $006E
+	bit  PCF_HITOTHER, [hl]			; Did we reach?
+	jp   z, .canStartThrow_no		; If not, skip (it whiffed)
+	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
-	bit  7, [hl]
-	jp   nz, L056D9D
-	bit  4, [hl]
-	jp   z, L056D9D
-	bit  3, [hl]
-	jp   nz, L056D9D
+	bit  PF1B_INVULN, [hl]			; Is the opponent invulnerable?
+	jp   nz, .canStartThrow_no		; If so, skip
+	bit  PF1B_HITRECV, [hl]			; Did the opponent get hit?
+	jp   z, .canStartThrow_no		; If not, skip
+	bit  PF1B_GUARD, [hl]			; Is the opponent blocking?
+	jp   nz, .canStartThrow_no		; If so, skip
+	
+	; Otherwise, try to start the command throw.
+	; Which should never fail if we got here.
+.canStartThrow_yes:	
 	call MoveInputS_TryStartCommandThrow_Unk_Coli05
-	jp   nc, L056D9D
+	jp   nc, .canStartThrow_no
 	call Task_PassControlFar
-	ld   a, $03
+	ld   a, PLAY_THROWACT_NEXT03
 	ld   [wPlayPlThrowActId], a
-	ld   a, $0C
-	ld   h, $04
-	call L002E49
-	scf
+
+	; Switch to #3 once it's confirmed
+	mMvC_SetFrame $03*OBJLSTPTR_ENTRYSIZE, $04
+	scf		; C flag set
 	ret
-L056D9D:;J
-	xor  a
+.canStartThrow_no:
+	xor  a	; C flag clear
 	ret
-L056D9F:;J
-	mMvC_ValFrameEnd L056DD7
-	mMvC_SetDamageNext $04, HITANIM_THROW_ROTL, PF3_SHAKELONG
-	mMvC_MoveThrowOp -$08, -$18 ; Move opponent back 8px, up $18px
-	jp   L056DD7
-L056DB6:;J
-	mMvC_ValFrameEnd L056DD7
-	mMvC_SetDamageNext $04, HITANIM_DROP_SPEC_0F, PF3_SHAKELONG
-	jp   L056DD7
-L056DC7:;J
-	mMvC_ValFrameEnd L056DD7
-L056DCD:;J
-	ld   a, $00
+; =============== end of .canStartThrow ===============
+
+; --------------- frame #3 ---------------
+.obj3:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $04, HITANIM_THROW_ROTL, PF3_SHAKELONG
+		mMvC_MoveThrowOp -$08, -$18 ; Move opponent back 8px, up $18px
+		jp   .anim
+; --------------- frame #4 ---------------
+.obj4:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $04, HITANIM_DROP_SPEC_0F, PF3_SHAKELONG
+		jp   .anim
+; --------------- frame #7 ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+; --------------- common ---------------
+.end:
+	ld   a, PLAY_THROWACT_NONE
 	ld   [wPlayPlThrowActId], a
 	call Play_Pl_EndMove
-	jr   L056DDA
-L056DD7:;J
+	jr   .ret
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L056DDA:;JR
+.ret:
 	ret
-L056DDB:;I
+	
+; =============== MoveC_Mature_MetalMassacre ===============
+; Move code for Mature's Metal Massacre (MOVE_MATURE_METAL_MASSACRE_L, MOVE_MATURE_METAL_MASSACRE_H).
+MoveC_Mature_MetalMassacre:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L056EC2
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L056E0A
-	cp   $04
-	jp   z, L056E34
-	cp   $08
-	jp   z, L056E42
-	cp   $0C
-	jp   z, L056E59
-	cp   $1C
-	jp   z, L056E93
-	cp   $20
-	jp   z, L056EAD
-	jp   L056E82
-L056E0A:;J
-	mMvC_ValFrameStart L056E31
-	mMvIn_ChkLHE L056E22, L056E2B
-	mMvC_SetSpeedH $0500
-	jp   L056E31
-L056E22:;J
-	mMvC_SetSpeedH $0600
-	jp   L056E31
-L056E2B:;J
-	mMvC_SetSpeedH $0700
-L056E31:;J
-	jp   L056E65
-L056E34:;J
-	mMvC_ValFrameStart L056E65
-	ld   a, $9D
-	call HomeCall_Sound_ReqPlayExId
-	jp   L056E65
-L056E42:;J
-	mMvC_ValFrameStart L056E4D
-	ld   a, $9D
-	call HomeCall_Sound_ReqPlayExId
-L056E4D:;J
-	mMvC_ValFrameEnd L056E65
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	jp   L056E7C
-L056E59:;J
-	ld   hl, $0100
-	call OBJLstS_ApplyFrictionHAndMoveH
-	jp   nc, L056EC2
-	jp   L056EB9
-L056E65:;J
-	ld   hl, $0061
-	add  hl, bc
-	ld   a, [hl]
-	cp   $30
-	jp   nc, L056E7C
-	ld   a, $10
-	ld   h, $00
-	call L002E49
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $07*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj7
+	cp   $08*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .damageH40
+; --------------- frame #0 ---------------
+; Initial dash forward.
+.obj0:
+	mMvC_ValFrameStart .obj0_chkPlNear
+		mMvIn_ChkLHE .obj0_setDashH, .obj0_setDashE
+	.obj0_setDashL: ; Light
+		mMvC_SetSpeedH $0500
+		jp   .obj0_chkPlNear
+	.obj0_setDashH: ; Heavy
+		mMvC_SetSpeedH $0600
+		jp   .obj0_chkPlNear
+	.obj0_setDashE: ; [POI] Hidden Heavy
+		mMvC_SetSpeedH $0700
+	.obj0_chkPlNear:
+		jp   .chkPlNear
+; --------------- frame #1 ---------------
+; Initial dash forward.	
+.obj1:
+	mMvC_ValFrameStart .chkPlNear
+		mMvC_PlaySound SFX_STEP
+		jp   .chkPlNear
+; --------------- frame #2 ---------------
+; Initial dash forward.
+.obj2:
+	mMvC_ValFrameStart .obj2_cont
+		mMvC_PlaySound SFX_STEP	
+.obj2_cont:
+	mMvC_ValFrameEnd .chkPlNear
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		jp   .moveH
+; --------------- frame #3 ---------------
+; Early abort.
+.obj3:
+	mMvC_DoFrictionH $0100
+	jp   nc, .ret
+	jp   .end
+; --------------- frames #0-2 / common near check ---------------	
+; Switch to #4 as soon as we get near the opponent.
+; If by the end of #2 we don't, the animation switches to #3 and the move ends there.
+.chkPlNear:
+	mMvIn_ValidateClose .moveH, $30
+		mMvC_SetFrame $10, $00
+		call OBJLstS_ApplyXSpeed
+		IF FIX_BUGS == 1
+			jp   .ret
+		ELSE
+			jp   MoveC_Mature_Despair.ret
+		ENDC
+; --------------- common horz. movement ---------------	
+.moveH:
 	call OBJLstS_ApplyXSpeed
-	jp   L0570F1
-L056E7C:;J
-	call OBJLstS_ApplyXSpeed
-	jp   L056EBF
-L056E82:;J
+	jp   .anim
+; --------------- frames #4-6 ---------------	
+; We're close to the opponent now.
+; Deal continuously 1 line of damage, slowing down in the process.
+.damageH40:
 	mMvC_SetDamage $01, HITANIM_HIT0_MID, PF3_SHAKEONCE
-	ld   hl, $0040
-	call OBJLstS_ApplyFrictionHAndMoveH
-	jp   L056EBF
-L056E93:;J
+	mMvC_DoFrictionH $0040
+	jp   .anim
+; --------------- frame #7 ---------------
+; Like the previous one, but slowing down more.
+.obj7:
 	mMvC_SetDamage $01, HITANIM_HIT0_MID, PF3_SHAKEONCE
-	ld   hl, $0080
-	call OBJLstS_ApplyFrictionHAndMoveH
-	mMvC_ValFrameEnd L056EBF
-	mMvC_SetAnimSpeed $14
-	jp   L056EBF
-L056EAD:;J
-	ld   hl, $0080
-	call OBJLstS_ApplyFrictionHAndMoveH
-	mMvC_ValFrameEnd L056EBF
-L056EB9:;J
+	mMvC_DoFrictionH $0080
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $14
+		jp   .anim
+; --------------- frame #8 ---------------		
+.chkEnd:
+	mMvC_DoFrictionH $0080
+	mMvC_ValFrameEnd .anim
+; --------------- common ---------------	
+.end:
 	call Play_Pl_EndMove
-	jp   L056EC2
-L056EBF:;J
+	jp   .ret
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L056EC2:;J
+.ret:
 	ret
-L056EC3:;I
+	
+; =============== MoveC_Mature_DeathRow ===============
+; Move code for Mature's Death Row (MOVE_MATURE_DEATH_ROW_L, MOVE_MATURE_DEATH_ROW_H).
+; This move can repeat up to three times by having repeated entries in the frame handler.
+MoveC_Mature_DeathRow:
 	call Play_Pl_CreateJoyMergedKeysLH
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L057030
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L056F0E
-	cp   $04
-	jp   z, L056F52
-	cp   $08
-	jp   z, L056F7F
-	cp   $0C
-	jp   z, L056F0E
-	cp   $10
-	jp   z, L056F5D
-	cp   $14
-	jp   z, L056F8A
-	cp   $18
-	jp   z, L056F0E
-	cp   $1C
-	jp   z, L056F68
-	cp   $20
-	jp   z, L056F95
-	cp   $24
-	jp   z, L05700C
-	cp   $28
-	jp   z, L05701B
-L056F0B: db $C3;X
-L056F0C: db $2D;X
-L056F0D: db $70;X
-L056F0E:;J
-	mMvC_ValFrameStart L056F46
-	ld   a, $A8
-	call HomeCall_Sound_ReqPlayExId
-	call Play_Pl_ClearJoyDirBuffer
-	call Play_Pl_ClearJoyMergedKeysLH
-	ld   hl, $0083
-	add  hl, bc
-	ld   [hl], $00
-	mMvIn_ChkLHE L056F37, L056F40
-	mMvC_SetSpeedH $0300
-	jp   L056F46
-L056F37:;J
-	mMvC_SetSpeedH $0400
-	jp   L056F46
-L056F40:;J
-	mMvC_SetSpeedH $0500
-L056F46:;J
-	call L056FD0
-	ld   hl, $0040
-	call OBJLstS_ApplyFrictionHAndMoveH
-	jp   L05702D
-L056F52:;J
+	
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .initDash
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .hitA0
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .hitA1
+	
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .initDash
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .hitB0
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .hitB1
+	
+	cp   $06*OBJLSTPTR_ENTRYSIZE
+	jp   z, .initDash
+	cp   $07*OBJLSTPTR_ENTRYSIZE
+	jp   z, .hitC0
+	cp   $08*OBJLSTPTR_ENTRYSIZE
+	jp   z, .hitC1
+	
+	cp   $09*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEndEarly
+	cp   $0A*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------
+.initDash:
+	mMvC_ValFrameStart .initDash_cont
+		mMvC_PlaySound SND_ID_28
+		call Play_Pl_ClearJoyDirBuffer
+		call Play_Pl_ClearJoyMergedKeysLH
+		; Initialize this
+		ld   hl, iPlInfo_Mature_DeathRow_Repeat
+		add  hl, bc
+		ld   [hl], $00
+		; Set speed depending on move strength
+		mMvIn_ChkLHE .initDash_setDashH, .initDash_setDashE
+	.initDash_setDashL: ; Light
+		mMvC_SetSpeedH $0300
+		jp   .initDash_cont
+	.initDash_setDashH: ; Heavy
+		mMvC_SetSpeedH $0400
+		jp   .initDash_cont
+	.initDash_setDashE: ; [POI] Hidden Heavy
+		mMvC_SetSpeedH $0500
+.initDash_cont:
+	call .chkRepeatInput
+	mMvC_DoFrictionH $0040
+	jp   .anim
+; --------------- frame #1 ---------------
+.hitA0:
 	mMvC_SetDamage $03, HITANIM_HIT0_MID, PF3_BIT4|PF3_SHAKEONCE
-	jp   L056F73
-L056F5D:;J
+	jp   .hit0_main
+; --------------- frame #4 ---------------
+.hitB0:
 	mMvC_SetDamage $03, HITANIM_HIT1_MID, PF3_BIT4|PF3_SHAKEONCE
-	jp   L056F73
-L056F68:;J
+	jp   .hit0_main
+; --------------- frame #7 ---------------
+.hitC0:
 	mMvC_SetDamage $03, HITANIM_DROP_MD, PF3_BIT4|PF3_SHAKEONCE
-	jp   L056F73
-L056F73:;J
-	call L056FD0
-	ld   hl, $0040
-	call OBJLstS_ApplyFrictionHAndMoveH
-	jp   L05702D
-L056F7F:;J
-	mMvC_SetDamage $01, HITANIM_HIT0_MID, PF3_SHAKEONCE
-	jp   L056FA0
-L056F8A:;J
-	mMvC_SetDamage $01, HITANIM_HIT1_MID, PF3_SHAKEONCE
-	jp   L056FA0
-L056F95:;J
-	mMvC_SetDamage $01, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_SHAKEONCE
-	jp   L056FA0
-L056FA0:;J
-	ld   hl, $0040
-	call OBJLstS_ApplyFrictionHAndMoveH
-	mMvC_ValFrameEnd L056EBF
-	call L056FEA
-	jp   nz, L05702D
+	jp   .hit0_main
+; --------------- frame #1,4,7 / input repeat check ---------------
+.hit0_main:
+	call .chkRepeatInput
+	; Move forward as always, slowing down
+	mMvC_DoFrictionH $0040
+	jp   .anim
 	
-	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $18
-	jp   c, L056FC6
-	ld   a, $24
-	ld   h, $0A
-	call L002E49
-	jp   L057030
-L056FC6:;J
-	ld   a, $28
-	ld   h, $0A
-	call L002E49
-	jp   L057030
-L056FD0:;C
-	ld   hl, $0083
+; --------------- frame #2 ---------------
+.hitA1:
+	mMvC_SetDamage $01, HITANIM_HIT0_MID, PF3_SHAKEONCE
+	jp   .hit1_main
+; --------------- frame #5 ---------------
+.hitB1:
+	mMvC_SetDamage $01, HITANIM_HIT1_MID, PF3_SHAKEONCE
+	jp   .hit1_main
+; --------------- frame #8 ---------------
+.hitC1:
+	mMvC_SetDamage $01, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_SHAKEONCE
+	jp   .hit1_main
+; --------------- frame #2,5,8 / repeat done check ---------------	
+.hit1_main:
+	mMvC_DoFrictionH $0040
+	IF FIX_BUGS == 1
+		mMvC_ValFrameEnd .anim
+	ELSE
+		mMvC_ValFrameEnd MoveC_Mature_MetalMassacre.anim
+	ENDC
+		; If the move is allowed to continue animating to the next frame, it will "repeat". 
+		; To do so, we must have performed the same DB+P input before this point.
+		call .canMoveRepeat
+		jp   nz, .anim
+		
+		; Depending on the visible frame...
+		ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+		add  hl, de
+		ld   a, [hl]
+		cp   $06*OBJLSTPTR_ENTRYSIZE	; FrameId < $06?
+		jp   c, .hit1_earlyAbort		; If so, jump
+	.hit1_fullDone:
+		mMvC_SetFrame $09*OBJLSTPTR_ENTRYSIZE, $0A
+		jp   .ret
+	.hit1_earlyAbort:
+		mMvC_SetFrame $0A*OBJLSTPTR_ENTRYSIZE, $0A
+		jp   .ret
+	
+; =============== .chkRepeatInput ===============
+; Perform the input check to repeat the move, same as the one to get into MoveInit_Mature_DeathRow.
+; DB+P -> Despair
+.chkRepeatInput:
+	; Return if the motion was done already
+	ld   hl, iPlInfo_Mature_DeathRow_Repeat
 	add  hl, bc
-	bit  0, [hl]
-	ret  nz
+	bit  0, [hl]	; iPlInfo_Mature_DeathRow_Repeat != 0?
+	ret  nz			; If so, return
+	
+	; Must press the punch button
 	call MoveInputS_CheckPKTypeWithMergedLH
-	ret  nc
-	ret  nz
+	ret  nc	; Did we press a punch or kick btn? If not, return
+	ret  nz	; Did we press a kick button? If so, return
+	
+	; Must perform DB motion
 	ld   hl, MoveInput_DB
-	call MoveInputS_ChkInputDir
-	ret  nc
-	ld   hl, $0083
+	call MoveInputS_ChkInputDir		; Did we do it?
+	ret  nc							; If not, return
+	
+	; Otherwise, mark that the motion was done
+	ld   hl, iPlInfo_Mature_DeathRow_Repeat
 	add  hl, bc
 	set  0, [hl]
 	ret
-L056FEA:;C
 	
-	; Depending on the visible frame...
+; =============== .canMoveRepeat ===============
+; Checks if the move can repeat.
+; OUT
+; - Z flag: If set, the move can't repeat
+.canMoveRepeat:
+
+	; The move doesn't repeat more than 3 times.
+	; However, this could have just returned NZ since we do want to advance to #9 (see: .hit1_fullDone).
+	; By returning Z instead, it needed special logic in .hit1_main to manually set the frame to #9
+	; if we got here with the FrameId >= #6.
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $18
-	jp   c, L056FF6
-	xor  a
+	cp   $06*OBJLSTPTR_ENTRYSIZE		; FrameId < #6?	
+	jp   c, .canMoveRepeat_chkPlType	; If so, jump
+	xor  a								; Z flag set (no repeat)
 	ret
-L056FF6:;J
-	ld   hl, $0020
+.canMoveRepeat_chkPlType:
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	bit  7, [hl]
-	jp   z, L057005
+	bit  PF0B_CPU, [hl]
+	jp   z, .canMoveRepeat_human
+.canMoveRepeat_cpu:
+	; The CPU randomly chooses if to repeat the move or not.
 	ld   a, [wTimer]
-	bit  4, a
+	bit  4, a			; CanRepeat = (wTimer & $10) != 0
 	ret
-L057005:;J
-	ld   hl, $0083
+.canMoveRepeat_human:
+	; iPlInfo_Mature_DeathRow_Repeat must be set for the move to repeat.
+	; See .chkRepeatInput
+	ld   hl, iPlInfo_Mature_DeathRow_Repeat
 	add  hl, bc
 	bit  0, [hl]
 	ret
-L05700C:;J
-	ld   hl, $0040
-	call OBJLstS_ApplyFrictionHAndMoveH
-	mMvC_ValFrameEnd L05702D
-	jp   L057027
-L05701B:;J
-	ld   hl, $0040
-	call OBJLstS_ApplyFrictionHAndMoveH
-	mMvC_ValFrameEnd L05702D
-L057027:;J
+; =============== end of move repeat checks ===============	
+
+; --------------- frame #9 ---------------
+.chkEndEarly:
+	mMvC_DoFrictionH $0040
+	mMvC_ValFrameEnd .anim
+		jp   .end
+; --------------- frame #A ---------------
+.chkEnd:
+	mMvC_DoFrictionH $0040
+	mMvC_ValFrameEnd .anim
+; --------------- common ---------------
+.end:
 	call Play_Pl_EndMove
-	jp   L057030
-L05702D:;J
+	jp   .ret
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L057030:;J
+.ret:
 	ret
-L057031:;I
+	
+; =============== MoveC_Mature_Despair ===============
+; Move code for Mature's Despair (MOVE_MATURE_DESPAIR_L, MOVE_MATURE_DESPAIR_H).
+MoveC_Mature_Despair:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L0570F1
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L05705B
-	cp   $04
-	jp   z, L057067
-	cp   $08
-	jp   z, L0570B5
-	cp   $0C
-	jp   z, L0570D0
-	cp   $18
-	jp   z, L0570E3
-	jp   L0570EE
-L05705B:;J
-	mMvC_ValFrameEnd L0570EE
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	jp   L0570EE
-L057067:;J
-	mMvC_ValFrameStart L0570A8
-	ld   a, $12
-	call HomeCall_Sound_ReqPlayExId
-	mMvIn_ChkLHE L05708A, L057099
-	mMvC_SetSpeedH $0300
-	mMvC_SetSpeedV $FC00
-	jp   L0570A5
-L05708A:;J
-	mMvC_SetSpeedH $0400
-	mMvC_SetSpeedV $FB80
-	jp   L0570A5
-L057099:;J
-	mMvC_SetSpeedH $0580
-	mMvC_SetSpeedV $FC00
-L0570A5:;J
-	jp   L0570D0
-L0570A8:;J
-	mMvC_NextFrameOnGtYSpeed $FA, $FF
-	jp   nc, L0570D0
-	jp   L0570D0
-L0570B5:;J
-	call MoveInputS_CheckMoveLHVer
-	jp   nc, L0570C3
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .doGravity
+	cp   $06*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim
+; --------------- frame #0 ---------------
+; Startup.
+.obj0:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		jp   .anim
+; --------------- frame #1 ---------------	
+; Jump setup.
+.obj1:
+	mMvC_ValFrameStart .obj1_cont
+		mMvC_PlaySound SCT_11
+		mMvIn_ChkLHE .obj1_setJumpH, .obj1_setJumpE
+	.obj1_setJumpL: ; Light
+		mMvC_SetSpeedH +$0300
+		mMvC_SetSpeedV -$0400
+		jp   .obj1_doGravity
+	.obj1_setJumpH: ; Heavy
+		mMvC_SetSpeedH +$0400
+		mMvC_SetSpeedV -$0480
+		jp   .obj1_doGravity
+	.obj1_setJumpE: ; [POI] Hidden Heavy
+		mMvC_SetSpeedH +$0580
+		mMvC_SetSpeedV -$0400
+	.obj1_doGravity:
+		jp   .doGravity
+.obj1_cont:
+	; Immediate change, as the Y Speed will always be > -$06
+	mMvC_NextFrameOnGtYSpeed -$06, ANIMSPEED_NONE
+	jp   nc, .doGravity
+	jp   .doGravity
+; --------------- frame #2 ---------------	
+; Jump, until the near peak of the jump.
+.obj2:
+	; [POI] The hidden heavy version deals multiple continuous hits.
+	call MoveInputS_CheckMoveLHVer	; Is the the hidden heavy triggered?
+	jp   nc, .obj2_waitNext			; If not, jump
+.obj2_doDamageE:
 	mMvC_SetDamage $02, HITANIM_HIT0_MID, PF3_BIT4|PF3_SHAKEONCE
-L0570C3:;J
-	mMvC_NextFrameOnGtYSpeed $FF, $FF
-	jp   nc, L0570D0
-	jp   L0570D0
-L0570D0:;J
-	mMvC_ChkGravityHV $0060, L0570EE
-	mMvC_SetLandFrame $10, $02
-	jp   L0570F1
-L0570E3:;J
-	mMvC_ValFrameEnd L0570EE
-	call Play_Pl_EndMove
-	jr   L0570F1
-L0570EE:;J
+.obj2_waitNext:
+	mMvC_NextFrameOnGtYSpeed -$01, ANIMSPEED_NONE
+	jp   nc, .doGravity
+	jp   .doGravity
+; --------------- frame #1-3 / common gravity check ---------------
+; Switches to #4 when touching the ground.
+.doGravity:
+	mMvC_ChkGravityHV $0060, .anim
+		mMvC_SetLandFrame $04*OBJLSTPTR_ENTRYSIZE, $02
+		jp   .ret
+; --------------- frame #6 ---------------	
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jr   .ret
+; --------------- common ---------------		
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L0570F1:;JR
+.ret:
 	ret
-L0570F2:;I
+	
+; =============== MoveC_Mature_HeavensGate ===============
+; Move code for Mature's Heaven's Gate (MOVE_MATURE_HEAVENS_GATE_S, MOVE_MATURE_HEAVENS_GATE_D).
+MoveC_Mature_HeavensGate:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L0572A2
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L057126
-	cp   $04
-	jp   z, L057132
-	cp   $08
-	jp   z, L057161
-	cp   $0C
-	jp   z, L05716D
-	cp   $10
-	jp   z, L0571D6
-	cp   $14
-	jp   z, L05723E
-	cp   $18
-	jp   z, L057283
-L057123: db $C3;X
-L057124: db $9F;X
-L057125: db $72;X
-L057126:;J
-	mMvC_ValFrameEnd L05729F
-	mMvC_SetAnimSpeed $04
-	jp   L05729F
-L057132:;J
-	ld   hl, $0000
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj4
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj5
+	cp   $06*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------
+; Startup.
+.obj0:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $04
+		jp   .anim
+; --------------- frame #1 ---------------
+; Initial run towards opponent.
+.obj1:
+	;--
+	; Manual check for some reason instead of using mMvC_ValFrameStart
+	ld   hl, iOBJInfo_Status
 	add  hl, de
-	bit  3, [hl]
-	jp   z, L057161
-	ld   a, $11
-	call HomeCall_Sound_ReqPlayExId
-	mMvIn_ChkLHE L057152, L05715B
-	mMvC_SetSpeedH $0500
-	jp   L057161
-L057152:;J
-	mMvC_SetSpeedH $0600
-	jp   L057161
-L05715B:;J
-	mMvC_SetSpeedH $0700
-L057161:;J
-	call L057188
-	jp   c, L0572A2
-	jp   z, L057270
-	jp   L05727D
-L05716D:;J
-	call L057188
-	jp   c, L0572A2
-	jp   z, L057270
-	mMvC_ValFrameEnd L05727D
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	ld   hl, $0013
-	add  hl, de
-	ld   [hl], $14
-	jp   L05727D
-L057188:;C
-	ld   hl, $0063
+	bit  OSTB_GFXNEWLOAD, [hl]
+	jp   z, .obj2
+	;--
+		mMvC_PlaySound SCT_ATTACKG
+		; Set different movement speed depending on
+		mMvIn_ChkLHE .obj1_setDashH, .obj1_setDashE
+	.obj1_setDashL: ; Light
+		mMvC_SetSpeedH $0500
+		jp   .obj2
+	.obj1_setDashH: ; Heavy
+		mMvC_SetSpeedH $0600
+		jp   .obj2
+	.obj1_setDashE: ; [POI] Hidden Heavy
+		mMvC_SetSpeedH $0700
+; --------------- frame #1-2 ---------------
+; Initial run towards opponent.
+.obj2:
+
+	call .chkOtherHit
+	jp   c, .ret				; Is the grab confirmed? If so, wait
+	jp   z, .switchToBackHop	; Did the opponent block? If so, end it early and backhop away
+	; Otherwise, continue moving
+	jp   .moveH
+; --------------- frame #3 ---------------
+; Initial run towards opponent.
+.obj3:
+	call .chkOtherHit
+	jp   c, .ret				; Is the grab confirmed? If so, wait
+	jp   z, .switchToBackHop	; Did the opponent block? If so, end it early and backhop away
+	
+	; Otherwise, continue moving.
+	; If by the end of the frame, we didn't confirm the grab (which switches to #4),
+	; switch to #6 where the move will end.
+	mMvC_ValFrameEnd .moveH
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		; Switch to the last frame (#6) to end the move if the C flag didn't get set by the end
+		ld   hl, iOBJInfo_OBJLstPtrTblOffset
+		add  hl, de
+		ld   [hl], $05*OBJLSTPTR_ENTRYSIZE	; offset by -1
+		jp   .moveH
+		
+; =============== .chkOtherHit ===============
+; Checks if the opponent was successfully hit.
+; See also: Play_Pl_IsMoveHit
+; OUT
+; - C flag: If set, the move hit successfully
+; - Z flag: If set, the move got blocked
+.chkOtherHit:
+
+	;
+	; If we didn't hit the opponent twice yet, return without doing anything.
+	; 
+	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  1, [hl]
-	jp   z, L0571D2
-	ld   hl, $006E
+	bit  PCF_HITOTHER, [hl]			; Did we reach yet?	
+	jp   z, .chkOtherHit_wait		; If not, jump
+	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
-	bit  7, [hl]
-	jp   nz, L0571D2
-	bit  4, [hl]
-	jp   z, L0571D2
-	bit  3, [hl]
-	jp   nz, L0571D0
-	ld   a, $10
-	ld   h, $FF
-	call L002E49
-	ld   a, $03
+	bit  PF1B_INVULN, [hl]			; Is the opponent invulnerable?
+	jp   nz, .chkOtherHit_wait		; If so, jump
+	bit  PF1B_HITRECV, [hl]			; Did the opponent get hit?
+	jp   z, .chkOtherHit_wait		; If not, jump
+	
+	;
+	; If the hit is blocked, skip directly to the end of the move,
+	; where the player backhops away.
+	;
+	bit  PF1B_GUARD, [hl]			; Did the attack get blocked?
+	jp   nz, .chkOtherHit_blocked	; If so, jump
+	
+.chkOtherHit_ok:
+	;
+	; The second hit wasn't blocked, so switch to #4 to continue the attack.
+	;
+	mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_NONE
+	ld   a, PLAY_THROWACT_NEXT03
 	ld   [wPlayPlThrowActId], a
 	mMvC_SetDamageNext $01, HITANIM_THROW_ROTU, PF3_SHAKELONG
 	mMvC_SetDamage $01, HITANIM_THROW_ROTU, PF3_SHAKELONG
 	mMvC_MoveThrowOp -$08, +$00 ; Move back 8px
+	; Always sync position of the opponent relative to the player ???
+	; So he'll get moved automatically when we move to the edge of the screen while grabbing him.
 	ld   a, $01
-	ld   [wPlayPlThrowRot_Unk_UseInMove], a
+	ld   [wPlayPlThrowRot_Unk_AlwaysSync], a
 	call OBJLstS_ApplyXSpeed
-	scf
+	scf			; C flag set
 	ret
-L0571D0:;J
-	xor  a
+.chkOtherHit_blocked:
+	xor  a		; Z flag set
 	ret
-L0571D2:;J
+.chkOtherHit_wait:
 	ld   a, $01
-	or   a
+	or   a		; Z flag clear
 	ret
-L0571D6:;J
-	ld   hl, $0000
-	add  hl, de
-	bit  3, [hl]
-	jp   nz, L0571F3
-	ld   hl, $001B
-	add  hl, de
-	ld   a, [hl]
-	cp   $F8
-	jp   nc, L0571F3
-	ld   hl, $0073
-	add  hl, bc
-	ld   a, [hl]
-	cp   $11
-	jp   nz, L057270
-L0571F3:;J
-	call L0572F3
-	ld   hl, $0080
-	add  hl, bc
-	ld   a, [hl]
-	cp   $08
-	jp   z, L057217
-	cp   $F8
-	jp   z, L057217
-	ld   hl, $0003
-	add  hl, de
-	ld   a, [hl]
-	cp   $08
-	jp   z, L057217
-	cp   $F8
-	jp   z, L057217
-	jp   L05727D
-L057217:;J
-	ld   a, $14
-	ld   h, $08
-	call L002E49
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	cp   $66
-	jp   z, L057233
-	mMvC_SetDamageNext $14, HITANIM_DROP_MD, PF3_SHAKELONG
-	jp   L0572A2
-L057233:;J
-	mMvC_SetDamageNext $0C, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_BIT4
-	jp   L0572A2
-L05723E:;J
-	mMvC_ValFrameStart L05724A
-	mMvC_SetMoveH $F900
-L05724A:;J
-	mMvC_ValFrameEnd L05729F
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	cp   $66
-	jp   z, L057262
+; =============== end of .chkOtherHit ===============			
 	
-	mkhl $00, HITANIM_DROP_SPEC_AIR_0E
-	ld   hl, CHL
-	ld   a, PF3_SHAKELONG
-	jp   L057267
-L057262:;J
-	mkhl $01, HITANIM_DROP_SPEC_AIR_0E
-	ld   hl, CHL
-	ld   a, PF3_SHAKELONG
-L057267:;J
-	call Play_Pl_SetMoveDamageNext
-	call Play_Proj_CopyMoveDamageFromPl
-	call L0572A3
-L057270:;J
-	ld   a, $18
+; --------------- frame #4 ---------------	
+; Runs forward holding the opponent until reaching the edge of the stage.
+.obj4:
+
+	;
+	; If the opponent isn't in the intended HITANIM_THROW_ROTU after 8 frames,
+	; assume that something went wrong and hop back, ending the move.
+	;
+	
+	;--
+	ld   hl, iOBJInfo_Status
+	add  hl, de
+	bit  OSTB_GFXNEWLOAD, [hl]	; First time we get here?
+	jp   nz, .obj4_chkEdge		; If so, skip (not needed, see below)
+	;--
+	
+		; Skip the HITANIM check for the first 8 frames.
+		; We can do it this way since we know the initial value iOBJInfo_FrameLeft is set to,
+		; and that decrements every frame.
+		ld   hl, iOBJInfo_FrameLeft
+		add  hl, de
+		ld   a, [hl]
+		cp   ANIMSPEED_NONE-$07		; iOBJInfo_FrameLeft >= $F8?
+		jp   nc, .obj4_chkEdge		; If so, skip
+		
+		ld   hl, iPlInfo_HitAnimIdOther
+		add  hl, bc
+		ld   a, [hl]
+		cp   HITANIM_THROW_ROTU		; Opponent's HitAnim != HITANIM_THROW_ROTU?
+		jp   nz, .switchToBackHop	; If so, jump
+.obj4_chkEdge:
+	; Continuously spawn visual effects for the desperation versions
+	call ProjInit_Mature_HeavensGateD
+	
+	;
+	; Continue moving until either we or the opponent get near the edge of the stage.
+	; When that happens, switch to #5 and spawn the skull projectile.
+	;
+	ld   hl, iPlInfo_OBJInfoXOther
+	add  hl, bc
+	ld   a, [hl]
+	cp   $00+PLAY_BORDER_X		; Opponent on the left edge?	
+	jp   z, .obj4_setDamage		; If so, jump
+	cp   $100-PLAY_BORDER_X		; Opponent on the right edge?	
+	jp   z, .obj4_setDamage		; If so, jump
+	ld   hl, iOBJInfo_X
+	add  hl, de
+	ld   a, [hl]
+	cp   $00+PLAY_BORDER_X		; Are we on the left edge?	
+	jp   z, .obj4_setDamage		; If so, jump
+	cp   $100-PLAY_BORDER_X		; Are we on the right edge?
+	jp   z, .obj4_setDamage		; If so, jump
+	; Otherwise, continue moving
+	jp   .moveH
+.obj4_setDamage:
+	;
+	; Switch to #5 and setup the damage dealt by the move.
+	;
+	mMvC_SetFrame $05*OBJLSTPTR_ENTRYSIZE, $08
+	ld   hl, iPlInfo_MoveId
+	add  hl, bc
+	ld   a, [hl]
+	cp   MOVE_MATURE_HEAVENS_GATE_D		; Using the desperation version?
+	jp   z, .obj4_setDamageD			; If so, jump
+.obj4_setDamageS:
+	; This deals more damage since the projectile itself *doesn't*
+	mMvC_SetDamageNext $14, HITANIM_DROP_MD, PF3_SHAKELONG
+	jp   .ret
+.obj4_setDamageD:
+	; While the super desperation version does deal continuous damage, so the physical hit deals a bit less
+	mMvC_SetDamageNext $0C, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_BIT4
+	jp   .ret
+	
+; --------------- frame #5 ---------------
+; Initial back movement and projectile setup.
+; Last frame if everything went right.	
+.obj5:
+	; Set speed to dash backwards the first time we get here
+	mMvC_ValFrameStart .obj5_cont
+		mMvC_SetMoveH -$0700
+.obj5_cont:
+	mMvC_ValFrameEnd .anim
+	
+		; Initialize the projectile at the end of the frame.
+		; They are essentially the same between super and desperation versions, other than the damage dealt.
+		ld   hl, iPlInfo_MoveId
+		add  hl, bc
+		ld   a, [hl]
+		cp   MOVE_MATURE_HEAVENS_GATE_D		; Using the desperation version?
+		jp   z, .obj5_setProjDamageD		; If so, jump
+	.obj5_setProjDamageS:
+		; Super version deals no damage
+		mkhl $00, HITANIM_DROP_SPEC_AIR_0E
+		ld   hl, CHL
+		ld   a, PF3_SHAKELONG
+		jp   .obj5_initProj
+	.obj5_setProjDamageD:
+		; Desperation version deals 1 line of continuous damage
+		mkhl $01, HITANIM_DROP_SPEC_AIR_0E
+		ld   hl, CHL
+		ld   a, PF3_SHAKELONG
+	.obj5_initProj:
+		; Set damage settings
+		call Play_Pl_SetMoveDamageNext
+		; Copy them over to the projectile
+		call Play_Proj_CopyMoveDamageFromPl
+		; And spawn said projectile
+		call ProjInit_Mature_HeavensGateS
+		; Finally, backhop and end the move.
+		
+; --------------- common backhop switch ---------------
+; Switches to the backwards hop.
+.switchToBackHop:
+	ld   a, MOVE_SHARED_HOP_B
 	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
-	ld   a, $00
+	ld   a, PLAY_THROWACT_NONE
 	ld   [wPlayPlThrowActId], a
-	jp   L0572A2
-L05727D:;J
+	jp   .ret
+; --------------- common horizontal movement ---------------
+.moveH:
 	call OBJLstS_ApplyXSpeed
-	jp   L05729F
-L057283:;J
-	call L057188
-	jp   c, L0572A2
-	jp   z, L057270
-	ld   hl, $0080
-	call OBJLstS_ApplyFrictionHAndMoveH
-	jp   nc, L05729F
-	mMvC_EndThrow_Slow
-	jr   L0572A2
-L05729F:;J
+	jp   .anim
+; --------------- frame #6 ---------------
+; Slow down, and when we stop moving end the move.
+; We get here only if the opponent wasn't hit.
+.chkEnd:
+	;--
+	; It's a bit pointless to check this here.
+	call .chkOtherHit			; Check this again
+	jp   c, .ret				; Is the grab confirmed? If so, wait
+	jp   z, .switchToBackHop	; Did the opponent block? If so, backhop away
+	;--
+	mMvC_DoFrictionH $0080
+	jp   nc, .anim
+		mMvC_EndThrow_Slow
+		jr   .ret
+; --------------- common ---------------
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L0572A2:;JR
+.ret:
 	ret
-L0572A3:;C
-	ld   a, $14
-	call HomeCall_Sound_ReqPlayExId
+	
+; =============== ProjInit_Mature_HeavensGateS ===============
+; Initializes the projectile for Mature's Heaven's Gate (normal).
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+ProjInit_Mature_HeavensGateS:
+	mMvC_PlaySound SCT_13
+	
 	push bc
-	push de
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	push af
-	call L0024F8
-	ld   hl, $0020
-	add  hl, de
-	ld   [hl], $05
-	inc  hl
-	ld   [hl], $52
-	inc  hl
-	ld   [hl], $73
-	ld   hl, $0010
-	add  hl, de
-	ld   [hl], $01
-	inc  hl
-	ld   [hl], $59
-	inc  hl
-	ld   [hl], $5A
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $001B
-	add  hl, de
-	ld   [hl], $01
-	inc  hl
-	ld   [hl], $01
-	ld   hl, $0027
-	add  hl, de
-	ld   [hl], $03
-	inc  hl
-	pop  af
-	ld   [hl], $32
-	call OBJLstS_Overlap
-	mMvC_SetMoveH $0000
-	mMvC_SetMoveV $0000
-	pop  de
+		push de
+			; A = MoveId (not needed)
+			ld   hl, iPlInfo_MoveId
+			add  hl, bc
+			ld   a, [hl]
+			push af
+				call ProjInitS_InitAndGetOBJInfo
+				
+				; Set code pointer
+				ld   hl, iOBJInfo_Proj_CodeBank
+				add  hl, de
+				ld   [hl], BANK(ProjC_NoMove)	; BANK $05 ; iOBJInfo_Proj_CodeBank
+				inc  hl
+				ld   [hl], LOW(ProjC_NoMove)	; iOBJInfo_Proj_CodePtr_Low
+				inc  hl
+				ld   [hl], HIGH(ProjC_NoMove)	; iOBJInfo_Proj_CodePtr_High
+				
+				; Write sprite mapping ptr for this projectile.
+				ld   hl, iOBJInfo_BankNum
+				add  hl, de
+				ld   [hl], BANK(OBJLstPtrTable_Proj_Mature_HeavensGateS)	; BANK $01 ; iOBJInfo_BankNum
+				inc  hl
+				ld   [hl], LOW(OBJLstPtrTable_Proj_Mature_HeavensGateS)		; iOBJInfo_OBJLstPtrTbl_Low
+				inc  hl
+				ld   [hl], HIGH(OBJLstPtrTable_Proj_Mature_HeavensGateS)	; iOBJInfo_OBJLstPtrTbl_High
+				inc  hl
+				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
+
+				; Set animation speed.
+				ld   hl, iOBJInfo_FrameLeft
+				add  hl, de
+				ld   [hl], $01	; iOBJInfo_FrameLeft
+				inc  hl
+				ld   [hl], $01	; iOBJInfo_FrameTotal
+				
+				; Set priority value
+				ld   hl, iOBJInfo_Proj_Priority
+				add  hl, de
+				ld   [hl], PROJ_PRIORITY_NODESPAWN
+				inc  hl
+			pop  af
+			
+			; Set despawn timer
+			ld   [hl], $32 ; iOBJInfo_Proj_EnaTimer
+			
+			; Set initial position relative to the player's origin
+			call OBJLstS_Overlap
+			mMvC_SetMoveH +$0000
+			mMvC_SetMoveV +$0000
+		pop  de
 	pop  bc
 	ret
-L0572F3:;C
-	ld   hl, $0033
+	
+; =============== ProjInit_Mature_HeavensGateD ===============
+; Initializes the special effect for Mature's Heaven's Gate (desperation).
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+ProjInit_Mature_HeavensGateD:
+	
+	; Only for the desperation version.
+	ld   hl, iPlInfo_MoveId
 	add  hl, bc
 	ld   a, [hl]
-	cp   $66
+	cp   MOVE_MATURE_HEAVENS_GATE_D
 	ret  nz
-	ld   hl, $0080
+	
+	; Only if another projectile isn't already visible
+	ld   hl, (OBJINFO_SIZE*2)+iOBJInfo_Status
 	add  hl, de
-	bit  7, [hl]
+	bit  OSTB_VISIBLE, [hl]
 	ret  nz
-	ld   a, $14
-	call HomeCall_Sound_ReqPlayExId
+	
+	mMvC_PlaySound SCT_13
+	
 	push bc
-	push de
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	push af
-	call L0024F8
-	ld   hl, $0020
-	add  hl, de
-	ld   [hl], $05
-	inc  hl
-	ld   [hl], $52
-	inc  hl
-	ld   [hl], $73
-	ld   hl, $0010
-	add  hl, de
-	ld   [hl], $01
-	inc  hl
-	ld   [hl], $67
-	inc  hl
-	ld   [hl], $5A
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $001B
-	add  hl, de
-	ld   [hl], $00
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $0027
-	add  hl, de
-	ld   [hl], $03
-	inc  hl
-	pop  af
-	ld   [hl], $05
-	call OBJLstS_Overlap
-	mMvC_SetMoveH $0000
-	mMvC_SetMoveV $0000
-	pop  de
+		push de
+			; A = MoveId (not needed)
+			ld   hl, iPlInfo_MoveId
+			add  hl, bc
+			ld   a, [hl]
+			push af
+				call ProjInitS_InitAndGetOBJInfo
+				
+				; Set code pointer
+				ld   hl, iOBJInfo_Proj_CodeBank
+				add  hl, de
+				ld   [hl], BANK(ProjC_NoMove)	; BANK $05 ; iOBJInfo_Proj_CodeBank
+				inc  hl
+				ld   [hl], LOW(ProjC_NoMove)	; iOBJInfo_Proj_CodePtr_Low
+				inc  hl
+				ld   [hl], HIGH(ProjC_NoMove)	; iOBJInfo_Proj_CodePtr_High
+				
+				; Write sprite mapping ptr for this projectile.
+				ld   hl, iOBJInfo_BankNum
+				add  hl, de
+				ld   [hl], BANK(OBJLstPtrTable_Proj_Mature_HeavensGateD)	; BANK $01 ; iOBJInfo_BankNum
+				inc  hl
+				ld   [hl], LOW(OBJLstPtrTable_Proj_Mature_HeavensGateD)		; iOBJInfo_OBJLstPtrTbl_Low
+				inc  hl
+				ld   [hl], HIGH(OBJLstPtrTable_Proj_Mature_HeavensGateD)	; iOBJInfo_OBJLstPtrTbl_High
+				inc  hl
+				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
+
+				; Set animation speed.
+				ld   hl, iOBJInfo_FrameLeft
+				add  hl, de
+				ld   [hl], $00	; iOBJInfo_FrameLeft
+				inc  hl
+				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
+				
+				; Set priority value
+				ld   hl, iOBJInfo_Proj_Priority
+				add  hl, de
+				ld   [hl], PROJ_PRIORITY_NODESPAWN
+				inc  hl
+			pop  af
+			
+			; Set despawn timer
+			ld   [hl], $05 ; iOBJInfo_Proj_EnaTimer
+			
+			; Set initial position relative to the player's origin
+			call OBJLstS_Overlap
+			mMvC_SetMoveH +$0000
+			mMvC_SetMoveV +$0000
+		pop  de
 	pop  bc
 	ret
-L057352:;I
-	ld   hl, $0028
+	
+; =============== ProjC_NoMove ===============
+; Generic projectile code for those that don't move and *only* despawn after a certain amount of time.
+; Getting hit by this won't make it disappear, so if it's set to deal damage it will deal it continuously.
+ProjC_NoMove:
+	; Handle despawn timer.
+	ld   hl, iOBJInfo_Proj_EnaTimer
 	add  hl, de
 	dec  [hl]
-	jp   z, L05735E
+	jp   z, .despawn
+	; Ok, display
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 	ret
-L05735E:;J
+.despawn:
 	call OBJLstS_Hide
 	ret
 	
@@ -10241,464 +10684,569 @@ MoveInputReader_Chizuru_SetMove:
 MoveInputReader_Chizuru_NoMove:
 	or   a
 	ret
-L057499:;I
+	
+; =============== MoveC_Chizuru_ShinsokuNoroti ===============
+; Move code for Chizuru's 212 Katsu Shinsoku no Noroti:
+; - MOVE_CHIZURU_SHINSOKU_NOROTI_HIGH_L
+; - MOVE_CHIZURU_SHINSOKU_NOROTI_HIGH_H
+; - MOVE_CHIZURU_SHINSOKU_NOROTI_LOW_L
+; - MOVE_CHIZURU_SHINSOKU_NOROTI_LOW_H
+; This move can chain into 212 Katsu Shinsoku no Noroti Ten Zui (MOVE_CHIZURU_TEN_ZUI_L, MOVE_CHIZURU_TEN_ZUI_H)
+MoveC_Chizuru_ShinsokuNoroti:
 	call Play_Pl_CreateJoyMergedKeysLH
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L057623
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L0574C8
-	cp   $04
-	jp   z, L05750B
-	cp   $08
-	jp   z, L05752C
-	cp   $0C
-	jp   z, L0575A9
-	cp   $10
-	jp   z, L0575C0
-	cp   $14
-	jp   z, L057605
-L0574C8:;J
-	mMvC_ValFrameStart L0574F8
-	call Play_Pl_ClearJoyMergedKeysLH
-	ld   hl, $0083
-	add  hl, bc
-	ld   [hl], $00
-	mMvIn_ChkLHE L0574E9, L0574F2
-	mMvC_SetSpeedH $0500
-	jp   L0574F8
-L0574E9:;J
-	mMvC_SetSpeedH $0600
-	jp   L0574F8
-L0574F2:;J
-	mMvC_SetSpeedH $0700
-L0574F8:;J
-	call L057556
-	jp   z, L057614
-	ld   a, $0C
-	ld   h, $00
-	call L002E49
-	call OBJLstS_ApplyXSpeed
-	jp   L057623
-L05750B:;J
-	call L057556
-	jp   z, L05751E
-	ld   a, $0C
-	ld   h, $00
-	call L002E49
-	call OBJLstS_ApplyXSpeed
-	jp   L057623
-L05751E:;J
-	mMvC_ValFrameStart L057614
-	ld   a, $9D
-	call HomeCall_Sound_ReqPlayExId
-	jp   L057614
-L05752C:;J
-	call L057556
-	jp   z, L05753F
-	ld   a, $0C
-	ld   h, $00
-	call L002E49
-	call OBJLstS_ApplyXSpeed
-	jp   L057623
-L05753F:;J
-	mMvC_ValFrameStart L05754A
-	ld   a, $9D
-	call HomeCall_Sound_ReqPlayExId
-L05754A:;J
-	mMvC_ValFrameEnd L057614
-	mMvC_SetAnimSpeed ANIMSPEED_INSTANT
-	jp   L057614
-L057556:;C
-	call L0575A2
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj4
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+; --------------- frame #0 ---------------
+; Forward run.
+.obj0:
+	mMvC_ValFrameStart .obj0_cont
+		call Play_Pl_ClearJoyMergedKeysLH
+		ld   hl, iPlInfo_Chizuru_ShinsokuNoroti_ChainedMove
+		add  hl, bc
+		ld   [hl], $00
+		mMvIn_ChkLHE .obj0_setDashH, .obj0_setDashE
+	.obj0_setDashL: ; Light
+		mMvC_SetSpeedH +$0500
+		jp   .obj0_cont
+	.obj0_setDashH: ; Heavy
+		mMvC_SetSpeedH +$0600
+		jp   .obj0_cont
+	.obj0_setDashE: ; [POI] Hidden Heavy
+		mMvC_SetSpeedH +$0700
+.obj0_cont:
+	; Skip the first part and switch to #3 directly if starting a chained move
+	call .chkCM
+	jp   z, .moveH
+		mMvC_SetFrame $03*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+		call OBJLstS_ApplyXSpeed
+		jp   .ret
+; --------------- frame #1 ---------------
+; Forward run.
+.obj1:
+	; Skip the first part and switch to #3 directly if starting a chained move
+	call .chkCM
+	jp   z, .obj1_main
+		mMvC_SetFrame $03*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+		call OBJLstS_ApplyXSpeed
+		jp   .ret
+.obj1_main:
+	; Play step SFX at the start of the frame
+	mMvC_ValFrameStart .moveH
+		mMvC_PlaySound SFX_STEP
+		jp   .moveH
+; --------------- frame #2 ---------------
+; Forward run.
+.obj2:
+	; Skip the first part and switch to #3 directly if starting a chained move
+	call .chkCM
+	jp   z, .obj2_main
+		mMvC_SetFrame $03*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+		call OBJLstS_ApplyXSpeed
+		jp   .ret
+.obj2_main:
+	mMvC_ValFrameStart .obj2_cont
+		mMvC_PlaySound SFX_STEP
+.obj2_cont:
+	mMvC_ValFrameEnd .moveH
+		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
+		jp   .moveH
+	
+; =============== .chkCM ===============
+; Checks the input for starting a chained move, and updates the bitmask
+; marking which move to chain into.
+; OUT
+; - Z flag: If set, no move was started
+.chkCM:
+	; Don't check this again if we already started a move.
+	; The return value of NZ works for us.
+	call .isCMSet
 	ret  nz
-	ld   hl, $0020
+	
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	bit  7, [hl]
-	jp   z, L057571
+	bit  PF0B_CPU, [hl]				; Is this a CPU player?
+	jp   z, .chkCm_chkInputHuman	; If not, jump
+.chkCm_cpu:
+	; The CPU randomly decides which move to chain into.
+	
+	; This uses the upper nybble of the timer, giving a $10 frame window where the
+	; CPU may not chain into anything. It's much less likely than chaining though.
+	; ChainedMove = (wTimer / $10) & $03
 	ld   a, [wTimer]
 	swap a
 	and  a, $03
-	ld   hl, $0083
+	ld   hl, iPlInfo_Chizuru_ShinsokuNoroti_ChainedMove
 	add  hl, bc
 	ld   [hl], a
-	or   a
+	or   a			; Return ZFlag = ChainedMove == 0
 	ret
-L057571:;J
+.chkCm_chkInputHuman:
+	; Human players need to perform the input DB+P/K to start 212 Katsu Shinsoku no Noroti Ten Zui.
+	; Depending on the button pressed, start the light or hard versions.
 	call MoveInputS_CheckPKTypeWithMergedLH
-	jp   nc, L0575A0
-	jp   nz, L05758D
-	mMvIn_ChkDirNot MoveInput_DB, L0575A0
-	call Play_Pl_ClearJoyDirBuffer
-	ld   hl, $0083
+	jp   nc, .chkCm_retZ		; Pressed any punch/kick button? If not, jump
+	jp   nz, .chkCm_chkTenZuiH	; Pressed the kick button? If so start the hard version
+.chkCm_chkTenZuiL:				; Otherwise, start the light one
+	mMvIn_ChkDirNot MoveInput_DB, .chkCm_retZ
+		; Input done
+		call Play_Pl_ClearJoyDirBuffer
+		; Flag that we're starting the move
+		ld   hl, iPlInfo_Chizuru_ShinsokuNoroti_ChainedMove
+		add  hl, bc
+		set  PCMB_CHIZURU_TEN_ZUI_L, [hl]
+		ret
+.chkCm_chkTenZuiH:
+	mMvIn_ChkDirNot MoveInput_DB, .chkCm_retZ
+		; Input done
+		call Play_Pl_ClearJoyDirBuffer
+		; Flag that we're starting the move
+		ld   hl, iPlInfo_Chizuru_ShinsokuNoroti_ChainedMove
+		add  hl, bc
+		set  PCMB_CHIZURU_TEN_ZUI_H, [hl]
+		ret
+.chkCm_retZ:
+	xor  a	; Z flag set. Nothing started.
+	ret
+; =============== .isCMSet ===============
+; Checks if a chained move was already started.
+; OUT
+; - A: iPlInfo_Chizuru_ShinsokuNoroti_ChainedMove
+; - Z flag: If set, no move is started yet
+.isCMSet:
+	ld   hl, iPlInfo_Chizuru_ShinsokuNoroti_ChainedMove
 	add  hl, bc
-	set  0, [hl]
+	ld   a, [hl]	; A = ChainedMoveMask
+	or   a			; A != 0?
 	ret
-L05758D:;J
-	mMvIn_ChkDirNot MoveInput_DB, L0575A0
-	call Play_Pl_ClearJoyDirBuffer
-	ld   hl, $0083
-	add  hl, bc
-	set  1, [hl]
-	ret
-L0575A0:;J
-	xor  a
-	ret
-L0575A2:;C
-	ld   hl, $0083
-	add  hl, bc
-	ld   a, [hl]
-	or   a
-	ret
-L0575A9:;J
-	mMvC_ValFrameStart L0575B4
-	ld   a, $09
-	call HomeCall_Sound_ReqPlayExId
-L0575B4:;J
-	call L057556
-	ld   hl, $0080
-	call OBJLstS_ApplyFrictionHAndMoveH
-	jp   L057620
-L0575C0:;J
-	call L057556
-	ld   hl, $0080
-	call OBJLstS_ApplyFrictionHAndMoveH
-	mMvC_ValFrameEnd L057620
-	mMvC_SetAnimSpeed $14
-	call L0575A2
-	jp   z, L057620
-	bit  0, a
-	jp   nz, L0575E5
-	bit  1, a
-	jp   nz, L0575F5
-L0575E2: db $C3;X
-L0575E3: db $20;X
-L0575E4: db $76;X
-L0575E5:;J
-	ld   a, $54
-	call MoveInputS_SetSpecMove_StopSpeed
-	mMvC_SetDamageNext $02, HITANIM_DROP_MD, PF3_SHAKELONG
-	jp   L057623
-L0575F5:;J
-	ld   a, $56
-	call MoveInputS_SetSpecMove_StopSpeed
-	mMvC_SetDamageNext $02, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
-	jp   L057623
-L057605:;J
-	ld   hl, $0080
-	call OBJLstS_ApplyFrictionHAndMoveH
-	mMvC_ValFrameEnd L057620
-	jp   L05761A
-L057614:;J
+; =============== end of .chkCM ===============
+	
+; --------------- frame #3 ---------------
+; Progressive slow down.
+.obj3:
+	mMvC_ValFrameStart .obj3_cont
+		mMvC_PlaySound SCT_HEAVY
+.obj3_cont:
+	call .chkCM
+	mMvC_DoFrictionH $0080
+	jp   .anim
+; --------------- frame #4 ---------------
+; Progressive slow down + chained move start.
+.obj4:
+	call .chkCM
+	mMvC_DoFrictionH $0080
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $14
+		
+		call .isCMSet					; A = ChainedMove
+		jp   z, .anim					; A == 0? If so, skip
+		bit  PCMB_CHIZURU_TEN_ZUI_L, a	; Light ver set?
+		jp   nz, .switchToTenZuiL		; If so, jump
+		bit  PCMB_CHIZURU_TEN_ZUI_H, a	; Hard ver set?
+		jp   nz, .switchToTenZuiH		; If so, jump
+		jp   .anim
+	.switchToTenZuiL:
+		ld   a, MOVE_CHIZURU_TEN_ZUI_L
+		call MoveInputS_SetSpecMove_StopSpeed
+		mMvC_SetDamageNext $02, HITANIM_DROP_MD, PF3_SHAKELONG
+		jp   .ret
+	.switchToTenZuiH:
+		ld   a, MOVE_CHIZURU_TEN_ZUI_H
+		call MoveInputS_SetSpecMove_StopSpeed
+		mMvC_SetDamageNext $02, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
+		jp   .ret
+; --------------- frame #5 ---------------
+; Slow down. When the frame ends, the move ends.
+.chkEnd:
+	mMvC_DoFrictionH $0080
+	mMvC_ValFrameEnd .anim
+		jp   .end
+; --------------- common ---------------
+.moveH:
 	call OBJLstS_ApplyXSpeed
-	jp   L057620
-L05761A:;J
+	jp   .anim
+.end:
 	call Play_Pl_EndMove
-	jp   L057623
-L057620:;J
+	jp   .ret
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L057623:;J
+.ret:
 	ret
-L057624:;I
+	
+; =============== MoveC_Chizuru_TenZuiL ===============
+; Move code for the light version of Chizuru's 212 Katsu Shinsoku no Noroti Ten Zui (MOVE_CHIZURU_TEN_ZUI_L).
+MoveC_Chizuru_TenZuiL:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L05769C
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L057644
-	cp   $04
-	jp   z, L05767B
-	cp   $08
-	jp   z, L05768E
-L057641: db $C3;X
-L057642: db $99;X
-L057643: db $76;X
-L057644:;J
-	mMvC_ValFrameStart L05766E
-	call MoveInputS_CheckMoveLHVer
-	jp   c, L05765F
-	mMvC_SetSpeedH $0100
-	mMvC_SetSpeedV $FC00
-	jp   L05767B
-L05765F:;J
-	mMvC_SetSpeedH $0200
-	mMvC_SetSpeedV $FC00
-	jp   L05767B
-L05766E:;J
-	mMvC_NextFrameOnGtYSpeed $FE, $FF
-	jp   nc, L05767B
-	jp   L05767B
-L05767B:;J
-	mMvC_ChkGravityHV $0060, L057699
-	mMvC_SetLandFrame $08, $05
-	jp   L05769C
-L05768E:;J
-	mMvC_ValFrameEnd L057699
-	call Play_Pl_EndMove
-	jr   L05769C
-L057699:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .doGravity
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------
+.obj0:
+	mMvC_ValFrameStart .obj0_cont
+		mMvIn_ChkE .obj0_setJumpE
+	.obj0_setJumpLH: ; Light / Heavy
+		mMvC_SetSpeedH +$0100
+		mMvC_SetSpeedV -$0400
+		jp   .doGravity
+	.obj0_setJumpE: ; [POI] Hidden Heavy
+		mMvC_SetSpeedH +$0200
+		mMvC_SetSpeedV -$0400
+		jp   .doGravity
+.obj0_cont:
+	mMvC_NextFrameOnGtYSpeed -$02, ANIMSPEED_NONE
+	jp   nc, .doGravity
+	jp   .doGravity
+; --------------- frame #0-1 / common gravity check ---------------
+.doGravity:
+	mMvC_ChkGravityHV $0060, .anim
+		mMvC_SetLandFrame $02*OBJLSTPTR_ENTRYSIZE, $05
+		jp   .ret
+; --------------- frame #2 ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jr   .ret
+; --------------- common ---------------
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L05769C:;JR
+.ret:
 	ret
-L05769D:;I
+	
+; =============== MoveC_Chizuru_TenZuiH ===============
+; Move code for the hard version of Chizuru's 212 Katsu Shinsoku no Noroti Ten Zui (MOVE_CHIZURU_TEN_ZUI_H).
+MoveC_Chizuru_TenZuiH:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L0576C1
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $08
-	jp   z, L0576B3
-	jp   L0576BE
-L0576B3:;J
-	mMvC_ValFrameEnd L0576BE
-	call Play_Pl_EndMove
-	jr   L0576C1
-L0576BE:;J
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	jp   .anim
+; --------------- frame #2 ---------------
+.obj2:
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jr   .ret
+; --------------- common ---------------
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L0576C1:;JR
+.ret:
 	ret
-L0576C2:;I
+	
+; =============== MoveC_Chizuru_TamayuraShitsuneL ===============
+; Move code for the light version of Chizuru's 108 Katsu Tamayura no Shitsune (MOVE_CHIZURU_TAMAYURA_SHITSUNE_L).	
+MoveC_Chizuru_TamayuraShitsuneL:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L0576F4
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $10
-	jp   z, L0576E6
-	jp   L0576F1
-L0576D8: db $CD;X
-L0576D9: db $D2;X
-L0576DA: db $2D;X
-L0576DB: db $CA;X
-L0576DC: db $E3;X
-L0576DD: db $76;X
-L0576DE: db $3E;X
-L0576DF: db $11;X
-L0576E0: db $CD;X
-L0576E1: db $16;X
-L0576E2: db $10;X
-L0576E3: db $C3;X
-L0576E4: db $F1;X
-L0576E5: db $76;X
-L0576E6:;J
-	mMvC_ValFrameEnd L0576F1
-	call Play_Pl_EndMove
-	jr   L0576F4
-L0576F1:;J
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj4
+	jp   .anim
+; --------------- [TCRF] Unreferenced frame code ---------------
+; Would have played the attack SFX, likely somewhere between #0 and #3.
+.unused0:
+	mMvC_ValFrameStart .unused0_cont
+		mMvC_PlaySound SCT_ATTACKG
+.unused0_cont:
+	jp   .anim
+; --------------- frame #4 ---------------
+.obj4:
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jr   .ret
+; --------------- common ---------------
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L0576F4:;JR
+.ret:
 	ret
-L0576F5:;I
+	
+; =============== MoveC_Chizuru_TamayuraShitsuneH ===============
+; Move code for the hard version of Chizuru's 108 Katsu Tamayura no Shitsune (MOVE_CHIZURU_TAMAYURA_SHITSUNE_H).
+MoveC_Chizuru_TamayuraShitsuneH:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L05776D
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L05771F
-	cp   $04
-	jp   z, L057742
-	cp   $08
-	jp   z, L057742
-	cp   $0C
-	jp   z, L057745
-	cp   $20
-	jp   z, L05775F
-	jp   L05776A
-L05771F:;J
-	mMvC_ValFrameStart L057742
-	ld   a, $09
-	call HomeCall_Sound_ReqPlayExId
-	call MoveInputS_CheckMoveLHVer
-	jp   c, L057739
-	mMvC_SetSpeedH $0080
-	jp   L057742
-L057739: db $21;X
-L05773A: db $00;X
-L05773B: db $01;X
-L05773C: db $CD;X
-L05773D: db $69;X
-L05773E: db $35;X
-L05773F: db $C3;X
-L057740: db $42;X
-L057741: db $77;X
-L057742:;J
-	jp   L057759
-L057745:;J
-	mMvC_ValFrameEnd L057759
-	ld   hl, $0021
-	add  hl, bc
-	res  7, [hl]
-	ld   a, $11
-	call HomeCall_Sound_ReqPlayExId
-	jp   L05776A
-L057759:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .moveH_stub
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .moveH_stub
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $08*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim
+; --------------- frame #0 ---------------
+.obj0:
+	mMvC_ValFrameStart .moveH_stub
+		mMvC_PlaySound SCT_HEAVY
+		mMvIn_ChkE .obj0_setDashE
+	.obj0_setDashLH: ; Light / Heavy
+		mMvC_SetSpeedH $0080
+		jp   .moveH_stub
+	.obj0_setDashE:  ; [POI] Hidden Heavy
+		mMvC_SetSpeedH $0100
+		jp   .moveH_stub
+; --------------- frame #0-2 ---------------
+.moveH_stub:
+	jp   .moveH
+; --------------- frame #3 ---------------
+.obj3:
+	mMvC_ValFrameEnd .moveH
+		ld   hl, iPlInfo_Flags1
+		add  hl, bc
+		res  PF1B_INVULN, [hl]
+		mMvC_PlaySound SCT_ATTACKG
+		jp   .anim
+; --------------- common horz movement ---------------
+.moveH:
 	call OBJLstS_ApplyXSpeed
-	jp   L05776A
-L05775F:;J
-	mMvC_ValFrameEnd L05776A
-	call Play_Pl_EndMove
-	jr   L05776D
-L05776A:;J
+	jp   .anim
+; --------------- frame #8 ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jr   .ret
+; --------------- common ---------------
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L05776D:;JR
+.ret:
 	ret
-L05776E:;I
+	
+; =============== MoveC_Chizuru_SanRaiFuiJin ===============
+; Move code for Chizuru's Ichimen Ikatsu San Rai no Fui Jin (MOVE_CHIZURU_SAN_RAI_FUI_JIN_S, MOVE_CHIZURU_SAN_RAI_FUI_JIN_D).
+; This is the move where Chizuru pauses for a bit, then dashes forward.
+; If the opponent is hit, he will flash and won't be able to start specials for a while.
+MoveC_Chizuru_SanRaiFuiJin:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L0577F3
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $0C
-	jp   z, L05778E
-	cp   $10
-	jp   z, L05779A
-	cp   $14
-	jp   z, L0577DE
-	jp   L0577F0
-L05778E:;J
-	mMvC_ValFrameEnd L0577F0
-	mMvC_SetAnimSpeed $14
-	jp   L0577F0
-L05779A:;J
-	mMvC_ValFrameStart L0577CC
-	ld   a, $09
-	call HomeCall_Sound_ReqPlayExId
-	ld   hl, $0083
-	add  hl, bc
-	ld   [hl], $00
-	mMvIn_ChkLHE L0577BD, L0577C6
-	mMvC_SetSpeedH $0400
-	jp   L0577CC
-L0577BD:;J
-	mMvC_SetSpeedH $0500
-	jp   L0577CC
-L0577C6:;J
-	mMvC_SetSpeedH $0600
-L0577CC:;J
-	ld   hl, $0040
-	call OBJLstS_ApplyFrictionHAndMoveH
-	mMvC_ValFrameEnd L0577F0
-	mMvC_SetAnimSpeed $0A
-	jp   L0577F0
-L0577DE:;J
-	ld   hl, $0080
-	call OBJLstS_ApplyFrictionHAndMoveH
-	mMvC_ValFrameEnd L0577F0
-	call Play_Pl_EndMove
-	jp   L0577F3
-L0577F0:;J
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj4
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim
+; --------------- frame #3 ---------------
+.obj3:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $14
+		jp   .anim
+; --------------- frame #4 ---------------
+.obj4:
+	mMvC_ValFrameStart .obj4_cont
+		mMvC_PlaySound SCT_HEAVY
+		;--
+		; [TCRF] This is not used elsewhere in this move
+		ld   hl, iPlInfo_Chizuru_SanRaiFuiJin_83
+		add  hl, bc
+		ld   [hl], $00
+		;--
+		; Set the dash speed depending on move strength
+		mMvIn_ChkLHE .obj4_setSpeedH, .obj4_setSpeedE
+	.obj4_setSpeedL: ; Light
+		mMvC_SetSpeedH $0400
+		jp   .obj4_cont
+	.obj4_setSpeedH: ; Heavy
+		mMvC_SetSpeedH $0500
+		jp   .obj4_cont
+	.obj4_setSpeedE: ; [POI] Hidden Heavy
+		mMvC_SetSpeedH $0600
+.obj4_cont:
+	mMvC_DoFrictionH $0040
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $0A
+		jp   .anim
+; --------------- frame #5 ---------------
+; Progressively slow down.
+.chkEnd:
+	mMvC_DoFrictionH $0080
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jp   .ret
+; --------------- common ---------------
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L0577F3:;J
+.ret:
 	ret
-L0577F4:;I
+	
+; =============== MoveC_Chizuru_ReijiIshizue ===============
+; Move code for Chizuru's Ichimen 85 Katsu Reigi no Ishizue (MOVE_CHIZURU_REIGI_ISHIZUE_S, MOVE_CHIZURU_REIGI_ISHIZUE_D).
+; Chizuru Clone projectile.
+MoveC_Chizuru_ReijiIshizue:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L057827
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L05780A
-L057807: db $C3;X
-L057808: db $24;X
-L057809: db $78;X
-L05780A:;J
-	mMvC_ValFrameStart L057818
-	call L057828
-	ld   a, $09
-	call HomeCall_Sound_ReqPlayExId
-L057818:;J
-	mMvC_ValFrameEnd L057824
-	call Play_Pl_EndMove
-	jp   L057827
-L057824:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------	
+.obj0:
+	; Spawn the projectile when starting the frame
+	mMvC_ValFrameStart .chkEnd
+		call ProjInit_Chizuru_ReigiIshizue
+		mMvC_PlaySound SCT_HEAVY
+.chkEnd:
+	; End the move when the frame's over
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jp   .ret
+; --------------- common ---------------
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L057827:;J
+.ret:
 	ret
-L057828:;C
-	ld   a, $16
-	call HomeCall_Sound_ReqPlayExId
+	
+; =============== ProjInit_Chizuru_ReigiIshizue ===============
+; Initializes the projectile for Chizuru's Ichimen 85 Katsu Reigi no Ishizue.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+ProjInit_Chizuru_ReigiIshizue:
+	mMvC_PlaySound SCT_15
+	
 	push bc
-	push de
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	push af
-	call L0024F8
-	ld   hl, $0020
-	add  hl, de
-	ld   [hl], $05
-	inc  hl
-	ld   [hl], $7C
-	inc  hl
-	ld   [hl], $78
-	ld   hl, $0010
-	add  hl, de
-	ld   [hl], $01
-	inc  hl
-	ld   [hl], $9B
-	inc  hl
-	ld   [hl], $5A
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $001B
-	add  hl, de
-	ld   [hl], $06
-	inc  hl
-	ld   [hl], $06
-	ld   hl, $0027
-	add  hl, de
-	ld   [hl], $03
-	inc  hl
-	pop  af
-	cp   $6A
-	jp   z, L05786E
-	ld   [hl], $78
-	jp   L057870
-L05786E:;J
-	ld   [hl], $FF
-L057870:;J
-	call OBJLstS_Overlap
-	mMvC_SetSpeedH $0080
-	pop  de
+		push de
+		
+			; A = MoveId
+			ld   hl, iPlInfo_MoveId
+			add  hl, bc
+			ld   a, [hl]
+			push af	; Save MoveId
+				call ProjInitS_InitAndGetOBJInfo
+				
+				; Set code pointer
+				ld   hl, iOBJInfo_Proj_CodeBank
+				add  hl, de
+				ld   [hl], BANK(ProjC_Chizuru_ReigiIshizue)	; BANK $05 ; iOBJInfo_Proj_CodeBank
+				inc  hl
+				ld   [hl], LOW(ProjC_Chizuru_ReigiIshizue)	; iOBJInfo_Proj_CodePtr_Low
+				inc  hl
+				ld   [hl], HIGH(ProjC_Chizuru_ReigiIshizue)	; iOBJInfo_Proj_CodePtr_High
+				
+				; Write sprite mapping ptr for this projectile.
+				ld   hl, iOBJInfo_BankNum
+				add  hl, de
+				ld   [hl], BANK(OBJLstPtrTable_Proj_Chizuru_ReigiIshizue)	; BANK $01 ; iOBJInfo_BankNum
+				inc  hl
+				ld   [hl], LOW(OBJLstPtrTable_Proj_Chizuru_ReigiIshizue)	; iOBJInfo_OBJLstPtrTbl_Low
+				inc  hl
+				ld   [hl], HIGH(OBJLstPtrTable_Proj_Chizuru_ReigiIshizue)	; iOBJInfo_OBJLstPtrTbl_High
+				inc  hl
+				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
+				
+				; Set animation speed.
+				ld   hl, iOBJInfo_FrameLeft
+				add  hl, de
+				ld   [hl], $06	; iOBJInfo_FrameLeft
+				inc  hl
+				ld   [hl], $06	; iOBJInfo_FrameTotal
+				
+				; Set priority value
+				ld   hl, iOBJInfo_Proj_Priority
+				add  hl, de
+				ld   [hl], PROJ_PRIORITY_NODESPAWN
+				
+				;
+				; Determine how long to display it.
+				;
+				
+				inc  hl	; Seek to iOBJInfo_Proj_EnaTimer
+				
+			pop  af ; A = MoveId
+			
+			cp   MOVE_CHIZURU_REIGI_ISHIZUE_D	; Desperation move?
+			jp   z, .timerD						; If so, jump
+		.timerS:
+			; The normal version has a despawn timer
+			ld   [hl], $78
+			jp   .setPos
+		.timerD:
+			; The desperation version doesn't despawn until it goes offscreen
+			ld   [hl], $FF
+		.setPos:
+		
+			; Start on top of player, and move forward at $00.80px/frame
+			call OBJLstS_Overlap
+			mMvC_SetSpeedH +$0080
+		pop  de
 	pop  bc
 	ret
-L05787C:;I
-	call ExOBJS_Play_ChkHitModeAndMoveH
-	jp   c, L05789C
-	ld   hl, $0021
+	
+; =============== ProjC_Chizuru_ReigiIshizue ===============
+; Projectile code for Chizuru's Ichimen 85 Katsu Reigi no Ishizue.
+; This projectile is a walking Chizuru clone that deals continuous damage.
+ProjC_Chizuru_ReigiIshizue:
+	call ExOBJS_Play_ChkHitModeAndMoveH	; Move projectile
+	jp   c, .despawn					; Did it go off-screen? If so, despawn
+	
+	; Projectile despawns on hit
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	bit  4, [hl]
-	jp   nz, L05789C
-	ld   hl, $0028
+	bit  PF1B_HITRECV, [hl]				; Did we get hit?
+	jp   nz, .despawn					; If so, despawn it
+	
+	; Decrement despawn timer only if it's not $FF (like the desperation super)
+	ld   hl, iOBJInfo_Proj_EnaTimer
 	add  hl, de
-	bit  7, [hl]
-	jp   nz, L057898
-	dec  [hl]
-	jp   z, L05789C
-L057898:;J
+	bit  7, [hl]		; Is the despawn timer $FF? (>= $80)
+	jp   nz, .anim		; If so, don't decrement it
+	dec  [hl]			; Otherwise, Timer--
+	jp   z, .despawn	; Did it reach 0? If so, despawn it
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 	ret
-L05789C:;J
+.despawn:
 	call OBJLstS_Hide
 	ret
+	
 ; =============== MoveInputReader_Daimon ===============
 ; Special move input checker for DAIMON.
 ; IN
@@ -10716,7 +11264,7 @@ MoveInputReader_Daimon:
 ; GROUND SPECIALS
 .chkGround:
 	;             SELECT + B                      SELECT + A
-	mMvIn_ChkEasy MoveInit_Daimon_HeavenHellDrop, MoveInit_Daimon_Jiraishin
+	mMvIn_ChkEasy MoveInit_Daimon_HeavenHellDrop, MoveInit_Daimon_JiraiShin
 	mMvIn_ChkGA Daimon, .chkPunch, .chkKick
 	
 .chkPunch:
@@ -10727,24 +11275,24 @@ MoveInputReader_Daimon:
 .chkPunchNoSuper:
 	; FDBF+P -> Heaven Drop
 	mMvIn_ChkDir MoveInput_FDBF, MoveInit_Daimon_HeavenDrop
-	; FDF+P -> Jiraishin
-	mMvIn_ChkDir MoveInput_FDF, MoveInit_Daimon_Jiraishin
+	; FDF+P -> Jirai Shin
+	mMvIn_ChkDir MoveInput_FDF, MoveInit_Daimon_JiraiShin
 	; BDF+P -> Cloud Tosser / Stump Throw
 	mMvIn_ChkDir MoveInput_BDF, MoveInit_Daimon_CloudTosser
 	; End
 	jp   MoveInputReader_Daimon_NoMove
 .chkKick:
-	; BDF+K -> Chou Ousotogari
-	mMvIn_ChkDir MoveInput_BDF, MoveInit_Daimon_ChouOusotogari
+	; BDF+K -> Chou Oosoto Gari
+	mMvIn_ChkDir MoveInput_BDF, MoveInit_Daimon_ChouOosotoGari
 	; DB+K -> Chou Ukemi
 	mMvIn_ChkDir MoveInput_DB, MoveInit_Daimon_ChouUkemi
 	; End
 	jp   MoveInputReader_Daimon_NoMove
 	
-; =============== MoveInit_Daimon_Jiraishin ===============
-MoveInit_Daimon_Jiraishin:
+; =============== MoveInit_Daimon_JiraiShin ===============
+MoveInit_Daimon_JiraiShin:
 	call Play_Pl_ClearJoyDirBuffer
-	mMvIn_GetLH MOVE_DAIMON_JIRAISHIN, MOVE_DAIMON_JIRAISHIN_FAKE
+	mMvIn_GetLH MOVE_DAIMON_JIRAI_SHIN, MOVE_DAIMON_JIRAI_SHIN_FAKE
 	call MoveInputS_SetSpecMove_StopSpeed
 	jp   MoveInputReader_Daimon_MoveSet
 ; =============== MoveInit_Daimon_ChouUkemi ===============
@@ -10757,10 +11305,10 @@ MoveInit_Daimon_ChouUkemi:
 	add  hl, bc
 	set  PF1B_INVULN, [hl]
 	jp   MoveInputReader_Daimon_MoveSet
-; =============== MoveInit_Daimon_ChouOusotogari ===============
-MoveInit_Daimon_ChouOusotogari:
+; =============== MoveInit_Daimon_ChouOosotoGari ===============
+MoveInit_Daimon_ChouOosotoGari:
 	call Play_Pl_ClearJoyDirBuffer
-	mMvIn_GetLH MOVE_DAIMON_CHOU_OUSOTOGARI_L, MOVE_DAIMON_CHOU_OUSOTOGARI_H
+	mMvIn_GetLH MOVE_DAIMON_CHOU_OOSOTO_GARI_L, MOVE_DAIMON_CHOU_OOSOTO_GARI_H
 	call MoveInputS_SetSpecMove_StopSpeed
 	jp   MoveInputReader_Daimon_MoveSet
 ; =============== MoveInit_Daimon_CloudTosser ===============
@@ -10801,503 +11349,688 @@ MoveInputReader_Daimon_NoMove:
 	or   a
 	ret
 	
-L0579B7:;I
+; =============== MoveC_Daimon_JiraiShin ===============
+; Move code for Daimon's Jirai Shin and its fake variant. (MOVE_DAIMON_JIRAI_SHIN, MOVE_DAIMON_JIRAI_SHIN_FAKE).
+MoveC_Daimon_JiraiShin:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L057A26
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L0579DC
-	cp   $04
-	jp   z, L0579EA
-	cp   $08
-	jp   z, L057A05
-	cp   $0C
-	jp   z, L057A18
-L0579D9: db $C3;X
-L0579DA: db $23;X
-L0579DB: db $7A;X
-L0579DC:;J
-	mMvC_ValFrameEnd L057A23
-	ld   a, $09
-	call HomeCall_Sound_ReqPlayExId
-	jp   L057A23
-L0579EA:;J
-	mMvC_ValFrameEnd L057A23
-	mMvC_SetAnimSpeed $0A
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	cp   $4A
-	jp   z, L057A1E
-	ld   a, $0E
-	call HomeCall_Sound_ReqPlayExId
-	jp   L057A23
-L057A05:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------	
+.obj0:
+	mMvC_ValFrameEnd .anim
+		mMvC_PlaySound SCT_HEAVY
+		jp   .anim
+; --------------- frame #1 ---------------	
+.obj1:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $0A
+		
+		; The fake version ends early, before the actual attack starts
+		ld   hl, iPlInfo_MoveId
+		add  hl, bc
+		ld   a, [hl]
+		cp   MOVE_DAIMON_JIRAI_SHIN_FAKE	; iPlInfo_MoveId == MOVE_DAIMON_JIRAI_SHIN_FAKE
+		jp   z, .end						; If so, we're done
+		
+		mMvC_PlaySound SCT_0D
+		jp   .anim
+; --------------- frame #2 ---------------	
+.obj2:
 	call Play_Pl_DoGroundScreenShake
-	mMvC_ValFrameEnd L057A23
-	mMvC_SetAnimSpeed $10
-	xor  a
-	ld   [wScreenShakeY], a
-	jp   L057A23
-L057A18:;J
-	mMvC_ValFrameEnd L057A23
-L057A1E:;J
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $10
+		; Frame #3 uses an extremely long hitbox across the ground.
+		; When the opponent gets hit, the screen shakes, so initialize this.
+		xor  a
+		ld   [wScreenShakeY], a
+		jp   .anim
+; --------------- frame #3 ---------------
+; Attack frame. When it ends, the move's over.
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+; --------------- common ---------------	
+.end:
 	call Play_Pl_EndMove
-	jr   L057A26
-L057A23:;J
+	jr   .ret
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L057A26:;JR
+.ret:
 	ret
-L057A27:;I
+	
+; =============== MoveC_Daimon_ChouUkemi ===============
+; Move code for Daimon's Chou Ukemi (MOVE_DAIMON_CHOU_UKEMI_L, MOVE_DAIMON_CHOU_UKEMI_H).	
+; Command roll.
+MoveC_Daimon_ChouUkemi:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L057ABA
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L057A49
-	cp   $04
-	jp   z, L057A78
-	cp   $08
-	jp   z, L057A8F
-	cp   $0C
-	jp   z, L057AAB
-L057A49:;J
-	mMvC_ValFrameStart L057A75
-	ld   a, $93
-	call HomeCall_Sound_ReqPlayExId
-	mMvIn_ChkLHE L057A66, L057A6F
-	mMvC_SetSpeedH $0100
-	jp   L057A75
-L057A66:;J
-	mMvC_SetSpeedH $0200
-	jp   L057A75
-L057A6F:;J
-	mMvC_SetSpeedH $0300
-L057A75:;J
-	jp   L057A89
-L057A78:;J
-	mMvC_ValFrameEnd L057A89
-	mMvC_SetAnimSpeed $04
-	ld   a, $9B
-	call HomeCall_Sound_ReqPlayExId
-	jp   L057A89
-L057A89:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+; --------------- frame #0 ---------------	
+.obj0:
+	; At the start of the frame, set the forward movement speed
+	mMvC_ValFrameStart .obj0_moveH
+		mMvC_PlaySound SFX_HEAVY
+		
+		; Depending on the move strength...
+		mMvIn_ChkLHE .obj0_setSpeedH, .obj0_setSpeedE
+	.obj0_setSpeedL: ; Light
+		mMvC_SetSpeedH +$0100
+		jp   .obj0_moveH
+	.obj0_setSpeedH: ; Heavy
+		mMvC_SetSpeedH +$0200
+		jp   .obj0_moveH
+	.obj0_setSpeedE: ; [POI] Hidden Heavy
+		mMvC_SetSpeedH +$0300
+.obj0_moveH:
+	jp   .moveH
+; --------------- frame #1 ---------------	
+.obj1:
+	mMvC_ValFrameEnd .moveH
+		mMvC_SetAnimSpeed $04 ; Slow down anim (from $01)
+		mMvC_PlaySound SFX_DROP
+		jp   .moveH
+; --------------- frame #1-2, common horz movement ---------------	
+.moveH:
 	call OBJLstS_ApplyXSpeed
-	jp   L057AB7
-L057A8F:;J
+	jp   .anim
+; --------------- frame #2 ---------------	
+.obj2:
+	; Shake the ground for the duration of this frame
 	call Play_Pl_DoGroundScreenShake
-	mMvC_ValFrameEnd L057A23
-	mMvC_SetAnimSpeed $02
-	xor  a
-	ld   [wScreenShakeY], a
-	ld   hl, $0020
-	add  hl, bc
-	res  1, [hl]
-	inc  hl
-	res  2, [hl]
-	jp   L057AB7
-L057AAB:;J
-	mMvC_ValFrameEnd L057AB7
-	call Play_Pl_EndMove
-	jp   L057ABA
-L057AB7:;J
+	
+	; [POI] Incorrect target
+IF FIX_BUGS == 1
+	mMvC_ValFrameEnd .anim
+ELSE
+	mMvC_ValFrameEnd MoveC_Daimon_JiraiShin.anim
+ENDC
+		; When the frame is over...
+		mMvC_SetAnimSpeed $02	; Speed up the anim
+		xor  a					; Reset the screen Y offset
+		ld   [wScreenShakeY], a
+		
+		; Allow chaining into another special during recovery (#3)
+		ld   hl, iPlInfo_Flags0
+		add  hl, bc
+		res  PF0B_SPECMOVE, [hl]
+		inc  hl			; Seek to iPlInfo_Flags1
+		res  PF1B_NOSPECSTART, [hl]
+		jp   .anim
+; --------------- frame #3 ---------------	
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jp   .ret
+; --------------- common ---------------	
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L057ABA:;J
+.ret:
 	ret
-L057ABB:;I
+	
+; =============== MoveC_Daimon_CmdThrow ===============
+; Move code for Daimon's command throws:
+; - Chou Oosoto Gari (MOVE_DAIMON_CHOU_OOSOTO_GARI_L, MOVE_DAIMON_CHOU_OOSOTO_GARI_H)
+; - Cloud Tosser (MOVE_DAIMON_CLOUD_TOSSER)
+; - Stump Throw (MOVE_DAIMON_STUMP_THROW)
+MoveC_Daimon_CmdThrow:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L057BDF
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L057AF9
-	cp   $04
-	jp   z, L057AFC
-	cp   $08
-	jp   z, L057BBC
-	cp   $0C
-	jp   z, L057BC8
-	cp   $10
-	jp   z, L057B47
-	cp   $14
-	jp   z, L057B71
-	cp   $18
-	jp   z, L057B9B
-	cp   $1C
-	jp   z, L057BBC
-	cp   $20
-	jp   z, L057BC8
-L057AF6: db $C3;X
-L057AF7: db $DC;X
-L057AF8: db $7B;X
-L057AF9:;J
-	jp   L057BDC
-L057AFC:;J
-	ld   hl, $0063
+	
+	; Startup
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	
+	; Throw test
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	
+	; Throw whiff
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	
+	; Throw ok
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj4
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj5
+	cp   $06*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj6
+	cp   $07*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $08*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------	
+; Startup.
+.obj0:
+	jp   .anim
+; --------------- frame #1 ---------------
+; Tries to start the command throw.	
+.obj1:
+	; If the animation continues as normal (.obj1_anim), the throw hasn't grabbed the opponent yet.
+	; If the validation must passes, the throw is confirmed, so we get moved to #4.
+	
+	; Opponent must be in throw range (overlapped with hitbox for throw range)
+	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  1, [hl]
-	jp   z, L057B44
-	ld   hl, $006E
+	bit  PCF_HITOTHER, [hl]
+	jp   z, .obj1_anim
+	
+	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
-	bit  7, [hl]
-	jp   nz, L057B44
-	bit  4, [hl]
-	jp   z, L057B44
-	bit  3, [hl]
-	jp   nz, L057B44
-	call MoveInputS_TryStartCommandThrow_Unk_Coli05
-	jp   nc, L057BDC
+	; Opponent must not be invulnerable
+	bit  PF1B_INVULN, [hl]
+	jp   nz, .obj1_anim
+	; Opponent must be hit
+	bit  PF1B_HITRECV, [hl]
+	jp   z, .obj1_anim
+	; Opponent can't have blocked the hit
+	bit  PF1B_GUARD, [hl]
+	jp   nz, .obj1_anim
+	
+	; Start the command throw.
+	; This also verifies the collision box again but oh well.
+	call MoveInputS_TryStartCommandThrow_Unk_Coli05		; Did it start successfully?
+	jp   nc, .anim										; If not, jump
+	
+	; Switch to throw confirm
 	call Task_PassControlFar
-	ld   a, $03
+	ld   a, PLAY_THROWACT_NEXT03
 	ld   [wPlayPlThrowActId], a
-	ld   hl, $0021
+	
+	; We're invulnerable with the throw confirmed
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	set  7, [hl]
-	ld   a, $10
-	ld   h, $01
-	call L002E49
+	set  PF1B_INVULN, [hl]
+	
+	; Set info for next frame
+	mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, $01
 	mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
 	mMvC_MoveThrowOp -$10, -$18
-	jp   L057BDF
-L057B44:;J
-	jp   L057BDC
-L057B47:;J
-	mMvC_ValFrameEnd L057BDC
-	mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
-	mMvC_MoveThrowOp -$08, -$18 ; Move opponent back 8px, up $18px
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	cp   $54
-	jp   nc, L057BDC
-	call L002827
-	mMvC_MoveThrowOp -$10, -$18
-	jp   L057BDC
-L057B71:;J
-	mMvC_ValFrameEnd L057BDC
-	mMvC_SetDamageNext $06, HITANIM_THROW_ROTD, PF3_SHAKELONG
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	cp   $54
-	jp   nc, L057B92
-	mMvC_MoveThrowOp -$10, -$10
-	jp   L057BDC
-L057B92:;J
-	mMvC_MoveThrowOp +$10, -$08
-	jp   L057BDC
-L057B9B:;J
-	mMvC_ValFrameEnd L057BDC
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	cp   $54
-	jp   nc, L057BB1
-	mkhl $06, HITANIM_DROP_SPEC_0C
-	ld   hl, CHL
-	jp   L057BB4
-L057BB1:;J
-	mkhl $06, HITANIM_DROP_SPEC_0F
-	ld   hl, CHL
-L057BB4:;J
-	ld   a, $00
-	call Play_Pl_SetMoveDamageNext
-	jp   L057BDC
-L057BBC:;J
-	mMvC_ValFrameEnd L057BDC
-	mMvC_SetAnimSpeed $0A
-	jp   L057BDC
-L057BC8:;J
-	mMvC_ValFrameEnd L057BDC
-	jp   L057BD1
-L057BD1:;J
-	mMvC_EndThrow_Slow
-	jp   L057BDF
-L057BDC:;J
+	jp   .ret
+.obj1_anim:
+	jp   .anim
+; --------------- frame #4 ---------------
+; Rotation frame 1
+.obj4:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
+		
+		; For Cloud Tosser / Stump Throw
+		mMvC_MoveThrowOp -$08, -$18 ; Move opponent back 8px, up $18px
+		
+		; Chou Oosoto Gari uses a different position and makes the opponent face the same direction as us
+		ld   hl, iPlInfo_MoveId
+		add  hl, bc
+		ld   a, [hl]
+		cp   MOVE_DAIMON_CLOUD_TOSSER	; MoveId >= MOVE_DAIMON_CLOUD_TOSSER?
+		jp   nc, .anim					; If so, jump (not Chou Oosoto Gari)
+		call Pl_CopyXFlipToOther
+		mMvC_MoveThrowOp -$10, -$18
+		jp   .anim
+; --------------- frame #5 ---------------
+; Rotation frame 2
+.obj5:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $06, HITANIM_THROW_ROTD, PF3_SHAKELONG
+		
+		; Use different opponent position for Chou Oosoto Gari
+		ld   hl, iPlInfo_MoveId
+		add  hl, bc
+		ld   a, [hl]
+		cp   MOVE_DAIMON_CLOUD_TOSSER	; MoveId >= MOVE_DAIMON_CLOUD_TOSSER?
+		jp   nc, .obj5_setPosCt			; If so, jump (not Chou Oosoto Gari)
+	.obj5_setPosCog:
+		mMvC_MoveThrowOp -$10, -$10
+		jp   .anim
+	.obj5_setPosCt:
+		mMvC_MoveThrowOp +$10, -$08
+		jp   .anim
+; --------------- frame #6 ---------------
+; Rotation frame 3, switch to damage at the end.
+.obj6:
+	mMvC_ValFrameEnd .anim
+	
+		; Set damage info when switching to #7.
+		; Chou Oosoto Gari uses a different hit animation than the others.
+		ld   hl, iPlInfo_MoveId
+		add  hl, bc
+		ld   a, [hl]
+		cp   MOVE_DAIMON_CLOUD_TOSSER	; MoveId >= MOVE_DAIMON_CLOUD_TOSSER?
+		jp   nc, .obj6_setDamageCt		; If so, jump (not Chou Oosoto Gari)
+	.obj6_setDamageCog:
+		mkhl $06, HITANIM_DROP_SPEC_0C
+		ld   hl, CHL
+		jp   .obj6_setDamage
+	.obj6_setDamageCt:
+		mkhl $06, HITANIM_DROP_SPEC_0F
+		ld   hl, CHL
+	.obj6_setDamage:
+		ld   a, $00 ; Flags
+		call Play_Pl_SetMoveDamageNext
+		jp   .anim
+; --------------- frame #2,#7 ---------------
+; Whiff for #2, Damage frame for #7.
+.obj2:
+	; When switching to #3 or #8, set $0A frames of delay to the recovery.
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $0A
+		jp   .anim
+; --------------- frames #3,#8 ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		jp   .end
+	.end:
+		mMvC_EndThrow_Slow
+		jp   .ret
+; --------------- common ---------------	
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L057BDF:;J
+.ret:
 	ret
-L057BE0:;I
+	
+; =============== MoveC_Daimon_HeavenDrop ===============
+; Move code for Daimon's Heaven Drop (MOVE_DAIMON_HEAVEN_DROP_L, MOVE_DAIMON_HEAVEN_DROP_H).
+; Command throw.
+MoveC_Daimon_HeavenDrop:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L057CDB
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L057C23
-	cp   $04
-	jp   z, L057C46
-	cp   $08
-	jp   z, L057C5D
-	cp   $0C
-	jp   z, L057C6E
-	cp   $10
-	jp   z, L057C85
-	cp   $14
-	jp   z, L057C9C
-	cp   $18
-	jp   z, L057CB3
-	cp   $1C
-	jp   z, L057C3A
-	cp   $20
-	jp   z, L057C3A
-	cp   $24
-	jp   z, L057CC7
-L057C20: db $C3;X
-L057C21: db $D8;X
-L057C22: db $7C;X
-L057C23:;J
-	mMvC_ValFrameEnd L057CD8
-	mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
-	mMvC_MoveThrowOp -$10, -$18
-	jp   L057CD8
-L057C3A:;J
-	mMvC_ValFrameEnd L057CD8
-	mMvC_SetAnimSpeed $05
-	jp   L057CD8
-L057C46:;J
-	mMvC_ValFrameEnd L057CD8
-	mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
-	mMvC_MoveThrowOp +$08, -$20
-	jp   L057CD8
-L057C5D:;J
-	mMvC_ValFrameEnd L057CD8
-	mMvC_SetDamageNext $06, HITANIM_HIT_SPEC_0B, PF3_BIT4|PF3_SHAKEONCE
-	jp   L057CD8
-L057C6E:;J
-	mMvC_ValFrameEnd L057CD8
-	call MoveInputS_TryStartCommandThrow_Unk_Coli05
-	jp   nc, L057CDB
-	call Task_PassControlFar
-	ld   a, $03
-	ld   [wPlayPlThrowActId], a
-	jp   L057CD8
-L057C85:;J
-	mMvC_ValFrameEnd L057CD8
-	mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
-	mMvC_MoveThrowOp -$10, -$20
-	jp   L057CD8
-L057C9C:;J
-	mMvC_ValFrameEnd L057CD8
-	mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
-	mMvC_MoveThrowOp +$04, -$18
-	jp   L057CD8
-L057CB3:;J
-	mMvC_ValFrameEnd L057CD8 ; test 
-	mMvC_SetAnimSpeed $1E
-	mMvC_SetDamageNext $06, HITANIM_DROP_SPEC_AIR_0E, PF3_SHAKELONG
-	jp   L057CD8
-L057CC7:;J
-	mMvC_ValFrameEnd L057CD8
-	mMvC_EndThrow_Slow
-	jp   L057CDB
-L057CD8:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj4
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj5
+	cp   $06*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj6
+	cp   $07*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj7
+	cp   $08*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj7
+	cp   $09*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------	
+.obj0:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
+		mMvC_MoveThrowOp -$10, -$18
+		jp   .anim
+; --------------- frames #7-8 ---------------	
+.obj7:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $05
+		jp   .anim
+; --------------- frame #1 ---------------	
+.obj1:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
+		mMvC_MoveThrowOp +$08, -$20
+		jp   .anim
+; --------------- frame #2 ---------------	
+.obj2:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $06, HITANIM_HIT_SPEC_0B, PF3_BIT4|PF3_SHAKEONCE
+		jp   .anim
+; --------------- frame #3 ---------------	
+.obj3:
+	mMvC_ValFrameEnd .anim
+		call MoveInputS_TryStartCommandThrow_Unk_Coli05	; Did the throw start?
+		jp   nc, .ret									; If not, return
+		call Task_PassControlFar
+		ld   a, PLAY_THROWACT_NEXT03
+		ld   [wPlayPlThrowActId], a
+		jp   .anim
+; --------------- frame #4 ---------------	
+.obj4:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
+		mMvC_MoveThrowOp -$10, -$20
+		jp   .anim
+; --------------- frame #5 ---------------	
+.obj5:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
+		mMvC_MoveThrowOp +$04, -$18
+		jp   .anim
+; --------------- frame #6 ---------------	
+.obj6:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $1E
+		mMvC_SetDamageNext $06, HITANIM_DROP_SPEC_AIR_0E, PF3_SHAKELONG
+		jp   .anim
+; --------------- frame #9 ---------------	
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		mMvC_EndThrow_Slow
+		jp   .ret
+; --------------- common ---------------	
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L057CDB:;J
+.ret:
 	ret
-L057CDC:;I
+	
+; =============== MoveC_Daimon_HeavenHellDrop ===============
+; Move code for Daimon's Heaven to Hell Drop (MOVE_DAIMON_HEAVEN_HELL_DROP_S, MOVE_DAIMON_HEAVEN_HELL_DROP_D).	
+; Command throw.
+MoveC_Daimon_HeavenHellDrop:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L057ED1
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L057D4C
-	cp   $04
-	jp   z, L057D7E
-	cp   $08
-	jp   z, L057D95
-	cp   $0C
-	jp   z, L057DAC
-	cp   $10
-	jp   z, L057DBD
-	cp   $14
-	jp   z, L057E05
-	cp   $18
-	jp   z, L057E33
-	cp   $1C
-	jp   z, L057E45
-	cp   $20
-	jp   z, L057E6A
-	cp   $24
-	jp   z, L057E1C
-	cp   $28
-	jp   z, L057E3C
-	cp   $2C
-	jp   z, L057E45
-	cp   $30
-	jp   z, L057E75
-	cp   $34
-	jp   z, L057E05
-	cp   $38
-	jp   z, L057E33
-	cp   $3C
-	jp   z, L057E56
-	cp   $40
-	jp   z, L057E96
-	cp   $44
-	jp   z, L057E99
-	cp   $48
-	jp   z, L057EA5
-L057D49: db $C3;X
-L057D4A: db $CE;X
-L057D4B: db $7E;X
-L057D4C:;J
-	mMvC_ValFrameEnd L057ECE
-	mMvC_SetAnimSpeed $05
-	mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	cp   $66
-	jr   z, L057D6B
-	ld   a, $02
-	jp   L057D6D
-L057D6B:;R
-	ld   a, $04
-L057D6D:;J
-	ld   hl, $0083
-	add  hl, bc
-	ld   [hl], a
-	call L002827
-	mMvC_MoveThrowOp -$08, -$10
-	jp   L057ECE
-L057D7E:;J
-	mMvC_ValFrameEnd L057ECE
-	mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
-	mMvC_MoveThrowOp -$0C, -$10
-	jp   L057ECE
-L057D95:;J
-	mMvC_ValFrameEnd L057ECE
-	mMvC_SetDamageNext $06, HITANIM_THROW_ROTD, PF3_BIT4|PF3_SHAKEONCE
-	mMvC_MoveThrowOp -$10, -$08
-	jp   L057ECE
-L057DAC:;J
-	mMvC_ValFrameEnd L057ECE
-	mMvC_SetDamageNext $06, HITANIM_HIT_SPEC_0B, PF3_BIT4|PF3_SHAKEONCE
-	jp   L057ECE
-L057DBD:;J
-	mMvC_ValFrameEnd L057ECE
-	push hl
-	ld   hl, $0083
-	add  hl, bc
-	ld   a, [hl]
-	sla  a
-	pop  hl
-	inc  hl
-	ld   [hl], a
-	jp   L057ECE
-L057DD1:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .init
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .iGrabUF
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .iGrabF
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .iGrabDFDamage
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .iSetSpeed
+	
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .lpGrabStartF
+	cp   $06*OBJLSTPTR_ENTRYSIZE
+	jp   z, .lpGrabU
+	cp   $07*OBJLSTPTR_ENTRYSIZE
+	jp   z, .lpGrabUB_setDamage
+	cp   $08*OBJLSTPTR_ENTRYSIZE
+	jp   z, .lpGrabB_decAnimSpeed
+	cp   $09*OBJLSTPTR_ENTRYSIZE
+	jp   z, .lpGrabStartB
+	cp   $0A*OBJLSTPTR_ENTRYSIZE
+	jp   z, .lpGrabU2
+	cp   $0B*OBJLSTPTR_ENTRYSIZE
+	jp   z, .lpGrabUB_setDamage
+	cp   $0C*OBJLSTPTR_ENTRYSIZE
+	jp   z, .lpChkLoop
+	
+	cp   $0D*OBJLSTPTR_ENTRYSIZE
+	jp   z, .lpGrabStartF
+	cp   $0E*OBJLSTPTR_ENTRYSIZE
+	jp   z, .lpGrabU
+	cp   $0F*OBJLSTPTR_ENTRYSIZE
+	jp   z, .startThrow
+	cp   $10*OBJLSTPTR_ENTRYSIZE
+	jp   z, .throw1
+	cp   $11*OBJLSTPTR_ENTRYSIZE
+	jp   z, .throw2
+	
+	cp   $12*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	
+	jp   .anim ; We never get here
+	
+; --------------- frame #0 ---------------
+; Startup & initialization code.
+.init:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $05
+		mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
+		
+		; 
+		; This move animation is divided in five parts:
+		; - Init (here)
+		; - First hit in grab mode (#1-#4)
+		; - Looping part for 2nd+ hit during grab mode (#5-#C)
+		; - The throw itself (#C-#11)
+		; - Transition to Jirai Shin for the earthquake effect (if applicable) (#12)
+		;
+		; How many times the second part is looped is determined by the timer in iPlInfo_Daimon_HeavenHellDrop_GrabLoopsLeft.
+		; The looping part loops more times in the desperation version of the move, meaning the opponents receives more damage by the end.
+		; Because the loop timer also directly influences the animation speed (Speed = Timer >> 1), having
+		; it loop more means the desperation super starts with a slower animation speed.
+		;
+		
+		
+		; Initialize the aforemented loop timer
+		ld   hl, iPlInfo_MoveId
+		add  hl, bc
+		ld   a, [hl]
+		cp   MOVE_DAIMON_HEAVEN_HELL_DROP_D	; Is the current move the desperation super?
+		jr   z, .init_setLoopCountD			; If so, jump
+	.init_setLoopCountS:
+		ld   a, $02				; Loop twice for normal super			
+		jp   .init_setLoopCount
+	.init_setLoopCountD:
+		ld   a, $04				; Loop 4 times for desperation super
+	.init_setLoopCount:
+		ld   hl, iPlInfo_Daimon_HeavenHellDrop_GrabLoopsLeft
+		add  hl, bc				; Seek to loop counter
+		ld   [hl], a			; Save the new value
+		
+		; Make opponent face same direction as us
+		call Pl_CopyXFlipToOther
+		mMvC_MoveThrowOp -$08, -$10
+		jp   .anim
+; --------------- frame #1 ---------------
+; Initial grab frame. Opponent up-front.
+.iGrabUF:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
+		mMvC_MoveThrowOp -$0C, -$10
+		jp   .anim
+; --------------- frame #2 ---------------
+; Initial grab frame. Opponent is in front.
+.iGrabF:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $06, HITANIM_THROW_ROTD, PF3_BIT4|PF3_SHAKEONCE
+		mMvC_MoveThrowOp -$10, -$08
+		jp   .anim
+; --------------- frame #3 ---------------
+; Initial grab frame. Opponent is in front and slightly below the middle.
+.iGrabDFDamage:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $06, HITANIM_HIT_SPEC_0B, PF3_BIT4|PF3_SHAKEONCE
+		jp   .anim
+; --------------- frame #4 ---------------
+; Initial grab frame. Opponent is on the ground forward.
+;
+; At the end of the frame, it initializes the animation speed for the looping portion:
+; iOBJInfo_FrameTotal = LoopCounter * 2
+; This will get decremented twice for every loop, appropriately.
+.iSetSpeed:
+	mMvC_ValFrameEnd .anim
+
+		push hl	; Save HL
+			ld   hl, iPlInfo_Daimon_HeavenHellDrop_GrabLoopsLeft
+			add  hl, bc
+			ld   a, [hl]	; A = Timer << 1
+			sla  a
+		pop  hl			; Restore ptr to iOBJInfo_FrameLeft
+		inc  hl			; Seek to iOBJInfo_FrameTotal
+		ld   [hl], a	; iOBJInfo_FrameTotal = A
+		jp   .anim
+; --------------- common move / damage instructions ---------------
+.setRotL_XM08_YM18:
 	mMvC_MoveThrowOp -$08, -$18 ; Move opponent back 8px, up $18px
-	jp   L057DE0
-L057DDA:;J
+	jp   .setRotL
+.setRotL_XP08_YM18:
 	mMvC_MoveThrowOp +$08, -$18
-L057DE0:;J
+.setRotL:
 	mMvC_SetDamageNext $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
-	jp   L057ECE
-L057DEB:;J
+	jp   .anim
+.setRotD_XM10YM14:
 	mMvC_MoveThrowOp -$10, -$14
-	jp   L057DFA
-L057DF4:;J
+	jp   .setRotD
+.setRotD_XP10YM14:
 	mMvC_MoveThrowOp +$10, -$14
-L057DFA:;J
+.setRotD:
 	mMvC_SetDamageNext $06, HITANIM_THROW_ROTD, PF3_SHAKELONG
-	jp   L057ECE
-L057E05:;J
-	mMvC_ValFrameEnd L057ECE
-	call MoveInputS_TryStartCommandThrow_Unk_Coli05
-	jp   nc, L057ED1
-	call Task_PassControlFar
-	ld   a, $03
-	ld   [wPlayPlThrowActId], a
-	jp   L057DD1
-L057E1C:;J
-	mMvC_ValFrameEnd L057ECE
-	call MoveInputS_TryStartCommandThrow_Unk_Coli05
-	jp   nc, L057ED1
-	call Task_PassControlFar
-	ld   a, $03
-	ld   [wPlayPlThrowActId], a
-	jp   L057DDA
-L057E33:;J
-	mMvC_ValFrameEnd L057ECE
-	jp   L057DF4
-L057E3C:;J
-	mMvC_ValFrameEnd L057ECE
-	jp   L057DEB
-L057E45:;J
-	mMvC_ValFrameEnd L057ECE
-	mMvC_SetDamageNext $06, HITANIM_HIT_SPEC_0B, PF3_SHAKELONG
-	jp   L057ECE
-L057E56:;J
-	mMvC_ValFrameEnd L057ECE
-	mMvC_SetAnimSpeed $0A
-	mMvC_SetDamageNext $06, HITANIM_DROP_SPEC_AIR_0E, PF3_SHAKELONG
-	jp   L057ECE
-L057E6A:;J
-	mMvC_ValFrameEnd L057ECE
-	inc  hl
-	dec  [hl]
-	jp   L057ECE
-L057E75:;J
-	mMvC_ValFrameEnd L057ECE
-	inc  hl
-	dec  [hl]
-	push hl
-	ld   hl, $0083
-	add  hl, bc
-	dec  [hl]
-	jp   z, L057E90
-	pop  hl
-	ld   hl, $0013
-	add  hl, de
-	ld   [hl], $10
-	jp   L057ECE
-L057E90:;J
-	pop  hl
-	ld   [hl], $00
-	jp   L057ECE
-L057E96:;J
-	jp   L057ECE
-L057E99:;J
-	mMvC_ValFrameEnd L057ECE
-	mMvC_SetAnimSpeed $64
-	jp   L057ECE
-L057EA5:;J
-	mMvC_ValFrameEnd L057ECE
-	ld   a, $00
-	ld   [wPlayPlThrowActId], a
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	cp   $66
-	jr   z, L057EBE
-	ld   a, $4A
-	jp   L057EC0
-L057EBE:;R
-	ld   a, $48
-L057EC0:;J
-	call MoveInputS_SetSpecMove_StopSpeed
-	mMvC_SetDamageNext $08, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_SHAKEONCE
-	jp   L057ED1
-L057ECE:;J
+	jp   .anim
+; --------------- frame #5,#D ---------------
+; Grab loop - Daimon crouching starting the throw. Opponent is on the ground in front.
+.lpGrabStartF:
+	mMvC_ValFrameEnd .anim
+		; Start the command throw again, since damaging the player using HITANIM_HIT_SPEC_0B internally ended the throw state.
+		; As the opponent is near and "frozen", this should never fail.
+		call MoveInputS_TryStartCommandThrow_Unk_Coli05
+		jp   nc, .ret
+		call Task_PassControlFar
+		ld   a, PLAY_THROWACT_NEXT03
+		ld   [wPlayPlThrowActId], a
+		jp   .setRotL_XM08_YM18
+; --------------- frame #9 ---------------
+; Grab loop - Daimon crouching starting the throw. Opponent is on the ground behind.
+.lpGrabStartB:
+	mMvC_ValFrameEnd .anim
+		; See #5
+		call MoveInputS_TryStartCommandThrow_Unk_Coli05
+		jp   nc, .ret
+		call Task_PassControlFar
+		ld   a, PLAY_THROWACT_NEXT03
+		ld   [wPlayPlThrowActId], a
+		jp   .setRotL_XP08_YM18
+; --------------- frame #6,#E ---------------
+; Grab loop. Opponent is above, coming from forward.
+.lpGrabU:
+	mMvC_ValFrameEnd .anim
+		jp   .setRotD_XP10YM14
+; --------------- frame #A ---------------
+; Grab loop. Opponent is above, coming from behind.
+.lpGrabU2:
+	mMvC_ValFrameEnd .anim
+		jp   .setRotD_XM10YM14
+; --------------- frame #7,#B ---------------
+; Grab loop. Opponent is diagonally up backwards..
+.lpGrabUB_setDamage:
+	; At the end of this, deal damage.
+	; Doing this ends the throw state, so one of the frames after regrabs the opponent.
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $06, HITANIM_HIT_SPEC_0B, PF3_SHAKELONG
+		jp   .anim
+; --------------- frame #F ---------------
+; At the end of the frame, perform the long off-screen throw.
+.startThrow:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $0A
+		mMvC_SetDamageNext $06, HITANIM_DROP_SPEC_AIR_0E, PF3_SHAKELONG
+		jp   .anim
+; --------------- frame #8 ---------------
+; Grab loop. Opponent is on the ground backwards.
+.lpGrabB_decAnimSpeed:
+	mMvC_ValFrameEnd .anim
+		inc  hl	; Seek to iOBJInfo_FrameTotal
+		dec  [hl]
+		jp   .anim
+; --------------- frame #C ---------------
+; Grab loop. Opponent is on the ground forwards, like in #5.
+; At the end of the frame, check if the looping portion should actually loop.
+.lpChkLoop:
+	mMvC_ValFrameEnd .anim
+		; Increase animation speed again (after it was done on #8)
+		inc  hl		; Seek to iOBJInfo_FrameTotal
+		dec  [hl]	; iOBJInfo_FrameTotal--
+		
+		push hl
+			; LoopCount--
+			ld   hl, iPlInfo_Daimon_HeavenHellDrop_GrabLoopsLeft
+			add  hl, bc
+			dec  [hl]					; Did the loop counter elapse?
+			jp   z, .lpChkLoop_noLoop	; If so, jump
+		pop  hl	
+		
+		; Otherwise, loop back to #5.
+		; Since .anim will increment the internal sprite mapping ID, this value must be set to #4.
+		ld   hl, iOBJInfo_OBJLstPtrTblOffset
+		add  hl, de
+		ld   [hl], $04*OBJLSTPTR_ENTRYSIZE
+		jp   .anim
+		
+		.lpChkLoop_noLoop:
+		pop  hl
+		; When the looping is over, continue normally to #D and animate as fast as possible.
+		ld   [hl], ANIMSPEED_INSTANT
+		jp   .anim
+; --------------- frame #10 ---------------
+; Throw frame. Nothing happens here.
+.throw1:
+	jp   .anim
+; --------------- frame #11 ---------------
+; Post-throw frame.
+.throw2:
+	mMvC_ValFrameEnd .anim
+		; Set a really large delay for #12 before it starts the earthquake.
+		; This is sync'd to how the opponent moves when thrown, so the earthquake happens
+		; when the opponent is on the ground.
+		mMvC_SetAnimSpeed $64
+		jp   .anim
+; --------------- frame #12 ---------------
+; Last frame before the transition to Jirai Shin.
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		; Transition to Jirai Shin when the move ends.
+		; Only the desperation super actually transitions to the real one though.
+		ld   a, PLAY_THROWACT_NONE
+		ld   [wPlayPlThrowActId], a
+		ld   hl, iPlInfo_MoveId
+		add  hl, bc
+		ld   a, [hl]
+		cp   MOVE_DAIMON_HEAVEN_HELL_DROP_D	; Is the current move the desperation super?
+		jr   z, .chkEnd_real				; If so, jump
+	.chkEnd_fake:
+		ld   a, MOVE_DAIMON_JIRAI_SHIN_FAKE
+		jp   .chkEnd_setNextMove
+	.chkEnd_real:
+		ld   a, MOVE_DAIMON_JIRAI_SHIN
+	.chkEnd_setNextMove:
+		call MoveInputS_SetSpecMove_StopSpeed
+		mMvC_SetDamageNext $08, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_SHAKEONCE
+		jp   .ret
+; --------------- common ---------------	
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L057ED1:;J
+.ret:
 	ret
+; =============== END OF BANK ===============
+; Junk area below.
 L057ED2: db $3E;X
 L057ED3: db $83;X
 L057ED4: db $CD;X

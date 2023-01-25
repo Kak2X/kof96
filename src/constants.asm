@@ -19,6 +19,18 @@ KEY_B            EQU 1 << KEYB_B
 KEY_SELECT       EQU 1 << KEYB_SELECT
 KEY_START        EQU 1 << KEYB_START
 
+; Flags for iPlInfo_JoyNewKeysLH in the upper nybble
+; (low nybble is the same as KEYB_*)
+KEPB_A_LIGHT EQU 4 ; A button pressed and released before 6 frames
+KEPB_B_LIGHT EQU 5 ; B button pressed and released before 6 frames
+KEPB_A_HEAVY EQU 6 ; A button held for 6 frames
+KEPB_B_HEAVY EQU 7 ; B button held for 6 frames
+KEP_A_LIGHT EQU 1 << KEPB_A_LIGHT
+KEP_B_LIGHT EQU 1 << KEPB_B_LIGHT
+KEP_A_HEAVY EQU 1 << KEPB_A_HEAVY
+KEP_B_HEAVY EQU 1 << KEPB_B_HEAVY
+
+
 DIFFICULTY_EASY		EQU $00
 DIFFICULTY_NORMAL	EQU $01
 DIFFICULTY_HARD		EQU $02
@@ -93,6 +105,7 @@ STAGESEQ_MRKARATE EQU $12
 C_NL EQU $FF ; Newline character in strings
 
 OBJ_OFFSET_X        EQU $08 ; Standard offset used when sprite positions are compared to the screen/scroll
+PLAY_BORDER_X       EQU $08 ; Threshold value for being treated as being on the wall.
 OBJLSTPTR_NONE      EQU $FFFF ; Placeholder pointer that marks the lack of a secondary sprite mapping and the end separator
 OBJLSTPTR_ENTRYSIZE EQU $04 ; Size of each OBJLstPtrTable entry (pair of OBJLstHdrA_* and OBJLstHdrB_* pointers)
 ANIMSPEED_INSTANT   EQU $00 ; Close enough
@@ -187,7 +200,7 @@ OLF_XFLIP        EQU 1 << OLFB_XFLIP ; $20
 OLF_YFLIP        EQU 1 << OLFB_YFLIP ; $40
 OLF_NOBUF        EQU 1 << OLFB_NOBUF
 
-; Raw versions from inside the ROM, which are shifted up before getting converted
+; Raw versions of the above from inside the ROM, which are shifted up before getting converted
 OLR_XFLIP EQU OLF_XFLIP << 1
 OLR_YFLIP EQU OLF_YFLIP << 1
 
@@ -207,6 +220,19 @@ TASK_EXEC_TODO EQU $04 ; Not executed yet, but was executed previously already. 
 TASK_EXEC_NEW  EQU $08 ; Never executed before. Likely init code which will set a new task. Jump HL type.
 
 PLINFO_SIZE EQU $100
+
+; Note that there isn't a single flag marking if we got hit and damaged.
+; A combination of at least one of these is checked:
+; PCF_HIT -> opponent collided with our hitbox (the move can still whiff)
+; PF1B_INVULN -> Invulnerability
+; PF1B_HITRECV -> damage string, aka hit received (definitely no whiff)
+; PF1B_GUARD -> blocked the hit
+; Moves that manually check for collision tend to handle them like this, generally for
+; attacks where the player moves forward until colliding with the player:
+; - PCF_HIT = 0 or PF1B_INVULN = 1 -> not hit yet
+; - PF1B_HITRECV = 1 and PF1B_GUARD = 1 -> opponent blocked the attack (from last frame)
+; - PF1B_HITRECV = 1 and PF1B_GUARD = 0 -> opponent got hit successfully (from last frame)
+
 
 ; iPlInfo_Flags0 flags
 PF0B_PROJ         EQU 0 ; If set, a projectile is active on-screen (ie: a new one can't be thrown)
@@ -232,7 +258,7 @@ PF1B_NOSPECSTART    EQU 2 ; If set, the current move can't be cancelled into a n
                           ; Overridden by PF1B_ALLOWHITCANCEL.
 PF1B_GUARD          EQU 3 ; If set, the player is guarding, and will receive less damage on hit.
                           ; Primarily set when blocking, but some special moves set this as well to have the same effects as blocking when getting hit out of them.
-PF1B_COMBORECV      EQU 4 ; If set, the player is on the receiving end of a damage string.
+PF1B_HITRECV        EQU 4 ; If set, the player is on the receiving end of a damage string.
                           ; This is set when the player is attacked at least once (hit or blocked), and
                           ; resets on its own if not cancelling the attack into one that hits.
 PF1B_CROUCH         EQU 5 ; If set, the player is crouching
@@ -268,26 +294,15 @@ PF3_BIT5            EQU 1 << PF3B_BIT5
 PF3_FLASH_B_FAST    EQU 1 << PF3B_FLASH_B_FAST
 PF3_SHAKEONCE       EQU 1 << PF3B_SHAKEONCE   
 
-; Flags for iPlInfo_JoyNewKeysLH in the upper nybble
-; (low nybble is the same as KEYB_*)
-KEPB_A_LIGHT EQU 4 ; A button pressed and released before 6 frames
-KEPB_B_LIGHT EQU 5 ; B button pressed and released before 6 frames
-KEPB_A_HEAVY EQU 6 ; A button held for 6 frames
-KEPB_B_HEAVY EQU 7 ; B button held for 6 frames
-KEP_A_LIGHT EQU 1 << KEPB_A_LIGHT
-KEP_B_LIGHT EQU 1 << KEPB_B_LIGHT
-KEP_A_HEAVY EQU 1 << KEPB_A_HEAVY
-KEP_B_HEAVY EQU 1 << KEPB_B_HEAVY
-
 ; Flags for iPlInfo_ColiFlags
 ; One half is for our collision status, the other is for the opponent.
 
 PCF_PUSHED       EQU 0 ; Player is being pushed 
-PCF_HITOTHER     EQU 1 ; The other player got hit
+PCF_HITOTHER     EQU 1 ; The other player got hit (hitbox collided, though it can't be used alone as the opponent may be invulnerable)
 PCF_PROJHITOTHER EQU 2 ; The other player got hit by a projectile
 PCF_PROJREMOTHER EQU 3 ; The other player removed/reflected a projectile
 PCF_PUSHEDOTHER  EQU 4 ; The other player is being pushed
-PCF_HIT          EQU 5 ; Player is hit by a physical attack
+PCF_HIT          EQU 5 ; Player is hit by a physical attack (hitbox collided, though it can't be used alone as the player may be invulnerable)
 PCF_PROJHIT      EQU 6 ; Player is by a projectile
 PCF_PROJREM      EQU 7 ; Player removed/reflected a projectile
 
@@ -396,11 +411,11 @@ SCT_0D                EQU $0E
 SCT_REFLECT           EQU $0F
 SCT_0F                EQU $10
 SCT_ATTACKG           EQU $11
-SCT_11                EQU $12 ; Andy Throw, Mai air throw
+SCT_11                EQU $12 ; Andy Throw, Mai air throw, Kyo's RED kick
 SCT_12                EQU $13
-SCT_13                EQU $14
+SCT_13                EQU $14 ; (Large?) Projectile spawned
 SCT_14                EQU $15
-SCT_15                EQU $16
+SCT_15                EQU $16 ; (Large?) Projectile spawned
 SCT_16                EQU $17
 SCT_17                EQU $18
 SCT_18                EQU $19
@@ -644,7 +659,7 @@ MOVE_SHARED_BLOCK_G        EQU $10 ; Ground block / mid
 MOVE_SHARED_BLOCK_C        EQU $12 ; Crouch block / low
 MOVE_SHARED_BLOCK_A        EQU $14 ; Air block
 MOVE_SHARED_RUN_F          EQU $16 ; Run forward
-MOVE_SHARED_DASH_B         EQU $18 ; Hop back
+MOVE_SHARED_HOP_B          EQU $18 ; Hop back
 MOVE_SHARED_CHARGEMETER    EQU $1A ; Charge meter
 MOVE_SHARED_TAUNT          EQU $1C ; Taunt
 MOVE_SHARED_ROLL_F         EQU $1E ; Roll forward
@@ -717,31 +732,31 @@ MOVE_SHARED_HIT_98         EQU $98
 MOVE_FF                    EQU $FF
 
 ; Character-specific
-MOVE_KYO_SHIKI_ARA_KAMI_L              EQU $48
-MOVE_KYO_SHIKI_ARA_KAMI_H              EQU $4A
-MOVE_KYO_SHIKI_ONIYAKI_L               EQU $4C
-MOVE_KYO_SHIKI_ONIYAKI_H               EQU $4E
+MOVE_KYO_ARA_KAMI_L                    EQU $48
+MOVE_KYO_ARA_KAMI_H                    EQU $4A
+MOVE_KYO_ONIYAKI_L                     EQU $4C
+MOVE_KYO_ONIYAKI_H                     EQU $4E
 MOVE_KYO_RED_KICK_L                    EQU $50
 MOVE_KYO_RED_KICK_H                    EQU $52
-MOVE_KYO_SHIKI_KOTOTSUKI_YOU_L         EQU $54
-MOVE_KYO_SHIKI_KOTOTSUKI_YOU_H         EQU $56
-MOVE_KYO_SHIKI_KAI_L                   EQU $58
-MOVE_KYO_SHIKI_KAI_H                   EQU $5A
-MOVE_KYO_SHIKI_NUE_TUMI_L              EQU $5C
-MOVE_KYO_SHIKI_NUE_TUMI_H              EQU $5E
+MOVE_KYO_KOTOTSUKI_YOU_L               EQU $54
+MOVE_KYO_KOTOTSUKI_YOU_H               EQU $56
+MOVE_KYO_KAI_L                         EQU $58
+MOVE_KYO_KAI_H                         EQU $5A
+MOVE_KYO_NUE_TUMI_L                    EQU $5C
+MOVE_KYO_NUE_TUMI_H                    EQU $5E
 MOVE_KYO_SPEC_6_L                      EQU $60
 MOVE_KYO_SPEC_6_H                      EQU $62
-MOVE_KYO_URA_SHIKI_OROCHINAGI_S        EQU $64 ; Super
-MOVE_KYO_URA_SHIKI_OROCHINAGI_D        EQU $66 ; Desperation super
+MOVE_KYO_URA_OROCHI_NAGI_S             EQU $64 ; Super
+MOVE_KYO_URA_OROCHI_NAGI_D             EQU $66 ; Desperation super
 MOVE_KYO_SUPER_1_S                     EQU $68
 MOVE_KYO_SUPER_1_D                     EQU $6A
 
-MOVE_DAIMON_JIRAISHIN                  EQU $48
-MOVE_DAIMON_JIRAISHIN_FAKE             EQU $4A
+MOVE_DAIMON_JIRAI_SHIN                 EQU $48
+MOVE_DAIMON_JIRAI_SHIN_FAKE            EQU $4A
 MOVE_DAIMON_CHOU_UKEMI_L               EQU $4C
 MOVE_DAIMON_CHOU_UKEMI_H               EQU $4E
-MOVE_DAIMON_CHOU_OUSOTOGARI_L          EQU $50
-MOVE_DAIMON_CHOU_OUSOTOGARI_H          EQU $52
+MOVE_DAIMON_CHOU_OOSOTO_GARI_L         EQU $50
+MOVE_DAIMON_CHOU_OOSOTO_GARI_H         EQU $52
 MOVE_DAIMON_CLOUD_TOSSER               EQU $54
 MOVE_DAIMON_STUMP_THROW                EQU $56
 MOVE_DAIMON_HEAVEN_DROP_L              EQU $58
@@ -786,8 +801,8 @@ MOVE_ANDY_GEKI_HEKI_HAI_SUI_SHO_L      EQU $58
 MOVE_ANDY_GEKI_HEKI_HAI_SUI_SHO_H      EQU $5A
 MOVE_ANDY_GENEI_SHIRANUI_L             EQU $5C
 MOVE_ANDY_GENEI_SHIRANUI_H             EQU $5E
-MOVE_ANDY_SPEC_6_L                     EQU $60
-MOVE_ANDY_SPEC_6_H                     EQU $62
+MOVE_ANDY_SHIMO_AGITO                  EQU $60
+MOVE_ANDY_UWA_AGITO                    EQU $62
 MOVE_ANDY_CHO_REPPA_DAN_S              EQU $64
 MOVE_ANDY_CHO_REPPA_DAN_D              EQU $66
 MOVE_ANDY_SUPER_1_S                    EQU $68
@@ -845,10 +860,10 @@ MOVE_ATHENA_SPEC_5_L                   EQU $5C
 MOVE_ATHENA_SPEC_5_H                   EQU $5E
 MOVE_ATHENA_SPEC_6_L                   EQU $60
 MOVE_ATHENA_SPEC_6_H                   EQU $62
-SHINING_CRYSTAL_BIT_GS                 EQU $64
-SHINING_CRYSTAL_BIT_GD                 EQU $66
-SHINING_CRYSTAL_BIT_AS                 EQU $68
-SHINING_CRYSTAL_BIT_AD                 EQU $6A
+MOVE_ATHENA_SHINING_CRYSTAL_BIT_GS     EQU $64
+MOVE_ATHENA_SHINING_CRYSTAL_BIT_GD     EQU $66
+MOVE_ATHENA_SHINING_CRYSTAL_BIT_AS     EQU $68
+MOVE_ATHENA_SHINING_CRYSTAL_BIT_AD     EQU $6A
 
 MOVE_MAI_KA_CHO_SEN_L                  EQU $48
 MOVE_MAI_KA_CHO_SEN_H                  EQU $4A
@@ -858,10 +873,10 @@ MOVE_MAI_RYU_EN_BU_L                   EQU $50
 MOVE_MAI_RYU_EN_BU_H                   EQU $52
 MOVE_MAI_HISHO_RYU_EN_JIN_L            EQU $54
 MOVE_MAI_HISHO_RYU_EN_JIN_H            EQU $56
-MOVE_MAI_CHIJOU_MUSASABI_MAI_L         EQU $58
-MOVE_MAI_CHIJOU_MUSASABI_MAI_H         EQU $5A
-MOVE_MAI_KUUCHUU_MUSASABI_MAI_L        EQU $5C
-MOVE_MAI_KUUCHUU_MUSASABI_MAI_H        EQU $5E
+MOVE_MAI_CHIJOU_MUSASABI_L             EQU $58
+MOVE_MAI_CHIJOU_MUSASABI_H             EQU $5A
+MOVE_MAI_KUUCHUU_MUSASABI_L            EQU $5C
+MOVE_MAI_KUUCHUU_MUSASABI_H            EQU $5E
 MOVE_MAI_SPEC_6_L                      EQU $60
 MOVE_MAI_SPEC_6_H                      EQU $62
 MOVE_MAI_CHO_HISSATSU_SHINOBIBACHI_S   EQU $64
@@ -957,8 +972,8 @@ MOVE_IORI_SCUM_GALE_L                  EQU $58
 MOVE_IORI_SCUM_GALE_H                  EQU $5A
 MOVE_IORI_SPEC_5_L                     EQU $5C
 MOVE_IORI_SPEC_5_H                     EQU $5E
-MOVE_IORI_MYSTERY_L                    EQU $60
-MOVE_IORI_MYSTERY_H                    EQU $62
+MOVE_IORI_KIN_YA_OTOME_ESCAPE_L        EQU $60
+MOVE_IORI_KIN_YA_OTOME_ESCAPE_H        EQU $62
 MOVE_IORI_KIN_YA_OTOME_S               EQU $64
 MOVE_IORI_KIN_YA_OTOME_D               EQU $66
 MOVE_OIORI_KIN_YA_OTOME_S              EQU $68
@@ -989,8 +1004,8 @@ MOVE_CHIZURU_SHINSOKU_NOROTI_HIGH_L    EQU $4C
 MOVE_CHIZURU_SHINSOKU_NOROTI_HIGH_H    EQU $4E
 MOVE_CHIZURU_SHINSOKU_NOROTI_LOW_L     EQU $50
 MOVE_CHIZURU_SHINSOKU_NOROTI_LOW_H     EQU $52
-MOVE_CHIZURU_SPEC_3_L                  EQU $54
-MOVE_CHIZURU_SPEC_3_H                  EQU $56
+MOVE_CHIZURU_TEN_ZUI_L                 EQU $54
+MOVE_CHIZURU_TEN_ZUI_H                 EQU $56
 MOVE_CHIZURU_TAMAYURA_SHITSUNE_L       EQU $58
 MOVE_CHIZURU_TAMAYURA_SHITSUNE_H       EQU $5A
 MOVE_CHIZURU_SPEC_5_L                  EQU $5C
@@ -1012,27 +1027,27 @@ MOVE_GOENITZ_WANPYOU_TOKOBUSE_L        EQU $54
 MOVE_GOENITZ_WANPYOU_TOKOBUSE_H        EQU $56
 MOVE_GOENITZ_YAMIDOUKOKU_SL            EQU $58 ; Treated as a super...
 MOVE_GOENITZ_YAMIDOUKOKU_SH            EQU $5A ; Treated as a super...
-MOVE_GOENITZ_SPEC_5_L                  EQU $5C
-MOVE_GOENITZ_SPEC_5_H                  EQU $5E
-MOVE_GOENITZ_SPEC_6_L                  EQU $60
-MOVE_GOENITZ_SPEC_6_H                  EQU $62
+MOVE_GOENITZ_SHINYAOTOME_THROW_L       EQU $5C
+MOVE_GOENITZ_SHINYAOTOME_THROW_H       EQU $5E
+MOVE_GOENITZ_SHINYAOTOME_PART2_L       EQU $60
+MOVE_GOENITZ_SHINYAOTOME_PART2_H       EQU $62
 MOVE_GOENITZ_SHINYAOTOME_MIZUCHI_SL    EQU $64
 MOVE_GOENITZ_SHINYAOTOME_MIZUCHI_SH    EQU $66
 MOVE_GOENITZ_SHINYAOTOME_JISSOUKOKU_DL EQU $68
 MOVE_GOENITZ_SHINYAOTOME_JISSOUKOKU_DH EQU $6A
 
-MOVE_MRKARATE_SHOURAN_KO_OU_KEN_L      EQU $48
-MOVE_MRKARATE_SHOURAN_KO_OU_KEN_H      EQU $4A
+MOVE_MRKARATE_KO_OU_KEN_L              EQU $48
+MOVE_MRKARATE_KO_OU_KEN_H              EQU $4A
 MOVE_MRKARATE_SHOURAN_KYAKU_L          EQU $4C
 MOVE_MRKARATE_SHOURAN_KYAKU_H          EQU $4E
 MOVE_MRKARATE_HIEN_SHIPPUU_KYAKU_L     EQU $50
 MOVE_MRKARATE_HIEN_SHIPPUU_KYAKU_H     EQU $52
 MOVE_MRKARATE_ZENRETSUKEN_L            EQU $54
 MOVE_MRKARATE_ZENRETSUKEN_H            EQU $56
-MOVE_MRKARATE_PUNCH_COMBO_L            EQU $58
-MOVE_MRKARATE_PUNCH_COMBO_H            EQU $5A
-MOVE_MRKARATE_SPEC_5_L                 EQU $5C
-MOVE_MRKARATE_SPEC_5_H                 EQU $5E
+MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_L EQU $58
+MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_H EQU $5A
+MOVE_MRKARATE_KO_OU_KEN_UNUSED_EL      EQU $5C ; [TCRF] Counterpart of MOVE_RYO_KO_HOU_EL that is incomplete.
+MOVE_MRKARATE_KO_OU_KEN_UNUSED_EH      EQU $5E
 MOVE_MRKARATE_SPEC_6_L                 EQU $60
 MOVE_MRKARATE_SPEC_6_H                 EQU $62
 MOVE_MRKARATE_RYUKO_RANBU_S            EQU $64
@@ -1070,6 +1085,8 @@ HITANIM_DUMMY               EQU $81 ; Placeholder used for some empty slots in t
 
 COLIBOX_00 EQU $00 ; None
 
+PROJ_PRIORITY_NODESPAWN EQU $03
+PROJ_PRIORITY_ALTSPEED EQU $04 ; Athena only
 
 ; wPlayPlThrowActId
 PLAY_THROWACT_NONE EQU $00
@@ -1087,7 +1104,37 @@ PLAY_THROWOP_UNUSED_BOTH EQU $02 ; [TCRF] Unused, works on both.
 PLAY_THROWDIR_F EQU $00
 PLAY_THROWDIR_B EQU $01
 
+; iPlInfo_Kyo_AraKami_SubInputMask for MOVE_KYO_ARA_KAMI_H
+MSIB_K0S0_P    EQU 0 ; 401 Shiki Tumi Yomi - Light punch pressed
+MSIB_K0S0_DB   EQU 1 ; 401 Shiki Tumi Yomi - DB input performed
+MSIB_K0S1_P    EQU 2 ; 402 Shiki Batu Yomi - Light punch pressed
+
+; iPlInfo_Chizuru_ShinsokuNoroti_ChainedMove
+PCMB_CHIZURU_TEN_ZUI_L EQU 0
+PCMB_CHIZURU_TEN_ZUI_H EQU 1
+
+; iPlInfo_Athena_ShCryst_ProjSize
+PACT_SIZE_NORM EQU $00
+PACT_SIZE_01 EQU $01
+PACT_SIZE_02 EQU $02
+PACT_SIZE_03 EQU $03
+PACT_SIZE_04 EQU $04
+
+; iOBJInfo_Proj_ShCrystThrow_TypeId
+PROJ_SHCRYST2_TYPE_GL EQU $01 ; Ground - light
+PROJ_SHCRYST2_TYPE_GH EQU $02 ; Ground - heavy
+PROJ_SHCRYST2_TYPE_AL EQU $03 ; Air - light
+PROJ_SHCRYST2_TYPE_AH EQU $04 ; Air - heavy
+
+
+; iOBJInfo_Proj_ShCrystCharge_OrbitMode
+PROJ_SHCRYST_ORBITMODE_OVAL EQU $00 ; Phase 1 - Projectile orbits in an oval trajectory at constant speeed
+PROJ_SHCRYST_ORBITMODE_SLOW EQU $01 ; Phase 2 - Orbit slows down until it stops moving vertically
+PROJ_SHCRYST_ORBITMODE_HOLD EQU $02 ; Phase 2 - Only horizontal movement
+PROJ_SHCRYST_ORBITMODE_SPIRAL EQU $FF ; Projectile moves in a spiral motion, expanding outwards, when releasing it early before phase 2
+
 PLAY_HEALTH_CRITICAL EQU $18 ; Threshold for critical health (allow infinite super & desperation supers)
+PLAY_HEALTH_MAX EQU $48 ; Health cap
 PL_FLOOR_POS EQU $88
 
 PLAY_MAXMODE_NONE EQU $00

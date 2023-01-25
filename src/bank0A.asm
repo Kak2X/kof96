@@ -12365,12 +12365,14 @@ MoveInputReader_Goenitz:
 	; Both the normal and desperation supers have light/heavy variations,
 	; which is why it's using mMvIn_JpSD to then jump to the light/heavy check.
 	
+	; Only the heavy versions can be started in the air.
+	
 .chkAir:
 	;             SELECT + B                            SELECT + A
 	mMvIn_ChkEasy .startAirPunchSuper, MoveInit_Goenitz_Hyouga.heavy
 	mMvIn_ChkGA Goenitz, .chkAirPunch, .chkAirKick
 .chkAirPunch:
-	; DBDF+P (air) -> Shinyaotome Mizuchi / Shinyaotome Jissoukoku  (always heavy)
+	; DBDF+P (air) -> Shinyaotome Mizuchi / Shinyaotome Jissoukoku (always heavy)
 	mMvIn_ValidateSuper .chkAirPunchNoSuper
 	mMvIn_ChkDirNot MoveInput_DBDF, .chkAirPunchNoSuper
 .startAirPunchSuper:
@@ -12378,7 +12380,7 @@ MoveInputReader_Goenitz:
 .chkAirPunchNoSuper:
 	jp   MoveInputReader_Goenitz_NoMove
 .chkAirKick:
-	; DB+K (air) -> Wanpyou Tokobuse
+	; DB+K (air) -> Hyouga
 	mMvIn_ChkDir MoveInput_DB, MoveInit_Goenitz_Hyouga.heavy
 	jp   MoveInputReader_Goenitz_NoMove
 	
@@ -12482,334 +12484,389 @@ MoveInputReader_Goenitz_SetMove:
 MoveInputReader_Goenitz_NoMove:
 	or   a
 	ret
-L0A74EA:;I
+	
+; =============== MoveC_Goenitz_Yonokaze ===============
+; Move code for Goenitz's Yonokaze (MOVE_GOENITZ_YONOKAZE1, MOVE_GOENITZ_YONOKAZE2, MOVE_GOENITZ_YONOKAZE3, MOVE_GOENITZ_YONOKAZE4).
+MoveC_Goenitz_Yonokaze:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L0A755A
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $08
-	jp   z, L0A7505
-	cp   $14
-	jp   z, L0A754B
-	jp   L0A7557
-L0A7505:;J
-	mMvC_ValFrameStart L0A7548
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	cp   $4A
-	jp   z, L0A7525
-	cp   $4C
-	jp   z, L0A752B
-	cp   $4E
-	jp   z, L0A7531
-	ld   hl, $1000
-	jp   L0A7534
-L0A7525:;J
-	ld   hl, $3000
-	jp   L0A7534
-L0A752B:;J
-	ld   hl, $5000
-	jp   L0A7534
-L0A7531:;J
-	ld   hl, $7000
-L0A7534:;J
-	push hl
-	call MoveInputS_CheckMoveLHVer
-	jp   nc, L0A7544
-	pop  hl
-	ld   l, $04
-	call L0A7DC1
-	jp   L0A7557
-L0A7544:;J
-	pop  hl
-	call L0A7DC1
-L0A7548:;J
-	jp   L0A7557
-L0A754B:;J
-	mMvC_ValFrameEnd L0A7557
-	call Play_Pl_EndMove
-	jp   L0A755A
-L0A7557:;J
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim
+; --------------- frame #2 ---------------
+.obj2:
+	mMvC_ValFrameStart .obj2_cont
+		; Pick a different spawn distance depending on the move started.
+		; Store it to H and clear L for later.
+		ld   hl, iPlInfo_MoveId
+		add  hl, bc
+		ld   a, [hl]				; A = iPlInfo_MoveId
+		cp   MOVE_GOENITZ_YONOKAZE2	; A == MOVE_GOENITZ_YONOKAZE2?
+		jp   z, .obj2_type2			; If so, jump
+		cp   MOVE_GOENITZ_YONOKAZE3	; ...
+		jp   z, .obj2_type3
+		cp   MOVE_GOENITZ_YONOKAZE4
+		jp   z, .obj2_type4
+	.obj2_type1:
+		ld   hl, $1000				; H = $10px forward
+		jp   .obj2_chkE
+	.obj2_type2:
+		ld   hl, $3000				; H = $30px forward
+		jp   .obj2_chkE
+	.obj2_type3:
+		ld   hl, $5000				; H = $50px forward
+		jp   .obj2_chkE
+	.obj2_type4:
+		ld   hl, $7000				; H = $70px forward
+		
+	.obj2_chkE:
+		; Determine if the wind projectile should move forward or not.
+		; [POI] It moves forward only with the hidden heavy.
+		push hl
+			call MoveInputS_CheckMoveLHVer	; Performed an hidden heavy? 
+			jp   nc, .obj2_verLH			; If not, jump
+		.obj2_verE:
+		pop  hl
+		ld   l, $04							; L = 4px/frame
+		call ProjInit_Goenitz_Yonokaze
+		jp   .anim
+		.obj2_verLH:
+		pop  hl								; L = 0
+		call ProjInit_Goenitz_Yonokaze
+.obj2_cont:
+	jp   .anim
+; --------------- frame #5 ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jp   .ret
+; --------------- common ---------------
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L0A755A:;J
+.ret:
 	ret
-L0A755B:;I
+	
+; =============== MoveC_Goenitz_HyougaL ===============
+; Move code for the light version of Goenitz's Hyouga (MOVE_GOENITZ_HYOUGA_L).
+; This is a long ground dash.
+MoveC_Goenitz_HyougaL:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L0A75FA
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $04
-	jp   z, L0A7580
-	cp   $08
-	jp   z, L0A7592
-	cp   $0C
-	jp   z, L0A75B4
-	cp   $10
-	jp   z, L0A75DD
-	jp   L0A75F7
-L0A7580:;J
-	mMvC_ValFrameEnd L0A75F7
-	mMvC_SetAnimSpeed $05
-	ld   hl, $0083
-	add  hl, bc
-	ld   [hl], $0A
-	jp   L0A75F7
-L0A7592:;J
-	mMvC_ValFrameStart L0A75A3
-	ld   a, $11
-	call HomeCall_Sound_ReqPlayExId
-	mMvC_SetSpeedH $0700
-L0A75A3:;J
-	ld   hl, $0083
-	add  hl, bc
-	dec  [hl]
-	jp   nz, L0A75EC
-	ld   hl, $0021
-	add  hl, bc
-	res  7, [hl]
-	jp   L0A75EC
-L0A75B4:;J
-	mMvC_ValFrameStart L0A75C3
-	ld   hl, $0020
-	add  hl, bc
-	res  1, [hl]
-	inc  hl
-	res  2, [hl]
-L0A75C3:;J
-	ld   hl, $0083
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim
+; --------------- frame #1 ---------------
+.obj1:
+	; Player is invulnerable until $0A frames into #2
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $05
+		ld   hl, iPlInfo_Goenitz_Hyouga_InvulnTimer
+		add  hl, bc
+		ld   [hl], $0A
+		jp   .anim
+; --------------- frame #2 ---------------
+.obj2:
+	mMvC_ValFrameStart .obj2_cont
+		mMvC_PlaySound SCT_ATTACKG
+		mMvC_SetSpeedH +$0700
+.obj2_cont:
+	; Remove invulnerability when the timer elapses.
+	; Dubious timer check since it doesn't check for underflow.
+	ld   hl, iPlInfo_Goenitz_Hyouga_InvulnTimer
 	add  hl, bc
 	dec  [hl]
-	jp   nz, L0A75EC
-L0A75CB: db $21;X
-L0A75CC: db $21;X
-L0A75CD: db $00;X
-L0A75CE: db $09;X
-L0A75CF: db $CB;X
-L0A75D0: db $BE;X
-L0A75D1: db $CD;X
-L0A75D2: db $D9;X
-L0A75D3: db $2D;X
-L0A75D4: db $D2;X
-L0A75D5: db $EC;X
-L0A75D6: db $75;X
-L0A75D7: db $23;X
-L0A75D8: db $36;X
-L0A75D9: db $03;X
-L0A75DA: db $C3;X
-L0A75DB: db $EC;X
-L0A75DC: db $75;X
-L0A75DD:;J
-	ld   hl, $0080
-	call OBJLstS_ApplyFrictionHAndMoveH
-	mMvC_ValFrameEnd L0A75F7
-	jp   L0A75F2
-L0A75EC:;J
+	jp   nz, .moveH
+	ld   hl, iPlInfo_Flags1
+	add  hl, bc
+	res  PF1B_INVULN, [hl]
+	jp   .moveH
+; --------------- frame #3 ---------------
+.obj3:
+	; Allow chaining into other specials from this
+	mMvC_ValFrameStart .obj3_cont
+		ld   hl, iPlInfo_Flags0
+		add  hl, bc
+		res  PF0B_SPECMOVE, [hl]
+		inc  hl			; Seek to iPlInfo_Flags1
+		res  PF1B_NOSPECSTART, [hl]
+.obj3_cont:
+	; [TCRF] / [BUG] Was invulnerability meant to last until #3?
+	; #2 already decremented the timer to 0 (and underflowed it), so we never get to
+	; execute the mMvC_ValFrameEnd part (not like it makes much difference).
+	; The timer check here is also bad since it doesn't check for underflow.
+IF FIX_BUGS == 0
+	ld   hl, iPlInfo_Goenitz_Hyouga_InvulnTimer
+	add  hl, bc
+	dec  [hl]
+	jp   nz, .moveH
+	;##
+	; We never get here
+	ld   hl, iPlInfo_Flags1
+	add  hl, bc
+	res  PF1B_INVULN, [hl]
+ENDC
+	mMvC_ValFrameEnd .moveH
+		mMvC_SetAnimSpeed $03
+		jp   .moveH
+	;##
+; --------------- frame #4 ---------------
+.chkEnd:
+	mMvC_DoFrictionH $0080
+	mMvC_ValFrameEnd .anim
+		jp   .end
+; --------------- common ---------------
+.moveH:
 	call OBJLstS_ApplyXSpeed
-	jp   L0A75F7
-L0A75F2:;J
+	jp   .anim
+.end:
 	call Play_Pl_EndMove
-	jr   L0A75FA
-L0A75F7:;J
+	jr   .ret
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L0A75FA:;JR
+.ret:
 	ret
-L0A75FB:;I
+	
+; =============== MoveC_Goenitz_HyougaH ===============
+; Move code for the hard version of Goenitz's Hyouga (MOVE_GOENITZ_HYOUGA_H).
+; This is a long air dash that can also be started on the ground.
+MoveC_Goenitz_HyougaH:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L0A76A8
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $04
-	jp   z, L0A761B
-	cp   $08
-	jp   z, L0A762D
-	cp   $0C
-	jp   z, L0A769A
-	jp   L0A76A5
-L0A761B:;J
-	mMvC_ValFrameEnd L0A76A5
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	ld   hl, $0083
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim
+; --------------- frame #1 ---------------
+.obj1:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		; Player is invulnerable until $0A frames into #2
+		ld   hl, iPlInfo_Goenitz_Hyouga_InvulnTimer
+		add  hl, bc
+		ld   [hl], $0A
+		jp   .anim
+; --------------- frame #2 ---------------
+.obj2:
+	mMvC_ValFrameStart .obj2_cont
+		mMvC_PlaySound SCT_ATTACKG
+		
+		;
+		; Determine by how much to move the player up, while the player is hidden
+		; in the first frame #2 starts.
+		;
+		
+		; If this move was started while on the ground, move up by $20px so we won't just end it immediately.
+		ld   hl, iOBJInfo_Y
+		add  hl, de
+		ld   a, [hl]				; A = YPos
+		cp   PL_FLOOR_POS			; YPos != PL_FLOOR_POS
+		jp   nz, .obj2_setOffsetA	; If so, jump
+	.obj2_setOffsetG:
+		ld   hl, -$2000		; HL = $20px up
+		jp   .obj2_moveUp
+	.obj2_setOffsetA:
+		; If we did it in the air, move up by $08px if we aren't too close to the top of the screen.
+		ld   hl, iOBJInfo_Y
+		add  hl, de
+		ld   a, [hl]				; A = YPos
+		cp   $08					; YPos < $08?
+		jp   c, .obj2_setDashSpeed	; If so, skip (don't underflow the Y coord)
+		ld   hl, -$0800				; HL = $08px up
+	.obj2_moveUp:
+		call Play_OBJLstS_MoveV
+	.obj2_setDashSpeed:
+		; Dash forwards in the air
+		mMvC_SetSpeedH +$0700
+		mMvC_SetSpeedV +$0000
+		
+		; [POI] The hidden heavy version can chain into other specials
+		call MoveInputS_CheckMoveLHVer
+		jp   nc, .anim
+		ld   hl, iPlInfo_Flags0
+		add  hl, bc
+		res  PF0B_SPECMOVE, [hl]
+		inc  hl			; Seek to iPlInfo_Flags1
+		res  PF1B_NOSPECSTART, [hl]
+		jp   .anim
+	
+.obj2_cont:
+	; Handle invulnerability timer. When it elapses we aren't invulnerable anymore.
+	ld   hl, iPlInfo_Goenitz_Hyouga_InvulnTimer
 	add  hl, bc
-	ld   [hl], $0A
-	jp   L0A76A5
-L0A762D:;J
-	mMvC_ValFrameStart L0A7676
-	ld   a, $11
-	call HomeCall_Sound_ReqPlayExId
-	ld   hl, $0005
-	add  hl, de
-	ld   a, [hl]
-	cp   $88
-	jp   nz, L0A7648
-	ld   hl, $E000
-	jp   L0A7655
-L0A7648: db $21;X
-L0A7649: db $05;X
-L0A764A: db $00;X
-L0A764B: db $19;X
-L0A764C: db $7E;X
-L0A764D: db $FE;X
-L0A764E: db $08;X
-L0A764F: db $DA;X
-L0A7650: db $58;X
-L0A7651: db $76;X
-L0A7652: db $21;X
-L0A7653: db $00;X
-L0A7654: db $F8;X
-L0A7655:;J
-	call Play_OBJLstS_MoveV
-	mMvC_SetSpeedH $0700
-	mMvC_SetSpeedV $0000
-	call MoveInputS_CheckMoveLHVer
-	jp   nc, L0A76A5
-L0A766A: db $21;X
-L0A766B: db $20;X
-L0A766C: db $00;X
-L0A766D: db $09;X
-L0A766E: db $CB;X
-L0A766F: db $8E;X
-L0A7670: db $23;X
-L0A7671: db $CB;X
-L0A7672: db $96;X
-L0A7673: db $C3;X
-L0A7674: db $A5;X
-L0A7675: db $76;X
-L0A7676:;J
-	ld   hl, $0083
+	dec  [hl]				; Timer--
+	jp   nz, .doGravity		; Timer != 0? If so, skip
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	dec  [hl]
-	jp   nz, L0A7687
-	ld   hl, $0021
-	add  hl, bc
-	res  7, [hl]
-	jp   L0A7687
-L0A7687:;J
-	mMvC_ChkGravityHV $0018, L0A76A5
-	mMvC_SetLandFrame $0C, $03
-	jp   L0A76A8
-L0A769A:;J
-	mMvC_ValFrameEnd L0A76A5
-	call Play_Pl_EndMove
-	jr   L0A76A8
-L0A76A5:;J
+	res  PF1B_INVULN, [hl]	; No more invulnerable
+	jp   .doGravity
+	
+.doGravity:
+	; Move down at $00.18px/frame, switch to #3 when touching the ground
+	mMvC_ChkGravityHV $0018, .anim
+	mMvC_SetLandFrame $03*OBJLSTPTR_ENTRYSIZE, $03
+	jp   .ret
+; --------------- frame #3 ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jr   .ret
+; --------------- common ---------------
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L0A76A8:;JR
+.ret:
 	ret
-L0A76A9:;I
+	
+; =============== MoveC_Goenitz_WanpyouTokobuse ===============
+; Move code for Goenitz's Wanpyou Tokobuse (MOVE_GOENITZ_WANPYOU_TOKOBUSE_L, MOVE_GOENITZ_WANPYOU_TOKOBUSE_H).
+MoveC_Goenitz_WanpyouTokobuse:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L0A7713
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $04
-	jp   z, L0A76C9
-	cp   $08
-	jp   z, L0A76E0
-	cp   $10
-	jp   z, L0A7704
-	jp   L0A7710
-L0A76C9:;J
-	mMvC_ValFrameStart L0A76D4
-	ld   a, $1B
-	call HomeCall_Sound_ReqPlayExId
-L0A76D4:;J
-	mMvC_ValFrameEnd L0A7710
-	mMvC_SetAnimSpeed $1E
-	jp   L0A7710
-L0A76E0:;J
-	mMvC_ValFrameStart L0A76F8
-	mMvIn_ChkLH L0A76F2
-	ld   hl, $1C00
-	jp   L0A76F5
-L0A76F2:;J
-	ld   hl, $18E8
-L0A76F5:;J
-	call L0A7E68
-L0A76F8:;J
-	mMvC_ValFrameEnd L0A7710
-	mMvC_SetAnimSpeed $02
-	jp   L0A7710
-L0A7704:;J
-	mMvC_ValFrameEnd L0A7710
-	call Play_Pl_EndMove
-	jp   L0A7713
-L0A7710:;J
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim
+; --------------- frame #1 ---------------
+.obj1:
+	mMvC_ValFrameStart .obj1_cont
+		mMvC_PlaySound SCT_THROW
+.obj1_cont:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $1E
+		jp   .anim
+; --------------- frame #2 ---------------
+.obj2:
+	; Set the projectile's origin, relative to the player's, depending on the move strength.
+	; The heavy version is $18px above the light one.
+	mMvC_ValFrameStart .obj2_cont
+		mMvIn_ChkLH .obj2_setPosH
+	.obj2_setPosL: ; Light
+		mkhl $1C, $00 ; $1Cpx fwd
+		ld   hl, CHL
+		jp   .obj2_initProj
+	.obj2_setPosH: ; Heavy
+		mkhl $18, -$18 ; $18px fwd, $18px up
+		ld   hl, CHL
+	.obj2_initProj:
+		call ProjInit_Goenitz_WanpyouTokobuse
+.obj2_cont:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $02
+		jp   .anim
+; --------------- frame #4 ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jp   .ret
+; --------------- common ---------------
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L0A7713:;J
+.ret:
 	ret
-L0A7714:;I
+	
+; =============== MoveC_Goenitz_Yamidoukoku ===============
+; Move code for Goenitz's Yamidoukoku (MOVE_GOENITZ_YAMIDOUKOKU_SL, MOVE_GOENITZ_YAMIDOUKOKU_SH).
+MoveC_Goenitz_Yamidoukoku:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L0A77C9
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L0A773E
-	cp   $04
-	jp   z, L0A775E
-	cp   $08
-	jp   z, L0A7775
-	cp   $0C
-	jp   z, L0A7795
-	cp   $14
-	jp   z, L0A77B5
-	jp   L0A77C6
-L0A773E:;J
-	mMvC_ValFrameStart L0A7752
-	mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
-	mMvC_MoveThrowOp -$10, -$10
-L0A7752:;J
-	mMvC_ValFrameEnd L0A77C6
-	mMvC_SetAnimSpeed $06
-	jp   L0A77C6
-L0A775E:;J
-	mMvC_ValFrameStart L0A77C6
-	mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
-	mMvC_MoveThrowOp -$10, -$11
-	jp   L0A77C6
-L0A7775:;J
-	mMvC_ValFrameStart L0A7789
-	mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
-	mMvC_MoveThrowOp -$10, -$12
-L0A7789:;J
-	mMvC_ValFrameEnd L0A77C6
-	mMvC_SetAnimSpeed $1E
-	jp   L0A77C6
-L0A7795:;J
-	mMvC_ValFrameStart L0A77A9
-	mMvC_SetDamageNext $02, HITANIM_DROP_SPEC_AIR_0E, PF3_SHAKELONG
-	call Play_Proj_CopyMoveDamageFromPl
-	call L0A7E1D
-L0A77A9:;J
-	mMvC_ValFrameEnd L0A77C6
-	mMvC_SetAnimSpeed $06
-	jp   L0A77C6
-L0A77B5:;J
-	mMvC_ValFrameEnd L0A77C6
-	mMvC_EndThrow_Slow
-	jp   L0A77C9
-L0A77C6:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim
+; --------------- frame #0 ---------------
+.obj0:
+	mMvC_ValFrameStart .obj0_cont
+		mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+		mMvC_MoveThrowOp -$10, -$10
+.obj0_cont:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $06
+		jp   .anim
+; --------------- frame #1 ---------------
+.obj1:
+	mMvC_ValFrameStart .anim
+		mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+		mMvC_MoveThrowOp -$10, -$11
+		jp   .anim
+; --------------- frame #2 ---------------
+.obj2:
+	mMvC_ValFrameStart .obj2_cont
+		mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+		mMvC_MoveThrowOp -$10, -$12
+.obj2_cont:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $1E
+		jp   .anim
+; --------------- frame #3 ---------------
+.obj3:
+	mMvC_ValFrameStart .obj3_cont
+		mMvC_SetDamageNext $02, HITANIM_DROP_SPEC_AIR_0E, PF3_SHAKELONG
+		call Play_Proj_CopyMoveDamageFromPl
+		call ProjInit_Goenitz_Yamidoukoku
+.obj3_cont:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $06
+		jp   .anim
+; --------------- frame #5 ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		mMvC_EndThrow_Slow
+		jp   .ret
+; --------------- common ---------------
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L0A77C9:;J
+.ret:
 	ret
-; =============== MoveC_Goenitz_ThrowG ===============
-; Move code for Goenitz's throw (MOVE_SHARED_THROW_G).
-; ??? and also MOVE_GOENITZ_SPEC_5_L
-MoveC_Goenitz_ThrowG:
+; =============== MoveC_Goenitz_ShinyaotomeThrowL ===============
+; Move code for:
+; - Goenitz's throw (MOVE_SHARED_THROW_G)
+; - The third part of Goenitz's light supers (MOVE_GOENITZ_SHINYAOTOME_THROW_L)
+MoveC_Goenitz_ShinyaotomeThrowL:
 	call Play_Pl_MoveByColiBoxOverlapX
 	mMvC_ValLoaded .ret
 	
@@ -12833,920 +12890,1048 @@ MoveC_Goenitz_ThrowG:
 ; --------------- frame #0 ---------------
 .setSpeed06:
 	mMvC_ValFrameEnd .anim
-	mMvC_SetAnimSpeed $06
-	jp   .anim
+		mMvC_SetAnimSpeed $06
+		jp   .anim
 ; --------------- frame #1 ---------------
 .rotU1:
 	mMvC_ValFrameStart .anim
-	
-	mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
-	
-	mMvC_MoveThrowOp -$10, -$10
-
-	jp   .anim
+		mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+		mMvC_MoveThrowOp -$10, -$10
+		jp   .anim
 ; --------------- frame #2 ---------------
 .rotU2:
 	mMvC_ValFrameStart .anim
-	
-	mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
-	
-	mMvC_MoveThrowOp -$0D, -$10
-
-	jp   .anim
+		mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+		mMvC_MoveThrowOp -$0D, -$10
+		jp   .anim
 ; --------------- frame #3 ---------------
 .rotL:
 	mMvC_ValFrameStart .anim
-	
-	mMvC_SetDamage $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
-	
-	mMvC_MoveThrowOp +$0C, -$20
-
-	jp   .anim
+		mMvC_SetDamage $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
+		mMvC_MoveThrowOp +$0C, -$20
+		jp   .anim
 ; --------------- frame #4 ---------------
 .rotD:
 	mMvC_ValFrameStart .rotD_setSpeed14
-	
-	mMvC_SetDamage $06, HITANIM_THROW_ROTD, PF3_SHAKELONG
-	
-	mMvC_MoveThrowOp +$10, -$04
-
-	jp   .anim
+		mMvC_SetDamage $06, HITANIM_THROW_ROTD, PF3_SHAKELONG
+		mMvC_MoveThrowOp +$10, -$04
+		jp   .anim
 .rotD_setSpeed14:
 	mMvC_ValFrameEnd .anim
-	mMvC_SetAnimSpeed $14
-	jp   .anim
+		mMvC_SetAnimSpeed $14
+		jp   .anim
 ; --------------- frame #5 ---------------
 .setDamage:
 	mMvC_ValFrameStart .chkEnd
-	; Goenitz's throw deals almost double the damage of other character's throws.
-	mMvC_SetDamage $0A, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
-	jp   .anim
+		; Goenitz's throw deals almost double the damage of other character's throws.
+		mMvC_SetDamage $0A, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
+		jp   .anim
 .chkEnd:
 	mMvC_ValFrameEnd .anim
-	mMvC_EndThrow_Slow
-	jp   .ret
+		mMvC_EndThrow_Slow
+		jp   .ret
 ; --------------- common ---------------
 .anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 .ret:
 	ret
 	
-L0A7893:;I
+; =============== MoveC_Goenitz_ShinyaotomeThrowH ===============
+; Move code for the third part of Goenitz's heavy supers (MOVE_GOENITZ_SHINYAOTOME_THROW_H).
+; The player jumps while grabbing the opponent, then releases him on the ground for big damage.
+MoveC_Goenitz_ShinyaotomeThrowH:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L0A79A9
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L0A78C7
-	cp   $04
-	jp   z, L0A78D3
-	cp   $08
-	jp   z, L0A78EA
-	cp   $0C
-	jp   z, L0A790D
-	cp   $10
-	jp   z, L0A7944
-	cp   $14
-	jp   z, L0A7960
-	cp   $18
-	jp   z, L0A7995
-L0A78C4: db $C3;X
-L0A78C5: db $A6;X
-L0A78C6: db $79;X
-L0A78C7:;J
-	mMvC_ValFrameEnd L0A79A6
-	mMvC_SetAnimSpeed $06
-	jp   L0A79A6
-L0A78D3:;J
-	mMvC_ValFrameStart L0A79A6
-	mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
-	mMvC_MoveThrowOp -$10, -$10
-	jp   L0A79A6
-L0A78EA:;J
-	mMvC_ValFrameStart L0A7901
-	mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
-	mMvC_MoveThrowOp -$0D, -$10
-	jp   L0A79A6
-L0A7901:;J
-	mMvC_ValFrameEnd L0A79A6
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	jp   L0A79A6
-L0A790D:;J
-	mMvC_ValFrameStart L0A7937
-	ld   a, $12
-	call HomeCall_Sound_ReqPlayExId
-	mMvC_SetSpeedH $0000
-	mMvC_SetSpeedV $FA00
-	mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
-	mMvC_MoveThrowOp -$0D, -$10
-	ld   a, $01
-	ld   [wPlayPlThrowRot_Unk_UseInMove], a
-L0A7937:;J
-	mMvC_NextFrameOnGtYSpeed $FC, $FF
-	jp   nc, L0A797A
-	jp   L0A797A
-L0A7944:;J
-	mMvC_ValFrameStart L0A795D
-	mMvC_SetDamage $06, HITANIM_THROW_ROTD, PF3_SHAKELONG
-	mMvC_MoveThrowOp +$04, -$18
-	ld   a, $01
-	ld   [wPlayPlThrowRot_Unk_UseInMove], a
-L0A795D:;J
-	jp   L0A797A
-L0A7960:;J
-	mMvC_ValFrameStart L0A7977
-	mMvC_SetDamage $0A, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
-	mMvC_ValFrameEnd L0A79A6
-L0A7974: db $23;X
-L0A7975: db $36;X
-L0A7976: db $14;X
-L0A7977:;J
-	jp   L0A79A6
-L0A797A:;J
-	mMvC_ChkGravityHV $0060, L0A79A6
-	mMvC_SetLandFrame $14, $04
-	mMvC_SetDamageNext $0A, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
-	jp   L0A79A9
-L0A7995:;J
-	mMvC_ValFrameEnd L0A79A6
-	mMvC_EndThrow_Slow
-	jp   L0A79A9
-L0A79A6:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .rotU1
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .rotU2
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .rotU3
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .rotU4Jump
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .rotDJump
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setDamage
+	cp   $06*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------
+.rotU1:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $06
+		jp   .anim
+; --------------- frame #1 ---------------
+.rotU2:
+	mMvC_ValFrameStart .anim
+		mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+		mMvC_MoveThrowOp -$10, -$10
+		jp   .anim
+; --------------- frame #2 ---------------
+.rotU3:
+	mMvC_ValFrameStart .rotU3_cont
+		mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+		mMvC_MoveThrowOp -$0D, -$10
+		jp   .anim
+.rotU3_cont:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		jp   .anim
+; --------------- frame #3 ---------------
+.rotU4Jump:
+	mMvC_ValFrameStart .rotU4Jump_cont
+		mMvC_PlaySound SCT_11
+		mMvC_SetSpeedH +$0000
+		mMvC_SetSpeedV -$0600
+		mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+		mMvC_MoveThrowOp -$0D, -$10
+		ld   a, $01
+		ld   [wPlayPlThrowRot_Unk_AlwaysSync], a
+.rotU4Jump_cont:
+	mMvC_NextFrameOnGtYSpeed -$04, ANIMSPEED_NONE
+	jp   nc, .doGravity
+	jp   .doGravity
+; --------------- frame #4 ---------------
+.rotDJump:
+	mMvC_ValFrameStart .rotDJump_cont
+		mMvC_SetDamage $06, HITANIM_THROW_ROTD, PF3_SHAKELONG
+		mMvC_MoveThrowOp +$04, -$18
+		ld   a, $01
+		ld   [wPlayPlThrowRot_Unk_AlwaysSync], a
+.rotDJump_cont:
+	jp   .doGravity
+; --------------- frame #5 ---------------
+.setDamage:
+	mMvC_ValFrameStart .setDamage_cont
+		; Just in case we got from #4 normally, set this again
+		mMvC_SetDamage $0A, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
+		mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $14 ; We never get here?
+.setDamage_cont:
+	jp   .anim
+; --------------- common gravity check ---------------
+; If we land at any point, switch to #5 and deal the damage.
+.doGravity:
+	mMvC_ChkGravityHV $0060, .anim
+		mMvC_SetLandFrame $05*OBJLSTPTR_ENTRYSIZE, $04
+		mMvC_SetDamageNext $0A, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
+		jp   .ret
+; --------------- frame #6 ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		mMvC_EndThrow_Slow
+		jp   .ret
+; --------------- common ---------------
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L0A79A9:;J
+.ret:
 	ret
-L0A79AA:;I
+	
+; =============== MoveC_Goenitz_ShinyaotomePart2 ===============
+; Move code for the second part Goenitz's supers (MOVE_GOENITZ_SHINYAOTOME_PART2_L, MOVE_GOENITZ_SHINYAOTOME_PART2_H).
+; This is the part that deals the large amount of damage. Every light/heavy super transitions into this when the dash ends.
+MoveC_Goenitz_ShinyaotomePart2:
 	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L0A7A95
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L0A79D4
-	cp   $04
-	jp   z, L0A79F4
-	cp   $08
-	jp   z, L0A7A08
-	cp   $0C
-	jp   z, L0A79F4
-	cp   $10
-	jp   z, L0A7A36
-L0A79D1: db $C3;X
-L0A79D2: db $8C;X
-L0A79D3: db $7A;X
-L0A79D4:;J
-	mMvC_ValFrameStart L0A79E0
-	mMvC_SetSpeedH $0080
-L0A79E0:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .unused_end ; We never get here
+; --------------- frame #0 ---------------
+; Initial loop. Horizontal movement, with speed setup.
+; Every frame in the first loop deals 1 line of damage, but it's repeated several times.
+.obj0:
+	mMvC_ValFrameStart .obj0_cont
+		mMvC_SetSpeedH +$0080
+.obj0_cont:
 	call OBJLstS_ApplyXSpeed
-	mMvC_ValFrameEnd L0A7A92
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
-	jp   L0A7A75
-L0A79F4:;J
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+		jp   .chkOtherEscape
+; --------------- frame #1 ---------------
+; Initial loop. Horizontal movement.
+.obj1:
 	call OBJLstS_ApplyXSpeed
-	mMvC_ValFrameEnd L0A7A92
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
-	jp   L0A7A75
-L0A7A08:;J
+	mMvC_ValFrameEnd .anim
+		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+		jp   .chkOtherEscape
+; --------------- frame #2 ---------------
+; Initial loop. Horizontal movement.
+.obj2:
 	call OBJLstS_ApplyXSpeed
-	mMvC_ValFrameEnd L0A7A92
-	ld   hl, $0083
-	add  hl, bc
-	dec  [hl]
-	jp   z, L0A7A2B
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_BIT4
-	ld   a, $00
-	ld   h, $00
-	call L002E49
-	jp   L0A7A95
-L0A7A2B:;J
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
-	jp   L0A7A75
-L0A7A36:;J
+	mMvC_ValFrameEnd .anim	
+		; Loop back to #0 until the timer elapses.
+		; Note that this timer was set by whoever started the move.
+		ld   hl, iPlInfo_Goenitz_Shinyaotome_LoopTimer
+		add  hl, bc
+		dec  [hl]
+		jp   z, .obj2_noLoop
+	.obj2_loop:
+		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_BIT4
+		mMvC_SetFrame $00*OBJLSTPTR_ENTRYSIZE, $00
+		jp   .ret
+	.obj2_noLoop:
+		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+		jp   .chkOtherEscape
+		
+; --------------- frame #3 ---------------
+; Start the actual command throw for the third part, and transitions into it.
+.chkEnd:
 	call OBJLstS_ApplyXSpeed
-	mMvC_ValFrameEnd L0A7A92
-	call MoveInputS_TryStartCommandThrow_Unk_Coli05
-	jp   nc, L0A7A95
-	call Task_PassControlFar
-	ld   a, $03
-	ld   [wPlayPlThrowActId], a
-	ld   hl, $0021
-	add  hl, bc
-	set  7, [hl]
-	ld   hl, $0033
+	mMvC_ValFrameEnd .anim
+		; Try to start the command throw, which shouldn't fail if we got here.
+		call MoveInputS_TryStartCommandThrow_Unk_Coli05
+		jp   nc, .ret
+		call Task_PassControlFar
+		ld   a, PLAY_THROWACT_NEXT03
+		ld   [wPlayPlThrowActId], a
+		
+		; We're invulnerable during the throw.
+		ld   hl, iPlInfo_Flags1
+		add  hl, bc
+		set  PF1B_INVULN, [hl]
+		
+		; Switch to the appropriate version of the throw.
+		; If we're doing the light version of the move (MOVE_GOENITZ_SHINYAOTOME_PART2_L), switch to MOVE_GOENITZ_SHINYAOTOME_THROW_L.
+		ld   hl, iPlInfo_MoveId
+		add  hl, bc
+		ld   a, [hl]
+		cp   MOVE_GOENITZ_SHINYAOTOME_PART2_L		; Doing the light move?
+		jp   nz, .chkEnd_startThrowH				; If not, start the heavy version of the throw.
+	.chkEnd_startThrowL:
+		ld   a, MOVE_GOENITZ_SHINYAOTOME_THROW_L
+		call MoveInputS_SetSpecMove_StopSpeed
+		jp   .chkEnd_setLastDamage
+	.chkEnd_startThrowH:
+		ld   a, MOVE_GOENITZ_SHINYAOTOME_THROW_H
+		call MoveInputS_SetSpecMove_StopSpeed
+	.chkEnd_setLastDamage:
+		; Deal one last line of damage
+		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+		jp   .ret
+; --------------- frames #0-2 / common escape check ---------------
+.chkOtherEscape:
+	;
+	; [TCRF] If the opponent somehow isn't in one of the hit animations 
+	;        this move sets, hop back instead of continuing.
+	;        This should never happen.
+	;
+	ld   hl, iPlInfo_HitAnimIdOther
 	add  hl, bc
 	ld   a, [hl]
-	cp   $60
-	jp   nz, L0A7A65
-	ld   a, $5C
-	call MoveInputS_SetSpecMove_StopSpeed
-	jp   L0A7A6A
-L0A7A65:;J
-	ld   a, $5E
-	call MoveInputS_SetSpecMove_StopSpeed
-L0A7A6A:;J
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
-	jp   L0A7A95
-L0A7A75:;J
-	ld   hl, $0073
-	add  hl, bc
-	ld   a, [hl]
-	cp   $09
-	jp   z, L0A7A92
-	cp   $0A
-	jp   z, L0A7A92
-L0A7A84: db $3E;X
-L0A7A85: db $18;X
-L0A7A86: db $CD;X
-L0A7A87: db $1B;X
-L0A7A88: db $34;X
-L0A7A89: db $C3;X
-L0A7A8A: db $95;X
-L0A7A8B: db $7A;X
-L0A7A8C: db $CD;X
-L0A7A8D: db $A2;X
-L0A7A8E: db $2E;X
-L0A7A8F: db $C3;X
-L0A7A90: db $95;X
-L0A7A91: db $7A;X
-L0A7A92:;J
-	call OBJLstS_DoAnimTiming_Loop_by_DE
-L0A7A95:;J
-	ret
-L0A7A96:;I
-	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L0A7B4B
-	
-	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $00
-	jp   z, L0A7ABB
-	cp   $04
-	jp   z, L0A7AD2
-	cp   $08
-	jp   z, L0A7B07
-L0A7AB3: db $FE;X
-L0A7AB4: db $0C;X
-L0A7AB5: db $CA;X
-L0A7AB6: db $36;X
-L0A7AB7: db $7B;X
-L0A7AB8: db $C3;X
-L0A7AB9: db $48;X
-L0A7ABA: db $7B;X
-L0A7ABB:;J
-	mMvC_ValFrameStart L0A7AC6
-	ld   a, $09
-	call HomeCall_Sound_ReqPlayExId
-L0A7AC6:;J
-	mMvC_ValFrameEnd L0A7B48
-	mMvC_SetAnimSpeed $02
-	jp   L0A7B48
-L0A7AD2:;J
-	mMvC_ValFrameStart L0A7ADE
-	mMvC_SetSpeedH $0700
-L0A7ADE:;J
-	call L003745
-	jp   nc, L0A7AFB
-	jp   nz, L0A7AF5
-	ld   a, $60
-	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0083
-	add  hl, bc
-	ld   [hl], $04
-	jp   L0A7B4B
-L0A7AF5: db $21;X
-L0A7AF6: db $00;X
-L0A7AF7: db $01;X
-L0A7AF8: db $CD;X
-L0A7AF9: db $69;X
-L0A7AFA: db $35;X
-L0A7AFB:;J
-	mMvC_ValFrameEnd L0A7B30
-	mMvC_SetAnimSpeed $0A
-	jp   L0A7B30
-L0A7B07:;J
-	call L003745
-	jp   nc, L0A7B24
-	jp   nz, L0A7B1E
-	ld   a, $60
-	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0083
-	add  hl, bc
-	ld   [hl], $04
-	jp   L0A7B4B
-L0A7B1E: db $21;X
-L0A7B1F: db $00;X
-L0A7B20: db $01;X
-L0A7B21: db $CD;X
-L0A7B22: db $69;X
-L0A7B23: db $35;X
-L0A7B24: db $CD;X
-L0A7B25: db $D9;X
-L0A7B26: db $2D;X
-L0A7B27: db $D2;X
-L0A7B28: db $30;X
-L0A7B29: db $7B;X
-L0A7B2A: db $23;X
-L0A7B2B: db $36;X
-L0A7B2C: db $04;X
-L0A7B2D: db $C3;X
-L0A7B2E: db $30;X
-L0A7B2F: db $7B;X
-L0A7B30:;J
-	call OBJLstS_ApplyXSpeed
-	jp   L0A7B48
-L0A7B36: db $21;X
-L0A7B37: db $80;X
-L0A7B38: db $00;X
-L0A7B39: db $CD;X
-L0A7B3A: db $D9;X
-L0A7B3B: db $35;X
-L0A7B3C: db $CD;X
-L0A7B3D: db $D9;X
-L0A7B3E: db $2D;X
-L0A7B3F: db $D2;X
-L0A7B40: db $48;X
-L0A7B41: db $7B;X
-L0A7B42: db $CD;X
-L0A7B43: db $A2;X
-L0A7B44: db $2E;X
-L0A7B45: db $C3;X
-L0A7B46: db $4B;X
-L0A7B47: db $7B;X
-L0A7B48:;J
-	call OBJLstS_DoAnimTiming_Loop_by_DE
-L0A7B4B:;J
-	ret
-L0A7B4C:;I
-	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L0A7C40
-	
-	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $00
-	jp   z, L0A7B76
-	cp   $08
-	jp   z, L0A7B93
-	cp   $0C
-	jp   z, L0A7BAB
-	cp   $10
-	jp   z, L0A7BEE
-	cp   $14
-	jp   z, L0A7C2B
-	jp   L0A7C3D
-L0A7B76:;J
-	ld   hl, $0021
-	add  hl, bc
-	set  7, [hl]
-	mMvC_ValFrameStart L0A7B87
-	ld   a, $09
-	call HomeCall_Sound_ReqPlayExId
-L0A7B87:;J
-	mMvC_ValFrameEnd L0A7C3D
-	mMvC_SetAnimSpeed ANIMSPEED_INSTANT
-	jp   L0A7C3D
-L0A7B93:;J
-	ld   hl, $0021
-	add  hl, bc
-	set  7, [hl]
-	mMvC_ValFrameEnd L0A7C3D
-	mMvC_SetAnimSpeed $02
-	ld   hl, $0083
-	add  hl, bc
-	ld   [hl], $06
-	jp   L0A7C3D
-L0A7BAB:;J
-	mMvC_ValFrameStart L0A7BB7
-	mMvC_SetSpeedH $0700
-L0A7BB7:;J
-	ld   hl, $0083
-	add  hl, bc
-	dec  [hl]
-	jp   nz, L0A7BC5
-	ld   hl, $0021
-	add  hl, bc
-	res  7, [hl]
-L0A7BC5:;J
-	call L003745
-	jp   nc, L0A7BE2
-	jp   nz, L0A7BDC
-	ld   a, $62
-	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0083
-	add  hl, bc
-	ld   [hl], $08
-	jp   L0A7C40
-L0A7BDC: db $21;X
-L0A7BDD: db $00;X
-L0A7BDE: db $01;X
-L0A7BDF: db $CD;X
-L0A7BE0: db $69;X
-L0A7BE1: db $35;X
-L0A7BE2:;J
-	mMvC_ValFrameEnd L0A7C25
-	mMvC_SetAnimSpeed $0A
-	jp   L0A7C25
-L0A7BEE: db $21;X
-L0A7BEF: db $83;X
-L0A7BF0: db $00;X
-L0A7BF1: db $09;X
-L0A7BF2: db $35;X
-L0A7BF3: db $C2;X
-L0A7BF4: db $FC;X
-L0A7BF5: db $7B;X
-L0A7BF6: db $21;X
-L0A7BF7: db $21;X
-L0A7BF8: db $00;X
-L0A7BF9: db $09;X
-L0A7BFA: db $CB;X
-L0A7BFB: db $BE;X
-L0A7BFC: db $CD;X
-L0A7BFD: db $45;X
-L0A7BFE: db $37;X
-L0A7BFF: db $D2;X
-L0A7C00: db $19;X
-L0A7C01: db $7C;X
-L0A7C02: db $C2;X
-L0A7C03: db $13;X
-L0A7C04: db $7C;X
-L0A7C05: db $3E;X
-L0A7C06: db $62;X
-L0A7C07: db $CD;X
-L0A7C08: db $D0;X
-L0A7C09: db $37;X
-L0A7C0A: db $21;X
-L0A7C0B: db $83;X
-L0A7C0C: db $00;X
-L0A7C0D: db $09;X
-L0A7C0E: db $36;X
-L0A7C0F: db $08;X
-L0A7C10: db $C3;X
-L0A7C11: db $40;X
-L0A7C12: db $7C;X
-L0A7C13: db $21;X
-L0A7C14: db $00;X
-L0A7C15: db $01;X
-L0A7C16: db $CD;X
-L0A7C17: db $69;X
-L0A7C18: db $35;X
-L0A7C19: db $CD;X
-L0A7C1A: db $D9;X
-L0A7C1B: db $2D;X
-L0A7C1C: db $D2;X
-L0A7C1D: db $25;X
-L0A7C1E: db $7C;X
-L0A7C1F: db $23;X
-L0A7C20: db $36;X
-L0A7C21: db $04;X
-L0A7C22: db $C3;X
-L0A7C23: db $25;X
-L0A7C24: db $7C;X
-L0A7C25:;J
-	call OBJLstS_ApplyXSpeed
-	jp   L0A7C3D
-L0A7C2B: db $21;X
-L0A7C2C: db $80;X
-L0A7C2D: db $00;X
-L0A7C2E: db $CD;X
-L0A7C2F: db $D9;X
-L0A7C30: db $35;X
-L0A7C31: db $CD;X
-L0A7C32: db $D9;X
-L0A7C33: db $2D;X
-L0A7C34: db $D2;X
-L0A7C35: db $3D;X
-L0A7C36: db $7C;X
-L0A7C37: db $CD;X
-L0A7C38: db $A2;X
-L0A7C39: db $2E;X
-L0A7C3A: db $C3;X
-L0A7C3B: db $40;X
-L0A7C3C: db $7C;X
-L0A7C3D:;J
-	call OBJLstS_DoAnimTiming_Loop_by_DE
-L0A7C40:;J
-	ret
-L0A7C41:;I
-	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L0A7CED
-	
-	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $00
-	jp   z, L0A7C66
-	cp   $04
-	jp   z, L0A7C7D
-	cp   $08
-	jp   z, L0A7C99
-L0A7C5E: db $FE;X
-L0A7C5F: db $0C;X
-L0A7C60: db $CA;X
-L0A7C61: db $DE;X
-L0A7C62: db $7C;X
-L0A7C63: db $C3;X
-L0A7C64: db $EA;X
-L0A7C65: db $7C;X
-L0A7C66:;J
-	mMvC_ValFrameStart L0A7C71
-	ld   a, $09
-	call HomeCall_Sound_ReqPlayExId
-L0A7C71:;J
-	mMvC_ValFrameEnd L0A7CEA
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	jp   L0A7CEA
-L0A7C7D:;J
-	mMvC_ValFrameStart L0A7C8F
-	mMvC_SetSpeedH $0100
-	mMvC_SetSpeedV -$0200
-L0A7C8F:;J
-	mMvC_NextFrameOnGtYSpeed $F7, $FF
-	jp   L0A7CCB
-L0A7C99:;J
-	mMvC_ValFrameStart L0A7CA5
-	mMvC_SetSpeedH $0700
-L0A7CA5:;J
-	call L003745
-	jp   nc, L0A7CC8
-	jp   nz, L0A7CC2
-	ld   hl, $0005
-	add  hl, de
-	ld   [hl], $88
-	ld   a, $60
-	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0083
-	add  hl, bc
-	ld   [hl], $04
-	jp   L0A7CED
-L0A7CC2: db $21;X
-L0A7CC3: db $00;X
-L0A7CC4: db $01;X
-L0A7CC5: db $CD;X
-L0A7CC6: db $69;X
-L0A7CC7: db $35;X
-L0A7CC8:;J
-	jp   L0A7CCB
-L0A7CCB:;J
-	mMvC_ChkGravityHV $0020, L0A7CEA
-L0A7CD4: db $3E;X
-L0A7CD5: db $0C;X
-L0A7CD6: db $26;X
-L0A7CD7: db $06;X
-L0A7CD8: db $CD;X
-L0A7CD9: db $EC;X
-L0A7CDA: db $2D;X
-L0A7CDB: db $C3;X
-L0A7CDC: db $ED;X
-L0A7CDD: db $7C;X
-L0A7CDE: db $CD;X
-L0A7CDF: db $D9;X
-L0A7CE0: db $2D;X
-L0A7CE1: db $D2;X
-L0A7CE2: db $EA;X
-L0A7CE3: db $7C;X
-L0A7CE4: db $CD;X
-L0A7CE5: db $A2;X
-L0A7CE6: db $2E;X
-L0A7CE7: db $C3;X
-L0A7CE8: db $ED;X
-L0A7CE9: db $7C;X
-L0A7CEA:;J
-	call OBJLstS_DoAnimTiming_Loop_by_DE
-L0A7CED:;J
-	ret
-L0A7CEE:;I
-	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L0A7DC0
-	
-	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $00
-	jp   z, L0A7D13
-	cp   $08
-	jp   z, L0A7D30
-	cp   $0C
-	jp   z, L0A7D48
-	cp   $10
-	jp   z, L0A7DB1
-	jp   L0A7DBD
-L0A7D13:;J
-	ld   hl, $0021
-	add  hl, bc
-	set  7, [hl]
-	mMvC_ValFrameStart L0A7D24
-	ld   a, $09
-	call HomeCall_Sound_ReqPlayExId
-L0A7D24:;J
-	mMvC_ValFrameEnd L0A7DBD
-	mMvC_SetAnimSpeed ANIMSPEED_INSTANT
-	jp   L0A7DBD
-L0A7D30:;J
-	ld   hl, $0021
-	add  hl, bc
-	set  7, [hl]
-	mMvC_ValFrameEnd L0A7DBD
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	ld   hl, $0083
-	add  hl, bc
-	ld   [hl], $06
-	jp   L0A7DBD
-L0A7D48:;J
-	mMvC_ValFrameStart L0A7D6A
-	ld   hl, $0005
-	add  hl, de
-	ld   a, [hl]
-	cp   $88
-	jp   nz, L0A7D5E
-	mMvC_SetMoveV $E000
-L0A7D5E:
-	mMvC_SetSpeedH $0700
-	mMvC_SetSpeedV $0000
-L0A7D6A:;J
-	ld   hl, $0083
-	add  hl, bc
-	dec  [hl]
-	jp   nz, L0A7D78
-	ld   hl, $0021
-	add  hl, bc
-	res  7, [hl]
-L0A7D78:;J
-	call L003745
-	jp   nc, L0A7D9B
-	jp   nz, L0A7D95
-	ld   hl, $0005
-	add  hl, de
-	ld   [hl], $88
-	ld   a, $62
-	call MoveInputS_SetSpecMove_StopSpeed
-	ld   hl, $0083
-	add  hl, bc
-	ld   [hl], $08
-	jp   L0A7DC0
-L0A7D95: db $21;X
-L0A7D96: db $00;X
-L0A7D97: db $01;X
-L0A7D98: db $CD;X
-L0A7D99: db $69;X
-L0A7D9A: db $35;X
-L0A7D9B:;J
-	jp   L0A7D9E
-L0A7D9E:;J
-	mMvC_ChkGravityHV $0018, L0A7DBD
-	mMvC_SetLandFrame $10, $06
-	jp   L0A7DC0
-L0A7DB1:;J
-	mMvC_ValFrameEnd L0A7DBD
+	cp   HITANIM_HIT_SPEC_09	; A == HITANIM_HIT_SPEC_09?
+	jp   z, .anim				; If so, skip
+	cp   HITANIM_HIT_SPEC_0A	; A == HITANIM_HIT_SPEC_0A?
+	jp   z, .anim				; If so, skip
+	ld   a, MOVE_SHARED_HOP_B
+	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+	jp   .ret
+; --------------- common ---------------
+.unused_end: ; [TCRF] Unreferenced code, this isn't used here
 	call Play_Pl_EndMove
-	jp   L0A7DC0
-L0A7DBD:;J
+	jp   .ret
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
-L0A7DC0:;J
+.ret:
 	ret
-L0A7DC1:;C
-	ld   a, $A8
-	call HomeCall_Sound_ReqPlayExId
-	push bc
-	push de
-	push hl
-	call L0024F8
-	ld   hl, $0020
-	add  hl, de
-	ld   [hl], $0A
-	inc  hl
-	ld   [hl], $CA
-	inc  hl
-	ld   [hl], $7E
-	ld   hl, $0010
-	add  hl, de
-	ld   [hl], $01
-	inc  hl
-	ld   [hl], $71
-	inc  hl
-	ld   [hl], $5A
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $001B
-	add  hl, de
-	ld   [hl], $00
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $0027
-	add  hl, de
-	ld   [hl], $02
-	inc  hl
-	ld   [hl], $28
-	call OBJLstS_Overlap
-	pop  hl
-	push hl
-	ld   l, $00
-	call Play_OBJLstS_MoveH_ByXFlipR
-	pop  hl
-	ld   h, L
-	ld   l, $00
-	srl  h
-	rr   l
-	srl  h
-	rr   l
-	srl  h
-	rr   l
-	srl  h
-	rr   l
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	pop  de
-	pop  bc
-	ret
-L0A7E1D:;C
-	ld   a, $A8
-	call HomeCall_Sound_ReqPlayExId
-	push bc
-	push de
-	push hl
-	call L0024F8
-	ld   hl, $0020
-	add  hl, de
-	ld   [hl], $0A
-	inc  hl
-	ld   [hl], $CA
-	inc  hl
-	ld   [hl], $7E
-	ld   hl, $0010
-	add  hl, de
-	ld   [hl], $01
-	inc  hl
-	ld   [hl], $7F
-	inc  hl
-	ld   [hl], $5A
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $001B
-	add  hl, de
-	ld   [hl], $00
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $0027
-	add  hl, de
-	ld   [hl], $05
-	inc  hl
-	ld   [hl], $78
-	call OBJLstS_Overlap
-	pop  hl
-	mMvC_SetMoveH $1000
-	mMvC_SetSpeedH $0000
-	pop  de
-	pop  bc
-	ret
-L0A7E68:;C
-	ld   a, $A8
-	call HomeCall_Sound_ReqPlayExId
-	push bc
-	push de
-	push hl
-	call L0024F8
-	ld   hl, $0020
-	add  hl, de
-	ld   [hl], $0A
-	inc  hl
-	ld   [hl], $E0
-	inc  hl
-	ld   [hl], $7E
-	ld   hl, $0010
-	add  hl, de
-	ld   [hl], $01
-	inc  hl
-	ld   [hl], $8D
-	inc  hl
-	ld   [hl], $5A
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $001B
-	add  hl, de
-	ld   [hl], $00
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $0027
-	add  hl, de
-	ld   [hl], $00
-	inc  hl
-	ld   [hl], $1E
-	call OBJLstS_Overlap
-	pop  hl
-	push hl
-	ld   l, $00
-	call Play_OBJLstS_MoveH_ByXFlipR
-	pop  hl
-	ld   h, L
-	ld   l, $00
-	call Play_OBJLstS_MoveV
-	ld   hl, $0003
+
+; The remainder of the moves for Goenitz are the first parts of his supers.
+; These are all ground or air dashes towards the opponent.
+; They all transition to MoveC_Goenitz_ShinyaotomePart2 if the opponent didn't block the move,
+; so they must set a proper value for iPlInfo_Goenitz_Shinyaotome_LoopTimer.
+	
+; =============== MoveC_Goenitz_ShinyaotomeMizuchiSL ===============
+; Move code for the light version of Goenitz's Shinyaotome - Mizuchi (MOVE_GOENITZ_SHINYAOTOME_MIZUCHI_SL).
+; Ground version.
+MoveC_Goenitz_ShinyaotomeMizuchiSL:
+	call Play_Pl_MoveByColiBoxOverlapX
+	mMvC_ValLoaded .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	ld   hl, $0029
-	add  hl, de
-	ld   [hl], a
-	ld   hl, $0005
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   a, $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------
+; Startup.
+.obj0:
+	mMvC_ValFrameStart .obj0_cont
+		mMvC_PlaySound SCT_HEAVY
+.obj0_cont:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $02
+		jp   .anim
+; --------------- frame #1 ---------------
+; Fast dash forward.
+.obj1:
+	mMvC_ValFrameStart .obj1_cont
+		mMvC_SetSpeedH +$0700
+.obj1_cont:
+	; Continue moving forward until we hit the opponent or switch to #2.
+	mMvC_ValHit .obj1_noHit, .obj1_block
+		; If we hit it, switch to the attack move
+		ld   a, MOVE_GOENITZ_SHINYAOTOME_PART2_L
+		call MoveInputS_SetSpecMove_StopSpeed
+		ld   hl, iPlInfo_Goenitz_Shinyaotome_LoopTimer
+		add  hl, bc
+		ld   [hl], $04	; 4 loops of attacks
+		jp   .ret
+.obj1_block:
+	; Significantly slow down on block
+	mMvC_SetSpeedH +$0100
+.obj1_noHit:
+	mMvC_ValFrameEnd .moveH
+		mMvC_SetAnimSpeed $0A
+		jp   .moveH
+; --------------- frame #2 ---------------
+; Fast dash forward.
+.obj2:
+	; Exactly like above
+	mMvC_ValHit .obj2_noHit, .obj2_block
+		ld   a, MOVE_GOENITZ_SHINYAOTOME_PART2_L
+		call MoveInputS_SetSpecMove_StopSpeed
+		ld   hl, iPlInfo_Goenitz_Shinyaotome_LoopTimer
+		add  hl, bc
+		ld   [hl], $04
+		jp   .ret
+.obj2_block:
+	mMvC_SetSpeedH +$0100
+.obj2_noHit:
+	mMvC_ValFrameEnd .moveH
+		mMvC_SetAnimSpeed $04
+		jp   .moveH
+; --------------- common movement ---------------
+.moveH:
+	call OBJLstS_ApplyXSpeed
+	jp   .anim
+; --------------- frame #3 ---------------
+; Recovery.
+; We only get here if the opponent blocked the hit or the move whiffed.
+.chkEnd:
+	mMvC_DoFrictionH $0080
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jp   .ret
+; --------------- common ---------------
+.anim:
+	call OBJLstS_DoAnimTiming_Loop_by_DE
+.ret:
+	ret
+	
+; =============== MoveC_Goenitz_ShinyaotomeJissoukokuDL ===============
+; Move code for the light version of Goenitz's Shinyaotome - Jissoukoku (MOVE_GOENITZ_SHINYAOTOME_JISSOUKOKU_DL).
+; Ground version.	
+MoveC_Goenitz_ShinyaotomeJissoukokuDL:
+	call Play_Pl_MoveByColiBoxOverlapX
+	mMvC_ValLoaded .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	ld   hl, $002A
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj4
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim
+; --------------- frame #0 ---------------
+; Startup.
+.obj0:
+	; The player gets to be invulnerable when doing the desperation super.
+	ld   hl, iPlInfo_Flags1
+	add  hl, bc
+	set  PF1B_INVULN, [hl]
+	mMvC_ValFrameStart .obj0_cont
+		mMvC_PlaySound SCT_HEAVY
+.obj0_cont:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
+		jp   .anim
+; --------------- frame #2 ---------------
+; Preparing dash.
+.obj2:
+	ld   hl, iPlInfo_Flags1
+	add  hl, bc
+	set  PF1B_INVULN, [hl]
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $02
+		; Initialize invuln timer for #3
+		ld   hl, iPlInfo_Goenitz_Jissoukoku_InvulnTimer
+		add  hl, bc
+		ld   [hl], $06
+		jp   .anim
+; --------------- frame #3 ---------------
+; Forwards dash.
+.obj3:
+	mMvC_ValFrameStart .obj3_cont
+		mMvC_SetSpeedH $0700
+.obj3_cont:
+
+	; Remove invulnerability when the timer expires
+	ld   hl, iPlInfo_Goenitz_Jissoukoku_InvulnTimer
+	add  hl, bc
+	dec  [hl]
+	jp   nz, .obj3_chkHit
+	ld   hl, iPlInfo_Flags1
+	add  hl, bc
+	res  PF1B_INVULN, [hl]
+.obj3_chkHit:
+	; Continue moving forward until we hit the opponent.
+	mMvC_ValHit .obj3_noHit, .obj3_blocked
+		ld   a, MOVE_GOENITZ_SHINYAOTOME_PART2_H
+		call MoveInputS_SetSpecMove_StopSpeed
+		ld   hl, iPlInfo_Goenitz_Shinyaotome_LoopTimer
+		add  hl, bc
+		ld   [hl], $08
+		jp   .ret
+.obj3_blocked:
+	; Significantly slow down on block
+	mMvC_SetSpeedH $0100
+.obj3_noHit:
+	mMvC_ValFrameEnd .moveH
+		mMvC_SetAnimSpeed $0A
+		jp   .moveH
+		
+; --------------- frame #4 ---------------
+; Like #3, except without initializing the speed.
+.obj4:
+	; Remove invulnerability when the timer expires
+	ld   hl, iPlInfo_Goenitz_Jissoukoku_InvulnTimer
+	add  hl, bc
+	dec  [hl]
+	jp   nz, .obj4_chkHit
+	ld   hl, iPlInfo_Flags1
+	add  hl, bc
+	res  PF1B_INVULN, [hl]
+.obj4_chkHit:
+	; Continue moving forward until we hit the opponent.
+	; If the animation is allowed to continue to #5, the move ends.
+	mMvC_ValHit .obj4_noHit, .obj4_blocked
+		ld   a, MOVE_GOENITZ_SHINYAOTOME_PART2_H
+		call MoveInputS_SetSpecMove_StopSpeed
+		ld   hl, iPlInfo_Goenitz_Shinyaotome_LoopTimer
+		add  hl, bc
+		ld   [hl], $08		; 8 loops of attacks for desperation
+		jp   .ret
+.obj4_blocked:
+	; Significantly slow down on block
+	mMvC_SetSpeedH $0100
+.obj4_noHit:
+	mMvC_ValFrameEnd .moveH
+		mMvC_SetAnimSpeed $04
+		jp   .moveH
+; --------------- common movement ---------------
+.moveH:
+	call OBJLstS_ApplyXSpeed
+	jp   .anim
+; --------------- frame #5 ---------------
+; Recovery.
+; We only get here if the opponent blocked the hit or the move whiffed.
+.chkEnd:
+	mMvC_DoFrictionH $0080
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jp   .ret
+; --------------- common ---------------
+.anim:
+	call OBJLstS_DoAnimTiming_Loop_by_DE
+.ret:
+	ret
+	
+; =============== MoveC_Goenitz_ShinyaotomeMizuchiSH ===============
+; Move code for the hard version of Goenitz's Shinyaotome - Mizuchi (MOVE_GOENITZ_SHINYAOTOME_MIZUCHI_SH).
+; Air/ground version.
+MoveC_Goenitz_ShinyaotomeMizuchiSH:
+	call Play_Pl_MoveByColiBoxOverlapX
+	mMvC_ValLoaded .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
-	ldi  [hl], a
-	ld   [hl], $00
-	pop  de
+	ld   a, [hl]
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   a, $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------
+; Startup.
+.obj0:
+	mMvC_ValFrameStart .obj0_cont
+		mMvC_PlaySound SCT_HEAVY
+.obj0_cont:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		jp   .anim
+; --------------- frame #1 ---------------
+; Small forwards hop.
+.obj1:
+	; This version handles the air by starting a small jump, forcing the player
+	; to be in the air by #2 if he wasn't already.
+	mMvC_ValFrameStart .obj1_cont
+		mMvC_SetSpeedH +$0100
+		mMvC_SetSpeedV -$0200
+.obj1_cont:
+	mMvC_NextFrameOnGtYSpeed -$09, ANIMSPEED_NONE
+	jp   .doGravity
+	
+; --------------- frame #2 ---------------
+; Fast dash forward, falling down.
+.obj2:
+	mMvC_ValFrameStart .obj2_cont
+		mMvC_SetSpeedH +$0700
+.obj2_cont:
+	; Continue dashing forward until we hit the opponent or switch to #3.
+	mMvC_ValHit .obj2_noHit, .obj2_block
+		; If we hit it...
+		
+		; ...snap to the ground and 
+		ld   hl, iOBJInfo_Y
+		add  hl, de
+		ld   [hl], PL_FLOOR_POS
+		; ...switch to the attack move
+		ld   a, MOVE_GOENITZ_SHINYAOTOME_PART2_L
+		call MoveInputS_SetSpecMove_StopSpeed
+		ld   hl, iPlInfo_Goenitz_Shinyaotome_LoopTimer
+		add  hl, bc
+		ld   [hl], $04	; 4 loops of attacks
+		jp   .ret
+.obj2_block:
+	; Significantly slow down on block
+	mMvC_SetSpeedH +$0100
+.obj2_noHit:
+	jp   .doGravity
+; --------------- common gravity check ---------------
+.doGravity:
+	mMvC_ChkGravityHV $0020, .anim
+		mMvC_SetLandFrame $03*OBJLSTPTR_ENTRYSIZE, $06
+		jp   .ret
+; --------------- frame #3 ---------------
+; Recovery.
+; We only get here if the opponent blocked the hit or the move whiffed.
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jp   .ret
+; --------------- common ---------------
+.anim:
+	call OBJLstS_DoAnimTiming_Loop_by_DE
+.ret:
+	ret
+	
+; =============== MoveC_Goenitz_ShinyaotomeJissoukokuDH ===============
+; Move code for the hard version of Goenitz's Shinyaotome - Jissoukoku (MOVE_GOENITZ_SHINYAOTOME_JISSOUKOKU_DH).
+; Air/ground version.	
+MoveC_Goenitz_ShinyaotomeJissoukokuDH:
+	call Play_Pl_MoveByColiBoxOverlapX
+	mMvC_ValLoaded .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+	add  hl, de
+	ld   a, [hl]
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim
+; --------------- frame #0 ---------------
+; Startup.	
+.obj0:
+	; The player gets to be invulnerable when doing the desperation super.
+	ld   hl, iPlInfo_Flags1
+	add  hl, bc
+	set  PF1B_INVULN, [hl]
+	mMvC_ValFrameStart .obj0_cont
+		mMvC_PlaySound SCT_HEAVY
+.obj0_cont:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
+		jp   .anim
+; --------------- frame #2 ---------------
+; Preparing dash.
+.obj2:
+	ld   hl, iPlInfo_Flags1
+	add  hl, bc
+	set  PF1B_INVULN, [hl]
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		; Initialize invuln timer for #3
+		ld   hl, iPlInfo_Goenitz_Jissoukoku_InvulnTimer
+		add  hl, bc
+		ld   [hl], $06
+		jp   .anim
+; --------------- frame #3 ---------------
+; Forwards dash.
+.obj3:
+	; The first frame is for the "hidden" warp, at least when on the ground.
+	mMvC_ValFrameStart .obj3_cont
+		; Only warp up $20px if we're on the ground.
+		ld   hl, iOBJInfo_Y
+		add  hl, de
+		ld   a, [hl]			; A = YPos
+		cp   PL_FLOOR_POS		; A != PL_FLOOR_POS?
+		jp   nz, .obj3_setDash	; If so, skip (we're in the air already)
+		mMvC_SetMoveV -$2000	; Warp up $20px while "hidden" in the ground
+	.obj3_setDash:
+		; Set dash speed
+		mMvC_SetSpeedH +$0700	
+		mMvC_SetSpeedV +$0000
+.obj3_cont:
+
+	; Remove invulnerability when the timer expires
+	ld   hl, iPlInfo_Goenitz_Jissoukoku_InvulnTimer
+	add  hl, bc
+	dec  [hl]
+	jp   nz, .obj3_chkHit
+	ld   hl, iPlInfo_Flags1
+	add  hl, bc
+	res  PF1B_INVULN, [hl]
+.obj3_chkHit:
+
+	; Continue moving forward until we hit the opponent.
+	mMvC_ValHit .obj3_noHit, .obj3_blocked
+		; If we hit it...
+		
+		; ...snap to the ground and 
+		ld   hl, iOBJInfo_Y
+		add  hl, de
+		ld   [hl], PL_FLOOR_POS
+		; ...switch to the attack move
+		ld   a, MOVE_GOENITZ_SHINYAOTOME_PART2_H
+		call MoveInputS_SetSpecMove_StopSpeed
+		ld   hl, iPlInfo_Goenitz_Shinyaotome_LoopTimer
+		add  hl, bc
+		ld   [hl], $08	; 8 loops of attacks for desperation
+		jp   .ret
+.obj3_blocked:
+	; Significantly slow down on block
+	mMvC_SetSpeedH $0100
+.obj3_noHit:
+	; Continue moving down
+	jp   .doGravity
+; --------------- common gravity check ---------------
+.doGravity:
+	mMvC_ChkGravityHV $0018, .anim
+		mMvC_SetLandFrame $04*OBJLSTPTR_ENTRYSIZE, $06
+		jp   .ret
+; --------------- frame #4 ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jp   .ret
+; --------------- common ---------------
+.anim:
+	call OBJLstS_DoAnimTiming_Loop_by_DE
+.ret:
+	ret
+	
+; =============== ProjInit_Goenitz_Yonokaze ===============
+; Initializes the projectile for Goenitz's Yonokaze.
+; ここですか？
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+; - H: Horizontal offset, relative to the player's origin
+; - L: Horizontal movement speed
+ProjInit_Goenitz_Yonokaze:
+	mMvC_PlaySound SND_ID_28
+	push bc
+		push de
+			push hl
+				call ProjInitS_InitAndGetOBJInfo	; DE = Ptr to wOBJInfo_Pl*Projectile
+				
+				; Set code pointer
+				ld   hl, iOBJInfo_Proj_CodeBank
+				add  hl, de
+				ld   [hl], BANK(ProjC_Goenitz_Yonokaze)	; BANK $0A ; iOBJInfo_Proj_CodeBank
+				inc  hl
+				ld   [hl], LOW(ProjC_Goenitz_Yonokaze)	; iOBJInfo_Proj_CodePtr_Low
+				inc  hl
+				ld   [hl], HIGH(ProjC_Goenitz_Yonokaze)	; iOBJInfo_Proj_CodePtr_High
+				
+				; Write sprite mapping ptr for this projectile.
+				ld   hl, iOBJInfo_BankNum
+				add  hl, de
+				ld   [hl], BANK(OBJLstPtrTable_Proj_Goenitz_Yonokaze)	; BANK $01 ; iOBJInfo_BankNum
+				inc  hl
+				ld   [hl], LOW(OBJLstPtrTable_Proj_Goenitz_Yonokaze)	; iOBJInfo_OBJLstPtrTbl_Low
+				inc  hl
+				ld   [hl], HIGH(OBJLstPtrTable_Proj_Goenitz_Yonokaze)	; iOBJInfo_OBJLstPtrTbl_High
+				inc  hl
+				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
+
+				; Set animation speed.
+				ld   hl, iOBJInfo_FrameLeft
+				add  hl, de
+				ld   [hl], $00	; iOBJInfo_FrameLeft
+				inc  hl
+				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
+				
+				; Set priority value
+				ld   hl, iOBJInfo_Proj_Priority
+				add  hl, de
+				ld   [hl], $02
+				
+				; Set despawn timer
+				inc  hl
+				ld   [hl], $28 ; iOBJInfo_Proj_EnaTimer
+				
+				; Set initial position relative to the player's origin
+				call OBJLstS_Overlap
+			pop  hl
+			; Move horizontally by H
+			push hl
+				ld   l, $00
+				call Play_OBJLstS_MoveH_ByXFlipR
+			pop  hl
+			
+			; Make the wind move forward.
+			; XSpeed = L / 4
+			; This is only used for the hidden heavy version, it's always $00 in any other case.
+			ld   h, l
+			ld   l, $00
+REPT 4
+			srl  h
+			rr   l
+ENDR
+			call Play_OBJLstS_SetSpeedH_ByXFlipR
+		pop  de
 	pop  bc
 	ret
-L0A7ECA:;I
-	call ExOBJS_Play_ChkHitModeAndMoveH
-	jp   c, L0A7EDC
-	ld   hl, $0028
+; =============== ProjInit_Goenitz_Yamidoukoku ===============
+; Initializes the projectile for Goenitz's Yamidoukoku.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+ProjInit_Goenitz_Yamidoukoku:
+	mMvC_PlaySound SND_ID_28
+	push bc
+		push de
+			push hl
+				call ProjInitS_InitAndGetOBJInfo	; DE = Ptr to wOBJInfo_Pl*Projectile
+				
+				; Set code pointer
+				ld   hl, iOBJInfo_Proj_CodeBank
+				add  hl, de
+				ld   [hl], BANK(ProjC_Goenitz_Yonokaze)	; BANK $0A ; iOBJInfo_Proj_CodeBank
+				inc  hl
+				ld   [hl], LOW(ProjC_Goenitz_Yonokaze)	; iOBJInfo_Proj_CodePtr_Low
+				inc  hl
+				ld   [hl], HIGH(ProjC_Goenitz_Yonokaze)	; iOBJInfo_Proj_CodePtr_High
+				
+				; Write sprite mapping ptr for this projectile.
+				ld   hl, iOBJInfo_BankNum
+				add  hl, de
+				ld   [hl], BANK(OBJLstPtrTable_Proj_Goenitz_Yamidoukoku)	; BANK $01 ; iOBJInfo_BankNum
+				inc  hl
+				ld   [hl], LOW(OBJLstPtrTable_Proj_Goenitz_Yamidoukoku)		; iOBJInfo_OBJLstPtrTbl_Low
+				inc  hl
+				ld   [hl], HIGH(OBJLstPtrTable_Proj_Goenitz_Yamidoukoku)	; iOBJInfo_OBJLstPtrTbl_High
+				inc  hl
+				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
+
+				; Set animation speed.
+				ld   hl, iOBJInfo_FrameLeft
+				add  hl, de
+				ld   [hl], $00	; iOBJInfo_FrameLeft
+				inc  hl
+				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
+				
+				; Set priority value
+				ld   hl, iOBJInfo_Proj_Priority
+				add  hl, de
+				ld   [hl], $05 ; Highest priority value!
+				
+				; Set despawn timer
+				inc  hl
+				ld   [hl], $78 ; iOBJInfo_Proj_EnaTimer
+				
+				; Set initial position relative to the player's origin
+				call OBJLstS_Overlap
+			pop  hl
+			mMvC_SetMoveH +$1000
+			mMvC_SetSpeedH +$0000
+		pop  de
+	pop  bc
+	ret
+; =============== ProjInit_Goenitz_WanpyouTokobuse ===============
+; Initializes the projectile for Goenitz's Wanpyou Tokobuse.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+; - H: Horizontal offset
+; - L: Vertical offset
+ProjInit_Goenitz_WanpyouTokobuse:
+	mMvC_PlaySound SND_ID_28
+	push bc
+		push de
+			push hl ; Save coords
+				call ProjInitS_InitAndGetOBJInfo	; DE = Ptr to wOBJInfo_Pl*Projectile
+				
+				; Set code pointer
+				ld   hl, iOBJInfo_Proj_CodeBank
+				add  hl, de
+				ld   [hl], BANK(ProjC_Goenitz_WanpyouTokobuse)	; BANK $0A ; iOBJInfo_Proj_CodeBank
+				inc  hl
+				ld   [hl], LOW(ProjC_Goenitz_WanpyouTokobuse)	; iOBJInfo_Proj_CodePtr_Low
+				inc  hl
+				ld   [hl], HIGH(ProjC_Goenitz_WanpyouTokobuse)	; iOBJInfo_Proj_CodePtr_High
+				
+				; Write sprite mapping ptr for this projectile.
+				ld   hl, iOBJInfo_BankNum
+				add  hl, de
+				ld   [hl], BANK(OBJLstPtrTable_Proj_Goenitz_WanpyouTokobuse)	; BANK $01 ; iOBJInfo_BankNum
+				inc  hl
+				ld   [hl], LOW(OBJLstPtrTable_Proj_Goenitz_WanpyouTokobuse)		; iOBJInfo_OBJLstPtrTbl_Low
+				inc  hl
+				ld   [hl], HIGH(OBJLstPtrTable_Proj_Goenitz_WanpyouTokobuse)	; iOBJInfo_OBJLstPtrTbl_High
+				inc  hl
+				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
+
+				; Set animation speed.
+				ld   hl, iOBJInfo_FrameLeft
+				add  hl, de
+				ld   [hl], $00	; iOBJInfo_FrameLeft
+				inc  hl
+				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
+				
+				; Set priority value
+				ld   hl, iOBJInfo_Proj_Priority
+				add  hl, de
+				ld   [hl], $00
+				
+				; Set despawn timer
+				inc  hl
+				ld   [hl], $1E ; iOBJInfo_Proj_EnaTimer
+				
+				
+				; Set initial position relative to the player's origin
+				call OBJLstS_Overlap
+			pop  hl 
+			
+			; Move it horizontally by H
+			push hl
+				ld   l, $00							; H -> h offset, L -> 0 subpixels
+				call Play_OBJLstS_MoveH_ByXFlipR	; Move by that
+			pop  hl
+			; Move it vertically by L
+			ld   h, l				; H -> v offset,
+			ld   l, $00				; L -> 0 subpixels
+			call Play_OBJLstS_MoveV	; Move by that
+			
+			;
+			; Keep track of the player's position when the projectile is first spawned.
+			; This is because it's used as the projectile's origin.
+			;
+			ld   hl, iOBJInfo_X	; A = Player X position
+			add  hl, de
+			ld   a, [hl]
+			ld   hl, iOBJInfo_Proj_WanToko_OrigX	
+			add  hl, de			; Seek to X origin
+			ld   [hl], a		; Copy it there
+			
+			ld   hl, iOBJInfo_Y	; A = Player X position
+			add  hl, de
+			ld   a, [hl]
+			ld   hl, iOBJInfo_Proj_WanToko_OrigY
+			add  hl, de			; Seek to Y origin
+			ldi  [hl], a		; Copy it there, seek to speed
+			
+			; Initialize movement speed
+			ld   [hl], $00		; iOBJInfo_Proj_WanToko_MoveSpeed
+		pop  de
+	pop  bc
+	ret
+; =============== ProjC_Goenitz_Yonokaze ===============
+; Projectile code for Goenitz's Yonokaze and Yamidoukoku.
+; Like ProjC_Horz, except it despawns automatically when the despawn timer elapses.
+ProjC_Goenitz_Yonokaze:
+	call ExOBJS_Play_ChkHitModeAndMoveH		; Did it go off-screen? (or hit the opponent, for Yonokaze)
+	jp   c, .despawn						; If so, jump
+	
+	; Handle despawn timer
+	ld   hl, iOBJInfo_Proj_EnaTimer
 	add  hl, de
 	dec  [hl]
-	jp   z, L0A7EDC
+	jp   z, .despawn
+	
+	; Continue animating
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 	ret
-L0A7EDC:;J
+.despawn:
 	call OBJLstS_Hide
 	ret
-L0A7EE0:;I
-	ld   hl, $0021
+; =============== ProjC_Goenitz_WanpyouTokobuse ===============
+ProjC_Goenitz_WanpyouTokobuse:
+
+	; Projectile goes away if we get hit
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	bit  4, [hl]
-	jp   nz, L0A7F54
-	ld   hl, $0028
+	bit  PF1B_HITRECV, [hl]
+	jp   nz, .despawn
+	
+	; Handle the despawn timer
+	ld   hl, iOBJInfo_Proj_EnaTimer
 	add  hl, de
 	dec  [hl]
-	jp   z, L0A7F54
-	mMvC_ValFrameEnd L0A7F50
+	jp   z, .despawn
+	
+	; Only execute the code below between frames... pointless for projectiles with ANIMSPEED_INSTANT.
+	mMvC_ValFrameEnd .anim
+	
+	;
+	; This projectile is animated in a way to make it look like there are many transparent
+	; projectiles spreading from Goenitz's hand.
+	;
+	; In practice, it's just a single projectile that gets moved every frame.
+	;
+	; This projectile first moves top to bottom in three frames, each using unique sprite mappings
+	; for the top, middle and bottom part.
+	; After the bottom part is displayed, we move right and return to the top projectile.
+	; Every time we move right, the vertical offset also increases.
+	; After the third "column" is finished, it resets back to the first one with its original movement offsets.
+	;
+	; The horizontal and vertical movements are always MoveSpeed * 4, resulting in a cone-like shape.
+	;
 	
 	; Depending on the internal frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffset
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L0A7F0E
-	cp   $04
-	jp   z, L0A7F0E
-	cp   $08
-	jp   z, L0A7F1E
-L0A7F0B: db $C3;X
-L0A7F0C: db $50;X
-L0A7F0D: db $7F;X
-L0A7F0E:;J
-	ld   hl, $002B
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .objTopMid
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .objTopMid
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .objBottom
+	jp   .anim ; We never get here
+; --------------- frame #0-1 ---------------
+; Top and mid frame.
+; We only need to move down by iOBJInfo_Proj_WanToko_MoveSpeed.
+.objTopMid:
+	; HL = MoveSpeed * 4
+	; Since the first MoveSpeed is 0, the first column will display the three frames at the same location.
+	ld   hl, iOBJInfo_Proj_WanToko_MoveSpeed
 	add  hl, de
-	ld   a, [hl]
+	ld   a, [hl] 
 	add  a, a
 	add  a, a
 	ld   h, a
 	ld   l, $00
+	; Move vertically by that
 	call Play_OBJLstS_MoveV
-	jp   L0A7F50
-L0A7F1E:;J
-	ld   hl, $0029
+	jp   .anim
+	
+; --------------- frame #0-1 ---------------
+; Bottom frame.
+; Needs to reset to the top frame of the next row.
+; This means moving to the right, unless we're on the third row, which resets it back to the beginning.
+.objBottom:
+
+	;
+	; Before doing anything, reset the projectile's to its origin.
+	; This simplifies the movement later on.
+	;
+	
+	; iOBJInfo_X = iOBJInfo_Proj_WanToko_OrigX
+	ld   hl, iOBJInfo_Proj_WanToko_OrigX
 	add  hl, de
 	ld   a, [hl]
-	ld   hl, $0003
+	ld   hl, iOBJInfo_X
 	add  hl, de
 	ld   [hl], a
-	ld   hl, $002A
+	; iOBJInfo_Y = iOBJInfo_Proj_WanToko_OrigY
+	ld   hl, iOBJInfo_Proj_WanToko_OrigY
 	add  hl, de
 	ld   a, [hl]
-	ld   hl, $0005
+	ld   hl, iOBJInfo_Y
 	add  hl, de
 	ld   [hl], a
-	ld   hl, $002B
+	
+	;
+	; Cycle to the next movement speed.
+	; If we're on speed $03, loop back to the first one.
+	; 
+	; MoveSpeed = (MoveSpeed + 1) % 4
+	;
+	ld   hl, iOBJInfo_Proj_WanToko_MoveSpeed
 	add  hl, de
-	ld   a, [hl]
-	inc  a
-	and  a, $03
-	ld   [hl], a
+	ld   a, [hl]	; A = MoveSpeed
+	inc  a			; A++
+	and  a, $03		; Loop a "4th" row back to 0
+	ld   [hl], a	; Save it back
+	
+	;
+	; Move right from the origin to the target column.
+	;
+	
+	; A = MoveSpeed * 4
 	add  a, a
 	add  a, a
+	; HL = A
 	ld   h, a
 	ld   l, $00
+	; Move horizontally by that
 	push af
-	call Play_OBJLstS_MoveH_ByXFlipR
+		call Play_OBJLstS_MoveH_ByXFlipR
 	pop  af
+	
+	;
+	; Move up by the same amount.
+	;
+	
+	; HL = -A
 	cpl
 	inc  a
 	ld   h, a
 	ld   l, $00
 	call Play_OBJLstS_MoveV
-	jp   L0A7F50
-L0A7F50:;J
+	jp   .anim
+.anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 	ret
-L0A7F54:;J
+.despawn:
 	call OBJLstS_Hide
 	ret
 ; =============== END OF BANK ===============

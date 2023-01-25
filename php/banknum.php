@@ -8,7 +8,7 @@ require "lib/common.php";
 const BANK_SIZE = 0x4000;
 
 if ($argc != 2) die("hex address required");
-if (!is_numeric($argv[1])) die ("no");
+//if (!is_numeric($argv[1])) die ("no");
 $addr = hexdec($argv[1]);
 
 $banknum = floor($addr / BANK_SIZE);

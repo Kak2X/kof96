@@ -6300,7 +6300,7 @@ L01589D: db $FF
 L01589E: db $FF
 L01589F: db $FF;X
 L0158A0: db $FF
-L0158A1: db $D4
+OBJLstPtrTable_Proj_Terry_PowerWave: db $D4
 L0158A2: db $5B
 L0158A3: db $FF
 L0158A4: db $FF
@@ -6354,7 +6354,7 @@ L0158D3: db $FF
 L0158D4: db $FF
 L0158D5: db $FF;X
 L0158D6: db $FF;X
-L0158D7: db $E8
+OBJLstPtrTable_Proj_Terry_PowerGeyser: db $E8
 L0158D8: db $5B
 L0158D9: db $FF
 L0158DA: db $FF
@@ -6400,7 +6400,7 @@ L015901: db $FF
 L015902: db $FF
 L015903: db $FF;X
 L015904: db $FF;X
-L015905: db $F1
+OBJLstPtrTable_Proj_Iori_YamiBarai: db $F1
 L015906: db $5C
 L015907: db $FF
 L015908: db $FF
@@ -6418,7 +6418,7 @@ L015913: db $FF
 L015914: db $FF
 L015915: db $FF;X
 L015916: db $FF
-L015917: db $A4
+OBJLstPtrTable_Proj_HaohShokohKenS: db $A4
 L015918: db $5C
 L015919: db $FF
 L01591A: db $FF
@@ -6436,7 +6436,7 @@ L015925: db $FF
 L015926: db $FF
 L015927: db $FF;X
 L015928: db $FF
-L015929: db $B5
+OBJLstPtrTable_Proj_HaohShokohKenD: db $B5
 L01592A: db $5F
 L01592B: db $FF
 L01592C: db $FF
@@ -6454,7 +6454,7 @@ L015937: db $FF
 L015938: db $FF
 L015939: db $FF;X
 L01593A: db $FF
-L01593B: db $D4
+OBJLstPtrTable_Proj_MrKarate_KoOuKen: db $D4
 L01593C: db $5C
 L01593D: db $FF
 L01593E: db $FF
@@ -6464,7 +6464,7 @@ L015941: db $FF
 L015942: db $FF
 L015943: db $FF;X
 L015944: db $FF
-L015945: db $37
+OBJLstPtrTable_Proj_Athena_PsychoBall: db $37
 L015946: db $5D
 L015947: db $FF
 L015948: db $FF
@@ -6482,37 +6482,37 @@ L015953: db $FF
 L015954: db $FF
 L015955: db $FF;X
 L015956: db $FF
-L015957: db $1C
+OBJLstPtrTable_Proj_Athena_ShCryst_Swirl: db $1C
 L015958: db $5D
 L015959: db $FF
 L01595A: db $FF
 L01595B: db $FF;X
 L01595C: db $FF;X
-L01595D: db $41;X
+OBJLstPtrTable_Proj_Athena_ShCryst_OrbitS1: db $41;X
 L01595E: db $5D;X
 L01595F: db $FF;X
 L015960: db $FF;X
 L015961: db $FF;X
 L015962: db $FF;X
-L015963: db $66;X
+OBJLstPtrTable_Proj_Athena_ShCryst_OrbitS2: db $66;X
 L015964: db $5D;X
 L015965: db $FF;X
 L015966: db $FF;X
 L015967: db $FF;X
 L015968: db $FF;X
-L015969: db $8D;X
+OBJLstPtrTable_Proj_Athena_ShCryst_OrbitS3: db $8D;X
 L01596A: db $5D;X
 L01596B: db $FF;X
 L01596C: db $FF;X
 L01596D: db $FF;X
 L01596E: db $FF;X
-L01596F: db $C3;X
+OBJLstPtrTable_Proj_Athena_ShCryst_OrbitS4: db $C3;X
 L015970: db $5D;X
 L015971: db $FF;X
 L015972: db $FF;X
 L015973: db $FF;X
 L015974: db $FF;X
-L015975: db $26
+OBJLstPtrTable_Proj_Athena_ShCryst_ThrownNorm: db $26
 L015976: db $5D
 L015977: db $FF
 L015978: db $FF
@@ -6530,7 +6530,7 @@ L015983: db $FF
 L015984: db $FF
 L015985: db $FF;X
 L015986: db $FF
-L015987: db $4B;X
+OBJLstPtrTable_Proj_Athena_ShCryst_ThrownS1: db $4B;X
 L015988: db $5D;X
 L015989: db $FF;X
 L01598A: db $FF;X
@@ -6540,25 +6540,25 @@ L01598D: db $FF;X
 L01598E: db $FF;X
 L01598F: db $FF;X
 L015990: db $FF;X
-L015991: db $70;X
+OBJLstPtrTable_Proj_Athena_ShCryst_ThrownS2: db $70;X
 L015992: db $5D;X
 L015993: db $FF;X
 L015994: db $FF;X
 L015995: db $FF;X
 L015996: db $FF;X
-L015997: db $97;X
+OBJLstPtrTable_Proj_Athena_ShCryst_ThrownS3: db $97;X
 L015998: db $5D;X
 L015999: db $FF;X
 L01599A: db $FF;X
 L01599B: db $FF;X
 L01599C: db $FF;X
-L01599D: db $CD;X
+OBJLstPtrTable_Proj_Athena_ShCryst_ThrownS4: db $CD;X
 L01599E: db $5D;X
 L01599F: db $FF;X
 L0159A0: db $FF;X
 L0159A1: db $FF;X
 L0159A2: db $FF;X
-L0159A3: db $12
+OBJLstPtrTable_Proj_Athena_PsychoTeleport: db $12
 L0159A4: db $5E
 L0159A5: db $FF
 L0159A6: db $FF
@@ -6568,7 +6568,7 @@ L0159A9: db $FF
 L0159AA: db $FF
 L0159AB: db $FF;X
 L0159AC: db $FF
-L0159AD: db $61
+OBJLstPtrTable_Proj_Mai_KaChoSen: db $61
 L0159AE: db $5C
 L0159AF: db $FF
 L0159B0: db $FF
@@ -6586,7 +6586,7 @@ L0159BB: db $FF
 L0159BC: db $FF
 L0159BD: db $FF;X
 L0159BE: db $FF
-L0159BF: db $39
+OBJLstPtrTable_Proj_Leona_VSlasherS: db $39
 L0159C0: db $5E
 L0159C1: db $FF
 L0159C2: db $FF
@@ -6596,7 +6596,7 @@ L0159C5: db $FF
 L0159C6: db $FF
 L0159C7: db $FF;X
 L0159C8: db $FF
-L0159C9: db $62
+OBJLstPtrTable_Proj_Leona_VSlasherD: db $62
 L0159CA: db $5E
 L0159CB: db $FF
 L0159CC: db $FF
@@ -6606,7 +6606,7 @@ L0159CF: db $FF
 L0159D0: db $FF
 L0159D1: db $FF;X
 L0159D2: db $FF
-L0159D3: db $A1
+OBJLstPtrTable_Leona_BalticLauncher: db $A1
 L0159D4: db $5E
 L0159D5: db $FF
 L0159D6: db $FF
@@ -6616,7 +6616,7 @@ L0159D9: db $FF
 L0159DA: db $FF
 L0159DB: db $FF;X
 L0159DC: db $FF
-L0159DD: db $D3
+OBJLstPtrTable_Proj_OLeona_VSlasher: db $D3
 L0159DE: db $60
 L0159DF: db $FF
 L0159E0: db $FF
@@ -6634,7 +6634,7 @@ L0159EB: db $FF
 L0159EC: db $FF
 L0159ED: db $FF;X
 L0159EE: db $FF
-L0159EF: db $D9
+OBJLstPtrTable_Proj_Geese_RagingStormS: db $D9
 L0159F0: db $5E
 L0159F1: db $FF
 L0159F2: db $FF
@@ -6652,7 +6652,7 @@ L0159FD: db $FF
 L0159FE: db $FF
 L0159FF: db $FF;X
 L015A00: db $FF
-L015A01: db $21
+OBJLstPtrTable_Proj_Geese_RagingStormD: db $21
 L015A02: db $5F
 L015A03: db $FF
 L015A04: db $FF
@@ -6670,7 +6670,7 @@ L015A0F: db $FF
 L015A10: db $FF
 L015A11: db $FF;X
 L015A12: db $FF
-L015A13: db $84
+OBJLstPtrTable_Proj_Geese_ShippuKen: db $84
 L015A14: db $5F
 L015A15: db $FF
 L015A16: db $FF
@@ -6680,7 +6680,7 @@ L015A19: db $FF
 L015A1A: db $FF
 L015A1B: db $FF;X
 L015A1C: db $FF
-L015A1D: db $3F
+OBJLstPtrTable_Proj_Krauser_BlitzBall: db $3F
 L015A1E: db $60
 L015A1F: db $FF
 L015A20: db $FF
@@ -6698,7 +6698,7 @@ L015A2B: db $FF
 L015A2C: db $FF
 L015A2D: db $FF;X
 L015A2E: db $FF
-L015A2F: db $B5
+OBJLstPtrTable_Proj_Krauser_KaiserWaveS: db $B5
 L015A30: db $5F
 L015A31: db $FF
 L015A32: db $FF
@@ -6708,7 +6708,7 @@ L015A35: db $FF
 L015A36: db $FF
 L015A37: db $FF;X
 L015A38: db $FF
-L015A39: db $F4
+OBJLstPtrTable_Proj_Krauser_KaiserWaveD: db $F4
 L015A3A: db $5F
 L015A3B: db $FF
 L015A3C: db $FF
@@ -6722,7 +6722,7 @@ L015A43: db $FF
 L015A44: db $FF
 L015A45: db $FF;X
 L015A46: db $FF
-L015A47: db $78
+OBJLstPtrTable_Proj_MrBig_BlasterWave: db $78
 L015A48: db $60
 L015A49: db $FF
 L015A4A: db $FF
@@ -6740,7 +6740,7 @@ L015A55: db $FF
 L015A56: db $FF
 L015A57: db $FF;X
 L015A58: db $FF
-L015A59: db $D3
+OBJLstPtrTable_Proj_Mature_HeavensGateS: db $D3
 L015A5A: db $60
 L015A5B: db $FF
 L015A5C: db $FF
@@ -6754,7 +6754,7 @@ L015A63: db $FF
 L015A64: db $FF
 L015A65: db $FF;X
 L015A66: db $FF
-L015A67: db $DD
+OBJLstPtrTable_Proj_Mature_HeavensGateD: db $DD
 L015A68: db $60
 L015A69: db $FF
 L015A6A: db $FF
@@ -6764,7 +6764,7 @@ L015A6D: db $FF
 L015A6E: db $FF
 L015A6F: db $FF;X
 L015A70: db $FF
-L015A71: db $29
+OBJLstPtrTable_Proj_Goenitz_Yonokaze: db $29
 L015A72: db $62
 L015A73: db $FF
 L015A74: db $FF
@@ -6778,7 +6778,7 @@ L015A7B: db $FF
 L015A7C: db $FF
 L015A7D: db $FF;X
 L015A7E: db $FF
-L015A7F: db $29
+OBJLstPtrTable_Proj_Goenitz_Yamidoukoku: db $29
 L015A80: db $62
 L015A81: db $FF
 L015A82: db $FF
@@ -6792,7 +6792,7 @@ L015A89: db $FF
 L015A8A: db $FF
 L015A8B: db $FF;X
 L015A8C: db $FF
-L015A8D: db $C9
+OBJLstPtrTable_Proj_Goenitz_WanpyouTokobuse: db $C9
 L015A8E: db $62
 L015A8F: db $FF
 L015A90: db $FF
@@ -6806,7 +6806,7 @@ L015A97: db $FF
 L015A98: db $FF
 L015A99: db $FF;X
 L015A9A: db $FF
-L015A9B: db $05
+OBJLstPtrTable_Proj_Chizuru_ReigiIshizue: db $05
 L015A9C: db $63
 L015A9D: db $FF
 L015A9E: db $FF
@@ -9909,7 +9909,7 @@ Play_DoUnkChain_ResetDamage:
 	res  PF2B_HITCOMBO, [hl]
 	
 .copyDamageVars:
-	; Give visibility to the player-yo-player push request
+	; Give visibility to the player-to-player push request
 	ld   a, [wPlInfo_Pl1+iPlInfo_PushSpeedHReq]
 	ld   [wPlInfo_Pl2+iPlInfo_PushSpeedHRecv], a
 	ld   a, [wPlInfo_Pl2+iPlInfo_PushSpeedHReq]

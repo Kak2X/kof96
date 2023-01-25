@@ -1506,7 +1506,7 @@ ENDM
 ; [TCRF] Unreferenced code.
 VBlank_Unused_Pl1Checks:
 	ld   a, [wPlInfo_Pl1+iPlInfo_Flags1]
-	bit  PF1B_COMBORECV, a
+	bit  PF1B_HITRECV, a
 	jp   nz, VBlank_CopyPl1Tiles
 	ld   a, [wPlInfo_Pl1+iPlInfo_Flags2]
 	bit  PF2B_HITCOMBO, a
@@ -1526,7 +1526,7 @@ VBlank_CopyPl1Tiles:
 ; [TCRF] Unreferenced code
 VBlank_Unused_Pl2Checks:
 	ld   a, [wPlInfo_Pl2+iPlInfo_Flags1]
-	bit  PF1B_COMBORECV, a
+	bit  PF1B_HITRECV, a
 	jp   nz, VBlank_CopyPl2Tiles
 	ld   a, [wPlInfo_Pl2+iPlInfo_Flags2]
 	bit  PF2B_HITCOMBO, a
@@ -6066,7 +6066,7 @@ Pl_Unknown_InitBeforeStage:
 	ld   [wPlInfo_Pl1+iPlInfo_HitComboRecvSet], a
 	ld   [wPlInfo_Pl2+iPlInfo_HitComboRecvSet], a
 	; Set initial health values.
-	ld   a, $48
+	ld   a, PLAY_HEALTH_MAX
 	ld   [wPlInfo_Pl1+iPlInfo_Health], a
 	ld   [wPlInfo_Pl2+iPlInfo_Health], a
 	ret
@@ -6413,13 +6413,13 @@ Play_InitRound:
 	ld   a, [wLastWinner]
 	bit  PLB1, a				; Did 1P win the last round?
 	jp   nz, .chkLastWin2P		; If so, skip
-	ld   a, $48					; Otherwise, reset 1P health
+	ld   a, PLAY_HEALTH_MAX		; Otherwise, reset 1P health
 	ld   [wPlInfo_Pl1+iPlInfo_Health], a
 .chkLastWin2P:
 	ld   a, [wLastWinner]
 	bit  PLB2, a				; Did 2P win the last round?
 	jp   nz, .chkFinalTeam		; If so, skip
-	ld   a, $48					; Otherwise, reset 2P health
+	ld   a, PLAY_HEALTH_MAX		; Otherwise, reset 2P health
 	ld   [wPlInfo_Pl2+iPlInfo_Health], a
 .chkFinalTeam:
 	
@@ -6464,7 +6464,7 @@ Play_InitRound:
 	jp   .end
 .setNormRound:
 	; Set max health for both players
-	ld   a, $48				
+	ld   a, PLAY_HEALTH_MAX			
 	ld   [wPlInfo_Pl1+iPlInfo_Health], a
 	ld   [wPlInfo_Pl2+iPlInfo_Health], a
 .end:
@@ -8796,39 +8796,69 @@ Play_DoPl:
 	; - DE: Ptr to respective wOBJInfo structure
 	jp   hl
 	
+; =============== HomeCall_L037707 ===============	
 L0024E4:;C
 	ldh  a, [hROMBank]
 	push af
-	ld   a, $03
+	ld   a, BANK(L037707) ; BANK $03
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	call $7707
+	call L037707
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-L0024F8:;C
-	ld   hl, $002B
+	
+; =============== ProjInitS_InitAndGetOBJInfo ===============
+; Gets the projectile's wOBJInfo for the current player and initializes its common properties.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+; OUT
+; - DE: Ptr to projectile wOBJInfo (wOBJInfo_Pl*Projectile)
+; WIPES
+; - BC
+ProjInitS_InitAndGetOBJInfo:
+	;
+	; A = Player marker (for the tile ID check)
+	;
+	ld   hl, iPlInfo_PlId
 	add  hl, bc
 	ld   a, [hl]
-	push de
+	
+	;
+	; Seek to the wOBJInfo for the current player's projectile.
+	; This will either be  Ptr to wOBJInfo_Pl1Projectile or  Ptr to wOBJInfo_Pl2Projectile.
+	; Save its ptr to DE and HL.
+	;
+	push de			; BC = Ptr to player wOBJInfo
 	pop  bc
-	ld   hl, $0080
-	add  hl, bc
+	ld   hl, (OBJINFO_SIZE*2)+iOBJInfo_Status
+	add  hl, bc		; Seek to 2 slots after
 	push hl
-	pop  de
-	ld   [hl], $80
-	or   a
-	jp   nz, L002514
-	ld   hl, $000D
-	add  hl, de
-	ld   [hl], $80
-	jp   L00251A
-L002514:;J
-	ld   hl, $000D
-	add  hl, de
-	ld   [hl], $A6
-L00251A:;J
+	pop  de			; Copy it to DE
+	
+	;
+	; Show the projectile
+	;
+	ld   [hl], OST_VISIBLE
+	
+	;
+	; Set the tile ID base for the projectile depending on the player we're playing as.
+	; The values must be consistent with that's written in Play_LoadProjectileOBJInfo
+	;
+	or   a				; iPlInfo_PlId != PL1?
+	jp   nz, .tileId2P	; If so, jump
+.tileId1P:
+	ld   hl, iOBJInfo_TileIDBase
+	add  hl, de		; Seek to iOBJInfo_TileIDBase
+	ld   [hl], $80	; Graphics from $8800
+	jp   .ret
+.tileId2P:
+	ld   hl, iOBJInfo_TileIDBase
+	add  hl, de		; Seek to iOBJInfo_TileIDBase
+	ld   [hl], $A6	; Graphics from $8A60
+.ret:
 	ret
 	
 ; =============== OBJLstS_Overlap ===============
@@ -8878,445 +8908,669 @@ ENDR
 	; Write it over
 	ld   [hl], a
 	ret
+
+; =============== ProjInit_Leona_BalticLauncher ===============
+; Initializes the projectile for Leona's Baltic Launcher.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo	
+ProjInit_Leona_BalticLauncher:
+	mMvC_PlaySound SCT_15
+	push bc
+		push de
+			; --------------- common projectile init code ---------------
+			
+			;
+			; C flag = If set, we're at max power
+			;
+			ld   hl, iPlInfo_Pow
+			add  hl, bc
+			ld   a, [hl]		; A = Pow meter
+			cp   PLAY_POW_MAX	; Are we at max power?
+			jp   z, .initMaxPow	; If so, jump
+			xor  a				; C flag clear
+			jp   .getFlags2
+		.initMaxPow:
+			scf					; C flag set
+		.getFlags2:
+			;
+			; A = iPlInfo_Flags2
+			;
+			ld   hl, iPlInfo_Flags2
+			push af				; Preserve C flag for this
+				add  hl, bc		; Seek to iPlInfo_Flags2
+			pop  af
+			ld   a, [hl]		; Read out to A
+			
+			push af ; Save A & C flag
+				
+				call ProjInitS_InitAndGetOBJInfo	; DE = Ptr to wOBJInfo_Pl*Projectile
+				
+				; Set code pointer
+				ld   hl, iOBJInfo_Proj_CodeBank
+				add  hl, de
+				ld   [hl], BANK(ProjC_Leona_BalticLauncher)	; BANK $02 ; iOBJInfo_Proj_CodeBank
+				inc  hl
+				ld   [hl], LOW(ProjC_Leona_BalticLauncher)	; iOBJInfo_Proj_CodePtr_Low
+				inc  hl
+				ld   [hl], HIGH(ProjC_Leona_BalticLauncher)	; iOBJInfo_Proj_CodePtr_High
+
+				; Write sprite mapping ptr for this projectile.
+				ld   hl, iOBJInfo_BankNum
+				add  hl, de
+				ld   [hl], BANK(OBJLstPtrTable_Leona_BalticLauncher)	; BANK $01 ; iOBJInfo_BankNum
+				inc  hl
+				ld   [hl], LOW(OBJLstPtrTable_Leona_BalticLauncher)		; iOBJInfo_OBJLstPtrTbl_Low
+				inc  hl
+				ld   [hl], HIGH(OBJLstPtrTable_Leona_BalticLauncher)	; iOBJInfo_OBJLstPtrTbl_High
+				inc  hl
+				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
+				
+				; Set animation speed.
+				ld   hl, iOBJInfo_FrameLeft
+				add  hl, de
+				ld   [hl], $01	; iOBJInfo_FrameLeft
+				inc  hl
+				ld   [hl], $01	; iOBJInfo_FrameTotal
+				
+				; Set priority value
+				ld   hl, iOBJInfo_Proj_Priority
+				add  hl, de
+				ld   [hl], $00
+				
+				; Set initial position relative to the player's origin
+				call OBJLstS_Overlap
+				mMvC_SetMoveH +$1000
+				mMvC_SetMoveV -$0800
+				
+			;
+			; Determine projectile properties depending on Max POW / LH attack type.
+			; Projectiles spawned by heavy attacks travel faster and longer.
+			;	
+			pop  af						; Restore A & C flag
+			jp   nc, .fldNoMaxPow		; Are we at max power? If not, jump
+		.fldMaxPow:	
+			bit  PF2B_HEAVY, a			; Was this an heavy attack?
+			jp   nz, .fldHeavyMaxPow	; If so, jump
+			jp   .fldLight
+		.fldNoMaxPow:
+			bit  PF2B_HEAVY, a			; Was this an heavy attack?
+			jp   nz, .fldHeavy			; If so, jump
+			
+		.fldLight:
+			ld   hl, iOBJInfo_Proj_EnaTimer
+			add  hl, de
+			ld   [hl], $1E ; Frames before despawn
+			ld   hl, $0000 ; H Speed (no movement)
+			jp   .setSpeed
+		.fldHeavy:
+			ld   hl, iOBJInfo_Proj_EnaTimer
+			add  hl, de
+			ld   [hl], $23 ; Frames before despawn
+			ld   hl, $0100 ; H Speed (1px/frame)
+			jp   .setSpeed
+		.fldHeavyMaxPow:
+			ld   hl, iOBJInfo_Proj_EnaTimer
+			add  hl, de
+			ld   [hl], $28 ; Frames before despawn
+			ld   hl, $0200 ; H Speed (1px/frame)
+		.setSpeed:
+			call Play_OBJLstS_SetSpeedH_ByXFlipR
+		pop  de
+	pop  bc
+	ret
 	
-L00253E:;C
-	ld   a, $16
-	call HomeCall_Sound_ReqPlayExId
+; =============== ProjInit_Leona_VSlasher ===============
+; Initializes the projectile for Leona's V Slasher.
+; This has a fixed position and disappears after 1 second.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+ProjInit_Leona_VSlasher:
 	push bc
-	push de
-	ld   hl, iPlInfo_Pow
-	add  hl, bc
-	ld   a, [hl]
-	cp   $28
-	jp   z, L002553
-	xor  a
-	jp   L002554
-L002553:;J
-	scf
-L002554:;J
-	ld   hl, $0022
-	push af
-	add  hl, bc
-	pop  af
-	ld   a, [hl]
-	push af
-	call L0024F8
-	ld   hl, $0020
-	add  hl, de
-	ld   [hl], $02
-	inc  hl
-	ld   [hl], $47
-	inc  hl
-	ld   [hl], $71
-	ld   hl, $0010
-	add  hl, de
-	ld   [hl], $01
-	inc  hl
-	ld   [hl], $D3
-	inc  hl
-	ld   [hl], $59
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $001B
-	add  hl, de
-	ld   [hl], $01
-	inc  hl
-	ld   [hl], $01
-	ld   hl, $0027
-	add  hl, de
-	ld   [hl], $00
-	call OBJLstS_Overlap
-	mMvC_SetMoveH $1000
-	mMvC_SetMoveV $F800
-	pop  af
-	jp   nc, L0025A4
-	bit  1, a
-	jp   nz, L0025C1
-	jp   L0025A9
-L0025A4:;J
-	bit  1, a
-	jp   nz, L0025B5
-L0025A9:;J
-	ld   hl, $0028
-	add  hl, de
-	ld   [hl], $1E
-	ld   hl, $0000
-	jp   L0025CA
-L0025B5:;J
-	ld   hl, $0028
-	add  hl, de
-	ld   [hl], $23
-	ld   hl, $0100
-	jp   L0025CA
-L0025C1:;J
-	ld   hl, $0028
-	add  hl, de
-	ld   [hl], $28
-	ld   hl, $0200
-L0025CA:;J
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	pop  de
+		push de
+			; A = CharId
+			ld   hl, iPlInfo_CharId
+			add  hl, bc
+			ld   a, [hl]
+			
+			push af	; Save CharId
+				push af	; Save CharId
+					; A = MoveId
+					ld   hl, iPlInfo_MoveId
+					add  hl, bc
+					ld   a, [hl]
+					push af	; Save MoveId
+					
+						; DE = Ptr to wOBJInfo_Pl*Projectile
+						call ProjInitS_InitAndGetOBJInfo
+						
+						; Set code pointer
+						ld   hl, iOBJInfo_Proj_CodeBank
+						add  hl, de
+						ld   [hl], BANK(ProjC_NoMove)	; BANK $05 ; iOBJInfo_Proj_CodeBank
+						inc  hl
+						ld   [hl], LOW(ProjC_NoMove)	; iOBJInfo_Proj_CodePtr_Low
+						inc  hl
+						ld   [hl], HIGH(ProjC_NoMove)	; iOBJInfo_Proj_CodePtr_High
+						
+					;--
+					;
+					; Write sprite mapping ptr for this projectile.
+					;
+					; The super and desperation versions of the move use different sprite mappings.
+					; When playing as O.Leona, another different set of sprite mappings is used.
+					;
+					pop  af	; A = MoveId
+					cp   MOVE_LEONA_V_SLASHER_D		; Using the desperation super version?
+					jp   z, .objLstD				; If so, jump
+				.objLstS:
+				
+				pop  af	; A = CharId
+				cp   CHAR_ID_LEONA		; Playing as normal LEONA?
+				jp   nz, .objLstO		; If not, jump
+				
+				; Super -> Normal V
+				ld   hl, iOBJInfo_BankNum
+				add  hl, de
+				ld   [hl], BANK(OBJLstPtrTable_Proj_Leona_VSlasherS)	; BANK $01 ; iOBJInfo_BankNum
+				inc  hl
+				ld   [hl], LOW(OBJLstPtrTable_Proj_Leona_VSlasherS)		; iOBJInfo_OBJLstPtrTbl_Low
+				inc  hl
+				ld   [hl], HIGH(OBJLstPtrTable_Proj_Leona_VSlasherS)	; iOBJInfo_OBJLstPtrTbl_High
+				inc  hl
+				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
+				
+				jp   .setAnimSpeed
+				
+				.objLstD:
+				pop  af
+				cp   CHAR_ID_LEONA		; Playing as normal LEONA?
+				jp   nz, .objLstO		; If not, jump
+				
+				; Desperation -> Large V
+				ld   hl, iOBJInfo_BankNum
+				add  hl, de
+				ld   [hl], BANK(OBJLstPtrTable_Proj_Leona_VSlasherD)	; BANK $01 ; iOBJInfo_BankNum
+				inc  hl
+				ld   [hl], LOW(OBJLstPtrTable_Proj_Leona_VSlasherD)		; iOBJInfo_OBJLstPtrTbl_Low
+				inc  hl
+				ld   [hl], HIGH(OBJLstPtrTable_Proj_Leona_VSlasherD)	; iOBJInfo_OBJLstPtrTbl_High
+				inc  hl
+				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
+				
+				jp   .setAnimSpeed
+				
+			.objLstO:
+				; Orochi -> Skull wall
+				
+				ld   hl, iOBJInfo_BankNum
+				add  hl, de
+				ld   [hl], BANK(OBJLstPtrTable_Proj_OLeona_VSlasher)	; BANK $01 ; iOBJInfo_BankNum
+				inc  hl
+				ld   [hl], LOW(OBJLstPtrTable_Proj_OLeona_VSlasher)		; iOBJInfo_OBJLstPtrTbl_Low
+				inc  hl
+				ld   [hl], HIGH(OBJLstPtrTable_Proj_OLeona_VSlasher)	; iOBJInfo_OBJLstPtrTbl_High
+				inc  hl
+				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
+				
+				; This also plays a SFX
+				mMvC_PlaySound SND_ID_28
+				jp   .setAnimSpeed
+				;--
+			.setAnimSpeed:
+			
+				; Set animation speed.
+				ld   hl, iOBJInfo_FrameLeft
+				add  hl, de
+				ld   [hl], $00	; iOBJInfo_FrameLeft
+				inc  hl
+				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
+				
+				; Set priority and despawn timer
+				ld   hl, iOBJInfo_Proj_Priority
+				add  hl, de
+				ld   [hl], $00	; iOBJInfo_Proj_Priority
+				inc  hl
+				ld   [hl], 60	; iOBJInfo_Proj_EnaTimer
+				
+				; Set initial position relative to the player's origin
+				call OBJLstS_Overlap
+				
+			pop  af ; A = CharId
+			cp   CHAR_ID_LEONA
+			jp   nz, .moveOLeona
+		.moveLeona:
+			; When playing as LEONA, the projectile is diagonally down.
+			mMvC_SetMoveH +$1000
+			mMvC_SetMoveV -$0800
+			jp   .end
+		.moveOLeona:
+			; When playing as O.Leona, the projectile is aligned to the ground.
+			; This is because it's a full-height skull wall.
+			mMvC_SetMoveH +$1000
+			ld   hl, iOBJInfo_Y
+			add  hl, de
+			ld   [hl], PL_FLOOR_POS
+		.end:
+		pop  de
 	pop  bc
 	ret
-L0025D0:;C
+	
+; =============== ProjInit_MrKarate_KoOuKen ===============
+; Initializes the projectile for Mr.Karate's Ko Ou Ken.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+ProjInit_MrKarate_KoOuKen:
+	mMvC_PlaySound SND_ID_28
+	
 	push bc
-	push de
-	ld   hl, $002C
-	add  hl, bc
-	ld   a, [hl]
-	push af
-	push af
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	push af
-	call L0024F8
-	ld   hl, $0020
-	add  hl, de
-	ld   [hl], $05
-	inc  hl
-	ld   [hl], $52
-	inc  hl
-	ld   [hl], $73
-	pop  af
-	cp   $66
-	jp   z, L00260C
-	pop  af
-	cp   $10
-	jp   nz, L002624
-	ld   hl, $0010
-	add  hl, de
-	ld   [hl], $01
-	inc  hl
-	ld   [hl], $BF
-	inc  hl
-	ld   [hl], $59
-	inc  hl
-	ld   [hl], $00
-	jp   L00263B
-L00260C:;J
-	pop  af
-	cp   $10
-	jp   nz, L002624
-	ld   hl, $0010
-	add  hl, de
-	ld   [hl], $01
-	inc  hl
-	ld   [hl], $C9
-	inc  hl
-	ld   [hl], $59
-	inc  hl
-	ld   [hl], $00
-	jp   L00263B
-L002624:;J
-	ld   hl, $0010
-	add  hl, de
-	ld   [hl], $01
-	inc  hl
-	ld   [hl], $DD
-	inc  hl
-	ld   [hl], $59
-	inc  hl
-	ld   [hl], $00
-	ld   a, $A8
-	call HomeCall_Sound_ReqPlayExId
-	jp   L00263B
-L00263B:;J
-	ld   hl, $001B
-	add  hl, de
-	ld   [hl], $00
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $0027
-	add  hl, de
-	ld   [hl], $00
-	inc  hl
-	ld   [hl], $3C
-	call OBJLstS_Overlap
-	pop  af
-	cp   $10
-	jp   nz, L002665
-	mMvC_SetMoveH $1000
-	mMvC_SetMoveV $F800
-	jp   L002671
-L002665:;J
-	mMvC_SetMoveH $1000
-	ld   hl, $0005
-	add  hl, de
-	ld   [hl], PL_FLOOR_POS
-L002671:;J
-	pop  de
+		push de
+		
+			; --------------- common projectile init code ---------------
+			
+			;
+			; C flag = If set, we're at max power
+			;
+			ld   hl, iPlInfo_Pow
+			add  hl, bc
+			ld   a, [hl]		; A = Pow meter
+			cp   PLAY_POW_MAX	; Are we at max power?
+			jp   z, .initMaxPow	; If so, jump
+			xor  a				; C flag clear
+			jp   .getFlags2
+		.initMaxPow:
+			scf					; C flag set
+		.getFlags2:
+			;
+			; A = iPlInfo_Flags2
+			;
+			ld   hl, iPlInfo_Flags2
+			push af				; Preserve C flag for this
+				add  hl, bc		; Seek to iPlInfo_Flags2
+			pop  af
+			ld   a, [hl]		; Read out to A
+			
+			push af ; Save A & C flag
+				
+				call ProjInitS_InitAndGetOBJInfo	; DE = Ptr to wOBJInfo_Pl*Projectile
+				
+				; --------------- main ---------------
+				
+				; Write sprite mapping ptr for this projectile.
+				ld   hl, iOBJInfo_BankNum
+				add  hl, de
+				ld   [hl], BANK(OBJLstPtrTable_Proj_MrKarate_KoOuKen)	; BANK $01 ; iOBJInfo_BankNum
+				inc  hl
+				ld   [hl], LOW(OBJLstPtrTable_Proj_MrKarate_KoOuKen)	; iOBJInfo_OBJLstPtrTbl_Low
+				inc  hl
+				ld   [hl], HIGH(OBJLstPtrTable_Proj_MrKarate_KoOuKen)	; iOBJInfo_OBJLstPtrTbl_High
+				inc  hl
+				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
+				
+				; Set priority value
+				ld   hl, iOBJInfo_Proj_Priority
+				add  hl, de
+				ld   [hl], $00
+			
+				; Set code pointer
+				ld   hl, iOBJInfo_Proj_CodeBank
+				add  hl, de
+				ld   [hl], BANK(ProjC_Horz)	; BANK $06 ; iOBJInfo_Proj_CodeBank
+				inc  hl
+				ld   [hl], LOW(ProjC_Horz)	; iOBJInfo_Proj_CodePtr_Low
+				inc  hl
+				ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Proj_CodePtr_High
+				
+				; Set animation speed.
+				ld   hl, iOBJInfo_FrameLeft
+				add  hl, de
+				ld   [hl], $00	; iOBJInfo_FrameLeft
+				inc  hl
+				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
+				
+				; Set initial position relative to the player's origin
+				call OBJLstS_Overlap
+				mMvC_SetMoveH +$1C00
+				mMvC_SetMoveV -$0400
+				
+			;
+			; Determine projectile horizontal speed.
+			;
+		
+			pop  af	; Restore A & C flag
+			jp   nc, .spdMaxPow			; Are we at max power? If not, jump
+			bit  PF2B_HEAVY, a			; Was this an heavy attack?
+			jp   nz, .spdHeavy			; If so, jump
+			jp   .spdLight
+		.spdMaxPow:
+			bit  PF2B_HEAVY, a			; Was this an heavy attack?
+			jp   nz, .spdHeavyMaxPow	; If so, jump
+		.spdLight:
+			ld   hl, +$0180
+			jp   .setSpeed
+		.spdHeavyMaxPow:
+			ld   hl, +$0300
+			jp   .setSpeed
+		.spdHeavy:
+			ld   hl, +$0500
+		.setSpeed:
+			call Play_OBJLstS_SetSpeedH_ByXFlipR
+			
+		pop  de
 	pop  bc
 	ret
-L002674:;C
-	ld   a, $A8
-	call HomeCall_Sound_ReqPlayExId
+	
+; =============== ProjInit_HaohShokohKenS ===============
+; Initializes the large projectile for the super version of Haoh Shokoh Ken.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+ProjInit_HaohShokohKenS:
+	mMvC_PlaySound SCT_15
 	push bc
-	push de
-	ld   hl, iPlInfo_Pow
-	add  hl, bc
-	ld   a, [hl]
-	cp   $28
-	jp   z, L002689
-	xor  a
-	jp   L00268A
-L002689:;J
-	scf
-L00268A:;J
-	ld   hl, $0022
-	push af
-	add  hl, bc
-	pop  af
-	ld   a, [hl]
-	push af
-	call L0024F8
-	ld   hl, $0010
-	add  hl, de
-	ld   [hl], $01
-	inc  hl
-	ld   [hl], $3B
-	inc  hl
-	ld   [hl], $59
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $0027
-	add  hl, de
-	ld   [hl], $00
-	ld   hl, $0020
-	add  hl, de
-	ld   [hl], $06
-	inc  hl
-	ld   [hl], $9E
-	inc  hl
-	ld   [hl], $52
-	ld   hl, $001B
-	add  hl, de
-	ld   [hl], $00
-	inc  hl
-	ld   [hl], $00
-	call OBJLstS_Overlap
-	mMvC_SetMoveH $1C00
-	mMvC_SetMoveV $FC00
-	pop  af
-	jp   nc, L0026DA
-	bit  1, a
-	jp   nz, L0026EB
-	jp   L0026DF
-L0026DA:;J
-	bit  1, a
-	jp   nz, L0026E5
-L0026DF:;J
-	ld   hl, $0180
-	jp   L0026EE
-L0026E5:;J
-	ld   hl, $0300
-	jp   L0026EE
-L0026EB:;J
-	ld   hl, $0500
-L0026EE:;J
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	pop  de
+		push de
+		
+			; --------------- common projectile init code ---------------
+			
+			;
+			; C flag = If set, we're at max power
+			;
+			ld   hl, iPlInfo_Pow
+			add  hl, bc
+			ld   a, [hl]		; A = Pow meter
+			cp   PLAY_POW_MAX	; Are we at max power?
+			jp   z, .initMaxPow	; If so, jump
+			xor  a				; C flag clear
+			jp   .getFlags2
+		.initMaxPow:
+			scf					; C flag set
+		.getFlags2:
+			;
+			; A = iPlInfo_Flags2
+			;
+			ld   hl, iPlInfo_Flags2
+			push af				; Preserve C flag for this
+				add  hl, bc		; Seek to iPlInfo_Flags2
+			pop  af
+			ld   a, [hl]		; Read out to A
+			
+			push af ; Save A & C
+				
+				call ProjInitS_InitAndGetOBJInfo	; DE = Ptr to wOBJInfo_Pl*Projectile
+				
+				; --------------- main ---------------
+				
+				; Write sprite mapping ptr for this projectile.
+				ld   hl, iOBJInfo_BankNum
+				add  hl, de
+				ld   [hl], BANK(OBJLstPtrTable_Proj_HaohShokohKenS)	; BANK $01 ; iOBJInfo_BankNum
+				inc  hl
+				ld   [hl], LOW(OBJLstPtrTable_Proj_HaohShokohKenS)	; iOBJInfo_OBJLstPtrTbl_Low
+				inc  hl
+				ld   [hl], HIGH(OBJLstPtrTable_Proj_HaohShokohKenS)	; iOBJInfo_OBJLstPtrTbl_High
+				inc  hl
+				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
+				
+				; Set priority value
+				ld   hl, iOBJInfo_Proj_Priority
+				add  hl, de
+				ld   [hl], $01
+				
+				jp   ProjInit_HaohShokohKenD.initShared
+	
+; =============== ProjInit_HaohShokohKenD ===============
+; Initializes the large projectile for the super desperation version of Haoh Shokoh Ken.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+ProjInit_HaohShokohKenD:
+	mMvC_PlaySound SCT_13
+	
+	push bc
+		push de
+		
+			; --------------- common projectile init code ---------------
+			
+			;
+			; C flag = If set, we're at max power
+			;
+			ld   hl, iPlInfo_Pow
+			add  hl, bc
+			ld   a, [hl]		; A = Pow meter
+			cp   PLAY_POW_MAX	; Are we at max power?
+			jp   z, .initMaxPow	; If so, jump
+			xor  a				; C flag clear
+			jp   .getFlags2
+		.initMaxPow:
+			scf					; C flag set
+		.getFlags2:
+			;
+			; A = iPlInfo_Flags2
+			;
+			ld   hl, iPlInfo_Flags2
+			push af				; Preserve C flag for this
+				add  hl, bc		; Seek to iPlInfo_Flags2
+			pop  af
+			ld   a, [hl]		; Read out to A
+			
+			push af ; Save A & C flag
+				
+				call ProjInitS_InitAndGetOBJInfo	; DE = Ptr to wOBJInfo_Pl*Projectile
+				
+				; --------------- main ---------------
+				
+				; Write sprite mapping ptr for this projectile.
+				ld   hl, iOBJInfo_BankNum
+				add  hl, de
+				ld   [hl], BANK(OBJLstPtrTable_Proj_HaohShokohKenD)	; BANK $01 ; iOBJInfo_BankNum
+				inc  hl
+				ld   [hl], LOW(OBJLstPtrTable_Proj_HaohShokohKenD)	; iOBJInfo_OBJLstPtrTbl_Low
+				inc  hl
+				ld   [hl], HIGH(OBJLstPtrTable_Proj_HaohShokohKenD)	; iOBJInfo_OBJLstPtrTbl_High
+				inc  hl
+				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
+				
+				; Set priority value
+				ld   hl, iOBJInfo_Proj_Priority
+				add  hl, de
+				ld   [hl], $02
+
+				; Common code between S and D init
+			.initShared:
+			
+				; Set code pointer
+				ld   hl, iOBJInfo_Proj_CodeBank
+				add  hl, de
+				ld   [hl], BANK(ProjC_Horz)	; BANK $06 ; iOBJInfo_Proj_CodeBank
+				inc  hl
+				ld   [hl], LOW(ProjC_Horz)	; iOBJInfo_Proj_CodePtr_Low
+				inc  hl
+				ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Proj_CodePtr_High
+				
+				; Set animation speed.
+				; Since these don't use the GFX buffer, using ANIMSPEED_INSTANT will animate the projectile every frame.
+				ld   hl, iOBJInfo_FrameLeft
+				add  hl, de
+				ld   [hl], $00	; iOBJInfo_FrameLeft
+				inc  hl
+				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
+				
+				; Set initial position
+				call OBJLstS_Overlap 	; Relative to the player's origin
+				mMvC_SetMoveH +$1000	; $10px forward
+				mMvC_SetMoveV -$0800	; $08px above
+				
+			;
+			; Determine projectile horizontal speed.
+			; There are different settings for light, heavy and heavy at max power.
+			;
+		
+			pop  af	; Restore A & C flag
+			jp   nc, .spdMaxPow			; Are we at max power? If not, jump
+			bit  PF2B_HEAVY, a			; Was this an heavy attack?
+			jp   nz, .spdHeavy			; If so, jump
+			jp   .spdLight
+		.spdMaxPow:
+			bit  PF2B_HEAVY, a			; Was this an heavy attack?
+			jp   nz, .spdHeavyMaxPow	; If so, jump
+		.spdLight:
+			ld   hl, +$0180
+			jp   .setSpeed
+		.spdHeavyMaxPow:
+			ld   hl, +$0300
+			jp   .setSpeed
+		.spdHeavy:
+			ld   hl, +$0500
+		.setSpeed:
+			call Play_OBJLstS_SetSpeedH_ByXFlipR
+			
+		pop  de
 	pop  bc
 	ret
-L0026F4:;C
-	ld   a, $16
-	call HomeCall_Sound_ReqPlayExId
+	
+; =============== ProjInit_Iori_YamiBarai ===============
+; Initializes the projectile for Iori's 108 Shiki Yami Barai.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+ProjInit_Iori_YamiBarai:
+	mMvC_PlaySound SCT_15
+	
 	push bc
-	push de
-	ld   hl, iPlInfo_Pow
-	add  hl, bc
-	ld   a, [hl]
-	cp   $28
-	jp   z, L002709
-	xor  a
-	jp   L00270A
-L002709:;J
-	scf
-L00270A:;J
-	ld   hl, $0022
-	push af
-	add  hl, bc
-	pop  af
-	ld   a, [hl]
-	push af
-	call L0024F8
-	ld   hl, $0010
-	add  hl, de
-	ld   [hl], $01
-	inc  hl
-	ld   [hl], $17
-	inc  hl
-	ld   [hl], $59
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $0027
-	add  hl, de
-	ld   [hl], $01
-	jp   L002763
-L00272D:;C
-	ld   a, $14
-	call HomeCall_Sound_ReqPlayExId
-	push bc
-	push de
-	ld   hl, iPlInfo_Pow
-	add  hl, bc
-	ld   a, [hl]
-	cp   $28
-	jp   z, L002742
-L00273E: db $AF;X
-L00273F: db $C3;X
-L002740: db $43;X
-L002741: db $27;X
-L002742:;J
-	scf
-	ld   hl, $0022
-	push af
-	add  hl, bc
-	pop  af
-	ld   a, [hl]
-	push af
-	call L0024F8
-	ld   hl, $0010
-	add  hl, de
-	ld   [hl], $01
-	inc  hl
-	ld   [hl], $29
-	inc  hl
-	ld   [hl], $59
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $0027
-	add  hl, de
-	ld   [hl], $02
-L002763:;J
-	ld   hl, $0020
-	add  hl, de
-	ld   [hl], $06
-	inc  hl
-	ld   [hl], $9E
-	inc  hl
-	ld   [hl], $52
-	ld   hl, $001B
-	add  hl, de
-	ld   [hl], $00
-	inc  hl
-	ld   [hl], $00
-	call OBJLstS_Overlap
-	mMvC_SetMoveH $1000
-	mMvC_SetMoveV $F800
-	pop  af
-	jp   nc, L002793
-	bit  1, a
-	jp   nz, L0027A4
-	jp   L002798
-L002793:;J
-	bit  1, a
-	jp   nz, L00279E
-L002798:;J
-	ld   hl, $0180
-	jp   L0027A7
-L00279E:;J
-	ld   hl, $0300
-	jp   L0027A7
-L0027A4:;J
-	ld   hl, $0500
-L0027A7:;J
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	pop  de
+		push de
+		
+			; --------------- common projectile init code ---------------
+			
+			;
+			; C flag = If set, we're at max power
+			;
+			ld   hl, iPlInfo_Pow
+			add  hl, bc
+			ld   a, [hl]		; A = Pow meter
+			cp   PLAY_POW_MAX	; Are we at max power?
+			jp   z, .initMaxPow	; If so, jump
+			xor  a				; C flag clear
+			jp   .getFlags2
+		.initMaxPow:
+			scf					; C flag set
+		.getFlags2:
+			;
+			; A = iPlInfo_Flags2
+			;
+			ld   hl, iPlInfo_Flags2
+			push af				; Preserve C flag for this
+				add  hl, bc		; Seek to iPlInfo_Flags2
+			pop  af
+			ld   a, [hl]		; Read out to A
+			
+			push af ; Save A & C flag
+				
+				call ProjInitS_InitAndGetOBJInfo	; DE = Ptr to wOBJInfo_Pl*Projectile
+				
+				; --------------- main ---------------
+			
+				; Set code pointer
+				ld   hl, iOBJInfo_Proj_CodeBank
+				add  hl, de
+				ld   [hl], BANK(ProjC_Horz)	; BANK $06 ; iOBJInfo_Proj_CodeBank
+				inc  hl
+				ld   [hl], LOW(ProjC_Horz)	; iOBJInfo_Proj_CodePtr_Low
+				inc  hl
+				ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Proj_CodePtr_High
+				
+				; Write sprite mapping ptr for this projectile.
+				ld   hl, iOBJInfo_BankNum
+				add  hl, de
+				ld   [hl], BANK(OBJLstPtrTable_Proj_Iori_YamiBarai)	; BANK $01 ; iOBJInfo_BankNum
+				inc  hl
+				ld   [hl], LOW(OBJLstPtrTable_Proj_Iori_YamiBarai)	; iOBJInfo_OBJLstPtrTbl_Low
+				inc  hl
+				ld   [hl], HIGH(OBJLstPtrTable_Proj_Iori_YamiBarai)	; iOBJInfo_OBJLstPtrTbl_High
+				inc  hl
+				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
+
+				
+				; Set animation speed.
+				ld   hl, iOBJInfo_FrameLeft
+				add  hl, de
+				ld   [hl], $00	; iOBJInfo_FrameLeft
+				inc  hl
+				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
+				
+				; Set priority value
+				ld   hl, iOBJInfo_Proj_Priority
+				add  hl, de
+				ld   [hl], $00
+				
+				; Set initial position relative to the player's origin
+				call OBJLstS_Overlap
+				mMvC_SetMoveH +$0800
+				
+			;
+			; Determine projectile horizontal speed.
+			;
+		
+			pop  af	; Restore A & C flag
+			jp   nc, .fldMaxPow			; Are we at max power? If not, jump
+			bit  PF2B_HEAVY, a			; Was this an heavy attack?
+			jp   nz, .fldHeavy			; If so, jump
+			jp   .fldLight
+		.fldMaxPow:
+			bit  PF2B_HEAVY, a			; Was this an heavy attack?
+			jp   nz, .fldHeavyMaxPow	; If so, jump
+		.fldLight:
+			ld   hl, +$0100
+			jp   .setSpeed
+		.fldHeavyMaxPow:
+			ld   hl, +$0200
+			jp   .setSpeed
+		.fldHeavy:
+			ld   hl, +$0400
+		.setSpeed:
+			call Play_OBJLstS_SetSpeedH_ByXFlipR
+			
+		pop  de
 	pop  bc
 	ret
-L0027AD:;C
-	ld   a, $16
-	call HomeCall_Sound_ReqPlayExId
-	push bc
+; =============== Pl_CopyXFlipToOther ===============
+; Makes the opponent visually face the same direction as the current player.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+Pl_CopyXFlipToOther:
 	push de
-	ld   hl, iPlInfo_Pow
-	add  hl, bc
-	ld   a, [hl]
-	cp   $28
-	jp   z, L0027C2
-	xor  a
-	jp   L0027C3
-L0027C2:;J
-	scf
-L0027C3:;J
-	ld   hl, $0022
-	push af
-	add  hl, bc
-	pop  af
-	ld   a, [hl]
-	push af
-	call L0024F8
-	ld   hl, $0020
-	add  hl, de
-	ld   [hl], $06
-	inc  hl
-	ld   [hl], $9E
-	inc  hl
-	ld   [hl], $52
-	ld   hl, $0010
-	add  hl, de
-	ld   [hl], $01
-	inc  hl
-	ld   [hl], $05
-	inc  hl
-	ld   [hl], $59
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $001B
-	add  hl, de
-	ld   [hl], $00
-	inc  hl
-	ld   [hl], $00
-	ld   hl, $0027
-	add  hl, de
-	ld   [hl], $00
-	call OBJLstS_Overlap
-	mMvC_SetMoveH $0800
-	pop  af
-	jp   nc, L00280D
-	bit  1, a
-	jp   nz, L00281E
-	jp   L002812
-L00280D:;J
-	bit  1, a
-	jp   nz, L002818
-L002812:;J
-	ld   hl, $0100
-	jp   L002821
-L002818:;J
-	ld   hl, $0200
-	jp   L002821
-L00281E:;J
-	ld   hl, $0400
-L002821:;J
-	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	pop  de
-	pop  bc
-	ret
-L002827:;C
-	push de
-	ld   hl, $0001
-	add  hl, de
-	ld   a, [hl]
-	and  a, $20
-	ld   d, a
-	ld   hl, $002B
-	add  hl, bc
-	ld   a, [hl]
-	or   a
-	jp   nz, L00283F
-	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstFlags
-	jp   L002842
-L00283F:;J
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstFlags
-L002842:;J
-	ld   a, [hl]
-	and  a, $DF
-	or   a, d
-	ld   [hl], a
+		; D = SPR_XFLIP flag for current player
+		ld   hl, iOBJInfo_OBJLstFlags
+		add  hl, de
+		ld   a, [hl]
+		and  a, SPR_XFLIP
+		ld   d, a
+		
+		; HL = Ptr to opponent's OBJLst flags
+		ld   hl, iPlInfo_PlId
+		add  hl, bc
+		ld   a, [hl]		; A = iPlInfo_PlId
+		or   a				; A != PL1?
+		jp   nz, .pl2		; If so, jump
+	.pl1:
+		; 1P gets 2P's flags
+		ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstFlags
+		jp   .sync
+	.pl2:
+		; 2P gets 1P's flags
+		ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstFlags
+	.sync:
+	
+		; Replace the opponent's SPR_XFLIP flag with ours
+		ld   a, [hl]			; A = Opponent's OBJLst flags
+		and  a, $FF^SPR_XFLIP	; Remove SPR_XFLIP flag
+		or   a, d				; Copy over ours
+		ld   [hl], a			; Save back updated value
 	pop  de
 	ret
+	
 ; =============== Pl_SetNewMove ===============
 ; Shared code for updating the wPlInfo when starting a new move.
 ; IN
@@ -9492,6 +9746,7 @@ Pl_SetNewMove:
 	ret
 	
 ; =============== ExOBJS_Play_ChkHitModeAndMoveH ===============
+; Moves the specified projectile horizontally and handles its hit mode.
 ; IN
 ; - DE: Ptr to wOBJInfo
 ; OUT
@@ -9511,6 +9766,7 @@ ExOBJS_Play_ChkHitModeAndMoveH:
 	
 	;
 	; Handle sprite hit modes, applicable to projectiles only.
+	; These are related to the collision detection against the opponent.
 	;
 	ld   hl, iOBJInfo_Proj_HitMode
 	add  hl, de
@@ -9529,13 +9785,11 @@ ExOBJS_Play_ChkHitModeAndMoveH:
 	
 .chkRemove:
 	; Despawn the projectiles only if it has its priority value < $03.
-	; [TCRF?] Are there actually any?
-	;         In 95, the priority check was before the hit mode one
-	;         and it would skip it outright if iOBJInfo_Proj_Priority == $02.
+	; Undespawnable projectiles that deal continuous damage or those for special effects use this value.
 	ld   hl, iOBJInfo_Proj_Priority
 	add  hl, de
 	ld   a, [hl]
-	cp   $03		; iOBJInfo_Proj_Priority >= $03?
+	cp   PROJ_PRIORITY_NODESPAWN		; iOBJInfo_Proj_Priority >= $03?
 	jp   nc, .move	; If so, jump
 .retSet:
 	scf		; C flag set
@@ -11163,53 +11417,92 @@ ENDC
 	pop  bc
 	ret
 	
-L002E1A:;C
+; =============== Play_Pl_SetDropAnimFrame ===============
+; Sets the animation/SFX for dropping on the ground.
+; See also: Play_Pl_SetJumpLandAnimFrame
+; IN
+; - A: OBJLst Id
+; - H: Animation speed (iOBJInfo_FrameTotal)
+; - DE: Ptr to wOBJInfo
+; OUT
+; - Z flag: If set, the new animation frame wasn't set
+Play_Pl_SetDropAnimFrame:
 	push bc
-	ld   b, h
-	ld   hl, $0013
-	add  hl, de
-	cp   a, [hl]
-	jp   z, L002E47
-	ld   [hl], a
-	ld   hl, $001B
-	add  hl, de
-	ld   [hl], b
-	inc  hl
-	ld   [hl], b
-	call OBJLstS_DoAnimTiming_Initial_by_DE
+		ld   b, h		; B = Animation speed
+		
+		; Only do this if we're requesting a different animation frame
+		ld   hl, iOBJInfo_OBJLstPtrTblOffset
+		add  hl, de		; Seek to OBJLstId
+		cp   a, [hl]	; A == OBJLstId?
+		jp   z, .retZ	; If so, return
+		
+		; Otherwise, write the new sprite mapping
+		ld   [hl], a
+		
+		; Reset the animation speed to the specified value
+		ld   hl, iOBJInfo_FrameLeft
+		add  hl, de		; Seek iOBJInfo_FrameLeft
+		ld   [hl], b	; Frames remaining before change
+		inc  hl			; Seek to iOBJInfo_FrameTotal
+		ld   [hl], b	; Total count when switching frames
+		
+		; Apply the changes
+		call OBJLstS_DoAnimTiming_Initial_by_DE
 	pop  bc
 	call Play_Pl_IsDizzyNext
-	jp   nz, L002E3E
-	ld   a, $9B
+	jp   nz, .playDizzySFX
+	
+.playNormSFX:
+	ld   a, SFX_DROP
 	call HomeCall_Sound_ReqPlayExId
-	jp   L002E43
-L002E3E:;J
-	ld   a, $01
+	jp   .retNz
+.playDizzySFX:
+	ld   a, SCT_DIZZY
 	call HomeCall_Sound_ReqPlayExId
-L002E43:;J
+.retNz:
 	ld   a, $01
 	or   a
 	ret
-L002E47:;J
+.retZ:
 	pop  bc
 	ret
-L002E49:;C
+	
+; =============== Play_Pl_SetAnimFrame ===============
+; Sets a custom sprite mapping ID for the current animation.
+; See also: Play_Pl_SetJumpLandAnimFrame
+; IN
+; - A: OBJLst Id
+; - H: Animation speed (iOBJInfo_FrameTotal)
+; - DE: Ptr to wOBJInfo
+; OUT
+; - Z flag: If set, the new animation frame wasn't set
+Play_Pl_SetAnimFrame:
 	push bc
-	ld   b, h
-	ld   hl, $0013
-	add  hl, de
-	cp   a, [hl]
-	jp   z, L002E61
-	ld   [hl], a
-	ld   hl, $001B
-	add  hl, de
-	ld   [hl], b
-	inc  hl
-	ld   [hl], b
-	call OBJLstS_DoAnimTiming_Initial_by_DE
-	ld   a, $01
-	or   a
-L002E61:;J
+		ld   b, h		; B = Animation speed
+		
+		; Only do this if we're requesting a different animation frame
+		ld   hl, iOBJInfo_OBJLstPtrTblOffset
+		add  hl, de		; Seek to OBJLstId
+		cp   a, [hl]	; A == OBJLstId?
+		jp   z, .end	; If so, return
+		
+		; Otherwise, write the new sprite mapping
+		ld   [hl], a
+		
+		; Reset the animation speed to the specified value
+		ld   hl, iOBJInfo_FrameLeft
+		add  hl, de		; Seek iOBJInfo_FrameLeft
+		ld   [hl], b	; Frames remaining before change
+		inc  hl			; Seek to iOBJInfo_FrameTotal
+		ld   [hl], b	; Total count when switching frames
+		
+		; Apply the changes
+		call OBJLstS_DoAnimTiming_Initial_by_DE
+		
+		; Return NZ
+		ld   a, $01
+		or   a
+	.end:
 	pop  bc
 	ret
 	
@@ -11365,7 +11658,7 @@ Play_Pl_EndMove:
 	res  PF1B_NOBASICINPUT, [hl] ; Since we're resetting to MOVE_SHARED_NONE
 	res  PF1B_XFLIPLOCK, [hl]
 	res  PF1B_NOSPECSTART, [hl]
-	res  PF1B_COMBORECV, [hl]
+	res  PF1B_HITRECV, [hl]
 	res  PF1B_ALLOWHITCANCEL, [hl]
 	res  PF1B_INVULN, [hl]
 	inc  hl	; Seek to iPlInfo_Flags2
@@ -12340,7 +12633,7 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_XFLIPLOCK, [hl]
 			
 			; New move
-			ld   a, MOVE_SHARED_DASH_B
+			ld   a, MOVE_SHARED_HOP_B
 			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
 			jp   BasicInput_End
 			
@@ -13583,14 +13876,14 @@ MoveInputS_CanStartSpecialMove:
 	add  hl, bc				; Seek to iPlInfo_Flags1	
 	
 	;
-	; If the player is about to get dizzy or is getting combo'd, no special moves can be input...
+	; If the player is about to get dizzy or is in a damage string, no special moves can be input...
 	; ...except when blocking, as it's possible to cancel blockstun.
 	; Note that all of the guard cancel validation already happened
 	; by the time we get here.
 	;
-	bit  PF1B_GUARD, [hl]		; Is the player blocking? (checked here since PF1B_COMBORECV also applies when blocking)
+	bit  PF1B_GUARD, [hl]		; Is the player blocking? (checked here since PF1B_HITRECV also applies when blocking)
 	jp   nz, .chkMoveId			; If so, jump
-	bit  PF1B_COMBORECV, [hl]	; Are we getting combo'd?
+	bit  PF1B_HITRECV, [hl]		; Are we in a damage string?
 	jp   nz, .retNoMove			; If so, return
 	call Play_Pl_IsDizzyNext	; Is the player about to get dizzy?
 	jp   nz, .retNoMove			; If so, return
@@ -13680,23 +13973,38 @@ MoveInputS_CanStartSuperMove:
 	scf		; Set carry
 	ret
 	
-L003745:;C
-	ld   hl, $0063
+; =============== Play_Pl_IsMoveHit ===============
+; Determines if we successfully hit the opponent in the damage string already.
+; Used for moves that perform certain failsafe actions when the attack whiffs or gets blocked.
+; Some do this check manually without calling this, or have slightly different logic.
+; IN
+; - BC: Ptr to wPlInfo structure
+; OUT
+; - C flag: If set, the attack didn't hit the opponent yet
+; - Z flag: If set, the opponent didn't block it (only valid if C is also set)
+Play_Pl_IsMoveHit:
+	;
+	; Verify that we did a combo move that didn't whiff first.
+	;
+	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  1, [hl]
-	jp   z, L003760
-	ld   hl, $006E
+	bit  PCF_HITOTHER, [hl]			; Did we collide with the opponent yet?
+	jp   z, .retClear				; If not, skip
+	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
-	bit  7, [hl]
-	jp   nz, L003760
-	bit  4, [hl]
-	jp   z, L003760
-	bit  3, [hl]
-	scf
+	bit  PF1B_INVULN, [hl]			; Is the opponent invulnerable?
+	jp   nz, .retClear				; If so, skip
+	bit  PF1B_HITRECV, [hl]			; Did we hit the opponent in the damage string so far?
+	jp   z, .retClear				; If not, skip
+	
+.retSet:
+	; C flag confirmed.
+	bit  PF1B_GUARD, [hl]			; Is the opponent blocking? (if not, Z flag set)
+	scf		; C flag set
 	ret
-L003760:;J
+.retClear:
 	scf
-	ccf
+	ccf		; C flag clear
 	ret
 	
 ; =============== MoveInputS_CanStartProjMove ===============
@@ -13891,7 +14199,7 @@ MoveInputS_SetSpecMove_StopSpeed:
 	set  PF1B_NOSPECSTART, [hl] 	; For consistency (PF0B_SPECMOVE takes care of this already)
 	res  PF1B_GUARD, [hl]			; Receive full damage by default if hit out of the special
 	res  PF1B_CROUCH, [hl]			; Remove crouch flag in case we performed the move while crouching
-	res  PF1B_INVULN, [hl] 		; Disable invulnerability in case we got here from guard cancels
+	res  PF1B_INVULN, [hl] 			; Disable invulnerability in case we got here from guard cancels
 	
 	;
 	; Remove any temporary invuln. effect on player
@@ -13914,14 +14222,14 @@ MoveInputS_SetSpecMove_StopSpeed:
 	; This means the move animation will only wait for the player graphics to load
 	; before switching to the next frame.
 	;
-	dec  hl						; Seek to iPlInfo_Flags1
+	dec  hl							; Seek to iPlInfo_Flags1
 	bit  PF1B_ALLOWHITCANCEL, [hl]	; Did we combo the move off a previous hit?
-	jp   z, .ret				; If not, return
+	jp   z, .ret					; If not, return
 	; Set that we started a combo'd move
 	inc  hl						
 	set  PF2B_HITCOMBO, [hl]
 	; Note that Pl_Unk_SetNewMoveAndAnim_StopSpeed set us a new FrameLeft/FrameTotal value.
-	; In case of moves with slow animations (iOBJInfo_FrameLeft > $7F), don't remove the delay.
+	; In case of moves that expect manual control by having set ANIMSPEED_NONE ($FF) initially, don't remove the delay.
 	ld   hl, iOBJInfo_FrameLeft
 	add  hl, de		; Seek to iOBJInfo_FrameLeft
 	ld   a, [hl]
@@ -14064,7 +14372,7 @@ Play_Pl_MoveRotThrown:
 	; ??? By default only use it in the HitAnim code for rotation frames.
 	;     If it needs to be used in the move code as well, it should be manually set after calling this.
 	xor  a
-	ld   [wPlayPlThrowRot_Unk_UseInMove], a
+	ld   [wPlayPlThrowRot_Unk_AlwaysSync], a
 	ret
 	
 ; =============== Play_Pl_SetMoveDamage ===============
@@ -14133,7 +14441,8 @@ Play_Pl_SetMoveDamageNext:
 	ret
 	
 ; =============== Play_Proj_CopyMoveDamageFromPl ===============
-; Copies the move damage fields from the current player over to its respective projectile.
+; Copies the pending move damage fields from the current player over to its respective projectile.
+; Typically called after mMvC_SetDamageNext.
 ;
 ; This is called for moves where the projectile is what deals damage --
 ; which includes actual projectiles and special effects that are animated independently from the player (see: Power Geyser).
@@ -15465,7 +15774,7 @@ L003CB3:;C
 	res  PF0B_PROJREFLECT, [hl]
 	
 	inc  hl							; Seek to iPlInfo_Flags1
-	res  PF1B_COMBORECV, [hl] 		; Falling to the ground ends the opponent's combo
+	res  PF1B_HITRECV, [hl] 		; Falling to the ground ends the opponent's combo
 	res  PF1B_ALLOWHITCANCEL, [hl] ; For next time
 	; The player can't be hit on the ground
 	set  PF1B_INVULN, [hl]
@@ -15641,7 +15950,7 @@ MoveInputS_CheckEasyMoveKeys:
 ; =============== Play_Pl_TempPauseOtherAnim ===============
 ; Temporarily pauses the opponent's animation by setting its iOBJInfo_FrameLeft to $FF.
 ;
-; ??? Meant when the hitting the other player in a way that freezes it, like in throws.
+; ??? Meant when the hitting the other player in a way that freezes it, like with counters.
 ;
 ; Though this iOBJInfo_FrameLeft should never elapse as another animation should interrupt it,
 ; because it can, it prevents possible softlocks if a move were to break and not unfreeze the opponent.
@@ -15820,7 +16129,7 @@ MoveInput_DFDB:
 	db $01         ; Min len
 	db $FF         ; Max len
 	
-MoveInput_DFURD:
+MoveInput_DFUBD:
 	db $05         ; Number of inputs
 .i5:
 	db KEY_DOWN    ; Key
