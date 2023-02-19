@@ -9871,10 +9871,10 @@ Play_DoUnkChain_ShareVars:
 	ld   [wPlInfo_Pl2+iPlInfo_MoveIdOther], a
 	ld   a, [wPlInfo_Pl2+iPlInfo_MoveId]
 	ld   [wPlInfo_Pl1+iPlInfo_MoveIdOther], a
-	ld   a, [wPlInfo_Pl1+iPlInfo_HitAnimId]
-	ld   [wPlInfo_Pl2+iPlInfo_HitAnimIdOther], a
-	ld   a, [wPlInfo_Pl2+iPlInfo_HitAnimId]
-	ld   [wPlInfo_Pl1+iPlInfo_HitAnimIdOther], a
+	ld   a, [wPlInfo_Pl1+iPlInfo_HitTypeId]
+	ld   [wPlInfo_Pl2+iPlInfo_HitTypeIdOther], a
+	ld   a, [wPlInfo_Pl2+iPlInfo_HitTypeId]
+	ld   [wPlInfo_Pl1+iPlInfo_HitTypeIdOther], a
 	
 Play_DoUnkChain_ResetDamage:
 	;

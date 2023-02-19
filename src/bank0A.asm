@@ -12821,7 +12821,7 @@ MoveC_Goenitz_Yamidoukoku:
 ; --------------- frame #0 ---------------
 .obj0:
 	mMvC_ValFrameStart .obj0_cont
-		mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+		mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG
 		mMvC_MoveThrowOp -$10, -$10
 .obj0_cont:
 	mMvC_ValFrameEnd .anim
@@ -12830,13 +12830,13 @@ MoveC_Goenitz_Yamidoukoku:
 ; --------------- frame #1 ---------------
 .obj1:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+		mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG
 		mMvC_MoveThrowOp -$10, -$11
 		jp   .anim
 ; --------------- frame #2 ---------------
 .obj2:
 	mMvC_ValFrameStart .obj2_cont
-		mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+		mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG
 		mMvC_MoveThrowOp -$10, -$12
 .obj2_cont:
 	mMvC_ValFrameEnd .anim
@@ -12845,7 +12845,7 @@ MoveC_Goenitz_Yamidoukoku:
 ; --------------- frame #3 ---------------
 .obj3:
 	mMvC_ValFrameStart .obj3_cont
-		mMvC_SetDamageNext $02, HITANIM_DROP_SWOOPUP, PF3_SHAKELONG
+		mMvC_SetDamageNext $02, HITTYPE_DROP_SWOOPUP, PF3_SHAKELONG
 		call Play_Proj_CopyMoveDamageFromPl
 		call ProjInit_Goenitz_Yamidoukoku
 .obj3_cont:
@@ -12895,25 +12895,25 @@ MoveC_Goenitz_ShinyaotomeThrowL:
 ; --------------- frame #1 ---------------
 .rotU1:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+		mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG
 		mMvC_MoveThrowOp -$10, -$10
 		jp   .anim
 ; --------------- frame #2 ---------------
 .rotU2:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+		mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG
 		mMvC_MoveThrowOp -$0D, -$10
 		jp   .anim
 ; --------------- frame #3 ---------------
 .rotL:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamage $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
+		mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_SHAKELONG
 		mMvC_MoveThrowOp +$0C, -$20
 		jp   .anim
 ; --------------- frame #4 ---------------
 .rotD:
 	mMvC_ValFrameStart .rotD_setSpeed14
-		mMvC_SetDamage $06, HITANIM_THROW_ROTD, PF3_SHAKELONG
+		mMvC_SetDamage $06, HITTYPE_THROW_ROTD, PF3_SHAKELONG
 		mMvC_MoveThrowOp +$10, -$04
 		jp   .anim
 .rotD_setSpeed14:
@@ -12924,7 +12924,7 @@ MoveC_Goenitz_ShinyaotomeThrowL:
 .setDamage:
 	mMvC_ValFrameStart .chkEnd
 		; Goenitz's throw deals almost double the damage of other character's throws.
-		mMvC_SetDamage $0A, HITANIM_DROP_DB_A, PF3_SHAKELONG
+		mMvC_SetDamage $0A, HITTYPE_DROP_DB_A, PF3_SHAKELONG
 		jp   .anim
 .chkEnd:
 	mMvC_ValFrameEnd .anim
@@ -12970,13 +12970,13 @@ MoveC_Goenitz_ShinyaotomeThrowH:
 ; --------------- frame #1 ---------------
 .rotU2:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+		mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG
 		mMvC_MoveThrowOp -$10, -$10
 		jp   .anim
 ; --------------- frame #2 ---------------
 .rotU3:
 	mMvC_ValFrameStart .rotU3_cont
-		mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+		mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG
 		mMvC_MoveThrowOp -$0D, -$10
 		jp   .anim
 .rotU3_cont:
@@ -12989,7 +12989,7 @@ MoveC_Goenitz_ShinyaotomeThrowH:
 		mMvC_PlaySound SCT_11
 		mMvC_SetSpeedH +$0000
 		mMvC_SetSpeedV -$0600
-		mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+		mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG
 		mMvC_MoveThrowOp -$0D, -$10
 		mMvC_MoveThrowOpSync
 .rotU4Jump_cont:
@@ -12999,7 +12999,7 @@ MoveC_Goenitz_ShinyaotomeThrowH:
 ; --------------- frame #4 ---------------
 .rotDJump:
 	mMvC_ValFrameStart .rotDJump_cont
-		mMvC_SetDamage $06, HITANIM_THROW_ROTD, PF3_SHAKELONG
+		mMvC_SetDamage $06, HITTYPE_THROW_ROTD, PF3_SHAKELONG
 		mMvC_MoveThrowOp +$04, -$18
 		mMvC_MoveThrowOpSync
 .rotDJump_cont:
@@ -13008,7 +13008,7 @@ MoveC_Goenitz_ShinyaotomeThrowH:
 .setDamage:
 	mMvC_ValFrameStart .setDamage_cont
 		; Just in case we got from #4 normally, set this again
-		mMvC_SetDamage $0A, HITANIM_DROP_DB_A, PF3_SHAKELONG
+		mMvC_SetDamage $0A, HITTYPE_DROP_DB_A, PF3_SHAKELONG
 		mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $14 ; We never get here?
 .setDamage_cont:
@@ -13018,7 +13018,7 @@ MoveC_Goenitz_ShinyaotomeThrowH:
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
 		mMvC_SetLandFrame $05*OBJLSTPTR_ENTRYSIZE, $04
-		mMvC_SetDamageNext $0A, HITANIM_DROP_DB_A, PF3_SHAKELONG
+		mMvC_SetDamageNext $0A, HITTYPE_DROP_DB_A, PF3_SHAKELONG
 		jp   .ret
 ; --------------- frame #6 ---------------
 .chkEnd:
@@ -13062,14 +13062,14 @@ MoveC_Goenitz_ShinyaotomePart2:
 .obj0_cont:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
 		jp   .chkOtherEscape
 ; --------------- frame #1 ---------------
 ; Initial loop. Horizontal movement.
 .obj1:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
 		jp   .chkOtherEscape
 ; --------------- frame #2 ---------------
 ; Initial loop. Horizontal movement.
@@ -13083,11 +13083,11 @@ MoveC_Goenitz_ShinyaotomePart2:
 		dec  [hl]
 		jp   z, .obj2_noLoop
 	.obj2_loop:
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
 		mMvC_SetFrame $00*OBJLSTPTR_ENTRYSIZE, $00
 		jp   .ret
 	.obj2_noLoop:
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
 		jp   .chkOtherEscape
 		
 ; --------------- frame #3 ---------------
@@ -13123,22 +13123,22 @@ MoveC_Goenitz_ShinyaotomePart2:
 		call MoveInputS_SetSpecMove_StopSpeed
 	.chkEnd_setLastDamage:
 		; Deal one last line of damage
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
 		jp   .ret
 ; --------------- frames #0-2 / common escape check ---------------
 .chkOtherEscape:
 	;
-	; [POI] If the opponent somehow isn't in one of the hit animations 
+	; [POI] If the opponent somehow isn't in one of the hit effects 
 	;       this move sets, hop back instead of continuing.
 	;       This can happen if the opponent gets hit by a previously thrown
 	;       fireball in the middle of the move.
 	;
-	ld   hl, iPlInfo_HitAnimIdOther
+	ld   hl, iPlInfo_HitTypeIdOther
 	add  hl, bc
 	ld   a, [hl]
-	cp   HITANIM_HIT_MULTI0	; A == HITANIM_HIT_MULTI0?
+	cp   HITTYPE_HIT_MULTI0	; A == HITTYPE_HIT_MULTI0?
 	jp   z, .anim				; If so, skip
-	cp   HITANIM_HIT_MULTI1	; A == HITANIM_HIT_MULTI1?
+	cp   HITTYPE_HIT_MULTI1	; A == HITTYPE_HIT_MULTI1?
 	jp   z, .anim				; If so, skip
 	ld   a, MOVE_SHARED_HOP_B
 	call Pl_SetMove_StopSpeed

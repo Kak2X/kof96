@@ -1057,34 +1057,34 @@ MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D     EQU $66 ; [TCRF] Unused desperation super
 MOVE_MRKARATE_HAOH_SHO_KOH_KEN_S       EQU $68
 MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D       EQU $6A
 
-HITANIM_BLOCKED             EQU $00 ; Nothing happens
-HITANIM_GUARDBREAK_G        EQU $01
-HITANIM_GUARDBREAK_A        EQU $02
-HITANIM_HIT_MID0            EQU $03 ; Standard hit #0
-HITANIM_HIT_MID1            EQU $04 ; Standard hit #1
-HITANIM_HIT_LOW             EQU $05 ; Punched or kicked while crouching
-HITANIM_DROP_CH             EQU $06 ; Crouching heavy kick (Small drop with no recovery)
-HITANIM_DROP_A              EQU $07 ; Hit by a normal in the air (Small drop with recovery)
-HITANIM_DROP_MAIN           EQU $08 ; Standard drop without recovery
+HITTYPE_BLOCKED             EQU $00 ; Nothing happens
+HITTYPE_GUARDBREAK_G        EQU $01
+HITTYPE_GUARDBREAK_A        EQU $02
+HITTYPE_HIT_MID0            EQU $03 ; Standard hit #0
+HITTYPE_HIT_MID1            EQU $04 ; Standard hit #1
+HITTYPE_HIT_LOW             EQU $05 ; Punched or kicked while crouching
+HITTYPE_DROP_CH             EQU $06 ; Crouching heavy kick (Small drop with no recovery)
+HITTYPE_DROP_A              EQU $07 ; Hit by a normal in the air (Small drop with recovery)
+HITTYPE_DROP_MAIN           EQU $08 ; Standard drop without recovery
 ;--
 ; dubious names below but comments mostly correct
 
 ; Used by certain special moves
-HITANIM_HIT_MULTI0          EQU $09 ; Mid-special move, chainable hit #0
-HITANIM_HIT_MULTI1          EQU $0A ; Mid-special move, chainable hit #1
-HITANIM_HIT_MULTIGS         EQU $0B ; Mid-super move, player pushed on the ground and frozen
-HITANIM_DROP_DB_A           EQU $0C ; Hit (not throw) that sends the player to the ground with screen shake - from air
-HITANIM_DROP_DB_G           EQU $0D ; Hit (not throw) that sends the player to the ground with screen shake - from ground
+HITTYPE_HIT_MULTI0          EQU $09 ; Mid-special move, chainable hit #0
+HITTYPE_HIT_MULTI1          EQU $0A ; Mid-special move, chainable hit #1
+HITTYPE_HIT_MULTIGS         EQU $0B ; Mid-super move, player pushed on the ground and frozen
+HITTYPE_DROP_DB_A           EQU $0C ; Hit (not throw) that sends the player to the ground with screen shake - from air
+HITTYPE_DROP_DB_G           EQU $0D ; Hit (not throw) that sends the player to the ground with screen shake - from ground
 ;---
-HITANIM_DROP_SWOOPUP        EQU $0E ; Very high throw or swept up above
-HITANIM_THROW_END           EQU $0F ; End of the throw. The actual part where the player is launched.
-HITANIM_THROW_START         EQU $10 ; Start of the throw anim
-HITANIM_THROW_ROTU          EQU $11 ; Throw rotation frame, head up
-HITANIM_THROW_ROTL          EQU $12 ; Throw rotation frame, head left
-HITANIM_THROW_ROTD          EQU $13 ; Throw rotation frame, head down
-HITANIM_THROW_ROTR          EQU $14 ; Throw rotation frame, head right
+HITTYPE_DROP_SWOOPUP        EQU $0E ; Very high throw or swept up above
+HITTYPE_THROW_END           EQU $0F ; End of the throw. The actual part where the player is launched.
+HITTYPE_THROW_START         EQU $10 ; Start of the throw anim
+HITTYPE_THROW_ROTU          EQU $11 ; Throw rotation frame, head up
+HITTYPE_THROW_ROTL          EQU $12 ; Throw rotation frame, head left
+HITTYPE_THROW_ROTD          EQU $13 ; Throw rotation frame, head down
+HITTYPE_THROW_ROTR          EQU $14 ; Throw rotation frame, head right
 
-HITANIM_DUMMY               EQU $81 ; Placeholder used for some empty slots in the special move entries
+HITTYPE_DUMMY               EQU $81 ; Placeholder used for some empty slots in the special move entries
 
 
 COLIBOX_00 EQU $00 ; None

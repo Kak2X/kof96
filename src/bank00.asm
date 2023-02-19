@@ -1447,9 +1447,9 @@ mVBlank_CopyPlTiles: MACRO
 	inc  de			; SrcPtr++
 	inc  hl			; DestPtr++
 	
-	ld   a, [hl]	; A = iPlInfo_MoveDamageHitAnimIdNext
-	ld   [de], a	; Copy iPlInfo_MoveDamageHitAnimIdNext to iPlInfo_MoveDamageHitAnimId	
-	ld   [hl], $00	; Clear iPlInfo_MoveDamageHitAnimIdNext
+	ld   a, [hl]	; A = iPlInfo_MoveDamageHitTypeIdNext
+	ld   [de], a	; Copy iPlInfo_MoveDamageHitTypeIdNext to iPlInfo_MoveDamageHitTypeId	
+	ld   [hl], $00	; Clear iPlInfo_MoveDamageHitTypeIdNext
 	inc  de			; SrcPtr++
 	inc  hl			; DestPtr++
 	
@@ -9717,7 +9717,7 @@ Pl_SetNewMove:
 			xor  a
 			ld   [bc], a	; iPlInfo_MoveDamageVal
 			inc  bc
-			ld   [bc], a	; iPlInfo_MoveDamageHitAnimId
+			ld   [bc], a	; iPlInfo_MoveDamageHitTypeId
 			inc  bc
 			ld   [bc], a	; iPlInfo_MoveDamageFlags3
 			inc  bc
@@ -9729,7 +9729,7 @@ Pl_SetNewMove:
 			ld   [bc], a
 			inc  bc
 			
-			; byte6 -> iPlInfo_MoveDamageHitAnimIdNext
+			; byte6 -> iPlInfo_MoveDamageHitTypeIdNext
 			ldi  a, [hl]
 			ld   [bc], a
 			inc  bc
@@ -12950,12 +12950,12 @@ Pl_SetMove_ShakeScreenReset:
 	add  hl, bc
 	xor  a			; Clear...
 	ldi  [hl], a	; ...iPlInfo_MoveDamageVal		
-	ldi  [hl], a	; ...iPlInfo_MoveDamageHitAnimId	
+	ldi  [hl], a	; ...iPlInfo_MoveDamageHitTypeId	
 	ld   [hl], a	; ...iPlInfo_MoveDamageFlags3	
 	ld   hl, iPlInfo_MoveDamageValNext
 	add  hl, bc
 	ldi  [hl], a	; ...iPlInfo_MoveDamageValNext		
-	ldi  [hl], a	; ...iPlInfo_MoveDamageHitAnimIdNext	
+	ldi  [hl], a	; ...iPlInfo_MoveDamageHitTypeIdNext	
 	ld   [hl], a	; ...iPlInfo_MoveDamageFlags3Next	
 	ret
 	
@@ -14386,7 +14386,7 @@ Play_Pl_MoveRotThrown:
 ; as that's handled by Pl_SetNewMove.
 ; IN
 ; - H: Damage amount
-; - L: Hit animation ID (HITANIM_*)
+; - L: Hit effect ID (HITTYPE_*)
 ; - A: Damage flags
 ; - BC: Ptr to wPlInfo
 Play_Pl_SetMoveDamage:
@@ -14400,7 +14400,7 @@ Play_Pl_SetMoveDamage:
 		; Copy the data over
 		ld   [hl], d	; iPlInfo_MoveDamageVal = D
 		inc  hl
-		ld   [hl], e	; iPlInfo_MoveDamageHitAnimId = E
+		ld   [hl], e	; iPlInfo_MoveDamageHitTypeId = E
 		inc  hl
 		ld   [hl], a	; iPlInfo_MoveDamageFlags3 = A
 	pop  de
@@ -14425,7 +14425,7 @@ Play_Pl_SetMoveDamage:
 ; and by using this one VBlankHandler will apply the changes.
 ; IN
 ; - H: Damage amount
-; - L: Hit animation ID (HITANIM_*)
+; - L: Hit effect ID (HITTYPE_*)
 ; - A: Damage flags
 ; - BC: Ptr to wPlInfo
 Play_Pl_SetMoveDamageNext:
@@ -14439,7 +14439,7 @@ Play_Pl_SetMoveDamageNext:
 		; Copy the data over
 		ld   [hl], d	; iPlInfo_MoveDamageValNext = D
 		inc  hl
-		ld   [hl], e	; iPlInfo_MoveDamageHitAnimIdNext = E
+		ld   [hl], e	; iPlInfo_MoveDamageHitTypeIdNext = E
 		inc  hl
 		ld   [hl], a	; iPlInfo_MoveDamageFlags3Next = A
 	pop  de
@@ -14481,9 +14481,9 @@ Play_Proj_CopyMoveDamageFromPl:
 		ld   a, [bc]	; Read iPlInfo_MoveDamageValNext
 		inc  bc
 		ldi  [hl], a	; Copy to iOBJInfo_Play_DamageVal
-		ld   a, [bc]	; Read iPlInfo_MoveDamageHitAnimIdNext
+		ld   a, [bc]	; Read iPlInfo_MoveDamageHitTypeIdNext
 		inc  bc
-		ldi  [hl], a	; Copy to iOBJInfo_Play_DamageHitAnimId
+		ldi  [hl], a	; Copy to iOBJInfo_Play_DamageHitTypeId
 		ld   a, [bc]	; Read iPlInfo_MoveDamageFlags3Next
 		ld   [hl], a	; Copy to iOBJInfo_Play_DamageFlags3
 	pop  bc
@@ -14603,9 +14603,9 @@ Play_Pl_IsMoveLoading:
 		inc  de			; SrcPtr++
 		inc  hl			; DestPtr++
 		
-		ld   a, [hl]	; A = iPlInfo_MoveDamageHitAnimIdNext
-		ld   [de], a	; Copy iPlInfo_MoveDamageHitAnimIdNext to iPlInfo_MoveDamageHitAnimId	
-		ld   [hl], $00	; Clear iPlInfo_MoveDamageHitAnimIdNext
+		ld   a, [hl]	; A = iPlInfo_MoveDamageHitTypeIdNext
+		ld   [de], a	; Copy iPlInfo_MoveDamageHitTypeIdNext to iPlInfo_MoveDamageHitTypeId	
+		ld   [hl], $00	; Clear iPlInfo_MoveDamageHitTypeIdNext
 		inc  de			; SrcPtr++
 		inc  hl			; DestPtr++
 		
@@ -14786,15 +14786,15 @@ Play_Pl_ChkThrowInput:
 	ld   a, $0C						; 12 lines of damage
 	ld   [hl], a
 	
-	; If the grab occurres, the opponent will use hit animation HITANIM_THROW_START
-	inc  hl							; Seek to iPlInfo_MoveDamageHitAnimId
-	ld   a, HITANIM_THROW_START
+	; If the grab occurres, the opponent will use hit effect HITTYPE_THROW_START
+	inc  hl							; Seek to iPlInfo_MoveDamageHitTypeId
+	ld   a, HITTYPE_THROW_START
 	ld   [hl], a					; Save value
 	
 	; Pass control once with the throw hitbox enabled (+ an extra one to disable it)
 	; and determine if the opponent got grabbed successfully (in range + passed validation).
 	;
-	; If it went all right, the opponent should have gone through Play_Pl_SetHitAnim.chkThrow
+	; If it went all right, the opponent should have gone through Play_Pl_SetHitType.chkThrow
 	; (which required us to set wPlayPlThrowActId to PLAY_THROWACT_START first), which will
 	; cause in the second frame ???????? to update wPlayPlThrowActId to PLAY_THROWACT_NEXT02.
 	
@@ -14987,15 +14987,15 @@ MoveInputS_TryStartCommandThrow:
 	ld   a, $0C						; 12 lines of damage
 	ld   [hl], a
 	
-	; If the grab occurres, the opponent will use hit animation HITANIM_THROW_START
-	inc  hl							; Seek to iPlInfo_MoveDamageHitAnimId
-	ld   a, HITANIM_THROW_START
+	; If the grab occurres, the opponent will use hit effect HITTYPE_THROW_START
+	inc  hl							; Seek to iPlInfo_MoveDamageHitTypeId
+	ld   a, HITTYPE_THROW_START
 	ld   [hl], a					; Save value
 	
 	; Pass control once with the throw hitbox enabled (+ an extra one to disable it)
 	; and determine if the opponent got grabbed successfully (in range + passed validation).
 	;
-	; If it went all right, the opponent should have gone through Play_Pl_SetHitAnim.chkThrow
+	; If it went all right, the opponent should have gone through Play_Pl_SetHitType.chkThrow
 	; (which required us to set wPlayPlThrowActId to PLAY_THROWACT_START first), which will
 	; cause in the second frame ???????? to update wPlayPlThrowActId to PLAY_THROWACT_NEXT02.
 	
@@ -15109,7 +15109,7 @@ Play_Pl_ChkHitStop:
 	call Play_Pl_ExecSpecMoveInputCode	; Was a special move started?
 	jp   c, .moveSet				; If so, return
 	; Guard cancel variant
-	; If we get attacked, Play_Pl_DoHit will call an HitAnimC_* and take exclusive control for a bit.
+	; If we get attacked, Play_Pl_DoHit will call an HitTypeC_* and take exclusive control for a bit.
 	; In case of blocking, we can start a new special move (or a roll) when guard canceling.
 	call HomeCall_Play_Pl_DoHit		; Did we get attacked and guard cancelled?
 	jp   c, .moveSet				; If so, return
@@ -15734,7 +15734,7 @@ Play_Pl_IsDizzyNext:
 	
 ; =============== Play_Pl_StartWakeUp ===============
 ; Initializes the wake up move, meant to be used after a player falls on the ground
-; (see: HitAnimC_Drop* and MoveC_Hit_Drop*).
+; (see: HitTypeC_Drop* and MoveC_Hit_Drop*).
 ;
 ; If the player has no health left (what hit the player killed him), he will instead
 ; stay on the ground forever, by setting MOVE_SHARED_NONE.

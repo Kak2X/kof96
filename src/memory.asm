@@ -475,7 +475,7 @@ iOBJInfo_Play_CodeBank EQU iOBJInfo_Custom+$00 ; Bank number for the CodePtr
 iOBJInfo_Play_CodePtr_Low EQU iOBJInfo_Custom+$01 ; Custom code for ExOBJ (low byte)
 iOBJInfo_Play_CodePtr_High EQU iOBJInfo_Custom+$02 ; Custom code for ExOBJ (high byte)
 iOBJInfo_Play_DamageVal EQU iOBJInfo_Custom+$03 ; Damage given the ExOBJ hits the opponent.
-iOBJInfo_Play_DamageHitAnimId EQU iOBJInfo_Custom+$04 ; Animation playing when the projectile hits the opponent (HITANIM_*)
+iOBJInfo_Play_DamageHitTypeId EQU iOBJInfo_Custom+$04 ; Animation playing when the projectile hits the opponent (HITTYPE_*)
 iOBJInfo_Play_DamageFlags3 EQU iOBJInfo_Custom+$05 ; Damage flags applied when the opponent gets hit (they get copied to iPlInfo_Flags3)
 iOBJInfo_Play_HitMode EQU iOBJInfo_Custom+$06 ; If set, marks what happens when the projectile hits a target
 iOBJInfo_Play_Priority EQU iOBJInfo_Custom+$07 ; Higher priority projectiles erase others
@@ -570,7 +570,7 @@ iPlInfo_TeamCharId2 EQU $30 ; 3rd team member ID (*2)
 iPlInfo_RoundWinStreak EQU $31 ; Number of consecutive wins in a stage (determines win pose)
 iPlInfo_32 EQU $32
 iPlInfo_MoveId EQU $33 ; ID of the current move. (multiplied by 2)
-iPlInfo_HitAnimId EQU $34 ; ID of the currently playing hit animation. (HITANIM_*)
+iPlInfo_HitTypeId EQU $34 ; ID of the currently playing hit effect. (HITTYPE_*)
 iPlInfo_IntroMoveId EQU $35 ; Intro/outro move ID. When set, iPlInfo_MoveId should be set to the same value.
 iPlInfo_SingleWinCount EQU $36 ; Single mode - Win count. If it reaches 2 the stage ends.
 iPlInfo_HitComboRecvSet EQU $37 ; Sets the combo count of received hits (shown on the other player side)
@@ -580,11 +580,11 @@ iPlInfo_OBJLstPtrTblOffsetMoveEnd EQU $39 ; iOBJInfo_OBJLstPtrTblOffset must mat
                                           ; This is mostly to reuse truncated animations.
 ; Move damage fields - current
 iPlInfo_MoveDamageVal EQU $3A ; Damage given when hitting the opponent directly
-iPlInfo_MoveDamageHitAnimId EQU $3B ; Animation playing when getting hit (HITANIM_*)
+iPlInfo_MoveDamageHitTypeId EQU $3B ; Animation playing when getting hit (HITTYPE_*)
 iPlInfo_MoveDamageFlags3 EQU $3C ; Source damage flags applied when getting hit (they get copied to iPlInfo_Flags3)
 ; Move damage fields - pending (for currently loading frame)
 iPlInfo_MoveDamageValNext EQU $3D
-iPlInfo_MoveDamageHitAnimIdNext EQU $3E
+iPlInfo_MoveDamageHitTypeIdNext EQU $3E
 iPlInfo_MoveDamageFlags3Next EQU $3F
 
 iPlInfo_40 EQU $40 ;
@@ -659,12 +659,12 @@ iPlInfo_Flags3Other EQU $70
 ;--
 iPlInfo_CharIdOther EQU $71 ; Copy of iPlInfo_CharId
 iPlInfo_MoveIdOther EQU $72
-iPlInfo_HitAnimIdOther EQU $73
+iPlInfo_HitTypeIdOther EQU $73
 iPlInfo_MoveDamageValOther EQU $74
-iPlInfo_MoveDamageHitAnimIdOther EQU $75
+iPlInfo_MoveDamageHitTypeIdOther EQU $75
 iPlInfo_MoveDamageFlags3Other EQU $76
 iPlInfo_MoveDamageValNextOther EQU $77
-iPlInfo_MoveDamageHitAnimIdNextOther EQU $78
+iPlInfo_MoveDamageHitTypeIdNextOther EQU $78
 iPlInfo_MoveDamageFlags3NextOther EQU $79
 iPlInfo_NoThrowTimerOther EQU $7A
 iPlInfo_Unused_ThrowKeyTimerOther EQU $7B

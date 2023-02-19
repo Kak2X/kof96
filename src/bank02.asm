@@ -1133,14 +1133,14 @@ ExOBJ_SuperSparkle:
 ;           Only used by Play_Pl_ChkHitStop, and it makes hitstop end early.
 Play_Pl_DoHit:
 
-	; For all intents and purposes Play_Pl_DoHit is a direct continuation of Play_Pl_SetHitAnim.
+	; For all intents and purposes Play_Pl_DoHit is a direct continuation of Play_Pl_SetHitType.
 	; Set up everything, update counters, damage player, (...) if it's applicable.
 	; A = HitEffect ID * 2
-	call Play_Pl_SetHitAnim	; Did the opponent's attack make contact?
+	call Play_Pl_SetHitType	; Did the opponent's attack make contact?
 	jp   nc, .noHit			; If not, jump
 	
 	;
-	; We got hit, so handle the hit effect (HitAnimC_*).
+	; We got hit, so handle the hit effect (HitTypeC_*).
 	;
 	; This is move-like code executed once, when we get hit. Each type of hit has its own code.
 	; Typically it handles the hitstun/blockstun effect (player shaking), hit sound effects, flashing and knockback speed (a backjump, usually).
@@ -1158,8 +1158,8 @@ Play_Pl_DoHit:
 		call Play_Pl_EmptyPowOnSuperEnd
 	pop  af
 	
-	; HITANIM_DROP_SWOOPUP, HITANIM_THROW_END and the throw parts do not increment the combo counter.
-	cp   HITANIM_DROP_SWOOPUP*2	; HitAnimId >= $0E?
+	; HITTYPE_DROP_SWOOPUP, HITTYPE_THROW_END and the throw parts do not increment the combo counter.
+	cp   HITTYPE_DROP_SWOOPUP*2	; HitTypeId >= $0E?
 	jp   nc, .updateFlags			; If so, skip
 	
 	push af
@@ -1208,7 +1208,7 @@ Play_Pl_DoHit:
 	; Prevent cancelling out of hitstun.
 	; (though there's a special override in PF1B_ALLOWHITCANCEL)
 	;
-	cp   HITANIM_BLOCKED			; Are we in the blockstun anim?
+	cp   HITTYPE_BLOCKED			; Are we in the blockstun anim?
 	jp   z, .execCode				; If so, skip
 	set  PF1B_NOSPECSTART, [hl]		; Otherwise, we got hit. Prevent specials from starting.
 .execCode:
@@ -1217,9 +1217,9 @@ Play_Pl_DoHit:
 	;
 	
 	push bc
-		; Index Play_HitAnimPtrTable by HitAnimId
-		ld   hl, Play_HitAnimPtrTable	; HL = Ptr to start of table
-		ld   b, $00		; BC = HitAnimId (* 2)
+		; Index Play_HitTypePtrTable by HitTypeId
+		ld   hl, Play_HitTypePtrTable	; HL = Ptr to start of table
+		ld   b, $00		; BC = HitTypeId (* 2)
 		ld   c, a
 		add  hl, bc		; Index it
 		; Read it out to BC
@@ -1247,36 +1247,36 @@ Play_Pl_DoHit:
 	xor  a	; C flag clear
 	ret
 	
-Play_HitAnimPtrTable:
-	dw HitAnimC_Blocked
-	dw HitAnimC_GuardBreakGround
-	dw HitAnimC_GuardBreakAir
-	dw HitAnimC_HitMid0
-	dw HitAnimC_HitMid1
-	dw HitAnimC_HitLow
-	dw HitAnimC_DropCH
-	dw HitAnimC_DropA
-	dw HitAnimC_DropMain
-	dw HitAnimC_Hit_Multi0
-	dw HitAnimC_Hit_Multi1
-	dw HitAnimC_Hit_MultiGS
-	dw HitAnimC_Drop_DB_A
-	dw HitAnimC_Drop_DB_G
-	dw HitAnimC_SwoopUp
-	dw HitAnimC_Throw_End
-	dw HitAnimC_ThrowStart
-	dw HitAnimC_ThrowRotU
-	dw HitAnimC_ThrowRotL
-	dw HitAnimC_ThrowRotD
-	dw HitAnimC_ThrowRotR
+Play_HitTypePtrTable:
+	dw HitTypeC_Blocked
+	dw HitTypeC_GuardBreakGround
+	dw HitTypeC_GuardBreakAir
+	dw HitTypeC_HitMid0
+	dw HitTypeC_HitMid1
+	dw HitTypeC_HitLow
+	dw HitTypeC_DropCH
+	dw HitTypeC_DropA
+	dw HitTypeC_DropMain
+	dw HitTypeC_Hit_Multi0
+	dw HitTypeC_Hit_Multi1
+	dw HitTypeC_Hit_MultiGS
+	dw HitTypeC_Drop_DB_A
+	dw HitTypeC_Drop_DB_G
+	dw HitTypeC_SwoopUp
+	dw HitTypeC_Throw_End
+	dw HitTypeC_ThrowStart
+	dw HitTypeC_ThrowRotU
+	dw HitTypeC_ThrowRotL
+	dw HitTypeC_ThrowRotD
+	dw HitTypeC_ThrowRotR
 
-; =============== HitAnimC_Blocked ===============
-; ID: HITANIM_BLOCKED
+; =============== HitTypeC_Blocked ===============
+; ID: HITTYPE_BLOCKED
 ;
 ; Hit effect used when blocking, called for every blocked hit.
 ; OUT
 ; - C: If set, hitstop should end early (if applicable)
-HitAnimC_Blocked:
+HitTypeC_Blocked:
 	;
 	; Play a SGB/DMG SFX
 	;
@@ -1401,13 +1401,13 @@ HitAnimC_Blocked:
 	ccf		; C flag clear
 	ret
 	
-; =============== HitAnimC_GuardBreakGround ===============
-; ID: HITANIM_GUARDBREAK_G
+; =============== HitTypeC_GuardBreakGround ===============
+; ID: HITTYPE_GUARDBREAK_G
 ;
 ; Hit effet used when the player's guard breaks on the ground.
 ; OUT
 ; - C flag: Always clear (never end hitstop early)
-HitAnimC_GuardBreakGround:
+HitTypeC_GuardBreakGround:
 
 	; Stop the player from flashing
 	ld   hl, iPlInfo_Flags3
@@ -1448,15 +1448,15 @@ HitAnimC_GuardBreakGround:
 	scf
 	ret
 	
-; =============== HitAnimC_GuardBreakAir ===============
-; ID: HITANIM_GUARDBREAK_A
+; =============== HitTypeC_GuardBreakAir ===============
+; ID: HITTYPE_GUARDBREAK_A
 ;
 ; Hit logic used when the player's guard breaks in the air.
-; See also: HitAnimC_GuardBreakGround
+; See also: HitTypeC_GuardBreakGround
 ;           Parts inside ## are different compared to that.
 ; OUT
 ; - C flag: Always clear (never end hitstop early)
-HitAnimC_GuardBreakAir:
+HitTypeC_GuardBreakAir:
 	; Stop the player from flashing
 	ld   hl, iPlInfo_Flags3
 	add  hl, bc
@@ -1512,42 +1512,42 @@ HitAnimC_GuardBreakAir:
 	scf
 	ret
 	
-; =============== HitAnimC_HitGeneric group ===============
-; These next few ones that call HitAnimC_HitGeneric are basically the same hit type,
+; =============== HitTypeC_HitGeneric group ===============
+; These next few ones that call HitTypeC_HitGeneric are basically the same hit type,
 ; a generic hit that can be used by any type of move (normals, specials, supers).
 ; Even though they set different move IDs, they point to the same code.
 ;
 ; The only difference between these is the animation associated to the move, most
 ; obvious for MOVE_SHARED_HITLOW which has the player getting hit while crouching.
 	
-; =============== HitAnimC_HitMid0 ===============
-; ID: HITANIM_HIT_MID0
+; =============== HitTypeC_HitMid0 ===============
+; ID: HITTYPE_HIT_MID0
 ;
 ; Hit logic used for generic mid hit #0.
 ; OUT
 ; - C flag: Always set (ends hitstop)
-HitAnimC_HitMid0:
+HitTypeC_HitMid0:
 	ld   a, MOVE_SHARED_HIT0MID
-	jp   HitAnimC_HitGeneric
-; =============== HitAnimC_HitMid1 ===============
-; ID: HITANIM_HIT_MID1
+	jp   HitTypeC_HitGeneric
+; =============== HitTypeC_HitMid1 ===============
+; ID: HITTYPE_HIT_MID1
 ;
 ; Hit logic used for generic mid hit #1.
 ; OUT
 ; - C flag: Always set (ends hitstop)
-HitAnimC_HitMid1:
+HitTypeC_HitMid1:
 	ld   a, MOVE_SHARED_HIT1MID
-	jp   HitAnimC_HitGeneric
-; =============== HitAnimC_HitLow ===============
-; ID: HITANIM_HIT_LOW
+	jp   HitTypeC_HitGeneric
+; =============== HitTypeC_HitLow ===============
+; ID: HITTYPE_HIT_LOW
 ;
 ; Hit logic used for generic low hit.
 ; OUT
 ; - C flag: Always set (ends hitstop)
-HitAnimC_HitLow:
+HitTypeC_HitLow:
 	ld   a, MOVE_SHARED_HITLOW
 	; Fall-through
-; =============== HitAnimC_HitGeneric ===============
+; =============== HitTypeC_HitGeneric ===============
 ; Hit logic used for generic mid hit #0.
 ; IN
 ; - A: Move ID to set
@@ -1555,7 +1555,7 @@ HitAnimC_HitLow:
 ; - DE: Ptr to respective wOBJInfo
 ; OUT
 ; - C flag: Always set (ends hitstop)	
-HitAnimC_HitGeneric:
+HitTypeC_HitGeneric:
 
 	; Play hit sound effect (normal or fire)
 	push af	; Save MoveID
@@ -1583,8 +1583,8 @@ HitAnimC_HitGeneric:
 	scf	; Return set
 	ret
 	
-; =============== HitAnimC_DropMain ===============
-; ID: HITANIM_DROP_MAIN
+; =============== HitTypeC_DropMain ===============
+; ID: HITTYPE_DROP_MAIN
 ;
 ; Hit effect that causes the player to drop on the ground.
 ; This is the standard generic drop that can be used by any move.
@@ -1602,7 +1602,7 @@ HitAnimC_HitGeneric:
 ; - Can be used when the player gets KO'd
 ; OUT
 ; - C flag: Always set (ends hitstop)
-HitAnimC_DropMain:
+HitTypeC_DropMain:
 
 	;
 	; Invulnerability check.
@@ -1697,12 +1697,12 @@ HitAnimC_DropMain:
 	scf	; C flag set
 	ret
 	
-; =============== HitAnimC_Drop_DB_A ===============
-; ID: HITANIM_DROP_DB_A
+; =============== HitTypeC_Drop_DB_A ===============
+; ID: HITTYPE_DROP_DB_A
 ;
 ; Hit effect that knocks the player on the ground from the air.
 ; Uses the same continuation code as the air throw, but this hit
-; effect is *not* meant for them, as throws are handled in HITANIM_THROW_END.
+; effect is *not* meant for them, as throws are handled in HITTYPE_THROW_END.
 ;
 ; Features:
 ; - Can optionally end a damage string
@@ -1712,7 +1712,7 @@ HitAnimC_DropMain:
 ; - After hitstun ends, the player always gets thrown diagonally down backwards
 ; OUT
 ; - C flag: Always set (ends hitstop)
-HitAnimC_Drop_DB_A:
+HitTypeC_Drop_DB_A:
 	;
 	; Invulnerability check.
 	;
@@ -1777,8 +1777,8 @@ HitAnimC_Drop_DB_A:
 	scf	; C flag set
 	ret
 	
-; =============== HitAnimC_Drop_DB_G ===============
-; ID: HITANIM_DROP_DB_G
+; =============== HitTypeC_Drop_DB_G ===============
+; ID: HITTYPE_DROP_DB_G
 ;
 ; Hit effect that knocks the player on the ground, shaking it.
 ;
@@ -1791,7 +1791,7 @@ HitAnimC_Drop_DB_A:
 ; - After hitstun ends, the ground shakes.
 ; OUT
 ; - C flag: Always set (ends hitstop)
-HitAnimC_Drop_DB_G:
+HitTypeC_Drop_DB_G:
 	;
 	; Invulnerability check.
 	;
@@ -1826,8 +1826,8 @@ HitAnimC_Drop_DB_G:
 	scf	; C flag set
 	ret
 	
-; =============== HitAnimC_Throw_End ===============
-; ID: HITANIM_THROW_END
+; =============== HitTypeC_Throw_End ===============
+; ID: HITTYPE_THROW_END
 ;
 ; Used as the last part of throws (including command throws).
 ;
@@ -1835,7 +1835,7 @@ HitAnimC_Drop_DB_G:
 ; This is where the player gets knocked back with a large backwards jump, away from the opponent,
 ; with the playfield shaking when touching the ground.
 ; Unlike others, there's no hitstun here since the jump should start immediately.
-HitAnimC_Throw_End:
+HitTypeC_Throw_End:
 	;
 	; Invulnerability check.
 	;
@@ -1951,8 +1951,8 @@ HitAnimC_Throw_End:
 	scf	; C flag set
 	ret
 	
-; =============== HitAnimC_SwoopUp ===============
-; ID: HITANIM_DROP_SWOOPUP
+; =============== HitTypeC_SwoopUp ===============
+; ID: HITTYPE_DROP_SWOOPUP
 ;
 ; This is used by hits that end up causing the player to move really high up, to off-screen above.
 ;
@@ -1966,18 +1966,18 @@ HitAnimC_Throw_End:
 ; Their effect is the same, as they both set the move MOVE_SHARED_HIT_SWOOPUP: the player keeps moving up. It then starts falling down.
 ; As a side note, Daimon's super move animations are aligned to hit the player with a full width
 ; ground hitbox when the opponent hits the ground.
-HitAnimC_SwoopUp:
+HitTypeC_SwoopUp:
 	; There's special code for getting hit by Daimon
 	ld   hl, iPlInfo_CharIdOther
 	add  hl, bc
 	ld   a, [hl]
 	cp   CHAR_ID_DAIMON			; Did we get hit by Daimon?
-	jp   nz, HitAnimC_SwoopUp_ToProj	; If not, jump
+	jp   nz, HitTypeC_SwoopUp_ToProj	; If not, jump
 	
 	
-; =============== HitAnimC_SwoopUp_Daimon ===============
+; =============== HitTypeC_SwoopUp_Daimon ===============
 ; Command throw version for Daimon.
-HitAnimC_SwoopUp_Daimon:
+HitTypeC_SwoopUp_Daimon:
 
 	; Set continuation
 	ld   a, MOVE_SHARED_HIT_SWOOPUP
@@ -2009,11 +2009,11 @@ HitAnimC_SwoopUp_Daimon:
 	ld   hl, +$0200			; 2px/frame forward
 .setJump:
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	jp   HitAnimC_SwoopUp_RetSet	
+	jp   HitTypeC_SwoopUp_RetSet	
 	
-; =============== HitAnimC_SwoopUp_ToProj ===============
+; =============== HitTypeC_SwoopUp_ToProj ===============
 ; Projectile version for other characters.
-HitAnimC_SwoopUp_ToProj:
+HitTypeC_SwoopUp_ToProj:
 
 	;--
 	;
@@ -2087,12 +2087,12 @@ HitAnimC_SwoopUp_ToProj:
 	call OBJLstS_ApplyGravityVAndMoveHV
 	; Fall-through
 	
-HitAnimC_SwoopUp_RetSet:
+HitTypeC_SwoopUp_RetSet:
 	scf
 	ret
 	
-; =============== HitAnimC_DropCH ===============
-; ID: HITANIM_DROP_CH
+; =============== HitTypeC_DropCH ===============
+; ID: HITTYPE_DROP_CH
 ;
 ; Hit effect that causes the player to drop on the ground with a low jump.
 ; Exclusively used by crouching heavy kicks and Daimon's Jirai Shin.
@@ -2105,7 +2105,7 @@ HitAnimC_SwoopUp_RetSet:
 ; - Can be used in the air or on the ground
 ; OUT
 ; - C flag: Always set (ends hitstop)
-HitAnimC_DropCH:
+HitTypeC_DropCH:
 	
 	;
 	; If the hit has PF3B_LASTHIT set, this will be the last one for the combo string.
@@ -2114,7 +2114,7 @@ HitAnimC_DropCH:
 	;
 	
 	; Ignore this if the player is already dead (in theory)...
-	; [BUG?] Seems like a broken version of the check that works in HitAnimC_DropMain.
+	; [BUG?] Seems like a broken version of the check that works in HitTypeC_DropMain.
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc				; Seek to iPlInfo_Flags0
 	or   a					; Are we dead?
@@ -2170,8 +2170,8 @@ HitAnimC_DropCH:
 	scf	; C flag set
 	ret
 	
-; =============== HitAnimC_DropA ===============
-; ID: HITANIM_DROP_A
+; =============== HitTypeC_DropA ===============
+; ID: HITTYPE_DROP_A
 ;
 ; Hit effect for getting hit by a normal in the air.
 ; No move explicitly sets this.
@@ -2184,8 +2184,8 @@ HitAnimC_DropCH:
 ; - Player recovers in the air
 ; OUT
 ; - C flag: Always set (ends hitstop)
-HitAnimC_DropA:
-	; Unlike HitAnimC_DropCH, the player is *always* invulnerable with this hit type,
+HitTypeC_DropA:
+	; Unlike HitTypeC_DropCH, the player is *always* invulnerable with this hit type,
 	; likely to avoid juggles, essentially treating it as if PF3B_LASTHIT was always set.
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
@@ -2244,28 +2244,28 @@ MoveS_PlayHitSFX:
 	call HomeCall_Sound_ReqPlayExId
 	ret
 
-; =============== HitAnimC_Hit_Multi* ===============	
+; =============== HitTypeC_Hit_Multi* ===============	
 ; Hit types used by special moves that hit multiple times, for hits outside of the last one.
-; Moves tend to alternate hits betweeen this and HitAnimC_Hit_Multi1.
+; Moves tend to alternate hits betweeen this and HitTypeC_Hit_Multi1.
 ;
-; Some super moves may also use HitAnimC_Hit_MultiGS, which pushes the player on the ground
+; Some super moves may also use HitTypeC_Hit_MultiGS, which pushes the player on the ground
 ; and forces them there.
 ;
 ; Specifically made to prevent the opponent from getting out of the damage string,
 ; though it's not impossible with a well timed projectile.
 ;
-; =============== HitAnimC_Hit_Multi0 ===============
-; ID: HITANIM_HIT_MULTI0
+; =============== HitTypeC_Hit_Multi0 ===============
+; ID: HITTYPE_HIT_MULTI0
 ; OUT
 ; - C flag: Always set (ends hitstop)
-HitAnimC_Hit_Multi0:
+HitTypeC_Hit_Multi0:
 	ld   a, MOVE_SHARED_HIT_MULTIMID0
-	jp   HitAnimC_Hit_Multi1.main
-; =============== HitAnimC_Hit_Multi1 ===============
-; ID: HITANIM_HIT_MULTI1
+	jp   HitTypeC_Hit_Multi1.main
+; =============== HitTypeC_Hit_Multi1 ===============
+; ID: HITTYPE_HIT_MULTI1
 ; OUT
 ; - C flag: Always set (ends hitstop)
-HitAnimC_Hit_Multi1:
+HitTypeC_Hit_Multi1:
 	ld   a, MOVE_SHARED_HIT_MULTIMID1
 	; Fall-through
 	
@@ -2288,7 +2288,7 @@ HitAnimC_Hit_Multi1:
 	call Pl_SetMove_ShakeScreenReset
 	
 	; Force position to be in front of opponent
-	call HitAnimS_MovePlToOpFront
+	call HitTypeS_MovePlToOpFront
 	
 	; Some super moves use this (notably Iori's)
 	call Play_Pl_FlashPlayfieldOnSuperHit
@@ -2302,12 +2302,12 @@ HitAnimC_Hit_Multi1:
 	scf	; C flag set
 	ret
 	
-; =============== HitAnimC_Hit_MultiGS ===============
-; ID: HITANIM_HIT_MULTIGS
+; =============== HitTypeC_Hit_MultiGS ===============
+; ID: HITTYPE_HIT_MULTIGS
 ;
 ; OUT
 ; - C flag: Always set (ends hitstop)	
-HitAnimC_Hit_MultiGS:
+HitTypeC_Hit_MultiGS:
 	ld   a, MOVE_SHARED_HIT_MULTIGS
 	; Play SGB/DMG drop SFX
 	push af
@@ -2323,7 +2323,7 @@ HitAnimC_Hit_MultiGS:
 	ld   [hl], PL_FLOOR_POS
 	
 	; Move to same X position as opponent
-	call HitAnimS_SyncPlXFromOtherX
+	call HitTypeS_SyncPlXFromOtherX
 	
 	; Determine how much we're moving backwards.
 	; [POI] Normally we move $10px back, but getting hit by Daimon moves us twice as far.
@@ -2351,7 +2351,7 @@ HitAnimC_Hit_MultiGS:
 	
 	scf	; C flag set
 	ret
-; =============== HitAnimS_MovePlToOpFront ===============
+; =============== HitTypeS_MovePlToOpFront ===============
 ; Forces the player to be placed in front of the opponent, on the ground.
 ; This is meant to be used by "intermediate" hits for special moves that hit
 ; multiple times, so that the player won't manage to escape.
@@ -2359,7 +2359,7 @@ HitAnimC_Hit_MultiGS:
 ; IN
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
-HitAnimS_MovePlToOpFront:
+HitTypeS_MovePlToOpFront:
 
 	;##
 	;
@@ -2371,7 +2371,7 @@ HitAnimS_MovePlToOpFront:
 	; It suggests the move would have hit multiple times in the air, using byte $83 to keep track of where to offset the player.
 	; 
 	; However, not only does the move not use byte $83, meaning it wouldn't act any different than the normal code path,
-	; but it also uses HitAnims that never call this subroutine anyway.
+	; but it also uses HitTypes that never call this subroutine anyway.
 	;
 
 	; Perform the character check
@@ -2422,7 +2422,7 @@ HitAnimS_MovePlToOpFront:
 	ld   [hl], a	; Save A here
 	
 	; X Position -> $18px in front of the opponent (like in .norm)
-	call HitAnimS_SyncPlXFromOtherX	; Sync to opponent X
+	call HitTypeS_SyncPlXFromOtherX	; Sync to opponent X
 	ld   hl, -$1800 				; Move back $18px
 	call Play_OBJLstS_MoveH_ByXDirR
 	jp   .ret
@@ -2439,18 +2439,18 @@ HitAnimS_MovePlToOpFront:
 	ld   [hl], PL_FLOOR_POS
 	
 	; X Position -> $18px in front of the opponent
-	call HitAnimS_SyncPlXFromOtherX	; Sync to opponent X
+	call HitTypeS_SyncPlXFromOtherX	; Sync to opponent X
 	ld   hl, -$1800 				; Move back $18px
 	call Play_OBJLstS_MoveH_ByXDirR
 .ret:
 	ret
 	
-; =============== HitAnimS_SyncPlXFromOtherX ===============
+; =============== HitTypeS_SyncPlXFromOtherX ===============
 ; Makes the player use the same X pixel position as the opponent.
 ; IN
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
-HitAnimS_SyncPlXFromOtherX:
+HitTypeS_SyncPlXFromOtherX:
 	push bc
 		; BC = Ptr to opponent's X Position
 		ld   hl, iPlInfo_OBJInfoXOther
@@ -2468,12 +2468,12 @@ HitAnimS_SyncPlXFromOtherX:
 		ldi  [hl], a
 	pop  bc
 	ret
-; =============== HitAnimS_SyncPlPosFromOtherPos ===============
+; =============== HitTypeS_SyncPlPosFromOtherPos ===============
 ; Makes the player use the same X and Y positions as the opponent.
 ; IN
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
-HitAnimS_SyncPlPosFromOtherPos:
+HitTypeS_SyncPlPosFromOtherPos:
 	push bc
 		; BC = Ptr to opponent's X Position
 		ld   hl, iPlInfo_OBJInfoXOther
@@ -2497,13 +2497,13 @@ HitAnimS_SyncPlPosFromOtherPos:
 	pop  bc
 	ret
 	
-; =============== HitAnimC_ThrowStart ===============
-; ID: HITANIM_THROW_START
+; =============== HitTypeC_ThrowStart ===============
+; ID: HITTYPE_THROW_START
 ;
 ; This hit effect handles the second part of getting thrown, after the opponent's throw request was accepted,
 ; and ends when the opponent gets into the second part of the throw (BasicInput_StartGroundThrow or BasicInput_StartAirThrow).
 ;
-; We get here when the initial validation in Play_Pl_SetHitAnim.chkThrow passes, meaning we were in throw range
+; We get here when the initial validation in Play_Pl_SetHitType.chkThrow passes, meaning we were in throw range
 ; and in the appropriate state.
 ;
 ; What this part does is set up delays and player flags, then increment wPlayPlThrowActId to PLAY_THROWACT_NEXT02
@@ -2516,7 +2516,7 @@ HitAnimS_SyncPlPosFromOtherPos:
 ;
 ; OUT
 ; - C flag: If set, the throw continued successfully
-HitAnimC_ThrowStart:	
+HitTypeC_ThrowStart:	
 
 	; Not applicable if we're getting thrown
 	ld   a, [wPlayPlThrowActId]
@@ -2536,7 +2536,7 @@ HitAnimC_ThrowStart:
 	; Can't switch direction since it wouldn't make sense
 	res  PF1B_XFLIPLOCK, [hl]
 	
-	; Set the continuation code, which handles throw tech after the HitAnim ends
+	; Set the continuation code, which handles throw tech after the HitType ends
 	ld   a, MOVE_SHARED_THROW_START
 	call Pl_SetMove_ShakeScreenReset
 	
@@ -2584,7 +2584,7 @@ HitAnimC_ThrowStart:
 	
 	; Reposition 16px in front of the opponent.
 	; Because we're facing the opponent, moving backwards places us there.
-	call HitAnimS_SyncPlXFromOtherX	; over opponent X
+	call HitTypeS_SyncPlXFromOtherX	; over opponent X
 	ld   hl, -$1000					; move back $10px
 	call Play_OBJLstS_MoveH_ByXDirR
 	
@@ -2607,12 +2607,12 @@ HitAnimC_ThrowStart:
 	ret
 
 
-; =============== HitAnimC_ThrowRot* ===============
+; =============== HitTypeC_ThrowRot* ===============
 ; These hit effects are for the "rotation frames", which can be requested by the opponent's
 ; move code after the grab is fully confirmed and before the actual throw happens.
 ;
 ; Typically set up by something like:
-;	mMvC_SetDamage xxx, HITANIM_THROW_ROT*, PF3_SHAKELONG
+;	mMvC_SetDamage xxx, HITTYPE_THROW_ROT*, PF3_SHAKELONG
 ;	mMvC_MoveThrowOp yy, zz
 ;
 ; These are supposed to be instant, so they just reposition the player
@@ -2621,37 +2621,37 @@ HitAnimC_ThrowStart:
 ; OUT
 ; - C flag: Always set
 	
-; =============== HitAnimC_ThrowRotU ===============
-; ID: HITANIM_THROW_ROTU
-HitAnimC_ThrowRotU:
+; =============== HitTypeC_ThrowRotU ===============
+; ID: HITTYPE_THROW_ROTU
+HitTypeC_ThrowRotU:
 	ld   a, MOVE_SHARED_THROW_ROTU
-	jp   HitAnimC_ThrowRotCustom
-; =============== HitAnimC_ThrowRotL ===============
-; ID: HITANIM_THROW_ROTL
-HitAnimC_ThrowRotL:
+	jp   HitTypeC_ThrowRotCustom
+; =============== HitTypeC_ThrowRotL ===============
+; ID: HITTYPE_THROW_ROTL
+HitTypeC_ThrowRotL:
 	ld   a, MOVE_SHARED_THROW_ROTL
-	jp   HitAnimC_ThrowRotCustom
-; =============== HitAnimC_ThrowRotD ===============
-; ID: HITANIM_THROW_ROTD
-HitAnimC_ThrowRotD:
+	jp   HitTypeC_ThrowRotCustom
+; =============== HitTypeC_ThrowRotD ===============
+; ID: HITTYPE_THROW_ROTD
+HitTypeC_ThrowRotD:
 	ld   a, MOVE_SHARED_THROW_ROTD
-	jp   HitAnimC_ThrowRotCustom
-; =============== HitAnimC_ThrowRotR ===============
-; ID: HITANIM_THROW_ROTR
-HitAnimC_ThrowRotR:
+	jp   HitTypeC_ThrowRotCustom
+; =============== HitTypeC_ThrowRotR ===============
+; ID: HITTYPE_THROW_ROTR
+HitTypeC_ThrowRotR:
 	ld   a, MOVE_SHARED_THROW_ROTR
-	jp   HitAnimC_ThrowRotCustom
-; =============== HitAnimC_ThrowRotCustom ===============
+	jp   HitTypeC_ThrowRotCustom
+; =============== HitTypeC_ThrowRotCustom ===============
 ; IN
 ; - A: Move ID
-HitAnimC_ThrowRotCustom:
+HitTypeC_ThrowRotCustom:
 	; Set continuation code.
 	; Every MOVE_SHARED_THROW_ROT* points to the same move code, it's only
 	; the animation assigned to it that varies.
 	call Pl_SetMove_ShakeScreenReset
 	
 	; Reposition relative to the opponent, based on whatever the opponent specified in Play_Pl_MoveRotThrown.
-	call HitAnimS_SyncPlPosFromOtherPos		; Move over opponent
+	call HitTypeS_SyncPlPosFromOtherPos		; Move over opponent
 	; The position is relative to the opponent facing left, meaning it's more or less equivalent
 	; to the standard "player facing right" relative positioning.
 	ld   a, [wPlayPlThrowRotMoveH]			; Move forward by wPlayPlThrowRotMoveH
@@ -2672,28 +2672,28 @@ HitAnimC_ThrowRotCustom:
 	scf	; C flag set
 	ret
 	
-; =============== Play_Pl_SetHitAnim ===============
+; =============== Play_Pl_SetHitType ===============
 ; Handles the player status and damage-related fields when getting hit.
 ; This does a lot of setup for Play_Pl_DoHit to do the final adjustments
-; and execute the HitAnim code.
+; and execute the HitType code.
 ; IN
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
 ; OUT
-; - A: Hit Animation ID that was set, * 2 (HITANIM_*)
+; - A: Hit effect ID that was set, * 2 (HITTYPE_*)
 ; - C flag: If set, we got hit or blocked the attack. The return value in A can be used.
 ;           If cleared, the hit didn't have any effect.
-Play_Pl_SetHitAnim:
+Play_Pl_SetHitType:
 	push bc
 		push de
 		
 		;--------------------------------
 		;
 		; Update the airborne flag on the player status,
-		; since it's used later on when validating hit animations.
-		; (As some animations are switched when in the air or on the ground)
+		; since it's used later on when validating hit effects.
+		; (As some hit effects are switched when in the air or on the ground)
 		;
-		Play_Pl_SetHitAnimC_SetAirFlag:
+		Play_Pl_SetHitTypeC_SetAirFlag:
 			ld   hl, iOBJInfo_Y
 			add  hl, de
 			ld   a, [hl]		; A = iOBJInfo_Y
@@ -2713,10 +2713,10 @@ Play_Pl_SetHitAnim:
 		; Start by dividing between projectile hits and physical hits.
 		; 
 		; There are significant differences between the handling of those, though the code paths later
-		; converge back at Play_Pl_SetHitAnimC_ChkBlock (but not before setting the PF0B_PROJHIT flag)
-		; when it comes to applying the damage and hit animation.
+		; converge back at Play_Pl_SetHitTypeC_ChkBlock (but not before setting the PF0B_PROJHIT flag)
+		; when it comes to applying the damage and hit effect.
 		;
-		Play_Pl_SetHitAnimC_ChkHitType:		
+		Play_Pl_SetHitTypeC_ChkHitType:		
 			; The flags checked here were previously set this frame during collision detection by the main task.
 			ld   hl, iPlInfo_ColiFlags
 			add  hl, bc
@@ -2729,7 +2729,7 @@ Play_Pl_SetHitAnim:
 			jp   nz, .phys						; If so, jump
 			
 			; Otherwise, we definitely didn't get hit. Return.
-			jp   Play_Pl_SetHitAnim_RetClear
+			jp   Play_Pl_SetHitType_RetClear
 			
 		;--------------------------------
 		;
@@ -2747,7 +2747,7 @@ Play_Pl_SetHitAnim:
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc							; Seek to iPlInfo_Flags1
 			bit  PF1B_INVULN, [hl]				; Can we get hit?
-			jp   nz, Play_Pl_SetHitAnim_RetClear	; If not, return
+			jp   nz, Play_Pl_SetHitType_RetClear	; If not, return
 			
 			;
 			; Throws have more priority than projectiles.
@@ -2768,7 +2768,7 @@ Play_Pl_SetHitAnim:
 			bit  PCF_PUSHED, [hl]				; Did we push another player?	
 			jp   nz, .phys						; If so, jump (always happens)
 			
-			jp   Play_Pl_SetHitAnim_RetClear	; We never get here
+			jp   Play_Pl_SetHitType_RetClear	; We never get here
 			
 		.getProjDamage:
 		
@@ -2792,14 +2792,14 @@ Play_Pl_SetHitAnim:
 			;
 			ld   a, [hl]
 			or   a								; Is there damage assigned to the projectile?
-			jp   z, Play_Pl_SetHitAnim_RetClear	; If not, return
+			jp   z, Play_Pl_SetHitType_RetClear	; If not, return
 			
 			;
 			; Retrieve the move damage fields from the projectile.
 			;
 			ld   d, [hl]	; D = iOBJInfo_Play_DamageVal
 			inc  hl
-			ld   e, [hl]	; E = iOBJInfo_Play_DamageHitAnimId
+			ld   e, [hl]	; E = iOBJInfo_Play_DamageHitTypeId
 			inc  hl
 			ld   a, [hl]	; A = iOBJInfo_Play_DamageFlags3
 			
@@ -2822,7 +2822,7 @@ Play_Pl_SetHitAnim:
 			ld   [hl], a						; Copy iOBJInfo_Play_DamageFlags3 there
 			
 			; There's nothing else to check here, skip to the shared code
-			jp   Play_Pl_SetHitAnimC_ChkBlock
+			jp   Play_Pl_SetHitTypeC_ChkBlock
 			
 			
 		;--------------------------------
@@ -2837,7 +2837,7 @@ Play_Pl_SetHitAnim:
 			ld   hl, iPlInfo_ColiFlags
 			add  hl, bc							
 			bit  PCF_HIT, [hl]					; Did we get hit?
-			jp   z, Play_Pl_SetHitAnim_RetClear	; If not, return
+			jp   z, Play_Pl_SetHitType_RetClear	; If not, return
 			
 			;
 			; Make sure the opponent can damage the player.
@@ -2856,14 +2856,14 @@ Play_Pl_SetHitAnim:
 			add  hl, bc							; Seek to iPlInfo_MoveDamageValOther
 			ld   a, [hl]
 			or   a								; iPlInfo_MoveDamageValOther == 0?
-			jp   z, Play_Pl_SetHitAnim_RetClear	; If so, return
+			jp   z, Play_Pl_SetHitType_RetClear	; If so, return
 			
 			;
 			; Retrieve the move damage fields from the other player.
 			;
 			ld   d, [hl]				; D = iPlInfo_MoveDamageValOther
 			inc  hl
-			ld   e, [hl]				; E = iPlInfo_MoveDamageHitAnimIdOther
+			ld   e, [hl]				; E = iPlInfo_MoveDamageHitTypeIdOther
 			inc  hl
 			ld   a, [hl]				; A = iPlInfo_MoveDamageFlags3Other
 			
@@ -2883,34 +2883,34 @@ Play_Pl_SetHitAnim:
 			inc  hl						; Seek to iPlInfo_Flags3
 			ld   [hl], a				
 			
-			ld   a, e		; A = HitAnimId
+			ld   a, e		; A = HitTypeId
 			
 			;
 			; Perform extra validation before registering that we got damaged.
 			;
-			; First determine what type of damage move (set hit animation ID) this was, as set by the move code.
-			; The hit animation IDs are grouped in a specific order:
-			; - All standard hit/drop animations (including the end of a throw) use IDs < $10
+			; First determine what type of damage move (set hit effect ID) this was, as set by the move code.
+			; The hit effect IDs are grouped in a specific order:
+			; - All standard hit/drop effects (including the end of a throw) use IDs < $10
 			; - ID $10 is used when starting a throw
 			; - IDs > $10 are the rotation frames used for the "next" parts of a throw.
 			;         Each character decides how to cycle between them.
 			;
-			; All of the validation to check if we can be grabbed happens at the start of the throw (HITANIM_THROW_START).
-			; If the throw was already started (HitAnimId >= $10) then we're definitely allowed to continue it.
+			; All of the validation to check if we can be grabbed happens at the start of the throw (HITTYPE_THROW_START).
+			; If the throw was already started (HitTypeId >= $10) then we're definitely allowed to continue it.
 			; (as long as we don't get throw tech, but that's handled elsewhere).
 			;
-			; The throws are also special since they never cause damage directly (read: as long as HitAnimId >= $10),
+			; The throws are also special since they never cause damage directly (read: as long as HitTypeId >= $10),
 			; so when they are confirmed (.setThrowFlags) they just set some flags to force the throw state and jump 
-			; directly to the end, skipping the damage evaluator. After returning, the HitAnimC for the throw will
+			; directly to the end, skipping the damage evaluator. After returning, the HitTypeC for the throw will
 			; then be executed, continuing the throw sequence.
-			; The actual damage only happens the when the code for the throw sets HitAnimId < $10, which makes
+			; The actual damage only happens the when the code for the throw sets HitTypeId < $10, which makes
 			; it count as a normal hit.
 			;
-			cp   HITANIM_THROW_START	; HitAnimId == $10?
+			cp   HITTYPE_THROW_START	; HitTypeId == $10?
 			jp   z, .chkThrow			; If so, jump
-			cp   HITANIM_THROW_START	; HitAnimId >= $10?
+			cp   HITTYPE_THROW_START	; HitTypeId >= $10?
 			jp   nc, .setThrowFlags		; If so, jump
-			; Otherwise, iPlInfo_MoveDamageHitAnimIdOther < $10, meaning it's a generic hit.
+			; Otherwise, iPlInfo_MoveDamageHitTypeIdOther < $10, meaning it's a generic hit.
 			jp   .chkHit
 			
 			;################
@@ -2926,10 +2926,10 @@ Play_Pl_SetHitAnim:
 			;
 			ld   a, [wPlayPlThrowActId]
 			cp   PLAY_THROWACT_START				; wPlayPlThrowActId == $01?
-			jp   nz, Play_Pl_SetHitAnim_RetClear	; If not, return
+			jp   nz, Play_Pl_SetHitType_RetClear	; If not, return
 			
 			;
-			; If we got thrown by a special move (command throw), always allow the throw to start.
+			; If we got thrown by a special move (command throw), always allow the throw to continue.
 			; The air/ground and invulnerability checks (PF1B_INVULN) also get ignored.
 			;
 			ld   hl, iPlInfo_Flags0Other
@@ -2953,7 +2953,7 @@ Play_Pl_SetHitAnim:
 		.chkThrow_Unused_ForBoth:
 			ld   hl, iPlInfo_Flags1
 			bit  PF1B_INVULN, [hl]		; Are we invulnerable against throws?
-			jp   nz, Play_Pl_SetHitAnim_RetClear	; If so, return
+			jp   nz, Play_Pl_SetHitType_RetClear	; If so, return
 			jp   .setThrowFlags			; Otherwise, jump
 			
 		.chkThrowForGround:
@@ -2964,14 +2964,14 @@ Play_Pl_SetHitAnim:
 			ld   hl, iPlInfo_Flags0
 			add  hl, bc					
 			bit  PF0B_AIR, [hl]						; Are we in the air?
-			jp   nz, Play_Pl_SetHitAnim_RetClear	; If so, return
+			jp   nz, Play_Pl_SetHitType_RetClear	; If so, return
 			
 			;
 			; Standard invulnerability check.
 			;
 			inc  hl									; Seek to iPlInfo_Flags1
 			bit  PF1B_INVULN, [hl]					; Are we invulnerable?
-			jp   nz, Play_Pl_SetHitAnim_RetClear	; If so, return
+			jp   nz, Play_Pl_SetHitType_RetClear	; If so, return
 			
 			; OK
 			jp   .setThrowFlags
@@ -2984,13 +2984,13 @@ Play_Pl_SetHitAnim:
 			ld   hl, iPlInfo_Flags0
 			add  hl, bc							; Seek to iPlInfo_Flags0
 			bit  PF0B_AIR, [hl]					; Are we in the air?
-			jp   z, Play_Pl_SetHitAnim_RetClear	; If not, return
+			jp   z, Play_Pl_SetHitType_RetClear	; If not, return
 			
 			;
 			; [POI] The CPU can't be thrown in the air.
 			;
 			bit  PF0B_CPU, [hl]					; Are we a CPU player?
-			jp   nz, Play_Pl_SetHitAnim_RetClear	; If so, return
+			jp   nz, Play_Pl_SetHitType_RetClear	; If so, return
 			
 		.setThrowFlags:
 			;
@@ -3006,12 +3006,12 @@ Play_Pl_SetHitAnim:
 			res  PF2B_AUTOGUARDLOW, [hl]
 			
 			; Throws don't cause damage directly.
-			; Just set the updated hit animation ID from E and return.
+			; Just set the updated hit effect ID from E and return.
 			; After returning, the updated hit effect code will be executed:
-			; - The first time we get here, it will be for HITANIM_THROW_START, which executes HitAnimC_ThrowStart.
+			; - The first time we get here, it will be for HITTYPE_THROW_START, which executes HitTypeC_ThrowStart.
 			;   That will handle the next part of the throw, from PLAY_THROWACT_START to PLAY_THROWACT_NEXT03.
 			; - The next times are as part of the rotation frames, which is past the point throw tech is allowed.
-			jp   Play_Pl_SetHitAnimC_SetHitAnimId
+			jp   Play_Pl_SetHitTypeC_SetHitTypeId
 			
 			;################
 			;
@@ -3034,7 +3034,7 @@ Play_Pl_SetHitAnim:
 			res  PF3B_FLASH_B_SLOW, [hl]
 			res  PF3B_FLASH_B_FAST, [hl]
 			; Exit hit state
-			jp   Play_Pl_SetHitAnim_RetClear
+			jp   Play_Pl_SetHitType_RetClear
 			;--
 			
 		.chkAutoguard:
@@ -3053,14 +3053,14 @@ Play_Pl_SetHitAnim:
 			
 			; Otherwise, reset the autoguard indicator
 			res  PF2B_AUTOGUARDDONE, [hl]			; Clear result flag
-			jp   Play_Pl_SetHitAnimC_ChkBlock	; Skip to the common block
+			jp   Play_Pl_SetHitTypeC_ChkBlock	; Skip to the common block
 			
 		.onAutoguardMid:
 			; If the attack hits low, we got hit
 			ld   hl, iPlInfo_Flags3
 			add  hl, bc									
 			bit  PF3B_HITLOW, [hl]
-			jp   nz, Play_Pl_SetHitAnimC_BlockBypass
+			jp   nz, Play_Pl_SetHitTypeC_BlockBypass
 			
 			; When playing as KYO, autoguarding overheads only works against normals.
 			; [BUG?] Suspicious. Was this meant to check if the opponent is KYO (iPlInfo_CharIdOther)?
@@ -3078,7 +3078,7 @@ Play_Pl_SetHitAnim:
 			ld   hl, iPlInfo_Flags3
 			add  hl, bc		 		
 			bit  PF3B_OVERHEAD, [hl]
-			jp   nz, Play_Pl_SetHitAnimC_BlockBypass
+			jp   nz, Play_Pl_SetHitTypeC_BlockBypass
 			
 		.chkSpecial:
 			; Autoguarding lows only works against normals in general.
@@ -3086,7 +3086,7 @@ Play_Pl_SetHitAnim:
 			add  hl, bc
 			ld   a, [hl]
 			and  a, PF0_SUPERMOVE|PF0_SPECMOVE			; Did we get hit by a special move?
-			jp   nz, Play_Pl_SetHitAnimC_BlockBypass		; If so, jump
+			jp   nz, Play_Pl_SetHitTypeC_BlockBypass		; If so, jump
 		.autoguardOk:
 			
 			ld   hl, iPlInfo_Flags2
@@ -3098,14 +3098,14 @@ Play_Pl_SetHitAnim:
 			; Stop flashing
 			res  PF3B_FLASH_B_SLOW, [hl]
 			res  PF3B_FLASH_B_FAST, [hl]
-			jp   Play_Pl_SetHitAnim_RetClear
+			jp   Play_Pl_SetHitType_RetClear
 			;###
 			
 		;--------------------------------
 		;
 		; SHARED - Block Check.
 		;
-		Play_Pl_SetHitAnimC_ChkBlock:
+		Play_Pl_SetHitTypeC_ChkBlock:
 			;
 			; If we're blocking, determine if the attack was properly blocked.
 			; If not, the guard is removed and we take full damage.
@@ -3121,29 +3121,29 @@ Play_Pl_SetHitAnim:
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc									
 			bit  PF1B_GUARD, [hl]					; Were we blocking the attack?
-			jp   z, Play_Pl_SetHitAnimC_ApplyDamage	; If not, skip ahead
+			jp   z, Play_Pl_SetHitTypeC_ApplyDamage	; If not, skip ahead
 			bit  PF1B_CROUCH, [hl]					; Did we block low?
 			jp   z, .onBlockMid						; If not, jump
 		.onBlockLow:
 			ld   hl, iPlInfo_Flags3
 			add  hl, bc								; Seek to iPlInfo_Flags3
 			bit  PF3B_OVERHEAD, [hl]				; Is this an overhead?
-			jp   nz, Play_Pl_SetHitAnimC_BlockBypass	; If so, we got hit
-			jp   Play_Pl_SetHitAnimC_Blocked			; Otherwise, we blocked it
+			jp   nz, Play_Pl_SetHitTypeC_BlockBypass	; If so, we got hit
+			jp   Play_Pl_SetHitTypeC_Blocked			; Otherwise, we blocked it
 		.onBlockMid:
 			ld   hl, iPlInfo_Flags3
 			add  hl, bc								; Seek to iPlInfo_Flags3
 			bit  PF3B_HITLOW, [hl]					; Does the attack require blocking low?
-			jp   nz, Play_Pl_SetHitAnimC_BlockBypass	; If so, we got hit
-			jp   Play_Pl_SetHitAnimC_Blocked			; Otherwise, we blocked it
+			jp   nz, Play_Pl_SetHitTypeC_BlockBypass	; If so, we got hit
+			jp   Play_Pl_SetHitTypeC_Blocked			; Otherwise, we blocked it
 			
-		Play_Pl_SetHitAnimC_Blocked:
+		Play_Pl_SetHitTypeC_Blocked:
 			; Since we blocked the attack, remove the hit effect
 			; so we can continue blocking.
 			ld   e, $00
-			jp   Play_Pl_SetHitAnimC_ApplyDamage
+			jp   Play_Pl_SetHitTypeC_ApplyDamage
 			
-		Play_Pl_SetHitAnimC_BlockBypass:
+		Play_Pl_SetHitTypeC_BlockBypass:
 			; We didn't guard the attack correctly.
 			; This counts as a standard hit.
 			
@@ -3160,7 +3160,7 @@ Play_Pl_SetHitAnim:
 		;
 		; SHARED - Apply Damage
 		;
-		Play_Pl_SetHitAnimC_ApplyDamage:
+		Play_Pl_SetHitTypeC_ApplyDamage:
 			
 			; Play_Pl_ApplyDamageToStats recalculates the values in DE, so save/restore it
 			push de
@@ -3169,40 +3169,40 @@ Play_Pl_SetHitAnim:
 			
 		;--------------------------------
 		;
-		; SHARED - Set Hit Animation
+		; SHARED - Set Hit Effect
 		;
-		Play_Pl_SetHitAnimC_SetHitAnim:
+		Play_Pl_SetHitTypeC_SetHitType:
 			;
-			; Second pass to validate the animation to play when getting hit,
+			; Second pass to validate the effect to use when getting hit,
 			; as it may get replaced with something else depending on the player status flags.
-			; After this last series of checks in made, save it to iPlInfo_HitAnimId.
+			; After this last series of checks in made, save it to iPlInfo_HitTypeId.
 			;
-			ld   a, e						; A = HitAnimId
+			ld   a, e						; A = HitTypeId
 			
 			;
 			; This is the first of many whitelists where some moves can't be overriden at all.
-			; HITANIM_HIT_MULTI0, HITANIM_HIT_MULTI1 and HITANIM_HIT_MULTIGS in particular
+			; HITTYPE_HIT_MULTI0, HITTYPE_HIT_MULTI1 and HITTYPE_HIT_MULTIGS in particular
 			; tend to be used by special moves that hit multiple times for every hit
 			; except the last one, thus preventing the opponent from escaping mid-move.
 			; (though it can still happen if a projectile hits at the right time, see the .chkOtherEscape in many moves)
 			;
 			
-			; These animation IDs can always be used
-			cp   HITANIM_HIT_MULTI0				; E == $09?
-			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId	; If so, jump
-			cp   HITANIM_HIT_MULTI1				; ...
-			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
-			cp   HITANIM_HIT_MULTIGS
-			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
-			cp   HITANIM_DROP_MAIN
-			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
-			cp   HITANIM_DROP_SWOOPUP
-			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
+			; These type IDs can always be used
+			cp   HITTYPE_HIT_MULTI0				; E == $09?
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId	; If so, jump
+			cp   HITTYPE_HIT_MULTI1				; ...
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
+			cp   HITTYPE_HIT_MULTIGS
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
+			cp   HITTYPE_DROP_MAIN
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
+			cp   HITTYPE_DROP_SWOOPUP
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
 		
 		.chkDead:
 			;
-			; Getting KO'd restricts the number of allowed hit animations, as the player
-			; has to visibily drop to the ground, something not all HitAnims do.
+			; Getting KO'd restricts the number of allowed hit effects, as the player
+			; has to visibily drop to the ground, something not all HitTypes do.
 			;
 			ld   hl, iPlInfo_Health
 			add  hl, bc
@@ -3214,90 +3214,90 @@ Play_Pl_SetHitAnim:
 			add  hl, bc					; Seek to our iPlInfo_Flags1
 			res  PF1B_GUARD, [hl]		; Disable blocking
 			
-			; E = HitAnimId (Opponent)
-			ld   hl, iPlInfo_MoveDamageHitAnimIdOther
+			; E = HitTypeId (Opponent)
+			ld   hl, iPlInfo_MoveDamageHitTypeIdOther
 			add  hl, bc					
 			ld   a, [hl]				
 			ld   e, a
 			
-			; There are different allowed HitAnims depending on whether we got
+			; There are different allowed HitTypes depending on whether we got
 			; killed by a hit or a throw.
 			ld   a, [wPlayPlThrowActId]
 			or   a						; Did we get thrown?
 			jp   nz, .deadThrown		; If so, jump
 		.deadHit:
-			; Getting KO'd by a normal always sets HITANIM_DROP_MAIN.
+			; Getting KO'd by a normal always sets HITTYPE_DROP_MAIN.
 			; For specials there's a whitelist.
 			ld   hl, iPlInfo_Flags0Other
 			add  hl, bc					; Seek to opponent's status
-			bit  PF0B_SPECMOVE, [hl]		; Did we get killed by a special move?
+			bit  PF0B_SPECMOVE, [hl]	; Did we get killed by a special move?
 			jp   nz, .deadSpecHit		; If so, jump
-			jp   .useStdDrop				; Otherwise, use HITANIM_DROP_MAIN
+			jp   .useStdDrop			; Otherwise, use HITTYPE_DROP_MAIN
 		.deadThrown:
-			; There are three allowed animations when getting KO's by a throw.
-			; Otherwise, default to HITANIM_DROP_MAIN.
+			; There are three allowed effects when getting KO's by a throw.
+			; Otherwise, default to HITTYPE_DROP_MAIN.
 			ld   a, e
-			cp   HITANIM_DROP_DB_A		; HitAnimId == $0C?
-			jp   z, .useDrop0C				; If so, jump
-			cp   HITANIM_THROW_END		; ...
-			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
+			cp   HITTYPE_DROP_DB_A		; HitTypeId == $0C?
+			jp   z, .useDrop0C			; If so, jump
+			cp   HITTYPE_THROW_END		; ...
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
 			;--
 			; [TCRF?] Unreachable code?
-			cp   a, HITANIM_DROP_SWOOPUP
-			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
+			cp   a, HITTYPE_DROP_SWOOPUP
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
 			jp   .useStdDrop
 			;--
 		.deadSpecHit:
-			; Whitelist of allowed hit animations when getting KO'd by a hit.
-			; Otherwise, default to HITANIM_DROP_MAIN.
+			; Whitelist of allowed hit effects when getting KO'd by a hit.
+			; Otherwise, default to HITTYPE_DROP_MAIN.
 			ld   a, e
-			cp   HITANIM_HIT_MULTI0
-			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
-			cp   HITANIM_HIT_MULTI1
-			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
-			cp   HITANIM_HIT_MULTIGS
-			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
-			cp   HITANIM_DROP_DB_A
+			cp   HITTYPE_HIT_MULTI0
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
+			cp   HITTYPE_HIT_MULTI1
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
+			cp   HITTYPE_HIT_MULTIGS
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
+			cp   HITTYPE_DROP_DB_A
 			jp   z, .useDrop0C
-			cp   HITANIM_THROW_END
-			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
-			cp   HITANIM_DROP_SWOOPUP
-			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
+			cp   HITTYPE_THROW_END
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
+			cp   HITTYPE_DROP_SWOOPUP
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
 			jp   .useStdDrop
 			
 		.notDead:
 			ld   a, e
 			
-			; If we blocked the hit, determine if guard broke as that uses its own anims.
-			; Note that HITANIM_BLOCKED got set previously by the subroutine, overriding
+			; If we blocked the hit, determine if guard broke as that uses its own types.
+			; Note that HITTYPE_BLOCKED got set previously by the subroutine, overriding
 			; whatever the attack set when blocking it successfully.
-			cp   HITANIM_BLOCKED		; Did we block the hit?
+			cp   HITTYPE_BLOCKED		; Did we block the hit?
 			jp   nz, .noBlock			; If not, jump
 			call Play_Pl_DoGuardBreak	; Did our guard break?
 			jp   z, .useGuardBreak		; If so, jump
-			jp   Play_Pl_SetHitAnimC_SetHitAnimId	; Otherwise, confirm HITANIM_BLOCKED
+			jp   Play_Pl_SetHitTypeC_SetHitTypeId	; Otherwise, confirm HITTYPE_BLOCKED
 			
 		.noBlock:
 			call Play_Pl_IsDizzyNext	; Are we supposed to get dizzy on this hit?
 			jp   z, .noDizzy			; If not, jump
 		.dizzy:
-			; Handle the animation blacklist when getting hit "right before getting" dizzy.
-			; When getting dizzy, the player will drop to the ground regardless of the hit animation,
-			; by overriding whatever animation was set with HITANIM_DROP_MAIN (by reaching .useStdDrop).
-			; However, the animations checked below can't be overridden.
+			; Handle the type blacklist when getting hit "right before getting" dizzy.
+			; When getting dizzy, the player will drop to the ground regardless of the hit effect,
+			; by overriding whatever effect was set with HITTYPE_DROP_MAIN (by reaching .useStdDrop).
+			; However, the effects checked below can't be overridden.
 			ld   a, e
-			cp   HITANIM_HIT_MULTI0
-			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
-			cp   HITANIM_HIT_MULTI1
-			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
-			cp   HITANIM_HIT_MULTIGS
-			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
-			cp   HITANIM_DROP_DB_A
+			cp   HITTYPE_HIT_MULTI0
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
+			cp   HITTYPE_HIT_MULTI1
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
+			cp   HITTYPE_HIT_MULTIGS
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
+			cp   HITTYPE_DROP_DB_A
 			jp   z, .useDrop0C
-			cp   HITANIM_THROW_END
-			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
-			cp   HITANIM_DROP_SWOOPUP
-			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
+			cp   HITTYPE_THROW_END
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
+			cp   HITTYPE_DROP_SWOOPUP
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
 			jp   .useStdDrop
 		.noDizzy:
 		
@@ -3310,10 +3310,10 @@ Play_Pl_SetHitAnim:
 			
 			;##
 		.air:
-			; HITANIM_DROP_SWOOPUP is always allowed when getting hit in the air
-			; (alongside HITANIM_DROP_DB_A and HITANIM_THROW_END...)
-			cp   HITANIM_DROP_SWOOPUP
-			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
+			; HITTYPE_DROP_SWOOPUP is always allowed when getting hit in the air
+			; (alongside HITTYPE_DROP_DB_A and HITTYPE_THROW_END...)
+			cp   HITTYPE_DROP_SWOOPUP
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
 			
 			;
 			; When getting hit by a normal in the air, the player recovers before touching the ground.
@@ -3329,28 +3329,28 @@ Play_Pl_SetHitAnim:
 			;--
 			; [POI] This is the same between .noAirNoSpec and .noAirSpec.
 			;       It could have been moved before the PF0B_PROJHIT check.
-			cp   HITANIM_DROP_DB_A
+			cp   HITTYPE_DROP_DB_A
 			jp   z, .useDrop0C
-			cp   HITANIM_THROW_END
-			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
+			cp   HITTYPE_THROW_END
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
 			;--
-			jp   .useHitAirRec		; Use HITANIM_DROP_A
+			jp   .useHitAirRec		; Use HITTYPE_DROP_A
 		.airSpec:
 			;--
 			; [POI] See above
-			cp   HITANIM_DROP_DB_A
+			cp   HITTYPE_DROP_DB_A
 			jp   z, .useDrop0C
-			cp   HITANIM_THROW_END
-			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
+			cp   HITTYPE_THROW_END
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
 			;--
-			jp   .useStdDrop		; Use HITANIM_DROP_MAIN
+			jp   .useStdDrop		; Use HITTYPE_DROP_MAIN
 			;##
 			
 		.noAir:
 			;
 			; This is the only part that doesn't define default values.
 			; When getting hit on the ground without getting dizzy or blocking,
-			; every HitAnim value is valid as long as it doesn't get replaced
+			; every HitType value is valid as long as it doesn't get replaced
 			; by the crouching checks.
 			;
 			bit  PF0B_PROJHIT, [hl]	; Did we get hit by a projectile?
@@ -3360,11 +3360,11 @@ Play_Pl_SetHitAnim:
 			bit  PF0B_SPECMOVE, [hl]	; Did we get hit by a special move?
 			jp   nz, .noAirSpec		; If so, jump
 		.noAirNorm:
-			; HITANIM_DROP_CH is always allowed
-			cp   HITANIM_DROP_CH
-			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
+			; HITTYPE_DROP_CH is always allowed
+			cp   HITTYPE_DROP_CH
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
 			
-			; If we got hit by a normal while crouching, force use HITANIM_HIT_LOW
+			; If we got hit by a normal while crouching, force use HITTYPE_HIT_LOW
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc
 			bit  PF1B_CROUCH, [hl]		; Are we crouching?
@@ -3372,27 +3372,27 @@ Play_Pl_SetHitAnim:
 			
 			; Otherwise, use the existing value
 			;
-			; Of course, this assumes that normals will never set anims
-			; they aren't intended to use, like HITANIM_DROP_DB_A.
-			jp   Play_Pl_SetHitAnimC_SetHitAnimId
+			; Of course, this assumes that normals will never set hit types
+			; they aren't intended to use, like HITTYPE_DROP_DB_A.
+			jp   Play_Pl_SetHitTypeC_SetHitTypeId
 		.noAirSpec:
 			; No special behaviour when hit by a special move, other
-			; than the standard special case for HITANIM_DROP_DB_A
+			; than the standard special case for HITTYPE_DROP_DB_A
 			; that's also everywhere else.
-			cp   HITANIM_DROP_DB_A
+			cp   HITTYPE_DROP_DB_A
 			jp   z, .useDrop0C
-			jp   Play_Pl_SetHitAnimC_SetHitAnimId
+			jp   Play_Pl_SetHitTypeC_SetHitTypeId
 			;##
 			
 		.useDrop0C:
-			; If we're not in the air, replace HITANIM_DROP_DB_A with its ground version,
+			; If we're not in the air, replace HITTYPE_DROP_DB_A with its ground version,
 			; which is a shortened version without the downwards movement.
 			ld   hl, iPlInfo_Flags0
 			add  hl, bc
 			bit  PF0B_AIR, [hl]						; Are we in the air?
-			jp   nz, Play_Pl_SetHitAnimC_SetHitAnimId			; If so, confirm the air ver
-			ld   e, HITANIM_DROP_DB_G		; Otherwise, replace it with the ground ver
-			jp   Play_Pl_SetHitAnimC_SetHitAnimId
+			jp   nz, Play_Pl_SetHitTypeC_SetHitTypeId			; If so, confirm the air ver
+			ld   e, HITTYPE_DROP_DB_G		; Otherwise, replace it with the ground ver
+			jp   Play_Pl_SetHitTypeC_SetHitTypeId
 			
 		.useGuardBreak:
 			; Like .useDrop0C, but for the guard break.
@@ -3401,38 +3401,38 @@ Play_Pl_SetHitAnim:
 			bit  PF0B_AIR, [hl]				; Are we in the air?
 			jp   z, .useGuardBreakGround	; If not, jump
 		.useGuardBreakAir:
-			ld   e, HITANIM_GUARDBREAK_A
-			jp   Play_Pl_SetHitAnimC_SetHitAnimId
+			ld   e, HITTYPE_GUARDBREAK_A
+			jp   Play_Pl_SetHitTypeC_SetHitTypeId
 		.useGuardBreakGround:
-			ld   e, HITANIM_GUARDBREAK_G
-			jp   Play_Pl_SetHitAnimC_SetHitAnimId
+			ld   e, HITTYPE_GUARDBREAK_G
+			jp   Play_Pl_SetHitTypeC_SetHitTypeId
 			
 		;--
-		; [TCRF] Unreferenced code to force the standard hit animations
+		; [TCRF] Unreferenced code to force the standard hit effects
 		.unused_useHit03:
-			ld   e, HITANIM_HIT_MID0
-			jp   Play_Pl_SetHitAnimC_SetHitAnimId
+			ld   e, HITTYPE_HIT_MID0
+			jp   Play_Pl_SetHitTypeC_SetHitTypeId
 		.unused_useHit04:
-			ld   e, HITANIM_HIT_MID1
-			jp   Play_Pl_SetHitAnimC_SetHitAnimId
+			ld   e, HITTYPE_HIT_MID1
+			jp   Play_Pl_SetHitTypeC_SetHitTypeId
 		;--
 		
 		.useStdDrop:
-			ld   e, HITANIM_DROP_MAIN
-			jp   Play_Pl_SetHitAnimC_SetHitAnimId
+			ld   e, HITTYPE_DROP_MAIN
+			jp   Play_Pl_SetHitTypeC_SetHitTypeId
 		.useHitAirRec:
-			ld   e, HITANIM_DROP_A
-			jp   Play_Pl_SetHitAnimC_SetHitAnimId
+			ld   e, HITTYPE_DROP_A
+			jp   Play_Pl_SetHitTypeC_SetHitTypeId
 		.useHitLow:
-			ld   e, HITANIM_HIT_LOW
-			jp   Play_Pl_SetHitAnimC_SetHitAnimId
+			ld   e, HITTYPE_HIT_LOW
+			jp   Play_Pl_SetHitTypeC_SetHitTypeId
 			
-		Play_Pl_SetHitAnimC_SetHitAnimId:
-			; Save the updated hit animation ID.
-			; iPlInfo_HitAnimId = E
+		Play_Pl_SetHitTypeC_SetHitTypeId:
+			; Save the updated hit effect ID.
+			; iPlInfo_HitTypeId = E
 			ld   a, e			; A = E
-			ld   hl, iPlInfo_HitAnimId
-			add  hl, bc			; Seek to iPlInfo_HitAnimId
+			ld   hl, iPlInfo_HitTypeId
+			add  hl, bc			; Seek to iPlInfo_HitTypeId
 			ld   [hl], a		; Write it over
 			
 			; Return the same value to A, except multiplied by 2.
@@ -3442,7 +3442,7 @@ Play_Pl_SetHitAnim:
 		pop  de
 	pop  bc
 	ret
-		Play_Pl_SetHitAnim_RetClear:
+		Play_Pl_SetHitType_RetClear:
 			or   a	; A = 0, C flag clear
 		pop  de
 	pop  bc
@@ -3831,13 +3831,9 @@ Play_Pl_DecStunTimer:
 		ld   a, d	; Not necessary
 		
 		;
-		; We got here by having PF1B_GUARD set.
-		;
-		; However, some special moves set that flag as well to automatically transition
-		; to the block animation in case we get hit out of them.
-		;
-		; The player isn't explicitly blocking in that case, so if we're in the middle
-		; of a special or super move, return immediately to leave the guard break timer unchanged.
+		; Special moves can enable autoblocking when they set PF1B_GUARD.
+		; However, probably because the player isn't explicitly blocking in that case,
+		; when the guard triggers no penalty is subtracted to the stun timer.
 		;
 		ld   hl, iPlInfo_Flags0
 		add  hl, bc
@@ -3925,7 +3921,7 @@ Play_Pl_DoGuardBreak:
 
 	;
 	; If our guard wasn't broken, return without doing anything.
-	; This will keep the Z flag cleared, preventing the guard break HitAnim from being set.
+	; This will keep the Z flag cleared, preventing the guard break HitType from being set.
 	;
 	ld   hl, iPlInfo_GuardBreakProg
 	add  hl, bc
@@ -4011,7 +4007,7 @@ MoveS_ChkHalfSpeedHit:
 ;        - Time Over
 ;        - Died
 ;        - Pressed any button
-; The counter itself is set to $08 by HitAnimC_ThrowStart and read by nothing else,
+; The counter itself is set to $08 by HitTypeC_ThrowStart and read by nothing else,
 ; except for giving it visibility to the opponent.
 ; IN
 ; - BC: Ptr to wPlInfo
@@ -4137,7 +4133,7 @@ MoveC_Hit_PostStunKnockback:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 	
 ; =============== MoveC_Hit_DropMain ===============
-; Continuation code for the standard drop without mid-air recovery, for HitAnimC_DropMain. (MOVE_SHARED_DROP_MAIN)
+; Continuation code for the standard drop without mid-air recovery, for HitTypeC_DropMain. (MOVE_SHARED_DROP_MAIN)
 ; This one also triggers a rebound, and allows roll canceling.
 MoveC_Hit_DropMain:
 	call Play_Pl_MoveByColiBoxOverlapX
@@ -4476,7 +4472,7 @@ MoveC_Hit_Throw_End:
 	ret
 	
 ; =============== MoveC_Hit_DropDBG ===============
-; Continuation code for HitAnimC_Drop_DB_G. (HITANIM_DROP_DB_G)
+; Continuation code for HitTypeC_Drop_DB_G. (HITTYPE_DROP_DB_G)
 ; This is a generic move that just handles the ground shake effect,
 ; as the player is already on the ground and doesn't move.
 ; Handler for:
@@ -4820,9 +4816,9 @@ MoveC_Hit_SwoopUp:
 	ret
 	
 ; =============== MoveC_Hit_DropCH ===============
-; Continuation code for HitAnimC_DropCH, for use with crouching heavy kicks. (MOVE_SHARED_DROP_CH)
+; Continuation code for HitTypeC_DropCH, for use with crouching heavy kicks. (MOVE_SHARED_DROP_CH)
 ; This causes the player to be knocked back with a jump, with settings previously
-; set in HitAnimC_DropCH.
+; set in HitTypeC_DropCH.
 ; Shouldn't be used on player death even though it's "compatible" with it.
 ; OUT
 ; - C flag: Always set (ends hitstop)
@@ -4877,7 +4873,7 @@ MoveC_Hit_DropCH:
 ; Move code for a generic backjump with air recovery.
 ; 
 ; This is used for:
-; - The continuation code for getting hit by a normal in the air by HitAnimC_DropA (MOVE_SHARED_BACKJUMP_REC_A)
+; - The continuation code for getting hit by a normal in the air by HitTypeC_DropA (MOVE_SHARED_BACKJUMP_REC_A)
 ; - The backjump for several special moves that can transition to this
 ;
 ; Since the player recovers mid-air, it can't be used with player death.
@@ -4977,7 +4973,7 @@ MoveC_Hit_GuardBreakA:
 	ret
 	
 ; =============== MoveC_Hit_MultiMidKnockback ===============
-; Continuation code for hits in the middle of a ground-based special move that hits multiple times (HITANIM_HIT_MULTI0, HITANIM_HIT_MULTI1)
+; Continuation code for hits in the middle of a ground-based special move that hits multiple times (HITTYPE_HIT_MULTI0, HITTYPE_HIT_MULTI1)
 ;
 ; In practice, this is identical to MoveC_Hit_PostStunKnockback except that the player drops on the ground at the end.
 ; (there are more differences, but they are either unreachable or useless)
@@ -5036,7 +5032,7 @@ MoveC_Hit_MultiMidKnockback:
 	; to first handle the knockback, and only drop on the ground when we stop moving.
 	
 	; [TCRF] If we're in the air though, drop down immediately using the just set speed settings.
-	;        This will never jump since all moves that use this call HitAnimS_MovePlToOpFront to force
+	;        This will never jump since all moves that use this call HitTypeS_MovePlToOpFront to force
 	;        the attacked player to be on the ground. 
 	ld   hl, iOBJInfo_Y
 	add  hl, de
@@ -5076,15 +5072,15 @@ MoveC_Hit_MultiMidKnockback:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 	
 ; =============== MoveC_Hit_MultiMidGS ===============
-; Continuation code for HitAnimC_Hit_MultiGS (HITANIM_HIT_MULTIGS).
+; Continuation code for HitTypeC_Hit_MultiGS (HITTYPE_HIT_MULTIGS).
 ;
 ; Handles the hit effect for hits that push/freeze the player on the ground.
 ; This can happen when getting hit in the middle of a ground-based super move
-; that hits multiple times (HitAnimC_MultiHit_MidG*).
+; that hits multiple times (HitTypeC_MultiHit_MidG*).
 ;
 ; This does nothing but animate the player (2 frames in total), giving ample time for 
 ; the opponent to deliver another hit as part of the super.
-; Because of it, HITANIM_HIT_MULTIGS should absolutely not be used as the last hit for a super
+; Because of it, HITTYPE_HIT_MULTIGS should absolutely not be used as the last hit for a super
 ; move, otherwise the player gets stuck for a few seconds.
 ;
 ; Handler for:
@@ -5122,7 +5118,7 @@ MoveC_Hit_MultiMidGS:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 
 ; =============== MoveC_Hit_Throw_Start ===============
-; Continuation code for HitAnimC_ThrowStart (HITANIM_THROW_START).
+; Continuation code for HitTypeC_ThrowStart (HITTYPE_THROW_START).
 ; 
 ; This handles the third part of the throw for the thrown side, which is the throw tech.
 ; While this happens, the opponent is either waiting in BasicInput_StartGroundThrow.loop, or
@@ -5365,7 +5361,7 @@ MoveC_Hit_Throw_Start:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 	
 ; =============== MoveC_Hit_Throw_Rot ===============
-; Continuation code for HitAnimC_ThrowRot*, the rotation frames (HITANIM_THROW_ROT*).
+; Continuation code for HitTypeC_ThrowRot*, the rotation frames (HITTYPE_THROW_ROT*).
 ;
 ; In practice, only used to sync the player's position with the opponent's, if enabled.
 ;
@@ -5392,12 +5388,12 @@ MoveC_Hit_Throw_Rot:
 	jp   z, .setKnockbackSpeed
 .chkContMove:
 	;
-	; If enabled, reposition the player every frame like HitAnimC_ThrowRotCustom did once.
+	; If enabled, reposition the player every frame like HitTypeC_ThrowRotCustom did once.
 	;
 	ld   a, [wPlayPlThrowRotSync]
 	or   a									; Sync enabled?
 	jp   z, .anim							; If not, skip
-	call HitAnimS_SyncPlPosFromOtherPos		; Move over opponent
+	call HitTypeS_SyncPlPosFromOtherPos		; Move over opponent
 	; The position is relative to the opponent facing left, meaning it's more or less equivalent
 	; to the standard "player facing right" relative positioning.
 	ld   a, [wPlayPlThrowRotMoveH]			; Move forward by wPlayPlThrowRotMoveH
@@ -5690,12 +5686,12 @@ MoveC_Ryo_MouKoRaiJinGou:
 		jp   .moveH_m40
 .obj1_cont:
 	mMvC_ValFrameEnd .moveH_m40
-		mMvC_SetDamageNext $04, HITANIM_HIT_MID1, PF3_LASTHIT
+		mMvC_SetDamageNext $04, HITTYPE_HIT_MID1, PF3_LASTHIT
 		jp   .moveH_m40
 ; --------------- frame #2 ---------------
 .obj2:
 	mMvC_ValFrameEnd .moveH_m40
-		mMvC_SetDamageNext $04, HITANIM_DROP_MAIN, PF3_LASTHIT
+		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_LASTHIT
 		jp   .moveH_m40
 ; --------------- frame #3 ---------------
 .obj3:
@@ -5793,7 +5789,7 @@ MoveC_Ryo_HienShippuKyaku:
 .obj3:
 	mMvC_ValFrameEnd .doGravity
 	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	mMvC_SetDamageNext $08, HITANIM_DROP_MAIN, PF3_SHAKELONG
+	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_SHAKELONG
 	jp   .doGravity
 ; --------------- common gravity check ---------------	
 .doGravity:
@@ -5894,7 +5890,7 @@ MoveC_Ryo_RyuKoRanbuS:
 	jp   nz, .obj1_chkGuard_guard		; If so, jump
 .obj1_chkGuard_noGuard:
 	; Otherwise, continue to #2
-	mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
+	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
 	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
 	mMvC_SetSpeedH $0000
 	; Force player on the ground
@@ -5910,18 +5906,18 @@ MoveC_Ryo_RyuKoRanbuS:
 	jp   .doGravity
 ; --------------- frames #3,5,7,9... ---------------
 ; Generic damage - odd frames.
-; Alongside .objEven is used to alternate between hit animations constantly.
+; Alongside .objEven is used to alternate between hit effects constantly.
 .objOdd:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
 		jp   .chkOtherEscape
 ; --------------- frame #2 ---------------
 ; Initial frame before the odd/even switching.
 ; This sets the initial jump speed and doesn't check for block yet.
 .obj2:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
 		mMvC_SetSpeedH $0080
 		jp   .anim
 ; --------------- frames #4,6,8,A,... ---------------
@@ -5929,22 +5925,22 @@ MoveC_Ryo_RyuKoRanbuS:
 .objEven:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
 		;
-		; [POI] If the opponent somehow isn't in one of the hit animations 
+		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
 		;       This can happen if the opponent gets hit by a previously thrown
 		;       fireball in the middle of the move.
 		;
-		ld   hl, iPlInfo_HitAnimIdOther
+		ld   hl, iPlInfo_HitTypeIdOther
 		add  hl, bc
 		ld   a, [hl]
-		cp   HITANIM_HIT_MULTI0	; A == HITANIM_HIT_MULTI0?
+		cp   HITTYPE_HIT_MULTI0	; A == HITTYPE_HIT_MULTI0?
 		jp   z, .anim				; If so, skip
-		cp   HITANIM_HIT_MULTI1	; A == HITANIM_HIT_MULTI1?
+		cp   HITTYPE_HIT_MULTI1	; A == HITTYPE_HIT_MULTI1?
 		jp   z, .anim				; If so, skip
 		; Otherwise, transition to hop
 		ld   a, MOVE_SHARED_HOP_B
@@ -5962,7 +5958,7 @@ MoveC_Ryo_RyuKoRanbuS:
 		ld   a, MOVE_RYO_KO_HOU_H
 	.startKoHou_setMove:
 		call MoveInputS_SetSpecMove_StopSpeed
-		mMvC_SetDamageNext $06, HITANIM_DROP_MAIN, PF3_LASTHIT
+		mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_LASTHIT
 		jp   .ret
 ; --------------- common gravity check ---------------	
 .doGravity:
@@ -6085,7 +6081,7 @@ MoveC_Ryo_RyuKoRanbuD:
 	jp   nz, .obj1_chkGuard_guard		; If so, jump
 .obj1_chkGuard_noGuard:
 	; Otherwise, continue to #2
-	mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
+	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
 	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
 	mMvC_SetSpeedH $0000
 	; Force player on the ground
@@ -6101,18 +6097,18 @@ MoveC_Ryo_RyuKoRanbuD:
 	jp   .doGravity
 ; --------------- frames #3,5,7,9... ---------------
 ; Generic damage - odd frames.
-; Alongside .objEven is used to alternate between hit animations constantly.
+; Alongside .objEven is used to alternate between hit effects constantly.
 .objOdd:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
 		jp   .chkOtherEscape
 ; --------------- frame #2 ---------------
 ; Initial frame before the odd/even switching.
 ; This sets the initial jump speed and doesn't check for block yet.
 .obj2:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
 		mMvC_SetSpeedH $0080
 		jp   .anim
 ; --------------- frames #4,6,8,A,... ---------------
@@ -6120,22 +6116,22 @@ MoveC_Ryo_RyuKoRanbuD:
 .objEven:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
 		;
-		; [POI] If the opponent somehow isn't in one of the hit animations 
+		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
 		;       This can happen if the opponent gets hit by a previously thrown
 		;       fireball in the middle of the move.
 		;
-		ld   hl, iPlInfo_HitAnimIdOther
+		ld   hl, iPlInfo_HitTypeIdOther
 		add  hl, bc
 		ld   a, [hl]
-		cp   HITANIM_HIT_MULTI0	; A == HITANIM_HIT_MULTI0?
+		cp   HITTYPE_HIT_MULTI0	; A == HITTYPE_HIT_MULTI0?
 		jp   z, .anim				; If so, skip
-		cp   HITANIM_HIT_MULTI1	; A == HITANIM_HIT_MULTI1?
+		cp   HITTYPE_HIT_MULTI1	; A == HITTYPE_HIT_MULTI1?
 		jp   z, .anim				; If so, skip
 		; Otherwise, transition to hop
 		ld   a, MOVE_SHARED_HOP_B
@@ -6154,7 +6150,7 @@ MoveC_Ryo_RyuKoRanbuD:
 		ld   a, MOVE_RYO_KO_HOU_EH
 	.startKoHou_setMove:
 		call MoveInputS_SetSpecMove_StopSpeed
-		mMvC_SetDamageNext $02, HITANIM_DROP_MAIN, PF3_LASTHIT
+		mMvC_SetDamageNext $02, HITTYPE_DROP_MAIN, PF3_LASTHIT
 		jp   .ret
 ; --------------- common gravity check ---------------	
 .doGravity:
@@ -6389,7 +6385,7 @@ MoveC_Robert_HienShippuKyaku:
 ; --------------- frame #2 ---------------	
 .obj2:
 	mMvC_ValFrameEnd .doGravity
-		mMvC_SetDamageNext $04, HITANIM_HIT_MID1, PF3_LASTHIT
+		mMvC_SetDamageNext $04, HITTYPE_HIT_MID1, PF3_LASTHIT
 		mMvC_PlaySound SCT_ATTACKG
 		jp   .doGravity
 ; --------------- frame #3 ---------------	
@@ -6398,7 +6394,7 @@ MoveC_Robert_HienShippuKyaku:
 ; --------------- frame #4 ---------------	
 .obj4:
 	mMvC_ValFrameEnd .doGravity
-		mMvC_SetDamageNext $04, HITANIM_HIT_MID0, PF3_LASTHIT
+		mMvC_SetDamageNext $04, HITTYPE_HIT_MID0, PF3_LASTHIT
 		mMvC_PlaySound SCT_ATTACKG
 		jp   .doGravity
 ; --------------- frame #5 ---------------	
@@ -6586,13 +6582,13 @@ MoveC_Robert_RyuuGa:
 		mMvC_PlaySound SND_ID_28
 		mMvIn_ChkLHE .obj1_setHitH, .obj1_setHitE
 	.obj1_setHitL: ; Light
-		mMvC_SetDamageNext $06, HITANIM_DROP_MAIN, PF3_SHAKELONG
+		mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_SHAKELONG
 		jp   .anim
 	.obj1_setHitH: ; Heavy
-		mMvC_SetDamageNext $06, HITANIM_DROP_MAIN, PF3_SHAKELONG
+		mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_SHAKELONG
 		jp   .anim
 	.obj1_setHitE: ; [POI] Hidden Heavy
-		mMvC_SetDamageNext $06, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
+		mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #1 ---------------	
 .obj2:
@@ -6680,7 +6676,7 @@ MoveC_Terry_RisingTackle:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
 		mMvC_PlaySound SND_ID_28
-		mMvC_SetDamageNext $02, HITANIM_DROP_MAIN, PF3_LASTHIT
+		mMvC_SetDamageNext $02, HITTYPE_DROP_MAIN, PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #1 ---------------	
 .obj1:
@@ -6707,13 +6703,13 @@ MoveC_Terry_RisingTackle:
 		jp   .doGravity
 .obj1_cont:
 	; Continuous damage
-	mMvC_SetDamage $02, HITANIM_DROP_MAIN, PF3_LASTHIT
+	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_LASTHIT
 	jp   .doGravity
 	
 ; --------------- frames #2-3 ---------------
 ; Attack frames.	
 .obj2:
-	mMvC_SetDamage $02, HITANIM_DROP_MAIN, PF3_LASTHIT
+	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_LASTHIT
 	mMvC_ValFrameEnd .doGravity
 		; Skip to #5 if YSpeed > -$03
 		mMvC_NextFrameOnGtYSpeed -$03, ANIMSPEED_NONE
@@ -6725,7 +6721,7 @@ MoveC_Terry_RisingTackle:
 ; --------------- frame #4 ---------------
 ; Attack frames with loop check.
 .obj4:
-	mMvC_SetDamage $02, HITANIM_DROP_MAIN, PF3_LASTHIT
+	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_LASTHIT
 	mMvC_ValFrameEnd .doGravity
 		; Continue looping to #2 until YSpeed > -$03
 		mMvC_NextFrameOnGtYSpeed -$03, ANIMSPEED_NONE	; YSpeed > -$03?
@@ -6790,7 +6786,7 @@ MoveC_Robert_KyokugenRyuRanbuKyaku:
 		mMvC_SetMoveH $0400
 .obj1_cont:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $04, HITANIM_HIT_MID0, PF3_LASTHIT
+		mMvC_SetDamageNext $04, HITTYPE_HIT_MID0, PF3_LASTHIT
 		mMvC_PlaySound SCT_HEAVY
 		jp   .anim
 ; --------------- frame #3 ---------------	
@@ -6799,7 +6795,7 @@ MoveC_Robert_KyokugenRyuRanbuKyaku:
 		mMvC_SetMoveH $0200
 .obj3_cont:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $04, HITANIM_HIT_MID1, PF3_LASTHIT
+		mMvC_SetDamageNext $04, HITTYPE_HIT_MID1, PF3_LASTHIT
 		mMvC_PlaySound SCT_HEAVY
 		jp   .anim
 ; --------------- frame #5 ---------------	
@@ -6808,7 +6804,7 @@ MoveC_Robert_KyokugenRyuRanbuKyaku:
 		mMvC_SetMoveH $0600
 .obj5_cont:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $04, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
+		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
 		mMvC_PlaySound SCT_HEAVY
 		jp   .anim
 ; --------------- frame #7 ---------------	
@@ -6899,7 +6895,7 @@ MoveC_Robert_RyuKoRanbuS:
 	jp   nz, .obj1_chkGuard_guard		; If so, jump
 .obj1_chkGuard_noGuard:
 	; Otherwise, continue to #2
-	mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
+	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
 	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
 	mMvC_SetSpeedH $0000
 	; Force player on the ground
@@ -6915,18 +6911,18 @@ MoveC_Robert_RyuKoRanbuS:
 	jp   .doGravity
 ; --------------- frames #3,5,7,9... ---------------
 ; Generic damage - odd frames.
-; Alongside .objEven is used to alternate between hit animations constantly.
+; Alongside .objEven is used to alternate between hit effects constantly.
 .objOdd:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
 		jp   .chkOtherEscape
 ; --------------- frame #2 ---------------
 ; Initial frame before the odd/even switching.
 ; This sets the initial jump speed and doesn't check for block yet.
 .obj2:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
 		mMvC_SetSpeedH $0080
 		jp   .anim
 ; --------------- frames #4,6,8,A,... ---------------
@@ -6934,22 +6930,22 @@ MoveC_Robert_RyuKoRanbuS:
 .objEven:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
 		;
-		; [POI] If the opponent somehow isn't in one of the hit animations 
+		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
 		;       This can happen if the opponent gets hit by a previously thrown
 		;       fireball in the middle of the move.
 		;
-		ld   hl, iPlInfo_HitAnimIdOther
+		ld   hl, iPlInfo_HitTypeIdOther
 		add  hl, bc
 		ld   a, [hl]
-		cp   HITANIM_HIT_MULTI0	; A == HITANIM_HIT_MULTI0?
+		cp   HITTYPE_HIT_MULTI0	; A == HITTYPE_HIT_MULTI0?
 		jp   z, .anim				; If so, skip
-		cp   HITANIM_HIT_MULTI1	; A == HITANIM_HIT_MULTI1?
+		cp   HITTYPE_HIT_MULTI1	; A == HITTYPE_HIT_MULTI1?
 		jp   z, .anim				; If so, skip
 		; Otherwise, transition to hop
 		ld   a, MOVE_SHARED_HOP_B
@@ -6967,7 +6963,7 @@ MoveC_Robert_RyuKoRanbuS:
 		ld   a, MOVE_ROBERT_RYUU_GA_H
 	.startRyuuGa_setMove:
 		call MoveInputS_SetSpecMove_StopSpeed
-		mMvC_SetDamageNext $06, HITANIM_DROP_MAIN, PF3_LASTHIT
+		mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_LASTHIT
 		jp   .ret
 ; --------------- common gravity check ---------------	
 .doGravity:
@@ -7080,7 +7076,7 @@ MoveC_Robert_RyuKoRanbuD:
 	jp   nz, .obj1_chkGuard_guard		; If so, jump
 .obj1_chkGuard_noGuard:
 	; Otherwise, continue to #2
-	mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
+	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
 	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
 	mMvC_SetSpeedH $0000
 	; Force player on the ground
@@ -7096,18 +7092,18 @@ MoveC_Robert_RyuKoRanbuD:
 	jp   .doGravity
 ; --------------- frames #3,5,7,9... ---------------
 ; Generic damage - odd frames.
-; Alongside .objEven is used to alternate between hit animations constantly.
+; Alongside .objEven is used to alternate between hit effects constantly.
 .objOdd:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
 		jp   .chkOtherEscape
 ; --------------- frame #2 ---------------
 ; Initial frame before the odd/even switching.
 ; This sets the initial jump speed and doesn't check for block yet.
 .obj2:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
 		mMvC_SetSpeedH $0080
 		jp   .anim
 ; --------------- frames #4,6,8,A,... ---------------
@@ -7115,22 +7111,22 @@ MoveC_Robert_RyuKoRanbuD:
 .objEven:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
 		;
-		; [POI] If the opponent somehow isn't in one of the hit animations 
+		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
 		;       This can happen if the opponent gets hit by a previously thrown
 		;       fireball in the middle of the move.
 		;
-		ld   hl, iPlInfo_HitAnimIdOther
+		ld   hl, iPlInfo_HitTypeIdOther
 		add  hl, bc
 		ld   a, [hl]
-		cp   HITANIM_HIT_MULTI0	; A == HITANIM_HIT_MULTI0?
+		cp   HITTYPE_HIT_MULTI0	; A == HITTYPE_HIT_MULTI0?
 		jp   z, .anim				; If so, skip
-		cp   HITANIM_HIT_MULTI1	; A == HITANIM_HIT_MULTI1?
+		cp   HITTYPE_HIT_MULTI1	; A == HITTYPE_HIT_MULTI1?
 		jp   z, .anim				; If so, skip
 		; Otherwise, transition to hop
 		ld   a, MOVE_SHARED_HOP_B
@@ -7149,7 +7145,7 @@ MoveC_Robert_RyuKoRanbuD:
 	.startRyuuGa_setMove:
 		call MoveInputS_SetSpecMove_StopSpeed
 		; ##
-		mMvC_SetDamageNext $02, HITANIM_DROP_MAIN, PF3_LASTHIT
+		mMvC_SetDamageNext $02, HITTYPE_DROP_MAIN, PF3_LASTHIT
 		; ##
 		jp   .ret
 ; --------------- common gravity check ---------------	
@@ -7571,7 +7567,7 @@ MoveC_Leona_GrandSabre:
 	call MoveInputS_CheckGAType
 	jp   nc, .anim	; Was an attack button pressed? If not, jump
 	jp   z, .anim	; Was the punch button pressed? If so, jump
-	mMvC_SetDamageNext $08, HITANIM_DROP_MAIN, PF3_SHAKELONG
+	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_SHAKELONG
 	mMvC_SetFrame $0A*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_NONE
 	jp   .ret
 ; --------------- Gliding Buster - frame #A ---------------
@@ -7656,7 +7652,7 @@ MoveC_Leona_XCalibur:
 		jp   c, .obj0_doDamageE	; Hidden heavy triggered? If so, jump
 		jp   .obj0_anim			; Otherwise, skip it
 	.obj0_doDamageE:
-		mMvC_SetDamageNext $02, HITANIM_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_SHAKEONCE
+		mMvC_SetDamageNext $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_SHAKEONCE
 	.obj0_anim:
 		jp   .anim
 ; --------------- frame #1 ---------------	
@@ -7711,7 +7707,7 @@ MoveC_Leona_XCalibur:
 	jp   c, .obj4_doDamageE	; Hidden heavy triggered? If so, jump
 	jp   .doGravity			; Otherwise, skip it
 .obj4_doDamageE:
-	mMvC_SetDamage $02, HITANIM_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_SHAKEONCE
+	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_SHAKEONCE
 	jp   .doGravity
 ; --------------- frame #5 ---------------	
 .obj5:
@@ -7720,7 +7716,7 @@ MoveC_Leona_XCalibur:
 	jp   c, .obj5_doDamageE	; Hidden heavy triggered? If so, jump
 	jp   .obj5_cont			; Otherwise, skip it
 .obj5_doDamageE:
-	mMvC_SetDamage $02, HITANIM_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_SHAKEONCE
+	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_SHAKEONCE
 .obj5_cont:
 	mMvC_ValFrameEnd .doGravity
 		; Loop back to #4 if we didn't touch the ground yet
@@ -7777,7 +7773,7 @@ MoveC_Leona_MoonSlasher:
 		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
 		mMvC_PlaySound SND_ID_28
 		mMvC_ChkNotMaxPow .anim ; Jump to .anim if not at max power
-			mMvC_SetDamageNext $08, HITANIM_DROP_MAIN, PF3_LASTHIT
+			mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_LASTHIT
 			jp   .anim
 ; --------------- frame #1 ---------------	
 .obj1:
@@ -7794,7 +7790,7 @@ MoveC_Leona_MoonSlasher:
 	; If we're at max power, deal extra damage
 	mMvC_ValFrameEnd .anim
 		mMvC_ChkNotMaxPow .anim ; Jump to .anim if not at max power
-			mMvC_SetDamageNext $08, HITANIM_DROP_MAIN, PF3_LASTHIT
+			mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_LASTHIT
 			jp   .anim
 ; --------------- frame #3 ---------------
 .obj3:
@@ -7847,13 +7843,13 @@ MoveC_OLeona_StormBringer:
 		ld   hl, iPlInfo_OLeona_StormBringer_LoopTimer
 		add  hl, bc
 		ld   [hl], $08
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_SHAKEONCE
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_SHAKEONCE
 		jp   .anim
 ; --------------- frame #1 ---------------
 ; Health restore loop.
 .obj1:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_FLASH_B_FAST|PF3_SHAKEONCE
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FLASH_B_FAST|PF3_SHAKEONCE
 		jp   .restoreHealth
 ; --------------- frame #2 ---------------
 ; Health restore loop.
@@ -7869,7 +7865,7 @@ MoveC_OLeona_StormBringer:
 	ld   hl, iOBJInfo_OBJLstPtrTblOffset
 	add  hl, de
 	ld   [hl], $00*OBJLSTPTR_ENTRYSIZE
-	mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_SHAKEONCE
+	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_SHAKEONCE
 	jp   .restoreHealth
 .obj2_setAnimSpeed:
 	; Set animation speed to $0A before switching to #3
@@ -7970,13 +7966,13 @@ MoveC_Leona_VSlasher:
 	.obj3_setDamageNorm:
 		; As normal Leona, deliver hit dealing $14 lines of damage the next frame.
 		; The "V" projectile deals no damage and is a purely visual effect here.
-		mMvC_SetDamageNext $14, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $14, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW
 		jp   .anim
 	.obj3_setDamageO:
 		; As O.Leona, the projectile spawns a skull wall that actually deals continuous damage.
 		
 		; Prepare flags to copy
-		mMvC_SetDamageNext $02, HITANIM_DROP_SWOOPUP, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $02, HITTYPE_DROP_SWOOPUP, PF3_SHAKELONG|PF3_FLASH_B_SLOW
 		; Copy them over to the projectile
 		call Play_Proj_CopyMoveDamageFromPl
 		jp   .anim
@@ -8105,7 +8101,7 @@ MoveC_OLeona_SuperMoonSlasher:
 		; Otherwise, continue to #4
 		mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, $00
 		mMvC_SetSpeedH $0080
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_SHAKEONCE
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_SHAKEONCE
 		jp   .ret
 .obj3_blocked:
 	mMvC_SetSpeedH $0000
@@ -8116,13 +8112,13 @@ MoveC_OLeona_SuperMoonSlasher:
 .obj4:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_FLASH_B_FAST|PF3_SHAKEONCE
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FLASH_B_FAST|PF3_SHAKEONCE
 		jp   .chkOtherEscape
 ; --------------- frame #5 ---------------
 .obj5:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_SHAKEONCE
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_SHAKEONCE
 		jp   .chkOtherEscape
 ; --------------- frame #6 ---------------
 .obj6:
@@ -8138,11 +8134,11 @@ MoveC_OLeona_SuperMoonSlasher:
 		ld   hl, iOBJInfo_OBJLstPtrTblOffset
 		add  hl, de
 		ld   [hl], $03*OBJLSTPTR_ENTRYSIZE ; offset by -1
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_SHAKEONCE
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_SHAKEONCE
 		jp   .chkOtherEscape
 	.obj6_noLoop:
 		; Deal more damage for #7
-		mMvC_SetDamageNext $0C, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_FAST
+		mMvC_SetDamageNext $0C, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_FAST
 		; And enable manual control
 		ld   hl, iOBJInfo_FrameTotal
 		add  hl, de
@@ -8151,17 +8147,17 @@ MoveC_OLeona_SuperMoonSlasher:
 ; --------------- frames #4-6 / common escape check ---------------
 	.chkOtherEscape:
 		;
-		; [POI] If the opponent somehow isn't in one of the hit animations 
+		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
 		;       This can happen if the opponent gets hit by a previously thrown
 		;       fireball in the middle of the move.
 		;
-		ld   hl, iPlInfo_HitAnimIdOther
+		ld   hl, iPlInfo_HitTypeIdOther
 		add  hl, bc
 		ld   a, [hl]
-		cp   HITANIM_HIT_MULTI0	; A == HITANIM_HIT_MULTI0?
+		cp   HITTYPE_HIT_MULTI0	; A == HITTYPE_HIT_MULTI0?
 		jp   z, .anim				; If so, skip
-		cp   HITANIM_HIT_MULTI1	; A == HITANIM_HIT_MULTI1?
+		cp   HITTYPE_HIT_MULTI1	; A == HITTYPE_HIT_MULTI1?
 		jp   z, .anim				; If so, skip
 		; Otherwise, transition to hop
 		ld   a, MOVE_SHARED_HOP_B
@@ -8363,7 +8359,7 @@ MoveC_MrKarate_KoOuKen:
 	jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
-	mMvC_SetDamage $01, HITANIM_DROP_MAIN, PF3_LASTHIT|PF3_SHAKEONCE
+	mMvC_SetDamage $01, HITTYPE_DROP_MAIN, PF3_LASTHIT|PF3_SHAKEONCE
 	mMvC_ValFrameEnd .anim
 		mMvC_PlaySound SCT_15
 		jp   .anim
@@ -8371,7 +8367,7 @@ MoveC_MrKarate_KoOuKen:
 ; This should have been assigned to #2 to make the recovery frame last more, but it isn't.
 ; Intentional quick change or bug?
 .unused_obj2:
-	mMvC_SetDamage $01, HITANIM_DROP_MAIN, PF3_LASTHIT
+	mMvC_SetDamage $01, HITTYPE_DROP_MAIN, PF3_LASTHIT
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $14
 		jp   .anim
@@ -8434,7 +8430,7 @@ MoveC_MrKarate_ShouranKyaku:
 	mMvC_ValHit .obj0_noHit, .obj0_blocked
 		mMvC_SetFrame $03*OBJLSTPTR_ENTRYSIZE, $00
 		; Set initial for damage loop
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, $00
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, $00
 		
 		; Repeat the damage loop 3 times
 		ld   hl, iPlInfo_MrKarate_ShouranKyaku_LoopCount
@@ -8459,14 +8455,14 @@ MoveC_MrKarate_ShouranKyaku:
 ; Damage loop.
 .obj3:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #4 ---------------
 ; Damage loop.
-; Alternates between HITANIM_HIT_MULTI0 and HITANIM_HIT_MULTI1 to view different frames.
+; Alternates between HITTYPE_HIT_MULTI0 and HITTYPE_HIT_MULTI1 to view different frames.
 .obj4:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #5 ---------------
 ; Damage loop.
@@ -8477,7 +8473,7 @@ MoveC_MrKarate_ShouranKyaku:
 	add  hl, bc
 	dec  [hl]
 	jp   z, .obj5_noLoop
-	mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
+	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
 	ld   hl, iOBJInfo_OBJLstPtrTblOffset
 	add  hl, de
 	ld   [hl], $02*OBJLSTPTR_ENTRYSIZE	; offset by -1
@@ -8581,13 +8577,13 @@ MoveC_MrKarate_HienShippuuKyaku:
 .obj3:
 	mMvC_ValFrameEnd .doGravity
 		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
-		mMvC_SetDamageNext $08, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
+		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
 		jp   .doGravity
 ; --------------- frame #4 ---------------
 .obj4:
 	mMvC_ValFrameEnd .doGravity
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
-		mMvC_SetDamageNext $08, HITANIM_DROP_DB_A, PF3_SHAKELONG|PF3_LASTHIT
+		mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_SHAKELONG|PF3_LASTHIT
 		jp   .doGravity
 ; --------------- common gravity check ---------------	
 .doGravity:
@@ -8634,7 +8630,7 @@ MoveC_MrKarate_Zenretsuken:;I
 	jp   .anim
 ; --------------- frame #0 ---------------
 .obj0:
-	mMvC_SetDamage $01, HITANIM_HIT_MULTI0, PF3_LASTHIT|PF3_SHAKEONCE
+	mMvC_SetDamage $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT|PF3_SHAKEONCE
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
 		mMvC_PlaySound SND_ID_28
@@ -8644,11 +8640,11 @@ MoveC_MrKarate_Zenretsuken:;I
 		jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
-	mMvC_SetDamage $01, HITANIM_HIT_MULTI1, PF3_LASTHIT|PF3_SHAKEONCE
+	mMvC_SetDamage $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT|PF3_SHAKEONCE
 	jp   .anim
 ; --------------- frame #2 ---------------
 .obj2:
-	mMvC_SetDamage $01, HITANIM_HIT_MULTI0, PF3_LASTHIT|PF3_SHAKEONCE
+	mMvC_SetDamage $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT|PF3_SHAKEONCE
 	mMvC_ValFrameEnd .anim
 		mMvC_PlaySound SND_ID_28
 		
@@ -8658,30 +8654,30 @@ MoveC_MrKarate_Zenretsuken:;I
 		dec  [hl]
 		jp   z, .obj2_noLoop
 	.obj2_loop:
-		mMvC_SetDamage $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
+		mMvC_SetDamage $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
 		ld   hl, iOBJInfo_OBJLstPtrTblOffset
 		add  hl, de
 		ld   [hl], $00*OBJLSTPTR_ENTRYSIZE ; offset by -1
 		jp   .anim
 	.obj2_noLoop:
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #3 ---------------
 .obj3:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #4 ---------------
 .obj4:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #5 ---------------
 .obj5:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $1E
 		mMvC_PlaySound SND_ID_28
-		mMvC_SetDamageNext $01, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #6 ---------------
 .obj6:
@@ -8781,7 +8777,7 @@ MoveC_MrKarate_RyukoRanbuS:
 	jp   nz, .obj1_chkGuard_guard		; If so, jump
 .obj1_chkGuard_noGuard:
 	; Otherwise, continue to #2
-	mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
+	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
 	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
 	mMvC_SetSpeedH $0000
 	; Force player on the ground
@@ -8797,18 +8793,18 @@ MoveC_MrKarate_RyukoRanbuS:
 	jp   .doGravity
 ; --------------- frames #3,5,7,9... ---------------
 ; Generic damage - odd frames.
-; Alongside .objEven is used to alternate between hit animations constantly.
+; Alongside .objEven is used to alternate between hit effects constantly.
 .objOdd:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
 		jp   .chkOtherEscape
 ; --------------- frame #2 ---------------
 ; Initial frame before the odd/even switching.
 ; This sets the initial jump speed and doesn't check for block yet.
 .obj2:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
 		mMvC_SetSpeedH $0080
 		jp   .anim
 ; --------------- frames #4,6,8,A,... ---------------
@@ -8816,22 +8812,22 @@ MoveC_MrKarate_RyukoRanbuS:
 .objEven:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
 		;
-		; [POI] If the opponent somehow isn't in one of the hit animations 
+		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
 		;       This can happen if the opponent gets hit by a previously thrown
 		;       fireball in the middle of the move.
 		;
-		ld   hl, iPlInfo_HitAnimIdOther
+		ld   hl, iPlInfo_HitTypeIdOther
 		add  hl, bc
 		ld   a, [hl]
-		cp   HITANIM_HIT_MULTI0	; A == HITANIM_HIT_MULTI0?
+		cp   HITTYPE_HIT_MULTI0	; A == HITTYPE_HIT_MULTI0?
 		jp   z, .anim				; If so, skip
-		cp   HITANIM_HIT_MULTI1	; A == HITANIM_HIT_MULTI1?
+		cp   HITTYPE_HIT_MULTI1	; A == HITTYPE_HIT_MULTI1?
 		jp   z, .anim				; If so, skip
 		; Otherwise, transition to hop
 		ld   a, MOVE_SHARED_HOP_B
@@ -8849,7 +8845,7 @@ MoveC_MrKarate_RyukoRanbuS:
 		ld   a, MOVE_MRKARATE_ZENRETSUKEN_H
 	.startZenretsuken_setMove:
 		call MoveInputS_SetSpecMove_StopSpeed
-		mMvC_SetDamageNext $06, HITANIM_DROP_MAIN, PF3_LASTHIT
+		mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_LASTHIT
 		jp   .ret
 ; --------------- common gravity check ---------------	
 .doGravity:
@@ -8972,7 +8968,7 @@ MoveC_MrKarate_Unused_RyukoRanbuD:
 	jp   nz, .obj1_chkGuard_guard		; If so, jump
 .obj1_chkGuard_noGuard:
 	; Otherwise, continue to #2
-	mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
+	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
 	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
 	mMvC_SetSpeedH $0000
 	; Force player on the ground
@@ -8988,18 +8984,18 @@ MoveC_MrKarate_Unused_RyukoRanbuD:
 	jp   .doGravity
 ; --------------- frames #3,5,7,9... ---------------
 ; Generic damage - odd frames.
-; Alongside .objEven is used to alternate between hit animations constantly.
+; Alongside .objEven is used to alternate between hit effects constantly.
 .objOdd:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
 		jp   .chkOtherEscape
 ; --------------- frame #2 ---------------
 ; Initial frame before the odd/even switching.
 ; This sets the initial jump speed and doesn't check for block yet.
 .obj2:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
 		mMvC_SetSpeedH $0080
 		jp   .anim
 ; --------------- frames #4,6,8,A,... ---------------
@@ -9007,22 +9003,22 @@ MoveC_MrKarate_Unused_RyukoRanbuD:
 .objEven:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
 		;
-		; [POI] If the opponent somehow isn't in one of the hit animations 
+		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
 		;       This can happen if the opponent gets hit by a previously thrown
 		;       fireball in the middle of the move.
 		;
-		ld   hl, iPlInfo_HitAnimIdOther
+		ld   hl, iPlInfo_HitTypeIdOther
 		add  hl, bc
 		ld   a, [hl]
-		cp   HITANIM_HIT_MULTI0	; A == HITANIM_HIT_MULTI0?
+		cp   HITTYPE_HIT_MULTI0	; A == HITTYPE_HIT_MULTI0?
 		jp   z, .anim				; If so, skip
-		cp   HITANIM_HIT_MULTI1	; A == HITANIM_HIT_MULTI1?
+		cp   HITTYPE_HIT_MULTI1	; A == HITTYPE_HIT_MULTI1?
 		jp   z, .anim				; If so, skip
 		; Otherwise, transition to hop
 		ld   a, MOVE_SHARED_HOP_B
@@ -9042,7 +9038,7 @@ MoveC_MrKarate_Unused_RyukoRanbuD:
 		ld   a, MOVE_MRKARATE_KO_OU_KEN_UNUSED_EH
 	.startZenretsuken_setMove:
 		call MoveInputS_SetSpecMove_StopSpeed
-		mMvC_SetDamageNext $02, HITANIM_DROP_MAIN, PF3_LASTHIT
+		mMvC_SetDamageNext $02, HITTYPE_DROP_MAIN, PF3_LASTHIT
 		jp   .ret
 ; --------------- common gravity check ---------------	
 .doGravity:
@@ -9091,7 +9087,7 @@ MoveC_Kyo_ThrowG:
 ; When visually switching to #2, hit the opponent.
 .obj1:
 	mMvC_ValFrameEnd .anim ; About to advance the anim? If not, skip to .anim
-	mMvC_SetDamageNext $06, HITANIM_DROP_MAIN, PF3_SHAKELONG ; 6 lines of damage on hit, make opponent drop on ground
+	mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_SHAKELONG ; 6 lines of damage on hit, make opponent drop on ground
 	jp   .anim
 ; --------------- common ---------------
 .chkEnd:
@@ -9129,7 +9125,7 @@ MoveC_Daimon_ThrowG:
 ; Set U rotation frame to opponent the first time we get here.
 .rotU:
 	mMvC_ValFrameStart .rotU_anim
-	mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG ; Damage ignored in this hitanim
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG ; Damage ignored in this hitanim
 	mMvC_MoveThrowOp -$08, $00	; Move left 8px
 .rotU_anim:
 	jp   .anim
@@ -9137,7 +9133,7 @@ MoveC_Daimon_ThrowG:
 ; Set L rotation frame to opponent the first time we get here.
 .rotL:
 	mMvC_ValFrameStart .rotL_anim
-	mMvC_SetDamage $06, HITANIM_THROW_ROTL, PF3_SHAKELONG ; Damage ignored in this hitanim
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_SHAKELONG ; Damage ignored in this hitanim
 	mMvC_MoveThrowOp +$08, -$08	; Move right 8px (reset), up 8px
 .rotL_anim:
 	jp   .anim
@@ -9145,7 +9141,7 @@ MoveC_Daimon_ThrowG:
 ; Deal damage the first time we get here.
 .hit:
 	mMvC_ValFrameStart .obj2_anim
-	mMvC_SetDamage $06, HITANIM_DROP_DB_A, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_DROP_DB_A, PF3_SHAKELONG
 .obj2_anim:
 	jp   .anim
 ; --------------- common ---------------
@@ -9177,7 +9173,7 @@ MoveC_Terry_ThrowG:
 	; When switching to #1, deal damage to the opponent
 	mMvC_ValFrameEnd .anim
 	
-	mMvC_SetDamageNext $06, HITANIM_DROP_MAIN, PF3_SHAKELONG
+	mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_SHAKELONG
 	jp   .anim
 ; --------------- common ---------------
 .chkEnd:
@@ -9215,7 +9211,7 @@ MoveC_Andy_ThrowG:
 	mMvC_ValFrameStart .obj0_waitManCtrl
 	
 	; Set damage rotation frame
-	mMvC_SetDamage $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_SHAKELONG
 	; Move opponent left 2px, up 20px
 	mMvC_MoveThrowOp -$02, -$20
 
@@ -9250,7 +9246,7 @@ ENDC
 	mMvC_SetSpeedV -$0600	; 6px/frame up
 	
 	; Set new rotation frame
-	mMvC_SetDamage $06, HITANIM_THROW_ROTR, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_SHAKELONG
 	; Move opponent left 2px, up 10px
 	mMvC_MoveThrowOp -$02, -$10
 	mMvC_MoveThrowOpSync
@@ -9268,7 +9264,7 @@ ENDC
 	; The first time we get here...
 	mMvC_ValFrameStart .anim
 	; Set new rotation frame
-	mMvC_SetDamage $06, HITANIM_THROW_ROTR, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_SHAKELONG
 	; Move opponent left 2px
 	mMvC_MoveThrowOp -$02, +$00
 
@@ -9278,7 +9274,7 @@ ENDC
 	; The first time we get here...
 	mMvC_ValFrameStart .anim
 	; Set new rotation frame
-	mMvC_SetDamage $06, HITANIM_THROW_ROTR, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_SHAKELONG
 	; Move opponent left 2px
 	mMvC_MoveThrowOp -$02, +$00
 
@@ -9287,7 +9283,7 @@ ENDC
 .obj4:
 	; The first time we get here, damage the player
 	mMvC_ValFrameStart .chkEnd
-	mMvC_SetDamage $06, HITANIM_DROP_MAIN, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_DROP_MAIN, PF3_SHAKELONG
 .chkEnd:
 	; End the move when the anim advances
 	mMvC_ValFrameEnd .anim
@@ -9320,19 +9316,19 @@ MoveC_Ryo_ThrowG:
 ; --------------- frame #0 ---------------
 .rotU:
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG
 	mMvC_MoveThrowOp -$08, +$00
 	jp   .anim
 ; --------------- frame #1 ---------------
 .rotL:
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_SHAKELONG
 	mMvC_MoveThrowOp +$01, -$10
 	jp   .anim
 ; --------------- frame #2 ---------------
 .setDamage:
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITANIM_THROW_END, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_END, PF3_SHAKELONG
 	jp   .anim
 ; --------------- frame #3 ---------------
 .chkEnd:
@@ -9363,7 +9359,7 @@ MoveC_Robert_ThrowG:
 ; Damages the player when switching to #2.
 .setDamage:
 	mMvC_ValFrameEnd .anim
-	mMvC_SetDamageNext $06, HITANIM_DROP_MAIN, PF3_SHAKELONG
+	mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_SHAKELONG
 	jp   .anim
 ; --------------- frame #2 ---------------
 ; When switching to #3, make Robert jump back.
@@ -9411,31 +9407,31 @@ MoveC_Athena_ThrowG:
 ; --------------- frame #1 ---------------
 .rotL:
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_SHAKELONG
 	mMvC_MoveThrowOp +$01, -$08
 	jp   .anim
 ; --------------- frame #2 ---------------
 .rotD:
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITANIM_THROW_ROTD, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTD, PF3_SHAKELONG
 	mMvC_MoveThrowOp -$02, -$08
 	jp   .anim
 ; --------------- frame #3 ---------------
 .rotR:
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITANIM_THROW_ROTR, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_SHAKELONG
 	mMvC_MoveThrowOp +$01, -$08
 	jp   .anim
 ; --------------- frame #4 ---------------
 .rotU:
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG
 	mMvC_MoveThrowOp -$02, -$08
 	jp   .anim
 ; --------------- frame #5 ---------------
 .setDamage:
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITANIM_THROW_END, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_END, PF3_SHAKELONG
 	jp   .anim
 ; --------------- frame #6 ---------------
 .chkEnd:
@@ -9473,14 +9469,14 @@ MoveC_Base_ThrowA_DiagF:
 .obj0:
 	; The first time we get here...
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITANIM_THROW_ROTL, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_SHAKELONG
 	mMvC_MoveThrowOp -$08, -$08 ; 8px left, 8px up
 	jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
 	; The first time we get here...
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITANIM_THROW_ROTD, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTD, PF3_SHAKELONG
 	mMvC_MoveThrowOp -$08, -$08 ; 8px left, 8px up
 	jp   .anim
 ; --------------- frame #2 ---------------
@@ -9489,7 +9485,7 @@ MoveC_Base_ThrowA_DiagF:
 	mMvC_ValFrameStart .obj2_setManCtrl
 	
 	; Throw opponent forward, diagonally down + damage for 6 lines
-	mMvC_SetDamage $06, HITANIM_DROP_DB_A, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_DROP_DB_A, PF3_SHAKELONG
 	
 	; Move us 2px back, 2px up
 	mMvC_SetSpeedH -$0200
@@ -9546,7 +9542,7 @@ MoveC_Mai_ThrowG:
 	; [POI] Useless
 	mMvC_SetMoveH $0000
 	; Set rotation frame
-	mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG
 	; Move thrown player left 8px
 	mMvC_MoveThrowOp -$08, +$00
 	jp   .anim
@@ -9556,7 +9552,7 @@ MoveC_Mai_ThrowG:
 	; Move player left 8px
 	mMvC_SetMoveH -$0800
 	; Set rotation frame again to apply Play_Pl_MoveRotThrown
-	mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG
 	; Move opponent left $10px
 	mMvC_MoveThrowOp -$10, +$00
 	jp   .anim
@@ -9568,7 +9564,7 @@ MoveC_Mai_ThrowG:
 	;--
 	; [POI] Not needed
 	; Set rotation frame again to apply Play_Pl_MoveRotThrown
-	mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG
 	; (nothing)
 	mMvC_MoveThrowOp +$00, +$00
 	;--
@@ -9579,7 +9575,7 @@ MoveC_Mai_ThrowG:
 	; Move player right $08px
 	mMvC_SetMoveH $0800
 	; Set rotation frame again to apply Play_Pl_MoveRotThrown
-	mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG
 	; Move opponent right $10px (reset)
 	mMvC_MoveThrowOp +$10, +$00
 	jp   .anim
@@ -9587,7 +9583,7 @@ MoveC_Mai_ThrowG:
 .setDamage:
 	mMvC_ValFrameStart .anim
 	mMvC_SetMoveH $0000 ; [POI] Useless
-	mMvC_SetDamage $06, HITANIM_THROW_END, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_END, PF3_SHAKELONG
 	jp   .anim
 ; --------------- frame #5 ---------------
 .chkEnd:
@@ -9623,7 +9619,7 @@ MoveC_Base_ThrowA_DirD:
 	mMvC_ValFrameStart .obj0_setManCtrl
 	
 	; Set damage rotation frame
-	mMvC_SetDamage $06, HITANIM_THROW_ROTR, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_SHAKELONG
 	; Move opponent left 2px, up 1px
 	mMvC_MoveThrowOp -$02, -$01
 
@@ -9655,7 +9651,7 @@ ENDC
 	mMvC_SetSpeedV -$0100
 	
 	; Move opponent left 2px, up 1px
-	mMvC_SetDamage $06, HITANIM_THROW_ROTR, PF3_SHAKELONG ; Same as before, to enable Play_Pl_MoveRotThrown
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_SHAKELONG ; Same as before, to enable Play_Pl_MoveRotThrown
 	mMvC_MoveThrowOp -$02, -$01
 	mMvC_MoveThrowOpSync
 .obj1_move:
@@ -9669,7 +9665,7 @@ ENDC
 	mMvC_SetLandFrame $02*OBJLSTPTR_ENTRYSIZE, $02
 	
 	; Move opponent left 2px, up 1px
-	mMvC_SetDamage $06, HITANIM_THROW_ROTR, PF3_SHAKELONG ; Same as before, to enable Play_Pl_MoveRotThrown
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_SHAKELONG ; Same as before, to enable Play_Pl_MoveRotThrown
 	mMvC_MoveThrowOp -$02, -$01
 	
 	;--
@@ -9682,7 +9678,7 @@ ENDC
 .obj2:
 	; The first time we get here, make the throw deal damage
 	mMvC_ValFrameStart .chkEnd
-	mMvC_SetDamage $06, HITANIM_DROP_DB_A, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_DROP_DB_A, PF3_SHAKELONG
 .chkEnd:
 	; Start backjump when switching to #3.
 	
@@ -9725,7 +9721,7 @@ MoveC_Leona_ThrowG:
 ; Damage player when switching to #1.
 .setDamage:
 	mMvC_ValFrameEnd .anim
-	mMvC_SetDamageNext $06, HITANIM_DROP_MAIN, PF3_SHAKELONG
+	mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_SHAKELONG
 	jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
