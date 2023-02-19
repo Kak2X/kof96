@@ -473,34 +473,34 @@ ENDM
 
 ; Starts 128 Shiki Kono Kizu
 .startKonoKizu:
-	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_LASTHIT
+	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_SLOW|PF3_LASTHIT
 	mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, $00
 	mMvC_PlaySound SND_ID_28
 	jp   .ret
 	
 ; Starts 127 Shiki Yano Sabi
 .startYanoSabi:
-	mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_OVERHEAD|PF3_LASTHIT
+	mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_HEAVYHIT|PF3_FLASH_B_SLOW|PF3_OVERHEAD|PF3_LASTHIT
 	mMvC_SetFrame $08*OBJLSTPTR_ENTRYSIZE, $00
 	mMvC_PlaySound SND_ID_28
 	jp   .ret
 ; Starts 127 Shiki Yano Sabi from 128 Shiki Kono Kizu
 .startYanoSabiFromKonoKizu:
-	mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_OVERHEAD|PF3_LASTHIT
+	mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_HEAVYHIT|PF3_FLASH_B_SLOW|PF3_OVERHEAD|PF3_LASTHIT
 	mMvC_SetFrame $0C*OBJLSTPTR_ENTRYSIZE, $00
 	mMvC_PlaySound SND_ID_28
 	jp   .ret
 	
 ; Starts Ge Shiki Migiri Ugachi
 .startMigiriUgachi:
-	mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_LASTHIT
+	mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_HEAVYHIT|PF3_FLASH_B_SLOW|PF3_LASTHIT
 	mMvC_SetFrame $10*OBJLSTPTR_ENTRYSIZE, $00
 	mMvC_PlaySound SND_ID_28
 	jp   .ret
 	
 ; Starts 125 Shiki Nana Se
 .startNanaSe:
-	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
+	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
 	mMvC_SetFrame $14*OBJLSTPTR_ENTRYSIZE, $00
 	mMvC_PlaySound SND_ID_28
 	jp   .ret
@@ -752,7 +752,7 @@ ENDM
 .startTumiYomi:
 	mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, $00	; Was the frame set already?
 	jp   z, .ret								; If so, return
-	mMvC_SetDamageNext $08, HITTYPE_HIT_MID0, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_LASTHIT
+	mMvC_SetDamageNext $08, HITTYPE_HIT_MID0, PF3_HEAVYHIT|PF3_FLASH_B_SLOW|PF3_LASTHIT
 	mMvC_PlaySound SND_ID_28
 	; Reset the LH status for the next keypress
 	ld   hl, iPlInfo_JoyMergedKeysLH
@@ -763,7 +763,7 @@ ENDM
 .startBatuYomi:
 	mMvC_SetFrame $07*OBJLSTPTR_ENTRYSIZE, $00	; Was the frame set already?
 	jp   z, .ret								; If so, return
-	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
+	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
 	mMvC_PlaySound SND_ID_28
 	; Reset the LH status for the next keypress (not needed)
 	ld   hl, iPlInfo_JoyMergedKeysLH
@@ -923,10 +923,10 @@ MoveC_Kyo_OniYaki:
 		; Light and heavy do identical damage, there's no point in checking it.
 		mMvIn_ChkLH .obj1_setDamageH
 	.obj1_setDamageL:
-		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_SLOW
 		jp   .anim
 	.obj1_setDamageH:
-		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_SLOW
 		jp   .anim
 ; --------------- frame #2 ---------------
 ; Starts the jump.
@@ -967,10 +967,10 @@ MoveC_Kyo_OniYaki:
 	; Deal 4 lines of damage on contact.
 	mMvIn_ChkLH .obj2_heavyDamage ; Pointless check, both are the same.
 .obj2_lightDamage:
-	mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+	mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_SLOW
 	jp   .doGravity
 .obj2_heavyDamage:
-	mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+	mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_SLOW
 	jp   .doGravity
 ; --------------- frame #3 ---------------
 ; Immediately advances the anim during the jump.
@@ -1034,7 +1034,7 @@ MoveC_Kyo_RedKick:
 	;--
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
-		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
+		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
 	jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
@@ -1063,7 +1063,7 @@ MoveC_Kyo_RedKick:
 .obj2:;J
 	mMvC_NextFrameOnGtYSpeed -$02, ANIMSPEED_NONE
 	jp   nc, .doGravity
-	mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_SHAKELONG
+	mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_HEAVYHIT
 	jp   .doGravity
 ; --------------- frame #3 ---------------
 .obj3:
@@ -1200,7 +1200,7 @@ MoveC_Kyo_KototsukiYou:
 .obj5_setHit2:
 	; Immediately switch to the second attack frame.
 	; The second hit will deal 8 lines of damage and drop him on the ground.
-	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_SLOW
 	mMvC_SetFrame $06*OBJLSTPTR_ENTRYSIZE, $08
 	jp   .ret
 ; --------------- frame #6 ---------------	
@@ -1295,7 +1295,7 @@ MoveC_Kyo_Kai:
 ; Set damage for 2nd hit when the frame ends.
 .obj2:
 	mMvC_ValFrameEnd .doGravity
-		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
+		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
 		mMvC_PlaySound SCT_HEAVY
 		jp   .doGravity
 ; --------------- frame #3 ---------------
@@ -1389,7 +1389,7 @@ MoveC_Kyo_NueTumi:
 .obj0_autoguard_setNextFrame:
 	; Immediately switch to frame #4, hitting the opponent
 	mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, $01
-	mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+	mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_HEAVYHIT|PF3_FLASH_B_SLOW
 	jp   .ret
 .obj0_noAutoguard:
 	mMvC_ValFrameEnd .anim
@@ -1437,7 +1437,7 @@ MoveC_Kyo_NueTumi:
 .obj1_autoguard_setNextFrame:
 	; Immediately switch to frame #8, hitting the opponent
 	mMvC_SetFrame $08*OBJLSTPTR_ENTRYSIZE, $01
-	mMvC_SetDamageNext $08, HITTYPE_HIT_MID0, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+	mMvC_SetDamageNext $08, HITTYPE_HIT_MID0, PF3_HEAVYHIT|PF3_FLASH_B_SLOW
 	jp   .ret
 .obj1_noAutoguard:
 	mMvC_ValFrameEnd .anim
@@ -1536,7 +1536,7 @@ MoveC_Kyo_UraOrochiNagi:
 	; When switching to #4, initialize the move damage.
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
-		mMvC_SetDamageNext $18, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_HALFSPEED
+		mMvC_SetDamageNext $18, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_SLOW|PF3_HALFSPEED
 		;--
 		; [POI] Where does this come from? We didn't have this set to begin with.
 		ld   hl, iPlInfo_Flags2
@@ -1992,13 +1992,13 @@ MoveC_Terry_BurnKnuckle:
 .obj4:
 	; [POI] Hidden heavy deals continuous damage
 	mMvIn_ChkNotE .doGravity
-		mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_SHAKEONCE
+		mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_LIGHTHIT
 		jp   .doGravity
 ; --------------- frame #5 ---------------
 .obj5:
 	; [POI] Hidden heavy deals continuous damage
 	mMvIn_ChkNotE .obj5_chkLoop
-		mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_SHAKEONCE
+		mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_LIGHTHIT
 .obj5_chkLoop:
 	; Loop to #4 (until we touch the ground)
 	mMvC_ValFrameEnd .doGravity
@@ -2072,13 +2072,13 @@ MoveC_Terry_CrackShot:
 .obj1_cont:
 	mMvC_NextFrameOnGtYSpeed -$03, ANIMSPEED_NONE
 	jp   nc, .doGravity
-		mMvC_SetDamageNext $08, HITTYPE_HIT_MID0, PF3_SHAKELONG
+		mMvC_SetDamageNext $08, HITTYPE_HIT_MID0, PF3_HEAVYHIT
 		jp   .doGravity
 ; --------------- frame #2 ---------------
 .obj2:
 	mMvC_NextFrameOnGtYSpeed -$01, ANIMSPEED_NONE
 	jp   nc, .doGravity
-		mMvC_SetDamageNext $08, HITTYPE_HIT_MID0, PF3_SHAKELONG
+		mMvC_SetDamageNext $08, HITTYPE_HIT_MID0, PF3_HEAVYHIT
 		jp   .doGravity
 ; --------------- frame #1-3 / common gravity check ---------------
 .doGravity:
@@ -2162,7 +2162,7 @@ MoveC_Terry_PowerDunk:
 		mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, $00
 		jp   .doGravity
 	.obj2_setDamageH:
-		mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_SHAKELONG
+		mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_HEAVYHIT
 		jp   .doGravity
 ; --------------- frame #3 ---------------
 .obj3:
@@ -2585,7 +2585,7 @@ MoveC_Mai_HissatsuShinobibachi:
 	mMvC_ValFrameEnd .moveH
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
 		mMvC_PlaySound SFX_STEP
-		mMvC_SetDamageNext $0A, HITTYPE_DROP_MAIN, PF3_SHAKELONG
+		mMvC_SetDamageNext $0A, HITTYPE_DROP_MAIN, PF3_HEAVYHIT
 ; --------------- frames #0-2 / common horizontal movement ---------------
 .moveH:
 	call OBJLstS_ApplyXSpeed
@@ -2651,7 +2651,7 @@ MoveC_Mai_RyuEnBu:
 .obj0:
 	mMvC_ValFrameEnd .anim
 		mMvC_PlaySound SCT_14
-		mMvC_SetDamageNext $09, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_HALFSPEED
+		mMvC_SetDamageNext $09, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_SLOW|PF3_HALFSPEED
 		jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
@@ -2667,7 +2667,7 @@ MoveC_Mai_RyuEnBu:
 		mMvC_SetMoveH $0700
 .obj2_cont:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $09, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_HALFSPEED
+		mMvC_SetDamageNext $09, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_SLOW|PF3_HALFSPEED
 		jp   .anim
 ; --------------- frame #3 ---------------
 .obj3:
@@ -2720,7 +2720,7 @@ MoveC_Mai_HishoRyuEnJin:
 	; Enable manual control / set damage for #2
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
-		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_HALFSPEED
+		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_SLOW|PF3_HALFSPEED
 		jp   .anim
 ; --------------- frame #2 ---------------
 .obj2:
@@ -2751,7 +2751,7 @@ MoveC_Mai_HishoRyuEnJin:
 	mMvC_NextFrameOnGtYSpeed -$08, ANIMSPEED_NONE
 	; and then set the damage settings for #3
 	mMvC_ValFrameEnd .doGravity
-		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_HALFSPEED
+		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_SLOW|PF3_HALFSPEED
 		jp   .doGravity
 ; --------------- frame #3 ---------------
 .obj3:
@@ -3218,20 +3218,20 @@ MoveC_Mai_ChoHissatsuShinobibachiD:
 		jp   .doGravity
 .obj7_cont:
 	; Continuous damage
-	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_SHAKEONCE
+	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_LIGHTHIT
 	jp   .doGravity
 ; --------------- frame #8 ---------------
 ; Mid-jump loop
 .obj8:
 	; Continuous damage
-	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_SHAKEONCE
+	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_LIGHTHIT
 	mMvC_ValFrameEnd .doGravity
 		jp   .doGravity
 ; --------------- frame #9 ---------------
 ; Mid-jump loop.
 .obj9:
 	; Continuous damage
-	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_SHAKEONCE
+	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_LIGHTHIT
 	; Loop back to #8 if we didn't touch the ground by the end of the frame
 	mMvC_ValFrameEnd .doGravity
 		ld   hl, iOBJInfo_OBJLstPtrTblOffset
@@ -3712,7 +3712,7 @@ MoveC_Athena_PsychoReflector:
 ; --------------- frame #2 ---------------
 .obj2:
 	; Deal continuous damage while this is displayed
-	mMvC_SetDamage $01, HITTYPE_DROP_MAIN, PF3_LASTHIT|PF3_SHAKEONCE
+	mMvC_SetDamage $01, HITTYPE_DROP_MAIN, PF3_LASTHIT|PF3_LIGHTHIT
 	mMvC_ValFrameEnd .anim
 		mMvIn_ChkLH .obj2_setSpeedH
 	.obj2_setSpeedL:
@@ -3728,12 +3728,12 @@ MoveC_Athena_PsychoReflector:
 ; --------------- frame #3 ---------------
 ; Deal continuous damage while this is displayed
 .obj3:
-	mMvC_SetDamage $01, HITTYPE_DROP_MAIN, PF3_LASTHIT|PF3_SHAKEONCE
+	mMvC_SetDamage $01, HITTYPE_DROP_MAIN, PF3_LASTHIT|PF3_LIGHTHIT
 	jp   .anim
 ; --------------- frame #3 ---------------
 ; Deal continuous damage while this is displayed
 .obj4:
-	mMvC_SetDamage $01, HITTYPE_DROP_MAIN, PF3_LASTHIT|PF3_SHAKEONCE
+	mMvC_SetDamage $01, HITTYPE_DROP_MAIN, PF3_LASTHIT|PF3_LIGHTHIT
 	mMvC_ValFrameEnd .anim
 		ld   hl, iOBJInfo_FrameTotal
 		add  hl, de
@@ -4215,7 +4215,7 @@ ENDM
 		mMvC_PlaySound SCT_0F
 		mkhl $14, HITTYPE_DROP_MAIN
 		ld   hl, CHL
-		ld   a, PF3_SHAKELONG|PF3_FLASH_B_FAST
+		ld   a, PF3_HEAVYHIT|PF3_FLASH_B_FAST
 		jp   .obj5_setDamage
 	.obj5_setDamage1:
 		; Size 1.
@@ -4223,7 +4223,7 @@ ENDM
 		mMvC_PlaySound SCT_0F
 		mkhl $19, HITTYPE_DROP_MAIN
 		ld   hl, CHL
-		ld   a, PF3_SHAKELONG|PF3_FLASH_B_FAST
+		ld   a, PF3_HEAVYHIT|PF3_FLASH_B_FAST
 		jp   .obj5_setDamage
 	.obj5_setDamage2:
 		; Sizes 2 - 4
@@ -4231,19 +4231,19 @@ ENDM
 		mMvC_PlaySound SCT_15
 		mkhl $03, HITTYPE_DROP_MAIN
 		ld   hl, CHL
-		ld   a, PF3_LASTHIT|PF3_FLASH_B_FAST|PF3_SHAKEONCE
+		ld   a, PF3_LASTHIT|PF3_FLASH_B_FAST|PF3_LIGHTHIT
 		jp   .obj5_setDamage
 	.obj5_setDamage3:
 		mMvC_PlaySound SCT_15
 		mkhl $03, HITTYPE_DROP_MAIN
 		ld   hl, CHL
-		ld   a, PF3_LASTHIT|PF3_FLASH_B_FAST|PF3_SHAKEONCE
+		ld   a, PF3_LASTHIT|PF3_FLASH_B_FAST|PF3_LIGHTHIT
 		jp   .obj5_setDamage
 	.obj5_setDamage4:
 		mMvC_PlaySound SCT_15
 		mkhl $03, HITTYPE_DROP_MAIN
 		ld   hl, CHL
-		ld   a, PF3_LASTHIT|PF3_FLASH_B_FAST|PF3_SHAKEONCE
+		ld   a, PF3_LASTHIT|PF3_FLASH_B_FAST|PF3_LIGHTHIT
 	.obj5_setDamage:
 		; Save the damage
 		call Play_Pl_SetMoveDamageNext
@@ -6255,7 +6255,7 @@ MoveC_Andy_ZanEiKen:
 	; Otherwise, switch to the submove
 	mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, $06
 	call OBJLstS_ApplyXSpeed
-	mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_SHAKELONG
+	mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_HEAVYHIT
 	jp   .ret
 ; --------------- Gadankoh frame #0 (frame #4) ---------------	
 .gadankoh_obj0:
@@ -6307,7 +6307,7 @@ MoveC_Andy_KuHaDan:
 		mMvC_SetMoveH +$0700
 .obj0_cont:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $04, HITTYPE_HIT_MID1, PF3_SHAKELONG|PF3_LASTHIT
+		mMvC_SetDamageNext $04, HITTYPE_HIT_MID1, PF3_HEAVYHIT|PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #1 ---------------	
 .obj1:
@@ -6316,7 +6316,7 @@ MoveC_Andy_KuHaDan:
 .obj1_cont:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
-		mMvC_SetDamageNext $04, HITTYPE_HIT_MID0, PF3_SHAKELONG|PF3_LASTHIT
+		mMvC_SetDamageNext $04, HITTYPE_HIT_MID0, PF3_HEAVYHIT|PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #2 ---------------	
 .obj2:
@@ -6341,13 +6341,13 @@ MoveC_Andy_KuHaDan:
 .obj2_cont:
 	mMvC_NextFrameOnGtYSpeed -$02, ANIMSPEED_NONE
 	jp   nc, .doGravity	; Reached Y Speed > - $02? If not, jump
-		mMvC_SetDamageNext $04, HITTYPE_HIT_MID0, PF3_SHAKELONG|PF3_LASTHIT
+		mMvC_SetDamageNext $04, HITTYPE_HIT_MID0, PF3_HEAVYHIT|PF3_LASTHIT
 		jp   .doGravity
 ; --------------- frame #3 ---------------	
 .obj3:
 	mMvC_NextFrameOnGtYSpeed +$00, ANIMSPEED_NONE
 	jp   nc, .doGravity	; Reached Y Speed > 0? If not, jump
-		mMvC_SetDamageNext $04, HITTYPE_HIT_MID0, PF3_SHAKELONG|PF3_LASTHIT
+		mMvC_SetDamageNext $04, HITTYPE_HIT_MID0, PF3_HEAVYHIT|PF3_LASTHIT
 		jp   .doGravity
 ; --------------- frame #2-4 / common gravity check ---------------	
 .doGravity:
@@ -6543,7 +6543,7 @@ MoveC_Andy_GekiHekiHaiSuiSho:;I
 .obj7:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $03
-		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
+		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
 		mMvC_PlaySound SCT_HEAVY
 		jp   .anim
 ; --------------- frame #8 ---------------	
@@ -6790,7 +6790,7 @@ MoveC_Andy_ChoReppaDan:;I
 	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_LASTHIT
 	jp   .move
 .setDamageContD:
-	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_LASTHIT|PF3_SHAKEONCE
+	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_LASTHIT|PF3_LIGHTHIT
 	jp   .move
 	
 ; --------------- common movement code ---------------
@@ -7037,7 +7037,7 @@ MoveC_MrBig_CrossDiving:
 	.obj3_noDamage:
 		jp   .moveH
 	.obj3_damage: 
-		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
+		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
 		jp   .moveH
 ; --------------- frame #4 ---------------
 .obj4:
@@ -7158,7 +7158,7 @@ MoveC_MrBig_SpinningLancer:
 	mMvC_DoFrictionH $0040
 		mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $1E
-		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
+		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #7 ---------------
 .chkEnd:
@@ -7711,7 +7711,7 @@ MoveC_Geese_ReppukenH:
 .obj3_cont:
 	mMvC_ValFrameEnd .anim
 		mMvC_PlaySound SND_ID_28
-		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_SHAKELONG
+		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT
 		jp   .anim
 ; --------------- frame #6 ---------------
 .obj6:
@@ -7785,7 +7785,7 @@ MoveC_Geese_JaEiKen:
 .obj1_hitOk:
 	; Otherwise, continue to #2 and disable manual control.
 	; The next two frames will deal damage.
-	mMvC_SetDamageNext $08, HITTYPE_HIT_MID1, PF3_SHAKELONG
+	mMvC_SetDamageNext $08, HITTYPE_HIT_MID1, PF3_HEAVYHIT
 	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $05
 	call OBJLstS_ApplyXSpeed
 	jp   .ret
@@ -7802,7 +7802,7 @@ MoveC_Geese_JaEiKen:
 .obj2_cont:
 	mMvC_ValFrameEnd .moveH
 		mMvC_SetAnimSpeed $0A
-		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_SHAKELONG
+		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT
 		jp   .moveH
 ; --------------- frame #3 ---------------
 ; Hit confirmed. Last sprint before the move ends.
@@ -7866,7 +7866,7 @@ MoveC_Geese_HishouNichirinZan:
 .obj1_cont:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
-		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_SHAKELONG
+		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT
 		jp   .anim
 ; --------------- frame #2 ---------------
 .obj2:
@@ -8047,14 +8047,14 @@ MoveC_Geese_AtemiNage:
 ; Autoguard. Grab frame L.
 .obj2:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_SHAKELONG
+		mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
 		mMvC_MoveThrowOp +$08, -$28
 		jp   .anim
 ; --------------- frame #3 ---------------
 ; Autoguard. Grab frame D.
 .obj3:
 	mMvC_ValFrameStart .obj3_cont
-		mMvC_SetDamage $06, HITTYPE_THROW_ROTD, PF3_SHAKELONG
+		mMvC_SetDamage $06, HITTYPE_THROW_ROTD, PF3_HEAVYHIT
 		mMvC_MoveThrowOp +$18, -$04
 		jp   .anim
 .obj3_cont:
@@ -8065,7 +8065,7 @@ MoveC_Geese_AtemiNage:
 ; Autoguard. Throw.
 .obj4:
 	mMvC_ValFrameStart .chkEnd
-		mMvC_SetDamage $0A, HITTYPE_DROP_DB_A, PF3_SHAKELONG
+		mMvC_SetDamage $0A, HITTYPE_DROP_DB_A, PF3_HEAVYHIT
 		jp   .anim
 .chkEnd:
 	mMvC_ValFrameEnd .anim

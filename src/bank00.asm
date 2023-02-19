@@ -8675,7 +8675,7 @@ Play_DoPl:
 	; Create base inputs
 	call Play_Pl_CreateJoyKeysLH
 	; Apply opponent-induced effects (push speed, hitstop)
-	call Play_Pl_ChkHitStop				; Did we start a new move from here?
+	call Play_Pl_ChkHitstop				; Did we start a new move from here?
 	jp   c, .execMoveCode				; If so, jump
 	; Perform the special input reader check (character-specific)
 	call Play_Pl_ExecSpecMoveInputCode	; Did we start a new special/super?
@@ -12787,7 +12787,7 @@ Play_Pl_DoBasicMoveInput:
 			; Shake more before getting pushed back by the throw tech
 			inc  hl ; Seek to iPlInfo_Flags2
 			inc  hl ; Seek to iPlInfo_Flags3
-			set  PF3B_SHAKELONG, [hl]
+			set  PF3B_HEAVYHIT, [hl]
 			jp   BasicInput_End
 			
 		;
@@ -15044,7 +15044,7 @@ MoveInputS_TryStartCommandThrow:
 	ld   [wPlayPlThrowActId], a
 .ret:
 	ret
-; =============== Play_Pl_ChkHitStop ===============
+; =============== Play_Pl_ChkHitstop ===============
 ; Applies hitstop if enabled, as well as other effects induced by the other player.
 ;
 ; IN:
@@ -15052,7 +15052,7 @@ MoveInputS_TryStartCommandThrow:
 ; - DE: Ptr to respective wOBJInfo structure
 ; OUT
 ; - C: If set, a new move was started (and interrupted hitstop early)
-Play_Pl_ChkHitStop:
+Play_Pl_ChkHitstop:
 	
 	;
 	; Handle the horizontal push speed we received from the other player.
@@ -15318,11 +15318,11 @@ Play_Pl_GetShakeCount:
 	add  hl, bc
 	
 	; Some moves shake the player once
-	bit  PF3B_SHAKEONCE, [hl]	; Is the bit set?
+	bit  PF3B_LIGHTHIT, [hl]	; Is this a light hit?
 	jp   nz, .shakeOnce			; If so, jump
 	
 	; If this isn't set as a long shake, cut in half the shake count
-	bit  PF3B_SHAKELONG, [hl]	; Is the bit set?
+	bit  PF3B_HEAVYHIT, [hl]	; Is this an heavy hit?
 	jp   nz, .chkHealth			; If so, jump
 .shakeHalf:
 	srl  a						; ShakeCnt = ShakeCnt / 2				

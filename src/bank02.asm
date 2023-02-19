@@ -1130,7 +1130,7 @@ ExOBJ_SuperSparkle:
 ; - DE: Ptr to respective wOBJInfo
 ; OUT
 ; - C flag: If set, a move was started (by guard cancelling)
-;           Only used by Play_Pl_ChkHitStop, and it makes hitstop end early.
+;           Only used by Play_Pl_ChkHitstop, and it makes hitstop end early.
 Play_Pl_DoHit:
 
 	; For all intents and purposes Play_Pl_DoHit is a direct continuation of Play_Pl_SetHitType.
@@ -1621,7 +1621,7 @@ HitTypeC_DropMain:
 	inc  hl						; Seek to iPlInfo_Flags1
 	inc  hl						; Seek to iPlInfo_Flags2
 	inc  hl						; Seek to iPlInfo_Flags3
-	set  PF3B_SHAKELONG, [hl]	; Shake longer (heavy hit)
+	set  PF3B_HEAVYHIT, [hl]	; Shake longer (heavy hit)
 	set  PF3B_LASTHIT, [hl]		; End the damage string (will trigger invulnerability shortly after)
 	
 .chkDead:
@@ -1674,11 +1674,11 @@ HitTypeC_DropMain:
 	;
 	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	bit  PF3B_SHAKEONCE, [hl]	; Is this a light hit?
+	bit  PF3B_LIGHTHIT, [hl]	; Is this a light hit?
 	jp   nz, .retSet			; If so, don't alter speed settings.
 								; This will cause the player to just drop on the ground directly down.
 								
-	bit  PF3B_SHAKELONG, [hl]	; Is this a heavy hit?
+	bit  PF3B_HEAVYHIT, [hl]	; Is this a heavy hit?
 	jp   nz, .setJumpH			; If so, use higher jump speed
 .setJumpN:
 	; Normal hit
@@ -1761,7 +1761,7 @@ HitTypeC_Drop_DB_A:
 	;
 	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	bit  PF3B_SHAKELONG, [hl]	; Is this a heavy hit?
+	bit  PF3B_HEAVYHIT, [hl]	; Is this a heavy hit?
 	jp   nz, .setJumpH			; If so, use higher jump speed
 .setJumpL:
 	ld   hl, +$0500				; 5px/frame back
@@ -1934,7 +1934,7 @@ HitTypeC_Throw_End:
 	;
 	ld   hl, iPlInfo_Flags3
 	add  hl, bc							
-	bit  PF3B_SHAKELONG, [hl]	; Is this a heavy hit?
+	bit  PF3B_HEAVYHIT, [hl]	; Is this a heavy hit?
 	jp   nz, .setJumpH			; If so, use higher jump speed
 .setJumpN:
 	; Normal hit
@@ -2071,7 +2071,7 @@ HitTypeC_SwoopUp_ToProj:
 	; [POI] This check is pointless, both conditions are the same.
 	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	bit  PF3B_SHAKELONG, [hl]
+	bit  PF3B_HEAVYHIT, [hl]
 	jp   nz, .setSpeedH
 .setSpeedN: ; [TCRF?] Do we even get here?
 	ld   hl, +$0000
@@ -2156,7 +2156,7 @@ HitTypeC_DropCH:
 	; Move up either at 3px/frame or 4px/frame depending on the hit strength.
 	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	bit  PF3B_SHAKELONG, [hl]	; Is this an heavy hit?
+	bit  PF3B_HEAVYHIT, [hl]	; Is this an heavy hit?
 	jp   nz, .setSpeedH			; If so, jump
 .setSpeedN:
 	ld   hl, -$0300				; 3px/frame up for light hits
@@ -2208,7 +2208,7 @@ HitTypeC_DropA:
 	; [POI] Useless check, as the same value gets used.
 	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	bit  PF3B_SHAKELONG, [hl]
+	bit  PF3B_HEAVYHIT, [hl]
 	jp   nz, .setSpeedH
 .setSpeedL:
 	ld   hl, $0180
@@ -2612,7 +2612,7 @@ HitTypeC_ThrowStart:
 ; move code after the grab is fully confirmed and before the actual throw happens.
 ;
 ; Typically set up by something like:
-;	mMvC_SetDamage xxx, HITTYPE_THROW_ROT*, PF3_SHAKELONG
+;	mMvC_SetDamage xxx, HITTYPE_THROW_ROT*, PF3_HEAVYHIT
 ;	mMvC_MoveThrowOp yy, zz
 ;
 ; These are supposed to be instant, so they just reposition the player
@@ -4109,7 +4109,7 @@ MoveC_Hit_PostStunKnockback:
 	
 	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	bit  PF3B_SHAKELONG, [hl]	; Attack shook us for long?
+	bit  PF3B_HEAVYHIT, [hl]	; Was this an heavy hit?
 	jp   nz, .setSpeedFast		; If so, jump
 .setSpeedNorm:
 	ld   hl, $0280				; Otherwise HL = $02.80px/frame (short)
@@ -4159,7 +4159,7 @@ MoveC_Hit_DropMain:
 	; Do specific actions depending on the hit type
 	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	bit  PF3B_SHAKEONCE, [hl]	; Is this a light hit?
+	bit  PF3B_LIGHTHIT, [hl]	; Is this a light hit?
 	jp   nz, .obj0_hitL			; If so, jump
 	
 .obj0_hitN:
@@ -4171,12 +4171,12 @@ MoveC_Hit_DropMain:
 .obj0_hitL:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
-		; If this is a light hit, setup the jump depending on PF3B_SHAKELONG
+		; If this is a light hit, setup the jump depending on PF3B_HEAVYHIT
 		
-		; Note that if PF3B_SHAKEONCE and PF3B_SHAKELONG are set at the same time, ???
+		; Note that if PF3B_LIGHTHIT and PF3B_HEAVYHIT are set at the same time, ???
 		ld   hl, iPlInfo_Flags3
 		add  hl, bc
-		bit  PF3B_SHAKELONG, [hl]	; Is this a heavy hit?
+		bit  PF3B_HEAVYHIT, [hl]	; Is this a heavy hit?
 		jp   nz, .obj0_setJumpH		; If so, jump
 	.obj0_setJumpN:
 		mMvC_SetSpeedHInt +$0140	; 1.25px/frame away from the opponent
@@ -5018,7 +5018,7 @@ MoveC_Hit_MultiMidKnockback:
 	
 	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	bit  PF3B_SHAKELONG, [hl]	; Attack shook us for long?
+	bit  PF3B_HEAVYHIT, [hl]	; Was this an heavy hit?
 	jp   nz, .setSpeedFast		; If so, jump
 .setSpeedNorm:
 	ld   hl, $0280				; Otherwise HL = $02.80px/frame (short)
@@ -5306,7 +5306,7 @@ MoveC_Hit_Throw_Start:
 	;
 	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	bit  PF3B_SHAKELONG, [hl]	; Attack shook us for long?
+	bit  PF3B_HEAVYHIT, [hl]	; Was this an heavy hit?
 	jp   nz, .setSpeedFast		; If so, jump
 .setSpeedNorm:
 	ld   hl, $0280				; Otherwise HL = $02.80px/frame (short)
@@ -5418,7 +5418,7 @@ MoveC_Hit_Throw_Rot:
 	; Setup the knockback speed, depending on how long we have shaken.
 	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	bit  PF3B_SHAKELONG, [hl]	; Attack shook us for long?
+	bit  PF3B_HEAVYHIT, [hl]	; Was this an heavy hit?
 	jp   nz, .setSpeedFast		; If so, jump
 .setSpeedNorm:
 	ld   hl, $0280				; Otherwise HL = $02.80px/frame (short)
@@ -5789,7 +5789,7 @@ MoveC_Ryo_HienShippuKyaku:
 .obj3:
 	mMvC_ValFrameEnd .doGravity
 	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_SHAKELONG
+	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT
 	jp   .doGravity
 ; --------------- common gravity check ---------------	
 .doGravity:
@@ -6582,13 +6582,13 @@ MoveC_Robert_RyuuGa:
 		mMvC_PlaySound SND_ID_28
 		mMvIn_ChkLHE .obj1_setHitH, .obj1_setHitE
 	.obj1_setHitL: ; Light
-		mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_SHAKELONG
+		mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_HEAVYHIT
 		jp   .anim
 	.obj1_setHitH: ; Heavy
-		mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_SHAKELONG
+		mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_HEAVYHIT
 		jp   .anim
 	.obj1_setHitE: ; [POI] Hidden Heavy
-		mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
+		mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #1 ---------------	
 .obj2:
@@ -6804,7 +6804,7 @@ MoveC_Robert_KyokugenRyuRanbuKyaku:
 		mMvC_SetMoveH $0600
 .obj5_cont:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
+		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
 		mMvC_PlaySound SCT_HEAVY
 		jp   .anim
 ; --------------- frame #7 ---------------	
@@ -7567,7 +7567,7 @@ MoveC_Leona_GrandSabre:
 	call MoveInputS_CheckGAType
 	jp   nc, .anim	; Was an attack button pressed? If not, jump
 	jp   z, .anim	; Was the punch button pressed? If so, jump
-	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_SHAKELONG
+	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT
 	mMvC_SetFrame $0A*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_NONE
 	jp   .ret
 ; --------------- Gliding Buster - frame #A ---------------
@@ -7652,7 +7652,7 @@ MoveC_Leona_XCalibur:
 		jp   c, .obj0_doDamageE	; Hidden heavy triggered? If so, jump
 		jp   .obj0_anim			; Otherwise, skip it
 	.obj0_doDamageE:
-		mMvC_SetDamageNext $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_SHAKEONCE
+		mMvC_SetDamageNext $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_LIGHTHIT
 	.obj0_anim:
 		jp   .anim
 ; --------------- frame #1 ---------------	
@@ -7707,7 +7707,7 @@ MoveC_Leona_XCalibur:
 	jp   c, .obj4_doDamageE	; Hidden heavy triggered? If so, jump
 	jp   .doGravity			; Otherwise, skip it
 .obj4_doDamageE:
-	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_SHAKEONCE
+	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_LIGHTHIT
 	jp   .doGravity
 ; --------------- frame #5 ---------------	
 .obj5:
@@ -7716,7 +7716,7 @@ MoveC_Leona_XCalibur:
 	jp   c, .obj5_doDamageE	; Hidden heavy triggered? If so, jump
 	jp   .obj5_cont			; Otherwise, skip it
 .obj5_doDamageE:
-	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_SHAKEONCE
+	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_LIGHTHIT
 .obj5_cont:
 	mMvC_ValFrameEnd .doGravity
 		; Loop back to #4 if we didn't touch the ground yet
@@ -7843,13 +7843,13 @@ MoveC_OLeona_StormBringer:
 		ld   hl, iPlInfo_OLeona_StormBringer_LoopTimer
 		add  hl, bc
 		ld   [hl], $08
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_SHAKEONCE
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_LIGHTHIT
 		jp   .anim
 ; --------------- frame #1 ---------------
 ; Health restore loop.
 .obj1:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FLASH_B_FAST|PF3_SHAKEONCE
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FLASH_B_FAST|PF3_LIGHTHIT
 		jp   .restoreHealth
 ; --------------- frame #2 ---------------
 ; Health restore loop.
@@ -7865,7 +7865,7 @@ MoveC_OLeona_StormBringer:
 	ld   hl, iOBJInfo_OBJLstPtrTblOffset
 	add  hl, de
 	ld   [hl], $00*OBJLSTPTR_ENTRYSIZE
-	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_SHAKEONCE
+	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_LIGHTHIT
 	jp   .restoreHealth
 .obj2_setAnimSpeed:
 	; Set animation speed to $0A before switching to #3
@@ -7966,13 +7966,13 @@ MoveC_Leona_VSlasher:
 	.obj3_setDamageNorm:
 		; As normal Leona, deliver hit dealing $14 lines of damage the next frame.
 		; The "V" projectile deals no damage and is a purely visual effect here.
-		mMvC_SetDamageNext $14, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $14, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_SLOW
 		jp   .anim
 	.obj3_setDamageO:
 		; As O.Leona, the projectile spawns a skull wall that actually deals continuous damage.
 		
 		; Prepare flags to copy
-		mMvC_SetDamageNext $02, HITTYPE_DROP_SWOOPUP, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $02, HITTYPE_DROP_SWOOPUP, PF3_HEAVYHIT|PF3_FLASH_B_SLOW
 		; Copy them over to the projectile
 		call Play_Proj_CopyMoveDamageFromPl
 		jp   .anim
@@ -8101,7 +8101,7 @@ MoveC_OLeona_SuperMoonSlasher:
 		; Otherwise, continue to #4
 		mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, $00
 		mMvC_SetSpeedH $0080
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_SHAKEONCE
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_LIGHTHIT
 		jp   .ret
 .obj3_blocked:
 	mMvC_SetSpeedH $0000
@@ -8112,13 +8112,13 @@ MoveC_OLeona_SuperMoonSlasher:
 .obj4:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FLASH_B_FAST|PF3_SHAKEONCE
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FLASH_B_FAST|PF3_LIGHTHIT
 		jp   .chkOtherEscape
 ; --------------- frame #5 ---------------
 .obj5:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_SHAKEONCE
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_LIGHTHIT
 		jp   .chkOtherEscape
 ; --------------- frame #6 ---------------
 .obj6:
@@ -8134,11 +8134,11 @@ MoveC_OLeona_SuperMoonSlasher:
 		ld   hl, iOBJInfo_OBJLstPtrTblOffset
 		add  hl, de
 		ld   [hl], $03*OBJLSTPTR_ENTRYSIZE ; offset by -1
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_SHAKEONCE
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_LIGHTHIT
 		jp   .chkOtherEscape
 	.obj6_noLoop:
 		; Deal more damage for #7
-		mMvC_SetDamageNext $0C, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_FAST
+		mMvC_SetDamageNext $0C, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_FAST
 		; And enable manual control
 		ld   hl, iOBJInfo_FrameTotal
 		add  hl, de
@@ -8359,7 +8359,7 @@ MoveC_MrKarate_KoOuKen:
 	jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
-	mMvC_SetDamage $01, HITTYPE_DROP_MAIN, PF3_LASTHIT|PF3_SHAKEONCE
+	mMvC_SetDamage $01, HITTYPE_DROP_MAIN, PF3_LASTHIT|PF3_LIGHTHIT
 	mMvC_ValFrameEnd .anim
 		mMvC_PlaySound SCT_15
 		jp   .anim
@@ -8577,13 +8577,13 @@ MoveC_MrKarate_HienShippuuKyaku:
 .obj3:
 	mMvC_ValFrameEnd .doGravity
 		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
-		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
+		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
 		jp   .doGravity
 ; --------------- frame #4 ---------------
 .obj4:
 	mMvC_ValFrameEnd .doGravity
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
-		mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_SHAKELONG|PF3_LASTHIT
+		mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_HEAVYHIT|PF3_LASTHIT
 		jp   .doGravity
 ; --------------- common gravity check ---------------	
 .doGravity:
@@ -8630,7 +8630,7 @@ MoveC_MrKarate_Zenretsuken:;I
 	jp   .anim
 ; --------------- frame #0 ---------------
 .obj0:
-	mMvC_SetDamage $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT|PF3_SHAKEONCE
+	mMvC_SetDamage $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT|PF3_LIGHTHIT
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
 		mMvC_PlaySound SND_ID_28
@@ -8640,11 +8640,11 @@ MoveC_MrKarate_Zenretsuken:;I
 		jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
-	mMvC_SetDamage $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT|PF3_SHAKEONCE
+	mMvC_SetDamage $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT|PF3_LIGHTHIT
 	jp   .anim
 ; --------------- frame #2 ---------------
 .obj2:
-	mMvC_SetDamage $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT|PF3_SHAKEONCE
+	mMvC_SetDamage $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT|PF3_LIGHTHIT
 	mMvC_ValFrameEnd .anim
 		mMvC_PlaySound SND_ID_28
 		
@@ -8677,7 +8677,7 @@ MoveC_MrKarate_Zenretsuken:;I
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $1E
 		mMvC_PlaySound SND_ID_28
-		mMvC_SetDamageNext $01, HITTYPE_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #6 ---------------
 .obj6:
@@ -9087,7 +9087,7 @@ MoveC_Kyo_ThrowG:
 ; When visually switching to #2, hit the opponent.
 .obj1:
 	mMvC_ValFrameEnd .anim ; About to advance the anim? If not, skip to .anim
-	mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_SHAKELONG ; 6 lines of damage on hit, make opponent drop on ground
+	mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_HEAVYHIT ; 6 lines of damage on hit, make opponent drop on ground
 	jp   .anim
 ; --------------- common ---------------
 .chkEnd:
@@ -9125,7 +9125,7 @@ MoveC_Daimon_ThrowG:
 ; Set U rotation frame to opponent the first time we get here.
 .rotU:
 	mMvC_ValFrameStart .rotU_anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG ; Damage ignored in this hitanim
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_HEAVYHIT ; Damage ignored in this hitanim
 	mMvC_MoveThrowOp -$08, $00	; Move left 8px
 .rotU_anim:
 	jp   .anim
@@ -9133,7 +9133,7 @@ MoveC_Daimon_ThrowG:
 ; Set L rotation frame to opponent the first time we get here.
 .rotL:
 	mMvC_ValFrameStart .rotL_anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_SHAKELONG ; Damage ignored in this hitanim
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT ; Damage ignored in this hitanim
 	mMvC_MoveThrowOp +$08, -$08	; Move right 8px (reset), up 8px
 .rotL_anim:
 	jp   .anim
@@ -9141,7 +9141,7 @@ MoveC_Daimon_ThrowG:
 ; Deal damage the first time we get here.
 .hit:
 	mMvC_ValFrameStart .obj2_anim
-	mMvC_SetDamage $06, HITTYPE_DROP_DB_A, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_DROP_DB_A, PF3_HEAVYHIT
 .obj2_anim:
 	jp   .anim
 ; --------------- common ---------------
@@ -9173,7 +9173,7 @@ MoveC_Terry_ThrowG:
 	; When switching to #1, deal damage to the opponent
 	mMvC_ValFrameEnd .anim
 	
-	mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_SHAKELONG
+	mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_HEAVYHIT
 	jp   .anim
 ; --------------- common ---------------
 .chkEnd:
@@ -9211,7 +9211,7 @@ MoveC_Andy_ThrowG:
 	mMvC_ValFrameStart .obj0_waitManCtrl
 	
 	; Set damage rotation frame
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
 	; Move opponent left 2px, up 20px
 	mMvC_MoveThrowOp -$02, -$20
 
@@ -9246,7 +9246,7 @@ ENDC
 	mMvC_SetSpeedV -$0600	; 6px/frame up
 	
 	; Set new rotation frame
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_HEAVYHIT
 	; Move opponent left 2px, up 10px
 	mMvC_MoveThrowOp -$02, -$10
 	mMvC_MoveThrowOpSync
@@ -9264,7 +9264,7 @@ ENDC
 	; The first time we get here...
 	mMvC_ValFrameStart .anim
 	; Set new rotation frame
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_HEAVYHIT
 	; Move opponent left 2px
 	mMvC_MoveThrowOp -$02, +$00
 
@@ -9274,7 +9274,7 @@ ENDC
 	; The first time we get here...
 	mMvC_ValFrameStart .anim
 	; Set new rotation frame
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_HEAVYHIT
 	; Move opponent left 2px
 	mMvC_MoveThrowOp -$02, +$00
 
@@ -9283,7 +9283,7 @@ ENDC
 .obj4:
 	; The first time we get here, damage the player
 	mMvC_ValFrameStart .chkEnd
-	mMvC_SetDamage $06, HITTYPE_DROP_MAIN, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_DROP_MAIN, PF3_HEAVYHIT
 .chkEnd:
 	; End the move when the anim advances
 	mMvC_ValFrameEnd .anim
@@ -9316,19 +9316,19 @@ MoveC_Ryo_ThrowG:
 ; --------------- frame #0 ---------------
 .rotU:
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_HEAVYHIT
 	mMvC_MoveThrowOp -$08, +$00
 	jp   .anim
 ; --------------- frame #1 ---------------
 .rotL:
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
 	mMvC_MoveThrowOp +$01, -$10
 	jp   .anim
 ; --------------- frame #2 ---------------
 .setDamage:
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITTYPE_THROW_END, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_END, PF3_HEAVYHIT
 	jp   .anim
 ; --------------- frame #3 ---------------
 .chkEnd:
@@ -9359,7 +9359,7 @@ MoveC_Robert_ThrowG:
 ; Damages the player when switching to #2.
 .setDamage:
 	mMvC_ValFrameEnd .anim
-	mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_SHAKELONG
+	mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_HEAVYHIT
 	jp   .anim
 ; --------------- frame #2 ---------------
 ; When switching to #3, make Robert jump back.
@@ -9407,31 +9407,31 @@ MoveC_Athena_ThrowG:
 ; --------------- frame #1 ---------------
 .rotL:
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
 	mMvC_MoveThrowOp +$01, -$08
 	jp   .anim
 ; --------------- frame #2 ---------------
 .rotD:
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTD, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTD, PF3_HEAVYHIT
 	mMvC_MoveThrowOp -$02, -$08
 	jp   .anim
 ; --------------- frame #3 ---------------
 .rotR:
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_HEAVYHIT
 	mMvC_MoveThrowOp +$01, -$08
 	jp   .anim
 ; --------------- frame #4 ---------------
 .rotU:
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_HEAVYHIT
 	mMvC_MoveThrowOp -$02, -$08
 	jp   .anim
 ; --------------- frame #5 ---------------
 .setDamage:
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITTYPE_THROW_END, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_END, PF3_HEAVYHIT
 	jp   .anim
 ; --------------- frame #6 ---------------
 .chkEnd:
@@ -9469,14 +9469,14 @@ MoveC_Base_ThrowA_DiagF:
 .obj0:
 	; The first time we get here...
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
 	mMvC_MoveThrowOp -$08, -$08 ; 8px left, 8px up
 	jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
 	; The first time we get here...
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTD, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTD, PF3_HEAVYHIT
 	mMvC_MoveThrowOp -$08, -$08 ; 8px left, 8px up
 	jp   .anim
 ; --------------- frame #2 ---------------
@@ -9485,7 +9485,7 @@ MoveC_Base_ThrowA_DiagF:
 	mMvC_ValFrameStart .obj2_setManCtrl
 	
 	; Throw opponent forward, diagonally down + damage for 6 lines
-	mMvC_SetDamage $06, HITTYPE_DROP_DB_A, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_DROP_DB_A, PF3_HEAVYHIT
 	
 	; Move us 2px back, 2px up
 	mMvC_SetSpeedH -$0200
@@ -9542,7 +9542,7 @@ MoveC_Mai_ThrowG:
 	; [POI] Useless
 	mMvC_SetMoveH $0000
 	; Set rotation frame
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_HEAVYHIT
 	; Move thrown player left 8px
 	mMvC_MoveThrowOp -$08, +$00
 	jp   .anim
@@ -9552,7 +9552,7 @@ MoveC_Mai_ThrowG:
 	; Move player left 8px
 	mMvC_SetMoveH -$0800
 	; Set rotation frame again to apply Play_Pl_MoveRotThrown
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_HEAVYHIT
 	; Move opponent left $10px
 	mMvC_MoveThrowOp -$10, +$00
 	jp   .anim
@@ -9564,7 +9564,7 @@ MoveC_Mai_ThrowG:
 	;--
 	; [POI] Not needed
 	; Set rotation frame again to apply Play_Pl_MoveRotThrown
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_HEAVYHIT
 	; (nothing)
 	mMvC_MoveThrowOp +$00, +$00
 	;--
@@ -9575,7 +9575,7 @@ MoveC_Mai_ThrowG:
 	; Move player right $08px
 	mMvC_SetMoveH $0800
 	; Set rotation frame again to apply Play_Pl_MoveRotThrown
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_HEAVYHIT
 	; Move opponent right $10px (reset)
 	mMvC_MoveThrowOp +$10, +$00
 	jp   .anim
@@ -9583,7 +9583,7 @@ MoveC_Mai_ThrowG:
 .setDamage:
 	mMvC_ValFrameStart .anim
 	mMvC_SetMoveH $0000 ; [POI] Useless
-	mMvC_SetDamage $06, HITTYPE_THROW_END, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_END, PF3_HEAVYHIT
 	jp   .anim
 ; --------------- frame #5 ---------------
 .chkEnd:
@@ -9619,7 +9619,7 @@ MoveC_Base_ThrowA_DirD:
 	mMvC_ValFrameStart .obj0_setManCtrl
 	
 	; Set damage rotation frame
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_HEAVYHIT
 	; Move opponent left 2px, up 1px
 	mMvC_MoveThrowOp -$02, -$01
 
@@ -9651,7 +9651,7 @@ ENDC
 	mMvC_SetSpeedV -$0100
 	
 	; Move opponent left 2px, up 1px
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_SHAKELONG ; Same as before, to enable Play_Pl_MoveRotThrown
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_HEAVYHIT ; Same as before, to enable Play_Pl_MoveRotThrown
 	mMvC_MoveThrowOp -$02, -$01
 	mMvC_MoveThrowOpSync
 .obj1_move:
@@ -9665,7 +9665,7 @@ ENDC
 	mMvC_SetLandFrame $02*OBJLSTPTR_ENTRYSIZE, $02
 	
 	; Move opponent left 2px, up 1px
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_SHAKELONG ; Same as before, to enable Play_Pl_MoveRotThrown
+	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_HEAVYHIT ; Same as before, to enable Play_Pl_MoveRotThrown
 	mMvC_MoveThrowOp -$02, -$01
 	
 	;--
@@ -9678,7 +9678,7 @@ ENDC
 .obj2:
 	; The first time we get here, make the throw deal damage
 	mMvC_ValFrameStart .chkEnd
-	mMvC_SetDamage $06, HITTYPE_DROP_DB_A, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITTYPE_DROP_DB_A, PF3_HEAVYHIT
 .chkEnd:
 	; Start backjump when switching to #3.
 	
@@ -9721,7 +9721,7 @@ MoveC_Leona_ThrowG:
 ; Damage player when switching to #1.
 .setDamage:
 	mMvC_ValFrameEnd .anim
-	mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_SHAKELONG
+	mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_HEAVYHIT
 	jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
