@@ -471,6 +471,18 @@ mMvC_SetSpeedH: MACRO
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
 ENDM
 
+; =============== mMvC_SetSpeedHInt ===============
+; Sets the horizontal movement speed for (usually) the current player,
+; relative to the internal flip flag being for the *2P* side (negative values move forwards).
+; Used to move relative to the opponent's position, since the internal
+; flip flag is always updated.
+; IN
+; - 1: Speed value (pixels + subpixels), as px/frame
+mMvC_SetSpeedHInt: MACRO
+	ld   hl, \1
+	call Play_OBJLstS_SetSpeedH_ByXDirL
+ENDM
+
 ; =============== mMvC_SetSpeedV ===============
 ; Sets the vertical movement speed for (usually) the current player.
 ; If something else was set to DE, that OBJInfo will get its speed set.
@@ -591,7 +603,7 @@ ENDM
 
 ; =============== mMvC_MoveThrowOp ===============
 ; Moves the grabbed opponent relative to the current location.
-; By default, this only is applied if the the player is set in a rotation frame (mMvC_SetDamage with HITANIM_THROW_ROT*)
+; This is only applied if the the player is set in a rotation frame (mMvC_SetDamage with HITANIM_THROW_ROT*)
 ; IN
 ; - 1: Horz. Movement (relative to the 1P side, negative values move backwards)
 ; - 2: Vert. Movement
@@ -599,6 +611,14 @@ mMvC_MoveThrowOp: MACRO
 	mkhl \1, \2
 	ld   hl, CHL
 	call Play_Pl_MoveRotThrown
+ENDM
+
+; =============== mMvC_MoveThrowSync ===============
+; Always syncs the relative position set in mMvC_MoveThrowOp to be applied every frame of the HITANIM_THROW_ROT*.
+; Must be used if the player moves during the grab portion of the throw.
+mMvC_MoveThrowOpSync: MACRO
+	ld   a, $01
+	ld   [wPlayPlThrowRotSync], a
 ENDM
 
 ; =============== mMvC_ChkTarget ===============
@@ -650,13 +670,23 @@ mMvC_ChkGravityHV: MACRO
 ENDM
 
 ; =============== mMvC_DoGravityV ===============
-; Handles gravity and moves the OBJInfo vertically
+; Handles gravity and moves the OBJInfo vertically.
 ; IN
 ; - 1: Gravity value
 mMvC_DoGravityV: MACRO
 	ld   hl, \1
 	call OBJLstS_ApplyGravityVAndMoveV
 ENDM
+
+; =============== mMvC_DoGravityHV ===============
+; Handles gravity and moves the OBJInfo horizontally and vertically.
+; IN
+; - 1: Gravity value
+mMvC_DoGravityHV: MACRO
+	ld   hl, \1
+	call OBJLstS_ApplyGravityVAndMoveHV
+ENDM
+
 
 ; =============== mMvC_DoFrictionH ===============
 ; Handles friction and moves the player horizontally.
@@ -728,6 +758,17 @@ ENDM
 mMvC_ValFrameStart: MACRO
 	call OBJLstS_IsFrameNewLoad
 	jp   z, \1
+ENDM
+
+; =============== mMvC_ValFrameStartFast ===============
+; Simpler version of mMvC_ValFrameStart.
+; IN
+; - 1: Where to jump if validation fails
+mMvC_ValFrameStartFast: MACRO
+	ld   hl, iOBJInfo_Status
+	add  hl, de					; Seek to iOBJInfo_Status
+	bit  OSTB_GFXNEWLOAD, [hl]	; Have the graphics for the frame just finished loading?
+	jp   z, \1					; If not, jump
 ENDM
 
 ; =============== mMvC_ValFrameNotStart ===============

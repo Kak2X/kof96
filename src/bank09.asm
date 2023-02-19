@@ -13790,7 +13790,7 @@ MoveC_Krauser_LegTomahawk:
 	.obj0_noDamage:
 		jp   .anim
 	.obj0_setDamage:
-		mMvC_SetDamageNext $04, HITANIM_HIT1_MID, PF3_SHAKELONG|PF3_BIT4
+		mMvC_SetDamageNext $04, HITANIM_HIT_MID1, PF3_SHAKELONG|PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
@@ -13814,7 +13814,7 @@ MoveC_Krauser_LegTomahawk:
 	; Switch to #2 when YSpeed > -$06 (immediately) and then set its damage
 	mMvC_NextFrameOnGtYSpeed -$06, ANIMSPEED_NONE
 	jp   nc, .doGravity
-		mMvC_SetDamageNext $08, HITANIM_HIT0_MID, PF3_SHAKELONG|PF3_BIT4
+		mMvC_SetDamageNext $08, HITANIM_HIT_MID0, PF3_SHAKELONG|PF3_LASTHIT
 		jp   .doGravity
 ; --------------- frame #2 ---------------
 .obj2:
@@ -13823,13 +13823,13 @@ MoveC_Krauser_LegTomahawk:
 		ld   hl, iPlInfo_Flags1
 		add  hl, bc
 		res  PF1B_INVULN, [hl]
-		mMvC_SetDamageNext $08, HITANIM_DROP_SPEC_0C, PF3_BIT4
+		mMvC_SetDamageNext $08, HITANIM_DROP_DB_A, PF3_LASTHIT
 		jp   .doGravity
 ; --------------- frames #1-2 / common gravity check ---------------
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
 		mMvC_SetLandFrame $04*OBJLSTPTR_ENTRYSIZE, $06
-		mMvC_SetDamageNext $08, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
+		mMvC_SetDamageNext $08, HITANIM_DROP_DB_A, PF3_SHAKELONG
 		jp   .ret
 ; --------------- frame #6 ---------------
 .chkEnd:;J
@@ -13949,7 +13949,7 @@ MoveC_Krauser_KaiserDuelSobat:
 .obj2:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $10
-		mMvC_SetDamageNext $04, HITANIM_DROP_MD, PF3_SHAKELONG
+		mMvC_SetDamageNext $04, HITANIM_DROP_MAIN, PF3_SHAKELONG
 		jp   .anim
 ; --------------- frame #3 ---------------
 .chkEnd:
@@ -14027,9 +14027,7 @@ MoveC_Krauser_KaiserSuplex:
 		mMvC_SetSpeedV -$0400
 		mMvC_SetDamage $06, HITANIM_THROW_ROTR, PF3_SHAKELONG
 		mMvC_MoveThrowOp -$08, -$18 ; Move opponent back 8px, up $18px
-		; ???
-		ld   a, $01					
-		ld   [wPlayPlThrowRot_Unk_AlwaysSync], a
+		mMvC_MoveThrowOpSync
 .obj3_cont:
 	; Switch to next frame as soon as the speed decrements once (it's -$04 at first)
 	mMvC_NextFrameOnGtYSpeed -$04, ANIMSPEED_NONE
@@ -14042,14 +14040,13 @@ MoveC_Krauser_KaiserSuplex:
 	mMvC_ValFrameStart .obj4_cont
 		mMvC_SetDamage $06, HITANIM_THROW_ROTD, PF3_SHAKELONG
 		mMvC_MoveThrowOp -$10, -$04
-		ld   a, $01					; ???
-		ld   [wPlayPlThrowRot_Unk_AlwaysSync], a
+		mMvC_MoveThrowOpSync
 .obj4_cont:
 	jp   .doGravityDamage
 ; --------------- frame #5 ---------------
-; Deal large amounts of damage once, releasing the opponent with HITANIM_DROP_SPEC_0C.
+; Deal large amounts of damage once, releasing the opponent with HITANIM_DROP_DB_A.
 .obj5:
-	mMvC_SetDamage $0A, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
+	mMvC_SetDamage $0A, HITANIM_DROP_DB_A, PF3_SHAKELONG
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
 		jp   .anim
@@ -14077,7 +14074,7 @@ MoveC_Krauser_KaiserSuplex:
 .doGravityDamage:
 	mMvC_ChkGravityHV $0060, .anim
 		mMvC_SetLandFrame $05*OBJLSTPTR_ENTRYSIZE, $03
-		mMvC_SetDamageNext $0A, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
+		mMvC_SetDamageNext $0A, HITANIM_DROP_DB_A, PF3_SHAKELONG
 		jp   .ret
 ; --------------- frames #6-8 / gravity check ---------------
 .doGravity:
@@ -14421,7 +14418,7 @@ MoveC_Geese_ThrowG:
 ; (between #3-6 Geese arms move)
 .setDamage:
 	mMvC_ValFrameEnd .anim
-	mMvC_SetDamageNext $06, HITANIM_DROP_SPEC_0F, PF3_SHAKELONG
+	mMvC_SetDamageNext $06, HITANIM_THROW_END, PF3_SHAKELONG
 	jp   .anim
 ; --------------- frame #6 ---------------
 .chkEnd:
@@ -14487,7 +14484,7 @@ MoveC_Krauser_ThrowG:
 	;       is skipped they neglect to copy over the move damage fields.
 	;       Because of this, the logic for #4 manually updates the *current* move damage fields
 	;       as soon as possible.
-	mMvC_SetDamageNext $06, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
+	mMvC_SetDamageNext $06, HITANIM_DROP_DB_A, PF3_SHAKELONG
 	;--	
 	
 	jp   .anim
@@ -14495,7 +14492,7 @@ MoveC_Krauser_ThrowG:
 .setDamage2:
 	; The first time we get here, damage the opponent
 	mMvC_ValFrameStart .chkEnd
-	mMvC_SetDamage $06, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITANIM_DROP_DB_A, PF3_SHAKELONG
 .chkEnd:
 	; End the move when switching to #4
 	mMvC_ValFrameEnd .anim
@@ -14547,7 +14544,7 @@ MoveC_MrBig_ThrowG:
 .setDamage:
 	mMvC_ValFrameStart .chkEnd
 	
-	mMvC_SetDamage $06, HITANIM_DROP_SPEC_0F, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITANIM_THROW_END, PF3_SHAKELONG
 	
 	mMvC_MoveThrowOp +$04, -$20
 
@@ -14580,7 +14577,7 @@ MoveC_Iori_ThrowG:
 ; When switching to #2, deal damage.
 .setDamage:
 	mMvC_ValFrameEnd .anim
-	mMvC_SetDamageNext $06, HITANIM_DROP_MD, PF3_SHAKELONG
+	mMvC_SetDamageNext $06, HITANIM_DROP_MAIN, PF3_SHAKELONG
 	jp   .anim
 ; --------------- frame #3 ---------------
 ; When attempting to switch to #4, end the move.
@@ -14627,7 +14624,7 @@ MoveC_Mature_ThrowG:
 ; --------------- frame #2 ---------------
 .setDamage:
 	mMvC_ValFrameStart .chkEnd
-	mMvC_SetDamage $06, HITANIM_HIT_SPEC_09, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITANIM_HIT_MULTI0, PF3_SHAKELONG
 .chkEnd:
 	mMvC_ValFrameEnd .anim
 	mMvC_EndThrow
@@ -14680,7 +14677,7 @@ MoveC_Chizuru_ThrowG:
 ; --------------- frame #3 ---------------
 .setDamage:
 	mMvC_ValFrameStart .chkEnd
-	mMvC_SetDamage $06, HITANIM_DROP_SPEC_0F, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITANIM_THROW_END, PF3_SHAKELONG
 .chkEnd:
 	mMvC_ValFrameEnd .anim
 	mMvC_EndThrow

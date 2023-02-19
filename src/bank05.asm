@@ -8353,7 +8353,7 @@ MoveC_Iori_OniYaki:
 .obj0_cont:
 	; 4 lines of damage at the end
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $04, HITANIM_HIT0_MID, PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $04, HITANIM_HIT_MID0, PF3_FLASH_B_SLOW
 		jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
@@ -8364,7 +8364,7 @@ MoveC_Iori_OniYaki:
 	; 4 lines of damage at the end
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
-		mMvC_SetDamageNext $04, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $04, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW
 		jp   .anim
 ; --------------- frame #2 ---------------
 ; Jump setup.
@@ -8394,7 +8394,7 @@ MoveC_Iori_OniYaki:
 	; Immediately switch to the next frame (YSpeed always > -$09)
 	mMvC_NextFrameOnGtYSpeed -$09, ANIMSPEED_NONE
 	jp   nc, .doGravity
-		mMvC_SetDamageNext $04, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $04, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW
 		jp   .doGravity
 ; --------------- frame #3 ---------------
 .obj3:
@@ -8452,7 +8452,7 @@ MoveC_OIori_OniYaki:
 	; 4 lines of damage at the end
 	mMvC_ValFrameEnd .anim
 		; Different hit flags compared to normal version
-		mMvC_SetDamageNext $04, HITANIM_HIT0_MID, PF3_FLASH_B_SLOW|PF3_BIT4
+		mMvC_SetDamageNext $04, HITANIM_HIT_MID0, PF3_FLASH_B_SLOW|PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
@@ -8463,7 +8463,7 @@ MoveC_OIori_OniYaki:
 	; 4 lines of damage at the end
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $01 ; No manual control, unlike normal version
-		mMvC_SetDamageNext $04, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_BIT4
+		mMvC_SetDamageNext $04, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #2 ---------------
 ; Jump setup.
@@ -8500,7 +8500,7 @@ MoveC_OIori_OniYaki:
 ; Launches the opponent on the ground, unique to this version.
 .obj3:
 	mMvC_ValFrameEnd .doGravity
-		mMvC_SetDamageNext $04, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_BIT4
+		mMvC_SetDamageNext $04, HITANIM_DROP_DB_A, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_LASTHIT
 		jp   .doGravity
 ; --------------- frame #4 ---------------
 .obj4:
@@ -8571,7 +8571,7 @@ MoveC_Iori_AoiHana:
 		;
 		
 		; Set damage for heavy version initially
-		mMvC_SetDamageNext $08, HITANIM_DROP_MD, PF3_BIT4
+		mMvC_SetDamageNext $08, HITANIM_DROP_MAIN, PF3_LASTHIT
 		
 		ld   hl, iPlInfo_MoveId
 		add  hl, bc
@@ -8584,7 +8584,7 @@ MoveC_Iori_AoiHana:
 		add  hl, de
 		ld   [hl], ANIMSPEED_NONE
 		; And shake the opponent for longer
-		mMvC_SetDamageNext $08, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_BIT4
+		mMvC_SetDamageNext $08, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
 		jp   .moveH
 ; --------------- frame #2 ---------------
 ; Forward dash #2.
@@ -8629,7 +8629,7 @@ MoveC_Iori_AoiHana:
 	; This pretty much ends the combo string, so it's better to perform the light version instead.
 	mMvC_ValFrameEnd .doGravity
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
-		mMvC_SetDamageNext $08, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
+		mMvC_SetDamageNext $08, HITANIM_DROP_DB_A, PF3_SHAKELONG
 		jp   .doGravity
 ; --------------- frame #4 ---------------
 ; Small jump, mid-jump. Heavy version only.
@@ -8769,17 +8769,17 @@ MoveC_Iori_KotoTsukiIn:
 	; Switch to #6
 	mMvC_SetFrame $06*OBJLSTPTR_ENTRYSIZE, $02
 	; Deal more damage the next frame.
-	; The drop type and PF3_BIT4 differ between Iori and O.Iori, but damage is the same.
+	; The drop type and PF3_LASTHIT differ between Iori and O.Iori, but damage is the same.
 	ld   hl, iPlInfo_CharId
 	add  hl, bc
 	ld   a, [hl]
 	cp   CHAR_ID_OIORI				; Playing as IORI'?
 	jp   z, .obj5_setDamageOIori	; If so, jump
 .obj5_setDamageIori:
-	mMvC_SetDamageNext $08, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+	mMvC_SetDamageNext $08, HITANIM_DROP_DB_A, PF3_SHAKELONG|PF3_FLASH_B_SLOW
 	jp   .ret
 .obj5_setDamageOIori:
-	mMvC_SetDamageNext $08, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_BIT4
+	mMvC_SetDamageNext $08, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_LASTHIT
 	jp   .ret
 ; --------------- frame #6 ---------------
 ; Delay after the hit.
@@ -8829,13 +8829,13 @@ MoveC_Iori_ScumGale:
 ; --------------- frame #1 ---------------
 .obj1:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $06, HITANIM_THROW_ROTU, PF3_SHAKELONG|PF3_BIT4
+		mMvC_SetDamageNext $06, HITANIM_THROW_ROTU, PF3_SHAKELONG|PF3_LASTHIT
 		mMvC_MoveThrowOp +$04, +$00 ; Move fwd 4px
 		jp   .anim
 ; --------------- frame #2 ---------------
 .obj2:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_SHAKELONG|PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_SHAKELONG|PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #3 ---------------
 .chkEnd:
@@ -8969,13 +8969,13 @@ MoveC_Iori_KinYaOtomeEscapeD:
 ; Single punches that deal a single line of damage each.
 .setDamageLine:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0B, $00
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTIGS, $00
 		jp   .anim
 ; --------------- frame #1A ---------------
 ; Finisher, opponent launched with a backwards jump.
 .setDamageDrop:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITANIM_DROP_MD, $00
+		mMvC_SetDamageNext $01, HITANIM_DROP_MAIN, $00
 		jp   .anim
 ; --------------- frame #1B ---------------
 .setAnimSpeed28_2:
@@ -9077,7 +9077,7 @@ MoveC_Iori_KinYaOtomeS:
 	bit  PF1B_GUARD, [hl]			; Is the opponent blocking?
 	jp   nz, .obj1_chkGuard_guard	; If so, jump
 .obj1_chkGuard_noGuard:
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_FLASH_B_SLOW
+	mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_FLASH_B_SLOW
 	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
 	jp   .ret
 .obj1_chkGuard_noHit:
@@ -9089,45 +9089,46 @@ MoveC_Iori_KinYaOtomeS:
 ; --------------- odd frames #3,5,7,9,B,D,F - line damage + block check ---------------
 .setDamage1:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_FLASH_B_SLOW
 		jp   .chkOtherEscape
 ; --------------- frame #2 ---------------
 .setDamage0:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_FLASH_B_SLOW
 		jp   .anim
 ; --------------- even frames - line damage ---------------
 .setDamage0_chkOtherBlock:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_FLASH_B_SLOW
 		jp   .chkOtherEscape
 ; --------------- frames #10,11 - line damage + block check ---------------		
 .setDamage1_chkOtherBlock:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, $00
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, $00
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
 		;
-		; [TCRF] If the opponent somehow isn't in one of the hit animations 
-		;        this move sets, hop back instead of continuing.
-		;        This should never happen.
+		; [POI] If the opponent somehow isn't in one of the hit animations 
+		;       this move sets, hop back instead of continuing.
+		;       This can happen if the opponent gets hit by a previously thrown
+		;       fireball in the middle of the move.
 		;
 		ld   hl, iPlInfo_HitAnimIdOther
 		add  hl, bc
 		ld   a, [hl]
-		cp   HITANIM_HIT_SPEC_09	; A == HITANIM_HIT_SPEC_09?
+		cp   HITANIM_HIT_MULTI0	; A == HITANIM_HIT_MULTI0?
 		jp   z, .anim				; If so, skip
-		cp   HITANIM_HIT_SPEC_0A	; A == HITANIM_HIT_SPEC_0A?
+		cp   HITANIM_HIT_MULTI1	; A == HITANIM_HIT_MULTI1?
 		jp   z, .anim				; If so, skip
 		ld   a, MOVE_SHARED_HOP_B
-		call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+		call Pl_SetMove_StopSpeed
 		jp   .ret
 ; --------------- frame #12 ---------------
 ; Deals the big boy damage.
 .setDamageFinisher:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $10, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $10, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW
 		jp   .anim
 ; --------------- common horizontal movement ---------------
 .moveH:
@@ -9227,7 +9228,7 @@ MoveC_Iori_KinYaOtomeD:
 	jp   nz, .obj1_chkGuard_guard	; If so, jump
 .obj1_chkGuard_noGuard:
 	; Damage confirmed, switch to #2
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_FLASH_B_SLOW
+	mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_FLASH_B_SLOW
 	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
 	jp   .ret
 .obj1_chkGuard_noHit:
@@ -9245,7 +9246,7 @@ MoveC_Iori_KinYaOtomeD:
 	mMvC_ValFrameNotStart .obj2_setDamage
 		jp   .anim
 .obj2_setDamage:
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0B, $00
+	mMvC_SetDamageNext $01, HITANIM_HIT_MULTIGS, $00
 	;--
 	; This is exactly the same as the code in Pl_CopyXFlipToOther.
 	push de
@@ -9297,22 +9298,23 @@ MoveC_Iori_KinYaOtomeD:
 ; --------------- frames #4,6,8,A,C,E,14,16 ---------------
 .setDamage05:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $05, HITANIM_HIT_SPEC_0B, $00
+		mMvC_SetDamageNext $05, HITANIM_HIT_MULTIGS, $00
 		jp   .chkOtherEscape
 	.chkOtherEscape:
 		;
-		; [TCRF] If the opponent somehow isn't in one of the hit animations 
-		;        this move sets, switch to an alternate version of the move.
-		;        This should never happen.
+		; [POI] If the opponent somehow isn't in one of the hit animations 
+		;       this move sets, switch to an alternate version of the move.
+		;       This can happen if the opponent gets hit by a previously thrown
+		;       fireball in the middle of the move.
 		;
 		ld   hl, iPlInfo_HitAnimIdOther
 		add  hl, bc
 		ld   a, [hl]
-		cp   HITANIM_HIT_SPEC_09	; A == HITANIM_HIT_SPEC_09?
+		cp   HITANIM_HIT_MULTI0	; A == HITANIM_HIT_MULTI0?
 		jp   z, .anim				; If so, skip
-		cp   HITANIM_HIT_SPEC_0A	; A == HITANIM_HIT_SPEC_0A?
+		cp   HITANIM_HIT_MULTI1	; A == HITANIM_HIT_MULTI1?
 		jp   z, .anim				; If so, skip
-		cp   HITANIM_HIT_SPEC_0B	; A == HITANIM_HIT_SPEC_0B?
+		cp   HITANIM_HIT_MULTIGS	; A == HITANIM_HIT_MULTIGS?
 		jp   z, .anim				; If so, skip
 		call Play_Pl_EmptyPowOnSuperEnd
 		ld   hl, iPlInfo_Flags0
@@ -9320,7 +9322,7 @@ MoveC_Iori_KinYaOtomeD:
 		res  PF0B_SPECMOVE, [hl]
 		res  PF0B_SUPERMOVE, [hl]
 		ld   a, MOVE_IORI_KIN_YA_OTOME_ESCAPE_L
-		call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+		call Pl_SetMove_StopSpeed
 		jp   .ret
 ; --------------- frame #19 ---------------
 .setLongDelay:
@@ -9331,7 +9333,7 @@ MoveC_Iori_KinYaOtomeD:
 			mMvC_SetAnimSpeed $3C
 			jp   .anim
 .setDamageFinish:
-	mMvC_SetDamageNext $10, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+	mMvC_SetDamageNext $10, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW
 	jp   .anim
 ; --------------- common horizontal movement ---------------
 .moveH:
@@ -9436,7 +9438,7 @@ MoveC_OIori_KinYaOtome:
 	jp   nz, .obj1_chkGuard_guard	; If so, jump
 .obj1_chkGuard_noGuard:
 	; Damage confirmed, switch to #2
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_FLASH_B_SLOW|PF3_SHAKEONCE
+	mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_FLASH_B_SLOW|PF3_SHAKEONCE
 	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $00
 	
 	; Loop the damage frames (#2-#5) 4 times
@@ -9456,13 +9458,13 @@ MoveC_OIori_KinYaOtome:
 ; Frame used during multiple damage loops/sequences.
 .setDamage1:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_FLASH_B_SLOW
 		jp   .chkOtherEscape
 ; --------------- frame #3 ---------------
 ; For damage loop 0.
 .setDamage0:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_FLASH_B_SLOW
 		jp   .chkOtherEscape
 ; --------------- frame #5 ---------------
 ; Loop back to #2 until the counter elapses
@@ -9476,7 +9478,7 @@ MoveC_OIori_KinYaOtome:
 		add  hl, de
 		ld   [hl], $01*OBJLSTPTR_ENTRYSIZE ; offset by -1
 	.chkLoop0_noLoop:
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_FLASH_B_SLOW
 		jp   .chkOtherEscape
 ; --------------- frame #7 ---------------
 .startLoop1:
@@ -9485,13 +9487,13 @@ MoveC_OIori_KinYaOtome:
 		ld   hl, iPlInfo_OIori_KinYaOtome_LoopCount
 		add  hl, bc
 		ld   [hl], $04
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0B, PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTIGS, PF3_FLASH_B_SLOW
 		jp   .chkOtherEscape
 ; --------------- frame #8 ---------------
 ; For damage loop 1.
 .setDamage2:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0B, PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTIGS, PF3_FLASH_B_SLOW
 		jp   .chkOtherEscape
 ; --------------- frame #9 ---------------
 ; Loop back to #8 until the counter elapses
@@ -9505,44 +9507,45 @@ MoveC_OIori_KinYaOtome:
 		add  hl, de
 		ld   [hl], $07*OBJLSTPTR_ENTRYSIZE ; offset by -1
 	.chkLoop1_noLoop:
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0B, PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTIGS, PF3_FLASH_B_SLOW
 		jp   .chkOtherEscape
 ; --------------- frame #A ---------------
 ; Damage sequence 2 (no loop). Hit 1.
 .setDamage0_seq2:;J
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_SHAKEONCE
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_SHAKEONCE
 		jp   .chkOtherEscape
 ; --------------- frame #B ---------------
 ; Damage sequence 2 (no loop). Hit 2.
 .setDamage1_seq2:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_SHAKEONCE
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_SHAKEONCE
 		jp   .chkOtherEscape
 ; --------------- frames #C,#D ---------------
 ; Damage sequence 2 (no loop). Hits 3,4.
 .setDamage2_seq2:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $01, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW
 		jp   .anim
 	; --------------- common escape check ---------------
 	.chkOtherEscape:
 		;
-		; [TCRF] If the opponent somehow isn't in one of the hit animations 
-		;        this move sets, hop back instead of continuing.
-		;        This should never happen.
+		; [POI] If the opponent somehow isn't in one of the hit animations 
+		;       this move sets, hop back instead of continuing.
+		;       This can happen if the opponent gets hit by a previously thrown
+		;       fireball in the middle of the move.
 		;
 		ld   hl, iPlInfo_HitAnimIdOther
 		add  hl, bc
 		ld   a, [hl]
-		cp   HITANIM_HIT_SPEC_09	; A == HITANIM_HIT_SPEC_09?
+		cp   HITANIM_HIT_MULTI0	; A == HITANIM_HIT_MULTI0?
 		jp   z, .anim				; If so, skip
-		cp   HITANIM_HIT_SPEC_0A	; A == HITANIM_HIT_SPEC_0A?
+		cp   HITANIM_HIT_MULTI1	; A == HITANIM_HIT_MULTI1?
 		jp   z, .anim				; If so, skip
-		cp   HITANIM_HIT_SPEC_0B	; A == HITANIM_HIT_SPEC_0B?
+		cp   HITANIM_HIT_MULTIGS	; A == HITANIM_HIT_MULTIGS?
 		jp   z, .anim				; If so, skip
 		ld   a, MOVE_SHARED_HOP_B
-		call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+		call Pl_SetMove_StopSpeed
 		jp   .ret
 ; --------------- common horizontal movement ---------------
 .moveH:
@@ -9737,7 +9740,7 @@ MoveC_Mature_Decide:
 ; --------------- frame #4 ---------------
 .obj4:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $04, HITANIM_DROP_SPEC_0F, PF3_SHAKELONG
+		mMvC_SetDamageNext $04, HITANIM_THROW_END, PF3_SHAKELONG
 		jp   .anim
 ; --------------- frame #7 ---------------
 .chkEnd:
@@ -9832,13 +9835,13 @@ MoveC_Mature_MetalMassacre:
 ; We're close to the opponent now.
 ; Deal continuously 1 line of damage, slowing down in the process.
 .damageH40:
-	mMvC_SetDamage $01, HITANIM_HIT0_MID, PF3_SHAKEONCE
+	mMvC_SetDamage $01, HITANIM_HIT_MID0, PF3_SHAKEONCE
 	mMvC_DoFrictionH $0040
 	jp   .anim
 ; --------------- frame #7 ---------------
 ; Like the previous one, but slowing down more.
 .obj7:
-	mMvC_SetDamage $01, HITANIM_HIT0_MID, PF3_SHAKEONCE
+	mMvC_SetDamage $01, HITANIM_HIT_MID0, PF3_SHAKEONCE
 	mMvC_DoFrictionH $0080
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $14
@@ -9921,15 +9924,15 @@ MoveC_Mature_DeathRow:
 	jp   .anim
 ; --------------- frame #1 ---------------
 .hitA0:
-	mMvC_SetDamage $03, HITANIM_HIT0_MID, PF3_BIT4|PF3_SHAKEONCE
+	mMvC_SetDamage $03, HITANIM_HIT_MID0, PF3_LASTHIT|PF3_SHAKEONCE
 	jp   .hit0_main
 ; --------------- frame #4 ---------------
 .hitB0:
-	mMvC_SetDamage $03, HITANIM_HIT1_MID, PF3_BIT4|PF3_SHAKEONCE
+	mMvC_SetDamage $03, HITANIM_HIT_MID1, PF3_LASTHIT|PF3_SHAKEONCE
 	jp   .hit0_main
 ; --------------- frame #7 ---------------
 .hitC0:
-	mMvC_SetDamage $03, HITANIM_DROP_MD, PF3_BIT4|PF3_SHAKEONCE
+	mMvC_SetDamage $03, HITANIM_DROP_MAIN, PF3_LASTHIT|PF3_SHAKEONCE
 	jp   .hit0_main
 ; --------------- frame #1,4,7 / input repeat check ---------------
 .hit0_main:
@@ -9940,15 +9943,15 @@ MoveC_Mature_DeathRow:
 	
 ; --------------- frame #2 ---------------
 .hitA1:
-	mMvC_SetDamage $01, HITANIM_HIT0_MID, PF3_SHAKEONCE
+	mMvC_SetDamage $01, HITANIM_HIT_MID0, PF3_SHAKEONCE
 	jp   .hit1_main
 ; --------------- frame #5 ---------------
 .hitB1:
-	mMvC_SetDamage $01, HITANIM_HIT1_MID, PF3_SHAKEONCE
+	mMvC_SetDamage $01, HITANIM_HIT_MID1, PF3_SHAKEONCE
 	jp   .hit1_main
 ; --------------- frame #8 ---------------
 .hitC1:
-	mMvC_SetDamage $01, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_SHAKEONCE
+	mMvC_SetDamage $01, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_SHAKEONCE
 	jp   .hit1_main
 ; --------------- frame #2,5,8 / repeat done check ---------------	
 .hit1_main:
@@ -10114,7 +10117,7 @@ MoveC_Mature_Despair:
 	call MoveInputS_CheckMoveLHVer	; Is the the hidden heavy triggered?
 	jp   nc, .obj2_waitNext			; If not, jump
 .obj2_doDamageE:
-	mMvC_SetDamage $02, HITANIM_HIT0_MID, PF3_BIT4|PF3_SHAKEONCE
+	mMvC_SetDamage $02, HITANIM_HIT_MID0, PF3_LASTHIT|PF3_SHAKEONCE
 .obj2_waitNext:
 	mMvC_NextFrameOnGtYSpeed -$01, ANIMSPEED_NONE
 	jp   nc, .doGravity
@@ -10254,10 +10257,7 @@ MoveC_Mature_HeavensGate:
 	mMvC_SetDamageNext $01, HITANIM_THROW_ROTU, PF3_SHAKELONG
 	mMvC_SetDamage $01, HITANIM_THROW_ROTU, PF3_SHAKELONG
 	mMvC_MoveThrowOp -$08, +$00 ; Move back 8px
-	; Always sync position of the opponent relative to the player ???
-	; So he'll get moved automatically when we move to the edge of the screen while grabbing him.
-	ld   a, $01
-	ld   [wPlayPlThrowRot_Unk_AlwaysSync], a
+	mMvC_MoveThrowOpSync
 	call OBJLstS_ApplyXSpeed
 	scf			; C flag set
 	ret
@@ -10336,11 +10336,11 @@ MoveC_Mature_HeavensGate:
 	jp   z, .obj4_setDamageD			; If so, jump
 .obj4_setDamageS:
 	; This deals more damage since the projectile itself *doesn't*
-	mMvC_SetDamageNext $14, HITANIM_DROP_MD, PF3_SHAKELONG
+	mMvC_SetDamageNext $14, HITANIM_DROP_MAIN, PF3_SHAKELONG
 	jp   .ret
 .obj4_setDamageD:
 	; While the super desperation version does deal continuous damage, so the physical hit deals a bit less
-	mMvC_SetDamageNext $0C, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_BIT4
+	mMvC_SetDamageNext $0C, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
 	jp   .ret
 	
 ; --------------- frame #5 ---------------
@@ -10362,13 +10362,13 @@ MoveC_Mature_HeavensGate:
 		jp   z, .obj5_setProjDamageD		; If so, jump
 	.obj5_setProjDamageS:
 		; Super version deals no damage
-		mkhl $00, HITANIM_DROP_SPEC_AIR_0E
+		mkhl $00, HITANIM_DROP_SWOOPUP
 		ld   hl, CHL
 		ld   a, PF3_SHAKELONG
 		jp   .obj5_initProj
 	.obj5_setProjDamageD:
 		; Desperation version deals 1 line of continuous damage
-		mkhl $01, HITANIM_DROP_SPEC_AIR_0E
+		mkhl $01, HITANIM_DROP_SWOOPUP
 		ld   hl, CHL
 		ld   a, PF3_SHAKELONG
 	.obj5_initProj:
@@ -10384,7 +10384,7 @@ MoveC_Mature_HeavensGate:
 ; Switches to the backwards hop.
 .switchToBackHop:
 	ld   a, MOVE_SHARED_HOP_B
-	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+	call Pl_SetMove_StopSpeed
 	ld   a, PLAY_THROWACT_NONE
 	ld   [wPlayPlThrowActId], a
 	jp   .ret
@@ -10864,12 +10864,12 @@ MoveC_Chizuru_ShinsokuNoroti:
 	.switchToTenZuiL:
 		ld   a, MOVE_CHIZURU_TEN_ZUI_L
 		call MoveInputS_SetSpecMove_StopSpeed
-		mMvC_SetDamageNext $02, HITANIM_DROP_MD, PF3_SHAKELONG
+		mMvC_SetDamageNext $02, HITANIM_DROP_MAIN, PF3_SHAKELONG
 		jp   .ret
 	.switchToTenZuiH:
 		ld   a, MOVE_CHIZURU_TEN_ZUI_H
 		call MoveInputS_SetSpecMove_StopSpeed
-		mMvC_SetDamageNext $02, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
+		mMvC_SetDamageNext $02, HITANIM_DROP_DB_A, PF3_SHAKELONG
 		jp   .ret
 ; --------------- frame #5 ---------------
 ; Slow down. When the frame ends, the move ends.
@@ -11631,11 +11631,11 @@ MoveC_Daimon_CmdThrow:
 		cp   MOVE_DAIMON_CLOUD_TOSSER	; MoveId >= MOVE_DAIMON_CLOUD_TOSSER?
 		jp   nc, .obj6_setDamageCt		; If so, jump (not Chou Oosoto Gari)
 	.obj6_setDamageCog:
-		mkhl $06, HITANIM_DROP_SPEC_0C
+		mkhl $06, HITANIM_DROP_DB_A
 		ld   hl, CHL
 		jp   .obj6_setDamage
 	.obj6_setDamageCt:
-		mkhl $06, HITANIM_DROP_SPEC_0F
+		mkhl $06, HITANIM_THROW_END
 		ld   hl, CHL
 	.obj6_setDamage:
 		ld   a, $00 ; Flags
@@ -11713,7 +11713,7 @@ MoveC_Daimon_HeavenDrop:
 ; --------------- frame #2 ---------------	
 .obj2:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $06, HITANIM_HIT_SPEC_0B, PF3_BIT4|PF3_SHAKEONCE
+		mMvC_SetDamageNext $06, HITANIM_HIT_MULTIGS, PF3_LASTHIT|PF3_SHAKEONCE
 		jp   .anim
 ; --------------- frame #3 ---------------	
 .obj3:
@@ -11740,7 +11740,7 @@ MoveC_Daimon_HeavenDrop:
 .obj6:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $1E
-		mMvC_SetDamageNext $06, HITANIM_DROP_SPEC_AIR_0E, PF3_SHAKELONG
+		mMvC_SetDamageNext $06, HITANIM_DROP_SWOOPUP, PF3_SHAKELONG
 		jp   .anim
 ; --------------- frame #9 ---------------	
 .chkEnd:
@@ -11861,14 +11861,14 @@ MoveC_Daimon_HeavenHellDrop:
 ; Initial grab frame. Opponent is in front.
 .iGrabF:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $06, HITANIM_THROW_ROTD, PF3_BIT4|PF3_SHAKEONCE
+		mMvC_SetDamageNext $06, HITANIM_THROW_ROTD, PF3_LASTHIT|PF3_SHAKEONCE
 		mMvC_MoveThrowOp -$10, -$08
 		jp   .anim
 ; --------------- frame #3 ---------------
 ; Initial grab frame. Opponent is in front and slightly below the middle.
 .iGrabDFDamage:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $06, HITANIM_HIT_SPEC_0B, PF3_BIT4|PF3_SHAKEONCE
+		mMvC_SetDamageNext $06, HITANIM_HIT_MULTIGS, PF3_LASTHIT|PF3_SHAKEONCE
 		jp   .anim
 ; --------------- frame #4 ---------------
 ; Initial grab frame. Opponent is on the ground forward.
@@ -11909,7 +11909,7 @@ MoveC_Daimon_HeavenHellDrop:
 ; Grab loop - Daimon crouching starting the throw. Opponent is on the ground in front.
 .lpGrabStartF:
 	mMvC_ValFrameEnd .anim
-		; Start the command throw again, since damaging the player using HITANIM_HIT_SPEC_0B internally ended the throw state.
+		; Start the command throw again, since damaging the player using HITANIM_HIT_MULTIGS internally ended the throw state.
 		; As the opponent is near and "frozen", this should never fail.
 		call MoveInputS_TryStartCommandThrow_Unk_Coli05
 		jp   nc, .ret
@@ -11944,14 +11944,14 @@ MoveC_Daimon_HeavenHellDrop:
 	; At the end of this, deal damage.
 	; Doing this ends the throw state, so one of the frames after regrabs the opponent.
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $06, HITANIM_HIT_SPEC_0B, PF3_SHAKELONG
+		mMvC_SetDamageNext $06, HITANIM_HIT_MULTIGS, PF3_SHAKELONG
 		jp   .anim
 ; --------------- frame #F ---------------
 ; At the end of the frame, perform the long off-screen throw.
 .startThrow:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $0A
-		mMvC_SetDamageNext $06, HITANIM_DROP_SPEC_AIR_0E, PF3_SHAKELONG
+		mMvC_SetDamageNext $06, HITANIM_DROP_SWOOPUP, PF3_SHAKELONG
 		jp   .anim
 ; --------------- frame #8 ---------------
 ; Grab loop. Opponent is on the ground backwards.
@@ -12022,7 +12022,7 @@ MoveC_Daimon_HeavenHellDrop:
 		ld   a, MOVE_DAIMON_JIRAI_SHIN
 	.chkEnd_setNextMove:
 		call MoveInputS_SetSpecMove_StopSpeed
-		mMvC_SetDamageNext $08, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_SHAKEONCE
+		mMvC_SetDamageNext $08, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW|PF3_SHAKEONCE
 		jp   .ret
 ; --------------- common ---------------	
 .anim:

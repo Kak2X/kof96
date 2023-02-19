@@ -10523,7 +10523,7 @@ Play_Pl_ChkWallJumpInput:
 .jumpOk:
 	; Restart the jump sequence by starting a new one.
 	ld   a, MOVE_SHARED_JUMP_N
-	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+	call Pl_SetMove_StopSpeed
 	scf		; C flag set
 	ret
 	
@@ -11971,7 +11971,7 @@ Play_Pl_DoBasicMoveInput:
 			; If the other player is attacking, attempting to walk backwards will block instead.
 			ld   hl, iPlInfo_Flags0Other
 			add  hl, bc
-			bit  PF0B_PROJ, [hl]						; Is the other player throwing a projectile?
+			bit  PF0B_PROJ, [hl]					; Is the other player throwing a projectile?
 			jp   nz, BasicInput_StartGroundBlock	; If so, jump	
 			ld   hl, iPlInfo_MoveDamageValOther
 			add  hl, bc
@@ -12088,7 +12088,7 @@ Play_Pl_DoBasicMoveInput:
 										; PF1B_CROUCH got already set before
 			; New move
 			ld   a, MOVE_SHARED_CROUCH
-			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			call Pl_SetMove_StopSpeed
 			jp   BasicInput_End
 			
 		;
@@ -12110,7 +12110,7 @@ Play_Pl_DoBasicMoveInput:
 			
 			; New move
 			ld   a, MOVE_SHARED_IDLE
-			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			call Pl_SetMove_StopSpeed
 			
 			jp   BasicInput_End
 
@@ -12141,7 +12141,7 @@ Play_Pl_DoBasicMoveInput:
 			
 			; New move
 			ld   a, MOVE_SHARED_WALK_F
-			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			call Pl_SetMove_StopSpeed
 			
 			; Apply continuous movement speed since we just nuked it
 			ld   hl, iPlInfo_SpeedX					; HL = Offset to walk speed for this char
@@ -12168,7 +12168,7 @@ Play_Pl_DoBasicMoveInput:
 			
 			; New move
 			ld   a, MOVE_SHARED_WALK_B
-			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			call Pl_SetMove_StopSpeed
 			
 			; Apply continuous movement speed since we just nuked it
 			ld   hl, iPlInfo_BackSpeedX				; HL = Offset to backwalk speed for this char
@@ -12228,7 +12228,7 @@ Play_Pl_DoBasicMoveInput:
 			; The code for it will then detect if it should switch to
 			; either the backwards or forwards jumps.
 			ld   a, MOVE_SHARED_JUMP_N
-			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			call Pl_SetMove_StopSpeed
 			jp   BasicInput_End
 			
 		;
@@ -12253,8 +12253,10 @@ Play_Pl_DoBasicMoveInput:
 			jp   z, BasicInput_End		; If so, return
 			ld   a, MOVE_SHARED_BLOCK_C	; Otherwise, start the low block
 		.start:
-			set  PF1B_GUARD, [hl]		; Reduce damage
-			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			; Set the block flag and switch to the appropriate move.
+			; For obvious reasons, this is done before execution gets to HomeCall_Play_Pl_DoHit.
+			set  PF1B_GUARD, [hl]		; Do the block
+			call Pl_SetMove_StopSpeed
 			jp   BasicInput_End
 			
 		;
@@ -12291,11 +12293,11 @@ Play_Pl_DoBasicMoveInput:
 			res  PF1B_CROUCH, [hl]			; and standing
 			set  PF1B_NOBASICINPUT, [hl]	; Not cancellable by movement
 			set  PF1B_XFLIPLOCK, [hl]		; Doesn't turn if opponent jumps over
-			set  PF1B_NOSPECSTART, [hl]	; Not cancellable by specials
+			set  PF1B_NOSPECSTART, [hl]		; Not cancellable by specials
 			
 			; New move
 			ld   a, MOVE_SHARED_CHARGEMETER
-			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			call Pl_SetMove_StopSpeed
 			jp   BasicInput_End
 			
 		;
@@ -12315,7 +12317,7 @@ Play_Pl_DoBasicMoveInput:
 			
 			; New move
 			ld   a, MOVE_SHARED_PUNCH_L
-			call Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH
+			call Pl_SetMove_ResetNewKeysLH
 			jp   BasicInput_End
 			
 		;
@@ -12354,7 +12356,7 @@ Play_Pl_DoBasicMoveInput:
 			
 			; New move
 			ld   a, MOVE_SHARED_PUNCH_H
-			call Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH
+			call Pl_SetMove_ResetNewKeysLH
 			jp   BasicInput_End
 			
 		;
@@ -12372,7 +12374,7 @@ Play_Pl_DoBasicMoveInput:
 			
 			; New move
 			ld   a, MOVE_SHARED_KICK_L
-			call Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH
+			call Pl_SetMove_ResetNewKeysLH
 			jp   BasicInput_End
 			
 		;
@@ -12412,7 +12414,7 @@ Play_Pl_DoBasicMoveInput:
 			
 			; New move
 			ld   a, MOVE_SHARED_KICK_H
-			call Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH
+			call Pl_SetMove_ResetNewKeysLH
 			jp   BasicInput_End
 			
 		;
@@ -12438,7 +12440,7 @@ Play_Pl_DoBasicMoveInput:
 			
 			; New move
 			ld   a, MOVE_SHARED_PUNCH_CL
-			call Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH
+			call Pl_SetMove_ResetNewKeysLH
 			jp   BasicInput_End
 			
 		;
@@ -12468,7 +12470,7 @@ Play_Pl_DoBasicMoveInput:
 			
 			; New move
 			ld   a, MOVE_SHARED_PUNCH_CH
-			call Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH
+			call Pl_SetMove_ResetNewKeysLH
 			jp   BasicInput_End
 			
 		;
@@ -12484,7 +12486,7 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_NOSPECSTART, [hl]
 			; New move
 			ld   a, MOVE_SHARED_KICK_CL
-			call Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH
+			call Pl_SetMove_ResetNewKeysLH
 			jp   BasicInput_End
 			
 		;
@@ -12505,7 +12507,7 @@ Play_Pl_DoBasicMoveInput:
 			
 			; New move
 			ld   a, MOVE_SHARED_KICK_CH
-			call Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH
+			call Pl_SetMove_ResetNewKeysLH
 			jp   BasicInput_End
 			
 		;
@@ -12533,7 +12535,7 @@ Play_Pl_DoBasicMoveInput:
 			
 			; New move
 			ld   a, MOVE_SHARED_ROLL_F
-			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			call Pl_SetMove_StopSpeed
 			jp   BasicInput_End
 			
 		;
@@ -12561,7 +12563,7 @@ Play_Pl_DoBasicMoveInput:
 			
 			; New move
 			ld   a, MOVE_SHARED_ROLL_B
-			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			call Pl_SetMove_StopSpeed
 			jp   BasicInput_End
 			
 		;
@@ -12583,7 +12585,7 @@ Play_Pl_DoBasicMoveInput:
 			
 			; New move
 			ld   a, MOVE_SHARED_ATTACK_G
-			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			call Pl_SetMove_StopSpeed
 			jp   BasicInput_End
 			
 		;
@@ -12606,7 +12608,7 @@ Play_Pl_DoBasicMoveInput:
 			
 			; New move
 			ld   a, MOVE_SHARED_RUN_F
-			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			call Pl_SetMove_StopSpeed
 			
 			; Set continuous running speed
 			ld   hl, iPlInfo_SpeedX					; HL = Offset to walk speed for this char
@@ -12634,7 +12636,7 @@ Play_Pl_DoBasicMoveInput:
 			
 			; New move
 			ld   a, MOVE_SHARED_HOP_B
-			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			call Pl_SetMove_StopSpeed
 			jp   BasicInput_End
 			
 		;
@@ -12670,7 +12672,7 @@ Play_Pl_DoBasicMoveInput:
 			
 			; New move
 			ld   a, MOVE_SHARED_TAUNT
-			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			call Pl_SetMove_StopSpeed
 			jp   BasicInput_End
 		.sndActTbl:
 			db SCT_TAUNT_B ; CHAR_ID_KYO     
@@ -12711,7 +12713,7 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_NOSPECSTART, [hl]
 			
 			; New move
-			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			call Pl_SetMove_StopSpeed
 			jp   BasicInput_End
 			
 		;
@@ -12734,7 +12736,7 @@ Play_Pl_DoBasicMoveInput:
 			
 			; New move
 			ld   a, MOVE_SHARED_THROW_G
-			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			call Pl_SetMove_StopSpeed
 			; Wait 1 frame
 			call Task_PassControlFar
 			; Switch to the next part of the throw.
@@ -12769,12 +12771,12 @@ Play_Pl_DoBasicMoveInput:
 			jp   BasicInput_End
 		.throwFail:
 			; Play the SFX
-			ld   a, SCT_THROWTECH
+			ld   a, SCT_BREAK
 			call HomeCall_Sound_ReqPlayExId
 			; We're on the receiving end of the throw tech.
 			; It should also reset the screen shake in case the throw was going to do one.
-			ld   a, MOVE_SHARED_THROWTECH_RECV
-			call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
+			ld   a, MOVE_SHARED_GUARDBREAK_G
+			call Pl_SetMove_ShakeScreenReset
 			; Flash the playfield (slightly differently) to signal that the throw got aborted
 			ld   a, $F0
 			ld   [wStageBGP], a
@@ -12812,7 +12814,7 @@ Play_Pl_DoBasicMoveInput:
 			
 			; New move
 			ld   a, MOVE_SHARED_THROW_A
-			call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+			call Pl_SetMove_StopSpeed
 			; Wait 1 frame
 			call Task_PassControlFar
 			; Switch to the next part of the throw.
@@ -12827,18 +12829,18 @@ Play_Pl_DoBasicMoveInput:
 	pop  bc
 	ret
 	
-; =============== Pl_Unk_SetNewMoveAndAnim_* ===============
+; =============== Pl_SetMove_* ===============
 ; Set of subroutines that start a new move, initialize its animation, and optionally cause a specific effect.
 ; Moves use one of these rather than directly calling Pl_SetNewMove.
 
-; =============== Pl_Unk_SetNewMoveAndAnim_StopSpeed ===============
+; =============== Pl_SetMove_StopSpeed ===============
 ; Starts a new move and initializes its animation.
 ; This is for continuous moves that kill the player momentum when used (ie: most of them).
 ; IN
 ; - A: Move ID
 ; - BC: Ptr to wPlInfo structure
 ; - DE: Ptr to respective wOBJInfo structure
-Pl_Unk_SetNewMoveAndAnim_StopSpeed:
+Pl_SetMove_StopSpeed:
 	push bc
 		push de
 			call Pl_SetNewMove
@@ -12860,7 +12862,7 @@ Pl_Unk_SetNewMoveAndAnim_StopSpeed:
 	pop  bc
 	ret
 	
-; =============== Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH ===============
+; =============== Pl_SetMove_ResetNewKeysLH ===============
 ; Starts a new move and initializes its animation.
 ; This is used for starting basic moves (BasicInput_ChkBaseInput) that depend on the light/heavy status.
 ;
@@ -12872,7 +12874,7 @@ Pl_Unk_SetNewMoveAndAnim_StopSpeed:
 ; - A: Move ID
 ; - BC: Ptr to wPlInfo structure
 ; - DE: Ptr to respective wOBJInfo structure
-Pl_Unk_SetNewMoveAndAnim_ResetNewKeysLH:
+Pl_SetMove_ResetNewKeysLH:
 	push bc
 		push de
 			call Pl_SetNewMove
@@ -12910,15 +12912,15 @@ Pl_Unk_SetNewMoveAndAnim:
 	pop  bc
 	ret
 	
-; =============== Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset ===============
+; =============== Pl_SetMove_ShakeScreenReset ===============
 ; Starts a new move and initializes its animation.
-; Some of the moves that start an earthquake use this for ????
-; This also resets the ??? values at 3A 3D
+; This one resets the earthquake effect and all move damage fields (in case they were used alongside the former).
+; This is done because move that use this do an earthquake effect themselves.
 ; IN
 ; - A: Move ID
 ; - BC: Ptr to wPlInfo structure
 ; - DE: Ptr to respective wOBJInfo structure
-Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset:
+Pl_SetMove_ShakeScreenReset:
 	push bc
 		push de
 			call Pl_SetNewMove
@@ -13352,6 +13354,7 @@ Play_OBJLstS_SetSpeedH_ByXFlipR:
 	
 ; =============== Play_OBJLstS_SetSpeedH_ByXDirL ===============
 ; Sets the horizontal movement speed for the specified sprite mapping, relative to the current player *internally* facing *left*.
+; There's no reason to have inconsistencies with the other SetSpeedH routines but oh well.
 ; See also: Play_OBJLstS_SetSpeedH_ByXFlipR
 ; IN
 ; - DE: Ptr to wOBJInfo structure
@@ -14153,7 +14156,7 @@ MoveInputS_CheckSuperDesperation:
 ; =============== MoveInputS_SetSpecMove_StopSpeed ===============
 ; Makes the specified player start a new special or super move.
 ; Most special moves use this subroutine to start them, and as a result
-; of using Pl_Unk_SetNewMoveAndAnim_StopSpeed, they cancel the player's momentum. 
+; of using Pl_SetMove_StopSpeed, they cancel the player's momentum. 
 ; IN
 ; - A: Move ID
 ; - BC: Ptr to wPlInfo structure
@@ -14212,7 +14215,7 @@ MoveInputS_SetSpecMove_StopSpeed:
 	; Actually start the move, stopping the player momentum
 	;
 	push hl
-		call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+		call Pl_SetMove_StopSpeed
 	pop  hl
 	
 	;
@@ -14228,7 +14231,7 @@ MoveInputS_SetSpecMove_StopSpeed:
 	; Set that we started a combo'd move
 	inc  hl						
 	set  PF2B_HITCOMBO, [hl]
-	; Note that Pl_Unk_SetNewMoveAndAnim_StopSpeed set us a new FrameLeft/FrameTotal value.
+	; Note that Pl_SetMove_StopSpeed set us a new FrameLeft/FrameTotal value.
 	; In case of moves that expect manual control by having set ANIMSPEED_NONE ($FF) initially, don't remove the delay.
 	ld   hl, iOBJInfo_FrameLeft
 	add  hl, de		; Seek to iOBJInfo_FrameLeft
@@ -14369,10 +14372,12 @@ Play_Pl_MoveRotThrown:
 	ld   [wPlayPlThrowRotMoveH], a
 	ld   a, l
 	ld   [wPlayPlThrowRotMoveV], a
-	; ??? By default only use it in the HitAnim code for rotation frames.
-	;     If it needs to be used in the move code as well, it should be manually set after calling this.
+	; By default, perform the movment only once.
+	; However, once isn't enough if the player moves in the middle of the throw,
+	; as the opponent needs to be sync'd to the updated position.
+	; Moves that need so manually set this value (mMvC_MoveThrowSync)
 	xor  a
-	ld   [wPlayPlThrowRot_Unk_AlwaysSync], a
+	ld   [wPlayPlThrowRotSync], a
 	ret
 	
 ; =============== Play_Pl_SetMoveDamage ===============
@@ -14773,7 +14778,7 @@ Play_Pl_ChkThrowInput:
 	ld   [wPlayPlThrowActId], a
 	
 	; All throws do $0C lines of damage.
-	; The damage is taken when the opponent gets thrown at the *end*.
+	; The damage is dealt when the opponent gets thrown at the *end*.
 	; Meaning that if it gets aborted early, no damage is dealt.
 	; Note that, in the MoveAnimTbl_* entries, the damage fields are all $00 anyway.
 	ld   hl, iPlInfo_MoveDamageVal
@@ -15104,7 +15109,7 @@ Play_Pl_ChkHitStop:
 	call Play_Pl_ExecSpecMoveInputCode	; Was a special move started?
 	jp   c, .moveSet				; If so, return
 	; Guard cancel variant
-	; If we get attacked, Play_Pl_DoHit will call an HitAnim_* and take exclusive control for a bit.
+	; If we get attacked, Play_Pl_DoHit will call an HitAnimC_* and take exclusive control for a bit.
 	; In case of blocking, we can start a new special move (or a roll) when guard canceling.
 	call HomeCall_Play_Pl_DoHit		; Did we get attacked and guard cancelled?
 	jp   c, .moveSet				; If so, return
@@ -15162,18 +15167,19 @@ Play_Pl_GiveKnockbackCornered:
 .ret:
 	ret
 	
-; =============== Play_Unk_Pl_BlockstunNormal ===============
-; Blockstun handler that doesn't allow guard cancels.
+; =============== Play_Pl_DoHitstun ===============
+; Generic hitstun handler that doesn't allow guard cancels.
 ;
 ; Handles the effect for the player shaking when coming in contact with an hit.
-; This happens regardless of the player blocking the attack or not.
+; This can happen both when blocking the attack or getting hit.
+;
 ; IN
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo structure
 ; OUT
 ; - C flag: Always clear, as there's no guard cancel. 
 ;           Return value required by Play_Pl_DoBlockstun jumping to here.
-Play_Unk_Pl_BlockstunNormal:
+Play_Pl_DoHitstun:
 
 	;
 	; If we haven't been hit by a projectile, mark that we received a physical hit
@@ -15352,14 +15358,15 @@ Play_Pl_GetShakeCount:
 .ret:
 	ret
 	
-; =============== Play_Unk_Pl_BlockstunNormalOnce ===============
+; =============== Play_Pl_DoHitstunOnce ===============
 ; Performs the normal hit shake effect once, for two frames.
 ; For physical hits only.
 ; IN:
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo structure
-Play_Unk_Pl_BlockstunNormalOnce:
-	; Enable hitstop to the opponent while this happens
+Play_Pl_DoHitstunOnce:
+	; Always enable hitstop to the opponent while this happens,
+	; since this is only called for physical hits.
 	ld   a, $01
 	ld   [wPlayHitstopSet], a
 	
@@ -15405,20 +15412,17 @@ Play_Unk_Pl_BlockstunNormalOnce:
 Play_Pl_DoBlockstun:
 	
 	;
-	; If not at max power, use the normal handler
+	; If not at max power, reuse the normal hitstun handler.
 	;
 	ld   hl, iPlInfo_Pow
 	add  hl, bc
 	ld   a, [hl]
-	cp   PLAY_POW_MAX						; iPlInfo_Pow != $28?
-	jp   nz, Play_Unk_Pl_BlockstunNormal	; If so, jump
+	cp   PLAY_POW_MAX			; iPlInfo_Pow != $28?
+	jp   nz, Play_Pl_DoHitstun	; If so, jump
 	
 	;
-	; At max power, the player shakes more visibly during stunlock,
-	; and there's no movement difference between 1P and 2P sides (see XFlip check in )
-	; This causes the player to shake more visibly.
-	;
-	; At max power, it's also possible to guard cancel by performing a roll or inputing a special move.
+	; At max power, both players shakes more visibly during blockstun.
+	; It's also possible to guard cancel by performing a roll or inputing a special move.
 	;
 	
 	;
@@ -15427,9 +15431,9 @@ Play_Pl_DoBlockstun:
 	;
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	bit  PF0B_PROJHIT, [hl]					; Did we get hit by a projectile?
-	jp   nz, .setFlags21					; If so, skip
-	; Enable opponent hitstop next frame
+	bit  PF0B_PROJHIT, [hl]				; Did we get hit by a projectile?
+	jp   nz, .setFlags1					; If so, skip
+	; Enable (opponent) hitstop next frame
 	ld   a, $01								
 	ld   [wPlayHitstopSet], a
 	; Remove the physical damage source next frame.
@@ -15437,8 +15441,7 @@ Play_Pl_DoBlockstun:
 	add  hl, bc
 	ld   [hl], a							
 	
-.setFlags21:
-
+.setFlags1:
 	; Save flags
 	ld   hl, iPlInfo_Flags1
 	add  hl, bc
@@ -15450,16 +15453,17 @@ Play_Pl_DoBlockstun:
 		; A = Shake count
 		call Play_Pl_GetShakeCount		
 		
-		; HL = Ptr to player X position
-		ld   hl, iOBJInfo_X
-		add  hl, de
-		
 		;
-		; Shake 2px at a time for the required amount of frames (*2).
+		; Shake 2px at a time A times.
+		; This will take A*2 frames.
 		;
 		; While that happens, check if the player has performed a guard cancel,
 		; and if so, break out of the loop.
 		;
+				
+		; HL = Ptr to player X position
+		ld   hl, iOBJInfo_X
+		add  hl, de
 	.loop:
 		push af
 			; Move left 2px
@@ -15471,10 +15475,10 @@ Play_Pl_DoBlockstun:
 			push hl
 				; Generate the light/heavy button info
 				call Play_Pl_CreateJoyKeysLH
-				call Play_Pl_ChkGuardCancelRoll	; Did we roll out of guard?
-				jp   c, .endEarly				; If so, return (we started a move)
+				call Play_Pl_ChkGuardCancelRoll		; Did we roll out of guard?
+				jp   c, .endEarly					; If so, return (we started a move)
 				call Play_Pl_ExecSpecMoveInputCode	; Performed any special move input?
-				jp   c, .endEarly				; If so, return (guard cancel to move)
+				jp   c, .endEarly					; If so, return (guard cancel to move)
 			pop  hl
 			
 			; Move right 2px
@@ -15573,12 +15577,12 @@ Play_Pl_ChkGuardCancelRoll:
 	; - Any normal fireball coming in contact with the player gets erased
 	set  PF0B_SUPERMOVE, [hl]
 	
-	inc  hl				; Seek to iPlInfo_Flags1
-	res  PF1B_GUARD, [hl] ; Can't block when rolling (we are invulnerable instead)
-	res  PF1B_CROUCH, [hl] ; As rolling starts from crouching, remove the crouch flag
-	set  PF1B_NOBASICINPUT, [hl] ; Don't override with normal movement
-	set  PF1B_XFLIPLOCK, [hl] ; Lock player direction during the roll
-	set  PF1B_NOSPECSTART, [hl] ; Don't allow cancelling the roll into a special
+	inc  hl							; Seek to iPlInfo_Flags1
+	res  PF1B_GUARD, [hl] 			; Can't block when rolling (we are invulnerable instead)
+	res  PF1B_CROUCH, [hl] 			; As rolling starts from crouching, remove the crouch flag
+	set  PF1B_NOBASICINPUT, [hl] 	; Don't override with normal movement
+	set  PF1B_XFLIPLOCK, [hl] 		; Lock player direction during the roll
+	set  PF1B_NOSPECSTART, [hl] 	; Don't allow cancelling the roll into a special
 	
 	inc  hl				; Seek to iPlInfo_Flags2
 	
@@ -15595,11 +15599,11 @@ Play_Pl_ChkGuardCancelRoll:
 	;
 	; Determine if player should roll forwards or backwards depending on the held directional keys.
 	;
-	; (well nevermind as DOWN isn't a switched input)
-	; ??????? Possibly because it was intended As front/back changes depending on the player direction, use Play_Pl_GetDirKeys_ByXFlipR to check for input.
-	; ??????? Note that the inputs are relative to a player facing RIGHT (1P side).
+	; Either due to a bug or because the player is likely to be holding back during blockstun,
+	; that button *isn't* checked for activating the back roll.
 	;
-	; Not holding any key on the d-pad defaults it to a forward roll.
+	; Instead, holding DOWN activates the back roll.
+	; Not holding any key on the d-pad instead defaults it to a forward roll.
 	;
 	call Play_Pl_GetDirKeys_ByXFlipR	; Check d-pad keys
 	jp   nc, .setRollFront		; Were any keys held? If not, default to front
@@ -15616,7 +15620,7 @@ Play_Pl_ChkGuardCancelRoll:
 	jp   .retSet
 .retSet:
 	; Switch to the new move
-	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+	call Pl_SetMove_StopSpeed
 	scf		; C flag set
 	ret
 .retClear:
@@ -15637,8 +15641,9 @@ Play_Pl_DoGroundScreenShake:
 
 	;
 	; Don't do anything other than forcing the player at ground level if
-	; the player graphics are still being copied to VRAM, as iOBJInfo_FrameLeft
-	; won't decrease until that is done.
+	; the player graphics (for the next frame) are being copied to VRAM.
+	; Otherwise there would be an issue with the way the earthquake effect
+	; is disabled (guarded by a mMvC_ValFrameEnd).
 	;
 	call OBJLstS_IsGFXLoadDone	; Loading finished?
 	jp   nz, .resetGround		; If not, skip
@@ -15727,20 +15732,24 @@ Play_Pl_IsDizzyNext:
 	or   a			; A != 0?
 	ret
 	
-; =============== L003CB3 ===============
-; Determines what happens when a player falls to the ground.
-; The player will either stay on the ground at zero health, or
-; get up otherwise.
+; =============== Play_Pl_StartWakeUp ===============
+; Initializes the wake up move, meant to be used after a player falls on the ground
+; (see: HitAnimC_Drop* and MoveC_Hit_Drop*).
+;
+; If the player has no health left (what hit the player killed him), he will instead
+; stay on the ground forever, by setting MOVE_SHARED_NONE.
 ;
 ; IN:
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
-L003CB3:;C
+Play_Pl_StartWakeUp:
 	; Empty Max POW is possible
 	call Play_Pl_EmptyPowOnSuperEnd
 	
 	;
 	; If the player has no health, stop player movement/animations by setting MOVE_SHARED_NONE.
+	; This is also important for Play_LoadPostRoundText0, since the game waits for both characters
+	; to be in either this or the idle move before showing the KO text.
 	;
 	ld   hl, iPlInfo_Health
 	add  hl, bc
@@ -15756,7 +15765,8 @@ L003CB3:;C
 	jp   .ret
 	
 .alive:
-	; Wait $1E frames before fully waking up
+	; Can't be thrown for $1E frames from here.
+	; This covers waking up and a few frames after.
 	ld   hl, iPlInfo_NoThrowTimer
 	add  hl, bc
 	ld   [hl], $1E
@@ -15781,7 +15791,7 @@ L003CB3:;C
 	
 	; Set move for getting up
 	ld   a, MOVE_SHARED_WAKEUP
-	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+	call Pl_SetMove_StopSpeed
 .ret:
 	ret
 	

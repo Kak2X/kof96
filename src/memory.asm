@@ -138,9 +138,9 @@ wPlayPlThrowDir EQU $C175 ; Sets the throw's direction. If 0, the opponent is th
 ; This avoids having to define the offsets in the sprite mapping itself.
 wPlayPlThrowRotMoveH EQU $C176 ; Relative X position
 wPlayPlThrowRotMoveV EQU $C177 ; Relative Y position
-wPlayPlThrowRot_Unk_AlwaysSync EQU $C178 ; If set, allows few moves in the "attacked" group to use the above two
+wPlayPlThrowRotSync EQU $C178 ; If set, allows few moves in the "attacked" group to use the above two
 ;--
-
+wPlayPlThrowTechTimer EQU $C179 ; Countdown timer, window of opportunity for doing a throw tech.
 wPlaySlowdownTimer EQU $C17A ; Countdown timer. When it's > 0, slowdown is enabled during gameplay. When it reaches 0, the slowdown stops.
 wPlaySlowdownSpeed EQU $C17B ; Determines how much the game should slow down. Execution is 1 every (wPlaySlowdownSpeed) frames.
 
@@ -469,7 +469,6 @@ iOBJInfo_CharSelFlip_PortraitId EQU iOBJInfo_Custom+$07
 iOBJInfo_CharSelFlip_BaseTileId EQU iOBJInfo_Custom+$08
 iOBJInfo_CharSelFlip_OBJIdTarget EQU iOBJInfo_Custom+$09
 
-; TODO: Rename to iOBJInfo_Play_CodeBank and merge with SuperSparkle ones? It's used by multiple OBJInfo...
 ; Default custom values used by multiple ExOBJ, mostly by projectiles.
 ; Some of these, in practice, are *only* used by those, like the damage flags.
 iOBJInfo_Play_CodeBank EQU iOBJInfo_Custom+$00 ; Bank number for the CodePtr
@@ -624,7 +623,7 @@ iPlInfo_GuardBreakProg EQU $5C ; Guard break progression timer. It increments on
 iPlInfo_GuardBreakProgCap EQU $5D ; Caps iPlInfo_GuardBreakProg to this value. As a result, the higher it is, the more hits it takes to guard break.
 ;--
 iPlInfo_NoThrowTimer EQU $5E ; Wake up timer set when a player drops on the ground. Prevents getting thrown.
-iPlInfo_5F EQU $5F
+iPlInfo_Unused_ThrowKeyTimer EQU $5F ; [TCRF] Countdown timer related to throws, but non-functional.
 iPlInfo_NoSpecialTimer EQU $60 ; Until it elapses, the player flashes and can only use normals
 iPlInfo_PlDistance EQU $61 ; Distance between players (the same across players)
 iPlInfo_ProjDistance EQU $62 ; Distance between player and the other player's projectile
@@ -668,7 +667,7 @@ iPlInfo_MoveDamageValNextOther EQU $77
 iPlInfo_MoveDamageHitAnimIdNextOther EQU $78
 iPlInfo_MoveDamageFlags3NextOther EQU $79
 iPlInfo_NoThrowTimerOther EQU $7A
-iPlInfo_5FOther EQU $7B
+iPlInfo_Unused_ThrowKeyTimerOther EQU $7B
 iPlInfo_PhysHitRecv EQU $7C ; If set, marks that we've been directly hit by the other player (ie: not from a projectile)
 
 iPlInfo_PushSpeedHRecv EQU $7D ; Copied from the other player's iPlInfo_PushSpeedHReq.
@@ -706,6 +705,8 @@ iPlInfo_Athena_ShCryst_ReleaseTimer EQU $83 ; Phase 2 release timer
 iPlInfo_Athena_ShCryst_ProjSize EQU $84 ; Projectile size, increases with more 360s ($00-$04)
 iPlInfo_Iori_Mystery_OBJLstFlagsOrig EQU $83 ; Untouched copy of iOBJInfo_OBJLstFlags to restore later
 iPlInfo_OIori_KinYaOtome_LoopCount EQU $83
+iPlInfo_Ryo_HienShippuKyaku_Unused_83 EQU $83 ; Nonexisting
+iPlInfo_Hit_SwoopUp_OkSpeedY EQU $83
 
 ; D-Pad Move input (MoveInput_*)
 ; Format: <iMoveInput_Length>[<iMoveInputItem*> last, <iMoveInputItem*> last-1, ...]		

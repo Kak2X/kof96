@@ -12845,7 +12845,7 @@ MoveC_Goenitz_Yamidoukoku:
 ; --------------- frame #3 ---------------
 .obj3:
 	mMvC_ValFrameStart .obj3_cont
-		mMvC_SetDamageNext $02, HITANIM_DROP_SPEC_AIR_0E, PF3_SHAKELONG
+		mMvC_SetDamageNext $02, HITANIM_DROP_SWOOPUP, PF3_SHAKELONG
 		call Play_Proj_CopyMoveDamageFromPl
 		call ProjInit_Goenitz_Yamidoukoku
 .obj3_cont:
@@ -12924,7 +12924,7 @@ MoveC_Goenitz_ShinyaotomeThrowL:
 .setDamage:
 	mMvC_ValFrameStart .chkEnd
 		; Goenitz's throw deals almost double the damage of other character's throws.
-		mMvC_SetDamage $0A, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
+		mMvC_SetDamage $0A, HITANIM_DROP_DB_A, PF3_SHAKELONG
 		jp   .anim
 .chkEnd:
 	mMvC_ValFrameEnd .anim
@@ -12991,8 +12991,7 @@ MoveC_Goenitz_ShinyaotomeThrowH:
 		mMvC_SetSpeedV -$0600
 		mMvC_SetDamage $06, HITANIM_THROW_ROTU, PF3_SHAKELONG
 		mMvC_MoveThrowOp -$0D, -$10
-		ld   a, $01
-		ld   [wPlayPlThrowRot_Unk_AlwaysSync], a
+		mMvC_MoveThrowOpSync
 .rotU4Jump_cont:
 	mMvC_NextFrameOnGtYSpeed -$04, ANIMSPEED_NONE
 	jp   nc, .doGravity
@@ -13002,15 +13001,14 @@ MoveC_Goenitz_ShinyaotomeThrowH:
 	mMvC_ValFrameStart .rotDJump_cont
 		mMvC_SetDamage $06, HITANIM_THROW_ROTD, PF3_SHAKELONG
 		mMvC_MoveThrowOp +$04, -$18
-		ld   a, $01
-		ld   [wPlayPlThrowRot_Unk_AlwaysSync], a
+		mMvC_MoveThrowOpSync
 .rotDJump_cont:
 	jp   .doGravity
 ; --------------- frame #5 ---------------
 .setDamage:
 	mMvC_ValFrameStart .setDamage_cont
 		; Just in case we got from #4 normally, set this again
-		mMvC_SetDamage $0A, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
+		mMvC_SetDamage $0A, HITANIM_DROP_DB_A, PF3_SHAKELONG
 		mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $14 ; We never get here?
 .setDamage_cont:
@@ -13020,7 +13018,7 @@ MoveC_Goenitz_ShinyaotomeThrowH:
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
 		mMvC_SetLandFrame $05*OBJLSTPTR_ENTRYSIZE, $04
-		mMvC_SetDamageNext $0A, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
+		mMvC_SetDamageNext $0A, HITANIM_DROP_DB_A, PF3_SHAKELONG
 		jp   .ret
 ; --------------- frame #6 ---------------
 .chkEnd:
@@ -13064,14 +13062,14 @@ MoveC_Goenitz_ShinyaotomePart2:
 .obj0_cont:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
 		jp   .chkOtherEscape
 ; --------------- frame #1 ---------------
 ; Initial loop. Horizontal movement.
 .obj1:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
 		jp   .chkOtherEscape
 ; --------------- frame #2 ---------------
 ; Initial loop. Horizontal movement.
@@ -13085,11 +13083,11 @@ MoveC_Goenitz_ShinyaotomePart2:
 		dec  [hl]
 		jp   z, .obj2_noLoop
 	.obj2_loop:
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
 		mMvC_SetFrame $00*OBJLSTPTR_ENTRYSIZE, $00
 		jp   .ret
 	.obj2_noLoop:
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
 		jp   .chkOtherEscape
 		
 ; --------------- frame #3 ---------------
@@ -13125,24 +13123,25 @@ MoveC_Goenitz_ShinyaotomePart2:
 		call MoveInputS_SetSpecMove_StopSpeed
 	.chkEnd_setLastDamage:
 		; Deal one last line of damage
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
 		jp   .ret
 ; --------------- frames #0-2 / common escape check ---------------
 .chkOtherEscape:
 	;
-	; [TCRF] If the opponent somehow isn't in one of the hit animations 
-	;        this move sets, hop back instead of continuing.
-	;        This should never happen.
+	; [POI] If the opponent somehow isn't in one of the hit animations 
+	;       this move sets, hop back instead of continuing.
+	;       This can happen if the opponent gets hit by a previously thrown
+	;       fireball in the middle of the move.
 	;
 	ld   hl, iPlInfo_HitAnimIdOther
 	add  hl, bc
 	ld   a, [hl]
-	cp   HITANIM_HIT_SPEC_09	; A == HITANIM_HIT_SPEC_09?
+	cp   HITANIM_HIT_MULTI0	; A == HITANIM_HIT_MULTI0?
 	jp   z, .anim				; If so, skip
-	cp   HITANIM_HIT_SPEC_0A	; A == HITANIM_HIT_SPEC_0A?
+	cp   HITANIM_HIT_MULTI1	; A == HITANIM_HIT_MULTI1?
 	jp   z, .anim				; If so, skip
 	ld   a, MOVE_SHARED_HOP_B
-	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+	call Pl_SetMove_StopSpeed
 	jp   .ret
 ; --------------- common ---------------
 .unused_end: ; [TCRF] Unreferenced code, this isn't used here

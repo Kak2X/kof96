@@ -7405,7 +7405,7 @@ MoveC_Base_NormL_2Hit_D06_A03:
 .obj0:
 	mMvC_ValFrameEnd .anim ; About to advance the anim? If not, skip to .anim
 	; Otherwise, request new damage fields to apply when visually switching frames
-	mMvC_SetDamageNext $06, HITANIM_HIT0_MID, PF3_SHAKELONG
+	mMvC_SetDamageNext $06, HITANIM_HIT_MID0, PF3_SHAKELONG
 	jp   .anim
 ; --------------- common ---------------
 .chkEnd:
@@ -7441,7 +7441,7 @@ MoveC_Base_NormH_2Hit_D06_A04:
 .obj1:
 	mMvC_ValFrameEnd .anim ; About to advance the anim? If not, skip to .anim
 	; Otherwise, request new damage fields to apply when visually switching frames
-	mMvC_SetDamageNext $06, HITANIM_HIT1_MID, PF3_SHAKELONG
+	mMvC_SetDamageNext $06, HITANIM_HIT_MID1, PF3_SHAKELONG
 	jp   .anim
 ; --------------- common ---------------
 .chkEnd:
@@ -7491,7 +7491,7 @@ MoveC_MrBig_PunchH:
 	;
 	mMvC_ValFrameEnd .anim ; About to advance the anim? If not, skip to .anim
 	; Otherwise, request new damage fields to apply when visually switching frames
-	mMvC_SetDamageNext $06, HITANIM_HIT1_MID, PF3_SHAKELONG
+	mMvC_SetDamageNext $06, HITANIM_HIT_MID1, PF3_SHAKELONG
 	jp   .anim
 ; --------------- common ---------------	
 .chkEnd:
@@ -7551,7 +7551,7 @@ MoveC_Mature_PunchH:
 	;
 	mMvC_ValFrameEnd .anim ; About to advance the anim? If not, skip to .anim
 	; Otherwise, request new damage fields to apply when visually switching frames
-	mMvC_SetDamageNext $06, HITANIM_HIT1_MID, PF3_SHAKELONG
+	mMvC_SetDamageNext $06, HITANIM_HIT_MID1, PF3_SHAKELONG
 	jp   .anim
 ; --------------- common ---------------	
 .chkEnd:
@@ -7595,7 +7595,7 @@ MoveC_Goenitz_PunchH:
 	; When visually switching to #2, use new damage info.
 	mMvC_ValFrameEnd .anim ; About to advance the anim? If not, skip to .anim
 	; Otherwise, request new damage fields to apply when visually switching frames
-	mMvC_SetDamageNext $06, HITANIM_HIT1_MID, $00
+	mMvC_SetDamageNext $06, HITANIM_HIT_MID1, $00
 	jp   .anim
 ; --------------- frame #3 ---------------
 .obj3:
@@ -7606,7 +7606,7 @@ MoveC_Goenitz_PunchH:
 	; When visually switching to #2, use new damage info.
 	mMvC_ValFrameEnd .anim ; About to advance the anim? If not, skip to .anim
 	; Otherwise, request new damage fields to apply when visually switching frames
-	mMvC_SetDamageNext $06, HITANIM_HIT0_MID, PF3_SHAKELONG
+	mMvC_SetDamageNext $06, HITANIM_HIT_MID0, PF3_SHAKELONG
 	jp   .anim
 ; --------------- frame #4 ---------------
 .obj4:
@@ -7655,7 +7655,7 @@ MoveC_Goenitz_KickH:
 .obj2_chkAdv:
 	mMvC_ValFrameEnd .anim ; About to advance the anim? If not, skip to .anim
 	; Otherwise, request new damage fields to apply when visually switching frames
-	mMvC_SetDamageNext $06, HITANIM_HIT1_MID, PF3_SHAKELONG
+	mMvC_SetDamageNext $06, HITANIM_HIT_MID1, PF3_SHAKELONG
 	jp   .anim
 ; --------------- common ---------------
 .chkEnd:

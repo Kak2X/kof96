@@ -801,7 +801,7 @@ MoveC_Base_WakeUp_End:
 	res  PF1B_INVULN, [hl] ; Not invulnerable
 	; New move
 	ld   a, MOVE_SHARED_DIZZY
-	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+	call Pl_SetMove_StopSpeed
 	ret
 .noDizzy:
 	call Play_Pl_EndMove
@@ -1130,25 +1130,36 @@ ExOBJ_SuperSparkle:
 ; - DE: Ptr to respective wOBJInfo
 ; OUT
 ; - C flag: If set, a move was started (by guard cancelling)
+;           Only used by Play_Pl_ChkHitStop, and it makes hitstop end early.
 Play_Pl_DoHit:
 
 	; For all intents and purposes Play_Pl_DoHit is a direct continuation of Play_Pl_SetHitAnim.
 	; Set up everything, update counters, damage player, (...) if it's applicable.
-	; A = HitAnim ID * 2
+	; A = HitEffect ID * 2
 	call Play_Pl_SetHitAnim	; Did the opponent's attack make contact?
 	jp   nc, .noHit			; If not, jump
 	
-	; We only get here for the single frame the attack makes contact.
-	; After that, the hit animation code gets executed, which takes exclusive control
-	; for a bit due to it calling the hitstun/blockstun code (only for the duration of the initial shake).
+	;
+	; We got hit, so handle the hit effect (HitAnimC_*).
+	;
+	; This is move-like code executed once, when we get hit. Each type of hit has its own code.
+	; Typically it handles the hitstun/blockstun effect (player shaking), hit sound effects, flashing and knockback speed (a backjump, usually).
+	; If hitstun is actviated, the code takes exclusive control of the player task while it is active.
+	;
+	; They also switch to another, actual move to handle the "next"/"post-hitstun" part of the hit
+	; so that it won't take exclusive control.
+	; This move is almost always part of the third group of moves (MoveC_Hit_*).
+	;
+	; Before getting there, first perform some common tasks:
+	;
 	
 	; Empty the pow meter in case we got hit out of a super
 	push af
 		call Play_Pl_EmptyPowOnSuperEnd
 	pop  af
 	
-	; HITANIM_DROP_SPEC_AIR_0E, HITANIM_DROP_SPEC_0F and the throw parts do not increment the combo counter.
-	cp   HITANIM_DROP_SPEC_AIR_0E*2	; HitAnimId >= $0E?
+	; HITANIM_DROP_SWOOPUP, HITANIM_THROW_END and the throw parts do not increment the combo counter.
+	cp   HITANIM_DROP_SWOOPUP*2	; HitAnimId >= $0E?
 	jp   nc, .updateFlags			; If so, skip
 	
 	push af
@@ -1199,11 +1210,10 @@ Play_Pl_DoHit:
 	;
 	cp   HITANIM_BLOCKED			; Are we in the blockstun anim?
 	jp   z, .execCode				; If so, skip
-	set  PF1B_NOSPECSTART, [hl]	; Otherwise, we got hit. Prevent specials from starting.
+	set  PF1B_NOSPECSTART, [hl]		; Otherwise, we got hit. Prevent specials from starting.
 .execCode:
 	;
-	; Execute the code for the currently set Hit Animation.
-	; This has the same purpose as the move code, except it's specifically for getting hit/blocking.
+	; Execute the code for the currently set Hit effect/type.
 	;
 	
 	push bc
@@ -1238,729 +1248,1428 @@ Play_Pl_DoHit:
 	ret
 	
 Play_HitAnimPtrTable:
-	dw HitAnim_Blocked
-	dw HitAnim_GuardBreakGround
-	dw HitAnim_GuardBreakAir
-	dw HitAnim_Hit0Mid
-	dw HitAnim_Hit1Mid
-	dw HitAnim_HitLow
-	dw HitAnim_06
-	dw HitAnim_07
-	dw HitAnim_08
-	dw HitAnim_09
-	dw HitAnim_0A
-	dw HitAnim_0B
-	dw HitAnim_0C
-	dw HitAnim_0D
-	dw HitAnim_0E
-	dw HitAnim_0F
-	dw HitAnim_ThrowStart
-	dw HitAnim_ThrowRotU
-	dw HitAnim_ThrowRotL
-	dw HitAnim_ThrowRotD
-	dw HitAnim_ThrowRotR
+	dw HitAnimC_Blocked
+	dw HitAnimC_GuardBreakGround
+	dw HitAnimC_GuardBreakAir
+	dw HitAnimC_HitMid0
+	dw HitAnimC_HitMid1
+	dw HitAnimC_HitLow
+	dw HitAnimC_DropCH
+	dw HitAnimC_DropA
+	dw HitAnimC_DropMain
+	dw HitAnimC_Hit_Multi0
+	dw HitAnimC_Hit_Multi1
+	dw HitAnimC_Hit_MultiGS
+	dw HitAnimC_Drop_DB_A
+	dw HitAnimC_Drop_DB_G
+	dw HitAnimC_SwoopUp
+	dw HitAnimC_Throw_End
+	dw HitAnimC_ThrowStart
+	dw HitAnimC_ThrowRotU
+	dw HitAnimC_ThrowRotL
+	dw HitAnimC_ThrowRotD
+	dw HitAnimC_ThrowRotR
 
-
-HitAnim_Blocked:;I
-	ld   a, $0D
-	ld   hl, $0020
+; =============== HitAnimC_Blocked ===============
+; ID: HITANIM_BLOCKED
+;
+; Hit effect used when blocking, called for every blocked hit.
+; OUT
+; - C: If set, hitstop should end early (if applicable)
+HitAnimC_Blocked:
+	;
+	; Play a SGB/DMG SFX
+	;
+	; There's also a special sound if we're blocking during a special or super (autoblock).
+	;
+	ld   a, SCT_AUTOBLOCK		; A = SFX ID for special block
+	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	bit  1, [hl]
-	jp   nz, L024695
-	bit  6, [hl]
-	jp   nz, L024695
-	ld   a, $0A
-L024695:;J
+	bit  PF0B_SPECMOVE, [hl]	; Doing a special move?
+	jp   nz, .playSFX			; If so, jump
+	bit  PF0B_SUPERMOVE, [hl]	; Doing a super move?
+	jp   nz, .playSFX			; If so, jump
+	ld   a, SCT_BLOCK			; A = SFX ID for normal block
+.playSFX:
 	call HomeCall_Sound_ReqPlayExId
-	ld   hl, $0021
+	
+	;
+	; Set up the player variables before starting blockstun.
+	;	
+	
+	; Confirm that we're blocking
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	set  3, [hl]
-	ld   hl, $0023
+	set  PF1B_GUARD, [hl]
+	
+	; Blocking a move prevents it from using its flashing effects, if any
+	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	res  1, [hl]
-	res  6, [hl]
-	ld   hl, $001B
+	res  PF3B_FLASH_B_SLOW, [hl]
+	res  PF3B_FLASH_B_FAST, [hl]
+	
+	
+	; Reset the frame timer to 5, which is used for timing the knockback (MOVE_SHARED_POST_BLOCKSTUN).
+	; Reinitializing this while the knockback is being already executed effectively
+	; extends the amount of time we stay in the knockback state.
+	; (This won't be decremented until we get there because blockstun doesn't animate the player.)
+	ld   hl, iOBJInfo_FrameLeft
 	add  hl, de
 	ld   [hl], $05
-	mMvC_ChkMaxPow L0246BC
-	ld   hl, $0021
+	
+	; Can't guard cancel if not at MAX Power.
+	; This isn't necessary though since the blockstun handler won't allow guard
+	; danceling anyway without MAX power.
+	ld   hl, iPlInfo_Pow
 	add  hl, bc
-	set  2, [hl]
-L0246BC:;J
-	call Play_Pl_DoBlockstun
-	jp   c, L024702
+	ld   a, [hl]				; A = Pow
+	cp   PLAY_POW_MAX			; Are we at max power?
+	jp   z, .doBlockStun		; If so, skip
+	ld   hl, iPlInfo_Flags1
+	add  hl, bc
+	set  PF1B_NOSPECSTART, [hl]	; Otherwise, prevent starting specials while blocking
+	
+.doBlockStun:
+	;
+	; Perform the blockstun effect, and handle what happens once it ends.
+	; Blockstun lasts until it either ends normally (nc) or we guard canceled (c).
+	;
+	call Play_Pl_DoBlockstun		; Did we start a move out of blockstun?
+	jp   c, .retMoveStart			; If so, jump
+	
+	;
+	; Considerably slow down if we aren't in the middle of the knockback move (read: still executing MOVE_SHARED_BLOCK_*).
+	; Knockback affects the player's speed, so we don't want to mess with that.
+	; In the case of ground blocking, we set up the knockback.
+	;
+	; This works because this subroutine is called for any blocked hit, but it
+	; does *NOT* set the block move, as that's handled by the basic input handler.
+	; That handler is only executed if there isn't a move in progress already.
+	; Since we're setting MOVE_SHARED_POST_BLOCKSTUN if we're in one of the block moves,
+	; it prevents executing the handler until knockback ends. If we hit the opponent quickly
+	; enough, we'll be getting here with MOVE_SHARED_POST_BLOCKSTUN set, which falls down to .retMoveStart.
+	;
+	; Air blocking doesn't set a different move, so any hit slows down our descent.
+	;
 	call Play_Pl_MoveByColiBoxOverlapX
-	ld   hl, $0033
-	add  hl, bc
-	ld   a, [hl]
-	cp   $10
-	jp   z, L0246DC
-	cp   $12
-	jp   z, L0246DC
-	cp   $14
-	jp   z, L0246E1
-	jp   L024702
-L0246DC:;J
-	ld   [hl], $70
-	jp   L024700
-L0246E1:;J
-	ld   hl, $001B
+	ld   hl, iPlInfo_MoveId
+	add  hl, bc					; HL = Ptr to iPlInfo_MoveId
+	ld   a, [hl]				; A = MoveId
+	
+	; Ground blocks transition to MOVE_SHARED_POST_BLOCKSTUN
+	cp   MOVE_SHARED_BLOCK_G	; Doing the neutral block?
+	jp   z, .blockGround		; If so, jump
+	cp   MOVE_SHARED_BLOCK_C	; Doing the crouch block?
+	jp   z, .blockGround		; If so, jump
+	; while air blocks continue as-is
+	cp   MOVE_SHARED_BLOCK_A	; Doing the air block?
+	jp   z, .blockGeneric		; If so, jump
+	
+	; We were on the ground and executed the slowdown logic already.
+	; Skip to the end (with .retMoveStart).
+	jp   .retMoveStart
+	
+.blockGround:
+	; Directly switch to post ground blockstun move
+	ld   [hl], MOVE_SHARED_POST_BLOCKSTUN
+	jp   .retNoStart
+.blockGeneric:
+	; Delay the block as much as possible.
+	; Especially important for air blocking, where we have to land on the ground first.
+	ld   hl, iOBJInfo_FrameLeft
 	add  hl, de
-	ld   [hl], $FF
+	ld   [hl], ANIMSPEED_NONE
+	
+	; Set the initial speed at $00.80px/frame forwards
 	ld   hl, $0080
 	call Play_OBJLstS_SetSpeedH_ByXDirL
-	ld   hl, $0009
+	
+	; Blocking an attack resets the vertical speed as long as we're moving down
+	ld   hl, iOBJInfo_SpeedY
 	add  hl, de
-	ld   a, [hl]
-	bit  7, a
-	jp   nz, L024700
-	mMvC_SetSpeedV $0000
-	jp   L024700
-L024700:;J
-	scf
+	ld   a, [hl]			; A = SpeedY
+	bit  7, a				; SpeedY < 0? (MSB set, moving up)
+	jp   nz, .retNoStart	; If so, skip
+	ld   hl, $0000			; Otherwise, reset the vertical speed
+	call Play_OBJLstS_SetSpeedV
+	jp   .retNoStart
+.retNoStart:
+	scf		; C flag set
 	ret
-L024702:;J
+.retMoveStart:
 	scf
-	ccf
+	ccf		; C flag clear
 	ret
-HitAnim_GuardBreakGround:;I
-	ld   hl, $0023
+	
+; =============== HitAnimC_GuardBreakGround ===============
+; ID: HITANIM_GUARDBREAK_G
+;
+; Hit effet used when the player's guard breaks on the ground.
+; OUT
+; - C flag: Always clear (never end hitstop early)
+HitAnimC_GuardBreakGround:
+
+	; Stop the player from flashing
+	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	res  1, [hl]
-	res  6, [hl]
-	ld   a, $1C
+	res  PF3B_FLASH_B_SLOW, [hl]
+	res  PF3B_FLASH_B_FAST, [hl]
+	
+	; Play standard X break sound
+	ld   a, SCT_BREAK
 	call HomeCall_Sound_ReqPlayExId
-	ld   a, $72
-	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
+	
+	; Switch to the guard break move (also used on the receiving end of a throw tech)
+	ld   a, MOVE_SHARED_GUARDBREAK_G
+	call Pl_SetMove_ShakeScreenReset
+	
+	; Run gameplay at half speed for $0F frames, if possible
 	ld   a, $0F
-	call L025003
+	call MoveS_ChkHalfSpeedHit
+	
+	; Flash the stage palette
 	ld   a, $00
 	ld   [wStageBGP], a
-	call Play_Unk_Pl_BlockstunNormal
+	
+	; Perform hitstun effect
+	call Play_Pl_DoHitstun
+	
+	; Don't allow overlapping collision boxes
 	call Play_Pl_MoveByColiBoxOverlapX
-	ld   hl, $0050
+	
+	; [POI] When guard breaks at MAX Power, the POW bar empties itself.
+	ld   hl, iPlInfo_Pow
 	add  hl, bc
-	ld   a, [hl]
-	cp   $28
-	jp   nz, L024733
-	ld   [hl], $00
-L024733:;J
+	ld   a, [hl]			; A = Pow
+	cp   PLAY_POW_MAX		; Are we at max power?
+	jp   nz, .retClear		; If not, skip
+	ld   [hl], $00			; Otherwise, Pow = 0
+.retClear:
 	scf
 	ret
-HitAnim_GuardBreakAir: db $21;X
-L024736: db $23;X
-L024737: db $00;X
-L024738: db $09;X
-L024739: db $CB;X
-L02473A: db $8E;X
-L02473B: db $CB;X
-L02473C: db $B6;X
-L02473D: db $3E;X
-L02473E: db $1C;X
-L02473F: db $CD;X
-L024740: db $16;X
-L024741: db $10;X
-L024742: db $3E;X
-L024743: db $74;X
-L024744: db $CD
-L024745: db $51
-L024746: db $34
-L024747: db $3E
-L024748: db $00;X
-L024749: db $EA;X
-L02474A: db $7C;X
-L02474B: db $C1;X
-L02474C: db $CD;X
-L02474D: db $E8;X
-L02474E: db $3A;X
-L02474F: db $CD;X
-L024750: db $7B;X
-L024751: db $34;X
-L024752: db $21;X
-L024753: db $80;X
-L024754: db $00;X
-L024755: db $CD;X
-L024756: db $85;X
-L024757: db $35;X
-L024758: db $21;X
-L024759: db $09;X
-L02475A: db $00;X
-L02475B: db $19;X
-L02475C: db $7E;X
-L02475D: db $CB;X
-L02475E: db $7F;X
-L02475F: db $C2;X
-L024760: db $68;X
-L024761: db $47;X
-L024762: db $21;X
-L024763: db $00;X
-L024764: db $00;X
-L024765: db $CD;X
-L024766: db $AD;X
-L024767: db $35;X
-L024768: db $21;X
-L024769: db $50;X
-L02476A: db $00;X
-L02476B: db $09;X
-L02476C: db $7E;X
-L02476D: db $FE;X
-L02476E: db $28;X
-L02476F: db $C2;X
-L024770: db $74;X
-L024771: db $47;X
-L024772: db $36;X
-L024773: db $00;X
-L024774: db $37;X
-L024775: db $C9;X
-HitAnim_Hit0Mid:;I
-	ld   a, $76
-	jp   L024782
-HitAnim_Hit1Mid:;I
-	ld   a, $78
-	jp   L024782
-HitAnim_HitLow:;I
-	ld   a, $7A
-L024782:;J
-	push af
-	call L0249F2
-	pop  af
-	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
+	
+; =============== HitAnimC_GuardBreakAir ===============
+; ID: HITANIM_GUARDBREAK_A
+;
+; Hit logic used when the player's guard breaks in the air.
+; See also: HitAnimC_GuardBreakGround
+;           Parts inside ## are different compared to that.
+; OUT
+; - C flag: Always clear (never end hitstop early)
+HitAnimC_GuardBreakAir:
+	; Stop the player from flashing
+	ld   hl, iPlInfo_Flags3
+	add  hl, bc
+	res  PF3B_FLASH_B_SLOW, [hl]
+	res  PF3B_FLASH_B_FAST, [hl]
+	
+	; Play standard X break sound
+	ld   a, SCT_BREAK
+	call HomeCall_Sound_ReqPlayExId
+	
+	;##
+	; Switch to the air guard break move
+	ld   a, MOVE_SHARED_GUARDBREAK_A
+	call Pl_SetMove_ShakeScreenReset
+	
+	; (No half speed)
+	;##
+	
+	; Flash the stage palette
+	ld   a, $00
+	ld   [wStageBGP], a
+	
+	; Perform hitstun effect
+	call Play_Pl_DoHitstun
+	
+	; Don't allow overlapping collision boxes
+	call Play_Pl_MoveByColiBoxOverlapX
+	
+	;##
+	; Move back at 0.5px/frame
+	ld   hl, $0080
+	call Play_OBJLstS_SetSpeedH_ByXDirL
+	
+	; Reset the vertical speed as long as we're moving down
+	ld   hl, iOBJInfo_SpeedY
+	add  hl, de
+	ld   a, [hl]			; A = SpeedY
+	bit  7, a				; SpeedY < 0? (MSB set, moving up)
+	jp   nz, .chkEmptyPow	; If so, skip
+	ld   hl, $0000			; Otherwise, reset the vertical speed
+	call Play_OBJLstS_SetSpeedV
+	;##
+	
+.chkEmptyPow:	
+	; [POI] When guard breaks at MAX Power, the POW bar empties itself.
+	ld   hl, iPlInfo_Pow
+	add  hl, bc
+	ld   a, [hl]			; A = Pow
+	cp   PLAY_POW_MAX		; Are we at max power?
+	jp   nz, .retClear		; If not, skip
+	ld   [hl], $00			; Otherwise, Pow = 0
+.retClear:
+	scf
+	ret
+	
+; =============== HitAnimC_HitGeneric group ===============
+; These next few ones that call HitAnimC_HitGeneric are basically the same hit type,
+; a generic hit that can be used by any type of move (normals, specials, supers).
+; Even though they set different move IDs, they point to the same code.
+;
+; The only difference between these is the animation associated to the move, most
+; obvious for MOVE_SHARED_HITLOW which has the player getting hit while crouching.
+	
+; =============== HitAnimC_HitMid0 ===============
+; ID: HITANIM_HIT_MID0
+;
+; Hit logic used for generic mid hit #0.
+; OUT
+; - C flag: Always set (ends hitstop)
+HitAnimC_HitMid0:
+	ld   a, MOVE_SHARED_HIT0MID
+	jp   HitAnimC_HitGeneric
+; =============== HitAnimC_HitMid1 ===============
+; ID: HITANIM_HIT_MID1
+;
+; Hit logic used for generic mid hit #1.
+; OUT
+; - C flag: Always set (ends hitstop)
+HitAnimC_HitMid1:
+	ld   a, MOVE_SHARED_HIT1MID
+	jp   HitAnimC_HitGeneric
+; =============== HitAnimC_HitLow ===============
+; ID: HITANIM_HIT_LOW
+;
+; Hit logic used for generic low hit.
+; OUT
+; - C flag: Always set (ends hitstop)
+HitAnimC_HitLow:
+	ld   a, MOVE_SHARED_HITLOW
+	; Fall-through
+; =============== HitAnimC_HitGeneric ===============
+; Hit logic used for generic mid hit #0.
+; IN
+; - A: Move ID to set
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+; OUT
+; - C flag: Always set (ends hitstop)	
+HitAnimC_HitGeneric:
+
+	; Play hit sound effect (normal or fire)
+	push af	; Save MoveID
+		call MoveS_PlayHitSFX
+
+	; Switch to new move
+	pop  af	; Restore MoveID
+	call Pl_SetMove_ShakeScreenReset
+	
+	; Run gameplay at half speed for the next $0F frames, if applicable.
+	; This will at least cover part of the hitstun effect.
 	ld   a, $0F
-	call L025003
-	call L02504C
-	call Play_Unk_Pl_BlockstunNormal
+	call MoveS_ChkHalfSpeedHit
+	
+	; Flash playfield if the hit came off a super move
+	call Play_Pl_FlashPlayfieldOnSuperHit
+	
+	; Do the hitstun effect for multiple frames
+	call Play_Pl_DoHitstun
+	
+	;
+	; After the hitstun finishes
+	;
 	call Play_Pl_MoveByColiBoxOverlapX
-	scf
+	scf	; Return set
 	ret
-HitAnim_08:;I
-	ld   hl, $0020
+	
+; =============== HitAnimC_DropMain ===============
+; ID: HITANIM_DROP_MAIN
+;
+; Hit effect that causes the player to drop on the ground.
+; This is the standard generic drop that can be used by any move.
+;
+; Features:
+; - Can optionally end a damage string
+; - Gameplay runs at half speed for $1E frames
+; - Supports super move playfield flashing
+; - After hitstun ends, the player may optionally gets knock back with a backjump.
+;   If the hit is considered "light", the player just falls (handled like the backjump, but with no vertical height)
+; - Backjump height is high
+; - The player can roll cancel when landing from the jump
+; - Player can't recover mid-air
+; - Can be used in the air or on the ground
+; - Can be used when the player gets KO'd
+; OUT
+; - C flag: Always set (ends hitstop)
+HitAnimC_DropMain:
+
+	;
+	; Invulnerability check.
+	;
+	; If the hit has PF3B_LASTHIT set, this will be the last one for the combo string.
+	; This is accomplished by making the player invulnerable during the drop, preventing
+	; further hits until waking up.
+	; Additionally, also treat it as the end of a combo string if we got hit out of a special move.
+	;
+	
+	; Special move check
+	ld   hl, iPlInfo_Flags0
+	add  hl, bc					; Seek to iPlInfo_Flags0
+	bit  PF0B_SPECMOVE, [hl]	; Did we get hit while doing a special?
+	jp   z, .chkDead			; If not, skip
+	inc  hl						; Seek to iPlInfo_Flags1
+	inc  hl						; Seek to iPlInfo_Flags2
+	inc  hl						; Seek to iPlInfo_Flags3
+	set  PF3B_SHAKELONG, [hl]	; Shake longer (heavy hit)
+	set  PF3B_LASTHIT, [hl]		; End the damage string (will trigger invulnerability shortly after)
+	
+.chkDead:
+	; Ignore this if the player is already dead
+	ld   hl, iPlInfo_Health
 	add  hl, bc
-	bit  1, [hl]
-	jp   z, L0247AA
-L0247A3: db $23;X
-L0247A4: db $23;X
-L0247A5: db $23;X
-L0247A6: db $CB;X
-L0247A7: db $C6;X
-L0247A8: db $CB;X
-L0247A9: db $E6;X
-L0247AA:;J
-	ld   hl, $004E
-	add  hl, bc
-	ld   a, [hl]
-	ld   hl, $0020
-	add  hl, bc
-	or   a
-	jp   z, L0247C3
-	inc  hl
-	inc  hl
-	inc  hl
-	bit  4, [hl]
-	jp   nz, L0247C3
-	dec  hl
-	dec  hl
-	set  7, [hl]
-L0247C3:;J
-	call L0249F2
-	ld   a, $7C
-	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
+	ld   a, [hl]				; A = Player Health
+	ld   hl, iPlInfo_Flags0
+	add  hl, bc					; HL = Ptr to iPlInfo_Flags0
+	or   a						; iPlInfo_Health == 0?
+	jp   z, .main				; If so, skip
+	
+	; Seek to damage flags
+	inc  hl					; Seek to iPlInfo_Flags1
+	inc  hl					; Seek to iPlInfo_Flags2
+	inc  hl					; Seek to iPlInfo_Flags3
+	
+	; Enable invulnerability if the flag is set
+	bit  PF3B_LASTHIT, [hl]	; Is the flag set?
+	jp   nz, .main			; If so, skip
+	dec  hl					; Seek back to iPlInfo_Flags2
+	dec  hl					; Seek back to iPlInfo_Flags1
+	set  PF1B_INVULN, [hl]	; Enable invulnerability
+.main:
+	;
+	; Main hitstun part.
+	;
+	call MoveS_PlayHitSFX
+	
+	; Switch to default backjump move
+	ld   a, MOVE_SHARED_DROP_MAIN
+	call Pl_SetMove_ShakeScreenReset
+	
+	; Run gameplay at half speed for the next $1E frames, if applicable
 	ld   a, $1E
-	call L025003
-	call L02504C
-	call Play_Unk_Pl_BlockstunNormal
+	call MoveS_ChkHalfSpeedHit
+	
+	; Flash playfield if applicable
+	call Play_Pl_FlashPlayfieldOnSuperHit
+	
+	; Do it
+	call Play_Pl_DoHitstun
+	
+	; Once the hitstun is over, prevent the collision boxes from overlapping
 	call Play_Pl_MoveByColiBoxOverlapX
-	ld   hl, $0023
+	
+	;
+	; This knockback effect causes the player to optionally drop with a back jump.
+	; Set the initial jump settings.
+	;
+	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	bit  7, [hl]
-	jp   nz, L024802
-	bit  0, [hl]
-	jp   nz, L0247F6
-	ld   hl, $0140
+	bit  PF3B_SHAKEONCE, [hl]	; Is this a light hit?
+	jp   nz, .retSet			; If so, don't alter speed settings.
+								; This will cause the player to just drop on the ground directly down.
+								
+	bit  PF3B_SHAKELONG, [hl]	; Is this a heavy hit?
+	jp   nz, .setJumpH			; If so, use higher jump speed
+.setJumpN:
+	; Normal hit
+	ld   hl, +$0140				; 1.25px/frame back
 	call Play_OBJLstS_SetSpeedH_ByXDirL
-	mMvC_SetSpeedV $FC00
-	jp   L024802
-L0247F6:;J
-	ld   hl, $0180
+	ld   hl, -$0400				; 4px/frame up
+	call Play_OBJLstS_SetSpeedV
+	jp   .retSet
+.setJumpH:
+	; Heavy hit
+	ld   hl, +$0180				; 1.5px/frame back
 	call Play_OBJLstS_SetSpeedH_ByXDirL
-	mMvC_SetSpeedV $FA00
-L024802:;J
-	scf
+	ld   hl, -$0600				; 6px/frame up
+	call Play_OBJLstS_SetSpeedV
+.retSet:
+	scf	; C flag set
 	ret
-HitAnim_0C:;I
-	ld   hl, $004E
+	
+; =============== HitAnimC_Drop_DB_A ===============
+; ID: HITANIM_DROP_DB_A
+;
+; Hit effect that knocks the player on the ground from the air.
+; Uses the same continuation code as the air throw, but this hit
+; effect is *not* meant for them, as throws are handled in HITANIM_THROW_END.
+;
+; Features:
+; - Can optionally end a damage string
+; - Supports super move playfield flashing
+; - Normal hitstun time
+; - Can only be used in the air
+; - After hitstun ends, the player always gets thrown diagonally down backwards
+; OUT
+; - C flag: Always set (ends hitstop)
+HitAnimC_Drop_DB_A:
+	;
+	; Invulnerability check.
+	;
+	; If the hit has PF3B_LASTHIT set, this will be the last one for the combo string.
+	;
+	
+	; Ignore this if the player is already dead
+	ld   hl, iPlInfo_Health
 	add  hl, bc
-	ld   a, [hl]
-	ld   hl, $0020
-	add  hl, bc
-	or   a
-	jp   z, L02481D
-	inc  hl
-	inc  hl
-	inc  hl
-	bit  4, [hl]
-	jp   nz, L02481D
-	dec  hl
-	dec  hl
-	set  7, [hl]
-L02481D:;J
-	call L0249F2
-	ld   a, $7E
-	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
-	call L02504C
-	call Play_Unk_Pl_BlockstunNormal
+	ld   a, [hl]				; A = Player Health
+	ld   hl, iPlInfo_Flags0
+	add  hl, bc					; HL = Ptr to iPlInfo_Flags0
+	or   a						; iPlInfo_Health == 0?
+	jp   z, .main				; If so, skip
+	
+	; Seek to damage flags
+	inc  hl					; Seek to iPlInfo_Flags1
+	inc  hl					; Seek to iPlInfo_Flags2
+	inc  hl					; Seek to iPlInfo_Flags3
+	
+	; Enable invulnerability if the flag is set
+	bit  PF3B_LASTHIT, [hl]	; Is the flag set?
+	jp   nz, .main			; If so, skip
+	dec  hl					; Seek back to iPlInfo_Flags2
+	dec  hl					; Seek back to iPlInfo_Flags1
+	set  PF1B_INVULN, [hl]	; Enable invulnerability
+.main:
+	; Play hit SFX, with fire support
+	call MoveS_PlayHitSFX
+	
+	; Switch to ??? after hitstun ends
+	ld   a, MOVE_SHARED_THROW_END_A
+	call Pl_SetMove_ShakeScreenReset
+	
+	; Flash playfield if applicable
+	call Play_Pl_FlashPlayfieldOnSuperHit
+	
+	; Do it
+	call Play_Pl_DoHitstun
+	
+	; Once the hitstun is over, prevent the collision boxes from overlapping
 	call Play_Pl_MoveByColiBoxOverlapX
-	ld   hl, $0023
+	
+	;
+	; This knockback effect causes the player to drop diagonally down.
+	;
+	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	bit  0, [hl]
-	jp   nz, L02483D
-	ld   hl, $0500
-	jp   L024840
-L02483D:;J
-	ld   hl, $0600
-L024840:;J
+	bit  PF3B_SHAKELONG, [hl]	; Is this a heavy hit?
+	jp   nz, .setJumpH			; If so, use higher jump speed
+.setJumpL:
+	ld   hl, +$0500				; 5px/frame back
+	jp   .setJump
+.setJumpH:
+	ld   hl, +$0600				; 6px/frame back
+.setJump:
 	call Play_OBJLstS_SetSpeedH_ByXDirL
-	mMvC_SetSpeedV $0600
-	scf
+	
+	ld   hl, $0600				; 6px/frame up
+	call Play_OBJLstS_SetSpeedV
+
+	scf	; C flag set
 	ret
-HitAnim_0D:;I
-	ld   hl, $0023
+	
+; =============== HitAnimC_Drop_DB_G ===============
+; ID: HITANIM_DROP_DB_G
+;
+; Hit effect that knocks the player on the ground, shaking it.
+;
+; Special move drop (Ground)
+; Features:
+; - Can optionally end a damage string
+; - Supports super move playfield flashing
+; - Very short hitstun time
+; - Can only be used on the ground
+; - After hitstun ends, the ground shakes.
+; OUT
+; - C flag: Always set (ends hitstop)
+HitAnimC_Drop_DB_G:
+	;
+	; Invulnerability check.
+	;
+	; If the hit has PF3B_LASTHIT set, this will be the last one for the combo string.
+	; This doesn't check if we died beforehand.
+	;
+	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	bit  4, [hl]
-	jp   nz, L024858
-	dec  hl
-	dec  hl
-	set  7, [hl]
-L024858:;J
-	call L0249F2
-	ld   a, $80
-	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
-	call L02504C
-	call Play_Unk_Pl_BlockstunNormalOnce
+	bit  PF3B_LASTHIT, [hl]	; Is the flag set?
+	jp   nz, .main			; If so, skip
+	dec  hl					; Seek back to iPlInfo_Flags2
+	dec  hl					; Seek back to iPlInfo_Flags1
+	set  PF1B_INVULN, [hl]	; Enable invulnerability
+.main:
+	; Play SFX, with fire effect if needed
+	call MoveS_PlayHitSFX
+	
+	; Set the continuation for the hit, which is used after hitstun ends.
+	; This shakes the ground.
+	ld   a, MOVE_SHARED_DROP_DBG
+	call Pl_SetMove_ShakeScreenReset
+	
+	; Flash playfield if applicable
+	call Play_Pl_FlashPlayfieldOnSuperHit
+	
+	; Do it
+	call Play_Pl_DoHitstunOnce
+	
+	; Once the hitstun is over, prevent the collision boxes from overlapping
 	call Play_Pl_MoveByColiBoxOverlapX
-	scf
+	
+	scf	; C flag set
 	ret
-HitAnim_0F:;I
-	ld   hl, $004E
+	
+; =============== HitAnimC_Throw_End ===============
+; ID: HITANIM_THROW_END
+;
+; Used as the last part of throws (including command throws).
+;
+; When a throw animation ends, it delivers a last hit with this type.
+; This is where the player gets knocked back with a large backwards jump, away from the opponent,
+; with the playfield shaking when touching the ground.
+; Unlike others, there's no hitstun here since the jump should start immediately.
+HitAnimC_Throw_End:
+	;
+	; Invulnerability check.
+	;
+	; If the hit has PF3B_LASTHIT set, this will be the last one for the combo string.
+	;
+	
+	; Ignore this if the player is already dead
+	ld   hl, iPlInfo_Health
 	add  hl, bc
-	ld   a, [hl]
-	ld   hl, $0020
-	add  hl, bc
-	or   a
-	jp   z, L024884
-	inc  hl
-	inc  hl
-	inc  hl
-	bit  4, [hl]
-	jp   nz, L024884
-	dec  hl
-	dec  hl
-	set  7, [hl]
-L024884:;J
-	ld   hl, $007C
+	ld   a, [hl]				; A = Player Health
+	ld   hl, iPlInfo_Flags0
+	add  hl, bc					; HL = Ptr to iPlInfo_Flags0
+	or   a						; iPlInfo_Health == 0?
+	jp   z, .main				; If so, skip
+	
+	; Seek to damage flags
+	inc  hl					; Seek to iPlInfo_Flags1
+	inc  hl					; Seek to iPlInfo_Flags2
+	inc  hl					; Seek to iPlInfo_Flags3
+	
+	; Enable invulnerability if the flag is set
+	bit  PF3B_LASTHIT, [hl]	; Is the flag set?
+	jp   nz, .main			; If so, skip
+	dec  hl					; Seek back to iPlInfo_Flags2
+	dec  hl					; Seek back to iPlInfo_Flags1
+	set  PF1B_INVULN, [hl]	; Enable invulnerability
+.main:
+
+	; Remove the physical damage source next frame.
+	ld   hl, iPlInfo_PhysHitRecv
 	add  hl, bc
 	ld   [hl], $01
-	ld   a, $8E
-	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
-	ld   hl, $0071
+	
+	; Switch to throw animation
+	ld   a, MOVE_SHARED_THROW_END_G
+	call Pl_SetMove_ShakeScreenReset
+	
+	;
+	; Throw the player by updating its speed settings.
+	;
+	; Almost every move that uses this hits uses standard logic similar to other hit effects,
+	; with the player being thrown away from the opponent with a jump arc, relative to his X 
+	; position (using Play_OBJLstS_SetSpeedH_ByXDirL).
+	;
+	; However:
+	; - Mai's ground throw throws the player forward from *behind*.
+	;   This can't be done with Play_OBJLstS_SetSpeedH_ByXDirL, as the player would just
+	;   move backwards.
+	;   Because of the direction the player is facing, to move forwards he has to move back (-3px/frame).
+	; - Mature's command throw (Decide) does the same thing, and throws the opponent at
+	;   a very fast horizontal speed.
+	;   It still looks like a forward throw, but that's only because the move animation
+	;   was made to look like she's turning, while the actual sprite mapping flip flag
+	;   is locked until the move ends as always.
+	; 
+	ld   hl, iPlInfo_CharIdOther
 	add  hl, bc
 	ld   a, [hl]
-	cp   $1A
-	jp   z, L0248A1
-	cp   $0E
-	jp   z, L0248B3
-	jp   L0248DE
-L0248A1:;J
-	ld   hl, $0072
+	cp   CHAR_ID_MATURE			; Opponent is Mature?
+	jp   z, .chkMatureMove		; If so, jump
+	cp   CHAR_ID_MAI			; Opponent is Mai?
+	jp   z, .chkMaiMove			; If so, jump
+	jp   .default				; Otherwise, use the default
+.chkMatureMove:
+	ld   hl, iPlInfo_MoveIdOther
 	add  hl, bc
 	ld   a, [hl]
-	cp   $48
-	jp   z, L0248C0
-	cp   $4A
-	jp   z, L0248C0
-L0248B0: db $C3;X
-L0248B1: db $DE;X
-L0248B2: db $48;X
-L0248B3:;J
-	ld   hl, $0072
+	cp   MOVE_MATURE_DECIDE_L	; Using Decide?
+	jp   z, .matureDecide		; If so, jump
+	cp   MOVE_MATURE_DECIDE_H	; Using Decide?
+	jp   z, .matureDecide		; If so, jump
+	jp   .default				; Otherwise, use the default (we never get here)
+.chkMaiMove:
+	ld   hl, iPlInfo_MoveIdOther
 	add  hl, bc
 	ld   a, [hl]
-	cp   $6C
-	jp   z, L0248CF
-L0248BD: db $C3;X
-L0248BE: db $DE;X
-L0248BF: db $48;X
-L0248C0:;J
-	mMvC_SetSpeedH $0900
-	mMvC_SetSpeedV $FC00
-	jp   L0248F9
-L0248CF:;J
-	mMvC_SetSpeedH $FD00
-	mMvC_SetSpeedV $FC00
-	jp   L0248F9
-L0248DE:;J
-	ld   hl, $0023
-	add  hl, bc
-	bit  0, [hl]
-	jp   nz, L0248ED
-	ld   hl, $0200
-	jp   L0248F0
-L0248ED:;J
-	ld   hl, $0300
-L0248F0:;J
+	cp   MOVE_SHARED_THROW_G	; Doing Mai's ground throw?
+	jp   z, .maiThrow			; If so, jump
+	jp   .default				; Otherwise, use the default (we never get here)
+.matureDecide:
+	mMvC_SetSpeedH +$0900		; 9px/frame forward
+	mMvC_SetSpeedV -$0400		; 4px/frame up (standard)
+	jp   .retSet
+.maiThrow:
+	mMvC_SetSpeedH -$0300		; 3px/frame backwards
+	mMvC_SetSpeedV -$0400		; 4px/frame up (standard)
+	jp   .retSet
+	
+.default:
+	;
+	; Default knockback for most characters/moves.
+	;
+	; This is pretty much the same as many other knockback jumps.
+	; This knockback effect causes the player to drop with a back jump, away from the opponent.
+	; Set the initial jump settings.
+	;
+	ld   hl, iPlInfo_Flags3
+	add  hl, bc							
+	bit  PF3B_SHAKELONG, [hl]	; Is this a heavy hit?
+	jp   nz, .setJumpH			; If so, use higher jump speed
+.setJumpN:
+	; Normal hit
+	ld   hl, +$0200				; 2px/frame back
+	jp   .setJump
+.setJumpH:
+	; Heavy hit
+	ld   hl, +$0300				; 3px/frame back
+.setJump:
 	call Play_OBJLstS_SetSpeedH_ByXDirL
-	mMvC_SetSpeedV $FC00
-L0248F9:;J
-	scf
+	mMvC_SetSpeedV -$0400		; 4px/frame up
+	
+.retSet:
+	scf	; C flag set
 	ret
-HitAnim_0E:;I
-	ld   hl, $0071
+	
+; =============== HitAnimC_SwoopUp ===============
+; ID: HITANIM_DROP_SWOOPUP
+;
+; This is used by hits that end up causing the player to move really high up, to off-screen above.
+;
+; There are two different kinds of hit types in this one:
+; - Projectile-based. Used by Mature, O.Leona and Goenitz when they spawn a very tall projectile
+;   that covers the entire playfield's height. The projectile hits the player and they get moved 
+;   towards its center, then off-screen above.
+;   These projectile hit multiple times, which will progressively decrease the gravity.
+; - Physical throw. Used by Daimon for two of his command throws, that launch the opponent really high up.
+;
+; Their effect is the same, as they both set the move MOVE_SHARED_HIT_SWOOPUP: the player keeps moving up. It then starts falling down.
+; As a side note, Daimon's super move animations are aligned to hit the player with a full width
+; ground hitbox when the opponent hits the ground.
+HitAnimC_SwoopUp:
+	; There's special code for getting hit by Daimon
+	ld   hl, iPlInfo_CharIdOther
 	add  hl, bc
 	ld   a, [hl]
-	cp   $02
-	jp   nz, L024937
-	ld   a, $82
-	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
+	cp   CHAR_ID_DAIMON			; Did we get hit by Daimon?
+	jp   nz, HitAnimC_SwoopUp_ToProj	; If not, jump
+	
+	
+; =============== HitAnimC_SwoopUp_Daimon ===============
+; Command throw version for Daimon.
+HitAnimC_SwoopUp_Daimon:
+
+	; Set continuation
+	ld   a, MOVE_SHARED_HIT_SWOOPUP
+	call Pl_SetMove_ShakeScreenReset
+	
+	; Push opponent in case we are cornered
 	call Play_Pl_GiveKnockbackCornered
-	ld   hl, $0021
+	
+	; Make player invulnerable while this happens
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	set  7, [hl]
-	ld   hl, $0072
+	set  PF1B_INVULN, [hl]
+	
+	; The special and super move versions set a different throw speed.
+	ld   hl, iPlInfo_MoveIdOther
 	add  hl, bc
 	ld   a, [hl]
-	cp   $64
-	jr   nc, L024928
-	mMvC_SetSpeedV $F900
-	ld   hl, $0300
-	jp   L024931
-L024928:;R
-	mMvC_SetSpeedV $F400
-	ld   hl, $0200
-L024931:;J
+	cp   MOVE_DAIMON_HEAVEN_HELL_DROP_S	; MoveId >= (super)?
+	jr   nc, .setJumpS					; If so, jump
+.setJumpN:
+	; Special (Heaven Drop)
+	mMvC_SetSpeedV -$0700	; 7px/frame up
+	ld   hl, +$0300			; 3px/frame forward
+	jp   .setJump
+.setJumpS:
+	; Super (Heaven to Hell Drop)
+	; Used for the part where the player gets thrown up in the air, before causing the earthquake
+	mMvC_SetSpeedV -$0C00	; 12px/frame up, very high up
+	ld   hl, +$0200			; 2px/frame forward
+.setJump:
 	call Play_OBJLstS_SetSpeedH_ByXFlipR
-	jp   L02497F
-L024937:;J
-	ld   hl, $004E
+	jp   HitAnimC_SwoopUp_RetSet	
+	
+; =============== HitAnimC_SwoopUp_ToProj ===============
+; Projectile version for other characters.
+HitAnimC_SwoopUp_ToProj:
+
+	;--
+	;
+	; [POI] Pointless Invulnerability check, since we're always setting PF1B_INVULN later.
+	;
+	
+	; Ignore this if the player is already dead
+	ld   hl, iPlInfo_Health
 	add  hl, bc
-	ld   a, [hl]
-	ld   hl, $0020
+	ld   a, [hl]				; A = Player Health
+	ld   hl, iPlInfo_Flags0
+	add  hl, bc					; HL = Ptr to iPlInfo_Flags0
+	or   a						; iPlInfo_Health == 0?
+	jp   z, .main				; If so, skip
+	
+	; Seek to damage flags
+	inc  hl					; Seek to iPlInfo_Flags1
+	inc  hl					; Seek to iPlInfo_Flags2
+	inc  hl					; Seek to iPlInfo_Flags3
+	
+	; Enable invulnerability if the flag is set
+	bit  PF3B_LASTHIT, [hl]	; Is the flag set?
+	jp   nz, .main			; If so, skip
+	dec  hl					; Seek back to iPlInfo_Flags2
+	dec  hl					; Seek back to iPlInfo_Flags1
+	set  PF1B_INVULN, [hl]	; Enable invulnerability
+.main:
+	;--
+
+	; Make player invulnerable for a short while to avoid receiving hits every frame.
+	; MOVE_SHARED_HIT_SWOOPUP will reset this for us after a while.
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	or   a
-	jp   z, L024950
-	inc  hl
-	inc  hl
-	inc  hl
-	bit  4, [hl]
-	jp   nz, L024950
-	dec  hl
-	dec  hl
-	set  7, [hl]
-L024950:;J
-	ld   hl, $0021
-	add  hl, bc
-	set  7, [hl]
-	ld   a, $82
-	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
+	set  PF1B_INVULN, [hl]
+	
+	; Set continuation code
+	ld   a, MOVE_SHARED_HIT_SWOOPUP
+	call Pl_SetMove_ShakeScreenReset
+	
+	; Prevent overlapping with player
 	call Play_Pl_MoveByColiBoxOverlapX
-	ld   hl, $0180
+	
+	
+	;
+	; Handle movement.
+	;
+	
+	; Move 1.5px towards the enemy projectile (the "wall")
+	; As the projectile hits multiple times, the player will move horizontally back and forth.
+	ld   hl, +$0180
 	call Play_OBJLstS_MoveH_ByOtherProjOnR
-	ld   hl, $0023
+	
+	; Reset the horizontal speed.
+	;--
+	; [POI] This check is pointless, both conditions are the same.
+	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	bit  0, [hl]
-	jp   nz, L024973
-L02496D: db $21;X
-L02496E: db $00;X
-L02496F: db $00;X
-L024970: db $C3;X
-L024971: db $76;X
-L024972: db $49;X
-L024973:;J
-	ld   hl, $0000
+	bit  PF3B_SHAKELONG, [hl]
+	jp   nz, .setSpeedH
+.setSpeedN: ; [TCRF?] Do we even get here?
+	ld   hl, +$0000
+	jp   .setSpeed
+.setSpeedH:
+	;--
+	ld   hl, +$0000
+.setSpeed:
 	call Play_OBJLstS_SetSpeedH_ByXDirL
-	ld   hl, OAM_Begin
+	; Subtract 2 to the current vertical speed, and move the player with the updated speed settings.
+	; As the projectile hits multiple times, the player will progressively move quicker upwards.
+	ld   hl, -$0200
 	call OBJLstS_ApplyGravityVAndMoveHV
-L02497F:;J
+	; Fall-through
+	
+HitAnimC_SwoopUp_RetSet:
 	scf
 	ret
-HitAnim_06:;I
-	ld   hl, $0020
-	add  hl, bc
-	or   a
-	jp   z, L024995
-	inc  hl
-	inc  hl
-	inc  hl
-	bit  4, [hl]
-	jp   nz, L024995
-	dec  hl
-	dec  hl
-	set  7, [hl]
-L024995:
-	call L0249F2
-	ld   a, $84
-	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
-	call Play_Unk_Pl_BlockstunNormal
+	
+; =============== HitAnimC_DropCH ===============
+; ID: HITANIM_DROP_CH
+;
+; Hit effect that causes the player to drop on the ground with a low jump.
+; Exclusively used by crouching heavy kicks and Daimon's Jirai Shin.
+;
+; Features:
+; - Can optionally end a damage string
+; - After hitstun ends, the player always gets knocked back with a backjump
+; - Backjump height is high and can vary slightly depending on the hit strength
+; - Player can't recover mid-air
+; - Can be used in the air or on the ground
+; OUT
+; - C flag: Always set (ends hitstop)
+HitAnimC_DropCH:
+	
+	;
+	; If the hit has PF3B_LASTHIT set, this will be the last one for the combo string.
+	; This is accomplished by making the player invulnerable during the drop, preventing
+	; further hits until waking up.
+	;
+	
+	; Ignore this if the player is already dead (in theory)...
+	; [BUG?] Seems like a broken version of the check that works in HitAnimC_DropMain.
+	ld   hl, iPlInfo_Flags0
+	add  hl, bc				; Seek to iPlInfo_Flags0
+	or   a					; Are we dead?
+	jp   z, .main			; If not, skip
+	
+	; Seek to damage flags
+	inc  hl					; Seek to iPlInfo_Flags1
+	inc  hl					; Seek to iPlInfo_Flags2
+	inc  hl					; Seek to iPlInfo_Flags3
+	
+	; Enable invulnerability if the flag is set
+	bit  PF3B_LASTHIT, [hl]	; Is the flag set?
+	jp   nz, .main			; If so, skip
+	dec  hl					; Seek back to iPlInfo_Flags2
+	dec  hl					; Seek back to iPlInfo_Flags1
+	set  PF1B_INVULN, [hl]	; Enable invulnerability
+	
+.main:
+	;
+	; Main hitstun part.
+	;
+	call MoveS_PlayHitSFX
+	ld   a, MOVE_SHARED_DROP_CH
+	call Pl_SetMove_ShakeScreenReset
+	call Play_Pl_DoHitstun
+	
+	; Once the hitstun is over, prevent the collision boxes from overlapping
 	call Play_Pl_MoveByColiBoxOverlapX
+	
+	
+	;
+	; This knockback effect causes the player to drop with a back jump.
+	;
+	
+	; Move 1.5px/frame backwards
 	ld   hl, $0180
 	call Play_OBJLstS_SetSpeedH_ByXDirL
-	ld   hl, $0023
+	
+	; Move up either at 3px/frame or 4px/frame depending on the hit strength.
+	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	bit  0, [hl]
-	jp   nz, L0249B8
-	ld   hl, $FD00
-	jp   L0249BB
-L0249B8: db $21;X
-L0249B9: db $00;X
-L0249BA: db $FC;X
-L0249BB:;J
+	bit  PF3B_SHAKELONG, [hl]	; Is this an heavy hit?
+	jp   nz, .setSpeedH			; If so, jump
+.setSpeedN:
+	ld   hl, -$0300				; 3px/frame up for light hits
+	jp   .setSpeed
+.setSpeedH:
+	; [TCRF?] Do we get here?
+	ld   hl, -$0400				; 4px/frame up for light hits
+.setSpeed:
+	call Play_OBJLstS_SetSpeedV	; Start the jump!
+	
+	scf	; C flag set
+	ret
+	
+; =============== HitAnimC_DropA ===============
+; ID: HITANIM_DROP_A
+;
+; Hit effect for getting hit by a normal in the air.
+; No move explicitly sets this.
+; 
+; Features:
+; - Only makes sense to use in the air
+; - Always ends a damage string
+; - After hitstun ends, the player always gets knocked back with a backjump
+; - Backjump height is high and doesn't vary
+; - Player recovers in the air
+; OUT
+; - C flag: Always set (ends hitstop)
+HitAnimC_DropA:
+	; Unlike HitAnimC_DropCH, the player is *always* invulnerable with this hit type,
+	; likely to avoid juggles, essentially treating it as if PF3B_LASTHIT was always set.
+	ld   hl, iPlInfo_Flags0
+	add  hl, bc
+	inc  hl	; Seek to iPlInfo_Flags1
+	set  PF1B_INVULN, [hl]
+	
+.main:
+	;
+	; Main hitstun part.
+	;
+	call MoveS_PlayHitSFX
+	ld   a, MOVE_SHARED_BACKJUMP_REC_A
+	call Pl_SetMove_ShakeScreenReset
+	call Play_Pl_DoHitstun
+	
+	; Once the hitstun is over, prevent the collision boxes from overlapping
+	call Play_Pl_MoveByColiBoxOverlapX
+	
+	; Move 1.5px/frame backwards
+	; [POI] Useless check, as the same value gets used.
+	ld   hl, iPlInfo_Flags3
+	add  hl, bc
+	bit  PF3B_SHAKELONG, [hl]
+	jp   nz, .setSpeedH
+.setSpeedL:
+	ld   hl, $0180
+	jp   .setSpeed
+.setSpeedH:
+	ld   hl, $0180
+.setSpeed:
+	call Play_OBJLstS_SetSpeedH_ByXDirL
+	
+	; Move 4px/frame up
+	ld   hl, -$0400
 	call Play_OBJLstS_SetSpeedV
-	scf
+	
+	scf	; C flag set
 	ret
-HitAnim_07:;I
-	ld   hl, $0020
-	add  hl, bc
-	inc  hl
-	set  7, [hl]
-	call L0249F2
-	ld   a, $86
-	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
-	call Play_Unk_Pl_BlockstunNormal
-	call Play_Pl_MoveByColiBoxOverlapX
-	ld   hl, $0023
-	add  hl, bc
-	bit  0, [hl]
-	jp   nz, L0249E4
-	ld   hl, $0180
-	jp   L0249E7
-L0249E4:;J
-	ld   hl, $0180
-L0249E7:;J
-	call Play_OBJLstS_SetSpeedH_ByXDirL
-	mMvC_SetSpeedV $FC00
-	scf
-	ret
-L0249F2:;C
-	ld   hl, $0023
-	add  hl, bc
-	bit  1, [hl]
-	jp   nz, L024A00
-	ld   a, $0B
-	jp   L024A02
-L024A00:;J
-	ld   a, $13
-L024A02:;J
+	
+; =============== MoveS_PlayHitSFX ===============
+; Plays a generic SFX for the player getting hit.
+; IN
+; - BC: Ptr to wPlInfo
+MoveS_PlayHitSFX:
+	; The sound effect used is different for "firey" moves (those with PF3B_FLASH_B_SLOW set).
+	ld   hl, iPlInfo_Flags3
+	add  hl, bc						; Seek to iPlInfo_Flags3
+	bit  PF3B_FLASH_B_SLOW, [hl]	; Is this a firey move?
+	jp   nz, .slowFlash				; If so, jump
+.noFlash:
+	ld   a, SCT_0A					; A = SFX ID for normal hits
+	jp   .playSFX
+.slowFlash:
+	ld   a, SCT_12					; A = SFX ID for firey hits
+.playSFX:
 	call HomeCall_Sound_ReqPlayExId
 	ret
-HitAnim_09:;I
-	ld   a, $88
-	jp   L024A0D
-HitAnim_0A:;I
-	ld   a, $8A
-L024A0D:;J
+
+; =============== HitAnimC_Hit_Multi* ===============	
+; Hit types used by special moves that hit multiple times, for hits outside of the last one.
+; Moves tend to alternate hits betweeen this and HitAnimC_Hit_Multi1.
+;
+; Some super moves may also use HitAnimC_Hit_MultiGS, which pushes the player on the ground
+; and forces them there.
+;
+; Specifically made to prevent the opponent from getting out of the damage string,
+; though it's not impossible with a well timed projectile.
+;
+; =============== HitAnimC_Hit_Multi0 ===============
+; ID: HITANIM_HIT_MULTI0
+; OUT
+; - C flag: Always set (ends hitstop)
+HitAnimC_Hit_Multi0:
+	ld   a, MOVE_SHARED_HIT_MULTIMID0
+	jp   HitAnimC_Hit_Multi1.main
+; =============== HitAnimC_Hit_Multi1 ===============
+; ID: HITANIM_HIT_MULTI1
+; OUT
+; - C flag: Always set (ends hitstop)
+HitAnimC_Hit_Multi1:
+	ld   a, MOVE_SHARED_HIT_MULTIMID1
+	; Fall-through
+	
+; =============== .main ===============
+; - Hitstun lasts very little
+; - Player gets stuck and placed in front of the opponent.
+; - Supports super move playfield flashing
+; - Ground-only
+; IN
+; - A: Move ID
+; OUT
+; - C flag: Always set (ends hitstop)
+.main:
+	; Play SGB/DMG drop SFX
 	push af
-	ld   a, $0C
-	call HomeCall_Sound_ReqPlayExId
+		ld   a, SCT_0B
+		call HomeCall_Sound_ReqPlayExId
 	pop  af
-	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
-	call L024A5B
-	call L02504C
-	call Play_Unk_Pl_BlockstunNormalOnce
+	; Switch to move A
+	call Pl_SetMove_ShakeScreenReset
+	
+	; Force position to be in front of opponent
+	call HitAnimS_MovePlToOpFront
+	
+	; Some super moves use this (notably Iori's)
+	call Play_Pl_FlashPlayfieldOnSuperHit
+	
+	; Hitstun time is very short since hits should come quickly
+	call Play_Pl_DoHitstunOnce
+	
+	; Push opponent if we're cornered
 	call Play_Pl_GiveKnockbackCornered
-	scf
+	
+	scf	; C flag set
 	ret
-HitAnim_0B:;I
-	ld   a, $8C
+	
+; =============== HitAnimC_Hit_MultiGS ===============
+; ID: HITANIM_HIT_MULTIGS
+;
+; OUT
+; - C flag: Always set (ends hitstop)	
+HitAnimC_Hit_MultiGS:
+	ld   a, MOVE_SHARED_HIT_MULTIGS
+	; Play SGB/DMG drop SFX
 	push af
-	ld   a, $0C
-	call HomeCall_Sound_ReqPlayExId
+		ld   a, SCT_0B
+		call HomeCall_Sound_ReqPlayExId
+	; Set move
 	pop  af
-	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
-	ld   hl, $0005
+	call Pl_SetMove_ShakeScreenReset
+	
+	; Snap to the ground
+	ld   hl, iOBJInfo_Y
 	add  hl, de
-	ld   [hl], $88
-	call L024AB1
-	ld   hl, $0071
+	ld   [hl], PL_FLOOR_POS
+	
+	; Move to same X position as opponent
+	call HitAnimS_SyncPlXFromOtherX
+	
+	; Determine how much we're moving backwards.
+	; [POI] Normally we move $10px back, but getting hit by Daimon moves us twice as far.
+	ld   hl, iPlInfo_CharIdOther
 	add  hl, bc
-	ld   a, [hl]
-	cp   $02
-	jp   z, L024A4A
-	ld   hl, $F000
-	jp   L024A4D
-L024A4A:;J
-	ld   hl, $E000
-L024A4D:;J
+	ld   a, [hl]			; A = Opponent CharId
+	cp   CHAR_ID_DAIMON		; CharId == CHAR_ID_DAIMON?
+	jp   z, .moveH_Daimon	; If so, jump
+.moveH_Norm:				; Otherwise, use the normal speed
+	ld   hl, -$1000			; Move $10px back
+	jp   .moveH
+.moveH_Daimon:
+	ld   hl, -$2000			; Move $20px back
+.moveH:
 	call Play_OBJLstS_MoveH_ByXDirR
-	call L02504C
-	call Play_Unk_Pl_BlockstunNormalOnce
+	
+	; Flash playfield if applicable
+	call Play_Pl_FlashPlayfieldOnSuperHit
+	
+	; Small hitstun period
+	call Play_Pl_DoHitstunOnce
+	
+	; Push opponent if we're cornered
 	call Play_Pl_GiveKnockbackCornered
-	scf
+	
+	scf	; C flag set
 	ret
-L024A5B:;C
-	ld   hl, $0071
+; =============== HitAnimS_MovePlToOpFront ===============
+; Forces the player to be placed in front of the opponent, on the ground.
+; This is meant to be used by "intermediate" hits for special moves that hit
+; multiple times, so that the player won't manage to escape.
+;
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+HitAnimS_MovePlToOpFront:
+
+	;##
+	;
+	; [TCRF] This whole part is unnecessary.
+	;
+	; There's a separate, code path for getting hit by Ryo's Hien Shippu Kyaku.
+	; This does the same thing as the normal code path, except byte $83 (iPlInfo_Ryo_HienShippuKyaku_Unused_83)
+	; from the opponent's wPlInfo gets subtracted to the vertical position.
+	; It suggests the move would have hit multiple times in the air, using byte $83 to keep track of where to offset the player.
+	; 
+	; However, not only does the move not use byte $83, meaning it wouldn't act any different than the normal code path,
+	; but it also uses HitAnims that never call this subroutine anyway.
+	;
+
+	; Perform the character check
+	ld   hl, iPlInfo_CharIdOther
 	add  hl, bc
 	ld   a, [hl]
-	cp   $08
-	jp   z, L024A68
-	jp   L024AA1
-L024A68:;J
-	ld   hl, $0072
+	cp   CHAR_ID_RYO					; Playing as RYO?
+	jp   z, .chkRyoMove					; If so, jump
+	jp   .norm							; Otherwise, skip
+.chkRyoMove:
+	; Perform the move check
+	ld   hl, iPlInfo_MoveIdOther
 	add  hl, bc
 	ld   a, [hl]
-	cp   $50
-	jp   z, L024A7A
-	cp   $52
-	jp   z, L024A7A
-	jp   L024AA1
-L024A7A: db $21;X
-L024A7B: db $2B;X
-L024A7C: db $00;X
-L024A7D: db $09;X
-L024A7E: db $CB;X
-L024A7F: db $46;X
-L024A80: db $C2;X
-L024A81: db $89;X
-L024A82: db $4A;X
-L024A83: db $FA;X
-L024A84: db $83;X
-L024A85: db $DA;X
-L024A86: db $C3;X
-L024A87: db $8C;X
-L024A88: db $4A;X
-L024A89: db $FA;X
-L024A8A: db $83;X
-L024A8B: db $D9;X
-L024A8C: db $2F;X
-L024A8D: db $3C;X
-L024A8E: db $C6;X
-L024A8F: db $88;X
-L024A90: db $21;X
-L024A91: db $05;X
-L024A92: db $00;X
-L024A93: db $19;X
-L024A94: db $77;X
-L024A95: db $CD;X
-L024A96: db $B1;X
-L024A97: db $4A;X
-L024A98: db $21;X
-L024A99: db $00;X
-L024A9A: db $E8;X
-L024A9B: db $CD;X
-L024A9C: db $13;X
-L024A9D: db $35;X
-L024A9E: db $C3;X
-L024A9F: db $B0;X
-L024AA0: db $4A;X
-L024AA1:;J
-	ld   hl, $0005
-	add  hl, de
-	ld   [hl], $88
-	call L024AB1
-	ld   hl, $E800
+	cp   MOVE_RYO_HIEN_SHIPPU_KYAKU_L	; Performing light version of Hien Shippu Kyaku?
+	jp   z, .unused_ryo					; If so, jump
+	cp   MOVE_RYO_HIEN_SHIPPU_KYAKU_H	; Performing heavy version of Hien Shippu Kyaku?
+	jp   z, .unused_ryo					; If so, jump
+	jp   .norm							; Otherwise, skip
+.unused_ryo:
+	;--
+	;
+	; RYO CASE
+	;
+
+	; Y Position -> Snap to the ground, but offset by the opponent's iPlInfo_Ryo_HienShippuKyaku_Unused_83
+	; iOBJInfo_Y = PL_FLOOR_POS - (opponent's)iPlInfo_Ryo_HienShippuKyaku_Unused_83
+	
+	; Determine which player we're playing as, and read to A the opponent's iPlInfo_Ryo_HienShippuKyaku_Unused_83
+	ld   hl, iPlInfo_PlId
+	add  hl, bc
+	bit  0, [hl]		; iPlInfo_PlId != PL1?
+	jp   nz, .ryo_pl2	; If so, jump
+.ryo_pl1:
+	ld   a, [wPlInfo_Pl2+iPlInfo_Ryo_HienShippuKyaku_Unused_83]	; Use 2P's value when we're 1P
+	jp   .ryo_setY
+.ryo_pl2:
+	ld   a, [wPlInfo_Pl1+iPlInfo_Ryo_HienShippuKyaku_Unused_83]	; Use 1P's value when we're 2P
+.ryo_setY:
+	; A = -A for subtraction
+	cpl  				
+	inc  a
+	; Add the base floor position
+	add  PL_FLOOR_POS
+	; Save the result to iOBJInfo_Y
+	ld   hl, iOBJInfo_Y
+	add  hl, de		; Seek to Y position
+	ld   [hl], a	; Save A here
+	
+	; X Position -> $18px in front of the opponent (like in .norm)
+	call HitAnimS_SyncPlXFromOtherX	; Sync to opponent X
+	ld   hl, -$1800 				; Move back $18px
 	call Play_OBJLstS_MoveH_ByXDirR
-	ret
-L024AB1:;C
-	push bc
-	ld   hl, $0080
-	add  hl, bc
-	push hl
-	pop  bc
-	ld   hl, $0003
+	jp   .ret
+.norm:
+	;##
+
+	;
+	; STANDARD CASE
+	;
+
+	; Y Position -> Snap to the ground
+	ld   hl, iOBJInfo_Y
 	add  hl, de
-	ld   a, [bc]
-	inc  bc
-	ldi  [hl], a
-	pop  bc
+	ld   [hl], PL_FLOOR_POS
+	
+	; X Position -> $18px in front of the opponent
+	call HitAnimS_SyncPlXFromOtherX	; Sync to opponent X
+	ld   hl, -$1800 				; Move back $18px
+	call Play_OBJLstS_MoveH_ByXDirR
+.ret:
 	ret
-L024AC1:;C
+	
+; =============== HitAnimS_SyncPlXFromOtherX ===============
+; Makes the player use the same X pixel position as the opponent.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+HitAnimS_SyncPlXFromOtherX:
 	push bc
-	ld   hl, $0080
-	add  hl, bc
-	push hl
-	pop  bc
-	ld   hl, $0003
-	add  hl, de
-	ld   a, [bc]
-	inc  bc
-	ldi  [hl], a
-	inc  hl
-	ld   a, [bc]
-	ld   [hl], a
+		; BC = Ptr to opponent's X Position
+		ld   hl, iPlInfo_OBJInfoXOther
+		add  hl, bc
+		push hl
+		pop  bc
+		
+		; HL = Ptr to player X Position
+		ld   hl, iOBJInfo_X
+		add  hl, de
+		
+		; Copy iPlInfo_OBJInfoXOther to iOBJInfo_X
+		ld   a, [bc]
+		inc  bc			; Not needed
+		ldi  [hl], a
 	pop  bc
 	ret
-HitAnim_ThrowStart:;I
+; =============== HitAnimS_SyncPlPosFromOtherPos ===============
+; Makes the player use the same X and Y positions as the opponent.
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+HitAnimS_SyncPlPosFromOtherPos:
+	push bc
+		; BC = Ptr to opponent's X Position
+		ld   hl, iPlInfo_OBJInfoXOther
+		add  hl, bc
+		push hl
+		pop  bc
+		
+		; HL = Ptr to player X Position
+		ld   hl, iOBJInfo_X
+		add  hl, de
+		
+		; Copy iPlInfo_OBJInfoXOther to iOBJInfo_X
+		ld   a, [bc]
+		inc  bc			; Seek to iPlInfo_OBJInfoYOther	
+		ldi  [hl], a	; Save value, seek to iOBJInfo_XSub
+		inc  hl			; Seek to iOBJInfo_Y
+		
+		; Copy iPlInfo_OBJInfoYOther to iOBJInfo_Y
+		ld   a, [bc]
+		ld   [hl], a
+	pop  bc
+	ret
+	
+; =============== HitAnimC_ThrowStart ===============
+; ID: HITANIM_THROW_START
+;
+; This hit effect handles the second part of getting thrown, after the opponent's throw request was accepted,
+; and ends when the opponent gets into the second part of the throw (BasicInput_StartGroundThrow or BasicInput_StartAirThrow).
+;
+; We get here when the initial validation in Play_Pl_SetHitAnim.chkThrow passes, meaning we were in throw range
+; and in the appropriate state.
+;
+; What this part does is set up delays and player flags, then increment wPlayPlThrowActId to PLAY_THROWACT_NEXT02
+; and wait in a loop, passing control to the opponent's task.
+; Said task resumes executing from Play_Pl_ChkThrowInput.tryStart, where it validates that wPlayPlThrowActId was
+; set to PLAY_THROWACT_NEXT02. If it isn't, the throw action is set to PLAY_THROWACT_NONE and ends, which also
+; causes us to jump to .retClear once we get execution again.
+; If instead his validation passes, he will get to BasicInput_StartGroundThrow or BasicInput_StartAirThrow
+; and set wPlayPlThrowActId to PLAY_THROWACT_NEXT03, which is the value we're waiting for.
+;
+; OUT
+; - C flag: If set, the throw continued successfully
+HitAnimC_ThrowStart:	
+
+	; Not applicable if we're getting thrown
 	ld   a, [wPlayPlThrowActId]
-	cp   $01
-	jp   nz, L024B37
-	ld   hl, $005F
+	cp   PLAY_THROWACT_START		; wPlayPlThrowActId == PLAY_THROWACT_START?
+	jp   nz, .retClear				; If not, jump
+	
+	; [TCRF] Require 15 button presses to do something... but nothing checks for this.
+	ld   hl, iPlInfo_Unused_ThrowKeyTimer
 	add  hl, bc
 	ld   [hl], $0F
-	ld   hl, $0021
+	
+	; We're not invulnerable during throws, since the opponent uses hurtboxes to
+	; continue the throw sequence.
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	res  7, [hl]
-	res  1, [hl]
-	ld   a, $90
-	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
-	ld   a, $02
+	res  PF1B_INVULN, [hl]
+	; Can't switch direction since it wouldn't make sense
+	res  PF1B_XFLIPLOCK, [hl]
+	
+	; Set the continuation code, which handles throw tech after the HitAnim ends
+	ld   a, MOVE_SHARED_THROW_START
+	call Pl_SetMove_ShakeScreenReset
+	
+	; Switch to the next part of the throw sequence.
+	; This signals 
+	ld   a, PLAY_THROWACT_NEXT02
 	ld   [wPlayPlThrowActId], a
-L024AF4:;J
-	call Task_PassControlFar
+	
+	;
+	; Wait until the opponent task sets a new value for wPlayPlThrowActId.
+	;
+.waitCont:
+	call Task_PassControlFar		; Pass out to opponent task
 	ld   a, [wPlayPlThrowActId]
-	cp   $00
-	jp   z, L024B37
-	cp   $03
-	jp   nz, L024AF4
+	cp   PLAY_THROWACT_NONE			; Did he reset the value to PLAY_THROWACT_NONE?
+	jp   z, .retClear				; If so, the throw is aborted
+	cp   PLAY_THROWACT_NEXT03		; Did he set it to PLAY_THROWACT_NEXT03 yet?
+	jp   nz, .waitCont				; If not, loop
+	
+	;
+	; If we got here, the opponent got into the second part of the throw.
+	; Prepare for the continuation code to start.
+	;
+	
+	; $14 frame window to perform a throw tech
 	ld   a, $14
-	ld   [$C179], a
-	ld   a, $1B
+	ld   [wPlayPlThrowTechTimer], a
+	
+	; Play throw SGB/DMG SFX
+	ld   a, SCT_THROW
 	call HomeCall_Sound_ReqPlayExId
+	
+	; Face the opponent and lock the direction again
 	call OBJLstS_SyncXFlip
-	ld   hl, $0021
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	set  1, [hl]
-	ld   hl, $001B
+	set  PF1B_XFLIPLOCK, [hl]
+	
+	; Freeze the player while doing MOVE_SHARED_THROW_START.
+	ld   hl, iOBJInfo_FrameLeft
 	add  hl, de
-	ld   [hl], $FF
+	ld   [hl], ANIMSPEED_NONE
 	inc  hl
-	ld   [hl], $FF
-	call L024AB1
-	ld   hl, $F000
+	ld   [hl], ANIMSPEED_NONE
+	
+	; Reposition 16px in front of the opponent.
+	; Because we're facing the opponent, moving backwards places us there.
+	call HitAnimS_SyncPlXFromOtherX	; over opponent X
+	ld   hl, -$1000					; move back $10px
 	call Play_OBJLstS_MoveH_ByXDirR
-	ld   hl, $007C
+	
+	; Remove throw range hitbox next frame
+	ld   hl, iPlInfo_PhysHitRecv
 	add  hl, bc
 	ld   [hl], $01
+	
+	; Prevent collision box overlapping
 	call Play_Pl_MoveByColiBoxOverlapX
+	; and push the opponent if we couldn't
 	call Play_Pl_GiveKnockbackCornered
+	
+	; C flag set - throw continued
 	scf
 	ret
-L024B37: db $AF;X
-L024B38: db $C9;X
-HitAnim_ThrowRotU:;I
-	ld   a, $92
-	jp   HitAnim_ThrowRotCustom
-HitAnim_ThrowRotL:;I
-	ld   a, $94
-	jp   HitAnim_ThrowRotCustom
-HitAnim_ThrowRotD:;I
-	ld   a, $96
-	jp   HitAnim_ThrowRotCustom
-HitAnim_ThrowRotR:;I
-	ld   a, $98
-	jp   HitAnim_ThrowRotCustom
-HitAnim_ThrowRotCustom:;J
-	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
-	call L024AC1
-	ld   a, [wPlayPlThrowRotMoveH]
-	ld   h, a
+.retClear:
+	; C flag clear - throw aborted
+	xor  a
+	ret
+
+
+; =============== HitAnimC_ThrowRot* ===============
+; These hit effects are for the "rotation frames", which can be requested by the opponent's
+; move code after the grab is fully confirmed and before the actual throw happens.
+;
+; Typically set up by something like:
+;	mMvC_SetDamage xxx, HITANIM_THROW_ROT*, PF3_SHAKELONG
+;	mMvC_MoveThrowOp yy, zz
+;
+; These are supposed to be instant, so they just reposition the player
+; and switch to the main move MOVE_SHARED_THROW_ROT*.
+;
+; OUT
+; - C flag: Always set
+	
+; =============== HitAnimC_ThrowRotU ===============
+; ID: HITANIM_THROW_ROTU
+HitAnimC_ThrowRotU:
+	ld   a, MOVE_SHARED_THROW_ROTU
+	jp   HitAnimC_ThrowRotCustom
+; =============== HitAnimC_ThrowRotL ===============
+; ID: HITANIM_THROW_ROTL
+HitAnimC_ThrowRotL:
+	ld   a, MOVE_SHARED_THROW_ROTL
+	jp   HitAnimC_ThrowRotCustom
+; =============== HitAnimC_ThrowRotD ===============
+; ID: HITANIM_THROW_ROTD
+HitAnimC_ThrowRotD:
+	ld   a, MOVE_SHARED_THROW_ROTD
+	jp   HitAnimC_ThrowRotCustom
+; =============== HitAnimC_ThrowRotR ===============
+; ID: HITANIM_THROW_ROTR
+HitAnimC_ThrowRotR:
+	ld   a, MOVE_SHARED_THROW_ROTR
+	jp   HitAnimC_ThrowRotCustom
+; =============== HitAnimC_ThrowRotCustom ===============
+; IN
+; - A: Move ID
+HitAnimC_ThrowRotCustom:
+	; Set continuation code.
+	; Every MOVE_SHARED_THROW_ROT* points to the same move code, it's only
+	; the animation assigned to it that varies.
+	call Pl_SetMove_ShakeScreenReset
+	
+	; Reposition relative to the opponent, based on whatever the opponent specified in Play_Pl_MoveRotThrown.
+	call HitAnimS_SyncPlPosFromOtherPos		; Move over opponent
+	; The position is relative to the opponent facing left, meaning it's more or less equivalent
+	; to the standard "player facing right" relative positioning.
+	ld   a, [wPlayPlThrowRotMoveH]			; Move forward by wPlayPlThrowRotMoveH
+	ld   h, a								
 	ld   l, $00
 	call Play_OBJLstS_MoveH_ByOtherXFlipL
-	ld   a, [wPlayPlThrowRotMoveV]
+	ld   a, [wPlayPlThrowRotMoveV]			; Move down by wPlayPlThrowRotMoveV
 	ld   h, a
 	ld   l, $00
 	call Play_OBJLstS_MoveV
-	ld   hl, $007C
+	; Remove throw rotation range hitbox next frame
+	ld   hl, iPlInfo_PhysHitRecv
 	add  hl, bc
 	ld   [hl], $01
+	; Push the opponent if we couldn't fully reposition (ie: attempted to move off-screen)
 	call Play_Pl_GiveKnockbackCornered
-	scf
+	
+	scf	; C flag set
 	ret
 	
 ; =============== Play_Pl_SetHitAnim ===============
@@ -1984,7 +2693,7 @@ Play_Pl_SetHitAnim:
 		; since it's used later on when validating hit animations.
 		; (As some animations are switched when in the air or on the ground)
 		;
-		Play_Pl_SetHitAnim_SetAirFlag:
+		Play_Pl_SetHitAnimC_SetAirFlag:
 			ld   hl, iOBJInfo_Y
 			add  hl, de
 			ld   a, [hl]		; A = iOBJInfo_Y
@@ -2004,10 +2713,10 @@ Play_Pl_SetHitAnim:
 		; Start by dividing between projectile hits and physical hits.
 		; 
 		; There are significant differences between the handling of those, though the code paths later
-		; converge back at Play_Pl_SetHitAnim_ChkGuardBypass (but not before setting the PF0B_PROJHIT flag)
+		; converge back at Play_Pl_SetHitAnimC_ChkBlock (but not before setting the PF0B_PROJHIT flag)
 		; when it comes to applying the damage and hit animation.
 		;
-		Play_Pl_SetHitAnim_ChkHitType:		
+		Play_Pl_SetHitAnimC_ChkHitType:		
 			; The flags checked here were previously set this frame during collision detection by the main task.
 			ld   hl, iPlInfo_ColiFlags
 			add  hl, bc
@@ -2113,7 +2822,7 @@ Play_Pl_SetHitAnim:
 			ld   [hl], a						; Copy iOBJInfo_Play_DamageFlags3 there
 			
 			; There's nothing else to check here, skip to the shared code
-			jp   Play_Pl_SetHitAnim_ChkGuardBypass
+			jp   Play_Pl_SetHitAnimC_ChkBlock
 			
 			
 		;--------------------------------
@@ -2192,7 +2901,8 @@ Play_Pl_SetHitAnim:
 			;
 			; The throws are also special since they never cause damage directly (read: as long as HitAnimId >= $10),
 			; so when they are confirmed (.setThrowFlags) they just set some flags to force the throw state and jump 
-			; directly to the end, skipping the damage evaluator.
+			; directly to the end, skipping the damage evaluator. After returning, the HitAnimC for the throw will
+			; then be executed, continuing the throw sequence.
 			; The actual damage only happens the when the code for the throw sets HitAnimId < $10, which makes
 			; it count as a normal hit.
 			;
@@ -2297,7 +3007,11 @@ Play_Pl_SetHitAnim:
 			
 			; Throws don't cause damage directly.
 			; Just set the updated hit animation ID from E and return.
-			jp   Play_Pl_SetHitAnim_SetHitAnimId
+			; After returning, the updated hit effect code will be executed:
+			; - The first time we get here, it will be for HITANIM_THROW_START, which executes HitAnimC_ThrowStart.
+			;   That will handle the next part of the throw, from PLAY_THROWACT_START to PLAY_THROWACT_NEXT03.
+			; - The next times are as part of the rotation frames, which is past the point throw tech is allowed.
+			jp   Play_Pl_SetHitAnimC_SetHitAnimId
 			
 			;################
 			;
@@ -2325,11 +3039,8 @@ Play_Pl_SetHitAnim:
 			
 		.chkAutoguard:
 			;
-			; By default, it's impossible to guard while performing a special move,
-			; though some special moves may use PF1B_GUARD to reduce the damage received.
-			;
-			; If one of the autoguard flags are set, however, special moves can be
-			; set to either block lows or highs automatically.
+			; Special moves can be set to either block lows or highs automatically 
+			; with the autoguard flags.
 			; Unlike with normal blocks, blocking the hit prevents *any* damage from 
 			; being received (read: we return).
 			;
@@ -2342,14 +3053,14 @@ Play_Pl_SetHitAnim:
 			
 			; Otherwise, reset the autoguard indicator
 			res  PF2B_AUTOGUARDDONE, [hl]			; Clear result flag
-			jp   Play_Pl_SetHitAnim_ChkGuardBypass	; Skip to the common block
+			jp   Play_Pl_SetHitAnimC_ChkBlock	; Skip to the common block
 			
 		.onAutoguardMid:
 			; If the attack hits low, we got hit
 			ld   hl, iPlInfo_Flags3
 			add  hl, bc									
 			bit  PF3B_HITLOW, [hl]
-			jp   nz, Play_Pl_SetHitAnim_BlockBypass
+			jp   nz, Play_Pl_SetHitAnimC_BlockBypass
 			
 			; When playing as KYO, autoguarding overheads only works against normals.
 			; [BUG?] Suspicious. Was this meant to check if the opponent is KYO (iPlInfo_CharIdOther)?
@@ -2367,7 +3078,7 @@ Play_Pl_SetHitAnim:
 			ld   hl, iPlInfo_Flags3
 			add  hl, bc		 		
 			bit  PF3B_OVERHEAD, [hl]
-			jp   nz, Play_Pl_SetHitAnim_BlockBypass
+			jp   nz, Play_Pl_SetHitAnimC_BlockBypass
 			
 		.chkSpecial:
 			; Autoguarding lows only works against normals in general.
@@ -2375,7 +3086,7 @@ Play_Pl_SetHitAnim:
 			add  hl, bc
 			ld   a, [hl]
 			and  a, PF0_SUPERMOVE|PF0_SPECMOVE			; Did we get hit by a special move?
-			jp   nz, Play_Pl_SetHitAnim_BlockBypass		; If so, jump
+			jp   nz, Play_Pl_SetHitAnimC_BlockBypass		; If so, jump
 		.autoguardOk:
 			
 			ld   hl, iPlInfo_Flags2
@@ -2394,7 +3105,7 @@ Play_Pl_SetHitAnim:
 		;
 		; SHARED - Block Check.
 		;
-		Play_Pl_SetHitAnim_ChkGuardBypass:
+		Play_Pl_SetHitAnimC_ChkBlock:
 			;
 			; If we're blocking, determine if the attack was properly blocked.
 			; If not, the guard is removed and we take full damage.
@@ -2404,32 +3115,35 @@ Play_Pl_SetHitAnim:
 			; Most moves don't set either flag, meaning they can be blocked in both ways.
 			; The few unblockables have both PF3B_OVERHEAD and PF3B_HITLOW set at the same time.
 			;
+			; By default, special moves clear PF1B_GUARD, but a few moves set it.
+			; The same exact logic applies when performing a special with PF1B_GUARD set.
+			;
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc									
 			bit  PF1B_GUARD, [hl]					; Were we blocking the attack?
-			jp   z, Play_Pl_SetHitAnim_ApplyDamage	; If not, skip ahead
+			jp   z, Play_Pl_SetHitAnimC_ApplyDamage	; If not, skip ahead
 			bit  PF1B_CROUCH, [hl]					; Did we block low?
 			jp   z, .onBlockMid						; If not, jump
 		.onBlockLow:
 			ld   hl, iPlInfo_Flags3
 			add  hl, bc								; Seek to iPlInfo_Flags3
 			bit  PF3B_OVERHEAD, [hl]				; Is this an overhead?
-			jp   nz, Play_Pl_SetHitAnim_BlockBypass	; If so, we got hit
-			jp   Play_Pl_SetHitAnim_Blocked			; Otherwise, we blocked it
+			jp   nz, Play_Pl_SetHitAnimC_BlockBypass	; If so, we got hit
+			jp   Play_Pl_SetHitAnimC_Blocked			; Otherwise, we blocked it
 		.onBlockMid:
 			ld   hl, iPlInfo_Flags3
 			add  hl, bc								; Seek to iPlInfo_Flags3
 			bit  PF3B_HITLOW, [hl]					; Does the attack require blocking low?
-			jp   nz, Play_Pl_SetHitAnim_BlockBypass	; If so, we got hit
-			jp   Play_Pl_SetHitAnim_Blocked			; Otherwise, we blocked it
+			jp   nz, Play_Pl_SetHitAnimC_BlockBypass	; If so, we got hit
+			jp   Play_Pl_SetHitAnimC_Blocked			; Otherwise, we blocked it
 			
-		Play_Pl_SetHitAnim_Blocked:
+		Play_Pl_SetHitAnimC_Blocked:
 			; Since we blocked the attack, remove the hit effect
 			; so we can continue blocking.
 			ld   e, $00
-			jp   Play_Pl_SetHitAnim_ApplyDamage
+			jp   Play_Pl_SetHitAnimC_ApplyDamage
 			
-		Play_Pl_SetHitAnim_BlockBypass:
+		Play_Pl_SetHitAnimC_BlockBypass:
 			; We didn't guard the attack correctly.
 			; This counts as a standard hit.
 			
@@ -2446,7 +3160,7 @@ Play_Pl_SetHitAnim:
 		;
 		; SHARED - Apply Damage
 		;
-		Play_Pl_SetHitAnim_ApplyDamage:
+		Play_Pl_SetHitAnimC_ApplyDamage:
 			
 			; Play_Pl_ApplyDamageToStats recalculates the values in DE, so save/restore it
 			push de
@@ -2457,7 +3171,7 @@ Play_Pl_SetHitAnim:
 		;
 		; SHARED - Set Hit Animation
 		;
-		Play_Pl_SetHitAnim_SetHitAnim:
+		Play_Pl_SetHitAnimC_SetHitAnim:
 			;
 			; Second pass to validate the animation to play when getting hit,
 			; as it may get replaced with something else depending on the player status flags.
@@ -2465,28 +3179,25 @@ Play_Pl_SetHitAnim:
 			;
 			ld   a, e						; A = HitAnimId
 			
+			;
 			; This is the first of many whitelists where some moves can't be overriden at all.
-			; HITANIM_HIT_SPEC_09, HITANIM_HIT_SPEC_0A and HITANIM_HIT_SPEC_0B in particular
+			; HITANIM_HIT_MULTI0, HITANIM_HIT_MULTI1 and HITANIM_HIT_MULTIGS in particular
 			; tend to be used by special moves that hit multiple times for every hit
 			; except the last one, thus preventing the opponent from escaping mid-move.
-			;
-			; [TCRF?] Even then, some moves actually have an "escape check" to perform an action if
-			;         the opponent were to escape. Usually, the player will hop back, but Iori's 
-			;         desperation super makes it transition to a completely unique move.
-			;         Because of this blacklist, their effect becomes unreachable.
+			; (though it can still happen if a projectile hits at the right time, see the .chkOtherEscape in many moves)
 			;
 			
 			; These animation IDs can always be used
-			cp   HITANIM_HIT_SPEC_09				; E == $09?
-			jp   z, Play_Pl_SetHitAnim_SetHitAnimId	; If so, jump
-			cp   HITANIM_HIT_SPEC_0A				; ...
-			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
-			cp   HITANIM_HIT_SPEC_0B
-			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
-			cp   HITANIM_DROP_MD
-			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
-			cp   HITANIM_DROP_SPEC_AIR_0E
-			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			cp   HITANIM_HIT_MULTI0				; E == $09?
+			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId	; If so, jump
+			cp   HITANIM_HIT_MULTI1				; ...
+			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
+			cp   HITANIM_HIT_MULTIGS
+			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
+			cp   HITANIM_DROP_MAIN
+			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
+			cp   HITANIM_DROP_SWOOPUP
+			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
 		
 		.chkDead:
 			;
@@ -2515,43 +3226,43 @@ Play_Pl_SetHitAnim:
 			or   a						; Did we get thrown?
 			jp   nz, .deadThrown		; If so, jump
 		.deadHit:
-			; Getting KO'd by a normal always sets HITANIM_DROP_MD.
+			; Getting KO'd by a normal always sets HITANIM_DROP_MAIN.
 			; For specials there's a whitelist.
 			ld   hl, iPlInfo_Flags0Other
 			add  hl, bc					; Seek to opponent's status
 			bit  PF0B_SPECMOVE, [hl]		; Did we get killed by a special move?
 			jp   nz, .deadSpecHit		; If so, jump
-			jp   .useStdDrop				; Otherwise, use HITANIM_DROP_MD
+			jp   .useStdDrop				; Otherwise, use HITANIM_DROP_MAIN
 		.deadThrown:
 			; There are three allowed animations when getting KO's by a throw.
-			; Otherwise, default to HITANIM_DROP_MD.
+			; Otherwise, default to HITANIM_DROP_MAIN.
 			ld   a, e
-			cp   HITANIM_DROP_SPEC_0C		; HitAnimId == $0C?
+			cp   HITANIM_DROP_DB_A		; HitAnimId == $0C?
 			jp   z, .useDrop0C				; If so, jump
-			cp   HITANIM_DROP_SPEC_0F		; ...
-			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			cp   HITANIM_THROW_END		; ...
+			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
 			;--
 			; [TCRF?] Unreachable code?
-			cp   a, HITANIM_DROP_SPEC_AIR_0E
-			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			cp   a, HITANIM_DROP_SWOOPUP
+			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
 			jp   .useStdDrop
 			;--
 		.deadSpecHit:
 			; Whitelist of allowed hit animations when getting KO'd by a hit.
-			; Otherwise, default to HITANIM_DROP_MD.
+			; Otherwise, default to HITANIM_DROP_MAIN.
 			ld   a, e
-			cp   HITANIM_HIT_SPEC_09
-			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
-			cp   HITANIM_HIT_SPEC_0A
-			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
-			cp   HITANIM_HIT_SPEC_0B
-			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
-			cp   HITANIM_DROP_SPEC_0C
+			cp   HITANIM_HIT_MULTI0
+			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
+			cp   HITANIM_HIT_MULTI1
+			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
+			cp   HITANIM_HIT_MULTIGS
+			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
+			cp   HITANIM_DROP_DB_A
 			jp   z, .useDrop0C
-			cp   HITANIM_DROP_SPEC_0F
-			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
-			cp   HITANIM_DROP_SPEC_AIR_0E
-			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			cp   HITANIM_THROW_END
+			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
+			cp   HITANIM_DROP_SWOOPUP
+			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
 			jp   .useStdDrop
 			
 		.notDead:
@@ -2564,7 +3275,7 @@ Play_Pl_SetHitAnim:
 			jp   nz, .noBlock			; If not, jump
 			call Play_Pl_DoGuardBreak	; Did our guard break?
 			jp   z, .useGuardBreak		; If so, jump
-			jp   Play_Pl_SetHitAnim_SetHitAnimId	; Otherwise, confirm HITANIM_BLOCKED
+			jp   Play_Pl_SetHitAnimC_SetHitAnimId	; Otherwise, confirm HITANIM_BLOCKED
 			
 		.noBlock:
 			call Play_Pl_IsDizzyNext	; Are we supposed to get dizzy on this hit?
@@ -2572,21 +3283,21 @@ Play_Pl_SetHitAnim:
 		.dizzy:
 			; Handle the animation blacklist when getting hit "right before getting" dizzy.
 			; When getting dizzy, the player will drop to the ground regardless of the hit animation,
-			; by overriding whatever animation was set with HITANIM_DROP_MD (by reaching .useStdDrop).
+			; by overriding whatever animation was set with HITANIM_DROP_MAIN (by reaching .useStdDrop).
 			; However, the animations checked below can't be overridden.
 			ld   a, e
-			cp   HITANIM_HIT_SPEC_09
-			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
-			cp   HITANIM_HIT_SPEC_0A
-			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
-			cp   HITANIM_HIT_SPEC_0B
-			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
-			cp   HITANIM_DROP_SPEC_0C
+			cp   HITANIM_HIT_MULTI0
+			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
+			cp   HITANIM_HIT_MULTI1
+			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
+			cp   HITANIM_HIT_MULTIGS
+			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
+			cp   HITANIM_DROP_DB_A
 			jp   z, .useDrop0C
-			cp   HITANIM_DROP_SPEC_0F
-			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
-			cp   HITANIM_DROP_SPEC_AIR_0E
-			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			cp   HITANIM_THROW_END
+			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
+			cp   HITANIM_DROP_SWOOPUP
+			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
 			jp   .useStdDrop
 		.noDizzy:
 		
@@ -2599,10 +3310,10 @@ Play_Pl_SetHitAnim:
 			
 			;##
 		.air:
-			; HITANIM_DROP_SPEC_AIR_0E is always allowed when getting hit in the air
-			; (alongside HITANIM_DROP_SPEC_0C and HITANIM_DROP_SPEC_0F...)
-			cp   HITANIM_DROP_SPEC_AIR_0E
-			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			; HITANIM_DROP_SWOOPUP is always allowed when getting hit in the air
+			; (alongside HITANIM_DROP_DB_A and HITANIM_THROW_END...)
+			cp   HITANIM_DROP_SWOOPUP
+			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
 			
 			;
 			; When getting hit by a normal in the air, the player recovers before touching the ground.
@@ -2618,21 +3329,21 @@ Play_Pl_SetHitAnim:
 			;--
 			; [POI] This is the same between .noAirNoSpec and .noAirSpec.
 			;       It could have been moved before the PF0B_PROJHIT check.
-			cp   HITANIM_DROP_SPEC_0C
+			cp   HITANIM_DROP_DB_A
 			jp   z, .useDrop0C
-			cp   HITANIM_DROP_SPEC_0F
-			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			cp   HITANIM_THROW_END
+			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
 			;--
-			jp   .useHitAirRec		; Use HITANIM_DROP_SM_REC
+			jp   .useHitAirRec		; Use HITANIM_DROP_A
 		.airSpec:
 			;--
 			; [POI] See above
-			cp   HITANIM_DROP_SPEC_0C
+			cp   HITANIM_DROP_DB_A
 			jp   z, .useDrop0C
-			cp   HITANIM_DROP_SPEC_0F
-			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			cp   HITANIM_THROW_END
+			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
 			;--
-			jp   .useStdDrop		; Use HITANIM_DROP_MD
+			jp   .useStdDrop		; Use HITANIM_DROP_MAIN
 			;##
 			
 		.noAir:
@@ -2649,9 +3360,9 @@ Play_Pl_SetHitAnim:
 			bit  PF0B_SPECMOVE, [hl]	; Did we get hit by a special move?
 			jp   nz, .noAirSpec		; If so, jump
 		.noAirNorm:
-			; HITANIM_DROP_SM is always allowed
-			cp   HITANIM_DROP_SM
-			jp   z, Play_Pl_SetHitAnim_SetHitAnimId
+			; HITANIM_DROP_CH is always allowed
+			cp   HITANIM_DROP_CH
+			jp   z, Play_Pl_SetHitAnimC_SetHitAnimId
 			
 			; If we got hit by a normal while crouching, force use HITANIM_HIT_LOW
 			ld   hl, iPlInfo_Flags1
@@ -2662,26 +3373,26 @@ Play_Pl_SetHitAnim:
 			; Otherwise, use the existing value
 			;
 			; Of course, this assumes that normals will never set anims
-			; they aren't intended to use, like HITANIM_DROP_SPEC_0C.
-			jp   Play_Pl_SetHitAnim_SetHitAnimId
+			; they aren't intended to use, like HITANIM_DROP_DB_A.
+			jp   Play_Pl_SetHitAnimC_SetHitAnimId
 		.noAirSpec:
 			; No special behaviour when hit by a special move, other
-			; than the standard special case for HITANIM_DROP_SPEC_0C
+			; than the standard special case for HITANIM_DROP_DB_A
 			; that's also everywhere else.
-			cp   HITANIM_DROP_SPEC_0C
+			cp   HITANIM_DROP_DB_A
 			jp   z, .useDrop0C
-			jp   Play_Pl_SetHitAnim_SetHitAnimId
+			jp   Play_Pl_SetHitAnimC_SetHitAnimId
 			;##
 			
 		.useDrop0C:
-			; If we're not in the air, replace HITANIM_DROP_SPEC_0C with its ground version,
+			; If we're not in the air, replace HITANIM_DROP_DB_A with its ground version,
 			; which is a shortened version without the downwards movement.
 			ld   hl, iPlInfo_Flags0
 			add  hl, bc
 			bit  PF0B_AIR, [hl]						; Are we in the air?
-			jp   nz, Play_Pl_SetHitAnim_SetHitAnimId			; If so, confirm the air ver
-			ld   e, HITANIM_DROP_SPEC_0C_GROUND		; Otherwise, replace it with the ground ver
-			jp   Play_Pl_SetHitAnim_SetHitAnimId
+			jp   nz, Play_Pl_SetHitAnimC_SetHitAnimId			; If so, confirm the air ver
+			ld   e, HITANIM_DROP_DB_G		; Otherwise, replace it with the ground ver
+			jp   Play_Pl_SetHitAnimC_SetHitAnimId
 			
 		.useGuardBreak:
 			; Like .useDrop0C, but for the guard break.
@@ -2690,33 +3401,33 @@ Play_Pl_SetHitAnim:
 			bit  PF0B_AIR, [hl]				; Are we in the air?
 			jp   z, .useGuardBreakGround	; If not, jump
 		.useGuardBreakAir:
-			ld   e, HITANIM_GUARDBREAK_AIR
-			jp   Play_Pl_SetHitAnim_SetHitAnimId
+			ld   e, HITANIM_GUARDBREAK_A
+			jp   Play_Pl_SetHitAnimC_SetHitAnimId
 		.useGuardBreakGround:
-			ld   e, HITANIM_GUARDBREAK_GROUND
-			jp   Play_Pl_SetHitAnim_SetHitAnimId
+			ld   e, HITANIM_GUARDBREAK_G
+			jp   Play_Pl_SetHitAnimC_SetHitAnimId
 			
 		;--
 		; [TCRF] Unreferenced code to force the standard hit animations
 		.unused_useHit03:
-			ld   e, HITANIM_HIT0_MID
-			jp   Play_Pl_SetHitAnim_SetHitAnimId
+			ld   e, HITANIM_HIT_MID0
+			jp   Play_Pl_SetHitAnimC_SetHitAnimId
 		.unused_useHit04:
-			ld   e, HITANIM_HIT1_MID
-			jp   Play_Pl_SetHitAnim_SetHitAnimId
+			ld   e, HITANIM_HIT_MID1
+			jp   Play_Pl_SetHitAnimC_SetHitAnimId
 		;--
 		
 		.useStdDrop:
-			ld   e, HITANIM_DROP_MD
-			jp   Play_Pl_SetHitAnim_SetHitAnimId
+			ld   e, HITANIM_DROP_MAIN
+			jp   Play_Pl_SetHitAnimC_SetHitAnimId
 		.useHitAirRec:
-			ld   e, HITANIM_DROP_SM_REC
-			jp   Play_Pl_SetHitAnim_SetHitAnimId
+			ld   e, HITANIM_DROP_A
+			jp   Play_Pl_SetHitAnimC_SetHitAnimId
 		.useHitLow:
 			ld   e, HITANIM_HIT_LOW
-			jp   Play_Pl_SetHitAnim_SetHitAnimId
+			jp   Play_Pl_SetHitAnimC_SetHitAnimId
 			
-		Play_Pl_SetHitAnim_SetHitAnimId:
+		Play_Pl_SetHitAnimC_SetHitAnimId:
 			; Save the updated hit animation ID.
 			; iPlInfo_HitAnimId = E
 			ld   a, e			; A = E
@@ -3034,9 +3745,9 @@ Play_Pl_DecStunTimer:
 		; If the player is blocking, it must have the guard flag set (PF1B_GUARD).
 		;
 		ld   hl, iPlInfo_Flags1
-		add  hl, bc						; Seek to iPlInfo_Flags1
-		bit  PF1B_GUARD, [hl]	; Is the flag set?
-		jp   nz, .chkGuard				; If so, jump
+		add  hl, bc					; Seek to iPlInfo_Flags1
+		bit  PF1B_GUARD, [hl]		; Is the flag set?
+		jp   nz, .chkGuard			; If so, jump
 		
 	.noGuard:
 		;
@@ -3122,8 +3833,8 @@ Play_Pl_DecStunTimer:
 		;
 		; We got here by having PF1B_GUARD set.
 		;
-		; However, some special moves set that flag as well to reduce the damage 
-		; received when getting hit out of them.
+		; However, some special moves set that flag as well to automatically transition
+		; to the block animation in case we get hit out of them.
 		;
 		; The player isn't explicitly blocking in that case, so if we're in the middle
 		; of a special or super move, return immediately to leave the guard break timer unchanged.
@@ -3251,1044 +3962,1511 @@ Play_Pl_DoGuardBreak:
 .ret:
 	ret
 	
-L025003:;C
-	push af
-	ld   hl, $004E
-	add  hl, bc
-	ld   a, [hl]
-	or   a
-	jp   z, L025023
-	ld   hl, $0023
-	add  hl, bc
-	bit  5, [hl]
-	jp   nz, L025019
-	jp   L025023
-L025019:;J
-	pop  af
+; =============== MoveS_ChkHalfSpeedHit ===============
+; Runs the game at half speed for the specified amount of frames if the move allows for it.
+; IN
+; - A: How many frames to perform the effect
+; - BC: Ptr to wPlInfo
+MoveS_ChkHalfSpeedHit:
+
+	push af	; Save frame count
+	
+		;
+		; Validate that we can actually start slowdown mode
+		;
+		
+		; Not applicable when dead, as getting killed already sets its own slowdown. don't interfere
+		ld   hl, iPlInfo_Health
+		add  hl, bc
+		ld   a, [hl]
+		or   a			; iPlInfo_Health == 0?
+		jp   z, .ret	; If so, jump
+		
+		; Only do it if the move we got hit with has the slowdown flag set.
+		ld   hl, iPlInfo_Flags3
+		add  hl, bc
+		bit  PF3B_HALFSPEED, [hl]	; Is the move tagged with halfspeed?
+		jp   nz, .setSlowdown		; If so, jump
+		jp   .ret					; Otherwise, don't do anything
+		
+	.setSlowdown:
+		;
+		; All OK. Initialize that mode
+		;
+	pop  af							; Slow down for A frames
 	ld   [wPlaySlowdownTimer], a
-	ld   a, $01
+	ld   a, $01						; Run gameplay every other frame
 	ld   [wPlaySlowdownSpeed], a
 	ret
-L025023:;J
+	.ret:
+		;
+		; Validation failed.
+		;
 	pop  af
 	ret
-L025025: db $FA;X
-L025026: db $69;X
-L025027: db $C1;X
-L025028: db $B7;X
-L025029: db $CA;X
-L02502A: db $3F;X
-L02502B: db $50;X
-L02502C: db $21;X
-L02502D: db $4E;X
-L02502E: db $00;X
-L02502F: db $09;X
-L025030: db $7E;X
-L025031: db $B7;X
-L025032: db $CA;X
-L025033: db $3F;X
-L025034: db $50;X
-L025035: db $21;X
-L025036: db $44;X
-L025037: db $00;X
-L025038: db $09;X
-L025039: db $7E;X
-L02503A: db $E6;X
-L02503B: db $7F;X
-L02503C: db $CA;X
-L02503D: db $4B;X
-L02503E: db $50;X
-L02503F: db $21;X
-L025040: db $5F;X
-L025041: db $00;X
-L025042: db $09;X
-L025043: db $7E;X
-L025044: db $D6;X
-L025045: db $01;X
-L025046: db $D2;X
-L025047: db $4A;X
-L025048: db $50;X
-L025049: db $AF;X
-L02504A: db $77;X
-L02504B: db $C9;X
-L02504C:;C
-	ld   hl, $006D
-	add  hl, bc
-	bit  6, [hl]
-	jp   z, L02505A
-	ld   a, $00
-	ld   [wStageBGP], a
-L02505A:;J
-	ret
-L02505B:;I
-	call Play_Pl_GiveKnockbackCornered
-	call Play_Pl_MoveByColiBoxOverlapX
-	call OBJLstS_IsGFXLoadDone
-	jp   nz, L02509D
-	ld   hl, $001B
-	add  hl, de
-	ld   a, [hl]
-	cp   $00
-	jp   z, L025090
-	cp   $01
-	jp   nz, L02509D
-	ld   [hl], $00
-	ld   hl, $0023
-	add  hl, bc
-	bit  0, [hl]
-	jp   nz, L025087
-	ld   hl, $0280
-	jp   L02508A
-L025087:;J
-	ld   hl, $0400
-L02508A:;J
-	call Play_OBJLstS_SetSpeedH_ByXDirL
-	jp   L02509C
-L025090:;J
-	mMvC_DoFrictionH $0040
-	jp   nc, L02509C
-	call Play_Pl_EndMove
-L02509C:;J
-	ret
-L02509D:;J
-	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L0250A0:;I
-	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L0251F1
 	
-	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $00
-	jp   z, L0250CA
-	cp   $04
-	jp   z, L02511B
-	cp   $08
-	jp   z, L02512D
-	cp   $0C
-	jp   z, L025139
-	cp   $10
-	jp   z, L0251E2
-L0250C7: db $C3;X
-L0250C8: db $EE;X
-L0250C9: db $51;X
-L0250CA:;J
-	ld   hl, $0023
-	add  hl, bc
-	bit  7, [hl]
-	jp   nz, L0250DF
-	mMvC_ValFrameEnd L025160
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	jp   L025160
-L0250DF:;J
-	mMvC_ValFrameEnd L0251EE
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	ld   hl, $0023
-	add  hl, bc
-	bit  0, [hl]
-	jp   nz, L025100
-	ld   hl, $0140
-	call Play_OBJLstS_SetSpeedH_ByXDirL
-	mMvC_SetSpeedV $FC00
-	jp   L02510C
-L025100:;J
-	ld   hl, $0180
-	call Play_OBJLstS_SetSpeedH_ByXDirL
-	mMvC_SetSpeedV $FA00
-L02510C:;J
-	mMvC_SetMoveV -$0100
-	ld   hl, $0000
-	call OBJLstS_ApplyGravityVAndMoveHV
-	jp   L0251EE
-L02511B:;J
-	ld   hl, $0000
-	add  hl, de
-	bit  3, [hl]
-	jp   z, L025160
-	mMvC_SetMoveV -$0100
-	jp   L025160
-L02512D:;J
-	mMvC_ValFrameEnd L0251EE
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	jp   L0251EE
-L025139:;J
-	ld   hl, $0000
-	add  hl, de
-	bit  3, [hl]
-	jp   z, L02515D
-	push bc
-	ld   hl, $0007
-	add  hl, de
-	ld   b, [hl]
-	inc  hl
-	ld   c, [hl]
-	push bc
-	pop  hl
-	pop  bc
-	sra  h
-	rr   l
-	call Play_OBJLstS_SetSpeedH
-	mMvC_SetSpeedV $FD00
-	jp   L0251CF
-L02515D:;J
-	jp   L0251CF
-L025160:;J
-	mMvC_ChkGravityHV $0060, L0251EE
-	call Play_Pl_IsDizzyNext
-	jp   nz, L02517E
-	ld   hl, $004E
-	add  hl, bc
-	ld   a, [hl]
-	or   a
-	jp   z, L02517E
-	call Play_Pl_AreBothBtnHeld
-	jp   c, L025196
-L02517E:;J
-	mMvC_SetDropFrame $08, $05
-	ld   hl, $0021
-	add  hl, bc
-	set  7, [hl]
-	ld   hl, $0023
-	add  hl, bc
-	res  1, [hl]
-	res  6, [hl]
-	jp   L0251F1
-L025196:;J
-	ld   hl, $0083
-	add  hl, bc
-	ld   [hl], $00
-	ld   hl, $0021
-	add  hl, bc
-	res  3, [hl]
-	res  5, [hl]
-	set  0, [hl]
-	set  1, [hl]
-	set  2, [hl]
-	inc  hl
-	set  6, [hl]
-	set  7, [hl]
-	inc  hl
-	res  1, [hl]
-	res  6, [hl]
-	call Play_Pl_GetDirKeys_ByXFlipR
-	jp   nc, L0251BF
-	bit  0, a
-	jp   nz, L0251C4
-L0251BF:;J
-	ld   a, $20
-	jp   L0251C9
-L0251C4:;J
-	ld   a, $1E
-	jp   L0251C9
-L0251C9:;J
-	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
-	jp   L0251F1
-L0251CF:;J
-	mMvC_ChkGravityHV $0060, L0251EE
-	mMvC_SetDropFrame $10, $05
-	jp   L0251F1
-L0251E2:;J
-	mMvC_ValFrameEnd L0251EE
-	call L003CB3
-	jp   L0251F1
-L0251EE:;J
-	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L0251F1:;J
-	ret
-L0251F2:;I
-	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L0252CA
+; =============== Play_Pl_Unused_DecThrowKeyTimer ===============
+; [TCRF] Weird unreferenced code that decrements a counter related to throws
+;        when any of these conditions pass:
+;        - Time Over
+;        - Died
+;        - Pressed any button
+; The counter itself is set to $08 by HitAnimC_ThrowStart and read by nothing else,
+; except for giving it visibility to the opponent.
+; IN
+; - BC: Ptr to wPlInfo
+Play_Pl_Unused_DecThrowKeyTimer:
+	; If we time over'd, decrement the counter
+	ld   a, [wRoundTime]
+	or   a					; wRoundTime == 0?
+	jp   z, .decTimer		; If so, jump
 	
-	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $00
-	jp   z, L025217
-	cp   $04
-	jp   z, L025245
-	cp   $08
-	jp   z, L025258
-	cp   $0C
-	jp   z, L0252BB
-L025214: db $C3;X
-L025215: db $C7;X
-L025216: db $52;X
-L025217:;J
-	ld   hl, $0071
+	; If we have no health, decrement the counter
+	ld   hl, iPlInfo_Health
 	add  hl, bc
 	ld   a, [hl]
-	cp   $1A
-	jp   nz, L025242
-	ld   hl, $0072
-	add  hl, bc
-	ld   a, [hl]
-	cp   $48
-	jp   z, L025233
-	cp   $4A
-	jp   z, L025233
-	jp   L025242
-L025233:;J
-	ld   hl, $0009
-	add  hl, de
-	bit  7, [hl]
-	jp   nz, L02527F
-	mMvC_SetSpeedH $0300
-L025242:;J
-	jp   L02527F
-L025245:;J
-	call Play_Pl_DoGroundScreenShake
-	mMvC_ValFrameEnd L0252C7
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	xor  a
-	ld   [wScreenShakeY], a
-	jp   L0252C7
-L025258:;J
-	ld   hl, $0000
-	add  hl, de
-	bit  3, [hl]
-	jp   z, L02527C
-	push bc
-	ld   hl, $0007
-	add  hl, de
-	ld   b, [hl]
-	inc  hl
-	ld   c, [hl]
-	push bc
-	pop  hl
-	pop  bc
-	sra  h
-	rr   l
-	call Play_OBJLstS_SetSpeedH
-	mMvC_SetSpeedV $FD00
-	jp   L0252A8
-L02527C:;J
-	jp   L0252A8
-L02527F:;J
-	mMvC_ChkGravityHV $0060, L0252C7
-	mMvC_SetDropFrame $04, $09
-	jp   z, L0252CA
-	ld   hl, $0021
-	add  hl, bc
-	set  7, [hl]
-	ld   a, $0E
-	call HomeCall_Sound_ReqPlayExId
-	ld   hl, $0023
-	add  hl, bc
-	res  1, [hl]
-	res  6, [hl]
-	jp   L0252CA
-L0252A8:;J
-	mMvC_ChkGravityHV $0060, L0252C7
-	mMvC_SetDropFrame $0C, $05
-	jp   L0252CA
-L0252BB:;J
-	mMvC_ValFrameEnd L0252C7
-	call L003CB3
-	jp   L0252CA
-L0252C7:;J
-	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L0252CA:;J
-	ret
-L0252CB:;I
-	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L025326
+	or   a					; iPlInfo_Health == 0?
+	jp   z, .decTimer		; If so, jump
 	
-	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $00
-	jp   z, L0252EB
-	cp   $04
-	jp   z, L0252FC
-	cp   $08
-	jp   z, L025317
-L0252E8: db $C3;X
-L0252E9: db $23;X
-L0252EA: db $53;X
-L0252EB:;J
-	mMvC_ValFrameEnd L025323
-	mMvC_SetAnimSpeed $05
-	ld   a, $0E
-	call HomeCall_Sound_ReqPlayExId
-	jp   L025323
-L0252FC:;J
-	call Play_Pl_DoGroundScreenShake
-	mMvC_ValFrameEnd L025323
-	mMvC_SetAnimSpeed $10
-	xor  a
-	ld   [wScreenShakeY], a
-	ld   hl, $0023
+	; If we pressed any button, decrement the counter
+	ld   hl, iPlInfo_JoyNewKeys
 	add  hl, bc
-	res  1, [hl]
-	res  6, [hl]
-	jp   L025323
-L025317:;J
-	mMvC_ValFrameEnd L025323
-	call L003CB3
-	jp   L025326
-L025323:;J
-	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L025326:;J
-	ret
-L025327:;I
-	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L025495
+	ld   a, [hl]
+	and  a, $FF^KEY_START	; Pressed any key other than START?
+	jp   z, .ret			; If not, return
 	
-	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $00
-	jp   z, L02535B
-	cp   $04
-	jp   z, L02536E
-	cp   $08
-	jp   z, L0253A8
-	cp   $0C
-	jp   z, L0253BB
-	cp   $10
-	jp   z, L0253DA
-	cp   $14
-	jp   z, L0253E9
-	cp   $18
-	jp   z, L025486
-L025358: db $C3;X
-L025359: db $92;X
-L02535A: db $54;X
-L02535B:;J
-	ld   hl, $0009
-	add  hl, de
-	ld   a, [hl]
-	bit  7, a
-	jp   nz, L02541B
-	ld   hl, $0013
-	add  hl, de
-	ld   [hl], $08
-	jp   L025424
-L02536E:;J
-	ld   hl, $0009
-	add  hl, de
-	ld   a, [hl]
-	bit  7, a
-	jp   nz, L025381
-	ld   hl, $0013
-	add  hl, de
-	ld   [hl], $08
-	jp   L025424
-L025381:;J
-	mMvC_ValFrameEnd L02541B
-	ld   hl, $0071
-	add  hl, bc
-	ld   a, [hl]
-	cp   $02
-	jp   nz, L025399
-	ld   a, $08
-	call HomeCall_Sound_ReqPlayExId
-	jp   L02539F
-L025399:;J
-	ld   hl, $0021
-	add  hl, bc
-	res  7, [hl]
-L02539F:;J
-	ld   hl, $0013
-	add  hl, de
-	ld   [hl], $18
-	jp   L02541B
-L0253A8:;J
-	ld   hl, $0071
-	add  hl, bc
-	ld   a, [hl]
-	cp   $02
-	jp   nz, L025424
-	ld   hl, $0021
-	add  hl, bc
-	res  7, [hl]
-	jp   L025424
-L0253BB:;J
-	ld   hl, $0071
-	add  hl, bc
-	ld   a, [hl]
-	cp   $02
-	jp   nz, L0253CB
-	ld   hl, $0021
-	add  hl, bc
-	res  7, [hl]
-L0253CB:;J
-	mMvC_ValFrameEnd L025424
-	ld   hl, $0013
-	add  hl, de
-	ld   [hl], $04
-	jp   L025424
-L0253DA:;J
-	call Play_Pl_DoGroundScreenShake
-	mMvC_ValFrameEnd L025492
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	jp   L025492
-L0253E9:;J
-	ld   hl, $0000
-	add  hl, de
-	bit  3, [hl]
-	jp   z, L025418
-	push bc
-	ld   hl, $0007
-	add  hl, de
-	ld   b, [hl]
-	inc  hl
-	ld   c, [hl]
-	push bc
-	pop  hl
-	pop  bc
-	sra  h
-	rr   l
-	call Play_OBJLstS_SetSpeedH
-	ld   hl, $0083
-	add  hl, bc
-	ld   a, [hl]
-	sra  a
-	add  a, $04
-	cpl
-	inc  a
-	ld   h, a
-	ld   l, $FF
-	call Play_OBJLstS_SetSpeedV
-	jp   L025473
-L025418:;J
-	jp   L025473
-L02541B:;J
-	ld   hl, OAM_Begin
-	ld   hl, $0030
-	jp   L025437
-L025424:;J
-	ld   hl, $0071
-	add  hl, bc
-	ld   a, [hl]
-	cp   $02
-	jp   z, L025434
-	ld   hl, $0021
-	add  hl, bc
-	set  7, [hl]
-L025434:;J
-	ld   hl, $0060
-L025437:;J
-	push hl
-	ld   hl, $0009
-	add  hl, de
-	ld   a, [hl]
-	ld   hl, $0083
-	add  hl, bc
+.decTimer:
+	; iPlInfo_Unused_ThrowKeyTimer = MAX(iPlInfo_Unused_ThrowKeyTimer - 1, 0)
+	ld   hl, iPlInfo_Unused_ThrowKeyTimer
+	add  hl, bc				; HL = Ptr to iPlInfo_Unused_ThrowKeyTimer
+	ld   a, [hl]			; A = iPlInfo_Unused_ThrowKeyTimer - 1
+	sub  a, $01
+	jp   nc, .save			; Did we underflow? If not, jump
+	xor  a					; Otherwise, A = 0
+.save:
 	ld   [hl], a
-	pop  hl
-	call OBJLstS_ApplyGravityVAndMoveHV
-	jp   nc, L025492
-	mMvC_SetDropFrame $10, $0B
-	jp   z, L025495
-	ld   a, $0E
-	call HomeCall_Sound_ReqPlayExId
-	ld   hl, $0071
-	add  hl, bc
-	ld   a, [hl]
-	cp   $02
-	jp   z, L025468
-	ld   hl, $0021
-	add  hl, bc
-	set  7, [hl]
-L025468:;J
-	ld   hl, $0023
-	add  hl, bc
-	res  1, [hl]
-	res  6, [hl]
-	jp   L025495
-L025473:;J
-	mMvC_ChkGravityHV $0060, L025492
-	mMvC_SetDropFrame $18, $05
-	jp   L025495
-L025486:;J
-	mMvC_ValFrameEnd L025492
-	call L003CB3
-	jp   L025495
-L025492:;J
-	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L025495:;J
+.ret:
 	ret
-L025496:;I
-	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L0254EF
 	
-	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $00
-	jp   z, L0254B6
-	cp   $04
-	jp   z, L0254C2
-	cp   $08
-	jp   z, L0254E0
-L0254B3: db $C3;X
-L0254B4: db $EC;X
-L0254B5: db $54;X
-L0254B6:;J
-	mMvC_ValFrameEnd L0254C5
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	jp   L0254C5
-L0254C2:;J
-	jp   L0254C5
-L0254C5:;J
-	mMvC_ChkGravityHV $0060, L0254EC
-	mMvC_SetDropFrame $08, $05
-	ld   hl, $0023
+; =============== Play_Pl_FlashPlayfieldOnSuperHit ===============
+; Flashes the playfield if the player got hit by a super move.
+; IN
+; - BC: Ptr to wPlInfo
+Play_Pl_FlashPlayfieldOnSuperHit:
+	; Note this is only called when getting hit.
+	ld   hl, iPlInfo_Flags0Other
 	add  hl, bc
-	res  1, [hl]
-	res  6, [hl]
-	jp   L0254EF
-L0254E0:;J
-	mMvC_ValFrameEnd L0254EC
-	call L003CB3
-	jp   L0254EF
-L0254EC:;J
-	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L0254EF:;J
+	bit  PF0B_SUPERMOVE, [hl]	; Is the opponent performing a super move?
+	jp   z, .ret				; If not, return
+	ld   a, $00					; Otherwise, start the flashing (playfield becomes black)
+	ld   [wStageBGP], a
+.ret:
 	ret
-L0254F0:;I
-	call Play_Pl_MoveByColiBoxOverlapX
-	mMvC_ValLoaded L025576
 	
-	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $00
-	jp   z, L025521
-	cp   $04
-	jp   z, L02552D
-	cp   $08
-	jp   z, L025537
-	cp   $0C
-	jp   z, L025541
-	cp   $10
-	jp   z, L02554B
-	cp   $14
-	jp   z, L025555
-	cp   $18
-	jp   z, L025568
-L025521:;J
-	mMvC_ValFrameEnd L025555
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	jp   L025555
-L02552D:;J
-	mMvC_NextFrameOnGtYSpeed $F9, $FF
-	jp   L025555
-L025537:;J
-	mMvC_NextFrameOnGtYSpeed $FB, $FF
-	jp   L025555
-L025541:;J
-	mMvC_NextFrameOnGtYSpeed $FF, $FF
-	jp   L025555
-L02554B:;J
-	mMvC_NextFrameOnGtYSpeed $01, $FF
-	jp   L025555
-L025555:;J
-	mMvC_ChkGravityHV $0060, L025573
-	mMvC_SetLandFrame $18, $00
-	jp   L025576
-L025568:;J
-	mMvC_ValFrameEnd L025573
-	call Play_Pl_EndMove
-	jr   L025576
-L025573:;J
-	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L025576:;JR
-	ret
-L025577: db $CD;X
-L025578: db $7B;X
-L025579: db $34;X
-L02557A: db $CD;X
-L02557B: db $B3;X
-L02557C: db $38;X
-L02557D: db $DA;X
-L02557E: db $B0;X
-L02557F: db $55;X
-L025580: db $21;X
-L025581: db $17;X
-L025582: db $00;X
-L025583: db $19;X
-L025584: db $7E;X
-L025585: db $FE;X
-L025586: db $00;X
-L025587: db $CA;X
-L025588: db $8F;X
-L025589: db $55;X
-L02558A: db $FE;X
-L02558B: db $04;X
-L02558C: db $CA;X
-L02558D: db $A2;X
-L02558E: db $55;X
-L02558F: db $21;X
-L025590: db $60;X
-L025591: db $00;X
-L025592: db $CD;X
-L025593: db $14;X
-L025594: db $36;X
-L025595: db $D2;X
-L025596: db $AD;X
-L025597: db $55;X
-L025598: db $3E;X
-L025599: db $04;X
-L02559A: db $26;X
-L02559B: db $00;X
-L02559C: db $CD;X
-L02559D: db $EC;X
-L02559E: db $2D;X
-L02559F: db $C3;X
-L0255A0: db $B0;X
-L0255A1: db $55;X
-L0255A2: db $CD;X
-L0255A3: db $D9;X
-L0255A4: db $2D;X
-L0255A5: db $D2;X
-L0255A6: db $AD;X
-L0255A7: db $55;X
-L0255A8: db $CD;X
-L0255A9: db $A2;X
-L0255AA: db $2E;X
-L0255AB: db $18;X
-L0255AC: db $03;X
-L0255AD: db $C3;X
-L0255AE: db $0B;X
-L0255AF: db $2F;X
-L0255B0: db $C9;X
-L0255B1:;I
+; =============== MoveC_Hit_PostStunKnockback ===============
+; Move handler for ground knockback.
+;
+; Because this only displays one single animation frame, it has different timing logic from other moves.
+; Instead of going off the animation timer (iOBJInfo_OBJLstPtrTblOffsetView), this goes
+; off the frame timer (iOBJInfo_FrameLeft) which ticks down.
+; Because of this, .anim is only used to decrement iOBJInfo_FrameLeft.
+;
+; Handler for:
+; - MOVE_SHARED_POST_BLOCKSTUN
+; - MOVE_SHARED_GUARDBREAK_G
+; - MOVE_SHARED_HIT0MID
+; - MOVE_SHARED_HIT1MID
+; - MOVE_SHARED_HITLOW
+MoveC_Hit_PostStunKnockback:
+	; Deliver knockback to the opponent, if needed
 	call Play_Pl_GiveKnockbackCornered
-	mMvC_ValLoaded L02561B
+	; No collision box overlapping allowed
+	call Play_Pl_MoveByColiBoxOverlapX
+	
+	; Equivalent to mMvC_ValLoaded for a single frame
 	call OBJLstS_IsGFXLoadDone
-	jp   nz, L02561C
-	ld   hl, $001B
+	jp   nz, .anim
+	
+	; Depending on the how many frames are left...
+	; (note that this is initialized to $05 frames on block,??? possibly more on other moves)
+	ld   hl, iOBJInfo_FrameLeft
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L0255F6
-	cp   $01
-	jp   z, L0255D2
-	jp   L02561C
-L0255D2:;J
+	cp   $00			; iOBJInfo_FrameLeft == $00? (last frame)
+	jp   z, .chkEnd		; If so, jump
+	cp   $01			; iOBJInfo_FrameLeft != $01?
+	jp   nz, .anim		; If so, jump (iOBJInfo_FrameLeft--)
+	
+; --------------- second to last subframe ---------------
+.setKnockbackSpeed:
+	; Manually reset back iOBJInfo_FrameLeft to $00, since we're not calling .anim (even though we could have if we really wanted).
 	ld   [hl], $00
-	ld   hl, $0023
+	
+	; Setup the knockback speed, depending on how long we have shaken.
+	;
+	; The direction here is relative to the internal flip flag, since it's
+	; not affected by the visual PF1B_XFLIPLOCK (see Play_CalcPlDistanceAndXFlip)
+	; and we always want to move away from the opponent.
+	;
+	; For some reason, this is relative to the player facing *left* (2P side),
+	; so moving to the right moves the player back.
+	
+	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	bit  0, [hl]
-	jp   nz, L0255E3
-	ld   hl, $0280
-	jp   L0255E6
-L0255E3:;J
-	ld   hl, $0400
-L0255E6:;J
+	bit  PF3B_SHAKELONG, [hl]	; Attack shook us for long?
+	jp   nz, .setSpeedFast		; If so, jump
+.setSpeedNorm:
+	ld   hl, $0280				; Otherwise HL = $02.80px/frame (short)
+	jp   .setSpeed
+.setSpeedFast:
+	ld   hl, $0400				; HL = $04px/frame (long)
+.setSpeed:
 	call Play_OBJLstS_SetSpeedH_ByXDirL
-	ld   hl, $0005
-	add  hl, de
-	ld   a, [hl]
-	cp   $88
-	jp   nz, L025610
-	jp   L02561B
-L0255F6:;J
+	jp   .ret
+; --------------- last subframe ---------------
+.chkEnd:
+	; Slow down at $00.40px/frame, and end the move when we stop moving.
+	; This doesn't call .anim, preventing iOBJInfo_FrameLeft from resetting back to iOBJInfo_FrameTotal.
 	mMvC_DoFrictionH $0040
-	jp   nc, L02561B
-	ld   hl, $004E
-	add  hl, bc
-	ld   a, [hl]
-	or   a
-	jp   z, L025610
-	ld   hl, $0071
-	add  hl, bc
-	ld   a, [hl]
-	jp   L025610
-L025610:;J
-	ld   a, $7C
-	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
-	jp   L02561B
-L025618: db $CD;X
-L025619: db $A2;X
-L02561A: db $2E;X
-L02561B:;J
+	jp   nc, .ret
+	call Play_Pl_EndMove
+; --------------- common ---------------
+.ret:
 	ret
-L02561C:;J
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L02561F:;I
-	call Play_Pl_GiveKnockbackCornered
-	mMvC_ValLoaded L02564F
+	
+; =============== MoveC_Hit_DropMain ===============
+; Continuation code for the standard drop without mid-air recovery, for HitAnimC_DropMain. (MOVE_SHARED_DROP_MAIN)
+; This one also triggers a rebound, and allows roll canceling.
+MoveC_Hit_DropMain:
+	call Play_Pl_MoveByColiBoxOverlapX
+	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L025637
-	cp   $04
-	jp   z, L025643
-L025637:;J
-	mMvC_ValFrameEnd L025650
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	jp   L025650
-L025643:;J
-	mMvC_ValFrameEnd L025650
-L025649: db $CD;X
-L02564A: db $B3;X
-L02564B: db $3C;X
-L02564C: db $C3;X
-L02564D: db $4F;X
-L02564E: db $56;X
-L02564F:;J
-	ret
-L025650:;J
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------
+.obj0:
+	; Do specific actions depending on the hit type
+	ld   hl, iPlInfo_Flags3
+	add  hl, bc
+	bit  PF3B_SHAKEONCE, [hl]	; Is this a light hit?
+	jp   nz, .obj0_hitL			; If so, jump
+	
+.obj0_hitN:
+	; If this is a normal hit, don't do anything special yet.
+	; Treat it as startup.
+	mMvC_ValFrameEnd .doGravity_chkRoll
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		jp   .doGravity_chkRoll
+.obj0_hitL:
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		; If this is a light hit, setup the jump depending on PF3B_SHAKELONG
+		
+		; Note that if PF3B_SHAKEONCE and PF3B_SHAKELONG are set at the same time, ???
+		ld   hl, iPlInfo_Flags3
+		add  hl, bc
+		bit  PF3B_SHAKELONG, [hl]	; Is this a heavy hit?
+		jp   nz, .obj0_setJumpH		; If so, jump
+	.obj0_setJumpN:
+		mMvC_SetSpeedHInt +$0140	; 1.25px/frame away from the opponent
+		mMvC_SetSpeedV -$0400 		; 4px/frame up 
+		jp   .obj0_move
+	.obj0_setJumpH:
+		mMvC_SetSpeedHInt +$0180	; 1.5px/frame away from the opponent
+		mMvC_SetSpeedV -$0600 		; 6px/frame up
+	.obj0_move:
+		mMvC_SetMoveV -$0100		; Move 1px backwards
+		mMvC_DoGravityHV $0000		; Move by the set speed without altering it
+		jp   .anim
+; --------------- frame #1 ---------------
+.obj1:
+	; Move 1px backwards at the start of the frame
+	mMvC_ValFrameStartFast .doGravity_chkRoll
+		mMvC_SetMoveV -$0100
+		jp   .doGravity_chkRoll
+; --------------- frame #2 ---------------
+; Pre-rebound frame.
+.obj2:
+	; Set manual control for #3
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		jp   .anim
+; --------------- frame #3 ---------------
+; Rebounding off the ground.
+.obj3:
+	; At the start of the frame, set the jump speed for the rebound.
+	mMvC_ValFrameStartFast .obj3_cont
+		
+		;--
+		;
+		; Cut in half the horizontal speed.
+		; iOBJInfo_SpeedX /= 2
+		;
+		push bc
+			ld   hl, iOBJInfo_SpeedX
+			add  hl, de		; Seek to iOBJInfo_SpeedX
+			ld   b, [hl]	; B = iOBJInfo_SpeedX
+			inc  hl			; Seek to iOBJInfo_SpeedXSub
+			ld   c, [hl]	; C = iOBJInfo_SpeedXSub
+			push bc			; Move to HL
+			pop  hl
+		pop  bc
+		sra  h				; HL >> 1
+		rr   l
+		call Play_OBJLstS_SetSpeedH	; Set the horizontal speed to that
+		;--
+		mMvC_SetSpeedV -$0300	; 3px/frame up
+		jp   .doGravity_noRoll
+.obj3_cont:
+	jp   .doGravity_noRoll
+; --------------- frames #0-1 / common gravity check with roll cancel support ---------------	
+; Roll input validation.
+;
+; When we touch the ground, allow roll cancelling when holding A+B (with optionally L or R).
+; This works as long as the hit didn't KO or get us dizzy.
+;
+; If the validation succeeds by the time, we switch to the appropriate roll input.
+; Otherwise, we continue to #2, where the player rebounds from the ground.
+.doGravity_chkRoll:
+	mMvC_ChkGravityHV $0060, .anim
+	
+		; Can't be dizzy
+		call Play_Pl_IsDizzyNext	; About to get dizzy?
+		jp   nz, .noRoll			; If so, skip
+		; Can't be dead
+		ld   hl, iPlInfo_Health
+		add  hl, bc
+		ld   a, [hl]
+		or   a						; Did we get KO'd?
+		jp   z, .noRoll				; If so, skip
+		; Key check
+		call Play_Pl_AreBothBtnHeld	; Did we press A+B?
+		jp   c, .roll				; If so, jump
+	.noRoll:
+	
+		; We didn't roll.
+		; Use frame #2 when bouncing off the ground.
+		mMvC_SetDropFrame $02*OBJLSTPTR_ENTRYSIZE, $05
+		
+		; Can't be hit until we get up
+		ld   hl, iPlInfo_Flags1
+		add  hl, bc
+		set  PF1B_INVULN, [hl]
+		
+		; Stop flashing
+		ld   hl, iPlInfo_Flags3
+		add  hl, bc
+		res  PF3B_FLASH_B_SLOW, [hl]
+		res  PF3B_FLASH_B_FAST, [hl]
+		jp   .ret
+		
+	.roll:
+	
+		;
+		; Part very similar to relevant code in Play_Pl_ChkGuardCancelRoll,
+		; except this isn't treated as a super move, has more sensical key checks,
+		; and jumps coming out of the roll won't be hyper jumps.
+		;
+			
+		; Don't hyper jump out of the roll
+		ld   hl, iPlInfo_RunningJump
+		add  hl, bc			
+		ld   [hl], $00
+		
+		ld   hl, iPlInfo_Flags1
+		add  hl, bc						; Seek to iPlInfo_Flags1
+		res  PF1B_GUARD, [hl] 			; Can't block when rolling (we are invulnerable instead)
+		res  PF1B_CROUCH, [hl] 			; As rolling starts from crouching, remove the crouch flag
+		set  PF1B_NOBASICINPUT, [hl] 	; Don't override with normal movement
+		set  PF1B_XFLIPLOCK, [hl] 		; Lock player direction during the roll
+		set  PF1B_NOSPECSTART, [hl] 	; Don't allow cancelling the roll into a special
+		
+		inc  hl				; Seek to iPlInfo_Flags2
+		
+		; Make player completely invulnerable while rolling.
+		; Disabling both hurtbox and hitbox causes every attack collision check to be ignored.
+		set  PF2B_NOHURTBOX, [hl]
+		set  PF2B_NOCOLIBOX, [hl]
+		
+		inc  hl				; Seek to iPlInfo_Flags3
+		; Remove these flash bits to let PF0B_SUPERMOVE handle the flashing
+		res  PF3B_FLASH_B_SLOW, [hl]
+		res  PF3B_FLASH_B_FAST, [hl]
+		
+		;
+		; Determine if player should roll forwards or backwards depending on the held directional keys.
+		;
+		call Play_Pl_GetDirKeys_ByXFlipR	; Check d-pad keys, relative to 1P side (so left moves back)
+		jp   nc, .setRollBack				; Were any keys held? If not, default to back
+		
+		; Holding back activates the back roll
+		bit  KEYB_RIGHT, a			; Holding forward?
+		jp   nz, .setRollFront		; If so, roll forward
+	.setRollBack:
+		ld   a, MOVE_SHARED_ROLL_B
+		jp   .doGravity_setRoll
+	.setRollFront:
+		ld   a, MOVE_SHARED_ROLL_F
+		jp   .doGravity_setRoll
+	.doGravity_setRoll:
+		; Switch to the new move
+		call Pl_SetMove_StopSpeed
+		jp   .ret
+; --------------- frame #3, common gravity check ---------------	
+.doGravity_noRoll:
+	; When touching the ground after the rebound, play the drop SFX and switch to #4
+	mMvC_ChkGravityHV $0060, .anim
+		mMvC_SetDropFrame $04*OBJLSTPTR_ENTRYSIZE, $05
+		jp   .ret
+; --------------- frame #4 ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_StartWakeUp
+		jp   .ret
+; --------------- common ---------------
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L025653:;I
-	ld   hl, $0072
+.ret:
+	ret
+	
+; =============== MoveC_Hit_Throw_End ===============
+; Move code used for the last part of the throw animation.
+; Similar to the code used in MoveC_Hit_DropMain.
+; Used to handle the actual jump arc for:
+; - Air throws (MOVE_SHARED_THROW_END_A)
+; - Ground throws (MOVE_SHARED_THROW_END_G)
+MoveC_Hit_Throw_End:
+	call Play_Pl_MoveByColiBoxOverlapX
+	mMvC_ValLoaded .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+	add  hl, de
+	ld   a, [hl]
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------
+.obj0:
+	;
+	; Getting thrown by Mature's Decide moves horizontally at 3px/frame
+	; if we aren't moving upwards.
+	; Do nothing but handle gravity otherwise.
+	;
+	ld   hl, iPlInfo_CharIdOther
 	add  hl, bc
 	ld   a, [hl]
-	cp   $6C
-	jp   nz, L0256FC
-	ld   hl, $C179
+	cp   CHAR_ID_MATURE				; Opponent is Mature?
+	jp   nz, .obj0_doGravity		; If not, skip
+.obj0_chkMatureMove:
+	ld   hl, iPlInfo_MoveIdOther
+	add  hl, bc
 	ld   a, [hl]
-	or   a
-	jp   z, L0256F7
-	dec  [hl]
-	jp   z, L0256F7
+	cp   MOVE_MATURE_DECIDE_L		; Hit by Decide?
+	jp   z, .obj0_chkSpeed			; If so, jump
+	cp   MOVE_MATURE_DECIDE_H		; Hit by Decide?
+	jp   z, .obj0_chkSpeed			; If so, jump
+	jp   .obj0_doGravity			; Otherwise, skip
+.obj0_chkSpeed:
+	ld   hl, iOBJInfo_SpeedY
+	add  hl, de
+	bit  7, [hl]					; iOBJInfo_SpeedY < 0? (MSB set)
+	jp   nz, .doGravity_preRebound	; If so, jump
+	mMvC_SetSpeedH $0300			
+.obj0_doGravity:
+	jp   .doGravity_preRebound
+; --------------- frame #1 ---------------
+; Frame when hitting the ground.
+.obj1:
+	; Shake the screen when the ground is hit
+	call Play_Pl_DoGroundScreenShake
+	mMvC_ValFrameEnd .anim
+		; Set manual control for #2
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		; Stop shaking when we leave the ground
+		xor  a
+		ld   [wScreenShakeY], a
+		jp   .anim
+; --------------- frame #2 ---------------
+; Rebounding off the ground. Identical to version in MoveC_Hit_DropMain.
+.obj2:
+	; At the start of the frame, set the jump speed for the rebound.
+	mMvC_ValFrameStartFast .obj2_cont
+		;--
+		;
+		; Cut in half the horizontal speed.
+		; iOBJInfo_SpeedX /= 2
+		;
+		push bc
+			ld   hl, iOBJInfo_SpeedX
+			add  hl, de		; Seek to iOBJInfo_SpeedX
+			ld   b, [hl]	; B = iOBJInfo_SpeedX
+			inc  hl			; Seek to iOBJInfo_SpeedXSub
+			ld   c, [hl]	; C = iOBJInfo_SpeedXSub
+			push bc			; Move to HL
+			pop  hl
+		pop  bc
+		sra  h				; HL >> 1
+		rr   l
+		call Play_OBJLstS_SetSpeedH	; Set the horizontal speed to that
+		;--
+		mMvC_SetSpeedV -$0300	; 3px/frame up
+		jp   .doGravity_afterRebound
+.obj2_cont:;J
+	jp   .doGravity_afterRebound
+; --------------- frame #0 / common gravity check ---------------
+; Before hitting the ground the first time...
+.doGravity_preRebound:
+	mMvC_ChkGravityHV $0060, .anim
+		mMvC_SetDropFrame $01*OBJLSTPTR_ENTRYSIZE, $09
+		jp   z, .ret
+		
+		; End the damage string when touching the ground
+		ld   hl, iPlInfo_Flags1
+		add  hl, bc
+		set  PF1B_INVULN, [hl]
+	
+		ld   a, SCT_0D
+		call HomeCall_Sound_ReqPlayExId
+		
+		; Stop flashing as well
+		ld   hl, iPlInfo_Flags3
+		add  hl, bc
+		res  PF3B_FLASH_B_SLOW, [hl]
+		res  PF3B_FLASH_B_FAST, [hl]
+		jp   .ret
+; --------------- frame #2 / common gravity check ---------------
+; After we rebounded once...
+.doGravity_afterRebound:
+	; Handle gravity
+	mMvC_ChkGravityHV $0060, .anim
+		mMvC_SetDropFrame $03*OBJLSTPTR_ENTRYSIZE, $05
+		jp   .ret
+; --------------- frame #3 ---------------
+.chkEnd:
+	; Wake up at the end of the frame
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_StartWakeUp
+		jp   .ret
+; --------------- common ---------------
+.anim:
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
+.ret:
+	ret
+	
+; =============== MoveC_Hit_DropDBG ===============
+; Continuation code for HitAnimC_Drop_DB_G. (HITANIM_DROP_DB_G)
+; This is a generic move that just handles the ground shake effect,
+; as the player is already on the ground and doesn't move.
+; Handler for:
+; - MOVE_SHARED_DROP_DBG
+MoveC_Hit_DropDBG:
+	call Play_Pl_MoveByColiBoxOverlapX
+	mMvC_ValLoaded .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+	add  hl, de
+	ld   a, [hl]
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------
+.obj0:
+	; Show #1 for 5 frames (+ load)
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $05
+		mMvC_PlaySound SCT_0D
+		jp   .anim
+; --------------- frame #1 ---------------
+.obj1:
+	; Perform an earthquake effect while this frame is active.
+	; This shakes the player on the ground.
+	call Play_Pl_DoGroundScreenShake
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed $10
+		; Stop the earthquake effect
+		xor  a
+		ld   [wScreenShakeY], a
+		; Stop flashing the opponent as well
+		ld   hl, iPlInfo_Flags3
+		add  hl, bc
+		res  PF3B_FLASH_B_SLOW, [hl]
+		res  PF3B_FLASH_B_FAST, [hl]
+		jp   .anim
+; --------------- frame #2 ---------------
+.chkEnd:
+	; Wake up at the end of the frame.
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_StartWakeUp
+		jp   .ret
+; --------------- common ---------------
+.anim:
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
+.ret:
+	ret
+	
+; =============== MoveC_Hit_SwoopUp ===============
+; Continuation code for hits that launch the player upwards. (MOVE_SHARED_HIT_SWOOPUP)
+; This handles both the projectile and throw versions.
+;
+; The projectile version is a bit special with the way it handles the invulnerability flag.
+; There are two phases for this move, the moving up and moving down parts.
+; The player, during this move, overlaps a tall projectile that would hit every frame, which 
+; also decreases the gravity by 2px/frame and restarts the move. 
+; To avoid that it, both the hit effect and this move make sure the player is invulnerable 
+; until we move into the frames meant for moving down (even when still moving up).
+; If the projectile is still active, this will deal a new hit the next frame, implicitly looping back to #0.
+;
+; Note that the throw version, used by Daimon, doesn't do this.
+; It's a simple throw, and so it consistently avoids touching the invulnerability flag
+; until we start moving down.
+;
+MoveC_Hit_SwoopUp:
+	call Play_Pl_MoveByColiBoxOverlapX
+	mMvC_ValLoaded .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+	add  hl, de
+	ld   a, [hl]
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj4
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj5
+	cp   $06*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------
+; Upwards movement - frame #0.
+.obj0:
+	; Apply $00.30px/frame gravity while moving up.
+	ld   hl, iOBJInfo_SpeedY
+	add  hl, de
+	ld   a, [hl]
+	bit  7, a				; SpeedY < 0? (MSB set)
+	jp   nz, .doGravity0030	; If so, jump
+.obj0_onDown:	
+	; Immediately switch to #2 and apply $00.60px/frame gravity if we start moving down.
+	ld   hl, iOBJInfo_OBJLstPtrTblOffset
+	add  hl, de
+	ld   [hl], $02*OBJLSTPTR_ENTRYSIZE
+	jp   .doGravity0060
+; --------------- frame #1 ---------------
+; Upwards movement - frame #1.
+.obj1:
+	ld   hl, iOBJInfo_SpeedY
+	add  hl, de
+	ld   a, [hl]
+	bit  7, a				; SpeedY < 0? (MSB set)
+	jp   nz, .obj1_onUp		; If so, jump
+.obj1_onDown:
+	; Immediately switch to #2 and apply $00.60px/frame gravity if we start moving down.
+	; Like with #0.
+	ld   hl, iOBJInfo_OBJLstPtrTblOffset
+	add  hl, de
+	ld   [hl], $02*OBJLSTPTR_ENTRYSIZE
+	jp   .doGravity0060
+.obj1_onUp:
+	mMvC_ValFrameEnd .doGravity0030
+		; The non-projectile (Daimon) version consistently avoids touching PF1B_INVULN.
+		ld   hl, iPlInfo_CharIdOther
+		add  hl, bc
+		ld   a, [hl]
+		cp   CHAR_ID_DAIMON		; Opponent is Daimon?
+		jp   nz, .obj1_onUpProj	; If not, skip
+	.obj1_onUpDaimon:
+		; Play SFX
+		ld   a, SCT_LIGHT
+		call HomeCall_Sound_ReqPlayExId
+		jp   .obj1_switchToChkEnd
+	.obj1_onUpProj:
+		; Allow next hit to happen.
+		; If the projectile is still active, this will reset the move and continue the upwards movement.
+		ld   hl, iPlInfo_Flags1
+		add  hl, bc
+		res  PF1B_INVULN, [hl]
+	.obj1_switchToChkEnd:
+		ld   hl, iOBJInfo_OBJLstPtrTblOffset
+		add  hl, de
+		ld   [hl], $06*OBJLSTPTR_ENTRYSIZE
+		jp   .doGravity0030
+; --------------- frame #2 ---------------
+; Downwards movement - loop frame #0.
+.obj2:
+	; For Daimon's command throw, disable invulnerability with the higher gravity.
+	ld   hl, iPlInfo_CharIdOther
+	add  hl, bc
+	ld   a, [hl]
+	cp   CHAR_ID_DAIMON		; Opponent is Daimon?
+	jp   nz, .doGravity0060	; If not, skip
+	ld   hl, iPlInfo_Flags1
+	add  hl, bc
+	res  PF1B_INVULN, [hl]	; Otherwise, disable invuln first
+	jp   .doGravity0060
+; --------------- frame #3 ---------------
+; Downwards movement - loop frame #1.
+.obj3:
+	; For Daimon's command throw, disable invulnerability with the higher gravity.
+	ld   hl, iPlInfo_CharIdOther
+	add  hl, bc
+	ld   a, [hl]
+	cp   CHAR_ID_DAIMON		; Opponent is Daimon?
+	jp   nz, .obj3_chkLoop		; If not, skip
+	ld   hl, iPlInfo_Flags1
+	add  hl, bc
+	res  PF1B_INVULN, [hl]	; Otherwise, disable invuln first
+.obj3_chkLoop:
+	; Loop back to #2 if we haven't touched the ground by the time this frame ended
+	mMvC_ValFrameEnd .doGravity0060
+		ld   hl, iOBJInfo_OBJLstPtrTblOffset
+		add  hl, de
+		ld   [hl], $01*OBJLSTPTR_ENTRYSIZE ; offset by -1
+		jp   .doGravity0060
+; --------------- frame #4 ---------------
+; Ground touched - screen shake effect, speed reset.
+.obj4:
+	call Play_Pl_DoGroundScreenShake
+	mMvC_ValFrameEnd .anim
+		; Get manual control for #5.
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		jp   .anim
+; --------------- frame #5 ---------------
+; Rebounding off the ground.
+.obj5:
+	; At the start of the frame, set the jump speed for the rebound.
+	; This is like what MoveC_Hit_DropMain does.
+	mMvC_ValFrameStartFast .obj5_cont
+	
+		;--
+		;
+		; Cut in half the horizontal speed.
+		; iOBJInfo_SpeedX /= 2
+		;
+		push bc
+			ld   hl, iOBJInfo_SpeedX
+			add  hl, de		; Seek to iOBJInfo_SpeedX
+			ld   b, [hl]	; B = iOBJInfo_SpeedX
+			inc  hl			; Seek to iOBJInfo_SpeedXSub
+			ld   c, [hl]	; C = iOBJInfo_SpeedXSub
+			push bc			; Move to HL
+			pop  hl
+		pop  bc
+		sra  h				; HL >> 1
+		rr   l
+		call Play_OBJLstS_SetSpeedH	; Set the horizontal speed to that
+		;--
+		
+		;
+		; Unlike MoveC_Hit_DropMain, this doesn't use a fixed vertical speed.
+		; The new vertical speed is calculated from:
+		; iOBJInfo_SpeedY = -(OkSpeedY/2) - $04
+		;
+		; Use iPlInfo_Hit_SwoopUp_OkSpeedY since that's the last valid speed value
+		; from before touching the ground.
+		ld   hl, iPlInfo_Hit_SwoopUp_OkSpeedY
+		add  hl, bc
+		ld   a, [hl]	; A = Orig Y Speed
+		sra  a			; Cut it in half
+		add  a, $04		; Add 4
+		cpl				; Invert it from positive to negative, since we're moving up
+		inc  a
+		ld   h, a		; Set that as number of pixels
+		ld   l, $FF		; and $FF as subpixels
+		call Play_OBJLstS_SetSpeedV
+		
+		jp   .doGravityToChkEnd
+.obj5_cont:
+	jp   .doGravityToChkEnd
+	
+; -------------------------------------------------------------------
+; --------------- frames #0-3 / common gravity checks ---------------	
+; -------------------------------------------------------------------
+; Two different entry points to the gravity function are used, depending on
+; the direction we're moving vertically.
+;
+; - $00.30px/frame gravity is applied when moving up.
+; - $00.60px/frame gravity is applied when moving down.
+;   This also makes the player invulnerable for projectile-based hits. (read: not hit by Daimon)
+;
+
+; --------------- .doGravity0030 ---------------
+; Applies gravity at $00.30px/frame.
+.doGravity0030:
+	;--
+	; [TCRF] It looks like this originally applied a significant amount of negative gravity.
+	;        This would have made the upwards movement much faster... but it also the breaks downwards movement,
+	ld   hl, -$0200		
+	;--
+	ld   hl, +$0030		; HL = $00.30px/frame gravity
+	jp   .doGravityByHL
+; --------------- .doGravity0060 ---------------
+; Applies gravity at $00.60px/frame.
+.doGravity0060:
+	; Really make sure the player is invulnerable if we're doing the projectile version
+	ld   hl, iPlInfo_CharIdOther
+	add  hl, bc
+	ld   a, [hl]
+	cp   CHAR_ID_DAIMON			; iPlInfo_CharIdOther == CHAR_ID_DAIMON?
+	jp   z, .doGravity0060_main	; If so, skip
+	ld   hl, iPlInfo_Flags1
+	add  hl, bc
+	set  PF1B_INVULN, [hl]		; Otherwise, enable invuln
+.doGravity0060_main:
+	ld   hl, $0060				; HL = $00.60px/frame gravity
+	; Fall-through
+	
+; --------------- .doGravityByHL ---------------
+; Handles gravity and moves the player.
+; IN
+; - HL: Gravity to apply
+.doGravityByHL:
+
+	;
+	; Always save a copy of the current Y Speed.
+	; This is because iOBJInfo_SpeedY gets erased when touching the ground (#4), 
+	; and in #5 we need to rebound at a speed relative to it.
+	;
+	push hl
+		ld   hl, iOBJInfo_SpeedY
+		add  hl, de
+		ld   a, [hl]		; A = Y Speed		
+		ld   hl, iPlInfo_Hit_SwoopUp_OkSpeedY
+		add  hl, bc			; Seek to backup field
+		ld   [hl], a		; Copy it there
+	pop  hl
+	
+	;
+	; Apply HL gravity and move in both directions.
+	; In case of the projectile version of the hit, our H Speed will be 0.
+	;
+	; When touching the ground, switch to #4.
+	;
+	call OBJLstS_ApplyGravityVAndMoveHV	; Did we touch the ground?
+	jp   nc, .anim						; If not, jump
+		mMvC_SetDropFrame $04*OBJLSTPTR_ENTRYSIZE, $0B	; Attempt to set the next frame
+		jp   z, .ret									; Did it work? If not (ie: already set it before), return
+		
+			; Play a sound effect for hitting the ground
+			ld   a, SCT_0D
+			call HomeCall_Sound_ReqPlayExId
+			
+			; If we got hit by Daimon, do not turn invulnerability back on.
+			; This is because his super move hits the player with an earthquake effect
+			; the moment the opponent touches the ground.
+			ld   hl, iPlInfo_CharIdOther
+			add  hl, bc
+			ld   a, [hl]						; A = Opponent CharId
+			cp   CHAR_ID_DAIMON					; A == CHAR_ID_DAIMON?
+			jp   z, .doGravityByHL_stopFlash	; If so, skip
+			ld   hl, iPlInfo_Flags1
+			add  hl, bc
+			set  PF1B_INVULN, [hl]				; Otherwise, turn invulnerability on to end the damage string
+		.doGravityByHL_stopFlash:
+			; Stop flashing the opponent as well
+			ld   hl, iPlInfo_Flags3
+			add  hl, bc
+			res  PF3B_FLASH_B_SLOW, [hl]
+			res  PF3B_FLASH_B_FAST, [hl]
+			jp   .ret
+; --------------- frame #5 / gravity check ---------------
+.doGravityToChkEnd:
+	mMvC_ChkGravityHV $0060, .anim
+		mMvC_SetDropFrame $06*OBJLSTPTR_ENTRYSIZE, $05
+		jp   .ret
+; --------------- frame #6 ---------------
+; Wake up when the frame ends.
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_StartWakeUp
+		jp   .ret
+; --------------- common ---------------
+.anim:
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
+.ret:
+	ret
+	
+; =============== MoveC_Hit_DropCH ===============
+; Continuation code for HitAnimC_DropCH, for use with crouching heavy kicks. (MOVE_SHARED_DROP_CH)
+; This causes the player to be knocked back with a jump, with settings previously
+; set in HitAnimC_DropCH.
+; Shouldn't be used on player death even though it's "compatible" with it.
+; OUT
+; - C flag: Always set (ends hitstop)
+MoveC_Hit_DropCH:
+	call Play_Pl_MoveByColiBoxOverlapX
+	mMvC_ValLoaded .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+	add  hl, de
+	ld   a, [hl]
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .anim ; We never get here
+; --------------- frame #0 ---------------
+.obj0:
+	; Get manual control for #1
+	mMvC_ValFrameEnd .doGravity
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		jp   .doGravity
+; --------------- frame #1 ---------------
+.obj1:
+	jp   .doGravity
+; --------------- common gravity check ---------------
+.doGravity:
+	; Switch to #2 when landing on the ground
+	mMvC_ChkGravityHV $0060, .anim
+		mMvC_SetDropFrame $02*OBJLSTPTR_ENTRYSIZE, $05
+		; Stop flashing
+		ld   hl, iPlInfo_Flags3
+		add  hl, bc
+		res  PF3B_FLASH_B_SLOW, [hl]
+		res  PF3B_FLASH_B_FAST, [hl]
+		jp   .ret
+; --------------- frame #2 ---------------
+.chkEnd:
+	; The knockback ends when the frame ends
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_StartWakeUp
+		jp   .ret
+; --------------- common ---------------
+.anim:
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
+.ret:
+	ret
+	
+; =============== MoveC_Hit_BackJumpAirRec ===============
+; Move code for a generic backjump with air recovery.
+; 
+; This is used for:
+; - The continuation code for getting hit by a normal in the air by HitAnimC_DropA (MOVE_SHARED_BACKJUMP_REC_A)
+; - The backjump for several special moves that can transition to this
+;
+; Since the player recovers mid-air, it can't be used with player death.
+MoveC_Hit_BackJumpAirRec:
+	call Play_Pl_MoveByColiBoxOverlapX
+	mMvC_ValLoaded .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+	add  hl, de
+	ld   a, [hl]
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setManCtrl
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .waitM07
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .waitM05
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .waitM01
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .waitP01
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .doGravity
+	cp   $06*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+; --------------- frame #0 ---------------
+; Set manual control at the end of the frame.
+.setManCtrl:
+	mMvC_ValFrameEnd .doGravity
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		jp   .doGravity
+; --------------- frame #1 ---------------
+; Wait for YSpeed > -$07 before continuing to #2.
+.waitM07:
+	mMvC_NextFrameOnGtYSpeed -$07, ANIMSPEED_NONE
+	jp   .doGravity
+; --------------- frame #2 ---------------
+.waitM05:
+	mMvC_NextFrameOnGtYSpeed -$05, ANIMSPEED_NONE
+	jp   .doGravity
+; --------------- frame #3 ---------------
+.waitM01:
+	mMvC_NextFrameOnGtYSpeed -$01, ANIMSPEED_NONE
+	jp   .doGravity
+; --------------- frame #4 ---------------
+.waitP01:
+	mMvC_NextFrameOnGtYSpeed +$01, ANIMSPEED_NONE
+	jp   .doGravity
+; --------------- frames #0-5 / common gravity check ---------------
+.doGravity:
+	; Switch to #6 when touching the ground
+	mMvC_ChkGravityHV $0060, .anim
+		mMvC_SetLandFrame $06*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+		jp   .ret
+; --------------- frame #6 ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jr   .ret
+; --------------- common ---------------
+.anim:
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
+.ret:
+	ret
+	
+; =============== MoveC_Hit_GuardBreakA ===============
+; Move code for guard breaking in the air (MOVE_SHARED_GUARDBREAK_A).
+MoveC_Hit_GuardBreakA:
+	call Play_Pl_MoveByColiBoxOverlapX
+	mMvC_ValLoaded .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+	add  hl, de
+	ld   a, [hl]
+	cp   a, $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   a, $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+; --------------- frame #0 ---------------
+.obj0:
+	; Slow down at $00.60px/frame.
+	; When we touch the ground, switch to #1.
+	mMvC_ChkGravityHV $0060, .anim
+		mMvC_SetLandFrame $01*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+		jp   .ret
+; --------------- frame #1 ---------------
+.chkEnd:
+	; Move ends when the frame ends
+	mMvC_ValFrameEnd .anim
+		call Play_Pl_EndMove
+		jr   .ret
+; --------------- common ---------------
+.anim:
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
+.ret:
+	ret
+	
+; =============== MoveC_Hit_MultiMidKnockback ===============
+; Continuation code for hits in the middle of a ground-based special move that hits multiple times (HITANIM_HIT_MULTI0, HITANIM_HIT_MULTI1)
+;
+; In practice, this is identical to MoveC_Hit_PostStunKnockback except that the player drops on the ground at the end.
+; (there are more differences, but they are either unreachable or useless)
+;
+; Like that move, it uses the frame timer since the player doesn't animate.
+;
+; Handler for: 
+; - MOVE_SHARED_HIT_MULTIMID0
+; - MOVE_SHARED_HIT_MULTIMID1.
+MoveC_Hit_MultiMidKnockback:
+	; Deliver knockback to the opponent, if needed
+	call Play_Pl_GiveKnockbackCornered
+	; This shouldn't be needed
+	mMvC_ValLoaded .ret
+	; Equivalent to mMvC_ValLoaded for a single frame
+	call OBJLstS_IsGFXLoadDone
+	jp   nz, .anim
+	
+	; Depending on the how many frames are left...
+	ld   hl, iOBJInfo_FrameLeft
+	add  hl, de
+	ld   a, [hl]
+	cp   $00					; iOBJInfo_FrameLeft == $00? (last frame)
+	jp   z, .chkEnd				; If so, jump
+	cp   $01					; iOBJInfo_FrameLeft == $01?
+	jp   z, .setKnockbackSpeed	; If so, jump
+	; Otherwise, tick down iOBJInfo_FrameLeft
+	jp   .anim
+; --------------- second to last subframe ---------------
+.setKnockbackSpeed:
+	; Manually reset back iOBJInfo_FrameLeft to $00, since we're not calling .anim (even though we could have if we really wanted).
+	ld   [hl], $00
+	
+	; Setup the knockback speed, depending on how long we have shaken.
+	;
+	; The direction here is relative to the internal flip flag, since it's
+	; not affected by the visual PF1B_XFLIPLOCK (see Play_CalcPlDistanceAndXFlip)
+	; and we always want to move away from the opponent.
+	;
+	; For some reason, this is relative to the player facing *left* (2P side),
+	; so moving to the right moves the player back.
+	
+	ld   hl, iPlInfo_Flags3
+	add  hl, bc
+	bit  PF3B_SHAKELONG, [hl]	; Attack shook us for long?
+	jp   nz, .setSpeedFast		; If so, jump
+.setSpeedNorm:
+	ld   hl, $0280				; Otherwise HL = $02.80px/frame (short)
+	jp   .setSpeed
+.setSpeedFast:
+	ld   hl, $0400				; HL = $04px/frame (long)
+.setSpeed:
+	call Play_OBJLstS_SetSpeedH_ByXDirL
+	
+	; If we're on the ground, we can proceed to .chkEnd from the next frame
+	; to first handle the knockback, and only drop on the ground when we stop moving.
+	
+	; [TCRF] If we're in the air though, drop down immediately using the just set speed settings.
+	;        This will never jump since all moves that use this call HitAnimS_MovePlToOpFront to force
+	;        the attacked player to be on the ground. 
+	ld   hl, iOBJInfo_Y
+	add  hl, de
+	ld   a, [hl]			; A = Y Pos
+	cp   PL_FLOOR_POS		; A == PL_FLOOR_POS?
+	jp   nz, .switchToDrop	; If not, jump
+	
+	jp   .ret
+; --------------- last subframe ---------------
+.chkEnd:
+	; Slow down at $00.40px/frame, and switch to the drop move when we stop moving.
+	; This doesn't call .anim, preventing iOBJInfo_FrameLeft from resetting back to iOBJInfo_FrameTotal.
+	mMvC_DoFrictionH $0040
+	jp   nc, .ret
+		;--
+		; [TCRF] Useless code, does nothing.
+		ld   hl, iPlInfo_Health
+		add  hl, bc
+		ld   a, [hl]
+		or   a					; No health left?
+		jp   z, .switchToDrop	; If so, jump
+		ld   hl, iPlInfo_CharIdOther
+		add  hl, bc
+		ld   a, [hl]			; A = Opponent CharId
+		jp   .switchToDrop
+		;--
+.switchToDrop:
+	ld   a, MOVE_SHARED_DROP_MAIN
+	call Pl_SetMove_StopSpeed
+	jp   .ret
+; --------------- [TCRF] Unreferenced code ---------------
+.unused_end:
+	call Play_Pl_EndMove
+.ret:
+	ret
+.anim:
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
+	
+; =============== MoveC_Hit_MultiMidGS ===============
+; Continuation code for HitAnimC_Hit_MultiGS (HITANIM_HIT_MULTIGS).
+;
+; Handles the hit effect for hits that push/freeze the player on the ground.
+; This can happen when getting hit in the middle of a ground-based super move
+; that hits multiple times (HitAnimC_MultiHit_MidG*).
+;
+; This does nothing but animate the player (2 frames in total), giving ample time for 
+; the opponent to deliver another hit as part of the super.
+; Because of it, HITANIM_HIT_MULTIGS should absolutely not be used as the last hit for a super
+; move, otherwise the player gets stuck for a few seconds.
+;
+; Handler for:
+; - MOVE_SHARED_HIT_MULTIGS.
+MoveC_Hit_MultiMidGS:
+	call Play_Pl_GiveKnockbackCornered
+	mMvC_ValLoaded .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+	add  hl, de
+	ld   a, [hl]
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .setManCtrl
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+; --------------- frame #0 ---------------
+.setManCtrl:
+	; When switching to #1, get manual control to give plenty of time for the next hit to come.
+	mMvC_ValFrameEnd .anim
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		jp   .anim
+; --------------- frame #1 ---------------
+.chkEnd:
+	; During normal operation, this should just wait until the opponent hits
+	; us again, which starts a new move ID.
+	; It should never get to Play_Pl_StartWakeUp, but...
+	mMvC_ValFrameEnd .anim
+		; [TCRF] ...there's a failsafe in case the next hit never comes.
+		call Play_Pl_StartWakeUp
+		jp   .ret
+.ret:
+	ret
+.anim:
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
+
+; =============== MoveC_Hit_Throw_Start ===============
+; Continuation code for HitAnimC_ThrowStart (HITANIM_THROW_START).
+; 
+; This handles the third part of the throw for the thrown side, which is the throw tech.
+; While this happens, the opponent is either waiting in BasicInput_StartGroundThrow.loop, or
+; just in the middle of performing an Air Throw or command throw.
+;
+; Since this move doesn't animate, it performs tasks based on the frame timer.
+;
+; Handler for:
+; - MOVE_SHARED_THROW_START
+MoveC_Hit_Throw_Start:
+
+	; Only ground throws can be throw tech'd (leading to the wait in BasicInput_StartGroundThrow on the opponent side).
+	; Everything else doesn't wait and the opponent immediately starts the throw move.
+	ld   hl, iPlInfo_MoveIdOther
+	add  hl, bc
+	ld   a, [hl]
+	cp   MOVE_SHARED_THROW_G	; iPlInfo_MoveIdOther == MOVE_SHARED_THROW_G?
+	jp   nz, .chkFrame			; If not, jump
+	
+	; Decrement the timer for the window of opportunity.
+	; If it reaches 0, the throw is confirmed.
+	ld   hl, wPlayPlThrowTechTimer
+	ld   a, [hl]
+	or   a					; Timer == 0 already?
+	jp   z, .throwConfirm	; If so, jump
+	dec  [hl]				; Timer--
+	jp   z, .throwConfirm	; Timer == 0? If so, jump
+	
+	
+	;
+	; Perform the input check.
+	;
+	; To throw tech, a player must press A or B during the window of opportunity.
+	; Depending on the button pressed and its light/heavy status, the "grabbed" state is
+	; canceled into a normal.
+	;
+	; If nothing is pressed by the time the window ends, the throw continues. 
+	;
+	
+	
+	; The CPU can't press buttons though.
+	; Instead, it treats the global timer as the input, with some extra rules
+	; depending on the difficulty level.
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	bit  PF0B_CPU, [hl]
-	jp   z, L025697
+	bit  PF0B_CPU, [hl]		; Are we a CPU?
+	jp   z, .techPl			; If not, skip
+.techCPU:
+	
+	;
+	; CPU Rules:
+	; - On EASY, the CPU can always be thrown.
+	; - On NORMAL, there's (up to) 50% chance to throw the CPU.
+	; - On HARD, it's impossible to throw it.
+	;
+	
 	ld   a, [wDifficulty]
-	cp   $00
-	jp   z, L025757
-	cp   $01
-	jp   z, L025687
+	cp   DIFFICULTY_EASY	; Playing on easy?
+	jp   z, .ret			; If so, return (never throw tech)
+	cp   DIFFICULTY_NORMAL	; Playing on normal?
+	jp   z, .techCPU_normal	; If so, jump
+	; Otherwise, we're playing on hard
+.techCPU_hard:
+	;
+	; On HARD, treat the timer value directly as input.
+	; Because there's a $14 frame window of opportunity and the global timer increments
+	; every frame, the throw tech will eventually always happen, making it impossible to throw the CPU.
+	;
+	ld   a, [wTimer]		; A = Timer
+	and  a, $F0				; Not necessary
+	jp   .tech_chkInput
+.techCPU_normal:
+	;
+	; On NORMAL, treat the gameplay timer as input, with 50% chance
+	; of returning immediately.
+	;
+	
+	; 50% chance we return immediately
 	ld   a, [wTimer]
-	and  a, $F0
-	jp   L02569C
-L025687:;J
-	ld   a, [wTimer]
-	and  a, $80
-	jp   z, L025757
-	ld   a, [wPlayTimer]
-	and  a, $F0
-	jp   L02569C
-L025697:;J
-	ld   hl, $0046
+	and  a, $80				; Timer % $80 != 0?
+	jp   z, .ret			; If so, return (no throw tech, for now)
+	; Use wPlayTimer instead, possibly to randomize the result a bit more.
+	; This does mean pausing can affect the result, though it'd be annoying to set up. 
+	ld   a, [wPlayTimer]	; A = PlayTimer
+	and  a, $F0				; Not necessary
+	jp   .tech_chkInput
+.techPl:
+	; Human players directly use iPlInfo_JoyNewKeysLH.
+	ld   hl, iPlInfo_JoyNewKeysLH
 	add  hl, bc
 	ld   a, [hl]
-L02569C:;J
-	bit  4, a
-	jp   nz, L0256BD
-	bit  5, a
-	jp   nz, L0256B3
-	bit  6, a
-	jp   nz, L0256C2
-	bit  7, a
-	jp   nz, L0256B8
-	jp   L025757
-L0256B3:;J
-	ld   a, $30
-	jp   L0256C4
-L0256B8:;J
-	ld   a, $32
-	jp   L0256C4
-L0256BD:;J
-	ld   a, $34
-	jp   L0256C4
-L0256C2:;J
-	ld   a, $36
-L0256C4:;J
-	ld   hl, $007C
+	
+.tech_chkInput:
+	; Depending on the input pressed, choose a move to transition.
+	bit  KEPB_A_LIGHT, a	; Pressed light A?
+	jp   nz, .tech_lk		; If so, start a light kick.
+	bit  KEPB_B_LIGHT, a	; ...
+	jp   nz, .tech_lp
+	bit  KEPB_A_HEAVY, a
+	jp   nz, .tech_hk
+	bit  KEPB_B_HEAVY, a
+	jp   nz, .tech_hp
+	; If no button was pressed, return.
+	; Next frame to perform the check again until the timer elapses.
+	jp   .ret
+.tech_lp:
+	ld   a, MOVE_SHARED_PUNCH_L
+	jp   .tech_setMove
+.tech_hp:
+	ld   a, MOVE_SHARED_PUNCH_H
+	jp   .tech_setMove
+.tech_lk:
+	ld   a, MOVE_SHARED_KICK_L
+	jp   .tech_setMove
+.tech_hk:
+	ld   a, MOVE_SHARED_KICK_H
+.tech_setMove:
+	
+	; Remove throw range hitbox next frame
+	ld   hl, iPlInfo_PhysHitRecv
 	add  hl, bc
 	ld   [hl], $01
-	ld   hl, $0021
+	
+	; Set standard attack flags (see BasicInput_StartLightPunch)
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	res  3, [hl]
-	res  5, [hl]
-	set  0, [hl]
-	set  1, [hl]
-	set  2, [hl]
-	call Pl_Unk_SetNewMoveAndAnim_ShakeScreenReset
-	ld   hl, $001B
+	res  PF1B_GUARD, [hl]
+	res  PF1B_CROUCH, [hl]
+	set  PF1B_NOBASICINPUT, [hl]
+	set  PF1B_XFLIPLOCK, [hl]
+	set  PF1B_NOSPECSTART, [hl]
+	
+	; Switch to the normal
+	call Pl_SetMove_ShakeScreenReset
+	
+	; Animate the normals as fast as possible
+	ld   hl, iOBJInfo_FrameLeft
 	add  hl, de
-	ld   [hl], $00
+	ld   [hl], ANIMSPEED_INSTANT
 	inc  hl
-	ld   [hl], $00
-	ld   hl, $0021
+	ld   [hl], ANIMSPEED_INSTANT
+	
+	; Enable invulnerability on this
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	set  7, [hl]
-	ld   a, $00
+	set  PF1B_INVULN, [hl]
+	
+	; The throw is canceled.
+	; This tells BasicInput_StartGroundThrow to start MOVE_SHARED_GUARDBREAK_G.
+	ld   a, PLAY_THROWACT_NONE
 	ld   [wPlayPlThrowActId], a
 	ld   a, $00
-	ld   [$C179], a
-	jp   L025757
-L0256F7:;J
-	ld   a, $04
+	ld   [wPlayPlThrowTechTimer], a
+	jp   .ret
+.throwConfirm:
+	; The throw was confirmed.
+	; This tells BasicInput_StartGroundThrow to start MOVE_SHARED_THROW_G (and reset it back to PLAY_THROWACT_NEXT03).
+	ld   a, PLAY_THROWACT_NEXT04
 	ld   [wPlayPlThrowActId], a
-L0256FC:;J
-	ld   hl, $001B
+	;--
+	
+.chkFrame:
+	; We get here when the throw is (auto)confirmed.
+	;
+	; [POI] iOBJInfo_FrameLeft is originally set to ANIMSPEED_NONE, so normally it should never reach 1 or 0.
+	;       In case it does though, there a failsafe to drop the player, using identical code to MoveC_Hit_MultiMidKnockback.
+	
+	; Depending on the how many frames are left...
+	ld   hl, iOBJInfo_FrameLeft
 	add  hl, de
 	ld   a, [hl]
-	cp   $00
-	jp   z, L025732
-	cp   $01
-	jp   z, L02570E
-	jp   L025758
-L02570E: db $36;X
-L02570F: db $00;X
-L025710: db $21;X
-L025711: db $23;X
-L025712: db $00;X
-L025713: db $09;X
-L025714: db $CB;X
-L025715: db $46;X
-L025716: db $C2;X
-L025717: db $1F;X
-L025718: db $57;X
-L025719: db $21;X
-L02571A: db $80;X
-L02571B: db $02;X
-L02571C: db $C3;X
-L02571D: db $22;X
-L02571E: db $57;X
-L02571F: db $21;X
-L025720: db $00;X
-L025721: db $04;X
-L025722: db $CD;X
-L025723: db $85;X
-L025724: db $35;X
-L025725: db $21;X
-L025726: db $05;X
-L025727: db $00;X
-L025728: db $19;X
-L025729: db $7E;X
-L02572A: db $FE;X
-L02572B: db $88;X
-L02572C: db $C2;X
-L02572D: db $4C;X
-L02572E: db $57;X
-L02572F: db $C3;X
-L025730: db $57;X
-L025731: db $57;X
-L025732: db $21;X
-L025733: db $40;X
-L025734: db $00;X
-L025735: db $CD;X
-L025736: db $D9;X
-L025737: db $35;X
-L025738: db $D2;X
-L025739: db $57;X
-L02573A: db $57;X
-L02573B: db $21;X
-L02573C: db $4E;X
-L02573D: db $00;X
-L02573E: db $09;X
-L02573F: db $7E;X
-L025740: db $B7;X
-L025741: db $CA;X
-L025742: db $4C;X
-L025743: db $57;X
-L025744: db $21;X
-L025745: db $71;X
-L025746: db $00;X
-L025747: db $09;X
-L025748: db $7E;X
-L025749: db $C3;X
-L02574A: db $4C;X
-L02574B: db $57;X
-L02574C: db $3E;X
-L02574D: db $7C;X
-L02574E: db $CD;X
-L02574F: db $1B;X
-L025750: db $34;X
-L025751: db $C3;X
-L025752: db $57;X
-L025753: db $57;X
-L025754: db $CD;X
-L025755: db $A2;X
-L025756: db $2E;X
-L025757:;J
+	cp   $00					; iOBJInfo_FrameLeft == $00? (last frame)
+	jp   z, .chkEnd				; If so, jump
+	cp   $01					; iOBJInfo_FrameLeft == $01?
+	jp   z, .setKnockbackSpeed	; If so, jump
+	; Otherwise, tick down iOBJInfo_FrameLeft
+	jp   .anim
+; --------------- second to last subframe ---------------
+.setKnockbackSpeed:
+	; Manually reset back iOBJInfo_FrameLeft to $00
+	ld   [hl], $00
+	
+	;
+	; Setup the knockback speed, depending on how long we have shaken.
+	;
+	ld   hl, iPlInfo_Flags3
+	add  hl, bc
+	bit  PF3B_SHAKELONG, [hl]	; Attack shook us for long?
+	jp   nz, .setSpeedFast		; If so, jump
+.setSpeedNorm:
+	ld   hl, $0280				; Otherwise HL = $02.80px/frame (short)
+	jp   .setSpeed
+.setSpeedFast:
+	ld   hl, $0400				; HL = $04px/frame (long)
+.setSpeed:
+	call Play_OBJLstS_SetSpeedH_ByXDirL
+	
+	; If we're on the ground, we can proceed to .chkEnd from the next frame
+	; to first handle the knockback, and only drop on the ground when we stop moving.
+	
+	; If we're in the air though, drop down immediately using the just set speed settings.
+	; Unlike the version in MoveC_Hit_MultiMidKnockback, this in theory could jump since
+	; it doesn't force the player to be on the ground... but in practice it's impossible for air throws to fail.
+	ld   hl, iOBJInfo_Y
+	add  hl, de
+	ld   a, [hl]			; A = Y Pos
+	cp   PL_FLOOR_POS		; A == PL_FLOOR_POS?
+	jp   nz, .switchToDrop	; If not, jump
+	
+	jp   .ret
+; --------------- last subframe ---------------
+.chkEnd:
+	; Slow down at $00.40px/frame, and switch to the drop move when we stop moving.
+	; This doesn't call .anim, preventing iOBJInfo_FrameLeft from resetting back to iOBJInfo_FrameTotal.
+	mMvC_DoFrictionH $0040
+	jp   nc, .ret
+		;--
+		; [TCRF] Useless code, does nothing.
+		ld   hl, iPlInfo_Health
+		add  hl, bc
+		ld   a, [hl]
+		or   a					; No health left?
+		jp   z, .switchToDrop	; If so, jump
+		ld   hl, iPlInfo_CharIdOther
+		add  hl, bc
+		ld   a, [hl]			; A = Opponent CharId
+		jp   .switchToDrop
+		;--
+.switchToDrop:
+	ld   a, MOVE_SHARED_DROP_MAIN
+	call Pl_SetMove_StopSpeed
+	jp   .ret
+; --------------- [TCRF] Unreferenced code ---------------
+.unused_end:
+	call Play_Pl_EndMove
+; --------------- common ---------------
+.ret:
 	ret
-L025758:;J
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
-L02575B:;I
+	
+; =============== MoveC_Hit_Throw_Rot ===============
+; Continuation code for HitAnimC_ThrowRot*, the rotation frames (HITANIM_THROW_ROT*).
+;
+; In practice, only used to sync the player's position with the opponent's, if enabled.
+;
+; Handler for:
+; - MOVE_SHARED_THROW_ROTU
+; - MOVE_SHARED_THROW_ROTL
+; - MOVE_SHARED_THROW_ROTD
+; - MOVE_SHARED_THROW_ROTR
+MoveC_Hit_Throw_Rot:
+	; Deliver knockback to the opponent, if needed
 	call Play_Pl_GiveKnockbackCornered
+	; Equivalent to mMvC_ValLoaded for a single frame
 	call OBJLstS_IsGFXLoadDone
-	jp   nz, L025773
-	ld   hl, $001B
+	jp   nz, .chkContMove
+	
+	; [POI] iOBJInfo_FrameLeft is initially set at ANIMSPEED_NONE when we get here.
+	;       It should never elapse, but in case it does, depending on the how many frames are left...
+	ld   hl, iOBJInfo_FrameLeft
 	add  hl, de
 	ld   a, [hl]
 	cp   $00
-	jp   z, L0257B6
+	jp   z, .chkEnd
 	cp   $01
-	jp   z, L025792
-L025773:;J
-	ld   a, [wPlayPlThrowRot_Unk_AlwaysSync]
-	or   a
-	jp   z, L0257D4
-	call L024AC1
-	ld   a, [wPlayPlThrowRotMoveH]
-	ld   h, a
+	jp   z, .setKnockbackSpeed
+.chkContMove:
+	;
+	; If enabled, reposition the player every frame like HitAnimC_ThrowRotCustom did once.
+	;
+	ld   a, [wPlayPlThrowRotSync]
+	or   a									; Sync enabled?
+	jp   z, .anim							; If not, skip
+	call HitAnimS_SyncPlPosFromOtherPos		; Move over opponent
+	; The position is relative to the opponent facing left, meaning it's more or less equivalent
+	; to the standard "player facing right" relative positioning.
+	ld   a, [wPlayPlThrowRotMoveH]			; Move forward by wPlayPlThrowRotMoveH
+	ld   h, a								
 	ld   l, $00
 	call Play_OBJLstS_MoveH_ByOtherXFlipL
-	ld   a, [wPlayPlThrowRotMoveV]
+	ld   a, [wPlayPlThrowRotMoveV]			; Move down by wPlayPlThrowRotMoveV
 	ld   h, a
 	ld   l, $00
 	call Play_OBJLstS_MoveV
-	jp   L0257D4
-L025792:;J
+	jp   .anim
+	
+
+; --------------- second to last subframe ---------------
+;
+; Fallback similar to the one in MoveC_Hit_MultiMidKnockback.
+;
+.setKnockbackSpeed:
+	; Manually reset back iOBJInfo_FrameLeft to $00, since we're not calling .anim (even though we could have if we really wanted).
 	ld   [hl], $00
-	ld   hl, $0023
+	
+	; Setup the knockback speed, depending on how long we have shaken.
+	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	bit  0, [hl]
-	jp   nz, L0257A3
-L02579D: db $21;X
-L02579E: db $80;X
-L02579F: db $02;X
-L0257A0: db $C3;X
-L0257A1: db $A6;X
-L0257A2: db $57;X
-L0257A3:;J
-	ld   hl, $0400
+	bit  PF3B_SHAKELONG, [hl]	; Attack shook us for long?
+	jp   nz, .setSpeedFast		; If so, jump
+.setSpeedNorm:
+	ld   hl, $0280				; Otherwise HL = $02.80px/frame (short)
+	jp   .setSpeed
+.setSpeedFast:
+	ld   hl, $0400				; HL = $04px/frame (long)
+.setSpeed:
 	call Play_OBJLstS_SetSpeedH_ByXDirL
-	ld   hl, $0005
+	
+	; If we're on the ground, we can proceed to .chkEnd from the next frame
+	; to first handle the knockback, and only drop on the ground when we stop moving.
+	; If we're in the air though, drop down immediately using the just set speed settings.
+	ld   hl, iOBJInfo_Y
 	add  hl, de
-	ld   a, [hl]
-	cp   $88
-	jp   nz, L0257C8
-L0257B3: db $C3;X
-L0257B4: db $D3;X
-L0257B5: db $57;X
-L0257B6: db $21;X
-L0257B7: db $40;X
-L0257B8: db $00;X
-L0257B9: db $CD;X
-L0257BA: db $D9;X
-L0257BB: db $35;X
-L0257BC: db $D2;X
-L0257BD: db $D3;X
-L0257BE: db $57;X
-L0257BF: db $21;X
-L0257C0: db $4E;X
-L0257C1: db $00;X
-L0257C2: db $09;X
-L0257C3: db $7E;X
-L0257C4: db $B7;X
-L0257C5: db $C2;X
-L0257C6: db $D0;X
-L0257C7: db $57;X
-L0257C8:;J
-	ld   a, $7C
-	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
-	jp   L0257D3
-L0257D0: db $CD;X
-L0257D1: db $A2;X
-L0257D2: db $2E;X
-L0257D3:;J
+	ld   a, [hl]			; A = Y Pos
+	cp   PL_FLOOR_POS		; A == PL_FLOOR_POS?
+	jp   nz, .switchToDrop	; If not, jump
+	
+	jp   .ret
+; --------------- last subframe ---------------
+.chkEnd:
+	; Slow down at $00.40px/frame, and switch to the drop move when we stop moving.
+	; This doesn't call .anim, preventing iOBJInfo_FrameLeft from resetting back to iOBJInfo_FrameTotal.
+	mMvC_DoFrictionH $0040
+	jp   nc, .ret
+		; If we died, just end the move.
+		; Hopefully we are on the ground when this happens.
+		ld   hl, iPlInfo_Health
+		add  hl, bc
+		ld   a, [hl]
+		or   a				; No health left?
+		jp   nz, .end		; If so, jump
+.switchToDrop:
+	ld   a, MOVE_SHARED_DROP_MAIN
+	call Pl_SetMove_StopSpeed
+	jp   .ret
+; --------------- common ---------------
+.end:
+	call Play_Pl_EndMove
+.ret:
 	ret
-L0257D4:;J
+.anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
+	
 ; =============== MoveInputReader_Ryo ===============
 ; Special move input checker for RYO.
 ; IN
@@ -4512,12 +5690,12 @@ MoveC_Ryo_MouKoRaiJinGou:
 		jp   .moveH_m40
 .obj1_cont:
 	mMvC_ValFrameEnd .moveH_m40
-		mMvC_SetDamageNext $04, HITANIM_HIT1_MID, PF3_BIT4
+		mMvC_SetDamageNext $04, HITANIM_HIT_MID1, PF3_LASTHIT
 		jp   .moveH_m40
 ; --------------- frame #2 ---------------
 .obj2:
 	mMvC_ValFrameEnd .moveH_m40
-		mMvC_SetDamageNext $04, HITANIM_DROP_MD, PF3_BIT4
+		mMvC_SetDamageNext $04, HITANIM_DROP_MAIN, PF3_LASTHIT
 		jp   .moveH_m40
 ; --------------- frame #3 ---------------
 .obj3:
@@ -4615,7 +5793,7 @@ MoveC_Ryo_HienShippuKyaku:
 .obj3:
 	mMvC_ValFrameEnd .doGravity
 	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	mMvC_SetDamageNext $08, HITANIM_DROP_MD, PF3_SHAKELONG
+	mMvC_SetDamageNext $08, HITANIM_DROP_MAIN, PF3_SHAKELONG
 	jp   .doGravity
 ; --------------- common gravity check ---------------	
 .doGravity:
@@ -4716,7 +5894,7 @@ MoveC_Ryo_RyuKoRanbuS:
 	jp   nz, .obj1_chkGuard_guard		; If so, jump
 .obj1_chkGuard_noGuard:
 	; Otherwise, continue to #2
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+	mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
 	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
 	mMvC_SetSpeedH $0000
 	; Force player on the ground
@@ -4736,14 +5914,14 @@ MoveC_Ryo_RyuKoRanbuS:
 .objOdd:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
 		jp   .chkOtherEscape
 ; --------------- frame #2 ---------------
 ; Initial frame before the odd/even switching.
 ; This sets the initial jump speed and doesn't check for block yet.
 .obj2:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
 		mMvC_SetSpeedH $0080
 		jp   .anim
 ; --------------- frames #4,6,8,A,... ---------------
@@ -4751,25 +5929,26 @@ MoveC_Ryo_RyuKoRanbuS:
 .objEven:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
 		;
-		; [TCRF] If the opponent somehow isn't in one of the hit animations 
-		;        this move sets, hop back instead of continuing.
-		;        This should never happen.
+		; [POI] If the opponent somehow isn't in one of the hit animations 
+		;       this move sets, hop back instead of continuing.
+		;       This can happen if the opponent gets hit by a previously thrown
+		;       fireball in the middle of the move.
 		;
 		ld   hl, iPlInfo_HitAnimIdOther
 		add  hl, bc
 		ld   a, [hl]
-		cp   HITANIM_HIT_SPEC_09	; A == HITANIM_HIT_SPEC_09?
+		cp   HITANIM_HIT_MULTI0	; A == HITANIM_HIT_MULTI0?
 		jp   z, .anim				; If so, skip
-		cp   HITANIM_HIT_SPEC_0A	; A == HITANIM_HIT_SPEC_0A?
+		cp   HITANIM_HIT_MULTI1	; A == HITANIM_HIT_MULTI1?
 		jp   z, .anim				; If so, skip
 		; Otherwise, transition to hop
 		ld   a, MOVE_SHARED_HOP_B
-		call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+		call Pl_SetMove_StopSpeed
 		jp   .ret
 ; --------------- frame #15 ---------------
 ; Transitions to Ko Hou at the end of the frame.	
@@ -4783,7 +5962,7 @@ MoveC_Ryo_RyuKoRanbuS:
 		ld   a, MOVE_RYO_KO_HOU_H
 	.startKoHou_setMove:
 		call MoveInputS_SetSpecMove_StopSpeed
-		mMvC_SetDamageNext $06, HITANIM_DROP_MD, PF3_BIT4
+		mMvC_SetDamageNext $06, HITANIM_DROP_MAIN, PF3_LASTHIT
 		jp   .ret
 ; --------------- common gravity check ---------------	
 .doGravity:
@@ -4906,7 +6085,7 @@ MoveC_Ryo_RyuKoRanbuD:
 	jp   nz, .obj1_chkGuard_guard		; If so, jump
 .obj1_chkGuard_noGuard:
 	; Otherwise, continue to #2
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+	mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
 	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
 	mMvC_SetSpeedH $0000
 	; Force player on the ground
@@ -4926,14 +6105,14 @@ MoveC_Ryo_RyuKoRanbuD:
 .objOdd:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
 		jp   .chkOtherEscape
 ; --------------- frame #2 ---------------
 ; Initial frame before the odd/even switching.
 ; This sets the initial jump speed and doesn't check for block yet.
 .obj2:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
 		mMvC_SetSpeedH $0080
 		jp   .anim
 ; --------------- frames #4,6,8,A,... ---------------
@@ -4941,25 +6120,26 @@ MoveC_Ryo_RyuKoRanbuD:
 .objEven:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
 		;
-		; [TCRF] If the opponent somehow isn't in one of the hit animations 
-		;        this move sets, hop back instead of continuing.
-		;        This should never happen.
+		; [POI] If the opponent somehow isn't in one of the hit animations 
+		;       this move sets, hop back instead of continuing.
+		;       This can happen if the opponent gets hit by a previously thrown
+		;       fireball in the middle of the move.
 		;
 		ld   hl, iPlInfo_HitAnimIdOther
 		add  hl, bc
 		ld   a, [hl]
-		cp   HITANIM_HIT_SPEC_09	; A == HITANIM_HIT_SPEC_09?
+		cp   HITANIM_HIT_MULTI0	; A == HITANIM_HIT_MULTI0?
 		jp   z, .anim				; If so, skip
-		cp   HITANIM_HIT_SPEC_0A	; A == HITANIM_HIT_SPEC_0A?
+		cp   HITANIM_HIT_MULTI1	; A == HITANIM_HIT_MULTI1?
 		jp   z, .anim				; If so, skip
 		; Otherwise, transition to hop
 		ld   a, MOVE_SHARED_HOP_B
-		call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+		call Pl_SetMove_StopSpeed
 		jp   .ret
 		
 ; --------------- frame #2C ---------------
@@ -4974,7 +6154,7 @@ MoveC_Ryo_RyuKoRanbuD:
 		ld   a, MOVE_RYO_KO_HOU_EH
 	.startKoHou_setMove:
 		call MoveInputS_SetSpecMove_StopSpeed
-		mMvC_SetDamageNext $02, HITANIM_DROP_MD, PF3_BIT4
+		mMvC_SetDamageNext $02, HITANIM_DROP_MAIN, PF3_LASTHIT
 		jp   .ret
 ; --------------- common gravity check ---------------	
 .doGravity:
@@ -5209,7 +6389,7 @@ MoveC_Robert_HienShippuKyaku:
 ; --------------- frame #2 ---------------	
 .obj2:
 	mMvC_ValFrameEnd .doGravity
-		mMvC_SetDamageNext $04, HITANIM_HIT1_MID, PF3_BIT4
+		mMvC_SetDamageNext $04, HITANIM_HIT_MID1, PF3_LASTHIT
 		mMvC_PlaySound SCT_ATTACKG
 		jp   .doGravity
 ; --------------- frame #3 ---------------	
@@ -5218,7 +6398,7 @@ MoveC_Robert_HienShippuKyaku:
 ; --------------- frame #4 ---------------	
 .obj4:
 	mMvC_ValFrameEnd .doGravity
-		mMvC_SetDamageNext $04, HITANIM_HIT0_MID, PF3_BIT4
+		mMvC_SetDamageNext $04, HITANIM_HIT_MID0, PF3_LASTHIT
 		mMvC_PlaySound SCT_ATTACKG
 		jp   .doGravity
 ; --------------- frame #5 ---------------	
@@ -5406,13 +6586,13 @@ MoveC_Robert_RyuuGa:
 		mMvC_PlaySound SND_ID_28
 		mMvIn_ChkLHE .obj1_setHitH, .obj1_setHitE
 	.obj1_setHitL: ; Light
-		mMvC_SetDamageNext $06, HITANIM_DROP_MD, PF3_SHAKELONG
+		mMvC_SetDamageNext $06, HITANIM_DROP_MAIN, PF3_SHAKELONG
 		jp   .anim
 	.obj1_setHitH: ; Heavy
-		mMvC_SetDamageNext $06, HITANIM_DROP_MD, PF3_SHAKELONG
+		mMvC_SetDamageNext $06, HITANIM_DROP_MAIN, PF3_SHAKELONG
 		jp   .anim
 	.obj1_setHitE: ; [POI] Hidden Heavy
-		mMvC_SetDamageNext $06, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_BIT4
+		mMvC_SetDamageNext $06, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #1 ---------------	
 .obj2:
@@ -5500,7 +6680,7 @@ MoveC_Terry_RisingTackle:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
 		mMvC_PlaySound SND_ID_28
-		mMvC_SetDamageNext $02, HITANIM_DROP_MD, PF3_BIT4
+		mMvC_SetDamageNext $02, HITANIM_DROP_MAIN, PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #1 ---------------	
 .obj1:
@@ -5527,13 +6707,13 @@ MoveC_Terry_RisingTackle:
 		jp   .doGravity
 .obj1_cont:
 	; Continuous damage
-	mMvC_SetDamage $02, HITANIM_DROP_MD, PF3_BIT4
+	mMvC_SetDamage $02, HITANIM_DROP_MAIN, PF3_LASTHIT
 	jp   .doGravity
 	
 ; --------------- frames #2-3 ---------------
 ; Attack frames.	
 .obj2:
-	mMvC_SetDamage $02, HITANIM_DROP_MD, PF3_BIT4
+	mMvC_SetDamage $02, HITANIM_DROP_MAIN, PF3_LASTHIT
 	mMvC_ValFrameEnd .doGravity
 		; Skip to #5 if YSpeed > -$03
 		mMvC_NextFrameOnGtYSpeed -$03, ANIMSPEED_NONE
@@ -5545,7 +6725,7 @@ MoveC_Terry_RisingTackle:
 ; --------------- frame #4 ---------------
 ; Attack frames with loop check.
 .obj4:
-	mMvC_SetDamage $02, HITANIM_DROP_MD, PF3_BIT4
+	mMvC_SetDamage $02, HITANIM_DROP_MAIN, PF3_LASTHIT
 	mMvC_ValFrameEnd .doGravity
 		; Continue looping to #2 until YSpeed > -$03
 		mMvC_NextFrameOnGtYSpeed -$03, ANIMSPEED_NONE	; YSpeed > -$03?
@@ -5610,7 +6790,7 @@ MoveC_Robert_KyokugenRyuRanbuKyaku:
 		mMvC_SetMoveH $0400
 .obj1_cont:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $04, HITANIM_HIT0_MID, PF3_BIT4
+		mMvC_SetDamageNext $04, HITANIM_HIT_MID0, PF3_LASTHIT
 		mMvC_PlaySound SCT_HEAVY
 		jp   .anim
 ; --------------- frame #3 ---------------	
@@ -5619,7 +6799,7 @@ MoveC_Robert_KyokugenRyuRanbuKyaku:
 		mMvC_SetMoveH $0200
 .obj3_cont:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $04, HITANIM_HIT1_MID, PF3_BIT4
+		mMvC_SetDamageNext $04, HITANIM_HIT_MID1, PF3_LASTHIT
 		mMvC_PlaySound SCT_HEAVY
 		jp   .anim
 ; --------------- frame #5 ---------------	
@@ -5628,7 +6808,7 @@ MoveC_Robert_KyokugenRyuRanbuKyaku:
 		mMvC_SetMoveH $0600
 .obj5_cont:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $04, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_BIT4
+		mMvC_SetDamageNext $04, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
 		mMvC_PlaySound SCT_HEAVY
 		jp   .anim
 ; --------------- frame #7 ---------------	
@@ -5719,7 +6899,7 @@ MoveC_Robert_RyuKoRanbuS:
 	jp   nz, .obj1_chkGuard_guard		; If so, jump
 .obj1_chkGuard_noGuard:
 	; Otherwise, continue to #2
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+	mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
 	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
 	mMvC_SetSpeedH $0000
 	; Force player on the ground
@@ -5739,14 +6919,14 @@ MoveC_Robert_RyuKoRanbuS:
 .objOdd:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
 		jp   .chkOtherEscape
 ; --------------- frame #2 ---------------
 ; Initial frame before the odd/even switching.
 ; This sets the initial jump speed and doesn't check for block yet.
 .obj2:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
 		mMvC_SetSpeedH $0080
 		jp   .anim
 ; --------------- frames #4,6,8,A,... ---------------
@@ -5754,25 +6934,26 @@ MoveC_Robert_RyuKoRanbuS:
 .objEven:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
 		;
-		; [TCRF] If the opponent somehow isn't in one of the hit animations 
-		;        this move sets, hop back instead of continuing.
-		;        This should never happen.
+		; [POI] If the opponent somehow isn't in one of the hit animations 
+		;       this move sets, hop back instead of continuing.
+		;       This can happen if the opponent gets hit by a previously thrown
+		;       fireball in the middle of the move.
 		;
 		ld   hl, iPlInfo_HitAnimIdOther
 		add  hl, bc
 		ld   a, [hl]
-		cp   HITANIM_HIT_SPEC_09	; A == HITANIM_HIT_SPEC_09?
+		cp   HITANIM_HIT_MULTI0	; A == HITANIM_HIT_MULTI0?
 		jp   z, .anim				; If so, skip
-		cp   HITANIM_HIT_SPEC_0A	; A == HITANIM_HIT_SPEC_0A?
+		cp   HITANIM_HIT_MULTI1	; A == HITANIM_HIT_MULTI1?
 		jp   z, .anim				; If so, skip
 		; Otherwise, transition to hop
 		ld   a, MOVE_SHARED_HOP_B
-		call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+		call Pl_SetMove_StopSpeed
 		jp   .ret
 ; --------------- frame #10 ---------------
 ; Transitions to Ryuu Ga at the end of the frame.	
@@ -5786,7 +6967,7 @@ MoveC_Robert_RyuKoRanbuS:
 		ld   a, MOVE_ROBERT_RYUU_GA_H
 	.startRyuuGa_setMove:
 		call MoveInputS_SetSpecMove_StopSpeed
-		mMvC_SetDamageNext $06, HITANIM_DROP_MD, PF3_BIT4
+		mMvC_SetDamageNext $06, HITANIM_DROP_MAIN, PF3_LASTHIT
 		jp   .ret
 ; --------------- common gravity check ---------------	
 .doGravity:
@@ -5899,7 +7080,7 @@ MoveC_Robert_RyuKoRanbuD:
 	jp   nz, .obj1_chkGuard_guard		; If so, jump
 .obj1_chkGuard_noGuard:
 	; Otherwise, continue to #2
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+	mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
 	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
 	mMvC_SetSpeedH $0000
 	; Force player on the ground
@@ -5919,14 +7100,14 @@ MoveC_Robert_RyuKoRanbuD:
 .objOdd:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
 		jp   .chkOtherEscape
 ; --------------- frame #2 ---------------
 ; Initial frame before the odd/even switching.
 ; This sets the initial jump speed and doesn't check for block yet.
 .obj2:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
 		mMvC_SetSpeedH $0080
 		jp   .anim
 ; --------------- frames #4,6,8,A,... ---------------
@@ -5934,25 +7115,26 @@ MoveC_Robert_RyuKoRanbuD:
 .objEven:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
 		;
-		; [TCRF] If the opponent somehow isn't in one of the hit animations 
-		;        this move sets, hop back instead of continuing.
-		;        This should never happen.
+		; [POI] If the opponent somehow isn't in one of the hit animations 
+		;       this move sets, hop back instead of continuing.
+		;       This can happen if the opponent gets hit by a previously thrown
+		;       fireball in the middle of the move.
 		;
 		ld   hl, iPlInfo_HitAnimIdOther
 		add  hl, bc
 		ld   a, [hl]
-		cp   HITANIM_HIT_SPEC_09	; A == HITANIM_HIT_SPEC_09?
+		cp   HITANIM_HIT_MULTI0	; A == HITANIM_HIT_MULTI0?
 		jp   z, .anim				; If so, skip
-		cp   HITANIM_HIT_SPEC_0A	; A == HITANIM_HIT_SPEC_0A?
+		cp   HITANIM_HIT_MULTI1	; A == HITANIM_HIT_MULTI1?
 		jp   z, .anim				; If so, skip
 		; Otherwise, transition to hop
 		ld   a, MOVE_SHARED_HOP_B
-		call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+		call Pl_SetMove_StopSpeed
 		jp   .ret
 ; --------------- frame #10 ---------------
 ; Transitions to Ryuu Ga at the end of the frame.	
@@ -5967,7 +7149,7 @@ MoveC_Robert_RyuKoRanbuD:
 	.startRyuuGa_setMove:
 		call MoveInputS_SetSpecMove_StopSpeed
 		; ##
-		mMvC_SetDamageNext $02, HITANIM_DROP_MD, PF3_BIT4
+		mMvC_SetDamageNext $02, HITANIM_DROP_MAIN, PF3_LASTHIT
 		; ##
 		jp   .ret
 ; --------------- common gravity check ---------------	
@@ -6389,7 +7571,7 @@ MoveC_Leona_GrandSabre:
 	call MoveInputS_CheckGAType
 	jp   nc, .anim	; Was an attack button pressed? If not, jump
 	jp   z, .anim	; Was the punch button pressed? If so, jump
-	mMvC_SetDamageNext $08, HITANIM_DROP_MD, PF3_SHAKELONG
+	mMvC_SetDamageNext $08, HITANIM_DROP_MAIN, PF3_SHAKELONG
 	mMvC_SetFrame $0A*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_NONE
 	jp   .ret
 ; --------------- Gliding Buster - frame #A ---------------
@@ -6474,7 +7656,7 @@ MoveC_Leona_XCalibur:
 		jp   c, .obj0_doDamageE	; Hidden heavy triggered? If so, jump
 		jp   .obj0_anim			; Otherwise, skip it
 	.obj0_doDamageE:
-		mMvC_SetDamageNext $02, HITANIM_DROP_MD, PF3_FLASH_B_SLOW|PF3_BIT4|PF3_SHAKEONCE
+		mMvC_SetDamageNext $02, HITANIM_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_SHAKEONCE
 	.obj0_anim:
 		jp   .anim
 ; --------------- frame #1 ---------------	
@@ -6529,7 +7711,7 @@ MoveC_Leona_XCalibur:
 	jp   c, .obj4_doDamageE	; Hidden heavy triggered? If so, jump
 	jp   .doGravity			; Otherwise, skip it
 .obj4_doDamageE:
-	mMvC_SetDamage $02, HITANIM_DROP_MD, PF3_FLASH_B_SLOW|PF3_BIT4|PF3_SHAKEONCE
+	mMvC_SetDamage $02, HITANIM_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_SHAKEONCE
 	jp   .doGravity
 ; --------------- frame #5 ---------------	
 .obj5:
@@ -6538,7 +7720,7 @@ MoveC_Leona_XCalibur:
 	jp   c, .obj5_doDamageE	; Hidden heavy triggered? If so, jump
 	jp   .obj5_cont			; Otherwise, skip it
 .obj5_doDamageE:
-	mMvC_SetDamage $02, HITANIM_DROP_MD, PF3_FLASH_B_SLOW|PF3_BIT4|PF3_SHAKEONCE
+	mMvC_SetDamage $02, HITANIM_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_SHAKEONCE
 .obj5_cont:
 	mMvC_ValFrameEnd .doGravity
 		; Loop back to #4 if we didn't touch the ground yet
@@ -6595,7 +7777,7 @@ MoveC_Leona_MoonSlasher:
 		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
 		mMvC_PlaySound SND_ID_28
 		mMvC_ChkNotMaxPow .anim ; Jump to .anim if not at max power
-			mMvC_SetDamageNext $08, HITANIM_DROP_MD, PF3_BIT4
+			mMvC_SetDamageNext $08, HITANIM_DROP_MAIN, PF3_LASTHIT
 			jp   .anim
 ; --------------- frame #1 ---------------	
 .obj1:
@@ -6612,7 +7794,7 @@ MoveC_Leona_MoonSlasher:
 	; If we're at max power, deal extra damage
 	mMvC_ValFrameEnd .anim
 		mMvC_ChkNotMaxPow .anim ; Jump to .anim if not at max power
-			mMvC_SetDamageNext $08, HITANIM_DROP_MD, PF3_BIT4
+			mMvC_SetDamageNext $08, HITANIM_DROP_MAIN, PF3_LASTHIT
 			jp   .anim
 ; --------------- frame #3 ---------------
 .obj3:
@@ -6665,13 +7847,13 @@ MoveC_OLeona_StormBringer:
 		ld   hl, iPlInfo_OLeona_StormBringer_LoopTimer
 		add  hl, bc
 		ld   [hl], $08
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_FLASH_B_FAST|PF3_SHAKEONCE
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_SHAKEONCE
 		jp   .anim
 ; --------------- frame #1 ---------------
 ; Health restore loop.
 .obj1:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_FLASH_B_FAST|PF3_SHAKEONCE
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_FLASH_B_FAST|PF3_SHAKEONCE
 		jp   .restoreHealth
 ; --------------- frame #2 ---------------
 ; Health restore loop.
@@ -6687,7 +7869,7 @@ MoveC_OLeona_StormBringer:
 	ld   hl, iOBJInfo_OBJLstPtrTblOffset
 	add  hl, de
 	ld   [hl], $00*OBJLSTPTR_ENTRYSIZE
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_FLASH_B_FAST|PF3_SHAKEONCE
+	mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_SHAKEONCE
 	jp   .restoreHealth
 .obj2_setAnimSpeed:
 	; Set animation speed to $0A before switching to #3
@@ -6788,13 +7970,13 @@ MoveC_Leona_VSlasher:
 	.obj3_setDamageNorm:
 		; As normal Leona, deliver hit dealing $14 lines of damage the next frame.
 		; The "V" projectile deals no damage and is a purely visual effect here.
-		mMvC_SetDamageNext $14, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $14, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_SLOW
 		jp   .anim
 	.obj3_setDamageO:
 		; As O.Leona, the projectile spawns a skull wall that actually deals continuous damage.
 		
 		; Prepare flags to copy
-		mMvC_SetDamageNext $02, HITANIM_DROP_SPEC_AIR_0E, PF3_SHAKELONG|PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $02, HITANIM_DROP_SWOOPUP, PF3_SHAKELONG|PF3_FLASH_B_SLOW
 		; Copy them over to the projectile
 		call Play_Proj_CopyMoveDamageFromPl
 		jp   .anim
@@ -6923,7 +8105,7 @@ MoveC_OLeona_SuperMoonSlasher:
 		; Otherwise, continue to #4
 		mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, $00
 		mMvC_SetSpeedH $0080
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_FLASH_B_FAST|PF3_SHAKEONCE
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_SHAKEONCE
 		jp   .ret
 .obj3_blocked:
 	mMvC_SetSpeedH $0000
@@ -6934,13 +8116,13 @@ MoveC_OLeona_SuperMoonSlasher:
 .obj4:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_FLASH_B_FAST|PF3_SHAKEONCE
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_FLASH_B_FAST|PF3_SHAKEONCE
 		jp   .chkOtherEscape
 ; --------------- frame #5 ---------------
 .obj5:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_FLASH_B_FAST|PF3_SHAKEONCE
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_SHAKEONCE
 		jp   .chkOtherEscape
 ; --------------- frame #6 ---------------
 .obj6:
@@ -6956,11 +8138,11 @@ MoveC_OLeona_SuperMoonSlasher:
 		ld   hl, iOBJInfo_OBJLstPtrTblOffset
 		add  hl, de
 		ld   [hl], $03*OBJLSTPTR_ENTRYSIZE ; offset by -1
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_FLASH_B_FAST|PF3_SHAKEONCE
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_SHAKEONCE
 		jp   .chkOtherEscape
 	.obj6_noLoop:
 		; Deal more damage for #7
-		mMvC_SetDamageNext $0C, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_FLASH_B_FAST
+		mMvC_SetDamageNext $0C, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_FLASH_B_FAST
 		; And enable manual control
 		ld   hl, iOBJInfo_FrameTotal
 		add  hl, de
@@ -6969,20 +8151,21 @@ MoveC_OLeona_SuperMoonSlasher:
 ; --------------- frames #4-6 / common escape check ---------------
 	.chkOtherEscape:
 		;
-		; [TCRF] If the opponent somehow isn't in one of the hit animations 
-		;        this move sets, hop back instead of continuing.
-		;        This should never happen.
+		; [POI] If the opponent somehow isn't in one of the hit animations 
+		;       this move sets, hop back instead of continuing.
+		;       This can happen if the opponent gets hit by a previously thrown
+		;       fireball in the middle of the move.
 		;
 		ld   hl, iPlInfo_HitAnimIdOther
 		add  hl, bc
 		ld   a, [hl]
-		cp   HITANIM_HIT_SPEC_09	; A == HITANIM_HIT_SPEC_09?
+		cp   HITANIM_HIT_MULTI0	; A == HITANIM_HIT_MULTI0?
 		jp   z, .anim				; If so, skip
-		cp   HITANIM_HIT_SPEC_0A	; A == HITANIM_HIT_SPEC_0A?
+		cp   HITANIM_HIT_MULTI1	; A == HITANIM_HIT_MULTI1?
 		jp   z, .anim				; If so, skip
 		; Otherwise, transition to hop
 		ld   a, MOVE_SHARED_HOP_B
-		call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+		call Pl_SetMove_StopSpeed
 		jp   .ret
 ; --------------- frame #7 ---------------
 .obj7:
@@ -7180,7 +8363,7 @@ MoveC_MrKarate_KoOuKen:
 	jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
-	mMvC_SetDamage $01, HITANIM_DROP_MD, PF3_BIT4|PF3_SHAKEONCE
+	mMvC_SetDamage $01, HITANIM_DROP_MAIN, PF3_LASTHIT|PF3_SHAKEONCE
 	mMvC_ValFrameEnd .anim
 		mMvC_PlaySound SCT_15
 		jp   .anim
@@ -7188,7 +8371,7 @@ MoveC_MrKarate_KoOuKen:
 ; This should have been assigned to #2 to make the recovery frame last more, but it isn't.
 ; Intentional quick change or bug?
 .unused_obj2:
-	mMvC_SetDamage $01, HITANIM_DROP_MD, PF3_BIT4
+	mMvC_SetDamage $01, HITANIM_DROP_MAIN, PF3_LASTHIT
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $14
 		jp   .anim
@@ -7251,7 +8434,7 @@ MoveC_MrKarate_ShouranKyaku:
 	mMvC_ValHit .obj0_noHit, .obj0_blocked
 		mMvC_SetFrame $03*OBJLSTPTR_ENTRYSIZE, $00
 		; Set initial for damage loop
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, $00
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, $00
 		
 		; Repeat the damage loop 3 times
 		ld   hl, iPlInfo_MrKarate_ShouranKyaku_LoopCount
@@ -7276,14 +8459,14 @@ MoveC_MrKarate_ShouranKyaku:
 ; Damage loop.
 .obj3:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #4 ---------------
 ; Damage loop.
-; Alternates between HITANIM_HIT_SPEC_09 and HITANIM_HIT_SPEC_0A to view different frames.
+; Alternates between HITANIM_HIT_MULTI0 and HITANIM_HIT_MULTI1 to view different frames.
 .obj4:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #5 ---------------
 ; Damage loop.
@@ -7294,15 +8477,15 @@ MoveC_MrKarate_ShouranKyaku:
 	add  hl, bc
 	dec  [hl]
 	jp   z, .obj5_noLoop
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_BIT4
+	mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
 	ld   hl, iOBJInfo_OBJLstPtrTblOffset
 	add  hl, de
 	ld   [hl], $02*OBJLSTPTR_ENTRYSIZE	; offset by -1
 	jp   .anim
 .obj5_noLoop:
 	; If it expired, hyper jump back
-	ld   a, MOVE_SHARED_HIT_86
-	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+	ld   a, MOVE_SHARED_BACKJUMP_REC_A
+	call Pl_SetMove_StopSpeed
 	mMvC_SetSpeedH -$0300
 	mMvC_SetSpeedV -$0500
 	jp   .ret
@@ -7398,13 +8581,13 @@ MoveC_MrKarate_HienShippuuKyaku:
 .obj3:
 	mMvC_ValFrameEnd .doGravity
 		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
-		mMvC_SetDamageNext $08, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_BIT4
+		mMvC_SetDamageNext $08, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
 		jp   .doGravity
 ; --------------- frame #4 ---------------
 .obj4:
 	mMvC_ValFrameEnd .doGravity
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
-		mMvC_SetDamageNext $08, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG|PF3_BIT4
+		mMvC_SetDamageNext $08, HITANIM_DROP_DB_A, PF3_SHAKELONG|PF3_LASTHIT
 		jp   .doGravity
 ; --------------- common gravity check ---------------	
 .doGravity:
@@ -7451,7 +8634,7 @@ MoveC_MrKarate_Zenretsuken:;I
 	jp   .anim
 ; --------------- frame #0 ---------------
 .obj0:
-	mMvC_SetDamage $01, HITANIM_HIT_SPEC_09, PF3_BIT4|PF3_SHAKEONCE
+	mMvC_SetDamage $01, HITANIM_HIT_MULTI0, PF3_LASTHIT|PF3_SHAKEONCE
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
 		mMvC_PlaySound SND_ID_28
@@ -7461,11 +8644,11 @@ MoveC_MrKarate_Zenretsuken:;I
 		jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
-	mMvC_SetDamage $01, HITANIM_HIT_SPEC_0A, PF3_BIT4|PF3_SHAKEONCE
+	mMvC_SetDamage $01, HITANIM_HIT_MULTI1, PF3_LASTHIT|PF3_SHAKEONCE
 	jp   .anim
 ; --------------- frame #2 ---------------
 .obj2:
-	mMvC_SetDamage $01, HITANIM_HIT_SPEC_09, PF3_BIT4|PF3_SHAKEONCE
+	mMvC_SetDamage $01, HITANIM_HIT_MULTI0, PF3_LASTHIT|PF3_SHAKEONCE
 	mMvC_ValFrameEnd .anim
 		mMvC_PlaySound SND_ID_28
 		
@@ -7475,30 +8658,30 @@ MoveC_MrKarate_Zenretsuken:;I
 		dec  [hl]
 		jp   z, .obj2_noLoop
 	.obj2_loop:
-		mMvC_SetDamage $01, HITANIM_HIT_SPEC_09, PF3_BIT4
+		mMvC_SetDamage $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
 		ld   hl, iOBJInfo_OBJLstPtrTblOffset
 		add  hl, de
 		ld   [hl], $00*OBJLSTPTR_ENTRYSIZE ; offset by -1
 		jp   .anim
 	.obj2_noLoop:
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #3 ---------------
 .obj3:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #4 ---------------
 .obj4:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #5 ---------------
 .obj5:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $1E
 		mMvC_PlaySound SND_ID_28
-		mMvC_SetDamageNext $01, HITANIM_DROP_MD, PF3_SHAKELONG|PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_DROP_MAIN, PF3_SHAKELONG|PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #6 ---------------
 .obj6:
@@ -7598,7 +8781,7 @@ MoveC_MrKarate_RyukoRanbuS:
 	jp   nz, .obj1_chkGuard_guard		; If so, jump
 .obj1_chkGuard_noGuard:
 	; Otherwise, continue to #2
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+	mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
 	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
 	mMvC_SetSpeedH $0000
 	; Force player on the ground
@@ -7618,14 +8801,14 @@ MoveC_MrKarate_RyukoRanbuS:
 .objOdd:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
 		jp   .chkOtherEscape
 ; --------------- frame #2 ---------------
 ; Initial frame before the odd/even switching.
 ; This sets the initial jump speed and doesn't check for block yet.
 .obj2:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
 		mMvC_SetSpeedH $0080
 		jp   .anim
 ; --------------- frames #4,6,8,A,... ---------------
@@ -7633,25 +8816,26 @@ MoveC_MrKarate_RyukoRanbuS:
 .objEven:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
 		;
-		; [TCRF] If the opponent somehow isn't in one of the hit animations 
-		;        this move sets, hop back instead of continuing.
-		;        This should never happen.
+		; [POI] If the opponent somehow isn't in one of the hit animations 
+		;       this move sets, hop back instead of continuing.
+		;       This can happen if the opponent gets hit by a previously thrown
+		;       fireball in the middle of the move.
 		;
 		ld   hl, iPlInfo_HitAnimIdOther
 		add  hl, bc
 		ld   a, [hl]
-		cp   HITANIM_HIT_SPEC_09	; A == HITANIM_HIT_SPEC_09?
+		cp   HITANIM_HIT_MULTI0	; A == HITANIM_HIT_MULTI0?
 		jp   z, .anim				; If so, skip
-		cp   HITANIM_HIT_SPEC_0A	; A == HITANIM_HIT_SPEC_0A?
+		cp   HITANIM_HIT_MULTI1	; A == HITANIM_HIT_MULTI1?
 		jp   z, .anim				; If so, skip
 		; Otherwise, transition to hop
 		ld   a, MOVE_SHARED_HOP_B
-		call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+		call Pl_SetMove_StopSpeed
 		jp   .ret
 ; --------------- frame #14 ---------------
 ; Transitions to Zenretsuken at the end of the frame.	
@@ -7665,7 +8849,7 @@ MoveC_MrKarate_RyukoRanbuS:
 		ld   a, MOVE_MRKARATE_ZENRETSUKEN_H
 	.startZenretsuken_setMove:
 		call MoveInputS_SetSpecMove_StopSpeed
-		mMvC_SetDamageNext $06, HITANIM_DROP_MD, PF3_BIT4
+		mMvC_SetDamageNext $06, HITANIM_DROP_MAIN, PF3_LASTHIT
 		jp   .ret
 ; --------------- common gravity check ---------------	
 .doGravity:
@@ -7788,7 +8972,7 @@ MoveC_MrKarate_Unused_RyukoRanbuD:
 	jp   nz, .obj1_chkGuard_guard		; If so, jump
 .obj1_chkGuard_noGuard:
 	; Otherwise, continue to #2
-	mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+	mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
 	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
 	mMvC_SetSpeedH $0000
 	; Force player on the ground
@@ -7808,14 +8992,14 @@ MoveC_MrKarate_Unused_RyukoRanbuD:
 .objOdd:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_0A, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI1, PF3_LASTHIT
 		jp   .chkOtherEscape
 ; --------------- frame #2 ---------------
 ; Initial frame before the odd/even switching.
 ; This sets the initial jump speed and doesn't check for block yet.
 .obj2:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
 		mMvC_SetSpeedH $0080
 		jp   .anim
 ; --------------- frames #4,6,8,A,... ---------------
@@ -7823,25 +9007,26 @@ MoveC_MrKarate_Unused_RyukoRanbuD:
 .objEven:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITANIM_HIT_SPEC_09, PF3_BIT4
+		mMvC_SetDamageNext $01, HITANIM_HIT_MULTI0, PF3_LASTHIT
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
 		;
-		; [TCRF] If the opponent somehow isn't in one of the hit animations 
-		;        this move sets, hop back instead of continuing.
-		;        This should never happen.
+		; [POI] If the opponent somehow isn't in one of the hit animations 
+		;       this move sets, hop back instead of continuing.
+		;       This can happen if the opponent gets hit by a previously thrown
+		;       fireball in the middle of the move.
 		;
 		ld   hl, iPlInfo_HitAnimIdOther
 		add  hl, bc
 		ld   a, [hl]
-		cp   HITANIM_HIT_SPEC_09	; A == HITANIM_HIT_SPEC_09?
+		cp   HITANIM_HIT_MULTI0	; A == HITANIM_HIT_MULTI0?
 		jp   z, .anim				; If so, skip
-		cp   HITANIM_HIT_SPEC_0A	; A == HITANIM_HIT_SPEC_0A?
+		cp   HITANIM_HIT_MULTI1	; A == HITANIM_HIT_MULTI1?
 		jp   z, .anim				; If so, skip
 		; Otherwise, transition to hop
 		ld   a, MOVE_SHARED_HOP_B
-		call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+		call Pl_SetMove_StopSpeed
 		jp   .ret
 		
 ; --------------- frame #2C ---------------
@@ -7857,7 +9042,7 @@ MoveC_MrKarate_Unused_RyukoRanbuD:
 		ld   a, MOVE_MRKARATE_KO_OU_KEN_UNUSED_EH
 	.startZenretsuken_setMove:
 		call MoveInputS_SetSpecMove_StopSpeed
-		mMvC_SetDamageNext $02, HITANIM_DROP_MD, PF3_BIT4
+		mMvC_SetDamageNext $02, HITANIM_DROP_MAIN, PF3_LASTHIT
 		jp   .ret
 ; --------------- common gravity check ---------------	
 .doGravity:
@@ -7906,7 +9091,7 @@ MoveC_Kyo_ThrowG:
 ; When visually switching to #2, hit the opponent.
 .obj1:
 	mMvC_ValFrameEnd .anim ; About to advance the anim? If not, skip to .anim
-	mMvC_SetDamageNext $06, HITANIM_DROP_MD, PF3_SHAKELONG ; 6 lines of damage on hit, make opponent drop on ground
+	mMvC_SetDamageNext $06, HITANIM_DROP_MAIN, PF3_SHAKELONG ; 6 lines of damage on hit, make opponent drop on ground
 	jp   .anim
 ; --------------- common ---------------
 .chkEnd:
@@ -7960,7 +9145,7 @@ MoveC_Daimon_ThrowG:
 ; Deal damage the first time we get here.
 .hit:
 	mMvC_ValFrameStart .obj2_anim
-	mMvC_SetDamage $06, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITANIM_DROP_DB_A, PF3_SHAKELONG
 .obj2_anim:
 	jp   .anim
 ; --------------- common ---------------
@@ -7992,7 +9177,7 @@ MoveC_Terry_ThrowG:
 	; When switching to #1, deal damage to the opponent
 	mMvC_ValFrameEnd .anim
 	
-	mMvC_SetDamageNext $06, HITANIM_DROP_MD, PF3_SHAKELONG
+	mMvC_SetDamageNext $06, HITANIM_DROP_MAIN, PF3_SHAKELONG
 	jp   .anim
 ; --------------- common ---------------
 .chkEnd:
@@ -8068,10 +9253,7 @@ ENDC
 	mMvC_SetDamage $06, HITANIM_THROW_ROTR, PF3_SHAKELONG
 	; Move opponent left 2px, up 10px
 	mMvC_MoveThrowOp -$02, -$10
-
-	; Allow the move code for getting damaged to set this once.
-	ld   a, $01
-	ld   [wPlayPlThrowRot_Unk_AlwaysSync], a
+	mMvC_MoveThrowOpSync
 .obj1_move:
 	jp   .uhok
 .uhok:
@@ -8105,7 +9287,7 @@ ENDC
 .obj4:
 	; The first time we get here, damage the player
 	mMvC_ValFrameStart .chkEnd
-	mMvC_SetDamage $06, HITANIM_DROP_MD, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITANIM_DROP_MAIN, PF3_SHAKELONG
 .chkEnd:
 	; End the move when the anim advances
 	mMvC_ValFrameEnd .anim
@@ -8150,7 +9332,7 @@ MoveC_Ryo_ThrowG:
 ; --------------- frame #2 ---------------
 .setDamage:
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITANIM_DROP_SPEC_0F, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITANIM_THROW_END, PF3_SHAKELONG
 	jp   .anim
 ; --------------- frame #3 ---------------
 .chkEnd:
@@ -8181,15 +9363,15 @@ MoveC_Robert_ThrowG:
 ; Damages the player when switching to #2.
 .setDamage:
 	mMvC_ValFrameEnd .anim
-	mMvC_SetDamageNext $06, HITANIM_DROP_MD, PF3_SHAKELONG
+	mMvC_SetDamageNext $06, HITANIM_DROP_MAIN, PF3_SHAKELONG
 	jp   .anim
 ; --------------- frame #2 ---------------
 ; When switching to #3, make Robert jump back.
 .chkEnd:
 	mMvC_ValFrameEnd .anim
 	; Set a new move to do the jump.
-	ld   a, MOVE_SHARED_HIT_86
-	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+	ld   a, MOVE_SHARED_BACKJUMP_REC_A
+	call Pl_SetMove_StopSpeed
 	; Initialize jump settings
 	mMvC_SetSpeedH -$0300	; 3px/frame backwards
 	mMvC_SetSpeedV -$0500	; 5px/frame up
@@ -8253,7 +9435,7 @@ MoveC_Athena_ThrowG:
 ; --------------- frame #5 ---------------
 .setDamage:
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITANIM_DROP_SPEC_0F, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITANIM_THROW_END, PF3_SHAKELONG
 	jp   .anim
 ; --------------- frame #6 ---------------
 .chkEnd:
@@ -8307,7 +9489,7 @@ MoveC_Base_ThrowA_DiagF:
 	mMvC_ValFrameStart .obj2_setManCtrl
 	
 	; Throw opponent forward, diagonally down + damage for 6 lines
-	mMvC_SetDamage $06, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITANIM_DROP_DB_A, PF3_SHAKELONG
 	
 	; Move us 2px back, 2px up
 	mMvC_SetSpeedH -$0200
@@ -8405,7 +9587,7 @@ MoveC_Mai_ThrowG:
 .setDamage:
 	mMvC_ValFrameStart .anim
 	mMvC_SetMoveH $0000 ; [POI] Useless
-	mMvC_SetDamage $06, HITANIM_DROP_SPEC_0F, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITANIM_THROW_END, PF3_SHAKELONG
 	jp   .anim
 ; --------------- frame #5 ---------------
 .chkEnd:
@@ -8475,10 +9657,7 @@ ENDC
 	; Move opponent left 2px, up 1px
 	mMvC_SetDamage $06, HITANIM_THROW_ROTR, PF3_SHAKELONG ; Same as before, to enable Play_Pl_MoveRotThrown
 	mMvC_MoveThrowOp -$02, -$01
-	
-	; Enable move to use moverot values for ???
-	ld   a, $01
-	ld   [wPlayPlThrowRot_Unk_AlwaysSync], a
+	mMvC_MoveThrowOpSync
 .obj1_move:
 	jp   .uhok
 .uhok:
@@ -8496,14 +9675,14 @@ ENDC
 	;--
 	; Not necessary, already done by Play_Pl_MoveRotThrown
 	ld   a, $00
-	ld   [wPlayPlThrowRot_Unk_AlwaysSync], a
+	ld   [wPlayPlThrowRotSync], a
 	;--
 	jp   .ret
 ; --------------- frame #2 ---------------
 .obj2:
 	; The first time we get here, make the throw deal damage
 	mMvC_ValFrameStart .chkEnd
-	mMvC_SetDamage $06, HITANIM_DROP_SPEC_0C, PF3_SHAKELONG
+	mMvC_SetDamage $06, HITANIM_DROP_DB_A, PF3_SHAKELONG
 .chkEnd:
 	; Start backjump when switching to #3.
 	
@@ -8513,8 +9692,8 @@ IF FIX_BUGS == 1
 ELSE
 	mMvC_ValFrameEnd MoveC_Mai_ThrowG.anim
 ENDC
-	ld   a, MOVE_SHARED_HIT_86
-	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+	ld   a, MOVE_SHARED_BACKJUMP_REC_A
+	call Pl_SetMove_StopSpeed
 	mMvC_SetSpeedH -$0300 ; 3px/frame back
 	mMvC_SetSpeedV -$0500 ; 5px/frame up
 	xor  a ; PLAY_THROWACT_NONE
@@ -8546,7 +9725,7 @@ MoveC_Leona_ThrowG:
 ; Damage player when switching to #1.
 .setDamage:
 	mMvC_ValFrameEnd .anim
-	mMvC_SetDamageNext $06, HITANIM_DROP_MD, PF3_SHAKELONG
+	mMvC_SetDamageNext $06, HITANIM_DROP_MAIN, PF3_SHAKELONG
 	jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
@@ -8555,8 +9734,8 @@ MoveC_Leona_ThrowG:
 ; Start backjump when switching to #3.
 .chkEnd:
 	mMvC_ValFrameEnd .anim
-	ld   a, MOVE_SHARED_HIT_86
-	call Pl_Unk_SetNewMoveAndAnim_StopSpeed
+	ld   a, MOVE_SHARED_BACKJUMP_REC_A
+	call Pl_SetMove_StopSpeed
 	mMvC_SetSpeedH -$0300 ; 3px/frame back
 	mMvC_SetSpeedV -$0500 ; 5px/frame up
 	xor  a ; PLAY_THROWACT_NONE

@@ -10144,16 +10144,17 @@ Play_DoUnkChain_DoMiscTimers:
 	dec  [hl]
 .end:
 
-Play_DoUnkChain_ShareVars2:
-	; Give visibility to these variables too
+Play_DoUnkChain_ShareThrowTimerVars:
+	; Give visibility to throw-related timers
 	ld   a, [wPlInfo_Pl1+iPlInfo_NoThrowTimer]
 	ld   [wPlInfo_Pl2+iPlInfo_NoThrowTimerOther], a
 	ld   a, [wPlInfo_Pl2+iPlInfo_NoThrowTimer]
 	ld   [wPlInfo_Pl1+iPlInfo_NoThrowTimerOther], a
-	ld   a, [wPlInfo_Pl1+iPlInfo_5F]
-	ld   [wPlInfo_Pl2+iPlInfo_5FOther], a
-	ld   a, [wPlInfo_Pl2+iPlInfo_5F]
-	ld   [wPlInfo_Pl1+iPlInfo_5FOther], a
+	; [TCRF] This one too
+	ld   a, [wPlInfo_Pl1+iPlInfo_Unused_ThrowKeyTimer]
+	ld   [wPlInfo_Pl2+iPlInfo_Unused_ThrowKeyTimerOther], a
+	ld   a, [wPlInfo_Pl2+iPlInfo_Unused_ThrowKeyTimer]
+	ld   [wPlInfo_Pl1+iPlInfo_Unused_ThrowKeyTimerOther], a
 	ret
 	
 ; =============== Play_CopyHLtoBC_3 ===============

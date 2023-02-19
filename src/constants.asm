@@ -276,21 +276,23 @@ PF2B_AUTOGUARDLOW   EQU 5 ; If set, the move automatically blocks mids
 PF2B_NOHURTBOX      EQU 6 ; If set, the player has no hurtbox (this separate from the collision box only here)
 PF2B_NOCOLIBOX      EQU 7 ; If set, the player has no collision box
 ; iPlInfo_Flags3, related to the move we got attacked with
+; TODO: PF3B_HEAVYHIT
 PF3B_SHAKELONG      EQU 0 ; Getting attacked shakes the player longer (doesn't cut the shake count in half).
-PF3B_FLASH_B_SLOW   EQU 1 ; Getting hit causes the player to flash slowly
+PF3B_FLASH_B_SLOW   EQU 1 ; Getting hit causes the player to flash slowly 
 PF3B_HITLOW         EQU 2 ; The attack hits low (must block crouching)
 PF3B_OVERHEAD       EQU 3 ; The attack is an overhead (must block standing)
-PF3B_BIT4           EQU 4 ; ???
-PF3B_BIT5           EQU 5 ; ???
+PF3B_LASTHIT        EQU 4 ; The attack makes the opponent invulnerable (mostly to prevent further hits while falling down)
+PF3B_HALFSPEED      EQU 5 ; Getting hit runs the game at half speed
 PF3B_FLASH_B_FAST   EQU 6 ; Getting hit causes the player to flash fast
+; TODO: PF3B_LIGHTHIT
 PF3B_SHAKEONCE      EQU 7 ; Getting attacked shakes the player once
 
 PF3_SHAKELONG       EQU 1 << PF3B_SHAKELONG   
 PF3_FLASH_B_SLOW    EQU 1 << PF3B_FLASH_B_SLOW
 PF3_HITLOW          EQU 1 << PF3B_HITLOW      
 PF3_OVERHEAD        EQU 1 << PF3B_OVERHEAD      
-PF3_BIT4            EQU 1 << PF3B_BIT4        
-PF3_BIT5            EQU 1 << PF3B_BIT5        
+PF3_LASTHIT         EQU 1 << PF3B_LASTHIT        
+PF3_HALFSPEED       EQU 1 << PF3B_HALFSPEED        
 PF3_FLASH_B_FAST    EQU 1 << PF3B_FLASH_B_FAST
 PF3_SHAKEONCE       EQU 1 << PF3B_SHAKEONCE   
 
@@ -403,10 +405,10 @@ SCT_CHARGEMETER       EQU $06
 SCT_MAXPOWSTART       EQU $07
 SCT_LIGHT             EQU $08
 SCT_HEAVY             EQU $09
-SCT_09                EQU $0A
+SCT_BLOCK             EQU $0A
 SCT_0A                EQU $0B
 SCT_0B                EQU $0C
-SCT_0C                EQU $0D
+SCT_AUTOBLOCK         EQU $0D
 SCT_0D                EQU $0E
 SCT_REFLECT           EQU $0F
 SCT_0F                EQU $10
@@ -421,7 +423,7 @@ SCT_17                EQU $18
 SCT_18                EQU $19
 SCT_19                EQU $1A
 SCT_THROW             EQU $1B
-SCT_THROWTECH         EQU $1C
+SCT_BREAK             EQU $1C ; Guard break, throw tech
 SCT_1C                EQU $1D
 
 ; Screen Palette IDs, passed to SGB_ApplyScreenPalSet 
@@ -708,27 +710,27 @@ MOVE_SUPER_1_D             EQU $6A
 MOVE_SHARED_THROW_G        EQU $6C ; Ground throw
 MOVE_SHARED_THROW_A        EQU $6E ; Air throw
 ; Attacked
-MOVE_SHARED_HIT_70         EQU $70
-MOVE_SHARED_THROWTECH_RECV EQU $72
-MOVE_SHARED_HIT_74         EQU $74
-MOVE_SHARED_HIT_76         EQU $76
-MOVE_SHARED_HIT_78         EQU $78
-MOVE_SHARED_HIT_7A         EQU $7A
-MOVE_SHARED_HIT_7C         EQU $7C
-MOVE_SHARED_HIT_7E         EQU $7E
-MOVE_SHARED_HIT_80         EQU $80
-MOVE_SHARED_HIT_82         EQU $82
-MOVE_SHARED_HIT_84         EQU $84
-MOVE_SHARED_HIT_86         EQU $86
-MOVE_SHARED_HIT_88         EQU $88
-MOVE_SHARED_HIT_8A         EQU $8A
-MOVE_SHARED_HIT_8C         EQU $8C
-MOVE_SHARED_HIT_8E         EQU $8E
-MOVE_SHARED_HIT_90         EQU $90
-MOVE_SHARED_HIT_92         EQU $92
-MOVE_SHARED_HIT_94         EQU $94
-MOVE_SHARED_HIT_96         EQU $96
-MOVE_SHARED_HIT_98         EQU $98
+MOVE_SHARED_POST_BLOCKSTUN EQU $70 ; After blockstun knockback
+MOVE_SHARED_GUARDBREAK_G   EQU $72 ; Guard break - Ground
+MOVE_SHARED_GUARDBREAK_A   EQU $74 ; Guard break - Air
+MOVE_SHARED_HIT0MID        EQU $76 ; Mid Hit #0
+MOVE_SHARED_HIT1MID        EQU $78 ; Mid Hit #1
+MOVE_SHARED_HITLOW         EQU $7A ; Low Hit
+MOVE_SHARED_DROP_MAIN      EQU $7C ; Default drop knockback
+MOVE_SHARED_THROW_END_A    EQU $7E ; Throw seq #2 - Actual air throw
+MOVE_SHARED_DROP_DBG       EQU $80 ; Diag. down drop on the ground
+MOVE_SHARED_HIT_SWOOPUP    EQU $82 ; Player thrown up very high / swooped up
+MOVE_SHARED_DROP_CH        EQU $84 ; Backjump Drop #0 - No Recovery
+MOVE_SHARED_BACKJUMP_REC_A EQU $86 ; Backjump Drop - With Recovery (Air only)
+MOVE_SHARED_HIT_MULTIMID0  EQU $88 ; Multi-hit special move, pre-last hit #0
+MOVE_SHARED_HIT_MULTIMID1  EQU $8A ; Multi-hit special move, pre-last hit #1
+MOVE_SHARED_HIT_MULTIGS    EQU $8C ; Multi-hit special (super) move, pre-last hit to ground
+MOVE_SHARED_THROW_END_G    EQU $8E ; Throw seq #2 - Actual ground throw
+MOVE_SHARED_THROW_START    EQU $90 ; Throw seq #0 - throw tech check
+MOVE_SHARED_THROW_ROTU     EQU $92 ; Throw seq #1 - Rotation frame
+MOVE_SHARED_THROW_ROTL     EQU $94 ; Throw seq #1 - Rotation frame
+MOVE_SHARED_THROW_ROTD     EQU $96 ; Throw seq #1 - Rotation frame
+MOVE_SHARED_THROW_ROTR     EQU $98 ; Throw seq #1 - Rotation frame
 MOVE_FF                    EQU $FF
 
 ; Character-specific
@@ -1056,24 +1058,26 @@ MOVE_MRKARATE_HAOH_SHO_KOH_KEN_S       EQU $68
 MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D       EQU $6A
 
 HITANIM_BLOCKED             EQU $00 ; Nothing happens
-HITANIM_GUARDBREAK_GROUND   EQU $01
-HITANIM_GUARDBREAK_AIR      EQU $02
-HITANIM_HIT0_MID            EQU $03 ; Punch
-HITANIM_HIT1_MID            EQU $04 ; Kick... but some punches too
+HITANIM_GUARDBREAK_G        EQU $01
+HITANIM_GUARDBREAK_A        EQU $02
+HITANIM_HIT_MID0            EQU $03 ; Standard hit #0
+HITANIM_HIT_MID1            EQU $04 ; Standard hit #1
 HITANIM_HIT_LOW             EQU $05 ; Punched or kicked while crouching
-HITANIM_DROP_SM             EQU $06 ; Small drop
-HITANIM_DROP_SM_REC         EQU $07 ; Small drop with recovery (Air only?)
-HITANIM_DROP_MD             EQU $08 ; Standard drop without recovery
+HITANIM_DROP_CH             EQU $06 ; Crouching heavy kick (Small drop with no recovery)
+HITANIM_DROP_A              EQU $07 ; Hit by a normal in the air (Small drop with recovery)
+HITANIM_DROP_MAIN           EQU $08 ; Standard drop without recovery
+;--
+; dubious names below but comments mostly correct
 
 ; Used by certain special moves
-HITANIM_HIT_SPEC_09         EQU $09
-HITANIM_HIT_SPEC_0A         EQU $0A
-HITANIM_HIT_SPEC_0B         EQU $0B
-HITANIM_DROP_SPEC_0C        EQU $0C ; Air throw directly to ground?
-HITANIM_DROP_SPEC_0C_GROUND EQU $0D ; Drop to ground with shake
-HITANIM_DROP_SPEC_AIR_0E    EQU $0E ; Jump up then drop to ground with shake (Air throw?)
-
-HITANIM_DROP_SPEC_0F        EQU $0F ; Large drop which causes the ground to shake. Used as end of the throw??
+HITANIM_HIT_MULTI0          EQU $09 ; Mid-special move, chainable hit #0
+HITANIM_HIT_MULTI1          EQU $0A ; Mid-special move, chainable hit #1
+HITANIM_HIT_MULTIGS         EQU $0B ; Mid-super move, player pushed on the ground and frozen
+HITANIM_DROP_DB_A           EQU $0C ; Hit (not throw) that sends the player to the ground with screen shake - from air
+HITANIM_DROP_DB_G           EQU $0D ; Hit (not throw) that sends the player to the ground with screen shake - from ground
+;---
+HITANIM_DROP_SWOOPUP        EQU $0E ; Very high throw or swept up above
+HITANIM_THROW_END           EQU $0F ; End of the throw. The actual part where the player is launched.
 HITANIM_THROW_START         EQU $10 ; Start of the throw anim
 HITANIM_THROW_ROTU          EQU $11 ; Throw rotation frame, head up
 HITANIM_THROW_ROTL          EQU $12 ; Throw rotation frame, head left
