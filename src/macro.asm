@@ -221,26 +221,40 @@ mMvIn_ValSkipWithChar: MACRO
 	jp   z, \2	; If so, skip
 ENDM
 
-; =============== mMvIn_ValStartCmdThrow04 ===============
-; Verifies that the command throw grabbed the opponent successfully.
+; =============== mMvIn_ValStartCmdThrow_StdColi ===============
+; Verifies that the command throw grabbed the opponent successfully using standard throw range collision.
 ; This will take a few frames to complete.
 ; IN
 ; - 1: Char Key
-mMvIn_ValStartCmdThrow04: MACRO
+mMvIn_ValStartCmdThrow_StdColi: MACRO
 	; Throw validation / try to start it
-	call MoveInputS_TryStartCommandThrow_Unk_Coli04	; Did the command throw grab the other player successfully?
+	call MoveInputS_TryStartCommandThrow_StdColi	; Did the command throw grab the other player successfully?
 	jp   nc, MoveInputReader_\<1>_NoMove			; If not, jump
 	call Task_PassControlFar
 	ld   a, PLAY_THROWACT_NEXT03					; Otherwise, the command throw is confirmed
 	ld   [wPlayPlThrowActId], a
 ENDM
 
-; =============== mMvIn_ValStartCmdThrow04 ===============
-; Jumps to the specified location if the command throw grabbed the opponent successfully.
+; =============== mMvIn_ValStartCmdThrow_AllColi ===============
+; Verifies that the command throw grabbed the opponent successfully using full-screen throw range collision.
+; This will take a few frames to complete.
+; IN
+; - 1: Ptr to target if validation fails.
+mMvIn_ValStartCmdThrow_AllColi: MACRO
+	; Throw validation / try to start it
+	call MoveInputS_TryStartCommandThrow_AllColi	; Did the command throw grab the other player successfully?
+	jp   nc, \1										; If not, jump
+	call Task_PassControlFar
+	ld   a, PLAY_THROWACT_NEXT03					; Otherwise, the command throw is confirmed
+	ld   [wPlayPlThrowActId], a
+ENDM
+
+; =============== mMvIn_JpIfStartCmdThrow_StdColi ===============
+; Jumps to the specified location if the command throw grabbed the opponent successfully using standard throw range collision.
 ; IN
 ; - 1: Ptr to target
-mMvIn_JpIfStartCmdThrow04: MACRO
-	call MoveInputS_TryStartCommandThrow_Unk_Coli04	; Did we grab the opponent?
+mMvIn_JpIfStartCmdThrow_StdColi: MACRO
+	call MoveInputS_TryStartCommandThrow_StdColi	; Did we grab the opponent?
 	jp   c, \1										; If so, jump
 ENDM
 

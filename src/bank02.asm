@@ -7297,7 +7297,7 @@ MoveInit_Leona_MoonSlasher:
 ; =============== MoveInit_OLeona_StormBringer ===============
 MoveInit_OLeona_StormBringer:
 	call Play_Pl_ClearJoyDirBuffer
-	mMvIn_ValStartCmdThrow04 Leona
+	mMvIn_ValStartCmdThrow_StdColi Leona
 	mMvIn_GetLH MOVE_OLEONA_STORM_BRINGER_L, MOVE_OLEONA_STORM_BRINGER_H
 	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, iPlInfo_Flags1

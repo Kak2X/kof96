@@ -8251,7 +8251,7 @@ MoveInit_Iori_KotoTsukiIni:
 ; =============== MoveInit_Iori_ScumGale ===============
 MoveInit_Iori_ScumGale:
 	call Play_Pl_ClearJoyDirBuffer
-	mMvIn_ValStartCmdThrow04 Iori
+	mMvIn_ValStartCmdThrow_StdColi Iori
 	mMvIn_GetLH MOVE_IORI_SCUM_GALE_L, MOVE_IORI_SCUM_GALE_H
 	call MoveInputS_SetSpecMove_StopSpeed
 	ld   hl, iPlInfo_Flags1
@@ -9716,16 +9716,11 @@ MoveC_Mature_Decide:
 	; Otherwise, try to start the command throw.
 	; Which should never fail if we got here.
 .canStartThrow_yes:	
-	call MoveInputS_TryStartCommandThrow_Unk_Coli05
-	jp   nc, .canStartThrow_no
-	call Task_PassControlFar
-	ld   a, PLAY_THROWACT_NEXT03
-	ld   [wPlayPlThrowActId], a
-
-	; Switch to #3 once it's confirmed
-	mMvC_SetFrame $03*OBJLSTPTR_ENTRYSIZE, $04
-	scf		; C flag set
-	ret
+	mMvIn_ValStartCmdThrow_AllColi .canStartThrow_no
+		; Switch to #3 once it's confirmed
+		mMvC_SetFrame $03*OBJLSTPTR_ENTRYSIZE, $04
+		scf		; C flag set
+		ret
 .canStartThrow_no:
 	xor  a	; C flag clear
 	ret
@@ -11320,7 +11315,7 @@ MoveInit_Daimon_CloudTosser:
 ; =============== MoveInit_Daimon_HeavenDrop ===============
 MoveInit_Daimon_HeavenDrop:
 	call Play_Pl_ClearJoyDirBuffer
-	mMvIn_ValStartCmdThrow04 Daimon
+	mMvIn_ValStartCmdThrow_StdColi Daimon
 	mMvIn_GetLH MOVE_DAIMON_HEAVEN_DROP_L, MOVE_DAIMON_HEAVEN_DROP_H
 	call MoveInputS_SetSpecMove_StopSpeed
 	; Command throw gets invulnerability when confirmed
@@ -11332,7 +11327,7 @@ MoveInit_Daimon_HeavenDrop:
 ; =============== MoveInit_Daimon_HeavenHellDrop ===============
 MoveInit_Daimon_HeavenHellDrop:
 	call Play_Pl_ClearJoyDirBuffer
-	mMvIn_ValStartCmdThrow04 Daimon
+	mMvIn_ValStartCmdThrow_StdColi Daimon
 	mMvIn_GetSD MOVE_DAIMON_HEAVEN_HELL_DROP_S, MOVE_DAIMON_HEAVEN_HELL_DROP_D
 	call MoveInputS_SetSpecMove_StopSpeed
 	; Command throw gets invulnerability when confirmed
@@ -11560,26 +11555,19 @@ MoveC_Daimon_CmdThrow:
 	bit  PF1B_GUARD, [hl]
 	jp   nz, .obj1_anim
 	
-	; Start the command throw.
-	; This also verifies the collision box again but oh well.
-	call MoveInputS_TryStartCommandThrow_Unk_Coli05		; Did it start successfully?
-	jp   nc, .anim										; If not, jump
+	; Try to start the command throw
+	mMvIn_ValStartCmdThrow_AllColi .anim
 	
-	; Switch to throw confirm
-	call Task_PassControlFar
-	ld   a, PLAY_THROWACT_NEXT03
-	ld   [wPlayPlThrowActId], a
-	
-	; We're invulnerable with the throw confirmed
-	ld   hl, iPlInfo_Flags1
-	add  hl, bc
-	set  PF1B_INVULN, [hl]
-	
-	; Set info for next frame
-	mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, $01
-	mMvC_SetDamageNext $06, HITTYPE_THROW_ROTL, PF3_SHAKELONG
-	mMvC_MoveThrowOp -$10, -$18
-	jp   .ret
+		; We're invulnerable with the throw confirmed
+		ld   hl, iPlInfo_Flags1
+		add  hl, bc
+		set  PF1B_INVULN, [hl]
+		
+		; Set info for next frame
+		mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, $01
+		mMvC_SetDamageNext $06, HITTYPE_THROW_ROTL, PF3_SHAKELONG
+		mMvC_MoveThrowOp -$10, -$18
+		jp   .ret
 .obj1_anim:
 	jp   .anim
 ; --------------- frame #4 ---------------
@@ -11718,12 +11706,8 @@ MoveC_Daimon_HeavenDrop:
 ; --------------- frame #3 ---------------	
 .obj3:
 	mMvC_ValFrameEnd .anim
-		call MoveInputS_TryStartCommandThrow_Unk_Coli05	; Did the throw start?
-		jp   nc, .ret									; If not, return
-		call Task_PassControlFar
-		ld   a, PLAY_THROWACT_NEXT03
-		ld   [wPlayPlThrowActId], a
-		jp   .anim
+		mMvIn_ValStartCmdThrow_AllColi .ret
+			jp   .anim
 ; --------------- frame #4 ---------------	
 .obj4:
 	mMvC_ValFrameEnd .anim
@@ -11911,23 +11895,15 @@ MoveC_Daimon_HeavenHellDrop:
 	mMvC_ValFrameEnd .anim
 		; Start the command throw again, since damaging the player using HITTYPE_HIT_MULTIGS internally ended the throw state.
 		; As the opponent is near and "frozen", this should never fail.
-		call MoveInputS_TryStartCommandThrow_Unk_Coli05
-		jp   nc, .ret
-		call Task_PassControlFar
-		ld   a, PLAY_THROWACT_NEXT03
-		ld   [wPlayPlThrowActId], a
-		jp   .setRotL_XM08_YM18
+		mMvIn_ValStartCmdThrow_AllColi .ret
+			jp   .setRotL_XM08_YM18
 ; --------------- frame #9 ---------------
 ; Grab loop - Daimon crouching starting the throw. Opponent is on the ground behind.
 .lpGrabStartB:
 	mMvC_ValFrameEnd .anim
 		; See #5
-		call MoveInputS_TryStartCommandThrow_Unk_Coli05
-		jp   nc, .ret
-		call Task_PassControlFar
-		ld   a, PLAY_THROWACT_NEXT03
-		ld   [wPlayPlThrowActId], a
-		jp   .setRotL_XP08_YM18
+		mMvIn_ValStartCmdThrow_AllColi .ret
+			jp   .setRotL_XP08_YM18
 ; --------------- frame #6,#E ---------------
 ; Grab loop. Opponent is above, coming from forward.
 .lpGrabU:

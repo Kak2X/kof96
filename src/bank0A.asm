@@ -12445,7 +12445,7 @@ MoveInit_Goenitz_WanpyouTokobuse:
 ; Extra super move.
 MoveInit_Goenitz_Yamidoukoku:
 	call Play_Pl_ClearJoyDirBuffer
-	mMvIn_ValStartCmdThrow04 Goenitz
+	mMvIn_ValStartCmdThrow_StdColi Goenitz
 	mMvIn_GetLH MOVE_GOENITZ_YAMIDOUKOKU_SL, MOVE_GOENITZ_YAMIDOUKOKU_SH
 	call MoveInputS_SetSpecMove_StopSpeed
 	; We want this to be a super move, even though it's not in a slot reserved for one.
@@ -13096,35 +13096,30 @@ MoveC_Goenitz_ShinyaotomePart2:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameEnd .anim
 		; Try to start the command throw, which shouldn't fail if we got here.
-		call MoveInputS_TryStartCommandThrow_Unk_Coli05
-		jp   nc, .ret
-		call Task_PassControlFar
-		ld   a, PLAY_THROWACT_NEXT03
-		ld   [wPlayPlThrowActId], a
-		
-		; We're invulnerable during the throw.
-		ld   hl, iPlInfo_Flags1
-		add  hl, bc
-		set  PF1B_INVULN, [hl]
-		
-		; Switch to the appropriate version of the throw.
-		; If we're doing the light version of the move (MOVE_GOENITZ_SHINYAOTOME_PART2_L), switch to MOVE_GOENITZ_SHINYAOTOME_THROW_L.
-		ld   hl, iPlInfo_MoveId
-		add  hl, bc
-		ld   a, [hl]
-		cp   MOVE_GOENITZ_SHINYAOTOME_PART2_L		; Doing the light move?
-		jp   nz, .chkEnd_startThrowH				; If not, start the heavy version of the throw.
-	.chkEnd_startThrowL:
-		ld   a, MOVE_GOENITZ_SHINYAOTOME_THROW_L
-		call MoveInputS_SetSpecMove_StopSpeed
-		jp   .chkEnd_setLastDamage
-	.chkEnd_startThrowH:
-		ld   a, MOVE_GOENITZ_SHINYAOTOME_THROW_H
-		call MoveInputS_SetSpecMove_StopSpeed
-	.chkEnd_setLastDamage:
-		; Deal one last line of damage
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
-		jp   .ret
+		mMvIn_ValStartCmdThrow_AllColi .ret
+			; We're invulnerable during the throw.
+			ld   hl, iPlInfo_Flags1
+			add  hl, bc
+			set  PF1B_INVULN, [hl]
+			
+			; Switch to the appropriate version of the throw.
+			; If we're doing the light version of the move (MOVE_GOENITZ_SHINYAOTOME_PART2_L), switch to MOVE_GOENITZ_SHINYAOTOME_THROW_L.
+			ld   hl, iPlInfo_MoveId
+			add  hl, bc
+			ld   a, [hl]
+			cp   MOVE_GOENITZ_SHINYAOTOME_PART2_L		; Doing the light move?
+			jp   nz, .chkEnd_startThrowH				; If not, start the heavy version of the throw.
+		.chkEnd_startThrowL:
+			ld   a, MOVE_GOENITZ_SHINYAOTOME_THROW_L
+			call MoveInputS_SetSpecMove_StopSpeed
+			jp   .chkEnd_setLastDamage
+		.chkEnd_startThrowH:
+			ld   a, MOVE_GOENITZ_SHINYAOTOME_THROW_H
+			call MoveInputS_SetSpecMove_StopSpeed
+		.chkEnd_setLastDamage:
+			; Deal one last line of damage
+			mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
+			jp   .ret
 ; --------------- frames #0-2 / common escape check ---------------
 .chkOtherEscape:
 	;

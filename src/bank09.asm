@@ -13605,7 +13605,7 @@ MoveInputReader_Krauser:
 	; FDBF+P (close) -> Kaiser Suplex
 	; "Not" check for this command throw, since it uses the same input as the next one.
 	mMvIn_ChkDirNot MoveInput_FDBF, .chkPunchSuper
-	mMvIn_JpIfStartCmdThrow04 MoveInit_Krauser_KaiserSuplex ; Jump here on success
+	mMvIn_JpIfStartCmdThrow_StdColi MoveInit_Krauser_KaiserSuplex ; Jump here on success
 .chkPunchSuper:
 	; FBDF+P -> Kaiser Wave
 	mMvIn_ValidateSuper .chkPunchNoSuper

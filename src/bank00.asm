@@ -14308,14 +14308,14 @@ Play_StartSuperSparkle:
 
 				; Start anim from the beginning
 				inc  hl			
-				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset = 0
+				ld   [hl], $00*OBJLSTPTR_ENTRYSIZE	; iOBJInfo_OBJLstPtrTblOffset = 0
 				
-				; ??? Display each animation frame for a single frame each
+				; Display each animation frame for a single frame each
 				ld   hl, iOBJInfo_FrameLeft
 				add  hl, de
-				ld   [hl], $00
+				ld   [hl], ANIMSPEED_INSTANT
 				inc  hl
-				ld   [hl], $00
+				ld   [hl], ANIMSPEED_INSTANT
 				
 				; Display for $14 frames
 				ld   hl, iOBJInfo_Play_EnaTimer
@@ -14884,9 +14884,11 @@ Play_Pl_ChkThrowInput:
 .ret:
 	ret
 	
-; =============== MoveInputS_TryStartCommandThrow_Unk_Coli05 ===============
+; =============== MoveInputS_TryStartCommandThrow_AllColi ===============
 ; Attempts to start a command throw that:
-; - Uses collision box $05 as throw range
+; - Uses collision box $05 as throw range.
+;   This is a special collision box that covers the whole screen, so to use this
+;   the player distance should be checked before calling this.
 ;
 ; This is the command grab equivalent to Play_Pl_ChkThrowInput, except
 ; that input was checked beforehand as it depends on the special move.
@@ -14900,7 +14902,7 @@ Play_Pl_ChkThrowInput:
 ; - DE: Ptr to respective wOBJInfo structure
 ; OUT
 ; - C: If set, the command throw can start
-MoveInputS_TryStartCommandThrow_Unk_Coli05:
+MoveInputS_TryStartCommandThrow_AllColi:
 	; If a throw is already in progress, return
 	ld   a, [wPlayPlThrowActId]
 	cp   PLAY_THROWACT_NONE
@@ -14917,9 +14919,10 @@ MoveInputS_TryStartCommandThrow_Unk_Coli05:
 	ld   a, $05
 	jp   MoveInputS_TryStartCommandThrow
 	
-; =============== MoveInputS_TryStartCommandThrow_Unk_Coli04 ===============
+; =============== MoveInputS_TryStartCommandThrow_StdColi ===============
 ; Attempts to start a command throw that:
 ; - Uses collision box $04 as throw range
+;   This is the same box used by normal throws to check for range.
 ; - Can't be done if the opponent is getting up
 ;
 ; See also: MoveInputS_TryStartCommandThrow_Coli05
@@ -14929,7 +14932,7 @@ MoveInputS_TryStartCommandThrow_Unk_Coli05:
 ; - DE: Ptr to respective wOBJInfo structure
 ; OUT
 ; - C: If set, the command throw can start
-MoveInputS_TryStartCommandThrow_Unk_Coli04:
+MoveInputS_TryStartCommandThrow_StdColi:
 	; If a throw is in progress, return
 	ld   a, [wPlayPlThrowActId]
 	cp   PLAY_THROWACT_NONE								; ThrowActId != NONE?

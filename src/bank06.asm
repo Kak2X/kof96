@@ -8020,24 +8020,19 @@ MoveC_Geese_AtemiNage:
 	ld   [hl], $01
 	
 .shakeDone:
-	; Put the opponent into the grabged state
-	call MoveInputS_TryStartCommandThrow_Unk_Coli05
+	; Put the opponent into the grabbed state
 	IF FIX_BUGS == 1
-		jp   nc, .anim
+		mMvIn_ValStartCmdThrow_AllColi .anim
 	ELSE
-		jp   nc, MoveC_Geese_HishouNichirinZan.anim
+		mMvIn_ValStartCmdThrow_AllColi MoveC_Geese_HishouNichirinZan.anim
 	ENDC
-	call Task_PassControlFar
-	ld   a, PLAY_THROWACT_NEXT03
-	ld   [wPlayPlThrowActId], a
-	
-	; We're invulnerable when it's confirmed
-	ld   hl, iPlInfo_Flags1
-	add  hl, bc
-	set  PF1B_INVULN, [hl]
-	; Switch to #2
-	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $08
-	jp   .ret
+		; We're invulnerable when it's confirmed
+		ld   hl, iPlInfo_Flags1
+		add  hl, bc
+		set  PF1B_INVULN, [hl]
+		; Switch to #2
+		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $08
+		jp   .ret
 	
 .obj0_waitEnd:
 	mMvC_ValFrameEnd .anim
