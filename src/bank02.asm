@@ -1305,8 +1305,8 @@ HitTypeC_Blocked:
 	; Blocking a move prevents it from using its flashing effects, if any
 	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	res  PF3B_FLASH_B_SLOW, [hl]
-	res  PF3B_FLASH_B_FAST, [hl]
+	res  PF3B_FIRE, [hl]
+	res  PF3B_SUPERALT, [hl]
 	
 	
 	; Reset the frame timer to 5, which is used for timing the knockback (MOVE_SHARED_POST_BLOCKSTUN).
@@ -1412,8 +1412,8 @@ HitTypeC_GuardBreakGround:
 	; Stop the player from flashing
 	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	res  PF3B_FLASH_B_SLOW, [hl]
-	res  PF3B_FLASH_B_FAST, [hl]
+	res  PF3B_FIRE, [hl]
+	res  PF3B_SUPERALT, [hl]
 	
 	; Play standard X break sound
 	ld   a, SCT_BREAK
@@ -1460,8 +1460,8 @@ HitTypeC_GuardBreakAir:
 	; Stop the player from flashing
 	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	res  PF3B_FLASH_B_SLOW, [hl]
-	res  PF3B_FLASH_B_FAST, [hl]
+	res  PF3B_FIRE, [hl]
+	res  PF3B_SUPERALT, [hl]
 	
 	; Play standard X break sound
 	ld   a, SCT_BREAK
@@ -2230,10 +2230,10 @@ HitTypeC_DropA:
 ; IN
 ; - BC: Ptr to wPlInfo
 MoveS_PlayHitSFX:
-	; The sound effect used is different for "firey" moves (those with PF3B_FLASH_B_SLOW set).
+	; The sound effect used is different for "firey" moves (those with PF3B_FIRE set).
 	ld   hl, iPlInfo_Flags3
 	add  hl, bc						; Seek to iPlInfo_Flags3
-	bit  PF3B_FLASH_B_SLOW, [hl]	; Is this a firey move?
+	bit  PF3B_FIRE, [hl]	; Is this a firey move?
 	jp   nz, .slowFlash				; If so, jump
 .noFlash:
 	ld   a, SCT_0A					; A = SFX ID for normal hits
@@ -2845,7 +2845,7 @@ Play_Pl_SetHitType:
 			; We're checking this because of what the game does to prevent a move from dealing
 			; damage for multiple continuous frames.
 			; 
-			; To ensure that, the main task at Play_DoUnkChain_ResetDamage blanks the damage field
+			; To ensure that, the main task at Play_DoMisc_ResetDamage blanks the damage field
 			; for the opponent if it detects that a physical hit happened the previous frame.
 			; Right after that, we're given visibility to those updated damage fields, so the opponent's
 			; iPlInfo_MoveDamageVal gets copied to our iPlInfo_MoveDamageValOther.
@@ -3031,8 +3031,8 @@ Play_Pl_SetHitType:
 			inc  hl			; Seek to iPlInfo_Flags2
 			inc  hl			; Seek to iPlInfo_Flags3
 			; Stop flashing 
-			res  PF3B_FLASH_B_SLOW, [hl]
-			res  PF3B_FLASH_B_FAST, [hl]
+			res  PF3B_FIRE, [hl]
+			res  PF3B_SUPERALT, [hl]
 			; Exit hit state
 			jp   Play_Pl_SetHitType_RetClear
 			;--
@@ -3096,8 +3096,8 @@ Play_Pl_SetHitType:
 			set  PF2B_AUTOGUARDDONE, [hl]
 			inc  hl					; Seek to iPlInfo_Flags3
 			; Stop flashing
-			res  PF3B_FLASH_B_SLOW, [hl]
-			res  PF3B_FLASH_B_FAST, [hl]
+			res  PF3B_FIRE, [hl]
+			res  PF3B_SUPERALT, [hl]
 			jp   Play_Pl_SetHitType_RetClear
 			;###
 			
@@ -3727,7 +3727,7 @@ Play_Pl_IncPowOnHit:
 ; - iPlInfo_DizzyProg
 ; - iPlInfo_GuardBreakProg
 ;
-; See also: Play_DoUnkChain_IncDizzyTimer
+; See also: Play_DoMisc_IncDizzyTimer
 ;
 ; IN
 ; - BC: Ptr to wPlInfo
@@ -4267,8 +4267,8 @@ MoveC_Hit_DropMain:
 		; Stop flashing
 		ld   hl, iPlInfo_Flags3
 		add  hl, bc
-		res  PF3B_FLASH_B_SLOW, [hl]
-		res  PF3B_FLASH_B_FAST, [hl]
+		res  PF3B_FIRE, [hl]
+		res  PF3B_SUPERALT, [hl]
 		jp   .ret
 		
 	.roll:
@@ -4301,8 +4301,8 @@ MoveC_Hit_DropMain:
 		
 		inc  hl				; Seek to iPlInfo_Flags3
 		; Remove these flash bits to let PF0B_SUPERMOVE handle the flashing
-		res  PF3B_FLASH_B_SLOW, [hl]
-		res  PF3B_FLASH_B_FAST, [hl]
+		res  PF3B_FIRE, [hl]
+		res  PF3B_SUPERALT, [hl]
 		
 		;
 		; Determine if player should roll forwards or backwards depending on the held directional keys.
@@ -4449,8 +4449,8 @@ MoveC_Hit_Throw_End:
 		; Stop flashing as well
 		ld   hl, iPlInfo_Flags3
 		add  hl, bc
-		res  PF3B_FLASH_B_SLOW, [hl]
-		res  PF3B_FLASH_B_FAST, [hl]
+		res  PF3B_FIRE, [hl]
+		res  PF3B_SUPERALT, [hl]
 		jp   .ret
 ; --------------- frame #2 / common gravity check ---------------
 ; After we rebounded once...
@@ -4512,8 +4512,8 @@ MoveC_Hit_DropDBG:
 		; Stop flashing the opponent as well
 		ld   hl, iPlInfo_Flags3
 		add  hl, bc
-		res  PF3B_FLASH_B_SLOW, [hl]
-		res  PF3B_FLASH_B_FAST, [hl]
+		res  PF3B_FIRE, [hl]
+		res  PF3B_SUPERALT, [hl]
 		jp   .anim
 ; --------------- frame #2 ---------------
 .chkEnd:
@@ -4795,8 +4795,8 @@ MoveC_Hit_SwoopUp:
 			; Stop flashing the opponent as well
 			ld   hl, iPlInfo_Flags3
 			add  hl, bc
-			res  PF3B_FLASH_B_SLOW, [hl]
-			res  PF3B_FLASH_B_FAST, [hl]
+			res  PF3B_FIRE, [hl]
+			res  PF3B_SUPERALT, [hl]
 			jp   .ret
 ; --------------- frame #5 / gravity check ---------------
 .doGravityToChkEnd:
@@ -4854,8 +4854,8 @@ MoveC_Hit_DropCH:
 		; Stop flashing
 		ld   hl, iPlInfo_Flags3
 		add  hl, bc
-		res  PF3B_FLASH_B_SLOW, [hl]
-		res  PF3B_FLASH_B_FAST, [hl]
+		res  PF3B_FIRE, [hl]
+		res  PF3B_SUPERALT, [hl]
 		jp   .ret
 ; --------------- frame #2 ---------------
 .chkEnd:
@@ -7652,7 +7652,7 @@ MoveC_Leona_XCalibur:
 		jp   c, .obj0_doDamageE	; Hidden heavy triggered? If so, jump
 		jp   .obj0_anim			; Otherwise, skip it
 	.obj0_doDamageE:
-		mMvC_SetDamageNext $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_LIGHTHIT
+		mMvC_SetDamageNext $02, HITTYPE_DROP_MAIN, PF3_FIRE|PF3_LASTHIT|PF3_LIGHTHIT
 	.obj0_anim:
 		jp   .anim
 ; --------------- frame #1 ---------------	
@@ -7707,7 +7707,7 @@ MoveC_Leona_XCalibur:
 	jp   c, .obj4_doDamageE	; Hidden heavy triggered? If so, jump
 	jp   .doGravity			; Otherwise, skip it
 .obj4_doDamageE:
-	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_LIGHTHIT
+	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_FIRE|PF3_LASTHIT|PF3_LIGHTHIT
 	jp   .doGravity
 ; --------------- frame #5 ---------------	
 .obj5:
@@ -7716,7 +7716,7 @@ MoveC_Leona_XCalibur:
 	jp   c, .obj5_doDamageE	; Hidden heavy triggered? If so, jump
 	jp   .obj5_cont			; Otherwise, skip it
 .obj5_doDamageE:
-	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_FLASH_B_SLOW|PF3_LASTHIT|PF3_LIGHTHIT
+	mMvC_SetDamage $02, HITTYPE_DROP_MAIN, PF3_FIRE|PF3_LASTHIT|PF3_LIGHTHIT
 .obj5_cont:
 	mMvC_ValFrameEnd .doGravity
 		; Loop back to #4 if we didn't touch the ground yet
@@ -7843,13 +7843,13 @@ MoveC_OLeona_StormBringer:
 		ld   hl, iPlInfo_OLeona_StormBringer_LoopTimer
 		add  hl, bc
 		ld   [hl], $08
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_LIGHTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_SUPERALT|PF3_LIGHTHIT
 		jp   .anim
 ; --------------- frame #1 ---------------
 ; Health restore loop.
 .obj1:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FLASH_B_FAST|PF3_LIGHTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_SUPERALT|PF3_LIGHTHIT
 		jp   .restoreHealth
 ; --------------- frame #2 ---------------
 ; Health restore loop.
@@ -7865,7 +7865,7 @@ MoveC_OLeona_StormBringer:
 	ld   hl, iOBJInfo_OBJLstPtrTblOffset
 	add  hl, de
 	ld   [hl], $00*OBJLSTPTR_ENTRYSIZE
-	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_LIGHTHIT
+	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_SUPERALT|PF3_LIGHTHIT
 	jp   .restoreHealth
 .obj2_setAnimSpeed:
 	; Set animation speed to $0A before switching to #3
@@ -7966,13 +7966,13 @@ MoveC_Leona_VSlasher:
 	.obj3_setDamageNorm:
 		; As normal Leona, deliver hit dealing $14 lines of damage the next frame.
 		; The "V" projectile deals no damage and is a purely visual effect here.
-		mMvC_SetDamageNext $14, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $14, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE
 		jp   .anim
 	.obj3_setDamageO:
 		; As O.Leona, the projectile spawns a skull wall that actually deals continuous damage.
 		
 		; Prepare flags to copy
-		mMvC_SetDamageNext $02, HITTYPE_DROP_SWOOPUP, PF3_HEAVYHIT|PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $02, HITTYPE_DROP_SWOOPUP, PF3_HEAVYHIT|PF3_FIRE
 		; Copy them over to the projectile
 		call Play_Proj_CopyMoveDamageFromPl
 		jp   .anim
@@ -8101,7 +8101,7 @@ MoveC_OLeona_SuperMoonSlasher:
 		; Otherwise, continue to #4
 		mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, $00
 		mMvC_SetSpeedH $0080
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_LIGHTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_SUPERALT|PF3_LIGHTHIT
 		jp   .ret
 .obj3_blocked:
 	mMvC_SetSpeedH $0000
@@ -8112,13 +8112,13 @@ MoveC_OLeona_SuperMoonSlasher:
 .obj4:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FLASH_B_FAST|PF3_LIGHTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_SUPERALT|PF3_LIGHTHIT
 		jp   .chkOtherEscape
 ; --------------- frame #5 ---------------
 .obj5:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_LIGHTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_SUPERALT|PF3_LIGHTHIT
 		jp   .chkOtherEscape
 ; --------------- frame #6 ---------------
 .obj6:
@@ -8134,11 +8134,11 @@ MoveC_OLeona_SuperMoonSlasher:
 		ld   hl, iOBJInfo_OBJLstPtrTblOffset
 		add  hl, de
 		ld   [hl], $03*OBJLSTPTR_ENTRYSIZE ; offset by -1
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_FAST|PF3_LIGHTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_SUPERALT|PF3_LIGHTHIT
 		jp   .chkOtherEscape
 	.obj6_noLoop:
 		; Deal more damage for #7
-		mMvC_SetDamageNext $0C, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_FAST
+		mMvC_SetDamageNext $0C, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_SUPERALT
 		; And enable manual control
 		ld   hl, iOBJInfo_FrameTotal
 		add  hl, de

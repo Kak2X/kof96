@@ -276,22 +276,22 @@ PF2B_AUTOGUARDLOW   EQU 5 ; If set, the move automatically blocks mids
 PF2B_NOHURTBOX      EQU 6 ; If set, the player has no hurtbox (this separate from the collision box only here)
 PF2B_NOCOLIBOX      EQU 7 ; If set, the player has no collision box
 ; iPlInfo_Flags3, related to the move we got attacked with
-PF3B_HEAVYHIT       EQU 0 ; Getting attacked shakes the player longer (doesn't cut the shake count in half).
-PF3B_FLASH_B_SLOW   EQU 1 ; Getting hit causes the player to flash slowly 
+PF3B_HEAVYHIT       EQU 0 ; Used by "heavy" hits (not to be confused with heavy moves). Getting attacked shakes the player longer (doesn't cut the shake count in half).
+PF3B_FIRE           EQU 1 ; Used by firey hits. Getting hit causes the player to flash slowly.
 PF3B_HITLOW         EQU 2 ; The attack hits low (must block crouching)
 PF3B_OVERHEAD       EQU 3 ; The attack is an overhead (must block standing)
 PF3B_LASTHIT        EQU 4 ; The attack makes the opponent invulnerable (mostly to prevent further hits while falling down)
 PF3B_HALFSPEED      EQU 5 ; Getting hit runs the game at half speed
-PF3B_FLASH_B_FAST   EQU 6 ; Getting hit causes the player to flash fast
-PF3B_LIGHTHIT       EQU 7 ; Getting attacked shakes the player once
+PF3B_SUPERALT       EQU 6 ; Used by a few super moves to make them use an alternate palette cycle.
+PF3B_LIGHTHIT       EQU 7 ; Used by "light" hits (not to be confused with light moves). Getting attacked shakes the player once.
 
 PF3_HEAVYHIT        EQU 1 << PF3B_HEAVYHIT   
-PF3_FLASH_B_SLOW    EQU 1 << PF3B_FLASH_B_SLOW
+PF3_FIRE            EQU 1 << PF3B_FIRE
 PF3_HITLOW          EQU 1 << PF3B_HITLOW      
 PF3_OVERHEAD        EQU 1 << PF3B_OVERHEAD      
 PF3_LASTHIT         EQU 1 << PF3B_LASTHIT        
 PF3_HALFSPEED       EQU 1 << PF3B_HALFSPEED        
-PF3_FLASH_B_FAST    EQU 1 << PF3B_FLASH_B_FAST
+PF3_SUPERALT        EQU 1 << PF3B_SUPERALT
 PF3_LIGHTHIT        EQU 1 << PF3B_LIGHTHIT   
 
 ; Flags for iPlInfo_ColiFlags

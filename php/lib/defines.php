@@ -27,12 +27,12 @@ const OBJLST_ROMFLAGS = [
 
 const PLFLAGS3 = [
 	0 => "PF3_HEAVYHIT",
-	1 => "PF3_FLASH_B_SLOW",
+	1 => "PF3_FIRE",
 	2 => "PF3_HITLOW",
 	3 => "PF3_OVERHEAD",
 	4 => "PF3_LASTHIT",
 	5 => "PF3_HALFSPEED",
-	6 => "PF3_FLASH_B_FAST",
+	6 => "PF3_SUPERALT",
 	7 => "PF3_LIGHTHIT",
 ];
 const HIT_ANIMS = [

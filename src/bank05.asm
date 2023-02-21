@@ -8353,7 +8353,7 @@ MoveC_Iori_OniYaki:
 .obj0_cont:
 	; 4 lines of damage at the end
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $04, HITTYPE_HIT_MID0, PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $04, HITTYPE_HIT_MID0, PF3_FIRE
 		jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
@@ -8364,7 +8364,7 @@ MoveC_Iori_OniYaki:
 	; 4 lines of damage at the end
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
-		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE
 		jp   .anim
 ; --------------- frame #2 ---------------
 ; Jump setup.
@@ -8394,7 +8394,7 @@ MoveC_Iori_OniYaki:
 	; Immediately switch to the next frame (YSpeed always > -$09)
 	mMvC_NextFrameOnGtYSpeed -$09, ANIMSPEED_NONE
 	jp   nc, .doGravity
-		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE
 		jp   .doGravity
 ; --------------- frame #3 ---------------
 .obj3:
@@ -8452,7 +8452,7 @@ MoveC_OIori_OniYaki:
 	; 4 lines of damage at the end
 	mMvC_ValFrameEnd .anim
 		; Different hit flags compared to normal version
-		mMvC_SetDamageNext $04, HITTYPE_HIT_MID0, PF3_FLASH_B_SLOW|PF3_LASTHIT
+		mMvC_SetDamageNext $04, HITTYPE_HIT_MID0, PF3_FIRE|PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
@@ -8463,7 +8463,7 @@ MoveC_OIori_OniYaki:
 	; 4 lines of damage at the end
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $01 ; No manual control, unlike normal version
-		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_SLOW|PF3_LASTHIT
+		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #2 ---------------
 ; Jump setup.
@@ -8500,7 +8500,7 @@ MoveC_OIori_OniYaki:
 ; Launches the opponent on the ground, unique to this version.
 .obj3:
 	mMvC_ValFrameEnd .doGravity
-		mMvC_SetDamageNext $04, HITTYPE_DROP_DB_A, PF3_HEAVYHIT|PF3_FLASH_B_SLOW|PF3_LASTHIT
+		mMvC_SetDamageNext $04, HITTYPE_DROP_DB_A, PF3_HEAVYHIT|PF3_FIRE|PF3_LASTHIT
 		jp   .doGravity
 ; --------------- frame #4 ---------------
 .obj4:
@@ -8776,10 +8776,10 @@ MoveC_Iori_KotoTsukiIn:
 	cp   CHAR_ID_OIORI				; Playing as IORI'?
 	jp   z, .obj5_setDamageOIori	; If so, jump
 .obj5_setDamageIori:
-	mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_HEAVYHIT|PF3_FLASH_B_SLOW
+	mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_HEAVYHIT|PF3_FIRE
 	jp   .ret
 .obj5_setDamageOIori:
-	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_SLOW|PF3_LASTHIT
+	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_LASTHIT
 	jp   .ret
 ; --------------- frame #6 ---------------
 ; Delay after the hit.
@@ -9077,7 +9077,7 @@ MoveC_Iori_KinYaOtomeS:
 	bit  PF1B_GUARD, [hl]			; Is the opponent blocking?
 	jp   nz, .obj1_chkGuard_guard	; If so, jump
 .obj1_chkGuard_noGuard:
-	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FLASH_B_SLOW
+	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FIRE
 	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
 	jp   .ret
 .obj1_chkGuard_noHit:
@@ -9089,17 +9089,17 @@ MoveC_Iori_KinYaOtomeS:
 ; --------------- odd frames #3,5,7,9,B,D,F - line damage + block check ---------------
 .setDamage1:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FIRE
 		jp   .chkOtherEscape
 ; --------------- frame #2 ---------------
 .setDamage0:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FIRE
 		jp   .anim
 ; --------------- even frames - line damage ---------------
 .setDamage0_chkOtherBlock:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FIRE
 		jp   .chkOtherEscape
 ; --------------- frames #10,11 - line damage + block check ---------------		
 .setDamage1_chkOtherBlock:
@@ -9128,7 +9128,7 @@ MoveC_Iori_KinYaOtomeS:
 ; Deals the big boy damage.
 .setDamageFinisher:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $10, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $10, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE
 		jp   .anim
 ; --------------- common horizontal movement ---------------
 .moveH:
@@ -9228,7 +9228,7 @@ MoveC_Iori_KinYaOtomeD:
 	jp   nz, .obj1_chkGuard_guard	; If so, jump
 .obj1_chkGuard_noGuard:
 	; Damage confirmed, switch to #2
-	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FLASH_B_SLOW
+	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FIRE
 	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
 	jp   .ret
 .obj1_chkGuard_noHit:
@@ -9333,7 +9333,7 @@ MoveC_Iori_KinYaOtomeD:
 			mMvC_SetAnimSpeed $3C
 			jp   .anim
 .setDamageFinish:
-	mMvC_SetDamageNext $10, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_SLOW
+	mMvC_SetDamageNext $10, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE
 	jp   .anim
 ; --------------- common horizontal movement ---------------
 .moveH:
@@ -9438,7 +9438,7 @@ MoveC_OIori_KinYaOtome:
 	jp   nz, .obj1_chkGuard_guard	; If so, jump
 .obj1_chkGuard_noGuard:
 	; Damage confirmed, switch to #2
-	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FLASH_B_SLOW|PF3_LIGHTHIT
+	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FIRE|PF3_LIGHTHIT
 	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $00
 	
 	; Loop the damage frames (#2-#5) 4 times
@@ -9458,13 +9458,13 @@ MoveC_OIori_KinYaOtome:
 ; Frame used during multiple damage loops/sequences.
 .setDamage1:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FIRE
 		jp   .chkOtherEscape
 ; --------------- frame #3 ---------------
 ; For damage loop 0.
 .setDamage0:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FIRE
 		jp   .chkOtherEscape
 ; --------------- frame #5 ---------------
 ; Loop back to #2 until the counter elapses
@@ -9478,7 +9478,7 @@ MoveC_OIori_KinYaOtome:
 		add  hl, de
 		ld   [hl], $01*OBJLSTPTR_ENTRYSIZE ; offset by -1
 	.chkLoop0_noLoop:
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FIRE
 		jp   .chkOtherEscape
 ; --------------- frame #7 ---------------
 .startLoop1:
@@ -9487,13 +9487,13 @@ MoveC_OIori_KinYaOtome:
 		ld   hl, iPlInfo_OIori_KinYaOtome_LoopCount
 		add  hl, bc
 		ld   [hl], $04
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTIGS, PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTIGS, PF3_FIRE
 		jp   .chkOtherEscape
 ; --------------- frame #8 ---------------
 ; For damage loop 1.
 .setDamage2:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTIGS, PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTIGS, PF3_FIRE
 		jp   .chkOtherEscape
 ; --------------- frame #9 ---------------
 ; Loop back to #8 until the counter elapses
@@ -9507,7 +9507,7 @@ MoveC_OIori_KinYaOtome:
 		add  hl, de
 		ld   [hl], $07*OBJLSTPTR_ENTRYSIZE ; offset by -1
 	.chkLoop1_noLoop:
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTIGS, PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTIGS, PF3_FIRE
 		jp   .chkOtherEscape
 ; --------------- frame #A ---------------
 ; Damage sequence 2 (no loop). Hit 1.
@@ -9525,7 +9525,7 @@ MoveC_OIori_KinYaOtome:
 ; Damage sequence 2 (no loop). Hits 3,4.
 .setDamage2_seq2:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_SLOW
+		mMvC_SetDamageNext $01, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE
 		jp   .anim
 	; --------------- common escape check ---------------
 	.chkOtherEscape:
@@ -11998,7 +11998,7 @@ MoveC_Daimon_HeavenHellDrop:
 		ld   a, MOVE_DAIMON_JIRAI_SHIN
 	.chkEnd_setNextMove:
 		call MoveInputS_SetSpecMove_StopSpeed
-		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FLASH_B_SLOW|PF3_LIGHTHIT
+		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_LIGHTHIT
 		jp   .ret
 ; --------------- common ---------------	
 .anim:

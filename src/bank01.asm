@@ -9081,9 +9081,9 @@ OBJInfoInit_Projectile:
 	db $80 ; iOBJInfo_TileIDBase
 	db LOW($8800) ; iOBJInfo_VRAMPtr_Low
 	db HIGH($8800) ; iOBJInfo_VRAMPtr_High
-	db BANK(L0958D7) ; iOBJInfo_BankNum (BANK $09)
-	db LOW(L0958D7) ; iOBJInfo_OBJLstPtrTbl_Low
-	db HIGH(L0958D7) ; iOBJInfo_OBJLstPtrTbl_High
+	db $09 ; iOBJInfo_BankNum (BANK $09)
+	db LOW($58D7) ; iOBJInfo_OBJLstPtrTbl_Low
+	db HIGH($58D7) ; iOBJInfo_OBJLstPtrTbl_High
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
 	db $00 ; iOBJInfo_BankNum [N/A]
 	db $00 ; iOBJInfo_OBJLstPtrTbl_Low
@@ -9103,7 +9103,7 @@ OBJInfoInit_Projectile:
 ; Should be executed alongside the two other tasks Play_Unk_DoPlMove_1P and Play_Unk_DoPlMove_2P.
 Play_Main:
 	ld   sp, $DD00
-	; Set 60 seconds for subsecond timer
+	; Initialize subsecond timer to 60 frames
 	ld   a, 60
 	ld   [wRoundTimeSub], a
 	ei
@@ -9113,7 +9113,7 @@ Play_Main:
 	call Play_DoPlInput
 	call Play_ChkPause
 	call Play_DoHUD
-	call Play_DoUnkChain
+	call Play_DoMisc
 	call Play_DoPlColi
 	call Play_WriteKeysToBuffer
 	call Play_DoScrollPos
@@ -9539,7 +9539,7 @@ Play_FrameAdv:
 	; Execute gameplay routines
 	call Play_DoPlInput
 	call Play_DoHUD
-	call Play_DoUnkChain
+	call Play_DoMisc
 	call Play_DoPlColi
 	call Play_WriteKeysToBuffer
 	call Play_DoScrollPos
@@ -9551,9 +9551,9 @@ Play_FrameAdv:
 	ld   [wNoCopyGFXBuf], a
 	ret
 	
-; =============== Play_DoUnkChain ===============
-; Miscelanneous chain of checks related to gameplay / moves.
-Play_DoUnkChain:
+; =============== Play_DoMisc ===============
+; Handles miscelanneous actions related to gameplay / moves.
+Play_DoMisc:
 	
 	;
 	; PLAYFIELD FLASHING
@@ -9595,14 +9595,16 @@ Play_DoUnkChain:
 
 ; =============== mFlashPlPal ===============
 ; Generates code to handle the palette flashing/cycling effects for sprites.
-; This is a palette cycle effect based off wPlayTimer, and incrementing internal counter.
+; This is a palette cycle effect based off wPlayTimer and an incrementing internal counter.
 ; wPlayTimer is used as we want the effect to pause while the game is paused.
+;
 ; There are 4 different ways the palette is cycled:
-; - Set A - No Special
-; - Set A - Super Move
-; - Set B - Slow Speed
-; - Set B - Max Speed
-; The two sets differ in the actual palettes used, with A being used for ????
+; - Palette Set A:
+;   - "No Special" -> Under the effect of Chizuru's super move
+;   - Super Move -> Hit by any super move
+; - Palette Set B:
+;   - Hit by fire
+;   - Super Move -> A few super moves use the second palette cycle
 ;
 ; IN
 ; - 1: Ptr to wPlInfo struct
@@ -9617,15 +9619,15 @@ Play_DoUnkChain:
 ; - 10: Set B, Id 2 color
 ; - 11: Set B, Id 3 color
 mFlashPlPal: MACRO
-	; If any of these bits is set, it uses an alternate palette cycle (Set B)
+	; These two use palette set B
 	ld   a, [\1+iPlInfo_Flags3]
-	bit  PF3B_FLASH_B_SLOW, a	; bit1 set?	
-	jp   nz, .flashSlowB		; If so, jump
-	bit  PF3B_FLASH_B_FAST, a	; bit6 set?	
-	jp   nz, .flashMaxB			; If so, jump
+	bit  PF3B_FIRE, a		; bit1 set?	
+	jp   nz, .flashSlowB	; If so, jump
+	bit  PF3B_SUPERALT, a	; bit6 set?	
+	jp   nz, .flashSuperB		; If so, jump
 	
 	;
-	; OBJ FLASHING (Set A) - NO SPECIAL / INCREMENTING SPEED MODE
+	; OBJ FLASHING (Set A) - NO SPECIAL RESTRICTION
 	; 
 	; This makes use of an additional field, iPlInfo_NoSpecialTimer.
 	; This is a countdown timer set by one of Chizuru's super moves
@@ -9682,7 +9684,8 @@ mFlashPlPal: MACRO
 	
 .flashSlowB:
 	;
-	; OBJ FLASHING (Set B) - SLOW SPEED
+	; OBJ FLASHING (Set B) - HIT BY FIRE
+	; When hit by a fire attack, cycle the palette slowly.
 	; 
 	
 	; PalId = ((wPlayTimer & $0F) / 4) % 4
@@ -9692,10 +9695,12 @@ mFlashPlPal: MACRO
 	srl  a
 	jp   .flashB
 	
-.flashMaxB:
+.flashSuperB:
 	;
-	; OBJ FLASHING (Set B) - MAX SPEED
-	; Like .flashSuperA, except for a different palette and different bit (checked before).
+	; OBJ FLASHING (Set B) - SUPER MOVE
+	; The player flashes at max speed when hit by some special moves, quickly cycle the palette.
+	; Like .flashSuperA, the player flashes at max speed for the duration of the super move.
+	; However, individual hits can set PF3_SUPERALT to make them use the alternate palette.
 	; 
 	; PalId = wPlayTimer % 4
 	;
@@ -9769,19 +9774,18 @@ mFlashPlPal: MACRO
 ENDM
 
 ;                                                      NORM | SET A          | SET B	
-Play_DoUnkChain_FlashOBJ1P: mFlashPlPal wPlInfo_Pl1, rOBP0, $8C, $8C,$0C,$8C,$80, $4C,$D0,$34,$54
+Play_DoMisc_FlashOBJ1P: mFlashPlPal wPlInfo_Pl1, rOBP0, $8C, $8C,$0C,$8C,$80, $4C,$D0,$34,$54
 ; Fall-through
-Play_DoUnkChain_FlashOBJ2P: mFlashPlPal wPlInfo_Pl2, rOBP1, $4C, $4C,$0C,$4C,$40, $8C,$E0,$38,$A8
+Play_DoMisc_FlashOBJ2P: mFlashPlPal wPlInfo_Pl2, rOBP1, $4C, $4C,$0C,$4C,$40, $8C,$E0,$38,$A8
 ; Fall-through
 
-	; ???
-Play_DoUnkChain_CopyUnk:
+Play_DoMisc_ApplyHitstop:
 	; Copy over value
 	ld   a, [wPlayHitstopSet]
 	ld   [wPlayHitstop], a
 	
-Play_DoUnkChain_ClearInputProcOnStop:	
-	; If inputs aren't  processed, clear out the existing fields from both players
+Play_DoMisc_ClearInputProcOnStop:	
+	; If inputs aren't processed, clear out the existing fields from both players
 	ld   a, [wMisc_C027]
 	bit  MISCB_PLAY_STOP, a
 	jr   z, .end
@@ -9794,10 +9798,10 @@ Play_DoUnkChain_ClearInputProcOnStop:
 	ld   [wPlInfo_Pl2+iPlInfo_JoyNewKeys], a
 .end:
 	
-Play_DoUnkChain_CalcDistance:
+Play_DoMisc_CalcDistance:
 	call Play_CalcPlDistanceAndXFlip
 	
-Play_DoUnkChain_SetPlProjFlag:
+Play_DoMisc_SetPlProjFlag:
 
 	;
 	; Update the player status flag marking if a projectile is visible & active on-screen.
@@ -9830,14 +9834,14 @@ Play_DoUnkChain_SetPlProjFlag:
 	set  PF0B_PROJ, [hl]
 .end:
 	
-Play_DoUnkChain_ShareVars:
+Play_DoMisc_ShareVars:
 	; Give visibility to some of the other player's variables.
 	; This gives functions receiving the player struct known locations
 	; to read data for the other player without having to do manual offset checks.
 	
 	ld   a, [wPlInfo_Pl1+iPlInfo_Flags0]		; Copy 1P status...
 	ld   [wPlInfo_Pl2+iPlInfo_Flags0Other], a	; ...to 2P player's struct
-	ld   a, [wPlInfo_Pl1+iPlInfo_Flags1]			; And so on
+	ld   a, [wPlInfo_Pl1+iPlInfo_Flags1]		; And so on
 	ld   [wPlInfo_Pl2+iPlInfo_Flags1Other], a
 	ld   a, [wPlInfo_Pl1+iPlInfo_Flags2]
 	ld   [wPlInfo_Pl2+iPlInfo_Flags2Other], a
@@ -9876,13 +9880,14 @@ Play_DoUnkChain_ShareVars:
 	ld   a, [wPlInfo_Pl2+iPlInfo_HitTypeId]
 	ld   [wPlInfo_Pl1+iPlInfo_HitTypeIdOther], a
 	
-Play_DoUnkChain_ResetDamage:
+Play_DoMisc_ResetDamage:
 	;
 	; If we got hit *DIRECTLY* by the opponent the last frame (doesn't matter if we blocked it):
 	; - Reset physical damage-related variables to prevent the move from causing continuous damage every frame
 	; - Allow the opponent to combo off the hit.
 	;
 	; Note this isn't applicable to projectile hits, they are handled by the collision check code.
+	; This is, however, applicable to parts of the throw sequence.
 	;
 	ld   a, [wPlInfo_Pl1+iPlInfo_PhysHitRecv]
 	or   a										; Did we get hit by the opponent?
@@ -9983,8 +9988,8 @@ mDecMaxPow: MACRO
 .end:
 ENDM
 
-Play_DoUnkChain_DecMaxPow1P: mDecMaxPow wPlInfo_Pl1
-Play_DoUnkChain_DecMaxPow2P: mDecMaxPow wPlInfo_Pl2
+Play_DoMisc_DecMaxPow1P: mDecMaxPow wPlInfo_Pl1
+Play_DoMisc_DecMaxPow2P: mDecMaxPow wPlInfo_Pl2
 	
 ; =============== mIncPlPow ===============
 ; Generates code to increment the normal POW meter if possible.
@@ -10041,8 +10046,8 @@ mIncPlPow: MACRO
 .end:
 ENDM
 	
-Play_DoUnkChain_IncPow1P: mIncPlPow wPlInfo_Pl1
-Play_DoUnkChain_IncPow2P: mIncPlPow wPlInfo_Pl2
+Play_DoMisc_IncPow1P: mIncPlPow wPlInfo_Pl1
+Play_DoMisc_IncPow2P: mIncPlPow wPlInfo_Pl2
 
 
 ; =============== mDecPlPow ===============
@@ -10071,8 +10076,8 @@ mDecPlPow: MACRO
 .end:
 ENDM
 
-Play_DoUnkChain_DecPowOnTaunt1P: mDecPlPow wPlInfo_Pl1, wPlInfo_Pl2
-Play_DoUnkChain_DecPowOnTaunt2P: mDecPlPow wPlInfo_Pl2, wPlInfo_Pl1
+Play_DoMisc_DecPowOnTaunt1P: mDecPlPow wPlInfo_Pl1, wPlInfo_Pl2
+Play_DoMisc_DecPowOnTaunt2P: mDecPlPow wPlInfo_Pl2, wPlInfo_Pl1
 	
 ;
 ; Increment the stun timers over time, until they reach the cap.
@@ -10083,38 +10088,38 @@ Play_DoUnkChain_DecPowOnTaunt2P: mDecPlPow wPlInfo_Pl2, wPlInfo_Pl1
 ;
 ; See also: Play_Pl_DecStunTimer, which is executed by player tasks.
 ;
-Play_DoUnkChain_IncDizzyTimer:
+Play_DoMisc_IncDizzyTimer:
 	; Every $10 frames, increment iPlInfo_DizzyProg
 	ld   a, [wPlayTimer]
 	and  a, $0F			
 	jp   nz, .end
 	ld   a, [wPlInfo_Pl1+iPlInfo_DizzyProgCap]
 	ld   hl, wPlInfo_Pl1+iPlInfo_DizzyProg
-	call Play_DoUnkChain_IncCustomTimer
+	call Play_DoMisc_IncCustomTimer
 	ld   a, [wPlInfo_Pl2+iPlInfo_DizzyProgCap]
 	ld   hl, wPlInfo_Pl2+iPlInfo_DizzyProg
-	call Play_DoUnkChain_IncCustomTimer
+	call Play_DoMisc_IncCustomTimer
 .end:	
-Play_DoUnkChain_IncGuardBreakTimer:
+Play_DoMisc_IncGuardBreakTimer:
 	; Every $20 frames, increment iPlInfo_GuardBreakProg
 	ld   a, [wPlayTimer]
 	and  a, $1F
 	jp   nz, .end
 	ld   a, [wPlInfo_Pl1+iPlInfo_GuardBreakProgCap]
 	ld   hl, wPlInfo_Pl1+iPlInfo_GuardBreakProg
-	call Play_DoUnkChain_IncCustomTimer
+	call Play_DoMisc_IncCustomTimer
 	ld   a, [wPlInfo_Pl2+iPlInfo_GuardBreakProgCap]
 	ld   hl, wPlInfo_Pl2+iPlInfo_GuardBreakProg
-	call Play_DoUnkChain_IncCustomTimer
-.end:;J
-	jp   Play_DoUnkChain_DoMiscTimers
+	call Play_DoMisc_IncCustomTimer
+.end:
+	jp   Play_DoMisc_DecNoThrowTimers
 	
-; =============== Play_DoUnkChain_IncCustomTimer ===============
+; =============== Play_DoMisc_IncCustomTimer ===============
 ; Increments a custom timer in the player struct until the target is reached.
 ; IN
 ; -  A: Timer target (iPlInfo_DizzyProgCap or iPlInfo_GuardBreakProgCap)
 ; - HL: Ptr to timer (iPlInfo_DizzyProg or iPlInfo_GuardBreakProg)
-Play_DoUnkChain_IncCustomTimer:
+Play_DoMisc_IncCustomTimer:
 	cp   a, [hl]		
 	jp   z, .ret	; Target == Timer? If so, jump
 	jp   nc, .inc	; Target >= Timer? If so, jump
@@ -10127,7 +10132,7 @@ Play_DoUnkChain_IncCustomTimer:
 .ret:
 	ret
 	
-Play_DoUnkChain_DoMiscTimers:
+Play_DoMisc_DecNoThrowTimers:
 	; Decrement the wake up timer if it's not 0 already
 	; iPlInfo_NoThrowTimer = MAX(iPlInfo_NoThrowTimer - 1, 0)
 	ld   a, [wPlInfo_Pl1+iPlInfo_NoThrowTimer]
@@ -10144,7 +10149,7 @@ Play_DoUnkChain_DoMiscTimers:
 	dec  [hl]
 .end:
 
-Play_DoUnkChain_ShareThrowTimerVars:
+Play_DoMisc_ShareThrowTimerVars:
 	; Give visibility to throw-related timers
 	ld   a, [wPlInfo_Pl1+iPlInfo_NoThrowTimer]
 	ld   [wPlInfo_Pl2+iPlInfo_NoThrowTimerOther], a
@@ -11387,7 +11392,7 @@ Play_ChkEnd_Slowdown:
 		ld   [wNoCopyGFXBuf], a
 		call Play_DoPlInput
 		call Play_DoHUD
-		call Play_DoUnkChain
+		call Play_DoMisc
 		call Play_WriteKeysToBuffer
 		; Calling this is the main key behind how the slowdown works.
 		; This will skip processing the two other tasks, which are used
@@ -11401,7 +11406,7 @@ Play_ChkEnd_Slowdown:
 .execNorm:
 	call Play_DoPlInput
 	call Play_DoHUD
-	call Play_DoUnkChain
+	call Play_DoMisc
 	call Play_DoPlColi
 	call Play_WriteKeysToBuffer
 	call Play_DoScrollPos
@@ -11462,14 +11467,14 @@ Play_ChkEnd_KO:
 	; Otherwise, 1P Won
 .won1P:
 	call Play_Set1PWin
-	ld   bc, wPlInfo_Pl1
-	ld   de, wPlInfo_Pl2
+	ld   bc, wPlInfo_Pl1		; Winner
+	ld   de, wPlInfo_Pl2		; Loser
 	call Play_SetWinLoseMoves
 	jr   .showPostRoundText
-.won2P:;R
+.won2P:
 	call Play_Set2PWin
-	ld   bc, wPlInfo_Pl2
-	ld   de, wPlInfo_Pl1
+	ld   bc, wPlInfo_Pl2		; Winner
+	ld   de, wPlInfo_Pl1		; Loser
 	call Play_SetWinLoseMoves
 	jr   .showPostRoundText
 .draw:
@@ -11870,13 +11875,13 @@ Play_PrepForWinScreen:
 	; Disable screen sections (for now, they'll get re-enabled later if not on draw)
 	call DisableSectLYC
 	
-	; Disable the two extra tasks which write stuff for the buffers	
+	; Remove the two player tasks
 	ld   a, $02
 	call Task_RemoveAt
 	ld   a, $03
 	call Task_RemoveAt
 	
-	; ok I guess
+	; stop GFX loader
 	xor  a
 	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftA], a
 	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftB], a
@@ -12419,7 +12424,7 @@ Play_MainLoop_PostRoundTextNoDisplay:
 	push bc
 		call Play_DoPlInput
 		call Play_DoHUD
-		call Play_DoUnkChain
+		call Play_DoMisc
 		call Play_DoPlColi
 		call Play_WriteKeysToBuffer
 		call Play_DoScrollPos
@@ -12448,7 +12453,7 @@ Play_MainLoop_PostRoundTextDisplay:
 		; Standard calls
 		call Play_DoPlInput
 		call Play_DoHUD
-		call Play_DoUnkChain
+		call Play_DoMisc
 		call Play_DoPlColi
 		call Play_WriteKeysToBuffer
 		call Play_DoScrollPos

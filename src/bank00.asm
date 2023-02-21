@@ -6048,7 +6048,7 @@ Unknown_Unused_4380Jump:
 	jp   $4380
 	
 ; =============== Pl_Unknown_InitBeforeStage ===============
-; Initializes parts of the player struct outside gameplay for both players.
+; Initializes parts of the player struct (??? before the round starts) outside gameplay for both players.
 Pl_Unknown_InitBeforeStage:
 	; Initialize the round number to -1.
 	; At the start of a round, it always gets increased by 1.
@@ -6210,7 +6210,7 @@ Module_Play:
 	or   a, I_VBLANK|I_STAT
 	ldh  [rIE], a
 	
-	; Create two separate tasks for handling player movement/animation.
+	; Create two separate tasks for handling the two players
 	ld   a, $02
 	ld   bc, Play_DoPl_1P
 	call Task_CreateAt
@@ -15596,8 +15596,8 @@ Play_Pl_ChkGuardCancelRoll:
 	
 	inc  hl				; Seek to iPlInfo_Flags3
 	; Remove these flash bits to let PF0B_SUPERMOVE handle the flashing
-	res  PF3B_FLASH_B_SLOW, [hl]
-	res  PF3B_FLASH_B_FAST, [hl]
+	res  PF3B_FIRE, [hl]
+	res  PF3B_SUPERALT, [hl]
 	
 	;
 	; Determine if player should roll forwards or backwards depending on the held directional keys.
