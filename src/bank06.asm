@@ -3385,9 +3385,9 @@ MoveInputReader_Athena:
 	jp   MoveInputReader_Athena_NoMove
 .chkAirKick:
 	; DF+K (air) -> Psycho Teleport
-	; [POI] With the autocharge cheat enabled, this move can be pulled off mid-air.
+	; [POI] With the powerup cheat enabled, this move can be pulled off mid-air.
 	;       Though since it wasn't designed for this, as soon as the move ends Athena snaps to the ground.
-	mMvIn_ValidateDipAutoCharge MoveInputReader_Athena_NoMove
+	mMvIn_ValidateDipPowerup MoveInputReader_Athena_NoMove
 	mMvIn_ChkDir MoveInput_DF, MoveInit_Athena_PsychoTeleport
 	; End
 	jp   MoveInputReader_Athena_NoMove
@@ -4055,7 +4055,7 @@ ENDM
 ; until it almost stops moving over it.
 ; From here, two actions can be performed:
 ; - Releasing B to immediately release the projectile
-; - Performing 360s to increase its size up to 4 times (autocharge cheat only)
+; - Performing 360s to increase its size up to 4 times (powerup cheat only)
 .obj4:
 	mMvC_ValFrameEnd .anim
 		; Set a significant delay after releasing the projectile.
@@ -4091,13 +4091,13 @@ ENDM
 		
 	.obj4_chkEnlarge:
 		;
-		; [POI] With the autocharge cheat, it's possible to enlarge the projectile up to 4 times.
+		; [POI] With the powerup cheat, it's possible to enlarge the projectile up to 4 times.
 		;       If we can't, we just return.
 		;       Since we aren't calling .anim, it means we'll keep getting here until something
 		;       else calls .anim (either by releasing B or having the release timer elapses).
 		;
 		ld   a, [wDipSwitch]
-		bit  DIPB_AUTO_CHARGE, a		; Cheat enabled?
+		bit  DIPB_POWERUP, a		; Cheat enabled?
 		jp   z, .ret					; If not, return
 		
 		ld   hl, iPlInfo_Flags0

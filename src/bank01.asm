@@ -9135,12 +9135,12 @@ Play_DoPlInput:
 	;
 .do1P:
 	;
-	; CPU inputs are handled separately.
+	; CPU inputs are faked separately by the AI.
 	; This part handles only inputs read from the joypad (so, for human players).
 	;
 	ld   hl, wPlInfo_Pl1+iPlInfo_Flags0
 	bit  PF0B_CPU, [hl]		; Is 1P CPU controlled?
-	jp   nz, .cpu1P		; If so, skip ahead
+	jp   nz, .cpu1P			; If so, jump ahead
 	
 	;
 	; Copy over the raw joypad inputs to the player 1 struct
@@ -9193,8 +9193,8 @@ Play_DoPlInput:
 	
 	; If we held it for less than 6 frames, don't do anything
 	ld   a, $06			
-	cp   a, [hl]		; iPlInfo_JoyHeavyCountA < 6?
-	jp   nc, .bBufChk1P	; If so, jump
+	cp   a, [hl]			; iPlInfo_JoyHeavyCountA < 6?
+	jp   nc, .bBufChk1P		; If so, jump
 	
 .aHeavy1P:
 	; Set the heavy attack on A
@@ -9259,10 +9259,10 @@ Play_DoPlInput:
 	jp   .do2P
 	
 .cpu1P:
-	; Handle CPU input
+	; Generate inputs for the CPU
 	ld   bc, wPlInfo_Pl1
 	ld   de, wOBJInfo_Pl1
-	call L0024E4
+	call HomeCall_Play_CPU_Do
 	
 .do2P:
 
@@ -9273,7 +9273,7 @@ Play_DoPlInput:
 	
 	ld   hl, wPlInfo_Pl2+iPlInfo_Flags0
 	bit  PF0B_CPU, [hl]		; Is 2P CPU controlled?
-	jp   nz, .cpu2P			; If so, skip ahead
+	jp   nz, .cpu2P			; If so, jump ahead
 	
 	;
 	; Copy over the raw joypad inputs to the player 1 struct
@@ -9380,10 +9380,10 @@ Play_DoPlInput:
 	jp   .end
 	
 .cpu2P:
-	; Handle CPU input
+	; Generate inputs for the CPU
 	ld   bc, wPlInfo_Pl2
 	ld   de, wOBJInfo_Pl2
-	call L0024E4
+	call HomeCall_Play_CPU_Do
 .end:
 	ret
 	
@@ -9993,7 +9993,7 @@ Play_DoMisc_DecMaxPow2P: mDecMaxPow wPlInfo_Pl2
 	
 ; =============== mIncPlPow ===============
 ; Generates code to increment the normal POW meter if possible.
-; This also handles the cheat for the meter autocharge.
+; This also handles the cheat for the meter powerup.
 ; If that cheat is enabled, the meters increment automatically and increments/decrements slower.
 ;
 ; IN
@@ -10011,7 +10011,7 @@ mIncPlPow: MACRO
 	
 	; If meter charges up automatically, do it at a slower rate (0.1px/frame)
 	ld   a, [wDipSwitch]
-	bit  DIPB_AUTO_CHARGE, a	; Autocharge cheat enabled?
+	bit  DIPB_POWERUP, a	; Powerup cheat enabled?
 	jp   z, .end				; If not, jump 
 .autoSpeed:
 	ld   b, $0F		; B = Speed mask, slow (see also: mDecMaxPow)
@@ -10036,7 +10036,7 @@ mIncPlPow: MACRO
 	; If meter charged up automatically, decrement the meter at a slower rate
 	ld   hl, \1+iPlInfo_MaxPowDecSpeed
 	ld   a, [wDipSwitch]
-	bit  DIPB_AUTO_CHARGE, a	; Autocharge cheat enabled?
+	bit  DIPB_POWERUP, a	; Powerup cheat enabled?
 	jp   nz, .decSlow			; If not, jump
 .decFast:
 	ld   [hl], $1F				; Write speed to iPlInfo_MaxPowDecSpeed

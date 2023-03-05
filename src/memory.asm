@@ -680,13 +680,13 @@ iPlInfo_PowOther EQU $82
 ; Custom, move-specific
 iPlInfo_RunningJump EQU $83 ; If set, the last jump was started during a forward run (move MOVE_SHARED_RUN_F)
 iPlInfo_Kyo_AraKami_SubInputMask EQU $83 ; Flags which inputs were performed for the submoves
-iPlInfo_Kyo_NueTumi_AutoguardShakeDone EQU $83 ; Marks if the autocharge hitstop was done. Seems pointless.
+iPlInfo_Kyo_NueTumi_AutoguardShakeDone EQU $83 ; Marks if the powerup hitstop was done. Seems pointless.
 iPlInfo_Kyo_UraOrochiNagi_ChargeTimer EQU $83 ; Animation loop limit when charging the move.
 iPlInfo_Daimon_HeavenHellDrop_GrabLoopsLeft EQU $83 ; How many 180 grab loops are performed
 iPlInfo_Andy_ZanEiKen_OtherHit EQU $83 ; Marks if the opponent got hit.
 iPlInfo_OLeona_StormBringer_LoopTimer EQU $83 ; Hit loop
 iPlInfo_OLeona_SuperMoonSlasher_LoopTimer EQU $83 ; Hit loop
-iPlInfo_Geese_AtemiNage_AutoguardShakeDone EQU $83 ; Marks if the autocharge hitstop was done.
+iPlInfo_Geese_AtemiNage_AutoguardShakeDone EQU $83 ; Marks if the powerup hitstop was done.
 iPlInfo_MrBig_SpinningLancer_LoopTimer EQU $83 ; Movement loop
 iPlInfo_MrBig_CaliforniaRomance_LoopTimer EQU $83 ; Movement loop
 iPlInfo_MrBig_DrumShot_LoopTimer EQU $83 ; Movement loop
@@ -708,6 +708,12 @@ iPlInfo_OIori_KinYaOtome_LoopCount EQU $83
 iPlInfo_Ryo_HienShippuKyaku_Unused_83 EQU $83 ; Nonexisting
 iPlInfo_Hit_SwoopUp_OkSpeedY EQU $83
 
+; CPU block
+iPlInfo_CPUIdleTimer EQU $86 ; Delays picking a new idle move. Until it elapses, the existing iPlInfo_CPUIdleMove is valid.
+iPlInfo_CPUIdleMove EQU $87 ; ID of the idle movement mode. (CMA_*)
+iPlInfo_CPUWaitTimer EQU $89 ; Delays CPU input logic until it elapses
+
+
 ; D-Pad Move input (MoveInput_*)
 ; Format: <iMoveInput_Length>[<iMoveInputItem*> last, <iMoveInputItem*> last-1, ...]		
 iMoveInput_Length   EQU $00 ; Number of iMoveInputItem structures following this
@@ -715,6 +721,14 @@ iMoveInputItem_JoyKeys EQU $01 ; Keys to press (JOY_*)
 iMoveInputItem_JoyMaskKeys EQU $02 ; Only these keys are checked from the input buffer
 iMoveInputItem_MinLength EQU $03 ; The key must be held >= this value
 iMoveInputItem_MaxLength EQU $04 ; The key must be held <= this value
+
+
+iCPUMoveListItem_MoveInputPtr_Low EQU $00 ; Ptr to any MoveInput_* structure, low byte
+iCPUMoveListItem_MoveInputPtr_High EQU $01 ; Ptr to any MoveInput_* structure, high byte
+iCPUMoveListItem_LastLHKeyA EQU $02 ; iPlInfo_JoyNewKeysLH value, choice #0
+iCPUMoveListItem_LastLHKeyB EQU $03 ; iPlInfo_JoyNewKeysLH value, choice #1
+
+
 
 
 ; Sound channel data header (ROM)

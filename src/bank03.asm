@@ -2224,1344 +2224,1904 @@ MoveCodePtrTbl_Iori:
 	dpr MoveC_Iori_ThrowG ; BANK $09 ; MOVE_SHARED_THROW_G
 	dpr MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 	
-L037707:;C
-	ld   hl, $0089
+; 
+; =============== START OF SUBMODULE Play->CPU ===============
+;
+
+; =============== Play_CPU_Do ===============
+; Handles inputs for CPU players.
+;
+; While this handles the move inputs, not everything is handled here.
+; Some moves (in particular those that have submoves) have CPU-specific
+; code to randomize how to handle them.
+;
+; IN
+; - BC: Ptr to wPlInfo
+; - DE: Ptr to respective wOBJInfo
+Play_CPU_Do:
+
+	;
+	; If iPlInfo_CPUWaitTimer is set, don't do anything until it elapses.
+	; This is strictly to delay the next action by a bit, as the CPU doesn't use 
+	; the MoveInput_* like the player does.
+	;
+	ld   hl, iPlInfo_CPUWaitTimer
 	add  hl, bc
 	ld   a, [hl]
-	cp   $00
-	jr   z, L037713
-	dec  a
+	cp   $00			; WaitTimer == $00?
+	jr   z, .resetInput	; If so, jump
+	dec  a				; Otherwise, WaitTimer--
 	ld   [hl], a
-	ret
-L037713:;R
+	ret					; and exit
+.resetInput:
+	;
+	; Clear all joypad input fields
+	;
 	xor  a
-	ld   hl, $0044
+	ld   hl, iPlInfo_JoyNewKeys
 	add  hl, bc
-	ldi  [hl], a
-	ldi  [hl], a
-	ldi  [hl], a
+	ldi  [hl], a	; iPlInfo_JoyNewKeys
+	ldi  [hl], a	; iPlInfo_JoyKeys
+	ldi  [hl], a	; iPlInfo_JoyNewKeysLH
 	call Play_Pl_ClearJoyDirBuffer
-	ld   hl, $006D
+	
+	;
+	; CPU AI LOGIC STARTS HERE
+	;
+	; First part here is reacting to what the player is doing.
+	;
+	
+	; Handle separately what happens if there's an enemy projectile on screen
+	ld   hl, iPlInfo_Flags0Other
 	add  hl, bc
-	bit  0, [hl]
-	jp   nz, L037968
-	ld   hl, $0074
+	bit  PF0B_PROJ, [hl]			; Does the opponent have an active fireball?
+	jp   nz, Play_CPU_CheckProj		; If so, jump
+	
+	; Handle separately if the current or next frame from the opponent deal damage
+	ld   hl, iPlInfo_MoveDamageValOther
 	add  hl, bc
-	ld   a, [hl]
-	ld   hl, $0077
+	ld   a, [hl]					; A = Cur Damage value
+	ld   hl, iPlInfo_MoveDamageValNextOther
 	add  hl, bc
-	or   a, [hl]
-	jp   nz, L03791E
+	or   a, [hl]					; A |= Next damage value
+	jp   nz, Play_CPU_BlockAttack_ByDifficulty				; A != 0? If so, jump
+	
+	; On HARD difficulty, several additional checks are made.
+	; The only check that remains in this block on EASY/NORMAL difficulties
+	; is the player distance one, which also activates closer to the opponent.
 	ld   a, [wDifficulty]
-	cp   $02
-	jp   nz, L037772
-	ld   hl, $006E
+	cp   DIFFICULTY_HARD		; Playing on HARD?
+	jp   nz, .valNormEasy		; If not, jump
+.valHard:
+	;
+	; HARD ONLY
+	;
+	
+	; If the opponent is invulnerable, move/hop backwards
+	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
-	bit  7, [hl]
-	jp   nz, L037AC9
-	ld   hl, $0033
+	bit  PF1B_INVULN, [hl]
+	jp   nz, Play_CPU_SetJoyKeysB_HopRand
+	
+	; If we're in the post-blockstun knockback, randomize return input
+	ld   hl, iPlInfo_MoveId
 	add  hl, bc
 	ld   a, [hl]
-	cp   $70
-	jp   z, L0378CC
-	ld   hl, $0021
+	cp   MOVE_SHARED_POST_BLOCKSTUN			; During knockback?
+	jp   z, Play_CPU_OnBlockstunKnockback	; If so, jump
+	
+	; If we can cancel the current move into another, perform a random character-specific input
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	bit  6, [hl]
-	jp   nz, L037903
-	ld   hl, $0061
+	bit  PF1B_ALLOWHITCANCEL, [hl]
+	jp   nz, Play_CPU_SetRandCharInput
+	
+	; If we're within $20px from the opponent, try to perform a random action
+	ld   hl, iPlInfo_PlDistance
 	add  hl, bc
 	ld   a, [hl]
-	cp   $20
-	jp   c, L037809
+	cp   $20						; iPlInfo_PlDistance < $20?
+	jp   c, Play_CPU_OnPlNear		; If so, jump
+	
+	;
+	; Every alternating $40 frames, perform a random character-specific input.
+	; Notably, this only happens here, with the HARD difficulty setting.
+	; On NORMAL and EASY, the CPU will never attack when far away.
+	;
 	ld   a, [wTimer]
 	bit  6, a
-	jp   nz, L037903
+	jp   nz, Play_CPU_SetRandCharInput
+	; Every alternating $80 frames that don't fall into the above check, try to jump forwards.
+	; This gives a window of opportunity for the jump to happen.
 	bit  7, a
-	jp   nz, L0379FC
-	jp   L03777C
-L037772:;J
-	ld   hl, $0061
+	jp   nz, Play_CPU_SetJoyKeysJumpUF
+	
+	jp   .idle
+.valNormEasy:
+	;
+	; NORMAL/EASY ONLY
+	;
+	
+	; If we're within $1Apx from the opponent, try to perform a random action
+	ld   hl, iPlInfo_PlDistance
 	add  hl, bc
 	ld   a, [hl]
-	cp   $1A
-	jp   c, L037809
-L03777C:;J
-	ld   hl, $0086
+	cp   $1A						; iPlInfo_PlDistance < $1A?
+	jp   c, Play_CPU_OnPlNear		; If so, jump
+	
+.idle:
+
+	;
+	; IDLE MOVEMENT
+	;
+	; If we got here, there's nothing for the CPU to react to.
+	;
+
+	; Don't pick a new action until the next block until the timer elapses
+	ld   hl, iPlInfo_CPUIdleTimer
 	add  hl, bc
 	ld   a, [hl]
-	cp   $00
-	jr   z, L037789
-	dec  a
+	cp   $00				; iPlInfo_CPUIdleTimer == $00?
+	jr   z, .setIdleMove	; If so, jump
+	dec  a					; Otherwise, iPlInfo_CPUIdleTimer--
 	ld   [hl], a
-	jr   L0377DD
-L037789:;R
-	call Rand
-	or   a, $07
+	jr   .execIdleMove		; and skip
+.setIdleMove:
+
+	;
+	; Set the new length of the timer value.
+	; This is always $16.
+	;
+	
+	;--
+	; [POI] What's this used for? A canceled attempt at randomizing the timer?
+	call Rand	; A = Rand
+	or   a, $07	; Set lower three bits
+	;--
 	ld   a, $0B
 	ld   e, a
-	add  a, e
-	ld   hl, $0086
-	add  hl, bc
-	ld   [hl], a
+	add  a, e			; A = $0B * 2
+	ld   hl, iPlInfo_CPUIdleTimer
+	add  hl, bc			; Seek to delay
+	ld   [hl], a		; Write it
+	
+	;
+	; Randomize the action.
+	;
 	call Rand
+	; ~15.5% chance -> Attempt to move backwards (moves forward anyway if too far away from the opponent)
 	cp   $28
-	jr   c, L0377AE
+	jr   c, .chkSetMoveB
+	; ~23.5% chance -> Attempt to pause (moves forward anyway if too far away from the opponent)
 	cp   $64
-	jr   c, L0377C1
+	jr   c, .chkSetNoMove
+	; ~10% chance -> Charge meter
 	cp   $7D
-	jr   c, L0377D4
-L0377A6:;J
-	xor  a
-	ld   hl, $0087
+	jr   c, .setChargeMove
+	; ~51% chance -> Move forward
+.setMoveF:
+	; iPlInfo_CPUIdleMove = CMA_MOVEF
+	xor  a	; CMA_MOVEF
+	ld   hl, iPlInfo_CPUIdleMove
 	add  hl, bc
 	ld   [hl], a
-	jr   L0377DD
-L0377AE:;R
-	ld   hl, $0061
+	jr   .execIdleMove
+.chkSetMoveB:
+	; Move forward instead if too far away from the opponent
+	ld   hl, iPlInfo_PlDistance
 	add  hl, bc
 	ld   a, [hl]
-	cp   $5A
-	jp   nc, L0377A6
-	ld   a, $01
-	ld   hl, $0087
+	cp   $5A			; iPlInfo_PlDistance >= $5A?
+	jp   nc, .setMoveF	; If so, jump
+	; iPlInfo_CPUIdleMove = CMA_MOVEB
+	ld   a, CMA_MOVEB
+	ld   hl, iPlInfo_CPUIdleMove
 	add  hl, bc
 	ld   [hl], a
-	jr   L0377DD
-L0377C1:;R
-	ld   hl, $0061
+	jr   .execIdleMove
+.chkSetNoMove:
+	; Move forward instead if too far away from the opponent
+	ld   hl, iPlInfo_PlDistance
 	add  hl, bc
 	ld   a, [hl]
-	cp   $55
-	jp   nc, L0377A6
-	ld   a, $FF
-	ld   hl, $0087
+	cp   $55			; iPlInfo_PlDistance >= $55?
+	jp   nc, .setMoveF	; If so, jump
+	; iPlInfo_CPUIdleMove = CMA_NONE
+	ld   a, CMA_NONE
+	ld   hl, iPlInfo_CPUIdleMove
 	add  hl, bc
 	ld   [hl], a
-	jr   L0377DD
-L0377D4:;R
-	ld   a, $02
-	ld   hl, $0087
+	jr   .execIdleMove
+.setChargeMove:
+	; iPlInfo_CPUIdleMove = CMA_CHARGE
+	ld   a, CMA_CHARGE
+	ld   hl, iPlInfo_CPUIdleMove
 	add  hl, bc
 	ld   [hl], a
-	jr   L0377DD
-L0377DD:;R
-	ld   hl, $0087
+	jr   .execIdleMove
+	
+.execIdleMove:
+	; Execute the currently set idle move input
+	ld   hl, iPlInfo_CPUIdleMove
 	add  hl, bc
 	ld   a, [hl]
-	cp   $00
-	jp   z, L037B0D
-	cp   $01
-	jp   z, L037AC9
-	cp   $02
-	jp   z, L0377F2
+	cp   CMA_MOVEF
+	jp   z, Play_CPU_SetJoyKeysF_RunRand
+	cp   CMA_MOVEB
+	jp   z, Play_CPU_SetJoyKeysB_HopRand
+	cp   CMA_CHARGE
+	jp   z, Play_CPU_SetJoyKeys_Charge
 	ret
-L0377F2:;J
-	ld   hl, $0050
+	
+; =============== Play_CPU_SetJoyKeys_Charge ===============
+; Makes the CPU charge meter. (A+B+Down)
+Play_CPU_SetJoyKeys_Charge:
+
+	; If we reached max power, abort this move early.
+	ld   hl, iPlInfo_Pow
 	add  hl, bc
-	ld   a, [hl]
-	cp   $28
-	jr   z, L037802
-	ld   a, $38
-	ld   d, $30
-	jp   L037B3A
-L037802:;R
+	ld   a, [hl]		
+	cp   PLAY_POW_MAX	; At max power?
+	jr   z, .end		; If so, jump
+	
+	; Perform the charge input
+	ld   a, KEY_B|KEY_A|KEY_DOWN
+	ld   d, KEP_B_LIGHT|KEP_A_LIGHT
+	jp   Play_CPU_SetJoyKeys
+.end:
+	; Reset the idle timer.
+	; This will force to pick a new idle move next frame.
 	xor  a
-	ld   hl, $0086
+	ld   hl, iPlInfo_CPUIdleTimer
 	add  hl, bc
 	ld   [hl], a
 	ret
-L037809:;J
+; =============== Play_CPU_OnPlNear ===============
+; Handles the logic when the opponent is near us.
+;
+; This needs to survive a gauntlet of difficulty-specific validations, which,
+; if pass, make the CPU execute a random action.
+Play_CPU_OnPlNear:
+
+	;
+	; The difficulty variable for this part only matters for non-boss stages.
+	; The bosses and extra rounds have their own difficulty which is harder than hard.
+	;
+
+	; Depending on difficulty...
 	ld   a, [wDifficulty]
-	cp   $01
-	jp   z, L03782E
-	cp   $02
-	jp   z, L03784B
+	cp   DIFFICULTY_NORMAL
+	jp   z, .norm
+	cp   DIFFICULTY_HARD
+	jp   z, .hard
+.easy:
+	; Check hardcoded round difficulties
 	ld   a, [wRoundSeqId]
-	cp   $0F
-	jp   nc, L03784B
-	ld   hl, $0089
+	cp   STAGESEQ_KAGURA	; Are we in a boss or extra stage?
+	jp   nc, .hard			; If so, jump
+	
+	; Don't do anything for the next 10 frames
+	ld   hl, iPlInfo_CPUWaitTimer
 	add  hl, bc
 	ld   a, $0A
 	ld   [hl], a
+	
+	; ~39% chance of not doing anything
 	call Rand
 	cp   $64
 	ret  c
-	jp   L0378A0
-L03782E:;J
+	
+	jp   .doAction
+.norm:
+	; Check hardcoded round difficulties
 	ld   a, [wRoundSeqId]
-	cp   $10
-	jp   nc, L03787D
-	cp   $0F
-	jp   nc, L03784B
-	ld   hl, $0089
+	cp   STAGESEQ_GOENITZ	; Are we in the Goenitz or extra stages?
+	jp   nc, .hardest		; If so, jump
+	cp   STAGESEQ_KAGURA	; Are we in boss Kagura's stage?
+	jp   nc, .hard			; If so, jump
+	
+	; Don't do anything for the next frame
+	ld   hl, iPlInfo_CPUWaitTimer
 	add  hl, bc
 	ld   a, $01
 	ld   [hl], a
+	
+	; ~8% chance of not doing anything
 	call Rand
 	cp   $14
 	ret  c
-	jp   L0378A0
-L03784B:;J
+	
+	jp   .doAction
+.hard:
+	; Check hardcoded round difficulties.
+	; .hardest is like .hard, except it:
+	; - respects POWERUP mode 
+	; - allows hit cancel
+	; - makes the CPU block/walk back if the opponent is invulnerable.
+	
+	; [POI] On POWERUP mode, HARD is perpetually HARDEST here
 	ld   a, [wDipSwitch]
-	bit  3, a
-	jp   nz, L03787D
-L037853: db $FA;X
-L037854: db $7F;X
-L037855: db $C1;X
-L037856: db $FE;X
-L037857: db $0F;X
-L037858: db $D2;X
-L037859: db $7D;X
-L03785A: db $78;X
-L03785B: db $FA;X
-L03785C: db $05;X
-L03785D: db $C0;X
-L03785E: db $CB;X
-L03785F: db $7F;X
-L037860: db $C2;X
-L037861: db $7D;X
-L037862: db $78;X
-L037863: db $21;X
-L037864: db $33;X
-L037865: db $00;X
-L037866: db $09;X
-L037867: db $7E;X
-L037868: db $FE;X
-L037869: db $70;X
-L03786A: db $CA;X
-L03786B: db $03;X
-L03786C: db $79;X
-L03786D: db $21;X
-L03786E: db $89;X
-L03786F: db $00;X
-L037870: db $09;X
-L037871: db $3E;X
-L037872: db $00;X
-L037873: db $77;X
-L037874: db $CD;X
-L037875: db $70;X
-L037876: db $11;X
-L037877: db $FE;X
-L037878: db $0A;X
-L037879: db $D8;X
-L03787A: db $C3;X
-L03787B: db $A0;X
-L03787C: db $78;X
-L03787D:;J
-	ld   hl, $0021
-	add  hl, bc
-	bit  6, [hl]
-	jp   nz, L037903
-	ld   hl, $0033
+	bit  DIPB_POWERUP, a
+	jp   nz, .hardest
+	; [POI] The other STAGESEQ_KAGURA checks in .easy and .norm, instead of leading directly to .hardest, led here.
+	;       What gives? Is it an error? Should have this been checking STAGESEQ_GOENITZ?
+	ld   a, [wRoundSeqId]
+	cp   a, STAGESEQ_KAGURA	; Are we in a boss or extra stages?
+	jp   nc, .hardest		; If so, jump
+	; 50% chance to be in hardest mode
+	ld   a, [wTimer]
+	bit  7, a				; wTimer >= $80?
+	jp   nz, .hardest		; If so, jump
+	
+	; If we're in the post-blockstun knockback, randomize return input (WITHOUT respecting POWERUP mode)
+	ld   hl, iPlInfo_MoveId
 	add  hl, bc
 	ld   a, [hl]
-	cp   $70
-	jp   z, L0378CC
-	ld   hl, $0089
+	cp   MOVE_SHARED_POST_BLOCKSTUN		; During knockback?
+	jp   z, Play_CPU_SetRandCharInput	; If so, jump
+	
+	; Allow the CPU to do something the next frame
+	ld   hl, iPlInfo_CPUWaitTimer
 	add  hl, bc
 	ld   a, $00
 	ld   [hl], a
-	ld   hl, $006E
+	
+	; ~4% chance of not doing anything
+	; With the previous 50% chance to go to .hardest, which has a 0% rand chance, it makes it ~2%
+	call Rand
+	cp   a, $0A
+	ret  c
+	
+	jp   .doAction
+	;--
+.hardest:
+	; Attempt to special/super cancel if possible
+	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	bit  7, [hl]
-	jp   nz, L03791E
-L0378A0:;J
+	bit  PF1B_ALLOWHITCANCEL, [hl]
+	jp   nz, Play_CPU_SetRandCharInput
+	
+	; If we're in the post-blockstun knockback, randomize return input (respecting POWERUP mode)
+	ld   hl, iPlInfo_MoveId
+	add  hl, bc
+	ld   a, [hl]
+	cp   MOVE_SHARED_POST_BLOCKSTUN			; During knockback?
+	jp   z, Play_CPU_OnBlockstunKnockback	; If so, jump
+	
+	; Allow the CPU to do something the next frame
+	ld   hl, iPlInfo_CPUWaitTimer
+	add  hl, bc
+	ld   a, $00
+	ld   [hl], a
+	
+	; If the opponent is invulnerable, try to walk back outside of the "near" range.
+	ld   hl, iPlInfo_Flags1Other
+	add  hl, bc
+	bit  PF1B_INVULN, [hl]
+	jp   nz, Play_CPU_BlockAttack_ByDifficulty
+	
+	; 0% chance of not doing anything.
+	
+.doAction:
+	
+	;
+	; IDLE MODE (near player)
+	;
+	; There's nothing for the CPU to react to, so perform a random action.
+	;
+	
 	call Rand
+	; ~15.5% chance -> 25% chance of A+B attack
 	cp   $28
-	jp   c, L037A5E
+	jp   c, Play_CPU_SetJoyKeysAtkG_C25
+	; ~8%    chance -> 25% chance of heavy punch
 	cp   $3C
-	jp   c, L037A76
+	jp   c, Play_CPU_SetJoyKeysHP_C25
+	; ~8%    chance -> 25% chance of light punch
 	cp   $50
-	jp   c, L037A47
+	jp   c, Play_CPU_SetJoyKeysLP_C25
+	; ~8%    chance -> Heavy kick
 	cp   $64
-	jp   c, L037AC3
+	jp   c, Play_CPU_SetJoyKeysHK
+	; ~8%    chance -> Heavy punch
 	cp   $78
-	jp   c, L037ABD
+	jp   c, Play_CPU_SetJoyKeysLK
+	; ~8%    chance -> Random character-specific input
 	cp   $8C
-	jp   c, L037903
+	jp   c, Play_CPU_SetRandCharInput
+	; ~8%    chance -> Move/hop back
 	cp   $A0
-	jp   c, L037AC9
+	jp   c, Play_CPU_SetJoyKeysB_HopRand
+	; ~23.5% chance -> 50% chance of throw (or heavy punch while holding back)
 	cp   $DC
-	jp   c, L037A2A
+	jp   c, Play_CPU_SetJoyKeysB_HP_C50
+	; ~14%   chance -> Nothing
 	ret
-L0378CC:;J
+
+; =============== Play_CPU_OnBlockstunKnockback ===============
+; Handles the logic when in the middle of knockback after blockstun.
+; These attempt to set a character-specific input that may take effect 
+; as soon as knockback ends if something else doesn't write to the key buffer.
+Play_CPU_OnBlockstunKnockback:
+
+	;
+	; Without powerup mode active, fall back to Play_CPU_SetRandCharInput
+	;
 	ld   a, [wDipSwitch]
-	bit  3, a
-	jp   z, L037903
+	bit  DIPB_POWERUP, a				; Is the powerup cheat enabled?
+	jp   z, Play_CPU_SetRandCharInput	; If not, jump
+	
+.powerup:
+	;
+	; In powerup mode, continuously attempt to perform the inputs for either $01 or $07.
+	; Note that while $01 is an input for a normal special, $07 is the slot reserved for the super move input.
+	;
 	ld   a, [wTimer]
-	bit  1, a
-	jp   nz, L0378EE
-	bit  0, a
-	jp   nz, L0378E8
-	ld   a, $01
+	bit  1, a			; Every alternating $02 frames
+	jp   nz, .super
+.spec:
+	bit  0, a			; Every other frame
+	jp   nz, .specH
+.specL:
+	ld   a, $01	; Use move input $01
 	scf
-	ccf
-	jp   L037B41
-L0378E8:;J
-	ld   a, $01
-	scf
-	jp   L037B41
-L0378EE:;J
+	ccf	; Use light version (#0)
+	jp   Play_CPU_ApplyCharInput
+.specH:
+	ld   a, $01	; Use move input $01
+	scf	; Use heavy version (#1)
+	jp   Play_CPU_ApplyCharInput
+.super:
 	ld   a, [wTimer]
-	bit  0, a
-	jp   nz, L0378FD
-	ld   a, $07
+	bit  0, a			; Every other frame
+	jp   nz, .superH
+.superL:
+	ld   a, $07	; Use super move input
 	scf
-	ccf
-	jp   L037B41
-L0378FD:;J
-	ld   a, $07
+	ccf	; Use light version (#0)
+	jp   Play_CPU_ApplyCharInput
+.superH:
+	ld   a, $07	; Use super move input
+	scf	; Use heavy version (#1)
+	jp   Play_CPU_ApplyCharInput
+	
+	
+; =============== Play_CPU_SetRandCharInput ===============
+; Makes the CPU perform a random special move input / character-specific move input
+; with random strength.
+Play_CPU_SetRandCharInput:
+	;
+	; 62.5% chance of performing a light attack.
+	;
+	call Rand		; A = Rand
+	cp   $A0		; A < $A0?
+	jp   c, .light	; If so, jump
+.heavy:
+	call Rand	; Randomize moveinput id
+	and  a, $07	; Force valid range ($00-$07)
+	scf			; Use heavy version (#1)
+	jp   Play_CPU_ApplyCharInput
+.light:
+	call Rand	; Randomize moveinput id
+	and  a, $07	; Force valid range ($00-$07)
 	scf
-	jp   L037B41
-L037903:;J
-	call Rand
-	cp   $A0
-	jp   c, L037914
-	call Rand
-	and  a, $07
-	scf
-	jp   L037B41
-L037914:;J
-	call Rand
-	and  a, $07
-	scf
-	ccf
-	jp   L037B41
-L03791E:;J
+	ccf			; Use light version (#0)
+	jp   Play_CPU_ApplyCharInput
+	
+; =============== Play_CPU_BlockAttack_ByDifficulty ===============
+; Makes the opponent block the active attack (or, if we got here with no attack, to walk back away from the opponent), with difficulty-specific logic.
+; - EASY and NORMAL have almost identical logic. They randomize between blocking mid and low
+;   back depending on the global timer.
+;   The difference between these are the bits that are checked to determine if the CPU should
+;   do anything and which move should performed. 
+;   - On EASY those are respectively bit 7 and 6.
+;   - On NORMAL those are bit 6 and 5
+;   This means on EASY, the CPU will not do anything for longer and alternate between block stances less.
+; - HARD makes the CPU always do something. The action performed isn't randomized either.
+;   See Play_CPU_BlockAttack for more info.
+Play_CPU_BlockAttack_ByDifficulty:
+	; Determine which difficulty we're in.
 	ld   a, [wDifficulty]
-	cp   $00
-	jp   z, L03792E
-	cp   $01
-	jp   z, L03793C
-	jp   L037950
-L03792E:;J
+	cp   DIFFICULTY_EASY	; On EASY difficulty?
+	jp   z, .easy			; If so, jump
+	cp   DIFFICULTY_NORMAL	; On NORMAL difficulty?
+	jp   z, .norm			; If so, jump
+.hard:
+	jp   Play_CPU_BlockAttack	; Otherwise, we're on HARD
+.easy:
+	; Return every alternating $80 frames
 	ld   a, [wTimer]
 	bit  7, a
 	ret  nz
+	; Every $40 frames, alternate between crouch block and block
 	bit  6, a
-	jp   z, L037AF6
-	jp   L037ADF
-L03793C:;J
+	jp   z, Play_CPU_SetJoyKeysDB
+	jp   Play_CPU_SetJoyKeysB
+.norm:
+	; Return every alternating $40 frames
 	ld   a, [wTimer]
 	bit  6, a
 	ret  nz
+	; Every $20 frames, alternate between crouch block and block
 	bit  5, a
-	jp   z, L037AF6
-	jp   L037ADF
-L03794A:;J
-	call Rand
-	cp   $28
-	ret  c
-L037950:;JR
-	ld   hl, $0076
+	jp   z, Play_CPU_SetJoyKeysDB
+	jp   Play_CPU_SetJoyKeysB
+	
+; =============== Play_CPU_BlockAttack_C15 ===============
+; Performs actions depending on how the opponent's attack hits,
+; with 15% chance of not doing anything.
+Play_CPU_BlockAttack_C15:
+	;
+	; ~15.6% chance of not doing anything
+	;
+	call Rand	; A = Rand
+	cp   $28	; A < $28?
+	ret  c		; If so, return
+	; Fall-through
+	
+; =============== Play_CPU_BlockAttack ===============
+; Makes the opponent block or jump back the active attack.
+; Performs actions depending on how the opponent's attack hits.
+Play_CPU_BlockAttack:
+	
+	; Get the damage flags for the opponent's move
+	ld   hl, iPlInfo_MoveDamageFlags3Other
 	add  hl, bc
-	ld   a, [hl]
-	ld   hl, $0079
+	ld   a, [hl]	; A = Cur flags
+	ld   hl, iPlInfo_MoveDamageFlags3NextOther
 	add  hl, bc
-	or   a, [hl]
-	bit  2, a
-	jp   z, L037ADF
-	bit  3, a
-	jp   z, L037AF6
-	jp   L037ADF
-L037967: db $C9;X
-L037968:;J
+	or   a, [hl]	; A |= Next flags
+	
+	;
+	; Move backwards/block when the attack doesn't hit low.
+	; This means the CPU doesn't need to watch its feet and block low, so just block.
+	;
+	; If the opponent isn't attacking (ie: we got here through the PF1B_INVULN check),
+	; walk back in an attempt to get out of the opponent's range.
+	;
+	bit  PF3B_HITLOW, a				; Does the attack hit low?
+	jp   z, Play_CPU_SetJoyKeysB	; If not, jump
+	
+	;
+	; If the attack hits low (but doesn't also hit mid), crouch block.
+	;
+	bit  PF3B_OVERHEAD, a			; Does the attack hit high?
+	jp   z, Play_CPU_SetJoyKeysDB	; If not, jump
+	
+	;
+	; Otherwise, this is an unblockable. Try to block it anyway.
+	;
+	jp   Play_CPU_SetJoyKeysB
+	ret ; We never get here
+
+; =============== Play_CPU_CheckProj ===============	
+; Behaviour when an enemy projectile is active on-screen.
+Play_CPU_CheckProj:
+	;
+	; On EASY difficulty, there's a 50% chance of not doing anything.
+	;
 	ld   a, [wDifficulty]
-	cp   $00
-	jp   nz, L037976
+	cp   DIFFICULTY_EASY			; Playing on EASY?
+	jp   nz, .chkAthenaCrystalBit	; If not, skip
 	ld   a, [wTimer]
-	cp   $80
-	ret  c
-L037976:;J
+	cp   $80						; wTimer < $80?
+	ret  c							; If so, return
+	
+.chkAthenaCrystalBit:
+	;
+	; Start spamming user moves if we're on HARD and attempting to hit the CPU 
+	; with Athena's normal super.
+	; Note the desperation version is unaffected.
+	;
+	
 	ld   a, [wDifficulty]
-	cp   $02
-	jp   nz, L0379BA
-	ld   hl, $0071
+	cp   DIFFICULTY_HARD				; Playing on HARD?
+	jp   nz, .norm		; If not, skip
+	
+	ld   hl, iPlInfo_CharIdOther
 	add  hl, bc
 	ld   a, [hl]
-	cp   $0C
-	jp   nz, L037997
-L037988: db $21;X
-L037989: db $72;X
-L03798A: db $00;X
-L03798B: db $09;X
-L03798C: db $7E;X
-L03798D: db $FE;X
-L03798E: db $64;X
-L03798F: db $CA;X
-L037990: db $21;X
-L037991: db $7A;X
-L037992: db $FE;X
-L037993: db $68;X
-L037994: db $CA;X
-L037995: db $21;X
-L037996: db $7A;X
-L037997:;J
+	cp   CHAR_ID_ATHENA					; Opponent is Athena?
+	jp   nz, .chkPowerupMode			; If not, skip
+	
+	ld   hl, iPlInfo_MoveIdOther
+	add  hl, bc
+	ld   a, [hl]
+	cp   a, MOVE_ATHENA_SHINING_CRYSTAL_BIT_GS	; Opponent is doing a normal super?
+	jp   z, Play_CPU_SetRandCharInputH			; If so, jump
+	cp   a, MOVE_ATHENA_SHINING_CRYSTAL_BIT_AS	; ""
+	jp   z, Play_CPU_SetRandCharInputH			; ""
+
+.chkPowerupMode:
+
+	;
+	; Handle the projectile distance checks differently in powerup mode.
+	;
 	ld   a, [wDipSwitch]
-	bit  3, a
-	jp   z, L0379BA
-	ld   hl, $0049
+	bit  DIPB_POWERUP, a	; Is the powerup cheat enabled?
+	jp   z, .norm			; If not, jump
+	
+.powerup:	
+	;
+	; If we pressed any attack button in the last few frames but no attack started,
+	; perform a crouching light punch.
+	; Note that switching to a new move, most of the time, clears iPlInfo_JoyMergedKeysLH.
+	;
+	ld   hl, iPlInfo_JoyMergedKeysLH
 	add  hl, bc
 	ld   a, [hl]
-	and  a, $F0
-	jp   nz, L037A8D
-	ld   hl, $0062
+	and  a, KEP_A_LIGHT|KEP_B_LIGHT|KEP_A_HEAVY|KEP_B_HEAVY	; Are we pressing any button already?
+	jp   nz, Play_CPU_SetJoyKeysC_LP_C25					; If so, jump
+	
+	;
+	; Check distance with enemy projectile.
+	;
+	ld   hl, iPlInfo_ProjDistance
 	add  hl, bc
 	ld   a, [hl]
+	; Crouching light punch if distance >= $46
 	cp   $46
-	jp   nc, L037A8D
-	cp   $32
-	jp   nc, L0379D1
-	jr   L037950
-L0379BA:;J
-	ld   hl, $0062
+	jp   nc, Play_CPU_SetJoyKeysC_LP_C25
+	; Roll if distance in range $32-$45
+	cp   $32			
+	jp   nc, Play_CPU_StartRoll_D14_C20
+	; Block or jump back if distance < $32
+	jr   Play_CPU_BlockAttack
+.norm:
+	;
+	; Check distance with enemy projectile.
+	;
+	ld   hl, iPlInfo_ProjDistance
 	add  hl, bc
 	ld   a, [hl]
+	; Do a random character-specific input if distance >= $55
 	cp   $55
-	jp   nc, L037A21
+	jp   nc, Play_CPU_SetRandCharInputH
+	; Jump forward if distance in range $46-$54
 	cp   $46
-	jp   nc, L0379FC
+	jp   nc, Play_CPU_SetJoyKeysJumpUF
+	; Roll if distance < $32
 	cp   $32
-	jp   c, L0379D1
-	jp   L03794A
-L0379D1:;J
+	jp   c, Play_CPU_StartRoll_D14_C20
+	; Block or jump back if distance in range $32-$45
+	jp   Play_CPU_BlockAttack_C15
+	
+; =============== Play_CPU_StartRoll_D14_C20 ===============
+; Makes the CPU perform a roll in a random direction.
+; On EASY and NORMAL difficulties, there's a 20% chance of blocking the attack
+; instead of starting a roll.
+; On HARD, the roll always happens.
+Play_CPU_StartRoll_D14_C20:
 	ld   a, [wDifficulty]
-	cp   $02
-	jp   z, L0379E1
+	cp   DIFFICULTY_HARD	; Playing on HARD?
+	jp   z, .end			; If so, skip
+	; ~20% chance of jumping to Play_CPU_BlockAttack 
 	call Rand
 	cp   $32
-	jp   c, L037950
-L0379E1:;J
-	ld   hl, $0089
+	jp   c, Play_CPU_BlockAttack
+.end:
+	; Fall-through
+; =============== Play_CPU_StartRoll_D14 ===============
+; Makes the CPU perform a roll in a random direction.
+; After doing this, the CPU will not press anything for 20 frames.
+Play_CPU_StartRoll_D14:
+	; Wait 20 frames before next time we execute AI code
+	ld   hl, iPlInfo_CPUWaitTimer
 	add  hl, bc
 	ld   a, $14
 	ld   [hl], a
+	
+	; Hold A+B+(50% chance between L and R)
 	ld   a, [wTimer]
-	bit  0, a
-	jp   nz, L0379F5
-	ld   a, $31
-	jp   L0379F7
-L0379F5:;J
-	ld   a, $32
-L0379F7:;J
-	ld   d, $C0
-	jp   L037B3A
-L0379FC:;J
+	bit  0, a			; wTimer % 2 != 0?
+	jp   nz, .setL		; If so, jump
+.setR:
+	ld   a, KEY_A|KEY_B|KEY_RIGHT ; $31
+	jp   .go
+.setL:
+	ld   a, KEY_A|KEY_B|KEY_LEFT ; $32
+.go:
+	ld   d, KEP_A_HEAVY|KEP_B_HEAVY
+	jp   Play_CPU_SetJoyKeys
+	
+; =============== Play_CPU_SetJoyKeysJumpUF ===============
+; Makes the CPU perform the input for a forward jump, "randomized" between a small hop and hyper jump.
+; Note this will always be done regardless of whatever action we're in, so it could have
+; different effects if we are in the middle of a special move.
+Play_CPU_SetJoyKeysJumpUF:
+
+	;
+	; Every alternating 16 frames, try to perform a D+U input.
+	; This triggers an hyper jump if done.
+	;
 	ld   a, [wTimer]
-	bit  4, a
-	jp   z, L037A0A
+	bit  4, a					; (wTimer & $10) == 0?
+	jp   z, .setJumpDir			; If so, skip
 	ld   hl, MoveInput_DU_Fast
-	call L037BAA
-L037A0A:;J
-	ld   hl, $0001
+	call Play_CPU_ApplyMoveInputDir
+	
+.setJumpDir:
+
+	;
+	; Perform the forward jump input, which will get added to the buffer later
+	; in the frame when Play_WriteKeysToBuffer gets executed.
+	;
+	
+	; Determine which direction is for moving forward
+	ld   hl, iOBJInfo_OBJLstFlags
 	add  hl, de
-	bit  5, [hl]
-	jp   nz, L037A1A
-	ld   a, $06
+	bit  SPRB_XFLIP, [hl]		; Are we facing right?
+	jp   nz, .setJumpR			; If so, jump
+.setJumpL:	
+	ld   a, KEY_LEFT|KEY_UP		; UL is forward when facing left (2P side)
 	ld   d, $00
-	jp   L037B3A
-L037A1A:;J
-	ld   a, $05
+	jp   Play_CPU_SetJoyKeys
+.setJumpR:
+	ld   a, KEY_RIGHT|KEY_UP	; UR is forward when facing right (1P side)
 	ld   d, $00
-	jp   L037B3A
-L037A21:;J
-	call Rand
-	and  a, $07
-	scf
-	jp   L037B41
-L037A2A:;J
+	jp   Play_CPU_SetJoyKeys
+
+; =============== Play_CPU_SetRandCharInputH ===============
+; Makes the CPU perform a random heavy special move input / character-specific move input.
+Play_CPU_SetRandCharInputH:
+	call Rand	; Randomize moveinput id
+	and  a, $07	; Force valid range ($00-$07)
+	scf			; Use heavy version (#1)
+	jp   Play_CPU_ApplyCharInput
+	
+; =============== Play_CPU_SetJoyKeysB_HP_C50 ===============
+; Makes the CPU perform an heavy punch while holding back.
+; There's 50% chance for this to happen.
+; Because this is called when close to the opponent, the intention
+; is to start a throw, but the player may not be on the ground / in 
+; throw range, so it won't always happen.
+Play_CPU_SetJoyKeysB_HP_C50:
 	call Rand
 	bit  0, a
 	ret  z
-	ld   hl, $0001
+	ld   hl, iOBJInfo_OBJLstFlags
 	add  hl, de
-	bit  5, [hl]
-	jp   nz, L037A40
-	ld   a, $01
-	ld   d, $80
-	jp   L037B3A
-L037A40:;J
-	ld   a, $02
-	ld   d, $80
-	jp   L037B3A
-L037A47:;J
+	bit  SPRB_XFLIP, [hl]	; Are we visually facing right? (1P side)
+	jp   nz, .moveL			; If so, jump
+	ld   a, KEY_RIGHT		; On the 2P side, right is backwards
+	ld   d, KEP_B_HEAVY
+	jp   Play_CPU_SetJoyKeys
+.moveL:
+	ld   a, KEY_LEFT		; On the 1P side, left is backwards
+	ld   d, KEP_B_HEAVY
+	jp   Play_CPU_SetJoyKeys
+	
+
+; =============== Play_CPU_SetJoyKeys*_C75 ===============
+; Sets of subroutines that makes the CPU perform a punch/kick input.
+; These subroutines are affected by difficulty in the same way:
+; - On EASY and NORMAL difficulties, there's a 75% chance of not moving.
+; - On HARD difficulty, the CPU always moves.
+	
+; =============== Play_CPU_SetJoyKeysLP_C25 ===============
+; Makes the CPU perform a standing light punch input.
+Play_CPU_SetJoyKeysLP_C25:
 	ld   a, [wDifficulty]
-	cp   $02
-	jp   z, L037A58
+	cp   DIFFICULTY_HARD	; On HARD difficulty?
+	jp   z, .setKeys		; If so, skip
+	call Rand				; A = Rand
+	bit  0, a				; bit0 set? (50%)
+	ret  z					; If so, return
+	bit  1, a				; bit1 set? (another 50%)
+	ret  z					; If so, return
+.setKeys:
+	xor  a ; KEY_NONE
+	ld   d, KEP_B_LIGHT
+	jp   Play_CPU_SetJoyKeys
+; =============== Play_CPU_SetJoyKeysAtkG_C25 ===============
+; Makes the CPU perform a ground A+B attack.
+Play_CPU_SetJoyKeysAtkG_C25:
+	ld   a, [wDifficulty]
+	cp   DIFFICULTY_HARD
+	jp   z, .setKeys
 	call Rand
 	bit  0, a
 	ret  z
 	bit  1, a
 	ret  z
-L037A58:;J
-	xor  a
-	ld   d, $20
-	jp   L037B3A
-L037A5E:;J
+.setKeys:
+	ld   a, KEY_A|KEY_B
+	ld   d, KEP_B_HEAVY|KEP_A_HEAVY
+	jp   Play_CPU_SetJoyKeys
+; =============== Play_CPU_SetJoyKeysHP_C25 ===============
+; Makes the CPU perform a standing heavy punch input.
+Play_CPU_SetJoyKeysHP_C25:
 	ld   a, [wDifficulty]
-	cp   $02
-	jp   z, L037A6F
+	cp   DIFFICULTY_HARD
+	jp   z, .setKeys
 	call Rand
 	bit  0, a
 	ret  z
 	bit  1, a
 	ret  z
-L037A6F:;J
-	ld   a, $30
-	ld   d, $C0
-	jp   L037B3A
-L037A76:;J
+.setKeys:
+	xor  a ; KEY_NONE
+	ld   d, KEP_B_HEAVY
+	jp   Play_CPU_SetJoyKeys
+; =============== Play_CPU_SetJoyKeysC_LP_C25 ===============
+; Makes the CPU perform a crouching light punch input.
+Play_CPU_SetJoyKeysC_LP_C25:
 	ld   a, [wDifficulty]
-	cp   $02
-	jp   z, L037A87
+	cp   DIFFICULTY_HARD
+	jp   z, .setKeys
 	call Rand
 	bit  0, a
 	ret  z
 	bit  1, a
 	ret  z
-L037A87:;J
-	xor  a
-	ld   d, $80
-	jp   L037B3A
-L037A8D:;J
+.setKeys:
+	ld   a, KEY_DOWN
+	ld   d, KEP_B_LIGHT
+	jp   Play_CPU_SetJoyKeys
+; =============== Play_CPU_Unused_SetJoyKeysC_HP_C25 ===============
+; [TCRF] Unreferenced code.
+; Makes the CPU perform a crouching heavy punch input.
+Play_CPU_Unused_SetJoyKeysC_HP_C25:
 	ld   a, [wDifficulty]
-	cp   $02
-	jp   z, L037A9E
-L037A95: db $CD;X
-L037A96: db $70;X
-L037A97: db $11;X
-L037A98: db $CB;X
-L037A99: db $47;X
-L037A9A: db $C8;X
-L037A9B: db $CB;X
-L037A9C: db $4F;X
-L037A9D: db $C8;X
-L037A9E:;J
-	ld   a, $08
-	ld   d, $20
-	jp   L037B3A
-L037AA5: db $FA;X
-L037AA6: db $01;X
-L037AA7: db $C0;X
-L037AA8: db $FE;X
-L037AA9: db $02;X
-L037AAA: db $CA;X
-L037AAB: db $B6;X
-L037AAC: db $7A;X
-L037AAD: db $CD;X
-L037AAE: db $70;X
-L037AAF: db $11;X
-L037AB0: db $CB;X
-L037AB1: db $47;X
-L037AB2: db $C8;X
-L037AB3: db $CB;X
-L037AB4: db $4F;X
-L037AB5: db $C8;X
-L037AB6: db $3E;X
-L037AB7: db $08;X
-L037AB8: db $16;X
-L037AB9: db $80;X
-L037ABA: db $C3;X
-L037ABB: db $3A;X
-L037ABC: db $7B;X
-L037ABD:;J
-	xor  a
-	ld   d, $10
-	jp   L037B3A
-L037AC3:;J
-	xor  a
-	ld   d, $40
-	jp   L037B3A
-L037AC9:;J
-	ld   a, [wDifficulty]
-	cp   $02
-	jp   z, L037ADF
+	cp   DIFFICULTY_HARD
+	jp   z, .setKeys
 	call Rand
-	bit  7, a
-	jp   z, L037ADF
+	bit  0, a
+	ret  z
+	bit  1, a
+	ret  z
+.setKeys:          
+	ld   a, KEY_DOWN
+	ld   d, KEP_B_HEAVY
+	jp   Play_CPU_SetJoyKeys
+	
+; =============== Play_CPU_SetJoyKeysLK ===============
+; Makes the CPU perform the light kick input.
+Play_CPU_SetJoyKeysLK:
+	xor  a ; KEY_NONE
+	ld   d, KEP_A_LIGHT
+	jp   Play_CPU_SetJoyKeys
+	
+; =============== Play_CPU_SetJoyKeysHK ===============
+; Makes the CPU perform the heavy kick input.
+Play_CPU_SetJoyKeysHK:
+	xor  a ; KEY_NONE
+	ld   d, KEP_A_HEAVY
+	jp   Play_CPU_SetJoyKeys
+	
+; =============== Play_CPU_SetJoyKeysB_HopRand ===============
+; Makes the CPU move back.
+; On NORMAL and EASY difficulties, there's a 50% chance the CPU will hop backwards.
+Play_CPU_SetJoyKeysB_HopRand:
+	ld   a, [wDifficulty]
+	cp   DIFFICULTY_HARD			; On hard difficulty?
+	jp   z, Play_CPU_SetJoyKeysB	; If so, skip
+	
+	; Moving or hopping backwards? 50% chance of either.
+	call Rand		; A = Rand
+	bit  7, a		; A < $80?		
+	jp   z, Play_CPU_SetJoyKeysB	; If so, jump
+	
+	; The hop input will be copied to the buffer.
 	ld   hl, MoveInput_BB
-	call L037BAA
-L037ADF:;J
-	ld   hl, $0001
+	call Play_CPU_ApplyMoveInputDir
+	; Fall-through
+	
+; =============== Play_CPU_SetJoyKeysB ===============
+; Makes the CPU input back.
+Play_CPU_SetJoyKeysB:
+	ld   hl, iOBJInfo_OBJLstFlags
 	add  hl, de
-	bit  5, [hl]
-	jp   nz, L037AEF
-	ld   a, $01
+	bit  SPRB_XFLIP, [hl]	; Are we visually facing right? (1P side)
+	jp   nz, .moveL			; If so, jump
+.moveR:
+	ld   a, KEY_RIGHT		; On the 2P side, right is backwards
 	ld   d, $00
-	jp   L037B3A
-L037AEF:;J
-	ld   a, $02
+	jp   Play_CPU_SetJoyKeys
+.moveL:
+	ld   a, KEY_LEFT		; On the 1P side, left is backwards
 	ld   d, $00
-	jp   L037B3A
-L037AF6:;J
-	ld   hl, $0001
+	jp   Play_CPU_SetJoyKeys
+	
+; =============== Play_CPU_SetJoyKeysDB ===============
+; Makes the CPU input down back.
+Play_CPU_SetJoyKeysDB:
+	ld   hl, iOBJInfo_OBJLstFlags
 	add  hl, de
-	bit  5, [hl]
-	jp   nz, L037B06
-	ld   a, $09
+	bit  SPRB_XFLIP, [hl]	; Are we visually facing right? (1P side)
+	jp   nz, .moveUL		; If so, jump
+.moveUR:
+	ld   a, KEY_DOWN|KEY_RIGHT
 	ld   d, $00
-	jp   L037B3A
-L037B06:;J
-	ld   a, $0A
+	jp   Play_CPU_SetJoyKeys
+.moveUL:
+	ld   a, KEY_DOWN|KEY_LEFT
 	ld   d, $00
-	jp   L037B3A
-L037B0D:;J
-	ld   hl, $0061
+	jp   Play_CPU_SetJoyKeys
+	
+; =============== Play_CPU_SetJoyKeysF_RunRand ===============
+; Makes the CPU move forward if it's not too close to the opponent.
+; There's a 50% chance the CPU will run forwards.
+Play_CPU_SetJoyKeysF_RunRand:
+
+	; Don't do anything if we're too close to the opponent
+	ld   hl, iPlInfo_PlDistance
 	add  hl, bc
 	ld   a, [hl]
-	cp   $1A
-	ret  c
-	call Rand
-	bit  7, a
-	jp   z, L037B23
+	cp   $1A				; iPlInfo_PlDistance < $1A?
+	ret  c					; If so, return
+	
+	; Moving or running forward? 50% chance of either.
+	call Rand		; A = Rand
+	bit  7, a		; A < $80?
+	jp   z, Play_CPU_SetJoyKeysF	; If so, jump
+.setRun:
+	; The run input will be copied to the buffer.
+	; Note that we don't return because we still need to make the CPU hold forward,
+	; otherwise the run ends quickly.
 	ld   hl, MoveInput_FF
-	call L037BAA
-L037B23:;J
-	ld   hl, $0001
+	call Play_CPU_ApplyMoveInputDir
+	; Fall-through
+	
+; =============== Play_CPU_SetJoyKeysF ===============
+; Makes the CPU input forward.
+Play_CPU_SetJoyKeysF:
+	ld   hl, iOBJInfo_OBJLstFlags
 	add  hl, de
-	bit  5, [hl]
-	jp   nz, L037B33
-	ld   a, $02
+	bit  SPRB_XFLIP, [hl]	; Are we visually facing right? (1P side)
+	jp   nz, .moveR			; If so, jump
+.moveL:
+	ld   a, KEY_LEFT		; On the 2P side, left is forwards
 	ld   d, $00
-	jp   L037B3A
-L037B33:;J
-	ld   a, $01
+	jp   Play_CPU_SetJoyKeys
+.moveR:
+	ld   a, KEY_RIGHT		; On the 1P side, right is forwards
 	ld   d, $00
-	jp   L037B3A
-L037B3A:;J
-	ld   hl, $0045
+	jp   Play_CPU_SetJoyKeys
+	
+; =============== Play_CPU_SetJoyKeys ===============
+; Writes the "current" joypad keys values.
+;
+; Later in the frame, when Play_WriteKeysToBuffer gets executed, these inputs will
+; be added to the buffer at iPlInfo_JoyDirBuffer & iPlInfo_JoyBtnBuffer.
+;
+; IN
+; - A: Held keys (iPlInfo_JoyKeys)
+; - D: Light/Heavy button info (iPlInfo_JoyNewKeysLH)
+Play_CPU_SetJoyKeys:
+	ld   hl, iPlInfo_JoyKeys
 	add  hl, bc
-	ldi  [hl], a
-	ld   [hl], d
+	ldi  [hl], a	; Write A to iPlInfo_JoyKeys, seek to iPlInfo_JoyNewKeysLH
+	ld   [hl], d	; Write D to iPlInfo_JoyNewKeysLH
 	ret
-L037B41:;J
+	
+; =============== Play_CPU_ApplyCharInput ===============
+; Makes the CPU perform a character-specific move input.
+;
+; How this works:
+;
+; Each character is assigned a list of move inputs (CPU_MoveInputList_*).
+; The table at CPU_MoveListPtrTable assigns one for every character.
+;
+; Each MoveInputList itself is a table of 8 entries with 4 bytes each:
+; - 0-1: Ptr to a MoveInput_* (iCPUMoveListItem_MoveInputPtr) for the old keypresses
+; - 2: Current LH button input #0 + MoveInput type flag (CMLB_BTN) (iCPUMoveListItem_LastLHKeyA)
+; - 3: Current LH button input #1 (iCPUMoveListItem_LastLHKeyB)
+;
+; The combination of MoveInput and button allows to define standard motions like:
+; -> DF+B
+; With MoveInput_DF defining DF and iCPUMoveListItem_LastLHKey* being KEP_B_LIGHT.
+;
+; The MoveInput data doesn't necessarily have to point to a d-pad motion.
+; If in the second byte, iCPUMoveListItem_LastLHKeyA, the flag CML_BTN is set, the
+; MoveInput is treated as a button-based input (ie: pressing B 3 times).
+; Since this has to be defined manually, it should be consistent with the MoveInput. 
+;
+; Regardless of that, iCPUMoveListItem_LastLHKey* will always be a punch or kick input
+; in LH format (for iPlInfo_JoyNewKeysLH), with the CML_BTN flag stripped out.
+;
+; Notice that there are two possible inputs the game can choose.
+; Which one is picked depends on the C flag passed to the subroutine, which is arbitrary
+; for every point that calls this.
+; In practice, the input lists are set so that #0 is always a light button, and #1 is always an heavy.
+; This means the C flag effectively determines the strength of the move.
+;
+; IN
+; - A: ID of the CPU_MoveInputList_* entry, should be a random value
+; - C flag: If set, use LH input #1 (heavy button, iCPUMoveListItem_LastLHKeyB).
+;           If clear, use #0 (light button, iCPUMoveListItem_LastLHKeyA)
+Play_CPU_ApplyCharInput:
+
+	;
+	; Seek to the character-specific input list (CPU_MoveInputList_*)
+	; HL = CPU_MoveListPtrTable[iPlInfo_CharId]
+	;
 	push af
-	ld   hl, $002C
-	add  hl, bc
-	ld   a, [hl]
-	ld   hl, $7BD3
-	add  a, l
-	jp   nc, L037B4F
-L037B4E: db $24;X
-L037B4F:;J
-	ld   l, a
-	ld   e, [hl]
-	inc  hl
-	ld   d, [hl]
-	push de
-	pop  hl
+		; A = CharId
+		ld   hl, iPlInfo_CharId
+		add  hl, bc
+		ld   a, [hl]		
+		; HL = Base char table
+		ld   hl, CPU_MoveListPtrTable
+		; Index the table (HL += A)
+		add  a, l			; Index it
+		jp   nc, .noovf		; Did we overflow? (never happens)
+		inc  h 				
+	.noovf:
+		ld   l, a			; Save it back
+		ld   e, [hl]		; Read out the ptr to DE
+		inc  hl
+		ld   d, [hl]
+		push de				; Move it to HL
+		pop  hl
 	pop  af
+	
+	
+	;
+	; Seek to the <A>'th entry of the list and read out its bytes:
+	; - DE: iCPUMoveListItem_MoveInputPtr
+	; - A: iCPUMoveListItem_LastLHKeyA
+	; - HL: Ptr to iCPUMoveListItem_LastLHKeyA
+	;
 	push af
-	sla  a
-	sla  a
-	add  a, l
-	jp   nc, L037B60
-	inc  h
-L037B60:;J
-	ld   l, a
-	ld   e, [hl]
-	inc  hl
-	ld   d, [hl]
-	inc  hl
-	ld   a, [hl]
-	push hl
-	push de
-	pop  hl
-	bit  0, a
-	jp   nz, L037B80
-	call L037BAA
-	pop  hl
+		; As each entry is 4 bytes long, A = A * 4
+		sla  a				; A = A * 4
+		sla  a
+		; Offset the move list table (HL += A)
+		add  a, l			; Index HL by that
+		jp   nc, .noovf2
+		inc  h
+	.noovf2:
+		ld   l, a
+		
+		; HL now points to the start of the iCPUMoveListItem entry.
+		; Read out its initial data.
+		
+		; [byte0-1] DE = iCPUMoveListItem_MoveInputPtr
+		ld   e, [hl]
+		inc  hl
+		ld   d, [hl]
+		inc  hl
+		; [byte2] A = iCPUMoveListItem_LastLHKeyA
+		;         For now, this is strictly used for the CML_BTN flag,
+		;         which tells if this or the next value should be used as iPlInfo_JoyNewKeysLH
+		ld   a, [hl]		; Read out byte2 to A
+		
+		push hl ; Save the ptr to iCPUMoveListItem_LastLHKeyA
+		
+			;
+			; Determine what kind of MoveInput we're dealing with.
+			; If A has CMLB_BTN set, treat the input as contining LH punch/kick buttons (.inptBtn)
+			; Otherwise, treat it as containing d-pad keys (.inptDir).
+			;
+			; Note that the Play_CPU_ApplyMoveInput* subroutine called is the only difference
+			; between .inptDir and .inptBtn.
+			; Everything below that call is identical.
+			;
+	
+
+			; Move this to HL for Play_CPU_ApplyMoveInput*
+			push de			
+			pop  hl
+	
+			bit  CMLB_BTN, a	; Is the flag set?
+			jp   nz, .inptBtn	; If so, jump		
+		.inptDir:
+			
+			;
+			; Apply MoveInput to iPlInfo_JoyDirBuffer
+			;
+			call Play_CPU_ApplyMoveInputDir
+			
+			;
+			; Determine which LH input to use for the button, then filter it and apply it.
+			;
+			
+			; After the pop, HL will point to input #0.
+			; If the C flag passed to the subroutine is set, increment HL once
+			; to make it point to input #1.
+		pop  hl				; HL = Ptr to iCPUMoveListItem_LastLHKeyA (#0)
+	pop  af					; C flag = If set, use input #1
+	jp   nc, .inptDir_setLH	; Is it set? If not, skip (use #0)
+	inc  hl					; Otherwise, seek to #1 (iCPUMoveListItem_LastLHKeyB)
+.inptDir_setLH:
+	ld   a, [hl]			; Read LH input value
+	and  a, $FF^CML_BTN		; Remove CML_BTN flag since it has another purpose
+	ld   d, a				; D = LH Input
+	ld   a, KEY_NONE		; A = Nothing
+	jp   Play_CPU_SetJoyKeys
+	
+.inptBtn:
+			call Play_CPU_ApplyMoveInputBtn
+			; Rest is identical to above
+		pop  hl
 	pop  af
-	jp   nc, L037B77
+	jp   nc, .inptBtn_setLH
 	inc  hl
-L037B77:;J
+.inptBtn_setLH:
 	ld   a, [hl]
-	and  a, $FE
+	and  a, $FF^CML_BTN			
 	ld   d, a
-	ld   a, $00
-	jp   L037B3A
-L037B80:;J
-	call L037B92
-	pop  hl
-	pop  af
-	jp   nc, L037B89
-	inc  hl
-L037B89:;J
-	ld   a, [hl]
-	and  a, $FE
-	ld   d, a
-	ld   a, $00
-	jp   L037B3A
-L037B92:;C
+	ld   a, KEY_NONE
+	jp   Play_CPU_SetJoyKeys
+	
+; =============== Play_CPU_ApplyMoveInputBtn ===============
+; Writes the "old" joypad keys values for buttons.
+;
+; This copies the inputs from a MoveInfo to the input buffer of A/B button keys.
+; IN
+; - HL: Ptr to a MoveInput structure containing only button inputs.
+Play_CPU_ApplyMoveInputBtn:
 	push bc
-	push de
-	push hl
-	pop  de
-	ld   a, [de]
-	dec  a
-	sla  a
-	ld   hl, $004D
-	add  hl, bc
-	ld   [hl], a
-	ld   hl, $0000
-	add  hl, bc
-	add  a, l
-	ld   l, a
-	ld   a, [de]
-	inc  de
-	jp   L037BBF
-L037BAA:;C
+		push de
+			; Move the ptr to DE
+			push hl		; DE = HL
+			pop  de
+			
+			;
+			; The iMoveInputItem entries are stored from last to first for ease of checking when handling player inputs.
+			; However, since we're replacing the input buffer with inputs from a MoveInput, we have to write
+			; them in reverse.
+			;
+			
+			;
+			; Make iPlInfo_JoyBtnBufferOffset point to where the last MoveInput entry would be written.
+			;
+			
+			; A = (iMoveInput_Length - 1) * 2
+			ld   a, [de]	; A = iPlInfo_JoyBtnBufferOffset
+			dec  a			; -1 since we want the last entry
+			sla  a			; *2 since each iMoveInputItem is 2 bytes long
+			; Set it as iPlInfo_JoyBtnBufferOffset
+			ld   hl, iPlInfo_JoyBtnBufferOffset
+			add  hl, bc
+			ld   [hl], a
+			
+			; 
+			; HL = Ptr to the newly set buffer location.
+			;
+			ld   hl, iPlInfo_JoyBtnBuffer
+			add  hl, bc			; HL = Ptr to iPlInfo_JoyBtnBuffer
+			add  a, l			; L += iPlInfo_JoyBtnBufferOffset
+			ld   l, a
+			
+			;
+			; A = iMoveInput_Length
+			;
+			ld   a, [de]		
+			inc  de			; Seek to first iMoveInputItem_JoyKeys entry
+			jp   Play_CPU_ApplyMoveInputCustom
+; =============== Play_CPU_ApplyMoveInputDir ===============
+; Writes the "old" joypad keys values for d-pad keys.
+;
+; Copies the inputs from a MoveInfo to the input buffer of directional keys.
+; See also: Play_CPU_ApplyMoveInputBtn
+; IN
+; - HL: Ptr to a MoveInput structure containing only directional key inputs.
+Play_CPU_ApplyMoveInputDir:
 	push bc
-	push de
-	push hl
-	pop  de
-	ld   a, [de]
-	dec  a
-	sla  a
-	ld   hl, $004C
-	add  hl, bc
-	ld   [hl], a
-	ld   hl, $0010
-	add  hl, bc
-	add  a, l
-	ld   l, a
-	ld   a, [de]
-	inc  de
-L037BBF:;J
-	push af
-	ld   a, [de]
-	ldi  [hl], a
-	inc  de
-	inc  de
-	inc  de
-	ld   a, [de]
-	ld   [hl], a
-	inc  de
-	dec  hl
-	dec  hl
-	dec  hl
-	pop  af
-	dec  a
-	jp   nz, L037BBF
-	pop  de
+		push de
+			; DE = HL
+			push hl
+			pop  de
+			; A = (iMoveInput_Length - 1) * 2
+			ld   a, [de]
+			dec  a
+			sla  a
+			; iPlInfo_JoyBtnBufferOffset = A
+			ld   hl, iPlInfo_JoyDirBufferOffset
+			add  hl, bc
+			ld   [hl], a
+			; HL = iPlInfo_JoyDirBuffer + A
+			ld   hl, iPlInfo_JoyDirBuffer
+			add  hl, bc
+			add  a, l
+			ld   l, a
+			; A = iMoveInput_Length
+			ld   a, [de]
+			inc  de			; Seek to first iMoveInputItem_JoyKeys entry
+			
+			; Fall-through
+
+		; =============== Play_CPU_ApplyMoveInputCustom ===============			
+		; Copies inputs from a list of iMoveInputItem_* to the specified buffer.
+		; The copy operation is done backwards, starting at HL and moving backwards,
+		; and must point to an exact location so the last iMoveInputItem write aligns
+		; to the first entry of the buffer.
+		;
+		; IN
+		; - A: iMoveInput_Length
+		; - DE: Ptr to first iMoveInputItem_JoyKeys (byte0) of MenuInput
+		; - HL: Ptr to destination buffer (somewhere in iPlInfo_JoyBtnBuffer or iPlInfo_JoyDirBuffer)
+		Play_CPU_ApplyMoveInputCustom:
+			
+			; For every iMoveInputItem entry...
+			push af				; Save remaining count
+			
+				;
+				; Copy the keypress bitmask to byte0 of the iPlInfo_Joy*Buffer entry
+				;
+				ld   a, [de]	; A = iMoveInputItem_JoyKeys
+				ldi  [hl], a	; Copy it over to byte0, and seek to byte1
+				
+				;
+				; Copy the max keypress length to byte1 of the of the iPlInfo_Joy*Buffer entry
+				;
+				inc  de			; Seek to iMoveInputItem_JoyMaskKeys
+				inc  de			; Seek to iMoveInputItem_MinLength
+				inc  de			; Seek to iMoveInputItem_MaxLength
+				ld   a, [de]	; A = iMoveInputItem_MaxLength
+				ld   [hl], a	; Copy it over to byte1
+				
+				;
+				; Advance to next iMoveInputItem entry (source)
+				; and go back to byte0 of the previous iPlInfo_Joy*Buffer entry (destination)
+				;
+				inc  de			; Seek to iMoveInputItem_JoyKeys of next entry
+				
+				dec  hl			; Seek back to byte0 of current iPlInfo_Joy*Buffer entry
+				dec  hl			; Seek back to byte1 of previous iPlInfo_Joy*Buffer entry
+				dec  hl			; and to byte0
+				
+			;
+			; Are we done?
+			;
+			pop  af				; Restore remaining count
+			dec  a				; Copied all bytes?
+			jp   nz, Play_CPU_ApplyMoveInputCustom	; If not, loop
+		pop  de
 	pop  bc
 	ret
-L037BD3: db $FB
-L037BD4: db $7B
-L037BD5: db $1B
-L037BD6: db $7C
-L037BD7: db $3B
-L037BD8: db $7C
-L037BD9: db $5B
-L037BDA: db $7C
-L037BDB: db $7B
-L037BDC: db $7C
-L037BDD: db $9B
-L037BDE: db $7C
-L037BDF: db $BB
-L037BE0: db $7C
-L037BE1: db $DB
-L037BE2: db $7C
-L037BE3: db $FB
-L037BE4: db $7C
-L037BE5: db $3B
-L037BE6: db $7D
-L037BE7: db $5B
-L037BE8: db $7D
-L037BE9: db $7B
-L037BEA: db $7D
-L037BEB: db $9B
-L037BEC: db $7D
-L037BED: db $DB
-L037BEE: db $7D
-L037BEF: db $FB
-L037BF0: db $7D
-L037BF1: db $1B
-L037BF2: db $7E
-L037BF3: db $7B
-L037BF4: db $7C
-L037BF5: db $BB
-L037BF6: db $7D
-L037BF7: db $1B
-L037BF8: db $7D
-L037BF9: db $FB
-L037BFA: db $7D
-L037BFB: db $8C
-L037BFC: db $3D
-L037BFD: db $20
-L037BFE: db $80
-L037BFF: db $27
-L037C00: db $3E
-L037C01: db $20
-L037C02: db $80
-L037C03: db $8E
-L037C04: db $3E
-L037C05: db $10
-L037C06: db $40
-L037C07: db $09
-L037C08: db $3E
-L037C09: db $10
-L037C0A: db $40
-L037C0B: db $8C
-L037C0C: db $3D
-L037C0D: db $10
-L037C0E: db $40
-L037C0F: db $95
-L037C10: db $3D
-L037C11: db $20
-L037C12: db $80
-L037C13: db $27
-L037C14: db $3E
-L037C15: db $20
-L037C16: db $80
-L037C17: db $B0
-L037C18: db $3D
-L037C19: db $20
-L037C1A: db $80
-L037C1B: db $27
-L037C1C: db $3E
-L037C1D: db $20
-L037C1E: db $80
-L037C1F: db $95
-L037C20: db $3D
-L037C21: db $10
-L037C22: db $40
-L037C23: db $27
-L037C24: db $3E
-L037C25: db $20
-L037C26: db $80
-L037C27: db $70
-L037C28: db $3E
-L037C29: db $10
-L037C2A: db $40
-L037C2B: db $70
-L037C2C: db $3E
-L037C2D: db $20
-L037C2E: db $80
-L037C2F: db $34
-L037C30: db $3E
-L037C31: db $20
-L037C32: db $80
-L037C33: db $70
-L037C34: db $3E
-L037C35: db $20
-L037C36: db $80
-L037C37: db $45
-L037C38: db $3E
-L037C39: db $20
-L037C3A: db $80
-L037C3B: db $8C
-L037C3C: db $3D
-L037C3D: db $20
-L037C3E: db $80
-L037C3F: db $27
-L037C40: db $3E
-L037C41: db $20
-L037C42: db $80
-L037C43: db $95
-L037C44: db $3D
-L037C45: db $20
-L037C46: db $80
-L037C47: db $95
-L037C48: db $3D
-L037C49: db $10
-L037C4A: db $40
-L037C4B: db $27
-L037C4C: db $3E
-L037C4D: db $10
-L037C4E: db $40
-L037C4F: db $95
-L037C50: db $3D
-L037C51: db $20
-L037C52: db $80
-L037C53: db $27
-L037C54: db $3E
-L037C55: db $10
-L037C56: db $40
-L037C57: db $B0
-L037C58: db $3D
-L037C59: db $20
-L037C5A: db $80
-L037C5B: db $95
-L037C5C: db $3D
-L037C5D: db $20
-L037C5E: db $80
-L037C5F: db $27
-L037C60: db $3E
-L037C61: db $20
-L037C62: db $80
-L037C63: db $67
-L037C64: db $3E
-L037C65: db $20
-L037C66: db $80
-L037C67: db $70
-L037C68: db $3E
-L037C69: db $10
-L037C6A: db $40
-L037C6B: db $70
-L037C6C: db $3E
-L037C6D: db $20
-L037C6E: db $80
-L037C6F: db $8C
-L037C70: db $3D
-L037C71: db $10
-L037C72: db $40
-L037C73: db $27
-L037C74: db $3E
-L037C75: db $20
-L037C76: db $80
-L037C77: db $B0
-L037C78: db $3D
-L037C79: db $10
-L037C7A: db $40
-L037C7B: db $8C
-L037C7C: db $3D
-L037C7D: db $20
-L037C7E: db $80
-L037C7F: db $27
-L037C80: db $3E
-L037C81: db $20
-L037C82: db $80
-L037C83: db $95
-L037C84: db $3D
-L037C85: db $20
-L037C86: db $80
-L037C87: db $95
-L037C88: db $3D
-L037C89: db $10
-L037C8A: db $40
-L037C8B: db $70
-L037C8C: db $3E
-L037C8D: db $20
-L037C8E: db $80
-L037C8F: db $27
-L037C90: db $3E
-L037C91: db $10
-L037C92: db $40
-L037C93: db $16
-L037C94: db $3E
-L037C95: db $20
-L037C96: db $80
-L037C97: db $E3
-L037C98: db $3D
-L037C99: db $20
-L037C9A: db $80
-L037C9B: db $8C
-L037C9C: db $3D
-L037C9D: db $20
-L037C9E: db $80
-L037C9F: db $27
-L037CA0: db $3E
-L037CA1: db $20
-L037CA2: db $80
-L037CA3: db $95
-L037CA4: db $3D
-L037CA5: db $10
-L037CA6: db $40
-L037CA7: db $09
-L037CA8: db $3E
-L037CA9: db $10
-L037CAA: db $40
-L037CAB: db $70
-L037CAC: db $3E
-L037CAD: db $10
-L037CAE: db $40
-L037CAF: db $27
-L037CB0: db $3E
-L037CB1: db $10
-L037CB2: db $40
-L037CB3: db $16
-L037CB4: db $3E
-L037CB5: db $20
-L037CB6: db $80
-L037CB7: db $E3
-L037CB8: db $3D
-L037CB9: db $20
-L037CBA: db $80
-L037CBB: db $95
-L037CBC: db $3D
-L037CBD: db $20
-L037CBE: db $80
-L037CBF: db $27
-L037CC0: db $3E
-L037CC1: db $20
-L037CC2: db $80
-L037CC3: db $95
-L037CC4: db $3D
-L037CC5: db $20
-L037CC6: db $80
-L037CC7: db $09
-L037CC8: db $3E
-L037CC9: db $10
-L037CCA: db $40
-L037CCB: db $8C
-L037CCC: db $3D
-L037CCD: db $10
-L037CCE: db $40
-L037CCF: db $09
-L037CD0: db $3E
-L037CD1: db $10
-L037CD2: db $40
-L037CD3: db $8C
-L037CD4: db $3D
-L037CD5: db $10
-L037CD6: db $40
-L037CD7: db $7D
-L037CD8: db $3E
-L037CD9: db $20
-L037CDA: db $80
-L037CDB: db $8C
-L037CDC: db $3D
-L037CDD: db $20
-L037CDE: db $80
-L037CDF: db $27
-L037CE0: db $3E
-L037CE1: db $10
-L037CE2: db $40
-L037CE3: db $70
-L037CE4: db $3E
-L037CE5: db $10
-L037CE6: db $40
-L037CE7: db $95
-L037CE8: db $3D
-L037CE9: db $20
-L037CEA: db $80
-L037CEB: db $09
-L037CEC: db $3E
-L037CED: db $20
-L037CEE: db $80
-L037CEF: db $95
-L037CF0: db $3D
-L037CF1: db $20
-L037CF2: db $80
-L037CF3: db $95
-L037CF4: db $3D
-L037CF5: db $20
-L037CF6: db $80
-L037CF7: db $B0
-L037CF8: db $3D
-L037CF9: db $10
-L037CFA: db $40
-L037CFB: db $A7
-L037CFC: db $3D
-L037CFD: db $10
-L037CFE: db $40
-L037CFF: db $5E
-L037D00: db $3E
-L037D01: db $10
-L037D02: db $40
-L037D03: db $A7
-L037D04: db $3D
-L037D05: db $20
-L037D06: db $80
-L037D07: db $5E
-L037D08: db $3E
-L037D09: db $20
-L037D0A: db $80
-L037D0B: db $A7
-L037D0C: db $3D
-L037D0D: db $10
-L037D0E: db $40
-L037D0F: db $A7
-L037D10: db $3D
-L037D11: db $20
-L037D12: db $80
-L037D13: db $E3
-L037D14: db $3D
-L037D15: db $20
-L037D16: db $80
-L037D17: db $E3
-L037D18: db $3D
-L037D19: db $20
-L037D1A: db $80
-L037D1B: db $A7
-L037D1C: db $3D
-L037D1D: db $10
-L037D1E: db $40
-L037D1F: db $09
-L037D20: db $3E
-L037D21: db $20
-L037D22: db $80
-L037D23: db $5E
-L037D24: db $3E
-L037D25: db $10
-L037D26: db $40
-L037D27: db $A7
-L037D28: db $3D
-L037D29: db $20
-L037D2A: db $80
-L037D2B: db $5E
-L037D2C: db $3E
-L037D2D: db $20
-L037D2E: db $80
-L037D2F: db $A7
-L037D30: db $3D
-L037D31: db $10
-L037D32: db $40
-L037D33: db $E3
-L037D34: db $3D
-L037D35: db $20
-L037D36: db $80
-L037D37: db $E3
-L037D38: db $3D
-L037D39: db $20
-L037D3A: db $80
-L037D3B: db $8C
-L037D3C: db $3D
-L037D3D: db $20
-L037D3E: db $80
-L037D3F: db $70
-L037D40: db $3E
-L037D41: db $10
-L037D42: db $10
-L037D43: db $09
-L037D44: db $3E
-L037D45: db $20
-L037D46: db $80
-L037D47: db $27
-L037D48: db $3E
-L037D49: db $20
-L037D4A: db $80
-L037D4B: db $70
-L037D4C: db $3E
-L037D4D: db $10
-L037D4E: db $40
-L037D4F: db $95
-L037D50: db $3D
-L037D51: db $20
-L037D52: db $80
-L037D53: db $95
-L037D54: db $3D
-L037D55: db $20
-L037D56: db $80
-L037D57: db $9B
-L037D58: db $3E
-L037D59: db $20
-L037D5A: db $80
-L037D5B: db $95
-L037D5C: db $3D
-L037D5D: db $20
-L037D5E: db $80
-L037D5F: db $8C
-L037D60: db $3D
-L037D61: db $40
-L037D62: db $40
-L037D63: db $27
-L037D64: db $3E
-L037D65: db $10
-L037D66: db $40
-L037D67: db $70
-L037D68: db $3E
-L037D69: db $10
-L037D6A: db $40
-L037D6B: db $8C
-L037D6C: db $3D
-L037D6D: db $10
-L037D6E: db $40
-L037D6F: db $34
-L037D70: db $3E
-L037D71: db $20
-L037D72: db $80
-L037D73: db $95
-L037D74: db $3D
-L037D75: db $10
-L037D76: db $40;X
-L037D77: db $16
-L037D78: db $3E
-L037D79: db $20
-L037D7A: db $80
-L037D7B: db $8C
-L037D7C: db $3D
-L037D7D: db $20
-L037D7E: db $80
-L037D7F: db $27
-L037D80: db $3E
-L037D81: db $20
-L037D82: db $80
-L037D83: db $09
-L037D84: db $3E
-L037D85: db $20
-L037D86: db $80
-L037D87: db $09
-L037D88: db $3E
-L037D89: db $10
-L037D8A: db $40
-L037D8B: db $8C
-L037D8C: db $3D
-L037D8D: db $20
-L037D8E: db $80
-L037D8F: db $B0
-L037D90: db $3E
-L037D91: db $21
-L037D92: db $81
-L037D93: db $27
-L037D94: db $3E
-L037D95: db $20
-L037D96: db $80
-L037D97: db $D2
-L037D98: db $3D
-L037D99: db $20
-L037D9A: db $80
-L037D9B: db $8C
-L037D9C: db $3D
-L037D9D: db $20
-L037D9E: db $80
-L037D9F: db $27
-L037DA0: db $3E
-L037DA1: db $20
-L037DA2: db $80
-L037DA3: db $95
-L037DA4: db $3D
-L037DA5: db $20
-L037DA6: db $80
-L037DA7: db $09
-L037DA8: db $3E
-L037DA9: db $10
-L037DAA: db $40
-L037DAB: db $70
-L037DAC: db $3E
-L037DAD: db $20
-L037DAE: db $80
-L037DAF: db $09
-L037DB0: db $3E
-L037DB1: db $10
-L037DB2: db $40
-L037DB3: db $27
-L037DB4: db $3E
-L037DB5: db $20
-L037DB6: db $80
-L037DB7: db $B0
-L037DB8: db $3D
-L037DB9: db $20
-L037DBA: db $80
-L037DBB: db $8C
-L037DBC: db $3D
-L037DBD: db $20
-L037DBE: db $80
-L037DBF: db $27
-L037DC0: db $3E
-L037DC1: db $20
-L037DC2: db $80
-L037DC3: db $95
-L037DC4: db $3D
-L037DC5: db $20
-L037DC6: db $80
-L037DC7: db $09
-L037DC8: db $3E
-L037DC9: db $10
-L037DCA: db $40;X
-L037DCB: db $70
-L037DCC: db $3E
-L037DCD: db $20
-L037DCE: db $80
-L037DCF: db $B0
-L037DD0: db $3D
-L037DD1: db $10
-L037DD2: db $40
-L037DD3: db $27
-L037DD4: db $3E
-L037DD5: db $20
-L037DD6: db $80
-L037DD7: db $B0
-L037DD8: db $3D
-L037DD9: db $20
-L037DDA: db $80
-L037DDB: db $8C
-L037DDC: db $3D
-L037DDD: db $20
-L037DDE: db $80
-L037DDF: db $95
-L037DE0: db $3D
-L037DE1: db $10
-L037DE2: db $40
-L037DE3: db $70
-L037DE4: db $3E
-L037DE5: db $20
-L037DE6: db $80
-L037DE7: db $95
-L037DE8: db $3D
-L037DE9: db $20
-L037DEA: db $80
-L037DEB: db $8C
-L037DEC: db $3D
-L037DED: db $20
-L037DEE: db $80
-L037DEF: db $70
-L037DF0: db $3E
-L037DF1: db $20
-L037DF2: db $80
-L037DF3: db $95
-L037DF4: db $3D
-L037DF5: db $20
-L037DF6: db $80
-L037DF7: db $B0
-L037DF8: db $3D
-L037DF9: db $10
-L037DFA: db $40
-L037DFB: db $70
-L037DFC: db $3E
-L037DFD: db $20
-L037DFE: db $80
-L037DFF: db $27
-L037E00: db $3E
-L037E01: db $20
-L037E02: db $80
-L037E03: db $09
-L037E04: db $3E
-L037E05: db $20
-L037E06: db $80
-L037E07: db $09
-L037E08: db $3E
-L037E09: db $10
-L037E0A: db $40
-L037E0B: db $70
-L037E0C: db $3E
-L037E0D: db $20
-L037E0E: db $80
-L037E0F: db $27
-L037E10: db $3E
-L037E11: db $20
-L037E12: db $80
-L037E13: db $B0
-L037E14: db $3D
-L037E15: db $20
-L037E16: db $80
-L037E17: db $C1
-L037E18: db $3D
-L037E19: db $10
-L037E1A: db $40
-L037E1B: db $70
-L037E1C: db $3E
-L037E1D: db $20
-L037E1E: db $80
-L037E1F: db $B0
-L037E20: db $3D
-L037E21: db $20
-L037E22: db $80
-L037E23: db $70
-L037E24: db $3E
-L037E25: db $10
-L037E26: db $40
-L037E27: db $70
-L037E28: db $3E
-L037E29: db $20
-L037E2A: db $80
-L037E2B: db $95
-L037E2C: db $3D
-L037E2D: db $10
-L037E2E: db $40
-L037E2F: db $95
-L037E30: db $3D
-L037E31: db $20
-L037E32: db $80
-L037E33: db $45
-L037E34: db $3E
-L037E35: db $20
-L037E36: db $80
-L037E37: db $B0
-L037E38: db $3D
-L037E39: db $20
-L037E3A: db $80
+	
+; =============== CPU_MoveListPtrTable ===============
+; Assigns to each character a list of move inputs they can perform.
+; Notes:
+; - Chizuru and Kagura are almost identical and reuse the same move list.
+; - O.Iori and O.Leona have special moves that are unique to them, so they get their own lists.
+; - Mr.Karate reuses the same move list as Ryo.
+CPU_MoveListPtrTable:
+	dw CPU_MoveInputList_Kyo ; CHAR_ID_KYO
+	dw CPU_MoveInputList_Daimon ; CHAR_ID_DAIMON
+	dw CPU_MoveInputList_Terry ; CHAR_ID_TERRY
+	dw CPU_MoveInputList_Andy ; CHAR_ID_ANDY
+	dw CPU_MoveInputList_Ryo ; CHAR_ID_RYO
+	dw CPU_MoveInputList_Robert ; CHAR_ID_ROBERT
+	dw CPU_MoveInputList_Athena ; CHAR_ID_ATHENA
+	dw CPU_MoveInputList_Mai ; CHAR_ID_MAI
+	dw CPU_MoveInputList_Leona ; CHAR_ID_LEONA
+	dw CPU_MoveInputList_Geese ; CHAR_ID_GEESE
+	dw CPU_MoveInputList_Krauser ; CHAR_ID_KRAUSER
+	dw CPU_MoveInputList_MrBig ; CHAR_ID_MRBIG
+	dw CPU_MoveInputList_Iori ; CHAR_ID_IORI
+	dw CPU_MoveInputList_Mature ; CHAR_ID_MATURE
+	dw CPU_MoveInputList_Chizuru ; CHAR_ID_CHIZURU
+	dw CPU_MoveInputList_Goenitz ; CHAR_ID_GOENITZ
+	dw CPU_MoveInputList_Ryo ; CHAR_ID_MRKARATE
+	dw CPU_MoveInputList_OIori ; CHAR_ID_OIORI
+	dw CPU_MoveInputList_OLeona ; CHAR_ID_OLEONA
+	dw CPU_MoveInputList_Chizuru ; CHAR_ID_KAGURA
+
+; =============== CPU_MoveInputList_* ===============
+; List of character-specific move inputs.
+; See also: Play_CPU_ApplyCharInput for more info.
+CPU_MoveInputList_Kyo: 
+	; DF+P -> 114 Shiki Ara Kami
+	dw MoveInput_DF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDF+P -> 100 Shiki Oni Yaki
+	dw MoveInput_FDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; BDB+K -> R.E.D. Kick
+	dw MoveInput_BDB
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; FDB+K -> 212 Shiki Kototsuki You 
+	dw MoveInput_FDB
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; DF+K -> 75 Shiki Kai
+	dw MoveInput_DF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; DB+P -> 910 Shiki Nue Tumi
+	dw MoveInput_DB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDF+P -> 100 Shiki Oni Yaki
+	dw MoveInput_FDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DBDF+P -> Ura 108 Shiki Orochi Nagi
+	dw MoveInput_DBDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+
+CPU_MoveInputList_Daimon:
+	; FDF+P -> Jirai Shin
+	dw MoveInput_FDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DB+K -> Chou Ukemi
+	dw MoveInput_DB
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; FDF+P -> Jirai Shin
+	dw MoveInput_FDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; BDF+K -> Chou Oosoto Gari
+	dw MoveInput_BDF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; BDF+P -> Cloud Tosser / Stump Throw
+	dw MoveInput_BDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDBF+P -> Heaven Drop
+	dw MoveInput_FDBF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; BDF+P -> Cloud Tosser / Stump Throw
+	dw MoveInput_BDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDBx2+P -> Heaven to Hell Drop
+	dw MoveInput_FDBFDB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+
+CPU_MoveInputList_Terry:
+	; DF+P -> Power Wave
+	dw MoveInput_DF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDF+P -> Rising Tackle
+	dw MoveInput_FDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DB+P -> Burn Knuckle
+	dw MoveInput_DB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DB+K -> Crack Shot
+	dw MoveInput_DB
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; FDF+K -> Power Dunk
+	dw MoveInput_FDF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; DB+P -> Burn Knuckle
+	dw MoveInput_DB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDF+K -> Power Dunk
+	dw MoveInput_FDF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; DBDF+P -> Power Geyser
+	dw MoveInput_DBDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+
+CPU_MoveInputList_Andy:
+	; DB+P -> Hi Sho Ken
+	dw MoveInput_DB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDF+P -> Sho Ryu Dan
+	dw MoveInput_FDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; BF+P -> Zan Ei Ken
+	dw MoveInput_BF_Fast
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; BDF+K -> Ku Ha Dan 
+	dw MoveInput_BDF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; BDF+P (close) -> Geki Heki Hai Sui Sho
+	dw MoveInput_BDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DF+K (air) -> Genei Shiranui
+	dw MoveInput_DF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; FDF+P -> Sho Ryu Dan
+	dw MoveInput_FDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DBDF+K -> Cho Reppa Dan
+	dw MoveInput_DBDF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+
+CPU_MoveInputList_Ryo:
+	; DF+P -> Ko Ou Ken 
+	dw MoveInput_DF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDF+P -> Ko Hou
+	dw MoveInput_FDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DB+P -> Mou Ko Rai Jin Gou
+	dw MoveInput_DB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DB+K -> Hien Shippu Kyaku
+	dw MoveInput_DB
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; BDF+P (close) -> Kyokuken Ryu Renbu Ken
+	dw MoveInput_BDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; ???
+	dw MoveInput_FDF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; FBDF+P -> Haoh Shokoh Ken 
+	dw MoveInput_FBDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DFDB+P -> Ryu Ko Ranbu
+	dw MoveInput_DFDB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+
+CPU_MoveInputList_Robert:
+	; DF+P -> Ryuu Geki Ken	
+	dw MoveInput_DF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDF+P -> Ryuu Ga
+	dw MoveInput_FDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; ???
+	dw MoveInput_DB
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; FDB+K -> Hien Shippu Kyaku
+	dw MoveInput_FDB
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; BDF+K -> Kyokugen Ryu Ranbu Kyaku
+	dw MoveInput_BDF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; ???
+	dw MoveInput_FDF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; FBDF+P -> Haoh Shokoh Ken 
+	dw MoveInput_FBDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DFDB+P -> Ryu Ko Ranbu
+	dw MoveInput_DFDB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+
+CPU_MoveInputList_Athena:
+	; DB+P -> Psycho Ball (ground) / Phoenix Arrow (air)
+	dw MoveInput_DB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDF+P -> Psycho Sword
+	dw MoveInput_FDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DB+P -> Psycho Ball (ground) / Phoenix Arrow (air)
+	dw MoveInput_DB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDB+K -> Psycho Reflector
+	dw MoveInput_FDB
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; DF+K -> Psycho Teleport
+	dw MoveInput_DF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; FDB+K -> Psycho Reflector
+	dw MoveInput_FDB
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; DF+K -> Psycho Teleport
+	dw MoveInput_DF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; BFDB+P -> Shining Crystal Bit
+	dw MoveInput_BFDB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+
+CPU_MoveInputList_Mai:
+	; DF+P -> Ka Cho Sen
+	dw MoveInput_DF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDF+K -> Hisho Ryu En Jin
+	dw MoveInput_FDF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; BDF+K -> Hissatsu Shinobibachi
+	dw MoveInput_BDF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; DB+P -> Ryu En Bu (ground) / Kuuchuu Musasabi no Mai (air)
+	dw MoveInput_DB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDB+P -> Chijou Musasabi no Mai 
+	dw MoveInput_FDB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DB+P -> Ryu En Bu (ground) / Kuuchuu Musasabi no Mai (air)
+	dw MoveInput_DB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DB+P -> Ryu En Bu (ground) / Kuuchuu Musasabi no Mai (air)
+	dw MoveInput_DB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DBDF+K -> Cho Hissatsu Shinobibachi
+	dw MoveInput_DBDF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+
+CPU_MoveInputList_Leona:
+	; DU+K -> X-Calibur
+	dw MoveInput_DU_Slow
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; BF+K -> Grand Sabre
+	dw MoveInput_BF_Slow
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; DU+P -> Moon Slasher
+	dw MoveInput_DU_Slow
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; BF+P -> Baltic Launcher
+	dw MoveInput_BF_Slow
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DU+K -> X-Calibur
+	dw MoveInput_DU_Slow
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; DU+P -> Moon Slasher
+	dw MoveInput_DU_Slow
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DFDB+P (air) -> V Slasher
+	dw MoveInput_DFDB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DFDB+P (air) -> V Slasher
+	dw MoveInput_DFDB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+
+CPU_MoveInputList_OLeona:
+	; DU+K -> X-Calibur
+	dw MoveInput_DU_Slow
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; FDB+P -> Storm Bringer
+	dw MoveInput_FDB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; BF+K -> Grand Sabre
+	dw MoveInput_BF_Slow
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; DU+P -> Moon Slasher
+	dw MoveInput_DU_Slow
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; BF+P -> Baltic Launcher
+	dw MoveInput_BF_Slow
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DU+K -> X-Calibur
+	dw MoveInput_DU_Slow
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; DFDB+P -> Super Moon Slasher (ground) / V Slasher (air)
+	dw MoveInput_DFDB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DFDB+P -> Super Moon Slasher (ground) / V Slasher (air)
+	dw MoveInput_DFDB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+
+CPU_MoveInputList_Geese:
+	; DF+P -> Reppuken
+	dw MoveInput_DF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; BDF+K -> Atemi Nage
+	dw MoveInput_BDF
+	db KEP_A_LIGHT
+	db KEP_A_LIGHT
+	; FDB+P -> Ja ei ken
+	dw MoveInput_FDB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDF+P -> Hishou Nichirin Zan
+	dw MoveInput_FDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; BDF+K -> Atemi Nage
+	dw MoveInput_BDF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; DB+P (air) -> Shippu Ken
+	dw MoveInput_DB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DB+P (air) -> Shippu Ken
+	dw MoveInput_DB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; BFDBF+P -> Raging Storm
+	dw MoveInput_BFDBF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+
+CPU_MoveInputList_Krauser:
+	; DB+P -> High Blitz Ball
+	dw MoveInput_DB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DF+K -> Leg Tomahawk
+	dw MoveInput_DF
+	db KEP_A_HEAVY
+	db KEP_A_HEAVY
+	; FDF+K -> Kaiser Kick
+	dw MoveInput_FDF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; BDF+K -> Kaiser Duel Sobat
+	dw MoveInput_BDF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; DF+K -> Leg Tomahawk
+	dw MoveInput_DF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; FDBF+P (close) -> Kaiser Suplex
+	dw MoveInput_FDBF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DB+K -> Low Blitz Ball
+	dw MoveInput_DB
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY;X
+	; FBDF+P -> Kaiser Wave
+	dw MoveInput_FBDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+
+CPU_MoveInputList_MrBig:
+	; DF+P -> Ground Blaster
+	dw MoveInput_DF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDF+P -> California Romance
+	dw MoveInput_FDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDB+P -> Cross Divingz
+	dw MoveInput_FDB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDB+K -> Spinning Lancer
+	dw MoveInput_FDB
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; DF+P -> Ground Blaster
+	dw MoveInput_DF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; Px3 -> Crazy Drum Dram
+	dw MoveInput_PPP
+	db KEP_B_LIGHT|CML_BTN
+	db KEP_B_HEAVY|CML_BTN
+	; FDF+P -> California Romance
+	dw MoveInput_FDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DFDF+P -> Blaster Wave
+	dw MoveInput_DFDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+
+CPU_MoveInputList_Iori:
+	; DF+P -> 108 Shiki Yami-barai
+	dw MoveInput_DF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDF+P -> 100 Shiki Oni Yaki
+	dw MoveInput_FDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DB+P -> 127 Aoi Hana
+	dw MoveInput_DB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDB+K -> Shiki Koto Tsuki In
+	dw MoveInput_FDB
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; BDF+P -> Scum Gale
+	dw MoveInput_BDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDB+K -> Shiki Koto Tsuki In
+	dw MoveInput_FDB
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; FDF+P -> 100 Shiki Oni Yaki
+	dw MoveInput_FDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DBDF+P -> Kin 1201 Shiki Ya Otome
+	dw MoveInput_DBDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+
+CPU_MoveInputList_OIori:
+	; DF+P -> 108 Shiki Yami-barai
+	dw MoveInput_DF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDF+P -> 100 Shiki Oni Yaki
+	dw MoveInput_FDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DB+P -> 127 Aoi Hana
+	dw MoveInput_DB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDB+K -> Shiki Koto Tsuki In
+	dw MoveInput_FDB
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY;X
+	; BDF+P -> Scum Gale
+	dw MoveInput_BDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DBDF+K -> Kin 1201 Shiki Ya Otome (Alt)
+	dw MoveInput_DBDF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; FDF+P -> 100 Shiki Oni Yaki
+	dw MoveInput_FDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DBDF+P -> Kin 1201 Shiki Ya Otome
+	dw MoveInput_DBDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+
+CPU_MoveInputList_Mature:
+	; DF+P -> Despair
+	dw MoveInput_DF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DB+K -> Metal Massacre
+	dw MoveInput_DB
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; BDF+P -> Decide
+	dw MoveInput_BDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DB+P -> Death Row
+	dw MoveInput_DB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DF+P -> Despair
+	dw MoveInput_DF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; BDF+P -> Decide
+	dw MoveInput_BDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DB+P -> Death Row
+	dw MoveInput_DB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DBDF+K -> Heaven's Gate
+	dw MoveInput_DBDF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+
+CPU_MoveInputList_Chizuru:
+	; BDF+P -> 108 Katsu Tamayura no Shitsune
+	dw MoveInput_BDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDF+P -> 100 Katso Tenjin no Kotowari 
+	dw MoveInput_FDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDB+P -> 212 Katsu Shinsoku no Noroti (High)
+	dw MoveInput_FDB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDB+K -> 212 Katsu Shinsoku no Noroti (Low)
+	dw MoveInput_FDB
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; BDF+P -> 108 Katsu Tamayura no Shitsune
+	dw MoveInput_BDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDF+P -> 100 Katso Tenjin no Kotowari 
+	dw MoveInput_FDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DBDF+P -> Ichimen Ikatsu San Rai no Fui Jin 
+	dw MoveInput_DBDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DBDB+K -> Ichimen 85 Katsu Reigi no Ishizue 
+	dw MoveInput_DBDB
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+
+CPU_MoveInputList_Goenitz:
+	; BDF+P -> Yonokaze (Near)
+	dw MoveInput_BDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DBDF+P -> Shinyaotome Mizuchi / Shinyaotome Jissoukoku 
+	dw MoveInput_DBDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; BDF+K -> Yonokaze (Far)
+	dw MoveInput_BDF
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; BDF+P -> Yonokaze (Near)
+	dw MoveInput_BDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DB+K -> Hyouga
+	dw MoveInput_DB
+	db KEP_A_LIGHT
+	db KEP_A_HEAVY
+	; DB+P -> Wanpyou Tokobuse
+	dw MoveInput_DB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; FDBx2+P -> Yamidoukoku (Other super move)
+	dw MoveInput_FDBFDB
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	; DBDF+P -> Shinyaotome Mizuchi / Shinyaotome Jissoukoku 
+	dw MoveInput_DBDF
+	db KEP_B_LIGHT
+	db KEP_B_HEAVY
+	
+; 
+; =============== END OF SUBMODULE Play->CPU ===============
+;
+	
+; =============== END OF BANK ===============
+; Junk area below.
 L037E3B: db $00;X
 L037E3C: db $34;X
 L037E3D: db $40;X

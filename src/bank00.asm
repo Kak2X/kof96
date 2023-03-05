@@ -8796,14 +8796,14 @@ Play_DoPl:
 	; - DE: Ptr to respective wOBJInfo structure
 	jp   hl
 	
-; =============== HomeCall_L037707 ===============	
-L0024E4:;C
+; =============== HomeCall_Play_CPU_Do ===============	
+HomeCall_Play_CPU_Do:
 	ldh  a, [hROMBank]
 	push af
-	ld   a, BANK(L037707) ; BANK $03
+	ld   a, BANK(Play_CPU_Do) ; BANK $03
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	call L037707
+	call Play_CPU_Do
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
@@ -12421,9 +12421,9 @@ Play_Pl_DoBasicMoveInput:
 		; Starts a crouching light punch.
 		;
 		BasicInput_StartCrouchLightPunch:
-			; [POI] If the autocharge cheat is enabled, crouching lps reflect projectiles.
+			; [POI] If the powerup cheat is enabled, crouching lps reflect projectiles.
 			ld   a, [wDipSwitch]
-			bit  DIPB_AUTO_CHARGE, a	; Is the cheat set?
+			bit  DIPB_POWERUP, a	; Is the cheat set?
 			jp   z, .go					; If not, skip
 			ld   hl, iPlInfo_Flags0
 			add  hl, bc					; Otherwise, make it reflect projectiles
@@ -12451,9 +12451,9 @@ Play_Pl_DoBasicMoveInput:
 			ld   a, SCT_HEAVY
 			call HomeCall_Sound_ReqPlayExId
 			
-			; [POI] If the autocharge cheat is enabled, crouching hps erase projectiles.
+			; [POI] If the powerup cheat is enabled, crouching hps erase projectiles.
 			ld   a, [wDipSwitch]
-			bit  DIPB_AUTO_CHARGE, a	; Is the cheat set?
+			bit  DIPB_POWERUP, a	; Is the cheat set?
 			jp   z, .go					; If not, skip
 			ld   hl, iPlInfo_Flags0
 			add  hl, bc					; Otherwise, make it delete projectiles
@@ -13951,9 +13951,9 @@ MoveInputS_CanStartSpecialMove:
 ; - C flag: If set, we can't start a super
 MoveInputS_CanStartSuperMove:
 	
-	; With the meter autocharge cheat, you have infinite supers
+	; With the meter powerup cheat, you have infinite supers
 	ld   a, [wDipSwitch]
-	bit  DIPB_AUTO_CHARGE, a	; Is the flag set?
+	bit  DIPB_POWERUP, a	; Is the flag set?
 	jp   nz, .retOk				; If so, return clear
 	
 	; If the POW bar is at the maximum value, we can start a super
@@ -14033,7 +14033,7 @@ MoveInputS_CanStartProjMove:
 ; - BC: Ptr to wPlInfo structure
 ; OUT
 ; - C flag: If set, the "hidden heavy" version can be used.
-;           This is an heavy attack done at Max Power *WHEN* the meter autocharge cheat is enabled.
+;           This is an heavy attack done at Max Power *WHEN* the meter powerup cheat is enabled.
 ; - Z flag: If set, the attack is heavy
 MoveInputS_CheckMoveLHVer:
 
@@ -14041,7 +14041,7 @@ MoveInputS_CheckMoveLHVer:
 	; Perform the two initial checks for the cheated heavy attack
 	;
 	ld   a, [wDipSwitch]
-	bit  DIPB_AUTO_CHARGE, a	; Is the cheat set?
+	bit  DIPB_POWERUP, a	; Is the cheat set?
 	jp   z, .chkNorm			; If not, jump
 	
 	ld   hl, iPlInfo_Pow
@@ -14090,17 +14090,17 @@ MoveInputS_CheckSuperDesperation:
 	;
 	; Dsperation supers are triggered by pulling off a super at max meter with low health.
 	;
-	; When the meter autocharge cheat is enabled, only max meter is required.
+	; When the meter powerup cheat is enabled, only max meter is required.
 	; [POI] If the low health requirement is still met, an hidden desperation is triggered,
 	;       though only one super move (L064D82) actually checks for it.
 	;       There is no way to trigger it without the cheat.
 	;
 
 	;
-	; The rules are slightly different if the meter autocharge cheat is enabled.
+	; The rules are slightly different if the meter powerup cheat is enabled.
 	;
 	ld   a, [wDipSwitch]
-	bit  DIPB_AUTO_CHARGE, a	; Is the cheat set?
+	bit  DIPB_POWERUP, a	; Is the cheat set?
 	jp   z, .chkNormal			; If not, jump
 	
 .chkCheat:
@@ -15554,7 +15554,7 @@ Play_Pl_ChkGuardCancelRoll:
 	jp   nz, .retClear	; If so, jump
 	
 	;
-	; And they require holding both buttons at the same timeù
+	; And they require holding both buttons at the same time
 	;
 	call Play_Pl_AreBothBtnHeld		; Holding A and B?
 	jp   nc, .retClear				; If not, return

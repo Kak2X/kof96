@@ -13646,7 +13646,7 @@ MoveInit_Krauser_LegTomahawk:
 	call Play_Pl_ClearJoyDirBuffer
 	mMvIn_GetLH MOVE_KRAUSER_LEG_TOMAHAWK_L, MOVE_KRAUSER_LEG_TOMAHAWK_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	; [POI] There's a hidden heavy version with the autocharge enabled.
+	; [POI] There's a hidden heavy version with the powerup enabled.
 	;       This version is invulnerable compared to the normal heavy.
 	call MoveInputS_CheckMoveLHVer				; Recheck LH status
 	jr   nc, MoveInputReader_Krauser_SetMove	; Did we start an hidden heavy? If not, return

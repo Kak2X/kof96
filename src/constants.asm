@@ -30,6 +30,16 @@ KEP_B_LIGHT EQU 1 << KEPB_B_LIGHT
 KEP_A_HEAVY EQU 1 << KEPB_A_HEAVY
 KEP_B_HEAVY EQU 1 << KEPB_B_HEAVY
 
+CMLB_BTN EQU 0 ; For iCPUMoveListItem_LastLHKeyA. 
+               ; If set, the MoveInput iCPUMoveListItem_MoveInputPtr points to contains button (LH) keys.
+               ; If clear, it contains directional keys.
+CML_BTN EQU 1 << CMLB_BTN
+
+; CPU idle actions
+CMA_MOVEF  EQU $00 ; Move or run forwads
+CMA_MOVEB  EQU $01 ; Move or hop backwards
+CMA_CHARGE EQU $02 ; Charge meter
+CMA_NONE   EQU $FF ; Nothing. Player stands still.
 
 DIFFICULTY_EASY		EQU $00
 DIFFICULTY_NORMAL	EQU $01
@@ -113,7 +123,7 @@ ANIMSPEED_NONE      EQU $FF ; Slowest possible animation speed, set when we want
 
 ; FLAGS
 DIPB_EASY_MOVES       EQU 2 ; SELECT + A/B for easy super moves
-DIPB_AUTO_CHARGE      EQU 3 ; POW Meter grows on its own + Unlimited super moves
+DIPB_POWERUP          EQU 3 ; DIPB_POWERUP Powerup mode. POW Meter grows on its own + Unlimited super moves + move changes
 DIPB_SGB_SOUND_TEST   EQU 4 ; Adds SGB S.E TEST to the options menu
 DIPB_TEAM_DUPL        EQU 5 ; Allow duplicate characters in a team
 DIPB_UNLOCK_GOENITZ   EQU 6 ; Unlock Goenitz
@@ -642,7 +652,7 @@ ORDSEL_SELDONE EQU $03
 ; - A -> Air
 ; - L -> Light
 ; - H -> Heavy
-; - E -> Extra (hidden attack, requires max power and DIPB_AUTO_CHARGE)
+; - E -> Extra (hidden attack, requires max power and DIPB_POWERUP)
 ;        Moves marked as EL are inaccessible if not associated to a move shortcut (SELECT + A/B) 
 ; - S -> Super
 ; - D -> Desperation Super
@@ -1064,16 +1074,11 @@ HITTYPE_HIT_LOW             EQU $05 ; Punched or kicked while crouching
 HITTYPE_DROP_CH             EQU $06 ; Crouching heavy kick (Small drop with no recovery)
 HITTYPE_DROP_A              EQU $07 ; Hit by a normal in the air (Small drop with recovery)
 HITTYPE_DROP_MAIN           EQU $08 ; Standard drop without recovery
-;--
-; dubious names below but comments mostly correct
-
-; Used by certain special moves
 HITTYPE_HIT_MULTI0          EQU $09 ; Mid-special move, chainable hit #0
 HITTYPE_HIT_MULTI1          EQU $0A ; Mid-special move, chainable hit #1
 HITTYPE_HIT_MULTIGS         EQU $0B ; Mid-super move, player pushed on the ground and frozen
 HITTYPE_DROP_DB_A           EQU $0C ; Hit (not throw) that sends the player to the ground with screen shake - from air
 HITTYPE_DROP_DB_G           EQU $0D ; Hit (not throw) that sends the player to the ground with screen shake - from ground
-;---
 HITTYPE_DROP_SWOOPUP        EQU $0E ; Very high throw or swept up above
 HITTYPE_THROW_END           EQU $0F ; End of the throw. The actual part where the player is launched.
 HITTYPE_THROW_START         EQU $10 ; Start of the throw anim

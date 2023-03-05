@@ -5539,7 +5539,7 @@ MoveInit_Ryo_HienShippuKyaku:
 ; =============== MoveInit_Ryo_KoHou ===============
 MoveInit_Ryo_KoHou:
 	call Play_Pl_ClearJoyDirBuffer
-	; [POI] Hidden heavy version with the autocharge cheat.
+	; [POI] Hidden heavy version with the powerup cheat.
 	;       It moves further horizontally than the normal one and hits multiple
 	;       times, like Rising Tackle.
 	mMvIn_GetLHE MOVE_RYO_KO_HOU_L, MOVE_RYO_KO_HOU_H, MoveInit_Ryo_KoHou_Hidden
