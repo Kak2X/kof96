@@ -131,7 +131,7 @@ wPlayHitstopSet EQU $C171 ; Requests hitstop for the next frame.
 wPlayHitstop EQU $C172 ; If set, hitstop is applied. Due to how tasks are carefully managed, this is only applied to 
 wPlayPlThrowActId EQU $C173 ; Act ID for a throw. This is global since two throws can't be active at once.
 wPlayPlThrowOpMode EQU $C174 ; PLAY_THROWOP_*
-wPlayPlThrowDir EQU $C175 ; Sets the throw's direction. If 0, the opponent is thrown ???back or fwd??
+wPlayPlThrowDir EQU $C175 ; Sets the throw's direction. (PLAY_THROWDIR_*)
 ;--
 ; Movement amounts set by Play_Pl_MoveRotThrown, used to move the opponent at fixed relative positions,
 ; mostly during the "rotation frames" before the throw arc starts.
@@ -543,7 +543,7 @@ iOBJ_TileIDAndFlags EQU $02
 ;              -> hJoyNewKeys -> iPlInfo_JoyNewKeys -> iPlInfo_JoyNewKeysLH -> iPlInfo_JoyKeysLH
 ;                                                              | 1               ^
 ;                                                              v                 |
-;                                                      iPlInfo_JoyMergedKeysLH --o
+;                                                      iPlInfo_JoyBufKeysLH -----o
 iPlInfo_JoyBtnBuffer EQU $00 ; A/B buttons
 iPlInfo_JoyDirBuffer EQU $10 ; Directional keys
 iPlInfo_Flags0 EQU $20 ; Player flags (byte 0)
@@ -590,13 +590,13 @@ iPlInfo_MoveDamageFlags3Next EQU $3F
 iPlInfo_40 EQU $40 ;
 iPlInfo_41 EQU $41 ;
 iPlInfo_42 EQU $42 ;
-iPlInfo_JoyKeysLH EQU $43 ; Held directional keys + A/B light/heavy info. Used for the standard Punch/Kick check.
+iPlInfo_JoyKeysLH EQU $43 ; Held directional keys + *New* A/B light/heavy info + Cumulative A/B light heavy info. Used for the standard punch/kick check when starting moves (both normal and specials).
 iPlInfo_JoyNewKeys EQU $44 ; Newly pressed joypad keys. Copied directly from hJoyNewKeys,
 iPlInfo_JoyKeys EQU $45 ; Held joypad Keys. Copied directly from hJoyKeys.
-iPlInfo_JoyNewKeysLH EQU $46 ; Newly pressed directional keys + A/B light/heavy info
+iPlInfo_JoyNewKeysLH EQU $46 ; Newly pressed directional keys + new A/B light/heavy info
 iPlInfo_JoyKeysPreJump EQU $47 ; Backup of iPlInfo_JoyKeys set before jumping
 iPlInfo_JoyNewKeysLHPreJump EQU $48 ; Backup of iPlInfo_JoyNewKeysLH set before jumping
-iPlInfo_JoyMergedKeysLH EQU $49 ; Buffered merged counter ??? A/B light/heavy info
+iPlInfo_JoyBufKeysLH EQU $49 ; Holds a buffer of the current and previous A/B light/heavy info. This field is essentially a manual version of "iPlInfo_JoyKeys" for LH info, which normally isn't saved in iPlInfo_JoyKeysLH.
 iPlInfo_JoyHeavyCountA EQU $4A ; Counter to detect light/heavy punches, result saved to iPlInfo_JoyNewKeysLH
 iPlInfo_JoyHeavyCountB EQU $4B ; Counter to detect light/heavy kicks, result saved to iPlInfo_JoyNewKeysLH.
 iPlInfo_JoyDirBufferOffset EQU $4C ; Current offset to iPlInfo_JoyDirBuffer

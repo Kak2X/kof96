@@ -188,7 +188,7 @@ MoveInputReader_Kyo_NoMove:
 ; - 125 Shiki Nana Se
 ; - Ge Shiki Migiri Ugachi
 MoveC_Kyo_AraKami:
-	call Play_Pl_CreateJoyMergedKeysLH
+	call Play_Pl_AddToJoyBufKeysLH
 	call Play_Pl_MoveByColiBoxOverlapX
 	mMvC_ValLoaded .ret
 	
@@ -528,7 +528,7 @@ ENDM
 ; - 401 Shiki Tumi Yomi 
 ; - 402 Shiki Batu Yomi 
 MoveC_Kyo_DokuKami:
-	call Play_Pl_CreateJoyMergedKeysLH
+	call Play_Pl_AddToJoyBufKeysLH
 	call Play_Pl_MoveByColiBoxOverlapX
 	mMvC_ValLoaded .ret
 	
@@ -755,7 +755,7 @@ ENDM
 	mMvC_SetDamageNext $08, HITTYPE_HIT_MID0, PF3_HEAVYHIT|PF3_FIRE|PF3_LASTHIT
 	mMvC_PlaySound SND_ID_28
 	; Reset the LH status for the next keypress
-	ld   hl, iPlInfo_JoyMergedKeysLH
+	ld   hl, iPlInfo_JoyBufKeysLH
 	add  hl, bc
 	ld   [hl], $00
 	jp   .ret
@@ -766,7 +766,7 @@ ENDM
 	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
 	mMvC_PlaySound SND_ID_28
 	; Reset the LH status for the next keypress (not needed)
-	ld   hl, iPlInfo_JoyMergedKeysLH
+	ld   hl, iPlInfo_JoyBufKeysLH
 	add  hl, bc
 	ld   [hl], $00
 	jp   .ret
@@ -800,7 +800,7 @@ MoveC_Kyo_DokuKami_ChkTumiYomiInput:
 	jp   .ret				; Otherwise, return as we've done it already
 .chkBtn:
 	; Mark if we've pressed light punch.
-	ld   hl, iPlInfo_JoyMergedKeysLH
+	ld   hl, iPlInfo_JoyBufKeysLH
 	add  hl, bc
 	ld   a, [hl]
 	bit  KEPB_B_LIGHT, a	; Did we press LP?
@@ -815,7 +815,7 @@ MoveC_Kyo_DokuKami_ChkTumiYomiInput:
 	add  hl, bc
 	set  MSIB_K0S0_DB, [hl]	; Sets its bit
 	; Reset the LH status for the next keypress
-	ld   hl, iPlInfo_JoyMergedKeysLH
+	ld   hl, iPlInfo_JoyBufKeysLH
 	add  hl, bc
 	ld   [hl], $00
 	jp   .ret
@@ -862,7 +862,7 @@ MoveC_Kyo_DokuKami_ChkBatuYomiInput:
 	jp   nz, .ret			; If so, return
 	
 	; If we're pressing LP, set its bit
-	ld   hl, iPlInfo_JoyMergedKeysLH
+	ld   hl, iPlInfo_JoyBufKeysLH
 	add  hl, bc
 	ld   a, [hl]
 	bit  KEPB_B_LIGHT, a	; Pressed LP *now*?
@@ -875,7 +875,7 @@ MoveC_Kyo_DokuKami_ChkBatuYomiInput:
 	add  hl, bc
 	set  MSIB_K0S1_P, [hl]
 	; Reset the LH status for the next keypress
-	ld   hl, iPlInfo_JoyMergedKeysLH
+	ld   hl, iPlInfo_JoyBufKeysLH
 	add  hl, bc
 	ld   [hl], $00
 .ret:
@@ -6167,7 +6167,7 @@ MoveC_Andy_HiShoKen:
 ; Contains submove:
 ; - Gadankoh
 MoveC_Andy_ZanEiKen:
-	call Play_Pl_CreateJoyMergedKeysLH
+	call Play_Pl_AddToJoyBufKeysLH
 	call Play_Pl_MoveByColiBoxOverlapX
 	mMvC_ValLoaded .ret
 	

@@ -2845,9 +2845,9 @@ Play_CPU_CheckProj:
 	;
 	; If we pressed any attack button in the last few frames but no attack started,
 	; perform a crouching light punch.
-	; Note that switching to a new move, most of the time, clears iPlInfo_JoyMergedKeysLH.
+	; Note that switching to a new move, most of the time, clears iPlInfo_JoyBufKeysLH.
 	;
-	ld   hl, iPlInfo_JoyMergedKeysLH
+	ld   hl, iPlInfo_JoyBufKeysLH
 	add  hl, bc
 	ld   a, [hl]
 	and  a, KEP_A_LIGHT|KEP_B_LIGHT|KEP_A_HEAVY|KEP_B_HEAVY	; Are we pressing any button already?

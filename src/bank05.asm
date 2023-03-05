@@ -9858,7 +9858,7 @@ MoveC_Mature_MetalMassacre:
 ; Move code for Mature's Death Row (MOVE_MATURE_DEATH_ROW_L, MOVE_MATURE_DEATH_ROW_H).
 ; This move can repeat up to three times by having repeated entries in the frame handler.
 MoveC_Mature_DeathRow:
-	call Play_Pl_CreateJoyMergedKeysLH
+	call Play_Pl_AddToJoyBufKeysLH
 	call Play_Pl_MoveByColiBoxOverlapX
 	mMvC_ValLoaded .ret
 	
@@ -9898,7 +9898,7 @@ MoveC_Mature_DeathRow:
 	mMvC_ValFrameStart .initDash_cont
 		mMvC_PlaySound SND_ID_28
 		call Play_Pl_ClearJoyDirBuffer
-		call Play_Pl_ClearJoyMergedKeysLH
+		call Play_Pl_ClearJoyBufKeysLH
 		; Initialize this
 		ld   hl, iPlInfo_Mature_DeathRow_Repeat
 		add  hl, bc
@@ -9985,7 +9985,7 @@ MoveC_Mature_DeathRow:
 	ret  nz			; If so, return
 	
 	; Must press the punch button
-	call MoveInputS_CheckPKTypeWithMergedLH
+	call MoveInputS_CheckPKTypeWithJoyBufKeysLH
 	ret  nc	; Did we press a punch or kick btn? If not, return
 	ret  nz	; Did we press a kick button? If so, return
 	
@@ -10688,7 +10688,7 @@ MoveInputReader_Chizuru_NoMove:
 ; - MOVE_CHIZURU_SHINSOKU_NOROTI_LOW_H
 ; This move can chain into 212 Katsu Shinsoku no Noroti Ten Zui (MOVE_CHIZURU_TEN_ZUI_L, MOVE_CHIZURU_TEN_ZUI_H)
 MoveC_Chizuru_ShinsokuNoroti:
-	call Play_Pl_CreateJoyMergedKeysLH
+	call Play_Pl_AddToJoyBufKeysLH
 	call Play_Pl_MoveByColiBoxOverlapX
 	mMvC_ValLoaded .ret
 	
@@ -10712,7 +10712,7 @@ MoveC_Chizuru_ShinsokuNoroti:
 ; Forward run.
 .obj0:
 	mMvC_ValFrameStart .obj0_cont
-		call Play_Pl_ClearJoyMergedKeysLH
+		call Play_Pl_ClearJoyBufKeysLH
 		ld   hl, iPlInfo_Chizuru_ShinsokuNoroti_ChainedMove
 		add  hl, bc
 		ld   [hl], $00
@@ -10795,7 +10795,7 @@ MoveC_Chizuru_ShinsokuNoroti:
 .chkCm_chkInputHuman:
 	; Human players need to perform the input DB+P/K to start 212 Katsu Shinsoku no Noroti Ten Zui.
 	; Depending on the button pressed, start the light or hard versions.
-	call MoveInputS_CheckPKTypeWithMergedLH
+	call MoveInputS_CheckPKTypeWithJoyBufKeysLH
 	jp   nc, .chkCm_retZ		; Pressed any punch/kick button? If not, jump
 	jp   nz, .chkCm_chkTenZuiH	; Pressed the kick button? If so start the hard version
 .chkCm_chkTenZuiL:				; Otherwise, start the light one

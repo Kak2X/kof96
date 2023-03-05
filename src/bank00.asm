@@ -8672,7 +8672,7 @@ Play_DoPl:
 	jp   .mainLoop
 	
 .go:
-	; Create base inputs
+	; Create LH inputs
 	call Play_Pl_CreateJoyKeysLH
 	; Apply opponent-induced effects (push speed, hitstop)
 	call Play_Pl_ChkHitstop				; Did we start a new move from here?
@@ -9590,8 +9590,8 @@ Pl_SetNewMove:
 			add  hl, bc
 			ld   [hl], a
 			
-			; Blank out iPlInfo_JoyMergedKeysLH in case it was used to check for inputs
-			ld   hl, iPlInfo_JoyMergedKeysLH
+			; Blank out iPlInfo_JoyBufKeysLH in case it was used to check for inputs
+			ld   hl, iPlInfo_JoyBufKeysLH
 			add  hl, bc
 			ld   [hl], $00
 			
@@ -9945,7 +9945,7 @@ OBJLstS_Hide:
 ; speed to check, calling OBJLstS_ReqAnimOnGtYSpeed to request advancing the animation once.
 MoveC_Base_Jump:
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_CreateJoyMergedKeysLH
+	call Play_Pl_AddToJoyBufKeysLH
 	mMvC_ValLoaded .ret
 	
 	; Moves use iOBJInfo_OBJLstPtrTblOffsetView to always execute code relevant to the visible frame.
@@ -9976,7 +9976,7 @@ MoveC_Base_Jump:
 	jr   z, .chkAct		; If so, skip
 	
 	; Check if we're starting normals in the middle of the jump
-	ld   hl, iPlInfo_JoyMergedKeysLH
+	ld   hl, iPlInfo_JoyBufKeysLH
 	add  hl, bc
 	; Normals (air)
 	bit  KEPB_A_LIGHT, [hl]	; Light kick?
@@ -11171,10 +11171,16 @@ Play_Pl_ClearJoyBtnBuffer:
 	
 ; =============== Play_Pl_CreateJoyKeysLH ===============
 ; Generates the field iPlInfo_JoyKeysLH for the specified player.
-; This merges the held directional keys from iPlInfo_JoyKeys with the light/heavy flags.
 ;
+; This merges the held directional keys from iPlInfo_JoyKeys with the light/heavy flags.
 ; The value generated is the main one used by the input readers to detect if a punch/kick button
 ; was pressed, so it should be run before those.
+;
+; Note that *nothing* is read from the existing iPlInfo_JoyKeysLH value, meaning that by
+; default the LH info is only valid for one frame.
+; For that purpose, iPlInfo_JoyBufKeysLH is also OR'd over, which is a separate field
+; that contains the buffer of previous LH values, but that only gets updated manually
+; by calling Play_Pl_AddToJoyBufKeysLH.
 ; 
 ; IN
 ; - BC: Ptr to wPlInfo structure
@@ -11187,11 +11193,12 @@ Play_Pl_CreateJoyKeysLH:
 		ldi  a, [hl]	
 		and  a, KEY_RIGHT|KEY_LEFT|KEY_UP|KEY_DOWN
 		ld   b, a
-		; A = Light/Heavy button info (mix of current and ???? set)
-		;    (iPlInfo_JoyNewKeysLH | iPlInfo_JoyMergedKeysLH) & $F0
+		; A = Light/Heavy button info with everything merged.
+		;    (iPlInfo_JoyNewKeysLH | iPlInfo_JoyBufKeysLH) & $F0
+		;     Note that the LH info doesn't persist by default
 		ldi  a, [hl]	; A = iPlInfo_JoyNewKeysLH
 		inc  hl			; Seek to iPlInfo_JoyNewKeysLHPreJump
-		inc  hl			; Seek to iPlInfo_JoyMergedKeysLH
+		inc  hl			; Seek to iPlInfo_JoyBufKeysLH
 		or   a, [hl]	
 		and  a, KEP_A_LIGHT|KEP_B_LIGHT|KEP_A_HEAVY|KEP_B_HEAVY ; Filter valid LK bits
 		or   b ; Merge both variables
@@ -11202,28 +11209,33 @@ Play_Pl_CreateJoyKeysLH:
 	ld   [hl], a
 	ret
 	
-; =============== Play_Pl_CreateJoyMergedKeysLH ===============
-; Merges the current light/heavy flags to iPlInfo_JoyMergedKeysLH.
-; This is only called when a move uses iPlInfo_JoyMergedKeysLH to 
-; check inputs. TODO: Purpose over iPlInfo_JoyNewKeysLH directly ???
+; =============== Play_Pl_AddToJoyBufKeysLH ===============
+; OR's iPlInfo_JoyNewKeysLH to iPlInfo_JoyBufKeysLH, which will
+; keep every value until something clears it manually (ie: starting a new move).
+;
+; This is typically used when checking inputs for submoves.
+; Why doesn't this directly write to iPlInfo_JoyKeysLH? Likely to avoid having
+; the previously held buttons (from before starting the move) to count.
+; Note that iPlInfo_JoyBufKeysLH always gets wiped when starting a new move.
+;
 ; IN
 ; - BC: Ptr to wPlInfo structure
 ; OUT
-; - C flag: If set, iPlInfo_JoyMergedKeysLH was updated
-Play_Pl_CreateJoyMergedKeysLH:
+; - C flag: If set, iPlInfo_JoyBufKeysLH was updated
+Play_Pl_AddToJoyBufKeysLH:
 	; Read flags
 	ld   hl, iPlInfo_JoyNewKeysLH
 	add  hl, bc		; Seek to iPlInfo_JoyNewKeysLH
 	ld   a, [hl]	; A = iPlInfo_JoyNewKeysLH
-	; If the updated flags are blank, keep the old ones 
+	; If the updated flags are blank, there's no need to update anything 
 	and  a, KEP_A_LIGHT|KEP_B_LIGHT|KEP_A_HEAVY|KEP_B_HEAVY ; Filter valid LH bits
 	jr   z, .retClear
 .update:
 	; Otherwise, OR them over
-	; iPlInfo_JoyMergedKeysLH
-	ld   hl, iPlInfo_JoyMergedKeysLH
+	; iPlInfo_JoyBufKeysLH
+	ld   hl, iPlInfo_JoyBufKeysLH
 	add  hl, bc		
-	or   a, [hl]	; A |= iPlInfo_JoyMergedKeysLH
+	or   a, [hl]	; A |= iPlInfo_JoyBufKeysLH
 	ld   [hl], a	; Save it there
 .retSet:
 	scf				 
@@ -11627,7 +11639,7 @@ Play_Pl_EndMove:
 	ldi  [hl], a	; iOBJInfo_SpeedY
 	ld   [hl], a	; iOBJInfo_SpeedYSub
 	
-	; If we were performing a special move, clear iPlInfo_JoyMergedKeysLH
+	; If we were performing a special move, clear iPlInfo_JoyBufKeysLH
 	; This causes ???
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
@@ -11635,7 +11647,7 @@ Play_Pl_EndMove:
 	and  a, PF0_SUPERMOVE|PF0_SPECMOVE	; Doing a special or super?
 	jp   z, .clearFlags						; If not, skip
 	push hl
-		ld   hl, iPlInfo_JoyMergedKeysLH
+		ld   hl, iPlInfo_JoyBufKeysLH
 		add  hl, bc
 		ld   [hl], $00
 	pop  hl
@@ -12867,7 +12879,7 @@ Pl_SetMove_StopSpeed:
 ; This is used for starting basic moves (BasicInput_ChkBaseInput) that depend on the light/heavy status.
 ;
 ; These basic inputs don't kill the player's momentum, but do unmark any other newly pressed key,
-; in case we're starting a move that calls Play_Pl_CreateJoyMergedKeysLH to do something 
+; in case we're starting a move that calls Play_Pl_AddToJoyBufKeysLH to do something 
 ; (ie: start chained move, end the move early, ...)
 ;
 ; IN
@@ -14855,7 +14867,7 @@ Play_Pl_ChkThrowInput:
 	; If the opponent is being thrown "backwards", first switch the player's positions
 	; before starting the normal throw.
 	ld   a, [wPlayPlThrowDir]
-	or   a 					; wPlayPlThrowDir == PLAY_THROWOP_GROUND
+	or   a 					; wPlayPlThrowDir == PLAY_THROWDIR_F
 	jp   z, .retSet			; If so, skip
 	; Switch X positions
 	push bc
@@ -15105,7 +15117,7 @@ Play_Pl_ChkHitstop:
 	jp   z, .noStart	; If not, return
 .loop:
 	; Generate the light/heavy button info
-	call Play_Pl_CreateJoyMergedKeysLH
+	call Play_Pl_AddToJoyBufKeysLH
 	call Play_Pl_CreateJoyKeysLH
 	
 	; Check for special move inputs (character-specific)
@@ -15822,7 +15834,7 @@ HomeCall_Play_Pl_DoHit:
 ;                    This will be used when determining if the light or heavy move should start,
 ;                    see MoveInputS_CheckMoveLHVer
 MoveInputS_CheckGAType:
-	; A = Held keys
+	; A = Held keys + current LH keys
 	ld   hl, iPlInfo_JoyKeysLH
 	add  hl, bc
 	ld   a, [hl]		
@@ -15866,28 +15878,30 @@ MoveInputS_CheckGAType:
 	scf		; Set carry
 	ret
 	
-; =============== Play_Pl_ClearJoyMergedKeysLH ===============
-; Blank out iPlInfo_JoyMergedKeysLH for the specified player.
+; =============== Play_Pl_ClearJoyBufKeysLH ===============
+; Blank out iPlInfo_JoyBufKeysLH for the specified player.
 ; IN
 ; - BC: Ptr to wPlInfo structure
-Play_Pl_ClearJoyMergedKeysLH:
-	ld   hl, iPlInfo_JoyMergedKeysLH
+Play_Pl_ClearJoyBufKeysLH:
+	ld   hl, iPlInfo_JoyBufKeysLH
 	add  hl, bc
 	ld   [hl], $00
 	ret
 	
-; =============== MoveInputS_CheckPKTypeWithMergedLH ===============
+; =============== MoveInputS_CheckPKTypeWithJoyBufKeysLH ===============
 ; Simplified version of MoveInputS_CheckGAType that only determines if the attack
 ; triggered by the buttons is a light or a heavy.
-; This also uses iPlInfo_JoyMergedKeysLH instead of iPlInfo_JoyKeysLH.
+; This also uses iPlInfo_JoyBufKeysLH instead of iPlInfo_JoyKeysLH, because this
+; is called from move code that expects to use buffer of LH keys without old
+; values from before the move started.
 ; IN
 ; - BC: Ptr to wPlInfo structure
 ; OUT
 ; - C flag: If set, the punch or kick button was registered as being pressed.
 ; - Z flag: If set, a punch was registered. Otherwise, it's a kick.
-MoveInputS_CheckPKTypeWithMergedLH:
+MoveInputS_CheckPKTypeWithJoyBufKeysLH:
 	; A = Held keys
-	ld   hl, iPlInfo_JoyMergedKeysLH
+	ld   hl, iPlInfo_JoyBufKeysLH
 	add  hl, bc
 	ld   a, [hl]
 	

@@ -128,7 +128,7 @@ MoveC_Base_RunF:
 	; The player needs to hold forward to continue running.
 	; Use Play_Pl_GetDirKeys_ByXFlipR to get d-pad keys relative to the 1P side.
 	;
-	call Play_Pl_CreateJoyMergedKeysLH	; Did we just press A or B?
+	call Play_Pl_AddToJoyBufKeysLH		; Did we just press A or B?
 	jp   c, .end						; If so, stop running
 	call Play_Pl_GetDirKeys_ByXFlipR	; Holding any key in the d-pad?
 	jp   nc, .end						; If not, stop running
@@ -363,8 +363,8 @@ MoveC_Base_NormL:
 	; Something similar also happens in .obj1, except it
 	; also makes the animation immediately jump to its last frame.
 	;
-	call Play_Pl_CreateJoyMergedKeysLH	; Pressed any new LH button?
-	jp   nc, .chkAnim					; If not, skip
+	call Play_Pl_AddToJoyBufKeysLH	; Pressed any new LH button?
+	jp   nc, .chkAnim				; If not, skip
 	ld   hl, iOBJInfo_FrameLeft
 	add  hl, de
 	ld   [hl], $00
@@ -404,7 +404,7 @@ MoveC_Base_NormL:
 	mMvC_ValFrameEnd .anim
 	
 	; If we aren't pressing a punch/kick button, continue
-	ld   hl, iPlInfo_JoyMergedKeysLH
+	ld   hl, iPlInfo_JoyBufKeysLH
 	add  hl, bc
 	ld   a, [hl]
 	and  a, KEP_A_LIGHT|KEP_B_LIGHT|KEP_A_HEAVY|KEP_B_HEAVY
