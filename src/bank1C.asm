@@ -1315,7 +1315,7 @@ Title_Mode_TitleMenu:
 	ldh  [hScrollX], a
 	ld   a, $20
 	ldh  [hScrollY], a
-	ld   a, $08					; ???
+	ld   a, $08
 	ld   [wOBJScrollY], a
 	
 	; Save current cursor location
@@ -1541,10 +1541,10 @@ Title_Mode_ModeSelect:
 ; Sets of functions to set which players are controlled by the CPU, depending on the mode.
 
 ModeSelect_PrepSingle:
-	; SGB-only, wJoyActivePl is always ACTIVE_CTRL_PL1 in DMG
+	; SGB-only, wJoyActivePl is always PL1 in DMG
 	ld   a, [wJoyActivePl]
-	cp   ACTIVE_CTRL_PL1		; Does player 1 have control?
-	jp   nz, .pl2			; If not, jump
+	cp   PL1		; Does player 1 have control?
+	jp   nz, .pl2	; If not, jump
 .pl1:
 	; P1: Player, P2: CPU
 	ld   hl, wPlInfo_Pl1+iPlInfo_Flags0
@@ -2607,12 +2607,12 @@ TitleScreen_IsStartPressed:
 	xor  a					; C = 0, not pressed
 	ret
 .pressed1:
-	ld   a, ACTIVE_CTRL_PL1	; Player 1 pressed it
+	ld   a, PL1				; Player 1 pressed it
 	ld   [wJoyActivePl], a
 	scf						; C = 1, pressed
 	ret
 .pressed2:
-	ld   a, ACTIVE_CTRL_PL2	; Player 2 pressed it
+	ld   a, PL2				; Player 2 pressed it
 	ld   [wJoyActivePl], a
 	scf						; C = 1, pressed
 	ret
@@ -2653,7 +2653,7 @@ Title_GetMenuInput:
 	; Pick the controller from the active side
 	;
 	ld   a, [wJoyActivePl]
-	cp   ACTIVE_CTRL_PL1			; Is pad 1 active?
+	cp   PL1					; Is pad 1 active?
 	jp   nz, .usePl2			; If not, jump
 .usePl1:
 	ld   hl, hJoyKeys			; HL = Controller 1 input
@@ -3577,7 +3577,7 @@ IntroScene_TextPrint:
 	ld   a, BGM_IN1996
 	call HomeCall_Sound_ReqPlayExId_Stub
 	call Intro_CharS_LoadVRAM
-	ld   a, ISC_CHAR
+	ld   a, GM_INTRO_CHAR
 	ld   [wIntroScene], a
 	ret
 .abort:
@@ -3596,9 +3596,9 @@ IntroScene_Chars:
 	; There are also a few special cases for exiting to different intro scenes.
 	
 	ld   a, [wIntroCharScene]
-	cp   ISCC_CHG_IORIRISE	; SceneId == $1C?
+	cp   INTRO_SCENE_CHG_IORIRISE	; SceneId == $1C?
 	jr   z, .startIoriRise	; If so, jump
-	cp   ISCC_CHG_IORIKYO	; SceneId == $26?
+	cp   INTRO_SCENE_CHG_IORIKYO	; SceneId == $26?
 	jr   z, .startIoriKyo	; If so, jump
 .dynJump:
 	ld   hl, Intro_CharScene_PtrTable
@@ -3609,7 +3609,7 @@ IntroScene_Chars:
 	; Prepare VRAM and exit
 	; (we disabled player sprites at the end of Intro_CharScene_Mature)
 	call Intro_IoriRise_LoadVRAM
-	ld   a, ISC_IORIRISE
+	ld   a, GM_INTRO_IORIRISE
 	ld   [wIntroScene], a
 	xor  a
 	ret
@@ -3622,7 +3622,7 @@ IntroScene_Chars:
 	res  OSTB_VISIBLE, [hl]
 	; Prepare VRAM and exit
 	call Intro_IoriKyo_LoadVRAM
-	ld   a, ISC_IORIKYO		
+	ld   a, GM_INTRO_IORIKYO		
 	ld   [wIntroScene], a
 	xor  a
 	ret
@@ -4007,7 +4007,7 @@ Intro_CharScene_Mature:
 	ld   hl, $9805
 	call Intro_CharS_FillBGRectLeft_MultiFrame
 	
-	; Hide player sprites since we're moving to ISC_IORIRISE
+	; Hide player sprites since we're moving to GM_INTRO_IORIRISE
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	res  OSTB_VISIBLE, [hl]
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
@@ -4097,13 +4097,13 @@ Intro_CharScene_IoriKyoC:
 	; attack frame when they get to the center of the screen.
 	;
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset]
-	cp   $04*4								; Reached frame 4? (which is still loading)
+	cp   $04*OBJLSTPTR_ENTRYSIZE			; Reached frame 4? (which is still loading)
 	jr   nz, .chkIori						; If not, skip
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status	; End animation. The frame will still applied when it loads.
 	set  OSTB_ANIMEND, [hl]
-.chkIori:;R
+.chkIori:
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffset]
-	cp   $01*4								; Reached frame 1? (which is still loading)
+	cp   $01*OBJLSTPTR_ENTRYSIZE			; Reached frame 1? (which is still loading)
 	jr   nz, .waitEnd						; If not, skip
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status	; End animation. The frame will still applied when it loads.
 	set  OSTB_ANIMEND, [hl]
@@ -4171,7 +4171,7 @@ Intro_CharS_SetNextChar:
 	; Generate the index to the table
 	ld   a, [wIntroCharScene]	; A = (wIntroCharScene / 2) - 2
 	srl  a						; /2 because it's an offset, not index
-	sub  a, (ISCC_ANDY/2)		; -2 to save bytes, since the Andy scene is the first one to call this
+	sub  a, (INTRO_SCENE_ANDY/2)		; -2 to save bytes, since the Andy scene is the first one to call this
 	
 	; Pick the first player slot whose animation is ended.
 	;
@@ -4276,22 +4276,22 @@ mIntroCharDef: MACRO
 ENDM
 
 	;;;;;;;;;;;;; ANIMATION TABLE       |  X|   Y| ANIMDELAY ; BANK | For Scene Loading
-	mIntroCharDef L0860DC,               $50, $40,       $00 ;  $08 | ISCC_MAI        
-	mIntroCharDef L08526D,               $20, $40,       $00 ;  $08 | ISCC_ATHENA     
-	mIntroCharDef L0A5DBD,               $50, $40,       $03 ;  $0A | ISCC_LEONA      
-	mIntroCharDef L075391,               $80, $00,       $06 ;  $07 | ISCC_ROBERT     
-	mIntroCharDef L0A40FC,               $20, $50,       $04 ;  $0A | ISCC_RYO        
-	mIntroCharDef L0A460C,               $50, $24,       $08 ;  $0A | ISCC_MRKARATE   
-	mIntroCharDef L0770C1,               $20, $24,       $00 ;  $07 | ISCC_MRBIG      
-	mIntroCharDef L076226,               $80, $24,       $00 ;  $07 | ISCC_GEESE      
-	mIntroCharDef L095B53,               $50, $24,       $00 ;  $09 | ISCC_KRAUSER    
-	mIntroCharDef L09409E,               $84, $40,       $00 ;  $09 | ISCC_DAIMON     
-	mIntroCharDef L096891,               $1C, $40,       $06 ;  $09 | ISCC_MATURE     
-	db      $00,  $00,$00,               $00, $00,       $00 ;  $00 | ISCC_CHG_IORIRISE (N/A)
-	mIntroCharDef L0740F2,               $84, $40,       $00 ;  $07 | ISCC_KYO        
-	mIntroCharDef L0540AC,               $1C, $40,       $00 ;  $05 | ISCC_IORIKYOA   
-	mIntroCharDef L07443C,               $84, $40,       $03 ;  $07 | ISCC_IORIKYOB   
-	mIntroCharDef L054464,               $1C, $40,       $0F ;  $05 | ISCC_IORIKYOC 
+	mIntroCharDef L0860DC,               $50, $40,       $00 ;  $08 | INTRO_SCENE_MAI        
+	mIntroCharDef L08526D,               $20, $40,       $00 ;  $08 | INTRO_SCENE_ATHENA     
+	mIntroCharDef L0A5DBD,               $50, $40,       $03 ;  $0A | INTRO_SCENE_LEONA      
+	mIntroCharDef L075391,               $80, $00,       $06 ;  $07 | INTRO_SCENE_ROBERT     
+	mIntroCharDef L0A40FC,               $20, $50,       $04 ;  $0A | INTRO_SCENE_RYO        
+	mIntroCharDef L0A460C,               $50, $24,       $08 ;  $0A | INTRO_SCENE_MRKARATE   
+	mIntroCharDef L0770C1,               $20, $24,       $00 ;  $07 | INTRO_SCENE_MRBIG      
+	mIntroCharDef L076226,               $80, $24,       $00 ;  $07 | INTRO_SCENE_GEESE      
+	mIntroCharDef L095B53,               $50, $24,       $00 ;  $09 | INTRO_SCENE_KRAUSER    
+	mIntroCharDef L09409E,               $84, $40,       $00 ;  $09 | INTRO_SCENE_DAIMON     
+	mIntroCharDef L096891,               $1C, $40,       $06 ;  $09 | INTRO_SCENE_MATURE     
+	db      $00,  $00,$00,               $00, $00,       $00 ;  $00 | INTRO_SCENE_CHG_IORIRISE (N/A)
+	mIntroCharDef L0740F2,               $84, $40,       $00 ;  $07 | INTRO_SCENE_KYO        
+	mIntroCharDef L0540AC,               $1C, $40,       $00 ;  $05 | INTRO_SCENE_IORIKYOA   
+	mIntroCharDef L07443C,               $84, $40,       $03 ;  $07 | INTRO_SCENE_IORIKYOB   
+	mIntroCharDef L054464,               $1C, $40,       $0F ;  $05 | INTRO_SCENE_IORIKYOC 
 	
 ; =============== IntroScene_IoriRise ===============
 ; OUT
@@ -4309,10 +4309,10 @@ IntroScene_IoriRise:
 		call .addToPos
 		
 		; Move Iori up at $00.36px/frame
-		ld   hl, wOBJInfo2+iOBJInfo_Y
+		ld   hl, wOBJInfo_IIoriH+iOBJInfo_Y
 		ld   bc, -$0036
 		call .addToPos
-		ld   hl, wOBJInfo3+iOBJInfo_Y
+		ld   hl, wOBJInfo_IIoriL+iOBJInfo_Y
 		ld   bc, -$0036
 		call .addToPos
 		
@@ -4321,13 +4321,13 @@ IntroScene_IoriRise:
 		; The reason the flag is set to begin with is because, otherwise,
 		; it would be visible on the lower section.
 		;
-		; The lower half of the sprite in wOBJInfo3 never reaches high enough,
-		; so it gets to keep its BG Priority flag.
+		; The lower half of the sprite in wOBJInfo_IIoriL never reaches
+		; high enough, so it gets to keep its BG Priority flag.
 		
-		ld   a, [wOBJInfo2+iOBJInfo_Y]
-		cp   $30								; Has Y position $30?
-		jr   nz, .noRemBGPr						; If not, skip
-		ld   hl, wOBJInfo2+iOBJInfo_OBJLstFlags	; Otherwise, remove BG priority
+		ld   a, [wOBJInfo_IIoriH+iOBJInfo_Y]
+		cp   $30										; Has Y position $30?
+		jr   nz, .noRemBGPr								; If not, skip
+		ld   hl, wOBJInfo_IIoriH+iOBJInfo_OBJLstFlags	; Otherwise, remove BG priority
 		res  SPRB_BGPRIORITY, [hl]
 	.noRemBGPr:
 	
@@ -4370,9 +4370,9 @@ IntroScene_IoriRise:
 	ldh  [rSTAT], a
 	
 	; Hide large sprite
-	ld   hl, wOBJInfo2+iOBJInfo_Status
+	ld   hl, wOBJInfo_IIoriH+iOBJInfo_Status
 	res  OSTB_VISIBLE, [hl]
-	ld   hl, wOBJInfo3+iOBJInfo_Status
+	ld   hl, wOBJInfo_IIoriL+iOBJInfo_Status
 	res  OSTB_VISIBLE, [hl]
 	
 	; Set new pal
@@ -4383,15 +4383,15 @@ IntroScene_IoriRise:
 	ld   a, $4C
 	ldh  [rOBP1], a
 	
-	; Loop the animations from the remainder of the modes (ISCC_KYO and above) 
+	; Loop the animations from the remainder of the modes (INTRO_SCENE_KYO and above) 
 	ld   a, $FF
 	ld   [wIntroLoopOBJAnim], a
 	
 	; Next mode
 	call Intro_CharS_SetNextChar
-	ld   a, ISCC_KYO
+	ld   a, INTRO_SCENE_KYO
 	ld   [wIntroCharScene], a
-	ld   a, ISC_CHAR
+	ld   a, GM_INTRO_CHAR
 	ld   [wIntroScene], a
 	xor  a
 	ret
@@ -5012,16 +5012,16 @@ Intro_IoriRise_LoadVRAM:
 	
 	; Write Iori's sprites to the special slots.
 	; This Iori is big enough that two sprites are needed to display him.
-	ld   hl, wOBJInfo2+iOBJInfo_Status
+	ld   hl, wOBJInfo_IIoriH+iOBJInfo_Status
 	ld   de, OBJInfoInit_Intro_Iori
 	call OBJLstS_InitFrom
-	ld   hl, wOBJInfo3+iOBJInfo_Status
+	ld   hl, wOBJInfo_IIoriL+iOBJInfo_Status
 	ld   de, OBJInfoInit_Intro_Iori
 	call OBJLstS_InitFrom
 	
-	; ???
-	ld   a, $04
-	ld   [wOBJInfo3+iOBJInfo_OBJLstPtrTblOffset], a
+	; Set second sprite mapping (wOBJInfo_IIoriH keeps its INTRO_OBJ_IORIH)
+	ld   a, INTRO_OBJ_IORIL*OBJLSTPTR_ENTRYSIZE
+	ld   [wOBJInfo_IIoriL+iOBJInfo_OBJLstPtrTblOffset], a
 	
 	; Display the WINDOW
 	ld   a, $00

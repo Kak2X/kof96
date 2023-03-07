@@ -58,19 +58,11 @@ MODE_TEAM1P   EQU $01
 MODE_SINGLEVS EQU $02
 MODE_TEAMVS   EQU $03
 
-; TODO: Replace all other related constants with these
 ; Player IDs used across multiple variables
 PL1 EQU $00		
 PL2 EQU $01
 PLB1 EQU 0 ; $01
 PLB2 EQU 1 ; $02
-
-ACTIVE_CTRL_PL1          EQU $00
-ACTIVE_CTRL_PL2          EQU $01
-
-LASTWIN_PL1 EQU 0
-LASTWIN_PL2 EQU 1
-
 
 ; Character IDs
 ; [POI] These are grouped by team, not like it matters.
@@ -172,7 +164,6 @@ GFXBUF_TILECOUNT EQU $20 ; Number of tiles in a GFX buffer
 
 ; iOBJInfo_Status bits
 OSTB_GFXLOAD    EQU 0 ; If set, the graphics are still being copied to the *opposite* buffer than the current one at OSTB_GFXBUF2
-OSTB_PL         EQU 0 ; ??? If the sprite mapping doesn't use the GFX buffer (ie: projectiles), it instead marks the player who spawned it (PLB1 or PLB2).
 OSTB_GFXBUF2    EQU 1 ; If set, the second GFX buffer is used for the *current* frame
 OSTB_GFXNEWLOAD EQU 3 ; If set, the graphics have just finished loading. Effectively valid for 1 frame only, since the animation routines resets it.
 OSTB_ANIMEND    EQU 4 ; Animation has ended, repeat last frame indefinitely
@@ -181,7 +172,6 @@ OSTB_YFLIP      EQU 6 ; Vertical flip
 OSTB_VISIBLE    EQU 7 ; If not set, the sprite mapping is hidden
 
 OST_GFXLOAD     EQU 1 << OSTB_GFXLOAD
-OST_PL          EQU 1 << OSTB_PL
 OST_GFXBUF2     EQU 1 << OSTB_GFXBUF2
 OST_GFXNEWLOAD  EQU 1 << OSTB_GFXNEWLOAD
 OST_ANIMEND     EQU 1 << OSTB_ANIMEND
@@ -454,35 +444,37 @@ SCRPAL_STAGE_STADIUM EQU $0A
 ; ============================================================
 ; INTRO
 
-; TODO: GM_INTRO_TEXTPRINT...
-ISC_TEXTPRINT       EQU $00
-ISC_CHAR            EQU $02
-ISC_IORIRISE        EQU $04
-ISC_IORIKYO         EQU $06
+GM_INTRO_TEXTPRINT       EQU $00
+GM_INTRO_CHAR            EQU $02
+GM_INTRO_IORIRISE        EQU $04
+GM_INTRO_IORIKYO         EQU $06
 
-ISCC_INIT           EQU $00
-ISCC_TERRY          EQU $02
-ISCC_ANDY           EQU $04
-ISCC_MAI            EQU $06
-ISCC_ATHENA         EQU $08
-ISCC_LEONA          EQU $0A
-ISCC_ROBERT         EQU $0C
-ISCC_RYO            EQU $0E
-ISCC_MRKARATE       EQU $10
-ISCC_MRBIG          EQU $12
-ISCC_GEESE          EQU $14
-ISCC_KRAUSER        EQU $16
-ISCC_DAIMON         EQU $18
-ISCC_MATURE         EQU $1A
-ISCC_CHG_IORIRISE   EQU $1C
-ISCC_KYO            EQU $1E
-ISCC_IORIKYOA       EQU $20
-ISCC_IORIKYOB       EQU $22
-ISCC_IORIKYOC       EQU $24
-ISCC_CHG_IORIKYO    EQU $26
+INTRO_SCENE_INIT         EQU $00
+INTRO_SCENE_TERRY        EQU $02
+INTRO_SCENE_ANDY         EQU $04
+INTRO_SCENE_MAI          EQU $06
+INTRO_SCENE_ATHENA       EQU $08
+INTRO_SCENE_LEONA        EQU $0A
+INTRO_SCENE_ROBERT       EQU $0C
+INTRO_SCENE_RYO          EQU $0E
+INTRO_SCENE_MRKARATE     EQU $10
+INTRO_SCENE_MRBIG        EQU $12
+INTRO_SCENE_GEESE        EQU $14
+INTRO_SCENE_KRAUSER      EQU $16
+INTRO_SCENE_DAIMON       EQU $18
+INTRO_SCENE_MATURE       EQU $1A
+INTRO_SCENE_CHG_IORIRISE EQU $1C
+INTRO_SCENE_KYO          EQU $1E
+INTRO_SCENE_IORIKYOA     EQU $20
+INTRO_SCENE_IORIKYOB     EQU $22
+INTRO_SCENE_IORIKYOC     EQU $24
+INTRO_SCENE_CHG_IORIKYO  EQU $26
 
-TILE_INTRO_WHITE    EQU $00
-TILE_INTRO_BLACK    EQU $01
+TILE_INTRO_WHITE         EQU $00
+TILE_INTRO_BLACK         EQU $01
+
+INTRO_OBJ_IORIH          EQU $00
+INTRO_OBJ_IORIL          EQU $01
 
 ; ============================================================
 ; TITLE SCREEN / MENUS

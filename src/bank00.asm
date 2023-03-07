@@ -930,9 +930,9 @@ Task_PassControl_Delay3B:
 	
 ; =============== Task_RemoveCurAndPassControl ===============	
 ; Like Task_PassControl, except the current task is removed before passing control.
-; Only used in ???????
+; Only used when the round ends, to remove player tasks.
 Task_RemoveCurAndPassControl:
-	di							; TODO: ?????
+	di							; Pointless
 	call Task_IndexTaskAuto		; Index current task
 	ld   [hl], TASK_EXEC_NONE	; Disable it
 	jp   Task_GetNext
@@ -1175,7 +1175,7 @@ LCDCHandler_Title:
 		ldh  [rSCX], a
 		ld   a, $7B				; Next LYC trigger
 		jp   .end
-	.mode3:;J
+	.mode3:
 		ld   a, $04
 		ld   [wLCDCSectId], a
 		ldh  a, [hTitleParallax3X]
@@ -1421,8 +1421,7 @@ mVBlank_CopyPlTiles: MACRO
 	;
 	; Note that this is *NOT* used to update the damage values when a new move starts.
 	; That's instead handled by Play_Pl_IsMoveLoading, which if needed has to be called manually at the start
-	; of a move (MoveC_*).
-	; Why isn't this also handling the "new move" handler? Probably related to its special cases ???
+	; of a move (MoveC_*), likely because there are special cases for updating those.
 	;
 	ld   hl, \1+iPlInfo_Flags2
 	bit  PF2B_MOVESTART, [hl]		; Was a move started?
@@ -1569,8 +1568,7 @@ VBlank_SetInitialSect:
 	ldh  [rBGP], a
 	
 	; If we have a lag frame or game is frozen, don't update sprites.
-	; Important for battle syncronization purposes, as sprites also determine
-	; something ??? in the player actor info.
+	; This avoids inconsistencies, even though it doesn't really matter as it's all purely visual.
 	ld   a, [wMisc_C026]
 	bit  MISCB_LAG_FRAME, a				
 	jp   nz, .stdSect_noDMA
@@ -1814,9 +1812,9 @@ mPL_KeepInScreenRange: MACRO
 	; If the distance is too small (player near the left border of the screen) or too large (near the right border),
 	; forcefully try to keep it in range.
 	;
-	; An extra $08 is added to the result to account for the player's origin being at the center of the sprite,
-	; compared to the screen origin being at the left corner of the screen.
-	; TODO: VERIFY
+	; An extra 8px is added to the result because the player origin is always at the center of the player's collision box,
+	; while the screen origin is always at the left corner of the screen.
+	; Perhaps due to this (or the other way around), the collision box for players is almost always 16px large.
 	;
 	
 	; Take the relative X position into account, since that's outside of iOBJInfo_X
@@ -4582,12 +4580,12 @@ LoadGFX_1bppFont_Default:
 	ldh  [hROMBank], a
 	ret
 ; =============== LoadGFX_Unused_1bppFontCustomCol ===============	
+; [TCRF] Unreferenced code.
 ; Loads the font GFX with custom palette settings.
-; [TCRF] Unused ???
 ; IN
 ; - D: Color to map to bit0
 ; - E: Color to map to bit1
-L0011B5:
+LoadGFX_Unused_1bppFontCustomCol:
 	ldh  a, [hROMBank]
 	push af
 	ld   a, BANK(FontDef_Default) ; BANK $1D
@@ -4624,12 +4622,12 @@ L0011B5:
 	ret  
 	
 ; =============== LoadGFX_Unused_1bppFontCustomAddr ===============
+; [TCRF] Unreferenced code.
 ; Loads the font GFX at a custom location.
-; [TCRF] Unused ???
 ; IN
 ; - DE: Destination ptr in VRAM
 ; -  B: Number of tiles to copy
-L0011DC:
+LoadGFX_Unused_1bppFontCustomAddr:
 	ldh  a, [hROMBank]
 	push af
 	ld   a, BANK(FontDef_Default.col) ; BANK $1D
@@ -4873,8 +4871,9 @@ NumberPrinter_Instant:
 	pop  bc
 	
 	; Offset the tile ID if necessary.
-	; ??? TODO VERIFY. This is necessary in case the normal 1bpp font isn't loaded,
-	; with the numbers having different tile IDs.	
+	; This would be necessary in case the normal 1bpp font
+	; isn't loaded, with the numbers having different tile IDs.
+	; ??? This never happens though.
 	add  c
 	
 	; Write it to the tilemap
@@ -5259,7 +5258,7 @@ Play_LoadStage:
 		
 		;--
 		; The extra round fighting against IORI' or LEONA' uses an hardcoded stage.
-		; [POI] ??? This is pointless, as the correct entries are already set in Play_CharStageMapTbl.
+		; [POI] This is pointless, as the correct entries are already set in Play_CharStageMapTbl.
 		ld   a, [wRoundSeqId]
 		cp   STAGESEQ_BONUS	; RoundId == STAGESEQ_BONUS?
 		jp   nz, .load		; If not, skip
@@ -5668,7 +5667,7 @@ Serial_DoHandshake:
 		ld   [wSerialDataSendBufferIndex_Head], a
 		ld   a, $00
 		ld   [wSerialDataSendBufferIndex_Tail], a
-		call Serial_Unknown_WaitAfterSend
+		call Serial_WaitAfterHandshake
 	.end:
 		; End all existing interrupt requests
 		xor  a
@@ -5677,9 +5676,10 @@ Serial_DoHandshake:
 	pop  af			
 	ldh  [rIE], a
 	ret
-; =============== Serial_UnkSend ===============	
+; =============== Serial_Unused_NulSend ===============
+; [TCRF] Unreferenced code, probably for testing.
 ; Sends a null byte $10 times to the other GB.
-L00161A:
+Serial_Unused_NulSend:
 	; Clear transfer flag... if it's useful
 	xor  a
 	ld   [wSerialTransferDone], a
@@ -5696,7 +5696,7 @@ L00161A:
 		ldh  [rSC], a
 		ei 
 		;--
-		call Serial_Unknown_WaitAfterSend
+		call Serial_WaitAfterHandshake
 		;--
 		; What's the point
 		ld   a, [wSerialTransferDone]
@@ -6029,9 +6029,9 @@ SerialHandler_HeadBufferSet:
 	inc  [hl]
 	ret  
 	
-; =============== Serial_Unknown_WaitAfterSend ===============
-; Waits for exactly <???> hardware cycles after finishing with ???.
-Serial_Unknown_WaitAfterSend:
+; =============== Serial_WaitAfterHandshake ===============
+; Waits for a bit after the slave finishes the handshake.
+Serial_WaitAfterHandshake:
 	ld   bc, $0600		; BC = Loop count
 .loop:
 	nop  				; Waste some cycles
@@ -6042,14 +6042,14 @@ Serial_Unknown_WaitAfterSend:
 	jp   nz, .loop		; If not, loop
 	ret 
 	
-; =============== Unknown_Unused_4380Jump ===============
-; ?????	
-Unknown_Unused_4380Jump:
+; =============== Serial_Unused_Jp4380 ===============
+; [TCRF] Unreferenced code.
+Serial_Unused_Jp4380:
 	jp   $4380
 	
-; =============== Pl_Unknown_InitBeforeStage ===============
-; Initializes parts of the player struct (??? before the round starts) outside gameplay for both players.
-Pl_Unknown_InitBeforeStage:
+; =============== Pl_InitBeforeStageLoad ===============
+; Initializes parts of the player struct (before the first round starts) outside gameplay for both players.
+Pl_InitBeforeStageLoad:
 	; Initialize the round number to -1.
 	; At the start of a round, it always gets increased by 1.
 	ld   a, -$01
@@ -6131,7 +6131,7 @@ Module_Play:
 	; in the tilemap from the previous screen.
 	;
 	; Note that this is the *only* point checking the round number before getting incremented, so if the pre-stage 
-	; defaults from Pl_Unknown_InitBeforeStage are still set, the round number will still be -1.
+	; defaults from Pl_InitBeforeStageLoad are still set, the round number will still be -1.
 	ld   a, [wRoundNum]
 	cp   -$01				; RoundNum == -1?
 	jp   nz, .setPlayPos	; If not, skip
@@ -6223,7 +6223,7 @@ Module_Play:
 	call Play_Char_SetIntroAnimInstant
 	ei
 	
-	; Pass control twice (??? to initialize the other tasks).
+	; Pass control to initialize the other tasks
 	call Task_PassControlFar
 	call Task_PassControlFar
 	
@@ -6405,7 +6405,7 @@ Play_InitRound:
 	; At the end of a round, the winner got some health back.
 	; Here, at the start of the round, the loser gets his health completely refilled.
 	;
-	; Note that, before the first round starts, the initial health values are set in Pl_Unknown_InitBeforeStage.
+	; Note that, before the first round starts, the initial health values are set in Pl_InitBeforeStageLoad.
 	; That's needed as wLastWinner doesn't get reset between stages.
 	;
 	
@@ -8724,8 +8724,9 @@ Play_DoPl:
 			;   Both normals, specials and supers.
 			;   These are character-specific, but move codes may be reused between characters
 			;   for similar moves.
-			; - Attacked ($70-$98) ??? Autojump arcs ($70-$98)
-			;   These are used when getting attacked (hit, thrown, ...)
+			; - Attacked + failsafes ($70-$98)
+			;   These are used when getting attacked (hit, thrown, ...) and for certain failsafe
+			;   actions (ie: backjumps).
 			;   Shared with every character.
 			;
 			; These groups vary across games on this engine.
@@ -9816,10 +9817,9 @@ ExOBJS_Play_ChkHitModeAndMoveH:
 	; 2P reflected 1P's projectile.
 	;
 	
-	; Don't reflect the projectile if there's 2P's projectile is visible.
+	; Don't reflect the projectile if 2P's projectile is visible.
 	; Otherwise the one on screen would visibly disappear.
-	; ??? In that case, the projectile will just be removed instead, since when
-	; reflecting or removing projetiles, PCF_PROJREM is always set.
+	; In that case, just flag the projectile for removal (return through .retClear).
 	ld   hl, wOBJInfo_Pl2Projectile+iOBJInfo_Status	; HL = Ptr to target projectile
 	bit  OSTB_VISIBLE, [hl]		; Is 2P's projectile already visible?
 	jp   nz, .retClear			; If so, ignore
@@ -10061,7 +10061,7 @@ MoveC_Base_Jump:
 	add  hl, bc
 	set  PF1B_GUARD, [hl]			
 	ld   a, MOVE_SHARED_BLOCK_A
-	call Pl_Unk_SetNewMoveAndAnim
+	call Pl_SetMove_Simple
 	jp   .move
 	
 ; Starts the A+B air attack.
@@ -10069,7 +10069,7 @@ MoveC_Base_Jump:
 	ld   a, SCT_HEAVY
 	call HomeCall_Sound_ReqPlayExId
 	ld   a, MOVE_SHARED_ATTACK_A
-	call Pl_Unk_SetNewMoveAndAnim
+	call Pl_SetMove_Simple
 	jp   .move
 	
 ; Starts an air punch.
@@ -10081,7 +10081,7 @@ MoveC_Base_Jump:
 	ld   a, SCT_LIGHT
 	call HomeCall_Sound_ReqPlayExId
 	ld   a, MOVE_SHARED_PUNCH_A
-	call Pl_Unk_SetNewMoveAndAnim
+	call Pl_SetMove_Simple
 	jp   .move
 	
 ;
@@ -10095,7 +10095,7 @@ MoveC_Base_Jump:
 	ld   a, SCT_HEAVY
 	call HomeCall_Sound_ReqPlayExId
 	ld   a, MOVE_SHARED_KICK_A
-	call Pl_Unk_SetNewMoveAndAnim
+	call Pl_SetMove_Simple
 	jp   .move
 
 ; --------------- frame #0 ---------------	
@@ -11640,12 +11640,12 @@ Play_Pl_EndMove:
 	ld   [hl], a	; iOBJInfo_SpeedYSub
 	
 	; If we were performing a special move, clear iPlInfo_JoyBufKeysLH
-	; This causes ???
+	; This causes iPlInfo_JoyKeysLH to lose the "held info" for the LH keys.
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	ld   a, [hl]		; A = Flags
+	ld   a, [hl]						; A = Flags
 	and  a, PF0_SUPERMOVE|PF0_SPECMOVE	; Doing a special or super?
-	jp   z, .clearFlags						; If not, skip
+	jp   z, .clearFlags					; If not, skip
 	push hl
 		ld   hl, iPlInfo_JoyBufKeysLH
 		add  hl, bc
@@ -11658,8 +11658,8 @@ Play_Pl_EndMove:
 	; - PF0B_CPU: Fixed
 	; - PF1B_GUARD: Preserve to avoid "holes" in the guard when changing moves.
 	; - PF1B_CROUCH: In case we ended crouch-based attacks
-	; - PF2B_MOVESTART: ???
-	; - PF2B_HEAVY: ???
+	; - PF2B_MOVESTART: It's already reset.
+	; - PF2B_HEAVY: Doesn't matter.
 	res  PF0B_SPECMOVE, [hl]
 	res  PF0B_AIR, [hl]
 	res  PF0B_PROJHIT, [hl]
@@ -12287,7 +12287,7 @@ Play_Pl_DoBasicMoveInput:
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc
 			set  PF1B_GUARD, [hl]			; Guard against attacks
-			call Pl_Unk_SetNewMoveAndAnim	; Switch to move A
+			call Pl_SetMove_Simple	; Switch to move A
 			jp   BasicInput_End
 			
 		;
@@ -12904,14 +12904,14 @@ Pl_SetMove_ResetNewKeysLH:
 	pop  bc
 	ret
 	
-; =============== Pl_Unk_SetNewMoveAndAnim ===============	
+; =============== Pl_SetMove_Simple ===============	
 ; Starts a new move and initializes its animation.
 ; This has no special effect.
 ; IN
 ; - A: Move ID
 ; - BC: Ptr to wPlInfo structure
 ; - DE: Ptr to respective wOBJInfo structure
-Pl_Unk_SetNewMoveAndAnim:
+Pl_SetMove_Simple:
 	push bc
 		push de
 			call Pl_SetNewMove
@@ -14798,7 +14798,7 @@ Play_Pl_ChkThrowInput:
 	ld   a, $0C						; 12 lines of damage
 	ld   [hl], a
 	
-	; If the grab occurres, the opponent will use hit effect HITTYPE_THROW_START
+	; If the grab occurres, the opponent will use hit effect HITTYPE_THROW_START (HitTypeC_ThrowStart)
 	inc  hl							; Seek to iPlInfo_MoveDamageHitTypeId
 	ld   a, HITTYPE_THROW_START
 	ld   [hl], a					; Save value
@@ -14808,7 +14808,7 @@ Play_Pl_ChkThrowInput:
 	;
 	; If it went all right, the opponent should have gone through Play_Pl_SetHitType.chkThrow
 	; (which required us to set wPlayPlThrowActId to PLAY_THROWACT_START first), which will
-	; cause in the second frame ???????? to update wPlayPlThrowActId to PLAY_THROWACT_NEXT02.
+	; cause the hit effect HitTypeC_ThrowStart to update wPlayPlThrowActId to PLAY_THROWACT_NEXT02.
 	
 	; Preserve iPlInfo_JoyKeys and iPlInfo_JoyNewKeys while this happens
 	ld   hl, iPlInfo_JoyKeys
@@ -15012,7 +15012,7 @@ MoveInputS_TryStartCommandThrow:
 	;
 	; If it went all right, the opponent should have gone through Play_Pl_SetHitType.chkThrow
 	; (which required us to set wPlayPlThrowActId to PLAY_THROWACT_START first), which will
-	; cause in the second frame ???????? to update wPlayPlThrowActId to PLAY_THROWACT_NEXT02.
+	; cause the hit effect HitTypeC_ThrowStart to update wPlayPlThrowActId to PLAY_THROWACT_NEXT02.
 	
 	; Preserve iPlInfo_JoyKeys and iPlInfo_JoyNewKeys while this happens
 	ld   hl, iPlInfo_JoyKeys
@@ -15975,9 +15975,9 @@ MoveInputS_CheckEasyMoveKeys:
 	ret
 	
 ; =============== Play_Pl_TempPauseOtherAnim ===============
-; Temporarily pauses the opponent's animation by setting its iOBJInfo_FrameLeft to $FF.
+; Temporarily pauses the opponent's animation by setting its iOBJInfo_FrameLeft to ANIMSPEED_NONE.
 ;
-; ??? Meant when the hitting the other player in a way that freezes it, like with counters.
+; Meant when the hitting the other player in a way that freezes it, like with counters.
 ;
 ; Though this iOBJInfo_FrameLeft should never elapse as another animation should interrupt it,
 ; because it can, it prevents possible softlocks if a move were to break and not unfreeze the opponent.
@@ -15996,7 +15996,7 @@ Play_Pl_TempPauseOtherAnim:
 .pl2:
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_FrameLeft
 .clear:
-	ld   [hl], $FF
+	ld   [hl], ANIMSPEED_NONE
 	ret
 	
 ; Remember that these inputs are relative to the 2P side!

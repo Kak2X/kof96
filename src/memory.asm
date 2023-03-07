@@ -61,8 +61,6 @@ wMisc_C028 EQU $C028 ; Sect
 wIntroScene EQU $C029 ; Offset to scene ID in scene pointer table (some scenes have different parts)
 wIntroCharScene EQU $C02A ; Offset to the subscene ID when animating player sprites
 wTitleMode EQU $C029
-; ??? wModuleMode EQU $C029
-; ??? wModuleSubmode EQU $C02A
 
 wSGBSendPacketAtFrameEnd EQU $C02B ; If set, there are SGB packets to send after all tasks are processed
 wSGBSoundPacket EQU $C02C ; Data for the sound effect packet to be sent at the end of the frame.
@@ -304,6 +302,10 @@ wOBJInfo7 EQU $D840
 wOBJInfo8 EQU $D880
 
 ; Special purpose mappings
+; Intro
+wOBJInfo_IIoriH EQU wOBJInfo2
+wOBJInfo_IIoriL EQU wOBJInfo3
+
 ; Title screen
 wOBJInfo_CursorR  EQU wOBJInfo0
 wOBJInfo_MenuText EQU wOBJInfo1

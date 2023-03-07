@@ -127,7 +127,7 @@ Module_CharSel:
 	; See also: CharSelect_IsCPUOpponent
 	;
 	ld   a, [wJoyActivePl]
-	or   a						; Playing on the Pl1 side? (== ACTIVE_CTRL_PL1)
+	or   a						; Playing on the Pl1 side? (== PL1)
 	jp   z, .cpu2P				; If so, jump
 .cpu1P:
 	; We're playing on the 2P side, and the CPU is 1P
@@ -143,7 +143,7 @@ Module_CharSel:
 	ld   de, wCharSelP1CursorPos		; DE = Cursor position
 	
 	ld   a, [wLastWinner]		
-	bit  LASTWIN_PL1, a					; Did the CPU win?
+	bit  PLB1, a						; Did the CPU win?
 	jp   z, .clearCPUTeam				; If not, jump
 	jp   .lost				
 	
@@ -156,7 +156,7 @@ Module_CharSel:
 	ld   hl, wCharSelP2Char0			; HL = Cursor position
 	ld   de, wCharSelP2CursorPos		; DE = Cursor position
 	ld   a, [wLastWinner]
-	bit  LASTWIN_PL2, a					; Did the other player win?
+	bit  PLB2, a						; Did the other player win?
 	jp   z, .clearCPUTeam				; If not, jump
 	
 .lost:
@@ -167,9 +167,9 @@ Module_CharSel:
 	; If we didn't check this, the game would try to select three characters anyway.
 	ld   a, [wRoundSeqId]
 	cp   STAGESEQ_KAGURA		; Did we lose to Kagura?
-	jp   z, .lostOnBoss		; If so, jump
+	jp   z, .lostOnBoss			; If so, jump
 	cp   STAGESEQ_GOENITZ		; Did we lose to Goenitz?
-	jp   z, .lostOnBoss		; If so, jump
+	jp   z, .lostOnBoss			; If so, jump
 	jp   .chkInitialMode
 	
 .lostOnBoss:
@@ -324,14 +324,14 @@ chkInitialModeP2:
 	jp   nz, .team1PDrawEmpty	; If so, jump
 	; 2P should be the active player
 	ld   a, [wJoyActivePl]
-	or   a						; Are we playing on the 1P side? (wJoyActivePl == ACTIVE_CTRL_PL1)
+	or   a						; Are we playing on the 1P side? (wJoyActivePl == PL1)
 	jp   z, .team1PDrawEmpty	; If so, jump
 	
 	; Round sequence check
 	ld   a, [wRoundSeqId]
-	cp   STAGESEQ_KAGURA			; Fighting Kagura next?
+	cp   STAGESEQ_KAGURA		; Fighting Kagura next?
 	jp   z, .team2PDraw			; If so, skip
-	cp   STAGESEQ_GOENITZ			; Fighting Goenitz next?
+	cp   STAGESEQ_GOENITZ		; Fighting Goenitz next?
 	jp   z, .team2PDraw			; If so, skip
 .team1PDrawEmpty:
 	; Draw second and third placeholder
@@ -360,14 +360,14 @@ chkInitialModeP2:
 	jp   nz, .team2PDrawEmpty	; If so, jump
 	; 1P should be the active player
 	ld   a, [wJoyActivePl]
-	or   a						; Are we playing on the 1P side? (wJoyActivePl == ACTIVE_CTRL_PL1)
+	or   a						; Are we playing on the 1P side? (wJoyActivePl == PL1)
 	jp   nz, .team2PDrawEmpty	; If *not*, jump
 	
 	; Round sequence check
 	ld   a, [wRoundSeqId]
-	cp   STAGESEQ_KAGURA			; Fighting Kagura next?
+	cp   STAGESEQ_KAGURA		; Fighting Kagura next?
 	jp   z, .fillSelChars1P		; If so, skip
-	cp   STAGESEQ_GOENITZ			; Fighting Goenitz next?
+	cp   STAGESEQ_GOENITZ		; Fighting Goenitz next?
 	jp   z, .fillSelChars1P		; If so, skip
 .team2PDrawEmpty:
 	; Draw second and third placeholder
@@ -630,7 +630,7 @@ chkInitialModeP2:
 	ld   [hl], HIGH(OBJLstPtrTable_CharSel_Flip)
 	
 	
-	call Pl_Unknown_InitBeforeStage
+	call Pl_InitBeforeStageLoad
 	call Serial_DoHandshake
 	
 	;
@@ -3174,7 +3174,7 @@ CharSelect_IsCPUOpponent:
 	; Currently handling 1P.
 	; For 1P to be a CPU opponent, P2 must have control on the char select screen
 	ld   a, [wJoyActivePl]
-	or   a						; Playing on the 1P side? (== ACTIVE_CTRL_PL1)
+	or   a						; Playing on the 1P side? (== PL1)
 	jp   z, .retClear			; If so, return clear
 	
 	jp   .retSet
@@ -3182,7 +3182,7 @@ CharSelect_IsCPUOpponent:
 	; Currently handling 2P.
 	; For 2P to be a CPU opponent, 1P must have control on the char select screen
 	ld   a, [wJoyActivePl]
-	or   a						; Playing on the 2P side? (!= ACTIVE_CTRL_PL1)
+	or   a						; Playing on the 2P side? (!= PL1)
 	jp   nz, .retClear			; If so, return clear 
 .retSet:
 	scf		; C flag = 1, not controllable by player
@@ -3217,7 +3217,7 @@ CharSelect_IsLastWinner:
 	
 	; Final check
 	ld   a, [wLastWinner]
-	bit  LASTWIN_PL1, a		; Did 1P win the last round?
+	bit  PLB1, a			; Did 1P win the last round?
 	jp   nz, .retSet		; If so, return set
 	
 	; Otherwise, we game over'd before.
@@ -3231,7 +3231,7 @@ CharSelect_IsLastWinner:
 	
 	; Final check
 	ld   a, [wLastWinner]
-	bit  LASTWIN_PL2, a		; Did 2P win the last round?
+	bit  PLB2, a			; Did 2P win the last round?
 	jp   nz, .retSet		; If so, return set
 	
 	; Otherwise, we game over'd before.
@@ -3865,7 +3865,7 @@ Module_OrdSel:
 	ld   a, $58
 	ld   [wOBJInfo2+iOBJInfo_Y], a
 	
-	call Pl_Unknown_InitBeforeStage	; Just in case? This is already done by CharSel
+	call Pl_InitBeforeStageLoad	; Just in case? This is already done by CharSel
 	call Serial_DoHandshake
 	
 	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WTILEMAP|LCDC_ENABLE

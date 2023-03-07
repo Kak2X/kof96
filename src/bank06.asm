@@ -701,7 +701,7 @@ ENDM
 		mMvC_SetMoveH $0400
 		
 		;--
-		; ??? This doesn't make sense
+		; [POI] This doesn't make sense and is pointless.
 		ld   hl, iPlInfo_Flags0
 		add  hl, bc
 		res  PF0B_PROJHIT, [hl]
@@ -4028,7 +4028,7 @@ ENDM
 		jp   z, .part1_earlyEnd
 		
 		;--
-		; ???
+		; [POI] This doesn't make sense and is pointless.
 		ld   hl, iPlInfo_Flags2
 		add  hl, bc
 		res  PF2B_MOVESTART, [hl]

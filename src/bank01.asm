@@ -1110,7 +1110,7 @@ L014454: db $02
 L014455: db $40
 L014456: db $FD
 L014457: db $09
-L014458: db $79
+GFXLZ_Play_PostRoundText: db $79
 L014459: db $40
 L01445A: db $00
 L01445B: db $70
@@ -9100,7 +9100,7 @@ OBJInfoInit_Projectile:
 
 ; =============== Play_Main ===============
 ; The main gameplay loop.
-; Should be executed alongside the two other tasks Play_Unk_DoPlMove_1P and Play_Unk_DoPlMove_2P.
+; Should be executed alongside the two other tasks Play_DoPl_1P and Play_DoPl_2P.
 Play_Main:
 	ld   sp, $DD00
 	; Initialize subsecond timer to 60 frames
@@ -10282,7 +10282,7 @@ Play_CalcPlDistanceAndXFlip:
 		bit  PF1B_XFLIPLOCK, a		; X Flip lock flag set?
 		jr   nz, .onRightChk2P		; If so, skip
 		;--
-		; ???
+		; [POI] Broken code.
 		bit  0, c
 		jr   nz, .onRightChk2P
 		;--
@@ -10308,7 +10308,7 @@ Play_CalcPlDistanceAndXFlip:
 		bit  PF1B_XFLIPLOCK, a
 		jr   nz, .onRightChkEnd
 		;--
-		; ???
+		; [POI] Broken code.
 		bit  0, c
 		jr   nz, .onRightChkEnd
 		;--
@@ -10395,7 +10395,7 @@ Play_CalcPlDistanceAndXFlip:
 ; Handles collision detection between players/projectile combinations.
 ; This subroutine sets up the flags/fields which tell if the player are overlapping
 ; with something and with what.
-; How this is actually used is something that the hit code (Pl_DoHit) ??? decides.
+; How this is actually used is something that the hit code (Pl_DoHit) decides.
 Play_DoPlColi:
 	; Start by clearing out the collision flags from the last frame
 	xor  a
@@ -10764,7 +10764,7 @@ Play_DoPlColi_1PProj2PCharHitbox:
 
 	; If neiher of those bits is set, this collision check is skipped.
 	ld   a, [wPlInfo_Pl2+iPlInfo_Flags0]
-	and  a, PF0_PROJREM|PF0_PROJREFLECT		; Is 2P currently able to reflect projectiles?
+	and  a, PF0_PROJREM|PF0_PROJREFLECT		; Is 2P currently able to hit or reflect projectiles?
 	jp   z, .end							; If not, skip
 	
 	; If there's no active projectile, skip
@@ -10832,9 +10832,11 @@ Play_DoPlColi_1PProj2PCharHitbox:
 	ld   a, PHM_REFLECT
 	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Play_HitMode], a
 .setFlags:
-	; Sets the flag for both players
-	; [POI] Notice the reuse of PCF_HIT/PCF_HITOTHER, probably to fit this collision type into the 8 bit limit.
-	;       ??? The combination of these two flags is what needs to be checked when handling the reflection.
+	; [POI] Set the flags for both players... which aren't actually used.
+	;       Only the value at iOBJInfo_Play_HitMode matters.
+	;       Also, inexplicably, this is also setting PCF_HIT/PCF_HITOTHER, which is only
+	;       intended for physical hits that reach the opponent.
+	;       But because this is being set, code like Play_Pl_SetHitTypeC_ChkHitType still has to account for this.
 	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
 	set  PCF_PROJREMOTHER, [hl]
 	set  PCF_HIT, [hl]
@@ -11951,12 +11953,12 @@ Play_LoadPostRoundText0:
 	;
 	
 	; Do not update the GFX buffers while this is done.
-	; But why???
+	; There's no reason for doing this though, and it causes a slight
 	ld   a, $01
 	ld   [wNoCopyGFXBuf], a
 	call Task_PassControlFar
 	; Decompress to the temporary buffer
-	ld   hl, L014458
+	ld   hl, GFXLZ_Play_PostRoundText
 	ld   de, wLZSS_Buffer+$1E
 	call DecompressLZSS
 	; Unpause and wait

@@ -1968,10 +1968,10 @@ L1D5169:;J
 	ld   a, [wPlayMode]
 	bit  0, a
 	jp   nz, L1D5183
-	call Pl_Unknown_InitBeforeStage
+	call Pl_InitBeforeStageLoad
 	jp   Module_Play
 L1D5183:;J
-	call Pl_Unknown_InitBeforeStage
+	call Pl_InitBeforeStageLoad
 	ld   b, $1E
 	ld   hl, $626E
 	rst  $00
@@ -1997,10 +1997,10 @@ L1D51AC:;J
 	ld   a, [wPlayMode]
 	bit  0, a
 	jp   nz, L1D51C0
-	call Pl_Unknown_InitBeforeStage
+	call Pl_InitBeforeStageLoad
 	jp   Module_Play
 L1D51C0:;J
-	call Pl_Unknown_InitBeforeStage
+	call Pl_InitBeforeStageLoad
 	ld   b, $1E
 	ld   hl, $626E
 	rst  $00
@@ -2069,7 +2069,7 @@ L1D5241:;J
 	call L1D5428
 	ld   a, $11
 	ld   [wRoundSeqId], a
-	call Pl_Unknown_InitBeforeStage
+	call Pl_InitBeforeStageLoad
 	ld   b, $1E
 	ld   hl, $626E
 	rst  $00
@@ -2099,7 +2099,7 @@ L1D5264:;J
 	ld   [wRoundSeqId], a
 	ld   bc, $0000
 	call L1D54D8
-	call Pl_Unknown_InitBeforeStage
+	call Pl_InitBeforeStageLoad
 	jp   Module_Play
 L1D528F:;J
 	ld   b, $1D

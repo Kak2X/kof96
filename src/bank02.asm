@@ -839,7 +839,7 @@ MoveC_Base_Dizzy:
 ; =============== Play_Pl_DecDizzyTime ===============
 ; Decrements the dizzy countdown timer.
 ; This slowly decrements on its own, but it's possible to speed it up
-; by mashing buttons ????
+; by mashing buttons.
 ; IN
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
@@ -1743,7 +1743,7 @@ HitTypeC_Drop_DB_A:
 	; Play hit SFX, with fire support
 	call MoveS_PlayHitSFX
 	
-	; Switch to ??? after hitstun ends
+	; This is like an air throw, so set this as continuation code
 	ld   a, MOVE_SHARED_THROW_END_A
 	call Pl_SetMove_ShakeScreenReset
 	
@@ -4084,7 +4084,6 @@ MoveC_Hit_PostStunKnockback:
 	jp   nz, .anim
 	
 	; Depending on the how many frames are left...
-	; (note that this is initialized to $05 frames on block,??? possibly more on other moves)
 	ld   hl, iOBJInfo_FrameLeft
 	add  hl, de
 	ld   a, [hl]
@@ -4171,9 +4170,7 @@ MoveC_Hit_DropMain:
 .obj0_hitL:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
-		; If this is a light hit, setup the jump depending on PF3B_HEAVYHIT
-		
-		; Note that if PF3B_LIGHTHIT and PF3B_HEAVYHIT are set at the same time, ???
+		; Setup the jump speed depending on the hit status
 		ld   hl, iPlInfo_Flags3
 		add  hl, bc
 		bit  PF3B_HEAVYHIT, [hl]	; Is this a heavy hit?
@@ -4344,7 +4341,7 @@ MoveC_Hit_DropMain:
 ; Move code used for the last part of the throw animation.
 ; Similar to the code used in MoveC_Hit_DropMain.
 ; Used to handle the actual jump arc for:
-; - Air throws (MOVE_SHARED_THROW_END_A)
+; - Air throws, down drop "throw" (MOVE_SHARED_THROW_END_A)
 ; - Ground throws (MOVE_SHARED_THROW_END_G)
 MoveC_Hit_Throw_End:
 	call Play_Pl_MoveByColiBoxOverlapX
@@ -6644,8 +6641,10 @@ MoveC_Robert_RyuuGa:
 ; =============== MoveC_Terry_RisingTackle ===============
 ; Move code for several Rising Tackle-like moves:
 ; - Hidden version of Robert's Ryuu Ga (MOVE_ROBERT_RYUU_GA_HIDDEN_L, MOVE_ROBERT_RYUU_GA_HIDDEN_H)
-; - ???
-;
+; - Chizuru's 100 Katso Tenjin no Kotowari (MOVE_CHIZURU_TENJIN_KOTOWARI_L, MOVE_CHIZURU_TENJIN_KOTOWARI_H)
+; - Hidden version of Ryo's Ko Ou Ken (MOVE_RYO_KO_HOU_EL, MOVE_RYO_KO_HOU_EH)
+; - Hidden version of Mr. Karate's Ko Ou Ken (MOVE_MRKARATE_KO_OU_KEN_UNUSED_EL, MOVE_MRKARATE_KO_OU_KEN_UNUSED_EH)
+; - Terry's Rising Tackle (MOVE_TERRY_RISING_TACKLE_L, MOVE_TERRY_RISING_TACKLE_H)
 ; This version of Rising Tackle deals continuous low damage.
 MoveC_Terry_RisingTackle:
 	call Play_Pl_MoveByColiBoxOverlapX
@@ -6762,7 +6761,8 @@ MoveC_Terry_RisingTackle:
 ; =============== MoveC_Robert_KyokugenRyuRanbuKyaku ===============
 ; Move code for Ryo's Kyokuken Ryu Renbu Ken and similar moves from other AOF characters:
 ; - Robert's Kyokugen Ryu Ranbu Kyaku (MOVE_ROBERT_KYOKUGEN_RYU_RANBU_KYAKU_L, MOVE_ROBERT_KYOKUGEN_RYU_RANBU_KYAKU_H)
-; - ???
+; - Ryo's Kyokuken Ryu Renbu Ken (MOVE_RYO_KYOKUKEN_RYU_RENBU_KEN_L, MOVE_RYO_KYOKUKEN_RYU_RENBU_KEN_H)
+; - Mr. Karate's Kyokuken Ryu Renbu Ken (MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_L, MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_H)
 MoveC_Robert_KyokugenRyuRanbuKyaku:
 	call Play_Pl_MoveByColiBoxOverlapX
 	mMvC_ValLoaded .ret
