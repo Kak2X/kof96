@@ -2495,8 +2495,8 @@ Play_CPU_OnPlNear:
 	cp   DIFFICULTY_HARD
 	jp   z, .hard
 .easy:
-	; Check hardcoded round difficulties
-	ld   a, [wRoundSeqId]
+	; Check hardcoded stage difficulties
+	ld   a, [wCharSeqId]
 	cp   STAGESEQ_KAGURA	; Are we in a boss or extra stage?
 	jp   nc, .hard			; If so, jump
 	
@@ -2513,8 +2513,8 @@ Play_CPU_OnPlNear:
 	
 	jp   .doAction
 .norm:
-	; Check hardcoded round difficulties
-	ld   a, [wRoundSeqId]
+	; Check hardcoded stage difficulties
+	ld   a, [wCharSeqId]
 	cp   STAGESEQ_GOENITZ	; Are we in the Goenitz or extra stages?
 	jp   nc, .hardest		; If so, jump
 	cp   STAGESEQ_KAGURA	; Are we in boss Kagura's stage?
@@ -2533,7 +2533,7 @@ Play_CPU_OnPlNear:
 	
 	jp   .doAction
 .hard:
-	; Check hardcoded round difficulties.
+	; Check hardcoded stage difficulties.
 	; .hardest is like .hard, except it:
 	; - respects POWERUP mode 
 	; - allows hit cancel
@@ -2545,7 +2545,7 @@ Play_CPU_OnPlNear:
 	jp   nz, .hardest
 	; [POI] The other STAGESEQ_KAGURA checks in .easy and .norm, instead of leading directly to .hardest, led here.
 	;       What gives? Is it an error? Should have this been checking STAGESEQ_GOENITZ?
-	ld   a, [wRoundSeqId]
+	ld   a, [wCharSeqId]
 	cp   a, STAGESEQ_KAGURA	; Are we in a boss or extra stages?
 	jp   nc, .hardest		; If so, jump
 	; 50% chance to be in hardest mode

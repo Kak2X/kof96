@@ -4913,10 +4913,10 @@ TextPrinter_MultiFrameFar:
 ; Wrapper for TextPrinter_MultiFrame for printing text stored in an arbitrary bank
 ; starting at a custom tilemap offset.
 ; IN
-; - HL: Ptr to string length field of TextDef structure
+; - HL: Ptr to a TextC structure (or to the string length field of TextDef structure)
 ; - B: Bank number of TextDef structure
 ; - C: Delay between letter printing
-; - wTextPrintFlags: Option flags
+; - A: Option flags
 TextPrinter_MultiFrameFarCustomPos:
 	push af						; Save all args
 	push bc
@@ -5259,7 +5259,7 @@ Play_LoadStage:
 		;--
 		; The extra round fighting against IORI' or LEONA' uses an hardcoded stage.
 		; [POI] This is pointless, as the correct entries are already set in Play_CharStageMapTbl.
-		ld   a, [wRoundSeqId]
+		ld   a, [wCharSeqId]
 		cp   STAGESEQ_BONUS	; RoundId == STAGESEQ_BONUS?
 		jp   nz, .load		; If not, skip
 		ld   a, STAGE_ID_STADIUM_EXTRA
@@ -6231,7 +6231,7 @@ Module_Play:
 	; In single mode, the bosses and extra stages play a sound effect
 	; on the SGB side when a round starts.
 	;
-	ld   a, [wRoundSeqId]
+	ld   a, [wCharSeqId]
 	cp   STAGESEQ_KAGURA	; Is this the Chizuru boss stage?
 	jp   z, .sndKagura		; If so, jump
 	cp   STAGESEQ_GOENITZ	; Goenitz boss stage?
@@ -15970,7 +15970,7 @@ MoveInputS_CheckEasyMoveKeys:
 	inc  a
 	scf
 	ret
-.selectA:;J
+.selectA:
 	xor  a	; C flag clear, Z flag set
 	ret
 	

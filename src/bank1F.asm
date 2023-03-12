@@ -13812,264 +13812,267 @@ GFXS_XFlipTbl:
 	db $0F,$8F,$4F,$CF,$2F,$AF,$6F,$EF,$1F,$9F,$5F,$DF,$3F,$BF,$7F,$FF ; $F0
 
 ; =============== TextPrinter_CharsetToTileTbl ===============
-; Maps the character set used for strings in the ROM (based on ASCII) to tile IDs. 
-; The tile IDs correspond to the standard 1bpp font (FontDef_Default). 
-TextPrinter_CharsetToTileTbl: db $30;X
-L1F7EDD: db $31;X
-L1F7EDE: db $32;X
-L1F7EDF: db $33;X
-L1F7EE0: db $00;X
-L1F7EE1: db $00;X
-L1F7EE2: db $00;X
-L1F7EE3: db $00;X
-L1F7EE4: db $00;X
-L1F7EE5: db $00;X
-L1F7EE6: db $00;X
-L1F7EE7: db $00;X
-L1F7EE8: db $00;X
-L1F7EE9: db $00;X
-L1F7EEA: db $00;X
-L1F7EEB: db $00;X
-L1F7EEC: db $00;X
-L1F7EED: db $00;X
-L1F7EEE: db $00;X
-L1F7EEF: db $00;X
-L1F7EF0: db $00;X
-L1F7EF1: db $00;X
-L1F7EF2: db $00;X
-L1F7EF3: db $00;X
-L1F7EF4: db $00;X
-L1F7EF5: db $00;X
-L1F7EF6: db $00;X
-L1F7EF7: db $00;X
-L1F7EF8: db $00;X
-L1F7EF9: db $00;X
-L1F7EFA: db $00;X
-L1F7EFB: db $00;X
-L1F7EFC: db $00
-L1F7EFD: db $2B
-L1F7EFE: db $2E;X
-L1F7EFF: db $00;X
-L1F7F00: db $00;X
-L1F7F01: db $00;X
-L1F7F02: db $00;X
-L1F7F03: db $1E;X
-L1F7F04: db $00;X
-L1F7F05: db $00;X
-L1F7F06: db $00;X
-L1F7F07: db $2F;X
-L1F7F08: db $2D
-L1F7F09: db $29
-L1F7F0A: db $1D
-L1F7F0B: db $00;X
-L1F7F0C: db $1F
-L1F7F0D: db $20
-L1F7F0E: db $21
-L1F7F0F: db $22
-L1F7F10: db $23;X
-L1F7F11: db $24;X
-L1F7F12: db $25;X
-L1F7F13: db $26;X
-L1F7F14: db $27
-L1F7F15: db $28
-L1F7F16: db $2A;X
-L1F7F17: db $00;X
-L1F7F18: db $00;X
-L1F7F19: db $00;X
-L1F7F1A: db $00;X
-L1F7F1B: db $2C
-L1F7F1C: db $1C
-L1F7F1D: db $02
-L1F7F1E: db $03
-L1F7F1F: db $04
-L1F7F20: db $05
-L1F7F21: db $06
-L1F7F22: db $07
-L1F7F23: db $08
-L1F7F24: db $09
-L1F7F25: db $0A
-L1F7F26: db $0B
-L1F7F27: db $0C
-L1F7F28: db $0D
-L1F7F29: db $0E
-L1F7F2A: db $0F
-L1F7F2B: db $10
-L1F7F2C: db $11
-L1F7F2D: db $12;X
-L1F7F2E: db $13
-L1F7F2F: db $14
-L1F7F30: db $15
-L1F7F31: db $16
-L1F7F32: db $17
-L1F7F33: db $18
-L1F7F34: db $19
-L1F7F35: db $1A
-L1F7F36: db $1B
-L1F7F37: db $00;X
-L1F7F38: db $00;X
-L1F7F39: db $00;X
-L1F7F3A: db $00;X
-L1F7F3B: db $00;X
-L1F7F3C: db $1E
-L1F7F3D: db $34;X
-L1F7F3E: db $35;X
-L1F7F3F: db $36
-L1F7F40: db $37;X
-L1F7F41: db $38
-L1F7F42: db $39;X
-L1F7F43: db $3A
-L1F7F44: db $3B;X
-L1F7F45: db $3C
-L1F7F46: db $3D
-L1F7F47: db $3E;X
-L1F7F48: db $3F
-L1F7F49: db $40;X
-L1F7F4A: db $41
-L1F7F4B: db $42
-L1F7F4C: db $43;X
-L1F7F4D: db $44
-L1F7F4E: db $45
-L1F7F4F: db $46
-L1F7F50: db $47;X
-L1F7F51: db $48;X
-L1F7F52: db $49;X
-L1F7F53: db $4A;X
-L1F7F54: db $4B;X
-L1F7F55: db $4C;X
-L1F7F56: db $4D;X
-L1F7F57: db $00;X
-L1F7F58: db $00;X
-L1F7F59: db $00;X
-L1F7F5A: db $00;X
-L1F7F5B: db $00;X
-L1F7F5C: db $00;X
-L1F7F5D: db $00;X
-L1F7F5E: db $00;X
-L1F7F5F: db $00;X
-L1F7F60: db $00;X
-L1F7F61: db $00;X
-L1F7F62: db $00;X
-L1F7F63: db $00;X
-L1F7F64: db $00;X
-L1F7F65: db $00;X
-L1F7F66: db $00;X
-L1F7F67: db $00;X
-L1F7F68: db $00;X
-L1F7F69: db $00;X
-L1F7F6A: db $00;X
-L1F7F6B: db $00;X
-L1F7F6C: db $00;X
-L1F7F6D: db $00;X
-L1F7F6E: db $00;X
-L1F7F6F: db $00;X
-L1F7F70: db $00;X
-L1F7F71: db $00;X
-L1F7F72: db $00;X
-L1F7F73: db $00;X
-L1F7F74: db $00;X
-L1F7F75: db $00;X
-L1F7F76: db $00;X
-L1F7F77: db $00;X
-L1F7F78: db $00;X
-L1F7F79: db $00;X
-L1F7F7A: db $00;X
-L1F7F7B: db $00;X
-L1F7F7C: db $00;X
-L1F7F7D: db $47
-L1F7F7E: db $00;X
-L1F7F7F: db $00;X
-L1F7F80: db $48
-L1F7F81: db $4B
-L1F7F82: db $4C
-L1F7F83: db $4D;X
-L1F7F84: db $4E
-L1F7F85: db $00;X
-L1F7F86: db $00;X
-L1F7F87: db $00;X
-L1F7F88: db $4F
-L1F7F89: db $50
-L1F7F8A: db $51
-L1F7F8B: db $52
-L1F7F8C: db $29
-L1F7F8D: db $53
-L1F7F8E: db $54
-L1F7F8F: db $55
-L1F7F90: db $56
-L1F7F91: db $57
-L1F7F92: db $58
-L1F7F93: db $59
-L1F7F94: db $5A
-L1F7F95: db $5B
-L1F7F96: db $5C
-L1F7F97: db $5D
-L1F7F98: db $5E
-L1F7F99: db $5F
-L1F7F9A: db $60
-L1F7F9B: db $61
-L1F7F9C: db $62
-L1F7F9D: db $63
-L1F7F9E: db $64
-L1F7F9F: db $65
-L1F7FA0: db $66
-L1F7FA1: db $67
-L1F7FA2: db $68
-L1F7FA3: db $69
-L1F7FA4: db $6A
-L1F7FA5: db $6B
-L1F7FA6: db $6C
-L1F7FA7: db $6D
-L1F7FA8: db $6E
-L1F7FA9: db $6F
-L1F7FAA: db $70
-L1F7FAB: db $71
-L1F7FAC: db $72
-L1F7FAD: db $73
-L1F7FAE: db $74
-L1F7FAF: db $75
-L1F7FB0: db $76
-L1F7FB1: db $77
-L1F7FB2: db $78
-L1F7FB3: db $79
-L1F7FB4: db $7A
-L1F7FB5: db $7B
-L1F7FB6: db $7C
-L1F7FB7: db $7D
-L1F7FB8: db $7E
-L1F7FB9: db $7F
-L1F7FBA: db $4A
-L1F7FBB: db $49
-L1F7FBC: db $00;X
-L1F7FBD: db $00;X
-L1F7FBE: db $00;X
-L1F7FBF: db $00;X
-L1F7FC0: db $00;X
-L1F7FC1: db $00;X
-L1F7FC2: db $00;X
-L1F7FC3: db $00;X
-L1F7FC4: db $00;X
-L1F7FC5: db $00;X
-L1F7FC6: db $00;X
-L1F7FC7: db $00;X
-L1F7FC8: db $00;X
-L1F7FC9: db $00;X
-L1F7FCA: db $00;X
-L1F7FCB: db $00;X
-L1F7FCC: db $00;X
-L1F7FCD: db $00;X
-L1F7FCE: db $00;X
-L1F7FCF: db $00;X
-L1F7FD0: db $00;X
-L1F7FD1: db $00;X
-L1F7FD2: db $00;X
-L1F7FD3: db $00;X
-L1F7FD4: db $00;X
-L1F7FD5: db $00;X
-L1F7FD6: db $00;X
-L1F7FD7: db $00;X
-L1F7FD8: db $00;X
-L1F7FD9: db $00;X
-L1F7FDA: db $00;X
-L1F7FDB: db $00;X
+; Maps the 8-bit character set used for strings in the ROM to tile IDs. 
+; The tile IDs correspond to the standard 1bpp font (FontDef_Default).
+;
+; Every possible character is accounted for, though most point to $00, the blank space.
+TextPrinter_CharsetToTileTbl: 
+	db $30 ; $00 ;X ; ↑ ; [TCRF] Never used, even the graphic.
+	db $31 ; $01 ;X ; → ; [TCRF] Never used, even the graphic.
+	db $32 ; $02 ;X ; ↓ ; [TCRF] Never used, even the graphic.
+	db $33 ; $03 ;X ; ← ; [TCRF] Never used, even the graphic.
+	db $00 ; $04 ;X ;
+	db $00 ; $05 ;X ;
+	db $00 ; $06 ;X ;
+	db $00 ; $07 ;X ;
+	db $00 ; $08 ;X ;
+	db $00 ; $09 ;X ;
+	db $00 ; $0A ;X ;
+	db $00 ; $0B ;X ;
+	db $00 ; $0C ;X ;
+	db $00 ; $0D ;X ;
+	db $00 ; $0E ;X ;
+	db $00 ; $0F ;X ;
+	db $00 ; $10 ;X ;
+	db $00 ; $11 ;X ;
+	db $00 ; $12 ;X ;
+	db $00 ; $13 ;X ;
+	db $00 ; $14 ;X ;
+	db $00 ; $15 ;X ;
+	db $00 ; $16 ;X ;
+	db $00 ; $17 ;X ;
+	db $00 ; $18 ;X ;
+	db $00 ; $19 ;X ;
+	db $00 ; $1A ;X ;
+	db $00 ; $1B ;X ;
+	db $00 ; $1C ;X ;
+	db $00 ; $1D ;X ;
+	db $00 ; $1E ;X ;
+	db $00 ; $1F ;X ;
+	db $00 ; $20    ; (space)
+	db $2B ; $21    ; !
+	db $2E ; $22 ;X ; "
+	db $00 ; $23 ;X ;
+	db $00 ; $24 ;X ;
+	db $00 ; $25 ;X ;
+	db $00 ; $26 ;X ;
+	db $1E ; $27 ;X ; '
+	db $00 ; $28 ;X ;
+	db $00 ; $29 ;X ;
+	db $00 ; $2A ;X ;
+	db $2F ; $2B ;X ; +
+	db $2D ; $2C    ; ,
+	db $29 ; $2D    ; -
+	db $1D ; $2E    ; .
+	db $00 ; $2F ;X ; 
+	db $1F ; $30    ; 0
+	db $20 ; $31    ; 1
+	db $21 ; $32    ; 2
+	db $22 ; $33    ; 3
+	db $23 ; $34 ;X ; 4
+	db $24 ; $35 ;X ; 5
+	db $25 ; $36 ;X ; 6
+	db $26 ; $37 ;X ; 7
+	db $27 ; $38    ; 8
+	db $28 ; $39    ; 9
+	db $2A ; $3A ;X ; :
+	db $00 ; $3B ;X ; 
+	db $00 ; $3C ;X ; 
+	db $00 ; $3D ;X ; 
+	db $00 ; $3E ;X ; 
+	db $2C ; $3F    ; ?
+	db $1C ; $40    ; r.
+	db $02 ; $41    ; A
+	db $03 ; $42    ; B
+	db $04 ; $43    ; C
+	db $05 ; $44    ; D
+	db $06 ; $45    ; E
+	db $07 ; $46    ; F
+	db $08 ; $47    ; G
+	db $09 ; $48    ; H
+	db $0A ; $49    ; I
+	db $0B ; $4A    ; J
+	db $0C ; $4B    ; K
+	db $0D ; $4C    ; L
+	db $0E ; $4D    ; M
+	db $0F ; $4E    ; N
+	db $10 ; $4F    ; O
+	db $11 ; $50    ; P
+	db $12 ; $51 ;X ; Q
+	db $13 ; $52    ; R
+	db $14 ; $53    ; S
+	db $15 ; $54    ; T
+	db $16 ; $55    ; U
+	db $17 ; $56    ; V
+	db $18 ; $57    ; W
+	db $19 ; $58    ; X
+	db $1A ; $59    ; Y
+	db $1B ; $5A    ; Z
+	db $00 ; $5B ;X ; 
+	db $00 ; $5C ;X ; 
+	db $00 ; $5D ;X ; 
+	db $00 ; $5E ;X ; 
+	db $00 ; $5F ;X ; 
+	db $1E ; $60    ; ` ; Points to same tile as '
+	db $34 ; $61 ;X ; ッ
+	db $35 ; $62 ;X ; ア
+	db $36 ; $63    ; オ
+	db $37 ; $64 ;X ; カ
+	db $38 ; $65    ; コ
+	db $39 ; $66 ;X ; シ
+	db $3A ; $67    ; チ
+	db $3B ; $68 ;X ; テ
+	db $3C ; $69    ; ト
+	db $3D ; $6A    ; ナ
+	db $3E ; $6B ;X ; ハ
+	db $3F ; $6C    ; ヒ
+	db $40 ; $6D ;X ; フ
+	db $41 ; $6E    ; メ
+	db $42 ; $6F    ; ロ
+	db $43 ; $70 ;X ; ワ
+	db $44 ; $71    ; ン
+	db $45 ; $72    ; ホ
+	db $46 ; $73    ; タ
+	db $47 ; $74 ;X ; 。 ; Duplicate
+	db $48 ; $75 ;X ; 、 ; Duplicate
+	db $49 ; $76 ;X ; ゜ ; Duplicate
+	db $4A ; $77 ;X ; ﾞ ; Duplicate
+	db $4B ; $78 ;X ; ・ ; Duplicate
+	db $4C ; $79 ;X ; を ; Duplicate
+	db $4D ; $7A ;X ; ぁ ; Duplicate
+	db $00 ; $7B ;X ; 
+	db $00 ; $7C ;X ; 
+	db $00 ; $7D ;X ; 
+	db $00 ; $7E ;X ; 
+	db $00 ; $7F ;X ; 
+	db $00 ; $80 ;X ; 
+	db $00 ; $81 ;X ; 
+	db $00 ; $82 ;X ; 
+	db $00 ; $83 ;X ; 
+	db $00 ; $84 ;X ; 
+	db $00 ; $85 ;X ; 
+	db $00 ; $86 ;X ; 
+	db $00 ; $87 ;X ; 
+	db $00 ; $88 ;X ; 
+	db $00 ; $89 ;X ; 
+	db $00 ; $8A ;X ; 
+	db $00 ; $8B ;X ; 
+	db $00 ; $8C ;X ; 
+	db $00 ; $8D ;X ; 
+	db $00 ; $8E ;X ; 
+	db $00 ; $8F ;X ; 
+	db $00 ; $90 ;X ; 
+	db $00 ; $91 ;X ; 
+	db $00 ; $92 ;X ; 
+	db $00 ; $93 ;X ; 
+	db $00 ; $94 ;X ; 
+	db $00 ; $95 ;X ; 
+	db $00 ; $96 ;X ; 
+	db $00 ; $97 ;X ; 
+	db $00 ; $98 ;X ; 
+	db $00 ; $99 ;X ; 
+	db $00 ; $9A ;X ; 
+	db $00 ; $9B ;X ; 
+	db $00 ; $9C ;X ; 
+	db $00 ; $9D ;X ; 
+	db $00 ; $9E ;X ; 
+	db $00 ; $9F ;X ; 
+	db $00 ; $A0 ;X ; 
+	db $47 ; $A1    ; 。
+	db $00 ; $A2 ;X ; 
+	db $00 ; $A3 ;X ; 
+	db $48 ; $A4    ; 、
+	db $4B ; $A5    ; ・
+	db $4C ; $A6    ; を
+	db $4D ; $A7 ;X ; ぁ
+	db $4E ; $A8    ; ぃ
+	db $00 ; $A9 ;X ; 
+	db $00 ; $AA ;X ; 
+	db $00 ; $AB ;X ; 
+	db $4F ; $AC    ; ゃ
+	db $50 ; $AD    ; ゅ
+	db $51 ; $AE    ; ょ
+	db $52 ; $AF    ; っ
+	db $29 ; $B0    ; ｰ ; Reuses "-" symbol to save space
+	db $53 ; $B1    ; あ
+	db $54 ; $B2    ; い
+	db $55 ; $B3    ; う
+	db $56 ; $B4    ; え
+	db $57 ; $B5    ; お
+	db $58 ; $B6    ; か
+	db $59 ; $B7    ; き
+	db $5A ; $B8    ; く
+	db $5B ; $B9    ; け
+	db $5C ; $BA    ; こ
+	db $5D ; $BB    ; さ
+	db $5E ; $BC    ; し
+	db $5F ; $BD    ; す
+	db $60 ; $BE    ; せ
+	db $61 ; $BF    ; そ
+	db $62 ; $C0    ; た
+	db $63 ; $C1    ; ち
+	db $64 ; $C2    ; つ
+	db $65 ; $C3    ; て
+	db $66 ; $C4    ; と
+	db $67 ; $C5    ; な
+	db $68 ; $C6    ; に
+	db $69 ; $C7    ; ぬ
+	db $6A ; $C8    ; ね
+	db $6B ; $C9    ; の
+	db $6C ; $CA    ; は
+	db $6D ; $CB    ; ひ
+	db $6E ; $CC    ; ふ
+	db $6F ; $CD    ; へ
+	db $70 ; $CE    ; ほ
+	db $71 ; $CF    ; ま
+	db $72 ; $D0    ; み
+	db $73 ; $D1    ; む
+	db $74 ; $D2    ; め
+	db $75 ; $D3    ; も
+	db $76 ; $D4    ; や
+	db $77 ; $D5    ; ゆ
+	db $78 ; $D6    ; よ
+	db $79 ; $D7    ; ら
+	db $7A ; $D8    ; リ
+	db $7B ; $D9    ; る
+	db $7C ; $DA    ; れ
+	db $7D ; $DB    ; ろ
+	db $7E ; $DC    ; わ
+	db $7F ; $DD    ; ん
+	db $4A ; $DE    ; ﾞ
+	db $49 ; $DF    ; ﾟ
+	db $00 ; $E0 ;X ; 
+	db $00 ; $E1 ;X ; 
+	db $00 ; $E2 ;X ; 
+	db $00 ; $E3 ;X ; 
+	db $00 ; $E4 ;X ; 
+	db $00 ; $E5 ;X ; 
+	db $00 ; $E6 ;X ; 
+	db $00 ; $E7 ;X ; 
+	db $00 ; $E8 ;X ; 
+	db $00 ; $E9 ;X ; 
+	db $00 ; $EA ;X ; 
+	db $00 ; $EB ;X ; 
+	db $00 ; $EC ;X ; 
+	db $00 ; $ED ;X ; 
+	db $00 ; $EE ;X ; 
+	db $00 ; $EF ;X ; 
+	db $00 ; $F0 ;X ; 
+	db $00 ; $F1 ;X ; 
+	db $00 ; $F2 ;X ; 
+	db $00 ; $F3 ;X ; 
+	db $00 ; $F4 ;X ; 
+	db $00 ; $F5 ;X ; 
+	db $00 ; $F6 ;X ; 
+	db $00 ; $F7 ;X ; 
+	db $00 ; $F8 ;X ; 
+	db $00 ; $F9 ;X ; 
+	db $00 ; $FA ;X ; 
+	db $00 ; $FB ;X ; 
+	db $00 ; $FC ;X ; 
+	db $00 ; $FD ;X ; 
+	db $00 ; $FE ;X ; 
+	db $00 ; $FF ;X ; 
 ; =============== TextPrinter_DigitToTileTbl ===============
 ; Maps the number digits to tile IDs.
 ; The tile IDs correspond to the standard 1bpp font (FontDef_Default). 

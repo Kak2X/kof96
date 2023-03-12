@@ -98,11 +98,40 @@ STAGE_ID_STADIUM_EXTRA    EQU $06
 
 
 ; Special hardcoded stages for bosses or secrets.
-; These are special indexes to wRoundSeqTbl that return CHAR_ID_* instead of CHARSEL_ID_*
+; These are special indexes to wCharSeqTbl that return CHAR_ID_* instead of CHARSEL_ID_*
 STAGESEQ_KAGURA   EQU $0F
 STAGESEQ_GOENITZ  EQU $10
 STAGESEQ_BONUS    EQU $11
 STAGESEQ_MRKARATE EQU $12
+
+; Special Teams
+TEAM_ID_SACRED_TREASURES EQU $01 ; Iori, Kyo and Chizuru
+TEAM_ID_OLEONA           EQU $02 ; Leona, Iori, and Mature
+TEAM_ID_FFGEESE          EQU $03 ; Terry, Andy and Geese
+TEAM_ID_AOFMRBIG         EQU $04 ; Ryo, Robert and Mr.Big
+TEAM_ID_KTR              EQU $05 ; Kyo, Terry and Ryo
+TEAM_ID_BOSS             EQU $06 ; Geese, Krauser and Mr.Big
+TEAM_ID_NONE             EQU $FF
+
+; Bonus Fight Type ID (wBonusFightId)
+; Each of these has its own team character definitions.
+BONUS_ID_I_KC EQU $00 ; Iori vs Kyo and Chizuru
+BONUS_ID_KC_I EQU $01 ; ...
+BONUS_ID_L_IM EQU $02
+BONUS_ID_IM_L EQU $03
+BONUS_ID_TA_G EQU $04
+BONUS_ID_G_TA EQU $05
+BONUS_ID_RR_B EQU $06
+BONUS_ID_B_RR EQU $07
+BONUS_ID_K_TR EQU $08
+BONUS_ID_T_KR EQU $09
+BONUS_ID_R_KT EQU $0A
+BONUS_ID_G_KB EQU $0B
+BONUS_ID_K_GB EQU $0C
+BONUS_ID_B_GK EQU $0D
+
+BONUS_ID_NONE EQU $FF
+
 
 C_NL EQU $FF ; Newline character in strings
 
@@ -139,9 +168,6 @@ MISCB_TITLE_SECT      EQU 2 ; Allows parallax for the title screen
 
 MISC_USE_SECT         EQU 1 << MISCB_USE_SECT
 ;--
-; wPauseFlags
-PFB_1P        EQU 0 ; Player 1 paused the game
-PFB_2P        EQU 1 ; Player 2 paused the game
 
 
 ; TextPrinter_MultiFrame options
@@ -580,8 +606,8 @@ CHARSEL_ID_SPEC_OIORI  EQU $12
 CHARSEL_ID_SPEC_OLEONA EQU $13
 CHARSEL_ID_SPEC_KAGURA EQU $14
 
-CHARSEL_POSFB_BOSS EQU 7
-CHARSEL_POSF_BOSS EQU 1 << CHARSEL_POSFB_BOSS
+CHARSEL_POSFB_DEFEATED EQU 7
+CHARSEL_POSF_DEFEATED EQU 1 << CHARSEL_POSFB_DEFEATED
 
 CHARSEL_MODE_SELECT    EQU $00
 CHARSEL_MODE_READY     EQU $02

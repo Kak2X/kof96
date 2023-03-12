@@ -2,8 +2,10 @@
 ; =============== START OF MODULE CharSel ===============
 ;
 ; =============== Module_CharSel ===============
-; EntryPoint for character select screen. Called by rst $00 jump from Module_Title.
-L1E4000:
+; EntryPoint for character select screen.
+; Called by:
+; - rst $00 jump from Module_Title
+; - rst $00 jump from Module_Win
 Module_CharSel:
 	ld   sp, $DD00
 	di
@@ -165,7 +167,7 @@ Module_CharSel:
 	; Additionally, if we lost to a boss, we have to set their selected "team" manually.
 	; This is because they go alone instead of being part of a team. 
 	; If we didn't check this, the game would try to select three characters anyway.
-	ld   a, [wRoundSeqId]
+	ld   a, [wCharSeqId]
 	cp   STAGESEQ_KAGURA		; Did we lose to Kagura?
 	jp   z, .lostOnBoss			; If so, jump
 	cp   STAGESEQ_GOENITZ		; Did we lose to Goenitz?
@@ -174,11 +176,11 @@ Module_CharSel:
 	
 .lostOnBoss:
 	
-	; Retrieve the current wRoundSeqTbl value.
+	; Retrieve the current wCharSeqTbl value.
 	; The index is high enough that the value isn't stored as CHARSEL_ID_*, but directly as CHAR_ID_*.
-	;                                                                    (see ModeSelect_MakeRoundSeq)
+	;                                                                    (see ModeSelect_MakeStageSeq)
 	push hl
-		ld   hl, wRoundSeqTbl	; HL = Sequence table
+		ld   hl, wCharSeqTbl	; HL = Sequence table
 		ld   b, $00				; BC = RoundId
 		ld   c, a
 		add  hl, bc				; Index the table
@@ -317,7 +319,7 @@ chkInitialModeP2:
 	ld   c, TILE_CHARSEL_ICONEMPTY1
 	call CharSel_DrawEmptyIcon
 	
-	; Don't draw the two other placeholders if we're in a boss round.
+	; Don't draw the two other placeholders if we're in a boss stage.
 	; No "boss rounds" in VS mode
 	ld   a, [wPlayMode]
 	bit  MODEB_VS, a			; Playing in VS mode?
@@ -327,8 +329,8 @@ chkInitialModeP2:
 	or   a						; Are we playing on the 1P side? (wJoyActivePl == PL1)
 	jp   z, .team1PDrawEmpty	; If so, jump
 	
-	; Round sequence check
-	ld   a, [wRoundSeqId]
+	; Stage sequence check
+	ld   a, [wCharSeqId]
 	cp   STAGESEQ_KAGURA		; Fighting Kagura next?
 	jp   z, .team2PDraw			; If so, skip
 	cp   STAGESEQ_GOENITZ		; Fighting Goenitz next?
@@ -353,7 +355,7 @@ chkInitialModeP2:
 	ld   c, TILE_CHARSEL_ICONEMPTY1		
 	call CharSel_DrawEmptyIcon
 	
-	; Don't draw the two other placeholders if we're in a boss round.
+	; Don't draw the two other placeholders if we're in a boss stage.
 	; No "boss rounds" in VS mode
 	ld   a, [wPlayMode]
 	bit  MODEB_VS, a			; Playing in VS mode?
@@ -363,8 +365,8 @@ chkInitialModeP2:
 	or   a						; Are we playing on the 1P side? (wJoyActivePl == PL1)
 	jp   nz, .team2PDrawEmpty	; If *not*, jump
 	
-	; Round sequence check
-	ld   a, [wRoundSeqId]
+	; Stage sequence check
+	ld   a, [wCharSeqId]
 	cp   STAGESEQ_KAGURA		; Fighting Kagura next?
 	jp   z, .fillSelChars1P		; If so, skip
 	cp   STAGESEQ_GOENITZ		; Fighting Goenitz next?
@@ -1123,7 +1125,7 @@ ENDR
 			; See also: CharSelect_IsCPUOpponent
 			;
 			
-			; No round sequence in VS modes
+			; No stage sequence in VS modes
 			ld   a, [wPlayMode]
 			bit  MODEB_VS, a		; Playing in VS mode?
 			jp   nz, .noChange		; If so, skip
@@ -1151,13 +1153,13 @@ ENDR
 			;
 			; Get the char ID off the sequence of CPU opponents.
 			;
-			; CharId = wRoundSeqTbl[wRoundSeqId + TeamPos]
+			; CharId = wCharSeqTbl[wCharSeqId + TeamPos]
 			;          Where TeamPos is the 0-based number of the first free slot found.
 			;
 			
-			; Index wRoundSeqTbl by wRoundSeqId
-			ld   a, [wRoundSeqId]	; A = SeqId
-			ld   de, wRoundSeqTbl	; DE = SeqTbl
+			; Index wCharSeqTbl by wCharSeqId
+			ld   a, [wCharSeqId]	; A = SeqId
+			ld   de, wCharSeqTbl	; DE = SeqTbl
 			add  a, e				; DE += A
 			jp   nc, .chkFreeSlot
 			inc  d 					; We never get here
@@ -1854,7 +1856,7 @@ CharSel_IsPortraitLocked:
 ; OUT
 ; - C flag: If set, the game can return to the title screen
 CharSel_CanExitToTitle:
-	; In single mode, check which round we're in
+	; In single mode, check which stage we're in
 	ld   a, [wPlayMode]
 	bit  MODEB_VS, a		; Playing in VS mode?
 	jr   z, .chkRound		; If not, jump
@@ -1864,13 +1866,13 @@ CharSel_CanExitToTitle:
 	bit  MISCB_IS_SGB, [hl]	; Running on a SGB?
 	jr   z, .no				; If not, jump
 	
-	; Skip round check, it's not applicable in VS mode
+	; Skip stage check, it's not applicable in VS mode
 	jr   .chkSel
 	
 .chkRound:
 	; No exit on next rounds
-	ld   a, [wRoundSeqId]
-	or   a					; Beaten at least one round? (not the first char select screen)
+	ld   a, [wCharSeqId]
+	or   a					; Beaten at least one stage? (not the first char select screen)
 	jp   nz, .no			; If so, jump
 .chkSel:
 
@@ -2391,7 +2393,7 @@ CharSel_GetInput:
 ; This is done for characters in the sequence $00-$0E, which is up to and excluding Kagura.
 ; Characters from Kagura and above don't have a CHARSEL_ID_* value in the sequence anyway.
 CharSel_DrawCrossOnDefeatedChars:
-	ld   hl, wRoundSeqTbl	; HL = Round sequence table
+	ld   hl, wCharSeqTbl	; HL = Stage sequence table
 	ld   b, $0F				; HL = Number of slots remaining
 .loop:
 	ldi  a, [hl]			; A = Char portrait ID
@@ -2405,11 +2407,11 @@ CharSel_DrawCrossOnDefeatedChars:
 	ret
 ; IN
 ; - A: CHARSEL_ID_* value
-; - HL: Ptr to start of wRoundSeqTbl 
+; - HL: Ptr to start of wCharSeqTbl 
 .drawCross:
-	bit  CHARSEL_POSFB_BOSS, a		; Did we beat this opponent yet?
+	bit  CHARSEL_POSFB_DEFEATED, a	; Did we beat this opponent yet?
 	ret  z							; If not, return
-	and  a, $FF^CHARSEL_POSF_BOSS	; Filter out flag to get real cursor pos id
+	and  a, $FF^CHARSEL_POSF_DEFEATED	; Filter out flag to get real cursor pos id
 	sla  a							; A *= 2
 	ld   de, CharSel_IdTilesMapTbl	; DE = Table of VRAM pointers
 	ld   h, $00						; HL = A * 2
@@ -4979,6 +4981,7 @@ BG_OrdSel_Num1: INCBIN "data/bg/ordsel_num1.bin"
 BG_OrdSel_Num2: INCBIN "data/bg/ordsel_num2.bin"
 BG_OrdSel_Num3: INCBIN "data/bg/ordsel_num3.bin"
 GFXLZ_OrdSel_Char: INCBIN "data/gfx/ordsel_char.lzc"
+
 BGX_OrdSel_Char_Kyo: INCBIN "data/bg/ordsel_char_kyo.bin"
 BGX_OrdSel_Char_Daimon: INCBIN "data/bg/ordsel_char_daimon.bin"
 BGX_OrdSel_Char_Terry: INCBIN "data/bg/ordsel_char_terry.bin"
@@ -5051,369 +5054,484 @@ OBJLstHdrA_OrdSel_Cursor:
 ; =============== END OF MODULE OrdSel ===============
 ;
 
-L1E7D21:;I
-	rst  $10
+; 
+; =============== START OF MODULE Win ===============
+;
+
+; =============== SubModule_WinScr ===============
+; This submodule handles the display of the win screen, without touching any of 
+; the gameplay variables (ie: stage progression).
+;
+; This is structured like a module, but cannot be run directly -- it must be called by Module_Win.
+SubModule_WinScr:
+	;-----------------------------------
+	rst  $10				; Stop LCD
+	
+	; Stop any existing player animation
 	xor  a
 	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftA], a
 	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftB], a
 	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftA], a
 	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftB], a
+	
+	; Reset DMG pal
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
+	
+	; Set SGB pal
 	ld   de, SCRPAL_STAGECLEAR
 	call HomeCall_SGB_ApplyScreenPalSet
+	
+	; Reset tilemap
 	call ClearBGMap
-	ld   a, $18
-	ld   b, $5A
+	
+	; The screen is divided into the three sections the usual way.
+	; Set where the middle section is located
+	ld   a, $18			; Start at this scanline
+	ld   b, $5A			; End here
 	call SetSectLYC
-	ld   hl, $6DA5
+	
+	; Decompress the special block of character win sprites to the buffer.
+	;
+	; To get around the sprite limit, only the last played character is a real animated sprite.
+	; The other two are background graphics, and as a result aren't animated.
+	ld   hl, GFXLZ_OrdSel_Char
 	ld   de, wLZSS_Buffer+$20
 	call DecompressLZSS
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
+	
+	; Init default win sprite.
+	ld   hl, wOBJInfo_Winner+iOBJInfo_Status
 	ld   de, OBJInfoInit_Pl1
 	call OBJLstS_InitFrom
-	call L1E7DEE
+	
+	; Update that win sprite with character-specific data, and draw team members
+	call WinScr_InitChars
+	
+	; Set WINDOW position to align win quote
 	ld   a, $60
 	ldh  [rWY], a
 	ld   a, $0F
 	ldh  [rWX], a
-	ld   a, $E7
-	rst  $18
+	
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
+	
+	; Enable LYC
 	ldh  a, [rSTAT]
-	or   a, $40
+	or   a, STAT_LYC
 	ldh  [rSTAT], a
+	
 	ei
+	; Wait $09 frames
 	call Task_PassControl_Delay09
-	ld   a, $8C
+	
+	; Set DMG palettes 
+	ld   a, $8C			; OBJ Palette (animated win sprite)
 	ldh  [rOBP0], a
-	ld   a, $2D
+	ld   a, $2D			; BG Palette (second section, with other team chars if present)
 	ldh  [rBGP], a
 	ldh  [hScreenSect1BGP], a
-	ld   a, $13
+	ld   a, $13			; BG/WIN Palette (first and third section)
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect2BGP], a
-	ld   a, $82
+	
+	; Play stage win BGM
+	ld   a, BGM_STAGECLEAR
 	call HomeCall_Sound_ReqPlayExId_Stub
-	ld   a, BANK(L1E7DE8)
+	
+	;--
+	;
+	; Print out the Win Quote for the character wWinPlInfo is pointing to.
+	;
+	
+	; Make the win pose animates every frame the TextPrinter runs.
+	ld   a, BANK(WinScr_OBJLstAnim)
 	ld   [wTextPrintFrameCodeBank], a
 	ld   hl, wTextPrintFrameCodePtr_Low
-	ld   [hl], LOW(L1E7DE8)
+	ld   [hl], LOW(WinScr_OBJLstAnim)
 	inc  hl
-	ld   [hl], HIGH(L1E7DE8)
-	ld   a, [$C1B3]
+	ld   [hl], HIGH(WinScr_OBJLstAnim)
+	
+	; Read out the wPlInfo of the player who won to BC
+	ld   a, [wWinPlInfoPtr_Low]		
 	ld   c, a
-	ld   a, [wOrdSelP1CharsSelected]
+	ld   a, [wWinPlInfoPtr_High]
 	ld   b, a
-	ld   hl, $002C
-	add  hl, bc
-	ld   d, $00
+	; Use iPlInfo_CharId as table offset
+	ld   hl, iPlInfo_CharId			
+	add  hl, bc							; Seek to iPlInfo_CharId
+	ld   d, $00							; DE = iPlInfo_CharId
 	ld   e, [hl]
-	ld   hl, $7F3A
-	add  hl, de
-	ld   e, [hl]
+	; Index the table
+	ld   hl, WinScr_CharTextPtrTbl		; HL = Ptr to table base
+	add  hl, de	
+	; Read out the ptr
+	ld   e, [hl]						; Read out the entry to DE
 	inc  hl
 	ld   d, [hl]
-	push de
+	push de								; HL = Ptr to the character-specific TextC_* structure.
 	pop  hl
-	ld   de, WINDOWMap_Begin
-	ld   b, $1C
-	ld   c, $04
-	ld   a, $03
+	ld   de, WINDOWMap_Begin			; Start at the top of the WINDOW layer
+	ld   b, BANK(TextC_Win_Marker)		; The TextC ptr points to BANK $1C
+	ld   c, $04							; 4 frames between between letter printing
+	ld   a, TXT_PLAYSFX|TXT_ALLOWFAST	; Play SGB SFX for every letter + allow speeding up text printing
 	call TextPrinter_MultiFrameFarCustomPos
-	call L1E7EC9
+	;--
+	
+	; Wait a bit after the printing finishes
+	call WnScr_IdleWait
+	
+	; Reset DMG pal
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
 	ldh  [hScreenSect1BGP], a
+	
+	; Reset tilemap
 	call ClearBGMap
+	
+	; With the win screen gone, disable the screen sections
 	ld   hl, wMisc_C028
-	res  0, [hl]
+	res  MISCB_USE_SECT, [hl]
 	xor  a
 	ldh  [rSTAT], a
-	ld   [wOBJInfo_Pl1+iOBJInfo_Status], a
-	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
-	ld   [wOBJInfo_Pl1+iOBJInfo_Y], a
+	; Remove player sprite mapping
+	ld   [wOBJInfo_Winner+iOBJInfo_Status], a
+	ld   [wOBJInfo_Winner+iOBJInfo_X], a
+	ld   [wOBJInfo_Winner+iOBJInfo_Y], a
+	; Force stop GFX loading
 	xor  a
 	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftA], a
 	ld   [wGFXBufInfo_Pl1+iGFXBufInfo_TilesLeftB], a
 	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftA], a
 	ld   [wGFXBufInfo_Pl2+iGFXBufInfo_TilesLeftB], a
+	
+	; Wait a frame to give time for the screen to disable itself, and return.
 	jp   Task_PassControl_NoDelay
-L1E7DE8:;I
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
+	
+; =============== WinScr_OBJLstAnim ===============
+; Helper subroutine setup to be called by TextPrinter_MultiFrame to
+; animate the player sprite every frame.
+WinScr_OBJLstAnim:
+	ld   hl, wOBJInfo_Winner
 	jp   OBJLstS_DoAnimTiming_NoLoop
-L1E7DEE:;C
-	ld   a, [$C1B3]
+	
+; =============== WinScr_InitChars ===============	
+; Initializes the player characters for the Win Screen.
+; This will load the animation for the sprite mapping for the active character, 
+; and the GFX/tilemap for the other two team members.
+WinScr_InitChars:
+
+	; BC = Ptr to winner wPlInfo
+	; Since the wPlInfo gets untouched from the end of the stage, it will still
+	; contain useful info, like the character ID we won the stage as.
+	ld   a, [wWinPlInfoPtr_Low]
 	ld   c, a
-	ld   a, [wOrdSelP1CharsSelected]
+	ld   a, [wWinPlInfoPtr_High]
 	ld   b, a
+	
+	;
+	; Initialize and use wOBJInfo_Winner to display the animated sprite of the winner.
+	; Both 1P and 2P use this slot in the win screen.
+	;
 	push bc
-	ld   hl, $002C
-	add  hl, bc
-	ld   d, $00
-	ld   e, [hl]
-	sla  e
-	rl   d
-	ld   hl, $7EEA
-	add  hl, de
-	push hl
+		;
+		; Index the table that assigns animations for every character.
+		; Each entry in this table is 4 bytes long, so:
+		;
+		
+		; DE = iPlInfo_CharId * 2
+		ld   hl, iPlInfo_CharId
+		add  hl, bc		; Seek to iPlInfo_CharId
+		ld   d, $00		; DE = iPlInfo_CharId
+		ld   e, [hl]
+		sla  e			; DE << 1
+		rl   d
+		; Index the table
+		ld   hl, WinScr_CharAnimTbl
+		add  hl, de
+		; Move the ptr to BC
+		push hl
+		pop  bc
+		
+		;
+		; Update the sprite mapping.
+		;
+		
+		; Update sprite mapping status
+		ld   de, wOBJInfo_Winner+iOBJInfo_Status
+		ld   a, [de]			; Get status
+		and  a, $FF^OST_ANIMEND	; [POI] Not necessary, as the OBJInfo got reinitialized.
+		or   a, OST_VISIBLE		; Display the sprite mapping
+		ld   [de], a			; Save it back
+		
+		; Copy over the animation info from the previously indexed table entry
+		ld   hl, iOBJInfo_BankNum
+		add  hl, de
+		ld   a, [bc]	; Read byte0
+		ldi  [hl], a	; Copy it to iOBJInfo_BankNum
+		inc  bc
+		ld   a, [bc]	; Read byte1
+		ldi  [hl], a	; Copy it to iOBJInfo_OBJLstPtrTbl_Low
+		inc  bc
+		ld   a, [bc]	; Read byte2
+		ldi  [hl], a	; Copy it to iOBJInfo_OBJLstPtrTbl_High
+		inc  bc
+		xor  a
+		ld   [hl], a	; Restart animation (iOBJInfo_OBJLstPtrTblOffset = 0)
+
+		; Center the sprite
+		ld   hl, iOBJInfo_X
+		add  hl, de
+		ld   a, $50		; X Position $50
+		ldi  [hl], a
+		inc  hl
+		ld   [hl], $20	; Y Position $20
+		
+		; Update the animation speed from the last byte of the entry
+		ld   hl, iOBJInfo_FrameLeft
+		add  hl, de
+		ld   a, [bc]	; Read byte3
+		ldi  [hl], a	; Copy it to iOBJInfo_FrameLeft
+		ld   [hl], a	; Copy it to iOBJInfo_FrameTotal
+		
+		push de
+		pop  hl
+		call OBJLstS_DoAnimTiming_Initial
 	pop  bc
-	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   a, [de]
-	and  a, $EF
-	or   a, $80
-	ld   [de], a
-	ld   hl, $0010
-	add  hl, de
-	ld   a, [bc]
-	ldi  [hl], a
-	inc  bc
-	ld   a, [bc]
-	ldi  [hl], a
-	inc  bc
-	ld   a, [bc]
-	ldi  [hl], a
-	inc  bc
-	xor  a
-	ld   [hl], a
-	ld   hl, $0003
-	add  hl, de
-	ld   a, $50
-	ldi  [hl], a
-	inc  hl
-	ld   [hl], $20
-	ld   hl, $001B
-	add  hl, de
-	ld   a, [bc]
-	ldi  [hl], a
-	ld   [hl], a
-	push de
-	pop  hl
-	call OBJLstS_DoAnimTiming_Initial
-	pop  bc
-	ld   hl, $002D
+	
+	;
+	; Draw the other team members to the tilemap, if applicable.
+	;
+	
+	;
+	; The game doesn't reorder the character slots for team members (iPlInfo_TeamCharId*),
+	; so depending on how many team members lost, pick different character slots.
+	;
+	; Note these aren't consistent with the order of character icons in the team, but who cares.
+	;
+	ld   hl, iPlInfo_TeamLossCount
 	add  hl, bc
 	ld   a, [hl]
-	cp   $01
-	jr   z, L1E7E6B
-	cp   $02
-	jr   z, L1E7E92
-	ld   hl, $002F
-	add  hl, bc
-	ld   a, [hl]
-	cp   $FF
-	jr   z, L1E7E59
-	ld   de, $8800
+	cp   $01		; Did 1 member lose?
+	jr   z, .loss1	; If so, jump
+	cp   $02		; Did 2 members lose?
+	jr   z, .loss2	; If so, jump
+	; Otherwise, no members lost
+	
+; =============== mWinDrawSecChar ===============
+; Generates code to draw the other team members to the tilemap.
+; IN
+; - 1: Field for the character on the left
+; - 2: Field for the character on the right
+mWinDrawSecChar: MACRO
+	;
+	; Draw the character on the left facing right.
+	;
+	ld   hl, \1
+	add  hl, bc			; Seek to team char id
+	ld   a, [hl]		; A = CharId
+	cp   CHAR_ID_NONE	; Is there any character on this slot?
+	jr   z, .drawR_\@	; If not, skip
+	
+	; Otherwise, draw it
+	ld   de, $8800		; DE = Destination ptr for char GFX
 	push bc
-	ld   c, a
-	call OrdSel_LoadCharGFX1P
-	call L1E7EC2
+		ld   c, a					; C = CharId
+		call OrdSel_LoadCharGFX1P	; Copy them to DE, horizontally flipped
+		call .copyCharBG_L	; Update the tilemap
 	pop  bc
-L1E7E59:;R
-	ld   hl, $0030
-	add  hl, bc
-	ld   a, [hl]
-	cp   $FF
-	jr   z, L1E7EC8
-	ld   de, $8920
-	ld   c, a
-	call OrdSel_LoadCharGFX2P
-	jr   L1E7EB7
-L1E7E6B:;R
-	ld   hl, $002E
-	add  hl, bc
-	ld   a, [hl]
-	cp   $FF
-	jr   z, L1E7E80
-	ld   de, $8800
-	push bc
-	ld   c, a
-	call OrdSel_LoadCharGFX1P
-	call L1E7EC2
-	pop  bc
-L1E7E80:
-	ld   hl, $0030
-	add  hl, bc
-	ld   a, [hl]
-	cp   $FF
-	jr   z, L1E7EC8
-	ld   de, $8920
-	ld   c, a
-	call OrdSel_LoadCharGFX2P
-	jr   L1E7EB7
-L1E7E92:;R
-	ld   hl, $002E
-	add  hl, bc
-	ld   a, [hl]
-	cp   $FF
-	jr   z, L1E7EA7
-	ld   de, $8800
-	push bc
-	ld   c, a
-	call OrdSel_LoadCharGFX1P
-	call L1E7EC2
-	pop  bc
-L1E7EA7:
-	ld   hl, $002F
-	add  hl, bc
-	ld   a, [hl]
-	cp   $FF
-	jr   z, L1E7EC8
-	ld   de, $8920
-	ld   c, a
-	call OrdSel_LoadCharGFX2P
-L1E7EB7:;R
-	ld   hl, $988E
-	ld   de, $695E
-	ld   a, $92
+.drawR_\@:
+	;
+	; Draw the character on the right facing left.
+	;
+	ld   hl, \2
+	add  hl, bc			; Seek to team char id
+	ld   a, [hl]		; A = CharId
+	cp   CHAR_ID_NONE	; Is there any character on this slot?
+	jr   z, .ret		; If not, return (this never happens, there are no 2-character teams)
+	; Otherwise, draw it
+	ld   de, $8920		; DE = Destination ptr for char GFX
+	ld   c, a			; C = CharId
+	call OrdSel_LoadCharGFX2P	; Copy them to DE
+	; Fall-through to .copyCharBG_R
+ENDM
+	
+.loss0:
+	; With no losses, draw the team members in their normal order
+	mWinDrawSecChar iPlInfo_TeamCharId1, iPlInfo_TeamCharId2
+	jr   .copyCharBG_R
+.loss1:
+	; With 1 loss, iPlInfo_TeamCharId0 and iPlInfo_TeamCharId1 get switched 
+	mWinDrawSecChar iPlInfo_TeamCharId0, iPlInfo_TeamCharId2
+	jr   .copyCharBG_R
+.loss2:
+	; With 2 losses, iPlInfo_TeamCharId2 pushes both back
+	mWinDrawSecChar iPlInfo_TeamCharId0, iPlInfo_TeamCharId1
+	; Fall-through
+	
+; =============== .copyCharBG_R ===============
+; Writes the tilemap for the team member on the right, facing left.
+.copyCharBG_R:
+	ld   hl, $988E				; Destination ptr to tilemap
+	ld   de, BG_OrdSel_Char2P	; Ptr to uncompressed tilemap
+	ld   a, $92					; Tile ID base offset
 	jp   OrdSel_CopyCharBG
-L1E7EC2:;C
-	ld   hl, $9883
+; =============== .copyCharBG_L ===============
+; Writes the tilemap for the team member on the left, facing right.
+.copyCharBG_L:
+	ld   hl, $9883		; Destination ptr to tilemap
 	call OrdSel_CopyCharBG_1P0
-L1E7EC8:;R
+.ret:
 	ret
-L1E7EC9:;C
-	ld   b, $F0
-L1E7ECB:;J
+
+; =============== WnScr_IdleWait ===============
+; Waits for $F0 frames showing the Win Screen.
+; OUT
+; - C flag: If set, the wait ended prematurely
+WnScr_IdleWait:
+	ld   b, $F0	; B = Number of frames
+.loop:
+	; If any player presses START, the wait ends early
 	ldh  a, [hJoyNewKeys]
-	bit  7, a
-	jp   nz, L1E7EE8
+	bit  KEYB_START, a
+	jp   nz, .abort
 	ldh  a, [hJoyNewKeys2]
-	bit  7, a
-	jp   nz, L1E7EE8
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
+	bit  KEYB_START, a
+	jp   nz, .abort
+	
+	; Continue animating the player sprite
+	ld   hl, wOBJInfo_Winner
 	call OBJLstS_DoAnimTiming_NoLoop
+	
+	; Wait a frame
 	call Task_PassControl_NoDelay
-	dec  b
-	jp   nz, L1E7ECB
-	xor  a
+	
+	dec  b			; Are we finished?
+	jp   nz, .loop	; If not, loop
+	
+	xor  a	; C flag clear
 	ret
-L1E7EE8:;J
-	scf
+.abort:
+	scf		; C flag set
 	ret
-L1E7EEA: db $07
-L1E7EEB: db $58
-L1E7EEC: db $41
-L1E7EED: db $08
-L1E7EEE: db $09
-L1E7EEF: db $C2
-L1E7EF0: db $40
-L1E7EF1: db $08
-L1E7EF2: db $09
-L1E7EF3: db $AE
-L1E7EF4: db $4E
-L1E7EF5: db $08
-L1E7EF6: db $08
-L1E7EF7: db $BE
-L1E7EF8: db $41
-L1E7EF9: db $08
-L1E7EFA: db $0A
-L1E7EFB: db $40
-L1E7EFC: db $41
-L1E7EFD: db $08
-L1E7EFE: db $07
-L1E7EFF: db $EB
-L1E7F00: db $53
-L1E7F01: db $08
-L1E7F02: db $08
-L1E7F03: db $8F
-L1E7F04: db $52
-L1E7F05: db $08
-L1E7F06: db $08
-L1E7F07: db $FE
-L1E7F08: db $60
-L1E7F09: db $08
-L1E7F0A: db $0A
-L1E7F0B: db $AB
-L1E7F0C: db $5D
-L1E7F0D: db $08
-L1E7F0E: db $07
-L1E7F0F: db $4A
-L1E7F10: db $62
-L1E7F11: db $08
-L1E7F12: db $09
-L1E7F13: db $53
-L1E7F14: db $5B
-L1E7F15: db $08
-L1E7F16: db $07
-L1E7F17: db $C1
-L1E7F18: db $70
-L1E7F19: db $08
-L1E7F1A: db $05
-L1E7F1B: db $5C
-L1E7F1C: db $41
-L1E7F1D: db $08
-L1E7F1E: db $09
-L1E7F1F: db $91
-L1E7F20: db $68
-L1E7F21: db $08
-L1E7F22: db $05
-L1E7F23: db $93
-L1E7F24: db $55
-L1E7F25: db $08
-L1E7F26: db $08
-L1E7F27: db $FC
-L1E7F28: db $6F
-L1E7F29: db $08
-L1E7F2A: db $0A
-L1E7F2B: db $22
-L1E7F2C: db $46
-L1E7F2D: db $08
-L1E7F2E: db $05
-L1E7F2F: db $72
-L1E7F30: db $41
-L1E7F31: db $08
-L1E7F32: db $0A
-L1E7F33: db $BD
-L1E7F34: db $5D
-L1E7F35: db $08
-L1E7F36: db $05
-L1E7F37: db $9D
-L1E7F38: db $55
-L1E7F39: db $08
-L1E7F3A: db $1A
-L1E7F3B: db $75
-L1E7F3C: db $46
-L1E7F3D: db $75
-L1E7F3E: db $71
-L1E7F3F: db $75
-L1E7F40: db $9A
-L1E7F41: db $75
-L1E7F42: db $BB
-L1E7F43: db $75
-L1E7F44: db $F4
-L1E7F45: db $75
-L1E7F46: db $1F
-L1E7F47: db $76
-L1E7F48: db $45
-L1E7F49: db $76
-L1E7F4A: db $7C
-L1E7F4B: db $76
-L1E7F4C: db $9B
-L1E7F4D: db $76
-L1E7F4E: db $CC
-L1E7F4F: db $76
-L1E7F50: db $00
-L1E7F51: db $77
-L1E7F52: db $27
-L1E7F53: db $77
-L1E7F54: db $56
-L1E7F55: db $77
-L1E7F56: db $86
-L1E7F57: db $77
-L1E7F58: db $B7
-L1E7F59: db $77
-L1E7F5A: db $EA
-L1E7F5B: db $77
-L1E7F5C: db $0F
-L1E7F5D: db $78
-L1E7F5E: db $1C
-L1E7F5F: db $78
-L1E7F60: db $28
-L1E7F61: db $78
+	
+; =============== WinScr_CharAnimTbl ===============
+; This table assigns every character to its own win animation.
+; FORMAT
+; - 0-2: Ptr to sprite mapping table with bank number (iOBJInfo_BankNum + iOBJInfo_OBJLstPtrTbl)
+; - 3: Animation speed (iOBJInfo_FrameLeft / iOBJInfo_FrameTotal)
+WinScr_CharAnimTbl:
+	
+	; CHAR_ID_KYO
+	dp L074158 ; BANK $07
+	db $08
+	
+	; CHAR_ID_DAIMON
+	dp L0940C2 ; BANK $09
+	db $08
+
+	; CHAR_ID_TERRY
+	dp OBJLstPtrTable_Terry_WinA ; BANK $09
+	db $08
+
+	; CHAR_ID_ANDY
+	dp L0841BE ; BANK $08
+	db $08
+
+	; CHAR_ID_RYO
+	dp L0A4140 ; BANK $0A
+	db $08
+
+	; CHAR_ID_ROBERT
+	dp L0753EB ; BANK $07
+	db $08
+
+	; CHAR_ID_ATHENA
+	dp L08528F ; BANK $08
+	db $08
+
+	; CHAR_ID_MAI
+	dp L0860FE ; BANK $08
+	db $08
+
+	; CHAR_ID_LEONA
+	dp L0A5DAB ; BANK $0A
+	db $08
+
+	; CHAR_ID_GEESE
+	dp L07624A ; BANK $07
+	db $08
+
+	; CHAR_ID_KRAUSER
+	dp L095B53 ; BANK $09
+	db $08
+
+	; CHAR_ID_MRBIG
+	dp L0770C1 ; BANK $07
+	db $08
+
+	; CHAR_ID_IORI
+	dp L05415C ; BANK $05
+	db $08
+
+	; CHAR_ID_MATURE
+	dp L096891 ; BANK $09
+	db $08
+
+	; CHAR_ID_CHIZURU
+	dp L055593 ; BANK $05
+	db $08
+
+	; CHAR_ID_GOENITZ
+	dp L086FFC ; BANK $08
+	db $08
+
+	; CHAR_ID_MRKARATE
+	dp L0A4622 ; BANK $0A
+	db $08
+
+	; CHAR_ID_OIORI
+	dp L054172 ; BANK $05
+	db $08
+
+	; CHAR_ID_OLEONA
+	dp L0A5DBD ; BANK $0A
+	db $08
+
+	; CHAR_ID_KAGURA
+	dp L05559D ; BANK $05
+	db $08
+
+; =============== WinScr_CharTextPtrTbl ===============
+; This table maps every character to its own win quote.
+; These pointers all point to BANK $1C.
+WinScr_CharTextPtrTbl:
+	dw TextC_Win_Kyo ; CHAR_ID_KYO
+	dw TextC_Win_Daimon ; CHAR_ID_DAIMON
+	dw TextC_Win_Terry ; CHAR_ID_TERRY
+	dw TextC_Win_Andy ; CHAR_ID_ANDY
+	dw TextC_Win_Ryo ; CHAR_ID_RYO
+	dw TextC_Win_Robert ; CHAR_ID_ROBERT
+	dw TextC_Win_Athena ; CHAR_ID_ATHENA
+	dw TextC_Win_Mai ; CHAR_ID_MAI
+	dw TextC_Win_Leona ; CHAR_ID_LEONA
+	dw TextC_Win_Geese ; CHAR_ID_GEESE
+	dw TextC_Win_Krauser ; CHAR_ID_KRAUSER
+	dw TextC_Win_MrBig ; CHAR_ID_MRBIG
+	dw TextC_Win_Iori ; CHAR_ID_IORI
+	dw TextC_Win_Mature ; CHAR_ID_MATURE
+	dw TextC_Win_Chizuru ; CHAR_ID_CHIZURU
+	dw TextC_Win_Goenitz ; CHAR_ID_GOENITZ
+	dw TextC_Win_MrKarate ; CHAR_ID_MRKARATE
+	dw TextC_Win_OIori ; CHAR_ID_OIORI
+	dw TextC_Win_OLeona ; CHAR_ID_OLEONA
+	dw TextC_Win_Kagura ; CHAR_ID_KAGURA
+	
 L1E7F62: db $76;X
 L1E7F63: db $00;X
 L1E7F64: db $77;X

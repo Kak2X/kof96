@@ -899,8 +899,10 @@ L1C437F: db $00
 ; =============== START OF MODULE TitleMenu ===============
 ;
 ; =============== Module_Title ===============
-; EntryPoint for Title Screen and Menus. Called by rst $00 jump from Module_Intro.
-L1C4380:
+; EntryPoint for Title Screen and Menus.
+; Called by:
+; - rst $00 jump from Module_Intro
+; - rst $00 jump from Module_Win
 Module_Title:
 	ld   sp, $DD00
 	di
@@ -1551,7 +1553,7 @@ ModeSelect_PrepSingle:
 	res  PF0B_CPU, [hl]
 	ld   hl, wPlInfo_Pl2+iPlInfo_Flags0
 	set  PF0B_CPU, [hl]
-	call ModeSelect_MakeRoundSeq
+	call ModeSelect_MakeStageSeq
 	jp   ModeSelect_SwitchToCharSelect
 .pl2:
 	; P1: CPU, P2: Player
@@ -1559,7 +1561,7 @@ ModeSelect_PrepSingle:
 	set  PF0B_CPU, [hl]
 	ld   hl, wPlInfo_Pl2+iPlInfo_Flags0
 	res  PF0B_CPU, [hl]
-	call ModeSelect_MakeRoundSeq
+	call ModeSelect_MakeStageSeq
 	jp   ModeSelect_SwitchToCharSelect
 	
 ModeSelect_PrepVS:
@@ -1568,8 +1570,8 @@ ModeSelect_PrepVS:
 	res  PF0B_CPU, [hl]
 	ld   hl, wPlInfo_Pl2+iPlInfo_Flags0
 	res  PF0B_CPU, [hl]
-	; No round sequence in 2P mode
-	ld   hl, wRoundSeqId
+	; No stage sequence in 2P mode
+	ld   hl, wCharSeqId
 	ld   [hl], $00
 	jp   ModeSelect_SwitchToCharSelect
 	
@@ -1581,8 +1583,8 @@ ModeSelect_Unused_PrepVSCPU:
 	set  PF0B_CPU, [hl]
 	ld   hl, wPlInfo_Pl2+iPlInfo_Flags0
 	set  PF0B_CPU, [hl]
-	; No round sequence in 2P mode
-	ld   hl, wRoundSeqId
+	; No stage sequence in 2P mode
+	ld   hl, wCharSeqId
 	ld   [hl], $00
 	; Fall-through
 	
@@ -1592,7 +1594,7 @@ ModeSelect_SwitchToCharSelect:
 	; Initialize character select vars
 	ld   a, $00
 	ld   [wLastWinner], a
-	ld   [$C17E], a
+	ld   [wUnused_ContinueUsed], a
 	ld   a, $00
 	ld   [wCharSelP1CursorPos], a
 	ld   a, $05
@@ -2840,18 +2842,18 @@ Title_AddWithSubpixels:
 	ld   [hl], e	; Write subpixels
 	ret
 	
-; =============== ModeSelect_MakeRoundSeq ===============
+; =============== ModeSelect_MakeStageSeq ===============
 ; Generates the sequence of opponents to fight in 1P modes.
-ModeSelect_MakeRoundSeq:
-	; Reset starting round
-	ld   hl, wRoundSeqId
+ModeSelect_MakeStageSeq:
+	; Reset starting stage
+	ld   hl, wCharSeqId
 	ld   [hl], $00
 	
 	;
 	; Fill the sequence with $FF values.
 	;
 	ld   b, $12				; B = Total number of opponents
-	ld   hl, wRoundSeqTbl	; HL = Ptr to start of table
+	ld   hl, wCharSeqTbl	; HL = Ptr to start of table
 	ld   a, $FF				; A = Overwrite with
 .fillLoop:
 	ldi  [hl], a			
@@ -2864,7 +2866,7 @@ ModeSelect_MakeRoundSeq:
 	;
 	
 	; This is done by going through character *select* portrait IDs from highest allowed to lowest,
-	; and placing that character in a randomly generated slot in wRoundSeqTbl.
+	; and placing that character in a randomly generated slot in wCharSeqTbl.
 	ld   b, $0E				; B = Current CHARSEL_ID_* / Remaining chars
 .getRand:
 	call RandLY				; A = Random opponent slot
@@ -2875,7 +2877,7 @@ ModeSelect_MakeRoundSeq:
 	; HL = Ptr to generated slot
 	ld   d, $00				; DE = Current index
 	ld   e, a
-	ld   hl, wRoundSeqTbl	; HL = wRoundSeqTbl
+	ld   hl, wCharSeqTbl	; HL = wCharSeqTbl
 	add  hl, de				; Index it
 	
 	; Avoid overwriting already filled slots, which don't have the $FF placeholder anymore
@@ -2898,17 +2900,17 @@ ModeSelect_MakeRoundSeq:
 	jp   nz, .getRand		; If not, generate the next one
 	
 	;
-	; Add the 2 bosses and 2 secrets at the end.
+	; Add the 2 bosses and the secret at the end.
 	; These are raw character IDs as they don't go through the char select screen.
 	;
-	ld   hl, wRoundSeqTbl+$0F
-	ld   [hl], CHAR_ID_KAGURA/2
+	ld   hl, wCharSeqTbl+$0F
+	ld   [hl], CHAR_ID_KAGURA/2 ; STAGESEQ_KAGURA
 	inc  hl
-	ld   [hl], CHAR_ID_GOENITZ/2
+	ld   [hl], CHAR_ID_GOENITZ/2 ; STAGESEQ_GOENITZ
 	inc  hl
-	ld   [hl], $00 ; Placeholder for bonus fight, team-specific.
+	ld   [hl], $00 ; Placeholder for STAGESEQ_BONUS, value not used
 	inc  hl
-	ld   [hl], CHAR_ID_MRKARATE/2
+	ld   [hl], CHAR_ID_MRKARATE/2 ; STAGESEQ_MRKARATE
 	ret
 	
 OBJInfoInit_Title:
@@ -5312,2077 +5314,336 @@ BGLZ_Intro_KyoCutout: INCBIN "data/bg/intro_kyocutout.lzs"
 BGLZ_Intro_Sun: INCBIN "data/bg/intro_sun.lzs"
 GFXLZ_Intro_IoriRiseOBJ: INCBIN "data/gfx/intro_ioririse_obj.lzc"
 L1C7519: db $00;X
-L1C751A: db $2B
-L1C751B: db $C5
-L1C751C: db $AF
-L1C751D: db $C3
-L1C751E: db $C8
-L1C751F: db $B4
-L1C7520: db $21
-L1C7521: db $FF
-L1C7522: db $FF
-L1C7523: db $B5
-L1C7524: db $DA
-L1C7525: db $C4
-L1C7526: db $CC
-L1C7527: db $DE
-L1C7528: db $C2
-L1C7529: db $B6
-L1C752A: db $AF
-L1C752B: db $C3
-L1C752C: db $BF
-L1C752D: db $C9
-L1C752E: db $C3
-L1C752F: db $B2
-L1C7530: db $C4
-L1C7531: db $DE
-L1C7532: db $C3
-L1C7533: db $DE
-L1C7534: db $FF
-L1C7535: db $FF
-L1C7536: db $BD
-L1C7537: db $DD
-L1C7538: db $C0
-L1C7539: db $DE
-L1C753A: db $C9
-L1C753B: db $CA
-L1C753C: db $B7
-L1C753D: db $BE
-L1C753E: db $B7
-L1C753F: db $C3
-L1C7540: db $B7
-L1C7541: db $C0
-L1C7542: db $DE
-L1C7543: db $C5
-L1C7544: db $A1
-L1C7545: db $FF
-L1C7546: db $2A
-L1C7547: db $DC
-L1C7548: db $BB
-L1C7549: db $DE
-L1C754A: db $CA
-L1C754B: db $BF
-L1C754C: db $DA
-L1C754D: db $CE
-L1C754E: db $C4
-L1C754F: db $DE
-L1C7550: db $FF
-L1C7551: db $FF
-L1C7552: db $BC
-L1C7553: db $DE
-L1C7554: db $AD
-L1C7555: db $B3
-L1C7556: db $D6
-L1C7557: db $B3
-L1C7558: db $C3
-L1C7559: db $DE
-L1C755A: db $CA
-L1C755B: db $C5
-L1C755C: db $B2
-L1C755D: db $21
-L1C755E: db $FF
-L1C755F: db $FF
-L1C7560: db $BD
-L1C7561: db $CD
-L1C7562: db $DE
-L1C7563: db $C3
-L1C7564: db $CA
-L1C7565: db $BA
-L1C7566: db $BA
-L1C7567: db $DB
-L1C7568: db $C9
-L1C7569: db $D3
-L1C756A: db $C1
-L1C756B: db $D6
-L1C756C: db $B3
-L1C756D: db $C0
-L1C756E: db $DE
-L1C756F: db $21
-L1C7570: db $FF
-L1C7571: db $28
-L1C7572: db $B5
-L1C7573: db $DA
-L1C7574: db $C9
-L1C7575: db $C5
-L1C7576: db $B6
-L1C7577: db $C6
-L1C7578: db $B2
-L1C7579: db $D9
-L1C757A: db $B5
-L1C757B: db $B5
-L1C757C: db $B6
-L1C757D: db $D0
-L1C757E: db $A6
-L1C757F: db $FF
-L1C7580: db $FF
-L1C7581: db $B5
-L1C7582: db $BA
-L1C7583: db $BC
-L1C7584: db $C1
-L1C7585: db $CF
-L1C7586: db $AF
-L1C7587: db $C0
-L1C7588: db $D6
-L1C7589: db $B3
-L1C758A: db $C0
-L1C758B: db $DE
-L1C758C: db $C5
-L1C758D: db $A1
-L1C758E: db $FF
-L1C758F: db $FF
-L1C7590: db $DC
-L1C7591: db $D9
-L1C7592: db $B8
-L1C7593: db $B5
-L1C7594: db $D3
-L1C7595: db $B3
-L1C7596: db $C5
-L1C7597: db $D6
-L1C7598: db $21
-L1C7599: db $FF
-L1C759A: db $20
-L1C759B: db $CB
-L1C759C: db $C2
-L1C759D: db $D6
-L1C759E: db $B3
-L1C759F: db $C5
-L1C75A0: db $C9
-L1C75A1: db $CA
-L1C75A2: db $B6
-L1C75A3: db $B8
-L1C75A4: db $BA
-L1C75A5: db $DE
-L1C75A6: db $21
-L1C75A7: db $FF
-L1C75A8: db $FF
-L1C75A9: db $BF
-L1C75AA: db $C9
-L1C75AB: db $B2
-L1C75AC: db $BC
-L1C75AD: db $BB
-L1C75AE: db $B4
-L1C75AF: db $B1
-L1C75B0: db $DA
-L1C75B1: db $CA
-L1C75B2: db $DE
-L1C75B3: db $CF
-L1C75B4: db $B9
-L1C75B5: db $CA
-L1C75B6: db $BC
-L1C75B7: db $C5
-L1C75B8: db $B2
-L1C75B9: db $21
-L1C75BA: db $FF
-L1C75BB: db $38
-L1C75BC: db $B7
-L1C75BD: db $AE
-L1C75BE: db $B8
-L1C75BF: db $B9
-L1C75C0: db $DE
-L1C75C1: db $DD
-L1C75C2: db $D8
-L1C75C3: db $AD
-L1C75C4: db $B3
-L1C75C5: db $CA
-L1C75C6: db $B7
-L1C75C7: db $AE
-L1C75C8: db $B8
-L1C75C9: db $B9
-L1C75CA: db $DE
-L1C75CB: db $DD
-L1C75CC: db $C6
-L1C75CD: db $FF
-L1C75CE: db $FF
-L1C75CF: db $B5
-L1C75D0: db $B2
-L1C75D1: db $C3
-L1C75D2: db $C9
-L1C75D3: db $D0
-L1C75D4: db $CA
-L1C75D5: db $AF
-L1C75D6: db $BD
-L1C75D7: db $D9
-L1C75D8: db $C1
-L1C75D9: db $B6
-L1C75DA: db $D7
-L1C75DB: db $C9
-L1C75DC: db $B9
-L1C75DD: db $DE
-L1C75DE: db $B2
-L1C75DF: db $FF
-L1C75E0: db $FF
-L1C75E1: db $BC
-L1C75E2: db $DE
-L1C75E3: db $AD
-L1C75E4: db $C2
-L1C75E5: db $C0
-L1C75E6: db $DE
-L1C75E7: db $21
-L1C75E8: db $D4
-L1C75E9: db $BD
-L1C75EA: db $D4
-L1C75EB: db $BD
-L1C75EC: db $C4
-L1C75ED: db $B5
-L1C75EE: db $C1
-L1C75EF: db $CA
-L1C75F0: db $BC
-L1C75F1: db $C5
-L1C75F2: db $B2
-L1C75F3: db $FF
-L1C75F4: db $2A
-L1C75F5: db $C4
-L1C75F6: db $DE
-L1C75F7: db $C5
-L1C75F8: db $B2
-L1C75F9: db $BC
-L1C75FA: db $C0
-L1C75FB: db $3F
-L1C75FC: db $FF
-L1C75FD: db $FF
-L1C75FE: db $B6
-L1C75FF: db $B5
-L1C7600: db $B6
-L1C7601: db $DE
-L1C7602: db $D5
-L1C7603: db $D2
-L1C7604: db $B3
-L1C7605: db $C2
-L1C7606: db $C2
-L1C7607: db $AF
-L1C7608: db $C1
-L1C7609: db $AD
-L1C760A: db $B3
-L1C760B: db $B6
-L1C760C: db $DD
-L1C760D: db $BC
-L1C760E: db $DE
-L1C760F: db $FF
-L1C7610: db $FF
-L1C7611: db $D4
-L1C7612: db $C3
-L1C7613: db $DE
-L1C7614: db $A1
-L1C7615: db $20
-L1C7616: db $BC
-L1C7617: db $AC
-L1C7618: db $B7
-L1C7619: db $AF
-L1C761A: db $C4
-L1C761B: db $BE
-L1C761C: db $C5
-L1C761D: db $21
-L1C761E: db $FF
-L1C761F: db $25
-L1C7620: db $C2
-L1C7621: db $B7
-L1C7622: db $DE
-L1C7623: db $B6
-L1C7624: db $DE
-L1C7625: db $B1
-L1C7626: db $AF
-L1C7627: db $C0
-L1C7628: db $C5
-L1C7629: db $D7
-L1C762A: db $CF
-L1C762B: db $C0
-L1C762C: db $C0
-L1C762D: db $C0
-L1C762E: db $B6
-L1C762F: db $B2
-L1C7630: db $FF
-L1C7631: db $FF
-L1C7632: db $CF
-L1C7633: db $BC
-L1C7634: db $AE
-L1C7635: db $B3
-L1C7636: db $A1
-L1C7637: db $FF
-L1C7638: db $FF
-L1C7639: db $C0
-L1C763A: db $C9
-L1C763B: db $BC
-L1C763C: db $D0
-L1C763D: db $C6
-L1C763E: db $CF
-L1C763F: db $AF
-L1C7640: db $C3
-L1C7641: db $CF
-L1C7642: db $BD
-L1C7643: db $21
-L1C7644: db $FF
-L1C7645: db $36
-L1C7646: db $CF
-L1C7647: db $B1
-L1C7648: db $A4
-L1C7649: db $CE
-L1C764A: db $DD
-L1C764B: db $B7
-L1C764C: db $A6
-L1C764D: db $C1
-L1C764E: db $AE
-L1C764F: db $AF
-L1C7650: db $C4
-L1C7651: db $C0
-L1C7652: db $DE
-L1C7653: db $BE
-L1C7654: db $CA
-L1C7655: db $DE
-L1C7656: db $FF
-L1C7657: db $FF
-L1C7658: db $B6
-L1C7659: db $D9
-L1C765A: db $B2
-L1C765B: db $B6
-L1C765C: db $D9
-L1C765D: db $B2
-L1C765E: db $21
-L1C765F: db $20
-L1C7660: db $BC
-L1C7661: db $D7
-L1C7662: db $C7
-L1C7663: db $B2
-L1C7664: db $D8
-L1C7665: db $AD
-L1C7666: db $B3
-L1C7667: db $FF
-L1C7668: db $FF
-L1C7669: db $C6
-L1C766A: db $DD
-L1C766B: db $BC
-L1C766C: db $DE
-L1C766D: db $AD
-L1C766E: db $C2
-L1C766F: db $A4
-L1C7670: db $BB
-L1C7671: db $B2
-L1C7672: db $B7
-L1C7673: db $AE
-L1C7674: db $B3
-L1C7675: db $AF
-L1C7676: db $C3
-L1C7677: db $C4
-L1C7678: db $BA
-L1C7679: db $C8
-L1C767A: db $21
-L1C767B: db $FF
-L1C767C: db $1E
-L1C767D: db $B1
-L1C767E: db $C5
-L1C767F: db $C0
-L1C7680: db $CA
-L1C7681: db $BC
-L1C7682: db $C5
-L1C7683: db $C5
-L1C7684: db $B2
-L1C7685: db $DC
-L1C7686: db $A1
-L1C7687: db $FF
-L1C7688: db $FF
-L1C7689: db $BA
-L1C768A: db $BA
-L1C768B: db $CA
-L1C768C: db $BE
-L1C768D: db $DD
-L1C768E: db $BC
-L1C768F: db $DE
-L1C7690: db $AE
-L1C7691: db $B3
-L1C7692: db $BC
-L1C7693: db $DE
-L1C7694: db $AC
-L1C7695: db $C5
-L1C7696: db $B2
-L1C7697: db $D3
-L1C7698: db $C9
-L1C7699: db $A1
-L1C769A: db $FF
-L1C769B: db $30
-L1C769C: db $B1
-L1C769D: db $AF
-L1C769E: db $C4
-L1C769F: db $B3
-L1C76A0: db $C3
-L1C76A1: db $B7
-L1C76A2: db $C5
-L1C76A3: db $C1
-L1C76A4: db $B6
-L1C76A5: db $D7
-L1C76A6: db $C6
-L1C76A7: db $BC
-L1C76A8: db $CA
-L1C76A9: db $B2
-L1C76AA: db $BB
-L1C76AB: db $DA
-L1C76AC: db $D9
-L1C76AD: db $FF
-L1C76AE: db $FF
-L1C76AF: db $C9
-L1C76B0: db $CA
-L1C76B1: db $A4
-L1C76B2: db $C4
-L1C76B3: db $DE
-L1C76B4: db $DD
-L1C76B5: db $C5
-L1C76B6: db $B7
-L1C76B7: db $D3
-L1C76B8: db $C1
-L1C76B9: db $C0
-L1C76BA: db $DE
-L1C76BB: db $21
-L1C76BC: db $FF
-L1C76BD: db $FF
-L1C76BE: db $BB
-L1C76BF: db $B1
-L1C76C0: db $21
-L1C76C1: db $20
-L1C76C2: db $B5
-L1C76C3: db $BF
-L1C76C4: db $DA
-L1C76C5: db $D9
-L1C76C6: db $B6
-L1C76C7: db $DE
-L1C76C8: db $B2
-L1C76C9: db $B2
-L1C76CA: db $21
-L1C76CB: db $FF
-L1C76CC: db $33
-L1C76CD: db $DC
-L1C76CE: db $C0
-L1C76CF: db $BC
-L1C76D0: db $A6
-L1C76D1: db $C0
-L1C76D2: db $B5
-L1C76D3: db $BE
-L1C76D4: db $D9
-L1C76D5: db $C5
-L1C76D6: db $D7
-L1C76D7: db $BE
-L1C76D8: db $B6
-L1C76D9: db $B2
-L1C76DA: db $BB
-L1C76DB: db $B2
-L1C76DC: db $B7
-L1C76DD: db $AE
-L1C76DE: db $B3
-L1C76DF: db $FF
-L1C76E0: db $FF
-L1C76E1: db $CA
-L1C76E2: db $CF
-L1C76E3: db $C1
-L1C76E4: db $B6
-L1C76E5: db $DE
-L1C76E6: db $B2
-L1C76E7: db $C5
-L1C76E8: db $B2
-L1C76E9: db $C0
-L1C76EA: db $DE
-L1C76EB: db $DB
-L1C76EC: db $B3
-L1C76ED: db $21
-L1C76EE: db $FF
-L1C76EF: db $FF
-L1C76F0: db $B6
-L1C76F1: db $C3
-L1C76F2: db $DA
-L1C76F3: db $CA
-L1C76F4: db $DE
-L1C76F5: db $C9
-L1C76F6: db $CA
-L1C76F7: db $C5
-L1C76F8: db $BC
-L1C76F9: db $C0
-L1C76FA: db $DE
-L1C76FB: db $B6
-L1C76FC: db $DE
-L1C76FD: db $C5
-L1C76FE: db $21
-L1C76FF: db $FF
-L1C7700: db $26
-L1C7701: db $6C
-L1C7702: db $B0
-L1C7703: db $6F
-L1C7704: db $B0
-L1C7705: db $C6
-L1C7706: db $C3
-L1C7707: db $DE
-L1C7708: db $D3
-L1C7709: db $A4
-L1C770A: db $C5
-L1C770B: db $AF
-L1C770C: db $C0
-L1C770D: db $C2
-L1C770E: db $D3
-L1C770F: db $D8
-L1C7710: db $B6
-L1C7711: db $21
-L1C7712: db $FF
-L1C7713: db $FF
-L1C7714: db $B5
-L1C7715: db $B6
-L1C7716: db $BC
-L1C7717: db $B8
-L1C7718: db $C3
-L1C7719: db $C5
-L1C771A: db $D0
-L1C771B: db $C0
-L1C771C: db $DE
-L1C771D: db $B6
-L1C771E: db $DE
-L1C771F: db $C4
-L1C7720: db $CF
-L1C7721: db $D7
-L1C7722: db $DD
-L1C7723: db $BF
-L1C7724: db $DE
-L1C7725: db $21
-L1C7726: db $FF
-L1C7727: db $2E
-L1C7728: db $CA
-L1C7729: db $DE
-L1C772A: db $B6
-L1C772B: db $C6
-L1C772C: db $C2
-L1C772D: db $B9
-L1C772E: db $D9
-L1C772F: db $B8
-L1C7730: db $BD
-L1C7731: db $D8
-L1C7732: db $CA
-L1C7733: db $C5
-L1C7734: db $B2
-L1C7735: db $C4
-L1C7736: db $B2
-L1C7737: db $B3
-L1C7738: db $B6
-L1C7739: db $DE
-L1C773A: db $FF
-L1C773B: db $FF
-L1C773C: db $CF
-L1C773D: db $D9
-L1C773E: db $C3
-L1C773F: db $DE
-L1C7740: db $B5
-L1C7741: db $CF
-L1C7742: db $B4
-L1C7743: db $C0
-L1C7744: db $C1
-L1C7745: db $C9
-L1C7746: db $BA
-L1C7747: db $C4
-L1C7748: db $A6
-L1C7749: db $FF
-L1C774A: db $FF
-L1C774B: db $B2
-L1C774C: db $AF
-L1C774D: db $C3
-L1C774E: db $B2
-L1C774F: db $D9
-L1C7750: db $D6
-L1C7751: db $B3
-L1C7752: db $C0
-L1C7753: db $DE
-L1C7754: db $21
-L1C7755: db $FF
-L1C7756: db $2F
-L1C7757: db $B1
-L1C7758: db $C5
-L1C7759: db $C0
-L1C775A: db $C0
-L1C775B: db $C1
-L1C775C: db $D3
-L1C775D: db $D5
-L1C775E: db $D2
-L1C775F: db $A6
-L1C7760: db $D0
-L1C7761: db $D9
-L1C7762: db $C3
-L1C7763: db $DE
-L1C7764: db $BC
-L1C7765: db $AE
-L1C7766: db $A1
-L1C7767: db $FF
-L1C7768: db $FF
-L1C7769: db $BB
-L1C776A: db $B1
-L1C776B: db $B4
-L1C776C: db $B2
-L1C776D: db $B4
-L1C776E: db $DD
-L1C776F: db $C9
-L1C7770: db $D5
-L1C7771: db $D2
-L1C7772: db $C9
-L1C7773: db $BE
-L1C7774: db $B6
-L1C7775: db $B2
-L1C7776: db $C6
-L1C7777: db $B1
-L1C7778: db $DD
-L1C7779: db $C5
-L1C777A: db $B2
-L1C777B: db $FF
-L1C777C: db $FF
-L1C777D: db $BC
-L1C777E: db $C3
-L1C777F: db $B1
-L1C7780: db $B9
-L1C7781: db $DE
-L1C7782: db $D9
-L1C7783: db $DC
-L1C7784: db $21
-L1C7785: db $FF
-L1C7786: db $30
-L1C7787: db $B1
-L1C7788: db $C5
-L1C7789: db $C0
-L1C778A: db $C0
-L1C778B: db $C1
-L1C778C: db $CA
-L1C778D: db $CE
-L1C778E: db $DD
-L1C778F: db $C4
-L1C7790: db $B3
-L1C7791: db $C9
-L1C7792: db $C1
-L1C7793: db $B6
-L1C7794: db $D7
-L1C7795: db $B6
-L1C7796: db $DE
-L1C7797: db $FF
-L1C7798: db $FF
-L1C7799: db $C5
-L1C779A: db $C6
-L1C779B: db $B6
-L1C779C: db $A6
-L1C779D: db $BC
-L1C779E: db $D7
-L1C779F: db $C5
-L1C77A0: db $B2
-L1C77A1: db $D6
-L1C77A2: db $B3
-L1C77A3: db $C8
-L1C77A4: db $A1
-L1C77A5: db $FF
-L1C77A6: db $FF
-L1C77A7: db $BF
-L1C77A8: db $DA
-L1C77A9: db $C3
-L1C77AA: db $DE
-L1C77AB: db $CA
-L1C77AC: db $DC
-L1C77AD: db $C0
-L1C77AE: db $BC
-L1C77AF: db $CA
-L1C77B0: db $C0
-L1C77B1: db $B5
-L1C77B2: db $BE
-L1C77B3: db $C5
-L1C77B4: db $B2
-L1C77B5: db $A1
-L1C77B6: db $FF
-L1C77B7: db $32
-L1C77B8: db $BE
-L1C77B9: db $B6
-L1C77BA: db $B2
-L1C77BB: db $B6
-L1C77BC: db $DE
-L1C77BD: db $BF
-L1C77BE: db $DE
-L1C77BF: db $B3
-L1C77C0: db $B5
-L1C77C1: db $C9
-L1C77C2: db $C5
-L1C77C3: db $B6
-L1C77C4: db $C3
-L1C77C5: db $DE
-L1C77C6: db $D3
-L1C77C7: db $B4
-L1C77C8: db $C3
-L1C77C9: db $B2
-L1C77CA: db $FF
-L1C77CB: db $FF
-L1C77CC: db $CF
-L1C77CD: db $BD
-L1C77CE: db $A1
-L1C77CF: db $20
-L1C77D0: db $BC
-L1C77D1: db $DD
-L1C77D2: db $C9
-L1C77D3: db $BA
-L1C77D4: db $DD
-L1C77D5: db $C4
-L1C77D6: db $DD
-L1C77D7: db $CA
-L1C77D8: db $B5
-L1C77D9: db $BB
-L1C77DA: db $D2
-L1C77DB: db $D9
-L1C77DC: db $FF
-L1C77DD: db $FF
-L1C77DE: db $BA
-L1C77DF: db $C4
-L1C77E0: db $CA
-L1C77E1: db $CC
-L1C77E2: db $B6
-L1C77E3: db $C9
-L1C77E4: db $B3
-L1C77E5: db $C3
-L1C77E6: db $DE
-L1C77E7: db $BD
-L1C77E8: db $A1
-L1C77E9: db $FF
-L1C77EA: db $24
-L1C77EB: db $C5
-L1C77EC: db $DD
-L1C77ED: db $C4
-L1C77EE: db $DE
-L1C77EF: db $C3
-L1C77F0: db $DE
-L1C77F1: db $D3
-L1C77F2: db $B2
-L1C77F3: db $B5
-L1C77F4: db $B3
-L1C77F5: db $21
-L1C77F6: db $FF
-L1C77F7: db $FF
-L1C77F8: db $DC
-L1C77F9: db $B6
-L1C77FA: db $DE
-L1C77FB: db $B7
-L1C77FC: db $AE
-L1C77FD: db $B8
-L1C77FE: db $B9
-L1C77FF: db $DE
-L1C7800: db $DD
-L1C7801: db $D8
-L1C7802: db $AD
-L1C7803: db $B3
-L1C7804: db $C6
-L1C7805: db $FF
-L1C7806: db $FF
-L1C7807: db $C3
-L1C7808: db $B7
-L1C7809: db $CA
-L1C780A: db $B2
-L1C780B: db $C5
-L1C780C: db $B2
-L1C780D: db $A1
-L1C780E: db $FF
-L1C780F: db $0C
-L1C7810: db $B8
-L1C7811: db $DE
-L1C7812: db $B3
-L1C7813: db $B5
-L1C7814: db $B5
-L1C7815: db $B5
-L1C7816: db $B3
-L1C7817: db $B3
-L1C7818: db $B3
-L1C7819: db $21
-L1C781A: db $21
-L1C781B: db $FF
-L1C781C: db $0B
-L1C781D: db $A5
-L1C781E: db $A5
-L1C781F: db $A5
-L1C7820: db $A5
-L1C7821: db $A5
-L1C7822: db $A5
-L1C7823: db $A5
-L1C7824: db $A5
-L1C7825: db $A5
-L1C7826: db $A5
-L1C7827: db $FF
-L1C7828: db $34
-L1C7829: db $C5
-L1C782A: db $C6
-L1C782B: db $BA
-L1C782C: db $DE
-L1C782D: db $C4
-L1C782E: db $C6
-L1C782F: db $D3
-L1C7830: db $BE
-L1C7831: db $DE
-L1C7832: db $DD
-L1C7833: db $D8
-L1C7834: db $AE
-L1C7835: db $B8
-L1C7836: db $C3
-L1C7837: db $DE
-L1C7838: db $FF
-L1C7839: db $FF
-L1C783A: db $B2
-L1C783B: db $C4
-L1C783C: db $DE
-L1C783D: db $D1
-L1C783E: db $21
-L1C783F: db $20
-L1C7840: db $BF
-L1C7841: db $DA
-L1C7842: db $B6
-L1C7843: db $DE
-L1C7844: db $B2
-L1C7845: db $C2
-L1C7846: db $B6
-L1C7847: db $BC
-L1C7848: db $AE
-L1C7849: db $B3
-L1C784A: db $D8
-L1C784B: db $FF
-L1C784C: db $FF
-L1C784D: db $BD
-L1C784E: db $D9
-L1C784F: db $B7
-L1C7850: db $CE
-L1C7851: db $DE
-L1C7852: db $B3
-L1C7853: db $C6
-L1C7854: db $C2
-L1C7855: db $C5
-L1C7856: db $B6
-L1C7857: db $DE
-L1C7858: db $D9
-L1C7859: db $C9
-L1C785A: db $D6
-L1C785B: db $A1
-L1C785C: db $FF
-L1C785D: db $20
-L1C785E: db $B5
-L1C785F: db $D2
-L1C7860: db $C3
-L1C7861: db $DE
-L1C7862: db $C4
-L1C7863: db $B3
-L1C7864: db $BA
-L1C7865: db $DE
-L1C7866: db $BB
-L1C7867: db $DE
-L1C7868: db $B2
-L1C7869: db $CF
-L1C786A: db $BD
-L1C786B: db $A1
-L1C786C: db $FF
-L1C786D: db $FF
-L1C786E: db $BD
-L1C786F: db $CA
-L1C7870: db $DE
-L1C7871: db $D7
-L1C7872: db $BC
-L1C7873: db $B2
-L1C7874: db $BC
-L1C7875: db $B1
-L1C7876: db $B2
-L1C7877: db $C3
-L1C7878: db $DE
-L1C7879: db $BC
-L1C787A: db $C0
-L1C787B: db $DC
-L1C787C: db $A1
-L1C787D: db $FF
-L1C787E: db $27
-L1C787F: db $DC
-L1C7880: db $C0
-L1C7881: db $BC
-L1C7882: db $C9
-L1C7883: db $C5
-L1C7884: db $CA
-L1C7885: db $A4
-L1C7886: db $B6
-L1C7887: db $B8
-L1C7888: db $DE
-L1C7889: db $D7
-L1C788A: db $C1
-L1C788B: db $C2
-L1C788C: db $DE
-L1C788D: db $D9
-L1C788E: db $A5
-L1C788F: db $A5
-L1C7890: db $A5
-L1C7891: db $FF
-L1C7892: db $FF
-L1C7893: db $BA
-L1C7894: db $DD
-L1C7895: db $C0
-L1C7896: db $B2
-L1C7897: db $B6
-L1C7898: db $B2
-L1C7899: db $A6
-L1C789A: db $BC
-L1C789B: db $AD
-L1C789C: db $BB
-L1C789D: db $B2
-L1C789E: db $BC
-L1C789F: db $C0
-L1C78A0: db $D3
-L1C78A1: db $C9
-L1C78A2: db $C3
-L1C78A3: db $DE
-L1C78A4: db $BD
-L1C78A5: db $FF
-L1C78A6: db $28
-L1C78A7: db $52
-L1C78A8: db $55
-L1C78A9: db $47
-L1C78AA: db $41
-L1C78AB: db $4C
-L1C78AC: db $A6
-L1C78AD: db $C0
-L1C78AE: db $B5
-L1C78AF: db $BC
-L1C78B0: db $C0
-L1C78B1: db $BF
-L1C78B2: db $C9
-L1C78B3: db $C1
-L1C78B4: db $B6
-L1C78B5: db $D7
-L1C78B6: db $FF
-L1C78B7: db $FF
-L1C78B8: db $C9
-L1C78B9: db $CE
-L1C78BA: db $C4
-L1C78BB: db $DE
-L1C78BC: db $CA
-L1C78BD: db $B2
-L1C78BE: db $B9
-L1C78BF: db $DD
-L1C78C0: db $BC
-L1C78C1: db $C0
-L1C78C2: db $B6
-L1C78C3: db $AF
-L1C78C4: db $C0
-L1C78C5: db $FF
-L1C78C6: db $FF
-L1C78C7: db $C9
-L1C78C8: db $C3
-L1C78C9: db $DE
-L1C78CA: db $BD
-L1C78CB: db $B6
-L1C78CC: db $DE
-L1C78CD: db $A1
-L1C78CE: db $FF
-L1C78CF: db $18
-L1C78D0: db $B1
-L1C78D1: db $C5
-L1C78D2: db $C0
-L1C78D3: db $C0
-L1C78D4: db $C1
-L1C78D5: db $C9
-L1C78D6: db $CE
-L1C78D7: db $DD
-L1C78D8: db $C4
-L1C78D9: db $B3
-L1C78DA: db $C9
-L1C78DB: db $C1
-L1C78DC: db $B6
-L1C78DD: db $D7
-L1C78DE: db $B6
-L1C78DF: db $DE
-L1C78E0: db $FF
-L1C78E1: db $FF
-L1C78E2: db $D0
-L1C78E3: db $C0
-L1C78E4: db $B2
-L1C78E5: db $DC
-L1C78E6: db $A1
-L1C78E7: db $FF
-L1C78E8: db $2F
-L1C78E9: db $69
-L1C78EA: db $B0
-L1C78EB: db $6A
-L1C78EC: db $6E
-L1C78ED: db $71
-L1C78EE: db $69
-L1C78EF: db $C3
-L1C78F0: db $DE
-L1C78F1: db $D0
-L1C78F2: db $BE
-L1C78F3: db $C0
-L1C78F4: db $C9
-L1C78F5: db $B6
-L1C78F6: db $DE
-L1C78F7: db $FF
-L1C78F8: db $FF
-L1C78F9: db $BC
-L1C78FA: db $DE
-L1C78FB: db $C2
-L1C78FC: db $D8
-L1C78FD: db $AE
-L1C78FE: db $B8
-L1C78FF: db $C4
-L1C7900: db $B2
-L1C7901: db $B3
-L1C7902: db $C9
-L1C7903: db $C5
-L1C7904: db $D7
-L1C7905: db $FF
-L1C7906: db $FF
-L1C7907: db $CA
-L1C7908: db $C5
-L1C7909: db $BC
-L1C790A: db $CA
-L1C790B: db $CD
-L1C790C: db $DE
-L1C790D: db $C2
-L1C790E: db $C0
-L1C790F: db $DE
-L1C7910: db $B9
-L1C7911: db $C4
-L1C7912: db $DE
-L1C7913: db $A5
-L1C7914: db $A5
-L1C7915: db $A5
-L1C7916: db $A1
-L1C7917: db $FF
-L1C7918: db $0F
-L1C7919: db $C5
-L1C791A: db $BE
-L1C791B: db $DE
-L1C791C: db $52
-L1C791D: db $55
-L1C791E: db $47
-L1C791F: db $41
-L1C7920: db $4C
-L1C7921: db $C9
-L1C7922: db $BA
-L1C7923: db $C4
-L1C7924: db $A6
-L1C7925: db $21
-L1C7926: db $3F
-L1C7927: db $FF
-L1C7928: db $22
-L1C7929: db $52
-L1C792A: db $55
-L1C792B: db $47
-L1C792C: db $41
-L1C792D: db $4C
-L1C792E: db $B6
-L1C792F: db $DE
-L1C7930: db $C3
-L1C7931: db $C6
-L1C7932: db $B2
-L1C7933: db $DA
-L1C7934: db $D6
-L1C7935: db $B3
-L1C7936: db $C4
-L1C7937: db $BC
-L1C7938: db $C3
-L1C7939: db $FF
-L1C793A: db $FF
-L1C793B: db $C3
-L1C793C: db $DE
-L1C793D: db $B7
-L1C793E: db $C5
-L1C793F: db $B6
-L1C7940: db $AF
-L1C7941: db $C0
-L1C7942: db $63
-L1C7943: db $6F
-L1C7944: db $67
-L1C7945: db $C9
-L1C7946: db $C1
-L1C7947: db $B6
-L1C7948: db $D7
-L1C7949: db $A1
-L1C794A: db $FF
-L1C794B: db $1C
-L1C794C: db $CC
-L1C794D: db $B3
-L1C794E: db $BC
-L1C794F: db $DE
-L1C7950: db $D7
-L1C7951: db $DA
-L1C7952: db $BC
-L1C7953: db $A4
-L1C7954: db $BF
-L1C7955: db $C9
-L1C7956: db $C1
-L1C7957: db $B6
-L1C7958: db $D7
-L1C7959: db $A6
-L1C795A: db $FF
-L1C795B: db $FF
-L1C795C: db $DC
-L1C795D: db $C0
-L1C795E: db $BC
-L1C795F: db $CA
-L1C7960: db $CF
-L1C7961: db $D3
-L1C7962: db $AF
-L1C7963: db $C3
-L1C7964: db $B7
-L1C7965: db $C0
-L1C7966: db $A1
-L1C7967: db $FF
-L1C7968: db $12
-L1C7969: db $BF
-L1C796A: db $DA
-L1C796B: db $A6
-L1C796C: db $52
-L1C796D: db $55
-L1C796E: db $47
-L1C796F: db $41
-L1C7970: db $4C
-L1C7971: db $B6
-L1C7972: db $DE
-L1C7973: db $B6
-L1C7974: db $B2
-L1C7975: db $CE
-L1C7976: db $B3
-L1C7977: db $BC
-L1C7978: db $C0
-L1C7979: db $3F
-L1C797A: db $FF
-L1C797B: db $24
-L1C797C: db $52
-L1C797D: db $55
-L1C797E: db $47
-L1C797F: db $41
-L1C7980: db $4C
-L1C7981: db $CA
-L1C7982: db $A4
-L1C7983: db $B6
-L1C7984: db $B2
-L1C7985: db $CE
-L1C7986: db $B3
-L1C7987: db $BB
-L1C7988: db $DA
-L1C7989: db $C0
-L1C798A: db $C1
-L1C798B: db $B6
-L1C798C: db $D7
-L1C798D: db $A6
-L1C798E: db $FF
-L1C798F: db $FF
-L1C7990: db $D6
-L1C7991: db $BA
-L1C7992: db $B6
-L1C7993: db $D7
-L1C7994: db $B3
-L1C7995: db $CA
-L1C7996: db $DE
-L1C7997: db $B2
-L1C7998: db $C4
-L1C7999: db $AF
-L1C799A: db $C0
-L1C799B: db $C0
-L1C799C: db $DE
-L1C799D: db $B9
-L1C799E: db $A1
-L1C799F: db $FF
-L1C79A0: db $1F
-L1C79A1: db $BF
-L1C79A2: db $DA
-L1C79A3: db $C4
-L1C79A4: db $A4
-L1C79A5: db $B1
-L1C79A6: db $C5
-L1C79A7: db $C0
-L1C79A8: db $C4
-L1C79A9: db $C0
-L1C79AA: db $C0
-L1C79AB: db $B6
-L1C79AC: db $AF
-L1C79AD: db $C0
-L1C79AE: db $BA
-L1C79AF: db $C4
-L1C79B0: db $C4
-L1C79B1: db $FF
-L1C79B2: db $FF
-L1C79B3: db $C4
-L1C79B4: db $DE
-L1C79B5: db $B3
-L1C79B6: db $B2
-L1C79B7: db $B3
-L1C79B8: db $B6
-L1C79B9: db $DD
-L1C79BA: db $B9
-L1C79BB: db $B2
-L1C79BC: db $B6
-L1C79BD: db $DE
-L1C79BE: db $3F
-L1C79BF: db $FF
-L1C79C0: db $21
-L1C79C1: db $B1
-L1C79C2: db $C5
-L1C79C3: db $C0
-L1C79C4: db $C0
-L1C79C5: db $C1
-L1C79C6: db $C9
-L1C79C7: db $BC
-L1C79C8: db $DE
-L1C79C9: db $C2
-L1C79CA: db $D8
-L1C79CB: db $AE
-L1C79CC: db $B8
-L1C79CD: db $A6
-L1C79CE: db $D0
-L1C79CF: db $D9
-L1C79D0: db $C0
-L1C79D1: db $D2
-L1C79D2: db $C6
-L1C79D3: db $FF
-L1C79D4: db $FF
-L1C79D5: db $69
-L1C79D6: db $2D
-L1C79D7: db $6A
-L1C79D8: db $6E
-L1C79D9: db $71
-L1C79DA: db $69
-L1C79DB: db $A6
-L1C79DC: db $CB
-L1C79DD: db $D7
-L1C79DE: db $B2
-L1C79DF: db $C0
-L1C79E0: db $A1
-L1C79E1: db $FF
-L1C79E2: db $08
-L1C79E3: db $C5
-L1C79E4: db $DD
-L1C79E5: db $C9
-L1C79E6: db $C0
-L1C79E7: db $D2
-L1C79E8: db $C6
-L1C79E9: db $3F
-L1C79EA: db $FF
-L1C79EB: db $31
-L1C79EC: db $63
-L1C79ED: db $6F
-L1C79EE: db $67
-L1C79EF: db $C9
-L1C79F0: db $C1
-L1C79F1: db $B6
-L1C79F2: db $D7
-L1C79F3: db $A6
-L1C79F4: db $CC
-L1C79F5: db $B3
-L1C79F6: db $BC
-L1C79F7: db $DE
-L1C79F8: db $D9
-L1C79F9: db $C9
-L1C79FA: db $C6
-L1C79FB: db $A4
-L1C79FC: db $FF
-L1C79FD: db $FF
-L1C79FE: db $B1
-L1C79FF: db $C5
-L1C7A00: db $C0
-L1C7A01: db $C9
-L1C7A02: db $C1
-L1C7A03: db $B6
-L1C7A04: db $D7
-L1C7A05: db $A6
-L1C7A06: db $B6
-L1C7A07: db $BC
-L1C7A08: db $C3
-L1C7A09: db $CE
-L1C7A0A: db $BC
-L1C7A0B: db $B2
-L1C7A0C: db $C9
-L1C7A0D: db $D6
-L1C7A0E: db $A1
-L1C7A0F: db $FF
-L1C7A10: db $FF
-L1C7A11: db $BC
-L1C7A12: db $DE
-L1C7A13: db $B6
-L1C7A14: db $DD
-L1C7A15: db $CA
-L1C7A16: db $D3
-L1C7A17: db $B3
-L1C7A18: db $C5
-L1C7A19: db $B2
-L1C7A1A: db $DC
-L1C7A1B: db $A1
-L1C7A1C: db $FF
-L1C7A1D: db $1C
-L1C7A1E: db $B9
-L1C7A1F: db $CA
-L1C7A20: db $B2
-L1C7A21: db $C3
-L1C7A22: db $DE
-L1C7A23: db $DC
-L1C7A24: db $B6
-L1C7A25: db $D9
-L1C7A26: db $C9
-L1C7A27: db $A1
-L1C7A28: db $FF
-L1C7A29: db $FF
-L1C7A2A: db $D3
-L1C7A2B: db $B3
-L1C7A2C: db $BF
-L1C7A2D: db $BA
-L1C7A2E: db $CF
-L1C7A2F: db $C3
-L1C7A30: db $DE
-L1C7A31: db $B7
-L1C7A32: db $C3
-L1C7A33: db $B2
-L1C7A34: db $D9
-L1C7A35: db $A5
-L1C7A36: db $A5
-L1C7A37: db $A5
-L1C7A38: db $A1
-L1C7A39: db $FF
-L1C7A3A: db $06
-L1C7A3B: db $B7
-L1C7A3C: db $C3
-L1C7A3D: db $B2
-L1C7A3E: db $D9
-L1C7A3F: db $3F
-L1C7A40: db $FF
-L1C7A41: db $23
-L1C7A42: db $BF
-L1C7A43: db $B3
-L1C7A44: db $A5
-L1C7A45: db $A5
-L1C7A46: db $A5
-L1C7A47: db $A1
-L1C7A48: db $CC
-L1C7A49: db $B3
-L1C7A4A: db $BC
-L1C7A4B: db $DE
-L1C7A4C: db $D7
-L1C7A4D: db $DA
-L1C7A4E: db $C3
-L1C7A4F: db $B2
-L1C7A50: db $C0
-L1C7A51: db $FF
-L1C7A52: db $FF
-L1C7A53: db $63
-L1C7A54: db $6F
-L1C7A55: db $67
-L1C7A56: db $A6
-L1C7A57: db $B6
-L1C7A58: db $B2
-L1C7A59: db $CE
-L1C7A5A: db $B3
-L1C7A5B: db $BC
-L1C7A5C: db $C0
-L1C7A5D: db $B5
-L1C7A5E: db $C4
-L1C7A5F: db $BA
-L1C7A60: db $A5
-L1C7A61: db $A5
-L1C7A62: db $A5
-L1C7A63: db $A1
-L1C7A64: db $FF
-L1C7A65: db $10
-L1C7A66: db $C5
-L1C7A67: db $A4
-L1C7A68: db $C5
-L1C7A69: db $C6
-L1C7A6A: db $21
-L1C7A6B: db $3F
-L1C7A6C: db $20
-L1C7A6D: db $20
-L1C7A6E: db $B6
-L1C7A6F: db $BE
-L1C7A70: db $DE
-L1C7A71: db $B6
-L1C7A72: db $DE
-L1C7A73: db $21
-L1C7A74: db $3F
-L1C7A75: db $FF
-L1C7A76: db $06
-L1C7A77: db $B3
-L1C7A78: db $DC
-L1C7A79: db $B1
-L1C7A7A: db $B0
-L1C7A7B: db $21
-L1C7A7C: db $FF
-L1C7A7D: db $27
-L1C7A7E: db $BB
-L1C7A7F: db $BD
-L1C7A80: db $B6
-L1C7A81: db $DE
-L1C7A82: db $C3
-L1C7A83: db $DE
-L1C7A84: db $BD
-L1C7A85: db $C8
-L1C7A86: db $A1
-L1C7A87: db $BA
-L1C7A88: db $DA
-L1C7A89: db $B8
-L1C7A8A: db $DE
-L1C7A8B: db $D7
-L1C7A8C: db $B2
-L1C7A8D: db $C3
-L1C7A8E: db $DE
-L1C7A8F: db $CA
-L1C7A90: db $FF
-L1C7A91: db $FF
-L1C7A92: db $C4
-L1C7A93: db $DE
-L1C7A94: db $B3
-L1C7A95: db $C4
-L1C7A96: db $B2
-L1C7A97: db $B3
-L1C7A98: db $BA
-L1C7A99: db $C4
-L1C7A9A: db $CA
-L1C7A9B: db $B1
-L1C7A9C: db $D8
-L1C7A9D: db $CF
-L1C7A9E: db $BE
-L1C7A9F: db $DD
-L1C7AA0: db $B6
-L1C7AA1: db $A5
-L1C7AA2: db $A5
-L1C7AA3: db $A5
-L1C7AA4: db $FF
-L1C7AA5: db $05
-L1C7AA6: db $C0
-L1C7AA7: db $DE
-L1C7AA8: db $DA
-L1C7AA9: db $3F
-L1C7AAA: db $FF
-L1C7AAB: db $19
-L1C7AAC: db $CA
-L1C7AAD: db $BC
-L1C7AAE: db $DE
-L1C7AAF: db $D2
-L1C7AB0: db $CF
-L1C7AB1: db $BC
-L1C7AB2: db $C3
-L1C7AB3: db $A1
-L1C7AB4: db $FF
-L1C7AB5: db $FF
-L1C7AB6: db $47
-L1C7AB7: db $4F
-L1C7AB8: db $45
-L1C7AB9: db $4E
-L1C7ABA: db $49
-L1C7ABB: db $54
-L1C7ABC: db $5A
-L1C7ABD: db $C4
-L1C7ABE: db $D3
-L1C7ABF: db $B3
-L1C7AC0: db $BC
-L1C7AC1: db $CF
-L1C7AC2: db $BD
-L1C7AC3: db $2E
-L1C7AC4: db $FF
-L1C7AC5: db $2A
-L1C7AC6: db $B2
-L1C7AC7: db $CF
-L1C7AC8: db $CF
-L1C7AC9: db $C3
-L1C7ACA: db $DE
-L1C7ACB: db $C9
-L1C7ACC: db $BA
-L1C7ACD: db $C4
-L1C7ACE: db $CA
-L1C7ACF: db $A4
-L1C7AD0: db $CA
-L1C7AD1: db $B2
-L1C7AD2: db $B9
-L1C7AD3: db $DD
-L1C7AD4: db $BB
-L1C7AD5: db $BE
-L1C7AD6: db $C3
-L1C7AD7: db $FF
-L1C7AD8: db $FF
-L1C7AD9: db $B2
-L1C7ADA: db $C0
-L1C7ADB: db $C0
-L1C7ADC: db $DE
-L1C7ADD: db $B7
-L1C7ADE: db $CF
-L1C7ADF: db $BC
-L1C7AE0: db $C0
-L1C7AE1: db $A1
-L1C7AE2: db $FF
-L1C7AE3: db $FF
-L1C7AE4: db $BC
-L1C7AE5: db $B6
-L1C7AE6: db $BC
-L1C7AE7: db $A4
-L1C7AE8: db $D1
-L1C7AE9: db $C0
-L1C7AEA: db $DE
-L1C7AEB: db $C3
-L1C7AEC: db $DE
-L1C7AED: db $BD
-L1C7AEE: db $A1
-L1C7AEF: db $FF
-L1C7AF0: db $26
-L1C7AF1: db $B1
-L1C7AF2: db $C5
-L1C7AF3: db $C0
-L1C7AF4: db $C0
-L1C7AF5: db $C1
-L1C7AF6: db $C6
-L1C7AF7: db $CA
-L1C7AF8: db $C5
-L1C7AF9: db $C6
-L1C7AFA: db $D3
-L1C7AFB: db $C3
-L1C7AFC: db $DE
-L1C7AFD: db $B7
-L1C7AFE: db $CF
-L1C7AFF: db $BE
-L1C7B00: db $DD
-L1C7B01: db $A1
-L1C7B02: db $FF
-L1C7B03: db $FF
-L1C7B04: db $C4
-L1C7B05: db $B8
-L1C7B06: db $CD
-L1C7B07: db $DE
-L1C7B08: db $C2
-L1C7B09: db $C6
-L1C7B0A: db $BE
-L1C7B0B: db $DD
-L1C7B0C: db $C0
-L1C7B0D: db $B8
-L1C7B0E: db $BC
-L1C7B0F: db $A6
-L1C7B10: db $B1
-L1C7B11: db $B9
-L1C7B12: db $DE
-L1C7B13: db $CF
-L1C7B14: db $BD
-L1C7B15: db $A1
-L1C7B16: db $FF
-L1C7B17: db $17
-L1C7B18: db $C0
-L1C7B19: db $C0
-L1C7B1A: db $B6
-L1C7B1B: db $DC
-L1C7B1C: db $BD
-L1C7B1D: db $DE
-L1C7B1E: db $C6
-L1C7B1F: db $BC
-L1C7B20: db $C7
-L1C7B21: db $B6
-L1C7B22: db $A4
-L1C7B23: db $FF
-L1C7B24: db $FF
-L1C7B25: db $C0
-L1C7B26: db $C0
-L1C7B27: db $B6
-L1C7B28: db $AF
-L1C7B29: db $C3
-L1C7B2A: db $BC
-L1C7B2B: db $C7
-L1C7B2C: db $B6
-L1C7B2D: db $A1
-L1C7B2E: db $FF
-L1C7B2F: db $16
-L1C7B30: db $C4
-L1C7B31: db $DE
-L1C7B32: db $C1
-L1C7B33: db $D7
-L1C7B34: db $C3
-L1C7B35: db $DE
-L1C7B36: db $D3
-L1C7B37: db $C5
-L1C7B38: db $B2
-L1C7B39: db $21
-L1C7B3A: db $FF
-L1C7B3B: db $FF
-L1C7B3C: db $C0
-L1C7B3D: db $C0
-L1C7B3E: db $B6
-L1C7B3F: db $AF
-L1C7B40: db $C3
-L1C7B41: db $B6
-L1C7B42: db $C2
-L1C7B43: db $21
-L1C7B44: db $21
-L1C7B45: db $FF
-L1C7B46: db $17
-L1C7B47: db $B5
-L1C7B48: db $C4
-L1C7B49: db $DE
-L1C7B4A: db $DB
-L1C7B4B: db $B7
-L1C7B4C: db $C3
-L1C7B4D: db $DE
-L1C7B4E: db $BD
-L1C7B4F: db $C8
-L1C7B50: db $A1
-L1C7B51: db $FF
-L1C7B52: db $FF
-L1C7B53: db $BA
-L1C7B54: db $DA
-L1C7B55: db $CE
-L1C7B56: db $C4
-L1C7B57: db $DE
-L1C7B58: db $C4
-L1C7B59: db $CA
-L1C7B5A: db $A5
-L1C7B5B: db $A5
-L1C7B5C: db $A5
-L1C7B5D: db $FF
-L1C7B5E: db $2F
-L1C7B5F: db $BC
-L1C7B60: db $B6
-L1C7B61: db $BC
-L1C7B62: db $A4
-L1C7B63: db $B1
-L1C7B64: db $C5
-L1C7B65: db $C0
-L1C7B66: db $B6
-L1C7B67: db $DE
-L1C7B68: db $C0
-L1C7B69: db $C9
-L1C7B6A: db $C3
-L1C7B6B: db $C3
-L1C7B6C: db $DE
-L1C7B6D: db $63
-L1C7B6E: db $6F
-L1C7B6F: db $67
-L1C7B70: db $A6
-L1C7B71: db $FF
-L1C7B72: db $FF
-L1C7B73: db $CC
-L1C7B74: db $B3
-L1C7B75: db $BC
-L1C7B76: db $DE
-L1C7B77: db $D6
-L1C7B78: db $B3
-L1C7B79: db $C5
-L1C7B7A: db $C4
-L1C7B7B: db $DE
-L1C7B7C: db $C4
-L1C7B7D: db $CA
-L1C7B7E: db $B6
-L1C7B7F: db $DD
-L1C7B80: db $B6
-L1C7B81: db $DE
-L1C7B82: db $B4
-L1C7B83: db $C5
-L1C7B84: db $B2
-L1C7B85: db $FF
-L1C7B86: db $FF
-L1C7B87: db $BA
-L1C7B88: db $C4
-L1C7B89: db $C3
-L1C7B8A: db $DE
-L1C7B8B: db $BD
-L1C7B8C: db $A1
-L1C7B8D: db $FF
-L1C7B8E: db $11
-L1C7B8F: db $C3
-L1C7B90: db $A6
-L1C7B91: db $CB
-L1C7B92: db $B8
-L1C7B93: db $BA
-L1C7B94: db $C4
-L1C7B95: db $A6
-L1C7B96: db $B5
-L1C7B97: db $BD
-L1C7B98: db $BD
-L1C7B99: db $D2
-L1C7B9A: db $BC
-L1C7B9B: db $CF
-L1C7B9C: db $BD
-L1C7B9D: db $D6
-L1C7B9E: db $A1
-L1C7B9F: db $FF
-L1C7BA0: db $16
-L1C7BA1: db $CC
-L1C7BA2: db $B3
-L1C7BA3: db $BC
-L1C7BA4: db $DE
-L1C7BA5: db $C3
-L1C7BA6: db $D0
-L1C7BA7: db $BE
-L1C7BA8: db $D9
-L1C7BA9: db $DC
-L1C7BAA: db $A1
-L1C7BAB: db $FF
-L1C7BAC: db $FF
-L1C7BAD: db $B6
-L1C7BAE: db $C5
-L1C7BAF: db $D7
-L1C7BB0: db $BD
-L1C7BB1: db $DE
-L1C7BB2: db $A5
-L1C7BB3: db $A5
-L1C7BB4: db $A5
-L1C7BB5: db $A1
-L1C7BB6: db $FF
-L1C7BB7: db $2A
-L1C7BB8: db $B6
-L1C7BB9: db $C1
-L1C7BBA: db $B7
-L1C7BBB: db $C5
-L1C7BBC: db $B5
-L1C7BBD: db $B6
-L1C7BBE: db $C0
-L1C7BBF: db $C0
-L1C7BC0: db $DE
-L1C7BC1: db $A5
-L1C7BC2: db $A5
-L1C7BC3: db $A5
-L1C7BC4: db $A1
-L1C7BC5: db $FF
-L1C7BC6: db $FF
-L1C7BC7: db $B2
-L1C7BC8: db $B2
-L1C7BC9: db $B6
-L1C7BCA: db $BE
-L1C7BCB: db $DE
-L1C7BCC: db $B6
-L1C7BCD: db $DE
-L1C7BCE: db $B7
-L1C7BCF: db $CF
-L1C7BD0: db $BC
-L1C7BD1: db $C0
-L1C7BD2: db $A1
-L1C7BD3: db $FF
-L1C7BD4: db $FF
-L1C7BD5: db $BF
-L1C7BD6: db $DB
-L1C7BD7: db $BF
-L1C7BD8: db $DB
-L1C7BD9: db $BA
-L1C7BDA: db $DB
-L1C7BDB: db $B1
-L1C7BDC: db $B2
-L1C7BDD: db $C3
-L1C7BDE: db $DE
-L1C7BDF: db $BD
-L1C7BE0: db $A1
-L1C7BE1: db $FF
-L1C7BE2: db $07
-L1C7BE3: db $C6
-L1C7BE4: db $B9
-L1C7BE5: db $DE
-L1C7BE6: db $D9
-L1C7BE7: db $21
-L1C7BE8: db $3F
-L1C7BE9: db $FF
-L1C7BEA: db $0D
-L1C7BEB: db $B2
-L1C7BEC: db $B4
-L1C7BED: db $A4
-L1C7BEE: db $D2
-L1C7BEF: db $BB
-L1C7BF0: db $DA
-L1C7BF1: db $D9
-L1C7BF2: db $C9
-L1C7BF3: db $C3
-L1C7BF4: db $DE
-L1C7BF5: db $BD
-L1C7BF6: db $A1
-L1C7BF7: db $FF
-L1C7BF8: db $09
-L1C7BF9: db $A5
-L1C7BFA: db $A5
-L1C7BFB: db $A5
-L1C7BFC: db $C3
-L1C7BFD: db $DD
-L1C7BFE: db $20
-L1C7BFF: db $CD
-L1C7C00: db $A1
-L1C7C01: db $FF
-L1C7C02: db $26
-L1C7C03: db $BA
-L1C7C04: db $C9
-L1C7C05: db $B8
-L1C7C06: db $DE
-L1C7C07: db $D7
-L1C7C08: db $B2
-L1C7C09: db $C9
-L1C7C0A: db $BC
-L1C7C0B: db $DE
-L1C7C0C: db $C2
-L1C7C0D: db $D8
-L1C7C0E: db $AE
-L1C7C0F: db $B8
-L1C7C10: db $C3
-L1C7C11: db $DE
-L1C7C12: db $CA
-L1C7C13: db $A4
-L1C7C14: db $FF
-L1C7C15: db $FF
-L1C7C16: db $DC
-L1C7C17: db $C0
-L1C7C18: db $BC
-L1C7C19: db $B6
-L1C7C1A: db $DE
-L1C7C1B: db $C3
-L1C7C1C: db $DE
-L1C7C1D: db $D9
-L1C7C1E: db $CF
-L1C7C1F: db $C3
-L1C7C20: db $DE
-L1C7C21: db $D3
-L1C7C22: db $B1
-L1C7C23: db $D8
-L1C7C24: db $CF
-L1C7C25: db $BE
-L1C7C26: db $DD
-L1C7C27: db $A1
-L1C7C28: db $FF
-L1C7C29: db $1C
-L1C7C2A: db $4E
-L1C7C2B: db $4F
-L1C7C2C: db $52
-L1C7C2D: db $4D
-L1C7C2E: db $41
-L1C7C2F: db $4C
-L1C7C30: db $B2
-L1C7C31: db $BC
-L1C7C32: db $DE
-L1C7C33: db $AE
-L1C7C34: db $B3
-L1C7C35: db $C3
-L1C7C36: db $DE
-L1C7C37: db $FF
-L1C7C38: db $FF
-L1C7C39: db $B5
-L1C7C3A: db $B1
-L1C7C3B: db $B2
-L1C7C3C: db $BC
-L1C7C3D: db $CF
-L1C7C3E: db $BC
-L1C7C3F: db $AE
-L1C7C40: db $B3
-L1C7C41: db $A5
-L1C7C42: db $A5
-L1C7C43: db $A5
-L1C7C44: db $A1
-L1C7C45: db $FF
-L1C7C46: db $15
-L1C7C47: db $20
-L1C7C48: db $20
-L1C7C49: db $20
-L1C7C4A: db $20
-L1C7C4B: db $20
-L1C7C4C: db $20
-L1C7C4D: db $20
-L1C7C4E: db $20
-L1C7C4F: db $20
-L1C7C50: db $20
-L1C7C51: db $20
-L1C7C52: db $20
-L1C7C53: db $20
-L1C7C54: db $20
-L1C7C55: db $20
-L1C7C56: db $20
-L1C7C57: db $20
-L1C7C58: db $20
-L1C7C59: db $20
-L1C7C5A: db $20
-L1C7C5B: db $FF
-L1C7C5C: db $27
-L1C7C5D: db $D0
-L1C7C5E: db $C5
-L1C7C5F: db $BB
-L1C7C60: db $DD
-L1C7C61: db $A4
-L1C7C62: db $B1
-L1C7C63: db $D8
-L1C7C64: db $B6
-L1C7C65: db $DE
-L1C7C66: db $C4
-L1C7C67: db $B3
-L1C7C68: db $A1
-L1C7C69: db $FF
-L1C7C6A: db $FF
-L1C7C6B: db $BA
-L1C7C6C: db $DA
-L1C7C6D: db $C3
-L1C7C6E: db $DE
-L1C7C6F: db $B1
-L1C7C70: db $C9
-L1C7C71: db $B5
-L1C7C72: db $C4
-L1C7C73: db $BA
-L1C7C74: db $C9
-L1C7C75: db $B9
-L1C7C76: db $DE
-L1C7C77: db $DD
-L1C7C78: db $BF
-L1C7C79: db $B3
-L1C7C7A: db $D3
-L1C7C7B: db $FF
-L1C7C7C: db $FF
-L1C7C7D: db $B7
-L1C7C7E: db $B4
-L1C7C7F: db $CF
-L1C7C80: db $BC
-L1C7C81: db $C0
-L1C7C82: db $A1
-L1C7C83: db $FF
-L1C7C84: db $3A
-L1C7C85: db $C3
-L1C7C86: db $DE
-L1C7C87: db $D3
-L1C7C88: db $A4
-L1C7C89: db $B8
-L1C7C8A: db $D7
-L1C7C8B: db $D4
-L1C7C8C: db $D0
-L1C7C8D: db $C3
-L1C7C8E: db $DE
-L1C7C8F: db $B3
-L1C7C90: db $BA
-L1C7C91: db $DE
-L1C7C92: db $D2
-L1C7C93: db $B8
-L1C7C94: db $D3
-L1C7C95: db $C9
-L1C7C96: db $FF
-L1C7C97: db $FF
-L1C7C98: db $C4
-L1C7C99: db $DE
-L1C7C9A: db $D3
-L1C7C9B: db $CA
-L1C7C9C: db $A4
-L1C7C9D: db $B2
-L1C7C9E: db $C2
-L1C7C9F: db $A4
-L1C7CA0: db $CB
-L1C7CA1: db $C4
-L1C7CA2: db $CB
-L1C7CA3: db $DE
-L1C7CA4: db $C4
-L1C7CA5: db $A6
-L1C7CA6: db $BF
-L1C7CA7: db $C9
-L1C7CA8: db $D4
-L1C7CA9: db $D0
-L1C7CAA: db $FF
-L1C7CAB: db $FF
-L1C7CAC: db $C6
-L1C7CAD: db $C2
-L1C7CAE: db $C2
-L1C7CAF: db $D0
-L1C7CB0: db $BA
-L1C7CB1: db $D3
-L1C7CB2: db $B3
-L1C7CB3: db $C4
-L1C7CB4: db $BD
-L1C7CB5: db $D9
-L1C7CB6: db $B6
-L1C7CB7: db $DC
-L1C7CB8: db $B6
-L1C7CB9: db $D8
-L1C7CBA: db $CF
-L1C7CBB: db $BE
-L1C7CBC: db $DD
-L1C7CBD: db $A1
-L1C7CBE: db $FF
-L1C7CBF: db $32
-L1C7CC0: db $BF
-L1C7CC1: db $DA
-L1C7CC2: db $CA
-L1C7CC3: db $A4
-L1C7CC4: db $C1
-L1C7CC5: db $B6
-L1C7CC6: db $B2
-L1C7CC7: db $BC
-L1C7CC8: db $AE
-L1C7CC9: db $B3
-L1C7CCA: db $D7
-L1C7CCB: db $B2
-L1C7CCC: db $A4
-L1C7CCD: db $B5
-L1C7CCE: db $C4
-L1C7CCF: db $BD
-L1C7CD0: db $DE
-L1C7CD1: db $FF
-L1C7CD2: db $FF
-L1C7CD3: db $DA
-L1C7CD4: db $D9
-L1C7CD5: db $B6
-L1C7CD6: db $D3
-L1C7CD7: db $A5
-L1C7CD8: db $A5
-L1C7CD9: db $A5
-L1C7CDA: db $A1
-L1C7CDB: db $20
-L1C7CDC: db $20
-L1C7CDD: db $BF
-L1C7CDE: db $C9
-L1C7CDF: db $C4
-L1C7CE0: db $B7
-L1C7CE1: db $CA
-L1C7CE2: db $A4
-L1C7CE3: db $FF
-L1C7CE4: db $FF
-L1C7CE5: db $CF
-L1C7CE6: db $C0
-L1C7CE7: db $A4
-L1C7CE8: db $B5
-L1C7CE9: db $B1
-L1C7CEA: db $B2
-L1C7CEB: db $BC
-L1C7CEC: db $CF
-L1C7CED: db $BC
-L1C7CEE: db $AE
-L1C7CEF: db $B3
-L1C7CF0: db $A1
-L1C7CF1: db $FF
-L1C7CF2: db $3E
-L1C7CF3: db $54
-L1C7CF4: db $41
-L1C7CF5: db $4B
-L1C7CF6: db $41
-L1C7CF7: db $52
-L1C7CF8: db $41
-L1C7CF9: db $6F
-L1C7CFA: db $65
-L1C7CFB: db $DE
-L1C7CFC: db $C9
-L1C7CFD: db $CB
-L1C7CFE: db $AE
-L1C7CFF: db $B3
-L1C7D00: db $BC
-L1C7D01: db $DE
-L1C7D02: db $FF
-L1C7D03: db $FF
-L1C7D04: db $C1
-L1C7D05: db $AD
-L1C7D06: db $B3
-L1C7D07: db $C6
-L1C7D08: db $53
-L1C7D09: db $45
-L1C7D0A: db $4C
-L1C7D0B: db $45
-L1C7D0C: db $43
-L1C7D0D: db $54
-L1C7D0E: db $72
-L1C7D0F: db $DE
-L1C7D10: db $73
-L1C7D11: db $71
-L1C7D12: db $A6
-L1C7D13: db $FF
-L1C7D14: db $FF
-L1C7D15: db $33
-L1C7D16: db $B6
-L1C7D17: db $B2
-L1C7D18: db $B5
-L1C7D19: db $BD
-L1C7D1A: db $C4
-L1C7D1B: db $A4
-L1C7D1C: db $FF
-L1C7D1D: db $FF
-L1C7D1E: db $47
-L1C7D1F: db $4F
-L1C7D20: db $45
-L1C7D21: db $4E
-L1C7D22: db $49
-L1C7D23: db $54
-L1C7D24: db $5A
-L1C7D25: db $B6
-L1C7D26: db $DE
-L1C7D27: db $BC
-L1C7D28: db $D6
-L1C7D29: db $B3
-L1C7D2A: db $C3
-L1C7D2B: db $DE
-L1C7D2C: db $B7
-L1C7D2D: db $CF
-L1C7D2E: db $BD
-L1C7D2F: db $A1
-L1C7D30: db $FF
+TextC_Win_Marker:
+TextC_Win_Kyo:
+	db $2B
+	db "なってねえ!", C_NL
+	db C_NL
+	db "おれとふﾞつかってそのていとﾞてﾞ", C_NL
+	db C_NL
+	db "すんたﾞのはきせきてきたﾞな。", C_NL
+TextC_Win_Daimon:
+	db $2A
+	db "わさﾞはそれほとﾞ", C_NL
+	db C_NL
+	db "しﾞゅうようてﾞはない!", C_NL
+	db C_NL
+	db "すへﾞてはこころのもちようたﾞ!", C_NL
+TextC_Win_Terry:
+	db $28
+	db "おれのなかにいるおおかみを", C_NL
+	db C_NL
+	db "おこしちまったようたﾞな。", C_NL
+	db C_NL
+	db "わるくおもうなよ!", C_NL
+TextC_Win_Andy:
+	db $20
+	db "ひつようなのはかくこﾞ!", C_NL
+	db C_NL
+	db "そのいしさえあれはﾞまけはしない!", C_NL
+TextC_Win_Ryo:
+	db $38
+	db "きょくけﾞんリゅうはきょくけﾞんに", C_NL
+	db C_NL
+	db "おいてのみはっするちからのけﾞい", C_NL
+	db C_NL
+	db "しﾞゅつたﾞ!やすやすとおちはしない", C_NL
+TextC_Win_Robert:
+	db $2A
+	db "とﾞないした?", C_NL
+	db C_NL
+	db "かおかﾞゆめうつつっちゅうかんしﾞ", C_NL
+	db C_NL
+	db "やてﾞ。 しゃきっとせな!", C_NL
+TextC_Win_Athena:
+	db $25
+	db "つきﾞかﾞあったならまたたたかい", C_NL
+	db C_NL
+	db "ましょう。", C_NL
+	db C_NL
+	db "たのしみにまってます!", C_NL
+TextC_Win_Mai:
+	db $36
+	db "まあ、ほんきをちょっとたﾞせはﾞ", C_NL
+	db C_NL
+	db "かるいかるい! しらぬいリゅう", C_NL
+	db C_NL
+	db "にんしﾞゅつ、さいきょうってとこね!", C_NL
+TextC_Win_Leona:
+	db $1E
+	db "あなたはしなないわ。", C_NL
+	db C_NL
+	db "ここはせんしﾞょうしﾞゃないもの。", C_NL
+TextC_Win_Geese:
+	db $30
+	db "あっとうてきなちからにしはいされる", C_NL
+	db C_NL
+	db "のは、とﾞんなきもちたﾞ!", C_NL
+	db C_NL
+	db "さあ! おそれるかﾞいい!", C_NL
+TextC_Win_Krauser:
+	db $33
+	db "わたしをたおせるならせかいさいきょう", C_NL
+	db C_NL
+	db "はまちかﾞいないたﾞろう!", C_NL
+	db C_NL
+	db "かてれはﾞのはなしたﾞかﾞな!", C_NL
+TextC_Win_MrBig:
+	db $26
+	db "ヒｰロｰにてﾞも、なったつもリか!", C_NL
+	db C_NL
+	db "おかしくてなみたﾞかﾞとまらんそﾞ!", C_NL
+TextC_Win_Iori:
+	db $2E
+	db "はﾞかにつけるくすリはないというかﾞ", C_NL
+	db C_NL
+	db "まるてﾞおまえたちのことを", C_NL
+	db C_NL
+	db "いっているようたﾞ!", C_NL
+TextC_Win_Mature:
+	db $2F
+	db "あなたたちもゆめをみるてﾞしょ。", C_NL
+	db C_NL
+	db "さあえいえんのゆめのせかいにあんない", C_NL
+	db C_NL
+	db "してあけﾞるわ!", C_NL
+TextC_Win_Chizuru:
+	db $30
+	db "あなたたちはほんとうのちからかﾞ", C_NL
+	db C_NL
+	db "なにかをしらないようね。", C_NL
+	db C_NL
+	db "それてﾞはわたしはたおせない。", C_NL
+TextC_Win_Goenitz:
+	db $32
+	db "せかいかﾞそﾞうおのなかてﾞもえてい", C_NL
+	db C_NL
+	db "ます。 しんのこんとんはおさめる", C_NL
+	db C_NL
+	db "ことはふかのうてﾞす。", C_NL
+TextC_Win_MrKarate:
+	db $24
+	db "なんとﾞてﾞもいおう!", C_NL
+	db C_NL
+	db "わかﾞきょくけﾞんリゅうに", C_NL
+	db C_NL
+	db "てきはいない。", C_NL
+TextC_Win_OIori:
+	db $0C
+	db "くﾞうおおおううう!!", C_NL
+TextC_Win_OLeona:
+	db $0B
+	db "・・・・・・・・・・", C_NL
+TextC_Win_Kagura:
+	db $34
+	db "なにこﾞとにもせﾞんリょくてﾞ", C_NL
+	db C_NL
+	db "いとﾞむ! それかﾞいつかしょうリ", C_NL
+	db C_NL
+	db "するきほﾞうにつなかﾞるのよ。", C_NL
+TextC_CutsceneKagura0:
+	db $20
+	db "おめてﾞとうこﾞさﾞいます。", C_NL
+	db C_NL
+	db "すはﾞらしいしあいてﾞしたわ。", C_NL
+TextC_CutsceneKagura1:
+	db $27
+	db "わたしのなは、かくﾞらちつﾞる・・・", C_NL
+	db C_NL
+	db "こんたいかいをしゅさいしたものてﾞす", C_NL
+TextC_CutsceneKagura2:
+	db $28
+	db "RUGALをたおしたそのちから", C_NL
+	db C_NL
+	db "のほとﾞはいけんしたかった", C_NL
+	db C_NL
+	db "のてﾞすかﾞ。", C_NL
+TextC_CutsceneKagura3:
+	db $18
+	db "あなたたちのほんとうのちからかﾞ", C_NL
+	db C_NL
+	db "みたいわ。", C_NL
+TextC_CutsceneKagura4:
+	db $2F
+	db "トｰナメントてﾞみせたのかﾞ", C_NL
+	db C_NL
+	db "しﾞつリょくというのなら", C_NL
+	db C_NL
+	db "はなしはへﾞつたﾞけとﾞ・・・。", C_NL
+TextC_CutsceneGoenitz00:
+	db $0F
+	db "なせﾞRUGALのことを!?", C_NL
+TextC_CutsceneGoenitz01:
+	db $22
+	db "RUGALかﾞてにいれようとして", C_NL
+	db C_NL
+	db "てﾞきなかったオロチのちから。", C_NL
+TextC_CutsceneGoenitz02:
+	db $1C
+	db "ふうしﾞられし、そのちからを", C_NL
+	db C_NL
+	db "わたしはまもってきた。", C_NL
+TextC_CutsceneGoenitz03:
+	db $12
+	db "それをRUGALかﾞかいほうした?", C_NL
+TextC_CutsceneGoenitz04:
+	db $24
+	db "RUGALは、かいほうされたちからを", C_NL
+	db C_NL
+	db "よこからうはﾞいとったたﾞけ。", C_NL
+TextC_CutsceneGoenitz05:
+	db $1F
+	db "それと、あなたとたたかったことと", C_NL
+	db C_NL
+	db "とﾞういうかんけいかﾞ?", C_NL
+TextC_CutsceneGoenitz06:
+	db $21
+	db "あなたたちのしﾞつリょくをみるために", C_NL
+	db C_NL
+	db "ト-ナメントをひらいた。", C_NL
+TextC_CutsceneGoenitz07:
+	db $08
+	db "なんのために?", C_NL
+TextC_CutsceneGoenitz08:
+	db $31
+	db "オロチのちからをふうしﾞるのに、", C_NL
+	db C_NL
+	db "あなたのちからをかしてほしいのよ。", C_NL
+	db C_NL
+	db "しﾞかんはもうないわ。", C_NL
+TextC_CutsceneGoenitz09:
+	db $1C
+	db "けはいてﾞわかるの。", C_NL
+	db C_NL
+	db "もうそこまてﾞきている・・・。", C_NL
+TextC_CutsceneGoenitz0A:
+	db $06
+	db "きている?", C_NL
+TextC_CutsceneGoenitz0B:
+	db $23
+	db "そう・・・。ふうしﾞられていた", C_NL
+	db C_NL
+	db "オロチをかいほうしたおとこ・・・。", C_NL
+TextC_CutsceneGoenitz0C:
+	db $10
+	db "な、なに!?  かせﾞかﾞ!?", C_NL
+TextC_CutsceneGoenitz0D:
+	db $06
+	db "うわあｰ!", C_NL
+TextC_CutsceneGoenitz0E:
+	db $27
+	db "さすかﾞてﾞすね。これくﾞらいてﾞは", C_NL
+	db C_NL
+	db "とﾞうということはあリませんか・・・", C_NL
+TextC_CutsceneGoenitz0F:
+	db $05
+	db "たﾞれ?", C_NL
+TextC_CutsceneGoenitz10:
+	db $19
+	db "はしﾞめまして。", C_NL
+	db C_NL
+	db "GOENITZともうします.", C_NL
+TextC_CutsceneGoenitz11:
+	db $2A
+	db "いままてﾞのことは、はいけんさせて", C_NL
+	db C_NL
+	db "いたたﾞきました。", C_NL
+	db C_NL
+	db "しかし、むたﾞてﾞす。", C_NL
+TextC_CutsceneGoenitz12:
+	db $26
+	db "あなたたちにはなにもてﾞきません。", C_NL
+	db C_NL
+	db "とくへﾞつにせんたくしをあけﾞます。", C_NL
+TextC_CutsceneGoenitz13:
+	db $17
+	db "たたかわすﾞにしぬか、", C_NL
+	db C_NL
+	db "たたかってしぬか。", C_NL
+TextC_CutsceneGoenitz14:
+	db $16
+	db "とﾞちらてﾞもない!", C_NL
+	db C_NL
+	db "たたかってかつ!!", C_NL
+TextC_Ending_Generic0:
+	db $17
+	db "おとﾞろきてﾞすね。", C_NL
+	db C_NL
+	db "これほとﾞとは・・・", C_NL
+TextC_Ending_Generic1:
+	db $2F
+	db "しかし、あなたかﾞたのててﾞオロチを", C_NL
+	db C_NL
+	db "ふうしﾞようなとﾞとはかんかﾞえない", C_NL
+	db C_NL
+	db "ことてﾞす。", C_NL
+TextC_Ending_Generic2:
+	db $11
+	db "てをひくことをおすすめしますよ。", C_NL
+TextC_Ending_Generic3:
+	db $16
+	db "ふうしﾞてみせるわ。", C_NL
+	db C_NL
+	db "かならすﾞ・・・。", C_NL
+TextC_Ending_Generic4:
+	db $2A
+	db "かちきなおかたたﾞ・・・。", C_NL
+	db C_NL
+	db "いいかせﾞかﾞきました。", C_NL
+	db C_NL
+	db "そろそろころあいてﾞす。", C_NL
+TextC_Ending_Generic5:
+	db $07
+	db "にけﾞる!?", C_NL
+TextC_Ending_GoenitzLeave0:
+	db $0D
+	db "いえ、めされるのてﾞす。", C_NL
+TextC_Ending_GoenitzLeave2:
+	db $09
+	db "・・・てん へ。", C_NL
+TextC_CutsceneGoenitz0C_Easy:
+	db $26
+	db "このくﾞらいのしﾞつリょくてﾞは、", C_NL
+	db C_NL
+	db "わたしかﾞてﾞるまてﾞもあリません。", C_NL
+TextC_CutsceneGoenitz0D_Easy:
+	db $1C
+	db "NORMALいしﾞょうてﾞ", C_NL
+	db C_NL
+	db "おあいしましょう・・・。", C_NL
+TextC_Ending_GoenitzLeave1:
+	db $15
+	db "                    ", C_NL
+TextC_Ending_KaguraGeneric0:
+	db $27
+	db "みなさん、あリかﾞとう。", C_NL
+	db C_NL
+	db "これてﾞあのおとこのけﾞんそうも", C_NL
+	db C_NL
+	db "きえました。", C_NL
+TextC_Ending_KaguraGeneric1:
+	db $3A
+	db "てﾞも、くらやみてﾞうこﾞめくもの", C_NL
+	db C_NL
+	db "とﾞもは、いつ、ひとひﾞとをそのやみ", C_NL
+	db C_NL
+	db "につつみこもうとするかわかリません。", C_NL
+TextC_Ending_KaguraGeneric2:
+	db $32
+	db "それは、ちかいしょうらい、おとすﾞ", C_NL
+	db C_NL
+	db "れるかも・・・。  そのときは、", C_NL
+	db C_NL
+	db "また、おあいしましょう。", C_NL
+TextC_CheatList:
+	db $3E
+	db "TAKARAロコﾞのひょうしﾞ", C_NL
+	db C_NL
+	db "ちゅうにSELECTホﾞタンを", C_NL
+	db C_NL
+	db "3かいおすと、", C_NL
+	db C_NL
+	db "GOENITZかﾞしようてﾞきます。", C_NL
 
 ; =============== MoveC_Base_NormL_2Hit_D06_A03 ===============
 ; Generic move code used for light normals that hit twice.

@@ -1858,1047 +1858,1298 @@ FontDef_Default:
 .gfx: 
 	INCBIN "data/gfx/font.bin"
 	
-L1D509F:;I
+; 
+; =============== START OF MODULE Win ===============
+;
+; =============== Module_Win ===============
+; Entry point for the post-stage module. Called by rst $00 jump from Module_Play -> Play_ChkEnd_ChkNewRound.
+; This handles everything between rounds:
+; - Win Screen
+; - Stage progression / Bonus Fights
+; - "DRAW" Screen
+; - Continue/Game Over
+; - Cutscenes
+; - Credits
+Module_Win:
+
+	;
+	; Shared initialization code.
+	; Depending on what we're doing, other initialization code may be also called (ie: SubModule_WinScr)
+	;
+
 	ld   sp, $DD00
 	di
-	rst  $10
+	;-----------------------------------
+	rst  $10				; Stop LCD
+	
+	; We're no longer in gameplay, so disable the player/sprite range enforcement
 	ld   hl, wMisc_C028
-	res  1, [hl]
+	res  MISCB_PL_RANGE_CHECK, [hl]
+	
+	; Reset DMG pal
 	xor  a
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
+	
+	; Reset tilemaps
 	call ClearBGMap
 	call ClearWINDOWMap
+	
+	; Reset screen scrolling
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
 	ld   [wOBJScrollX], a
 	ld   [wOBJScrollY], a
+	
+	; Load font GFX
 	call LoadGFX_1bppFont_Default
+	
+	; Clear all sprites
 	call ClearOBJInfo
+	
+	; If serial is enabled, syncronize with other GB.
+	; The win screen timing should 100% match across the two GBs, like with gameplay.
 	call Serial_DoHandshake
+	
+	;
+	; Determine which path of execution we're taking, depending on who won/lost the last round.
+	;
+	
+	; If the last round ended in a draw, display the "DRAW" screen.
 	ld   a, [wStageDraw]
 	or   a
-	jp   nz, L1D511B
+	jp   nz, .draw
+	
+.chkWon1P:
+	; Note that wLastWinner can have only one bit set at most.
+	; ie: if 1P is marked as winner, 2P definitely isn't marked.
 	ld   a, [wLastWinner]
-	bit  0, a
-	jp   z, L1D50F6
+	bit  PLB1, a			; Did 1P win the last round?
+	jp   z, .chkWon2P		; If not, jump
+.won1P:
+	; Save the address of the winner (1P) to wWinPlInfoPtr.
+	; This will be the player sprite that gets animated in SubModule_WinScr.
 	ld   bc, wPlInfo_Pl1
 	ld   a, c
-	ld   [wUnknownTimer_C1B3], a
+	ld   [wWinPlInfoPtr_Low], a
 	ld   a, b
-	ld   [wUnknown_C1B4], a
+	ld   [wWinPlInfoPtr_High], a
+	
+	; VS mode doesn't distinguish between winning/losing.
 	ld   a, [wPlayMode]
-	bit  1, a
-	jp   nz, L1D512F
+	bit  MODEB_VS, a		; Playing in VS mode?
+	jp   nz, .vsWon1P		; If so, jump
+	
+	; Single mode, obviously, have to distinguish between those.
+	; Winning lets you continue, while losing throws you
+	; Determine if the active player won or lost the round.
 	ld   a, [wJoyActivePl]
-	or   a
-	jp   nz, L1D5138
-	jp   L1D5135
-L1D50F6:;J
+	or   a					; Is the current player on the 1P side? (wJoyActivePl == PL1)
+	jp   nz, .lost			; If not, jump (2P lost)
+	jp   .won				; (1P won)
+.chkWon2P:
+	
+	; 1P didn't win.
+	; If 2P didn't win too, this also counts as a draw.
 	ld   a, [wLastWinner]
-	bit  1, a
-	jp   z, L1D511B
+	bit  PLB2, a		; Did 2P win the stage?
+	jp   z, .draw		; If not, jump
+.won2P:
+
+	; Save the address of the winner (2P) to wWinPlInfoPtr.
+	; This will be the player sprite that gets animated in SubModule_WinScr.
 	ld   bc, wPlInfo_Pl2
 	ld   a, c
-	ld   [wUnknownTimer_C1B3], a
+	ld   [wWinPlInfoPtr_Low], a
 	ld   a, b
-	ld   [wUnknown_C1B4], a
+	ld   [wWinPlInfoPtr_High], a
+	
+	; VS mode doesn't distinguish between winning/losing.
 	ld   a, [wPlayMode]
-	bit  1, a
-	jp   nz, L1D5132
+	bit  MODEB_VS, a		; Playing in VS mode?
+	jp   nz, .vsWon2P		; If so, jump
+	
+	; Determine if the active player won or lost the round.
 	ld   a, [wJoyActivePl]
-	or   a
-	jp   z, L1D5138
-L1D5118: db $C3;X
-L1D5119: db $35;X
-L1D511A: db $51;X
-L1D511B:;J
-	ld   hl, $56D6
+	or   a					; Is the current player on the 1P side? (wJoyActivePl == PL1)
+	jp   z, .lost			; If so, jump (1P lost)
+	jp   .won				; (2P won)
+	
+.draw:
+	; Print out "DRAW" to the center of the screen
+	ld   hl, TextDef_Win_Draw
 	call TextPrinter_Instant
+	
+	; A draw counts as a loss, and just like losing the round:
+	; - In Single mode, you are thrown to the continue screen
+	; - In VS mode, you return back to the character select screen
 	ld   a, [wPlayMode]
-	bit  1, a
-	jp   nz, L1D512C
-	jp   L1D553E
-L1D512C: db $C3;X
-L1D512D: db $90;X
-L1D512E: db $55;X
-L1D512F: db $C3;X
-L1D5130: db $3B;X
-L1D5131: db $51;X
-L1D5132: db $C3;X
-L1D5133: db $3B;X
-L1D5134: db $51;X
-L1D5135:;J
-	jp   L1D5144
-L1D5138:;J
-	jp   L1D5504
-L1D513B: db $CD;X
-L1D513C: db $49;X
-L1D513D: db $56;X
-L1D513E: db $CD;X
-L1D513F: db $B1;X
-L1D5140: db $55;X
-L1D5141: db $C3;X
-L1D5142: db $43;X
-L1D5143: db $56;X
-L1D5144:;J
-	call L1D5649
-L1D5147:;X
-	call L1D5697
-	ld   a, [wRoundSeqId]
-	cp   $0F
-	jp   z, L1D5169
-	cp   $10
-	jp   z, L1D518C
-	cp   $11
-	jp   z, L1D51C9
-	cp   $12
-	jp   z, L1D5255
-	cp   $13
-	jp   z, L1D5258
-	jp   L1D5643
-L1D5169:;J
-	ld   b, $1D
-	ld   hl, $67BD
+	bit  MODEB_VS, a
+	jp   nz, .vsDraw
+	
+.singleDraw:
+	jp   Win_Mode_SingleDraw
+.vsDraw:
+	jp   Win_Mode_VSDraw
+; Both point to the same location, as in VS mode, regardless of winning or losing,
+; both players return to the character select.
+.vsWon1P:
+	jp   Win_Mode_VS
+.vsWon2P:
+	jp   Win_Mode_VS
+.won:
+	jp   Win_Mode_SingleWon
+.lost:
+	jp   Win_Mode_SingleLost
+	
+; =============== Win_Mode_VS ===============
+; VS Match ended.
+Win_Mode_VS:
+	; Show win screen with the character who won
+	call Win_DoWinScr
+	; .
+	call Win_ResetCharsOnUnusedVsModeCpuVsCpu
+	; We're done
+	jp   Win_SwitchToCharSel
+; =============== Win_Mode_SingleWon ===============
+; Won a stage in Single Mode.
+Win_Mode_SingleWon:
+	; Show win screen with the character who won
+	call Win_DoWinScr
+	; Fall-through
+	
+; =============== Win_StartNextStage ===============
+; Advances the stage progession for Single mode, handling cutscenes and bonus rounds.
+Win_StartNextStage:
+	; Increment stage sequence number
+	call Win_IncStageSeq
+	
+	; Display cutscenes when the higher stage sequence numbers are reached.
+	; Note that all of the cutscenes skip the character select screen, and either
+	; jump to gameplay (1P mode), or put you into the order select screen (team mode).
+	ld   a, [wCharSeqId]				; A = New stage number
+	cp   STAGESEQ_KAGURA				; Is KAGURA's stage next?
+	jp   z, Win_KaguraCutscene			; If so, jump
+	cp   STAGESEQ_GOENITZ				; Is GOENITZ's stage next?
+	jp   z, Win_GoenitzCutscene			; If so, jump
+	cp   STAGESEQ_GOENITZ+1				; Did we just defeat Goenitz?
+	jp   z, Win_EndingCutscene			; If so, jump
+	cp   STAGESEQ_BONUS+1				; Did we just defeat the bonus O.Iori/O.Leona opponent?
+	jp   z, Win_CreditsStub				; If so, jump
+	cp   STAGESEQ_MRKARATE+1			; Did we just defeat Mr.Karate?
+	jp   z, Win_MrKarateDefeatCutscene	; If so, jump
+	
+	; Otherwise, go back to the character select screen
+	jp   Win_SwitchToCharSel
+	
+; =============== Win_KaguraCutscene ===============
+; Displays the pre-match Kagura cutscene.
+Win_KaguraCutscene:
+	; Execute cutscene
+	ld   b, BANK(SubModule_CutsceneKagura) ; BANK $1D
+	ld   hl, SubModule_CutsceneKagura
 	rst  $08
-	ld   bc, $0000
-	call L1D54D8
+.cont:
+	;---
+	ld   bc, $0000 				; Not needed
+	; Set new opponent
+	call Win_SetSpecRoundChar
+	
 	ld   a, [wPlayMode]
-	bit  0, a
-	jp   nz, L1D5183
+	bit  MODEB_TEAM, a		; Playing in Team Mode?
+	jp   nz, .team			; If so, jump
+.single:
+	; Since there's no order select screen in 1P mode, Immediately proceed to gameplay.
 	call Pl_InitBeforeStageLoad
 	jp   Module_Play
-L1D5183:;J
+.team:
+	; Switch to the order select screen.
 	call Pl_InitBeforeStageLoad
-	ld   b, $1E
-	ld   hl, $626E
+	ld   b, BANK(Module_OrdSel) ; BANK $1E
+	ld   hl, Module_OrdSel
 	rst  $00
-L1D518C:;J
-	ld   b, $1D
-	ld   hl, $6934
+	
+; =============== Win_GoenitzCutscene ===============
+; Displays the pre-match Goenitz cutscene.
+Win_GoenitzCutscene:
+	; Execute cutscene
+	ld   b, BANK(SubModule_CutsceneGoenitz) ; BANK $1D
+	ld   hl, SubModule_CutsceneGoenitz
 	rst  $08
+	
+	;
+	; The game ends here on EASY mode, you don't get to fight Goenitz.
+	;
 	ld   a, [wDifficulty]
-	cp   $00
-	jp   nz, L1D51AC
-	ld   b, $1D
-	ld   hl, $7220
+	cp   DIFFICULTY_EASY	; Playing on EASY, eh?
+	jp   nz, .cont			; If not, jump
+.easy:
+	; Display the credits
+	ld   b, BANK(SubModule_Credits) ; BANK $1D
+	ld   hl, SubModule_Credits
 	rst  $08
-	ld   b, $1D
-	ld   hl, $73C5
+	
+	; THE END
+	ld   b, BANK(SubModule_TheEnd) ; BANK $1D
+	ld   hl, SubModule_TheEnd
 	rst  $08
-	ld   b, $0A
-	ld   hl, $6F42
+	
+	; Reset!
+	ld   b, BANK(Module_TakaraLogo) ; BANK $0A
+	ld   hl, Module_TakaraLogo
 	rst  $00
-L1D51AC:;J
-	ld   bc, $0000
-	call L1D54D8
+	
+.cont:
+	;---
+	ld   bc, $0000 				; Not needed
+	; Set new opponent
+	call Win_SetSpecRoundChar
+	
 	ld   a, [wPlayMode]
-	bit  0, a
-	jp   nz, L1D51C0
+	bit  MODEB_TEAM, a		; Playing in Team Mode?
+	jp   nz, .team			; If so, jump
+.single:
+	; Since there's no order select screen in 1P mode, Immediately proceed to gameplay.
 	call Pl_InitBeforeStageLoad
 	jp   Module_Play
-L1D51C0:;J
+.team:
+	; Switch to the order select screen.
 	call Pl_InitBeforeStageLoad
-	ld   b, $1E
-	ld   hl, $626E
+	ld   b, BANK(Module_OrdSel) ; BANK $1E
+	ld   hl, Module_OrdSel
 	rst  $00
-L1D51C9:;J
-	call L1D52A7
-	cp   $01
-	jp   z, L1D51F3
-	cp   $02
-	jp   z, L1D51FC
-	cp   $03
-	jp   z, L1D5205
-	cp   $04
-	jp   z, L1D5214
-	cp   $05
-	jp   z, L1D5223
-	cp   $06
-	jp   z, L1D5232
-	ld   b, $1D
-	ld   hl, $6B08
+; =============== Win_EndingCutscene ===============
+; Displays the post-match Goenitz cutscene.
+Win_EndingCutscene:
+	;
+	; There are multiple variations of the ending, depending on the team used.
+	; Some variations just add extra lines to the end of the cutscene, while others
+	; are completely different (ie: Team Sacred Treasure's ending).
+	;
+	; Every special team triggers a bonus 1 vs 2 / 2 vs 1 fight, which is the
+	; only time teams can be made of two characters.
+	;
+	
+	; A = Speciala Team ID
+	call Win_GetSpecTeamId
+	; Depending on that...
+	cp   TEAM_ID_SACRED_TREASURES
+	jp   z, .teamSacTre
+	cp   TEAM_ID_OLEONA
+	jp   z, .teamOLeona
+	cp   TEAM_ID_FFGEESE
+	jp   z, .teamFFGeese
+	cp   TEAM_ID_AOFMRBIG
+	jp   z, .teamAOFMrBig
+	cp   TEAM_ID_KTR
+	jp   z, .teamKTR
+	cp   TEAM_ID_BOSS
+	jp   z, .teamBoss
+.noSpec:
+	; Generic ending with no extra scenes
+	ld   b, BANK(SubModule_Ending_Generic) ; BANK $1D
+	ld   hl, SubModule_Ending_Generic
 	rst  $08
-	jp   L1D5264
-L1D51F3:;J
-	ld   b, $1D
-	ld   hl, $6D00
+	jp   Win_Credits
+.teamSacTre:
+	; Unique ending #1
+	ld   b, BANK(SubModule_Ending_SacredTreasures) ; BANK $1D
+	ld   hl, SubModule_Ending_SacredTreasures
 	rst  $08
-	jp   L1D5241
-L1D51FC:;J
-	ld   b, $1D
-	ld   hl, $6DE4
+	jp   .setBonusFight
+.teamOLeona:
+	; Unique ending #2
+	ld   b, BANK(SubModule_Ending_OLeona) ; BANK $1D
+	ld   hl, SubModule_Ending_OLeona
 	rst  $08
-	jp   L1D5241
-L1D5205:;J
-	ld   b, $1D
-	ld   hl, $6B08
+	jp   .setBonusFight
+.teamFFGeese:
+	ld   b, BANK(SubModule_Ending_Generic) ; BANK $1D
+	ld   hl, SubModule_Ending_Generic
 	rst  $08
-	ld   b, $1D
-	ld   hl, $6E92
+	ld   b, BANK(SubModule_EndingPost_FFGeese) ; BANK $1D
+	ld   hl, SubModule_EndingPost_FFGeese
 	rst  $08
-	jp   L1D5241
-L1D5214:;J
-	ld   b, $1D
-	ld   hl, $6B08
+	jp   .setBonusFight
+.teamAOFMrBig:
+	ld   b, BANK(SubModule_Ending_Generic) ; BANK $1D
+	ld   hl, SubModule_Ending_Generic
 	rst  $08
-	ld   b, $1D
-	ld   hl, $6EC4
+	ld   b, BANK(SubModule_EndingPost_AOFMrBig) ; BANK $1D
+	ld   hl, SubModule_EndingPost_AOFMrBig
 	rst  $08
-	jp   L1D5241
-L1D5223:;J
-	ld   b, $1D
-	ld   hl, $6B08
+	jp   .setBonusFight
+.teamKTR:
+	ld   b, BANK(SubModule_Ending_Generic) ; BANK $1D
+	ld   hl, SubModule_Ending_Generic
 	rst  $08
-	ld   b, $1D
-	ld   hl, $6EF6
+	ld   b, BANK(SubModule_EndingPost_KTR) ; BANK $1D
+	ld   hl, SubModule_EndingPost_KTR
 	rst  $08
-	jp   L1D5241
-L1D5232:;J
-	ld   b, $1D
-	ld   hl, $6B08
+	jp   .setBonusFight
+.teamBoss:
+	ld   b, BANK(SubModule_Ending_Generic) ; BANK $1D
+	ld   hl, SubModule_Ending_Generic
 	rst  $08
-	ld   b, $1D
-	ld   hl, $6F22
+	ld   b, BANK(SubModule_EndingPost_Boss) ; BANK $1D
+	ld   hl, SubModule_EndingPost_Boss
 	rst  $08
-	jp   L1D5241
-L1D5241:;J
-	ld   a, [$C15C]
-	call L1D5428
-	ld   a, $11
-	ld   [wRoundSeqId], a
+	jp   .setBonusFight
+.setBonusFight:
+
+	; Set up team members for bonus fight
+	ld   a, [wBonusFightId]
+	call Win_InitBonusFightTeams
+	
+	; Switch to bonus stage from the Goenitz one
+	ld   a, STAGESEQ_BONUS
+	ld   [wCharSeqId], a
+	
+	; Switch to order select screen.
+	; We only get here from Team Mode, so we can call this directly.
 	call Pl_InitBeforeStageLoad
-	ld   b, $1E
-	ld   hl, $626E
+	ld   b, BANK(Module_OrdSel) ; BANK $1E
+	ld   hl, Module_OrdSel
 	rst  $00
-L1D5255:;J
-	jp   L1D5264
-L1D5258:;J
-	ld   b, $1D
-	ld   hl, $7176
+	
+; =============== Win_CreditsStub ===============
+; Wrapper for Win_Credits called when defeating the bonus opponent.
+Win_CreditsStub:
+	jp   Win_Credits
+	
+; =============== Win_MrKarateDefeatCutscene ===============
+; Displays the cutscene for defeating Mr.Karate.
+; This is a congratulatory speech that also tells how to unlock him.
+Win_MrKarateDefeatCutscene:
+	ld   b, BANK(SubModule_CutsceneMrKarateDefeat) ; BANK $1D
+	ld   hl, SubModule_CutsceneMrKarateDefeat
 	rst  $08
-	ld   b, $0A
-	ld   hl, $6F42
+	
+	; Reset!
+	ld   b, BANK(Module_TakaraLogo) ; BANK $0A
+	ld   hl, Module_TakaraLogo
 	rst  $00
-L1D5264:;J
-	ld   b, $1D
-	ld   hl, $7220
+	
+; =============== Win_Credits ===============
+; Displays the credits.
+; This isn't called on EASY difficulties, to not give away the cheats. (it just calls the submodules)
+Win_Credits:
+	; Display the main credits
+	ld   b, BANK(SubModule_Credits) ; BANK $1D
+	ld   hl, SubModule_Credits
 	rst  $08
-	ld   b, $1D
-	ld   hl, $73C5
+	
+	; THE END
+	ld   b, BANK(SubModule_TheEnd) ; BANK $1D
+	ld   hl, SubModule_TheEnd
 	rst  $08
+	
+	;
+	; On HARD mode, there's an extra Mr.Karate fight on hard difficulty.
+	;
 	ld   a, [wDifficulty]
-	cp   $02
-	jp   nz, L1D528F
-	ld   b, $1D
-	ld   hl, $6F93
+	cp   DIFFICULTY_HARD	; Playing on HARD?
+	jp   nz, .showCheats	; If not, jump
+	
+	; Display intro cutscene
+	ld   b, BANK(SubModule_CutsceneMrKarate); BANK $1D
+	ld   hl, SubModule_CutsceneMrKarate
 	rst  $08
-	ld   a, $12
-	ld   [wRoundSeqId], a
+	
+	; Set next stage
+	ld   a, STAGESEQ_MRKARATE
+	ld   [wCharSeqId], a
+	
+	; Set opponent team
 	ld   bc, $0000
-	call L1D54D8
+	call Win_SetSpecRoundChar
+	
+	; Start gameplay, completely skipping the Order Select screen even in Team Mode.
 	call Pl_InitBeforeStageLoad
 	jp   Module_Play
-L1D528F:;J
-	ld   b, $1D
-	ld   hl, $6F6C
+	
+.showCheats:
+	;
+	; On NORMAL mode, display codes for the TAKARA logo.
+	;
+	ld   b, BANK(SubModule_CutsceneCheat); BANK $1D
+	ld   hl, SubModule_CutsceneCheat
 	rst  $08
-	ld   b, $0A
-	ld   hl, $6F42
+	
+	; Reset!
+	ld   b, BANK(Module_TakaraLogo) ; BANK $0A
+	ld   hl, Module_TakaraLogo
 	rst  $00
-L1D529B: db $06;X
-L1D529C: db $1D;X
-L1D529D: db $21;X
-L1D529E: db $C5;X
-L1D529F: db $73;X
-L1D52A0: db $CF;X
-L1D52A1: db $06;X
-L1D52A2: db $0A;X
-L1D52A3: db $21;X
-L1D52A4: db $42;X
-L1D52A5: db $6F;X
-L1D52A6: db $C7;X
-L1D52A7:;C
+	
+; =============== Win_Unused_TheEnd ===============
+; [TCRF] Unreferenced code showing "THE END", then resetting the game.
+Win_Unused_TheEnd:
+	ld   b, BANK(SubModule_TheEnd) ; BANK $1D
+	ld   hl, SubModule_TheEnd
+	rst  $08
+	
+	; Reset!
+	ld   b, BANK(Module_TakaraLogo) ; BANK $0A
+	ld   hl, Module_TakaraLogo
+	rst  $00
+
+; =============== Win_GetSpecTeamId ===============
+; Checks if the team used is eligible for a special ending.
+; OUT
+; - A: Special Team ID (TEAM_ID_*)
+; - wBonusFightId: Bonus Fight ID (BONUS_ID_*)
+;                  Every special team has at least one bonus fight assigned to it,
+;                  so this will be filled if a valid special team is set.
+Win_GetSpecTeamId:
+	; Not applicable outside of team mode, as 3 characters are required.
 	ld   a, [wPlayMode]
-	bit  0, a
-	jp   z, L1D5306
+	bit  MODEB_TEAM, a
+	jp   z, .none
+	
+	; Seek to the team of the active wPlInfo
 	ld   a, [wJoyActivePl]
-	or   a
-	jp   nz, L1D52BF
+	or   a				; Playing on the 1P side?
+	jp   nz, .tm2P		; If not, jump
+.tm1P:
 	ld   hl, wPlInfo_Pl1+iPlInfo_TeamCharId0
 	ld   a, [wPlInfo_Pl1+iPlInfo_CharId]
-	jp   L1D52C5
-L1D52BF: db $21;X
-L1D52C0: db $2E;X
-L1D52C1: db $DA;X
-L1D52C2: db $FA;X
-L1D52C3: db $2C;X
-L1D52C4: db $DA;X
-L1D52C5:;J
-	ld   b, a
-	call L1D530C
-	call L1D5334
-	jr   nc, L1D52D3
-	ld   a, $01
-	jp   L1D5305
-L1D52D3:;R
-	call L1D535A
-	jr   nc, L1D52DD
-	ld   a, $02
-	jp   L1D5305
-L1D52DD:;R
-	call L1D5380
-	jr   nc, L1D52E7
-	ld   a, $03
-	jp   L1D5305
-L1D52E7:;R
-	call L1D53A6
-	jr   nc, L1D52F1
-	ld   a, $04
-	jp   L1D5305
-L1D52F1:;R
-	call L1D53CC
-	jr   nc, L1D52FB
-	ld   a, $05
-	jp   L1D5305
-L1D52FB:;R
-	call L1D53FA
-	jr   nc, L1D5306
-	ld   a, $06
-	jp   L1D5305
-L1D5305:;J
-	ret
-L1D5306:;JR
-	ld   a, $FF
-	ld   [$C15C], a
-	ret
-L1D530C:;C
-	push bc
-	ld   de, $C15D
-	ld   b, $03
-L1D5312:;R
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	dec  b
-	jr   nz, L1D5312
-	ld   hl, $C15D
-	push hl
-	pop  de
-	inc  de
-	call L1D532B
-	inc  de
-	call L1D532B
-	inc  hl
-	call L1D532B
-	pop  bc
-	ret
-L1D532B:;C
-	ld   a, [de]
-	ld   b, [hl]
-	cp   a, b
-	jr   nc, L1D5333
-	ld   [hl], a
-	ld   a, b
-	ld   [de], a
-L1D5333:;R
-	ret
-L1D5334:;C
-	ld   hl, $C15D
-	ldi  a, [hl]
-	cp   $00
-	jr   nz, L1D5358
-	ldi  a, [hl]
-	cp   $18
-	jr   nz, L1D5358
-	ldi  a, [hl]
-	cp   $1C
-	jr   nz, L1D5358
-	ld   a, b
-	cp   $18
-	jr   nz, L1D534F
-L1D534B: db $3E;X
-L1D534C: db $00;X
-L1D534D: db $18;X
-L1D534E: db $04;X
-L1D534F:;R
-	ld   a, $01
-	jr   L1D5353
-L1D5353:;R
-	ld   [$C15C], a
-	scf
-	ret
-L1D5358:;R
-	xor  a
-	ret
-L1D535A:;C
-	ld   hl, $C15D
-	ldi  a, [hl]
-	cp   $10
-	jr   nz, L1D537E
-	ldi  a, [hl]
-	cp   $18
-	jr   nz, L1D537E
-	ldi  a, [hl]
-	cp   $1A
-	jr   nz, L1D537E
-	ld   a, b
-	cp   $10
-	jr   nz, L1D5375
-L1D5371: db $3E;X
-L1D5372: db $02;X
-L1D5373: db $18;X
-L1D5374: db $04;X
-L1D5375:;R
-	ld   a, $03
-	jr   L1D5379
-L1D5379:;R
-	ld   [$C15C], a
-	scf
-	ret
-L1D537E:;R
-	xor  a
-	ret
-L1D5380:;C
-	ld   hl, $C15D
-	ldi  a, [hl]
-	cp   $04
-	jr   nz, L1D53A4
-	ldi  a, [hl]
-	cp   $06
-	jr   nz, L1D53A4
-	ldi  a, [hl]
-	cp   $12
-	jr   nz, L1D53A4
-	ld   a, b
-	cp   $12
-	jr   nz, L1D539B
-	ld   a, $05
-	jr   L1D539F
-L1D539B:;R
-	ld   a, $04
-	jr   L1D539F
-L1D539F:;R
-	ld   [$C15C], a
-	scf
-	ret
-L1D53A4:;R
-	xor  a
-	ret
-L1D53A6:;C
-	ld   hl, $C15D
-	ldi  a, [hl]
-	cp   $08
-	jr   nz, L1D53CA
-	ldi  a, [hl]
-	cp   $0A
-	jr   nz, L1D53CA
-	ldi  a, [hl]
-	cp   $16
-	jr   nz, L1D53CA
-	ld   a, b
-	cp   $16
-	jr   nz, L1D53C1
-L1D53BD: db $3E;X
-L1D53BE: db $07;X
-L1D53BF: db $18;X
-L1D53C0: db $04;X
-L1D53C1:;R
-	ld   a, $06
-	jr   L1D53C5
-L1D53C5:;R
-	ld   [$C15C], a
-	scf
-	ret
-L1D53CA:;R
-	xor  a
-	ret
-L1D53CC:;C
-	ld   hl, $C15D
-	ldi  a, [hl]
-	cp   $00
-	jr   nz, L1D53F8
-	ldi  a, [hl]
-	cp   $04
-	jr   nz, L1D53F8
-	ldi  a, [hl]
-	cp   $08
-	jr   nz, L1D53F8
-	ld   a, b
-	cp   $00
-	jr   z, L1D53EF
-L1D53E3: db $FE;X
-L1D53E4: db $04;X
-L1D53E5: db $28;X
-L1D53E6: db $04;X
-L1D53E7: db $3E;X
-L1D53E8: db $0A;X
-L1D53E9: db $18;X
-L1D53EA: db $08;X
-L1D53EB: db $3E;X
-L1D53EC: db $09;X
-L1D53ED: db $18;X
-L1D53EE: db $04;X
-L1D53EF:;R
-	ld   a, $08
-	jr   L1D53F3
-L1D53F3:;R
-	ld   [$C15C], a
-	scf
-	ret
-L1D53F8:;R
-	xor  a
-	ret
-L1D53FA:;C
-	ld   hl, $C15D
-	ldi  a, [hl]
-	cp   $12
-	jr   nz, L1D5426
-	ldi  a, [hl]
-	cp   $14
-	jr   nz, L1D5426
-	ldi  a, [hl]
-	cp   $16
-	jr   nz, L1D5426
-	ld   a, b
-	cp   $12
-	jr   z, L1D541D
-	cp   $14
-	jr   z, L1D5419
-	ld   a, $0D
-	jr   L1D5421
-L1D5419: db $3E;X
-L1D541A: db $0C;X
-L1D541B: db $18;X
-L1D541C: db $04;X
-L1D541D: db $3E;X
-L1D541E: db $0B;X
-L1D541F: db $18;X
-L1D5420: db $00;X
-L1D5421:;R
-	ld   [$C15C], a
-	scf
-	ret
-L1D5426:;R
-	xor  a
-	ret
-L1D5428:;C
-	push af
-	ld   a, [wJoyActivePl]
-	or   a
-	jp   nz, L1D5439
-	ld   hl, wPlInfo_Pl1+iPlInfo_CharId
-	ld   de, wPlInfo_Pl2+iPlInfo_CharId
-	jp   L1D543F
-L1D5439: db $21;X
-L1D543A: db $2C;X
-L1D543B: db $DA;X
-L1D543C: db $11;X
-L1D543D: db $2C;X
-L1D543E: db $D9;X
-L1D543F:;J
-	pop  af
-	push hl
-	ld   hl, $5468
-	ld   b, $00
-	sla  a
-	sla  a
-	sla  a
-	ld   c, a
-	add  hl, bc
-	pop  bc
-	ldi  a, [hl]
-	ld   [bc], a
-	inc  bc
-	inc  bc
-	ldi  a, [hl]
-	ld   [bc], a
-	inc  bc
-	ldi  a, [hl]
-	ld   [bc], a
-	inc  bc
-	ldi  a, [hl]
-	ld   [bc], a
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	inc  de
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ldi  a, [hl]
-	ld   [de], a
-	inc  de
-	ldi  a, [hl]
-	ld   [de], a
-	ret
-L1D5468: db $22;X
-L1D5469: db $22;X
-L1D546A: db $FF;X
-L1D546B: db $FF;X
-L1D546C: db $00;X
-L1D546D: db $00;X
-L1D546E: db $1C;X
-L1D546F: db $FF;X
-L1D5470: db $00
-L1D5471: db $00
-L1D5472: db $1C
-L1D5473: db $FF
-L1D5474: db $22
-L1D5475: db $22
-L1D5476: db $FF
-L1D5477: db $FF
-L1D5478: db $24;X
-L1D5479: db $24;X
-L1D547A: db $FF;X
-L1D547B: db $FF;X
-L1D547C: db $18;X
-L1D547D: db $18;X
-L1D547E: db $1A;X
-L1D547F: db $FF;X
-L1D5480: db $18
-L1D5481: db $18
-L1D5482: db $1A
-L1D5483: db $FF
-L1D5484: db $24
-L1D5485: db $24
-L1D5486: db $FF
-L1D5487: db $FF
-L1D5488: db $04
-L1D5489: db $04
-L1D548A: db $06
-L1D548B: db $FF
-L1D548C: db $12
-L1D548D: db $12
-L1D548E: db $FF
-L1D548F: db $FF
-L1D5490: db $12
-L1D5491: db $12
-L1D5492: db $FF
-L1D5493: db $FF
-L1D5494: db $04
-L1D5495: db $04
-L1D5496: db $06
-L1D5497: db $FF
-L1D5498: db $08
-L1D5499: db $08
-L1D549A: db $0A
-L1D549B: db $FF
-L1D549C: db $16
-L1D549D: db $16
-L1D549E: db $FF
-L1D549F: db $FF
-L1D54A0: db $16;X
-L1D54A1: db $16;X
-L1D54A2: db $FF;X
-L1D54A3: db $FF;X
-L1D54A4: db $08;X
-L1D54A5: db $08;X
-L1D54A6: db $0A;X
-L1D54A7: db $FF;X
-L1D54A8: db $00
-L1D54A9: db $00
-L1D54AA: db $FF
-L1D54AB: db $FF
-L1D54AC: db $04
-L1D54AD: db $04
-L1D54AE: db $08
-L1D54AF: db $FF
-L1D54B0: db $04;X
-L1D54B1: db $04;X
-L1D54B2: db $FF;X
-L1D54B3: db $FF;X
-L1D54B4: db $00;X
-L1D54B5: db $00;X
-L1D54B6: db $08;X
-L1D54B7: db $FF;X
-L1D54B8: db $08;X
-L1D54B9: db $08;X
-L1D54BA: db $FF;X
-L1D54BB: db $FF;X
-L1D54BC: db $00;X
-L1D54BD: db $00;X
-L1D54BE: db $04;X
-L1D54BF: db $FF;X
-L1D54C0: db $12;X
-L1D54C1: db $12;X
-L1D54C2: db $FF;X
-L1D54C3: db $FF;X
-L1D54C4: db $14;X
-L1D54C5: db $14;X
-L1D54C6: db $16;X
-L1D54C7: db $FF;X
-L1D54C8: db $14;X
-L1D54C9: db $14;X
-L1D54CA: db $FF;X
-L1D54CB: db $FF;X
-L1D54CC: db $12;X
-L1D54CD: db $12;X
-L1D54CE: db $16;X
-L1D54CF: db $FF;X
-L1D54D0: db $16
-L1D54D1: db $16
-L1D54D2: db $FF
-L1D54D3: db $FF
-L1D54D4: db $12
-L1D54D5: db $12
-L1D54D6: db $14
-L1D54D7: db $FF
-L1D54D8:;C
-	ld   a, [wRoundSeqId]
-	ld   hl, wRoundSeqTbl
-	ld   d, $00
-	ld   e, a
-	add  hl, de
-	ld   a, [hl]
-	sla  a
-	push af
-	ld   a, [wJoyActivePl]
-	or   a
-	jp   nz, L1D54F6
+	jp   .mkList
+.tm2P:
 	ld   hl, wPlInfo_Pl2+iPlInfo_TeamCharId0
-	ld   de, wPlInfo_Pl2+iPlInfo_CharId
-	jp   L1D54FC
-L1D54F6: db $21;X
-L1D54F7: db $2E;X
-L1D54F8: db $D9;X
-L1D54F9: db $11;X
-L1D54FA: db $2C;X
-L1D54FB: db $D9;X
-L1D54FC:;J
-	pop  af
-	ld   [de], a
-	ldi  [hl], a
-	ld   a, $FF
-	ldi  [hl], a
-	ld   [hl], a
+	ld   a, [wPlInfo_Pl2+iPlInfo_CharId]
+	
+
+	; Generate ordered CHAR_ID_* list
+.mkList:
+	ld   b, a
+	call Win_MakeSortedCharIdList
+	
+	
+	;
+	; Check special character combinations one by one.
+	; The first one that matches returns a team ID.
+	; Each of these Win_IsSpecTeam* also sets the bonus fight id.
+	;
+	
+.chk1:
+	call Win_IsSpecTeamSacTre			; Playing as spec. team #1?
+	jr   nc, .chk2						; If not, check the next one
+	ld   a, TEAM_ID_SACRED_TREASURES	; Otherwise, return this group id
+	jp   .ret
+.chk2:
+	call Win_IsSpecTeamOLeona			; ...
+	jr   nc, .chk3
+	ld   a, TEAM_ID_OLEONA
+	jp   .ret
+.chk3:
+	call Win_IsSpecTeamFFGeese
+	jr   nc, .chk4
+	ld   a, TEAM_ID_FFGEESE
+	jp   .ret
+.chk4:
+	call Win_IsSpecTeamAOFMrBig
+	jr   nc, .chk5
+	ld   a, TEAM_ID_AOFMRBIG
+	jp   .ret
+.chk5:
+	call Win_IsSpecTeamKTR
+	jr   nc, .chk6
+	ld   a, TEAM_ID_KTR
+	jp   .ret
+.chk6:
+	call Win_IsSpecTeamBoss
+	jr   nc, .none
+	ld   a, TEAM_ID_BOSS
+	jp   .ret
+.ret:
 	ret
-L1D5504:;J
-	ld   a, [wRoundSeqId]
-	cp   $11
-	jp   nc, L1D5144
-	call L1D5649
-	rst  $10
+.none:
+	; No special team found, or not in team mode.
+	ld   a, BONUS_ID_NONE
+	ld   [wBonusFightId], a
+	ret
+	
+; =============== Win_MakeSortedCharIdList ===============
+; Generates a sorted list of team members from the specified wPlInfo, ordered by ID in ascending order.
+; This must be done before starting the checks to determine the value for wBonusFightId,
+; as the character ID checks are made on this list. 
+; IN
+; - HL: Ptr to active iPlInfo_TeamCharId0 (source)
+Win_MakeSortedCharIdList:
+	push bc
+	
+		;
+		; First, perform a direct copy of the table from the wPlInfo to wSpecTeamActiveCharId*
+		;
+		ld   de, wSpecTeamActiveCharId0	; DE = Destination
+		ld   b, $03						; B = Bytes to copy (3 team members)
+	.loop:
+		ldi  a, [hl]	; Read from iPlInfo_TeamCharId*, seek to next
+		ld   [de], a	; Write to wSpecTeamActiveCharId0
+		inc  de			; Seek to next dest. entry
+		dec  b			; Done copying?
+		jr   nz, .loop	; If not, loop
+		
+		;
+		; Then, sort the IDs from lowest to highest.
+		;
+		; This is done by comparing all of the unique combinations
+		; of the slots, and switching them around when the one on
+		; the left is > than the one on the right.
+		;
+		; The sorting is done to simplify the character ID checks, as they
+		; guarantee that, for any given special team, the character IDs will
+		; be in specific slots. (only need to check 3 slots instead of 3*3)
+		;
+		
+		; HL = DE = Ptr to Slot0
+		ld   hl, wSpecTeamActiveCharId0
+		push hl
+		pop  de
+		
+		; Since there are three slots, there are three unique combinations, as seen below.
+		
+		; Compare Slot0 with Slot1
+		inc  de				; Seek DE to Slot1
+		call .sortOrder
+		; Compare Slot0 with Slot2
+		inc  de				; Seek DE to Slot2
+		call .sortOrder
+		; Compare Slot1 with Slot2
+		inc  hl				; Seek HL to Slot1
+		call .sortOrder
+	pop  bc
+	ret
+	
+; =============== .sortOrder ===============
+; Helper function to switch two wSpecTeamActiveCharId* slots depending on their order.
+; If Id1 > Id2, the slots are switched.
+; IN
+; - HL: "SlotA". Ptr to a wSpecTeamActiveCharId* slot.
+; - DE: "SlotB". Ptr to a later wSpecTeamActiveCharId* slot.
+.sortOrder:
+	ld   a, [de]	; A = Id2 from SlotB
+	ld   b, [hl]	; B = Id1 from SlotA
+	cp   a, b		; Id2 >= Id1?
+	jr   nc, .ret	; If so, return
+	; Otherwise, Id2 < Id1.
+	; Switch the slots for A and B to fix that.
+	ld   [hl], a	; SlotA = Id2
+	ld   a, b
+	ld   [de], a	; SlotB = Id1
+.ret:
+	ret
+
+; =============== mWinIsSpecTeam ===============
+; Generates code to check if we're playing with a specific special team.
+;
+; To have a special team set, the player team must have all three specified characters.
+; If checks pass, then the bonus fight type is determined.
+;
+; The fight type depends on the current team lead character (the one who defeated Goenitz).
+; Fights can check for either one or two lead characters:
+; - In the case of 1, it's for fights that pit two characters against one.
+;   (ie: Kyo and Chizuru vs O.Iori, and the other way around) (2 fights assigned)
+; - In the case of 2, every character always fights two other ones.
+;   (ie: Kyo vs Terry and Ryo, but *not* the other way around) (3 fights assigned)
+;
+; Note that the IDs passed to this macro must be sorted from lowest to highest,
+; to go with the sorting order of wSpecTeamActiveCharId*.
+;
+; IN (2 VS 1)
+; - 1: Fight ID (without lead character matching)
+; - 2: Fight ID (when the lead character matches)
+; - 3: Lead character ID
+; - 4: Character ID 1
+; - 5: Character ID 2
+; - 6: Character ID 3
+; - B: Current lead character (active team member)
+; IN (1 VS 1 VS 1)
+; - 1: Fight ID (when the lead character 1 matches)
+; - 2: Fight ID (when the lead character 2 matches)
+; - 3: Fight ID (when the lead character 3 matches)
+; - 4: Lead character ID 1
+; - 5: Lead character ID 2
+; - 6: Character ID 1
+; - 7: Character ID 2
+; - 8: Character ID 3
+; - B: Current lead character (active team member)
+; OUT
+; - C flag: If set, we're using that special team.
+; - wBonusFightId: Set to the bonus team ID when C is set.
+mWinIsSpecTeam: MACRO
+
+IF _NARG < 7
+	;
+	; 2 VS 1 VARIANT
+	;
+
+	; Check if all three characters match. If any check fails, return.
+	ld   hl, wSpecTeamActiveCharId0	; Seek to first entry to check
+	ldi  a, [hl]		
+	cp   \4				; wSpecTeamActiveCharId0 != CharId1?
+	jr   nz, .retNone	; If so, return
+	ldi  a, [hl]
+	cp   \5				; wSpecTeamActiveCharId1 != CharId2?
+	jr   nz, .retNone	; If so, return
+	ldi  a, [hl]
+	cp   \6				; wSpecTeamActiveCharId2 != CharId3?
+	jr   nz, .retNone	; If so, return
+	
+	; Determine the bonus fight type, depending on who the current active character is.
+	ld   a, b			; A = CurLeadCharId
+	cp   \3				; A != LeadCharId?
+	jr   nz, .noLead	; If so, jump
+.leadMatch:
+	ld   a, \2			; Lead character matches
+	jr   .retOk
+.noLead:
+	ld   a, \1			; Lead character didn't match
+	jr   .retOk
+.retOk:
+	ld   [wBonusFightId], a	; Save fight ID
+	scf					; C flag set (can use wBonusFightId)
+	ret
+.retNone:
+	xor  a	; C flag clear
+	ret
+ELSE
+	;
+	; 1 VS 1 VS 1 VARIANT
+	;
+	
+	; Check if all three characters match. If any check fails, return.
+	ld   hl, wSpecTeamActiveCharId0	; Seek to first entry to check
+	ldi  a, [hl]		
+	cp   \6				; wSpecTeamActiveCharId0 != CharId1?
+	jr   nz, .retNone	; If so, return
+	ldi  a, [hl]
+	cp   \7				; wSpecTeamActiveCharId1 != CharId2?
+	jr   nz, .retNone	; If so, return
+	ldi  a, [hl]
+	cp   \8				; wSpecTeamActiveCharId2 != CharId3?
+	jr   nz, .retNone	; If so, return
+	
+	; Determine the bonus fight type, depending on who the current active character is.
+	ld   a, b			; A = CurLeadCharId
+	cp   a, \4			; A == LeadCharId1?
+	jr   z, .leadMatch1	; If so, jump
+	cp   a, \5			; A == LeadCharId2?
+	jr   z, .leadMatch2	; If so, jump
+.leadMatch3:			; Otherwise, it's the third character
+	ld   a, \3			; Lead character 3 matches
+	jr   .retOk
+.leadMatch2:
+	ld   a, \2			; Lead character 2 matches
+	jr   .retOk
+.leadMatch1:
+	ld   a, \1			; Lead character 1 matches
+	jr   .retOk
+.retOk:
+	ld   [wBonusFightId], a	; Save fight ID
+	scf 				 ; C flag set (can use wBonusFightId)
+	ret  
+.retNone:
+	xor  a	; C flag clear
+	ret
+ENDC
+ENDM
+	                                                       
+; BONUS FIGHT DEF (2 VS 1)           |            FIGHT |   FIGHT W/ LEAD |                     LEAD CHAR ID |                     CHAR ID 1 |     CHAR ID 2 |       CHAR ID 3     
+Win_IsSpecTeamSacTre:   mWinIsSpecTeam     BONUS_ID_KC_I,    BONUS_ID_I_KC,                      CHAR_ID_IORI,                    CHAR_ID_KYO,   CHAR_ID_IORI, CHAR_ID_CHIZURU
+Win_IsSpecTeamOLeona:   mWinIsSpecTeam     BONUS_ID_IM_L,    BONUS_ID_L_IM,                     CHAR_ID_LEONA,                  CHAR_ID_LEONA,   CHAR_ID_IORI,  CHAR_ID_MATURE
+Win_IsSpecTeamFFGeese:  mWinIsSpecTeam     BONUS_ID_TA_G,    BONUS_ID_G_TA,                     CHAR_ID_GEESE,                  CHAR_ID_TERRY,   CHAR_ID_ANDY,   CHAR_ID_GEESE
+Win_IsSpecTeamAOFMrBig: mWinIsSpecTeam     BONUS_ID_RR_B,    BONUS_ID_B_RR,                     CHAR_ID_MRBIG,                    CHAR_ID_RYO, CHAR_ID_ROBERT,   CHAR_ID_MRBIG
+; BONUS FIGHT DEF (1 VS 1 VS 1)      |  FIGHT W/ LEAD 1 | FIGHT W/ LEAD 2 | FIGHT W/ LEAD 3 | LEAD CHAR ID 1 | LEAD CHAR ID 2 |    CHAR ID 1 |      CHAR ID 2 |      CHAR ID 3     
+Win_IsSpecTeamKTR:      mWinIsSpecTeam     BONUS_ID_K_TR,    BONUS_ID_T_KR,    BONUS_ID_R_KT,     CHAR_ID_KYO,   CHAR_ID_TERRY,   CHAR_ID_KYO,   CHAR_ID_TERRY,    CHAR_ID_RYO
+Win_IsSpecTeamBoss:     mWinIsSpecTeam     BONUS_ID_G_KB,    BONUS_ID_K_GB,    BONUS_ID_B_GK,   CHAR_ID_GEESE, CHAR_ID_KRAUSER, CHAR_ID_GEESE, CHAR_ID_KRAUSER,  CHAR_ID_MRBIG
+
+
+; =============== Win_InitBonusFightTeams ===============
+; Sets up the teams for the specified bonus fight.
+; IN
+; - A: Bonus Fight ID
+Win_InitBonusFightTeams:
+	;
+	; Get the destination ptrs
+	; HL = Ptr to active player character ID
+	; DE = Ptr to CPU opponent character ID
+	;
+	push af
+		ld   a, [wJoyActivePl]
+		or   a				; Playing on the 1P side?
+		jp   nz, .d2P	; If not, jump
+	.d1P:
+		ld   hl, wPlInfo_Pl1+iPlInfo_CharId
+		ld   de, wPlInfo_Pl2+iPlInfo_CharId
+		jp   .setChars
+	.d2P:
+		ld   hl, wPlInfo_Pl2+iPlInfo_CharId
+		ld   de, wPlInfo_Pl1+iPlInfo_CharId
+	.setChars:
+	pop  af
+	
+	;
+	; Index the entry from the table of bonus fight definitions. (source)
+	; Each entry is 8 bytes long, and it contains character IDs.
+	;
+	
+	push hl	; Save active charId ptr
+		ld   hl, Win_BonusFightTbl	; HL = Table base
+		ld   b, $00					; BC = A * 8
+		sla  a
+		sla  a
+		sla  a
+		ld   c, a
+		add  hl, bc					; Offset it
+	pop  bc	; BC = Ptr to active player character ID
+	
+	;
+	; Copy its data over
+	;
+	
+	;--
+	; Player Team
+	
+	ldi  a, [hl]	; Read from byte0, SrcPtr++
+	ld   [bc], a	; Copy to player iPlInfo_CharId
+	inc  bc			; Seek to iPlInfo_TeamLossCount
+	inc  bc			; Seek to iPlInfo_TeamCharId0
+	
+	; For some reason, this is a separate value even though it has to be always the same
+	ldi  a, [hl]	; Read from byte1, SrcPtr++
+	ld   [bc], a	; Copy to player iPlInfo_TeamCharId0
+	
+	inc  bc			; Seek to iPlInfo_TeamCharId1
+	ldi  a, [hl]	; Read from byte2, SrcPtr++
+	ld   [bc], a	; Copy to player iPlInfo_TeamCharId1
+	inc  bc			; Seek to iPlInfo_TeamCharId2
+	ldi  a, [hl]	; Read from byte3, SrcPtr++
+	ld   [bc], a	; Copy to player iPlInfo_TeamCharId2
+	
+	;--
+	; CPU Opponent Team
+	
+	ldi  a, [hl]	; Read from byte4, SrcPtr++
+	ld   [de], a	; Copy to opponent iPlInfo_CharId
+	inc  de			; Seek to iPlInfo_TeamLossCount
+	inc  de			; Seek to iPlInfo_TeamCharId0
+	
+	; For some reason, this is a separate value even though it has to be always the same
+	ldi  a, [hl]	; Read from byte5, SrcPtr++
+	ld   [de], a	; Copy to opponent iPlInfo_TeamCharId0
+	
+	inc  de			; Seek to iPlInfo_TeamCharId1
+	ldi  a, [hl]	; Read from byte6, SrcPtr++
+	ld   [de], a	; Copy to opponent iPlInfo_TeamCharId1
+	inc  de			; Seek to iPlInfo_TeamCharId2
+	ldi  a, [hl]	; Read from byte7, SrcPtr++
+	ld   [de], a	; Copy to opponent iPlInfo_TeamCharId2
+	ret
+	
+; =============== Win_BonusFightTbl ===============
+; Team definitions for bonus fights (STAGESEQ_BONUS).
+Win_BonusFightTbl:
+	; PLAYER SIDE                                                        | OPPONENT SIDE
+	;        CUR CHAR |    TEAM CHAR 1 |    TEAM CHAR 2 |    TEAM CHAR 3 |       CUR CHAR |    TEAM CHAR 1 |    TEAM CHAR 2 |     TEAM CHAR 3 |      BONUS ID
+	db   CHAR_ID_OIORI,   CHAR_ID_OIORI,    CHAR_ID_NONE,    CHAR_ID_NONE,     CHAR_ID_KYO,     CHAR_ID_KYO, CHAR_ID_CHIZURU,    CHAR_ID_NONE ; BONUS_ID_I_KC
+	db     CHAR_ID_KYO,     CHAR_ID_KYO, CHAR_ID_CHIZURU,    CHAR_ID_NONE,   CHAR_ID_OIORI,   CHAR_ID_OIORI,    CHAR_ID_NONE,    CHAR_ID_NONE ; BONUS_ID_KC_I
+	db  CHAR_ID_OLEONA,  CHAR_ID_OLEONA,    CHAR_ID_NONE,    CHAR_ID_NONE,    CHAR_ID_IORI,    CHAR_ID_IORI,  CHAR_ID_MATURE,    CHAR_ID_NONE ; BONUS_ID_L_IM
+	db    CHAR_ID_IORI,    CHAR_ID_IORI,  CHAR_ID_MATURE,    CHAR_ID_NONE,  CHAR_ID_OLEONA,  CHAR_ID_OLEONA,    CHAR_ID_NONE,    CHAR_ID_NONE ; BONUS_ID_IM_L
+	db   CHAR_ID_TERRY,   CHAR_ID_TERRY,    CHAR_ID_ANDY,    CHAR_ID_NONE,   CHAR_ID_GEESE,   CHAR_ID_GEESE,    CHAR_ID_NONE,    CHAR_ID_NONE ; BONUS_ID_TA_G
+	db   CHAR_ID_GEESE,   CHAR_ID_GEESE,    CHAR_ID_NONE,    CHAR_ID_NONE,   CHAR_ID_TERRY,   CHAR_ID_TERRY,    CHAR_ID_ANDY,    CHAR_ID_NONE ; BONUS_ID_G_TA
+	db     CHAR_ID_RYO,     CHAR_ID_RYO,  CHAR_ID_ROBERT,    CHAR_ID_NONE,   CHAR_ID_MRBIG,   CHAR_ID_MRBIG,    CHAR_ID_NONE,    CHAR_ID_NONE ; BONUS_ID_RR_B
+	db   CHAR_ID_MRBIG,   CHAR_ID_MRBIG,    CHAR_ID_NONE,    CHAR_ID_NONE,     CHAR_ID_RYO,     CHAR_ID_RYO,  CHAR_ID_ROBERT,    CHAR_ID_NONE ; BONUS_ID_B_RR
+	db     CHAR_ID_KYO,     CHAR_ID_KYO,    CHAR_ID_NONE,    CHAR_ID_NONE,   CHAR_ID_TERRY,   CHAR_ID_TERRY,     CHAR_ID_RYO,    CHAR_ID_NONE ; BONUS_ID_K_TR
+	db   CHAR_ID_TERRY,   CHAR_ID_TERRY,    CHAR_ID_NONE,    CHAR_ID_NONE,     CHAR_ID_KYO,     CHAR_ID_KYO,     CHAR_ID_RYO,    CHAR_ID_NONE ; BONUS_ID_T_KR
+	db     CHAR_ID_RYO,     CHAR_ID_RYO,    CHAR_ID_NONE,    CHAR_ID_NONE,     CHAR_ID_KYO,     CHAR_ID_KYO,   CHAR_ID_TERRY,    CHAR_ID_NONE ; BONUS_ID_R_KT
+	db   CHAR_ID_GEESE,   CHAR_ID_GEESE,    CHAR_ID_NONE,    CHAR_ID_NONE, CHAR_ID_KRAUSER, CHAR_ID_KRAUSER,   CHAR_ID_MRBIG,    CHAR_ID_NONE ; BONUS_ID_G_KB
+	db CHAR_ID_KRAUSER, CHAR_ID_KRAUSER,    CHAR_ID_NONE,    CHAR_ID_NONE,   CHAR_ID_GEESE,   CHAR_ID_GEESE,   CHAR_ID_MRBIG,    CHAR_ID_NONE ; BONUS_ID_K_GB
+	db   CHAR_ID_MRBIG,   CHAR_ID_MRBIG,    CHAR_ID_NONE,    CHAR_ID_NONE,   CHAR_ID_GEESE,   CHAR_ID_GEESE, CHAR_ID_KRAUSER,    CHAR_ID_NONE ; BONUS_ID_B_GK
+	
+; =============== Win_SetSpecRoundChar ===============
+; Sets the CPU opponent character to fight for the new boss/extra stage.
+; This should not be used for the bonus fight (STAGESEQ_BONUS), since it uses a special team definition.
+Win_SetSpecRoundChar:
+	;
+	; Read out the character ID off the current wCharSeqTbl entry.
+	; This subroutine is expected to be called only for boss/extra rounds, 
+	; as those are the only rounds that contain straight CHAR_ID_* entries
+	; compared to the normal CHARSEL_ID_*.
+	;
+	ld   a, [wCharSeqId]	; A = Stage sequence ID
+	ld   hl, wCharSeqTbl	; HL = Sequence table
+	ld   d, $00				; DE = A
+	ld   e, a
+	add  hl, de				; Index it
+	ld   a, [hl]			; Read out character ID
+
+	; These entries are one of the very few times the game stores character IDs
+	; without having them already multiplied by two.
+	; So we've got to do it manually.
+	sla  a					; A * = 2
+	
+	;
+	; Update the team members for the inactive side/CPU opponent side.
+	; All of the boss/extra rounds make you fight one CPU opponent at most,
+	; so A gets written into the first slot, and the other two get CHAR_ID_NONE.
+	;
+	push af
+		; Determine the inactive side
+		ld   a, [wJoyActivePl]
+		or   a				; wJoyActivePl == PL1? (Playing as 1P?)
+		jp   nz, .op1P		; If not, jump (Playing as 2P)
+	.op2P:
+		; Playing as 1P, CPU is 2P
+		ld   hl, wPlInfo_Pl2+iPlInfo_TeamCharId0
+		ld   de, wPlInfo_Pl2+iPlInfo_CharId
+		jp   .setChar
+	.op1P:
+		; Playing as 2P, CPU is 1P
+		ld   hl, wPlInfo_Pl1+iPlInfo_TeamCharId0
+		ld   de, wPlInfo_Pl1+iPlInfo_CharId
+	.setChar:
+		; Write the character ID to the current character slot + first team member
+	pop  af		; A = CHAR_ID_*
+	
+	ld   [de], a	; Save it to iPlInfo_CharId
+	ldi  [hl], a	; Save it to iPlInfo_TeamCharId0, seek to next
+	; Clear out the other two team members
+	ld   a, CHAR_ID_NONE
+	ldi  [hl], a	; Save it to iPlInfo_TeamCharId1, seek to next
+	ld   [hl], a	; Save it to iPlInfo_TeamCharId2
+	ret
+	
+; =============== Win_Mode_SingleLost ===============
+; Lost a round on Single Mode by having the opponent win.
+Win_Mode_SingleLost:
+	; Losing the bonus fights doesn't affect anything.
+	ld   a, [wCharSeqId]
+	cp   STAGESEQ_BONUS			; Did we lose to the bonus opponent or Mr.Karate?
+	jp   nc, Win_Mode_SingleWon	; If so, pretend we won anyway
+	
+	; Display the opponent team's win animation
+	call Win_DoWinScr
+	
+	;
+	; INITIALIZE CONTINUE SCREEN
+	;
+	
+	;-----------------------------------
+	rst  $10				; Stop LCD
+	
+	; Black out palette
 	ld   a, $FF
 	ldh  [rBGP], a
+	
+	; Hide opponent team off-screen
 	ld   a, $80
 	ldh  [hScrollY], a
+	
+	; Load standard font
 	call LoadGFX_1bppFont_Default
+	
+	; Delete opponent team tilemap
 	call ClearBGMap
+	
+	; Load SGB palette
 	ld   de, SCRPAL_INTRO
 	call HomeCall_SGB_ApplyScreenPalSet
-	ld   hl, $56DD
+	
+	; Display "CONTINUE 9" text
+	ld   hl, TextDef_Continue
 	call TextPrinter_Instant
-	ld   a, $09
-	ld   [wUnknownTimer_C1B3], a
-	ld   a, $3C
-	ld   [wUnknown_C1B4], a
+	
+	; Init continue timer
+	ld   a, $09					; 9 seconds
+	ld   [wWinContinueTimer], a
+	ld   a, 60					; Decrement after 60 frames
+	ld   [wWinContinueTimerSub], a
+	
+	; Set real text palette
 	ld   a, $1B
 	ldh  [rBGP], a
-	ld   a, $C7
-	rst  $18
-	jp   L1D55D7
-L1D553E:;J
-	ld   a, $00
+	
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
+	
+	jp   Win_Continue
+
+; =============== Win_Mode_SingleDraw ===============
+; Lost a round on Single Mode by ending the stage on a DRAW.
+; Note that, by the time we get here, "DRAW" should already be in the tilemap.
+Win_Mode_SingleDraw:
+	; Music kills itself in shame
+	ld   a, SND_MUTE
 	call HomeCall_Sound_ReqPlayExId_Stub
-	ld   a, $C7
-	rst  $18
+	
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
 	call Task_PassControl_NoDelay
+	; Enable palette
 	ld   a, $1B
 	ldh  [rBGP], a
-	call L1D5669
-	jp   c, L1D5559
-L1D5553: db $CD;X
-L1D5554: db $08;X
-L1D5555: db $04;X
-L1D5556: db $C3;X
-L1D5557: db $4D;X
-L1D5558: db $55;X
-L1D5559:;J
-	ld   a, [wRoundSeqId]
-	cp   $11
-	jp   nc, L1D5147
-	rst  $10
+.wait:
+	call Win_IdleWaitLong
+	jp   c, .toContinue
+	;--
+	; [TCRF] C is always set, so we never get here.
+	;        Seems like pressing START would have reset the wait timer.
+	;        See also: other instances of Win_IdleWaitLong calls.
+	call Task_PassControl_NoDelay
+	jp   .wait
+	;--
+.toContinue:
+	; Losing the bonus fights doesn't affect anything.
+	ld   a, [wCharSeqId]
+	cp   STAGESEQ_BONUS			; Did we lose to the bonus opponent or Mr.Karate?
+	jp   nc, Win_StartNextStage	; If so, pretend we won anyway
+	
+	;
+	; INITIALIZE CONTINUE SCREEN
+	;
+	
+	;-----------------------------------
+	rst  $10				; Stop LCD
+	
+	; Black out palette
 	ld   a, $FF
 	ldh  [rBGP], a
+	
+	; Hide opponent team off-screen
 	ld   a, $80
 	ldh  [hScrollY], a
+	
+	; Load standard font
 	call LoadGFX_1bppFont_Default
+	
+	; Delete opponent team tilemap
 	call ClearBGMap
+	
+	; Load SGB palette
 	ld   de, SCRPAL_INTRO
 	call HomeCall_SGB_ApplyScreenPalSet
-	ld   hl, $56DD
+	
+	; Display "CONTINUE 9" text
+	ld   hl, TextDef_Continue
 	call TextPrinter_Instant
-	ld   a, $09
-	ld   [wUnknownTimer_C1B3], a
-	ld   a, $3C
-	ld   [wUnknown_C1B4], a
+	
+	; Init continue timer
+	ld   a, $09					; 9 seconds
+	ld   [wWinContinueTimer], a
+	ld   a, 60					; Decrement after 60 frames
+	ld   [wWinContinueTimerSub], a
+	
+	; Set real text palette
 	ld   a, $1B
 	ldh  [rBGP], a
-	ld   a, $C7
-	rst  $18
-	jp   L1D55D7
-L1D5590: db $3E;X
-L1D5591: db $00;X
-L1D5592: db $CD;X
-L1D5593: db $B2;X
-L1D5594: db $0F;X
-L1D5595: db $3E;X
-L1D5596: db $C7;X
-L1D5597: db $DF;X
-L1D5598: db $CD;X
-L1D5599: db $08;X
-L1D559A: db $04;X
-L1D559B: db $3E;X
-L1D559C: db $1B;X
-L1D559D: db $E0;X
-L1D559E: db $47;X
-L1D559F: db $CD;X
-L1D55A0: db $69;X
-L1D55A1: db $56;X
-L1D55A2: db $DA;X
-L1D55A3: db $AE;X
-L1D55A4: db $55;X
-L1D55A5: db $CD;X
-L1D55A6: db $08;X
-L1D55A7: db $04;X
-L1D55A8: db $C3;X
-L1D55A9: db $9F;X
-L1D55AA: db $55;X
-L1D55AB: db $CD;X
-L1D55AC: db $B1;X
-L1D55AD: db $55;X
-L1D55AE: db $C3;X
-L1D55AF: db $43;X
-L1D55B0: db $56;X
-L1D55B1: db $FA;X
-L1D55B2: db $63;X
-L1D55B3: db $C1;X
-L1D55B4: db $CB;X
-L1D55B5: db $4F;X
-L1D55B6: db $C8;X
-L1D55B7: db $FA;X
-L1D55B8: db $20;X
-L1D55B9: db $D9;X
-L1D55BA: db $47;X
-L1D55BB: db $FA;X
-L1D55BC: db $20;X
-L1D55BD: db $DA;X
-L1D55BE: db $A0;X
-L1D55BF: db $CB;X
-L1D55C0: db $7F;X
-L1D55C1: db $C8;X
-L1D55C2: db $3E;X
-L1D55C3: db $FF;X
-L1D55C4: db $EA;X
-L1D55C5: db $AB;X
-L1D55C6: db $C1;X
-L1D55C7: db $EA;X
-L1D55C8: db $AC;X
-L1D55C9: db $C1;X
-L1D55CA: db $EA;X
-L1D55CB: db $AD;X
-L1D55CC: db $C1;X
-L1D55CD: db $EA;X
-L1D55CE: db $AE;X
-L1D55CF: db $C1;X
-L1D55D0: db $EA;X
-L1D55D1: db $AF;X
-L1D55D2: db $C1;X
-L1D55D3: db $EA;X
-L1D55D4: db $B0;X
-L1D55D5: db $C1;X
-L1D55D6: db $C9;X
-L1D55D7:;J
+	
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
+	
+	jp   Win_Continue
+; =============== Win_Mode_SingleDraw ===============
+; Lost in VS mode by ending the stage on a DRAW.
+; Note that, by the time we get here, "DRAW" should already be in the tilemap.
+Win_Mode_VSDraw:
+	; Music kills itself in shame
+	ld   a, SND_MUTE
+	call HomeCall_Sound_ReqPlayExId_Stub
+	
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
 	call Task_PassControl_NoDelay
-L1D55DA:;J
-	call L1D5685
-	jp   c, L1D5629
-	ld   a, [wUnknown_C1B4]
-	or   a
-	jp   z, L1D55F1
-	dec  a
-	ld   [wUnknown_C1B4], a
+	; Enable palette
+	ld   a, $1B
+	ldh  [rBGP], a
+.wait:
+	call Win_IdleWaitLong
+	jp   c, .toCharSel
+	;--
+	; [TCRF] We never get here
 	call Task_PassControl_NoDelay
-	jp   L1D55DA
-L1D55F1:;J
-	ld   a, $3C
-	ld   [wUnknown_C1B4], a
-	ld   a, [wUnknownTimer_C1B3]
-	or   a
-	jp   z, L1D561B
-	dec  a
-	ld   [wUnknownTimer_C1B3], a
-	ld   a, $8E
+	jp   .wait
+	;--
+	; [TCRF] Unreferenced code
+.unused_resetChar:
+	call Win_ResetCharsOnUnusedVsModeCpuVsCpu
+	;--
+.toCharSel:
+	jp   Win_SwitchToCharSel
+	
+; =============== Win_ResetCharsOnUnusedVsModeCpuVsCpu ===============
+; [TCRF] In a CPU vs CPU battle in VS mode, force the game to pick new characters for both teams.
+Win_ResetCharsOnUnusedVsModeCpuVsCpu:
+	; Not applicable if not in VS mode
+	ld   a, [wPlayMode]
+	bit  MODEB_VS, a
+	ret  z
+	
+	; Not applicable if
+	ld   a, [wPlInfo_Pl1+iPlInfo_Flags0]
+	ld   b, a								; B = 1P Flags
+	ld   a, [wPlInfo_Pl2+iPlInfo_Flags0]	; A = 2P Flags
+	and  b									; Merge both
+	bit  PF0B_CPU, a						; Are both players CPUs?
+	ret  z									; If not, return
+	
+	; Clear selected team characters
+	ld   a, $FF
+	ld   [wCharSelP1Char0], a
+	ld   [wCharSelP1Char1], a
+	ld   [wCharSelP1Char2], a
+	ld   [wCharSelP2Char0], a
+	ld   [wCharSelP2Char1], a
+	ld   [wCharSelP2Char2], a
+	ret 
+	
+; =============== Win_Continue ===============
+; Handles the Continue screen.
+Win_Continue:
+	call Task_PassControl_NoDelay
+.loop:
+	; Pressing START returns to the character select.
+	call Win_IsStartPressed
+	jp   c, .toCharSel
+	
+.decSubSec:
+	; Decrement the subsecond timer
+	ld   a, [wWinContinueTimerSub]
+	or   a				; TimerSub == 0?
+	jp   z, .decSec		; If so, jump
+	dec  a				; Otherwise, TimerSub--
+	ld   [wWinContinueTimerSub], a
+	call Task_PassControl_NoDelay
+	jp   .loop
+.decSec:
+	; Reset subtimer to 60 frames
+	ld   a, 60
+	ld   [wWinContinueTimerSub], a
+	
+	; Decrement second timer
+	ld   a, [wWinContinueTimer]
+	or   a				; Timer == 0?
+	jp   z, .gameOver	; If so, jump
+	dec  a				; Otherwise, Timer--
+	ld   [wWinContinueTimer], a
+	
+	; Play sound when second ticks away
+	ld   a, SFX_CHARCURSORMOVE
 	call HomeCall_Sound_ReqPlayExId
-	ld   a, [wUnknownTimer_C1B3]
+	
+	;
+	; Update tilemap with new number.
+	; Because NumberPrinter_Instant writes two digits, after that
+	; replace the leading 0 with a space.
+	;
+	ld   a, [wWinContinueTimer]
 	ld   de, $9AED
 	call NumberPrinter_Instant
-	ld   hl, $56EA
+	ld   hl, TextDef_ContinueNumSpace
 	call TextPrinter_Instant
+	
 	call Task_PassControl_NoDelay
-	jp   L1D55DA
-L1D561B:;J
-	ld   a, $B1
+	jp   .loop
+	
+.gameOver:
+	ld   a, SFX_GAMEOVER
 	call HomeCall_Sound_ReqPlayExId
-	ld   hl, $56EE
+	
+	ld   hl, TextDef_GameOver
 	call TextPrinter_Instant
-	jp   L1D5631
-L1D5629:;J
+	jp   .toTitle
+	
+.toCharSel:
+	;--
+	; [TCRF] Mark that a continue was used. This is never read from.
 	ld   a, $01
-	ld   [$C17E], a
-	jp   L1D5643
-L1D5631:;J
-	call L1D5669
-	jp   c, L1D563D
-L1D5637: db $CD;X
-L1D5638: db $08;X
-L1D5639: db $04;X
-L1D563A: db $C3;X
-L1D563B: db $31;X
-L1D563C: db $56;X
-L1D563D:;J
-	ld   b, $1C
-	ld   hl, $4380
+	ld   [wUnused_ContinueUsed], a
+	;--
+	jp   Win_SwitchToCharSel
+	
+.toTitle:
+	call Win_IdleWaitLong
+	jp   c, Win_SwitchToTitle
+	; [TCRF] Unreachable code, Win_IdleWaitLong always returns C flag set.
+	call Task_PassControl_NoDelay
+	jp   .toTitle
+; =============== Win_SwitchToTitle ===============
+; Switches to the Title screen.
+Win_SwitchToTitle:
+	ld   b, BANK(Module_Title) ; BANK $1C
+	ld   hl, Module_Title
 	rst  $00
-L1D5643:;J
-	ld   b, $1E
-	ld   hl, $4000
+; =============== Win_SwitchToCharSel ===============
+; Switches to the Character Select screen.
+Win_SwitchToCharSel:
+	ld   b, BANK(Module_CharSel) ; BANK $1E
+	ld   hl, Module_CharSel
 	rst  $00
-L1D5649:;C
-	ld   b, $1E
-	ld   hl, $7D21
+; =============== Win_DoWinScr ===============
+; Performs initialization of the Win Screen.
+Win_DoWinScr:
+	ld   b, BANK(SubModule_WinScr) ; BANK $1E
+	ld   hl, SubModule_WinScr
 	rst  $08
 	ret
-L1D5650: db $06;X
-L1D5651: db $F0;X
-L1D5652: db $F0;X
-L1D5653: db $99;X
-L1D5654: db $CB;X
-L1D5655: db $7F;X
-L1D5656: db $C2;X
-L1D5657: db $67;X
-L1D5658: db $56;X
-L1D5659: db $F0;X
-L1D565A: db $AC;X
-L1D565B: db $CB;X
-L1D565C: db $7F;X
-L1D565D: db $C2;X
-L1D565E: db $67;X
-L1D565F: db $56;X
-L1D5660: db $CD;X
-L1D5661: db $08;X
-L1D5662: db $04;X
-L1D5663: db $05;X
-L1D5664: db $C2;X
-L1D5665: db $52;X
-L1D5666: db $56;X
-L1D5667: db $37;X
-L1D5668: db $C9;X
-L1D5669:;C
-	ld   bc, $01E0
-L1D566C:;J
+; =============== Win_Unused_IdleWaitShort ===============
+; [TCRF] Unreferenced code.
+; Waits for $F0 frames, or until someone presses START.
+; OUT
+; - C flag: Always set (leftover from WnScr_IdleWait)
+Win_Unused_IdleWaitShort:
+	ld   b, $F0			; B = Number of frames
+.loop:
+	; If any player presses START, the wait ends early
 	ldh  a, [hJoyNewKeys]
-	bit  7, a
-	jp   nz, L1D5683
+	bit  KEYB_START, a
+	jp   nz, .abort
 	ldh  a, [hJoyNewKeys2]
-	bit  7, a
-	jp   nz, L1D5683
+	bit  KEYB_START, a
+	jp   nz, .abort
+	; Wait a frame
 	call Task_PassControl_NoDelay
-	dec  bc
+	dec  b				; Are we finished?
+	jp   nz, .loop		; If not, loop
+.abort:
+	scf  
+	ret
+	
+; =============== Win_IdleWaitLong ===============
+; Waits for $01E0 frames, or until someone presses START.
+; OUT
+; - C flag: Always set (leftover from WnScr_IdleWait)
+Win_IdleWaitLong:
+	ld   bc, $01E0			; BC = Number of frames
+.loop:
+	; If any player presses START, the wait ends early
+	ldh  a, [hJoyNewKeys]
+	bit  KEYB_START, a
+	jp   nz, .abort
+	ldh  a, [hJoyNewKeys2]
+	bit  KEYB_START, a
+	jp   nz, .abort
+	; Wait a frame
+	call Task_PassControl_NoDelay
+	dec  bc			; FramesLeft--
 	ld   a, b
-	or   a, c
-	jp   nz, L1D566C
-L1D5683:;J
+	or   a, c		; B == 0 && C == 0?
+	jp   nz, .loop	; If not, loop
+	; Otherwise, we're done
+.abort:
 	scf
 	ret
-L1D5685:;C
+	
+; =============== Win_IsStartPressed ===============
+; Checks if any player pressed START.
+; OUT
+; - C flag: If set, someone did
+Win_IsStartPressed:
+	; If any player presses START, return set
 	ldh  a, [hJoyNewKeys]
-	bit  7, a
-	jp   nz, L1D5695
+	bit  KEYB_START, a
+	jp   nz, .abort
 	ldh  a, [hJoyNewKeys2]
-	bit  7, a
-	jp   nz, L1D5695
+	bit  KEYB_START, a
+	jp   nz, .abort
+	; Otherwise, return clear
 	xor  a
 	ret
-L1D5695:;J
+.abort:
 	scf
 	ret
-L1D5697:;C
-	ld   hl, wRoundSeqTbl
-	ld   a, [wRoundSeqId]
-	add  a, l
-	jp   nc, L1D56A2
-L1D56A1: db $24;X
-L1D56A2:;J
-	ld   l, a
-	push hl
+	
+; =============== Win_IncStageSeq ===============
+; Increases the stage sequence id by the number of opponents in the stage.
+;
+; This also marks them as defeated, which allows CharSel_DrawCrossOnDefeatedChars
+; to display crosses over defeated character icons
+;
+; Calling this allows the game to progress in Single Modes, and shouldn't be called in VS modes.
+Win_IncStageSeq:
+	;
+	; Seek to the current slot in the stage sequence table.
+	; DE = Ptr to current CHARSEL_ID_* entry in the opponent sequence table.
+	;
+	ld   hl, wCharSeqTbl	; HL = Sequence table
+	ld   a, [wCharSeqId]	; A = RoundId
+	add  a, l				; Index the table
+	jp   nc, .noOvf			; (we never overflow L)
+	inc  h
+.noOvf:
+	ld   l, a				; Save it back
+	push hl					; Move ptr to DE
 	pop  de
-	ld   hl, wRoundSeqId
-	ld   a, [wRoundSeqId]
-	cp   $0F
-	jp   z, L1D56C9
-	cp   $10
-	jp   z, L1D56C9
-	cp   $11
-	jp   z, L1D56C9
-	cp   $12
-	jp   z, L1D56C9
-	ld   b, $03
-	ld   a, [wPlayMode]
-	bit  0, a
-	jp   nz, L1D56CB
-L1D56C9:;J
-	ld   b, $01
-L1D56CB:;J
-	ld   a, [de]
-	set  7, a
-	ld   [de], a
-	inc  de
-	inc  [hl]
-	dec  b
-	jp   nz, L1D56CB
+	
+	; HL = Ptr to wCharSeqId
+	; This will later be incremented for every opponent marked as defeated.
+	ld   hl, wCharSeqId
+	
+	;
+	; Determine by how much to increase the stage sequence id.
+	;
+	
+	; There's only one opponent in the boss and extra rounds.
+	ld   a, [wCharSeqId]	; A = RoundSeqId
+	cp   STAGESEQ_KAGURA	; On KAGURA's stage?
+	jp   z, .set1			; If so, jump
+	cp   STAGESEQ_GOENITZ	; ...
+	jp   z, .set1
+	cp   STAGESEQ_BONUS
+	jp   z, .set1
+	cp   STAGESEQ_MRKARATE
+	jp   z, .set1
+	
+	; Otherwise, if we're in team mode, there are three opponents, so the stage sequence
+	; should increment by three.
+	ld   b, $03				; B = Slots to mark
+	ld   a, [wPlayMode]		
+	bit  MODEB_TEAM, a		; Are we in team mode?
+	jp   nz, .loop			; If so, skip
+.set1:						; Otherwise, there's only one opponent in single modes.
+	ld   b, $01				; B = Slots to mark
+	
+	;
+	; Advance the stage progress B times.
+	;
+.loop:
+	; Mark the opponent as defeated
+	ld   a, [de]					; A = Slot
+	set  CHARSEL_POSFB_DEFEATED, a	; Mark as defeated
+	ld   [de], a					; Save it back
+	inc  de							; Seek to next slot
+	
+	; Increment stage id
+	inc  [hl]						; wCharSeqId++
+	
+	dec  b							; Are we done?
+	jp   nz, .loop					; If not, loop
 	ret
-L1D56D6: db $88
-L1D56D7: db $98
-L1D56D8: db $04
-L1D56D9: db $44
-L1D56DA: db $52
-L1D56DB: db $41
-L1D56DC: db $57
-L1D56DD: db $E5
-L1D56DE: db $9A
-L1D56DF: db $0A
-L1D56E0: db $43
-L1D56E1: db $4F
-L1D56E2: db $4E
-L1D56E3: db $54
-L1D56E4: db $49
-L1D56E5: db $4E
-L1D56E6: db $55
-L1D56E7: db $45
-L1D56E8: db $20
-L1D56E9: db $39
-L1D56EA: db $ED
-L1D56EB: db $9A
-L1D56EC: db $01
-L1D56ED: db $20
-L1D56EE: db $E5
-L1D56EF: db $9A
-L1D56F0: db $0A
-L1D56F1: db $47
-L1D56F2: db $41
-L1D56F3: db $4D
-L1D56F4: db $45
-L1D56F5: db $20
-L1D56F6: db $20
-L1D56F7: db $4F
-L1D56F8: db $56
-L1D56F9: db $45
-L1D56FA: db $52
-L1D56FB: db $97
+	
+TextDef_Win_Draw:
+	dw $9888
+	db $04
+	db "DRAW"
+TextDef_Continue:
+	dw $9AE5
+	db $0A
+	db "CONTINUE 9"
+TextDef_ContinueNumSpace:
+	dw $9AED
+	db $01
+	db " "
+TextDef_GameOver:
+	dw $9AE5
+	db $0A
+	db "GAME  OVER"
+
+GFXLZ_Cutscene_StadiumBG: db $97
 L1D56FC: db $80
 L1D56FD: db $7B
 L1D56FE: db $00
@@ -4264,7 +4515,7 @@ L1D5C4D: db $03
 L1D5C4E: db $03
 L1D5C4F: db $02
 L1D5C50: db $00
-L1D5C51: db $0E
+BGLZ_Cutscene_StadiumBG: db $0E
 L1D5C52: db $00
 L1D5C53: db $42
 L1D5C54: db $01
@@ -4400,7 +4651,7 @@ L1D5CD5: db $C1
 L1D5CD6: db $B0
 L1D5CD7: db $21
 L1D5CD8: db $00
-L1D5CD9: db $71
+GFXLZ_Cutscene_Goenitz: db $71
 L1D5CDA: db $40
 L1D5CDB: db $7A
 L1D5CDC: db $00
@@ -5422,7 +5673,7 @@ L1D60D3: db $E8
 L1D60D4: db $80
 L1D60D5: db $08
 L1D60D6: db $41
-L1D60D7: db $09
+BGLZ_Cutscene_Goenitz: db $09
 L1D60D8: db $00
 L1D60D9: db $43
 L1D60DA: db $00
@@ -5512,7 +5763,7 @@ L1D612D: db $3F
 L1D612E: db $40
 L1D612F: db $43
 L1D6130: db $44
-L1D6131: db $45
+BGLZ_Cutscene_GoenitzDefeated: db $45
 L1D6132: db $46
 L1D6133: db $47
 L1D6134: db $48
@@ -5524,7 +5775,7 @@ L1D6139: db $23
 L1D613A: db $4A
 L1D613B: db $4B
 L1D613C: db $28
-L1D613D: db $71
+GFXLZ_Cutscene_GoenitzEscape: db $71
 L1D613E: db $00
 L1D613F: db $69
 L1D6140: db $00
@@ -6552,7 +6803,7 @@ L1D653D: db $0F
 L1D653E: db $0F
 L1D653F: db $0E
 L1D6540: db $00
-L1D6541: db $0B
+BGLZ_Cutscene_GoenitzEscape: db $0B
 L1D6542: db $80
 L1D6543: db $0C
 L1D6544: db $00
@@ -6658,7 +6909,7 @@ L1D65A7: db $49
 L1D65A8: db $4A
 L1D65A9: db $4B
 L1D65AA: db $4C
-L1D65AB: db $3A
+GFXLZ_Cutscene_Kagura: db $3A
 L1D65AC: db $00
 L1D65AD: db $50
 L1D65AE: db $00
@@ -7188,154 +7439,272 @@ L1D67B9: db $EC
 L1D67BA: db $10
 L1D67BB: db $FE
 L1D67BC: db $50
-L1D67BD:;I
-	call L1D71DE
-	call L1D682A
-	ld   a, $18
-	ld   b, $5C
+
+; =============== SubModule_CutsceneKagura ===============
+; This submodule handles the cutscene before fighting Kagura.
+SubModule_CutsceneKagura:
+	call Cutscene_SharedInit
+	call Cutscene_LoadKaguraOBJLst
+	
+	; Set screen sectors
+	ld   a, $18		; Second sector starts here (BG)
+	ld   b, $5C		; Text sector starts here (WINDOW)
 	call SetSectLYC
-	call L1D684D
+	
+	; Enable the LCD
+	call Cutscene_ResumeLCDWithLYC
+	
+	; Initialize vars
 	xor  a
-	ld   [wLZSS_Buffer], a
-	ld   [$C1CB], a
+	ld   [wCutMoveLargeChars], a
+	ld   [wCutFlashTimer], a
 	ei
+	
+	; Wait for next frame, to displaythe sectors
 	call Task_PassControl_NoDelay
+	
+	; Set Kagura's OBJ palette
 	ld   a, $6C
 	ldh  [rOBP0], a
+	
+	; Set white palette for middle section BG
 	xor  a
 	ldh  [rBGP], a
 	ldh  [rOBP1], a
 	ldh  [hScreenSect1BGP], a
+	
+	; Set different palette for top and bottom section BG.
+	; The font is black text on white background in the ROM, but on-screen it needs to be the other way around.
 	ld   a, $13
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect2BGP], a
-	ld   a, $98
+	
+	; Start cutscene music
+	ld   a, BGM_PROTECTOR
 	call HomeCall_Sound_ReqPlayExId_Stub
+	
+	;
+	; TEXT PRINTING
+	;
+	
+	; Don't execute custom code when writing lettters
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-	ld   hl, $785D
-	call L1D6857
-	ld   hl, $787E
-	call L1D6857
-	ld   hl, $78A6
-	call L1D6857
-	ld   hl, $78CF
-	call L1D6857
-	ld   hl, $78E8
-	call L1D6857
-L1D6811:;J
+	
+	; Print out the screens of text one by one
+	ld   hl, TextC_CutsceneKagura0
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_CutsceneKagura1
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_CutsceneKagura2
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_CutsceneKagura3
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_CutsceneKagura4
+	call Cutscene_WriteTextBank1C
+	
+	; Fall-through
+	
+; =============== Cutscene_End ===============
+; Common code to end a cutscene.
+Cutscene_End:
+
+	; Clear tilemap
 	call ClearBGMap
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	res  7, [hl]
+	
+	; Hide Kagura sprite mapping
+	ld   hl, wOBJInfo_Kagura+iOBJInfo_Status
+	res  OSTB_VISIBLE, [hl]
+	
+	; Disable sections
 	ld   hl, wMisc_C028
-	res  0, [hl]
+	res  MISCB_USE_SECT, [hl]
 	xor  a
 	ldh  [rSTAT], a
+	
+	; Reset DMG palette
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
 	ret
-L1D682A:;C
-	ld   hl, $65AB
-	ld   de, $C1DA
+	
+; =============== Cutscene_LoadKaguraOBJLst ===============
+; Loads the sprite mapping for Kagura's cutscene sprite.
+; The entire sprite has BG Priority set, to make it show up behind Goenitz.
+Cutscene_LoadKaguraOBJLst:
+	; Decompress/load the graphics to $8000
+	ld   hl, GFXLZ_Cutscene_Kagura
+	ld   de, wLZSS_Buffer+$10
 	call DecompressLZSS
-	ld   hl, $C1DA
+	ld   hl, wLZSS_Buffer+$10
 	ld   de, Tiles_Begin
 	ld   b, $28
 	call CopyTiles
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   de, L1D68D3
+	
+	; Load the sprite mapping from ROM.
+	; As this is an unique sprite definition, the needed coordinates and flags are directly set in the OBJInfoInit.
+	ld   hl, wOBJInfo_Kagura
+	ld   de, OBJInfoInit_Cutscene_Kagura
 	call OBJLstS_InitFrom
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
+	
+	; Initialize it
+	ld   hl, wOBJInfo_Kagura
 	jp   OBJLstS_DoAnimTiming_Initial
-L1D684D:;C
-	ld   a, $E7
-	rst  $18
+
+; =============== Cutscene_ResumeLCDWithLYC ===============
+; Resumes LCD output and enables LYC, which is required for the section system.
+Cutscene_ResumeLCDWithLYC:
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
+	; Enable LYC
 	ldh  a, [rSTAT]
-	or   a, $40
+	or   a, STAT_LYC
 	ldh  [rSTAT], a
 	ret
-L1D6857:;C
-	ld   b, $1C
-	call L1D6875
-	ld   b, $F0
-	jp   L1D7414
-L1D6861:;C
+; =============== Cutscene_WriteText* ===============
+; Set of subroutines to write a screen worth of text to the tilemap,
+; letter by letter through TextPrinter_MultiFrameFarCustomPos.
+;
+; The text is written from the beginning of the second row of the WINDOW layer.
+	
+; =============== Cutscene_WriteTextBank1C ===============
+; Writes text from BANK $1C.
+; IN
+; - HL: Ptr to TextC structure. Must point to BANK $1C.
+Cutscene_WriteTextBank1C:
+	ld   b, $1C ; Bank
+	call Cutscene_WriteText_Custom
+	ld   b, $F0 ; Wait for $F0 frames
+	jp   Cutscene_PostTextWrite
+; =============== Cutscene_WriteTextBank1D ===============
+; Writes text from BANK $1D.
+; IN
+; - HL: Ptr to TextC structure. Must point to BANK $1D.
+Cutscene_WriteTextBank1D:
 	ld   b, $1D
-	call L1D6875
+	call Cutscene_WriteText_Custom
 	ld   b, $F0
-	jp   L1D7414
-L1D686B:;C
+	jp   Cutscene_PostTextWrite
+; =============== Cutscene_WriteTextBank1CSFX ===============
+; Writes text from BANK $1C, playing SFX for every char printed.
+; IN
+; - HL: Ptr to TextC structure. Must point to BANK $1C.
+Cutscene_WriteTextBank1CSFX:
 	ld   b, $1C
-	call L1D68A4
+	call Cutscene_WriteText_CustomSFX
 	ld   b, $F0
-	jp   L1D7414
-L1D6875:;C
+	jp   Cutscene_PostTextWrite
+	
+; =============== Cutscene_WriteText_Custom ===============
+; Writes out a screen of text for a cutscene over multiple frames.
+; IN
+; - HL: Ptr to TextC structure
+; - B: Bank number of TextDef structure
+Cutscene_WriteText_Custom:
+
+	;
+	; Blank out any existing text from the WINDOW layer.
+	; Because this is done during HBLANK, it can't be done in a single frame.
+	;
 	push bc
-	push hl
-	call Task_PassControl_NoDelay
-	ld   hl, WINDOWMap_Begin
-	ld   b, $14
-	ld   c, $03
-	ld   d, $00
-	call FillBGRect
-	call Task_PassControl_NoDelay
-	ld   hl, $9C60
-	ld   b, $14
-	ld   c, $03
-	ld   d, $00
-	call FillBGRect
-	call Task_PassControl_NoDelay
-	pop  hl
+		push hl
+			; Wait start of next frame, to avoid running out of time
+			call Task_PassControl_NoDelay
+			
+			; Clear the rows 1-3
+			ld   hl, WINDOWMap_Begin	; BG Ptr
+			ld   b, $14	; Rect Width
+			ld   c, $03 ; Rect Height
+			ld   d, $00 ; Tile ID
+			call FillBGRect
+			call Task_PassControl_NoDelay	; Wait next frame
+			
+			; Clear the rows 4-6
+			ld   hl, WINDOWMap_Begin+$60	; BG Ptr
+			ld   b, $14	; Rect Width
+			ld   c, $03 ; Rect Height
+			ld   d, $00 ; Tile ID
+			call FillBGRect
+			call Task_PassControl_NoDelay	; Wait next frame
+		pop  hl
 	pop  bc
-	ld   de, $9C20
-	ld   c, $04
-	ld   a, $02
-	jp   TextPrinter_MultiFrameFarCustomPos
-L1D68A4:;C
+	
+	;
+	; Write text from the second row of the WINDOW
+	;
+	ld   de, WINDOWMap_Begin+$20 ; Destination ptr in the tilemap
+	ld   c, $04 ; Delay between letter printing
+	ld   a, TXT_ALLOWFAST ; Option flags
+	jp   TextPrinter_MultiFrameFarCustomPos	
+	
+; =============== Cutscene_WriteText_CustomSFX ===============
+; Writes out a screen of text for a cutscene over multiple frames.
+; Identical to Cutscene_WriteText_Custom except that this plays a SGB SFX whenever a character is printed.
+; IN
+; - HL: Ptr to TextC structure
+; - B: Bank number of TextDef structure
+Cutscene_WriteText_CustomSFX:
+	;
+	; Blank out any existing text from the WINDOW layer.
+	; Because this is done during HBLANK, it can't be done in a single frame.
+	;
 	push bc
-	push hl
-	call Task_PassControl_NoDelay
-	ld   hl, WINDOWMap_Begin
-	ld   b, $14
-	ld   c, $03
-	ld   d, $00
-	call FillBGRect
-	call Task_PassControl_NoDelay
-	ld   hl, $9C60
-	ld   b, $14
-	ld   c, $03
-	ld   d, $00
-	call FillBGRect
-	call Task_PassControl_NoDelay
-	pop  hl
+		push hl
+			; Wait start of next frame, to avoid running out of time
+			call Task_PassControl_NoDelay
+			
+			; Clear the rows 1-3
+			ld   hl, WINDOWMap_Begin	; BG Ptr
+			ld   b, $14	; Rect Width
+			ld   c, $03 ; Rect Height
+			ld   d, $00 ; Tile ID
+			call FillBGRect
+			call Task_PassControl_NoDelay	; Wait next frame
+			
+			; Clear the rows 4-6
+			ld   hl, WINDOWMap_Begin+$60	; BG Ptr
+			ld   b, $14	; Rect Width
+			ld   c, $03 ; Rect Height
+			ld   d, $00 ; Tile ID
+			call FillBGRect
+			call Task_PassControl_NoDelay	; Wait next frame
+		pop  hl
 	pop  bc
-	ld   de, $9C20
-	ld   c, $04
-	ld   a, $03
+	
+	;
+	; Write text from the second row of the WINDOW
+	;
+	ld   de, WINDOWMap_Begin+$20 ; Destination ptr in the tilemap
+	ld   c, $04 ; Delay between letter printing
+	ld   a, TXT_PLAYSFX|TXT_ALLOWFAST ; Option flags
 	jp   TextPrinter_MultiFrameFarCustomPos
-L1D68D3: db $80
-L1D68D4: db $80
-L1D68D5: db $00
-L1D68D6: db $28
-L1D68D7: db $00
-L1D68D8: db $35
-L1D68D9: db $00
-L1D68DA: db $00
-L1D68DB: db $00
-L1D68DC: db $00
-L1D68DD: db $00
-L1D68DE: db $00
-L1D68DF: db $00
-L1D68E0: db $00
-L1D68E1: db $00
-L1D68E2: db $00
-L1D68E3: db $1D
-L1D68E4: db $E7
-L1D68E5: db $68
-L1D68E6: db $00
-L1D68E7: db $ED
+
+; This OBJInfoInit structure is truncated, as every byte after iOBJInfo_OBJLstPtrTblOffset isn't needed.
+OBJInfoInit_Cutscene_Kagura:
+	db OST_VISIBLE ; iOBJInfo_Status
+	db SPR_BGPRIORITY ; iOBJInfo_OBJLstFlags
+	db $00 ; iOBJInfo_OBJLstFlagsView
+	db $28 ; iOBJInfo_X
+	db $00 ; iOBJInfo_XSub
+	db $35 ; iOBJInfo_Y
+	db $00 ; iOBJInfo_YSub
+	db $00 ; iOBJInfo_SpeedX
+	db $00 ; iOBJInfo_SpeedXSub
+	db $00 ; iOBJInfo_SpeedY
+	db $00 ; iOBJInfo_SpeedYSub
+	db $00 ; iOBJInfo_RelX (auto)
+	db $00 ; iOBJInfo_RelY (auto)
+	db $00 ; iOBJInfo_TileIDBase
+	db $00 ; iOBJInfo_VRAMPtr_Low
+	db $00 ; iOBJInfo_VRAMPtr_High
+	db BANK(OBJLstPtrTable_Cutscene_Kagura) ; iOBJInfo_BankNum (BANK $1D)
+	db LOW(OBJLstPtrTable_Cutscene_Kagura) ; iOBJInfo_OBJLstPtrTbl_Low
+	db HIGH(OBJLstPtrTable_Cutscene_Kagura) ; iOBJInfo_OBJLstPtrTbl_High
+	db $00 ; iOBJInfo_OBJLstPtrTblOffset
+	
+OBJLstPtrTable_Cutscene_Kagura: db $ED
 L1D68E8: db $68
 L1D68E9: db $FF
 L1D68EA: db $FF
@@ -7346,7 +7715,7 @@ L1D68EE: db $00
 L1D68EF: db $00
 L1D68F0: db $FF
 L1D68F1: db $FF
-L1D68F2: db $FF;X
+L1D68F2: db $FF
 L1D68F3: db $F7
 L1D68F4: db $68
 L1D68F5: db $00
@@ -7412,441 +7781,797 @@ L1D6930: db $24
 L1D6931: db $F8
 L1D6932: db $25
 L1D6933: db $26
-L1D6934:;I
-	call L1D71DE
-	ld   a, $00
-	ld   b, $5C
+; =============== SubModule_CutsceneGoenitz ===============
+; This submodule handles the cutscene before fighting Goenitz.
+SubModule_CutsceneGoenitz:
+	call Cutscene_SharedInit
+	
+	;
+	; This part of the cutscene has a large picture of the stadium.
+	;
+	
+	; Set screen sectors.
+	ld   a, $00		; Second sector starts here (BG)
+	ld   b, $5C		; Text sector starts here (WINDOW)
 	call SetSectLYC
-	ld   hl, $56FB
-	ld   de, $C1DA
+	
+	; Load the BG graphics for the stadium
+	ld   hl, GFXLZ_Cutscene_StadiumBG
+	ld   de, wLZSS_Buffer+$10
 	call DecompressLZSS
-	ld   hl, $C1DA
+	ld   hl, wLZSS_Buffer+$10
 	ld   de, $8800
 	ld   b, $68
 	call CopyTiles
-	ld   hl, $5C51
-	ld   de, $C1DA
+	
+	; Load the tilemap for the stadium picture as a rectangle
+	ld   hl, BGLZ_Cutscene_StadiumBG
+	ld   de, wLZSS_Buffer+$10
 	call DecompressLZSS
-	ld   de, $C1DA
-	ld   hl, $9823
-	ld   b, $0E
-	ld   c, $0A
-	ld   a, $80
+	ld   de, wLZSS_Buffer+$10 ; Ptr to uncompressed tilemap
+	ld   hl, $9823 ; Destination Ptr in VRAM
+	ld   b, $0E ; Rect Width
+	ld   c, $0A ; Rect Height
+	ld   a, $80 ; Tile ID base offset (from $8800)
 	call CopyBGToRectWithBase
-	call L1D684D
+	
+	; Enable screen
+	call Cutscene_ResumeLCDWithLYC
+	
+	; Initialize effect vars
 	xor  a
-	ld   [wLZSS_Buffer], a
-	ld   [$C1CB], a
+	ld   [wCutMoveLargeChars], a
+	ld   [wCutFlashTimer], a
 	ei
+	
+	; Sync screen before setting palette
 	call Task_PassControl_NoDelay
+	
+	; Set picture palette
 	ld   a, $1B
 	ldh  [rBGP], a
 	ldh  [hScreenSect1BGP], a
+	
+	; Set text palette
 	ld   a, $13
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect2BGP], a
-	ld   a, $98
+	
+	; Play cutscene BGM
+	ld   a, BGM_PROTECTOR
 	call HomeCall_Sound_ReqPlayExId_Stub
+	
+	;
+	; TEXT PRINTING
+	;
+	
+	; No code between letters
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-	ld   hl, $7918
-	call L1D6857
-	ld   hl, $7928
-	call L1D6857
-	ld   hl, $794B
-	call L1D6857
-	ld   hl, $7968
-	call L1D6857
-	ld   hl, $797B
-	call L1D6857
-	ld   hl, $79A0
-	call L1D6857
-	ld   hl, $79C0
-	call L1D6857
-	ld   hl, $79E2
-	call L1D6857
-	ld   hl, $79EB
-	call L1D6857
-	ld   hl, $7A1D
-	call L1D6857
-	ld   hl, $7A3A
-	call L1D6857
-	ld   hl, $7A41
-	call L1D6857
+	
+	; Write the text, screen by screen	
+	ld   hl, TextC_CutsceneGoenitz00
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_CutsceneGoenitz01
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_CutsceneGoenitz02
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_CutsceneGoenitz03
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_CutsceneGoenitz04
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_CutsceneGoenitz05
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_CutsceneGoenitz06
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_CutsceneGoenitz07
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_CutsceneGoenitz08
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_CutsceneGoenitz09
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_CutsceneGoenitz0A
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_CutsceneGoenitz0B
+	call Cutscene_WriteTextBank1C
+	
+	
+	; On EASY difficulty, the cutscene ends in an alternate way
 	ld   a, [wDifficulty]
-	cp   $00
-	jp   z, L1D6AD2
+	cp   DIFFICULTY_EASY
+	jp   z, CutsceneGoenitz_Easy
+	
+	;##
+	;
+	; Do the flashing effect.
+	;
+	
+	; White out palette for center section
 	xor  a
 	ldh  [rBGP], a
 	ldh  [hScreenSect1BGP], a
+	
+	; Scroll viewport to show an empty area of the tilemap in the middle sector.
+	; This scrolls off-screen the area where the Stadium background was located,
+	; which is also where the Goenitz tilemap is written to.
 	ld   a, $80
 	ldh  [hScrollY], a
+	
+	; Flash screen
 	ld   a, $01
-	ld   [$C1CB], a
-	ld   a, BANK(L1D6A77)
+	ld   [wCutFlashTimer], a
+	
+	; Flash screen while writing text.
+	; Because this happens only after a character is printed, it's relatively slow.
+	ld   a, BANK(Cutscene_FlashBGPal)
 	ld   [wTextPrintFrameCodeBank], a
 	ld   hl, wTextPrintFrameCodePtr_Low
-	ld   [hl], LOW(L1D6A77)
+	ld   [hl], LOW(Cutscene_FlashBGPal)
 	inc  hl
-	ld   [hl], HIGH(L1D6A77)
-	ld   hl, $7A65
-	call L1D6857
-	ld   hl, $7A76
-	call L1D6857
+	ld   [hl], HIGH(Cutscene_FlashBGPal)
+	
+	; Write the two screens of text
+	ld   hl, TextC_CutsceneGoenitz0C
+	call Cutscene_WriteTextBank1C
+	
+	ld   hl, TextC_CutsceneGoenitz0D
+	call Cutscene_WriteTextBank1C
+	
+	;##
+	;
+	; Goenitz appears
+	;
+	
 	di
-	rst  $10
+	;-----------------------------------
+	rst  $10				; Stop LCD
+	
+	; Clear tilemap for center sector
 	call ClearBGMap
-	call L1D6A97
+	
+	; Load Goenitz off-screen above
+	call Cutscene_LoadGoenitzBG
+	
 	ei
-	ld   a, $E7
-	rst  $18
-	ld   a, $8A
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
+	
+	; Play new music
+	ld   a, BGM_WIND
 	call HomeCall_Sound_ReqPlayExId_Stub
+	
+	; Stop flashing
 	xor  a
-	ld   [$C1CB], a
+	ld   [wCutFlashTimer], a
+	
+	; Wait 4 frames
 	call Task_PassControl_Delay04
-	ld   a, $FB
+	
+	; Scroll the screen back up to show Goenitz
+	ld   a, -$05
 	ldh  [hScrollY], a
+	
+	;
+	; Set sector palette data
+	;
+	
+	; Middle
 	ld   a, $6C
 	ldh  [rBGP], a
 	ldh  [hScreenSect1BGP], a
+	
+	; Top + bottom
 	ld   a, $13
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect2BGP], a
+	
+	;
+	; TEXT PRINTING
+	;
+	
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-	ld   hl, $7A7D
-	call L1D6857
-	ld   hl, $7AA5
-	call L1D6857
-	ld   hl, $7AAB
-	call L1D6857
-	ld   hl, $7AC5
-	call L1D6857
-	ld   hl, $7AF0
-	call L1D6857
-	ld   hl, $7B17
-	call L1D6857
+	ld   hl, TextC_CutsceneGoenitz0E
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_CutsceneGoenitz0F
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_CutsceneGoenitz10
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_CutsceneGoenitz11
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_CutsceneGoenitz12
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_CutsceneGoenitz13
+	call Cutscene_WriteTextBank1C
+	
+	;##
+	;
+	; Show the characters in the player team.
+	;
+	
+	
+	; Black out center section
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [hScreenSect1BGP], a
 	di
-	rst  $10
+	;-----------------------------------
+	rst  $10				; Stop LCD
+	
+	; Clear tilemap for center sector
 	call ClearBGMap
-	call L1D6FD7
+	
+	; Load character sprites in the tilemap, similar to the win screen.
+	call Cutscene_InitChars
+	
 	ei
-	ld   a, $E7
-	rst  $18
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
+	
 	call Task_PassControl_Delay04
-	call L1D7159
-	ld   hl, $7B2F
-	call L1D6857
-	jp   L1D6811
-L1D6A77:;CI
-	ld   a, [$C1CB]
+	
+	; Initialize other character screen field
+	call Cutscene_InitCharMisc
+	
+	; Show one last screen of text to go with the shot of the team
+	ld   hl, TextC_CutsceneGoenitz14
+	call Cutscene_WriteTextBank1C
+	
+	;
+	; We're done
+	;
+	jp   Cutscene_End
+	
+; =============== Cutscene_FlashBGPal ===============
+; Flashes the background palette for the middle section of the screen.
+Cutscene_FlashBGPal:
+
+	;
+	; Don't do this if it's disabled (Timer == 0)
+	;
+	ld   a, [wCutFlashTimer]
 	cp   $00
 	ret  z
+	
+	;
+	; Increment the flash timer, which determines the palette.
+	;
+	; This increments by one, except when it overflows.
+	; To avoid the flash effect from ending and to keep the timing consistent,
+	; the timer goes from $FF to $02.
+	; Though it could have jumped to $04 to avoid a 4-frame window of black frames.
+	; $FE -> black
+	; $FF -> black
+	; $00 -> (none)
+	; $01 -> norm
+	; $02 -> black
+	; $03 -> black
+	;
+	inc  a				; Timer++
+	jr   nz, .saveTimer	; Timer > 0? If so, jump
+	inc  a				; Timer += 2
 	inc  a
-	jr   nz, L1D6A82
-	inc  a
-	inc  a
-L1D6A82:;R
-	ld   [$C1CB], a
-	and  a, $02
-	jr   z, L1D6A90
+.saveTimer:
+	ld   [wCutFlashTimer], a
+	
+	;
+	; Determine the palette to set.
+	; Every two frames, switch to a different palette.
+	;
+	and  a, $02				; FlashTimer & %10 == 0?
+	jr   z, .setPalNorm		; If so, restore the normal palette
+.setPalBlack:				; Otherwise, completely black it
+	; Use completely black palette
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [hScreenSect1BGP], a
 	ret
-L1D6A90:;R
+.setPalNorm:
+	; Restore normal palette
 	ld   a, $6C
 	ldh  [rBGP], a
 	ldh  [hScreenSect1BGP], a
 	ret
-L1D6A97:;C
-	ld   hl, $5CD9
-	ld   de, $C1DA
+	
+; =============== Cutscene_LoadGoenitzBG ===============
+; Loads the graphics and tilemap for Goenitz during cutscenes.
+Cutscene_LoadGoenitzBG:
+	; Load GFX
+	ld   hl, GFXLZ_Cutscene_Goenitz
+	ld   de, wLZSS_Buffer+$10
 	call DecompressLZSS
-	ld   hl, $C1DA
+	ld   hl, wLZSS_Buffer+$10
 	ld   de, $8800
 	ld   b, $4C
 	call CopyTiles
-	ld   hl, $60D7
-	ld   de, $C1DA
+	
+	; Load tilemap
+	ld   hl, BGLZ_Cutscene_Goenitz
+	ld   de, wLZSS_Buffer+$10
 	call DecompressLZSS
-	ld   de, $C1DA
-	ld   hl, $9844
-	ld   b, $0C
-	ld   c, $09
-	ld   a, $80
+	ld   de, wLZSS_Buffer+$10
+	ld   hl, $9844 ; Destination Ptr in VRAM
+	ld   b, $0C ; Rect Width
+	ld   c, $09 ; Rect Height
+	ld   a, $80 ; Tile ID base offset (from $8800)
 	jp   CopyBGToRectWithBase
-L1D6AC3:;C
-	ld   de, $6131
-	ld   hl, $98C8
-	ld   b, $04
-	ld   c, $03
-	ld   a, $80
+	
+; =============== Cutscene_LoadGoenitzDefeatedBG ===============
+; Loads the patch tilemap for defeated Goenitz in the ending cutscene.
+; This is applied over the existing one loaded by Cutscene_LoadGoenitzBG.
+Cutscene_LoadGoenitzDefeatedBG:
+	ld   de, BGLZ_Cutscene_GoenitzDefeated
+	ld   hl, $98C8 ; Destination Ptr in VRAM
+	ld   b, $04 ; Rect Width
+	ld   c, $03 ; Rect Height
+	ld   a, $80 ; Tile ID base offset (from $8800)
 	jp   CopyBGToRectWithBase
-L1D6AD2:;J
+	
+; =============== CutsceneGoenitz_Easy ===============
+; EASY-mode specific ending for SubModule_CutsceneGoenitz.
+CutsceneGoenitz_Easy:
+	; Black out palette for center sector
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [hScreenSect1BGP], a
+	
+	;
+	; Clear tilemap for center sector.
+	; In easy mode, there's no screen flashing and Goenitz doesn't appear.
+	;
 	di
-	rst  $10
+	;-----------------------------------
+	rst  $10				; Stop LCD
 	call ClearBGMap
 	ei
-	ld   a, $E7
-	rst  $18
-	ld   a, $8A
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
+	
+	ld   a, BGM_WIND
 	call HomeCall_Sound_ReqPlayExId_Stub
+	
 	call Task_PassControl_Delay04
+	
+	;
+	; Set sector palette data
+	;
+	
+	; Middle
 	ld   a, $6C
 	ldh  [rBGP], a
 	ldh  [hScreenSect1BGP], a
+	
+	; Top + bottom
 	ld   a, $13
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect2BGP], a
+	
+	; Middle (OBJ)
 	ld   a, $8C
 	ldh  [rOBP0], a
-	ld   hl, $7C02
-	call L1D6857
-	ld   hl, $7C29
-	call L1D6857
-	jp   L1D6811
-L1D6B08:;I
-	call L1D71DE
+	
+	;
+	; TEXT PRINTING
+	;
+	
+	; Telling you to play on NORMAL difficulty
+	ld   hl, TextC_CutsceneGoenitz0C_Easy
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_CutsceneGoenitz0D_Easy
+	call Cutscene_WriteTextBank1C
+	
+	jp   Cutscene_End
+
+; =============== SubModule_Ending_Generic ===============
+; Generic ending after defeating Goenitz.
+SubModule_Ending_Generic:
+	call Cutscene_SharedInit
+	
+	; Top section collapsed
 	ld   a, $00
 	ld   b, $5C
 	call SetSectLYC
-	call L1D6A97
-	call L1D6AC3
+	
+	; Show defeated Goenitz in the tilemap
+	call Cutscene_LoadGoenitzBG
+	call Cutscene_LoadGoenitzDefeatedBG
+	
+	; Move viewport to the right, so Goenitz appears partially off-screen on the left.
 	ld   a, $40
 	ldh  [hScrollX], a
-	call L1D682A
+	
+	; Show Kagura sprite mapping
+	call Cutscene_LoadKaguraOBJLst
+	
+	; Move Kagura to the right, so she appears partially off-screen on the right.
 	ld   a, $80
-	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
-	call L1D684D
-	ld   [wLZSS_Buffer], a
+	ld   [wOBJInfo_Kagura+iOBJInfo_X], a
+	
+	; Move the characters towards the center
+	call Cutscene_ResumeLCDWithLYC	; A = (something != 0)
+	ld   [wCutMoveLargeChars], a
+	
+	; No flashing
 	xor  a
-	ld   [$C1CB], a
+	ld   [wCutFlashTimer], a
+	
+	; Wait for start of the frame before continuing
 	ei
 	call Task_PassControl_NoDelay
-	ld   a, $FB
+	
+	; Move viewport up so Goenitz is aligned to the end of the sector.
+	; Otherwise he'd visibly look cut off.
+	ld   a, -$05
 	ldh  [hScrollY], a
+	
+	; Set Kagura palette
 	ld   a, $6C
 	ldh  [rOBP0], a
+	
+	; Set Goenitz palette
 	ld   a, $6C
 	ldh  [rBGP], a
 	ldh  [hScreenSect1BGP], a
+	
+	; Set text sector palette
 	ld   a, $03
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect2BGP], a
-	ld   a, $8B
+	
+	; Play ending cutscene music
+	ld   a, BGM_TOTHESKY
 	call HomeCall_Sound_ReqPlayExId_Stub
-	ld   a, BANK(L1D6CC2)
+	
+	; Move the characters while printing the text
+	ld   a, BANK(Cutscene_MoveLargeChars) ; BANK $1D
 	ld   [wTextPrintFrameCodeBank], a
 	ld   hl, wTextPrintFrameCodePtr_Low
-	ld   [hl], LOW(L1D6CC2)
+	ld   [hl], LOW(Cutscene_MoveLargeChars)
 	inc  hl
-	ld   [hl], HIGH(L1D6CC2)
-	ld   hl, $7B46
-	call L1D6857
-	ld   hl, $7B5E
-	call L1D6857
-	ld   hl, $7B8E
-	call L1D6857
-	ld   hl, $7BA0
-	call L1D6857
-	ld   hl, $7BB7
-	call L1D6857
-	ld   hl, $7BE2
-	call L1D6857
-	call L1D6BB3
+	ld   [hl], HIGH(Cutscene_MoveLargeChars)
+	
+	;
+	; TEXT PRINTING
+	;
+	
+	ld   hl, TextC_Ending_Generic0
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_Ending_Generic1
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_Ending_Generic2
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_Ending_Generic3
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_Ending_Generic4
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_Ending_Generic5
+	call Cutscene_WriteTextBank1C
+	
+	;--
+	
+	call Ending_GoenitzLeave
+	
 	di
-	rst  $10
+	;-----------------------------------
+	rst  $10				; Stop LCD
+	
+	; Delete center sector
 	call ClearBGMap
-	ld   a, $80
-	ld   [wOBJInfo_Pl1+iOBJInfo_Status], a
+	
+	; Show and move Kagura to the center of the screen
+	ld   a, OST_VISIBLE
+	ld   [wOBJInfo_Kagura+iOBJInfo_Status], a
 	ld   a, $28
-	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
+	ld   [wOBJInfo_Kagura+iOBJInfo_X], a
 	ei
-	ld   a, $E7
-	rst  $18
+	
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
 	call Task_PassControl_NoDelay
+	
+	; Stop moving characters
 	xor  a
-	ld   [wLZSS_Buffer], a
+	ld   [wCutMoveLargeChars], a
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-	ld   hl, $7C5C
-	call L1D6857
-	ld   hl, $7C84
-	call L1D6857
-	ld   hl, $7CBF
-	call L1D6857
-	jp   L1D6811
-L1D6BB3:;C
+	
+	; Display the last lines of text
+	ld   hl, TextC_Ending_KaguraGeneric0
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_Ending_KaguraGeneric1
+	call Cutscene_WriteTextBank1C
+	ld   hl, TextC_Ending_KaguraGeneric2
+	call Cutscene_WriteTextBank1C
+	jp   Cutscene_End
+	
+; =============== Ending_GoenitzLeave ===============
+; Part of the ending where Goentiz leaves while flashing the palette.
+Ending_GoenitzLeave:
 	di
-	rst  $10
+	;-----------------------------------
+	rst  $10				; Stop LCD
+	
+	; Delete existing Goenitz
 	call ClearBGMap
+	
+	; Hide Kagura
 	xor  a
 	ld   [wOBJInfo_Pl1+iOBJInfo_Status], a
-	ld   a, $F0
+	
+	; Set center sector to focus on Goenitz (which will be loaded shortly after).
+	; [TCRF] The Y position cuts off the lower part of the graphic, and the screen only scrolls up.
+	ld   a, -$10
 	ldh  [hScrollX], a
-	ld   a, $20
+	ld   a, +$20
 	ldh  [hScrollY], a
-	ld   a, $18
-	ld   b, $5C
+	
+	; Enable sector system
+	ld   a, $18		; Start middle sector here
+	ld   b, $5C		; End it here
 	call SetSectLYC
-	ld   hl, $613D
-	ld   de, $C1DA
+	
+	; Load GFX for Goenitz holding an hand up
+	ld   hl, GFXLZ_Cutscene_GoenitzEscape
+	ld   de, wLZSS_Buffer+$10
 	call DecompressLZSS
-	ld   hl, $C1DA
+	ld   hl, wLZSS_Buffer+$10
 	ld   de, $8800
 	ld   b, $50
 	call CopyTiles
-	ld   hl, $6541
-	ld   de, $C1DA
+	
+	; And load the respective tilemap
+	ld   hl, BGLZ_Cutscene_GoenitzEscape
+	ld   de, wLZSS_Buffer+$10
 	call DecompressLZSS
-	ld   de, $C1DA
-	ld   hl, $9844
-	ld   b, $08
-	ld   c, $0E
-	ld   a, $80
+	ld   de, wLZSS_Buffer+$10
+	ld   hl, $9844 ; Destination Ptr in VRAM
+	ld   b, $08 ; Rect Width
+	ld   c, $0E ; Rect Height
+	ld   a, $80 ; Tile ID base offset (from $8800)
 	call CopyBGToRectWithBase
+	
 	ei
-	ld   a, $E7
-	rst  $18
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
+	
+	; Set fully black palette for top sector.
 	ld   a, $FF
 	ldh  [hScreenSect0BGP], a
+	; Set standard palette for middle sector
 	ld   a, $6C
 	ldh  [rBGP], a
 	ldh  [hScreenSect1BGP], a
+	; Set palette for text sector
 	ld   a, $03
 	ldh  [hScreenSect2BGP], a
+	
+	; Don't move characters horizontally.
+	; Goenitz will be moved vertically, but that's handled separately.
 	xor  a
-	ld   [wLZSS_Buffer], a
+	ld   [wCutMoveLargeChars], a
 	call Task_PassControl_Delay04
+	
+	;
+	; TEXT PRINTING
+	;
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-	ld   hl, $7BEA
-	call L1D6857
-	ld   a, BANK(L1D6CEC)
+	ld   hl, TextC_Ending_GoenitzLeave0
+	call Cutscene_WriteTextBank1C
+	
+	; Start moving up while printing the next text, scrolling
+	; Goenitz's hand into view.
+	ld   a, BANK(Cutscene_ScrollUp)
 	ld   [wTextPrintFrameCodeBank], a
 	ld   hl, wTextPrintFrameCodePtr_Low
-	ld   [hl], LOW(L1D6CEC)
+	ld   [hl], LOW(Cutscene_ScrollUp)
 	inc  hl
-	ld   [hl], HIGH(L1D6CEC)
-	ld   hl, $7C46
-	ld   b, $1C
-	call L1D6875
-	ld   hl, $7BF8
-	ld   b, $1C
-	call L1D6875
-L1D6C38:;R
+	ld   [hl], HIGH(Cutscene_ScrollUp)
+	
+	; Because Cutscene_WriteTextBank1C calls Cutscene_PostTextWrite, and that subroutine
+	; doesn't call Cutscene_ScrollUp, we have to call Cutscene_WriteText_Custom manually.
+	ld   hl, TextC_Ending_GoenitzLeave1
+	ld   b, BANK(TextC_Ending_GoenitzLeave1) ; BANK $1C
+	call Cutscene_WriteText_Custom
+	ld   hl, TextC_Ending_GoenitzLeave2
+	ld   b, BANK(TextC_Ending_GoenitzLeave2) ; BANK $1C
+	call Cutscene_WriteText_Custom
+	
+	
+
+	; Continue scrolling up until reaching the target position.
+.mvLoop:
 	call Task_PassControl_NoDelay
-	call L1D6CEC
+	call Cutscene_ScrollUp
 	ldh  a, [hScrollY]
-	cp   $E0
-	jr   nz, L1D6C38
+	cp   $E0						; Reached the target position yet?
+	jr   nz, .mvLoop				; If not, loop
 	call Task_PassControl_Delay3B
+	
+	; Scroll away from Goenitz's hand, to blank the center sector
+	; in preparation of the flashing.
 	ld   a, $80
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
-	ld   [$C1CC], a
+	ld   [wCutFlash2Timer], a
 	call Task_PassControl_NoDelay
+	
+	;
+	; Do the palette flash effect.
+	; Unlike the normal palette flashing by Cutscene_FlashBGPal, this one
+	; gets progressively faster as time goes on.
+	;
+	; There are four different thresholds for flashing speed, each handled
+	; by its own subroutine.
+	;
+	
+	
+	; Speed 0 (8 frames)
 	ld   b, $20
-L1D6C55:;R
-	call L1D6C86
+.s0Loop:
+	call Cutscene_Flash2Spd0
 	call Task_PassControl_NoDelay
 	dec  b
-	jr   nz, L1D6C55
+	jr   nz, .s0Loop
+	
+	; Speed 1 (4 frames)
 	ld   b, $20
-L1D6C60:;R
-	call L1D6C9B
+.s1Loop:
+	call Cutscene_Flash2Spd1
 	call Task_PassControl_NoDelay
 	dec  b
-	jr   nz, L1D6C60
+	jr   nz, .s1Loop
+	
+	; Speed 2 (2 frames)
 	ld   b, $20
-L1D6C6B:;R
-	call L1D6CA8
+.s2Loop:
+	call Cutscene_Flash2Spd2
 	call Task_PassControl_NoDelay
 	dec  b
-	jr   nz, L1D6C6B
+	jr   nz, .s2Loop
+	
+	; Speed 3 (1 frame)
 	ld   b, $20
-L1D6C76:;R
-	call L1D6CB5
+.s3Loop:
+	call Cutscene_Flash2Spd3
 	call Task_PassControl_NoDelay
 	dec  b
-	jr   nz, L1D6C76
+	jr   nz, .s3Loop
+	
+	; We're done, restore the normal palette
 	ld   a, $6C
 	ldh  [hScreenSect1BGP], a
 	jp   Task_PassControl_Delay3B
-L1D6C86:;C
-	ld   a, [$C1CC]
+	
+	
+; =============== Cutscene_Flash2Spd0 ===============
+; Switches between palettes every 8 frames.
+Cutscene_Flash2Spd0:
+	ld   a, [wCutFlash2Timer]			; Timer++
 	inc  a
-	ld   [$C1CC], a
-	and  a, $08
-	jr   z, L1D6C96
-L1D6C91:;R
+	ld   [wCutFlash2Timer], a
+	and  a, $08							; (Timer & %1000) == 0?
+	jr   z, Cutscene_Flash2SetPalWhite	; If so, jump
+	; Fall-through
+	
+; =============== Cutscene_Flash2SetPal* ===============
+; Helper subroutines called by every Cutscene_Flash2Spd*.
+Cutscene_Flash2SetPalBlack:
 	ld   a, $FF
 	ldh  [hScreenSect1BGP], a
 	ret
-L1D6C96:;R
+Cutscene_Flash2SetPalWhite:
 	ld   a, $6C
 	ldh  [hScreenSect1BGP], a
 	ret
-L1D6C9B:;C
-	ld   a, [$C1CC]
+	
+; =============== Cutscene_Flash2Spd1 ===============
+; Switches between palettes every 4 frames.
+Cutscene_Flash2Spd1:
+	ld   a, [wCutFlash2Timer]
 	inc  a
-	ld   [$C1CC], a
+	ld   [wCutFlash2Timer], a
 	and  a, $04
-	jr   z, L1D6C96
-	jr   L1D6C91
-L1D6CA8:;C
-	ld   a, [$C1CC]
+	jr   z, Cutscene_Flash2SetPalWhite
+	jr   Cutscene_Flash2SetPalBlack
+	
+; =============== Cutscene_Flash2Spd2 ===============
+; Switches between palettes every 2 frames.	
+Cutscene_Flash2Spd2:
+	ld   a, [wCutFlash2Timer]
 	inc  a
-	ld   [$C1CC], a
+	ld   [wCutFlash2Timer], a
 	and  a, $02
-	jr   z, L1D6C96
-	jr   L1D6C91
-L1D6CB5:;C
-	ld   a, [$C1CC]
+	jr   z, Cutscene_Flash2SetPalWhite
+	jr   Cutscene_Flash2SetPalBlack
+	
+; =============== Cutscene_Flash2Spd3 ===============
+; Switches between palettes every other frame.
+Cutscene_Flash2Spd3:
+	ld   a, [wCutFlash2Timer]
 	inc  a
-	ld   [$C1CC], a
+	ld   [wCutFlash2Timer], a
 	and  a, $01
-	jr   z, L1D6C96
-	jr   L1D6C91
-L1D6CC2:;CI
-	ld   a, [wLZSS_Buffer]
+	jr   z, Cutscene_Flash2SetPalWhite
+	jr   Cutscene_Flash2SetPalBlack
+	
+; =============== Cutscene_MoveLargeChars ===============
+; Moves the large cutscene characters (Kagura, Goenitz) until they reach their target position.
+; This is used in the main ending cutscene, where both characters are visible at the same
+; time, with Goenitz moving right and Kagura left from the edges of the screen.
+Cutscene_MoveLargeChars:
+
+	; This must be manually enabled
+	ld   a, [wCutMoveLargeChars]
 	and  a, a
 	ret  z
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
+	
+	; If we reached the target position of $50 already, return.
+	ld   a, [wOBJInfo_Kagura+iOBJInfo_X]
 	cp   $50
 	ret  z
-	ld   h, a
-	ld   a, [wOBJInfo_Pl1+iOBJInfo_XSub]
+	
+	;
+	; Move Kagura left at $00.10px/frame.
+	; This is in the sprite layer, so moving left accomplishes just that.
+	;
+
+	; H = Kagura X Pos
+	ld   h, a						
+	; L = Kagura Y Pos
+	ld   a, [wOBJInfo_Kagura+iOBJInfo_XSub]	; L = Sub Pos
 	ld   l, a
-	ld   de, hScreenSect0BGP
+	
+	; Move left by -$00.10
+	ld   de, -$0010
 	add  hl, de
+	
+	; Save the updated value back
 	ld   a, h
-	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
+	ld   [wOBJInfo_Kagura+iOBJInfo_X], a
 	ld   a, l
-	ld   [wOBJInfo_Pl1+iOBJInfo_XSub], a
+	ld   [wOBJInfo_Kagura+iOBJInfo_XSub], a
+	
+	
+	;
+	; Move Goenitz right at $00.10px/frame.
+	; Because Goenitz is part of the BG layer, this is done by moving the viewport to the left.
+	;
+	
+	; HL = Goenitz X Pos
 	ldh  a, [hScrollX]
 	ld   h, a
 	ldh  a, [hScrollXSub]
 	ld   l, a
+	
+	; Scroll viewport left by -$00.10
 	add  hl, de
+	
+	; Save the updated value back
 	ld   a, h
 	ldh  [hScrollX], a
 	ld   a, l
 	ldh  [hScrollXSub], a
 	ret
-L1D6CEC:;CI
-	ld   de, hTaskStats
+	
+; =============== Cutscene_ScrollUp ===============
+; Scrolls the screen up at $00.40px/frame, until the target is reached.
+; This is used to move Goenitz down to display his hand in his escape/death anim.
+Cutscene_ScrollUp:
+	; DE = Movement speed
+	ld   de, -$0040
+	
+	; If we reached the target position already, return
 	ldh  a, [hScrollY]
 	cp   $E0
 	ret  z
+	
+	; hScrollY += -$0040
 	ld   h, a
 	ldh  a, [hScrollYSub]
 	ld   l, a
@@ -7856,652 +8581,953 @@ L1D6CEC:;CI
 	ld   a, l
 	ldh  [hScrollYSub], a
 	ret
-L1D6D00:;I
-	call L1D71DE
+	
+; =============== SubModule_Ending_SacredTreasures ===============
+; Special ending after defeating Goenitz with Iori, Kyo and Chizuru in the team.	
+SubModule_Ending_SacredTreasures:
+	call Cutscene_SharedInit
+	
+	; Top section collapsed
 	ld   a, $00
 	ld   b, $5C
 	call SetSectLYC
-	call L1D6A97
-	call L1D6AC3
-	ld   a, $FB
+	
+	; Show defeated Goenitz in the tilemap
+	call Cutscene_LoadGoenitzBG
+	call Cutscene_LoadGoenitzDefeatedBG
+	
+	; Move viewport up so Goenitz is aligned to the end of the sector.
+	ld   a, -$05
 	ldh  [hScrollY], a
-	call L1D684D
+	
+	call Cutscene_ResumeLCDWithLYC
+	
+	; Don't do any effects.
+	; Goenitz stays fixed at the center of the screen.
 	xor  a
-	ld   [wLZSS_Buffer], a
-	ld   [$C1CB], a
+	ld   [wCutMoveLargeChars], a
+	ld   [wCutFlashTimer], a
+	
+	; Wait for start of the frame before continuing
 	ei
 	call Task_PassControl_Delay09
+	
+	; Set Goenitz palette
 	ld   a, $6C
 	ldh  [rBGP], a
 	ldh  [hScreenSect1BGP], a
+	
+	; Set text sector palette
 	ld   a, $13
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect2BGP], a
-	ld   a, $8B
+	
+	
+	; Play ending cutscene music
+	ld   a, BGM_TOTHESKY
 	call HomeCall_Sound_ReqPlayExId_Stub
+	
+	;
+	; TEXT PRINTING
+	;
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-	ld   hl, $7730
-	call L1D6861
-	ld   hl, $7756
-	call L1D6861
-	ld   hl, $775C
-	call L1D6861
+	ld   hl, TextC_Ending_SacredTreasures0
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_Ending_SacredTreasures1
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_Ending_SacredTreasures2
+	call Cutscene_WriteTextBank1D
+	
+	;
+	; FLASH EFFECT
+	;
+	
+	; White out screen
 	xor  a
-	ldh  [rBGP], a
+	ldh  [rBGP], a				; Fully white palette
 	ldh  [hScreenSect1BGP], a
-	ld   a, $80
+	ld   a, $80					; Scroll Goenitz off-screen
 	ldh  [hScrollY], a
+	
+	; Set up flashing
 	ld   a, $01
-	ld   [$C1CB], a
-	ld   a, BANK(L1D6A77)
+	ld   [wCutFlashTimer], a
+	ld   a, BANK(Cutscene_FlashBGPal)
 	ld   [wTextPrintFrameCodeBank], a
 	ld   hl, wTextPrintFrameCodePtr_Low
-	ld   [hl], LOW(L1D6A77)
+	ld   [hl], LOW(Cutscene_FlashBGPal)
 	inc  hl
-	ld   [hl], HIGH(L1D6A77)
-	ld   hl, $776A
-	call L1D6861
+	ld   [hl], HIGH(Cutscene_FlashBGPal)
+	
+	; Print this while flashing
+	ld   hl, TextC_Ending_SacredTreasures3
+	call Cutscene_WriteTextBank1D
+	
+	; Stop flashing
 	xor  a
-	ld   [$C1CB], a
+	ld   [wCutFlashTimer], a
 	call Task_PassControl_NoDelay
+	
+	;
+	; DISPLAY TEAM MEMBERS
+	;
+	
+	; Black out palette before load.
+	; This is required to hide that graphics are loading of graphics while the display is enabled.
+	; Why doing that? If display were disabled, the screen would flash white while doing this.
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [hScreenSect1BGP], a
 	ldh  [rOBP0], a
+	
+	; Wait for next frame
 	call Task_PassControl_NoDelay
 	di
-	rst  $10
+	;-----------------------------------
+	rst  $10				; Stop LCD
+	
+	; Scroll screen to top left
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
+	
+	; Delete Goenitz
 	call ClearBGMap
-	call L1D6FD7
+	
+	; Display team members
+	call Cutscene_InitChars
 	ei
-	ld   a, $E7
-	rst  $18
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
+	
+	; Wait a bit
 	call Task_PassControl_Delay09
-	call L1D7159
+	
+	; Set up palettes, etc...
+	call Cutscene_InitCharMisc
+	
+	;
+	; Print all of the screens of text.
+	;
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-	ld   hl, $7775
-	call L1D6861
-	ld   hl, $779D
-	call L1D6861
-	ld   hl, $77B9
-	call L1D6861
-	ld   hl, $77D8
-	call L1D6861
-	ld   hl, $7808
-	call L1D6861
-	ld   hl, $783B
-	call L1D6861
-	ld   hl, $786E
-	call L1D6861
-	ld   hl, $7899
-	call L1D6861
-	ld   hl, $78C4
-	call L1D6861
-	ld   hl, $78F1
-	call L1D6861
-	ld   hl, $7901
-	call L1D6861
-	ld   hl, $7915
-	call L1D6861
-	jp   L1D6811
-L1D6DE4:;I
-	call L1D71DE
+	ld   hl, TextC_Ending_SacredTreasures4
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_Ending_SacredTreasures5
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_Ending_SacredTreasures6
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_Ending_SacredTreasures7
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_Ending_SacredTreasures8
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_Ending_SacredTreasures9
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_Ending_SacredTreasuresA
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_Ending_SacredTreasuresB
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_Ending_SacredTreasuresC
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_Ending_SacredTreasuresD
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_Ending_SacredTreasuresE
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_Ending_SacredTreasuresF
+	call Cutscene_WriteTextBank1D
+	
+	jp   Cutscene_End
+	
+; =============== SubModule_Ending_OLeona ===============
+; Special ending after defeating Goenitz with Leona, Iori, and Mature in the team.		
+SubModule_Ending_OLeona:;I
+
+	call Cutscene_SharedInit
+	
+	; Top section collapsed
 	ld   a, $00
 	ld   b, $5C
 	call SetSectLYC
-	call L1D6A97
-	call L1D6AC3
-	ld   a, $FB
+	
+	; Show defeated Goenitz in the tilemap
+	call Cutscene_LoadGoenitzBG
+	call Cutscene_LoadGoenitzDefeatedBG
+	
+	; Move viewport up so Goenitz is aligned to the end of the sector.
+	ld   a, -$05
 	ldh  [hScrollY], a
-	call L1D684D
+	
+	call Cutscene_ResumeLCDWithLYC
+	
+	; Don't do any effects.
+	; Goenitz stays fixed at the center of the screen.
 	xor  a
-	ld   [wLZSS_Buffer], a
-	ld   [$C1CB], a
+	ld   [wCutMoveLargeChars], a
+	ld   [wCutFlashTimer], a
+	
+	; Wait for start of the frame before continuing
 	ei
 	call Task_PassControl_Delay09
+	
+	; Set Goenitz palette
 	ld   a, $6C
 	ldh  [rBGP], a
 	ldh  [hScreenSect1BGP], a
 	ldh  [rOBP0], a
+	
+	; Set text sector palette
 	ld   a, $13
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect2BGP], a
-	ld   a, $8B
+	
+	
+	; Play ending cutscene music
+	ld   a, BGM_TOTHESKY
 	call HomeCall_Sound_ReqPlayExId_Stub
+	
+	;
+	; TEXT PRINTING
+	;
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-	ld   hl, $79BF
-	call L1D6861
-	ld   hl, $79F1
-	call L1D6861
-	ld   hl, $7A13
-	call L1D6861
-	ld   hl, $7A49
-	call L1D6861
-	ld   hl, $7A58
-	call L1D6861
-	ld   hl, $7A86
-	call L1D6861
-	ld   hl, $7AAC
-	call L1D6861
-	ld   hl, $7BE2
-	call L1D6857
-	call L1D6BB3
+	ld   hl, TextC_Ending_OLeona0
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_Ending_OLeona1
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_Ending_OLeona2
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_Ending_OLeona3
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_Ending_OLeona4
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_Ending_OLeona5
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_Ending_OLeona6
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_Ending_Generic5 ; TextC_Ending_OLeona7
+	call Cutscene_WriteTextBank1C
+	
+	; Goenitz flies away with the palette flash, like the normal ending
+	call Ending_GoenitzLeave
 	call Task_PassControl_NoDelay
+	
+	;
+	; DISPLAY TEAM MEMBERS
+	;
+	
+	; Black out palette before load.
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect1BGP], a
 	ldh  [hScreenSect2BGP], a
 	ldh  [rOBP0], a
+	
+	; Wait for next frame
 	call Task_PassControl_NoDelay
 	di
-	rst  $10
+	;-----------------------------------
+	rst  $10				; Stop LCD
+	
+	; Delete Goenitz
 	call ClearBGMap
+	
+	; Scroll screen to top left
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
-	call L1D6FD7
+	
+	; Display team members
+	call Cutscene_InitChars
 	ei
-	ld   a, $E7
-	rst  $18
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
+	
+	; Wait a bit
 	call Task_PassControl_Delay04
-	call L1D7159
+	
+	; Set up palettes, etc...
+	call Cutscene_InitCharMisc
+	
+	; Disable flash
 	xor  a
-	ld   [$C1CB], a
+	ld   [wCutFlashTimer], a
+	
+	;
+	; Print all of the screens of text.
+	;
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-	ld   hl, $7AD2
-	call L1D6861
-	ld   hl, $7AE9
-	call L1D6861
-	jp   L1D6811
-L1D6E92:;I
-	call L1D71DE
+	ld   hl, TextC_Ending_OLeona8
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_Ending_OLeona9
+	call Cutscene_WriteTextBank1D
+	
+	jp   Cutscene_End
+	
+; =============== SubModule_EndingPost_FFGeese ===============
+; Special post ending scene after defeating Goenitz with Terry, Andy and Geese in the team.
+; All of the EndingPost_* cutscenes are set on the team display screen.
+SubModule_EndingPost_FFGeese:
+	call Cutscene_SharedInit
+	
+	; Top section collapsed
 	ld   a, $00
 	ld   b, $5C
 	call SetSectLYC
-	call L1D6FD7
-	call L1D684D
+	
+	; Display team members
+	call Cutscene_InitChars
+	
+	call Cutscene_ResumeLCDWithLYC
+	
+	; No special effects
 	xor  a
-	ld   [wLZSS_Buffer], a
-	ld   [$C1CB], a
+	ld   [wCutMoveLargeChars], a
+	ld   [wCutFlashTimer], a
 	ei
+	
+	; Wait a bit before showing anything
 	call Task_PassControl_Delay09
-	call L1D7159
+	
+	; Set up palettes, etc...
+	call Cutscene_InitCharMisc
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-	ld   hl, $7CE0
-	call L1D6861
-	ld   hl, $7CF8
-	call L1D6861
-	jp   L1D6811
-L1D6EC4:;I
-	call L1D71DE
+	
+	; Print out the special text
+	ld   hl, TextC_EndingPost_FFGeese0
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_EndingPost_FFGeese1
+	call Cutscene_WriteTextBank1D
+	
+	jp   Cutscene_End
+
+; =============== SubModule_EndingPost_AOFMrBig ===============
+; Special post ending scene after defeating Goenitz with Ryo, Robert and Mr.Big in the team.	
+SubModule_EndingPost_AOFMrBig:
+	call Cutscene_SharedInit
+	
+	; Top section collapsed
 	ld   a, $00
 	ld   b, $5C
 	call SetSectLYC
-	call L1D6FD7
-	call L1D684D
+	
+	; Display team members
+	call Cutscene_InitChars
+	
+	call Cutscene_ResumeLCDWithLYC
+	
+	; No special effects
 	xor  a
-	ld   [wLZSS_Buffer], a
-	ld   [$C1CB], a
+	ld   [wCutMoveLargeChars], a
+	ld   [wCutFlashTimer], a
 	ei
+	
+	; Wait a bit before showing anything
 	call Task_PassControl_Delay09
-	call L1D7159
+	
+	; Set up palettes, etc...
+	call Cutscene_InitCharMisc
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-	ld   hl, $7D14
-	call L1D6861
-	ld   hl, $7D31
-	call L1D6861
-	jp   L1D6811
-L1D6EF6:;I
-	call L1D71DE
+	
+	; Print out the special text
+	ld   hl, TextC_EndingPost_AOFMrBig0
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_EndingPost_AOFMrBig1
+	call Cutscene_WriteTextBank1D
+	jp   Cutscene_End
+
+; =============== SubModule_EndingPost_KTR ===============
+; Special post ending scene after defeating Goenitz with Kyo, Terry and Ryo in the team.	
+SubModule_EndingPost_KTR:
+	call Cutscene_SharedInit
+	
+	; Top section collapsed
 	ld   a, $00
 	ld   b, $5C
 	call SetSectLYC
-	call L1D6FD7
-	call L1D684D
+	
+	; Display team members
+	call Cutscene_InitChars
+	
+	call Cutscene_ResumeLCDWithLYC
+	
+	; No special effects
 	xor  a
-	ld   [wLZSS_Buffer], a
-	ld   [$C1CB], a
+	ld   [wCutMoveLargeChars], a
+	ld   [wCutFlashTimer], a
 	ei
+	
+	; Wait a bit before showing anything
 	call Task_PassControl_Delay09
-	call L1D7159
+	
+	; Set up palettes, etc...
+	call Cutscene_InitCharMisc
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-	ld   hl, $7D3D
-	call L1D6861
-	jp   L1D6811
-L1D6F22:;I
-	call L1D71DE
+	
+	; Print out the special text
+	ld   hl, TextC_EndingPost_KTR0
+	call Cutscene_WriteTextBank1D
+	jp   Cutscene_End
+	
+; =============== SubModule_EndingPost_Boss ===============
+; Special post ending scene after defeating Goenitz with Geese, Krauser and Mr.Big in the team.	
+SubModule_EndingPost_Boss:
+	call Cutscene_SharedInit
+	
+	; Top section collapsed
 	ld   a, $00
 	ld   b, $5C
 	call SetSectLYC
-	call L1D6FD7
-	call L1D684D
+	
+	; Display team members
+	call Cutscene_InitChars
+	
+	call Cutscene_ResumeLCDWithLYC
+	
+	; No special effects
 	xor  a
-	ld   [wLZSS_Buffer], a
-	ld   [$C1CB], a
+	ld   [wCutMoveLargeChars], a
+	ld   [wCutFlashTimer], a
 	ei
+	
+	; Wait a bit before showing anything
 	call Task_PassControl_Delay09
-	call L1D7159
+	
+	; Set up palettes, etc...
+	call Cutscene_InitCharMisc
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-	ld   hl, $7922
-	call L1D6861
-	ld   hl, $793A
-	call L1D6861
-	ld   hl, $7954
-	call L1D6861
-	ld   hl, $795C
-	call L1D6861
-	ld   hl, $7993
-	call L1D6861
-	ld   hl, $79B1
-	call L1D6861
-	jp   L1D6811
-L1D6F6C:;I
-	call L1D71DE
+	
+	; Print out the special text
+	ld   hl, TextC_EndingPost_Boss0
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_EndingPost_Boss1
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_EndingPost_Boss2
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_EndingPost_Boss3
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_EndingPost_Boss4
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_EndingPost_Boss5
+	call Cutscene_WriteTextBank1D
+	jp   Cutscene_End
+	
+; =============== SubModule_EndingPost_Boss ===============
+; Post-credits scene displayed in NORMAL mode.
+SubModule_CutsceneCheat:
+	call Cutscene_SharedInit
+	
+	; The text is printed into the WINDOW layer.
+	; Move it down a bit to vertically center the text.
 	ld   a, $20
 	ldh  [rWY], a
-	ld   a, $E7
-	rst  $18
+	
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
+	
+	; No special effect
 	xor  a
-	ld   [wLZSS_Buffer], a
-	ld   [$C1CB], a
+	ld   [wCutMoveLargeChars], a
+	ld   [wCutFlashTimer], a
+	
+	; Wait, then set text palette
 	ei
 	call Task_PassControl_NoDelay
 	ld   a, $03
 	ldh  [rBGP], a
+	
+	; Print out the instructions, while playing SGB SFX for each letter
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-	ld   hl, $7CF2
-	call L1D686B
-	jp   L1D6811
-L1D6F93:;I
-	call L1D71DE
-	ld   a, $18
-	ld   b, $5C
+	ld   hl, TextC_CheatList
+	call Cutscene_WriteTextBank1CSFX
+	
+	jp   Cutscene_End
+	
+; =============== SubModule_CutsceneMrKarate ===============
+; Post-credits scene displayed in HARD mode.	
+SubModule_CutsceneMrKarate:
+	call Cutscene_SharedInit
+	
+	; Enable sectors
+	ld   a, $18	; Middle sector starts here
+	ld   b, $5C ; Ends here
 	call SetSectLYC
+	
+	;
+	; Load Mr.Karate to wOBJInfo_Pl1 and place it at the center of the middle sector.
+	;
+	
+	; Reload player sprite mapping
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	ld   de, OBJInfoInit_Pl1
 	call OBJLstS_InitFrom
-	ld   hl, $7149
-	call L1D70A8
-	call L1D684D
+	; Setup properties (position, etc...) from an hardcoded entry
+	ld   hl, Cutscene_CharAnimTbl.mrKarate
+	call Cutscene_InitCharOBJLst
+	
+	call Cutscene_ResumeLCDWithLYC
+	
+	; No text effects
 	xor  a
-	ld   [wLZSS_Buffer], a
-	ld   [$C1CB], a
+	ld   [wCutMoveLargeChars], a
+	ld   [wCutFlashTimer], a
 	ei
+	
+	; Wait frame then load char display palettes, etc...
 	call Task_PassControl_Delay09
-	call L1D7159
+	call Cutscene_InitCharMisc
+	
+	;
+	; TEXT PRINTING
+	;
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-	ld   hl, $7B09
-	call L1D6861
-	ld   hl, $7B31
-	call L1D6861
-	ld   hl, $7B64
-	call L1D6861
-	jp   L1D6811
-L1D6FD7:;C
-	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
+	ld   hl, TextC_CutsceneMrKarate0
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_CutsceneMrKarate1
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_CutsceneMrKarate2
+	call Cutscene_WriteTextBank1D
+	
+	jp   Cutscene_End
+	
+; =============== Cutscene_InitChars ===============
+; Initializes the player characters when cutscenes want to display team members.
+; This is very similar to WinScr_InitChars, and calls some code from that bank too.
+Cutscene_InitChars:
+	;
+	; Initialize the sprite mapping for the player at the center of the screen.
+	; Note that even though it uses sprites, the player at the center is *not* animated
+	; unlike the win screen.
+	;
+	ld   hl, wOBJInfo_Winner
 	ld   de, OBJInfoInit_Pl1
 	call OBJLstS_InitFrom
-	ld   a, [wUnknownTimer_C1B3]
+	
+	; BC = Ptr to winner wPlInfo
+	ld   a, [wWinPlInfoPtr_Low]
 	ld   c, a
-	ld   a, [wUnknown_C1B4]
+	ld   a, [wWinPlInfoPtr_High]
 	ld   b, a
+	
+	;
+	; Initialize and use wOBJInfo_Winner to display the sprite of the winner.
+	; Both 1P and 2P use this slot in the win screen.
+	;
 	push bc
-	ld   hl, $002C
-	add  hl, bc
-	ld   d, $00
-	ld   e, [hl]
-	sla  e
-	rl   d
-	ld   hl, $7109
-	add  hl, de
+	
+		;
+		; Index the table that assigns animations for every character.
+		; Each entry in this table is 4 bytes long, so:
+		;
+		
+		; DE = iPlInfo_CharId * 2
+		ld   hl, iPlInfo_CharId
+		add  hl, bc		; Seek to iPlInfo_CharId
+		ld   d, $00		; DE = iPlInfo_CharId
+		ld   e, [hl]
+		sla  e			; DE << 1
+		rl   d
+		; Index the table
+		; HL = Ptr to animation table entry
+		ld   hl, Cutscene_CharAnimTbl
+		add  hl, de
+		
 	pop  bc
 	push bc
-	call L1D70A8
-	ld   b, $1E
-	ld   hl, $6937
-	rst  $08
+		;
+		; Set the animation / update the sprite mapping.
+		;
+		call Cutscene_InitCharOBJLst
+		
+		; Load the block of compressed character GFX to the LZSS buffer
+		ld   b, BANK(OrdSel_DecompressCharGFX) ; BANK $1E
+		ld   hl, OrdSel_DecompressCharGFX
+		rst  $08
 	pop  bc
-	ld   hl, $002D
+	
+	;
+	; Draw the other team members to the tilemap, if applicable.
+	;
+	
+	;
+	; The game doesn't reorder the character slots for team members (iPlInfo_TeamCharId*),
+	; so depending on how many team members lost, pick different character slots.
+	;
+	; Note these aren't consistent with the order of character icons in the team, but who cares.
+	;
+	ld   hl, iPlInfo_TeamLossCount
 	add  hl, bc
 	ld   a, [hl]
-	cp   $01
-	jr   z, L1D703E
-	cp   $02
-	jr   z, L1D706B
-	ld   hl, $002F
-	add  hl, bc
-	ld   a, [hl]
-	cp   $FF
-	jr   z, L1D7029
-	ld   de, $8800
+	cp   $01		; Did 1 member lose?
+	jr   z, .loss1	; If so, jump
+	cp   $02		; Did 2 members lose?
+	jr   z, .loss2	; If so, jump
+	; Otherwise, no members lost
+	
+; =============== mCutDrawSecChar ===============
+; Generates code to draw the other team members to the tilemap.
+; IN
+; - 1: Field for the character on the left
+; - 2: Field for the character on the right
+mCutDrawSecChar: MACRO
+	;
+	; Draw the character on the left facing right.
+	;
+	ld   hl, \1
+	add  hl, bc			; Seek to team char id
+	ld   a, [hl]		; A = CharId
+	cp   CHAR_ID_NONE	; Is there any character on this slot?
+	jr   z, .drawR_\@	; If not, skip
+	
+	; Otherwise, draw it
+	ld   de, $8800		; DE = Destination ptr for char GFX
 	push bc
-	ld   c, a
-	ld   b, $1E
-	ld   hl, $68D2
-	rst  $08
-	call L1D70A1
+		ld   c, a					; C = CharId
+		;##
+		ld   b, BANK(OrdSel_LoadCharGFX1P) ; BANK $1E
+		ld   hl, OrdSel_LoadCharGFX1P
+		rst  $08					; Copy them to DE, horizontally flipped
+		;##
+		call .copyCharBG_L	; Update the tilemap
 	pop  bc
-L1D7029:;R
-	ld   hl, $0030
-	add  hl, bc
-	ld   a, [hl]
-	cp   $FF
-	jr   z, L1D70A7
-	ld   de, $8920
-	ld   c, a
-	ld   b, $1E
-	ld   hl, $68E5
-	rst  $08
-	jr   L1D7096
-L1D703E:;R
-	ld   hl, $002E
-	add  hl, bc
-	ld   a, [hl]
-	cp   $FF
-	jr   z, L1D7056
-	ld   de, $8800
-	push bc
-	ld   c, a
-	ld   b, $1E
-	ld   hl, $68D2
-	rst  $08
-	call L1D70A1
-	pop  bc
-L1D7056:
-	ld   hl, $0030
-	add  hl, bc
-	ld   a, [hl]
-	cp   $FF
-	jr   z, L1D70A7
-	ld   de, $8920
-	ld   c, a
-	ld   b, $1E
-	ld   hl, $68E5
-	rst  $08
-	jr   L1D7096
-L1D706B: db $21;X
-L1D706C: db $2E;X
-L1D706D: db $00;X
-L1D706E: db $09;X
-L1D706F: db $7E;X
-L1D7070: db $FE;X
-L1D7071: db $FF;X
-L1D7072: db $28;X
-L1D7073: db $0F;X
-L1D7074: db $11;X
-L1D7075: db $00;X
-L1D7076: db $88;X
-L1D7077: db $C5;X
-L1D7078: db $4F;X
-L1D7079: db $06;X
-L1D707A: db $1E;X
-L1D707B: db $21;X
-L1D707C: db $D2;X
-L1D707D: db $68;X
-L1D707E: db $CF;X
-L1D707F: db $CD;X
-L1D7080: db $A1;X
-L1D7081: db $70;X
-L1D7082: db $C1;X
-L1D7083: db $21;X
-L1D7084: db $2F;X
-L1D7085: db $00;X
-L1D7086: db $09;X
-L1D7087: db $7E;X
-L1D7088: db $FE;X
-L1D7089: db $FF;X
-L1D708A: db $28;X
-L1D708B: db $1B;X
-L1D708C: db $11;X
-L1D708D: db $20;X
-L1D708E: db $89;X
-L1D708F: db $4F;X
-L1D7090: db $06;X
-L1D7091: db $1E;X
-L1D7092: db $21;X
-L1D7093: db $E5;X
-L1D7094: db $68;X
-L1D7095: db $CF;X
-L1D7096:;R
-	ld   hl, $988E
-	ld   de, $70F7
-	ld   a, $92
-	jp   L1D70DA
-L1D70A1:;C
-	ld   hl, $9883
-	call L1D70D5
-L1D70A7:;R
+.drawR_\@:
+	;
+	; Draw the character on the right facing left.
+	;
+	ld   hl, \2
+	add  hl, bc			; Seek to team char id
+	ld   a, [hl]		; A = CharId
+	cp   CHAR_ID_NONE	; Is there any character on this slot?
+	jr   z, .ret		; If not, return (this never happens, there are no 2-character teams)
+	; Otherwise, draw it
+	ld   de, $8920		; DE = Destination ptr for char GFX
+	ld   c, a			; C = CharId
+	;##
+	ld   b, BANK(OrdSel_LoadCharGFX2P) ; BANK $1E
+	ld   hl, OrdSel_LoadCharGFX2P
+	rst  $08					; Copy them to DE
+	;##
+	; Fall-through to .copyCharBG_R
+ENDM
+	
+.loss0:
+	; With no losses, draw the team members in their normal order
+	mCutDrawSecChar iPlInfo_TeamCharId1, iPlInfo_TeamCharId2
+	jr   .copyCharBG_R
+.loss1:
+	; With 1 loss, iPlInfo_TeamCharId0 and iPlInfo_TeamCharId1 get switched 
+	mCutDrawSecChar iPlInfo_TeamCharId0, iPlInfo_TeamCharId2
+	jr   .copyCharBG_R
+.loss2:
+	; With 2 losses, iPlInfo_TeamCharId2 pushes both back
+	mCutDrawSecChar iPlInfo_TeamCharId0, iPlInfo_TeamCharId1
+	; Fall-through
+	
+; =============== .copyCharBG_R ===============
+; Writes the tilemap for the team member on the right, facing left.
+.copyCharBG_R:
+	ld   hl, $988E				; Destination ptr to tilemap
+	ld   de, BG_Cutscene_Char2P	; Ptr to uncompressed tilemap
+	ld   a, $92					; Tile ID base offset
+	jp   Cutscene_CopyCharBG
+; =============== .copyCharBG_L ===============
+; Writes the tilemap for the team member on the left, facing right.
+.copyCharBG_L:
+	ld   hl, $9883		; Destination ptr to tilemap
+	call Cutscene_CopyCharBG_1P0
+.ret:
 	ret
-L1D70A8:;C
+	
+; =============== Cutscene_InitCharOBJLst ===============
+; Updates wOBJInfo_Winner with the specified animation data.	
+; Almost identical to the sprite mapping update code from WinScr_InitChars.
+; IN
+; - HL: Ptr to Cutscene_CharAnimTbl entry (4 byte entries, same format as WinScr_CharAnimTbl)
+Cutscene_InitCharOBJLst:
+	; Move the ptr to BC
 	push hl
 	pop  bc
-	ld   de, wOBJInfo_Pl1+iOBJInfo_Status
-	ld   a, $90
+	
+	;##
+	; (this is the only different part)
+	;
+	; Show the sprite mapping and loop the first frame indefinitely
+	ld   de, wOBJInfo_Winner+iOBJInfo_Status
+	ld   a, OST_ANIMEND|OST_VISIBLE
 	ld   [de], a
-	ld   hl, $0010
+	;##
+	
+	; Copy over the animation info from the previously indexed table entry
+	ld   hl, iOBJInfo_BankNum
 	add  hl, de
-	ld   a, [bc]
-	ldi  [hl], a
+	ld   a, [bc]	; Read byte0
+	ldi  [hl], a	; Copy it to iOBJInfo_BankNum
 	inc  bc
-	ld   a, [bc]
-	ldi  [hl], a
+	ld   a, [bc]	; Read byte1
+	ldi  [hl], a	; Copy it to iOBJInfo_OBJLstPtrTbl_Low
 	inc  bc
-	ld   a, [bc]
-	ldi  [hl], a
+	ld   a, [bc]	; Read byte2
+	ldi  [hl], a	; Copy it to iOBJInfo_OBJLstPtrTbl_High
 	inc  bc
 	xor  a
-	ld   [hl], a
-	ld   hl, $0003
+	ld   [hl], a	; Restart animation (iOBJInfo_OBJLstPtrTblOffset = 0)
+
+	; Center the sprite
+	ld   hl, iOBJInfo_X
 	add  hl, de
-	ld   a, $50
+	ld   a, $50		; X Position $50
 	ldi  [hl], a
 	inc  hl
-	ld   [hl], $20
-	ld   hl, $001B
+	ld   [hl], $20	; Y Position $20
+	
+	; Update the animation speed from the last byte of the entry
+	ld   hl, iOBJInfo_FrameLeft
 	add  hl, de
-	ld   a, [bc]
-	ldi  [hl], a
-	ld   [hl], a
+	ld   a, [bc]	; Read byte3
+	ldi  [hl], a	; Copy it to iOBJInfo_FrameLeft
+	ld   [hl], a	; Copy it to iOBJInfo_FrameTotal
+	
 	push de
 	pop  hl
 	jp   OBJLstS_DoAnimTiming_Initial
-L1D70D5:;C
+	
+; =============== Cutscene_CopyCharBG_* ===============
+; These are copied from the respective code in Module_OrdSel.
+
+; =============== Cutscene_CopyCharBG_1P0 ===============
+; Writes the tilemap for the leftmost 1P characters.
+; See also: OrdSel_CopyCharBG_1P0
+; IN
+; - HL: Destination ptr in VRAM	
+Cutscene_CopyCharBG_1P0:
 	ld   a, $80
-	ld   de, $70E5
-L1D70DA:;J
-	ld   b, $03
-	ld   c, $06
+	; Fall-through
+	
+; =============== OrdSel_CopyCharBG_1P ===============
+; Writes the tilemap for a 1P character.
+; IN
+; - A: Tile ID base offset
+; - HL: Destination ptr in VRAM
+Cutscene_CopyCharBG_1P:
+	ld   de, BG_Cutscene_Char1P
+	; Fall-through
+	
+; =============== Cutscene_CopyCharBG ===============
+; Writes the tilemap for a character to VRAM.
+; IN
+; - DE: Ptr to uncompressed tilemap
+; - HL: Destination Ptr in VRAM
+; - A: Tile ID base offset
+Cutscene_CopyCharBG:
+	ld   b, $03		; B = Rect Width
+	ld   c, $06		; C = Rect Height
 	jp   CopyBGToRectWithBase
-L1D70E1: db $3E;X
-L1D70E2: db $92;X
-L1D70E3: db $18;X
-L1D70E4: db $F2;X
-L1D70E5: db $02
-L1D70E6: db $01
-L1D70E7: db $00
-L1D70E8: db $05
-L1D70E9: db $04
-L1D70EA: db $03
-L1D70EB: db $08
-L1D70EC: db $07
-L1D70ED: db $06
-L1D70EE: db $0B
-L1D70EF: db $0A
-L1D70F0: db $09
-L1D70F1: db $0E
-L1D70F2: db $0D
-L1D70F3: db $0C
-L1D70F4: db $11
-L1D70F5: db $10
-L1D70F6: db $0F
-L1D70F7: db $00
-L1D70F8: db $01
-L1D70F9: db $02
-L1D70FA: db $03
-L1D70FB: db $04
-L1D70FC: db $05
-L1D70FD: db $06
-L1D70FE: db $07
-L1D70FF: db $08
-L1D7100: db $09
-L1D7101: db $0A
-L1D7102: db $0B
-L1D7103: db $0C
-L1D7104: db $0D
-L1D7105: db $0E
-L1D7106: db $0F
-L1D7107: db $10
-L1D7108: db $11
-L1D7109: db $07
-L1D710A: db $00
-L1D710B: db $40
-L1D710C: db $00
-L1D710D: db $09;X
-L1D710E: db $00;X
-L1D710F: db $40;X
-L1D7110: db $00;X
-L1D7111: db $09
-L1D7112: db $F6
-L1D7113: db $4D
-L1D7114: db $00
-L1D7115: db $08
-L1D7116: db $00
-L1D7117: db $40
-L1D7118: db $00
-L1D7119: db $0A
-L1D711A: db $00
-L1D711B: db $40
-L1D711C: db $00
-L1D711D: db $07;X
-L1D711E: db $B7;X
-L1D711F: db $52;X
-L1D7120: db $00;X
-L1D7121: db $08;X
-L1D7122: db $A3;X
-L1D7123: db $4F;X
-L1D7124: db $00;X
-L1D7125: db $08;X
-L1D7126: db $BA;X
-L1D7127: db $5F;X
-L1D7128: db $00;X
-L1D7129: db $0A;X
-L1D712A: db $F3;X
-L1D712B: db $5B;X
-L1D712C: db $00;X
-L1D712D: db $07
-L1D712E: db $54
-L1D712F: db $61
-L1D7130: db $00
-L1D7131: db $09;X
-L1D7132: db $A3;X
-L1D7133: db $5A;X
-L1D7134: db $00;X
-L1D7135: db $07
-L1D7136: db $0D
-L1D7137: db $70
-L1D7138: db $00
-L1D7139: db $05
-L1D713A: db $00
-L1D713B: db $40
-L1D713C: db $00
-L1D713D: db $09
-L1D713E: db $C3
-L1D713F: db $67
-L1D7140: db $00
-L1D7141: db $05;X
-L1D7142: db $DB;X
-L1D7143: db $52;X
-L1D7144: db $00;X
-L1D7145: db $08;X
-L1D7146: db $30;X
-L1D7147: db $6F;X
-L1D7148: db $00;X
-L1D7149: db $0A
-L1D714A: db $EA
-L1D714B: db $44
-L1D714C: db $00
-L1D714D: db $05
-L1D714E: db $12
-L1D714F: db $40
-L1D7150: db $00
-L1D7151: db $0A;X
-L1D7152: db $05;X
-L1D7153: db $5C;X
-L1D7154: db $00;X
-L1D7155: db $05;X
-L1D7156: db $DB;X
-L1D7157: db $52;X
-L1D7158: db $00;X
-L1D7159:;C
+	
+; =============== Cutscene_Unused_CopyCharBG_1P1 ===============
+; [TCRF] Unreferenced copied code.
+; Writes the tilemap for the 1P character in the middle.
+; - HL: Destination ptr in VRAM
+Cutscene_Unused_CopyCharBG_1P1:
+	ld   a, $92
+	jr   Cutscene_CopyCharBG_1P
+
+; =============== BG_Cutscene_Char*P ===============
+; Normal tilemaps with relative tile IDs, shared across characters.
+; Identical to ordsel version.
+BG_Cutscene_Char1P: INCBIN "data/bg/ordsel_char1p.bin"
+BG_Cutscene_Char2P: INCBIN "data/bg/ordsel_char2p.bin"
+
+; =============== Cutscene_CharAnimTbl ===============
+; This table assigns every character to its own animation, used when the
+; team member in the middle is displayed.
+; Note that only the first frame of these animations will be played.
+; See also: WinScr_CharAnimTbl
+Cutscene_CharAnimTbl:
+	; CHAR_ID_KYO
+	dp L074000 ; BANK $07
+	db $00
+
+	; CHAR_ID_DAIMON
+	dp L094000 ; BANK $09
+	db $00
+
+	; CHAR_ID_TERRY
+	dp L094DF6 ; BANK $09
+	db $00
+
+	; CHAR_ID_ANDY
+	dp L084000 ; BANK $08
+	db $00
+
+	; CHAR_ID_RYO
+	dp L0A4000 ; BANK $0A
+	db $00
+
+	; CHAR_ID_ROBERT
+	dp L0752B7 ; BANK $07
+	db $00
+
+	; CHAR_ID_ATHENA
+	dp L084FA3 ; BANK $08
+	db $00
+
+	; CHAR_ID_MAI
+	dp L085FBA ; BANK $08
+	db $00
+
+	; CHAR_ID_LEONA
+	dp L0A5BF3 ; BANK $0A
+	db $00
+
+	; CHAR_ID_GEESE
+	dp L076154 ; BANK $07
+	db $00
+
+	; CHAR_ID_KRAUSER
+	dp L095AA3 ; BANK $09
+	db $00
+
+	; CHAR_ID_MRBIG
+	dp L07700D ; BANK $07
+	db $00
+
+	; CHAR_ID_IORI
+	dp L054000 ; BANK $05
+	db $00
+
+	; CHAR_ID_MATURE
+	dp L0967C3 ; BANK $09
+	db $00
+
+	; CHAR_ID_CHIZURU
+	dp L0552DB ; BANK $05
+	db $00
+
+	; CHAR_ID_GOENITZ
+	dp L086F30 ; BANK $08
+	db $00
+.mrKarate:
+	; CHAR_ID_MRKARATE
+	dp L0A44EA ; BANK $0A
+	db $00
+
+	; CHAR_ID_OIORI
+	dp L054012 ; BANK $05
+	db $00
+
+	; CHAR_ID_OLEONA
+	dp L0A5C05 ; BANK $0A
+	db $00
+
+	; CHAR_ID_KAGURA
+	dp L0552DB ; BANK $05
+	db $00
+
+; =============== Cutscene_InitCharMisc ===============
+; Initializes miscellaneous data when displaying team members.
+Cutscene_InitCharMisc:
+	; Set center sector palette
 	ld   a, $8C
 	ldh  [rOBP0], a
 	ld   a, $2D
 	ldh  [rBGP], a
 	ldh  [hScreenSect1BGP], a
+	
+	; Set top/text sector palette
 	ld   a, $13
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect2BGP], a
+	
+	; The player at the center of the screen is slightly above the two other ones
 	ld   a, $20
-	ld   [wOBJInfo_Pl1+iOBJInfo_Y], a
-	ld   a, $9F
+	ld   [wOBJInfo_Winner+iOBJInfo_Y], a
+	
+	; Set pre-fight cutscene music
+	ld   a, BGM_MRKARATECUTSCENE
 	call HomeCall_Sound_ReqPlayExId_Stub
+	
+	; Wait frame
 	jp   Task_PassControl_NoDelay
-L1D7176:;I
-	call L1D71DE
-	ld   a, $18
-	ld   b, $5C
+	
+; =============== SubModule_CutsceneMrKarateDefeat ===============
+; Cutscene displayed after defeating the extra Mr.Karate stage.
+SubModule_CutsceneMrKarateDefeat:
+	call Cutscene_SharedInit
+	
+	; Enable sectors
+	ld   a, $18	; Middle sector starts here
+	ld   b, $5C ; Ends here
 	call SetSectLYC
+	
+	;
+	; Load Mr.Karate to wOBJInfo_Pl1 and place it at the center of the middle sector.
+	;
+	
+	; Reload player sprite mapping
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	ld   de, OBJInfoInit_Pl1
 	call OBJLstS_InitFrom
-	ld   hl, $7149
-	call L1D70A8
-	call L1D684D
+	; Setup properties (position, etc...) from an hardcoded entry
+	ld   hl, Cutscene_CharAnimTbl.mrKarate
+	call Cutscene_InitCharOBJLst
+	
+	call Cutscene_ResumeLCDWithLYC
+	
+	; No text effects
 	xor  a
-	ld   [wLZSS_Buffer], a
-	ld   [$C1CB], a
+	ld   [wCutMoveLargeChars], a
+	ld   [wCutFlashTimer], a
 	ei
+	
+	; Wait frame then load char display palettes, etc...
 	call Task_PassControl_Delay09
-	call L1D7159
+	call Cutscene_InitCharMisc
+	
+	;
+	; TEXT PRINTING
+	;
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-	ld   hl, $7B97
-	call L1D6861
-	ld   hl, $7BC6
-	call L1D6861
-	ld   hl, $7BE1
-	call L1D6861
-	ld   hl, $7C12
-	call L1D6861
-	ld   hl, $7C20
-	call L1D6861
-	ld   hl, $7C50
-	call L1D6861
-	ld   hl, $7C73
-	call L1D6861
-	ld   hl, $7C8C
-	call L1D6861
-	ld   hl, $7CB7
-	call L1D6861
-	jp   L1D6811
-L1D71DE:;C
-	ld   a, $E7
-	rst  $18
+	ld   hl, TextC_CutsceneMrKarateDefeat0
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_CutsceneMrKarateDefeat1
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_CutsceneMrKarateDefeat2
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_CutsceneMrKarateDefeat3
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_CutsceneMrKarateDefeat4
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_CutsceneMrKarateDefeat5
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_CutsceneMrKarateDefeat6
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_CutsceneMrKarateDefeat7
+	call Cutscene_WriteTextBank1D
+	ld   hl, TextC_CutsceneMrKarateDefeat8
+	call Cutscene_WriteTextBank1D
+	
+	jp   Cutscene_End
+	
+; =============== Cutscene_SharedInit ===============
+; Initialization code common between all cutscenes.
+Cutscene_SharedInit:
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
 	ei
+	; Reset all palettes
 	ld   a, $FF
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
@@ -8509,2584 +9535,870 @@ L1D71DE:;C
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect1BGP], a
 	ldh  [hScreenSect2BGP], a
+	; Wait frame show the changes
 	call Task_PassControl_NoDelay
 	di
-	rst  $10
+	;-----------------------------------
+	rst  $10				; Stop LCD
+	
+	; Cutscenes aren't gameplay
 	ld   hl, wMisc_C028
-	res  1, [hl]
+	res  MISCB_PL_RANGE_CHECK, [hl]
+	
+	; Reuse the SGB palette from the Intro, which is also visually setup in screen sections like cutscenes
 	ld   de, SCRPAL_INTRO
 	call HomeCall_SGB_ApplyScreenPalSet
+	
+	; Clear the tilemap
 	call ClearBGMap
 	call ClearWINDOWMap
+	
+	; Reset screen scroll to top left
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
 	ld   [wOBJScrollX], a
 	ld   [wOBJScrollY], a
+	
+	; Load standard font
 	call LoadGFX_1bppFont_Default
+	
+	; Delete all sprites
 	call ClearOBJInfo
-	ld   a, $5C
+	
+	; Move the WINDOW layer on the bottom of the screen, exactly where the text should start.
+	; Because of how screen sections enable/disable the WINDOW layer, the value of rWY should 
+	; match what's passed to SetSectLYC.
+	; The actual call to SetSectLYC is done after the subroutine returns, by the code which calls this,
+	; since while the third sector always starts at $5C, the top/center ones have variable height.
+	ld   a, $5C		; This is the same value
 	ldh  [rWY], a
 	ld   a, $0F
 	ldh  [rWX], a
 	ret
-L1D7220:;I
+	
+; =============== SubModule_Credits ===============
+; Displays the credits, shared across all difficulties.
+SubModule_Credits:
 	di
-	rst  $10
+	;-----------------------------------
+	rst  $10				; Stop LCD
+	
+	; We're not in gameplay
 	ld   hl, wMisc_C028
-	res  1, [hl]
+	res  MISCB_PL_RANGE_CHECK, [hl]
+	
+	; Clear DMG palettes
 	xor  a
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
+	
+	; Set new SGB palette
 	ld   de, SCRPAL_INTRO
 	call HomeCall_SGB_ApplyScreenPalSet
+	
+	; Clear tilemaps
 	call ClearBGMap
 	call ClearWINDOWMap
+	
+	; Reset scrolling to top left
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
 	ld   [wOBJScrollX], a
 	ld   [wOBJScrollY], a
+	
+	; Load standard font
 	call LoadGFX_1bppFont_Default
+	
+	; Delete all sprite mappings
 	call ClearOBJInfo
-	ld   a, $C7
-	rst  $18
+	
+	; Disable sectors
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
 	ei
+	
+	; Wait start of next frame before setting palettes, to avoid tearing
 	call Task_PassControl_NoDelay
+	
+	; Set actual DMG pals
 	ld   a, $3F
 	ldh  [rOBP0], a
 	ld   a, $00
 	ldh  [rOBP1], a
 	ld   a, $1B
 	ldh  [rBGP], a
-	ld   a, $85
+	
+	ld   a, BGM_RISINGRED
 	call HomeCall_Sound_ReqPlayExId_Stub
-	ld   hl, $744B
+	
+	;
+	; Print all screens of text in one go.
+	; When all text for a screen is printed, wait for a bit before continuing.
+	;
+	
+	; 0
+	ld   hl, TextDef_Credits0_0
 	call TextPrinter_Instant
 	ld   b, $04
-	call L1D742C
-	ld   hl, $7455
+	call Cutscene_ClearBG_Delay1D8
+	
+	; 1
+	ld   hl, TextDef_Credits1_0
 	call TextPrinter_Instant
-	ld   hl, $746C
-	call TextPrinter_Instant
-	ld   b, $08
-	call L1D742C
-	ld   hl, $747D
-	call TextPrinter_Instant
-	ld   hl, $748A
-	call TextPrinter_Instant
-	ld   hl, $749E
-	call TextPrinter_Instant
-	ld   hl, $74B0
+	ld   hl, TextDef_Credits1_1
 	call TextPrinter_Instant
 	ld   b, $08
-	call L1D742C
-	ld   hl, $74BC
+	call Cutscene_ClearBG_Delay1D8
+	
+	; 2
+	ld   hl, TextDef_Credits2_0
 	call TextPrinter_Instant
-	ld   hl, $74C9
+	ld   hl, TextDef_Credits2_1
 	call TextPrinter_Instant
-	ld   b, $08
-	call L1D742C
-	ld   hl, $74DD
+	ld   hl, TextDef_Credits2_2
 	call TextPrinter_Instant
-	ld   hl, $74ED
-	call TextPrinter_Instant
-	ld   hl, $74F8
+	ld   hl, TextDef_Credits2_3
 	call TextPrinter_Instant
 	ld   b, $08
-	call L1D742C
-	ld   hl, $7502
+	call Cutscene_ClearBG_Delay1D8
+	
+	; 3
+	ld   hl, TextDef_Credits3_0
 	call TextPrinter_Instant
-	ld   hl, $7511
-	call TextPrinter_Instant
-	ld   hl, $751B
-	call TextPrinter_Instant
-	ld   b, $08
-	call L1D742C
-	ld   hl, $7527
-	call TextPrinter_Instant
-	ld   hl, $7534
-	call TextPrinter_Instant
-	ld   hl, $753F
-	call TextPrinter_Instant
-	ld   hl, $754A
+	ld   hl, TextDef_Credits3_1
 	call TextPrinter_Instant
 	ld   b, $08
-	call L1D742C
-	ld   hl, $7554
+	call Cutscene_ClearBG_Delay1D8
+	
+	; 4
+	ld   hl, TextDef_Credits4_0
 	call TextPrinter_Instant
-	ld   hl, $755F
+	ld   hl, TextDef_Credits4_1
 	call TextPrinter_Instant
-	ld   b, $08
-	call L1D742C
-	ld   hl, $75C0
-	call TextPrinter_Instant
-	ld   hl, $75D3
-	call TextPrinter_Instant
-	ld   hl, $75E3
+	ld   hl, TextDef_Credits4_2
 	call TextPrinter_Instant
 	ld   b, $08
-	call L1D742C
-	ld   hl, $7573
+	call Cutscene_ClearBG_Delay1D8
+	
+	; 5
+	ld   hl, TextDef_Credits5_0
 	call TextPrinter_Instant
-	ld   hl, $7587
+	ld   hl, TextDef_Credits5_1
 	call TextPrinter_Instant
-	ld   hl, $759B
-	call TextPrinter_Instant
-	ld   hl, $75AD
-	call TextPrinter_Instant
-	ld   b, $08
-	call L1D742C
-	ld   hl, $762F
-	call TextPrinter_Instant
-	ld   hl, $7642
-	call TextPrinter_Instant
-	ld   hl, $7651
-	call TextPrinter_Instant
-	ld   hl, $7663
-	call TextPrinter_Instant
-	ld   hl, $7675
-	call TextPrinter_Instant
-	ld   hl, $7686
-	call TextPrinter_Instant
-	ld   hl, $7697
-	call TextPrinter_Instant
-	ld   hl, $76AB
-	call TextPrinter_Instant
-	ld   hl, $76B1
-	call TextPrinter_Instant
-	ld   hl, $76C3
-	call TextPrinter_Instant
-	ld   hl, $76D4
-	call TextPrinter_Instant
-	ld   hl, $76E5
-	call TextPrinter_Instant
-	ld   hl, $76F5
-	call TextPrinter_Instant
-	ld   hl, $7704
-	call TextPrinter_Instant
-	ld   hl, $7712
+	ld   hl, TextDef_Credits5_2
 	call TextPrinter_Instant
 	ld   b, $08
-	call L1D742C
-	ld   hl, $75F4
+	call Cutscene_ClearBG_Delay1D8
+	
+	; 6
+	ld   hl, TextDef_Credits6_0
 	call TextPrinter_Instant
-	ld   hl, $7605
+	ld   hl, TextDef_Credits6_1
 	call TextPrinter_Instant
-	ld   b, $08
-	call L1D742C
-	ld   hl, $7615
+	ld   hl, TextDef_Credits6_2
 	call TextPrinter_Instant
-	ld   hl, $7621
-	call TextPrinter_Instant
-	ld   hl, $7626
+	ld   hl, TextDef_Credits6_3
 	call TextPrinter_Instant
 	ld   b, $08
-	call L1D742C
+	call Cutscene_ClearBG_Delay1D8
+	
+	; 7
+	ld   hl, TextDef_Credits7_0
+	call TextPrinter_Instant
+	ld   hl, TextDef_Credits7_1
+	call TextPrinter_Instant
+	ld   b, $08
+	call Cutscene_ClearBG_Delay1D8
+	
+	; 8
+	ld   hl, TextDef_Credits8_0
+	call TextPrinter_Instant
+	ld   hl, TextDef_Credits8_1
+	call TextPrinter_Instant
+	ld   hl, TextDef_Credits8_2
+	call TextPrinter_Instant
+	ld   b, $08
+	call Cutscene_ClearBG_Delay1D8
+	
+	; 9
+	ld   hl, TextDef_Credits9_0
+	call TextPrinter_Instant
+	ld   hl, TextDef_Credits9_1
+	call TextPrinter_Instant
+	ld   hl, TextDef_Credits9_2
+	call TextPrinter_Instant
+	ld   hl, TextDef_Credits9_3
+	call TextPrinter_Instant
+	ld   b, $08
+	call Cutscene_ClearBG_Delay1D8
+	
+	; A
+	ld   hl, TextDef_CreditsA_0
+	call TextPrinter_Instant
+	ld   hl, TextDef_CreditsA_1
+	call TextPrinter_Instant
+	ld   hl, TextDef_CreditsA_2
+	call TextPrinter_Instant
+	ld   hl, TextDef_CreditsA_3
+	call TextPrinter_Instant
+	ld   hl, TextDef_CreditsA_4
+	call TextPrinter_Instant
+	ld   hl, TextDef_CreditsA_5
+	call TextPrinter_Instant
+	ld   hl, TextDef_CreditsA_6
+	call TextPrinter_Instant
+	ld   hl, TextDef_CreditsA_7
+	call TextPrinter_Instant
+	ld   hl, TextDef_CreditsA_8
+	call TextPrinter_Instant
+	ld   hl, TextDef_CreditsA_9
+	call TextPrinter_Instant
+	ld   hl, TextDef_CreditsA_A
+	call TextPrinter_Instant
+	ld   hl, TextDef_CreditsA_B
+	call TextPrinter_Instant
+	ld   hl, TextDef_CreditsA_C
+	call TextPrinter_Instant
+	ld   hl, TextDef_CreditsA_D
+	call TextPrinter_Instant
+	ld   hl, TextDef_CreditsA_E
+	call TextPrinter_Instant
+	ld   b, $08
+	call Cutscene_ClearBG_Delay1D8
+	
+	; B
+	ld   hl, TextDef_CreditsB_0
+	call TextPrinter_Instant
+	ld   hl, TextDef_CreditsB_1
+	call TextPrinter_Instant
+	ld   b, $08
+	call Cutscene_ClearBG_Delay1D8
+	
+	; C
+	ld   hl, TextDef_CreditsC_0
+	call TextPrinter_Instant
+	ld   hl, TextDef_CreditsC_1
+	call TextPrinter_Instant
+	ld   hl, TextDef_CreditsC_2
+	call TextPrinter_Instant
+	ld   b, $08
+	call Cutscene_ClearBG_Delay1D8
+	
 	ret
-L1D73C5:;I
+	
+; =============== SubModule_TheEnd ===============
+; Displays "THE END" on the screen.
+SubModule_TheEnd:
+
+	;
+	; Initialization code almost identical to SubModule_Credits, only difference
+	; is that it doesn't set a SGB palette.
+	;
 	di
-	rst  $10
+	;-----------------------------------
+	rst  $10				; Stop LCD
+	
+	; We're not in gameplay
 	ld   hl, wMisc_C028
-	res  1, [hl]
+	res  MISCB_PL_RANGE_CHECK, [hl]
+	
+	; Clear DMG palettes
 	xor  a
 	ldh  [rBGP], a
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
+	
+	; Clear tilemaps
 	call ClearBGMap
 	call ClearWINDOWMap
+	
+	; Reset scrolling to top left
 	xor  a
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
 	ld   [wOBJScrollX], a
 	ld   [wOBJScrollY], a
+	
+	; Load standard font
 	call LoadGFX_1bppFont_Default
+	
+	; Delete all sprite mappings
 	call ClearOBJInfo
-	ld   a, $C7
-	rst  $18
+	
+	; Disable sectors
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
 	ei
+	
+	; Wait start of next frame before setting palettes, to avoid tearing
 	call Task_PassControl_NoDelay
+	
+	; Set actual DMG pals
 	ld   a, $3F
 	ldh  [rOBP0], a
 	ld   a, $00
 	ldh  [rOBP1], a
 	ld   a, $1B
 	ldh  [rBGP], a
-	ld   hl, $7725
+	
+	; THE END
+	ld   hl, TextDef_TheEnd
 	call TextPrinter_Instant
-	ld   a, $00
+	
+	; Stop all sound
+	ld   a, SND_MUTE
 	call HomeCall_Sound_ReqPlayExId_Stub
+	
+	; Wait 590 frames before returning
 	ld   b, $0A
-L1D740A:;J
+.loop:
 	call Task_PassControl_Delay3B
 	dec  b
-	jp   nz, L1D740A
+	jp   nz, .loop
+	
 	jp   ClearBGMap
-L1D7414:;J
-	call L1D6CC2
-	call L1D6A77
-	call L1D7439
-	jr   nc, L1D7423
+	
+; =============== Cutscene_PostTextWrite ===============
+; Shared code executed after text finishes writing for a cutscene.
+; This delays the cutscene from continuing, while handling animations,
+; until the timer elapses or START is pressed.
+; IN
+; - B: Max number of frames to wait
+; OUT
+; - C flag: If set, it was aborted early
+Cutscene_PostTextWrite:
+	
+	;
+	; These are the two subroutines that were previously used by wTextPrintFrameCodePtr
+	; to be executed while printing text. Their effect should also continue here.
+	;
+	; Even though only one effect can be active at a time when printing text, this
+	; subroutine is shared, so it had to call both of them.
+	; This is partially why there are flags to enable each individual effect, it's
+	; to avoid having them both execute here.
+	; 
+	call Cutscene_MoveLargeChars
+	call Cutscene_FlashBGPal
+	
+	; Check early abort
+	call Cutscene_IsStartPressed	; Did anyone press START?
+	jr   nc, .contWait				; If not, jump
+.abort:
+	; Wait frame, this also preserves C flag
 	call Task_PassControl_NoDelay
-	ret
-L1D7423:;R
+	ret		; C flag set
+.contWait:
+	; Wait frame
 	call Task_PassControl_NoDelay
-	dec  b
-	jp   nz, L1D7414
-	xor  a
+	dec  b							; Are we done?
+	jp   nz, Cutscene_PostTextWrite	; If not, loop
+.end:
+	xor  a	; C flag clear
 	ret
-L1D742C:;C
-	ld   b, $08
-L1D742E:;J
+	
+; =============== Cutscene_ClearBG_Delay1D8 ===============
+; Waits for $1D8 frames and then clears the BG tilemap, which clears the middle section.
+Cutscene_ClearBG_Delay1D8:
+	ld   b, $08	; For 8 times...
+.loop:
+	; Wait $3B frames
 	call Task_PassControl_Delay3B
 	dec  b
-	jp   nz, L1D742E
+	jp   nz, .loop
+	; Clear middle section (Goenitz, characters)
 	call ClearBGMap
 	ret
-L1D7439:;C
+	
+	
+; =============== Cutscene_IsStartPressed ===============
+; Checks if any player pressed START.
+; Identical to Win_IsStartPressed.
+; OUT
+; - C flag: If set, someone did
+Cutscene_IsStartPressed:
+	; If any player presses START, return set
 	ldh  a, [hJoyNewKeys]
-	bit  7, a
-	jp   nz, L1D7449
+	bit  KEYB_START, a
+	jp   nz, .abort
 	ldh  a, [hJoyNewKeys2]
-	bit  7, a
-	jp   nz, L1D7449
+	bit  KEYB_START, a
+	jp   nz, .abort
+	; Otherwise, return clear
 	xor  a
 	ret
-L1D7449:;J
+.abort:
 	scf
 	ret
-L1D744B: db $06
-L1D744C: db $99
-L1D744D: db $07
-L1D744E: db $2D
-L1D744F: db $53
-L1D7450: db $54
-L1D7451: db $41
-L1D7452: db $46
-L1D7453: db $46
-L1D7454: db $2D
-L1D7455: db $C0
-L1D7456: db $98
-L1D7457: db $14
-L1D7458: db $2D
-L1D7459: db $45
-L1D745A: db $58
-L1D745B: db $45
-L1D745C: db $43
-L1D745D: db $55
-L1D745E: db $54
-L1D745F: db $49
-L1D7460: db $56
-L1D7461: db $45
-L1D7462: db $20
-L1D7463: db $50
-L1D7464: db $52
-L1D7465: db $4F
-L1D7466: db $44
-L1D7467: db $55
-L1D7468: db $43
-L1D7469: db $45
-L1D746A: db $52
-L1D746B: db $2D
-L1D746C: db $43
-L1D746D: db $99
-L1D746E: db $0E
-L1D746F: db $48
-L1D7470: db $49
-L1D7471: db $52
-L1D7472: db $4F
-L1D7473: db $48
-L1D7474: db $49
-L1D7475: db $53
-L1D7476: db $41
-L1D7477: db $20
-L1D7478: db $53
-L1D7479: db $41
-L1D747A: db $54
-L1D747B: db $4F
-L1D747C: db $48
-L1D747D: db $A5
-L1D747E: db $98
-L1D747F: db $0A
-L1D7480: db $2D
-L1D7481: db $50
-L1D7482: db $52
-L1D7483: db $4F
-L1D7484: db $44
-L1D7485: db $55
-L1D7486: db $43
-L1D7487: db $45
-L1D7488: db $52
-L1D7489: db $2D
-L1D748A: db $01
-L1D748B: db $99
-L1D748C: db $11
-L1D748D: db $4D
-L1D748E: db $41
-L1D748F: db $53
-L1D7490: db $41
-L1D7491: db $48
-L1D7492: db $49
-L1D7493: db $52
-L1D7494: db $4F
-L1D7495: db $20
-L1D7496: db $4D
-L1D7497: db $4F
-L1D7498: db $52
-L1D7499: db $49
-L1D749A: db $4B
-L1D749B: db $41
-L1D749C: db $57
-L1D749D: db $41
-L1D749E: db $42
-L1D749F: db $99
-L1D74A0: db $0F
-L1D74A1: db $54
-L1D74A2: db $41
-L1D74A3: db $4B
-L1D74A4: db $41
-L1D74A5: db $59
-L1D74A6: db $55
-L1D74A7: db $4B
-L1D74A8: db $49
-L1D74A9: db $20
-L1D74AA: db $4E
-L1D74AB: db $41
-L1D74AC: db $4B
-L1D74AD: db $41
-L1D74AE: db $4E
-L1D74AF: db $4F
-L1D74B0: db $85
-L1D74B1: db $99
-L1D74B2: db $09
-L1D74B3: db $54
-L1D74B4: db $2E
-L1D74B5: db $49
-L1D74B6: db $53
-L1D74B7: db $48
-L1D74B8: db $49
-L1D74B9: db $47
-L1D74BA: db $41
-L1D74BB: db $49
-L1D74BC: db $C5
-L1D74BD: db $98
-L1D74BE: db $0A
-L1D74BF: db $2D
-L1D74C0: db $44
-L1D74C1: db $49
-L1D74C2: db $52
-L1D74C3: db $45
-L1D74C4: db $43
-L1D74C5: db $54
-L1D74C6: db $4F
-L1D74C7: db $52
-L1D74C8: db $2D
-L1D74C9: db $21
-L1D74CA: db $99
-L1D74CB: db $11
-L1D74CC: db $48
-L1D74CD: db $49
-L1D74CE: db $52
-L1D74CF: db $4F
-L1D74D0: db $46
-L1D74D1: db $55
-L1D74D2: db $4D
-L1D74D3: db $49
-L1D74D4: db $20
-L1D74D5: db $4B
-L1D74D6: db $41
-L1D74D7: db $53
-L1D74D8: db $41
-L1D74D9: db $4B
-L1D74DA: db $41
-L1D74DB: db $57
-L1D74DC: db $41
-L1D74DD: db $C3
-L1D74DE: db $98
-L1D74DF: db $0D
-L1D74E0: db $2D
-L1D74E1: db $41
-L1D74E2: db $52
-L1D74E3: db $52
-L1D74E4: db $41
-L1D74E5: db $4E
-L1D74E6: db $47
-L1D74E7: db $45
-L1D74E8: db $4D
-L1D74E9: db $45
-L1D74EA: db $4E
-L1D74EB: db $54
-L1D74EC: db $2D
-L1D74ED: db $25
-L1D74EE: db $99
-L1D74EF: db $08
-L1D74F0: db $54
-L1D74F1: db $2E
-L1D74F2: db $53
-L1D74F3: db $41
-L1D74F4: db $49
-L1D74F5: db $54
-L1D74F6: db $4F
-L1D74F7: db $48
-L1D74F8: db $65
-L1D74F9: db $99
-L1D74FA: db $07
-L1D74FB: db $48
-L1D74FC: db $2E
-L1D74FD: db $4B
-L1D74FE: db $4F
-L1D74FF: db $49
-L1D7500: db $53
-L1D7501: db $4F
-L1D7502: db $C4
-L1D7503: db $98
-L1D7504: db $0C
-L1D7505: db $2D
-L1D7506: db $50
-L1D7507: db $52
-L1D7508: db $4F
-L1D7509: db $47
-L1D750A: db $52
-L1D750B: db $41
-L1D750C: db $4D
-L1D750D: db $4D
-L1D750E: db $45
-L1D750F: db $52
-L1D7510: db $2D
-L1D7511: db $26
-L1D7512: db $99
-L1D7513: db $07
-L1D7514: db $48
-L1D7515: db $2E
-L1D7516: db $4B
-L1D7517: db $4F
-L1D7518: db $49
-L1D7519: db $53
-L1D751A: db $4F
-L1D751B: db $65
-L1D751C: db $99
-L1D751D: db $09
-L1D751E: db $54
-L1D751F: db $2E
-L1D7520: db $49
-L1D7521: db $53
-L1D7522: db $48
-L1D7523: db $49
-L1D7524: db $47
-L1D7525: db $41
-L1D7526: db $49
-L1D7527: db $A5
-L1D7528: db $98
-L1D7529: db $0A
-L1D752A: db $2D
-L1D752B: db $44
-L1D752C: db $45
-L1D752D: db $53
-L1D752E: db $49
-L1D752F: db $47
-L1D7530: db $4E
-L1D7531: db $45
-L1D7532: db $52
-L1D7533: db $2D
-L1D7534: db $06
-L1D7535: db $99
-L1D7536: db $08
-L1D7537: db $54
-L1D7538: db $2E
-L1D7539: db $53
-L1D753A: db $41
-L1D753B: db $49
-L1D753C: db $54
-L1D753D: db $4F
-L1D753E: db $55
-L1D753F: db $46
-L1D7540: db $99
-L1D7541: db $08
-L1D7542: db $41
-L1D7543: db $2E
-L1D7544: db $54
-L1D7545: db $55
-L1D7546: db $59
-L1D7547: db $55
-L1D7548: db $4B
-L1D7549: db $49
-L1D754A: db $86
-L1D754B: db $99
-L1D754C: db $07
-L1D754D: db $41
-L1D754E: db $2E
-L1D754F: db $48
-L1D7550: db $41
-L1D7551: db $4E
-L1D7552: db $44
-L1D7553: db $41
-L1D7554: db $C5
-L1D7555: db $98
-L1D7556: db $08
-L1D7557: db $4D
-L1D7558: db $55
-L1D7559: db $53
-L1D755A: db $49
-L1D755B: db $43
-L1D755C: db $20
-L1D755D: db $42
-L1D755E: db $59
-L1D755F: db $21
-L1D7560: db $99
-L1D7561: db $11
-L1D7562: db $53
-L1D7563: db $54
-L1D7564: db $55
-L1D7565: db $44
-L1D7566: db $49
-L1D7567: db $4F
-L1D7568: db $20
-L1D7569: db $50
-L1D756A: db $4A
-L1D756B: db $20
-L1D756C: db $43
-L1D756D: db $4F
-L1D756E: db $2E
-L1D756F: db $2C
-L1D7570: db $4C
-L1D7571: db $54
-L1D7572: db $44
-L1D7573: db $A1
-L1D7574: db $98
-L1D7575: db $11
-L1D7576: db $2D
-L1D7577: db $53
-L1D7578: db $55
-L1D7579: db $50
-L1D757A: db $45
-L1D757B: db $52
-L1D757C: db $20
-L1D757D: db $4D
-L1D757E: db $41
-L1D757F: db $52
-L1D7580: db $4B
-L1D7581: db $45
-L1D7582: db $54
-L1D7583: db $54
-L1D7584: db $45
-L1D7585: db $52
-L1D7586: db $2D
-L1D7587: db $02
-L1D7588: db $99
-L1D7589: db $11
-L1D758A: db $54
-L1D758B: db $4F
-L1D758C: db $53
-L1D758D: db $48
-L1D758E: db $49
-L1D758F: db $48
-L1D7590: db $49
-L1D7591: db $52
-L1D7592: db $4F
-L1D7593: db $20
-L1D7594: db $4D
-L1D7595: db $4F
-L1D7596: db $52
-L1D7597: db $49
-L1D7598: db $4F
-L1D7599: db $4B
-L1D759A: db $41
-L1D759B: db $42
-L1D759C: db $99
-L1D759D: db $0F
-L1D759E: db $4B
-L1D759F: db $41
-L1D75A0: db $54
-L1D75A1: db $55
-L1D75A2: db $59
-L1D75A3: db $41
-L1D75A4: db $20
-L1D75A5: db $54
-L1D75A6: db $4F
-L1D75A7: db $52
-L1D75A8: db $49
-L1D75A9: db $48
-L1D75AA: db $41
-L1D75AB: db $4D
-L1D75AC: db $41
-L1D75AD: db $82
-L1D75AE: db $99
-L1D75AF: db $10
-L1D75B0: db $4D
-L1D75B1: db $41
-L1D75B2: db $53
-L1D75B3: db $41
-L1D75B4: db $48
-L1D75B5: db $49
-L1D75B6: db $52
-L1D75B7: db $4F
-L1D75B8: db $20
-L1D75B9: db $49
-L1D75BA: db $57
-L1D75BB: db $41
-L1D75BC: db $53
-L1D75BD: db $41
-L1D75BE: db $4B
-L1D75BF: db $49
-L1D75C0: db $C2
-L1D75C1: db $98
-L1D75C2: db $10
-L1D75C3: db $2D
-L1D75C4: db $41
-L1D75C5: db $52
-L1D75C6: db $54
-L1D75C7: db $57
-L1D75C8: db $4F
-L1D75C9: db $52
-L1D75CA: db $4B
-L1D75CB: db $20
-L1D75CC: db $44
-L1D75CD: db $45
-L1D75CE: db $53
-L1D75CF: db $49
-L1D75D0: db $47
-L1D75D1: db $4E
-L1D75D2: db $2D
-L1D75D3: db $23
-L1D75D4: db $99
-L1D75D5: db $0D
-L1D75D6: db $44
-L1D75D7: db $45
-L1D75D8: db $53
-L1D75D9: db $49
-L1D75DA: db $47
-L1D75DB: db $4E
-L1D75DC: db $20
-L1D75DD: db $4F
-L1D75DE: db $46
-L1D75DF: db $46
-L1D75E0: db $49
-L1D75E1: db $43
-L1D75E2: db $45
-L1D75E3: db $63
-L1D75E4: db $99
-L1D75E5: db $0E
-L1D75E6: db $53
-L1D75E7: db $50
-L1D75E8: db $41
-L1D75E9: db $43
-L1D75EA: db $45
-L1D75EB: db $20
-L1D75EC: db $4C
-L1D75ED: db $41
-L1D75EE: db $50
-L1D75EF: db $20
-L1D75F0: db $49
-L1D75F1: db $4E
-L1D75F2: db $43
-L1D75F3: db $2E
-L1D75F4: db $A3
-L1D75F5: db $98
-L1D75F6: db $0E
-L1D75F7: db $53
-L1D75F8: db $50
-L1D75F9: db $45
-L1D75FA: db $43
-L1D75FB: db $49
-L1D75FC: db $41
-L1D75FD: db $4C
-L1D75FE: db $20
-L1D75FF: db $54
-L1D7600: db $48
-L1D7601: db $41
-L1D7602: db $4E
-L1D7603: db $4B
-L1D7604: db $53
-L1D7605: db $23
-L1D7606: db $99
-L1D7607: db $0D
-L1D7608: db $53
-L1D7609: db $4E
-L1D760A: db $4B
-L1D760B: db $20
-L1D760C: db $41
-L1D760D: db $4C
-L1D760E: db $4C
-L1D760F: db $20
-L1D7610: db $53
-L1D7611: db $54
-L1D7612: db $41
-L1D7613: db $46
-L1D7614: db $46
-L1D7615: db $E6
-L1D7616: db $98
-L1D7617: db $09
-L1D7618: db $50
-L1D7619: db $52
-L1D761A: db $45
-L1D761B: db $53
-L1D761C: db $45
-L1D761D: db $4E
-L1D761E: db $54
-L1D761F: db $45
-L1D7620: db $44
-L1D7621: db $49
-L1D7622: db $99
-L1D7623: db $02
-L1D7624: db $42
-L1D7625: db $59
-L1D7626: db $87
-L1D7627: db $99
-L1D7628: db $06
-L1D7629: db $54
-L1D762A: db $41
-L1D762B: db $4B
-L1D762C: db $41
-L1D762D: db $52
-L1D762E: db $41
-L1D762F: db $21
-L1D7630: db $98
-L1D7631: db $10
-L1D7632: db $2D
-L1D7633: db $53
-L1D7634: db $50
-L1D7635: db $45
-L1D7636: db $43
-L1D7637: db $49
-L1D7638: db $41
-L1D7639: db $4C
-L1D763A: db $20
-L1D763B: db $54
-L1D763C: db $48
-L1D763D: db $41
-L1D763E: db $4E
-L1D763F: db $4B
-L1D7640: db $53
-L1D7641: db $2D
-L1D7642: db $62
-L1D7643: db $98
-L1D7644: db $0C
-L1D7645: db $54
-L1D7646: db $41
-L1D7647: db $54
-L1D7648: db $55
-L1D7649: db $59
-L1D764A: db $41
-L1D764B: db $20
-L1D764C: db $48
-L1D764D: db $4F
-L1D764E: db $43
-L1D764F: db $48
-L1D7650: db $4F
-L1D7651: db $82
-L1D7652: db $98
-L1D7653: db $0F
-L1D7654: db $53
-L1D7655: db $48
-L1D7656: db $55
-L1D7657: db $4E
-L1D7658: db $49
-L1D7659: db $43
-L1D765A: db $48
-L1D765B: db $49
-L1D765C: db $20
-L1D765D: db $4F
-L1D765E: db $48
-L1D765F: db $4B
-L1D7660: db $55
-L1D7661: db $53
-L1D7662: db $41
-L1D7663: db $A2
-L1D7664: db $98
-L1D7665: db $0F
-L1D7666: db $54
-L1D7667: db $41
-L1D7668: db $4B
-L1D7669: db $45
-L1D766A: db $53
-L1D766B: db $48
-L1D766C: db $49
-L1D766D: db $20
-L1D766E: db $49
-L1D766F: db $4B
-L1D7670: db $45
-L1D7671: db $4E
-L1D7672: db $4F
-L1D7673: db $55
-L1D7674: db $45
-L1D7675: db $C2
-L1D7676: db $98
-L1D7677: db $0E
-L1D7678: db $4E
-L1D7679: db $41
-L1D767A: db $4F
-L1D767B: db $59
-L1D767C: db $55
-L1D767D: db $4B
-L1D767E: db $49
-L1D767F: db $20
-L1D7680: db $54
-L1D7681: db $41
-L1D7682: db $4B
-L1D7683: db $41
-L1D7684: db $44
-L1D7685: db $41
-L1D7686: db $E2
-L1D7687: db $98
-L1D7688: db $0E
-L1D7689: db $41
-L1D768A: db $4B
-L1D768B: db $49
-L1D768C: db $48
-L1D768D: db $49
-L1D768E: db $4B
-L1D768F: db $4F
-L1D7690: db $20
-L1D7691: db $4B
-L1D7692: db $49
-L1D7693: db $4D
-L1D7694: db $55
-L1D7695: db $52
-L1D7696: db $41
-L1D7697: db $02
-L1D7698: db $99
-L1D7699: db $11
-L1D769A: db $4E
-L1D769B: db $4F
-L1D769C: db $52
-L1D769D: db $49
-L1D769E: db $48
-L1D769F: db $49
-L1D76A0: db $52
-L1D76A1: db $4F
-L1D76A2: db $20
-L1D76A3: db $48
-L1D76A4: db $41
-L1D76A5: db $59
-L1D76A6: db $41
-L1D76A7: db $53
-L1D76A8: db $41
-L1D76A9: db $4B
-L1D76AA: db $41
-L1D76AB: db $22
-L1D76AC: db $99
-L1D76AD: db $03
-L1D76AE: db $53
-L1D76AF: db $2E
-L1D76B0: db $48
-L1D76B1: db $42
-L1D76B2: db $99
-L1D76B3: db $0F
-L1D76B4: db $4D
-L1D76B5: db $49
-L1D76B6: db $54
-L1D76B7: db $53
-L1D76B8: db $55
-L1D76B9: db $4E
-L1D76BA: db $4F
-L1D76BB: db $52
-L1D76BC: db $49
-L1D76BD: db $20
-L1D76BE: db $53
-L1D76BF: db $48
-L1D76C0: db $4F
-L1D76C1: db $4A
-L1D76C2: db $49
-L1D76C3: db $62
-L1D76C4: db $99
-L1D76C5: db $0E
-L1D76C6: db $46
-L1D76C7: db $55
-L1D76C8: db $4D
-L1D76C9: db $49
-L1D76CA: db $48
-L1D76CB: db $49
-L1D76CC: db $4B
-L1D76CD: db $4F
-L1D76CE: db $20
-L1D76CF: db $4F
-L1D76D0: db $5A
-L1D76D1: db $41
-L1D76D2: db $57
-L1D76D3: db $41
-L1D76D4: db $82
-L1D76D5: db $99
-L1D76D6: db $0E
-L1D76D7: db $53
-L1D76D8: db $41
-L1D76D9: db $54
-L1D76DA: db $4F
-L1D76DB: db $53
-L1D76DC: db $48
-L1D76DD: db $49
-L1D76DE: db $20
-L1D76DF: db $4B
-L1D76E0: db $55
-L1D76E1: db $4D
-L1D76E2: db $41
-L1D76E3: db $54
-L1D76E4: db $41
-L1D76E5: db $A2
-L1D76E6: db $99
-L1D76E7: db $0D
-L1D76E8: db $54
-L1D76E9: db $41
-L1D76EA: db $54
-L1D76EB: db $53
-L1D76EC: db $55
-L1D76ED: db $59
-L1D76EE: db $41
-L1D76EF: db $20
-L1D76F0: db $59
-L1D76F1: db $41
-L1D76F2: db $55
-L1D76F3: db $52
-L1D76F4: db $41
-L1D76F5: db $C2
-L1D76F6: db $99
-L1D76F7: db $0C
-L1D76F8: db $54
-L1D76F9: db $45
-L1D76FA: db $54
-L1D76FB: db $53
-L1D76FC: db $55
-L1D76FD: db $59
-L1D76FE: db $41
-L1D76FF: db $20
-L1D7700: db $49
-L1D7701: db $49
-L1D7702: db $44
-L1D7703: db $41
-L1D7704: db $E2
-L1D7705: db $99
-L1D7706: db $0B
-L1D7707: db $54
-L1D7708: db $41
-L1D7709: db $4B
-L1D770A: db $41
-L1D770B: db $4F
-L1D770C: db $20
-L1D770D: db $53
-L1D770E: db $41
-L1D770F: db $54
-L1D7710: db $4F
-L1D7711: db $55
-L1D7712: db $02
-L1D7713: db $9A
-L1D7714: db $10
-L1D7715: db $4D
-L1D7716: db $55
-L1D7717: db $54
-L1D7718: db $53
-L1D7719: db $55
-L1D771A: db $4D
-L1D771B: db $49
-L1D771C: db $20
-L1D771D: db $4E
-L1D771E: db $41
-L1D771F: db $4B
-L1D7720: db $41
-L1D7721: db $4D
-L1D7722: db $55
-L1D7723: db $52
-L1D7724: db $41
-L1D7725: db $06
-L1D7726: db $99
-L1D7727: db $08
-L1D7728: db $54
-L1D7729: db $48
-L1D772A: db $45
-L1D772B: db $20
-L1D772C: db $20
-L1D772D: db $45
-L1D772E: db $4E
-L1D772F: db $44
-L1D7730: db $25
-L1D7731: db $BA
-L1D7732: db $DA
-L1D7733: db $CE
-L1D7734: db $C4
-L1D7735: db $DE
-L1D7736: db $C4
-L1D7737: db $CA
-L1D7738: db $A5
-L1D7739: db $A5
-L1D773A: db $A5
-L1D773B: db $A1
-L1D773C: db $FF
-L1D773D: db $FF
-L1D773E: db $BC
-L1D773F: db $B6
-L1D7740: db $BC
-L1D7741: db $A4
-L1D7742: db $BA
-L1D7743: db $DA
-L1D7744: db $C3
-L1D7745: db $DE
-L1D7746: db $B5
-L1D7747: db $BC
-L1D7748: db $CF
-L1D7749: db $B2
-L1D774A: db $C3
-L1D774B: db $DE
-L1D774C: db $CA
-L1D774D: db $FF
-L1D774E: db $FF
-L1D774F: db $B1
-L1D7750: db $D8
-L1D7751: db $CF
-L1D7752: db $BE
-L1D7753: db $DD
-L1D7754: db $A1
-L1D7755: db $FF
-L1D7756: db $05
-L1D7757: db $C1
-L1D7758: db $A8
-L1D7759: db $AF
-L1D775A: db $21
-L1D775B: db $FF
-L1D775C: db $0D
-L1D775D: db $B8
-L1D775E: db $D7
-L1D775F: db $B2
-L1D7760: db $D4
-L1D7761: db $B6
-L1D7762: db $DE
-L1D7763: db $DA
-L1D7764: db $B4
-L1D7765: db $B4
-L1D7766: db $B2
-L1D7767: db $AF
-L1D7768: db $21
-L1D7769: db $FF
-L1D776A: db $0A
-L1D776B: db $B8
-L1D776C: db $DE
-L1D776D: db $B1
-L1D776E: db $B1
-L1D776F: db $B1
-L1D7770: db $B1
-L1D7771: db $B1
-L1D7772: db $AF
-L1D7773: db $21
-L1D7774: db $FF
-L1D7775: db $27
-L1D7776: db $C5
-L1D7777: db $BE
-L1D7778: db $DE
-L1D7779: db $C0
-L1D777A: db $DE
-L1D777B: db $21
-L1D777C: db $3F
-L1D777D: db $20
-L1D777E: db $C5
-L1D777F: db $BE
-L1D7780: db $DE
-L1D7781: db $B1
-L1D7782: db $B6
-L1D7783: db $B2
-L1D7784: db $A5
-L1D7785: db $A5
-L1D7786: db $A5
-L1D7787: db $3F
-L1D7788: db $FF
-L1D7789: db $FF
-L1D778A: db $B5
-L1D778B: db $DA
-L1D778C: db $C9
-L1D778D: db $CE
-L1D778E: db $C9
-L1D778F: db $B3
-L1D7790: db $B6
-L1D7791: db $DE
-L1D7792: db $B1
-L1D7793: db $B6
-L1D7794: db $B2
-L1D7795: db $DC
-L1D7796: db $B9
-L1D7797: db $B6
-L1D7798: db $DE
-L1D7799: db $C5
-L1D779A: db $B2
-L1D779B: db $21
-L1D779C: db $FF
-L1D779D: db $1B
-L1D779E: db $CA
-L1D779F: db $D7
-L1D77A0: db $B3
-L1D77A1: db $D3
-L1D77A2: db $C9
-L1D77A3: db $A4
-L1D77A4: db $B8
-L1D77A5: db $BB
-L1D77A6: db $C5
-L1D77A7: db $B7
-L1D77A8: db $DE
-L1D77A9: db $FF
-L1D77AA: db $FF
-L1D77AB: db $CC
-L1D77AC: db $B3
-L1D77AD: db $BD
-L1D77AE: db $DE
-L1D77AF: db $D9
-L1D77B0: db $D3
-L1D77B1: db $C9
-L1D77B2: db $A4
-L1D77B3: db $D4
-L1D77B4: db $B6
-L1D77B5: db $DE
-L1D77B6: db $D0
-L1D77B7: db $A1
-L1D77B8: db $FF
-L1D77B9: db $1E
-L1D77BA: db $B1
-L1D77BB: db $C5
-L1D77BC: db $C5
-L1D77BD: db $C0
-L1D77BE: db $C1
-L1D77BF: db $CA
-L1D77C0: db $B2
-L1D77C1: db $CF
-L1D77C2: db $31
-L1D77C3: db $38
-L1D77C4: db $30
-L1D77C5: db $30
-L1D77C6: db $C8
-L1D77C7: db $DD
-L1D77C8: db $C9
-L1D77C9: db $C4
-L1D77CA: db $B7
-L1D77CB: db $A6
-L1D77CC: db $FF
-L1D77CD: db $FF
-L1D77CE: db $C5
-L1D77CF: db $BF
-L1D77D0: db $DE
-L1D77D1: db $D7
-L1D77D2: db $B4
-L1D77D3: db $C0
-L1D77D4: db $C9
-L1D77D5: db $D6
-L1D77D6: db $A1
-L1D77D7: db $FF
-L1D77D8: db $2F
-L1D77D9: db $63
-L1D77DA: db $6F
-L1D77DB: db $67
-L1D77DC: db $CA
-L1D77DD: db $D4
-L1D77DE: db $B6
-L1D77DF: db $DE
-L1D77E0: db $D0
-L1D77E1: db $C9
-L1D77E2: db $B1
-L1D77E3: db $B6
-L1D77E4: db $B2
-L1D77E5: db $CE
-L1D77E6: db $C9
-L1D77E7: db $B3
-L1D77E8: db $C3
-L1D77E9: db $DE
-L1D77EA: db $FF
-L1D77EB: db $FF
-L1D77EC: db $CC
-L1D77ED: db $B3
-L1D77EE: db $BC
-L1D77EF: db $DE
-L1D77F0: db $D7
-L1D77F1: db $DA
-L1D77F2: db $A4
-L1D77F3: db $B8
-L1D77F4: db $BB
-L1D77F5: db $C5
-L1D77F6: db $B7
-L1D77F7: db $DE
-L1D77F8: db $C6
-L1D77F9: db $D6
-L1D77FA: db $AF
-L1D77FB: db $C3
-L1D77FC: db $FF
-L1D77FD: db $FF
-L1D77FE: db $C5
-L1D77FF: db $B7
-L1D7800: db $DE
-L1D7801: db $CA
-L1D7802: db $D7
-L1D7803: db $DC
-L1D7804: db $DA
-L1D7805: db $C0
-L1D7806: db $A1
-L1D7807: db $FF
-L1D7808: db $32
-L1D7809: db $D4
-L1D780A: db $B6
-L1D780B: db $DE
-L1D780C: db $D0
-L1D780D: db $C9
-L1D780E: db $B1
-L1D780F: db $B6
-L1D7810: db $B7
-L1D7811: db $CE
-L1D7812: db $C9
-L1D7813: db $B3
-L1D7814: db $CA
-L1D7815: db $A4
-L1D7816: db $B1
-L1D7817: db $C5
-L1D7818: db $C0
-L1D7819: db $B6
-L1D781A: db $DE
-L1D781B: db $FF
-L1D781C: db $FF
-L1D781D: db $D3
-L1D781E: db $C2
-L1D781F: db $CB
-L1D7820: db $C4
-L1D7821: db $C9
-L1D7822: db $CC
-L1D7823: db $DE
-L1D7824: db $CC
-L1D7825: db $DE
-L1D7826: db $DD
-L1D7827: db $C9
-L1D7828: db $CE
-L1D7829: db $DD
-L1D782A: db $C9
-L1D782B: db $B3
-L1D782C: db $B6
-L1D782D: db $DE
-L1D782E: db $FF
-L1D782F: db $FF
-L1D7830: db $B3
-L1D7831: db $D0
-L1D7832: db $C0
-L1D7833: db $DE
-L1D7834: db $BC
-L1D7835: db $C0
-L1D7836: db $D3
-L1D7837: db $C9
-L1D7838: db $D6
-L1D7839: db $A1
-L1D783A: db $FF
-L1D783B: db $32
-L1D783C: db $B1
-L1D783D: db $C5
-L1D783E: db $C0
-L1D783F: db $B6
-L1D7840: db $DE
-L1D7841: db $B1
-L1D7842: db $D4
-L1D7843: db $C2
-L1D7844: db $D9
-L1D7845: db $B1
-L1D7846: db $B5
-L1D7847: db $B7
-L1D7848: db $CE
-L1D7849: db $C9
-L1D784A: db $B3
-L1D784B: db $A1
-L1D784C: db $FF
-L1D784D: db $FF
-L1D784E: db $BF
-L1D784F: db $DA
-L1D7850: db $CA
-L1D7851: db $B1
-L1D7852: db $C5
-L1D7853: db $C0
-L1D7854: db $C6
-L1D7855: db $C5
-L1D7856: db $B6
-L1D7857: db $DE
-L1D7858: db $DA
-L1D7859: db $D9
-L1D785A: db $63
-L1D785B: db $6F
-L1D785C: db $67
-L1D785D: db $C9
-L1D785E: db $FF
-L1D785F: db $FF
-L1D7860: db $C1
-L1D7861: db $B6
-L1D7862: db $D7
-L1D7863: db $B3
-L1D7864: db $CF
-L1D7865: db $DA
-L1D7866: db $D9
-L1D7867: db $D3
-L1D7868: db $C9
-L1D7869: db $A5
-L1D786A: db $A5
-L1D786B: db $A5
-L1D786C: db $A1
-L1D786D: db $FF
-L1D786E: db $2A
-L1D786F: db $B1
-L1D7870: db $C5
-L1D7871: db $C0
-L1D7872: db $C9
-L1D7873: db $B2
-L1D7874: db $C1
-L1D7875: db $BF
-L1D7876: db $DE
-L1D7877: db $B8
-L1D7878: db $B6
-L1D7879: db $DE
-L1D787A: db $FF
-L1D787B: db $FF
-L1D787C: db $C0
-L1D787D: db $DE
-L1D787E: db $B2
-L1D787F: db $C0
-L1D7880: db $DE
-L1D7881: db $B2
-L1D7882: db $C0
-L1D7883: db $DD
-L1D7884: db $D2
-L1D7885: db $B2
-L1D7886: db $C5
-L1D7887: db $C9
-L1D7888: db $CA
-L1D7889: db $A4
-L1D788A: db $FF
-L1D788B: db $FF
-L1D788C: db $BF
-L1D788D: db $C9
-L1D788E: db $63
-L1D788F: db $6F
-L1D7890: db $67
-L1D7891: db $C9
-L1D7892: db $C1
-L1D7893: db $C9
-L1D7894: db $BE
-L1D7895: db $B2
-L1D7896: db $D6
-L1D7897: db $A1
-L1D7898: db $FF
-L1D7899: db $2A
-L1D789A: db $BA
-L1D789B: db $C9
-L1D789C: db $CF
-L1D789D: db $CF
-L1D789E: db $BF
-L1D789F: db $C9
-L1D78A0: db $C1
-L1D78A1: db $B6
-L1D78A2: db $D7
-L1D78A3: db $A6
-L1D78A4: db $C2
-L1D78A5: db $B6
-L1D78A6: db $B2
-L1D78A7: db $FF
-L1D78A8: db $FF
-L1D78A9: db $C2
-L1D78AA: db $C2
-L1D78AB: db $DE
-L1D78AC: db $B9
-L1D78AD: db $DA
-L1D78AE: db $CA
-L1D78AF: db $DE
-L1D78B0: db $D4
-L1D78B1: db $B6
-L1D78B2: db $DE
-L1D78B3: db $D0
-L1D78B4: db $A4
-L1D78B5: db $FF
-L1D78B6: db $FF
-L1D78B7: db $B1
-L1D78B8: db $C5
-L1D78B9: db $C0
-L1D78BA: db $D3
-L1D78BB: db $B2
-L1D78BC: db $BD
-L1D78BD: db $DE
-L1D78BE: db $DA
-L1D78BF: db $A5
-L1D78C0: db $A5
-L1D78C1: db $A5
-L1D78C2: db $A1
-L1D78C3: db $FF
-L1D78C4: db $2C
-L1D78C5: db $B8
-L1D78C6: db $C0
-L1D78C7: db $DE
-L1D78C8: db $D7
-L1D78C9: db $C5
-L1D78CA: db $B2
-L1D78CB: db $BA
-L1D78CC: db $C4
-L1D78CD: db $A6
-L1D78CE: db $A5
-L1D78CF: db $A5
-L1D78D0: db $A5
-L1D78D1: db $A1
-L1D78D2: db $FF
-L1D78D3: db $FF
-L1D78D4: db $C5
-L1D78D5: db $DD
-L1D78D6: db $C0
-L1D78D7: db $DE
-L1D78D8: db $3F
-L1D78D9: db $A5
-L1D78DA: db $A5
-L1D78DB: db $A5
-L1D78DC: db $C5
-L1D78DD: db $A4
-L1D78DE: db $C5
-L1D78DF: db $C6
-L1D78E0: db $D3
-L1D78E1: db $D0
-L1D78E2: db $B4
-L1D78E3: db $DD
-L1D78E4: db $21
-L1D78E5: db $3F
-L1D78E6: db $FF
-L1D78E7: db $FF
-L1D78E8: db $B8
-L1D78E9: db $A4
-L1D78EA: db $B8
-L1D78EB: db $DE
-L1D78EC: db $CC
-L1D78ED: db $AF
-L1D78EE: db $21
-L1D78EF: db $21
-L1D78F0: db $FF
-L1D78F1: db $0F
-L1D78F2: db $C4
-L1D78F3: db $DE
-L1D78F4: db $B3
-L1D78F5: db $BC
-L1D78F6: db $C0
-L1D78F7: db $A4
-L1D78F8: db $D4
-L1D78F9: db $B6
-L1D78FA: db $DE
-L1D78FB: db $D0
-L1D78FC: db $A5
-L1D78FD: db $A5
-L1D78FE: db $A5
-L1D78FF: db $21
-L1D7900: db $FF
-L1D7901: db $13
-L1D7902: db $CF
-L1D7903: db $BB
-L1D7904: db $B6
-L1D7905: db $A5
-L1D7906: db $A5
-L1D7907: db $A5
-L1D7908: db $C1
-L1D7909: db $C9
-L1D790A: db $A5
-L1D790B: db $A5
-L1D790C: db $A5
-L1D790D: db $CE
-L1D790E: db $DE
-L1D790F: db $B3
-L1D7910: db $BF
-L1D7911: db $B3
-L1D7912: db $21
-L1D7913: db $3F
-L1D7914: db $FF
-L1D7915: db $0C
-L1D7916: db $B8
-L1D7917: db $DE
-L1D7918: db $B3
-L1D7919: db $B5
-L1D791A: db $B5
-L1D791B: db $B5
-L1D791C: db $B3
-L1D791D: db $B3
-L1D791E: db $B3
-L1D791F: db $21
-L1D7920: db $21
-L1D7921: db $FF
-L1D7922: db $17
-L1D7923: db $63
-L1D7924: db $6F
-L1D7925: db $67
-L1D7926: db $A5
-L1D7927: db $A5
-L1D7928: db $A5
-L1D7929: db $A1
-L1D792A: db $FF
-L1D792B: db $FF
-L1D792C: db $B8
-L1D792D: db $C1
-L1D792E: db $CE
-L1D792F: db $C4
-L1D7930: db $DE
-L1D7931: db $C6
-L1D7932: db $D3
-L1D7933: db $C5
-L1D7934: db $B6
-L1D7935: db $AF
-L1D7936: db $C0
-L1D7937: db $C5
-L1D7938: db $A1
-L1D7939: db $FF
-L1D793A: db $19
-L1D793B: db $47
-L1D793C: db $45
-L1D793D: db $45
-L1D793E: db $53
-L1D793F: db $45
-L1D7940: db $21
-L1D7941: db $21
-L1D7942: db $FF
-L1D7943: db $FF
-L1D7944: db $B7
-L1D7945: db $BB
-L1D7946: db $CF
-L1D7947: db $A4
-L1D7948: db $C4
-L1D7949: db $DE
-L1D794A: db $B3
-L1D794B: db $B2
-L1D794C: db $B3
-L1D794D: db $C2
-L1D794E: db $D3
-L1D794F: db $D8
-L1D7950: db $C0
-L1D7951: db $DE
-L1D7952: db $21
-L1D7953: db $FF
-L1D7954: db $07
-L1D7955: db $C5
-L1D7956: db $DD
-L1D7957: db $C0
-L1D7958: db $DE
-L1D7959: db $21
-L1D795A: db $3F
-L1D795B: db $FF
-L1D795C: db $36
-L1D795D: db $D0
-L1D795E: db $AE
-L1D795F: db $B3
-L1D7960: db $C5
-L1D7961: db $69
-L1D7962: db $B0
-L1D7963: db $6A
-L1D7964: db $6E
-L1D7965: db $71
-L1D7966: db $69
-L1D7967: db $C6
-L1D7968: db $CB
-L1D7969: db $AF
-L1D796A: db $CA
-L1D796B: db $DF
-L1D796C: db $D8
-L1D796D: db $FF
-L1D796E: db $FF
-L1D796F: db $BA
-L1D7970: db $CF
-L1D7971: db $DA
-L1D7972: db $D9
-L1D7973: db $CA
-L1D7974: db $A4
-L1D7975: db $C3
-L1D7976: db $BA
-L1D7977: db $DE
-L1D7978: db $CF
-L1D7979: db $C6
-L1D797A: db $BB
-L1D797B: db $DA
-L1D797C: db $D9
-L1D797D: db $DC
-L1D797E: db $A1
-L1D797F: db $FF
-L1D7980: db $FF
-L1D7981: db $B2
-L1D7982: db $BD
-L1D7983: db $DE
-L1D7984: db $DA
-L1D7985: db $B6
-L1D7986: db $C5
-L1D7987: db $D7
-L1D7988: db $BD
-L1D7989: db $DE
-L1D798A: db $B9
-L1D798B: db $D8
-L1D798C: db $A6
-L1D798D: db $C2
-L1D798E: db $B9
-L1D798F: db $D9
-L1D7990: db $A1
-L1D7991: db $FF
-L1D7992: db $FF
-L1D7993: db $1D
-L1D7994: db $B2
-L1D7995: db $BD
-L1D7996: db $DE
-L1D7997: db $DA
-L1D7998: db $C3
-L1D7999: db $DE
-L1D799A: db $CA
-L1D799B: db $C5
-L1D799C: db $B8
-L1D799D: db $A4
-L1D799E: db $B2
-L1D799F: db $CF
-L1D79A0: db $FF
-L1D79A1: db $FF
-L1D79A2: db $B9
-L1D79A3: db $D8
-L1D79A4: db $A6
-L1D79A5: db $C2
-L1D79A6: db $B9
-L1D79A7: db $D6
-L1D79A8: db $B3
-L1D79A9: db $C3
-L1D79AA: db $DE
-L1D79AB: db $CA
-L1D79AC: db $C5
-L1D79AD: db $B2
-L1D79AE: db $B6
-L1D79AF: db $A1
-L1D79B0: db $FF
-L1D79B1: db $0D
-L1D79B2: db $CC
-L1D79B3: db $AF
-L1D79B4: db $CC
-L1D79B5: db $AF
-L1D79B6: db $CC
-L1D79B7: db $21
-L1D79B8: db $20
-L1D79B9: db $D6
-L1D79BA: db $B6
-L1D79BB: db $DB
-L1D79BC: db $B3
-L1D79BD: db $A1
-L1D79BE: db $FF
-L1D79BF: db $31
-L1D79C0: db $B5
-L1D79C1: db $C4
-L1D79C2: db $DE
-L1D79C3: db $DB
-L1D79C4: db $B7
-L1D79C5: db $C3
-L1D79C6: db $DE
-L1D79C7: db $BD
-L1D79C8: db $C8
-L1D79C9: db $A1
-L1D79CA: db $BA
-L1D79CB: db $DA
-L1D79CC: db $CE
-L1D79CD: db $C4
-L1D79CE: db $DE
-L1D79CF: db $FF
-L1D79D0: db $FF
-L1D79D1: db $CF
-L1D79D2: db $C3
-L1D79D3: db $DE
-L1D79D4: db $C4
-L1D79D5: db $CA
-L1D79D6: db $A1
-L1D79D7: db $20
-L1D79D8: db $38
-L1D79D9: db $C8
-L1D79DA: db $DD
-L1D79DB: db $CF
-L1D79DC: db $B4
-L1D79DD: db $C9
-L1D79DE: db $BA
-L1D79DF: db $C4
-L1D79E0: db $CA
-L1D79E1: db $FF
-L1D79E2: db $FF
-L1D79E3: db $B5
-L1D79E4: db $CE
-L1D79E5: db $DE
-L1D79E6: db $B4
-L1D79E7: db $C3
-L1D79E8: db $B2
-L1D79E9: db $CF
-L1D79EA: db $BD
-L1D79EB: db $B6
-L1D79EC: db $A5
-L1D79ED: db $A5
-L1D79EE: db $A5
-L1D79EF: db $A1
-L1D79F0: db $FF
-L1D79F1: db $21
-L1D79F2: db $A5
-L1D79F3: db $A5
-L1D79F4: db $A5
-L1D79F5: db $21
-L1D79F6: db $3F
-L1D79F7: db $20
-L1D79F8: db $20
-L1D79F9: db $CF
-L1D79FA: db $BB
-L1D79FB: db $B6
-L1D79FC: db $A5
-L1D79FD: db $A5
-L1D79FE: db $A5
-L1D79FF: db $3F
-L1D7A00: db $FF
-L1D7A01: db $FF
-L1D7A02: db $DC
-L1D7A03: db $C0
-L1D7A04: db $BC
-L1D7A05: db $C9
-L1D7A06: db $B6
-L1D7A07: db $BF
-L1D7A08: db $DE
-L1D7A09: db $B8
-L1D7A0A: db $A6
-L1D7A0B: db $BA
-L1D7A0C: db $DB
-L1D7A0D: db $BC
-L1D7A0E: db $C0
-L1D7A0F: db $C9
-L1D7A10: db $CA
-L1D7A11: db $A1
-L1D7A12: db $FF
-L1D7A13: db $35
-L1D7A14: db $B6
-L1D7A15: db $DD
-L1D7A16: db $C1
-L1D7A17: db $B6
-L1D7A18: db $DE
-L1D7A19: db $B2
-L1D7A1A: db $BB
-L1D7A1B: db $DA
-L1D7A1C: db $C3
-L1D7A1D: db $CA
-L1D7A1E: db $BA
-L1D7A1F: db $CF
-L1D7A20: db $D8
-L1D7A21: db $CF
-L1D7A22: db $BD
-L1D7A23: db $C8
-L1D7A24: db $A1
-L1D7A25: db $FF
-L1D7A26: db $FF
-L1D7A27: db $A5
-L1D7A28: db $A5
-L1D7A29: db $A5
-L1D7A2A: db $B1
-L1D7A2B: db $C5
-L1D7A2C: db $C0
-L1D7A2D: db $C5
-L1D7A2E: db $C9
-L1D7A2F: db $C3
-L1D7A30: db $DE
-L1D7A31: db $BD
-L1D7A32: db $D6
-L1D7A33: db $A1
-L1D7A34: db $FF
-L1D7A35: db $FF
-L1D7A36: db $BC
-L1D7A37: db $DE
-L1D7A38: db $CC
-L1D7A39: db $DE
-L1D7A3A: db $DD
-L1D7A3B: db $C9
-L1D7A3C: db $B6
-L1D7A3D: db $BF
-L1D7A3E: db $DE
-L1D7A3F: db $B8
-L1D7A40: db $A6
-L1D7A41: db $BA
-L1D7A42: db $DB
-L1D7A43: db $BC
-L1D7A44: db $C0
-L1D7A45: db $C9
-L1D7A46: db $CA
-L1D7A47: db $A1
-L1D7A48: db $FF
-L1D7A49: db $0E
-L1D7A4A: db $21
-L1D7A4B: db $A5
-L1D7A4C: db $A5
-L1D7A4D: db $A5
-L1D7A4E: db $B3
-L1D7A4F: db $BF
-L1D7A50: db $A5
-L1D7A51: db $A5
-L1D7A52: db $A5
-L1D7A53: db $A5
-L1D7A54: db $A5
-L1D7A55: db $A5
-L1D7A56: db $A1
-L1D7A57: db $FF
-L1D7A58: db $2D
-L1D7A59: db $B3
-L1D7A5A: db $BF
-L1D7A5B: db $C3
-L1D7A5C: db $DE
-L1D7A5D: db $CA
-L1D7A5E: db $B1
-L1D7A5F: db $D8
-L1D7A60: db $CF
-L1D7A61: db $BE
-L1D7A62: db $DD
-L1D7A63: db $A1
-L1D7A64: db $FF
-L1D7A65: db $FF
-L1D7A66: db $B1
-L1D7A67: db $C5
-L1D7A68: db $C0
-L1D7A69: db $C9
-L1D7A6A: db $B6
-L1D7A6B: db $D7
-L1D7A6C: db $C0
-L1D7A6D: db $DE
-L1D7A6E: db $C6
-L1D7A6F: db $CA
-L1D7A70: db $63
-L1D7A71: db $6F
-L1D7A72: db $67
-L1D7A73: db $C9
-L1D7A74: db $C1
-L1D7A75: db $FF
-L1D7A76: db $FF
-L1D7A77: db $B6
-L1D7A78: db $DE
-L1D7A79: db $C5
-L1D7A7A: db $B6
-L1D7A7B: db $DE
-L1D7A7C: db $DA
-L1D7A7D: db $C3
-L1D7A7E: db $B2
-L1D7A7F: db $D9
-L1D7A80: db $C9
-L1D7A81: db $C3
-L1D7A82: db $DE
-L1D7A83: db $BD
-L1D7A84: db $A1
-L1D7A85: db $FF
-L1D7A86: db $25
-L1D7A87: db $C3
-L1D7A88: db $D0
-L1D7A89: db $D4
-L1D7A8A: db $B9
-L1D7A8B: db $DE
-L1D7A8C: db $C6
-L1D7A8D: db $38
-L1D7A8E: db $C8
-L1D7A8F: db $DD
-L1D7A90: db $CF
-L1D7A91: db $B4
-L1D7A92: db $C4
-L1D7A93: db $B5
-L1D7A94: db $C5
-L1D7A95: db $BC
-L1D7A96: db $DE
-L1D7A97: db $FF
-L1D7A98: db $FF
-L1D7A99: db $D6
-L1D7A9A: db $B3
-L1D7A9B: db $C6
-L1D7A9C: db $D2
-L1D7A9D: db $BB
-L1D7A9E: db $DE
-L1D7A9F: db $D2
-L1D7AA0: db $BB
-L1D7AA1: db $BE
-L1D7AA2: db $C3
-L1D7AA3: db $B1
-L1D7AA4: db $B9
-L1D7AA5: db $DE
-L1D7AA6: db $CF
-L1D7AA7: db $BC
-L1D7AA8: db $AE
-L1D7AA9: db $B3
-L1D7AAA: db $A1
-L1D7AAB: db $FF
-L1D7AAC: db $25
-L1D7AAD: db $CC
-L1D7AAE: db $CC
-L1D7AAF: db $CC
-L1D7AB0: db $A5
-L1D7AB1: db $A5
-L1D7AB2: db $A5
-L1D7AB3: db $A1
-L1D7AB4: db $FF
-L1D7AB5: db $FF
-L1D7AB6: db $B2
-L1D7AB7: db $B2
-L1D7AB8: db $B6
-L1D7AB9: db $BE
-L1D7ABA: db $DE
-L1D7ABB: db $B6
-L1D7ABC: db $DE
-L1D7ABD: db $B7
-L1D7ABE: db $CF
-L1D7ABF: db $BC
-L1D7AC0: db $C0
-L1D7AC1: db $C8
-L1D7AC2: db $A1
-L1D7AC3: db $FF
-L1D7AC4: db $FF
-L1D7AC5: db $BF
-L1D7AC6: db $DB
-L1D7AC7: db $BF
-L1D7AC8: db $DB
-L1D7AC9: db $BA
-L1D7ACA: db $DB
-L1D7ACB: db $B1
-L1D7ACC: db $B2
-L1D7ACD: db $C3
-L1D7ACE: db $DE
-L1D7ACF: db $BD
-L1D7AD0: db $A1
-L1D7AD1: db $FF
-L1D7AD2: db $16
-L1D7AD3: db $C5
-L1D7AD4: db $A4
-L1D7AD5: db $C5
-L1D7AD6: db $C6
-L1D7AD7: db $3F
-L1D7AD8: db $FF
-L1D7AD9: db $FF
-L1D7ADA: db $A5
-L1D7ADB: db $A5
-L1D7ADC: db $A5
-L1D7ADD: db $C5
-L1D7ADE: db $C6
-L1D7ADF: db $D3
-L1D7AE0: db $D0
-L1D7AE1: db $B4
-L1D7AE2: db $C5
-L1D7AE3: db $B2
-L1D7AE4: db $A5
-L1D7AE5: db $A5
-L1D7AE6: db $A5
-L1D7AE7: db $21
-L1D7AE8: db $FF
-L1D7AE9: db $1F
-L1D7AEA: db $C4
-L1D7AEB: db $DE
-L1D7AEC: db $B3
-L1D7AED: db $BC
-L1D7AEE: db $C0
-L1D7AEF: db $3F
-L1D7AF0: db $20
-L1D7AF1: db $4C
-L1D7AF2: db $45
-L1D7AF3: db $4F
-L1D7AF4: db $4E
-L1D7AF5: db $41
-L1D7AF6: db $A5
-L1D7AF7: db $A5
-L1D7AF8: db $A5
-L1D7AF9: db $21
-L1D7AFA: db $FF
-L1D7AFB: db $FF
-L1D7AFC: db $CF
-L1D7AFD: db $BB
-L1D7AFE: db $B6
-L1D7AFF: db $A4
-L1D7B00: db $63
-L1D7B01: db $6F
-L1D7B02: db $67
-L1D7B03: db $C9
-L1D7B04: db $A5
-L1D7B05: db $A5
-L1D7B06: db $A5
-L1D7B07: db $A1
-L1D7B08: db $FF
-L1D7B09: db $27
-L1D7B0A: db $CA
-L1D7B0B: db $AF
-L1D7B0C: db $CA
-L1D7B0D: db $AF
-L1D7B0E: db $CA
-L1D7B0F: db $21
-L1D7B10: db $FF
-L1D7B11: db $FF
-L1D7B12: db $C3
-L1D7B13: db $DE
-L1D7B14: db $DD
-L1D7B15: db $BE
-L1D7B16: db $C2
-L1D7B17: db $C9
-L1D7B18: db $B6
-L1D7B19: db $B8
-L1D7B1A: db $C4
-L1D7B1B: db $B3
-L1D7B1C: db $B6
-L1D7B1D: db $21
-L1D7B1E: db $FF
-L1D7B1F: db $FF
-L1D7B20: db $4D
-L1D7B21: db $52
-L1D7B22: db $2E
-L1D7B23: db $4B
-L1D7B24: db $41
-L1D7B25: db $52
-L1D7B26: db $41
-L1D7B27: db $54
-L1D7B28: db $45
-L1D7B29: db $BB
-L1D7B2A: db $DD
-L1D7B2B: db $BC
-L1D7B2C: db $DE
-L1D7B2D: db $AE
-L1D7B2E: db $B3
-L1D7B2F: db $21
-L1D7B30: db $FF
-L1D7B31: db $32
-L1D7B32: db $DC
-L1D7B33: db $BC
-L1D7B34: db $CA
-L1D7B35: db $A4
-L1D7B36: db $B5
-L1D7B37: db $CF
-L1D7B38: db $B4
-L1D7B39: db $C0
-L1D7B3A: db $C1
-L1D7B3B: db $C9
-L1D7B3C: db $C0
-L1D7B3D: db $C0
-L1D7B3E: db $B6
-L1D7B3F: db $B2
-L1D7B40: db $A6
-L1D7B41: db $FF
-L1D7B42: db $FF
-L1D7B43: db $C2
-L1D7B44: db $C8
-L1D7B45: db $C6
-L1D7B46: db $D0
-L1D7B47: db $C3
-L1D7B48: db $B7
-L1D7B49: db $C0
-L1D7B4A: db $A1
-L1D7B4B: db $20
-L1D7B4C: db $BB
-L1D7B4D: db $BD
-L1D7B4E: db $B6
-L1D7B4F: db $DE
-L1D7B50: db $D5
-L1D7B51: db $B3
-L1D7B52: db $BC
-L1D7B53: db $AE
-L1D7B54: db $B3
-L1D7B55: db $FF
-L1D7B56: db $FF
-L1D7B57: db $BC
-L1D7B58: db $C0
-L1D7B59: db $C0
-L1D7B5A: db $DE
-L1D7B5B: db $B9
-L1D7B5C: db $C9
-L1D7B5D: db $BA
-L1D7B5E: db $C4
-L1D7B5F: db $CA
-L1D7B60: db $B1
-L1D7B61: db $D9
-L1D7B62: db $A1
-L1D7B63: db $FF
-L1D7B64: db $32
-L1D7B65: db $C0
-L1D7B66: db $DE
-L1D7B67: db $B6
-L1D7B68: db $DE
-L1D7B69: db $A4
-L1D7B6A: db $CF
-L1D7B6B: db $C0
-L1D7B6C: db $DE
-L1D7B6D: db $CF
-L1D7B6E: db $C0
-L1D7B6F: db $DE
-L1D7B70: db $D0
-L1D7B71: db $BC
-L1D7B72: db $DE
-L1D7B73: db $AD
-L1D7B74: db $B8
-L1D7B75: db $21
-L1D7B76: db $FF
-L1D7B77: db $FF
-L1D7B78: db $DC
-L1D7B79: db $BC
-L1D7B7A: db $B6
-L1D7B7B: db $DE
-L1D7B7C: db $A4
-L1D7B7D: db $B9
-L1D7B7E: db $B2
-L1D7B7F: db $BA
-L1D7B80: db $A6
-L1D7B81: db $C2
-L1D7B82: db $B9
-L1D7B83: db $C3
-L1D7B84: db $D4
-L1D7B85: db $DB
-L1D7B86: db $B3
-L1D7B87: db $21
-L1D7B88: db $21
-L1D7B89: db $FF
-L1D7B8A: db $FF
-L1D7B8B: db $C3
-L1D7B8C: db $DE
-L1D7B8D: db $CA
-L1D7B8E: db $A4
-L1D7B8F: db $B2
-L1D7B90: db $B8
-L1D7B91: db $BF
-L1D7B92: db $DE
-L1D7B93: db $21
-L1D7B94: db $21
-L1D7B95: db $21
-L1D7B96: db $FF
-L1D7B97: db $2E
-L1D7B98: db $D1
-L1D7B99: db $D1
-L1D7B9A: db $A5
-L1D7B9B: db $A5
-L1D7B9C: db $A5
-L1D7B9D: db $C5
-L1D7B9E: db $B6
-L1D7B9F: db $C5
-L1D7BA0: db $B6
-L1D7BA1: db $D4
-L1D7BA2: db $D8
-L1D7BA3: db $B5
-L1D7BA4: db $D9
-L1D7BA5: db $A1
-L1D7BA6: db $FF
-L1D7BA7: db $FF
-L1D7BA8: db $BE
-L1D7BA9: db $DE
-L1D7BAA: db $DD
-L1D7BAB: db $C0
-L1D7BAC: db $B2
-L1D7BAD: db $B6
-L1D7BAE: db $B2
-L1D7BAF: db $D6
-L1D7BB0: db $D8
-L1D7BB1: db $A4
-L1D7BB2: db $B2
-L1D7BB3: db $C1
-L1D7BB4: db $C0
-L1D7BB5: db $DE
-L1D7BB6: db $DD
-L1D7BB7: db $C4
-L1D7BB8: db $FF
-L1D7BB9: db $FF
-L1D7BBA: db $C2
-L1D7BBB: db $D6
-L1D7BBC: db $B8
-L1D7BBD: db $C5
-L1D7BBE: db $AF
-L1D7BBF: db $C0
-L1D7BC0: db $C5
-L1D7BC1: db $A5
-L1D7BC2: db $A5
-L1D7BC3: db $A5
-L1D7BC4: db $A1
-L1D7BC5: db $FF
-L1D7BC6: db $1A
-L1D7BC7: db $BE
-L1D7BC8: db $DE
-L1D7BC9: db $DD
-L1D7BCA: db $C0
-L1D7BCB: db $B2
-L1D7BCC: db $B6
-L1D7BCD: db $B2
-L1D7BCE: db $A5
-L1D7BCF: db $A5
-L1D7BD0: db $A5
-L1D7BD1: db $3F
-L1D7BD2: db $FF
-L1D7BD3: db $FF
-L1D7BD4: db $D4
-L1D7BD5: db $CA
-L1D7BD6: db $D8
-L1D7BD7: db $A4
-L1D7BD8: db $B1
-L1D7BD9: db $C5
-L1D7BDA: db $C0
-L1D7BDB: db $CA
-L1D7BDC: db $A5
-L1D7BDD: db $A5
-L1D7BDE: db $A5
-L1D7BDF: db $3F
-L1D7BE0: db $FF
-L1D7BE1: db $30
-L1D7BE2: db $C1
-L1D7BE3: db $B6
-L1D7BE4: db $DE
-L1D7BE5: db $B3
-L1D7BE6: db $AF
-L1D7BE7: db $21
-L1D7BE8: db $20
-L1D7BE9: db $C0
-L1D7BEA: db $DE
-L1D7BEB: db $DD
-L1D7BEC: db $BC
-L1D7BED: db $DE
-L1D7BEE: db $C3
-L1D7BEF: db $C1
-L1D7BF0: db $B6
-L1D7BF1: db $DE
-L1D7BF2: db $B3
-L1D7BF3: db $21
-L1D7BF4: db $FF
-L1D7BF5: db $FF
-L1D7BF6: db $DC
-L1D7BF7: db $BC
-L1D7BF8: db $CA
-L1D7BF9: db $C3
-L1D7BFA: db $DE
-L1D7BFB: db $DD
-L1D7BFC: db $BE
-L1D7BFD: db $C2
-L1D7BFE: db $C9
-L1D7BFF: db $B6
-L1D7C00: db $B8
-L1D7C01: db $C4
-L1D7C02: db $B3
-L1D7C03: db $B6
-L1D7C04: db $A4
-L1D7C05: db $FF
-L1D7C06: db $FF
-L1D7C07: db $4D
-L1D7C08: db $52
-L1D7C09: db $2E
-L1D7C0A: db $4B
-L1D7C0B: db $41
-L1D7C0C: db $52
-L1D7C0D: db $41
-L1D7C0E: db $54
-L1D7C0F: db $45
-L1D7C10: db $21
-L1D7C11: db $FF
-L1D7C12: db $0D
-L1D7C13: db $C0
-L1D7C14: db $B8
-L1D7C15: db $CF
-L1D7C16: db $C3
-L1D7C17: db $DE
-L1D7C18: db $CA
-L1D7C19: db $C5
-L1D7C1A: db $B2
-L1D7C1B: db $A5
-L1D7C1C: db $A5
-L1D7C1D: db $A5
-L1D7C1E: db $21
-L1D7C1F: db $FF
-L1D7C20: db $0A
-L1D7C21: db $D4
-L1D7C22: db $A4
-L1D7C23: db $D4
-L1D7C24: db $CA
-L1D7C25: db $D8
-L1D7C26: db $A5
-L1D7C27: db $A5
-L1D7C28: db $A5
-L1D7C29: db $A1
-L1D7C2A: db $FF
-L1D7C2B: db $24;X
-L1D7C2C: db $B7;X
-L1D7C2D: db $AE;X
-L1D7C2E: db $B3;X
-L1D7C2F: db $C9;X
-L1D7C30: db $C4;X
-L1D7C31: db $BA;X
-L1D7C32: db $DB;X
-L1D7C33: db $CA;X
-L1D7C34: db $BA;X
-L1D7C35: db $BA;X
-L1D7C36: db $CF;X
-L1D7C37: db $C3;X
-L1D7C38: db $DE;X
-L1D7C39: db $C6;X
-L1D7C3A: db $FF;X
-L1D7C3B: db $FF;X
-L1D7C3C: db $BC;X
-L1D7C3D: db $C3;X
-L1D7C3E: db $B5;X
-L1D7C3F: db $B2;X
-L1D7C40: db $C3;X
-L1D7C41: db $D4;X
-L1D7C42: db $DB;X
-L1D7C43: db $B3;X
-L1D7C44: db $A1;X
-L1D7C45: db $FF;X
-L1D7C46: db $FF;X
-L1D7C47: db $CF;X
-L1D7C48: db $C0;X
-L1D7C49: db $A4;X
-L1D7C4A: db $B1;X
-L1D7C4B: db $B5;X
-L1D7C4C: db $B3;X
-L1D7C4D: db $21;X
-L1D7C4E: db $21;X
-L1D7C4F: db $FF;X
-L1D7C50: db $22
-L1D7C51: db $D3
-L1D7C52: db $B3
-L1D7C53: db $BD
-L1D7C54: db $BA
-L1D7C55: db $BC
-L1D7C56: db $C3
-L1D7C57: db $DE
-L1D7C58: db $A4
-L1D7C59: db $BC
-L1D7C5A: db $AE
-L1D7C5B: db $B3
-L1D7C5C: db $C0
-L1D7C5D: db $B2
-L1D7C5E: db $B6
-L1D7C5F: db $DE
-L1D7C60: db $FF
-L1D7C61: db $FF
-L1D7C62: db $CA
-L1D7C63: db $DE
-L1D7C64: db $DA
-L1D7C65: db $D9
-L1D7C66: db $C4
-L1D7C67: db $BA
-L1D7C68: db $DB
-L1D7C69: db $C3
-L1D7C6A: db $DE
-L1D7C6B: db $B1
-L1D7C6C: db $AF
-L1D7C6D: db $C0
-L1D7C6E: db $A5
-L1D7C6F: db $A5
-L1D7C70: db $A5
-L1D7C71: db $A1
-L1D7C72: db $FF
-L1D7C73: db $18
-L1D7C74: db $BA
-L1D7C75: db $DD
-L1D7C76: db $C4
-L1D7C77: db $DE
-L1D7C78: db $CA
-L1D7C79: db $DC
-L1D7C7A: db $BC
-L1D7C7B: db $D3
-L1D7C7C: db $C0
-L1D7C7D: db $B2
-L1D7C7E: db $B6
-L1D7C7F: db $B2
-L1D7C80: db $C6
-L1D7C81: db $FF
-L1D7C82: db $FF
-L1D7C83: db $BB
-L1D7C84: db $DD
-L1D7C85: db $B6
-L1D7C86: db $BD
-L1D7C87: db $D9
-L1D7C88: db $BF
-L1D7C89: db $DE
-L1D7C8A: db $A1
-L1D7C8B: db $FF
-L1D7C8C: db $2A
-L1D7C8D: db $54
-L1D7C8E: db $41
-L1D7C8F: db $4B
-L1D7C90: db $41
-L1D7C91: db $52
-L1D7C92: db $41
-L1D7C93: db $6F
-L1D7C94: db $65
-L1D7C95: db $DE
-L1D7C96: db $C9
-L1D7C97: db $CB
-L1D7C98: db $AE
-L1D7C99: db $B3
-L1D7C9A: db $BC
-L1D7C9B: db $DE
-L1D7C9C: db $FF
-L1D7C9D: db $FF
-L1D7C9E: db $C1
-L1D7C9F: db $AD
-L1D7CA0: db $B3
-L1D7CA1: db $C6
-L1D7CA2: db $53
-L1D7CA3: db $45
-L1D7CA4: db $4C
-L1D7CA5: db $45
-L1D7CA6: db $43
-L1D7CA7: db $54
-L1D7CA8: db $72
-L1D7CA9: db $DE
-L1D7CAA: db $73
-L1D7CAB: db $71
-L1D7CAC: db $FF
-L1D7CAD: db $FF
-L1D7CAE: db $A6
-L1D7CAF: db $32
-L1D7CB0: db $30
-L1D7CB1: db $B6
-L1D7CB2: db $B2
-L1D7CB3: db $B5
-L1D7CB4: db $BD
-L1D7CB5: db $A1
-L1D7CB6: db $FF
-L1D7CB7: db $28
-L1D7CB8: db $53
-L1D7CB9: db $45
-L1D7CBA: db $4C
-L1D7CBB: db $45
-L1D7CBC: db $43
-L1D7CBD: db $54
-L1D7CBE: db $B6
-L1D7CBF: db $DE
-L1D7CC0: db $D2
-L1D7CC1: db $DD
-L1D7CC2: db $C3
-L1D7CC3: db $DE
-L1D7CC4: db $DC
-L1D7CC5: db $BC
-L1D7CC6: db $A6
-L1D7CC7: db $FF
-L1D7CC8: db $FF
-L1D7CC9: db $B4
-L1D7CCA: db $D7
-L1D7CCB: db $DD
-L1D7CCC: db $C3
-L1D7CCD: db $DE
-L1D7CCE: db $A4
-L1D7CCF: db $BB
-L1D7CD0: db $B2
-L1D7CD1: db $B7
-L1D7CD2: db $AE
-L1D7CD3: db $B3
-L1D7CD4: db $A6
-L1D7CD5: db $FF
-L1D7CD6: db $FF
-L1D7CD7: db $D2
-L1D7CD8: db $BB
-L1D7CD9: db $DE
-L1D7CDA: db $BD
-L1D7CDB: db $C9
-L1D7CDC: db $C0
-L1D7CDD: db $DE
-L1D7CDE: db $A1
-L1D7CDF: db $FF
-L1D7CE0: db $17
-L1D7CE1: db $BA
-L1D7CE2: db $BA
-L1D7CE3: db $CF
-L1D7CE4: db $C3
-L1D7CE5: db $DE
-L1D7CE6: db $B7
-L1D7CE7: db $C0
-L1D7CE8: db $D7
-L1D7CE9: db $A4
-L1D7CEA: db $FF
-L1D7CEB: db $FF
-L1D7CEC: db $B7
-L1D7CED: db $BB
-L1D7CEE: db $CF
-L1D7CEF: db $D7
-L1D7CF0: db $C6
-L1D7CF1: db $D6
-L1D7CF2: db $B3
-L1D7CF3: db $CA
-L1D7CF4: db $C5
-L1D7CF5: db $B2
-L1D7CF6: db $A1
-L1D7CF7: db $FF
-L1D7CF8: db $1B
-L1D7CF9: db $47
-L1D7CFA: db $45
-L1D7CFB: db $45
-L1D7CFC: db $53
-L1D7CFD: db $45
-L1D7CFE: db $21
-L1D7CFF: db $FF
-L1D7D00: db $FF
-L1D7D01: db $BA
-L1D7D02: db $DD
-L1D7D03: db $C4
-L1D7D04: db $DE
-L1D7D05: db $BA
-L1D7D06: db $BF
-L1D7D07: db $B9
-L1D7D08: db $D8
-L1D7D09: db $A6
-L1D7D0A: db $C2
-L1D7D0B: db $B9
-L1D7D0C: db $C3
-L1D7D0D: db $D4
-L1D7D0E: db $D9
-L1D7D0F: db $BE
-L1D7D10: db $DE
-L1D7D11: db $21
-L1D7D12: db $21
-L1D7D13: db $FF
-L1D7D14: db $1C
-L1D7D15: db $52
-L1D7D16: db $59
-L1D7D17: db $4F
-L1D7D18: db $A4
-L1D7D19: db $52
-L1D7D1A: db $4F
-L1D7D1B: db $42
-L1D7D1C: db $45
-L1D7D1D: db $52
-L1D7D1E: db $54
-L1D7D1F: db $A4
-L1D7D20: db $FF
-L1D7D21: db $FF
-L1D7D22: db $B6
-L1D7D23: db $D8
-L1D7D24: db $CA
-L1D7D25: db $B6
-L1D7D26: db $B4
-L1D7D27: db $BB
-L1D7D28: db $BE
-L1D7D29: db $C3
-L1D7D2A: db $D3
-L1D7D2B: db $D7
-L1D7D2C: db $B3
-L1D7D2D: db $BE
-L1D7D2E: db $DE
-L1D7D2F: db $A1
-L1D7D30: db $FF
-L1D7D31: db $0B
-L1D7D32: db $C9
-L1D7D33: db $BF
-L1D7D34: db $DE
-L1D7D35: db $D1
-L1D7D36: db $C4
-L1D7D37: db $BA
-L1D7D38: db $DB
-L1D7D39: db $C0
-L1D7D3A: db $DE
-L1D7D3B: db $21
-L1D7D3C: db $FF
-L1D7D3D: db $28
-L1D7D3E: db $D5
-L1D7D3F: db $B3
-L1D7D40: db $BC
-L1D7D41: db $AE
-L1D7D42: db $B3
-L1D7D43: db $CA
-L1D7D44: db $D3
-L1D7D45: db $D7
-L1D7D46: db $AF
-L1D7D47: db $C0
-L1D7D48: db $A1
-L1D7D49: db $FF
-L1D7D4A: db $FF
-L1D7D4B: db $BC
-L1D7D4C: db $AD
-L1D7D4D: db $D4
-L1D7D4E: db $B8
-L1D7D4F: db $CA
-L1D7D50: db $B5
-L1D7D51: db $DA
-L1D7D52: db $C0
-L1D7D53: db $DE
-L1D7D54: db $21
-L1D7D55: db $FF
-L1D7D56: db $FF
-L1D7D57: db $B9
-L1D7D58: db $AF
-L1D7D59: db $C1
-L1D7D5A: db $AC
-L1D7D5B: db $B8
-L1D7D5C: db $A6
-L1D7D5D: db $C2
-L1D7D5E: db $B9
-L1D7D5F: db $D6
-L1D7D60: db $B3
-L1D7D61: db $BE
-L1D7D62: db $DE
-L1D7D63: db $21
-L1D7D64: db $FF
-L1D7D65: db $FF
+TextDef_Credits0_0:
+	dw $9906
+	db $07
+	db "-STAFF-"
+TextDef_Credits1_0:
+	dw $98C0
+	db $14
+	db "-EXECUTIVE PRODUCER-"
+TextDef_Credits1_1:
+	dw $9943
+	db $0E
+	db "HIROHISA SATOH"
+TextDef_Credits2_0:
+	dw $98A5
+	db $0A
+	db "-PRODUCER-"
+TextDef_Credits2_1:
+	dw $9901
+	db $11
+	db "MASAHIRO MORIKAWA"
+TextDef_Credits2_2:
+	dw $9942
+	db $0F
+	db "TAKAYUKI NAKANO"
+TextDef_Credits2_3:
+	dw $9985
+	db $09
+	db "T.ISHIGAI"
+TextDef_Credits3_0:
+	dw $98C5
+	db $0A
+	db "-DIRECTOR-"
+TextDef_Credits3_1:
+	dw $9921
+	db $11
+	db "HIROFUMI KASAKAWA"
+TextDef_Credits4_0:
+	dw $98C3
+	db $0D
+	db "-ARRANGEMENT-"
+TextDef_Credits4_1:
+	dw $9925
+	db $08
+	db "T.SAITOH"
+TextDef_Credits4_2:
+	dw $9965
+	db $07
+	db "H.KOISO"
+TextDef_Credits5_0:
+	dw $98C4
+	db $0C
+	db "-PROGRAMMER-"
+TextDef_Credits5_1:
+	dw $9926
+	db $07
+	db "H.KOISO"
+TextDef_Credits5_2:
+	dw $9965
+	db $09
+	db "T.ISHIGAI"
+TextDef_Credits6_0:
+	dw $98A5
+	db $0A
+	db "-DESIGNER-"
+TextDef_Credits6_1:
+	dw $9906
+	db $08
+	db "T.SAITOU"
+TextDef_Credits6_2:
+	dw $9946
+	db $08
+	db "A.TUYUKI"
+TextDef_Credits6_3:
+	dw $9986
+	db $07
+	db "A.HANDA"
+TextDef_Credits7_0:
+	dw $98C5
+	db $08
+	db "MUSIC BY"
+TextDef_Credits7_1:
+	dw $9921
+	db $11
+	db "STUDIO PJ CO.,LTD"
+TextDef_Credits9_0:
+	dw $98A1
+	db $11
+	db "-SUPER MARKETTER-"
+TextDef_Credits9_1:
+	dw $9902
+	db $11
+	db "TOSHIHIRO MORIOKA"
+TextDef_Credits9_2:
+	dw $9942
+	db $0F
+	db "KATUYA TORIHAMA"
+TextDef_Credits9_3:
+	dw $9982
+	db $10
+	db "MASAHIRO IWASAKI"
+TextDef_Credits8_0:
+	dw $98C2
+	db $10
+	db "-ARTWORK DESIGN-"
+TextDef_Credits8_1:
+	dw $9923
+	db $0D
+	db "DESIGN OFFICE"
+TextDef_Credits8_2:
+	dw $9963
+	db $0E
+	db "SPACE LAP INC."
+TextDef_CreditsB_0:
+	dw $98A3
+	db $0E
+	db "SPECIAL THANKS"
+TextDef_CreditsB_1:
+	dw $9923
+	db $0D
+	db "SNK ALL STAFF"
+TextDef_CreditsC_0:
+	dw $98E6
+	db $09
+	db "PRESENTED"
+TextDef_CreditsC_1:
+	dw $9949
+	db $02
+	db "BY"
+TextDef_CreditsC_2:
+	dw $9987
+	db $06
+	db "TAKARA"
+TextDef_CreditsA_0:
+	dw $9821
+	db $10
+	db "-SPECIAL THANKS-"
+TextDef_CreditsA_1:
+	dw $9862
+	db $0C
+	db "TATUYA HOCHO"
+TextDef_CreditsA_2:
+	dw $9882
+	db $0F
+	db "SHUNICHI OHKUSA"
+TextDef_CreditsA_3:
+	dw $98A2
+	db $0F
+	db "TAKESHI IKENOUE"
+TextDef_CreditsA_4:
+	dw $98C2
+	db $0E
+	db "NAOYUKI TAKADA"
+TextDef_CreditsA_5:
+	dw $98E2
+	db $0E
+	db "AKIHIKO KIMURA"
+TextDef_CreditsA_6:
+	dw $9902
+	db $11
+	db "NORIHIRO HAYASAKA"
+TextDef_CreditsA_7:
+	dw $9922
+	db $03
+	db "S.H"
+TextDef_CreditsA_8:
+	dw $9942
+	db $0F
+	db "MITSUNORI SHOJI"
+TextDef_CreditsA_9:
+	dw $9962
+	db $0E
+	db "FUMIHIKO OZAWA"
+TextDef_CreditsA_A:
+	dw $9982
+	db $0E
+	db "SATOSHI KUMATA"
+TextDef_CreditsA_B:
+	dw $99A2
+	db $0D
+	db "TATSUYA YAURA"
+TextDef_CreditsA_C:
+	dw $99C2
+	db $0C
+	db "TETSUYA IIDA"
+TextDef_CreditsA_D:
+	dw $99E2
+	db $0B
+	db "TAKAO SATOU"
+TextDef_CreditsA_E:
+	dw $9A02
+	db $10
+	db "MUTSUMI NAKAMURA"
+TextDef_TheEnd:
+	dw $9906
+	db $08
+	db "THE  END"
+TextC_Ending_SacredTreasures0:
+	db $25
+	db "これほとﾞとは・・・。", C_NL
+	db C_NL
+	db "しかし、これてﾞおしまいてﾞは", C_NL
+	db C_NL
+	db "あリません。", C_NL
+TextC_Ending_SacredTreasures1:
+	db $05
+	db "ちぃっ!", C_NL
+TextC_Ending_SacredTreasures2:
+	db $0D
+	db "くらいやかﾞれええいっ!", C_NL
+TextC_Ending_SacredTreasures3:
+	db $0A
+	db "くﾞあああああっ!", C_NL
+TextC_Ending_SacredTreasures4:
+	db $27
+	db "なせﾞたﾞ!? なせﾞあかい・・・?", C_NL
+	db C_NL
+	db "おれのほのうかﾞあかいわけかﾞない!", C_NL
+TextC_Ending_SacredTreasures5:
+	db $1B
+	db "はらうもの、くさなきﾞ", C_NL
+	db C_NL
+	db "ふうすﾞるもの、やかﾞみ。", C_NL
+TextC_Ending_SacredTreasures6:
+	db $1E
+	db "あななたちはいま1800ねんのときを", C_NL
+	db C_NL
+	db "なそﾞらえたのよ。", C_NL
+TextC_Ending_SacredTreasures7:
+	db $2F
+	db "オロチはやかﾞみのあかいほのうてﾞ", C_NL
+	db C_NL
+	db "ふうしﾞられ、くさなきﾞによって", C_NL
+	db C_NL
+	db "なきﾞはらわれた。", C_NL
+TextC_Ending_SacredTreasures8:
+	db $32
+	db "やかﾞみのあかきほのうは、あなたかﾞ", C_NL
+	db C_NL
+	db "もつひとのふﾞふﾞんのほんのうかﾞ", C_NL
+	db C_NL
+	db "うみたﾞしたものよ。", C_NL
+TextC_Ending_SacredTreasures9:
+	db $32
+	db "あなたかﾞあやつるあおきほのう。", C_NL
+	db C_NL
+	db "それはあなたになかﾞれるオロチの", C_NL
+	db C_NL
+	db "ちからうまれるもの・・・。", C_NL
+TextC_Ending_SacredTreasuresA:
+	db $2A
+	db "あなたのいちそﾞくかﾞ", C_NL
+	db C_NL
+	db "たﾞいたﾞいたんめいなのは、", C_NL
+	db C_NL
+	db "そのオロチのちのせいよ。", C_NL
+TextC_Ending_SacredTreasuresB:
+	db $2A
+	db "このままそのちからをつかい", C_NL
+	db C_NL
+	db "つつﾞけれはﾞやかﾞみ、", C_NL
+	db C_NL
+	db "あなたもいすﾞれ・・・。", C_NL
+TextC_Ending_SacredTreasuresC:
+	db $2C
+	db "くたﾞらないことを・・・。", C_NL
+	db C_NL
+	db "なんたﾞ?・・・な、なにもみえん!?", C_NL
+	db C_NL
+	db "く、くﾞふっ!!", C_NL
+TextC_Ending_SacredTreasuresD:
+	db $0F
+	db "とﾞうした、やかﾞみ・・・!", C_NL
+TextC_Ending_SacredTreasuresE:
+	db $13
+	db "まさか・・・ちの・・・ほﾞうそう!?", C_NL
+TextC_Ending_SacredTreasuresF:
+	db $0C
+	db "くﾞうおおおううう!!", C_NL
+TextC_EndingPost_Boss0:
+	db $17
+	db "オロチ・・・。", C_NL
+	db C_NL
+	db "くちほとﾞにもなかったな。", C_NL
+TextC_EndingPost_Boss1:
+	db $19
+	db "GEESE!!", C_NL
+	db C_NL
+	db "きさま、とﾞういうつもリたﾞ!", C_NL
+TextC_EndingPost_Boss2:
+	db $07
+	db "なんたﾞ!?", C_NL
+TextC_EndingPost_Boss3:
+	db $36
+	db "みょうなトｰナメントにひっはﾟリ", C_NL
+	db C_NL
+	db "こまれるは、てこﾞまにされるわ。", C_NL
+	db C_NL
+	db "いすﾞれかならすﾞけリをつける。", C_NL
+	db C_NL
+TextC_EndingPost_Boss4:
+	db $1D
+	db "いすﾞれてﾞはなく、いま", C_NL
+	db C_NL
+	db "けリをつけようてﾞはないか。", C_NL
+TextC_EndingPost_Boss5:
+	db $0D
+	db "ふっふっふ! よかろう。", C_NL
+TextC_Ending_OLeona0:
+	db $31
+	db "おとﾞろきてﾞすね。これほとﾞ", C_NL
+	db C_NL
+	db "まてﾞとは。 8ねんまえのことは", C_NL
+	db C_NL
+	db "おほﾞえていますか・・・。", C_NL
+TextC_Ending_OLeona1:
+	db $21
+	db "・・・!?  まさか・・・?", C_NL
+	db C_NL
+	db "わたしのかそﾞくをころしたのは。", C_NL
+TextC_Ending_OLeona2:
+	db $35
+	db "かんちかﾞいされてはこまリますね。", C_NL
+	db C_NL
+	db "・・・あなたなのてﾞすよ。", C_NL
+	db C_NL
+	db "しﾞふﾞんのかそﾞくをころしたのは。", C_NL
+TextC_Ending_OLeona3:
+	db $0E
+	db "!・・・うそ・・・・・・。", C_NL
+TextC_Ending_OLeona4:
+	db $2D
+	db "うそてﾞはあリません。", C_NL
+	db C_NL
+	db "あなたのからたﾞにはオロチのち", C_NL
+	db C_NL
+	db "かﾞなかﾞれているのてﾞす。", C_NL
+TextC_Ending_OLeona5:
+	db $25
+	db "てみやけﾞに8ねんまえとおなしﾞ", C_NL
+	db C_NL
+	db "ようにめさﾞめさせてあけﾞましょう。", C_NL
+TextC_Ending_OLeona6:
+	db $25
+	db "ふふふ・・・。", C_NL
+	db C_NL
+	db "いいかせﾞかﾞきましたね。", C_NL
+	db C_NL
+	db "そろそろころあいてﾞす。", C_NL
+TextC_Ending_OLeona8:
+	db $16
+	db "な、なに?", C_NL
+	db C_NL
+	db "・・・なにもみえない・・・!", C_NL
+TextC_Ending_OLeona9:
+	db $1F
+	db "とﾞうした? LEONA・・・!", C_NL
+	db C_NL
+	db "まさか、オロチの・・・。", C_NL
+TextC_CutsceneMrKarate0:
+	db $27
+	db "はっはっは!", C_NL
+	db C_NL
+	db "てﾞんせつのかくとうか!", C_NL
+	db C_NL
+	db "MR.KARATEさんしﾞょう!", C_NL
+TextC_CutsceneMrKarate1:
+	db $32
+	db "わしは、おまえたちのたたかいを", C_NL
+	db C_NL
+	db "つねにみてきた。 さすかﾞゆうしょう", C_NL
+	db C_NL
+	db "したたﾞけのことはある。", C_NL
+TextC_CutsceneMrKarate2:
+	db $32
+	db "たﾞかﾞ、またﾞまたﾞみしﾞゅく!", C_NL
+	db C_NL
+	db "わしかﾞ、けいこをつけてやろう!!", C_NL
+	db C_NL
+	db "てﾞは、いくそﾞ!!!", C_NL
+TextC_CutsceneMrKarateDefeat0:
+	db $2E
+	db "むむ・・・なかなかやリおる。", C_NL
+	db C_NL
+	db "せﾞんたいかいよリ、いちたﾞんと", C_NL
+	db C_NL
+	db "つよくなったな・・・。", C_NL
+TextC_CutsceneMrKarateDefeat1:
+	db $1A
+	db "せﾞんたいかい・・・?", C_NL
+	db C_NL
+	db "やはリ、あなたは・・・?", C_NL
+TextC_CutsceneMrKarateDefeat2:
+	db $30
+	db "ちかﾞうっ! たﾞんしﾞてちかﾞう!", C_NL
+	db C_NL
+	db "わしはてﾞんせつのかくとうか、", C_NL
+	db C_NL
+	db "MR.KARATE!", C_NL
+TextC_CutsceneMrKarateDefeat3:
+	db $0D
+	db "たくまてﾞはない・・・!", C_NL
+TextC_CutsceneMrKarateDefeat4:
+	db $0A
+	db "や、やはリ・・・。", C_NL
+; [TCRF] Unused text, obvious purpose considering where it's placed.
+TextC_Unused_0:
+	db $24
+	db "きょうのところはここまてﾞに", C_NL
+	db C_NL
+	db "しておいてやろう。", C_NL
+	db C_NL
+	db "また、あおう!!", C_NL
+TextC_CutsceneMrKarateDefeat5:
+	db $22
+	db "もうすこしてﾞ、しょうたいかﾞ", C_NL
+	db C_NL
+	db "はﾞれるところてﾞあった・・・。", C_NL
+TextC_CutsceneMrKarateDefeat6:
+	db $18
+	db "こんとﾞはわしもたいかいに", C_NL
+	db C_NL
+	db "さんかするそﾞ。", C_NL
+TextC_CutsceneMrKarateDefeat7:
+	db $2A
+	db "TAKARAロコﾞのひょうしﾞ", C_NL
+	db C_NL
+	db "ちゅうにSELECTホﾞタン", C_NL
+	db C_NL
+	db "を20かいおす。", C_NL
+TextC_CutsceneMrKarateDefeat8:
+	db $28
+	db "SELECTかﾞめんてﾞわしを", C_NL
+	db C_NL
+	db "えらんてﾞ、さいきょうを", C_NL
+	db C_NL
+	db "めさﾞすのたﾞ。", C_NL
+TextC_EndingPost_FFGeese0:
+	db $17
+	db "ここまてﾞきたら、", C_NL
+	db C_NL
+	db "きさまらにようはない。", C_NL
+TextC_EndingPost_FFGeese1:
+	db $1B
+	db "GEESE!", C_NL
+	db C_NL
+	db "こんとﾞこそけリをつけてやるせﾞ!!", C_NL
+TextC_EndingPost_AOFMrBig0:
+	db $1C
+	db "RYO、ROBERT、", C_NL
+	db C_NL
+	db "かリはかえさせてもらうせﾞ。", C_NL
+TextC_EndingPost_AOFMrBig1:
+	db $0B
+	db "のそﾞむところたﾞ!", C_NL
+TextC_EndingPost_KTR0:
+	db $28
+	db "ゆうしょうはもらった。", C_NL
+	db C_NL
+	db "しゅやくはおれたﾞ!", C_NL
+	db C_NL
+	db "けっちゃくをつけようせﾞ!", C_NL
+	db C_NL
+
+; =============== END OF BANK ===============
+; Junk area below.
 L1D7D66: db $D6;X
 L1D7D67: db $B3;X
 L1D7D68: db $BE;X

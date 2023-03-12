@@ -105,6 +105,14 @@ wScreenShakeY EQU $C159 ; Y offset "subtracted" from hScrollY, for vertical scre
 ; a supposed wScreenSect0LYC for the first section is fixed, and always starts at $00
 wScreenSect1LYC EQU $C15A ; Scanline number the second screen section starts. During gameplay, it's the playfield.
 wScreenSect2LYC EQU $C15B ; Scanline number the third screen section starts. During gameplay, it's the meter HUD
+wBonusFightId EQU $C15C ; If set, the ID of the special team. (BONUS_ID_*) These receive special endings and/or bonus matches.
+; Temporary copy of the team char id table (iPlInfo_TeamCharId*) for the active player side.
+; Character ID checks to determine wBonusFightId are made on this.
+wSpecTeamActiveCharId0 EQU $C15D ; 1st team member ID 
+wSpecTeamActiveCharId1 EQU $C15E ; 2nd team member ID 
+wSpecTeamActiveCharId2 EQU $C15F ; 2nd team member ID 
+
+
 wRoundFinal EQU $C160 ; If set, this is the "FINAL!!" round, displayed when all characters in both sides are marked as defeated (requires a draw)
 wStageDraw EQU $C161 ; If set, forces the "DRAW" screen to appear in single mode when the stage ends. Single-mode specific.
 wLastWinner EQU $C162 ; Marks using bits the player who won the last round.
@@ -144,10 +152,11 @@ wPlaySlowdownSpeed EQU $C17B ; Determines how much the game should slow down. Ex
 
 wStageBGP EQU $C17C ; Determines palette for playfield (used to handle screen flashing)
 wPauseFlags EQU $C17D ; Contains flags the pause state
-wRoundSeqId EQU $C17F ; Index to the char sequence table, essentially the number of beat opponents after clearing a stage
-wRoundSeqTbl EQU $C180 ; Sequence of CPU opponents in order, containing initially CHARSEL_ID_* for normal rounds and CHAR_ID_* for bosses
+wUnused_ContinueUsed EQU $C17E ; If set, a continue was used. Not read by anything.
+wCharSeqId EQU $C17F ; "Stage sequence number". Index to the char sequence table, essentially the number of beat opponents after clearing a stage
+wCharSeqTbl EQU $C180 ; "Stage sequence". Sequence of CPU opponents in order, containing initially CHARSEL_ID_* for normal rounds and CHAR_ID_* for bosses
 
-wCharIdExtra EQU $C191 ; Part of wRoundSeqTbl, the optional opponent for certain team combinations. 
+wCharIdExtra EQU $C191 ; Part of wCharSeqTbl, the optional opponent for certain team combinations. 
 wCharSelIdMapTbl EQU $C194 ; Maps cursor locations in the char select screen (CHARSEL_ID_*) to actual character IDs (CHAR_ID_*)
                            ; $15 bytes ($C194-$C1A8), this is updated when flipping a tile.
 
@@ -226,6 +235,12 @@ wPlayTmpColiB_RadV EQU $C1E1
 		
 wIntroLoopOBJAnim EQU $C1B3 ; If set in the intro, sprite animations are set to loop
 wUnknownTimer_C1B3 EQU $C1B3
+wWinPlInfoPtr_Low EQU $C1B3 ; Ptr to the wPlInfo that won the stage (low byte)
+wWinPlInfoPtr_High EQU $C1B4 ; "" (high byte)
+wWinContinueTimer EQU $C1B3 ; Continue timer - seconds left
+wWinContinueTimerSub EQU $C1B4 ; Continue timer - frames left before decrementing second
+
+
 wTitleMenuOptId EQU $C1B4 ; Cursor location in title screen
 wUnknown_C1B4 EQU $C1B4
 wTitleMenuCursorXBak EQU $C1B5 ; Backup location of cursor X position
@@ -269,6 +284,11 @@ wOptionsSGBPacketSnd EQU $C1CA ; Start of SGB packet used when selecting a song 
 wOptionsSGBPacketSndIdA  EQU $C1CB ; Byte 1 determines Sound ID A
 wOptionsSGBPacketSndIdB  EQU $C1CC ; Byte 2 determines Sound ID B
 wOptionsSGBPacketSndBank EQU $C1CC ; Byte 3 determines Sound Bank
+
+wCutMoveLargeChars EQU $C1CA ; If enabled, the large Kagura and Goenitz cutscene characters will be moved
+wCutFlashTimer EQU $C1CB ; Timer that handles the palette flash effect during cutscenes.
+wCutFlash2Timer EQU $C1CC ; Timer that handles the secondary palette flash during the ending cutscene.
+
 
 wSnd_Unk_Unused_D480 EQU $D480 ; $80 is always written here, but never read back
 wSnd_Unused_ChUsed EQU $D481 ; Appears to be a bitmask intended to mark the used sound channels, but it is only set properly in unreachable code.
@@ -319,13 +339,15 @@ wOBJInfo_ChizuruFlip EQU wOBJInfo4
 wOBJInfo_RoundText EQU wOBJInfo3 ; Pre-round text and post-round text
 wOBJInfo_Pl1Cross EQU wOBJInfo4
 wOBJInfo_Pl2Cross EQU wOBJInfo5
-
-
 wOBJInfo_Pl1Projectile EQU wOBJInfo2
 wOBJInfo_Pl2Projectile EQU wOBJInfo3
 wOBJInfo_Pl1SuperSparkle EQU wOBJInfo4
 wOBJInfo_Pl2SuperSparkle EQU wOBJInfo5
 wOBJInfo_TerryHat EQU wOBJInfo2
+; Win Screen
+wOBJInfo_Winner EQU wOBJInfo_Pl1
+; Cutscene
+wOBJInfo_Kagura EQU wOBJInfo_Pl1
 
 wGFXBufInfo_Pl1 EQU $D8C0
 wGFXBufInfo_Pl2 EQU $D8E0

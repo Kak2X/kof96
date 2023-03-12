@@ -9404,7 +9404,7 @@ Play_ChkPause:
 	; As long as the game is paused, this main loop takes exclusive control.
 	;
 	ld   hl, wPauseFlags
-	set  PFB_1P, [hl]		; Set pause flag
+	set  PLB1, [hl]		; Set pause flag
 	call Play_Pause
 .mainLoop1P:
 	ldh  a, [hJoyNewKeys]
@@ -9421,7 +9421,7 @@ Play_ChkPause:
 .unpause1P:
 	call Play_Unpause
 	ld   hl, wPauseFlags
-	res  PFB_1P, [hl]		; Unset pause flag
+	res  PLB1, [hl]		; Unset pause flag
 	ret
 	
 .chk2P:
@@ -9432,7 +9432,7 @@ Play_ChkPause:
 	; As long as the game is paused, this main loop takes exclusive control.
 	;
 	ld   hl, wPauseFlags
-	set  PFB_2P, [hl]		; Set pause flag
+	set  PLB2, [hl]		; Set pause flag
 	call Play_Pause
 .mainLoop2P:
 	ldh  a, [hJoyNewKeys2]
@@ -9449,7 +9449,7 @@ Play_ChkPause:
 .unpause2P:
 	call Play_Unpause
 	ld   hl, wPauseFlags
-	res  PFB_2P, [hl]		; Unset pause flag
+	res  PLB2, [hl]		; Unset pause flag
 	ret
 .ret:
 	ret
@@ -9467,7 +9467,7 @@ Play_Pause:
 	; Draw "PAUSE" on the HUD.
 	; This gets drawn to the side of the player that paused the game.
 	ld   a, [wPauseFlags]
-	bit  PFB_1P, a		; Did 1P pause the game?
+	bit  PLB1, a		; Did 1P pause the game?
 	jp   z, .bg2P		; If not, jump
 .bg1P:
 	ld   hl, $9C46		; HL = Tilemap ptr for 1P side
@@ -9505,7 +9505,7 @@ Play_Unpause:
 	
 	; Blank out "PAUSE" from the HUD
 	ld   a, [wPauseFlags]
-	bit  PFB_1P, a		; Did 1P pause the game?
+	bit  PLB1, a		; Did 1P pause the game?
 	jp   z, .bg2P		; If not, jump
 .bg1P:
 	ld   hl, $9C46		; HL = Tilemap ptr for 1P side
@@ -11597,9 +11597,7 @@ Play_ChkEnd_ChkNewRound:
 	
 	;--
 	; [POI] This check is here to switch to the FINAL!! round when both teams are
-	;       made of < 3 characters... but this is impossible to do in-game.
-	;       The check *can* jump, but only before starting a mirror match in team mode
-	;       (and .chkBossFinal won't ever call .chkFinalRoundRes)
+	;       made of < 3 characters, which can happen in the extra stage on 1-VS-2 matches.
 	cp   a, b					; New1PChar == New2PChar?
 	jp   z, .chkBossFinal		; If so, jump
 	;--
@@ -11690,7 +11688,7 @@ Play_ChkEnd_ChkNewRound:
 	ld   [hl], $02			; Otherwise, cap to $02
 .win1P_setLast:
 	; Set 1P as the last winner.
-	; This is what determines if the round sequence should continue or not,
+	; This is what determines if the stage sequence should continue or not,
 	; even in case of the "DRAW" screen showing up.
 	ld   hl, wLastWinner
 	set  PLB1, [hl]
@@ -11727,8 +11725,8 @@ Play_ChkEnd_ChkNewRound:
 	call Play_PrepForWinScreen
 	
 	; Initialize the win screen
-	ld   b, BANK(L1D509F) ; BANK $1D
-	ld   hl, L1D509F
+	ld   b, BANK(Module_Win) ; BANK $1D
+	ld   hl, Module_Win
 	rst  $00
 Play_ChkEnd_Ret:
 	ret
