@@ -1,4 +1,4 @@
-L0A4000: db $4A
+OBJLstPtrTable_Ryo_Idle: db $4A
 L0A4001: db $49
 L0A4002: db $67
 L0A4003: db $49
@@ -20,7 +20,7 @@ L0A4012: db $67
 L0A4013: db $49
 L0A4014: db $FF;X
 L0A4015: db $FF
-L0A4016: db $B6
+OBJLstPtrTable_Ryo_WalkF: db $B6
 L0A4017: db $49
 L0A4018: db $CA
 L0A4019: db $49
@@ -38,7 +38,7 @@ L0A4024: db $F3
 L0A4025: db $49
 L0A4026: db $FF;X
 L0A4027: db $FF
-L0A4028: db $DC
+OBJLstPtrTable_Ryo_WalkB: db $DC
 L0A4029: db $49
 L0A402A: db $F3
 L0A402B: db $49
@@ -56,13 +56,13 @@ L0A4036: db $CA
 L0A4037: db $49
 L0A4038: db $FF;X
 L0A4039: db $FF
-L0A403A: db $11
+OBJLstPtrTable_Ryo_Crouch: db $11
 L0A403B: db $4A
 L0A403C: db $2F
 L0A403D: db $4A
 L0A403E: db $FF;X
 L0A403F: db $FF;X
-L0A4040: db $11
+OBJLstPtrTable_Ryo_JumpN: db $11
 L0A4041: db $4A
 L0A4042: db $2F
 L0A4043: db $4A
@@ -96,7 +96,7 @@ L0A405E: db $2F
 L0A405F: db $4A
 L0A4060: db $FF;X
 L0A4061: db $FF;X
-L0A4062: db $11;X
+OBJLstPtrTable_Ryo_JumpF: db $11;X
 L0A4063: db $4A;X
 L0A4064: db $2F;X
 L0A4065: db $4A;X
@@ -130,7 +130,7 @@ L0A4080: db $2F
 L0A4081: db $4A
 L0A4082: db $FF;X
 L0A4083: db $FF;X
-L0A4084: db $11;X
+OBJLstPtrTable_Ryo_JumpB: db $11;X
 L0A4085: db $4A;X
 L0A4086: db $2F;X
 L0A4087: db $4A;X
@@ -164,19 +164,19 @@ L0A40A2: db $2F
 L0A40A3: db $4A
 L0A40A4: db $FF;X
 L0A40A5: db $FF;X
-L0A40A6: db $4C
+OBJLstPtrTable_Ryo_BlockG: db $4C
 L0A40A7: db $4A
 L0A40A8: db $74
 L0A40A9: db $4A
 L0A40AA: db $FF;X
 L0A40AB: db $FF;X
-L0A40AC: db $60
+OBJLstPtrTable_Ryo_BlockC: db $60
 L0A40AD: db $4A
 L0A40AE: db $86
 L0A40AF: db $4A
 L0A40B0: db $FF;X
 L0A40B1: db $FF;X
-L0A40B2: db $6A;X
+OBJLstPtrTable_Ryo_BlockA: db $6A;X
 L0A40B3: db $4A;X
 L0A40B4: db $98;X
 L0A40B5: db $4A;X
@@ -186,7 +186,7 @@ L0A40B8: db $2F;X
 L0A40B9: db $4A;X
 L0A40BA: db $FF;X
 L0A40BB: db $FF;X
-L0A40BC: db $A9
+OBJLstPtrTable_Ryo_RunF: db $A9
 L0A40BD: db $51
 L0A40BE: db $C6
 L0A40BF: db $51
@@ -204,7 +204,7 @@ L0A40CA: db $FF
 L0A40CB: db $FF
 L0A40CC: db $FF;X
 L0A40CD: db $FF
-L0A40CE: db $B6
+OBJLstPtrTable_Ryo_HopB: db $B6
 L0A40CF: db $49
 L0A40D0: db $02
 L0A40D1: db $4A
@@ -218,7 +218,7 @@ L0A40D8: db $2F
 L0A40D9: db $4A
 L0A40DA: db $FF;X
 L0A40DB: db $FF;X
-L0A40DC: db $B5
+OBJLstPtrTable_Ryo_ChargeMeter: db $B5
 L0A40DD: db $4B
 L0A40DE: db $CF
 L0A40DF: db $4B
@@ -228,7 +228,7 @@ L0A40E2: db $CF
 L0A40E3: db $4B
 L0A40E4: db $FF;X
 L0A40E5: db $FF
-L0A40E6: db $F8
+OBJLstPtrTable_Ryo_Taunt: db $F8
 L0A40E7: db $4B
 L0A40E8: db $09
 L0A40E9: db $4C
@@ -250,7 +250,7 @@ L0A40F8: db $CA
 L0A40F9: db $49
 L0A40FA: db $FF;X
 L0A40FB: db $FF;X
-L0A40FC: db $A9
+OBJLstPtrTable_Ryo_Intro: db $A9
 L0A40FD: db $4C
 L0A40FE: db $C0
 L0A40FF: db $4C
@@ -292,7 +292,7 @@ L0A4122: db $CA
 L0A4123: db $49
 L0A4124: db $FF;X
 L0A4125: db $FF;X
-L0A4126: db $A9
+OBJLstPtrTable_Ryo_WinA: db $A9
 L0A4127: db $4C
 L0A4128: db $C0
 L0A4129: db $4C
@@ -318,7 +318,7 @@ L0A413C: db $FF
 L0A413D: db $FF
 L0A413E: db $FF;X
 L0A413F: db $FF;X
-L0A4140: db $4C
+OBJLstPtrTable_Ryo_WinB: db $4C
 L0A4141: db $4D
 L0A4142: db $60
 L0A4143: db $4D
@@ -364,7 +364,7 @@ L0A416A: db $FF
 L0A416B: db $FF
 L0A416C: db $FF;X
 L0A416D: db $FF
-L0A416E: db $E9
+OBJLstPtrTable_Ryo_PunchL: db $E9
 L0A416F: db $4C
 L0A4170: db $11
 L0A4171: db $4D
@@ -378,7 +378,7 @@ L0A4178: db $11
 L0A4179: db $4D
 L0A417A: db $FF;X
 L0A417B: db $FF;X
-L0A417C: db $4C
+OBJLstPtrTable_Ryo_PunchH: db $4C
 L0A417D: db $4D
 L0A417E: db $60
 L0A417F: db $4D
@@ -396,7 +396,7 @@ L0A418A: db $11
 L0A418B: db $4D
 L0A418C: db $FF;X
 L0A418D: db $FF;X
-L0A418E: db $AF
+OBJLstPtrTable_Ryo_KickL: db $AF
 L0A418F: db $4D
 L0A4190: db $D0
 L0A4191: db $4D
@@ -410,7 +410,7 @@ L0A4198: db $D0
 L0A4199: db $4D
 L0A419A: db $FF;X
 L0A419B: db $FF;X
-L0A419C: db $0B
+OBJLstPtrTable_Ryo_KickH: db $0B
 L0A419D: db $4E
 L0A419E: db $1C
 L0A419F: db $4E
@@ -428,7 +428,7 @@ L0A41AA: db $D0
 L0A41AB: db $4D
 L0A41AC: db $FF;X
 L0A41AD: db $FF;X
-L0A41AE: db $FD
+OBJLstPtrTable_Ryo_PunchCL: db $FD
 L0A41AF: db $4C
 L0A41B0: db $65
 L0A41B1: db $4E
@@ -442,7 +442,7 @@ L0A41B8: db $65
 L0A41B9: db $4E
 L0A41BA: db $FF;X
 L0A41BB: db $FF;X
-L0A41BC: db $77
+OBJLstPtrTable_Ryo_PunchCH: db $77
 L0A41BD: db $4E
 L0A41BE: db $A7
 L0A41BF: db $4D
@@ -460,7 +460,7 @@ L0A41CA: db $A7
 L0A41CB: db $4D
 L0A41CC: db $FF;X
 L0A41CD: db $FF;X
-L0A41CE: db $EC
+OBJLstPtrTable_Ryo_KickCL: db $EC
 L0A41CF: db $4E
 L0A41D0: db $0A
 L0A41D1: db $4F
@@ -474,7 +474,7 @@ L0A41D8: db $0A
 L0A41D9: db $4F
 L0A41DA: db $FF;X
 L0A41DB: db $FF;X
-L0A41DC: db $00
+OBJLstPtrTable_Ryo_KickCH: db $00
 L0A41DD: db $4F
 L0A41DE: db $1C
 L0A41DF: db $4F
@@ -492,7 +492,7 @@ L0A41EA: db $8A
 L0A41EB: db $4F
 L0A41EC: db $FF;X
 L0A41ED: db $FF;X
-L0A41EE: db $9F
+OBJLstPtrTable_Ryo_PunchA: db $9F
 L0A41EF: db $4F
 L0A41F0: db $B0
 L0A41F1: db $4F
@@ -514,7 +514,7 @@ L0A4200: db $2F
 L0A4201: db $4A
 L0A4202: db $FF;X
 L0A4203: db $FF;X
-L0A4204: db $C8
+OBJLstPtrTable_Ryo_KickA: db $C8
 L0A4205: db $4F
 L0A4206: db $DF
 L0A4207: db $4F
@@ -536,7 +536,7 @@ L0A4216: db $2F
 L0A4217: db $4A
 L0A4218: db $FF;X
 L0A4219: db $FF;X
-L0A421A: db $55
+OBJLstPtrTable_Ryo_AttackA: db $55
 L0A421B: db $50
 L0A421C: db $66
 L0A421D: db $50
@@ -558,7 +558,7 @@ L0A422C: db $2F
 L0A422D: db $4A
 L0A422E: db $FF;X
 L0A422F: db $FF;X
-L0A4230: db $C6
+OBJLstPtrTable_Ryo_AttackG: db $C6
 L0A4231: db $4D
 L0A4232: db $F1
 L0A4233: db $4F
@@ -576,7 +576,7 @@ L0A423E: db $23
 L0A423F: db $4D
 L0A4240: db $FF;X
 L0A4241: db $FF;X
-L0A4242: db $0D
+OBJLstPtrTable_Ryo_RollF: db $0D
 L0A4243: db $4B
 L0A4244: db $44
 L0A4245: db $4B
@@ -598,7 +598,7 @@ L0A4254: db $2F
 L0A4255: db $4A
 L0A4256: db $FF;X
 L0A4257: db $FF;X
-L0A4258: db $81
+OBJLstPtrTable_Ryo_RollB: db $81
 L0A4259: db $4B
 L0A425A: db $AD
 L0A425B: db $4B
@@ -620,13 +620,13 @@ L0A426A: db $2F
 L0A426B: db $4A
 L0A426C: db $FF;X
 L0A426D: db $FF;X
-L0A426E: db $0F
+OBJLstPtrTable_Ryo_GuardBreakG: db $0F
 L0A426F: db $51
 L0A4270: db $2D
 L0A4271: db $51
 L0A4272: db $FF;X
 L0A4273: db $FF;X
-L0A4274: db $4A
+OBJLstPtrTable_Ryo_Dizzy: db $4A
 L0A4275: db $49
 L0A4276: db $67
 L0A4277: db $49
@@ -634,19 +634,19 @@ L0A4278: db $0F;X
 L0A4279: db $51;X
 L0A427A: db $2D;X
 L0A427B: db $51;X
-L0A427C: db $AD
+OBJLstPtrTable_Ryo_TimeOver: db $AD
 L0A427D: db $50
 L0A427E: db $E2
 L0A427F: db $50
 L0A4280: db $FF;X
 L0A4281: db $FF;X
-L0A4282: db $23;X
+OBJLstPtrTable_Ryo_Hitlow: db $23;X
 L0A4283: db $51;X
 L0A4284: db $3F;X
 L0A4285: db $51;X
 L0A4286: db $FF;X
 L0A4287: db $FF;X
-L0A4288: db $0F;X
+OBJLstPtrTable_Ryo_GuardBreakA: db $0F;X
 L0A4289: db $51;X
 L0A428A: db $2D;X
 L0A428B: db $51;X
@@ -656,7 +656,7 @@ L0A428E: db $2F;X
 L0A428F: db $4A;X
 L0A4290: db $FF;X
 L0A4291: db $FF;X
-L0A4292: db $0F
+OBJLstPtrTable_Ryo_BackjumpRecA: db $0F
 L0A4293: db $51
 L0A4294: db $2D
 L0A4295: db $51
@@ -686,7 +686,7 @@ L0A42AC: db $2F
 L0A42AD: db $4A
 L0A42AE: db $FF;X
 L0A42AF: db $FF;X
-L0A42B0: db $0F
+OBJLstPtrTable_Ryo_DropMain: db $0F
 L0A42B1: db $51
 L0A42B2: db $2D
 L0A42B3: db $51
@@ -698,7 +698,7 @@ L0A42B8: db $86
 L0A42B9: db $51
 L0A42BA: db $97
 L0A42BB: db $51
-L0A42BC: db $51
+OBJLstPtrTable_Ryo_HitMultigs: db $51
 L0A42BD: db $51
 L0A42BE: db $6C
 L0A42BF: db $51
@@ -708,7 +708,7 @@ L0A42C2: db $97
 L0A42C3: db $51
 L0A42C4: db $FF;X
 L0A42C5: db $FF;X
-L0A42C6: db $AD
+OBJLstPtrTable_Ryo_HitSwoopup: db $AD
 L0A42C7: db $50
 L0A42C8: db $E2
 L0A42C9: db $50
@@ -720,7 +720,7 @@ L0A42CE: db $D8
 L0A42CF: db $50
 L0A42D0: db $07
 L0A42D1: db $51
-L0A42D2: db $CE
+OBJLstPtrTable_Ryo_ThrowEndA: db $CE
 L0A42D3: db $50
 L0A42D4: db $FF
 L0A42D5: db $50
@@ -738,7 +738,7 @@ L0A42E0: db $97
 L0A42E1: db $51
 L0A42E2: db $FF;X
 L0A42E3: db $FF
-L0A42E4: db $AD
+OBJLstPtrTable_Ryo_DropDbg: db $AD
 L0A42E5: db $50
 L0A42E6: db $E2
 L0A42E7: db $50
@@ -752,13 +752,13 @@ L0A42EE: db $97
 L0A42EF: db $51
 L0A42F0: db $FF;X
 L0A42F1: db $FF;X
-L0A42F2: db $62
+OBJLstPtrTable_Ryo_ThrowRotL: db $62
 L0A42F3: db $51
 L0A42F4: db $7E
 L0A42F5: db $51
 L0A42F6: db $FF;X
 L0A42F7: db $FF;X
-L0A42F8: db $11
+OBJLstPtrTable_Ryo_Wakeup: db $11
 L0A42F9: db $4A
 L0A42FA: db $2F
 L0A42FB: db $4A
@@ -768,7 +768,7 @@ L0A42FE: db $2F
 L0A42FF: db $4A
 L0A4300: db $FF;X
 L0A4301: db $FF;X
-L0A4302: db $12
+OBJLstPtrTable_Ryo_ThrowG: db $12
 L0A4303: db $52
 L0A4304: db $26
 L0A4305: db $52
@@ -786,7 +786,7 @@ L0A4310: db $44
 L0A4311: db $4A
 L0A4312: db $FF;X
 L0A4313: db $FF;X
-L0A4314: db $67
+OBJLstPtrTable_Ryo_KoOuKenL: db $67
 L0A4315: db $52
 L0A4316: db $87
 L0A4317: db $52
@@ -808,7 +808,7 @@ L0A4326: db $11
 L0A4327: db $4D
 L0A4328: db $FF;X
 L0A4329: db $FF;X
-L0A432A: db $11
+OBJLstPtrTable_Ryo_MouKoRaiJinGouL: db $11
 L0A432B: db $53
 L0A432C: db $87
 L0A432D: db $52
@@ -834,7 +834,7 @@ L0A4340: db $11
 L0A4341: db $4D
 L0A4342: db $FF;X
 L0A4343: db $FF;X
-L0A4344: db $11
+OBJLstPtrTable_Ryo_HienShippuKyakuL: db $11
 L0A4345: db $4A
 L0A4346: db $2F
 L0A4347: db $4A
@@ -860,7 +860,7 @@ L0A435A: db $2F
 L0A435B: db $4A
 L0A435C: db $FF;X
 L0A435D: db $FF;X
-L0A435E: db $11
+OBJLstPtrTable_Ryo_KoHouL: db $11
 L0A435F: db $4A
 L0A4360: db $2F
 L0A4361: db $4A
@@ -886,7 +886,7 @@ L0A4374: db $2F
 L0A4375: db $4A
 L0A4376: db $FF;X
 L0A4377: db $FF;X
-L0A4378: db $C6
+OBJLstPtrTable_Ryo_KyokukenRyuRenbuKenL: db $C6
 L0A4379: db $4D
 L0A437A: db $F1
 L0A437B: db $4F
@@ -920,7 +920,7 @@ L0A4396: db $FF
 L0A4397: db $FF
 L0A4398: db $FF;X
 L0A4399: db $FF;X
-L0A439A: db $2E
+OBJLstPtrTable_Ryo_KoHouEl: db $2E
 L0A439B: db $53
 L0A439C: db $FF
 L0A439D: db $FF
@@ -954,7 +954,7 @@ L0A43B8: db $2F
 L0A43B9: db $4A
 L0A43BA: db $FF;X
 L0A43BB: db $FF;X
-L0A43BC: db $4C
+OBJLstPtrTable_Ryo_RyuKoRanbuS: db $4C
 L0A43BD: db $4A
 L0A43BE: db $74
 L0A43BF: db $4A
@@ -1048,7 +1048,7 @@ L0A4416: db $2F
 L0A4417: db $4A
 L0A4418: db $FF;X
 L0A4419: db $FF;X
-L0A441A: db $4C
+OBJLstPtrTable_Ryo_RyuKoRanbuD: db $4C
 L0A441B: db $4A
 L0A441C: db $74
 L0A441D: db $4A
@@ -1234,7 +1234,7 @@ L0A44D0: db $2F;X
 L0A44D1: db $4A;X
 L0A44D2: db $FF;X
 L0A44D3: db $FF;X
-L0A44D4: db $4C
+OBJLstPtrTable_Ryo_HaohShokohKenS: db $4C
 L0A44D5: db $4A
 L0A44D6: db $74
 L0A44D7: db $4A
@@ -1256,7 +1256,7 @@ L0A44E6: db $23
 L0A44E7: db $4D
 L0A44E8: db $FF;X
 L0A44E9: db $FF;X
-L0A44EA: db $72
+OBJLstPtrTable_MrKarate_Idle: db $72
 L0A44EB: db $54
 L0A44EC: db $FF
 L0A44ED: db $FF
@@ -1274,7 +1274,7 @@ L0A44F8: db $FF
 L0A44F9: db $FF
 L0A44FA: db $FF;X
 L0A44FB: db $FF
-L0A44FC: db $D2
+OBJLstPtrTable_MrKarate_WalkF: db $D2
 L0A44FD: db $54
 L0A44FE: db $CA
 L0A44FF: db $49
@@ -1292,7 +1292,7 @@ L0A450A: db $F3
 L0A450B: db $49
 L0A450C: db $FF;X
 L0A450D: db $FF
-L0A450E: db $E6
+OBJLstPtrTable_MrKarate_WalkB: db $E6
 L0A450F: db $54
 L0A4510: db $F3
 L0A4511: db $49
@@ -1310,13 +1310,13 @@ L0A451C: db $CA
 L0A451D: db $49
 L0A451E: db $FF;X
 L0A451F: db $FF
-L0A4520: db $FD
+OBJLstPtrTable_MrKarate_Crouch: db $FD
 L0A4521: db $54
 L0A4522: db $2F
 L0A4523: db $4A
 L0A4524: db $FF;X
 L0A4525: db $FF;X
-L0A4526: db $FD
+OBJLstPtrTable_MrKarate_JumpN: db $FD
 L0A4527: db $54
 L0A4528: db $2F
 L0A4529: db $4A
@@ -1350,7 +1350,7 @@ L0A4544: db $2F
 L0A4545: db $4A
 L0A4546: db $FF;X
 L0A4547: db $FF;X
-L0A4548: db $FD;X
+OBJLstPtrTable_MrKarate_JumpF: db $FD;X
 L0A4549: db $54;X
 L0A454A: db $2F;X
 L0A454B: db $4A;X
@@ -1384,7 +1384,7 @@ L0A4566: db $2F
 L0A4567: db $4A
 L0A4568: db $FF;X
 L0A4569: db $FF;X
-L0A456A: db $FD;X
+OBJLstPtrTable_MrKarate_JumpB: db $FD;X
 L0A456B: db $54;X
 L0A456C: db $2F;X
 L0A456D: db $4A;X
@@ -1418,19 +1418,19 @@ L0A4588: db $2F
 L0A4589: db $4A
 L0A458A: db $FF;X
 L0A458B: db $FF;X
-L0A458C: db $1B
+OBJLstPtrTable_MrKarate_BlockG: db $1B
 L0A458D: db $55
 L0A458E: db $74
 L0A458F: db $4A
 L0A4590: db $FF;X
 L0A4591: db $FF;X
-L0A4592: db $2F
+OBJLstPtrTable_MrKarate_BlockC: db $2F
 L0A4593: db $55
 L0A4594: db $86
 L0A4595: db $4A
 L0A4596: db $FF;X
 L0A4597: db $FF;X
-L0A4598: db $39;X
+OBJLstPtrTable_MrKarate_BlockA: db $39;X
 L0A4599: db $55;X
 L0A459A: db $98;X
 L0A459B: db $4A;X
@@ -1440,7 +1440,7 @@ L0A459E: db $2F;X
 L0A459F: db $4A;X
 L0A45A0: db $FF;X
 L0A45A1: db $FF;X
-L0A45A2: db $61
+OBJLstPtrTable_MrKarate_RunF: db $61
 L0A45A3: db $59
 L0A45A4: db $7F
 L0A45A5: db $59
@@ -1458,7 +1458,7 @@ L0A45B0: db $94
 L0A45B1: db $59
 L0A45B2: db $FF;X
 L0A45B3: db $FF
-L0A45B4: db $B8
+OBJLstPtrTable_MrKarate_HopB: db $B8
 L0A45B5: db $59
 L0A45B6: db $FF
 L0A45B7: db $FF
@@ -1472,7 +1472,7 @@ L0A45BE: db $2F
 L0A45BF: db $4A
 L0A45C0: db $FF;X
 L0A45C1: db $FF;X
-L0A45C2: db $BA
+OBJLstPtrTable_MrKarate_ChargeMeter: db $BA
 L0A45C3: db $55
 L0A45C4: db $D4
 L0A45C5: db $55
@@ -1482,7 +1482,7 @@ L0A45C8: db $D4
 L0A45C9: db $55
 L0A45CA: db $FF;X
 L0A45CB: db $FF
-L0A45CC: db $00
+OBJLstPtrTable_MrKarate_Taunt: db $00
 L0A45CD: db $56
 L0A45CE: db $11
 L0A45CF: db $56
@@ -1496,7 +1496,7 @@ L0A45D6: db $11
 L0A45D7: db $4D
 L0A45D8: db $FF;X
 L0A45D9: db $FF;X
-L0A45DA: db $6E
+OBJLstPtrTable_MrKarate_Intro: db $6E
 L0A45DB: db $56
 L0A45DC: db $7F
 L0A45DD: db $56
@@ -1546,7 +1546,7 @@ L0A4608: db $74
 L0A4609: db $4A
 L0A460A: db $FF;X
 L0A460B: db $FF;X
-L0A460C: db $6E
+OBJLstPtrTable_MrKarate_DemoIntro: db $6E
 L0A460D: db $56
 L0A460E: db $7F
 L0A460F: db $56
@@ -1568,7 +1568,7 @@ L0A461E: db $BF
 L0A461F: db $56
 L0A4620: db $FF;X
 L0A4621: db $FF
-L0A4622: db $48
+OBJLstPtrTable_MrKarate_WinA: db $48
 L0A4623: db $57
 L0A4624: db $60
 L0A4625: db $4D
@@ -1614,7 +1614,7 @@ L0A464C: db $45
 L0A464D: db $56
 L0A464E: db $FF;X
 L0A464F: db $FF
-L0A4650: db $FF
+OBJLstPtrTable_MrKarate_PunchL: db $FF
 L0A4651: db $56
 L0A4652: db $11
 L0A4653: db $4D
@@ -1628,7 +1628,7 @@ L0A465A: db $11
 L0A465B: db $4D
 L0A465C: db $FF;X
 L0A465D: db $FF;X
-L0A465E: db $48
+OBJLstPtrTable_MrKarate_PunchH: db $48
 L0A465F: db $57
 L0A4660: db $60
 L0A4661: db $4D
@@ -1646,7 +1646,7 @@ L0A466C: db $11
 L0A466D: db $4D
 L0A466E: db $FF;X
 L0A466F: db $FF;X
-L0A4670: db $79
+OBJLstPtrTable_MrKarate_KickL: db $79
 L0A4671: db $57
 L0A4672: db $D0
 L0A4673: db $4D
@@ -1660,7 +1660,7 @@ L0A467A: db $D0
 L0A467B: db $4D
 L0A467C: db $FF;X
 L0A467D: db $FF;X
-L0A467E: db $AB
+OBJLstPtrTable_MrKarate_KickH: db $AB
 L0A467F: db $57
 L0A4680: db $1C
 L0A4681: db $4E
@@ -1678,7 +1678,7 @@ L0A468C: db $D0;X
 L0A468D: db $4D;X
 L0A468E: db $FF;X
 L0A468F: db $FF;X
-L0A4690: db $13
+OBJLstPtrTable_MrKarate_PunchCL: db $13
 L0A4691: db $57
 L0A4692: db $65
 L0A4693: db $4E
@@ -1692,7 +1692,7 @@ L0A469A: db $65
 L0A469B: db $4E
 L0A469C: db $FF;X
 L0A469D: db $FF;X
-L0A469E: db $D3
+OBJLstPtrTable_MrKarate_PunchCH: db $D3
 L0A469F: db $57
 L0A46A0: db $A7
 L0A46A1: db $4D
@@ -1710,7 +1710,7 @@ L0A46AC: db $A7
 L0A46AD: db $4D
 L0A46AE: db $FF;X
 L0A46AF: db $FF;X
-L0A46B0: db $FE
+OBJLstPtrTable_MrKarate_KickCL: db $FE
 L0A46B1: db $57
 L0A46B2: db $0A
 L0A46B3: db $4F
@@ -1724,7 +1724,7 @@ L0A46BA: db $0A
 L0A46BB: db $4F
 L0A46BC: db $FF;X
 L0A46BD: db $FF;X
-L0A46BE: db $15
+OBJLstPtrTable_MrKarate_KickCH: db $15
 L0A46BF: db $58
 L0A46C0: db $1C
 L0A46C1: db $4F
@@ -1742,7 +1742,7 @@ L0A46CC: db $8A
 L0A46CD: db $4F
 L0A46CE: db $FF;X
 L0A46CF: db $FF;X
-L0A46D0: db $58
+OBJLstPtrTable_MrKarate_PunchA: db $58
 L0A46D1: db $58
 L0A46D2: db $B0
 L0A46D3: db $4F
@@ -1764,7 +1764,7 @@ L0A46E2: db $2F
 L0A46E3: db $4A
 L0A46E4: db $FF;X
 L0A46E5: db $FF;X
-L0A46E6: db $69
+OBJLstPtrTable_MrKarate_KickA: db $69
 L0A46E7: db $58
 L0A46E8: db $DF
 L0A46E9: db $4F
@@ -1786,7 +1786,7 @@ L0A46F8: db $2F
 L0A46F9: db $4A
 L0A46FA: db $FF;X
 L0A46FB: db $FF;X
-L0A46FC: db $C0
+OBJLstPtrTable_MrKarate_AttackA: db $C0
 L0A46FD: db $58
 L0A46FE: db $66
 L0A46FF: db $50
@@ -1808,7 +1808,7 @@ L0A470E: db $2F
 L0A470F: db $4A
 L0A4710: db $FF;X
 L0A4711: db $FF;X
-L0A4712: db $90
+OBJLstPtrTable_MrKarate_AttackG: db $90
 L0A4713: db $57
 L0A4714: db $F1
 L0A4715: db $4F
@@ -1830,7 +1830,7 @@ L0A4724: db $23;X
 L0A4725: db $4D;X
 L0A4726: db $FF;X
 L0A4727: db $FF;X
-L0A4728: db $FD
+OBJLstPtrTable_MrKarate_RollF: db $FD
 L0A4729: db $54
 L0A472A: db $2F
 L0A472B: db $4A
@@ -1852,7 +1852,7 @@ L0A473A: db $2F
 L0A473B: db $4A
 L0A473C: db $FF;X
 L0A473D: db $FF;X
-L0A473E: db $FD
+OBJLstPtrTable_MrKarate_RollB: db $FD
 L0A473F: db $54
 L0A4740: db $2F
 L0A4741: db $4A
@@ -1874,13 +1874,13 @@ L0A4750: db $2F
 L0A4751: db $4A
 L0A4752: db $FF;X
 L0A4753: db $FF;X
-L0A4754: db $17
+OBJLstPtrTable_MrKarate_GuardBreakG: db $17
 L0A4755: db $59
 L0A4756: db $2D
 L0A4757: db $51
 L0A4758: db $FF;X
 L0A4759: db $FF;X
-L0A475A: db $72
+OBJLstPtrTable_MrKarate_Dizzy: db $72
 L0A475B: db $54
 L0A475C: db $FF
 L0A475D: db $FF
@@ -1888,19 +1888,19 @@ L0A475E: db $17
 L0A475F: db $59
 L0A4760: db $2D
 L0A4761: db $51
-L0A4762: db $E5
+OBJLstPtrTable_MrKarate_TimeOver: db $E5
 L0A4763: db $58
 L0A4764: db $E2
 L0A4765: db $50
 L0A4766: db $FF;X
 L0A4767: db $FF
-L0A4768: db $2B;X
+OBJLstPtrTable_MrKarate_Hitlow: db $2B;X
 L0A4769: db $59;X
 L0A476A: db $3F;X
 L0A476B: db $51;X
 L0A476C: db $FF;X
 L0A476D: db $FF;X
-L0A476E: db $17;X
+OBJLstPtrTable_MrKarate_GuardBreakA: db $17;X
 L0A476F: db $59;X
 L0A4770: db $2D;X
 L0A4771: db $51;X
@@ -1910,7 +1910,7 @@ L0A4774: db $2F;X
 L0A4775: db $4A;X
 L0A4776: db $FF;X
 L0A4777: db $FF;X
-L0A4778: db $17
+OBJLstPtrTable_MrKarate_BackjumpRecA: db $17
 L0A4779: db $59
 L0A477A: db $2D
 L0A477B: db $51
@@ -1940,7 +1940,7 @@ L0A4792: db $2F
 L0A4793: db $4A
 L0A4794: db $FF;X
 L0A4795: db $FF;X
-L0A4796: db $17
+OBJLstPtrTable_MrKarate_DropMain: db $17
 L0A4797: db $59
 L0A4798: db $2D
 L0A4799: db $51
@@ -1952,7 +1952,7 @@ L0A479E: db $50
 L0A479F: db $59
 L0A47A0: db $97
 L0A47A1: db $51
-L0A47A2: db $35
+OBJLstPtrTable_MrKarate_HitMultigs: db $35
 L0A47A3: db $59
 L0A47A4: db $6C
 L0A47A5: db $51
@@ -1962,7 +1962,7 @@ L0A47A8: db $97
 L0A47A9: db $51
 L0A47AA: db $FF;X
 L0A47AB: db $FF;X
-L0A47AC: db $E5
+OBJLstPtrTable_MrKarate_HitSwoopup: db $E5
 L0A47AD: db $58
 L0A47AE: db $E2
 L0A47AF: db $50
@@ -1974,7 +1974,7 @@ L0A47B4: db $0D
 L0A47B5: db $59
 L0A47B6: db $07
 L0A47B7: db $51
-L0A47B8: db $03
+OBJLstPtrTable_MrKarate_ThrowEndA: db $03
 L0A47B9: db $59
 L0A47BA: db $FF
 L0A47BB: db $50
@@ -1992,7 +1992,7 @@ L0A47C6: db $97
 L0A47C7: db $51
 L0A47C8: db $FF;X
 L0A47C9: db $FF
-L0A47CA: db $E5
+OBJLstPtrTable_MrKarate_DropDbg: db $E5
 L0A47CB: db $58
 L0A47CC: db $E2
 L0A47CD: db $50
@@ -2006,13 +2006,13 @@ L0A47D4: db $97
 L0A47D5: db $51
 L0A47D6: db $FF;X
 L0A47D7: db $FF;X
-L0A47D8: db $46
+OBJLstPtrTable_MrKarate_ThrowRotL: db $46
 L0A47D9: db $59
 L0A47DA: db $7E
 L0A47DB: db $51
 L0A47DC: db $FF;X
 L0A47DD: db $FF;X
-L0A47DE: db $FD
+OBJLstPtrTable_MrKarate_Wakeup: db $FD
 L0A47DF: db $54
 L0A47E0: db $2F
 L0A47E1: db $4A
@@ -2022,7 +2022,7 @@ L0A47E4: db $2F
 L0A47E5: db $4A
 L0A47E6: db $FF;X
 L0A47E7: db $FF;X
-L0A47E8: db $D8
+OBJLstPtrTable_MrKarate_ThrowG: db $D8
 L0A47E9: db $59
 L0A47EA: db $26
 L0A47EB: db $52
@@ -2040,7 +2040,7 @@ L0A47F6: db $44
 L0A47F7: db $4A
 L0A47F8: db $FF;X
 L0A47F9: db $FF;X
-L0A47FA: db $FD
+OBJLstPtrTable_MrKarate_KoOuKenL: db $FD
 L0A47FB: db $59
 L0A47FC: db $87
 L0A47FD: db $52
@@ -2058,7 +2058,7 @@ L0A4808: db $A4
 L0A4809: db $5A
 L0A480A: db $FF;X
 L0A480B: db $FF;X
-L0A480C: db $61
+OBJLstPtrTable_MrKarate_ShouranKyakuL: db $61
 L0A480D: db $59
 L0A480E: db $7F
 L0A480F: db $59
@@ -2088,7 +2088,7 @@ L0A4826: db $2F
 L0A4827: db $4A
 L0A4828: db $FF;X
 L0A4829: db $FF;X
-L0A482A: db $FD
+OBJLstPtrTable_MrKarate_HienShippuuKyakuL: db $FD
 L0A482B: db $54
 L0A482C: db $2F
 L0A482D: db $4A
@@ -2118,7 +2118,7 @@ L0A4844: db $D0
 L0A4845: db $4D
 L0A4846: db $FF;X
 L0A4847: db $FF;X
-L0A4848: db $7C
+OBJLstPtrTable_MrKarate_ZenretsukenL: db $7C
 L0A4849: db $5B
 L0A484A: db $6A
 L0A484B: db $5B
@@ -2156,7 +2156,7 @@ L0A486A: db $11
 L0A486B: db $4D
 L0A486C: db $FF;X
 L0A486D: db $FF;X
-L0A486E: db $48
+OBJLstPtrTable_MrKarate_KyokukenRyuRenbuKenL: db $48
 L0A486F: db $57
 L0A4870: db $60
 L0A4871: db $4D
@@ -2190,7 +2190,7 @@ L0A488C: db $FF
 L0A488D: db $FF
 L0A488E: db $FF;X
 L0A488F: db $FF;X
-L0A4890: db $1B
+OBJLstPtrTable_MrKarate_HaohShoKohKenS: db $1B
 L0A4891: db $55
 L0A4892: db $74
 L0A4893: db $4A
@@ -2212,7 +2212,7 @@ L0A48A2: db $A4
 L0A48A3: db $5A
 L0A48A4: db $FF;X
 L0A48A5: db $FF;X
-L0A48A6: db $1B
+OBJLstPtrTable_MrKarate_RyukoRanbuS: db $1B
 L0A48A7: db $55
 L0A48A8: db $74
 L0A48A9: db $4A
@@ -2306,7 +2306,7 @@ L0A4900: db $A4;X
 L0A4901: db $5A;X
 L0A4902: db $FF;X
 L0A4903: db $FF;X
-L0A4904: db $1B;X
+OBJLstPtrTable_MrKarate_RyukoRanbuUnusedD: db $1B;X
 L0A4905: db $55;X
 L0A4906: db $74;X
 L0A4907: db $4A;X
@@ -7153,7 +7153,7 @@ L0A5BEF: db $06
 L0A5BF0: db $1C
 L0A5BF1: db $ED
 L0A5BF2: db $08
-L0A5BF3: db $F5
+OBJLstPtrTable_Leona_Idle: db $F5
 L0A5BF4: db $60
 L0A5BF5: db $FF
 L0A5BF6: db $FF
@@ -7171,7 +7171,7 @@ L0A5C01: db $FF
 L0A5C02: db $FF
 L0A5C03: db $FF;X
 L0A5C04: db $FF
-L0A5C05: db $4C
+OBJLstPtrTable_OLeona_Idle: db $4C
 L0A5C06: db $61
 L0A5C07: db $67
 L0A5C08: db $61
@@ -7189,7 +7189,7 @@ L0A5C13: db $97
 L0A5C14: db $61
 L0A5C15: db $FF;X
 L0A5C16: db $FF
-L0A5C17: db $DC
+OBJLstPtrTable_Leona_WalkF: db $DC
 L0A5C18: db $61
 L0A5C19: db $FF
 L0A5C1A: db $FF
@@ -7207,7 +7207,7 @@ L0A5C25: db $44
 L0A5C26: db $62
 L0A5C27: db $FF;X
 L0A5C28: db $FF
-L0A5C29: db $5D
+OBJLstPtrTable_OLeona_WalkF: db $5D
 L0A5C2A: db $61
 L0A5C2B: db $53
 L0A5C2C: db $62
@@ -7225,7 +7225,7 @@ L0A5C37: db $8C
 L0A5C38: db $62
 L0A5C39: db $FF;X
 L0A5C3A: db $FF
-L0A5C3B: db $F6
+OBJLstPtrTable_Leona_WalkB: db $F6
 L0A5C3C: db $61
 L0A5C3D: db $44
 L0A5C3E: db $62
@@ -7243,7 +7243,7 @@ L0A5C49: db $FF
 L0A5C4A: db $FF
 L0A5C4B: db $FF;X
 L0A5C4C: db $FF
-L0A5C4D: db $8D
+OBJLstPtrTable_OLeona_WalkB: db $8D
 L0A5C4E: db $61
 L0A5C4F: db $8C
 L0A5C50: db $62
@@ -7261,13 +7261,13 @@ L0A5C5B: db $53
 L0A5C5C: db $62
 L0A5C5D: db $FF;X
 L0A5C5E: db $FF
-L0A5C5F: db $A1
+OBJLstPtrTable_Leona_Crouch: db $A1
 L0A5C60: db $62
 L0A5C61: db $FF
 L0A5C62: db $FF
 L0A5C63: db $FF;X
 L0A5C64: db $FF;X
-L0A5C65: db $A1
+OBJLstPtrTable_Leona_JumpN: db $A1
 L0A5C66: db $62
 L0A5C67: db $FF
 L0A5C68: db $FF
@@ -7301,7 +7301,7 @@ L0A5C83: db $FF
 L0A5C84: db $FF
 L0A5C85: db $FF;X
 L0A5C86: db $FF;X
-L0A5C87: db $A1;X
+OBJLstPtrTable_Leona_JumpB: db $A1;X
 L0A5C88: db $62;X
 L0A5C89: db $FF;X
 L0A5C8A: db $FF;X
@@ -7335,19 +7335,19 @@ L0A5CA5: db $FF
 L0A5CA6: db $FF
 L0A5CA7: db $FF;X
 L0A5CA8: db $FF;X
-L0A5CA9: db $CA
+OBJLstPtrTable_Leona_BlockG: db $CA
 L0A5CAA: db $62
 L0A5CAB: db $FF
 L0A5CAC: db $FF
 L0A5CAD: db $FF;X
 L0A5CAE: db $FF;X
-L0A5CAF: db $E1
+OBJLstPtrTable_Leona_BlockC: db $E1
 L0A5CB0: db $62
 L0A5CB1: db $FF
 L0A5CB2: db $62
 L0A5CB3: db $FF;X
 L0A5CB4: db $FF;X
-L0A5CB5: db $F5;X
+OBJLstPtrTable_Leona_BlockA: db $F5;X
 L0A5CB6: db $62;X
 L0A5CB7: db $11;X
 L0A5CB8: db $63;X
@@ -7357,7 +7357,7 @@ L0A5CBB: db $FF;X
 L0A5CBC: db $FF;X
 L0A5CBD: db $FF;X
 L0A5CBE: db $FF;X
-L0A5CBF: db $56
+OBJLstPtrTable_Leona_RunF: db $56
 L0A5CC0: db $6A
 L0A5CC1: db $81
 L0A5CC2: db $6A
@@ -7375,7 +7375,7 @@ L0A5CCD: db $96
 L0A5CCE: db $6A
 L0A5CCF: db $FF;X
 L0A5CD0: db $FF
-L0A5CD1: db $F6
+OBJLstPtrTable_Leona_HopB: db $F6
 L0A5CD2: db $61
 L0A5CD3: db $1F
 L0A5CD4: db $62
@@ -7389,7 +7389,7 @@ L0A5CDB: db $FF
 L0A5CDC: db $FF
 L0A5CDD: db $FF;X
 L0A5CDE: db $FF;X
-L0A5CDF: db $85
+OBJLstPtrTable_Leona_ChargeMeter: db $85
 L0A5CE0: db $63
 L0A5CE1: db $C7
 L0A5CE2: db $67
@@ -7401,7 +7401,7 @@ L0A5CE7: db $FF;X
 L0A5CE8: db $FF
 L0A5CE9: db $FF;X
 L0A5CEA: db $FF;X
-L0A5CEB: db $85
+OBJLstPtrTable_OLeona_ChargeMeter: db $85
 L0A5CEC: db $63
 L0A5CED: db $B3
 L0A5CEE: db $63
@@ -7413,7 +7413,7 @@ L0A5CF3: db $FF;X
 L0A5CF4: db $FF
 L0A5CF5: db $FF;X
 L0A5CF6: db $FF;X
-L0A5CF7: db $DD
+OBJLstPtrTable_Leona_Taunt: db $DD
 L0A5CF8: db $63
 L0A5CF9: db $EE
 L0A5CFA: db $63
@@ -7471,7 +7471,7 @@ L0A5D2D: db $22;X
 L0A5D2E: db $64;X
 L0A5D2F: db $FF;X
 L0A5D30: db $FF;X
-L0A5D31: db $B2
+OBJLstPtrTable_OLeona_Taunt: db $B2
 L0A5D32: db $66
 L0A5D33: db $FF
 L0A5D34: db $FF
@@ -7489,7 +7489,7 @@ L0A5D3F: db $EE
 L0A5D40: db $63
 L0A5D41: db $FF;X
 L0A5D42: db $FF;X
-L0A5D43: db $D9
+OBJLstPtrTable_Leona_Intro: db $D9
 L0A5D44: db $65
 L0A5D45: db $F0
 L0A5D46: db $65
@@ -7523,7 +7523,7 @@ L0A5D61: db $FF
 L0A5D62: db $FF
 L0A5D63: db $FF;X
 L0A5D64: db $FF;X
-L0A5D65: db $0B
+OBJLstPtrTable_OLeona_Intro: db $0B
 L0A5D66: db $64
 L0A5D67: db $22
 L0A5D68: db $64
@@ -7545,7 +7545,7 @@ L0A5D77: db $FF
 L0A5D78: db $FF
 L0A5D79: db $FF;X
 L0A5D7A: db $FF;X
-L0A5D7B: db $7A
+OBJLstPtrTable_Leona_WinA: db $7A
 L0A5D7C: db $67
 L0A5D7D: db $FF
 L0A5D7E: db $FF
@@ -7567,7 +7567,7 @@ L0A5D8D: db $CC
 L0A5D8E: db $64
 L0A5D8F: db $FF;X
 L0A5D90: db $FF;X
-L0A5D91: db $31
+OBJLstPtrTable_OLeona_WinA: db $31
 L0A5D92: db $65
 L0A5D93: db $4B
 L0A5D94: db $65
@@ -7593,7 +7593,7 @@ L0A5DA7: db $77
 L0A5DA8: db $65
 L0A5DA9: db $FF;X
 L0A5DAA: db $FF;X
-L0A5DAB: db $F6
+OBJLstPtrTable_Leona_WinB: db $F6
 L0A5DAC: db $61
 L0A5DAD: db $1F
 L0A5DAE: db $62
@@ -7611,7 +7611,7 @@ L0A5DB9: db $03
 L0A5DBA: db $64
 L0A5DBB: db $FF;X
 L0A5DBC: db $FF
-L0A5DBD: db $30
+OBJLstPtrTable_OLeona_WinB: db $30
 L0A5DBE: db $69
 L0A5DBF: db $FF
 L0A5DC0: db $FF
@@ -7645,7 +7645,7 @@ L0A5DDB: db $22
 L0A5DDC: db $64
 L0A5DDD: db $FF;X
 L0A5DDE: db $FF
-L0A5DDF: db $60
+OBJLstPtrTable_Leona_PunchL: db $60
 L0A5DE0: db $66
 L0A5DE1: db $4E
 L0A5DE2: db $66
@@ -7659,7 +7659,7 @@ L0A5DE9: db $4E
 L0A5DEA: db $66
 L0A5DEB: db $FF;X
 L0A5DEC: db $FF;X
-L0A5DED: db $60
+OBJLstPtrTable_Leona_PunchH: db $60
 L0A5DEE: db $66
 L0A5DEF: db $4E
 L0A5DF0: db $66
@@ -7677,7 +7677,7 @@ L0A5DFB: db $FF
 L0A5DFC: db $FF
 L0A5DFD: db $FF;X
 L0A5DFE: db $FF;X
-L0A5DFF: db $27
+OBJLstPtrTable_Leona_KickL: db $27
 L0A5E00: db $62
 L0A5E01: db $FF
 L0A5E02: db $FF
@@ -7691,7 +7691,7 @@ L0A5E09: db $FF
 L0A5E0A: db $FF
 L0A5E0B: db $FF;X
 L0A5E0C: db $FF;X
-L0A5E0D: db $D9
+OBJLstPtrTable_Leona_KickH: db $D9
 L0A5E0E: db $66
 L0A5E0F: db $FF
 L0A5E10: db $FF
@@ -7713,7 +7713,7 @@ L0A5E1F: db $FF
 L0A5E20: db $FF
 L0A5E21: db $FF;X
 L0A5E22: db $FF;X
-L0A5E23: db $3D
+OBJLstPtrTable_Leona_PunchCL: db $3D
 L0A5E24: db $67
 L0A5E25: db $FF
 L0A5E26: db $FF
@@ -7727,7 +7727,7 @@ L0A5E2D: db $FF
 L0A5E2E: db $FF
 L0A5E2F: db $FF;X
 L0A5E30: db $FF;X
-L0A5E31: db $A1
+OBJLstPtrTable_Leona_PunchCH: db $A1
 L0A5E32: db $62
 L0A5E33: db $FF
 L0A5E34: db $FF
@@ -7745,7 +7745,7 @@ L0A5E3F: db $B8
 L0A5E40: db $67
 L0A5E41: db $FF;X
 L0A5E42: db $FF;X
-L0A5E43: db $08
+OBJLstPtrTable_Leona_KickCL: db $08
 L0A5E44: db $68
 L0A5E45: db $29
 L0A5E46: db $68
@@ -7759,7 +7759,7 @@ L0A5E4D: db $29
 L0A5E4E: db $68
 L0A5E4F: db $FF;X
 L0A5E50: db $FF;X
-L0A5E51: db $46
+OBJLstPtrTable_Leona_KickCH: db $46
 L0A5E52: db $68
 L0A5E53: db $FF
 L0A5E54: db $FF
@@ -7777,7 +7777,7 @@ L0A5E5F: db $FF
 L0A5E60: db $FF
 L0A5E61: db $FF;X
 L0A5E62: db $FF;X
-L0A5E63: db $8A
+OBJLstPtrTable_Leona_PunchA: db $8A
 L0A5E64: db $68
 L0A5E65: db $FF
 L0A5E66: db $FF
@@ -7799,7 +7799,7 @@ L0A5E75: db $FF
 L0A5E76: db $FF
 L0A5E77: db $FF;X
 L0A5E78: db $FF;X
-L0A5E79: db $E3
+OBJLstPtrTable_Leona_KickA: db $E3
 L0A5E7A: db $67
 L0A5E7B: db $AA
 L0A5E7C: db $68
@@ -7821,7 +7821,7 @@ L0A5E8B: db $FF
 L0A5E8C: db $FF
 L0A5E8D: db $FF;X
 L0A5E8E: db $FF;X
-L0A5E8F: db $1F
+OBJLstPtrTable_Leona_AttackA: db $1F
 L0A5E90: db $68
 L0A5E91: db $3E
 L0A5E92: db $68
@@ -7843,7 +7843,7 @@ L0A5EA1: db $FF
 L0A5EA2: db $FF
 L0A5EA3: db $FF;X
 L0A5EA4: db $FF;X
-L0A5EA5: db $C5
+OBJLstPtrTable_Leona_AttackG: db $C5
 L0A5EA6: db $68
 L0A5EA7: db $FF
 L0A5EA8: db $FF
@@ -7861,7 +7861,7 @@ L0A5EB3: db $FF
 L0A5EB4: db $FF
 L0A5EB5: db $FF;X
 L0A5EB6: db $FF;X
-L0A5EB7: db $99
+OBJLstPtrTable_Leona_RollF: db $99
 L0A5EB8: db $69
 L0A5EB9: db $FF
 L0A5EBA: db $FF
@@ -7883,7 +7883,7 @@ L0A5EC9: db $FF
 L0A5ECA: db $FF
 L0A5ECB: db $FF;X
 L0A5ECC: db $FF;X
-L0A5ECD: db $7B
+OBJLstPtrTable_Leona_RollB: db $7B
 L0A5ECE: db $69
 L0A5ECF: db $FF
 L0A5ED0: db $FF
@@ -7905,13 +7905,13 @@ L0A5EDF: db $FF
 L0A5EE0: db $FF
 L0A5EE1: db $FF;X
 L0A5EE2: db $FF;X
-L0A5EE3: db $DE
+OBJLstPtrTable_Leona_GuardBreakG: db $DE
 L0A5EE4: db $69
 L0A5EE5: db $FF
 L0A5EE6: db $FF
 L0A5EE7: db $FF;X
 L0A5EE8: db $FF;X
-L0A5EE9: db $F5
+OBJLstPtrTable_Leona_Dizzy: db $F5
 L0A5EEA: db $60
 L0A5EEB: db $FF
 L0A5EEC: db $FF
@@ -7919,19 +7919,19 @@ L0A5EED: db $DE
 L0A5EEE: db $69
 L0A5EEF: db $FF
 L0A5EF0: db $FF
-L0A5EF1: db $A3
+OBJLstPtrTable_Leona_TimeOver: db $A3
 L0A5EF2: db $69
 L0A5EF3: db $FF
 L0A5EF4: db $FF
 L0A5EF5: db $FF;X
 L0A5EF6: db $FF
-L0A5EF7: db $FB;X
+OBJLstPtrTable_Leona_Hitlow: db $FB;X
 L0A5EF8: db $69;X
 L0A5EF9: db $FF;X
 L0A5EFA: db $FF;X
 L0A5EFB: db $FF;X
 L0A5EFC: db $FF;X
-L0A5EFD: db $DE;X
+OBJLstPtrTable_Leona_GuardBreakA: db $DE;X
 L0A5EFE: db $69;X
 L0A5EFF: db $FF;X
 L0A5F00: db $FF;X
@@ -7941,7 +7941,7 @@ L0A5F03: db $FF;X
 L0A5F04: db $FF;X
 L0A5F05: db $FF;X
 L0A5F06: db $FF;X
-L0A5F07: db $DE
+OBJLstPtrTable_Leona_BackjumpRecA: db $DE
 L0A5F08: db $69
 L0A5F09: db $FF
 L0A5F0A: db $FF
@@ -7971,7 +7971,7 @@ L0A5F21: db $FF
 L0A5F22: db $FF
 L0A5F23: db $FF;X
 L0A5F24: db $FF;X
-L0A5F25: db $DE
+OBJLstPtrTable_Leona_DropMain: db $DE
 L0A5F26: db $69
 L0A5F27: db $FF
 L0A5F28: db $FF
@@ -7983,7 +7983,7 @@ L0A5F2D: db $3C
 L0A5F2E: db $6A
 L0A5F2F: db $FF
 L0A5F30: db $FF
-L0A5F31: db $15
+OBJLstPtrTable_Leona_HitMultigs: db $15
 L0A5F32: db $6A
 L0A5F33: db $FF
 L0A5F34: db $FF
@@ -7993,7 +7993,7 @@ L0A5F37: db $FF
 L0A5F38: db $FF
 L0A5F39: db $FF;X
 L0A5F3A: db $FF;X
-L0A5F3B: db $A3
+OBJLstPtrTable_Leona_HitSwoopup: db $A3
 L0A5F3C: db $69
 L0A5F3D: db $FF
 L0A5F3E: db $FF
@@ -8005,7 +8005,7 @@ L0A5F43: db $D4
 L0A5F44: db $69
 L0A5F45: db $FF
 L0A5F46: db $FF
-L0A5F47: db $C0
+OBJLstPtrTable_Leona_ThrowEndA: db $C0
 L0A5F48: db $69
 L0A5F49: db $FF
 L0A5F4A: db $FF
@@ -8023,7 +8023,7 @@ L0A5F55: db $FF
 L0A5F56: db $FF
 L0A5F57: db $FF;X
 L0A5F58: db $FF
-L0A5F59: db $A3
+OBJLstPtrTable_Leona_DropDbg: db $A3
 L0A5F5A: db $69
 L0A5F5B: db $FF
 L0A5F5C: db $FF
@@ -8037,13 +8037,13 @@ L0A5F63: db $FF
 L0A5F64: db $FF
 L0A5F65: db $FF;X
 L0A5F66: db $FF;X
-L0A5F67: db $32
+OBJLstPtrTable_Leona_ThrowRotL: db $32
 L0A5F68: db $6A
 L0A5F69: db $FF
 L0A5F6A: db $FF
 L0A5F6B: db $FF;X
 L0A5F6C: db $FF;X
-L0A5F6D: db $A1
+OBJLstPtrTable_Leona_Wakeup: db $A1
 L0A5F6E: db $62
 L0A5F6F: db $FF
 L0A5F70: db $FF
@@ -8053,7 +8053,7 @@ L0A5F73: db $FF
 L0A5F74: db $FF
 L0A5F75: db $FF;X
 L0A5F76: db $FF;X
-L0A5F77: db $84
+OBJLstPtrTable_Leona_BalticLauncherL: db $84
 L0A5F78: db $6B
 L0A5F79: db $FF
 L0A5F7A: db $FF
@@ -8079,7 +8079,7 @@ L0A5F8D: db $4E
 L0A5F8E: db $66
 L0A5F8F: db $FF;X
 L0A5F90: db $FF;X
-L0A5F91: db $84
+OBJLstPtrTable_Leona_BalticLauncherH: db $84
 L0A5F92: db $6B
 L0A5F93: db $FF
 L0A5F94: db $FF
@@ -8097,7 +8097,7 @@ L0A5F9F: db $FF
 L0A5FA0: db $FF
 L0A5FA1: db $FF;X
 L0A5FA2: db $FF;X
-L0A5FA3: db $A1
+OBJLstPtrTable_Leona_GrandSabreL: db $A1
 L0A5FA4: db $62
 L0A5FA5: db $FF
 L0A5FA6: db $FF
@@ -8163,7 +8163,7 @@ L0A5FE1: db $FF
 L0A5FE2: db $FF
 L0A5FE3: db $FF;X
 L0A5FE4: db $FF;X
-L0A5FE5: db $A1
+OBJLstPtrTable_Leona_XCaliburL: db $A1
 L0A5FE6: db $62
 L0A5FE7: db $FF
 L0A5FE8: db $FF
@@ -8197,7 +8197,7 @@ L0A6003: db $FF
 L0A6004: db $FF
 L0A6005: db $FF;X
 L0A6006: db $FF;X
-L0A6007: db $A1
+OBJLstPtrTable_Leona_MoonSlasherL: db $A1
 L0A6008: db $62
 L0A6009: db $FF
 L0A600A: db $FF
@@ -8219,7 +8219,7 @@ L0A6019: db $24
 L0A601A: db $6E
 L0A601B: db $FF;X
 L0A601C: db $FF;X
-L0A601D: db $36
+OBJLstPtrTable_OLeona_StormBringerL: db $36
 L0A601E: db $6E
 L0A601F: db $FF
 L0A6020: db $FF
@@ -8245,7 +8245,7 @@ L0A6033: db $FF
 L0A6034: db $FF
 L0A6035: db $FF;X
 L0A6036: db $FF;X
-L0A6037: db $A5
+OBJLstPtrTable_Leona_VSlasherS: db $A5
 L0A6038: db $6E
 L0A6039: db $FF
 L0A603A: db $FF
@@ -8275,7 +8275,7 @@ L0A6051: db $FF
 L0A6052: db $FF
 L0A6053: db $FF;X
 L0A6054: db $FF;X
-L0A6055: db $CF
+OBJLstPtrTable_OLeona_LeonaVSlasherS: db $CF
 L0A6056: db $65
 L0A6057: db $30
 L0A6058: db $6F
@@ -8305,7 +8305,7 @@ L0A606F: db $FF
 L0A6070: db $FF
 L0A6071: db $FF;X
 L0A6072: db $FF;X
-L0A6073: db $31
+OBJLstPtrTable_OLeona_SuperMoonSlasherS: db $31
 L0A6074: db $65
 L0A6075: db $4B
 L0A6076: db $65
@@ -8359,7 +8359,7 @@ L0A60A5: db $FF
 L0A60A6: db $FF
 L0A60A7: db $FF;X
 L0A60A8: db $FF;X
-L0A60A9: db $BD
+OBJLstPtrTable_Leona_ThrowG: db $BD
 L0A60AA: db $6A
 L0A60AB: db $CB
 L0A60AC: db $6A
@@ -8389,7 +8389,7 @@ L0A60C3: db $FF;X
 L0A60C4: db $FF;X
 L0A60C5: db $FF;X
 L0A60C6: db $FF;X
-L0A60C7: db $37
+OBJLstPtrTable_OLeona_ThrowG: db $37
 L0A60C8: db $6B
 L0A60C9: db $CB
 L0A60CA: db $6A
@@ -8415,7 +8415,7 @@ L0A60DD: db $FF;X
 L0A60DE: db $FF;X
 L0A60DF: db $FF;X
 L0A60E0: db $FF;X
-L0A60E1: db $85;X
+OBJLstPtrTable_Leona_ThrowA: db $85;X
 L0A60E2: db $69;X
 L0A60E3: db $FF;X
 L0A60E4: db $FF;X

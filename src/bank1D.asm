@@ -9355,83 +9355,83 @@ BG_Cutscene_Char2P: INCBIN "data/bg/ordsel_char2p.bin"
 ; See also: WinScr_CharAnimTbl
 Cutscene_CharAnimTbl:
 	; CHAR_ID_KYO
-	dp L074000 ; BANK $07
+	dp OBJLstPtrTable_Kyo_Idle ; BANK $07
 	db $00
 
 	; CHAR_ID_DAIMON
-	dp L094000 ; BANK $09
+	dp OBJLstPtrTable_Daimon_Idle ; BANK $09
 	db $00
 
 	; CHAR_ID_TERRY
-	dp L094DF6 ; BANK $09
+	dp OBJLstPtrTable_Terry_Idle ; BANK $09
 	db $00
 
 	; CHAR_ID_ANDY
-	dp L084000 ; BANK $08
+	dp OBJLstPtrTable_Andy_Idle ; BANK $08
 	db $00
 
 	; CHAR_ID_RYO
-	dp L0A4000 ; BANK $0A
+	dp OBJLstPtrTable_Ryo_Idle ; BANK $0A
 	db $00
 
 	; CHAR_ID_ROBERT
-	dp L0752B7 ; BANK $07
+	dp OBJLstPtrTable_Robert_Idle ; BANK $07
 	db $00
 
 	; CHAR_ID_ATHENA
-	dp L084FA3 ; BANK $08
+	dp OBJLstPtrTable_Athena_Idle ; BANK $08
 	db $00
 
 	; CHAR_ID_MAI
-	dp L085FBA ; BANK $08
+	dp OBJLstPtrTable_Mai_Idle ; BANK $08
 	db $00
 
 	; CHAR_ID_LEONA
-	dp L0A5BF3 ; BANK $0A
+	dp OBJLstPtrTable_Leona_Idle ; BANK $0A
 	db $00
 
 	; CHAR_ID_GEESE
-	dp L076154 ; BANK $07
+	dp OBJLstPtrTable_Geese_Idle ; BANK $07
 	db $00
 
 	; CHAR_ID_KRAUSER
-	dp L095AA3 ; BANK $09
+	dp OBJLstPtrTable_Krauser_Idle ; BANK $09
 	db $00
 
 	; CHAR_ID_MRBIG
-	dp L07700D ; BANK $07
+	dp OBJLstPtrTable_MrBig_Idle ; BANK $07
 	db $00
 
 	; CHAR_ID_IORI
-	dp L054000 ; BANK $05
+	dp OBJLstPtrTable_Iori_Idle ; BANK $05
 	db $00
 
 	; CHAR_ID_MATURE
-	dp L0967C3 ; BANK $09
+	dp OBJLstPtrTable_Mature_Idle ; BANK $09
 	db $00
 
 	; CHAR_ID_CHIZURU
-	dp L0552DB ; BANK $05
+	dp OBJLstPtrTable_Chizuru_Idle ; BANK $05
 	db $00
 
 	; CHAR_ID_GOENITZ
-	dp L086F30 ; BANK $08
+	dp OBJLstPtrTable_Goenitz_Idle ; BANK $08
 	db $00
 .mrKarate:
 	; CHAR_ID_MRKARATE
-	dp L0A44EA ; BANK $0A
+	dp OBJLstPtrTable_MrKarate_Idle ; BANK $0A
 	db $00
 
 	; CHAR_ID_OIORI
-	dp L054012 ; BANK $05
+	dp OBJLstPtrTable_OIori_Idle ; BANK $05
 	db $00
 
 	; CHAR_ID_OLEONA
-	dp L0A5C05 ; BANK $0A
+	dp OBJLstPtrTable_OLeona_Idle ; BANK $0A
 	db $00
 
 	; CHAR_ID_KAGURA
-	dp L0552DB ; BANK $05
+	dp OBJLstPtrTable_Chizuru_Idle ; BANK $05
 	db $00
 
 ; =============== Cutscene_InitCharMisc ===============

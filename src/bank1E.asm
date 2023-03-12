@@ -5428,11 +5428,11 @@ WnScr_IdleWait:
 WinScr_CharAnimTbl:
 	
 	; CHAR_ID_KYO
-	dp L074158 ; BANK $07
+	dp OBJLstPtrTable_Kyo_WinB ; BANK $07
 	db $08
 	
 	; CHAR_ID_DAIMON
-	dp L0940C2 ; BANK $09
+	dp OBJLstPtrTable_Daimon_WinB ; BANK $09
 	db $08
 
 	; CHAR_ID_TERRY
@@ -5440,71 +5440,71 @@ WinScr_CharAnimTbl:
 	db $08
 
 	; CHAR_ID_ANDY
-	dp L0841BE ; BANK $08
+	dp OBJLstPtrTable_Andy_WinB ; BANK $08
 	db $08
 
 	; CHAR_ID_RYO
-	dp L0A4140 ; BANK $0A
+	dp OBJLstPtrTable_Ryo_WinB ; BANK $0A
 	db $08
 
 	; CHAR_ID_ROBERT
-	dp L0753EB ; BANK $07
+	dp OBJLstPtrTable_Robert_WinB ; BANK $07
 	db $08
 
 	; CHAR_ID_ATHENA
-	dp L08528F ; BANK $08
+	dp OBJLstPtrTable_Athena_WinB ; BANK $08
 	db $08
 
 	; CHAR_ID_MAI
-	dp L0860FE ; BANK $08
+	dp OBJLstPtrTable_Mai_WinB ; BANK $08
 	db $08
 
 	; CHAR_ID_LEONA
-	dp L0A5DAB ; BANK $0A
+	dp OBJLstPtrTable_Leona_WinB ; BANK $0A
 	db $08
 
 	; CHAR_ID_GEESE
-	dp L07624A ; BANK $07
+	dp OBJLstPtrTable_Geese_WinB ; BANK $07
 	db $08
 
 	; CHAR_ID_KRAUSER
-	dp L095B53 ; BANK $09
+	dp OBJLstPtrTable_Krauser_WinB ; BANK $09
 	db $08
 
 	; CHAR_ID_MRBIG
-	dp L0770C1 ; BANK $07
+	dp OBJLstPtrTable_MrBig_WinB ; BANK $07
 	db $08
 
 	; CHAR_ID_IORI
-	dp L05415C ; BANK $05
+	dp OBJLstPtrTable_Iori_WinB ; BANK $05
 	db $08
 
 	; CHAR_ID_MATURE
-	dp L096891 ; BANK $09
+	dp OBJLstPtrTable_Mature_WinB ; BANK $09
 	db $08
 
 	; CHAR_ID_CHIZURU
-	dp L055593 ; BANK $05
+	dp OBJLstPtrTable_Chizuru_WinB ; BANK $05
 	db $08
 
 	; CHAR_ID_GOENITZ
-	dp L086FFC ; BANK $08
+	dp OBJLstPtrTable_Goenitz_WinB ; BANK $08
 	db $08
 
 	; CHAR_ID_MRKARATE
-	dp L0A4622 ; BANK $0A
+	dp OBJLstPtrTable_MrKarate_WinA ; BANK $0A
 	db $08
 
 	; CHAR_ID_OIORI
-	dp L054172 ; BANK $05
+	dp OBJLstPtrTable_OIori_WinB ; BANK $05
 	db $08
 
 	; CHAR_ID_OLEONA
-	dp L0A5DBD ; BANK $0A
+	dp OBJLstPtrTable_OLeona_WinB ; BANK $0A
 	db $08
 
 	; CHAR_ID_KAGURA
-	dp L05559D ; BANK $05
+	dp OBJLstPtrTable_Kagura_WinB ; BANK $05
 	db $08
 
 ; =============== WinScr_CharTextPtrTbl ===============

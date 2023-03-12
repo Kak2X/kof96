@@ -7,7 +7,8 @@
 ; - HL: Ptr to code to code to execute
 ; WIPES
 ; - A
-FarJump:
+SECTION "Rst00", ROM0[$0000]
+;FarJump:
 	ld   a, b
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
@@ -15,8 +16,10 @@ FarJump:
 ;--
 L000007: db $17;X
 
+
 ; =============== RESET VECTOR $08 ===============
-Rst_FarCall:
+SECTION "Rst08", ROM0[$0008]
+;Rst_FarCall:
 	jp   FarCall
 ;--
 L00000B: db $FE;X
@@ -26,7 +29,8 @@ L00000E: db $22;X
 L00000F: db $00;X
 
 ; =============== RESET VECTOR $10 ===============
-Rst_StopLCDOperation:
+SECTION "Rst10", ROM0[$0010]
+;Rst_StopLCDOperation:
 	jp   StopLCDOperation
 ;--
 L000013: db $33;X
@@ -36,7 +40,8 @@ L000016: db $08;X
 L000017: db $CA;X
 
 ; =============== RESET VECTOR $18 ===============
-Rst_StartLCDOperation:
+SECTION "Rst18", ROM0[$0018]
+;Rst_StartLCDOperation:
 	jp   StartLCDOperation
 ;--
 L00001B: db $14;X
@@ -46,7 +51,8 @@ L00001E: db $00;X
 L00001F: db $C3;X
 ; =============== RESET VECTOR $20 ===============
 ; Disables the SERIAL interrupt.
-Rst_DisableSerialInt:
+SECTION "Rst20", ROM0[$0020]
+;Rst_DisableSerialInt:
 	ldh  a, [rIE]
 	and  a, $FF^I_SERIAL
 	ldh  [rIE], a
@@ -55,7 +61,8 @@ Rst_DisableSerialInt:
 L000027: db $00;X
 ; =============== RESET VECTOR $28 ===============
 ; Enables the SERIAL interrupt.
-Rst_EnableSerialInt:
+SECTION "Rst28", ROM0[$0028]
+;Rst_EnableSerialInt:
 	ldh  a, [rIE]
 	or   a, I_SERIAL
 	ldh  [rIE], a
@@ -63,7 +70,8 @@ Rst_EnableSerialInt:
 ;--
 L00002F: db $35;X
 ; =============== RESET VECTOR $30 ===============
-Rst_FarDecompressLZSS:
+SECTION "Rst30", ROM0[$0030]
+;Rst_FarDecompressLZSS:
 	jp   FarDecompressLZSS
 ;--
 L000033: db $CD;X
@@ -72,6 +80,7 @@ L000035: db $2B;X
 L000036: db $D2;X
 L000037: db $64;X
 ; =============== RESET VECTOR $38 ===============
+SECTION "Rst38", ROM0[$0038]
 ; Not used.
 	ret
 ;--
@@ -83,6 +92,7 @@ L00003D: db $01;X
 L00003E: db $CD;X
 L00003F: db $7A;X
 ; =============== VBLANK INTERRUPT ===============
+SECTION "VBlankInt", ROM0[$0040]
 	jp   VBlankHandler
 L000043: db $00;X
 L000044: db $CD;X
@@ -91,6 +101,7 @@ L000046: db $2B;X
 L000047: db $D2;X
 
 ; =============== LCDC/STAT INTERRUPT ===============
+SECTION "LCDCInt", ROM0[$0048]
 	jp   LCDCHandler
 L00004B: db $0C;X
 L00004C: db $06;X
@@ -99,6 +110,7 @@ L00004E: db $01;X
 L00004F: db $CD;X
 ; =============== TIMER INTERRUPT ===============
 ; Not used.
+SECTION "TimerInt", ROM0[$0050]
 	reti
 L000051: db $35;X
 L000052: db $C3;X
@@ -108,6 +120,7 @@ L000055: db $CD;X
 L000056: db $66;X
 L000057: db $2B;X
 ; =============== SERIAL INTERRUPT ===============
+SECTION "SerialInt", ROM0[$0058]
 	jp   SerialHandler
 L00005B: db $D9;X
 L00005C: db $2F;X
@@ -116,8 +129,11 @@ L00005E: db $AF;X
 L00005F: db $EA;X
 ; =============== JOYPAD INTERRUPT ===============
 ; Not used.
+SECTION "JoyInt", ROM0[$0060]
 	reti
-	
+
+SECTION "IntFunc", ROM0[$0061]
+
 ; =============== FarCall / SubCall ===============
 ; This subroutine performs a bankswitch to the specified code and calls it.
 ; When the subroutine is done, the previous bank is restored.
@@ -8614,13 +8630,13 @@ OBJInfoInit_Pl2:
 	db $40 ; iOBJInfo_TileIDBase
 	db LOW($8400) ; iOBJInfo_VRAMPtr_Low
 	db HIGH($8400) ; iOBJInfo_VRAMPtr_High
-	db BANK(L084000) ; iOBJInfo_BankNum (BANK $08)
-	db LOW(L084000) ; iOBJInfo_OBJLstPtrTbl_Low
-	db HIGH(L084000) ; iOBJInfo_OBJLstPtrTbl_High
+	db BANK(OBJLstPtrTable_Andy_Idle) ; iOBJInfo_BankNum (BANK $08)
+	db LOW(OBJLstPtrTable_Andy_Idle) ; iOBJInfo_OBJLstPtrTbl_Low
+	db HIGH(OBJLstPtrTable_Andy_Idle) ; iOBJInfo_OBJLstPtrTbl_High
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
-	db BANK(L084000) ; iOBJInfo_BankNumView (BANK $08)
-	db LOW(L084000) ; iOBJInfo_OBJLstPtrTbl_LowView
-	db HIGH(L084000) ; iOBJInfo_OBJLstPtrTbl_HighView
+	db BANK(OBJLstPtrTable_Andy_Idle) ; iOBJInfo_BankNumView (BANK $08)
+	db LOW(OBJLstPtrTable_Andy_Idle) ; iOBJInfo_OBJLstPtrTbl_LowView
+	db HIGH(OBJLstPtrTable_Andy_Idle) ; iOBJInfo_OBJLstPtrTbl_HighView
 	db $00 ; iOBJInfo_OBJLstPtrTblOffset
 	db $00 ; iOBJInfo_ColiBoxId (auto)
 	db $00 ; iOBJInfo_HitboxId (auto)

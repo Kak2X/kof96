@@ -1,4 +1,4 @@
-L094000: db $86
+OBJLstPtrTable_Daimon_Idle: db $86
 L094001: db $43
 L094002: db $A3
 L094003: db $43
@@ -16,7 +16,7 @@ L09400E: db $A3
 L09400F: db $43
 L094010: db $FF;X
 L094011: db $FF
-L094012: db $0C
+OBJLstPtrTable_Daimon_WalkF: db $0C
 L094013: db $44
 L094014: db $29
 L094015: db $44
@@ -34,7 +34,7 @@ L094020: db $5C
 L094021: db $44
 L094022: db $FF;X
 L094023: db $FF
-L094024: db $3B
+OBJLstPtrTable_Daimon_WalkB: db $3B
 L094025: db $44
 L094026: db $5C
 L094027: db $44
@@ -52,13 +52,13 @@ L094032: db $29
 L094033: db $44
 L094034: db $FF;X
 L094035: db $FF
-L094036: db $96
+OBJLstPtrTable_Daimon_Crouch: db $96
 L094037: db $44
 L094038: db $FF
 L094039: db $FF
 L09403A: db $FF;X
 L09403B: db $FF;X
-L09403C: db $96
+OBJLstPtrTable_Daimon_JumpN: db $96
 L09403D: db $44
 L09403E: db $FF
 L09403F: db $FF
@@ -92,19 +92,19 @@ L09405A: db $FF
 L09405B: db $FF
 L09405C: db $FF;X
 L09405D: db $FF;X
-L09405E: db $BD
+OBJLstPtrTable_Daimon_BlockG: db $BD
 L09405F: db $44
 L094060: db $EB
 L094061: db $44
 L094062: db $FF;X
 L094063: db $FF;X
-L094064: db $D4
+OBJLstPtrTable_Daimon_BlockC: db $D4
 L094065: db $44
 L094066: db $03
 L094067: db $45
 L094068: db $FF;X
 L094069: db $FF;X
-L09406A: db $BD;X
+OBJLstPtrTable_Daimon_BlockA: db $BD;X
 L09406B: db $44;X
 L09406C: db $15;X
 L09406D: db $45;X
@@ -114,7 +114,7 @@ L094070: db $FF;X
 L094071: db $FF;X
 L094072: db $FF;X
 L094073: db $FF;X
-L094074: db $C5
+OBJLstPtrTable_Daimon_RunF: db $C5
 L094075: db $45
 L094076: db $FF
 L094077: db $FF
@@ -132,7 +132,7 @@ L094082: db $5C
 L094083: db $44
 L094084: db $FF;X
 L094085: db $FF
-L094086: db $90
+OBJLstPtrTable_Daimon_HopB: db $90
 L094087: db $4A
 L094088: db $FF
 L094089: db $FF
@@ -146,7 +146,7 @@ L094090: db $FF
 L094091: db $FF
 L094092: db $FF;X
 L094093: db $FF;X
-L094094: db $76
+OBJLstPtrTable_Daimon_ChargeMeter: db $76
 L094095: db $45
 L094096: db $93
 L094097: db $45
@@ -156,7 +156,7 @@ L09409A: db $93
 L09409B: db $45
 L09409C: db $FF;X
 L09409D: db $FF
-L09409E: db $42
+OBJLstPtrTable_Daimon_Taunt: db $42
 L09409F: db $46
 L0940A0: db $FF
 L0940A1: db $FF
@@ -178,7 +178,7 @@ L0940B0: db $86
 L0940B1: db $46
 L0940B2: db $FF;X
 L0940B3: db $FF
-L0940B4: db $42
+OBJLstPtrTable_Daimon_WinA: db $42
 L0940B5: db $46
 L0940B6: db $FF
 L0940B7: db $FF
@@ -192,7 +192,7 @@ L0940BE: db $86
 L0940BF: db $46
 L0940C0: db $FF;X
 L0940C1: db $FF;X
-L0940C2: db $D8
+OBJLstPtrTable_Daimon_WinB: db $D8
 L0940C3: db $46
 L0940C4: db $E9
 L0940C5: db $46
@@ -206,7 +206,7 @@ L0940CC: db $E9
 L0940CD: db $46
 L0940CE: db $FF;X
 L0940CF: db $FF
-L0940D0: db $3B
+OBJLstPtrTable_Daimon_PunchL: db $3B
 L0940D1: db $44
 L0940D2: db $29
 L0940D3: db $44
@@ -220,7 +220,7 @@ L0940DA: db $29
 L0940DB: db $44
 L0940DC: db $FF;X
 L0940DD: db $FF;X
-L0940DE: db $56
+OBJLstPtrTable_Daimon_PunchH: db $56
 L0940DF: db $47
 L0940E0: db $88
 L0940E1: db $47
@@ -238,7 +238,7 @@ L0940EC: db $88
 L0940ED: db $47
 L0940EE: db $FF;X
 L0940EF: db $FF;X
-L0940F0: db $EB
+OBJLstPtrTable_Daimon_KickL: db $EB
 L0940F1: db $47
 L0940F2: db $FF
 L0940F3: db $FF
@@ -252,7 +252,7 @@ L0940FA: db $FF
 L0940FB: db $FF
 L0940FC: db $FF;X
 L0940FD: db $FF;X
-L0940FE: db $EB
+OBJLstPtrTable_Daimon_KickH: db $EB
 L0940FF: db $47
 L094100: db $FF
 L094101: db $FF
@@ -270,7 +270,7 @@ L09410C: db $FF;X
 L09410D: db $FF;X
 L09410E: db $FF;X
 L09410F: db $FF;X
-L094110: db $74
+OBJLstPtrTable_Daimon_PunchCL: db $74
 L094111: db $48
 L094112: db $91
 L094113: db $48
@@ -284,7 +284,7 @@ L09411A: db $91
 L09411B: db $48
 L09411C: db $FF;X
 L09411D: db $FF;X
-L09411E: db $74
+OBJLstPtrTable_Daimon_PunchCH: db $74
 L09411F: db $48
 L094120: db $E3
 L094121: db $48
@@ -302,7 +302,7 @@ L09412C: db $E3;X
 L09412D: db $48;X
 L09412E: db $FF;X
 L09412F: db $FF;X
-L094130: db $1E
+OBJLstPtrTable_Daimon_KickCL: db $1E
 L094131: db $49
 L094132: db $FF
 L094133: db $FF
@@ -316,7 +316,7 @@ L09413A: db $FF
 L09413B: db $FF
 L09413C: db $FF;X
 L09413D: db $FF;X
-L09413E: db $1E
+OBJLstPtrTable_Daimon_KickCH: db $1E
 L09413F: db $49
 L094140: db $FF
 L094141: db $FF
@@ -334,7 +334,7 @@ L09414C: db $FF
 L09414D: db $FF
 L09414E: db $FF;X
 L09414F: db $FF;X
-L094150: db $2D
+OBJLstPtrTable_Daimon_PunchA: db $2D
 L094151: db $45
 L094152: db $96
 L094153: db $49
@@ -356,7 +356,7 @@ L094162: db $FF
 L094163: db $FF
 L094164: db $FF;X
 L094165: db $FF;X
-L094166: db $28
+OBJLstPtrTable_Daimon_KickA: db $28
 L094167: db $49
 L094168: db $FF
 L094169: db $FF
@@ -378,7 +378,7 @@ L094178: db $FF
 L094179: db $FF
 L09417A: db $FF;X
 L09417B: db $FF;X
-L09417C: db $6A
+OBJLstPtrTable_Daimon_AttackA: db $6A
 L09417D: db $47
 L09417E: db $44
 L09417F: db $45
@@ -400,7 +400,7 @@ L09418E: db $FF
 L09418F: db $FF
 L094190: db $FF;X
 L094191: db $FF;X
-L094192: db $56
+OBJLstPtrTable_Daimon_AttackG: db $56
 L094193: db $47
 L094194: db $88
 L094195: db $47
@@ -418,7 +418,7 @@ L0941A0: db $29;X
 L0941A1: db $44;X
 L0941A2: db $FF;X
 L0941A3: db $FF;X
-L0941A4: db $96
+OBJLstPtrTable_Daimon_RollF: db $96
 L0941A5: db $44
 L0941A6: db $FF
 L0941A7: db $FF
@@ -440,7 +440,7 @@ L0941B6: db $FF
 L0941B7: db $FF
 L0941B8: db $FF;X
 L0941B9: db $FF;X
-L0941BA: db $96
+OBJLstPtrTable_Daimon_RollB: db $96
 L0941BB: db $44
 L0941BC: db $FF
 L0941BD: db $FF
@@ -462,13 +462,13 @@ L0941CC: db $FF
 L0941CD: db $FF
 L0941CE: db $FF;X
 L0941CF: db $FF;X
-L0941D0: db $D1
+OBJLstPtrTable_Daimon_GuardBreakG: db $D1
 L0941D1: db $4A
 L0941D2: db $F5
 L0941D3: db $4A
 L0941D4: db $FF;X
 L0941D5: db $FF;X
-L0941D6: db $86
+OBJLstPtrTable_Daimon_Dizzy: db $86
 L0941D7: db $43
 L0941D8: db $A3
 L0941D9: db $43
@@ -476,13 +476,13 @@ L0941DA: db $D1
 L0941DB: db $4A
 L0941DC: db $F5
 L0941DD: db $4A
-L0941DE: db $90
+OBJLstPtrTable_Daimon_TimeOver: db $90
 L0941DF: db $4A
 L0941E0: db $FF
 L0941E1: db $FF
 L0941E2: db $FF;X
 L0941E3: db $FF;X
-L0941E4: db $EB
+OBJLstPtrTable_Daimon_Hitlow: db $EB
 L0941E5: db $4A
 L0941E6: db $0D
 L0941E7: db $4B
@@ -490,7 +490,7 @@ L0941E8: db $FF;X
 L0941E9: db $FF;X
 L0941EA: db $FF;X
 L0941EB: db $FF;X
-L0941EC: db $D1;X
+OBJLstPtrTable_Daimon_GuardBreakA: db $D1;X
 L0941ED: db $4A;X
 L0941EE: db $F5;X
 L0941EF: db $4A;X
@@ -500,7 +500,7 @@ L0941F2: db $FF;X
 L0941F3: db $FF;X
 L0941F4: db $FF;X
 L0941F5: db $FF;X
-L0941F6: db $D1
+OBJLstPtrTable_Daimon_BackjumpRecA: db $D1
 L0941F7: db $4A
 L0941F8: db $F5
 L0941F9: db $4A
@@ -530,7 +530,7 @@ L094210: db $FF
 L094211: db $FF
 L094212: db $FF;X
 L094213: db $FF;X
-L094214: db $D1
+OBJLstPtrTable_Daimon_DropMain: db $D1
 L094215: db $4A
 L094216: db $F5
 L094217: db $4A
@@ -542,7 +542,7 @@ L09421C: db $4F
 L09421D: db $4B
 L09421E: db $FF
 L09421F: db $FF
-L094220: db $1F
+OBJLstPtrTable_Daimon_HitMultigs: db $1F
 L094221: db $4B
 L094222: db $FF
 L094223: db $FF
@@ -552,7 +552,7 @@ L094226: db $FF
 L094227: db $FF
 L094228: db $FF;X
 L094229: db $FF;X
-L09422A: db $90
+OBJLstPtrTable_Daimon_HitSwoopup: db $90
 L09422B: db $4A
 L09422C: db $FF
 L09422D: db $FF
@@ -564,7 +564,7 @@ L094232: db $BD
 L094233: db $4A
 L094234: db $FF
 L094235: db $FF
-L094236: db $B3
+OBJLstPtrTable_Daimon_ThrowEndA: db $B3
 L094237: db $4A
 L094238: db $FF
 L094239: db $FF
@@ -582,7 +582,7 @@ L094244: db $FF
 L094245: db $FF
 L094246: db $FF;X
 L094247: db $FF
-L094248: db $D1
+OBJLstPtrTable_Daimon_DropDbg: db $D1
 L094249: db $4A
 L09424A: db $F5
 L09424B: db $4A
@@ -596,13 +596,13 @@ L094252: db $FF
 L094253: db $FF
 L094254: db $FF;X
 L094255: db $FF;X
-L094256: db $45
+OBJLstPtrTable_Daimon_ThrowRotL: db $45
 L094257: db $4B
 L094258: db $FF
 L094259: db $FF
 L09425A: db $FF;X
 L09425B: db $FF;X
-L09425C: db $96
+OBJLstPtrTable_Daimon_Wakeup: db $96
 L09425D: db $44
 L09425E: db $FF
 L09425F: db $FF
@@ -612,7 +612,7 @@ L094262: db $FF
 L094263: db $FF
 L094264: db $FF;X
 L094265: db $FF;X
-L094266: db $42
+OBJLstPtrTable_Daimon_JiraiShin: db $42
 L094267: db $46
 L094268: db $FF
 L094269: db $FF
@@ -630,7 +630,7 @@ L094274: db $FF
 L094275: db $FF
 L094276: db $FF;X
 L094277: db $FF;X
-L094278: db $A6
+OBJLstPtrTable_Daimon_CHouUkemiL: db $A6
 L094279: db $4B
 L09427A: db $FF
 L09427B: db $FF
@@ -648,7 +648,7 @@ L094286: db $FF
 L094287: db $FF
 L094288: db $FF;X
 L094289: db $FF;X
-L09428A: db $3B
+OBJLstPtrTable_Daimon_CHouOosotoGariL: db $3B
 L09428B: db $44
 L09428C: db $5C
 L09428D: db $44
@@ -686,7 +686,7 @@ L0942AC: db $FF
 L0942AD: db $FF
 L0942AE: db $FF;X
 L0942AF: db $FF;X
-L0942B0: db $96
+OBJLstPtrTable_Daimon_CLoudTosser: db $96
 L0942B1: db $44
 L0942B2: db $FF
 L0942B3: db $FF
@@ -724,7 +724,7 @@ L0942D2: db $FF
 L0942D3: db $FF
 L0942D4: db $FF;X
 L0942D5: db $FF;X
-L0942D6: db $44
+OBJLstPtrTable_Daimon_StumpThrow: db $44
 L0942D7: db $4D
 L0942D8: db $FF
 L0942D9: db $FF
@@ -762,7 +762,7 @@ L0942F8: db $FF
 L0942F9: db $FF
 L0942FA: db $FF;X
 L0942FB: db $FF;X
-L0942FC: db $8A
+OBJLstPtrTable_Daimon_HeavenDropL: db $8A
 L0942FD: db $4D
 L0942FE: db $FF
 L0942FF: db $FF
@@ -804,7 +804,7 @@ L094322: db $FF
 L094323: db $FF
 L094324: db $FF;X
 L094325: db $FF;X
-L094326: db $8A
+OBJLstPtrTable_Daimon_HeavenHellDropS: db $8A
 L094327: db $4D
 L094328: db $FF
 L094329: db $FF
@@ -882,7 +882,7 @@ L094370: db $FF
 L094371: db $FF
 L094372: db $FF;X
 L094373: db $FF;X
-L094374: db $2F
+OBJLstPtrTable_Daimon_ThrowG: db $2F
 L094375: db $47
 L094376: db $29
 L094377: db $44
@@ -3572,7 +3572,7 @@ L094DF2: db $0C
 L094DF3: db $3A
 L094DF4: db $0E
 L094DF5: db $0E
-L094DF6: db $82
+OBJLstPtrTable_Terry_Idle: db $82
 L094DF7: db $51
 L094DF8: db $FF
 L094DF9: db $FF
@@ -3590,7 +3590,7 @@ L094E04: db $FF
 L094E05: db $FF
 L094E06: db $FF;X
 L094E07: db $FF
-L094E08: db $D9
+OBJLstPtrTable_Terry_WalkF: db $D9
 L094E09: db $51
 L094E0A: db $FF
 L094E0B: db $FF
@@ -3604,7 +3604,7 @@ L094E12: db $FF
 L094E13: db $FF
 L094E14: db $FF;X
 L094E15: db $FF
-L094E16: db $9F
+OBJLstPtrTable_Terry_WalkB: db $9F
 L094E17: db $51
 L094E18: db $FF
 L094E19: db $FF
@@ -3618,13 +3618,13 @@ L094E20: db $FF
 L094E21: db $FF
 L094E22: db $FF;X
 L094E23: db $FF
-L094E24: db $31
+OBJLstPtrTable_Terry_Crouch: db $31
 L094E25: db $52
 L094E26: db $48
 L094E27: db $52
 L094E28: db $FF;X
 L094E29: db $FF;X
-L094E2A: db $31
+OBJLstPtrTable_Terry_JumpN: db $31
 L094E2B: db $52
 L094E2C: db $48
 L094E2D: db $52
@@ -3658,19 +3658,19 @@ L094E48: db $48
 L094E49: db $52
 L094E4A: db $FF;X
 L094E4B: db $FF;X
-L094E4C: db $5A
+OBJLstPtrTable_Terry_BlockG: db $5A
 L094E4D: db $52
 L094E4E: db $FF
 L094E4F: db $FF
 L094E50: db $FF;X
 L094E51: db $FF;X
-L094E52: db $77
+OBJLstPtrTable_Terry_BlockC: db $77
 L094E53: db $52
 L094E54: db $48
 L094E55: db $52
 L094E56: db $FF;X
 L094E57: db $FF;X
-L094E58: db $8E;X
+OBJLstPtrTable_Terry_BlockA: db $8E;X
 L094E59: db $52;X
 L094E5A: db $98;X
 L094E5B: db $52;X
@@ -3680,7 +3680,7 @@ L094E5E: db $48;X
 L094E5F: db $52;X
 L094E60: db $FF;X
 L094E61: db $FF;X
-L094E62: db $E7
+OBJLstPtrTable_Terry_RunF: db $E7
 L094E63: db $56
 L094E64: db $FF
 L094E65: db $FF
@@ -3698,7 +3698,7 @@ L094E70: db $FF
 L094E71: db $FF
 L094E72: db $FF;X
 L094E73: db $FF
-L094E74: db $F6
+OBJLstPtrTable_Terry_HopB: db $F6
 L094E75: db $51
 L094E76: db $14
 L094E77: db $52
@@ -3712,7 +3712,7 @@ L094E7E: db $48
 L094E7F: db $52
 L094E80: db $FF;X
 L094E81: db $FF;X
-L094E82: db $D7
+OBJLstPtrTable_Terry_ChargeMeter: db $D7
 L094E83: db $52
 L094E84: db $F4
 L094E85: db $52
@@ -3722,7 +3722,7 @@ L094E88: db $F4
 L094E89: db $52
 L094E8A: db $FF;X
 L094E8B: db $FF
-L094E8C: db $6D
+OBJLstPtrTable_Terry_Taunt: db $6D
 L094E8D: db $53
 L094E8E: db $81
 L094E8F: db $53
@@ -3802,7 +3802,7 @@ OBJLstPtrTable_Terry_WinA:
 	dw L095468, $FFFF
 	dw $FFFF
 
-L094ED0: db $0A
+OBJLstPtrTable_Terry_WinB: db $0A
 L094ED1: db $52
 L094ED2: db $29
 L094ED3: db $52
@@ -3820,7 +3820,7 @@ L094EDE: db $BC
 L094EDF: db $54
 L094EE0: db $FF;X
 L094EE1: db $FF;X
-L094EE2: db $E8
+OBJLstPtrTable_Terry_PunchL: db $E8
 L094EE3: db $54
 L094EE4: db $FC
 L094EE5: db $54
@@ -3834,7 +3834,7 @@ L094EEC: db $FC
 L094EED: db $54
 L094EEE: db $FF;X
 L094EEF: db $FF;X
-L094EF0: db $2F
+OBJLstPtrTable_Terry_PunchH: db $2F
 L094EF1: db $55
 L094EF2: db $FF
 L094EF3: db $FF
@@ -3852,7 +3852,7 @@ L094EFE: db $FF
 L094EFF: db $FF
 L094F00: db $FF;X
 L094F01: db $FF;X
-L094F02: db $E8
+OBJLstPtrTable_Terry_KickL: db $E8
 L094F03: db $54
 L094F04: db $FC
 L094F05: db $54
@@ -3866,7 +3866,7 @@ L094F0C: db $FC
 L094F0D: db $54
 L094F0E: db $FF;X
 L094F0F: db $FF;X
-L094F10: db $8F
+OBJLstPtrTable_Terry_KickH: db $8F
 L094F11: db $55
 L094F12: db $FF
 L094F13: db $FF
@@ -3880,7 +3880,7 @@ L094F1A: db $FF
 L094F1B: db $FF
 L094F1C: db $FF;X
 L094F1D: db $FF;X
-L094F1E: db $CC
+OBJLstPtrTable_Terry_PunchCL: db $CC
 L094F1F: db $55
 L094F20: db $48
 L094F21: db $52
@@ -3894,7 +3894,7 @@ L094F28: db $48
 L094F29: db $52
 L094F2A: db $FF;X
 L094F2B: db $FF;X
-L094F2C: db $CC
+OBJLstPtrTable_Terry_PunchCH: db $CC
 L094F2D: db $55
 L094F2E: db $48
 L094F2F: db $52
@@ -3908,7 +3908,7 @@ L094F36: db $48
 L094F37: db $52
 L094F38: db $FF;X
 L094F39: db $FF;X
-L094F3A: db $31
+OBJLstPtrTable_Terry_KickCL: db $31
 L094F3B: db $52
 L094F3C: db $48
 L094F3D: db $52
@@ -3922,7 +3922,7 @@ L094F44: db $48
 L094F45: db $52
 L094F46: db $FF;X
 L094F47: db $FF;X
-L094F48: db $1A
+OBJLstPtrTable_Terry_KickCH: db $1A
 L094F49: db $56
 L094F4A: db $FF
 L094F4B: db $FF
@@ -3940,7 +3940,7 @@ L094F56: db $FF
 L094F57: db $FF
 L094F58: db $FF;X
 L094F59: db $FF;X
-L094F5A: db $64
+OBJLstPtrTable_Terry_PunchA: db $64
 L094F5B: db $56
 L094F5C: db $FF
 L094F5D: db $FF
@@ -3962,7 +3962,7 @@ L094F6C: db $48
 L094F6D: db $52
 L094F6E: db $FF;X
 L094F6F: db $FF;X
-L094F70: db $84
+OBJLstPtrTable_Terry_KickA: db $84
 L094F71: db $56
 L094F72: db $FF
 L094F73: db $FF
@@ -3984,7 +3984,7 @@ L094F82: db $48
 L094F83: db $52
 L094F84: db $FF;X
 L094F85: db $FF;X
-L094F86: db $F1
+OBJLstPtrTable_Terry_AttackA: db $F1
 L094F87: db $56
 L094F88: db $FF
 L094F89: db $FF
@@ -4006,7 +4006,7 @@ L094F98: db $48
 L094F99: db $52
 L094F9A: db $FF;X
 L094F9B: db $FF;X
-L094F9C: db $0A
+OBJLstPtrTable_Terry_AttackG: db $0A
 L094F9D: db $52
 L094F9E: db $29
 L094F9F: db $52
@@ -4024,7 +4024,7 @@ L094FAA: db $FF
 L094FAB: db $FF
 L094FAC: db $FF;X
 L094FAD: db $FF;X
-L094FAE: db $3C
+OBJLstPtrTable_Terry_RollF: db $3C
 L094FAF: db $59
 L094FB0: db $FF
 L094FB1: db $FF
@@ -4046,7 +4046,7 @@ L094FC0: db $48
 L094FC1: db $52
 L094FC2: db $FF;X
 L094FC3: db $FF;X
-L094FC4: db $1A
+OBJLstPtrTable_Terry_RollB: db $1A
 L094FC5: db $56
 L094FC6: db $FF
 L094FC7: db $FF
@@ -4068,13 +4068,13 @@ L094FD6: db $48
 L094FD7: db $52
 L094FD8: db $FF;X
 L094FD9: db $FF;X
-L094FDA: db $8F
+OBJLstPtrTable_Terry_GuardBreakG: db $8F
 L094FDB: db $57
 L094FDC: db $FF
 L094FDD: db $FF
 L094FDE: db $FF;X
 L094FDF: db $FF;X
-L094FE0: db $82
+OBJLstPtrTable_Terry_Dizzy: db $82
 L094FE1: db $51
 L094FE2: db $FF
 L094FE3: db $FF
@@ -4082,19 +4082,19 @@ L094FE4: db $8F
 L094FE5: db $57
 L094FE6: db $FF
 L094FE7: db $FF
-L094FE8: db $51
+OBJLstPtrTable_Terry_TimeOver: db $51
 L094FE9: db $57
 L094FEA: db $FF
 L094FEB: db $FF
 L094FEC: db $FF;X
 L094FED: db $FF;X
-L094FEE: db $AF
+OBJLstPtrTable_Terry_Hitlow: db $AF
 L094FEF: db $57
 L094FF0: db $FF
 L094FF1: db $FF
 L094FF2: db $FF;X
 L094FF3: db $FF;X
-L094FF4: db $8F;X
+OBJLstPtrTable_Terry_GuardBreakA: db $8F;X
 L094FF5: db $57;X
 L094FF6: db $FF;X
 L094FF7: db $FF;X
@@ -4104,7 +4104,7 @@ L094FFA: db $48;X
 L094FFB: db $52;X
 L094FFC: db $FF;X
 L094FFD: db $FF;X
-L094FFE: db $8F
+OBJLstPtrTable_Terry_BackjumpRecA: db $8F
 L094FFF: db $57
 L095000: db $FF
 L095001: db $FF
@@ -4134,7 +4134,7 @@ L095018: db $48
 L095019: db $52
 L09501A: db $FF;X
 L09501B: db $FF;X
-L09501C: db $8F
+OBJLstPtrTable_Terry_DropMain: db $8F
 L09501D: db $57
 L09501E: db $FF
 L09501F: db $FF
@@ -4146,7 +4146,7 @@ L095024: db $F6
 L095025: db $57
 L095026: db $FF
 L095027: db $FF
-L095028: db $CC
+OBJLstPtrTable_Terry_HitMultigs: db $CC
 L095029: db $57
 L09502A: db $FF
 L09502B: db $FF
@@ -4156,7 +4156,7 @@ L09502E: db $FF
 L09502F: db $FF
 L095030: db $FF;X
 L095031: db $FF;X
-L095032: db $51
+OBJLstPtrTable_Terry_HitSwoopup: db $51
 L095033: db $57
 L095034: db $FF
 L095035: db $FF
@@ -4168,7 +4168,7 @@ L09503A: db $7B
 L09503B: db $57
 L09503C: db $FF
 L09503D: db $FF
-L09503E: db $71
+OBJLstPtrTable_Terry_ThrowEndA: db $71
 L09503F: db $57
 L095040: db $FF
 L095041: db $FF
@@ -4186,7 +4186,7 @@ L09504C: db $FF
 L09504D: db $FF
 L09504E: db $FF;X
 L09504F: db $FF
-L095050: db $8F
+OBJLstPtrTable_Terry_DropDbg: db $8F
 L095051: db $57
 L095052: db $FF
 L095053: db $FF
@@ -4200,13 +4200,13 @@ L09505A: db $FF
 L09505B: db $FF
 L09505C: db $FF;X
 L09505D: db $FF;X
-L09505E: db $EC
+OBJLstPtrTable_Terry_ThrowRotL: db $EC
 L09505F: db $57
 L095060: db $FF
 L095061: db $FF
 L095062: db $FF;X
 L095063: db $FF;X
-L095064: db $31
+OBJLstPtrTable_Terry_Wakeup: db $31
 L095065: db $52
 L095066: db $48
 L095067: db $52
@@ -4216,7 +4216,7 @@ L09506A: db $48
 L09506B: db $52
 L09506C: db $FF;X
 L09506D: db $FF;X
-L09506E: db $10
+OBJLstPtrTable_Terry_PowerWaveL: db $10
 L09506F: db $58
 L095070: db $FF
 L095071: db $FF
@@ -4234,7 +4234,7 @@ L09507C: db $FF
 L09507D: db $FF
 L09507E: db $FF;X
 L09507F: db $FF;X
-L095080: db $5A
+OBJLstPtrTable_Terry_BurnKnuckleL: db $5A
 L095081: db $52
 L095082: db $FF
 L095083: db $FF
@@ -4264,7 +4264,7 @@ L09509A: db $48
 L09509B: db $52
 L09509C: db $FF;X
 L09509D: db $FF;X
-L09509E: db $3A
+OBJLstPtrTable_Terry_CrackShotL: db $3A
 L09509F: db $58
 L0950A0: db $FF
 L0950A1: db $FF
@@ -4286,7 +4286,7 @@ L0950B0: db $48
 L0950B1: db $52
 L0950B2: db $FF;X
 L0950B3: db $FF;X
-L0950B4: db $3C
+OBJLstPtrTable_Terry_RisingTackleL: db $3C
 L0950B5: db $59
 L0950B6: db $FF
 L0950B7: db $FF
@@ -4320,7 +4320,7 @@ L0950D2: db $48
 L0950D3: db $52
 L0950D4: db $FF;X
 L0950D5: db $FF;X
-L0950D6: db $31
+OBJLstPtrTable_Terry_PowerDunkL: db $31
 L0950D7: db $52
 L0950D8: db $48
 L0950D9: db $52
@@ -4350,7 +4350,7 @@ L0950F0: db $48
 L0950F1: db $52
 L0950F2: db $FF;X
 L0950F3: db $FF;X
-L0950F4: db $10
+OBJLstPtrTable_Terry_PowerGeyserD: db $10
 L0950F5: db $58
 L0950F6: db $FF
 L0950F7: db $FF
@@ -4392,7 +4392,7 @@ L09511A: db $FF
 L09511B: db $FF
 L09511C: db $FF;X
 L09511D: db $FF;X
-L09511E: db $10;X
+OBJLstPtrTable_Terry_PowerGeyserE: db $10;X
 L09511F: db $58;X
 L095120: db $FF;X
 L095121: db $FF;X
@@ -4478,7 +4478,7 @@ L095170: db $FF;X
 L095171: db $FF;X
 L095172: db $FF;X
 L095173: db $FF;X
-L095174: db $14
+OBJLstPtrTable_Terry_ThrowG: db $14
 L095175: db $57
 L095176: db $FF
 L095177: db $FF
@@ -6861,7 +6861,7 @@ L095A9F: db $80;X
 L095AA0: db $5A;X
 L095AA1: db $FF;X
 L095AA2: db $00;X
-L095AA3: db $D3
+OBJLstPtrTable_Krauser_Idle: db $D3
 L095AA4: db $5D
 L095AA5: db $F0
 L095AA6: db $5D
@@ -6879,7 +6879,7 @@ L095AB1: db $F0
 L095AB2: db $5D
 L095AB3: db $FF;X
 L095AB4: db $FF
-L095AB5: db $42
+OBJLstPtrTable_Krauser_WalkF: db $42
 L095AB6: db $5E
 L095AB7: db $FF
 L095AB8: db $FF
@@ -6897,13 +6897,13 @@ L095AC3: db $F0
 L095AC4: db $5D
 L095AC5: db $FF;X
 L095AC6: db $FF
-L095AC7: db $85
+OBJLstPtrTable_Krauser_Crouch: db $85
 L095AC8: db $5E
 L095AC9: db $FF
 L095ACA: db $FF
 L095ACB: db $FF;X
 L095ACC: db $FF;X
-L095ACD: db $85
+OBJLstPtrTable_Krauser_JumpN: db $85
 L095ACE: db $5E
 L095ACF: db $FF
 L095AD0: db $FF
@@ -6937,19 +6937,19 @@ L095AEB: db $FF
 L095AEC: db $FF
 L095AED: db $FF;X
 L095AEE: db $FF;X
-L095AEF: db $2E
+OBJLstPtrTable_Krauser_BlockG: db $2E
 L095AF0: db $5F
 L095AF1: db $FF
 L095AF2: db $FF
 L095AF3: db $FF;X
 L095AF4: db $FF;X
-L095AF5: db $4E
+OBJLstPtrTable_Krauser_BlockC: db $4E
 L095AF6: db $5F
 L095AF7: db $FF
 L095AF8: db $FF
 L095AF9: db $FF;X
 L095AFA: db $FF;X
-L095AFB: db $6B;X
+OBJLstPtrTable_Krauser_BlockA: db $6B;X
 L095AFC: db $5F;X
 L095AFD: db $11;X
 L095AFE: db $5F;X
@@ -6959,7 +6959,7 @@ L095B01: db $FF;X
 L095B02: db $FF;X
 L095B03: db $FF;X
 L095B04: db $FF;X
-L095B05: db $82
+OBJLstPtrTable_Krauser_RunF: db $82
 L095B06: db $5F
 L095B07: db $FF
 L095B08: db $FF
@@ -6977,7 +6977,7 @@ L095B13: db $FF
 L095B14: db $FF
 L095B15: db $FF;X
 L095B16: db $FF
-L095B17: db $B9
+OBJLstPtrTable_Krauser_HopB: db $B9
 L095B18: db $5E
 L095B19: db $FF
 L095B1A: db $FF
@@ -6991,7 +6991,7 @@ L095B21: db $FF
 L095B22: db $FF
 L095B23: db $FF;X
 L095B24: db $FF;X
-L095B25: db $EB
+OBJLstPtrTable_Krauser_ChargeMeter: db $EB
 L095B26: db $5F
 L095B27: db $FE
 L095B28: db $65
@@ -7001,7 +7001,7 @@ L095B2B: db $FE
 L095B2C: db $65
 L095B2D: db $FF;X
 L095B2E: db $FF
-L095B2F: db $1F
+OBJLstPtrTable_Krauser_Taunt: db $1F
 L095B30: db $60
 L095B31: db $39
 L095B32: db $60
@@ -7019,7 +7019,7 @@ L095B3D: db $39
 L095B3E: db $60
 L095B3F: db $FF;X
 L095B40: db $FF;X
-L095B41: db $82
+OBJLstPtrTable_Krauser_WinA: db $82
 L095B42: db $60
 L095B43: db $96
 L095B44: db $60
@@ -7037,7 +7037,7 @@ L095B4F: db $96
 L095B50: db $60
 L095B51: db $FF;X
 L095B52: db $FF;X
-L095B53: db $1F
+OBJLstPtrTable_Krauser_WinB: db $1F
 L095B54: db $60
 L095B55: db $39
 L095B56: db $60
@@ -7063,7 +7063,7 @@ L095B69: db $39
 L095B6A: db $60
 L095B6B: db $FF;X
 L095B6C: db $FF
-L095B6D: db $0A
+OBJLstPtrTable_Krauser_Intro: db $0A
 L095B6E: db $61
 L095B6F: db $FF
 L095B70: db $FF
@@ -7085,7 +7085,7 @@ L095B7F: db $FE
 L095B80: db $65
 L095B81: db $FF;X
 L095B82: db $FF;X
-L095B83: db $D1
+OBJLstPtrTable_Krauser_PunchL: db $D1
 L095B84: db $61
 L095B85: db $02
 L095B86: db $62
@@ -7099,7 +7099,7 @@ L095B8D: db $4D
 L095B8E: db $62
 L095B8F: db $FF;X
 L095B90: db $FF;X
-L095B91: db $8A
+OBJLstPtrTable_Krauser_PunchH: db $8A
 L095B92: db $62
 L095B93: db $FF
 L095B94: db $FF
@@ -7117,7 +7117,7 @@ L095B9F: db $FF
 L095BA0: db $FF
 L095BA1: db $FF;X
 L095BA2: db $FF;X
-L095BA3: db $D3
+OBJLstPtrTable_Krauser_KickL: db $D3
 L095BA4: db $62
 L095BA5: db $FF
 L095BA6: db $FF
@@ -7131,7 +7131,7 @@ L095BAD: db $FF
 L095BAE: db $FF
 L095BAF: db $FF;X
 L095BB0: db $FF;X
-L095BB1: db $23
+OBJLstPtrTable_Krauser_KickH: db $23
 L095BB2: db $63
 L095BB3: db $FF
 L095BB4: db $FF
@@ -7149,7 +7149,7 @@ L095BBF: db $FF
 L095BC0: db $FF
 L095BC1: db $FF;X
 L095BC2: db $FF;X
-L095BC3: db $76
+OBJLstPtrTable_Krauser_PunchCL: db $76
 L095BC4: db $63
 L095BC5: db $8A
 L095BC6: db $63
@@ -7163,7 +7163,7 @@ L095BCD: db $8A
 L095BCE: db $63
 L095BCF: db $FF;X
 L095BD0: db $FF;X
-L095BD1: db $76
+OBJLstPtrTable_Krauser_PunchCH: db $76
 L095BD2: db $63
 L095BD3: db $8A
 L095BD4: db $63
@@ -7181,7 +7181,7 @@ L095BDF: db $8A
 L095BE0: db $63
 L095BE1: db $FF;X
 L095BE2: db $FF;X
-L095BE3: db $76
+OBJLstPtrTable_Krauser_KickCL: db $76
 L095BE4: db $63
 L095BE5: db $8A
 L095BE6: db $63
@@ -7195,7 +7195,7 @@ L095BED: db $8A
 L095BEE: db $63
 L095BEF: db $FF;X
 L095BF0: db $FF;X
-L095BF1: db $76
+OBJLstPtrTable_Krauser_KickCH: db $76
 L095BF2: db $63
 L095BF3: db $8A
 L095BF4: db $63
@@ -7213,7 +7213,7 @@ L095BFF: db $8A
 L095C00: db $63
 L095C01: db $FF;X
 L095C02: db $FF;X
-L095C03: db $21
+OBJLstPtrTable_Krauser_PunchA: db $21
 L095C04: db $64
 L095C05: db $41
 L095C06: db $64
@@ -7235,7 +7235,7 @@ L095C15: db $FF
 L095C16: db $FF
 L095C17: db $FF;X
 L095C18: db $FF;X
-L095C19: db $05
+OBJLstPtrTable_Krauser_KickA: db $05
 L095C1A: db $64
 L095C1B: db $5B
 L095C1C: db $64
@@ -7257,7 +7257,7 @@ L095C2B: db $FF
 L095C2C: db $FF
 L095C2D: db $FF;X
 L095C2E: db $FF;X
-L095C2F: db $AE
+OBJLstPtrTable_Krauser_AttackA: db $AE
 L095C30: db $64
 L095C31: db $FF
 L095C32: db $FF
@@ -7279,7 +7279,7 @@ L095C41: db $FF
 L095C42: db $FF
 L095C43: db $FF;X
 L095C44: db $FF;X
-L095C45: db $23
+OBJLstPtrTable_Krauser_AttackG: db $23
 L095C46: db $63
 L095C47: db $FF
 L095C48: db $FF
@@ -7301,7 +7301,7 @@ L095C57: db $FF;X
 L095C58: db $FF;X
 L095C59: db $FF;X
 L095C5A: db $FF;X
-L095C5B: db $A3
+OBJLstPtrTable_Krauser_RollF: db $A3
 L095C5C: db $65
 L095C5D: db $FF
 L095C5E: db $FF
@@ -7323,7 +7323,7 @@ L095C6D: db $FF
 L095C6E: db $FF
 L095C6F: db $FF;X
 L095C70: db $FF;X
-L095C71: db $53
+OBJLstPtrTable_Krauser_RollB: db $53
 L095C72: db $65
 L095C73: db $FF
 L095C74: db $FF
@@ -7345,13 +7345,13 @@ L095C83: db $FF
 L095C84: db $FF
 L095C85: db $FF;X
 L095C86: db $FF;X
-L095C87: db $D4
+OBJLstPtrTable_Krauser_GuardBreakG: db $D4
 L095C88: db $64
 L095C89: db $F1
 L095C8A: db $64
 L095C8B: db $FF;X
 L095C8C: db $FF;X
-L095C8D: db $D3
+OBJLstPtrTable_Krauser_Dizzy: db $D3
 L095C8E: db $5D
 L095C8F: db $F0
 L095C90: db $5D
@@ -7359,19 +7359,19 @@ L095C91: db $D4;X
 L095C92: db $64;X
 L095C93: db $F1;X
 L095C94: db $64;X
-L095C95: db $1B
+OBJLstPtrTable_Krauser_TimeOver: db $1B
 L095C96: db $65
 L095C97: db $F1
 L095C98: db $64
 L095C99: db $FF;X
 L095C9A: db $FF;X
-L095C9B: db $53;X
+OBJLstPtrTable_Krauser_Hitlow: db $53;X
 L095C9C: db $65;X
 L095C9D: db $FF;X
 L095C9E: db $FF;X
 L095C9F: db $FF;X
 L095CA0: db $FF;X
-L095CA1: db $D4;X
+OBJLstPtrTable_Krauser_GuardBreakA: db $D4;X
 L095CA2: db $64;X
 L095CA3: db $F1;X
 L095CA4: db $64;X
@@ -7381,7 +7381,7 @@ L095CA7: db $FF;X
 L095CA8: db $FF;X
 L095CA9: db $FF;X
 L095CAA: db $FF;X
-L095CAB: db $D4
+OBJLstPtrTable_Krauser_BackjumpRecA: db $D4
 L095CAC: db $64
 L095CAD: db $F1
 L095CAE: db $64
@@ -7411,7 +7411,7 @@ L095CC5: db $FF
 L095CC6: db $FF
 L095CC7: db $FF;X
 L095CC8: db $FF;X
-L095CC9: db $D4
+OBJLstPtrTable_Krauser_DropMain: db $D4
 L095CCA: db $64
 L095CCB: db $F1
 L095CCC: db $64
@@ -7423,7 +7423,7 @@ L095CD1: db $B7
 L095CD2: db $65
 L095CD3: db $FF
 L095CD4: db $FF
-L095CD5: db $73
+OBJLstPtrTable_Krauser_HitMultigs: db $73
 L095CD6: db $65
 L095CD7: db $FF
 L095CD8: db $FF
@@ -7433,7 +7433,7 @@ L095CDB: db $FF
 L095CDC: db $FF
 L095CDD: db $FF;X
 L095CDE: db $FF;X
-L095CDF: db $1B
+OBJLstPtrTable_Krauser_HitSwoopup: db $1B
 L095CE0: db $65
 L095CE1: db $F1
 L095CE2: db $64
@@ -7445,7 +7445,7 @@ L095CE7: db $2F
 L095CE8: db $65
 L095CE9: db $01
 L095CEA: db $65
-L095CEB: db $49
+OBJLstPtrTable_Krauser_ThrowEndA: db $49
 L095CEC: db $65
 L095CED: db $13
 L095CEE: db $65
@@ -7463,7 +7463,7 @@ L095CF9: db $FF
 L095CFA: db $FF
 L095CFB: db $FF;X
 L095CFC: db $FF
-L095CFD: db $1B
+OBJLstPtrTable_Krauser_DropDbg: db $1B
 L095CFE: db $65
 L095CFF: db $F1
 L095D00: db $64
@@ -7477,13 +7477,13 @@ L095D07: db $FF
 L095D08: db $FF
 L095D09: db $FF;X
 L095D0A: db $FF;X
-L095D0B: db $AD
+OBJLstPtrTable_Krauser_ThrowRotL: db $AD
 L095D0C: db $65
 L095D0D: db $FF
 L095D0E: db $FF
 L095D0F: db $FF;X
 L095D10: db $FF;X
-L095D11: db $85
+OBJLstPtrTable_Krauser_Wakeup: db $85
 L095D12: db $5E
 L095D13: db $FF
 L095D14: db $FF
@@ -7493,7 +7493,7 @@ L095D17: db $FF
 L095D18: db $FF
 L095D19: db $FF;X
 L095D1A: db $FF;X
-L095D1B: db $1C
+OBJLstPtrTable_Krauser_ThrowG: db $1C
 L095D1C: db $62
 L095D1D: db $4D
 L095D1E: db $62
@@ -7515,7 +7515,7 @@ L095D2D: db $FF
 L095D2E: db $FF
 L095D2F: db $FF;X
 L095D30: db $FF;X
-L095D31: db $28
+OBJLstPtrTable_Krauser_HighBlitzBallL: db $28
 L095D32: db $66
 L095D33: db $FF
 L095D34: db $FF
@@ -7529,7 +7529,7 @@ L095D3B: db $4D
 L095D3C: db $62
 L095D3D: db $FF;X
 L095D3E: db $FF;X
-L095D3F: db $28
+OBJLstPtrTable_Krauser_LowBlitzBallL: db $28
 L095D40: db $66
 L095D41: db $FF
 L095D42: db $FF
@@ -7543,7 +7543,7 @@ L095D49: db $4D
 L095D4A: db $62
 L095D4B: db $FF;X
 L095D4C: db $FF;X
-L095D4D: db $D3
+OBJLstPtrTable_Krauser_LegTomahawkL: db $D3
 L095D4E: db $62
 L095D4F: db $FF
 L095D50: db $FF
@@ -7573,7 +7573,7 @@ L095D67: db $FF
 L095D68: db $FF
 L095D69: db $FF;X
 L095D6A: db $FF;X
-L095D6B: db $23
+OBJLstPtrTable_Krauser_KaiserKickL: db $23
 L095D6C: db $63
 L095D6D: db $FF
 L095D6E: db $FF
@@ -7591,7 +7591,7 @@ L095D79: db $FF
 L095D7A: db $FF
 L095D7B: db $FF;X
 L095D7C: db $FF;X
-L095D7D: db $82
+OBJLstPtrTable_Krauser_KaiserDuelSobatL: db $82
 L095D7E: db $5F
 L095D7F: db $FF
 L095D80: db $FF
@@ -7609,7 +7609,7 @@ L095D8B: db $FF
 L095D8C: db $FF
 L095D8D: db $FF;X
 L095D8E: db $FF;X
-L095D8F: db $DB
+OBJLstPtrTable_Krauser_KaiserSuplexL: db $DB
 L095D90: db $61
 L095D91: db $02
 L095D92: db $62
@@ -7651,7 +7651,7 @@ L095DB5: db $FF
 L095DB6: db $FF
 L095DB7: db $FF;X
 L095DB8: db $FF;X
-L095DB9: db $D1
+OBJLstPtrTable_Krauser_KaiserWaveS: db $D1
 L095DBA: db $61
 L095DBB: db $02
 L095DBC: db $62
@@ -10221,7 +10221,7 @@ L0967BF: db $01
 L0967C0: db $18
 L0967C1: db $FB
 L0967C2: db $00
-L0967C3: db $F7
+OBJLstPtrTable_Mature_Idle: db $F7
 L0967C4: db $6A
 L0967C5: db $11
 L0967C6: db $6B
@@ -10235,7 +10235,7 @@ L0967CD: db $FF
 L0967CE: db $FF
 L0967CF: db $FF;X
 L0967D0: db $FF
-L0967D1: db $5D
+OBJLstPtrTable_Mature_WalkF: db $5D
 L0967D2: db $6B
 L0967D3: db $FF
 L0967D4: db $FF
@@ -10257,7 +10257,7 @@ L0967E3: db $D5
 L0967E4: db $6B
 L0967E5: db $FF;X
 L0967E6: db $FF
-L0967E7: db $81
+OBJLstPtrTable_Mature_WalkB: db $81
 L0967E8: db $6B
 L0967E9: db $D5
 L0967EA: db $6B
@@ -10279,13 +10279,13 @@ L0967F9: db $FF
 L0967FA: db $FF
 L0967FB: db $FF;X
 L0967FC: db $FF
-L0967FD: db $E4
+OBJLstPtrTable_Mature_Crouch: db $E4
 L0967FE: db $6B
 L0967FF: db $FF
 L096800: db $FF
 L096801: db $FF;X
 L096802: db $FF;X
-L096803: db $E4
+OBJLstPtrTable_Mature_JumpN: db $E4
 L096804: db $6B
 L096805: db $FF
 L096806: db $FF
@@ -10319,19 +10319,19 @@ L096821: db $FF
 L096822: db $FF
 L096823: db $FF;X
 L096824: db $FF;X
-L096825: db $FE
+OBJLstPtrTable_Mature_BlockG: db $FE
 L096826: db $6B
 L096827: db $19
 L096828: db $6C
 L096829: db $FF;X
 L09682A: db $FF;X
-L09682B: db $0F
+OBJLstPtrTable_Mature_BlockC: db $0F
 L09682C: db $6C
 L09682D: db $2B
 L09682E: db $6C
 L09682F: db $FF;X
 L096830: db $FF;X
-L096831: db $3D;X
+OBJLstPtrTable_Mature_BlockA: db $3D;X
 L096832: db $6C;X
 L096833: db $A2;X
 L096834: db $6C;X
@@ -10341,7 +10341,7 @@ L096837: db $FF;X
 L096838: db $FF;X
 L096839: db $FF;X
 L09683A: db $FF;X
-L09683B: db $88
+OBJLstPtrTable_Mature_RunF: db $88
 L09683C: db $72
 L09683D: db $FF
 L09683E: db $FF
@@ -10351,7 +10351,7 @@ L096841: db $FF
 L096842: db $FF
 L096843: db $FF;X
 L096844: db $FF
-L096845: db $C6
+OBJLstPtrTable_Mature_HopB: db $C6
 L096846: db $74
 L096847: db $FF
 L096848: db $FF
@@ -10365,7 +10365,7 @@ L09684F: db $FF
 L096850: db $FF
 L096851: db $FF;X
 L096852: db $FF;X
-L096853: db $B7
+OBJLstPtrTable_Mature_ChargeMeter: db $B7
 L096854: db $6C
 L096855: db $11
 L096856: db $6B
@@ -10377,7 +10377,7 @@ L09685B: db $FF;X
 L09685C: db $FF
 L09685D: db $FF;X
 L09685E: db $FF;X
-L09685F: db $E5
+OBJLstPtrTable_Mature_Taunt: db $E5
 L096860: db $6C
 L096861: db $FF
 L096862: db $FF
@@ -10387,7 +10387,7 @@ L096865: db $FF
 L096866: db $FF
 L096867: db $FF;X
 L096868: db $FF;X
-L096869: db $8D
+OBJLstPtrTable_Mature_Intro: db $8D
 L09686A: db $6D
 L09686B: db $A1
 L09686C: db $6D
@@ -10417,7 +10417,7 @@ L096883: db $FF
 L096884: db $FF
 L096885: db $FF;X
 L096886: db $FF;X
-L096887: db $5D
+OBJLstPtrTable_Mature_WinA: db $5D
 L096888: db $6B
 L096889: db $FF
 L09688A: db $FF
@@ -10427,7 +10427,7 @@ L09688D: db $FF
 L09688E: db $FF
 L09688F: db $FF;X
 L096890: db $FF;X
-L096891: db $3C
+OBJLstPtrTable_Mature_WinB: db $3C
 L096892: db $6D
 L096893: db $FF
 L096894: db $FF
@@ -10441,7 +10441,7 @@ L09689B: db $FF
 L09689C: db $FF
 L09689D: db $FF;X
 L09689E: db $FF
-L09689F: db $3D
+OBJLstPtrTable_Mature_PunchL: db $3D
 L0968A0: db $6E
 L0968A1: db $5B
 L0968A2: db $6E
@@ -10455,7 +10455,7 @@ L0968A9: db $5B
 L0968AA: db $6E
 L0968AB: db $FF;X
 L0968AC: db $FF;X
-L0968AD: db $6D
+OBJLstPtrTable_Mature_PunchH: db $6D
 L0968AE: db $6E
 L0968AF: db $FF
 L0968B0: db $FF
@@ -10473,7 +10473,7 @@ L0968BB: db $1A
 L0968BC: db $6F
 L0968BD: db $FF;X
 L0968BE: db $FF;X
-L0968BF: db $2C
+OBJLstPtrTable_Mature_KickL: db $2C
 L0968C0: db $6F
 L0968C1: db $46
 L0968C2: db $6F
@@ -10491,7 +10491,7 @@ L0968CD: db $FF
 L0968CE: db $FF
 L0968CF: db $FF;X
 L0968D0: db $FF;X
-L0968D1: db $E4
+OBJLstPtrTable_Mature_KickH: db $E4
 L0968D2: db $6B
 L0968D3: db $FF
 L0968D4: db $FF
@@ -10509,7 +10509,7 @@ L0968DF: db $FF
 L0968E0: db $FF
 L0968E1: db $FF;X
 L0968E2: db $FF;X
-L0968E3: db $51
+OBJLstPtrTable_Mature_PunchCL: db $51
 L0968E4: db $6E
 L0968E5: db $13
 L0968E6: db $70
@@ -10523,7 +10523,7 @@ L0968ED: db $13
 L0968EE: db $70
 L0968EF: db $FF;X
 L0968F0: db $FF;X
-L0968F1: db $E4
+OBJLstPtrTable_Mature_PunchCH: db $E4
 L0968F2: db $6B
 L0968F3: db $FF
 L0968F4: db $FF
@@ -10541,7 +10541,7 @@ L0968FF: db $FF
 L096900: db $FF
 L096901: db $FF;X
 L096902: db $FF;X
-L096903: db $82
+OBJLstPtrTable_Mature_KickCL: db $82
 L096904: db $70
 L096905: db $FF
 L096906: db $FF
@@ -10555,7 +10555,7 @@ L09690D: db $FF
 L09690E: db $FF
 L09690F: db $FF;X
 L096910: db $FF;X
-L096911: db $81
+OBJLstPtrTable_Mature_KickCH: db $81
 L096912: db $6B
 L096913: db $D5
 L096914: db $6B
@@ -10573,7 +10573,7 @@ L09691F: db $D5
 L096920: db $6B
 L096921: db $FF;X
 L096922: db $FF;X
-L096923: db $00
+OBJLstPtrTable_Mature_PunchA: db $00
 L096924: db $6F
 L096925: db $E3
 L096926: db $70
@@ -10595,7 +10595,7 @@ L096935: db $FF
 L096936: db $FF
 L096937: db $FF;X
 L096938: db $FF;X
-L096939: db $2C
+OBJLstPtrTable_Mature_KickA: db $2C
 L09693A: db $6F
 L09693B: db $F5
 L09693C: db $70
@@ -10617,7 +10617,7 @@ L09694B: db $FF
 L09694C: db $FF
 L09694D: db $FF;X
 L09694E: db $FF;X
-L09694F: db $36
+OBJLstPtrTable_Mature_AttackA: db $36
 L096950: db $71
 L096951: db $FF
 L096952: db $FF
@@ -10639,7 +10639,7 @@ L096961: db $FF
 L096962: db $FF
 L096963: db $FF;X
 L096964: db $FF;X
-L096965: db $F2
+OBJLstPtrTable_Mature_AttackG: db $F2
 L096966: db $71
 L096967: db $FF
 L096968: db $FF
@@ -10657,7 +10657,7 @@ L096973: db $FF
 L096974: db $FF
 L096975: db $FF;X
 L096976: db $FF;X
-L096977: db $CB
+OBJLstPtrTable_Mature_RollF: db $CB
 L096978: db $71
 L096979: db $FF
 L09697A: db $FF
@@ -10679,7 +10679,7 @@ L096989: db $FF
 L09698A: db $FF
 L09698B: db $FF;X
 L09698C: db $FF;X
-L09698D: db $A4
+OBJLstPtrTable_Mature_RollB: db $A4
 L09698E: db $71
 L09698F: db $FF
 L096990: db $FF
@@ -10701,13 +10701,13 @@ L09699F: db $FF
 L0969A0: db $FF
 L0969A1: db $FF;X
 L0969A2: db $FF;X
-L0969A3: db $10
+OBJLstPtrTable_Mature_GuardBreakG: db $10
 L0969A4: db $72
 L0969A5: db $FF
 L0969A6: db $FF
 L0969A7: db $FF;X
 L0969A8: db $FF;X
-L0969A9: db $F7
+OBJLstPtrTable_Mature_Dizzy: db $F7
 L0969AA: db $6A
 L0969AB: db $11
 L0969AC: db $6B
@@ -10715,19 +10715,19 @@ L0969AD: db $10
 L0969AE: db $72
 L0969AF: db $FF
 L0969B0: db $FF
-L0969B1: db $D5
+OBJLstPtrTable_Mature_TimeOver: db $D5
 L0969B2: db $71
 L0969B3: db $FF
 L0969B4: db $FF
 L0969B5: db $FF;X
 L0969B6: db $FF;X
-L0969B7: db $2D;X
+OBJLstPtrTable_Mature_Hitlow: db $2D;X
 L0969B8: db $72;X
 L0969B9: db $FF;X
 L0969BA: db $FF;X
 L0969BB: db $FF;X
 L0969BC: db $FF;X
-L0969BD: db $10;X
+OBJLstPtrTable_Mature_GuardBreakA: db $10;X
 L0969BE: db $72;X
 L0969BF: db $FF;X
 L0969C0: db $FF;X
@@ -10737,7 +10737,7 @@ L0969C3: db $FF;X
 L0969C4: db $FF;X
 L0969C5: db $FF;X
 L0969C6: db $FF;X
-L0969C7: db $10
+OBJLstPtrTable_Mature_BackjumpRecA: db $10
 L0969C8: db $72
 L0969C9: db $FF
 L0969CA: db $FF
@@ -10767,7 +10767,7 @@ L0969E1: db $FF
 L0969E2: db $FF
 L0969E3: db $FF;X
 L0969E4: db $FF;X
-L0969E5: db $10
+OBJLstPtrTable_Mature_DropMain: db $10
 L0969E6: db $72
 L0969E7: db $FF
 L0969E8: db $FF
@@ -10779,7 +10779,7 @@ L0969ED: db $6E
 L0969EE: db $72
 L0969EF: db $FF
 L0969F0: db $FF
-L0969F1: db $4A
+OBJLstPtrTable_Mature_HitMultigs: db $4A
 L0969F2: db $72
 L0969F3: db $FF
 L0969F4: db $FF
@@ -10789,7 +10789,7 @@ L0969F7: db $FF
 L0969F8: db $FF
 L0969F9: db $FF;X
 L0969FA: db $FF;X
-L0969FB: db $D5
+OBJLstPtrTable_Mature_HitSwoopup: db $D5
 L0969FC: db $71
 L0969FD: db $FF
 L0969FE: db $FF
@@ -10801,7 +10801,7 @@ L096A03: db $FC
 L096A04: db $71
 L096A05: db $FF
 L096A06: db $FF
-L096A07: db $06
+OBJLstPtrTable_Mature_ThrowEndA: db $06
 L096A08: db $72
 L096A09: db $FF
 L096A0A: db $FF
@@ -10819,7 +10819,7 @@ L096A15: db $FF
 L096A16: db $FF
 L096A17: db $FF;X
 L096A18: db $FF
-L096A19: db $D5
+OBJLstPtrTable_Mature_DropDbg: db $D5
 L096A1A: db $71
 L096A1B: db $FF
 L096A1C: db $FF
@@ -10833,13 +10833,13 @@ L096A23: db $FF
 L096A24: db $FF
 L096A25: db $FF;X
 L096A26: db $FF;X
-L096A27: db $64
+OBJLstPtrTable_Mature_ThrowRotL: db $64
 L096A28: db $72
 L096A29: db $FF
 L096A2A: db $FF
 L096A2B: db $FF;X
 L096A2C: db $FF;X
-L096A2D: db $E4
+OBJLstPtrTable_Mature_Wakeup: db $E4
 L096A2E: db $6B
 L096A2F: db $FF
 L096A30: db $FF
@@ -10849,7 +10849,7 @@ L096A33: db $FF
 L096A34: db $FF
 L096A35: db $FF;X
 L096A36: db $FF;X
-L096A37: db $CF
+OBJLstPtrTable_Mature_DecideL: db $CF
 L096A38: db $6E
 L096A39: db $FF
 L096A3A: db $FF
@@ -10883,7 +10883,7 @@ L096A55: db $FF
 L096A56: db $FF
 L096A57: db $FF;X
 L096A58: db $FF;X
-L096A59: db $88
+OBJLstPtrTable_Mature_MetalMassacreL: db $88
 L096A5A: db $72
 L096A5B: db $FF
 L096A5C: db $FF
@@ -10921,7 +10921,7 @@ L096A7B: db $1A
 L096A7C: db $6F
 L096A7D: db $FF;X
 L096A7E: db $FF;X
-L096A7F: db $9F
+OBJLstPtrTable_Mature_DeathRowL: db $9F
 L096A80: db $73
 L096A81: db $FF
 L096A82: db $FF
@@ -10967,7 +10967,7 @@ L096AA9: db $5B
 L096AAA: db $6E
 L096AAB: db $FF;X
 L096AAC: db $FF;X
-L096AAD: db $E4
+OBJLstPtrTable_Mature_DespairL: db $E4
 L096AAE: db $6B
 L096AAF: db $FF
 L096AB0: db $FF
@@ -10997,7 +10997,7 @@ L096AC7: db $FF
 L096AC8: db $FF
 L096AC9: db $FF;X
 L096ACA: db $FF;X
-L096ACB: db $8C
+OBJLstPtrTable_Mature_HeavensGateS: db $8C
 L096ACC: db $74
 L096ACD: db $FF
 L096ACE: db $FF
@@ -11027,7 +11027,7 @@ L096AE5: db $FF
 L096AE6: db $FF
 L096AE7: db $FF;X
 L096AE8: db $FF;X
-L096AE9: db $DF
+OBJLstPtrTable_Mature_ThrowG: db $DF
 L096AEA: db $72
 L096AEB: db $FF
 L096AEC: db $FF

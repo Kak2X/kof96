@@ -694,8 +694,8 @@ MOVE_SHARED_ROLL_F         EQU $1E ; Roll forward
 MOVE_SHARED_ROLL_B         EQU $20 ; Roll back
 MOVE_SHARED_WAKEUP         EQU $22 ; Get up
 MOVE_SHARED_DIZZY          EQU $24 ; Dizzy
-MOVE_SHARED_WIN_NORM       EQU $26 ; Win (1st)
-MOVE_SHARED_WIN_ALT        EQU $28 ; Win (2nd+)
+MOVE_SHARED_WIN_A          EQU $26 ; Win (1st)
+MOVE_SHARED_WIN_B          EQU $28 ; Win (2nd+)
 MOVE_SHARED_LOST_TIMEOVER  EQU $2A ; Time over
 MOVE_SHARED_INTRO          EQU $2C ; Intro
 MOVE_SHARED_INTRO_SPEC     EQU $2E ; Special intro

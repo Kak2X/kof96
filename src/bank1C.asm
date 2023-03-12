@@ -4277,23 +4277,23 @@ mIntroCharDef: MACRO
 	db \2,\3,\4
 ENDM
 
-	;;;;;;;;;;;;; ANIMATION TABLE       |  X|   Y| ANIMDELAY ; BANK | For Scene Loading
-	mIntroCharDef L0860DC,               $50, $40,       $00 ;  $08 | INTRO_SCENE_MAI        
-	mIntroCharDef L08526D,               $20, $40,       $00 ;  $08 | INTRO_SCENE_ATHENA     
-	mIntroCharDef L0A5DBD,               $50, $40,       $03 ;  $0A | INTRO_SCENE_LEONA      
-	mIntroCharDef L075391,               $80, $00,       $06 ;  $07 | INTRO_SCENE_ROBERT     
-	mIntroCharDef L0A40FC,               $20, $50,       $04 ;  $0A | INTRO_SCENE_RYO        
-	mIntroCharDef L0A460C,               $50, $24,       $08 ;  $0A | INTRO_SCENE_MRKARATE   
-	mIntroCharDef L0770C1,               $20, $24,       $00 ;  $07 | INTRO_SCENE_MRBIG      
-	mIntroCharDef L076226,               $80, $24,       $00 ;  $07 | INTRO_SCENE_GEESE      
-	mIntroCharDef L095B53,               $50, $24,       $00 ;  $09 | INTRO_SCENE_KRAUSER    
-	mIntroCharDef L09409E,               $84, $40,       $00 ;  $09 | INTRO_SCENE_DAIMON     
-	mIntroCharDef L096891,               $1C, $40,       $06 ;  $09 | INTRO_SCENE_MATURE     
-	db      $00,  $00,$00,               $00, $00,       $00 ;  $00 | INTRO_SCENE_CHG_IORIRISE (N/A)
-	mIntroCharDef L0740F2,               $84, $40,       $00 ;  $07 | INTRO_SCENE_KYO        
-	mIntroCharDef L0540AC,               $1C, $40,       $00 ;  $05 | INTRO_SCENE_IORIKYOA   
-	mIntroCharDef L07443C,               $84, $40,       $03 ;  $07 | INTRO_SCENE_IORIKYOB   
-	mIntroCharDef L054464,               $1C, $40,       $0F ;  $05 | INTRO_SCENE_IORIKYOC 
+	;;;;;;;;;;;;; ANIMATION TABLE                   |  X|   Y| ANIMDELAY ; BANK | For Scene Loading
+	mIntroCharDef OBJLstPtrTable_Mai_WinA,           $50, $40,       $00 ;  $08 | INTRO_SCENE_MAI        
+	mIntroCharDef OBJLstPtrTable_Athena_WinA,        $20, $40,       $00 ;  $08 | INTRO_SCENE_ATHENA     
+	mIntroCharDef OBJLstPtrTable_OLeona_WinB,        $50, $40,       $03 ;  $0A | INTRO_SCENE_LEONA      
+	mIntroCharDef OBJLstPtrTable_Robert_Intro,       $80, $00,       $06 ;  $07 | INTRO_SCENE_ROBERT     
+	mIntroCharDef OBJLstPtrTable_Ryo_Intro,          $20, $50,       $04 ;  $0A | INTRO_SCENE_RYO        
+	mIntroCharDef OBJLstPtrTable_MrKarate_DemoIntro, $50, $24,       $08 ;  $0A | INTRO_SCENE_MRKARATE   
+	mIntroCharDef OBJLstPtrTable_MrBig_WinB,         $20, $24,       $00 ;  $07 | INTRO_SCENE_MRBIG      
+	mIntroCharDef OBJLstPtrTable_Geese_IntroSpec,    $80, $24,       $00 ;  $07 | INTRO_SCENE_GEESE      
+	mIntroCharDef OBJLstPtrTable_Krauser_WinB,       $50, $24,       $00 ;  $09 | INTRO_SCENE_KRAUSER    
+	mIntroCharDef OBJLstPtrTable_Daimon_Taunt,       $84, $40,       $00 ;  $09 | INTRO_SCENE_DAIMON     
+	mIntroCharDef OBJLstPtrTable_Mature_WinB,        $1C, $40,       $06 ;  $09 | INTRO_SCENE_MATURE     
+	db      $00,  $00,$00,                           $00, $00,       $00 ;  $00 | INTRO_SCENE_CHG_IORIRISE (N/A)
+	mIntroCharDef OBJLstPtrTable_Kyo_DemoIntro,      $84, $40,       $00 ;  $07 | INTRO_SCENE_KYO        
+	mIntroCharDef OBJLstPtrTable_OIori_ChargeMeter,  $1C, $40,       $00 ;  $05 | INTRO_SCENE_IORIKYOA   
+	mIntroCharDef OBJLstPtrTable_Kyo_UraOrochiNagiS, $84, $40,       $03 ;  $07 | INTRO_SCENE_IORIKYOB   
+	mIntroCharDef OBJLstPtrTable_Iori_KinYaOtomeS,   $1C, $40,       $0F ;  $05 | INTRO_SCENE_IORIKYOC 
 	
 ; =============== IntroScene_IoriRise ===============
 ; OUT

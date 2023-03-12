@@ -11784,10 +11784,10 @@ Play_SetWinLoseMoves:
 	cp   $02				; iPlInfo_RoundWinStreak >= $02?
 	jr   nc, .winAlt		; If so, jump
 .winNorm:
-	ld   a, MOVE_SHARED_WIN_NORM	; A = Move ID to use
+	ld   a, MOVE_SHARED_WIN_A	; A = Move ID to use
 	jr   .setWinMove
 .winAlt:
-	ld   a, MOVE_SHARED_WIN_ALT		; A = Move ID to use
+	ld   a, MOVE_SHARED_WIN_B		; A = Move ID to use
 .setWinMove:
 	ld   hl, iPlInfo_IntroMoveId
 	add  hl, bc				; Seek to iPlInfo_IntroMoveId

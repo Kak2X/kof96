@@ -936,7 +936,7 @@ Play_Pl_DecDizzyTime:
 	ret
 	
 ; =============== MoveC_Base_RoundEnd ===============
-; Custom code for moves used when the round ends (MOVE_SHARED_WIN_NORM, MOVE_SHARED_WIN_ALT, MOVE_SHARED_LOST_TIMEOVER).
+; Custom code for moves used when the round ends (MOVE_SHARED_WIN_A, MOVE_SHARED_WIN_B, MOVE_SHARED_LOST_TIMEOVER).
 MoveC_Base_RoundEnd:
 	call Play_Pl_MoveByColiBoxOverlapX
 	mMvC_ValLoaded .ret
@@ -960,7 +960,7 @@ MoveC_Base_RoundEnd:
 	ld   hl, iPlInfo_MoveId
 	add  hl, bc
 	ld   a, [hl]
-	cp   MOVE_SHARED_WIN_ALT	; Using the second win anim?
+	cp   MOVE_SHARED_WIN_B	; Using the second win anim?
 	jr   nz, .killTask			; If not, return
 	ld   hl, iPlInfo_CharId
 	add  hl, bc
