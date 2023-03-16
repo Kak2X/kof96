@@ -3,9 +3,6 @@
 ;
 ; =============== Module_CharSel ===============
 ; EntryPoint for character select screen.
-; Called by:
-; - rst $00 jump from Module_Title
-; - rst $00 jump from Module_Win
 Module_CharSel:
 	ld   sp, $DD00
 	di
@@ -3327,7 +3324,7 @@ OBJLstPtrTable_CharSel_Cursor:
 OBJLstHdrA_CharSel_CursorPl1P:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3343,7 +3340,7 @@ OBJLstHdrA_CharSel_CursorPl1P:
 OBJLstHdrA_CharSel_CursorPl1PWide:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3359,7 +3356,7 @@ OBJLstHdrA_CharSel_CursorPl1PWide:
 OBJLstHdrA_CharSel_CursorPl2P:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3375,7 +3372,7 @@ OBJLstHdrA_CharSel_CursorPl2P:
 OBJLstHdrA_CharSel_CursorPl2PWide:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3391,7 +3388,7 @@ OBJLstHdrA_CharSel_CursorPl2PWide:
 OBJLstHdrA_CharSel_CursorCPU1P:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3408,7 +3405,7 @@ OBJLstHdrA_CharSel_CursorCPU1P:
 OBJLstHdrA_CharSel_CursorCPU1PWide:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3425,7 +3422,7 @@ OBJLstHdrA_CharSel_CursorCPU1PWide:
 OBJLstHdrA_CharSel_CursorCPU2P:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3442,7 +3439,7 @@ OBJLstHdrA_CharSel_CursorCPU2P:
 OBJLstHdrA_CharSel_CursorCPU2PWide:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3470,7 +3467,7 @@ OBJLstPtrTable_CharSel_Flip:
 OBJLstHdrA_CharSel_FlipP2:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw OBJLst_CharSel_Flip0 ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3479,7 +3476,7 @@ OBJLstHdrA_CharSel_FlipP2:
 OBJLstHdrA_CharSel_FlipP0:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw OBJLst_CharSel_Flip1 ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3488,7 +3485,7 @@ OBJLstHdrA_CharSel_FlipP0:
 OBJLstHdrA_CharSel_FlipP1:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw OBJLst_CharSel_Flip2 ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3497,7 +3494,7 @@ OBJLstHdrA_CharSel_FlipP1:
 OBJLstHdrA_CharSel_FlipP4:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw OBJLst_CharSel_Flip3 ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3506,7 +3503,7 @@ OBJLstHdrA_CharSel_FlipP4:
 OBJLstHdrA_CharSel_FlipP3:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw OBJLst_CharSel_Flip4 ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3553,8 +3550,7 @@ OBJLst_CharSel_Flip4:
 ; =============== START OF MODULE OrdSel ===============
 ;
 ; =============== Module_OrdSel ===============
-; EntryPoint for team order select screen. Called by rst $00 jump from Module_CharSel.
-L1E626E:
+; EntryPoint for team order select screen.
 Module_OrdSel:
 	ld   sp, $DD00
 	di
@@ -5015,7 +5011,7 @@ OBJLstPtrTable_OrdSel_Cursor:
 OBJLstHdrA_OrdSel_VS:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -5038,7 +5034,7 @@ OBJLstHdrA_OrdSel_VS:
 OBJLstHdrA_OrdSel_Cursor:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -5532,161 +5528,6 @@ WinScr_CharTextPtrTbl:
 	dw TextC_Win_OLeona ; CHAR_ID_OLEONA
 	dw TextC_Win_Kagura ; CHAR_ID_KAGURA
 	
-L1E7F62: db $76;X
-L1E7F63: db $00;X
-L1E7F64: db $77;X
-L1E7F65: db $27;X
-L1E7F66: db $77;X
-L1E7F67: db $56;X
-L1E7F68: db $77;X
-L1E7F69: db $86;X
-L1E7F6A: db $77;X
-L1E7F6B: db $B7;X
-L1E7F6C: db $77;X
-L1E7F6D: db $EA;X
-L1E7F6E: db $77;X
-L1E7F6F: db $0F;X
-L1E7F70: db $78;X
-L1E7F71: db $1C;X
-L1E7F72: db $78;X
-L1E7F73: db $28;X
-L1E7F74: db $78;X
-L1E7F75: db $3E;X
-L1E7F76: db $82;X
-L1E7F77: db $CD;X
-L1E7F78: db $31;X
-L1E7F79: db $11;X
-L1E7F7A: db $CD;X
-L1E7F7B: db $55;X
-L1E7F7C: db $81;X
-L1E7F7D: db $DA;X
-L1E7F7E: db $86;X
-L1E7F7F: db $7F;X
-L1E7F80: db $CD;X
-L1E7F81: db $08;X
-L1E7F82: db $04;X
-L1E7F83: db $C3;X
-L1E7F84: db $7A;X
-L1E7F85: db $7F;X
-L1E7F86: db $CD;X
-L1E7F87: db $08;X
-L1E7F88: db $04;X
-L1E7F89: db $C9;X
-L1E7F8A: db $01;X
-L1E7F8B: db $00;X
-L1E7F8C: db $D9;X
-L1E7F8D: db $FA;X
-L1E7F8E: db $5E;X
-L1E7F8F: db $C1;X
-L1E7F90: db $B7;X
-L1E7F91: db $CA;X
-L1E7F92: db $97;X
-L1E7F93: db $7F;X
-L1E7F94: db $01;X
-L1E7F95: db $00;X
-L1E7F96: db $DA;X
-L1E7F97: db $C5;X
-L1E7F98: db $21;X
-L1E7F99: db $2C;X
-L1E7F9A: db $00;X
-L1E7F9B: db $09;X
-L1E7F9C: db $7E;X
-L1E7F9D: db $11;X
-L1E7F9E: db $40;X
-L1E7F9F: db $8A;X
-L1E7FA0: db $06;X
-L1E7FA1: db $01;X
-L1E7FA2: db $CD;X
-L1E7FA3: db $37;X
-L1E7FA4: db $80;X
-L1E7FA5: db $21;X
-L1E7FA6: db $67;X
-L1E7FA7: db $98;X
-L1E7FA8: db $11;X
-L1E7FA9: db $FC;X
-L1E7FAA: db $81;X
-L1E7FAB: db $3E;X
-L1E7FAC: db $A4;X
-L1E7FAD: db $06;X
-L1E7FAE: db $06;X
-L1E7FAF: db $0E;X
-L1E7FB0: db $06;X
-L1E7FB1: db $CD;X
-L1E7FB2: db $BC;X
-L1E7FB3: db $0D;X
-L1E7FB4: db $C1;X
-L1E7FB5: db $FA;X
-L1E7FB6: db $29;X
-L1E7FB7: db $C0;X
-L1E7FB8: db $FE;X
-L1E7FB9: db $03;X
-L1E7FBA: db $C2;X
-L1E7FBB: db $CF;X
-L1E7FBC: db $7F;X
-L1E7FBD: db $FA;X
-L1E7FBE: db $74;X
-L1E7FBF: db $C1;X
-L1E7FC0: db $FE;X
-L1E7FC1: db $0F;X
-L1E7FC2: db $CA;X
-L1E7FC3: db $36;X
-L1E7FC4: db $80;X
-L1E7FC5: db $FE;X
-L1E7FC6: db $10;X
-L1E7FC7: db $CA;X
-L1E7FC8: db $36;X
-L1E7FC9: db $80;X
-L1E7FCA: db $FE;X
-L1E7FCB: db $11;X
-L1E7FCC: db $CA;X
-L1E7FCD: db $36;X
-L1E7FCE: db $80;X
-L1E7FCF: db $FA;X
-L1E7FD0: db $5D;X
-L1E7FD1: db $C1;X
-L1E7FD2: db $CB;X
-L1E7FD3: db $47;X
-L1E7FD4: db $CA;X
-L1E7FD5: db $36;X
-L1E7FD6: db $80;X
-L1E7FD7: db $FA;X
-L1E7FD8: db $49;X
-L1E7FD9: db $D9;X
-L1E7FDA: db $21;X
-L1E7FDB: db $49;X
-L1E7FDC: db $DA;X
-L1E7FDD: db $BE;X
-L1E7FDE: db $C2;X
-L1E7FDF: db $E6;X
-L1E7FE0: db $7F;X
-L1E7FE1: db $21;X
-L1E7FE2: db $67;X
-L1E7FE3: db $00;X
-L1E7FE4: db $09;X
-L1E7FE5: db $35;X
-L1E7FE6: db $C5;X
-L1E7FE7: db $21;X
-L1E7FE8: db $67;X
-L1E7FE9: db $00;X
-L1E7FEA: db $09;X
-L1E7FEB: db $2A;X
-L1E7FEC: db $FE;X
-L1E7FED: db $00;X
-L1E7FEE: db $C2;X
-L1E7FEF: db $F2;X
-L1E7FF0: db $7F;X
-L1E7FF1: db $23;X
-L1E7FF2: db $7E;X
-L1E7FF3: db $11;X
-L1E7FF4: db $00;X
-L1E7FF5: db $88;X
-L1E7FF6: db $06;X
-L1E7FF7: db $00;X
-L1E7FF8: db $CD;X
-L1E7FF9: db $37;X
-L1E7FFA: db $80;X
-L1E7FFB: db $21;X
-L1E7FFC: db $61;X
-L1E7FFD: db $98;X
-L1E7FFE: db $11;X
-L1E7FFF: db $FC;X
+; =============== END OF BANK ===============
+; Junk area below.
+	mIncJunk "L1E7F62"

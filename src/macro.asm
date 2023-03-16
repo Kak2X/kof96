@@ -54,6 +54,20 @@ mBinDef: MACRO
 .end:
 ENDM
 
+; =============== mBinDef ===============
+; Generates an include for junk padding data.
+; IN
+; - \1: Filename without extension
+mIncJunk: MACRO
+
+IF LABEL_JUNK == 1
+Padding_\@:
+ENDC
+	IF SKIP_JUNK == 0
+		INCBIN STRCAT("padding/", \1, ".bin")
+	ENDC
+ENDM
+
 ; =============== dp ===============
 ; Shorthand for far pointers in standard order.
 dp: MACRO

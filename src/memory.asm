@@ -633,7 +633,7 @@ iPlInfo_PowVisual EQU $51 ; POW meter as it appears on the POW bar
 iPlInfo_MaxPowDecSpeed EQU $52 ; Determines how fast the MAX Power meter decrements. If $00, the bar is immediately wiped out.
 iPlInfo_MaxPow EQU $53 ; MAX Power meter
 iPlInfo_MaxPowVisual EQU $54 ; MAX Power meter as it appears on screen
-iPlInfo_MaxPowExtraLen EQU $55 ; Determines the length of the MAX Power meter. If $00, it's not enabled.
+iPlInfo_MaxPowExtraLen EQU $55 ; Determines the extra length of the MAX Power meter. If $00, it's not enabled. If > 0, the bar will have length (value)+4, so its min length is 5.
 iPlInfo_MaxPowBGPtr_High EQU $56 ; Ptr to the leftmost tile of MAX Power meter. *NOT* used when scrolling it on/offscreen. (high byte)
 iPlInfo_MaxPowBGPtr_Low EQU $57 ; Ptr to the leftmost tile of MAX Power meter. *NOT* used when scrolling it on/offscreen. (low byte)
 

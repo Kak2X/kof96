@@ -896,13 +896,10 @@ L1C437E: db $00
 L1C437F: db $00
 
 ; 
-; =============== START OF MODULE TitleMenu ===============
+; =============== START OF MODULE Title ===============
 ;
 ; =============== Module_Title ===============
 ; EntryPoint for Title Screen and Menus.
-; Called by:
-; - rst $00 jump from Module_Intro
-; - rst $00 jump from Module_Win
 Module_Title:
 	ld   sp, $DD00
 	di
@@ -2957,7 +2954,7 @@ OBJLstPtrTable_Title:
 OBJLstHdrA_Title_PushStart:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -2978,7 +2975,7 @@ OBJLstHdrA_Title_PushStart:
 OBJLstHdrA_Title_Menu:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3005,7 +3002,7 @@ OBJLstHdrA_Title_Menu:
 OBJLstHdrA_Title_CursorR:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3018,7 +3015,7 @@ OBJLstHdrA_Title_CursorR:
 OBJLstHdrA_Title_CursorU:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3031,7 +3028,7 @@ OBJLstHdrA_Title_CursorU:
 OBJLstHdrA_Title_SNKCopyright:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -3390,7 +3387,7 @@ GFXAuto_TitleOBJ:
 .end:
 
 ; 
-; =============== END OF MODULE TitleMenu ===============
+; =============== END OF MODULE Title ===============
 ;
 
 
@@ -3400,7 +3397,6 @@ GFXAuto_TitleOBJ:
 ;
 ; =============== Module_Intro ===============
 ; EntryPoint for Intro. Called by rst $00 jump from Module_TakaraLogo.
-L1C5FD2:
 Module_Intro:
 	ld   sp, $DD00
 	di
@@ -5258,7 +5254,7 @@ OBJLstPtrTable_Intro_Iori:
 OBJLstHdrA_Intro_Iori0:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -5287,7 +5283,7 @@ OBJLstHdrA_Intro_Iori0:
 OBJLstHdrA_Intro_Iori1:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
 	db $00 ; iOBJLstHdrA_ColiBoxId
-	db $00 ; iOBJLstHdrA_HitBoxId
+	db $00 ; iOBJLstHdrA_HitboxId
 	db $FF,$FF,$FF ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
@@ -5313,7 +5309,7 @@ BGLZ_Intro_IoriCutout: INCBIN "data/bg/intro_ioricutout.lzs"
 BGLZ_Intro_KyoCutout: INCBIN "data/bg/intro_kyocutout.lzs"
 BGLZ_Intro_Sun: INCBIN "data/bg/intro_sun.lzs"
 GFXLZ_Intro_IoriRiseOBJ: INCBIN "data/gfx/intro_ioririse_obj.lzc"
-L1C7519: db $00;X
+	mIncJunk "L1C7519"
 TextC_Win_Marker:
 TextC_Win_Kyo:
 	db $2B
@@ -5929,182 +5925,5 @@ MoveC_Goenitz_KickH:
 	ret
 ; =============== END OF BANK ===============
 ; Junk area below.
-L1C7F4D: db $24;X
-L1C7F4E: db $59;X
-L1C7F4F: db $6F;X
-L1C7F50: db $75;X
-L1C7F51: db $20;X
-L1C7F52: db $6E;X
-L1C7F53: db $65;X
-L1C7F54: db $76;X
-L1C7F55: db $65;X
-L1C7F56: db $72;X
-L1C7F57: db $20;X
-L1C7F58: db $68;X
-L1C7F59: db $61;X
-L1C7F5A: db $64;X
-L1C7F5B: db $FF;X
-L1C7F5C: db $20;X
-L1C7F5D: db $61;X
-L1C7F5E: db $20;X
-L1C7F5F: db $63;X
-L1C7F60: db $68;X
-L1C7F61: db $61;X
-L1C7F62: db $6E;X
-L1C7F63: db $63;X
-L1C7F64: db $65;X
-L1C7F65: db $2C;X
-L1C7F66: db $FF;X
-L1C7F67: db $20;X
-L1C7F68: db $20;X
-L1C7F69: db $62;X
-L1C7F6A: db $6C;X
-L1C7F6B: db $6F;X
-L1C7F6C: db $77;X
-L1C7F6D: db $68;X
-L1C7F6E: db $61;X
-L1C7F6F: db $72;X
-L1C7F70: db $64;X
-L1C7F71: db $2E;X
-L1C7F72: db $80;X
-L1C7F73: db $99;X
-L1C7F74: db $2F;X
-L1C7F75: db $49;X
-L1C7F76: db $60;X
-L1C7F77: db $6D;X
-L1C7F78: db $20;X
-L1C7F79: db $66;X
-L1C7F7A: db $69;X
-L1C7F7B: db $67;X
-L1C7F7C: db $68;X
-L1C7F7D: db $74;X
-L1C7F7E: db $69;X
-L1C7F7F: db $6E;X
-L1C7F80: db $67;X
-L1C7F81: db $20;X
-L1C7F82: db $6F;X
-L1C7F83: db $6E;X
-L1C7F84: db $FF;X
-L1C7F85: db $20;X
-L1C7F86: db $62;X
-L1C7F87: db $65;X
-L1C7F88: db $68;X
-L1C7F89: db $61;X
-L1C7F8A: db $6C;X
-L1C7F8B: db $66;X
-L1C7F8C: db $20;X
-L1C7F8D: db $6F;X
-L1C7F8E: db $66;X
-L1C7F8F: db $FF;X
-L1C7F90: db $20;X
-L1C7F91: db $20;X
-L1C7F92: db $74;X
-L1C7F93: db $68;X
-L1C7F94: db $65;X
-L1C7F95: db $20;X
-L1C7F96: db $6E;X
-L1C7F97: db $61;X
-L1C7F98: db $74;X
-L1C7F99: db $75;X
-L1C7F9A: db $72;X
-L1C7F9B: db $61;X
-L1C7F9C: db $6C;X
-L1C7F9D: db $20;X
-L1C7F9E: db $77;X
-L1C7F9F: db $6F;X
-L1C7FA0: db $72;X
-L1C7FA1: db $6C;X
-L1C7FA2: db $64;X
-L1C7FA3: db $2E;X
-L1C7FA4: db $6F;X
-L1C7FA5: db $77;X
-L1C7FA6: db $68;X
-L1C7FA7: db $61;X
-L1C7FA8: db $72;X
-L1C7FA9: db $64;X
-L1C7FAA: db $2E;X
-L1C7FAB: db $80;X
-L1C7FAC: db $99;X
-L1C7FAD: db $2F;X
-L1C7FAE: db $49;X
-L1C7FAF: db $60;X
-L1C7FB0: db $6D;X
-L1C7FB1: db $20;X
-L1C7FB2: db $66;X
-L1C7FB3: db $69;X
-L1C7FB4: db $67;X
-L1C7FB5: db $68;X
-L1C7FB6: db $74;X
-L1C7FB7: db $69;X
-L1C7FB8: db $6E;X
-L1C7FB9: db $67;X
-L1C7FBA: db $20;X
-L1C7FBB: db $6F;X
-L1C7FBC: db $6E;X
-L1C7FBD: db $FF;X
-L1C7FBE: db $20;X
-L1C7FBF: db $62;X
-L1C7FC0: db $65;X
-L1C7FC1: db $68;X
-L1C7FC2: db $61;X
-L1C7FC3: db $6C;X
-L1C7FC4: db $66;X
-L1C7FC5: db $20;X
-L1C7FC6: db $6F;X
-L1C7FC7: db $66;X
-L1C7FC8: db $FF;X
-L1C7FC9: db $20;X
-L1C7FCA: db $20;X
-L1C7FCB: db $74;X
-L1C7FCC: db $68;X
-L1C7FCD: db $65;X
-L1C7FCE: db $20;X
-L1C7FCF: db $6E;X
-L1C7FD0: db $61;X
-L1C7FD1: db $74;X
-L1C7FD2: db $75;X
-L1C7FD3: db $72;X
-L1C7FD4: db $61;X
-L1C7FD5: db $6C;X
-L1C7FD6: db $20;X
-L1C7FD7: db $77;X
-L1C7FD8: db $6F;X
-L1C7FD9: db $72;X
-L1C7FDA: db $6C;X
-L1C7FDB: db $64;X
-L1C7FDC: db $2E;X
-L1C7FDD: db $61;X
-L1C7FDE: db $6C;X
-L1C7FDF: db $66;X
-L1C7FE0: db $20;X
-L1C7FE1: db $6F;X
-L1C7FE2: db $66;X
-L1C7FE3: db $FF;X
-L1C7FE4: db $20;X
-L1C7FE5: db $20;X
-L1C7FE6: db $74;X
-L1C7FE7: db $68;X
-L1C7FE8: db $65;X
-L1C7FE9: db $20;X
-L1C7FEA: db $6E;X
-L1C7FEB: db $61;X
-L1C7FEC: db $74;X
-L1C7FED: db $75;X
-L1C7FEE: db $72;X
-L1C7FEF: db $61;X
-L1C7FF0: db $6C;X
-L1C7FF1: db $20;X
-L1C7FF2: db $77;X
-L1C7FF3: db $6F;X
-L1C7FF4: db $72;X
-L1C7FF5: db $6C;X
-L1C7FF6: db $64;X
-L1C7FF7: db $2E;X
-L1C7FF8: db $FF;X
-L1C7FF9: db $FF;X
-L1C7FFA: db $FF;X
-L1C7FFB: db $FF;X
-L1C7FFC: db $FF;X
-L1C7FFD: db $FF;X
-L1C7FFE: db $FF;X
-L1C7FFF: db $FF;X
+; [TCRF] Contains win screen text from the English version of KOF95.
+	mIncJunk "L1C7F4D"

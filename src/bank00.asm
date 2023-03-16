@@ -13,42 +13,26 @@ SECTION "Rst00", ROM0[$0000]
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	jp   hl
-;--
-L000007: db $17;X
-
+	mIncJunk "L000007"
 
 ; =============== RESET VECTOR $08 ===============
 SECTION "Rst08", ROM0[$0008]
 ;Rst_FarCall:
 	jp   FarCall
-;--
-L00000B: db $FE;X
-L00000C: db $00;X
-L00000D: db $CA;X
-L00000E: db $22;X
-L00000F: db $00;X
+	mIncJunk "L00000B"
 
 ; =============== RESET VECTOR $10 ===============
 SECTION "Rst10", ROM0[$0010]
 ;Rst_StopLCDOperation:
 	jp   StopLCDOperation
-;--
-L000013: db $33;X
-L000014: db $00;X
-L000015: db $FE;X
-L000016: db $08;X
-L000017: db $CA;X
+	mIncJunk "L000013"
 
 ; =============== RESET VECTOR $18 ===============
 SECTION "Rst18", ROM0[$0018]
 ;Rst_StartLCDOperation:
 	jp   StartLCDOperation
-;--
-L00001B: db $14;X
-L00001C: db $CA;X
-L00001D: db $55;X
-L00001E: db $00;X
-L00001F: db $C3;X
+	mIncJunk "L00001B"
+	
 ; =============== RESET VECTOR $20 ===============
 ; Disables the SERIAL interrupt.
 SECTION "Rst20", ROM0[$0020]
@@ -57,8 +41,8 @@ SECTION "Rst20", ROM0[$0020]
 	and  a, $FF^I_SERIAL
 	ldh  [rIE], a
 	ret  
-;--
-L000027: db $00;X
+	mIncJunk "L000027"
+	
 ; =============== RESET VECTOR $28 ===============
 ; Enables the SERIAL interrupt.
 SECTION "Rst28", ROM0[$0028]
@@ -67,66 +51,35 @@ SECTION "Rst28", ROM0[$0028]
 	or   a, I_SERIAL
 	ldh  [rIE], a
 	ret
-;--
-L00002F: db $35;X
+	mIncJunk "L00002F"
 ; =============== RESET VECTOR $30 ===============
 SECTION "Rst30", ROM0[$0030]
 ;Rst_FarDecompressLZSS:
 	jp   FarDecompressLZSS
-;--
-L000033: db $CD;X
-L000034: db $66;X
-L000035: db $2B;X
-L000036: db $D2;X
-L000037: db $64;X
+	mIncJunk "L000033"
 ; =============== RESET VECTOR $38 ===============
 SECTION "Rst38", ROM0[$0038]
 ; Not used.
 	ret
-;--
-L000039: db $21;X
-L00003A: db $12;X
-L00003B: db $06;X
-L00003C: db $3E;X
-L00003D: db $01;X
-L00003E: db $CD;X
-L00003F: db $7A;X
+	mIncJunk "L000039"
 ; =============== VBLANK INTERRUPT ===============
 SECTION "VBlankInt", ROM0[$0040]
 	jp   VBlankHandler
-L000043: db $00;X
-L000044: db $CD;X
-L000045: db $66;X
-L000046: db $2B;X
-L000047: db $D2;X
+	mIncJunk "L000043"
 
 ; =============== LCDC/STAT INTERRUPT ===============
 SECTION "LCDCInt", ROM0[$0048]
 	jp   LCDCHandler
-L00004B: db $0C;X
-L00004C: db $06;X
-L00004D: db $3E;X
-L00004E: db $01;X
-L00004F: db $CD;X
+	mIncJunk "L00004B"
 ; =============== TIMER INTERRUPT ===============
 ; Not used.
 SECTION "TimerInt", ROM0[$0050]
 	reti
-L000051: db $35;X
-L000052: db $C3;X
-L000053: db $64;X
-L000054: db $00;X
-L000055: db $CD;X
-L000056: db $66;X
-L000057: db $2B;X
+	mIncJunk "L000051"
 ; =============== SERIAL INTERRUPT ===============
 SECTION "SerialInt", ROM0[$0058]
 	jp   SerialHandler
-L00005B: db $D9;X
-L00005C: db $2F;X
-L00005D: db $2C;X
-L00005E: db $AF;X
-L00005F: db $EA;X
+	mIncJunk "L00005B"
 ; =============== JOYPAD INTERRUPT ===============
 ; Not used.
 SECTION "JoyInt", ROM0[$0060]
@@ -254,43 +207,9 @@ Play_HUDTileIdTbl:
 BG_Play_HUDHit:
 	db $D4
 	db $D5
+	mIncJunk "L0000DD"
 
-L0000DD: db $CD;X
-L0000DE: db $B3;X
-L0000DF: db $34;X
-L0000E0: db $CD;X
-L0000E1: db $88;X
-L0000E2: db $35;X
-L0000E3: db $C3;X
-L0000E4: db $53;X
-L0000E5: db $01;X
-L0000E6: db $CD;X
-L0000E7: db $E0;X
-L0000E8: db $2A;X
-L0000E9: db $CD;X
-L0000EA: db $74;X
-L0000EB: db $34;X
-L0000EC: db $20;X
-L0000ED: db $05;X
-L0000EE: db $3E;X
-L0000EF: db $4C;X
-L0000F0: db $C3;X
-L0000F1: db $F5;X
-L0000F2: db $00;X
-L0000F3: db $3E;X
-L0000F4: db $4E;X
-L0000F5: db $CD;X
-L0000F6: db $B3;X
-L0000F7: db $34;X
-L0000F8: db $C3;X
-L0000F9: db $53;X
-L0000FA: db $01;X
-L0000FB: db $CD;X
-L0000FC: db $E0;X
-L0000FD: db $2A;X
-L0000FE: db $CD;X
-L0000FF: db $74;X
-
+SECTION "EntryPoint", ROM0[$0100]
 ; =============== HW ENTRY POINT ===============
 	nop
 	jp   EntryPoint
@@ -320,7 +239,7 @@ EntryPoint:
 	di
 	ld   sp, $DC00			; Setup stack
 	ld   a, $0A				; Enable SRAM
-	ld   [$0000], a
+	ld   [MBC1SRamEnable], a
 	ld   a, $01				; Initialize first bank
 	ld   [MBC1RomBank], a
 	
@@ -416,8 +335,8 @@ EntryPoint:
 	call HomeCall_Sound_Init
 	
 	; Detect if we're running under the SGB
-	ASSERT(BANK(SGBPacket_EnableMultiJoy_1Pl) == BANK(SGBPacket_DisableMultiJoy))
-	ld   a, BANK(SGBPacket_EnableMultiJoy_1Pl)
+	ASSERT(BANK(SGBPacket_EnableMultiJoy_2Pl) == BANK(SGBPacket_DisableMultiJoy))
+	ld   a, BANK(SGBPacket_EnableMultiJoy_2Pl)
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	call IsSGBHardware				; Running under SGB?
@@ -431,7 +350,7 @@ EntryPoint:
 	set  MISCB_IS_SGB, [hl]
 	ld   bc, $0078					; Wait $78 superticks
 	call SGB_DelayAfterPacketSendCustom
-	ld   hl, SGBPacket_EnableMultiJoy_1Pl	; Enable multiplayer
+	ld   hl, SGBPacket_EnableMultiJoy_2Pl	; Enable multicontroller support
 	call SGB_SendPackets
 	ld   bc, $0004					; Wait $04 superticks
 	call SGB_DelayAfterPacketSendCustom
@@ -497,16 +416,17 @@ ENDM
 		; Stop the screen on the TAKARA logo to prevent it from displaying the data sent to the SGB side through VRAM
 		mSendPkg SGBPacket_FreezeScreen
 		
-		; Unknown byte sequence written to SNES RAM from 00:0810 to 00:0868.
-		; Seems to match with what's already there, going by BSNES-plus with SGB2
-		mSendPkg SGBPacket_Unknown_SNESWrite7
-		mSendPkg SGBPacket_Unknown_SNESWrite6
-		mSendPkg SGBPacket_Unknown_SNESWrite5
-		mSendPkg SGBPacket_Unknown_SNESWrite4
-		mSendPkg SGBPacket_Unknown_SNESWrite3
-		mSendPkg SGBPacket_Unknown_SNESWrite2
-		mSendPkg SGBPacket_Unknown_SNESWrite1
-		mSendPkg SGBPacket_Unknown_SNESWrite0
+		; Send 65816 code over to the SNES WRAM from 00:0810 to 00:0868.
+		; Almost every SGB game sends this at startup, apparently it's a bugfix for the original SGB1 BIOS.
+		; (SGB1b and SGB2 already have this code in memory)
+		mSendPkg SGBPacket_SGB1BiosPatch7
+		mSendPkg SGBPacket_SGB1BiosPatch6
+		mSendPkg SGBPacket_SGB1BiosPatch5
+		mSendPkg SGBPacket_SGB1BiosPatch4
+		mSendPkg SGBPacket_SGB1BiosPatch3
+		mSendPkg SGBPacket_SGB1BiosPatch2
+		mSendPkg SGBPacket_SGB1BiosPatch1
+		mSendPkg SGBPacket_SGB1BiosPatch0
 		
 		;-----------------------------------
 		; FarCall into border loader, which also stops the LCD
@@ -621,21 +541,30 @@ SGB_DelayAfterPacketSend:
 ; =============== IsSGBHardware ===============
 ; Detects if the system is a Super Game Boy.
 ; OUT
-; - Carry: If set, the system is a SGB.
+; - C flag: If set, the system is a SGB.
 IsSGBHardware:
-
-	; Send out a MLT_REQ packet to select the SNES's second controller.
-	; If the request succeeds (the first two bits in rJOYP are set), it means we're running under the SGB.
-	ld   hl, SGBPacket_EnableMultiJoy_1Pl
+	;
+	; Send out a MLT_REQ packet to enable the SNES second controller, then
+	; check if any of the two controllers returns the proper controller ID.
+	;
+	; If we get the ID we're looking for, it means we're running under the SGB.
+	;
+	
+	; Enable 2-player multicontroller support
+	ld   hl, SGBPacket_EnableMultiJoy_2Pl
 	call SGB_SendPackets
 	call SGB_DelayAfterPacketSend
 	
+	; Check if this is the Player 2 controller, in case
 	ldh  a, [rJOYP]		; Read the joypad status
 	and  a, $03			
-	cp   $03			; Is the second controller enabled?
+	cp   $03			; Is the second controller active? (rJOYP == $*E)
 	jr   nz, .isSGB		; If so, we're running under the SGB
 	
-	; ????? what is it sending?
+	; If it failed, it could be because the first controller may have been active.
+	; Check the next one, hopefully turning the $*F return value (1P) into $*E (2P).
+	
+	; Switch to next controller (set bit 0, then 1)
 	ld   a, SGB_BIT_0
 	ldh  [rJOYP], a
 	ldh  a, [rJOYP]
@@ -657,11 +586,15 @@ IsSGBHardware:
 	ldh  a, [rJOYP]
 	ldh  a, [rJOYP]
 	
+	; Do the same check again.
 	and  a, $03
-	cp   $03			; Is the second controller enabled?
+	cp   $03			; Is the second controller active?
 	jr   nz, .isSGB		; If so, we're running under the SGB
 .noSGB:
-	; Reselect back the first controller
+	; Otherwise, both controllers didn't report themselves as Controller 2.
+	; This means there's no SGB.
+
+	; Disable multicontroller support, just in case
 	ld   hl, SGBPacket_DisableMultiJoy
 	call SGB_SendPackets
 	call SGB_DelayAfterPacketSend
@@ -716,7 +649,11 @@ OAMDMACode:
 DefaultSettings:
 	db $00 ; Dip Switch: None
 	db DIFFICULTY_NORMAL ; Difficulty: Normal
+IF INF_TIMER == 1
+	db TIMER_INFINITE ; Timer: inf.
+ELSE
 	db $90 ; Timer: 90 secs
+ENDC
 .end:
 
 ; =============== START OF TASK MANAGER ===============
@@ -3464,14 +3401,18 @@ FillBGStripPair:
 	jp   nz, FillBGStripPair	; If not, loop
 	ret
 	
-; =============== CopyTilesAuto ===============
-; Is this used?
-L000E3C: ;X
-CopyTilesAuto:
-	ld   e, [hl]	; Read destination ptr
+; =============== Unused_CopyTilesAuto ===============
+; [TCRF] Unreferenced code.
+; Tile copy function.
+;
+; IN
+; - HL: Ptr to VRAM destination ptr, followed by the number of tiles to copy.
+Unused_CopyTilesAuto:
+	ld   e, [hl]	; Read out destination ptr to DE
 	inc  hl
 	ld   d, [hl]
 	inc  hl
+	; Fall-through
 
 ; =============== CopyTilesAutoNum ===============
 ; Tile copy function.
@@ -3502,12 +3443,24 @@ ENDR
 	jp   nz, CopyTiles	; If not, loop
 	ret
 	
-L000E77: db $5E;X
-L000E78: db $23;X
-L000E79: db $56;X
-L000E7A: db $23;X
-L000E7B: db $46;X
-L000E7C: db $23;X
+; =============== Unused_CopyTilesHBlankAuto ===============
+; [TCRF] Unreferenced code.
+; Tile copy function during HBlank.
+; IN
+; - HL: Ptr to a GFXDef-like structure followed by uncompressed GFX.
+;       This structure has two extra bytes at the beginning.
+Unused_CopyTilesHBlankAuto:
+	; byte0-1 -> Ptr to destination in VRAM
+	ld   e, [hl]	; Read out to DE
+	inc  hl
+	ld   d, [hl]
+	inc  hl
+	; byte2 -> Number of tiles to copy
+	ld   b, [hl]	; Read to B
+	inc  hl
+	; byte3+ -> Uncompressed GFX
+	
+	; Fall-through
 
 ; =============== CopyTilesHBlank ===============
 ; Tile copy function during HBlank.
@@ -3529,11 +3482,20 @@ CopyTilesHBlank:;
 	dec  b						; Copied all tiles?
 	jp   nz, CopyTilesHBlank	; If not, loop
 	ret
+
+; =============== Unused_CopyTilesOverAuto ===============
+; [TCRF] Unreferenced code.
+; IN
+; - HL: Ptr to GFXDef-like structure, like Unused_CopyTilesHBlankAuto.
+Unused_CopyTilesOverAuto:
+	; byte0-1 -> Ptr to destination in VRAM
+	ld   e, [hl]	; Read out to DE
+	inc  hl
+	ld   d, [hl]
+	inc  hl
+	; byte2 -> Number of tiles to copy
 	
-L000E94: db $5E;X
-L000E95: db $23;X
-L000E96: db $56;X
-L000E97: db $23;X
+	; Fall-through
 ; =============== CopyTilesOver ===============
 ; Draws a transparent GFX on top of an existing one.
 ;
@@ -3615,12 +3577,22 @@ CopyTilesOver_Custom:
 	jp   nz, .nextOrTile	; If not, loop
 	ret
 	
-L000EC9: db $5E;X
-L000ECA: db $23;X
-L000ECB: db $56;X
-L000ECC: db $23;X
-L000ECD: db $46;X
-L000ECE: db $23;X
+; =============== Unused_CopyTilesHBlankFlipXAuto ===============
+; [TCRF] Unreferenced code.
+; IN
+; - HL: Ptr to GFXDef-like structure, like Unused_CopyTilesHBlankAuto.
+Unused_CopyTilesHBlankFlipXAuto:
+	; byte0-1 -> Ptr to destination in VRAM
+	ld   e, [hl]	; Read out to DE
+	inc  hl
+	ld   d, [hl]
+	inc  hl
+	; byte2 -> Number of tiles to copy
+	ld   b, [hl]	; Read to B
+	inc  hl
+	; byte3+ -> Uncompressed GFX
+	
+	; Fall-through
 ; =============== CopyTilesHBlankFlipX ===============
 ; Copies graphics to VRAM and flips them horizontally.
 ;
@@ -6089,8 +6061,6 @@ Pl_InitBeforeStageLoad:
 	
 ; =============== Module_Play ===============
 ; Initializes the module where actual gameplay takes place.
-; Called by multiple places with jumps.
-L00179D:
 Module_Play:
 	ld   sp, $DD00
 	di
@@ -16521,271 +16491,5 @@ MoveInput_DU_Fast:
 	db $FF         ; Max len
 ; =============== END OF BANK ===============
 ; Junk area below.
-L003EF4: db $20;X
-L003EF5: db $01;X
-L003EF6: db $08;X
-L003EF7: db $20;X
-L003EF8: db $20;X
-L003EF9: db $01;X
-L003EFA: db $08;X
-L003EFB: db $00;X
-L003EFC: db $20;X
-L003EFD: db $01;X
-L003EFE: db $08;X
-L003EFF: db $04;X
-L003F00: db $01;X
-L003F01: db $0F;X
-L003F02: db $01;X
-L003F03: db $08;X
-L003F04: db $00;X
-L003F05: db $0F;X
-L003F06: db $01;X
-L003F07: db $08;X
-L003F08: db $01;X
-L003F09: db $0F;X
-L003F0A: db $01;X
-L003F0B: db $08;X
-L003F0C: db $00;X
-L003F0D: db $0F;X
-L003F0E: db $01;X
-L003F0F: db $FF;X
-L003F10: db $04;X
-L003F11: db $02;X
-L003F12: db $0F;X
-L003F13: db $01;X
-L003F14: db $08;X
-L003F15: db $00;X
-L003F16: db $0F;X
-L003F17: db $01;X
-L003F18: db $08;X
-L003F19: db $02;X
-L003F1A: db $0F;X
-L003F1B: db $01;X
-L003F1C: db $08;X
-L003F1D: db $00;X
-L003F1E: db $0F;X
-L003F1F: db $01;X
-L003F20: db $FF;X
-L003F21: db $02;X
-L003F22: db $04;X
-L003F23: db $04;X
-L003F24: db $01;X
-L003F25: db $14;X
-L003F26: db $08;X
-L003F27: db $08;X
-L003F28: db $01;X
-L003F29: db $FF;X
-L003F2A: db $04;X
-L003F2B: db $02;X
-L003F2C: db $0F;X
-L003F2D: db $01;X
-L003F2E: db $08;X
-L003F2F: db $00;X
-L003F30: db $0F;X
-L003F31: db $01;X
-L003F32: db $08;X
-L003F33: db $02;X
-L003F34: db $0F;X
-L003F35: db $01;X
-L003F36: db $08;X
-L003F37: db $00;X
-L003F38: db $0F;X
-L003F39: db $01;X
-L003F3A: db $FF;X
-L003F3B: db $02;X
-L003F3C: db $04;X
-L003F3D: db $04;X
-L003F3E: db $01;X
-L003F3F: db $14;X
-L003F40: db $08;X
-L003F41: db $08;X
-L003F42: db $01;X
-L003F43: db $FF;X
-L003F44: db $C6;X
-L003F45: db $CB;X
-L003F46: db $CE;X
-L003F47: db $CB;X
-L003F48: db $D6;X
-L003F49: db $3E;X
-L003F4A: db $32;X
-L003F4B: db $CD;X
-L003F4C: db $8B;X
-L003F4D: db $41;X
-L003F4E: db $C3;X
-L003F4F: db $72;X
-L003F50: db $41;X
-L003F51: db $21;X
-L003F52: db $21;X
-L003F53: db $00;X
-L003F54: db $09;X
-L003F55: db $CB;X
-L003F56: db $9E;X
-L003F57: db $CB;X
-L003F58: db $AE;X
-L003F59: db $CB;X
-L003F5A: db $C6;X
-L003F5B: db $CB;X
-L003F5C: db $CE;X
-L003F5D: db $CB;X
-L003F5E: db $D6;X
-L003F5F: db $3E;X
-L003F60: db $34;X
-L003F61: db $CD;X
-L003F62: db $8B;X
-L003F63: db $41;X
-L003F64: db $C3;X
-L003F65: db $72;X
-L003F66: db $41;X
-L003F67: db $CD;X
-L003F68: db $F9;X
-L003F69: db $3A;X
-L003F6A: db $D2;X
-L003F6B: db $7B;X
-L003F6C: db $3F;X
-L003F6D: db $CD;X
-L003F6E: db $0C;X
-L003F6F: db $3B;X
-L003F70: db $D2;X
-L003F71: db $4E;X
-L003F72: db $40;X
-L003F73: db $CB;X
-L003F74: db $47;X
-L003F75: db $C2;X
-L003F76: db $0C;X
-L003F77: db $40;X
-L003F78: db $C3;X
-L003F79: db $2D;X
-L003F7A: db $40;X
-L003F7B: db $3E;X
-L003F7C: db $09;X
-L003F7D: db $CD;X
-L003F7E: db $2A;X
-L003F7F: db $10;X
-L003F80: db $21;X
-L003F81: db $21;X
-L003F82: db $00;X
-L003F83: db $09;X
-L003F84: db $CB;X
-L003F85: db $9E;X
-L003F86: db $CB;X
-L003F87: db $AE;X
-L003F88: db $CB;X
-L003F89: db $C6;X
-L003F8A: db $CB;X
-L003F8B: db $CE;X
-L003F8C: db $CB;X
-L003F8D: db $D6;X
-L003F8E: db $3E;X
-L003F8F: db $36;X
-L003F90: db $CD;X
-L003F91: db $8B;X
-L003F92: db $41;X
-L003F93: db $C3;X
-L003F94: db $72;X
-L003F95: db $41;X
-L003F96: db $FA;X
-L003F97: db $00;X
-L003F98: db $C0;X
-L003F99: db $CB;X
-L003F9A: db $57;X
-L003F9B: db $CA;X
-L003F9C: db $A4;X
-L003F9D: db $3F;X
-L003F9E: db $21;X
-L003F9F: db $20;X
-L003FA0: db $00;X
-L003FA1: db $09;X
-L003FA2: db $CB;X
-L003FA3: db $EE;X
-L003FA4: db $21;X
-L003FA5: db $21;X
-L003FA6: db $00;X
-L003FA7: db $09;X
-L003FA8: db $CB;X
-L003FA9: db $9E;X
-L003FAA: db $CB;X
-L003FAB: db $C6;X
-L003FAC: db $CB;X
-L003FAD: db $CE;X
-L003FAE: db $CB;X
-L003FAF: db $D6;X
-L003FB0: db $3E;X
-L003FB1: db $38;X
-L003FB2: db $CD;X
-L003FB3: db $8B;X
-L003FB4: db $41;X
-L003FB5: db $C3;X
-L003FB6: db $72;X
-L003FB7: db $41;X
-L003FB8: db $3E;X
-L003FB9: db $09;X
-L003FBA: db $CD;X
-L003FBB: db $2A;X
-L003FBC: db $10;X
-L003FBD: db $FA;X
-L003FBE: db $00;X
-L003FBF: db $C0;X
-L003FC0: db $CB;X
-L003FC1: db $57;X
-L003FC2: db $CA;X
-L003FC3: db $CB;X
-L003FC4: db $3F;X
-L003FC5: db $21;X
-L003FC6: db $20;X
-L003FC7: db $00;X
-L003FC8: db $09;X
-L003FC9: db $CB;X
-L003FCA: db $E6;X
-L003FCB: db $21;X
-L003FCC: db $21;X
-L003FCD: db $00;X
-L003FCE: db $09;X
-L003FCF: db $CB;X
-L003FD0: db $9E;X
-L003FD1: db $CB;X
-L003FD2: db $C6;X
-L003FD3: db $CB;X
-L003FD4: db $CE;X
-L003FD5: db $CB;X
-L003FD6: db $D6;X
-L003FD7: db $3E;X
-L003FD8: db $3A;X
-L003FD9: db $CD;X
-L003FDA: db $8B;X
-L003FDB: db $41;X
-L003FDC: db $C3;X
-L003FDD: db $72;X
-L003FDE: db $41;X
-L003FDF: db $21;X
-L003FE0: db $21;X
-L003FE1: db $00;X
-L003FE2: db $09;X
-L003FE3: db $CB;X
-L003FE4: db $9E;X
-L003FE5: db $CB;X
-L003FE6: db $C6;X
-L003FE7: db $CB;X
-L003FE8: db $CE;X
-L003FE9: db $CB;X
-L003FEA: db $D6;X
-L003FEB: db $3E;X
-L003FEC: db $3C;X
-L003FED: db $CD;X
-L003FEE: db $8B;X
-L003FEF: db $41;X
-L003FF0: db $C3;X
-L003FF1: db $72;X
-L003FF2: db $41;X
-L003FF3: db $3E;X
-L003FF4: db $09;X
-L003FF5: db $CD;X
-L003FF6: db $2A;X
-L003FF7: db $10;X
-L003FF8: db $21;X
-L003FF9: db $21;X
-L003FFA: db $00;X
-L003FFB: db $09;X
-L003FFC: db $CB;X
-L003FFD: db $9E;X
-L003FFE: db $CB;X
-L003FFF: db $C6;X
+; Contains broken duplicate of the code starting around BasicInput_StartLightKick.
+	mIncJunk "L003EF4"

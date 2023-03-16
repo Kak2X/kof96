@@ -13691,8 +13691,8 @@ Sound_ReqPlayId:
 	ld   a, e					; Restore val
 	ldh  [hSndPlaySetCnt], a
 	ret
-; =============== L1F7D4B ===============
-L1F7D4B: db $FF;X
+	mIncJunk "L1F7D4B"
+	
 ; =============== Sound_ReqPlayExId ===============
 ; Requests playback for the sound associated with the specified action.
 ; Some may be played on the SGB side if possible.
@@ -14076,19 +14076,23 @@ TextPrinter_CharsetToTileTbl:
 ; =============== TextPrinter_DigitToTileTbl ===============
 ; Maps the number digits to tile IDs.
 ; The tile IDs correspond to the standard 1bpp font (FontDef_Default). 
-TextPrinter_DigitToTileTbl: db $1F
-L1F7FDD: db $20
-L1F7FDE: db $21
-L1F7FDF: db $22
-L1F7FE0: db $23
-L1F7FE1: db $24
-L1F7FE2: db $25
-L1F7FE3: db $26
-L1F7FE4: db $27
-L1F7FE5: db $28
-L1F7FE6: db $02
-L1F7FE7: db $03
-L1F7FE8: db $04
-L1F7FE9: db $05
-L1F7FEA: db $06
-L1F7FEB: db $07
+TextPrinter_DigitToTileTbl:
+	db $1F
+	db $20
+	db $21
+	db $22
+	db $23
+	db $24
+	db $25
+	db $26
+	db $27
+	db $28
+	db $02
+	db $03
+	db $04
+	db $05
+	db $06
+	db $07
+; =============== END OF BANK ===============
+; Null padding below.
+	mIncJunk "L1F7FEC"

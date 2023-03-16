@@ -203,7 +203,7 @@ SGB_PACKET_TEST_EN  EQU $0D ; Speed Function
 SGB_PACKET_ICON_EN  EQU $0E ; SGB Function
 SGB_PACKET_DATA_SND EQU $0F ; SUPER NES WRAM Transfer 1
 SGB_PACKET_DATA_TRN EQU $10 ; SUPER NES WRAM Transfer 2
-SGB_PACKET_MLT_REG  EQU $11 ; Controller 2 Request
+SGB_PACKET_MLT_REQ  EQU $11 ; Controller 2 Request
 SGB_PACKET_JUMP     EQU $12 ; Set SNES Program Counter
 SGB_PACKET_CHR_TRN  EQU $13 ; Transfer Character Font Data
 SGB_PACKET_PCT_TRN  EQU $14 ; Set Screen Data Color Data
