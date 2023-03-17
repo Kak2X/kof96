@@ -6228,11 +6228,12 @@ Module_Play:
 	jp   z, .sndMrKarate	; If so, jump
 	jp   .noSnd				; Otherwise, it's a normal round
 .sndKagura:
-	; what?
+	; Appears to do nothing.
 	ld   hl, (SGB_SND_B_DUMMY << 8)|$00
 	jr   .playSnd
+	; These other three rounds play a continuous SFX on the SGB side that fades in and out.
 .sndGoenitz:
-	; Appropriately, play a wind SFX when the round starts on Goenitz
+	; Appropriately, play a wind SFX during Goenitz's stage
 	ld   hl, (SGB_SND_B_WIND << 8)|$00
 	jr   .playSnd
 .sndBonus:
