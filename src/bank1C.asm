@@ -1096,16 +1096,16 @@ Options_SFXIdMapTbl:
 	db SFX_SUPERJUMP      ; $0D
 	db SFX_STEP           ; $0E
 	db SFX_STEP_HEAVY     ; $0F
-	db SFX_GRAB      ; $10
-	db SFX_FIREHIT_A          ; $11
-	db SFX_FIREHIT_B          ; $12
-	db SFX_MOVEJUMP_A          ; $13
-	db SFX_PROJ_SM          ; $14
-	db SFX_MOVEJUMP_B          ; $15
+	db SFX_GRAB           ; $10
+	db SFX_FIREHIT_A      ; $11
+	db SFX_FIREHIT_B      ; $12
+	db SFX_MOVEJUMP_A     ; $13
+	db SFX_PROJ_SM        ; $14
+	db SFX_MOVEJUMP_B     ; $15
 	db SFX_REFLECT        ; $16
-	db SFX_UNUSED_SIREN          ; $17
-	db SFX_UNUSED_NULL          ; $18
-	db SFX_PSYCTEL          ; $19
+	db SFX_UNUSED_SIREN   ; $17
+	db SFX_UNUSED_NULL    ; $18
+	db SFX_PSYCTEL        ; $19
 	db SFX_GAMEOVER       ; $1A
 .end:
  

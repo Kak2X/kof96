@@ -4861,7 +4861,7 @@ NumberPrinter_Instant:
 	; Offset the tile ID if necessary.
 	; This would be necessary in case the normal 1bpp font
 	; isn't loaded, with the numbers having different tile IDs.
-	; ??? This never happens though.
+	; [POI] This never happens though.
 	add  c
 	
 	; Write it to the tilemap

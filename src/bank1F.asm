@@ -1053,7 +1053,7 @@ Sound_Cmd_AddToBaseFreqId:
 Sound_Cmd_Unknown_Unused_SetStat6:
 	; Set status flag 6
 	ld   a, [de]
-	set  SISB_UNK_UNUSED_6, a
+	set  SISB_UNUSED_6, a
 	ld   [de], a
 
 	; Write $00 to byte9
@@ -1070,7 +1070,7 @@ Sound_Cmd_Unknown_Unused_SetStat6:
 Sound_Cmd_Unknown_Unused_ClrStat6:
 	; Clear status flag 6
 	ld   a, [de]
-	res  SISB_UNK_UNUSED_6, a
+	res  SISB_UNUSED_6, a
 	ld   [de], a
 
 	; Don't increase data ptr

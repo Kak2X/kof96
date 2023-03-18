@@ -343,19 +343,19 @@ SND_CH4_PTR        EQU LOW(rNR43)
 SNDLEN_INFINITE    EQU $FF
 
 ; iSndInfo_Status
-SISB_PAUSE         EQU 0 ; If set, iSndInfo processing is paused for that channel
-SISB_SKIPNRx2      EQU 1 ; If set, rNR*2 won't be updated
-SISB_USEDBYSFX     EQU 2 ; wBGMCh*Info only. If set, it marks that a sound effect is currently using the channel.
-SISB_SFX           EQU 3 ; If set, the SndInfo is handled as a sound effect. If clear, it's a BGM.
-SISB_UNK_UNUSED_6  EQU 6 ; ???
-SISB_ENABLED       EQU 7 ; If set, iSndInfo processing is enabled for that channel
+SISB_PAUSE            EQU 0 ; If set, iSndInfo processing is paused for that channel
+SISB_SKIPNRx2         EQU 1 ; If set, rNR*2 won't be updated
+SISB_USEDBYSFX        EQU 2 ; wBGMCh*Info only. If set, it marks that a sound effect is currently using the channel.
+SISB_SFX              EQU 3 ; If set, the SndInfo is handled as a sound effect. If clear, it's a BGM.
+SISB_UNUSED_6         EQU 6 ; Not used.
+SISB_ENABLED          EQU 7 ; If set, iSndInfo processing is enabled for that channel
 
-SIS_PAUSE          EQU 1 << SISB_PAUSE
-SIS_SKIPNRx2       EQU 1 << SISB_SKIPNRx2    
-SIS_USEDBYSFX      EQU 1 << SISB_USEDBYSFX   
-SIS_SFX            EQU 1 << SISB_SFX         
-SIS_UNK_UNUSED_6   EQU 1 << SISB_UNK_UNUSED_6
-SIS_ENABLED        EQU 1 << SISB_ENABLED     
+SIS_PAUSE             EQU 1 << SISB_PAUSE
+SIS_SKIPNRx2          EQU 1 << SISB_SKIPNRx2    
+SIS_USEDBYSFX         EQU 1 << SISB_USEDBYSFX   
+SIS_SFX               EQU 1 << SISB_SFX         
+SIS_UNUSED_6          EQU 1 << SISB_UNUSED_6
+SIS_ENABLED           EQU 1 << SISB_ENABLED     
 
 SNDCMD_BASE           EQU $E0
 SNDNOTE_BASE          EQU $80

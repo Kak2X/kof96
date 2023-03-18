@@ -23,7 +23,7 @@ $bit_status = [
 	3 => "SIS_SFX",
 	4 => "SIS_UNK_4",
 	5 => "SIS_UNK_5",
-	6 => "SIS_UNK_UNUSED_6",
+	6 => "SIS_UNUSED_6",
 	7 => "SIS_ENABLED",
 ];
 $sndptr_map = [
