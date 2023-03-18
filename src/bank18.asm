@@ -1,4 +1,4 @@
-L184000: db $00
+GFX_Char_Mature_Idle0_A: db $00
 L184001: db $00
 L184002: db $00
 L184003: db $00
@@ -158,7 +158,7 @@ L18409C: db $D8
 L18409D: db $30
 L18409E: db $90
 L18409F: db $60
-L1840A0: db $00
+GFX_Char_Mature_Idle0_B: db $00
 L1840A1: db $00
 L1840A2: db $01
 L1840A3: db $00
@@ -254,7 +254,7 @@ L1840FC: db $00
 L1840FD: db $00
 L1840FE: db $00
 L1840FF: db $00
-L184100: db $10
+GFX_Char_Mature_Idle1: db $10
 L184101: db $00
 L184102: db $2C
 L184103: db $10
@@ -446,7 +446,7 @@ L1841BC: db $00
 L1841BD: db $00
 L1841BE: db $00
 L1841BF: db $00
-L1841C0: db $20
+GFX_Char_Mature_Idle2: db $20
 L1841C1: db $00
 L1841C2: db $58
 L1841C3: db $20
@@ -638,7 +638,7 @@ L18427C: db $00
 L18427D: db $00
 L18427E: db $00
 L18427F: db $00
-L184280: db $0F
+GFX_Char_Mature_WalkF0: db $0F
 L184281: db $00
 L184282: db $1F
 L184283: db $0F
@@ -798,7 +798,7 @@ L18431C: db $00
 L18431D: db $00
 L18431E: db $00
 L18431F: db $00
-L184320: db $3F
+GFX_Char_Mature_WalkF1_A: db $3F
 L184321: db $1C
 L184322: db $3F
 L184323: db $13
@@ -894,7 +894,7 @@ L18437C: db $00
 L18437D: db $00
 L18437E: db $1E
 L18437F: db $00
-L184380: db $0F
+GFX_Char_Mature_WalkF1_B: db $0F
 L184381: db $07
 L184382: db $0F
 L184383: db $07
@@ -958,7 +958,7 @@ L1843BC: db $F8
 L1843BD: db $00
 L1843BE: db $B8
 L1843BF: db $00
-L1843C0: db $0F
+GFX_Char_Mature_WalkF2: db $0F
 L1843C1: db $00
 L1843C2: db $1F
 L1843C3: db $0E
@@ -1118,7 +1118,7 @@ L18445C: db $00
 L18445D: db $00
 L18445E: db $00
 L18445F: db $00
-L184460: db $00
+GFX_Char_Mature_WalkF3: db $00
 L184461: db $00
 L184462: db $0F
 L184463: db $00
@@ -1246,7 +1246,7 @@ L1844DC: db $1E
 L1844DD: db $00
 L1844DE: db $0E
 L1844DF: db $00
-L1844E0: db $0F
+GFX_Char_Mature_WalkF4_B: db $0F
 L1844E1: db $07
 L1844E2: db $0F
 L1844E3: db $07
@@ -1310,7 +1310,7 @@ L18451C: db $B0
 L18451D: db $00
 L18451E: db $A0
 L18451F: db $00
-L184520: db $3E
+GFX_Char_Mature_Crouch0: db $3E
 L184521: db $00
 L184522: db $7F
 L184523: db $3E
@@ -1470,7 +1470,7 @@ L1845BC: db $00
 L1845BD: db $00
 L1845BE: db $00
 L1845BF: db $00
-L1845C0: db $00
+GFX_Char_Mature_RollF1: db $00
 L1845C1: db $00
 L1845C2: db $00
 L1845C3: db $00
@@ -1662,7 +1662,7 @@ L18467C: db $00
 L18467D: db $00
 L18467E: db $00
 L18467F: db $00
-L184680: db $07
+GFX_Char_Mature_RollF2: db $07
 L184681: db $00
 L184682: db $0F
 L184683: db $00
@@ -1854,7 +1854,7 @@ L18473C: db $00
 L18473D: db $00
 L18473E: db $00
 L18473F: db $00
-L184740: db $61
+GFX_Char_Mature_JumpN1: db $61
 L184741: db $00
 L184742: db $97
 L184743: db $60
@@ -2078,7 +2078,7 @@ L18481C: db $00
 L18481D: db $00
 L18481E: db $00
 L18481F: db $00
-L184820: db $0D
+GFX_Char_Mature_JumpN2: db $0D
 L184821: db $00
 L184822: db $12
 L184823: db $0D
@@ -2270,7 +2270,7 @@ L1848DC: db $00
 L1848DD: db $00
 L1848DE: db $00
 L1848DF: db $00
-L1848E0: db $00
+GFX_Char_Mature_JumpN3_A: db $00
 L1848E1: db $00
 L1848E2: db $00
 L1848E3: db $00
@@ -2366,7 +2366,7 @@ L18493C: db $1F
 L18493D: db $00
 L18493E: db $1F
 L18493F: db $00
-L184940: db $1F
+GFX_Char_Mature_JumpN3_B: db $1F
 L184941: db $00
 L184942: db $3C
 L184943: db $00
@@ -2494,7 +2494,7 @@ L1849BC: db $00
 L1849BD: db $00
 L1849BE: db $00
 L1849BF: db $00
-L1849C0: db $00
+GFX_Char_Mature_BlockG0_A: db $00
 L1849C1: db $00
 L1849C2: db $00
 L1849C3: db $00
@@ -2558,7 +2558,7 @@ L1849FC: db $FC
 L1849FD: db $00
 L1849FE: db $F8
 L1849FF: db $00
-L184A00: db $01
+GFX_Char_Mature_BlockG0_B: db $01
 L184A01: db $00
 L184A02: db $07
 L184A03: db $00
@@ -2654,7 +2654,7 @@ L184A5C: db $1E
 L184A5D: db $00
 L184A5E: db $1F
 L184A5F: db $00
-L184A60: db $01
+GFX_Char_Mature_BlockC0_B: db $01
 L184A61: db $00
 L184A62: db $06
 L184A63: db $01
@@ -2750,7 +2750,7 @@ L184ABC: db $F2
 L184ABD: db $0C
 L184ABE: db $BC
 L184ABF: db $00
-L184AC0: db $00;X
+GFX_Char_Mature_BlockA0_A: db $00;X
 L184AC1: db $00;X
 L184AC2: db $00;X
 L184AC3: db $00;X
@@ -2846,7 +2846,7 @@ L184B1C: db $1F;X
 L184B1D: db $00;X
 L184B1E: db $1F;X
 L184B1F: db $00;X
-L184B20: db $03
+GFX_Char_Mature_PunchL1_A: db $03
 L184B21: db $00
 L184B22: db $02
 L184B23: db $01
@@ -3006,7 +3006,7 @@ L184BBC: db $00
 L184BBD: db $00
 L184BBE: db $1F
 L184BBF: db $00
-L184BC0: db $3F
+GFX_Char_Mature_PunchL1_B: db $3F
 L184BC1: db $1B
 L184BC2: db $3F
 L184BC3: db $1B
@@ -3070,7 +3070,7 @@ L184BFC: db $1E
 L184BFD: db $00
 L184BFE: db $1F
 L184BFF: db $00
-L184C00: db $0F
+GFX_Char_Mature_PunchL0_A: db $0F
 L184C01: db $00
 L184C02: db $1F
 L184C03: db $0F
@@ -3166,7 +3166,7 @@ L184C5C: db $80
 L184C5D: db $00
 L184C5E: db $80
 L184C5F: db $00
-L184C60: db $71
+GFX_Char_Mature_PunchL0_B: db $71
 L184C61: db $00
 L184C62: db $90
 L184C63: db $60
@@ -3262,7 +3262,7 @@ L184CBC: db $00
 L184CBD: db $00
 L184CBE: db $00
 L184CBF: db $00
-L184CC0: db $01
+GFX_Char_Mature_PunchH0: db $01
 L184CC1: db $00
 L184CC2: db $03
 L184CC3: db $01
@@ -3454,7 +3454,7 @@ L184D7C: db $00
 L184D7D: db $00
 L184D7E: db $00
 L184D7F: db $00
-L184D80: db $01
+GFX_Char_Mature_PunchH1_A: db $01
 L184D81: db $00
 L184D82: db $03
 L184D83: db $00
@@ -3582,7 +3582,7 @@ L184DFC: db $E0
 L184DFD: db $80
 L184DFE: db $FE
 L184DFF: db $E0
-L184E00: db $FE
+GFX_Char_Mature_PunchH1_B: db $FE
 L184E01: db $DC
 L184E02: db $FC
 L184E03: db $B0
@@ -3678,7 +3678,7 @@ L184E5C: db $00
 L184E5D: db $00
 L184E5E: db $00
 L184E5F: db $00
-L184E60: db $07
+GFX_Char_Mature_PunchH2: db $07
 L184E61: db $00
 L184E62: db $0F
 L184E63: db $07
@@ -3870,7 +3870,7 @@ L184F1C: db $00
 L184F1D: db $00
 L184F1E: db $00
 L184F1F: db $00
-L184F20: db $0F
+GFX_Char_Mature_PunchH3_A: db $0F
 L184F21: db $00
 L184F22: db $1F
 L184F23: db $0F
@@ -4030,7 +4030,7 @@ L184FBC: db $ED
 L184FBD: db $12
 L184FBE: db $FB
 L184FBF: db $00
-L184FC0: db $45
+GFX_Char_Mature_PunchH3_B: db $45
 L184FC1: db $3A
 L184FC2: db $86
 L184FC3: db $79
@@ -4126,7 +4126,7 @@ L18501C: db $00
 L18501D: db $00
 L18501E: db $00
 L18501F: db $00
-L185020: db $00
+GFX_Char_Mature_KickL0_A: db $00
 L185021: db $00
 L185022: db $00
 L185023: db $00
@@ -4286,7 +4286,7 @@ L1850BC: db $E3
 L1850BD: db $C0
 L1850BE: db $E5
 L1850BF: db $C2
-L1850C0: db $FF
+GFX_Char_Mature_KickL0_B: db $FF
 L1850C1: db $00
 L1850C2: db $FD
 L1850C3: db $00
@@ -4350,7 +4350,7 @@ L1850FC: db $07
 L1850FD: db $00
 L1850FE: db $0F
 L1850FF: db $00
-L185100: db $1F
+GFX_Char_Mature_KickL1: db $1F
 L185101: db $00
 L185102: db $3F
 L185103: db $1F
@@ -4542,7 +4542,7 @@ L1851BC: db $00
 L1851BD: db $00
 L1851BE: db $00
 L1851BF: db $00
-L1851C0: db $00
+GFX_Char_Mature_KickL2_A: db $00
 L1851C1: db $00
 L1851C2: db $00
 L1851C3: db $00
@@ -4734,7 +4734,7 @@ L18527C: db $F9
 L18527D: db $06
 L18527E: db $07
 L18527F: db $00
-L185280: db $67
+GFX_Char_Mature_KickL2_B: db $67
 L185281: db $00
 L185282: db $07
 L185283: db $00
@@ -4798,7 +4798,7 @@ L1852BC: db $0F
 L1852BD: db $00
 L1852BE: db $07
 L1852BF: db $00
-L1852C0: db $1C
+GFX_Char_Mature_KickH1: db $1C
 L1852C1: db $00
 L1852C2: db $3F
 L1852C3: db $00
@@ -4958,7 +4958,7 @@ L18535C: db $3B
 L18535D: db $00
 L18535E: db $00
 L18535F: db $00
-L185360: db $03
+GFX_Char_Mature_KickH2_A: db $03
 L185361: db $00
 L185362: db $07
 L185363: db $00
@@ -5054,7 +5054,7 @@ L1853BC: db $00
 L1853BD: db $00
 L1853BE: db $00
 L1853BF: db $00
-L1853C0: db $80
+GFX_Char_Mature_KickH2_B: db $80
 L1853C1: db $00
 L1853C2: db $C0
 L1853C3: db $80
@@ -5182,7 +5182,7 @@ L18543C: db $00
 L18543D: db $00
 L18543E: db $00
 L18543F: db $00
-L185440: db $00
+GFX_Char_Mature_KickH3: db $00
 L185441: db $00
 L185442: db $00
 L185443: db $00
@@ -5406,7 +5406,7 @@ L18551C: db $FF
 L18551D: db $00
 L18551E: db $FF
 L18551F: db $00
-L185520: db $7B
+GFX_Char_Mature_PunchCL1_B: db $7B
 L185521: db $01
 L185522: db $87
 L185523: db $79
@@ -5502,7 +5502,7 @@ L18557C: db $00
 L18557D: db $00
 L18557E: db $00
 L18557F: db $00
-L185580: db $7D
+GFX_Char_Mature_PunchCL0_B: db $7D
 L185581: db $00
 L185582: db $92
 L185583: db $6C
@@ -5598,7 +5598,7 @@ L1855DC: db $00
 L1855DD: db $00
 L1855DE: db $00
 L1855DF: db $00
-L1855E0: db $00
+GFX_Char_Mature_PunchCH1: db $00
 L1855E1: db $00
 L1855E2: db $01
 L1855E3: db $00
@@ -5822,7 +5822,7 @@ L1856BC: db $00
 L1856BD: db $00
 L1856BE: db $00
 L1856BF: db $00
-L1856C0: db $00
+GFX_Char_Mature_PunchCH2: db $00
 L1856C1: db $00
 L1856C2: db $00
 L1856C3: db $00
@@ -6014,7 +6014,7 @@ L18577C: db $00
 L18577D: db $00
 L18577E: db $00
 L18577F: db $00
-L185780: db $1C
+GFX_Char_Mature_KickCL1: db $1C
 L185781: db $00
 L185782: db $7F
 L185783: db $00
@@ -6238,7 +6238,7 @@ L18585C: db $00
 L18585D: db $00
 L18585E: db $00
 L18585F: db $00
-L185860: db $0C
+GFX_Char_Mature_KickCL0: db $0C
 L185861: db $00
 L185862: db $3F
 L185863: db $00
@@ -6398,7 +6398,7 @@ L1858FC: db $00
 L1858FD: db $00
 L1858FE: db $00
 L1858FF: db $00
-L185900: db $01
+GFX_Char_Mature_KickCH1: db $01
 L185901: db $00
 L185902: db $01
 L185903: db $00
@@ -6590,7 +6590,7 @@ L1859BC: db $00
 L1859BD: db $00
 L1859BE: db $00
 L1859BF: db $00
-L1859C0: db $39
+GFX_Char_Mature_KickCH2: db $39
 L1859C1: db $00
 L1859C2: db $3F
 L1859C3: db $00
@@ -6814,7 +6814,7 @@ L185A9C: db $38
 L185A9D: db $00
 L185A9E: db $78
 L185A9F: db $00
-L185AA0: db $21
+GFX_Char_Mature_PunchA0_B: db $21
 L185AA1: db $1E
 L185AA2: db $47
 L185AA3: db $38
@@ -6910,7 +6910,7 @@ L185AFC: db $40
 L185AFD: db $00
 L185AFE: db $00
 L185AFF: db $00
-L185B00: db $FE
+GFX_Char_Mature_KickA0_B: db $FE
 L185B01: db $00
 L185B02: db $71
 L185B03: db $00
@@ -7006,7 +7006,7 @@ L185B5C: db $00
 L185B5D: db $00
 L185B5E: db $00
 L185B5F: db $00
-L185B60: db $1D
+GFX_Char_Mature_KickA1_B: db $1D
 L185B61: db $1A
 L185B62: db $18
 L185B63: db $17
@@ -7070,7 +7070,7 @@ L185B9C: db $00
 L185B9D: db $00
 L185B9E: db $00
 L185B9F: db $00
-L185BA0: db $38
+GFX_Char_Mature_AttackG1: db $38
 L185BA1: db $00
 L185BA2: db $3E
 L185BA3: db $00
@@ -7294,7 +7294,7 @@ L185C7C: db $00
 L185C7D: db $00
 L185C7E: db $00
 L185C7F: db $00
-L185C80: db $01
+GFX_Char_Mature_AttackA0: db $01
 L185C81: db $00
 L185C82: db $03
 L185C83: db $00
@@ -7486,7 +7486,7 @@ L185D3C: db $00
 L185D3D: db $00
 L185D3E: db $00
 L185D3F: db $00
-L185D40: db $01
+GFX_Char_Mature_AttackA1: db $01
 L185D41: db $00
 L185D42: db $02
 L185D43: db $01
@@ -7710,7 +7710,7 @@ L185E1C: db $00
 L185E1D: db $00
 L185E1E: db $00
 L185E1F: db $00
-L185E20: db $01
+GFX_Char_Mature_TimeOver2: db $01
 L185E21: db $00
 L185E22: db $01
 L185E23: db $00
@@ -7902,7 +7902,7 @@ L185EDC: db $00
 L185EDD: db $00
 L185EDE: db $00
 L185EDF: db $00
-L185EE0: db $7C
+GFX_Char_Mature_GuardBreakG0: db $7C
 L185EE1: db $00
 L185EE2: db $47
 L185EE3: db $38
@@ -8094,7 +8094,7 @@ L185F9C: db $00
 L185F9D: db $00
 L185F9E: db $00
 L185F9F: db $00
-L185FA0: db $01;X
+GFX_Char_Mature_Hitlow0: db $01;X
 L185FA1: db $00;X
 L185FA2: db $06;X
 L185FA3: db $01;X
@@ -8286,7 +8286,7 @@ L18605C: db $00;X
 L18605D: db $00;X
 L18605E: db $00;X
 L18605F: db $00;X
-L186060: db $01
+GFX_Char_Mature_DropMain1: db $01
 L186061: db $00
 L186062: db $0F
 L186063: db $00
@@ -8446,7 +8446,7 @@ L1860FC: db $00
 L1860FD: db $00
 L1860FE: db $00
 L1860FF: db $00
-L186100: db $1F
+GFX_Char_Mature_DropMain2: db $1F
 L186101: db $00
 L186102: db $7F
 L186103: db $00
@@ -8606,7 +8606,7 @@ L18619C: db $00
 L18619D: db $00
 L18619E: db $00
 L18619F: db $00
-L1861A0: db $38
+GFX_Char_Mature_ChargeMeter0_A: db $38
 L1861A1: db $07
 L1861A2: db $7C
 L1861A3: db $03
@@ -8734,7 +8734,7 @@ L18621C: db $20
 L18621D: db $C0
 L18621E: db $40
 L18621F: db $80
-L186220: db $7A
+GFX_Char_Mature_ChargeMeter1_A: db $7A
 L186221: db $25
 L186222: db $38
 L186223: db $07
@@ -8862,7 +8862,7 @@ L18629C: db $A0
 L18629D: db $40
 L18629E: db $20
 L18629F: db $C0
-L1862A0: db $03
+GFX_Char_Mature_Intro0_A: db $03
 L1862A1: db $00
 L1862A2: db $02
 L1862A3: db $01
@@ -8958,7 +8958,7 @@ L1862FC: db $00
 L1862FD: db $00
 L1862FE: db $00
 L1862FF: db $00
-L186300: db $00
+GFX_Char_Mature_Intro0_B: db $00
 L186301: db $00
 L186302: db $00
 L186303: db $00
@@ -9118,7 +9118,7 @@ L18639C: db $78
 L18639D: db $00
 L18639E: db $78
 L18639F: db $00
-L1863A0: db $00
+GFX_Char_Mature_Intro1_A: db $00
 L1863A1: db $00
 L1863A2: db $00
 L1863A3: db $00
@@ -9182,7 +9182,7 @@ L1863DC: db $00
 L1863DD: db $00
 L1863DE: db $00
 L1863DF: db $00
-L1863E0: db $01
+GFX_Char_Mature_Intro2: db $01
 L1863E1: db $00
 L1863E2: db $0F
 L1863E3: db $00
@@ -9342,7 +9342,7 @@ L18647C: db $DE
 L18647D: db $00
 L18647E: db $1E
 L18647F: db $00
-L186480: db $1B
+GFX_Char_Mature_Intro4_A: db $1B
 L186481: db $00
 L186482: db $16
 L186483: db $09
@@ -9438,7 +9438,7 @@ L1864DC: db $00
 L1864DD: db $00
 L1864DE: db $00
 L1864DF: db $00
-L1864E0: db $3C
+GFX_Char_Mature_Taunt0: db $3C
 L1864E1: db $00
 L1864E2: db $7E
 L1864E3: db $3C
@@ -9630,7 +9630,7 @@ L18659C: db $00
 L18659D: db $00
 L18659E: db $00
 L18659F: db $00
-L1865A0: db $01
+GFX_Char_Mature_Taunt1: db $01
 L1865A1: db $00
 L1865A2: db $03
 L1865A3: db $01
@@ -9854,7 +9854,7 @@ L18667C: db $00
 L18667D: db $00
 L18667E: db $00
 L18667F: db $00
-L186680: db $01
+GFX_Char_Mature_WinA1: db $01
 L186681: db $00
 L186682: db $03
 L186683: db $01
@@ -10014,7 +10014,7 @@ L18671C: db $00
 L18671D: db $00
 L18671E: db $00
 L18671F: db $00
-L186720: db $00
+GFX_Char_Mature_WinB0: db $00
 L186721: db $00
 L186722: db $00
 L186723: db $00
@@ -10206,7 +10206,7 @@ L1867DC: db $00
 L1867DD: db $00
 L1867DE: db $00
 L1867DF: db $00
-L1867E0: db $01
+GFX_Char_Mature_WinB1: db $01
 L1867E1: db $00
 L1867E2: db $01
 L1867E3: db $00
@@ -10366,7 +10366,7 @@ L18687C: db $00
 L18687D: db $00
 L18687E: db $00
 L18687F: db $00
-L186880: db $03
+GFX_Char_Mature_WinB2: db $03
 L186881: db $00
 L186882: db $07
 L186883: db $03
@@ -10526,7 +10526,7 @@ L18691C: db $00
 L18691D: db $00
 L18691E: db $00
 L18691F: db $00
-L186920: db $00
+GFX_Char_Mature_ThrowG0: db $00
 L186921: db $00
 L186922: db $00
 L186923: db $00
@@ -10718,7 +10718,7 @@ L1869DC: db $00
 L1869DD: db $00
 L1869DE: db $00
 L1869DF: db $00
-L1869E0: db $03
+GFX_Char_Mature_ThrowG2: db $03
 L1869E1: db $00
 L1869E2: db $07
 L1869E3: db $03
@@ -10910,7 +10910,7 @@ L186A9C: db $00
 L186A9D: db $00
 L186A9E: db $00
 L186A9F: db $00
-L186AA0: db $03
+GFX_Char_Mature_RunF0: db $03
 L186AA1: db $00
 L186AA2: db $1F
 L186AA3: db $02
@@ -11134,7 +11134,7 @@ L186B7C: db $00
 L186B7D: db $00
 L186B7E: db $00
 L186B7F: db $00
-L186B80: db $03
+GFX_Char_Mature_RunF1: db $03
 L186B81: db $00
 L186B82: db $1F
 L186B83: db $02
@@ -11390,7 +11390,7 @@ L186C7C: db $38
 L186C7D: db $00
 L186C7E: db $18
 L186C7F: db $00
-L186C80: db $61
+GFX_Char_Mature_DecideL1: db $61
 L186C81: db $00
 L186C82: db $9F
 L186C83: db $60
@@ -11646,7 +11646,7 @@ L186D7C: db $00
 L186D7D: db $00
 L186D7E: db $00
 L186D7F: db $00
-L186D80: db $07
+GFX_Char_Mature_DecideL5_A: db $07
 L186D81: db $00
 L186D82: db $0F
 L186D83: db $06
@@ -11838,7 +11838,7 @@ L186E3C: db $98
 L186E3D: db $66
 L186E3E: db $D8
 L186E3F: db $27
-L186E40: db $01
+GFX_Char_Mature_MetalMassacreL5_A: db $01
 L186E41: db $00
 L186E42: db $02
 L186E43: db $01
@@ -12126,7 +12126,7 @@ L186F5C: db $DA
 L186F5D: db $24
 L186F5E: db $F6
 L186F5F: db $00
-L186F60: db $00
+GFX_Char_Mature_MetalMassacreL6_A: db $00
 L186F61: db $00
 L186F62: db $00
 L186F63: db $00
@@ -12350,7 +12350,7 @@ L18703C: db $DA
 L18703D: db $24
 L18703E: db $F6
 L18703F: db $00
-L187040: db $7C
+GFX_Char_Mature_DeathRowL0: db $7C
 L187041: db $00
 L187042: db $FF
 L187043: db $7C
@@ -12606,7 +12606,7 @@ L18713C: db $00
 L18713D: db $00
 L18713E: db $00
 L18713F: db $00
-L187140: db $00
+GFX_Char_Mature_DeathRowL1: db $00
 L187141: db $00
 L187142: db $00
 L187143: db $00
@@ -12990,7 +12990,7 @@ L1872BC: db $00
 L1872BD: db $00
 L1872BE: db $00
 L1872BF: db $00
-L1872C0: db $00
+GFX_Char_Mature_DeathRowL2_A: db $00
 L1872C1: db $03
 L1872C2: db $00
 L1872C3: db $07
@@ -13150,7 +13150,7 @@ L18735C: db $00;X
 L18735D: db $00;X
 L18735E: db $00;X
 L18735F: db $00;X
-L187360: db $01
+GFX_Char_Mature_DeathRowL4_A: db $01
 L187361: db $00
 L187362: db $03
 L187363: db $01
@@ -13374,7 +13374,7 @@ L18743C: db $00
 L18743D: db $00
 L18743E: db $00
 L18743F: db $00
-L187440: db $00
+GFX_Char_Mature_DeathRowL5_A: db $00
 L187441: db $04
 L187442: db $00
 L187443: db $0C
@@ -13566,7 +13566,7 @@ L1874FC: db $F0
 L1874FD: db $C0
 L1874FE: db $FF
 L1874FF: db $F0
-L187500: db $07
+GFX_Char_Mature_DespairL2: db $07
 L187501: db $00
 L187502: db $07
 L187503: db $00
@@ -13918,7 +13918,7 @@ L18765C: db $00
 L18765D: db $00
 L18765E: db $00
 L18765F: db $00
-L187660: db $08
+GFX_Char_Mature_DespairL3_A: db $08
 L187661: db $00
 L187662: db $03
 L187663: db $00
@@ -14014,7 +14014,7 @@ L1876BC: db $00
 L1876BD: db $00
 L1876BE: db $00
 L1876BF: db $00
-L1876C0: db $1F
+GFX_Char_Mature_HeavensGateS0: db $1F
 L1876C1: db $00
 L1876C2: db $3F
 L1876C3: db $1F
@@ -14174,7 +14174,7 @@ L18775C: db $00
 L18775D: db $00
 L18775E: db $00
 L18775F: db $00
-L187760: db $03
+GFX_Char_Mature_HeavensGateS5: db $03
 L187761: db $00
 L187762: db $04
 L187763: db $03
@@ -14398,7 +14398,7 @@ L18783C: db $03
 L18783D: db $00
 L18783E: db $00
 L18783F: db $00
-L187840: db $78
+GFX_Char_Mature_HopB0: db $78
 L187841: db $00
 L187842: db $44
 L187843: db $38
@@ -14622,7 +14622,7 @@ L18791C: db $80
 L18791D: db $00
 L18791E: db $00
 L18791F: db $00
-L187920: db $06
+GFX_Char_Leona_VSlasherS1: db $06
 L187921: db $00
 L187922: db $03
 L187923: db $00
@@ -14846,7 +14846,7 @@ L1879FC: db $00
 L1879FD: db $00
 L1879FE: db $00
 L1879FF: db $00
-L187A00: db $3F
+GFX_Char_Leona_VSlasherS3: db $3F
 L187A01: db $00
 L187A02: db $7C
 L187A03: db $03
@@ -14974,7 +14974,7 @@ L187A7C: db $00
 L187A7D: db $00
 L187A7E: db $00
 L187A7F: db $00
-L187A80: db $00
+GFX_Char_Leona_GrandSabreL9_A: db $00
 L187A81: db $00
 L187A82: db $00
 L187A83: db $00
@@ -15102,7 +15102,7 @@ L187AFC: db $00
 L187AFD: db $00
 L187AFE: db $00
 L187AFF: db $00
-L187B00: db $29
+GFX_Char_MrKarate_Crouch0_A: db $29
 L187B01: db $04
 L187B02: db $32
 L187B03: db $0D
@@ -15198,7 +15198,7 @@ L187B5C: db $00
 L187B5D: db $00
 L187B5E: db $04
 L187B5F: db $00
-L187B60: db $09
+GFX_Char_MrKarate_WinA9_B: db $09
 L187B61: db $00
 L187B62: db $12
 L187B63: db $09
@@ -15390,7 +15390,7 @@ L187C1C: db $00
 L187C1D: db $00
 L187C1E: db $00
 L187C1F: db $00
-L187C20: db $00
+GFX_Char_MrKarate_ZenretsukenL1_A: db $00
 L187C21: db $40
 L187C22: db $50
 L187C23: db $20
@@ -15646,7 +15646,7 @@ L187D1C: db $46
 L187D1D: db $82
 L187D1E: db $FE
 L187D1F: db $04
-L187D20: db $FC
+GFX_Char_MrKarate_ZenretsukenL0_B: db $FC
 L187D21: db $70
 L187D22: db $7E
 L187D23: db $3C
@@ -15742,7 +15742,7 @@ L187D7C: db $00
 L187D7D: db $00
 L187D7E: db $00
 L187D7F: db $00
-L187D80: db $00
+GFX_Char_MrKarate_ZenretsukenL0_A: db $00
 L187D81: db $00
 L187D82: db $00
 L187D83: db $00
@@ -15966,7 +15966,7 @@ L187E5C: db $F1
 L187E5D: db $CE
 L187E5E: db $F3
 L187E5F: db $0C
-L187E60: db $02
+GFX_Char_MrKarate_WinA7: db $02
 L187E61: db $00
 L187E62: db $03
 L187E63: db $00
@@ -16158,7 +16158,7 @@ L187F1C: db $00
 L187F1D: db $00
 L187F1E: db $00
 L187F1F: db $00
-L187F20: db $38
+GFX_Char_MrKarate_WinA8: db $38
 L187F21: db $00
 L187F22: db $4C
 L187F23: db $30

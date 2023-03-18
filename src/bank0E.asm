@@ -1,4 +1,4 @@
-L0E4000: db $00
+GFX_Char_Andy_Idle0_A: db $00
 L0E4001: db $00
 L0E4002: db $00
 L0E4003: db $00
@@ -94,7 +94,7 @@ L0E405C: db $CA
 L0E405D: db $F4
 L0E405E: db $6A
 L0E405F: db $F4
-L0E4060: db $01
+GFX_Char_Andy_Idle0_B: db $01
 L0E4061: db $00
 L0E4062: db $02
 L0E4063: db $01
@@ -190,7 +190,7 @@ L0E40BC: db $00
 L0E40BD: db $00
 L0E40BE: db $00
 L0E40BF: db $00
-L0E40C0: db $00
+GFX_Char_Andy_Idle3_A: db $00
 L0E40C1: db $00
 L0E40C2: db $00
 L0E40C3: db $00
@@ -286,7 +286,7 @@ L0E411C: db $B5
 L0E411D: db $7A
 L0E411E: db $B5
 L0E411F: db $7A
-L0E4120: db $00
+GFX_Char_Andy_Idle4: db $00
 L0E4121: db $00
 L0E4122: db $00
 L0E4123: db $00
@@ -446,7 +446,7 @@ L0E41BC: db $1E
 L0E41BD: db $00
 L0E41BE: db $00
 L0E41BF: db $00
-L0E41C0: db $00
+GFX_Char_Andy_Idle20: db $00
 L0E41C1: db $00
 L0E41C2: db $07
 L0E41C3: db $00
@@ -606,7 +606,7 @@ L0E425C: db $00
 L0E425D: db $00
 L0E425E: db $00
 L0E425F: db $00
-L0E4260: db $01
+GFX_Char_Andy_Idle22: db $01
 L0E4261: db $00
 L0E4262: db $02
 L0E4263: db $01
@@ -798,7 +798,7 @@ L0E431C: db $00
 L0E431D: db $00
 L0E431E: db $F0
 L0E431F: db $00
-L0E4320: db $00
+GFX_Char_Andy_Idle28_A: db $00
 L0E4321: db $00
 L0E4322: db $00
 L0E4323: db $00
@@ -926,7 +926,7 @@ L0E439C: db $80
 L0E439D: db $00
 L0E439E: db $80
 L0E439F: db $00
-L0E43A0: db $E3
+GFX_Char_Andy_Idle28_B: db $E3
 L0E43A1: db $1C
 L0E43A2: db $7F
 L0E43A3: db $02
@@ -1022,7 +1022,7 @@ L0E43FC: db $00
 L0E43FD: db $00
 L0E43FE: db $00
 L0E43FF: db $00
-L0E4400: db $00
+GFX_Char_Andy_Idle33_A: db $00
 L0E4401: db $00
 L0E4402: db $00
 L0E4403: db $00
@@ -1150,7 +1150,7 @@ L0E447C: db $1C
 L0E447D: db $0B
 L0E447E: db $1C
 L0E447F: db $0B
-L0E4480: db $00
+GFX_Char_Andy_Idle35: db $00
 L0E4481: db $00
 L0E4482: db $00
 L0E4483: db $00
@@ -1342,7 +1342,7 @@ L0E453C: db $00
 L0E453D: db $00
 L0E453E: db $00
 L0E453F: db $00
-L0E4540: db $07
+GFX_Char_Andy_WalkF0: db $07
 L0E4541: db $00
 L0E4542: db $08
 L0E4543: db $07
@@ -1502,7 +1502,7 @@ L0E45DC: db $00
 L0E45DD: db $00
 L0E45DE: db $00
 L0E45DF: db $00
-L0E45E0: db $00
+GFX_Char_Andy_WalkF1: db $00
 L0E45E1: db $00
 L0E45E2: db $00
 L0E45E3: db $00
@@ -1662,7 +1662,7 @@ L0E467C: db $00
 L0E467D: db $00
 L0E467E: db $00
 L0E467F: db $00
-L0E4680: db $03
+GFX_Char_Andy_WalkF2: db $03
 L0E4681: db $00
 L0E4682: db $04
 L0E4683: db $03
@@ -1822,7 +1822,7 @@ L0E471C: db $1E
 L0E471D: db $0C
 L0E471E: db $0E
 L0E471F: db $00
-L0E4720: db $07
+GFX_Char_Andy_Crouch0: db $07
 L0E4721: db $00
 L0E4722: db $08
 L0E4723: db $07
@@ -2014,7 +2014,7 @@ L0E47DC: db $00
 L0E47DD: db $00
 L0E47DE: db $00
 L0E47DF: db $00
-L0E47E0: db $03
+GFX_Char_Andy_JumpN1_A: db $03
 L0E47E1: db $00
 L0E47E2: db $04
 L0E47E3: db $03
@@ -2110,7 +2110,7 @@ L0E483C: db $80
 L0E483D: db $00
 L0E483E: db $80
 L0E483F: db $00
-L0E4840: db $B1
+GFX_Char_Andy_JumpN1_B: db $B1
 L0E4841: db $40
 L0E4842: db $42
 L0E4843: db $01
@@ -2206,7 +2206,7 @@ L0E489C: db $00
 L0E489D: db $00
 L0E489E: db $00
 L0E489F: db $00
-L0E48A0: db $B3
+GFX_Char_Andy_JumpN3_B: db $B3
 L0E48A1: db $40
 L0E48A2: db $47
 L0E48A3: db $03
@@ -2270,7 +2270,7 @@ L0E48DC: db $0E
 L0E48DD: db $04
 L0E48DE: db $0E
 L0E48DF: db $00
-L0E48E0: db $00
+GFX_Char_Andy_JumpF2: db $00
 L0E48E1: db $00
 L0E48E2: db $00
 L0E48E3: db $00
@@ -2430,7 +2430,7 @@ L0E497C: db $00
 L0E497D: db $00
 L0E497E: db $00
 L0E497F: db $00
-L0E4980: db $0F
+GFX_Char_Andy_JumpF3: db $0F
 L0E4981: db $00
 L0E4982: db $0F
 L0E4983: db $07
@@ -2590,7 +2590,7 @@ L0E4A1C: db $20
 L0E4A1D: db $C0
 L0E4A1E: db $C0
 L0E4A1F: db $00
-L0E4A20: db $18
+GFX_Char_Andy_BlockG0: db $18
 L0E4A21: db $0F
 L0E4A22: db $2F
 L0E4A23: db $1C
@@ -2750,7 +2750,7 @@ L0E4ABC: db $00
 L0E4ABD: db $00
 L0E4ABE: db $00
 L0E4ABF: db $00
-L0E4AC0: db $00
+GFX_Char_Andy_BlockC0_A: db $00
 L0E4AC1: db $00
 L0E4AC2: db $00
 L0E4AC3: db $00
@@ -2878,7 +2878,7 @@ L0E4B3C: db $00
 L0E4B3D: db $00
 L0E4B3E: db $3C
 L0E4B3F: db $00
-L0E4B40: db $F8
+GFX_Char_Andy_BlockC0_B: db $F8
 L0E4B41: db $77
 L0E4B42: db $EF
 L0E4B43: db $70
@@ -2974,7 +2974,7 @@ L0E4B9C: db $00
 L0E4B9D: db $00
 L0E4B9E: db $00
 L0E4B9F: db $00
-L0E4BA0: db $7C
+GFX_Char_Andy_BlockA0_B: db $7C
 L0E4BA1: db $3B
 L0E4BA2: db $7B
 L0E4BA3: db $3C
@@ -3038,7 +3038,7 @@ L0E4BDC: db $00
 L0E4BDD: db $00
 L0E4BDE: db $00
 L0E4BDF: db $00
-L0E4BE0: db $00
+GFX_Char_Andy_GuardBreakG0: db $00
 L0E4BE1: db $00
 L0E4BE2: db $00
 L0E4BE3: db $00
@@ -3198,7 +3198,7 @@ L0E4C7C: db $0F
 L0E4C7D: db $00
 L0E4C7E: db $00
 L0E4C7F: db $00
-L0E4C80: db $01
+GFX_Char_Andy_HopB0: db $01
 L0E4C81: db $00
 L0E4C82: db $02
 L0E4C83: db $01
@@ -3358,7 +3358,7 @@ L0E4D1C: db $00
 L0E4D1D: db $00
 L0E4D1E: db $00
 L0E4D1F: db $00
-L0E4D20: db $00
+GFX_Char_Andy_Hitlow0_A: db $00
 L0E4D21: db $00
 L0E4D22: db $00
 L0E4D23: db $00
@@ -3486,7 +3486,7 @@ L0E4D9C: db $3C
 L0E4D9D: db $00
 L0E4D9E: db $42
 L0E4D9F: db $3C
-L0E4DA0: db $E0
+GFX_Char_Andy_DropMain1: db $E0
 L0E4DA1: db $00
 L0E4DA2: db $FE
 L0E4DA3: db $60
@@ -3646,7 +3646,7 @@ L0E4E3C: db $00
 L0E4E3D: db $00
 L0E4E3E: db $00
 L0E4E3F: db $00
-L0E4E40: db $01
+GFX_Char_Andy_DropMain2: db $01
 L0E4E41: db $00
 L0E4E42: db $01
 L0E4E43: db $00
@@ -3806,7 +3806,7 @@ L0E4EDC: db $00
 L0E4EDD: db $00
 L0E4EDE: db $00
 L0E4EDF: db $00
-L0E4EE0: db $00
+GFX_Char_Andy_PunchL0: db $00
 L0E4EE1: db $00
 L0E4EE2: db $00
 L0E4EE3: db $00
@@ -3966,7 +3966,7 @@ L0E4F7C: db $3E
 L0E4F7D: db $00
 L0E4F7E: db $00
 L0E4F7F: db $00
-L0E4F80: db $30
+GFX_Char_Andy_PunchL1_A: db $30
 L0E4F81: db $00
 L0E4F82: db $28
 L0E4F83: db $10
@@ -4158,7 +4158,7 @@ L0E503C: db $90
 L0E503D: db $60
 L0E503E: db $78
 L0E503F: db $80
-L0E5040: db $7C
+GFX_Char_Andy_PunchL1_B: db $7C
 L0E5041: db $38
 L0E5042: db $74
 L0E5043: db $38
@@ -4222,7 +4222,7 @@ L0E507C: db $00
 L0E507D: db $00
 L0E507E: db $00
 L0E507F: db $00
-L0E5080: db $03
+GFX_Char_Andy_PunchH1_A: db $03
 L0E5081: db $00
 L0E5082: db $04
 L0E5083: db $03
@@ -4414,7 +4414,7 @@ L0E513C: db $08
 L0E513D: db $F0
 L0E513E: db $E8
 L0E513F: db $10
-L0E5140: db $48
+GFX_Char_Andy_PunchH2_A: db $48
 L0E5141: db $37
 L0E5142: db $44
 L0E5143: db $3B
@@ -4574,7 +4574,7 @@ L0E51DC: db $40
 L0E51DD: db $80
 L0E51DE: db $80
 L0E51DF: db $00
-L0E51E0: db $1C
+GFX_Char_Andy_KickL0: db $1C
 L0E51E1: db $00
 L0E51E2: db $13
 L0E51E3: db $0C
@@ -4766,7 +4766,7 @@ L0E529C: db $00
 L0E529D: db $00
 L0E529E: db $00
 L0E529F: db $00
-L0E52A0: db $00
+GFX_Char_Andy_KickL1: db $00
 L0E52A1: db $00
 L0E52A2: db $00
 L0E52A3: db $00
@@ -4958,7 +4958,7 @@ L0E535C: db $7E
 L0E535D: db $3C
 L0E535E: db $7E
 L0E535F: db $00
-L0E5360: db $00
+GFX_Char_Andy_KickH1: db $00
 L0E5361: db $00
 L0E5362: db $00
 L0E5363: db $00
@@ -5214,7 +5214,7 @@ L0E545C: db $00
 L0E545D: db $00
 L0E545E: db $00
 L0E545F: db $00
-L0E5460: db $00
+GFX_Char_Andy_KickH2_A: db $00
 L0E5461: db $00
 L0E5462: db $00
 L0E5463: db $00
@@ -5406,7 +5406,7 @@ L0E551C: db $00
 L0E551D: db $00
 L0E551E: db $00
 L0E551F: db $00
-L0E5520: db $00
+GFX_Char_Andy_KickH2_B: db $00
 L0E5521: db $00
 L0E5522: db $F0
 L0E5523: db $00
@@ -5470,7 +5470,7 @@ L0E555C: db $12
 L0E555D: db $0C
 L0E555E: db $0F
 L0E555F: db $06
-L0E5560: db $00
+GFX_Char_Andy_KickH3_B: db $00
 L0E5561: db $00
 L0E5562: db $F0
 L0E5563: db $00
@@ -5534,7 +5534,7 @@ L0E559C: db $12
 L0E559D: db $0C
 L0E559E: db $0F
 L0E559F: db $06
-L0E55A0: db $00
+GFX_Char_Andy_PunchCL0_A: db $00
 L0E55A1: db $00
 L0E55A2: db $00
 L0E55A3: db $00
@@ -5662,7 +5662,7 @@ L0E561C: db $00
 L0E561D: db $00
 L0E561E: db $1E
 L0E561F: db $00
-L0E5620: db $29
+GFX_Char_Andy_PunchCL0_B: db $29
 L0E5621: db $1F
 L0E5622: db $2F
 L0E5623: db $1E
@@ -5726,7 +5726,7 @@ L0E565C: db $00
 L0E565D: db $00
 L0E565E: db $00
 L0E565F: db $00
-L0E5660: db $00
+GFX_Char_Andy_PunchCL1_A: db $00
 L0E5661: db $00
 L0E5662: db $00
 L0E5663: db $00
@@ -5886,7 +5886,7 @@ L0E56FC: db $3C
 L0E56FD: db $00
 L0E56FE: db $42
 L0E56FF: db $3C
-L0E5700: db $0F
+GFX_Char_Andy_PunchCH0: db $0F
 L0E5701: db $00
 L0E5702: db $10
 L0E5703: db $0F
@@ -6046,7 +6046,7 @@ L0E579C: db $00
 L0E579D: db $00
 L0E579E: db $00
 L0E579F: db $00
-L0E57A0: db $00
+GFX_Char_Andy_PunchCH1: db $00
 L0E57A1: db $00
 L0E57A2: db $00
 L0E57A3: db $00
@@ -6270,7 +6270,7 @@ L0E587C: db $00
 L0E587D: db $00
 L0E587E: db $00
 L0E587F: db $00
-L0E5880: db $00
+GFX_Char_Andy_KickCL0: db $00
 L0E5881: db $00
 L0E5882: db $00
 L0E5883: db $00
@@ -6462,7 +6462,7 @@ L0E593C: db $00
 L0E593D: db $00
 L0E593E: db $00
 L0E593F: db $00
-L0E5940: db $0F
+GFX_Char_Andy_KickCL1: db $0F
 L0E5941: db $00
 L0E5942: db $1F
 L0E5943: db $0D
@@ -6686,7 +6686,7 @@ L0E5A1C: db $00
 L0E5A1D: db $00
 L0E5A1E: db $C0
 L0E5A1F: db $00
-L0E5A20: db $00
+GFX_Char_Andy_KickCH1: db $00
 L0E5A21: db $00
 L0E5A22: db $00
 L0E5A23: db $00
@@ -6910,7 +6910,7 @@ L0E5AFC: db $00
 L0E5AFD: db $00
 L0E5AFE: db $00
 L0E5AFF: db $00
-L0E5B00: db $70
+GFX_Char_Andy_PunchA0: db $70
 L0E5B01: db $00
 L0E5B02: db $4F
 L0E5B03: db $30
@@ -7134,7 +7134,7 @@ L0E5BDC: db $00
 L0E5BDD: db $00
 L0E5BDE: db $00
 L0E5BDF: db $00
-L0E5BE0: db $03
+GFX_Char_Andy_ThrowG0: db $03
 L0E5BE1: db $00
 L0E5BE2: db $06
 L0E5BE3: db $03
@@ -7326,7 +7326,7 @@ L0E5C9C: db $00
 L0E5C9D: db $00
 L0E5C9E: db $00
 L0E5C9F: db $00
-L0E5CA0: db $00
+GFX_Char_Andy_ThrowG2: db $00
 L0E5CA1: db $00
 L0E5CA2: db $00
 L0E5CA3: db $00
@@ -7518,7 +7518,7 @@ L0E5D5C: db $F8
 L0E5D5D: db $F0
 L0E5D5E: db $F8
 L0E5D5F: db $00
-L0E5D60: db $00
+GFX_Char_Andy_ThrowG3: db $00
 L0E5D61: db $00
 L0E5D62: db $07
 L0E5D63: db $00
@@ -7710,7 +7710,7 @@ L0E5E1C: db $0C
 L0E5E1D: db $00
 L0E5E1E: db $00
 L0E5E1F: db $00
-L0E5E20: db $00
+GFX_Char_Andy_ThrowG4: db $00
 L0E5E21: db $00
 L0E5E22: db $00
 L0E5E23: db $00
@@ -7934,7 +7934,7 @@ L0E5EFC: db $C8
 L0E5EFD: db $F0
 L0E5EFE: db $F0
 L0E5EFF: db $00
-L0E5F00: db $01
+GFX_Char_Andy_ChargeMeter0: db $01
 L0E5F01: db $00
 L0E5F02: db $01
 L0E5F03: db $00
@@ -8190,7 +8190,7 @@ L0E5FFC: db $00
 L0E5FFD: db $00
 L0E5FFE: db $00
 L0E5FFF: db $00
-L0E6000: db $01
+GFX_Char_Andy_ChargeMeter1: db $01
 L0E6001: db $00
 L0E6002: db $02
 L0E6003: db $01
@@ -8446,7 +8446,7 @@ L0E60FC: db $00
 L0E60FD: db $00
 L0E60FE: db $00
 L0E60FF: db $00
-L0E6100: db $00
+GFX_Char_Andy_AttackA1: db $00
 L0E6101: db $00
 L0E6102: db $00
 L0E6103: db $00
@@ -8670,7 +8670,7 @@ L0E61DC: db $E0
 L0E61DD: db $C0
 L0E61DE: db $E0
 L0E61DF: db $00
-L0E61E0: db $00
+GFX_Char_Andy_AttackA0: db $00
 L0E61E1: db $00
 L0E61E2: db $00
 L0E61E3: db $00
@@ -8830,7 +8830,7 @@ L0E627C: db $00
 L0E627D: db $00
 L0E627E: db $00
 L0E627F: db $00
-L0E6280: db $47
+GFX_Char_Andy_Taunt0: db $47
 L0E6281: db $38
 L0E6282: db $98
 L0E6283: db $67
@@ -8990,7 +8990,7 @@ L0E631C: db $40
 L0E631D: db $3F
 L0E631E: db $30
 L0E631F: db $0F
-L0E6320: db $01
+GFX_Char_Andy_Taunt1_A: db $01
 L0E6321: db $00
 L0E6322: db $02
 L0E6323: db $01
@@ -9086,7 +9086,7 @@ L0E637C: db $B0
 L0E637D: db $40
 L0E637E: db $C0
 L0E637F: db $00
-L0E6380: db $03
+GFX_Char_Andy_Taunt1_B: db $03
 L0E6381: db $01
 L0E6382: db $02
 L0E6383: db $01
@@ -9182,7 +9182,7 @@ L0E63DC: db $00
 L0E63DD: db $00
 L0E63DE: db $00
 L0E63DF: db $00
-L0E63E0: db $00
+GFX_Char_Andy_Taunt2_A: db $00
 L0E63E1: db $00
 L0E63E2: db $00
 L0E63E3: db $00
@@ -9278,7 +9278,7 @@ L0E643C: db $40
 L0E643D: db $80
 L0E643E: db $80
 L0E643F: db $00
-L0E6440: db $C0
+GFX_Char_Andy_Taunt3_A: db $C0
 L0E6441: db $00
 L0E6442: db $A0
 L0E6443: db $40
@@ -9406,7 +9406,7 @@ L0E64BC: db $80
 L0E64BD: db $00
 L0E64BE: db $80
 L0E64BF: db $00
-L0E64C0: db $60
+GFX_Char_Andy_Taunt4_A: db $60
 L0E64C1: db $00
 L0E64C2: db $50
 L0E64C3: db $20
@@ -9534,7 +9534,7 @@ L0E653C: db $80
 L0E653D: db $00
 L0E653E: db $80
 L0E653F: db $00
-L0E6540: db $06
+GFX_Char_Andy_WinA0: db $06
 L0E6541: db $00
 L0E6542: db $09
 L0E6543: db $06
@@ -9726,7 +9726,7 @@ L0E65FC: db $00
 L0E65FD: db $00
 L0E65FE: db $00
 L0E65FF: db $00
-L0E6600: db $00
+GFX_Char_Andy_WinA1_A: db $00
 L0E6601: db $00
 L0E6602: db $00
 L0E6603: db $00
@@ -9918,7 +9918,7 @@ L0E66BC: db $64
 L0E66BD: db $D8
 L0E66BE: db $F8
 L0E66BF: db $00
-L0E66C0: db $06
+GFX_Char_Andy_WinA1_B: db $06
 L0E66C1: db $03
 L0E66C2: db $0B
 L0E66C3: db $07
@@ -9982,7 +9982,7 @@ L0E66FC: db $1F
 L0E66FD: db $0E
 L0E66FE: db $1F
 L0E66FF: db $00
-L0E6700: db $00
+GFX_Char_Andy_WinA2_A: db $00
 L0E6701: db $00
 L0E6702: db $00
 L0E6703: db $00
@@ -10174,7 +10174,7 @@ L0E67BC: db $20
 L0E67BD: db $C0
 L0E67BE: db $C0
 L0E67BF: db $00
-L0E67C0: db $00
+GFX_Char_Andy_WinB0_A: db $00
 L0E67C1: db $00
 L0E67C2: db $00
 L0E67C3: db $00
@@ -10334,7 +10334,7 @@ L0E685C: db $00
 L0E685D: db $00
 L0E685E: db $00
 L0E685F: db $00
-L0E6860: db $00
+GFX_Char_Andy_WinB1_A: db $00
 L0E6861: db $00
 L0E6862: db $00
 L0E6863: db $00
@@ -10462,7 +10462,7 @@ L0E68DC: db $5C
 L0E68DD: db $38
 L0E68DE: db $5C
 L0E68DF: db $38
-L0E68E0: db $00
+GFX_Char_Andy_RunF0: db $00
 L0E68E1: db $00
 L0E68E2: db $00
 L0E68E3: db $00
@@ -10686,7 +10686,7 @@ L0E69BC: db $00
 L0E69BD: db $00
 L0E69BE: db $00
 L0E69BF: db $00
-L0E69C0: db $00
+GFX_Char_Andy_RunF1: db $00
 L0E69C1: db $00
 L0E69C2: db $03
 L0E69C3: db $00
@@ -10846,7 +10846,7 @@ L0E6A5C: db $00
 L0E6A5D: db $00
 L0E6A5E: db $00
 L0E6A5F: db $00
-L0E6A60: db $00
+GFX_Char_Andy_RunF2: db $00
 L0E6A61: db $00
 L0E6A62: db $00
 L0E6A63: db $00
@@ -11070,7 +11070,7 @@ L0E6B3C: db $00
 L0E6B3D: db $00
 L0E6B3E: db $00
 L0E6B3F: db $00
-L0E6B40: db $00
+GFX_Char_Andy_HiShoKenL0: db $00
 L0E6B41: db $00
 L0E6B42: db $00
 L0E6B43: db $00
@@ -11294,7 +11294,7 @@ L0E6C1C: db $00
 L0E6C1D: db $00
 L0E6C1E: db $00
 L0E6C1F: db $00
-L0E6C20: db $01
+GFX_Char_Andy_HiShoKenL1_A: db $01
 L0E6C21: db $00
 L0E6C22: db $03
 L0E6C23: db $01
@@ -11390,7 +11390,7 @@ L0E6C7C: db $80
 L0E6C7D: db $00
 L0E6C7E: db $00
 L0E6C7F: db $00
-L0E6C80: db $00
+GFX_Char_Andy_HiShoKenL1_B: db $00
 L0E6C81: db $00
 L0E6C82: db $00
 L0E6C83: db $00
@@ -11614,7 +11614,7 @@ L0E6D5C: db $00
 L0E6D5D: db $00
 L0E6D5E: db $00
 L0E6D5F: db $00
-L0E6D60: db $00
+GFX_Char_Andy_HiShoKenL2_A: db $00
 L0E6D61: db $00
 L0E6D62: db $00
 L0E6D63: db $00
@@ -11742,7 +11742,7 @@ L0E6DDC: db $00
 L0E6DDD: db $00
 L0E6DDE: db $00
 L0E6DDF: db $00
-L0E6DE0: db $00
+GFX_Char_Andy_HiShoKenL3_A: db $00
 L0E6DE1: db $00
 L0E6DE2: db $00
 L0E6DE3: db $00
@@ -11774,7 +11774,7 @@ L0E6DFC: db $07
 L0E6DFD: db $00
 L0E6DFE: db $00
 L0E6DFF: db $00
-L0E6E00: db $00
+GFX_Char_Andy_ZanEiKenL1_A: db $00
 L0E6E01: db $00
 L0E6E02: db $00
 L0E6E03: db $00
@@ -11870,7 +11870,7 @@ L0E6E5C: db $40
 L0E6E5D: db $80
 L0E6E5E: db $80
 L0E6E5F: db $00
-L0E6E60: db $00
+GFX_Char_Andy_ZanEiKenL1_B: db $00
 L0E6E61: db $00
 L0E6E62: db $00
 L0E6E63: db $00
@@ -12062,7 +12062,7 @@ L0E6F1C: db $00
 L0E6F1D: db $00
 L0E6F1E: db $00
 L0E6F1F: db $00
-L0E6F20: db $00
+GFX_Char_Andy_ZanEiKenL2_A: db $00
 L0E6F21: db $00
 L0E6F22: db $00
 L0E6F23: db $00
@@ -12126,7 +12126,7 @@ L0E6F5C: db $E4
 L0E6F5D: db $F8
 L0E6F5E: db $E4
 L0E6F5F: db $F8
-L0E6F60: db $00
+GFX_Char_Andy_ZanEiKenL4: db $00
 L0E6F61: db $00
 L0E6F62: db $07
 L0E6F63: db $00
@@ -12350,7 +12350,7 @@ L0E703C: db $00
 L0E703D: db $00
 L0E703E: db $00
 L0E703F: db $00
-L0E7040: db $00
+GFX_Char_Andy_KuHaDanL2_A: db $00
 L0E7041: db $00
 L0E7042: db $00
 L0E7043: db $00
@@ -12446,7 +12446,7 @@ L0E709C: db $03
 L0E709D: db $00
 L0E709E: db $01
 L0E709F: db $00
-L0E70A0: db $08
+GFX_Char_Andy_KuHaDanL2_B: db $08
 L0E70A1: db $00
 L0E70A2: db $08
 L0E70A3: db $00
@@ -12574,7 +12574,7 @@ L0E711C: db $00
 L0E711D: db $00
 L0E711E: db $78
 L0E711F: db $00
-L0E7120: db $0F
+GFX_Char_Andy_KuHaDanL3: db $0F
 L0E7121: db $00
 L0E7122: db $3F
 L0E7123: db $0D
@@ -12766,7 +12766,7 @@ L0E71DC: db $38
 L0E71DD: db $C0
 L0E71DE: db $C0
 L0E71DF: db $00
-L0E71E0: db $01
+GFX_Char_Andy_KuHaDanL4: db $01
 L0E71E1: db $00
 L0E71E2: db $02
 L0E71E3: db $01
@@ -12958,7 +12958,7 @@ L0E729C: db $02
 L0E729D: db $FC
 L0E729E: db $3E
 L0E729F: db $C0
-L0E72A0: db $00
+GFX_Char_Andy_ShoRyuDanL1: db $00
 L0E72A1: db $00
 L0E72A2: db $00
 L0E72A3: db $00
@@ -13246,7 +13246,7 @@ L0E73BC: db $00
 L0E73BD: db $00
 L0E73BE: db $00
 L0E73BF: db $00
-L0E73C0: db $00
+GFX_Char_Andy_ShoRyuDanL2: db $00
 L0E73C1: db $00
 L0E73C2: db $00
 L0E73C3: db $00
@@ -13662,7 +13662,7 @@ L0E755C: db $00
 L0E755D: db $00
 L0E755E: db $00
 L0E755F: db $00
-L0E7560: db $00
+GFX_Char_Andy_ShoRyuDanL3: db $00
 L0E7561: db $00
 L0E7562: db $00
 L0E7563: db $00
@@ -14078,7 +14078,7 @@ L0E76FC: db $00
 L0E76FD: db $00
 L0E76FE: db $00
 L0E76FF: db $00
-L0E7700: db $00
+GFX_Char_Andy_ShoRyuDanL5: db $00
 L0E7701: db $00
 L0E7702: db $00
 L0E7703: db $00
@@ -14270,7 +14270,7 @@ L0E77BC: db $00
 L0E77BD: db $00
 L0E77BE: db $00
 L0E77BF: db $00
-L0E77C0: db $06
+GFX_Char_Andy_ShoRyuDanL6: db $06
 L0E77C1: db $00
 L0E77C2: db $0A
 L0E77C3: db $04
@@ -14462,7 +14462,7 @@ L0E787C: db $80
 L0E787D: db $00
 L0E787E: db $00
 L0E787F: db $00
-L0E7880: db $00
+GFX_Char_Andy_GekiHekiHaiSuiShoL4: db $00
 L0E7881: db $00
 L0E7882: db $00
 L0E7883: db $00
@@ -14622,7 +14622,7 @@ L0E791C: db $FC
 L0E791D: db $70
 L0E791E: db $FC
 L0E791F: db $00
-L0E7920: db $00
+GFX_Char_Andy_GekiHekiHaiSuiShoL6: db $00
 L0E7921: db $00
 L0E7922: db $00
 L0E7923: db $00
@@ -14878,7 +14878,7 @@ L0E7A1C: db $00
 L0E7A1D: db $00
 L0E7A1E: db $00
 L0E7A1F: db $00
-L0E7A20: db $00
+GFX_Char_Andy_GeneiShiranuiL0: db $00
 L0E7A21: db $00
 L0E7A22: db $0F
 L0E7A23: db $00
@@ -15070,7 +15070,7 @@ L0E7ADC: db $00
 L0E7ADD: db $00
 L0E7ADE: db $00
 L0E7ADF: db $00
-L0E7AE0: db $00
+GFX_Char_Andy_UwaAgito1: db $00
 L0E7AE1: db $00
 L0E7AE2: db $00
 L0E7AE3: db $00
@@ -15262,7 +15262,7 @@ L0E7B9C: db $67
 L0E7B9D: db $18
 L0E7B9E: db $18
 L0E7B9F: db $00
-L0E7BA0: db $00
+GFX_Char_Andy_UwaAgito2: db $00
 L0E7BA1: db $00
 L0E7BA2: db $00
 L0E7BA3: db $00
@@ -15454,7 +15454,7 @@ L0E7C5C: db $00
 L0E7C5D: db $00
 L0E7C5E: db $00
 L0E7C5F: db $00
-L0E7C60: db $7F
+GFX_Char_Andy_CHoReppaDanS2_A: db $7F
 L0E7C61: db $00
 L0E7C62: db $FF
 L0E7C63: db $3F
@@ -15614,7 +15614,7 @@ L0E7CFC: db $01
 L0E7CFD: db $00
 L0E7CFE: db $00
 L0E7CFF: db $00
-L0E7D00: db $00
+GFX_Char_Andy_CHoReppaDanS3_A: db $00
 L0E7D01: db $00
 L0E7D02: db $00
 L0E7D03: db $00
@@ -15710,7 +15710,7 @@ L0E7D5C: db $C7
 L0E7D5D: db $7F
 L0E7D5E: db $E7
 L0E7D5F: db $FF
-L0E7D60: db $01
+GFX_Char_Andy_CHoReppaDanS3_B: db $01
 L0E7D61: db $07
 L0E7D62: db $1C
 L0E7D63: db $1F
@@ -15902,7 +15902,7 @@ L0E7E1C: db $98
 L0E7E1D: db $98
 L0E7E1E: db $FB
 L0E7E1F: db $FB
-L0E7E20: db $00
+GFX_Char_Andy_CHoReppaDanS4_A: db $00
 L0E7E21: db $00
 L0E7E22: db $00
 L0E7E23: db $00
@@ -16062,7 +16062,7 @@ L0E7EBC: db $05
 L0E7EBD: db $05
 L0E7EBE: db $0D
 L0E7EBF: db $0D
-L0E7EC0: db $00
+GFX_Char_Andy_CHoReppaDanS4_B: db $00
 L0E7EC1: db $00
 L0E7EC2: db $00
 L0E7EC3: db $00
@@ -16222,7 +16222,7 @@ L0E7F5C: db $00
 L0E7F5D: db $00
 L0E7F5E: db $00
 L0E7F5F: db $00
-L0E7F60: db $04
+GFX_Char_MrKarate_ThrowG0_A: db $04
 L0E7F61: db $02
 L0E7F62: db $09
 L0E7F63: db $06
@@ -16318,7 +16318,7 @@ L0E7FBC: db $00
 L0E7FBD: db $00
 L0E7FBE: db $24
 L0E7FBF: db $00
-L0E7FC0: db $DF
+GFX_Char_MrKarate_ThrowG2_A: db $DF
 L0E7FC1: db $20
 L0E7FC2: db $E0
 L0E7FC3: db $1F

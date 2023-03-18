@@ -1,4 +1,4 @@
-L104000: db $00
+GFX_Char_Robert_Idle0: db $00
 L104001: db $00
 L104002: db $00
 L104003: db $00
@@ -158,7 +158,7 @@ L10409C: db $E4
 L10409D: db $18
 L10409E: db $FC
 L10409F: db $00
-L1040A0: db $01
+GFX_Char_Robert_Idle1: db $01
 L1040A1: db $00
 L1040A2: db $00
 L1040A3: db $00
@@ -350,7 +350,7 @@ L10415C: db $00
 L10415D: db $00
 L10415E: db $00
 L10415F: db $00
-L104160: db $01
+GFX_Char_Robert_Idle2_A: db $01
 L104161: db $00
 L104162: db $07
 L104163: db $00
@@ -446,7 +446,7 @@ L1041BC: db $80
 L1041BD: db $00
 L1041BE: db $80
 L1041BF: db $00
-L1041C0: db $7B
+GFX_Char_Robert_Idle2_B: db $7B
 L1041C1: db $34
 L1041C2: db $3E
 L1041C3: db $01
@@ -510,7 +510,7 @@ L1041FC: db $32
 L1041FD: db $0C
 L1041FE: db $3E
 L1041FF: db $00
-L104200: db $03
+GFX_Char_Robert_WalkF0: db $03
 L104201: db $00
 L104202: db $07
 L104203: db $00
@@ -702,7 +702,7 @@ L1042BC: db $00
 L1042BD: db $00
 L1042BE: db $00
 L1042BF: db $00
-L1042C0: db $00
+GFX_Char_Robert_WalkF1: db $00
 L1042C1: db $00
 L1042C2: db $00
 L1042C3: db $00
@@ -862,7 +862,7 @@ L10435C: db $00
 L10435D: db $00
 L10435E: db $00
 L10435F: db $00
-L104360: db $00
+GFX_Char_Robert_WalkF2: db $00
 L104361: db $00
 L104362: db $00
 L104363: db $00
@@ -1022,7 +1022,7 @@ L1043FC: db $B8
 L1043FD: db $40
 L1043FE: db $E0
 L1043FF: db $00
-L104400: db $00
+GFX_Char_Robert_Crouch0_A: db $00
 L104401: db $00
 L104402: db $00
 L104403: db $00
@@ -1150,7 +1150,7 @@ L10447C: db $00
 L10447D: db $00
 L10447E: db $07
 L10447F: db $00
-L104480: db $48
+GFX_Char_Robert_Crouch0_B: db $48
 L104481: db $37
 L104482: db $44
 L104483: db $3B
@@ -1214,7 +1214,7 @@ L1044BC: db $00
 L1044BD: db $00
 L1044BE: db $00
 L1044BF: db $00
-L1044C0: db $01
+GFX_Char_Robert_RollF0: db $01
 L1044C1: db $00
 L1044C2: db $03
 L1044C3: db $00
@@ -1406,7 +1406,7 @@ L10457C: db $00
 L10457D: db $00
 L10457E: db $00
 L10457F: db $00
-L104580: db $00
+GFX_Char_Robert_JumpN1: db $00
 L104581: db $00
 L104582: db $00
 L104583: db $00
@@ -1630,7 +1630,7 @@ L10465C: db $00
 L10465D: db $00
 L10465E: db $00
 L10465F: db $00
-L104660: db $01
+GFX_Char_Robert_JumpN3: db $01
 L104661: db $00
 L104662: db $03
 L104663: db $00
@@ -1822,7 +1822,7 @@ L10471C: db $40
 L10471D: db $80
 L10471E: db $C0
 L10471F: db $00
-L104720: db $07
+GFX_Char_Robert_JumpF2: db $07
 L104721: db $00
 L104722: db $3F
 L104723: db $07
@@ -1918,7 +1918,7 @@ L10477C: db $00
 L10477D: db $00
 L10477E: db $00
 L10477F: db $00
-L104780: db $00
+GFX_Char_Robert_JumpF3: db $00
 L104781: db $00
 L104782: db $00
 L104783: db $00
@@ -2046,7 +2046,7 @@ L1047FC: db $00
 L1047FD: db $00
 L1047FE: db $00
 L1047FF: db $00
-L104800: db $00
+GFX_Char_Robert_BlockG0: db $00
 L104801: db $00
 L104802: db $00
 L104803: db $00
@@ -2206,7 +2206,7 @@ L10489C: db $3D
 L10489D: db $02
 L10489E: db $1F
 L10489F: db $00
-L1048A0: db $03
+GFX_Char_Robert_BlockC0_A: db $03
 L1048A1: db $00
 L1048A2: db $0F
 L1048A3: db $00
@@ -2302,7 +2302,7 @@ L1048FC: db $00
 L1048FD: db $00
 L1048FE: db $20
 L1048FF: db $00
-L104900: db $00;X
+GFX_Char_Robert_BlockA0: db $00;X
 L104901: db $00;X
 L104902: db $00;X
 L104903: db $00;X
@@ -2462,7 +2462,7 @@ L10499C: db $00;X
 L10499D: db $00;X
 L10499E: db $00;X
 L10499F: db $00;X
-L1049A0: db $00
+GFX_Char_Robert_PunchL1_A: db $00
 L1049A1: db $00
 L1049A2: db $00
 L1049A3: db $00
@@ -2590,7 +2590,7 @@ L104A1C: db $F8
 L104A1D: db $F0
 L104A1E: db $F0
 L104A1F: db $60
-L104A20: db $7F
+GFX_Char_Robert_PunchL1_B: db $7F
 L104A21: db $0C
 L104A22: db $FD
 L104A23: db $5A
@@ -2718,7 +2718,7 @@ L104A9C: db $00
 L104A9D: db $00
 L104A9E: db $00
 L104A9F: db $00
-L104AA0: db $00
+GFX_Char_Robert_PunchL0_A: db $00
 L104AA1: db $00
 L104AA2: db $00
 L104AA3: db $00
@@ -2782,7 +2782,7 @@ L104ADC: db $3E
 L104ADD: db $0C
 L104ADE: db $2C
 L104ADF: db $00
-L104AE0: db $06
+GFX_Char_Robert_PunchL0_B: db $06
 L104AE1: db $03
 L104AE2: db $06
 L104AE3: db $03
@@ -2910,7 +2910,7 @@ L104B5C: db $00
 L104B5D: db $00
 L104B5E: db $00
 L104B5F: db $00
-L104B60: db $01
+GFX_Char_Robert_PunchH0: db $01
 L104B61: db $00
 L104B62: db $01
 L104B63: db $00
@@ -3102,7 +3102,7 @@ L104C1C: db $00
 L104C1D: db $00
 L104C1E: db $00
 L104C1F: db $00
-L104C20: db $30
+GFX_Char_Robert_PunchH1: db $30
 L104C21: db $00
 L104C22: db $48
 L104C23: db $30
@@ -3326,7 +3326,7 @@ L104CFC: db $00
 L104CFD: db $00
 L104CFE: db $00
 L104CFF: db $00
-L104D00: db $01
+GFX_Char_Robert_KickL1: db $01
 L104D01: db $00
 L104D02: db $06
 L104D03: db $01
@@ -3518,7 +3518,7 @@ L104DBC: db $9F
 L104DBD: db $0E
 L104DBE: db $0E
 L104DBF: db $00
-L104DC0: db $01
+GFX_Char_Robert_HopB0: db $01
 L104DC1: db $00
 L104DC2: db $01
 L104DC3: db $00
@@ -3678,7 +3678,7 @@ L104E5C: db $39
 L104E5D: db $06
 L104E5E: db $3F
 L104E5F: db $00
-L104E60: db $00
+GFX_Char_Robert_KickH0: db $00
 L104E61: db $00
 L104E62: db $00
 L104E63: db $00
@@ -3870,7 +3870,7 @@ L104F1C: db $00
 L104F1D: db $00
 L104F1E: db $00
 L104F1F: db $00
-L104F20: db $01
+GFX_Char_Robert_KickH1_A: db $01
 L104F21: db $00
 L104F22: db $07
 L104F23: db $00
@@ -4062,7 +4062,7 @@ L104FDC: db $00
 L104FDD: db $00
 L104FDE: db $0E
 L104FDF: db $00
-L104FE0: db $D9
+GFX_Char_Robert_KickH1_B: db $D9
 L104FE1: db $26
 L104FE2: db $71
 L104FE3: db $8E
@@ -4126,7 +4126,7 @@ L10501C: db $80
 L10501D: db $00
 L10501E: db $80
 L10501F: db $00
-L105020: db $00
+GFX_Char_Robert_KickH3: db $00
 L105021: db $00
 L105022: db $01
 L105023: db $00
@@ -4286,7 +4286,7 @@ L1050BC: db $00
 L1050BD: db $00
 L1050BE: db $00
 L1050BF: db $00
-L1050C0: db $0F
+GFX_Char_Robert_PunchCL1_B: db $0F
 L1050C1: db $01
 L1050C2: db $1F
 L1050C3: db $0B
@@ -4414,7 +4414,7 @@ L10513C: db $00
 L10513D: db $00
 L10513E: db $00
 L10513F: db $00
-L105140: db $06
+GFX_Char_Robert_PunchCL0_B: db $06
 L105141: db $03
 L105142: db $06
 L105143: db $03
@@ -4542,7 +4542,7 @@ L1051BC: db $00
 L1051BD: db $00
 L1051BE: db $00
 L1051BF: db $00
-L1051C0: db $00
+GFX_Char_Robert_PunchCH0: db $00
 L1051C1: db $00
 L1051C2: db $00
 L1051C3: db $00
@@ -4766,7 +4766,7 @@ L10529C: db $00
 L10529D: db $00
 L10529E: db $00
 L10529F: db $00
-L1052A0: db $00
+GFX_Char_Robert_PunchCH1: db $00
 L1052A1: db $00
 L1052A2: db $00
 L1052A3: db $00
@@ -4990,7 +4990,7 @@ L10537C: db $00
 L10537D: db $00
 L10537E: db $00
 L10537F: db $00
-L105380: db $01
+GFX_Char_Robert_KickCL1: db $01
 L105381: db $00
 L105382: db $06
 L105383: db $01
@@ -5214,7 +5214,7 @@ L10545C: db $00
 L10545D: db $00
 L10545E: db $00
 L10545F: db $00
-L105460: db $01
+GFX_Char_Robert_KickCL0_B: db $01
 L105461: db $00
 L105462: db $01
 L105463: db $00
@@ -5310,7 +5310,7 @@ L1054BC: db $00
 L1054BD: db $00
 L1054BE: db $00
 L1054BF: db $00
-L1054C0: db $03
+GFX_Char_Robert_KickCH0: db $03
 L1054C1: db $00
 L1054C2: db $05
 L1054C3: db $02
@@ -5470,7 +5470,7 @@ L10555C: db $00
 L10555D: db $00
 L10555E: db $00
 L10555F: db $00
-L105560: db $03
+GFX_Char_Robert_KickCH1: db $03
 L105561: db $00
 L105562: db $07
 L105563: db $00
@@ -5726,7 +5726,7 @@ L10565C: db $00
 L10565D: db $00
 L10565E: db $00
 L10565F: db $00
-L105660: db $00
+GFX_Char_Robert_KickCH3: db $00
 L105661: db $00
 L105662: db $01
 L105663: db $00
@@ -5886,7 +5886,7 @@ L1056FC: db $00
 L1056FD: db $00
 L1056FE: db $00
 L1056FF: db $00
-L105700: db $01
+GFX_Char_Robert_PunchA0: db $01
 L105701: db $00
 L105702: db $03
 L105703: db $01
@@ -6078,7 +6078,7 @@ L1057BC: db $80
 L1057BD: db $00
 L1057BE: db $80
 L1057BF: db $00
-L1057C0: db $00
+GFX_Char_Robert_KickA0: db $00
 L1057C1: db $00
 L1057C2: db $00
 L1057C3: db $00
@@ -6302,7 +6302,7 @@ L10589C: db $00
 L10589D: db $00
 L10589E: db $00
 L10589F: db $00
-L1058A0: db $00
+GFX_Char_Robert_AttackG0: db $00
 L1058A1: db $00
 L1058A2: db $00
 L1058A3: db $00
@@ -6462,7 +6462,7 @@ L10593C: db $00
 L10593D: db $00
 L10593E: db $00
 L10593F: db $00
-L105940: db $D9
+GFX_Char_Robert_AttackG1_B: db $D9
 L105941: db $26
 L105942: db $71
 L105943: db $8E
@@ -6526,7 +6526,7 @@ L10597C: db $00
 L10597D: db $00
 L10597E: db $00
 L10597F: db $00
-L105980: db $00
+GFX_Char_Robert_AttackG3: db $00
 L105981: db $00
 L105982: db $00
 L105983: db $00
@@ -6750,7 +6750,7 @@ L105A5C: db $2F
 L105A5D: db $10
 L105A5E: db $30
 L105A5F: db $00
-L105A60: db $00
+GFX_Char_Robert_AttackA0: db $00
 L105A61: db $00
 L105A62: db $00
 L105A63: db $00
@@ -6942,7 +6942,7 @@ L105B1C: db $1C
 L105B1D: db $00
 L105B1E: db $7E
 L105B1F: db $00
-L105B20: db $00
+GFX_Char_Robert_TimeOver2: db $00
 L105B21: db $00
 L105B22: db $00
 L105B23: db $00
@@ -7134,7 +7134,7 @@ L105BDC: db $F0
 L105BDD: db $00
 L105BDE: db $00
 L105BDF: db $00
-L105BE0: db $00
+GFX_Char_Robert_GuardBreakG0_A: db $00
 L105BE1: db $00
 L105BE2: db $00
 L105BE3: db $00
@@ -7230,7 +7230,7 @@ L105C3C: db $FC
 L105C3D: db $38
 L105C3E: db $FC
 L105C3F: db $78
-L105C40: db $01
+GFX_Char_Robert_GuardBreakG0_B: db $01
 L105C41: db $00
 L105C42: db $02
 L105C43: db $01
@@ -7326,7 +7326,7 @@ L105C9C: db $20
 L105C9D: db $C0
 L105C9E: db $E0
 L105C9F: db $00
-L105CA0: db $1F
+GFX_Char_Robert_Hitlow0_B: db $1F
 L105CA1: db $00
 L105CA2: db $20
 L105CA3: db $1F
@@ -7422,7 +7422,7 @@ L105CFC: db $00
 L105CFD: db $00
 L105CFE: db $00
 L105CFF: db $00
-L105D00: db $06
+GFX_Char_Robert_DropMain1: db $06
 L105D01: db $00
 L105D02: db $05
 L105D03: db $02
@@ -7646,7 +7646,7 @@ L105DDC: db $00
 L105DDD: db $00
 L105DDE: db $00
 L105DDF: db $00
-L105DE0: db $01
+GFX_Char_Robert_DropMain2: db $01
 L105DE1: db $00
 L105DE2: db $01
 L105DE3: db $00
@@ -7806,7 +7806,7 @@ L105E7C: db $00
 L105E7D: db $00
 L105E7E: db $00
 L105E7F: db $00
-L105E80: db $01
+GFX_Char_Robert_RyuKoRanbuS0: db $01
 L105E81: db $00
 L105E82: db $02
 L105E83: db $01
@@ -7998,7 +7998,7 @@ L105F3C: db $00
 L105F3D: db $00
 L105F3E: db $00
 L105F3F: db $00
-L105F40: db $00
+GFX_Char_Robert_ChargeMeter0_A: db $00
 L105F41: db $00
 L105F42: db $00
 L105F43: db $00
@@ -8190,7 +8190,7 @@ L105FFC: db $F8
 L105FFD: db $00
 L105FFE: db $F0
 L105FFF: db $40
-L106000: db $08
+GFX_Char_Robert_ChargeMeter0_B: db $08
 L106001: db $07
 L106002: db $11
 L106003: db $0E
@@ -8286,7 +8286,7 @@ L10605C: db $00
 L10605D: db $00
 L10605E: db $00
 L10605F: db $00
-L106060: db $00
+GFX_Char_Robert_ChargeMeter1_A: db $00
 L106061: db $00
 L106062: db $00
 L106063: db $00
@@ -8478,7 +8478,7 @@ L10611C: db $C0
 L10611D: db $00
 L10611E: db $E0
 L10611F: db $00
-L106120: db $FF
+GFX_Char_Robert_Intro0_A: db $FF
 L106121: db $00
 L106122: db $E5
 L106123: db $1A
@@ -8606,7 +8606,7 @@ L10619C: db $03
 L10619D: db $00
 L10619E: db $00
 L10619F: db $00
-L1061A0: db $28
+GFX_Char_Robert_Intro0_B: db $28
 L1061A1: db $17
 L1061A2: db $28
 L1061A3: db $17
@@ -8670,7 +8670,7 @@ L1061DC: db $24
 L1061DD: db $18
 L1061DE: db $3C
 L1061DF: db $00
-L1061E0: db $01
+GFX_Char_Robert_Intro1_A: db $01
 L1061E1: db $00
 L1061E2: db $01
 L1061E3: db $00
@@ -8798,7 +8798,7 @@ L10625C: db $7E
 L10625D: db $00
 L10625E: db $FF
 L10625F: db $00
-L106260: db $7F
+GFX_Char_Robert_Intro4_A: db $7F
 L106261: db $00
 L106262: db $79
 L106263: db $06
@@ -8894,7 +8894,7 @@ L1062BC: db $7E
 L1062BD: db $00
 L1062BE: db $FF
 L1062BF: db $00
-L1062C0: db $7F
+GFX_Char_Robert_Intro5_A: db $7F
 L1062C1: db $00
 L1062C2: db $79
 L1062C3: db $06
@@ -9022,7 +9022,7 @@ L10633C: db $00
 L10633D: db $00
 L10633E: db $C0
 L10633F: db $00
-L106340: db $03
+GFX_Char_Robert_Taunt0: db $03
 L106341: db $00
 L106342: db $07
 L106343: db $00
@@ -9246,7 +9246,7 @@ L10641C: db $00
 L10641D: db $00
 L10641E: db $00
 L10641F: db $00
-L106420: db $00
+GFX_Char_Robert_Taunt1_A: db $00
 L106421: db $00
 L106422: db $00
 L106423: db $00
@@ -9342,7 +9342,7 @@ L10647C: db $56
 L10647D: db $A8
 L10647E: db $B7
 L10647F: db $4E
-L106480: db $FF
+GFX_Char_Robert_Taunt1_B: db $FF
 L106481: db $77
 L106482: db $7F
 L106483: db $3B
@@ -9502,7 +9502,7 @@ L10651C: db $00
 L10651D: db $00
 L10651E: db $00
 L10651F: db $00
-L106520: db $00
+GFX_Char_Robert_Taunt2_A: db $00
 L106521: db $00
 L106522: db $00
 L106523: db $00
@@ -9598,7 +9598,7 @@ L10657C: db $56
 L10657D: db $A8
 L10657E: db $B7
 L10657F: db $4E
-L106580: db $03
+GFX_Char_Robert_WinA0: db $03
 L106581: db $00
 L106582: db $03
 L106583: db $00
@@ -9822,7 +9822,7 @@ L10665C: db $00
 L10665D: db $00
 L10665E: db $00
 L10665F: db $00
-L106660: db $01
+GFX_Char_Robert_WinA1_A: db $01
 L106661: db $00
 L106662: db $01
 L106663: db $00
@@ -9950,7 +9950,7 @@ L1066DC: db $78
 L1066DD: db $00
 L1066DE: db $FE
 L1066DF: db $00
-L1066E0: db $E0
+GFX_Char_Robert_WinA1_B: db $E0
 L1066E1: db $1F
 L1066E2: db $24
 L1066E3: db $1B
@@ -10046,7 +10046,7 @@ L10673C: db $00
 L10673D: db $00
 L10673E: db $00
 L10673F: db $00
-L106740: db $07
+GFX_Char_Robert_WinA2_A: db $07
 L106741: db $00
 L106742: db $07
 L106743: db $00
@@ -10206,7 +10206,7 @@ L1067DC: db $78
 L1067DD: db $00
 L1067DE: db $FE
 L1067DF: db $00
-L1067E0: db $07
+GFX_Char_Robert_WinA3_A: db $07
 L1067E1: db $00
 L1067E2: db $07
 L1067E3: db $00
@@ -10366,7 +10366,7 @@ L10687C: db $3C
 L10687D: db $00
 L10687E: db $7F
 L10687F: db $00
-L106880: db $07
+GFX_Char_Robert_WinA6_A: db $07
 L106881: db $00
 L106882: db $07
 L106883: db $00
@@ -10494,7 +10494,7 @@ L1068FC: db $3C
 L1068FD: db $00
 L1068FE: db $7F
 L1068FF: db $00
-L106900: db $01
+GFX_Char_Robert_WinB2_A: db $01
 L106901: db $00
 L106902: db $01
 L106903: db $00
@@ -10622,7 +10622,7 @@ L10697C: db $78
 L10697D: db $00
 L10697E: db $FE
 L10697F: db $00
-L106980: db $C0
+GFX_Char_Robert_AttackA1: db $C0
 L106981: db $00
 L106982: db $BF
 L106983: db $40
@@ -10814,7 +10814,7 @@ L106A3C: db $F0
 L106A3D: db $00
 L106A3E: db $00
 L106A3F: db $00
-L106A40: db $03
+GFX_Char_Robert_RunF0: db $03
 L106A41: db $00
 L106A42: db $0F
 L106A43: db $00
@@ -11006,7 +11006,7 @@ L106AFC: db $00
 L106AFD: db $00
 L106AFE: db $00
 L106AFF: db $00
-L106B00: db $00
+GFX_Char_Robert_RunF1: db $00
 L106B01: db $00
 L106B02: db $00
 L106B03: db $00
@@ -11166,7 +11166,7 @@ L106B9C: db $00
 L106B9D: db $00
 L106B9E: db $00
 L106B9F: db $00
-L106BA0: db $07
+GFX_Char_Robert_RunF2: db $07
 L106BA1: db $00
 L106BA2: db $1F
 L106BA3: db $00
@@ -11358,7 +11358,7 @@ L106C5C: db $00
 L106C5D: db $00
 L106C5E: db $00
 L106C5F: db $00
-L106C60: db $00
+GFX_Char_Robert_RyuuGekiKenL0: db $00
 L106C61: db $00
 L106C62: db $00
 L106C63: db $00
@@ -11614,7 +11614,7 @@ L106D5C: db $00
 L106D5D: db $00
 L106D5E: db $00
 L106D5F: db $00
-L106D60: db $01
+GFX_Char_Robert_HaohShokohKenS2_B: db $01
 L106D61: db $00
 L106D62: db $03
 L106D63: db $00
@@ -11710,7 +11710,7 @@ L106DBC: db $00
 L106DBD: db $00
 L106DBE: db $00
 L106DBF: db $00
-L106DC0: db $05
+GFX_Char_Robert_RyuuGekiKenL1_A: db $05
 L106DC1: db $00
 L106DC2: db $0F
 L106DC3: db $04
@@ -11934,7 +11934,7 @@ L106E9C: db $FF
 L106E9D: db $03
 L106E9E: db $D7
 L106E9F: db $AD
-L106EA0: db $00
+GFX_Char_Robert_RyuuGekiKenL1_B: db $00
 L106EA1: db $00
 L106EA2: db $00
 L106EA3: db $00
@@ -12094,7 +12094,7 @@ L106F3C: db $00
 L106F3D: db $00
 L106F3E: db $00
 L106F3F: db $00
-L106F40: db $01
+GFX_Char_Robert_RyuuGekiKenL2_A: db $01
 L106F41: db $00
 L106F42: db $03
 L106F43: db $00
@@ -12350,7 +12350,7 @@ L10703C: db $00
 L10703D: db $00
 L10703E: db $00
 L10703F: db $00
-L107040: db $05
+GFX_Char_Robert_RyuuGekiKenL7_A: db $05
 L107041: db $05
 L107042: db $0F
 L107043: db $0F
@@ -12606,7 +12606,7 @@ L10713C: db $00
 L10713D: db $00
 L10713E: db $00
 L10713F: db $00
-L107140: db $00
+GFX_Char_Robert_RyuuGekiKenL8_A: db $00
 L107141: db $00
 L107142: db $02
 L107143: db $02
@@ -12830,7 +12830,7 @@ L10721C: db $00
 L10721D: db $00
 L10721E: db $00
 L10721F: db $00
-L107220: db $0F
+GFX_Char_Robert_HienShippuKyakuL3: db $0F
 L107221: db $00
 L107222: db $17
 L107223: db $08
@@ -13054,7 +13054,7 @@ L1072FC: db $00
 L1072FD: db $00
 L1072FE: db $00
 L1072FF: db $00
-L107300: db $00
+GFX_Char_Robert_RyuuGaL2: db $00
 L107301: db $00
 L107302: db $00
 L107303: db $00
@@ -13246,7 +13246,7 @@ L1073BC: db $78
 L1073BD: db $00
 L1073BE: db $38
 L1073BF: db $00
-L1073C0: db $00
+GFX_Char_Robert_RyuuGaL3: db $00
 L1073C1: db $00
 L1073C2: db $00
 L1073C3: db $00
@@ -13438,7 +13438,7 @@ L10747C: db $00
 L10747D: db $00
 L10747E: db $00
 L10747F: db $00
-L107480: db $07
+GFX_Char_Robert_KyokugenRyuRanbuKyakuL0: db $07
 L107481: db $00
 L107482: db $04
 L107483: db $03
@@ -13598,7 +13598,7 @@ L10751C: db $00
 L10751D: db $00
 L10751E: db $00
 L10751F: db $00
-L107520: db $00
+GFX_Char_Robert_KyokugenRyuRanbuKyakuL2_A: db $00
 L107521: db $00
 L107522: db $00
 L107523: db $00
@@ -13790,7 +13790,7 @@ L1075DC: db $00
 L1075DD: db $00
 L1075DE: db $0E
 L1075DF: db $00
-L1075E0: db $00
+GFX_Char_Robert_KyokugenRyuRanbuKyakuL6: db $00
 L1075E1: db $00
 L1075E2: db $00
 L1075E3: db $00
@@ -14014,7 +14014,7 @@ L1076BC: db $40
 L1076BD: db $80
 L1076BE: db $80
 L1076BF: db $00
-L1076C0: db $00
+GFX_Char_Robert_RyuKoRanbuS1: db $00
 L1076C1: db $00
 L1076C2: db $00
 L1076C3: db $00
@@ -14238,7 +14238,7 @@ L10779C: db $00
 L10779D: db $00
 L10779E: db $00
 L10779F: db $00
-L1077A0: db $01
+GFX_Char_Robert_RyuuGaHiddenL3: db $01
 L1077A1: db $00
 L1077A2: db $03
 L1077A3: db $01
@@ -14430,7 +14430,7 @@ L10785C: db $80
 L10785D: db $00
 L10785E: db $80
 L10785F: db $00
-L107860: db $01
+GFX_Char_Robert_RyuuGaHiddenL2: db $01
 L107861: db $00
 L107862: db $03
 L107863: db $01
@@ -14622,7 +14622,7 @@ L10791C: db $00
 L10791D: db $00
 L10791E: db $00
 L10791F: db $00
-L107920: db $0E
+GFX_Char_Robert_HaohShokohKenS2_A: db $0E
 L107921: db $00
 L107922: db $3F
 L107923: db $00
@@ -14750,7 +14750,7 @@ L10799C: db $FE
 L10799D: db $00
 L10799E: db $FF
 L10799F: db $70
-L1079A0: db $00
+GFX_Char_Robert_HaohShokohKenS3: db $00
 L1079A1: db $00
 L1079A2: db $00
 L1079A3: db $00
@@ -15006,7 +15006,7 @@ L107A9C: db $07
 L107A9D: db $00
 L107A9E: db $01
 L107A9F: db $00
-L107AA0: db $3F
+GFX_Char_Athena_ShiningCrystalBitGD1: db $3F
 L107AA1: db $FF
 L107AA2: db $7F
 L107AA3: db $FF
@@ -15518,7 +15518,7 @@ L107C9C: db $00
 L107C9D: db $00
 L107C9E: db $00
 L107C9F: db $00
-L107CA0: db $01
+GFX_Char_Athena_ShiningCrystalBitGD0: db $01
 L107CA1: db $01
 L107CA2: db $03
 L107CA3: db $03
@@ -15838,7 +15838,7 @@ L107DDC: db $00
 L107DDD: db $00
 L107DDE: db $00
 L107DDF: db $00
-L107DE0: db $00
+GFX_Char_Athena_ShiningCrystalBitGS5_A: db $00
 L107DE1: db $00
 L107DE2: db $00
 L107DE3: db $00
@@ -15998,7 +15998,7 @@ L107E7C: db $0F
 L107E7D: db $06
 L107E7E: db $0F
 L107E7F: db $00
-L107E80: db $01
+GFX_Char_Athena_ShiningCrystalBitAS5: db $01
 L107E81: db $00
 L107E82: db $03
 L107E83: db $00
@@ -16190,7 +16190,7 @@ L107F3C: db $00
 L107F3D: db $00
 L107F3E: db $00
 L107F3F: db $00
-L107F40: db $00
+GFX_Char_MrKarate_PunchA0_A: db $00
 L107F41: db $00
 L107F42: db $00
 L107F43: db $00
@@ -16254,7 +16254,7 @@ L107F7C: db $CF
 L107F7D: db $37
 L107F7E: db $0F
 L107F7F: db $F3
-L107F80: db $00
+GFX_Char_MrKarate_KickA0_A: db $00
 L107F81: db $00
 L107F82: db $06
 L107F83: db $00

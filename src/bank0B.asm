@@ -1,4 +1,4 @@
-L0B4000: db $00
+GFX_Char_Kyo_Idle0: db $00
 L0B4001: db $00
 L0B4002: db $01
 L0B4003: db $00
@@ -190,7 +190,7 @@ L0B40BC: db $00
 L0B40BD: db $00
 L0B40BE: db $00
 L0B40BF: db $00
-L0B40C0: db $00
+GFX_Char_Kyo_Idle1: db $00
 L0B40C1: db $00
 L0B40C2: db $03
 L0B40C3: db $00
@@ -382,7 +382,7 @@ L0B417C: db $00
 L0B417D: db $00
 L0B417E: db $00
 L0B417F: db $00
-L0B4180: db $00
+GFX_Char_Kyo_Idle3: db $00
 L0B4181: db $00
 L0B4182: db $01
 L0B4183: db $00
@@ -574,7 +574,7 @@ L0B423C: db $00
 L0B423D: db $00
 L0B423E: db $00
 L0B423F: db $00
-L0B4240: db $0F
+GFX_Char_Kyo_WalkF0_A: db $0F
 L0B4241: db $00
 L0B4242: db $0E
 L0B4243: db $01
@@ -702,7 +702,7 @@ L0B42BC: db $3F
 L0B42BD: db $00
 L0B42BE: db $7F
 L0B42BF: db $00
-L0B42C0: db $7F
+GFX_Char_Kyo_WalkF0_B: db $7F
 L0B42C1: db $35
 L0B42C2: db $7F
 L0B42C3: db $3B
@@ -766,7 +766,7 @@ L0B42FC: db $00
 L0B42FD: db $00
 L0B42FE: db $00
 L0B42FF: db $00
-L0B4300: db $00
+GFX_Char_Kyo_Crouch0_A: db $00
 L0B4301: db $00
 L0B4302: db $01
 L0B4303: db $00
@@ -894,7 +894,7 @@ L0B437C: db $00
 L0B437D: db $00
 L0B437E: db $3C
 L0B437F: db $00
-L0B4380: db $7F
+GFX_Char_Kyo_Crouch0_B: db $7F
 L0B4381: db $3B
 L0B4382: db $7F
 L0B4383: db $3D
@@ -990,7 +990,7 @@ L0B43DC: db $00
 L0B43DD: db $00
 L0B43DE: db $00
 L0B43DF: db $00
-L0B43E0: db $00
+GFX_Char_Kyo_JumpN1_A: db $00
 L0B43E1: db $00
 L0B43E2: db $07
 L0B43E3: db $00
@@ -1086,7 +1086,7 @@ L0B443C: db $EB
 L0B443D: db $C4
 L0B443E: db $CC
 L0B443F: db $00
-L0B4440: db $03
+GFX_Char_Kyo_JumpN1_B: db $03
 L0B4441: db $00
 L0B4442: db $07
 L0B4443: db $01
@@ -1182,7 +1182,7 @@ L0B449C: db $00
 L0B449D: db $00
 L0B449E: db $00
 L0B449F: db $00
-L0B44A0: db $3F
+GFX_Char_Kyo_JumpN3_B: db $3F
 L0B44A1: db $02
 L0B44A2: db $7F
 L0B44A3: db $3D
@@ -1246,7 +1246,7 @@ L0B44DC: db $00
 L0B44DD: db $00
 L0B44DE: db $00
 L0B44DF: db $00
-L0B44E0: db $30
+GFX_Char_Kyo_JumpF2: db $30
 L0B44E1: db $00
 L0B44E2: db $6B
 L0B44E3: db $10
@@ -1406,7 +1406,7 @@ L0B457C: db $00
 L0B457D: db $00
 L0B457E: db $00
 L0B457F: db $00
-L0B4580: db $00
+GFX_Char_Kyo_JumpF3: db $00
 L0B4581: db $00
 L0B4582: db $00
 L0B4583: db $00
@@ -1534,7 +1534,7 @@ L0B45FC: db $FE
 L0B45FD: db $00
 L0B45FE: db $70
 L0B45FF: db $00
-L0B4600: db $03
+GFX_Char_Kyo_BlockG0: db $03
 L0B4601: db $00
 L0B4602: db $0F
 L0B4603: db $00
@@ -1694,7 +1694,7 @@ L0B469C: db $00
 L0B469D: db $00
 L0B469E: db $00
 L0B469F: db $00
-L0B46A0: db $00
+GFX_Char_Kyo_BlockC0_A: db $00
 L0B46A1: db $00
 L0B46A2: db $07
 L0B46A3: db $00
@@ -1822,7 +1822,7 @@ L0B471C: db $00
 L0B471D: db $00
 L0B471E: db $0F
 L0B471F: db $00
-L0B4720: db $7F;X
+GFX_Char_Kyo_BlockA0_B: db $7F;X
 L0B4721: db $3B;X
 L0B4722: db $7F;X
 L0B4723: db $31;X
@@ -1918,7 +1918,7 @@ L0B477C: db $00;X
 L0B477D: db $00;X
 L0B477E: db $00;X
 L0B477F: db $00;X
-L0B4780: db $00
+GFX_Char_Kyo_PunchL0_A: db $00
 L0B4781: db $00
 L0B4782: db $00
 L0B4783: db $00
@@ -2014,7 +2014,7 @@ L0B47DC: db $71
 L0B47DD: db $AE
 L0B47DE: db $3E
 L0B47DF: db $D0
-L0B47E0: db $01
+GFX_Char_Kyo_PunchL0_B: db $01
 L0B47E1: db $00
 L0B47E2: db $01
 L0B47E3: db $00
@@ -2110,7 +2110,7 @@ L0B483C: db $00
 L0B483D: db $00
 L0B483E: db $00
 L0B483F: db $00
-L0B4840: db $1F
+GFX_Char_Kyo_PunchL1_A: db $1F
 L0B4841: db $00
 L0B4842: db $2F
 L0B4843: db $10
@@ -2238,7 +2238,7 @@ L0B48BC: db $FC
 L0B48BD: db $F0
 L0B48BE: db $F0
 L0B48BF: db $C0
-L0B48C0: db $0C
+GFX_Char_Kyo_PunchH0: db $0C
 L0B48C1: db $00
 L0B48C2: db $12
 L0B48C3: db $0C
@@ -2430,7 +2430,7 @@ L0B497C: db $00
 L0B497D: db $00
 L0B497E: db $00
 L0B497F: db $00
-L0B4980: db $03
+GFX_Char_Kyo_PunchH1: db $03
 L0B4981: db $00
 L0B4982: db $0F
 L0B4983: db $00
@@ -2622,7 +2622,7 @@ L0B4A3C: db $00
 L0B4A3D: db $00
 L0B4A3E: db $00
 L0B4A3F: db $00
-L0B4A40: db $F9
+GFX_Char_Kyo_PunchH2_A: db $F9
 L0B4A41: db $00
 L0B4A42: db $EB
 L0B4A43: db $10
@@ -2782,7 +2782,7 @@ L0B4ADC: db $40
 L0B4ADD: db $00
 L0B4ADE: db $3C
 L0B4ADF: db $00
-L0B4AE0: db $1F
+GFX_Char_Kyo_PunchH2_B: db $1F
 L0B4AE1: db $00
 L0B4AE2: db $1F
 L0B4AE3: db $0F
@@ -2878,7 +2878,7 @@ L0B4B3C: db $00
 L0B4B3D: db $00
 L0B4B3E: db $00
 L0B4B3F: db $00
-L0B4B40: db $07
+GFX_Char_Kyo_KickL1: db $07
 L0B4B41: db $00
 L0B4B42: db $0E
 L0B4B43: db $01
@@ -3102,7 +3102,7 @@ L0B4C1C: db $E0
 L0B4C1D: db $C0
 L0B4C1E: db $E0
 L0B4C1F: db $C0
-L0B4C20: db $01
+GFX_Char_Kyo_KickH0: db $01
 L0B4C21: db $00
 L0B4C22: db $01
 L0B4C23: db $00
@@ -3294,7 +3294,7 @@ L0B4CDC: db $00
 L0B4CDD: db $00
 L0B4CDE: db $00
 L0B4CDF: db $00
-L0B4CE0: db $03
+GFX_Char_Kyo_KickH2_A: db $03
 L0B4CE1: db $00
 L0B4CE2: db $3F
 L0B4CE3: db $02
@@ -3422,7 +3422,7 @@ L0B4D5C: db $00
 L0B4D5D: db $00
 L0B4D5E: db $00
 L0B4D5F: db $00
-L0B4D60: db $00
+GFX_Char_Kyo_KickH2_B: db $00
 L0B4D61: db $00
 L0B4D62: db $00
 L0B4D63: db $00
@@ -3582,7 +3582,7 @@ L0B4DFC: db $00
 L0B4DFD: db $00
 L0B4DFE: db $00
 L0B4DFF: db $00
-L0B4E00: db $00
+GFX_Char_Kyo_PunchCL1_A: db $00
 L0B4E01: db $00
 L0B4E02: db $00
 L0B4E03: db $00
@@ -3742,7 +3742,7 @@ L0B4E9C: db $1C
 L0B4E9D: db $00
 L0B4E9E: db $7F
 L0B4E9F: db $00
-L0B4EA0: db $00
+GFX_Char_Kyo_PunchCH0: db $00
 L0B4EA1: db $00
 L0B4EA2: db $00
 L0B4EA3: db $00
@@ -3934,7 +3934,7 @@ L0B4F5C: db $22
 L0B4F5D: db $1C
 L0B4F5E: db $3E
 L0B4F5F: db $00
-L0B4F60: db $00
+GFX_Char_Kyo_PunchCH1: db $00
 L0B4F61: db $00
 L0B4F62: db $00
 L0B4F63: db $00
@@ -4158,7 +4158,7 @@ L0B503C: db $05
 L0B503D: db $02
 L0B503E: db $07
 L0B503F: db $00
-L0B5040: db $00
+GFX_Char_Kyo_KickCL1: db $00
 L0B5041: db $00
 L0B5042: db $00
 L0B5043: db $00
@@ -4414,7 +4414,7 @@ L0B513C: db $00
 L0B513D: db $00
 L0B513E: db $00
 L0B513F: db $00
-L0B5140: db $08
+GFX_Char_Kyo_KickCH0: db $08
 L0B5141: db $07
 L0B5142: db $08
 L0B5143: db $07
@@ -4574,7 +4574,7 @@ L0B51DC: db $00
 L0B51DD: db $00
 L0B51DE: db $00
 L0B51DF: db $00
-L0B51E0: db $03
+GFX_Char_Kyo_KickCH1_A: db $03
 L0B51E1: db $00
 L0B51E2: db $1F
 L0B51E3: db $03
@@ -4638,7 +4638,7 @@ L0B521C: db $00
 L0B521D: db $00
 L0B521E: db $00
 L0B521F: db $00
-L0B5220: db $04
+GFX_Char_Kyo_KickCH1_B: db $04
 L0B5221: db $00
 L0B5222: db $0A
 L0B5223: db $04
@@ -4830,7 +4830,7 @@ L0B52DC: db $00
 L0B52DD: db $00
 L0B52DE: db $00
 L0B52DF: db $00
-L0B52E0: db $0F
+GFX_Char_Kyo_KickCH2_A: db $0F
 L0B52E1: db $00
 L0B52E2: db $1F
 L0B52E3: db $0F
@@ -4894,7 +4894,7 @@ L0B531C: db $00
 L0B531D: db $00
 L0B531E: db $00
 L0B531F: db $00
-L0B5320: db $00
+GFX_Char_Kyo_PunchA0: db $00
 L0B5321: db $00
 L0B5322: db $00
 L0B5323: db $00
@@ -5118,7 +5118,7 @@ L0B53FC: db $00
 L0B53FD: db $00
 L0B53FE: db $00
 L0B53FF: db $00
-L0B5400: db $00
+GFX_Char_Kyo_KickA0_A: db $00
 L0B5401: db $00
 L0B5402: db $00
 L0B5403: db $00
@@ -5246,7 +5246,7 @@ L0B547C: db $00
 L0B547D: db $00
 L0B547E: db $00
 L0B547F: db $00
-L0B5480: db $0F
+GFX_Char_Kyo_AttackG0: db $0F
 L0B5481: db $00
 L0B5482: db $3F
 L0B5483: db $00
@@ -5438,7 +5438,7 @@ L0B553C: db $00
 L0B553D: db $00
 L0B553E: db $00
 L0B553F: db $00
-L0B5540: db $0F
+GFX_Char_Kyo_AttackG1: db $0F
 L0B5541: db $00
 L0B5542: db $3F
 L0B5543: db $00
@@ -5630,7 +5630,7 @@ L0B55FC: db $00
 L0B55FD: db $00
 L0B55FE: db $00
 L0B55FF: db $00
-L0B5600: db $00
+GFX_Char_Kyo_AttackA0: db $00
 L0B5601: db $00
 L0B5602: db $00
 L0B5603: db $00
@@ -5822,7 +5822,7 @@ L0B56BC: db $C8
 L0B56BD: db $B0
 L0B56BE: db $B8
 L0B56BF: db $00
-L0B56C0: db $00
+GFX_Char_Kyo_HopB0_A: db $00
 L0B56C1: db $00
 L0B56C2: db $00
 L0B56C3: db $00
@@ -5918,7 +5918,7 @@ L0B571C: db $F1
 L0B571D: db $0E
 L0B571E: db $FE
 L0B571F: db $00
-L0B5720: db $00
+GFX_Char_Kyo_GuardBreakG0_A: db $00
 L0B5721: db $00
 L0B5722: db $00
 L0B5723: db $00
@@ -6014,7 +6014,7 @@ L0B577C: db $F1
 L0B577D: db $0E
 L0B577E: db $FE
 L0B577F: db $00
-L0B5780: db $37
+GFX_Char_Kyo_HopB0_B: db $37
 L0B5781: db $00
 L0B5782: db $07
 L0B5783: db $03
@@ -6110,7 +6110,7 @@ L0B57DC: db $00
 L0B57DD: db $00
 L0B57DE: db $00
 L0B57DF: db $00
-L0B57E0: db $00
+GFX_Char_Kyo_Hitlow0_A: db $00
 L0B57E1: db $00
 L0B57E2: db $00
 L0B57E3: db $00
@@ -6206,7 +6206,7 @@ L0B583C: db $FE
 L0B583D: db $00
 L0B583E: db $E0
 L0B583F: db $00
-L0B5840: db $83
+GFX_Char_Kyo_DropMain1: db $83
 L0B5841: db $00
 L0B5842: db $7F
 L0B5843: db $83
@@ -6398,7 +6398,7 @@ L0B58FC: db $00
 L0B58FD: db $00
 L0B58FE: db $00
 L0B58FF: db $00
-L0B5900: db $0F
+GFX_Char_Kyo_DropMain2: db $0F
 L0B5901: db $00
 L0B5902: db $1F
 L0B5903: db $0F
@@ -6558,7 +6558,7 @@ L0B599C: db $00
 L0B599D: db $00
 L0B599E: db $00
 L0B599F: db $00
-L0B59A0: db $00
+GFX_Char_Kyo_ChargeMeter0_A: db $00
 L0B59A1: db $00
 L0B59A2: db $00
 L0B59A3: db $00
@@ -6718,7 +6718,7 @@ L0B5A3C: db $80
 L0B5A3D: db $00
 L0B5A3E: db $80
 L0B5A3F: db $00
-L0B5A40: db $01
+GFX_Char_Kyo_ChargeMeter0_B: db $01
 L0B5A41: db $00
 L0B5A42: db $02
 L0B5A43: db $01
@@ -6846,7 +6846,7 @@ L0B5ABC: db $00
 L0B5ABD: db $00
 L0B5ABE: db $00
 L0B5ABF: db $00
-L0B5AC0: db $00
+GFX_Char_Kyo_ChargeMeter1_A: db $00
 L0B5AC1: db $00
 L0B5AC2: db $00
 L0B5AC3: db $00
@@ -7006,7 +7006,7 @@ L0B5B5C: db $80
 L0B5B5D: db $00
 L0B5B5E: db $C0
 L0B5B5F: db $00
-L0B5B60: db $03
+GFX_Char_Kyo_Intro0_A: db $03
 L0B5B61: db $00
 L0B5B62: db $07
 L0B5B63: db $00
@@ -7102,7 +7102,7 @@ L0B5BBC: db $38
 L0B5BBD: db $00
 L0B5BBE: db $FE
 L0B5BBF: db $00
-L0B5BC0: db $03
+GFX_Char_Kyo_DemoIntro0_B: db $03
 L0B5BC1: db $01
 L0B5BC2: db $03
 L0B5BC3: db $01
@@ -7198,7 +7198,7 @@ L0B5C1C: db $00
 L0B5C1D: db $00
 L0B5C1E: db $00
 L0B5C1F: db $00
-L0B5C20: db $00
+GFX_Char_Kyo_Intro1_A: db $00
 L0B5C21: db $00
 L0B5C22: db $00
 L0B5C23: db $00
@@ -7326,7 +7326,7 @@ L0B5C9C: db $00
 L0B5C9D: db $00
 L0B5C9E: db $0E
 L0B5C9F: db $00
-L0B5CA0: db $00
+GFX_Char_Kyo_DemoIntro0_A: db $00
 L0B5CA1: db $00
 L0B5CA2: db $04
 L0B5CA3: db $00
@@ -7486,7 +7486,7 @@ L0B5D3C: db $7C
 L0B5D3D: db $00
 L0B5D3E: db $FF
 L0B5D3F: db $00
-L0B5D40: db $00
+GFX_Char_Kyo_DemoIntro1_A: db $00
 L0B5D41: db $00
 L0B5D42: db $00
 L0B5D43: db $00
@@ -7646,7 +7646,7 @@ L0B5DDC: db $7C
 L0B5DDD: db $00
 L0B5DDE: db $FF
 L0B5DDF: db $00
-L0B5DE0: db $00
+GFX_Char_Kyo_Intro5: db $00
 L0B5DE1: db $00
 L0B5DE2: db $00
 L0B5DE3: db $00
@@ -7806,7 +7806,7 @@ L0B5E7C: db $7E
 L0B5E7D: db $00
 L0B5E7E: db $00
 L0B5E7F: db $00
-L0B5E80: db $00
+GFX_Char_Kyo_IntroSpec0_A: db $00
 L0B5E81: db $00
 L0B5E82: db $00
 L0B5E83: db $00
@@ -7934,7 +7934,7 @@ L0B5EFC: db $FE
 L0B5EFD: db $DC
 L0B5EFE: db $FE
 L0B5EFF: db $9C
-L0B5F00: db $3F
+GFX_Char_Kyo_IntroSpec0_B: db $3F
 L0B5F01: db $18
 L0B5F02: db $3E
 L0B5F03: db $1C
@@ -8030,7 +8030,7 @@ L0B5F5C: db $00
 L0B5F5D: db $00
 L0B5F5E: db $00
 L0B5F5F: db $00
-L0B5F60: db $7F
+GFX_Char_Kyo_IntroSpec1_A: db $7F
 L0B5F61: db $3E
 L0B5F62: db $FF
 L0B5F63: db $76
@@ -8158,7 +8158,7 @@ L0B5FDC: db $09
 L0B5FDD: db $F0
 L0B5FDE: db $9C
 L0B5FDF: db $68
-L0B5FE0: db $7F
+GFX_Char_Kyo_IntroSpec2_A: db $7F
 L0B5FE1: db $3E
 L0B5FE2: db $FF
 L0B5FE3: db $76
@@ -8286,7 +8286,7 @@ L0B605C: db $09
 L0B605D: db $F0
 L0B605E: db $9C
 L0B605F: db $68
-L0B6060: db $03
+GFX_Char_Kyo_Taunt1_A: db $03
 L0B6061: db $00
 L0B6062: db $07
 L0B6063: db $00
@@ -8414,7 +8414,7 @@ L0B60DC: db $00
 L0B60DD: db $00
 L0B60DE: db $F0
 L0B60DF: db $00
-L0B60E0: db $01
+GFX_Char_Kyo_WinA0: db $01
 L0B60E1: db $00
 L0B60E2: db $07
 L0B60E3: db $00
@@ -8606,7 +8606,7 @@ L0B619C: db $00
 L0B619D: db $00
 L0B619E: db $00
 L0B619F: db $00
-L0B61A0: db $7E
+GFX_Char_Kyo_WinA1_A: db $7E
 L0B61A1: db $00
 L0B61A2: db $7C
 L0B61A3: db $00
@@ -8734,7 +8734,7 @@ L0B621C: db $2D
 L0B621D: db $12
 L0B621E: db $3F
 L0B621F: db $00
-L0B6220: db $7E
+GFX_Char_Kyo_WinA1_B: db $7E
 L0B6221: db $0D
 L0B6222: db $3E
 L0B6223: db $1D
@@ -8894,7 +8894,7 @@ L0B62BC: db $00
 L0B62BD: db $00
 L0B62BE: db $00
 L0B62BF: db $00
-L0B62C0: db $00
+GFX_Char_Kyo_WinA2_A: db $00
 L0B62C1: db $00
 L0B62C2: db $00
 L0B62C3: db $00
@@ -8990,7 +8990,7 @@ L0B631C: db $09
 L0B631D: db $F0
 L0B631E: db $9C
 L0B631F: db $68
-L0B6320: db $00
+GFX_Char_Kyo_WinB0_A: db $00
 L0B6321: db $00
 L0B6322: db $00
 L0B6323: db $00
@@ -9150,7 +9150,7 @@ L0B63BC: db $00
 L0B63BD: db $00
 L0B63BE: db $38
 L0B63BF: db $00
-L0B63C0: db $00
+GFX_Char_Kyo_WinB1_A: db $00
 L0B63C1: db $00
 L0B63C2: db $00
 L0B63C3: db $00
@@ -9310,7 +9310,7 @@ L0B645C: db $00
 L0B645D: db $00
 L0B645E: db $78
 L0B645F: db $00
-L0B6460: db $00
+GFX_Char_Kyo_WinB2_A: db $00
 L0B6461: db $00
 L0B6462: db $01
 L0B6463: db $00
@@ -9438,7 +9438,7 @@ L0B64DC: db $00
 L0B64DD: db $00
 L0B64DE: db $7C
 L0B64DF: db $00
-L0B64E0: db $01
+GFX_Char_Kyo_OniyakiL0: db $01
 L0B64E1: db $00
 L0B64E2: db $01
 L0B64E3: db $00
@@ -9662,7 +9662,7 @@ L0B65BC: db $00
 L0B65BD: db $00
 L0B65BE: db $00
 L0B65BF: db $00
-L0B65C0: db $00
+GFX_Char_Kyo_ThrowG1: db $00
 L0B65C1: db $00
 L0B65C2: db $00
 L0B65C3: db $00
@@ -9854,7 +9854,7 @@ L0B667C: db $00
 L0B667D: db $00
 L0B667E: db $00
 L0B667F: db $00
-L0B6680: db $0C
+GFX_Char_Kyo_ThrowG2_A: db $0C
 L0B6681: db $00
 L0B6682: db $12
 L0B6683: db $0C
@@ -9950,7 +9950,7 @@ L0B66DC: db $02
 L0B66DD: db $01
 L0B66DE: db $03
 L0B66DF: db $00
-L0B66E0: db $E0
+GFX_Char_Kyo_AraKamiL8_B: db $E0
 L0B66E1: db $00
 L0B66E2: db $F8
 L0B66E3: db $00
@@ -10110,7 +10110,7 @@ L0B677C: db $00
 L0B677D: db $00
 L0B677E: db $00
 L0B677F: db $00
-L0B6780: db $00
+GFX_Char_Kyo_RunF0: db $00
 L0B6781: db $00
 L0B6782: db $03
 L0B6783: db $00
@@ -10302,7 +10302,7 @@ L0B683C: db $00
 L0B683D: db $00
 L0B683E: db $00
 L0B683F: db $00
-L0B6840: db $00
+GFX_Char_Kyo_RunF1: db $00
 L0B6841: db $00
 L0B6842: db $03
 L0B6843: db $00
@@ -10462,7 +10462,7 @@ L0B68DC: db $3F
 L0B68DD: db $00
 L0B68DE: db $00
 L0B68DF: db $00
-L0B68E0: db $03
+GFX_Char_Kyo_RunF2: db $03
 L0B68E1: db $00
 L0B68E2: db $0F
 L0B68E3: db $00
@@ -10654,7 +10654,7 @@ L0B699C: db $00
 L0B699D: db $00
 L0B699E: db $00
 L0B699F: db $00
-L0B69A0: db $00
+GFX_Char_Kyo_AraKamiL0: db $00
 L0B69A1: db $00
 L0B69A2: db $00
 L0B69A3: db $00
@@ -10910,7 +10910,7 @@ L0B6A9C: db $00
 L0B6A9D: db $00
 L0B6A9E: db $00
 L0B6A9F: db $00
-L0B6AA0: db $00
+GFX_Char_Kyo_AraKamiL1_A: db $00
 L0B6AA1: db $00
 L0B6AA2: db $00
 L0B6AA3: db $00
@@ -11230,7 +11230,7 @@ L0B6BDC: db $C0
 L0B6BDD: db $80
 L0B6BDE: db $E0
 L0B6BDF: db $C0
-L0B6BE0: db $FC
+GFX_Char_Kyo_AraKamiL1_B: db $FC
 L0B6BE1: db $60
 L0B6BE2: db $7E
 L0B6BE3: db $3C
@@ -11326,7 +11326,7 @@ L0B6C3C: db $00
 L0B6C3D: db $00
 L0B6C3E: db $00
 L0B6C3F: db $00
-L0B6C40: db $04
+GFX_Char_Kyo_AraKamiL2_A: db $04
 L0B6C41: db $00
 L0B6C42: db $00
 L0B6C43: db $00
@@ -11582,7 +11582,7 @@ L0B6D3C: db $C0
 L0B6D3D: db $80
 L0B6D3E: db $E0
 L0B6D3F: db $C0
-L0B6D40: db $00
+GFX_Char_Kyo_AraKamiL3_A: db $00
 L0B6D41: db $00
 L0B6D42: db $00
 L0B6D43: db $00
@@ -11742,7 +11742,7 @@ L0B6DDC: db $80
 L0B6DDD: db $00
 L0B6DDE: db $C0
 L0B6DDF: db $80
-L0B6DE0: db $00
+GFX_Char_Kyo_AraKamiL4_A: db $00
 L0B6DE1: db $00
 L0B6DE2: db $10
 L0B6DE3: db $00
@@ -11870,7 +11870,7 @@ L0B6E5C: db $07
 L0B6E5D: db $00
 L0B6E5E: db $0E
 L0B6E5F: db $01
-L0B6E60: db $F8
+GFX_Char_Kyo_AraKamiL4_B: db $F8
 L0B6E61: db $00
 L0B6E62: db $FC
 L0B6E63: db $00
@@ -12030,7 +12030,7 @@ L0B6EFC: db $00
 L0B6EFD: db $00
 L0B6EFE: db $00
 L0B6EFF: db $00
-L0B6F00: db $08
+GFX_Char_Kyo_AraKamiL5_A: db $08
 L0B6F01: db $00
 L0B6F02: db $06
 L0B6F03: db $00
@@ -12190,7 +12190,7 @@ L0B6F9C: db $06
 L0B6F9D: db $00
 L0B6F9E: db $03
 L0B6F9F: db $00
-L0B6FA0: db $00
+GFX_Char_Kyo_AraKamiL5_B: db $00
 L0B6FA1: db $00
 L0B6FA2: db $00
 L0B6FA3: db $00
@@ -12382,7 +12382,7 @@ L0B705C: db $00
 L0B705D: db $00
 L0B705E: db $00
 L0B705F: db $00
-L0B7060: db $08
+GFX_Char_Kyo_AraKamiL6_A: db $08
 L0B7061: db $00
 L0B7062: db $00
 L0B7063: db $00
@@ -12478,7 +12478,7 @@ L0B70BC: db $40
 L0B70BD: db $00
 L0B70BE: db $08
 L0B70BF: db $00
-L0B70C0: db $00
+GFX_Char_Kyo_AraKamiL7_A: db $00
 L0B70C1: db $00
 L0B70C2: db $00
 L0B70C3: db $00
@@ -12510,7 +12510,7 @@ L0B70DC: db $03
 L0B70DD: db $00
 L0B70DE: db $01
 L0B70DF: db $00
-L0B70E0: db $00
+GFX_Char_Kyo_AraKamiL8_A: db $00
 L0B70E1: db $00
 L0B70E2: db $00
 L0B70E3: db $00
@@ -12670,7 +12670,7 @@ L0B717C: db $02
 L0B717D: db $01
 L0B717E: db $03
 L0B717F: db $00
-L0B7180: db $07
+GFX_Char_Kyo_AraKamiL9_A: db $07
 L0B7181: db $00
 L0B7182: db $03
 L0B7183: db $00
@@ -12894,7 +12894,7 @@ L0B725C: db $02
 L0B725D: db $01
 L0B725E: db $03
 L0B725F: db $00
-L0B7260: db $3F
+GFX_Char_Kyo_AraKamiL10_A: db $3F
 L0B7261: db $06
 L0B7262: db $18
 L0B7263: db $0F
@@ -13086,7 +13086,7 @@ L0B731C: db $00
 L0B731D: db $00
 L0B731E: db $00
 L0B731F: db $00
-L0B7320: db $0E
+GFX_Char_Kyo_AraKamiL11_A: db $0E
 L0B7321: db $01
 L0B7322: db $0E
 L0B7323: db $01
@@ -13150,7 +13150,7 @@ L0B735C: db $07
 L0B735D: db $00
 L0B735E: db $07
 L0B735F: db $00
-L0B7360: db $00
+GFX_Char_Kyo_AraKamiL16: db $00
 L0B7361: db $00
 L0B7362: db $00
 L0B7363: db $00
@@ -13342,7 +13342,7 @@ L0B741C: db $00
 L0B741D: db $00
 L0B741E: db $00
 L0B741F: db $00
-L0B7420: db $06
+GFX_Char_Kyo_AraKamiL17_A: db $06
 L0B7421: db $01
 L0B7422: db $0F
 L0B7423: db $03
@@ -13438,7 +13438,7 @@ L0B747C: db $82
 L0B747D: db $7C
 L0B747E: db $0C
 L0B747F: db $F0
-L0B7480: db $3C
+GFX_Char_Kyo_AraKamiL17_B: db $3C
 L0B7481: db $00
 L0B7482: db $FE
 L0B7483: db $00
@@ -13630,7 +13630,7 @@ L0B753C: db $00
 L0B753D: db $00
 L0B753E: db $00
 L0B753F: db $00
-L0B7540: db $02
+GFX_Char_Kyo_AraKamiL18_A: db $02
 L0B7541: db $00
 L0B7542: db $03
 L0B7543: db $00
@@ -13822,7 +13822,7 @@ L0B75FC: db $A0
 L0B75FD: db $00
 L0B75FE: db $80
 L0B75FF: db $00
-L0B7600: db $20
+GFX_Char_Kyo_AraKamiL19_A: db $20
 L0B7601: db $00
 L0B7602: db $20
 L0B7603: db $00
@@ -13886,7 +13886,7 @@ L0B763C: db $00
 L0B763D: db $00
 L0B763E: db $00
 L0B763F: db $00
-L0B7640: db $00
+GFX_Char_Kyo_AraKamiL21: db $00
 L0B7641: db $00
 L0B7642: db $00
 L0B7643: db $00
@@ -14110,7 +14110,7 @@ L0B771C: db $00
 L0B771D: db $00
 L0B771E: db $00
 L0B771F: db $00
-L0B7720: db $07
+GFX_Char_Kyo_AraKamiH0: db $07
 L0B7721: db $00
 L0B7722: db $1F
 L0B7723: db $00
@@ -14366,7 +14366,7 @@ L0B781C: db $00
 L0B781D: db $00
 L0B781E: db $00
 L0B781F: db $00
-L0B7820: db $00
+GFX_Char_Kyo_AraKamiH1: db $00
 L0B7821: db $00
 L0B7822: db $00
 L0B7823: db $00
@@ -14686,7 +14686,7 @@ L0B795C: db $05
 L0B795D: db $02
 L0B795E: db $03
 L0B795F: db $00
-L0B7960: db $FE
+GFX_Char_Kyo_AraKamiH2_A: db $FE
 L0B7961: db $07
 L0B7962: db $7C
 L0B7963: db $0F
@@ -14814,7 +14814,7 @@ L0B79DC: db $7C
 L0B79DD: db $E0
 L0B79DE: db $FF
 L0B79DF: db $F8
-L0B79E0: db $00
+GFX_Char_Kyo_AraKamiH2_B: db $00
 L0B79E1: db $00
 L0B79E2: db $00
 L0B79E3: db $00
@@ -14974,7 +14974,7 @@ L0B7A7C: db $05
 L0B7A7D: db $02
 L0B7A7E: db $03
 L0B7A7F: db $00
-L0B7A80: db $00
+GFX_Char_Kyo_AraKamiH3_A: db $00
 L0B7A81: db $00
 L0B7A82: db $00
 L0B7A83: db $00
@@ -15134,7 +15134,7 @@ L0B7B1C: db $05
 L0B7B1D: db $02
 L0B7B1E: db $03
 L0B7B1F: db $00
-L0B7B20: db $E0
+GFX_Char_Kyo_AraKamiH4_B: db $E0
 L0B7B21: db $00
 L0B7B22: db $FC
 L0B7B23: db $00
@@ -15294,7 +15294,7 @@ L0B7BBC: db $80
 L0B7BBD: db $00
 L0B7BBE: db $80
 L0B7BBF: db $00
-L0B7BC0: db $00
+GFX_Char_Kyo_AraKamiH4_A: db $00
 L0B7BC1: db $00
 L0B7BC2: db $00
 L0B7BC3: db $00
@@ -15486,7 +15486,7 @@ L0B7C7C: db $00
 L0B7C7D: db $00
 L0B7C7E: db $00
 L0B7C7F: db $00
-L0B7C80: db $11
+GFX_Char_Kyo_AraKamiH5_A: db $11
 L0B7C81: db $00
 L0B7C82: db $0C
 L0B7C83: db $00
@@ -15742,7 +15742,7 @@ L0B7D7C: db $80
 L0B7D7D: db $00
 L0B7D7E: db $C4
 L0B7D7F: db $00
-L0B7D80: db $03
+GFX_Char_Kyo_AraKamiH6_A: db $03
 L0B7D81: db $00
 L0B7D82: db $07
 L0B7D83: db $00
@@ -15870,7 +15870,7 @@ L0B7DFC: db $02
 L0B7DFD: db $00
 L0B7DFE: db $04
 L0B7DFF: db $00
-L0B7E00: db $1F
+GFX_Char_Kyo_AraKamiH7: db $1F
 L0B7E01: db $00
 L0B7E02: db $7F
 L0B7E03: db $00
@@ -16094,7 +16094,7 @@ L0B7EDC: db $40
 L0B7EDD: db $80
 L0B7EDE: db $80
 L0B7EDF: db $00
-L0B7EE0: db $00
+GFX_Char_Kyo_AraKamiH8: db $00
 L0B7EE1: db $00
 L0B7EE2: db $03
 L0B7EE3: db $00
@@ -16318,7 +16318,7 @@ L0B7FBC: db $00
 L0B7FBD: db $00
 L0B7FBE: db $00
 L0B7FBF: db $00
-L0B7FC0: db $00
+GFX_Char_Kyo_UraOrochiNagiS1_A: db $00
 L0B7FC1: db $00
 L0B7FC2: db $00
 L0B7FC3: db $00

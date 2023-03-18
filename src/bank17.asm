@@ -1,4 +1,4 @@
-L174000: db $01
+GFX_Char_Iori_Idle0: db $01
 L174001: db $00
 L174002: db $07
 L174003: db $01
@@ -190,7 +190,7 @@ L1740BC: db $00
 L1740BD: db $00
 L1740BE: db $00
 L1740BF: db $00
-L1740C0: db $3F
+GFX_Char_Iori_Idle1_A: db $3F
 L1740C1: db $18
 L1740C2: db $3C
 L1740C3: db $13
@@ -318,7 +318,7 @@ L17413C: db $3F
 L17413D: db $1E
 L17413E: db $3F
 L17413F: db $1C
-L174140: db $5F
+GFX_Char_Iori_Idle1_B: db $5F
 L174141: db $08
 L174142: db $1F
 L174143: db $0E
@@ -414,7 +414,7 @@ L17419C: db $19
 L17419D: db $06
 L17419E: db $1F
 L17419F: db $00
-L1741A0: db $03
+GFX_Char_Iori_Idle2: db $03
 L1741A1: db $00
 L1741A2: db $07
 L1741A3: db $03
@@ -606,7 +606,7 @@ L17425C: db $00
 L17425D: db $00
 L17425E: db $00
 L17425F: db $00
-L174260: db $03
+GFX_Char_Iori_Idle3: db $03
 L174261: db $00
 L174262: db $07
 L174263: db $03
@@ -798,7 +798,7 @@ L17431C: db $00
 L17431D: db $00
 L17431E: db $00
 L17431F: db $00
-L174320: db $00
+GFX_Char_Iori_WalkF1: db $00
 L174321: db $00
 L174322: db $00
 L174323: db $00
@@ -958,7 +958,7 @@ L1743BC: db $D9
 L1743BD: db $06
 L1743BE: db $DF
 L1743BF: db $00
-L1743C0: db $01
+GFX_Char_Iori_WalkF2: db $01
 L1743C1: db $00
 L1743C2: db $03
 L1743C3: db $01
@@ -1118,7 +1118,7 @@ L17445C: db $5C
 L17445D: db $20
 L17445E: db $7C
 L17445F: db $00
-L174460: db $07
+GFX_Char_Iori_Crouch0: db $07
 L174461: db $00
 L174462: db $1F
 L174463: db $07
@@ -1278,7 +1278,7 @@ L1744FC: db $00
 L1744FD: db $00
 L1744FE: db $00
 L1744FF: db $00
-L174500: db $07
+GFX_Char_Iori_RollF1: db $07
 L174501: db $00
 L174502: db $1F
 L174503: db $07
@@ -1470,7 +1470,7 @@ L1745BC: db $00
 L1745BD: db $00
 L1745BE: db $00
 L1745BF: db $00
-L1745C0: db $00
+GFX_Char_Iori_RollB1: db $00
 L1745C1: db $00
 L1745C2: db $00
 L1745C3: db $00
@@ -1662,7 +1662,7 @@ L17467C: db $FC
 L17467D: db $F8
 L17467E: db $F8
 L17467F: db $00
-L174680: db $00
+GFX_Char_Iori_JumpN1: db $00
 L174681: db $00
 L174682: db $00
 L174683: db $00
@@ -1886,7 +1886,7 @@ L17475C: db $0C
 L17475D: db $00
 L17475E: db $00
 L17475F: db $00
-L174760: db $00
+GFX_Char_Iori_JumpN3: db $00
 L174761: db $00
 L174762: db $07
 L174763: db $00
@@ -2078,7 +2078,7 @@ L17481C: db $00
 L17481D: db $00
 L17481E: db $00
 L17481F: db $00
-L174820: db $00
+GFX_Char_Iori_BlockG0_A: db $00
 L174821: db $00
 L174822: db $00
 L174823: db $00
@@ -2174,7 +2174,7 @@ L17487C: db $02
 L17487D: db $01
 L17487E: db $02
 L17487F: db $01
-L174880: db $0E
+GFX_Char_Iori_BlockG0_B: db $0E
 L174881: db $01
 L174882: db $03
 L174883: db $00
@@ -2270,7 +2270,7 @@ L1748DC: db $17
 L1748DD: db $08
 L1748DE: db $1F
 L1748DF: db $00
-L1748E0: db $03
+GFX_Char_Iori_BlockC0_B: db $03
 L1748E1: db $00
 L1748E2: db $07
 L1748E3: db $02
@@ -2366,7 +2366,7 @@ L17493C: db $00
 L17493D: db $00
 L17493E: db $00
 L17493F: db $00
-L174940: db $0E;X
+GFX_Char_Iori_BlockA0_B: db $0E;X
 L174941: db $01;X
 L174942: db $03;X
 L174943: db $00;X
@@ -2462,7 +2462,7 @@ L17499C: db $00;X
 L17499D: db $00;X
 L17499E: db $00;X
 L17499F: db $00;X
-L1749A0: db $00
+GFX_Char_Iori_PunchL1_A: db $00
 L1749A1: db $00
 L1749A2: db $00
 L1749A3: db $00
@@ -2622,7 +2622,7 @@ L174A3C: db $F0
 L174A3D: db $60
 L174A3E: db $E0
 L174A3F: db $C0
-L174A40: db $3F
+GFX_Char_Iori_PunchL1_B: db $3F
 L174A41: db $02
 L174A42: db $3E
 L174A43: db $00
@@ -2718,7 +2718,7 @@ L174A9C: db $39
 L174A9D: db $06
 L174A9E: db $0F
 L174A9F: db $00
-L174AA0: db $03
+GFX_Char_Iori_PunchL0: db $03
 L174AA1: db $00
 L174AA2: db $0F
 L174AA3: db $03
@@ -2910,7 +2910,7 @@ L174B5C: db $00
 L174B5D: db $00
 L174B5E: db $00
 L174B5F: db $00
-L174B60: db $00
+GFX_Char_OIori_Intro2: db $00
 L174B61: db $00
 L174B62: db $00
 L174B63: db $00
@@ -3134,7 +3134,7 @@ L174C3C: db $00
 L174C3D: db $00
 L174C3E: db $00
 L174C3F: db $00
-L174C40: db $01
+GFX_Char_OIori_Intro3_A: db $01
 L174C41: db $00
 L174C42: db $03
 L174C43: db $01
@@ -3326,7 +3326,7 @@ L174CFC: db $F8
 L174CFD: db $67
 L174CFE: db $FC
 L174CFF: db $FB
-L174D00: db $03
+GFX_Char_OIori_Intro3_B: db $03
 L174D01: db $01
 L174D02: db $03
 L174D03: db $00
@@ -3454,7 +3454,7 @@ L174D7C: db $09
 L174D7D: db $06
 L174D7E: db $0F
 L174D7F: db $00
-L174D80: db $00
+GFX_Char_OIori_Intro4: db $00
 L174D81: db $00
 L174D82: db $00
 L174D83: db $00
@@ -3678,7 +3678,7 @@ L174E5C: db $00
 L174E5D: db $00
 L174E5E: db $00
 L174E5F: db $00
-L174E60: db $03
+GFX_Char_Iori_KickL1: db $03
 L174E61: db $00
 L174E62: db $05
 L174E63: db $00
@@ -3902,7 +3902,7 @@ L174F3C: db $00
 L174F3D: db $00
 L174F3E: db $00
 L174F3F: db $00
-L174F40: db $07
+GFX_Char_Iori_KickL0: db $07
 L174F41: db $00
 L174F42: db $07
 L174F43: db $03
@@ -4094,7 +4094,7 @@ L174FFC: db $00
 L174FFD: db $00
 L174FFE: db $00
 L174FFF: db $00
-L175000: db $00
+GFX_Char_Iori_KickH1: db $00
 L175001: db $00
 L175002: db $00
 L175003: db $00
@@ -4286,7 +4286,7 @@ L1750BC: db $3E
 L1750BD: db $00
 L1750BE: db $3E
 L1750BF: db $00
-L1750C0: db $01
+GFX_Char_Iori_KickH2: db $01
 L1750C1: db $00
 L1750C2: db $02
 L1750C3: db $00
@@ -4446,7 +4446,7 @@ L17515C: db $3E
 L17515D: db $00
 L17515E: db $1E
 L17515F: db $00
-L175160: db $00
+GFX_Char_Iori_KickH3: db $00
 L175161: db $00
 L175162: db $00
 L175163: db $00
@@ -4606,7 +4606,7 @@ L1751FC: db $00
 L1751FD: db $00
 L1751FE: db $00
 L1751FF: db $00
-L175200: db $00
+GFX_Char_Iori_PunchCL1: db $00
 L175201: db $00
 L175202: db $00
 L175203: db $00
@@ -4830,7 +4830,7 @@ L1752DC: db $00
 L1752DD: db $00
 L1752DE: db $00
 L1752DF: db $00
-L1752E0: db $38
+GFX_Char_Iori_PunchCL0: db $38
 L1752E1: db $00
 L1752E2: db $49
 L1752E3: db $30
@@ -5054,7 +5054,7 @@ L1753BC: db $00
 L1753BD: db $00
 L1753BE: db $00
 L1753BF: db $00
-L1753C0: db $00
+GFX_Char_OIori_Intro5_A: db $00
 L1753C1: db $00
 L1753C2: db $00
 L1753C3: db $00
@@ -5214,7 +5214,7 @@ L17545C: db $00
 L17545D: db $00
 L17545E: db $C0
 L17545F: db $00
-L175460: db $7F
+GFX_Char_OIori_Intro5_B: db $7F
 L175461: db $20
 L175462: db $3E
 L175463: db $18
@@ -5342,7 +5342,7 @@ L1754DC: db $00
 L1754DD: db $00
 L1754DE: db $00
 L1754DF: db $00
-L1754E0: db $30
+GFX_Char_Iori_PunchCH1_A: db $30
 L1754E1: db $00
 L1754E2: db $2C
 L1754E3: db $10
@@ -5566,7 +5566,7 @@ L1755BC: db $80
 L1755BD: db $00
 L1755BE: db $C0
 L1755BF: db $00
-L1755C0: db $00
+GFX_Char_OIori_Intro6_A: db $00
 L1755C1: db $00
 L1755C2: db $00
 L1755C3: db $00
@@ -5758,7 +5758,7 @@ L17567C: db $FC
 L17567D: db $F3
 L17567E: db $FA
 L17567F: db $F5
-L175680: db $07
+GFX_Char_Iori_KickCL1: db $07
 L175681: db $00
 L175682: db $1F
 L175683: db $07
@@ -5982,7 +5982,7 @@ L17575C: db $14
 L17575D: db $08
 L17575E: db $14
 L17575F: db $08
-L175760: db $7F
+GFX_Char_Iori_KickCL0: db $7F
 L175761: db $2E
 L175762: db $7F
 L175763: db $36
@@ -6174,7 +6174,7 @@ L17581C: db $F0
 L17581D: db $E0
 L17581E: db $F0
 L17581F: db $E0
-L175820: db $00
+GFX_Char_Iori_KickCH1: db $00
 L175821: db $00
 L175822: db $00
 L175823: db $00
@@ -6430,7 +6430,7 @@ L17591C: db $FC
 L17591D: db $78
 L17591E: db $7C
 L17591F: db $28
-L175920: db $00
+GFX_Char_Iori_TimeOver0: db $00
 L175921: db $00
 L175922: db $00
 L175923: db $00
@@ -6622,7 +6622,7 @@ L1759DC: db $00
 L1759DD: db $00
 L1759DE: db $00
 L1759DF: db $00
-L1759E0: db $00
+GFX_Char_Iori_PunchA0: db $00
 L1759E1: db $00
 L1759E2: db $00
 L1759E3: db $00
@@ -6846,7 +6846,7 @@ L175ABC: db $00
 L175ABD: db $00
 L175ABE: db $00
 L175ABF: db $00
-L175AC0: db $00
+GFX_Char_Iori_KickA0: db $00
 L175AC1: db $00
 L175AC2: db $00
 L175AC3: db $00
@@ -7070,7 +7070,7 @@ L175B9C: db $41
 L175B9D: db $3E
 L175B9E: db $3E
 L175B9F: db $00
-L175BA0: db $00
+GFX_Char_Iori_AttackG2: db $00
 L175BA1: db $00
 L175BA2: db $00
 L175BA3: db $00
@@ -7262,7 +7262,7 @@ L175C5C: db $00
 L175C5D: db $00
 L175C5E: db $00
 L175C5F: db $00
-L175C60: db $0C
+GFX_Char_Iori_AttackA5: db $0C
 L175C61: db $00
 L175C62: db $1E
 L175C63: db $0C
@@ -7454,7 +7454,7 @@ L175D1C: db $00
 L175D1D: db $00
 L175D1E: db $00
 L175D1F: db $00
-L175D20: db $01
+GFX_Char_Iori_AttackA6: db $01
 L175D21: db $00
 L175D22: db $01
 L175D23: db $00
@@ -7614,7 +7614,7 @@ L175DBC: db $0A
 L175DBD: db $04
 L175DBE: db $06
 L175DBF: db $00
-L175DC0: db $1F
+GFX_Char_Iori_Hit1mid2: db $1F
 L175DC1: db $00
 L175DC2: db $3F
 L175DC3: db $1F
@@ -7774,7 +7774,7 @@ L175E5C: db $00
 L175E5D: db $00
 L175E5E: db $00
 L175E5F: db $00
-L175E60: db $38
+GFX_Char_Iori_GuardBreakG0: db $38
 L175E61: db $00
 L175E62: db $48
 L175E63: db $30
@@ -7966,7 +7966,7 @@ L175F1C: db $80
 L175F1D: db $00
 L175F1E: db $80
 L175F1F: db $00
-L175F20: db $08;X
+GFX_Char_Iori_Hitlow0: db $08;X
 L175F21: db $00;X
 L175F22: db $14;X
 L175F23: db $08;X
@@ -8190,7 +8190,7 @@ L175FFC: db $C0;X
 L175FFD: db $80;X
 L175FFE: db $80;X
 L175FFF: db $00;X
-L176000: db $00
+GFX_Char_Iori_DropMain1: db $00
 L176001: db $00
 L176002: db $00
 L176003: db $00
@@ -8414,7 +8414,7 @@ L1760DC: db $00
 L1760DD: db $00
 L1760DE: db $00
 L1760DF: db $00
-L1760E0: db $03
+GFX_Char_Iori_DropMain2: db $03
 L1760E1: db $00
 L1760E2: db $FF
 L1760E3: db $00
@@ -8574,7 +8574,7 @@ L17617C: db $00
 L17617D: db $00
 L17617E: db $00
 L17617F: db $00
-L176180: db $00
+GFX_Char_Iori_ChargeMeter0_A: db $00
 L176181: db $00
 L176182: db $00
 L176183: db $00
@@ -8766,7 +8766,7 @@ L17623C: db $F0
 L17623D: db $00
 L17623E: db $F0
 L17623F: db $20
-L176240: db $BE
+GFX_Char_Iori_ChargeMeter0_B: db $BE
 L176241: db $1C
 L176242: db $3E
 L176243: db $1C
@@ -8830,7 +8830,7 @@ L17627C: db $00
 L17627D: db $00
 L17627E: db $00
 L17627F: db $00
-L176280: db $0F
+GFX_Char_Iori_ChargeMeter1_A: db $0F
 L176281: db $07
 L176282: db $0F
 L176283: db $04
@@ -8990,7 +8990,7 @@ L17631C: db $FF
 L17631D: db $FE
 L17631E: db $FF
 L17631F: db $8E
-L176320: db $4B
+GFX_Char_Iori_ChargeMeter1_B: db $4B
 L176321: db $35
 L176322: db $97
 L176323: db $69
@@ -9054,7 +9054,7 @@ L17635C: db $12
 L17635D: db $0C
 L17635E: db $1E
 L17635F: db $00
-L176360: db $00
+GFX_Char_Iori_IntroSpec1_A: db $00
 L176361: db $00
 L176362: db $00
 L176363: db $00
@@ -9214,7 +9214,7 @@ L1763FC: db $8F
 L1763FD: db $00
 L1763FE: db $9F
 L1763FF: db $00
-L176400: db $3C
+GFX_Char_Iori_Intro0: db $3C
 L176401: db $00
 L176402: db $7E
 L176403: db $1C
@@ -9406,7 +9406,7 @@ L1764BC: db $00
 L1764BD: db $00
 L1764BE: db $00
 L1764BF: db $00
-L1764C0: db $00
+GFX_Char_Iori_Intro1_A: db $00
 L1764C1: db $00
 L1764C2: db $01
 L1764C3: db $00
@@ -9470,7 +9470,7 @@ L1764FC: db $FC
 L1764FD: db $98
 L1764FE: db $FC
 L1764FF: db $E8
-L176500: db $03
+GFX_Char_Iori_Intro1_B: db $03
 L176501: db $00
 L176502: db $02
 L176503: db $01
@@ -9598,7 +9598,7 @@ L17657C: db $00
 L17657D: db $00
 L17657E: db $00
 L17657F: db $00
-L176580: db $1F
+GFX_Char_Iori_Intro2_B: db $1F
 L176581: db $03
 L176582: db $0F
 L176583: db $03
@@ -9758,7 +9758,7 @@ L17661C: db $00
 L17661D: db $00
 L17661E: db $00
 L17661F: db $00
-L176620: db $00
+GFX_Char_Iori_Taunt0_A: db $00
 L176621: db $00
 L176622: db $00
 L176623: db $00
@@ -9918,7 +9918,7 @@ L1766BC: db $80
 L1766BD: db $00
 L1766BE: db $00
 L1766BF: db $00
-L1766C0: db $00
+GFX_Char_OIori_Intro0_A: db $00
 L1766C1: db $00
 L1766C2: db $00
 L1766C3: db $00
@@ -10078,7 +10078,7 @@ L17675C: db $00
 L17675D: db $00
 L17675E: db $80
 L17675F: db $00
-L176760: db $07
+GFX_Char_OIori_Intro0_B: db $07
 L176761: db $00
 L176762: db $0F
 L176763: db $07
@@ -10174,7 +10174,7 @@ L1767BC: db $00
 L1767BD: db $00
 L1767BE: db $00
 L1767BF: db $00
-L1767C0: db $00
+GFX_Char_OIori_Intro1_A: db $00
 L1767C1: db $00
 L1767C2: db $00
 L1767C3: db $00
@@ -10334,7 +10334,7 @@ L17685C: db $00
 L17685D: db $00
 L17685E: db $80
 L17685F: db $00
-L176860: db $00
+GFX_Char_Iori_WinA5_A: db $00
 L176861: db $00
 L176862: db $00
 L176863: db $00
@@ -10462,7 +10462,7 @@ L1768DC: db $3E
 L1768DD: db $00
 L1768DE: db $3F
 L1768DF: db $02
-L1768E0: db $07
+GFX_Char_Iori_WinA4_B: db $07
 L1768E1: db $03
 L1768E2: db $07
 L1768E3: db $03
@@ -10558,7 +10558,7 @@ L17693C: db $00
 L17693D: db $00
 L17693E: db $00
 L17693F: db $00
-L176940: db $00
+GFX_Char_Iori_WinA4_A: db $00
 L176941: db $00
 L176942: db $00
 L176943: db $00
@@ -10686,7 +10686,7 @@ L1769BC: db $FE
 L1769BD: db $00
 L1769BE: db $3F
 L1769BF: db $02
-L1769C0: db $00
+GFX_Char_Iori_WinA11_A: db $00
 L1769C1: db $00
 L1769C2: db $00
 L1769C3: db $00
@@ -10814,7 +10814,7 @@ L176A3C: db $F8
 L176A3D: db $00
 L176A3E: db $FC
 L176A3F: db $08
-L176A40: db $00
+GFX_Char_Iori_WinA10_A: db $00
 L176A41: db $00
 L176A42: db $00
 L176A43: db $00
@@ -10974,7 +10974,7 @@ L176ADC: db $80
 L176ADD: db $00
 L176ADE: db $80
 L176ADF: db $00
-L176AE0: db $00
+GFX_Char_Iori_IntroSpec0_A: db $00
 L176AE1: db $00
 L176AE2: db $00
 L176AE3: db $00
@@ -11134,7 +11134,7 @@ L176B7C: db $8F
 L176B7D: db $00
 L176B7E: db $9F
 L176B7F: db $00
-L176B80: db $1F
+GFX_Char_Iori_IntroSpec0_B: db $1F
 L176B81: db $0F
 L176B82: db $1F
 L176B83: db $0E
@@ -11262,7 +11262,7 @@ L176BFC: db $00
 L176BFD: db $00
 L176BFE: db $00
 L176BFF: db $00
-L176C00: db $00
+GFX_Char_Iori_WinB1_A: db $00
 L176C01: db $00
 L176C02: db $00
 L176C03: db $00
@@ -11422,7 +11422,7 @@ L176C9C: db $8F
 L176C9D: db $00
 L176C9E: db $9F
 L176C9F: db $00
-L176CA0: db $00
+GFX_Char_Iori_WinB2_A: db $00
 L176CA1: db $00
 L176CA2: db $00
 L176CA3: db $00
@@ -11582,7 +11582,7 @@ L176D3C: db $8F
 L176D3D: db $00
 L176D3E: db $9F
 L176D3F: db $00
-L176D40: db $00
+GFX_Char_Iori_WinB3_A: db $00
 L176D41: db $00
 L176D42: db $0F
 L176D43: db $00
@@ -11646,7 +11646,7 @@ L176D7C: db $B1
 L176D7D: db $4E
 L176D7E: db $F9
 L176D7F: db $B6
-L176D80: db $3F
+GFX_Char_Iori_WinB3_B: db $3F
 L176D81: db $1F
 L176D82: db $1F
 L176D83: db $0F
@@ -11806,7 +11806,7 @@ L176E1C: db $00
 L176E1D: db $00
 L176E1E: db $00
 L176E1F: db $00
-L176E20: db $07
+GFX_Char_Iori_WinB4_A: db $07
 L176E21: db $00
 L176E22: db $09
 L176E23: db $06
@@ -11902,7 +11902,7 @@ L176E7C: db $0C
 L176E7D: db $00
 L176E7E: db $14
 L176E7F: db $08
-L176E80: db $00
+GFX_Char_Iori_ThrowG0_A: db $00
 L176E81: db $00
 L176E82: db $00
 L176E83: db $00
@@ -12062,7 +12062,7 @@ L176F1C: db $7E
 L176F1D: db $3D
 L176F1E: db $FE
 L176F1F: db $3D
-L176F20: db $03
+GFX_Char_Iori_ScumGaleL3_B: db $03
 L176F21: db $00
 L176F22: db $07
 L176F23: db $03
@@ -12190,7 +12190,7 @@ L176F9C: db $00
 L176F9D: db $00
 L176F9E: db $00
 L176F9F: db $00
-L176FA0: db $CB
+GFX_Char_Iori_ThrowG1_A: db $CB
 L176FA1: db $B4
 L176FA2: db $D6
 L176FA3: db $A8
@@ -12382,7 +12382,7 @@ L17705C: db $B7
 L17705D: db $48
 L17705E: db $58
 L17705F: db $00
-L177060: db $00
+GFX_Char_Iori_ThrowG2_A: db $00
 L177061: db $00
 L177062: db $00
 L177063: db $00
@@ -12510,7 +12510,7 @@ L1770DC: db $64
 L1770DD: db $18
 L1770DE: db $1C
 L1770DF: db $00
-L1770E0: db $00
+GFX_Char_Iori_RunF0_A: db $00
 L1770E1: db $00
 L1770E2: db $01
 L1770E3: db $00
@@ -12606,7 +12606,7 @@ L17713C: db $FC
 L17713D: db $F0
 L17713E: db $FE
 L17713F: db $E8
-L177140: db $F1
+GFX_Char_Iori_RunF0_B: db $F1
 L177141: db $9E
 L177142: db $F0
 L177143: db $7F
@@ -12702,7 +12702,7 @@ L17719C: db $00
 L17719D: db $00
 L17719E: db $00
 L17719F: db $00
-L1771A0: db $78
+GFX_Char_Iori_RunF1_B: db $78
 L1771A1: db $4F
 L1771A2: db $78
 L1771A3: db $3F
@@ -12798,7 +12798,7 @@ L1771FC: db $00
 L1771FD: db $00
 L1771FE: db $00
 L1771FF: db $00
-L177200: db $0F
+GFX_Char_Iori_RunF2_B: db $0F
 L177201: db $09
 L177202: db $0F
 L177203: db $07
@@ -12926,7 +12926,7 @@ L17727C: db $00
 L17727D: db $00
 L17727E: db $00
 L17727F: db $00
-L177280: db $03
+GFX_Char_Iori_YamiBaraiL0: db $03
 L177281: db $00
 L177282: db $07
 L177283: db $03
@@ -13150,7 +13150,7 @@ L17735C: db $3D
 L17735D: db $02
 L17735E: db $3F
 L17735F: db $00
-L177360: db $00
+GFX_Char_Iori_YamiBaraiL1_A: db $00
 L177361: db $00
 L177362: db $00
 L177363: db $00
@@ -13342,7 +13342,7 @@ L17741C: db $E0
 L17741D: db $C0
 L17741E: db $C0
 L17741F: db $80
-L177420: db $27
+GFX_Char_Iori_YamiBaraiL1_B: db $27
 L177421: db $00
 L177422: db $0F
 L177423: db $06
@@ -13438,7 +13438,7 @@ L17747C: db $00
 L17747D: db $00
 L17747E: db $00
 L17747F: db $00
-L177480: db $00
+GFX_Char_Iori_YamiBaraiL2_A: db $00
 L177481: db $00
 L177482: db $00
 L177483: db $00
@@ -13630,7 +13630,7 @@ L17753C: db $FF
 L17753D: db $1E
 L17753E: db $FE
 L17753F: db $1C
-L177540: db $07
+GFX_Char_Iori_IntroSpec2_A: db $07
 L177541: db $00
 L177542: db $1F
 L177543: db $07
@@ -13726,7 +13726,7 @@ L17759C: db $1F
 L17759D: db $03
 L17759E: db $3F
 L17759F: db $00
-L1775A0: db $01
+GFX_Char_Iori_KotoTsukiInL5_A: db $01
 L1775A1: db $00
 L1775A2: db $03
 L1775A3: db $01
@@ -13854,7 +13854,7 @@ L17761C: db $00
 L17761D: db $00
 L17761E: db $00
 L17761F: db $00
-L177620: db $00
+GFX_Char_Iori_KotoTsukiInL7_A: db $00
 L177621: db $00
 L177622: db $00
 L177623: db $00
@@ -14046,7 +14046,7 @@ L1776DC: db $00
 L1776DD: db $80
 L1776DE: db $00
 L1776DF: db $80
-L1776E0: db $00
+GFX_Char_Iori_AoiHanaL0_A: db $00
 L1776E1: db $00
 L1776E2: db $00
 L1776E3: db $00
@@ -14206,7 +14206,7 @@ L17777C: db $F0
 L17777D: db $60
 L17777E: db $E0
 L17777F: db $C0
-L177780: db $00
+GFX_Char_Iori_AoiHanaL2: db $00
 L177781: db $00
 L177782: db $00
 L177783: db $00
@@ -14462,7 +14462,7 @@ L17787C: db $00
 L17787D: db $00
 L17787E: db $00
 L17787F: db $00
-L177880: db $00
+GFX_Char_Iori_AoiHanaL4: db $00
 L177881: db $00
 L177882: db $00
 L177883: db $00
@@ -14654,7 +14654,7 @@ L17793C: db $00
 L17793D: db $00
 L17793E: db $00
 L17793F: db $00
-L177940: db $01
+GFX_Char_Iori_OniYakiL0: db $01
 L177941: db $00
 L177942: db $07
 L177943: db $01
@@ -14910,7 +14910,7 @@ L177A3C: db $00
 L177A3D: db $00
 L177A3E: db $00
 L177A3F: db $00
-L177A40: db $00
+GFX_Char_Iori_OniYakiL1_A: db $00
 L177A41: db $00
 L177A42: db $00
 L177A43: db $00
@@ -15166,7 +15166,7 @@ L177B3C: db $00
 L177B3D: db $00
 L177B3E: db $00
 L177B3F: db $00
-L177B40: db $07
+GFX_Char_Iori_OniYakiL1_B: db $07
 L177B41: db $00
 L177B42: db $02
 L177B43: db $01
@@ -15326,7 +15326,7 @@ L177BDC: db $00
 L177BDD: db $00
 L177BDE: db $00
 L177BDF: db $00
-L177BE0: db $07
+GFX_Char_Iori_OniYakiL2_B: db $07
 L177BE1: db $00
 L177BE2: db $02
 L177BE3: db $01
@@ -15486,7 +15486,7 @@ L177C7C: db $00
 L177C7D: db $00
 L177C7E: db $00
 L177C7F: db $00
-L177C80: db $01
+GFX_Char_Iori_OniYakiL3: db $01
 L177C81: db $01
 L177C82: db $02
 L177C83: db $02
@@ -15774,7 +15774,7 @@ L177D9C: db $00
 L177D9D: db $00
 L177D9E: db $00
 L177D9F: db $00
-L177DA0: db $00
+GFX_Char_Iori_ScumGaleL3_A: db $00
 L177DA1: db $00
 L177DA2: db $F8
 L177DA3: db $00
@@ -15902,7 +15902,7 @@ L177E1C: db $7E
 L177E1D: db $3D
 L177E1E: db $FE
 L177E1F: db $3D
-L177E20: db $03;X
+GFX_Char_Iori_Unused0__B: db $03;X
 L177E21: db $00;X
 L177E22: db $07;X
 L177E23: db $03;X
@@ -16030,7 +16030,7 @@ L177E9C: db $E0;X
 L177E9D: db $00;X
 L177E9E: db $E0;X
 L177E9F: db $00;X
-L177EA0: db $67
+GFX_Char_Iori_KinYaOtomeEscapeL7_B: db $67
 L177EA1: db $00
 L177EA2: db $9F
 L177EA3: db $07
@@ -16126,7 +16126,7 @@ L177EFC: db $00
 L177EFD: db $00
 L177EFE: db $00
 L177EFF: db $00
-L177F00: db $00
+GFX_Char_Iori_KinYaOtomeD7_A: db $00
 L177F01: db $00
 L177F02: db $00
 L177F03: db $00
@@ -16222,7 +16222,7 @@ L177F5C: db $F4
 L177F5D: db $E0
 L177F5E: db $F4
 L177F5F: db $C0
-L177F60: db $0F
+GFX_Char_Iori_KinYaOtomeEscapeL0_B: db $0F
 L177F61: db $07
 L177F62: db $6F
 L177F63: db $00
@@ -16318,7 +16318,7 @@ L177FBC: db $00
 L177FBD: db $00
 L177FBE: db $00
 L177FBF: db $00
-L177FC0: db $00
+GFX_Char_MrKarate_Taunt1_A: db $00
 L177FC1: db $00
 L177FC2: db $18
 L177FC3: db $00

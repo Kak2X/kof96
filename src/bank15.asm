@@ -1,4 +1,4 @@
-L154000: db $00
+GFX_Char_Krauser_Idle0_A: db $00
 L154001: db $00
 L154002: db $00
 L154003: db $00
@@ -190,7 +190,7 @@ L1540BC: db $E0
 L1540BD: db $C0
 L1540BE: db $F8
 L1540BF: db $40
-L1540C0: db $0C
+GFX_Char_Krauser_Idle0_B: db $0C
 L1540C1: db $00
 L1540C2: db $0B
 L1540C3: db $04
@@ -286,7 +286,7 @@ L15411C: db $1F
 L15411D: db $0E
 L15411E: db $1F
 L15411F: db $00
-L154120: db $01
+GFX_Char_Krauser_Idle1_A: db $01
 L154121: db $01
 L154122: db $02
 L154123: db $02
@@ -478,7 +478,7 @@ L1541DC: db $02
 L1541DD: db $01
 L1541DE: db $01
 L1541DF: db $00
-L1541E0: db $00
+GFX_Char_Krauser_Idle2: db $00
 L1541E1: db $00
 L1541E2: db $00
 L1541E3: db $00
@@ -734,7 +734,7 @@ L1542DC: db $C0
 L1542DD: db $00
 L1542DE: db $E0
 L1542DF: db $C0
-L1542E0: db $01
+GFX_Char_Krauser_WalkF0: db $01
 L1542E1: db $01
 L1542E2: db $02
 L1542E3: db $02
@@ -958,7 +958,7 @@ L1543BC: db $02
 L1543BD: db $01
 L1543BE: db $01
 L1543BF: db $00
-L1543C0: db $03
+GFX_Char_Krauser_WalkF1: db $03
 L1543C1: db $02
 L1543C2: db $05
 L1543C3: db $04
@@ -1214,7 +1214,7 @@ L1544BC: db $05
 L1544BD: db $02
 L1544BE: db $03
 L1544BF: db $00
-L1544C0: db $01
+GFX_Char_Krauser_Crouch0: db $01
 L1544C1: db $01
 L1544C2: db $02
 L1544C3: db $02
@@ -1438,7 +1438,7 @@ L15459C: db $02
 L15459D: db $01
 L15459E: db $01
 L15459F: db $00
-L1545A0: db $00
+GFX_Char_Krauser_JumpN1: db $00
 L1545A1: db $00
 L1545A2: db $00
 L1545A3: db $00
@@ -1662,7 +1662,7 @@ L15467C: db $00
 L15467D: db $00
 L15467E: db $00
 L15467F: db $00
-L154680: db $00
+GFX_Char_Krauser_JumpN3_A: db $00
 L154681: db $00
 L154682: db $00
 L154683: db $00
@@ -1822,7 +1822,7 @@ L15471C: db $3C
 L15471D: db $00
 L15471E: db $7F
 L15471F: db $1C
-L154720: db $07
+GFX_Char_Krauser_JumpN3_B: db $07
 L154721: db $00
 L154722: db $1F
 L154723: db $07
@@ -1950,7 +1950,7 @@ L15479C: db $00
 L15479D: db $00
 L15479E: db $00
 L15479F: db $00
-L1547A0: db $00
+GFX_Char_Krauser_BlockG0: db $00
 L1547A1: db $00
 L1547A2: db $09
 L1547A3: db $01
@@ -2174,7 +2174,7 @@ L15487C: db $00
 L15487D: db $00
 L15487E: db $00
 L15487F: db $00
-L154880: db $13
+GFX_Char_Krauser_BlockC0: db $13
 L154881: db $02
 L154882: db $2D
 L154883: db $14
@@ -2366,7 +2366,7 @@ L15493C: db $00
 L15493D: db $00
 L15493E: db $00
 L15493F: db $00
-L154940: db $00;X
+GFX_Char_Krauser_BlockA0_A: db $00;X
 L154941: db $00;X
 L154942: db $27;X
 L154943: db $06;X
@@ -2494,7 +2494,7 @@ L1549BC: db $F8;X
 L1549BD: db $40;X
 L1549BE: db $FE;X
 L1549BF: db $F0;X
-L1549C0: db $00
+GFX_Char_Krauser_RunF0: db $00
 L1549C1: db $00
 L1549C2: db $00
 L1549C3: db $00
@@ -2750,7 +2750,7 @@ L154ABC: db $00
 L154ABD: db $00
 L154ABE: db $00
 L154ABF: db $00
-L154AC0: db $00
+GFX_Char_Krauser_RunF1: db $00
 L154AC1: db $00
 L154AC2: db $00
 L154AC3: db $00
@@ -2974,7 +2974,7 @@ L154B9C: db $00
 L154B9D: db $00
 L154B9E: db $00
 L154B9F: db $00
-L154BA0: db $00
+GFX_Char_Krauser_RunF2: db $00
 L154BA1: db $00
 L154BA2: db $00
 L154BA3: db $00
@@ -3262,7 +3262,7 @@ L154CBC: db $00
 L154CBD: db $00
 L154CBE: db $00
 L154CBF: db $00
-L154CC0: db $BF
+GFX_Char_Krauser_ChargeMeter0_A: db $BF
 L154CC1: db $41
 L154CC2: db $EF
 L154CC3: db $15
@@ -3422,7 +3422,7 @@ L154D5C: db $00
 L154D5D: db $00
 L154D5E: db $E0
 L154D5F: db $00
-L154D60: db $BF
+GFX_Char_Krauser_ChargeMeter1_A: db $BF
 L154D61: db $43
 L154D62: db $EF
 L154D63: db $12
@@ -3582,7 +3582,7 @@ L154DFC: db $00
 L154DFD: db $00
 L154DFE: db $E0
 L154DFF: db $00
-L154E00: db $00
+GFX_Char_Krauser_Taunt0_A: db $00
 L154E01: db $00
 L154E02: db $00
 L154E03: db $00
@@ -3742,7 +3742,7 @@ L154E9C: db $9C
 L154E9D: db $60
 L154E9E: db $E2
 L154E9F: db $1C
-L154EA0: db $1F
+GFX_Char_Krauser_Taunt0_B: db $1F
 L154EA1: db $03
 L154EA2: db $17
 L154EA3: db $0B
@@ -3838,7 +3838,7 @@ L154EFC: db $00
 L154EFD: db $00
 L154EFE: db $00
 L154EFF: db $00
-L154F00: db $F7
+GFX_Char_Krauser_Taunt1_A: db $F7
 L154F01: db $08
 L154F02: db $8C
 L154F03: db $73
@@ -4030,7 +4030,7 @@ L154FBC: db $03
 L154FBD: db $00
 L154FBE: db $02
 L154FBF: db $01
-L154FC0: db $AE
+GFX_Char_Krauser_Taunt3_A: db $AE
 L154FC1: db $11
 L154FC2: db $A8
 L154FC3: db $17
@@ -4190,7 +4190,7 @@ L15505C: db $07
 L15505D: db $01
 L15505E: db $01
 L15505F: db $00
-L155060: db $07
+GFX_Char_Krauser_WinA0_A: db $07
 L155061: db $00
 L155062: db $04
 L155063: db $03
@@ -4286,7 +4286,7 @@ L1550BC: db $01
 L1550BD: db $00
 L1550BE: db $03
 L1550BF: db $00
-L1550C0: db $E0
+GFX_Char_Krauser_WinA0_B: db $E0
 L1550C1: db $00
 L1550C2: db $F8
 L1550C3: db $E0
@@ -4478,7 +4478,7 @@ L15517C: db $00
 L15517D: db $00
 L15517E: db $00
 L15517F: db $00
-L155180: db $17
+GFX_Char_Krauser_WinA1_A: db $17
 L155181: db $08
 L155182: db $3C
 L155183: db $13
@@ -4574,7 +4574,7 @@ L1551DC: db $01
 L1551DD: db $00
 L1551DE: db $03
 L1551DF: db $00
-L1551E0: db $E7
+GFX_Char_Krauser_WinA2_A: db $E7
 L1551E1: db $F8
 L1551E2: db $FC
 L1551E3: db $E3
@@ -4702,7 +4702,7 @@ L15525C: db $05
 L15525D: db $02
 L15525E: db $03
 L15525F: db $00
-L155260: db $EF
+GFX_Char_Krauser_WinA3_A: db $EF
 L155261: db $D0
 L155262: db $F4
 L155263: db $C3
@@ -4830,7 +4830,7 @@ L1552DC: db $16
 L1552DD: db $08
 L1552DE: db $18
 L1552DF: db $00
-L1552E0: db $15
+GFX_Char_Krauser_WinB5_A: db $15
 L1552E1: db $0A
 L1552E2: db $2A
 L1552E3: db $15
@@ -4958,7 +4958,7 @@ L15535C: db $8E
 L15535D: db $70
 L15535E: db $C4
 L15535F: db $38
-L155360: db $03
+GFX_Char_Krauser_Intro0: db $03
 L155361: db $00
 L155362: db $07
 L155363: db $01
@@ -5246,7 +5246,7 @@ L15547C: db $00
 L15547D: db $00
 L15547E: db $00
 L15547F: db $00
-L155480: db $01
+GFX_Char_Krauser_Intro1: db $01
 L155481: db $00
 L155482: db $01
 L155483: db $00
@@ -5470,7 +5470,7 @@ L15555C: db $00
 L15555D: db $00
 L15555E: db $00
 L15555F: db $00
-L155560: db $01
+GFX_Char_Krauser_Intro2: db $01
 L155561: db $01
 L155562: db $0E
 L155563: db $00
@@ -5886,7 +5886,7 @@ L1556FC: db $02
 L1556FD: db $01
 L1556FE: db $01
 L1556FF: db $00
-L155700: db $0E
+GFX_Char_Krauser_Intro3: db $0E
 L155701: db $00
 L155702: db $12
 L155703: db $0C
@@ -6302,7 +6302,7 @@ L15589C: db $00
 L15589D: db $00
 L15589E: db $00
 L15589F: db $00
-L1558A0: db $01
+GFX_Char_Krauser_Intro4_A: db $01
 L1558A1: db $01
 L1558A2: db $02
 L1558A3: db $02
@@ -6494,7 +6494,7 @@ L15595C: db $02
 L15595D: db $01
 L15595E: db $01
 L15595F: db $00
-L155960: db $00
+GFX_Char_Krauser_PunchL0_A: db $00
 L155961: db $00
 L155962: db $00
 L155963: db $00
@@ -6686,7 +6686,7 @@ L155A1C: db $40
 L155A1D: db $80
 L155A1E: db $80
 L155A1F: db $00
-L155A20: db $33
+GFX_Char_Krauser_PunchL0_B: db $33
 L155A21: db $01
 L155A22: db $2F
 L155A23: db $13
@@ -6782,7 +6782,7 @@ L155A7C: db $3E
 L155A7D: db $1C
 L155A7E: db $3E
 L155A7F: db $00
-L155A80: db $03
+GFX_Char_Krauser_PunchL1_A: db $03
 L155A81: db $00
 L155A82: db $02
 L155A83: db $01
@@ -6974,7 +6974,7 @@ L155B3C: db $A9
 L155B3D: db $96
 L155B3E: db $B9
 L155B3F: db $87
-L155B40: db $2F
+GFX_Char_Krauser_PunchL1_B: db $2F
 L155B41: db $03
 L155B42: db $1F
 L155B43: db $27
@@ -7134,7 +7134,7 @@ L155BDC: db $89
 L155BDD: db $76
 L155BDE: db $45
 L155BDF: db $BA
-L155BE0: db $00
+GFX_Char_Krauser_PunchL2_A: db $00
 L155BE1: db $00
 L155BE2: db $00
 L155BE3: db $00
@@ -7326,7 +7326,7 @@ L155C9C: db $00
 L155C9D: db $00
 L155C9E: db $00
 L155C9F: db $00
-L155CA0: db $00
+GFX_Char_Krauser_PunchH0: db $00
 L155CA1: db $00
 L155CA2: db $00
 L155CA3: db $00
@@ -7582,7 +7582,7 @@ L155D9C: db $40
 L155D9D: db $80
 L155D9E: db $40
 L155D9F: db $80
-L155DA0: db $00
+GFX_Char_Krauser_PunchH1: db $00
 L155DA1: db $00
 L155DA2: db $00
 L155DA3: db $00
@@ -7870,7 +7870,7 @@ L155EBC: db $00
 L155EBD: db $00
 L155EBE: db $00
 L155EBF: db $00
-L155EC0: db $01
+GFX_Char_Krauser_KickL0: db $01
 L155EC1: db $00
 L155EC2: db $03
 L155EC3: db $00
@@ -8094,7 +8094,7 @@ L155F9C: db $00
 L155F9D: db $00
 L155F9E: db $00
 L155F9F: db $00
-L155FA0: db $0F
+GFX_Char_Krauser_KickL1: db $0F
 L155FA1: db $00
 L155FA2: db $3C
 L155FA3: db $0B
@@ -8382,7 +8382,7 @@ L1560BC: db $00
 L1560BD: db $00
 L1560BE: db $00
 L1560BF: db $00
-L1560C0: db $00
+GFX_Char_Krauser_KickH0: db $00
 L1560C1: db $00
 L1560C2: db $00
 L1560C3: db $00
@@ -8638,7 +8638,7 @@ L1561BC: db $00
 L1561BD: db $00
 L1561BE: db $00
 L1561BF: db $00
-L1561C0: db $00
+GFX_Char_Krauser_KickH1: db $00
 L1561C1: db $00
 L1561C2: db $00
 L1561C3: db $00
@@ -8926,7 +8926,7 @@ L1562DC: db $3F
 L1562DD: db $1E
 L1562DE: db $3F
 L1562DF: db $00
-L1562E0: db $13
+GFX_Char_Krauser_PunchCL0_A: db $13
 L1562E1: db $0C
 L1562E2: db $11
 L1562E3: db $0E
@@ -9022,7 +9022,7 @@ L15633C: db $01
 L15633D: db $00
 L15633E: db $01
 L15633F: db $00
-L156340: db $F0
+GFX_Char_Krauser_PunchCL0_B: db $F0
 L156341: db $00
 L156342: db $FC
 L156343: db $70
@@ -9246,7 +9246,7 @@ L15641C: db $00
 L15641D: db $00
 L15641E: db $00
 L15641F: db $00
-L156420: db $93
+GFX_Char_Krauser_PunchCL1_A: db $93
 L156421: db $6C
 L156422: db $01
 L156423: db $FE
@@ -9374,7 +9374,7 @@ L15649C: db $01
 L15649D: db $00
 L15649E: db $01
 L15649F: db $00
-L1564A0: db $07
+GFX_Char_Krauser_PunchCH1: db $07
 L1564A1: db $00
 L1564A2: db $0B
 L1564A3: db $07
@@ -9662,7 +9662,7 @@ L1565BC: db $00
 L1565BD: db $00
 L1565BE: db $00
 L1565BF: db $00
-L1565C0: db $00
+GFX_Char_Krauser_KickCL1_A: db $00
 L1565C1: db $00
 L1565C2: db $00
 L1565C3: db $00
@@ -9886,7 +9886,7 @@ L15669C: db $00
 L15669D: db $00
 L15669E: db $00
 L15669F: db $00
-L1566A0: db $22
+GFX_Char_Krauser_KickCL1_B: db $22
 L1566A1: db $1D
 L1566A2: db $59
 L1566A3: db $26
@@ -9982,7 +9982,7 @@ L1566FC: db $00
 L1566FD: db $00
 L1566FE: db $00
 L1566FF: db $00
-L156700: db $00
+GFX_Char_Krauser_PunchA0_A: db $00
 L156701: db $00
 L156702: db $00
 L156703: db $00
@@ -10206,7 +10206,7 @@ L1567DC: db $9F
 L1567DD: db $00
 L1567DE: db $FF
 L1567DF: db $02
-L1567E0: db $FE
+GFX_Char_Krauser_PunchA0_B: db $FE
 L1567E1: db $0C
 L1567E2: db $FC
 L1567E3: db $78
@@ -10302,7 +10302,7 @@ L15683C: db $00
 L15683D: db $00
 L15683E: db $00
 L15683F: db $00
-L156840: db $22
+GFX_Char_Krauser_KickA0_B: db $22
 L156841: db $1D
 L156842: db $59
 L156843: db $26
@@ -10398,7 +10398,7 @@ L15689C: db $00
 L15689D: db $00
 L15689E: db $00
 L15689F: db $00
-L1568A0: db $00
+GFX_Char_Krauser_AttackG1_A: db $00
 L1568A1: db $00
 L1568A2: db $00
 L1568A3: db $00
@@ -10654,7 +10654,7 @@ L15699C: db $00
 L15699D: db $00
 L15699E: db $00
 L15699F: db $00
-L1569A0: db $00
+GFX_Char_Krauser_AttackG1_B: db $00
 L1569A1: db $00
 L1569A2: db $00
 L1569A3: db $00
@@ -10718,7 +10718,7 @@ L1569DC: db $E0
 L1569DD: db $C0
 L1569DE: db $F0
 L1569DF: db $00
-L1569E0: db $00
+GFX_Char_Krauser_AttackG2_B: db $00
 L1569E1: db $00
 L1569E2: db $00
 L1569E3: db $00
@@ -10782,7 +10782,7 @@ L156A1C: db $80
 L156A1D: db $00
 L156A1E: db $80
 L156A1F: db $00
-L156A20: db $C0
+GFX_Char_Krauser_AttackA0: db $C0
 L156A21: db $00
 L156A22: db $F0
 L156A23: db $40
@@ -11070,7 +11070,7 @@ L156B3C: db $C0
 L156B3D: db $00
 L156B3E: db $E2
 L156B3F: db $C0
-L156B40: db $0F
+GFX_Char_Krauser_GuardBreakG0_A: db $0F
 L156B41: db $00
 L156B42: db $11
 L156B43: db $0E
@@ -11262,7 +11262,7 @@ L156BFC: db $EE
 L156BFD: db $BC
 L156BFE: db $0F
 L156BFF: db $FA
-L156C00: db $06
+GFX_Char_Krauser_GuardBreakG0_B: db $06
 L156C01: db $00
 L156C02: db $05
 L156C03: db $02
@@ -11358,7 +11358,7 @@ L156C5C: db $1F
 L156C5D: db $0E
 L156C5E: db $1F
 L156C5F: db $00
-L156C60: db $B7
+GFX_Char_Krauser_TimeOver2_A: db $B7
 L156C61: db $6A
 L156C62: db $83
 L156C63: db $7C
@@ -11518,7 +11518,7 @@ L156CFC: db $07
 L156CFD: db $01
 L156CFE: db $03
 L156CFF: db $00
-L156D00: db $00
+GFX_Char_Krauser_RollF3: db $00
 L156D01: db $00
 L156D02: db $00
 L156D03: db $00
@@ -11742,7 +11742,7 @@ L156DDC: db $00
 L156DDD: db $00
 L156DDE: db $00
 L156DDF: db $00
-L156DE0: db $00
+GFX_Char_Krauser_RollF2: db $00
 L156DE1: db $00
 L156DE2: db $00
 L156DE3: db $00
@@ -12030,7 +12030,7 @@ L156EFC: db $00
 L156EFD: db $00
 L156EFE: db $00
 L156EFF: db $00
-L156F00: db $01
+GFX_Char_Krauser_DropMain2: db $01
 L156F01: db $00
 L156F02: db $01
 L156F03: db $00
@@ -12254,7 +12254,7 @@ L156FDC: db $00
 L156FDD: db $00
 L156FDE: db $00
 L156FDF: db $00
-L156FE0: db $8F
+GFX_Char_Krauser_ThrowG1_A: db $8F
 L156FE1: db $73
 L156FE2: db $9F
 L156FE3: db $6B
@@ -12446,7 +12446,7 @@ L15709C: db $80
 L15709D: db $00
 L15709E: db $80
 L15709F: db $00
-L1570A0: db $3F
+GFX_Char_Krauser_ChargeMeter0_B: db $3F
 L1570A1: db $00
 L1570A2: db $24
 L1570A3: db $1B
@@ -12574,7 +12574,7 @@ L15711C: db $00
 L15711D: db $00
 L15711E: db $00
 L15711F: db $00
-L157120: db $3F
+GFX_Char_Krauser_ThrowG2_B: db $3F
 L157121: db $00
 L157122: db $24
 L157123: db $1B
@@ -12702,7 +12702,7 @@ L15719C: db $00
 L15719D: db $00
 L15719E: db $00
 L15719F: db $00
-L1571A0: db $03
+GFX_Char_Krauser_HighBlitzBallL0: db $03
 L1571A1: db $02
 L1571A2: db $03
 L1571A3: db $01
@@ -12958,7 +12958,7 @@ L15729C: db $FF
 L15729D: db $7E
 L15729E: db $FF
 L15729F: db $00
-L1572A0: db $00
+GFX_Char_Krauser_HighBlitzBallL1_A: db $00
 L1572A1: db $00
 L1572A2: db $00
 L1572A3: db $00
@@ -13150,7 +13150,7 @@ L15735C: db $FA
 L15735D: db $04
 L15735E: db $06
 L15735F: db $00
-L157360: db $00
+GFX_Char_Krauser_LegTomahawkL1_A: db $00
 L157361: db $00
 L157362: db $00
 L157363: db $00
@@ -13374,7 +13374,7 @@ L15743C: db $7F
 L15743D: db $00
 L15743E: db $7E
 L15743F: db $00
-L157440: db $FA
+GFX_Char_Krauser_LegTomahawkL1_B: db $FA
 L157441: db $E4
 L157442: db $F9
 L157443: db $F6
@@ -13502,7 +13502,7 @@ L1574BC: db $00
 L1574BD: db $00
 L1574BE: db $00
 L1574BF: db $00
-L1574C0: db $04
+GFX_Char_Krauser_LegTomahawkL2_A: db $04
 L1574C1: db $03
 L1574C2: db $03
 L1574C3: db $00
@@ -13726,7 +13726,7 @@ L15759C: db $0F
 L15759D: db $07
 L15759E: db $07
 L15759F: db $00
-L1575A0: db $00
+GFX_Char_Krauser_LegTomahawkL3: db $00
 L1575A1: db $00
 L1575A2: db $00
 L1575A3: db $00
@@ -14046,7 +14046,7 @@ L1576DC: db $00
 L1576DD: db $00
 L1576DE: db $00
 L1576DF: db $00
-L1576E0: db $03
+GFX_Char_Krauser_LegTomahawkL4_A: db $03
 L1576E1: db $00
 L1576E2: db $1F
 L1576E3: db $03
@@ -14142,7 +14142,7 @@ L15773C: db $40
 L15773D: db $80
 L15773E: db $80
 L15773F: db $00
-L157740: db $18
+GFX_Char_Krauser_LegTomahawkL4_B: db $18
 L157741: db $00
 L157742: db $38
 L157743: db $10
@@ -14334,7 +14334,7 @@ L1577FC: db $00
 L1577FD: db $00
 L1577FE: db $00
 L1577FF: db $00
-L157800: db $00
+GFX_Char_Krauser_LegTomahawkL5_A: db $00
 L157801: db $00
 L157802: db $00
 L157803: db $00
@@ -14430,7 +14430,7 @@ L15785C: db $40
 L15785D: db $80
 L15785E: db $80
 L15785F: db $00
-L157860: db $00
+GFX_Char_Krauser_KaiserSuplexL3_A: db $00
 L157861: db $00
 L157862: db $00
 L157863: db $00
@@ -14686,7 +14686,7 @@ L15795C: db $04
 L15795D: db $03
 L15795E: db $07
 L15795F: db $00
-L157960: db $03
+GFX_Char_Krauser_KaiserWaveS1_A: db $03
 L157961: db $02
 L157962: db $1D
 L157963: db $04
@@ -14846,7 +14846,7 @@ L1579FC: db $78
 L1579FD: db $00
 L1579FE: db $FE
 L1579FF: db $38
-L157A00: db $0F
+GFX_Char_Krauser_KaiserWaveS2_A: db $0F
 L157A01: db $0A
 L157A02: db $1F
 L157A03: db $01
@@ -15006,7 +15006,7 @@ L157A9C: db $78
 L157A9D: db $00
 L157A9E: db $FE
 L157A9F: db $38
-L157AA0: db $00
+GFX_Char_Krauser_KaiserWaveS3_A: db $00
 L157AA1: db $00
 L157AA2: db $00
 L157AA3: db $00
@@ -15070,7 +15070,7 @@ L157ADC: db $00
 L157ADD: db $00
 L157ADE: db $00
 L157ADF: db $00
-L157AE0: db $00
+GFX_Char_Krauser_KaiserWaveS3_B: db $00
 L157AE1: db $00
 L157AE2: db $00
 L157AE3: db $00
@@ -15358,7 +15358,7 @@ L157BFC: db $00
 L157BFD: db $00
 L157BFE: db $00
 L157BFF: db $00
-L157C00: db $00
+GFX_Char_Krauser_KaiserWaveS4_A: db $00
 L157C01: db $00
 L157C02: db $00
 L157C03: db $00
@@ -15390,7 +15390,7 @@ L157C1C: db $12
 L157C1D: db $EC
 L157C1E: db $81
 L157C1F: db $7E
-L157C20: db $00
+GFX_Char_MrBig_DrumShotL2_A: db $00
 L157C21: db $00
 L157C22: db $00
 L157C23: db $00
@@ -15582,7 +15582,7 @@ L157CDC: db $F0
 L157CDD: db $00
 L157CDE: db $80
 L157CDF: db $00
-L157CE0: db $70
+GFX_Char_MrBig_DrumShotL4_A: db $70
 L157CE1: db $20
 L157CE2: db $79
 L157CE3: db $30
@@ -15806,7 +15806,7 @@ L157DBC: db $3F
 L157DBD: db $D8
 L157DBE: db $3F
 L157DBF: db $DF
-L157DC0: db $F7
+GFX_Char_MrBig_BlasterWaveS0_A: db $F7
 L157DC1: db $0A
 L157DC2: db $B3
 L157DC3: db $4C
@@ -16030,7 +16030,7 @@ L157E9C: db $6D
 L157E9D: db $03
 L157E9E: db $07
 L157E9F: db $00
-L157EA0: db $3C
+GFX_Char_MrBig_BlasterWaveS2_A: db $3C
 L157EA1: db $00
 L157EA2: db $1E
 L157EA3: db $00
@@ -16286,7 +16286,7 @@ L157F9C: db $20
 L157F9D: db $C0
 L157F9E: db $E0
 L157F9F: db $00
-L157FA0: db $00
+GFX_Char_MrKarate_BlockG0_A: db $00
 L157FA1: db $00
 L157FA2: db $00
 L157FA3: db $00

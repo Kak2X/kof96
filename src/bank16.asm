@@ -1,4 +1,4 @@
-L164000: db $05
+GFX_Char_MrBig_Idle0_A: db $05
 L164001: db $02
 L164002: db $02
 L164003: db $01
@@ -190,7 +190,7 @@ L1640BC: db $38
 L1640BD: db $D0
 L1640BE: db $FC
 L1640BF: db $38
-L1640C0: db $08
+GFX_Char_MrBig_Idle0_B: db $08
 L1640C1: db $07
 L1640C2: db $08
 L1640C3: db $07
@@ -286,7 +286,7 @@ L16411C: db $00
 L16411D: db $00
 L16411E: db $00
 L16411F: db $00
-L164120: db $0C
+GFX_Char_MrBig_Idle1_A: db $0C
 L164121: db $03
 L164122: db $07
 L164123: db $00
@@ -478,7 +478,7 @@ L1641DC: db $10
 L1641DD: db $E0
 L1641DE: db $38
 L1641DF: db $D0
-L1641E0: db $21
+GFX_Char_MrBig_Idle1_B: db $21
 L1641E1: db $1E
 L1641E2: db $21
 L1641E3: db $1E
@@ -574,7 +574,7 @@ L16423C: db $00
 L16423D: db $00
 L16423E: db $00
 L16423F: db $00
-L164240: db $0F
+GFX_Char_MrBig_Idle2_A: db $0F
 L164241: db $00
 L164242: db $06
 L164243: db $01
@@ -766,7 +766,7 @@ L1642FC: db $90
 L1642FD: db $60
 L1642FE: db $10
 L1642FF: db $E0
-L164300: db $47
+GFX_Char_MrBig_Idle2_B: db $47
 L164301: db $38
 L164302: db $43
 L164303: db $3C
@@ -862,7 +862,7 @@ L16435C: db $00
 L16435D: db $00
 L16435E: db $00
 L16435F: db $00
-L164360: db $00
+GFX_Char_MrBig_WalkF0: db $00
 L164361: db $00
 L164362: db $00
 L164363: db $00
@@ -1118,7 +1118,7 @@ L16445C: db $00
 L16445D: db $00
 L16445E: db $00
 L16445F: db $00
-L164460: db $00
+GFX_Char_MrBig_WalkF1: db $00
 L164461: db $00
 L164462: db $01
 L164463: db $00
@@ -1310,7 +1310,7 @@ L16451C: db $00
 L16451D: db $00
 L16451E: db $00
 L16451F: db $00
-L164520: db $00
+GFX_Char_MrBig_WalkF2: db $00
 L164521: db $00
 L164522: db $00
 L164523: db $00
@@ -1566,7 +1566,7 @@ L16461C: db $01
 L16461D: db $00
 L16461E: db $01
 L16461F: db $00
-L164620: db $18
+GFX_Char_MrBig_Crouch0: db $18
 L164621: db $00
 L164622: db $1C
 L164623: db $00
@@ -1758,7 +1758,7 @@ L1646DC: db $00
 L1646DD: db $00
 L1646DE: db $00
 L1646DF: db $00
-L1646E0: db $03
+GFX_Char_MrBig_RollF1: db $03
 L1646E1: db $00
 L1646E2: db $0F
 L1646E3: db $02
@@ -1982,7 +1982,7 @@ L1647BC: db $00
 L1647BD: db $00
 L1647BE: db $00
 L1647BF: db $00
-L1647C0: db $30
+GFX_Char_MrBig_RollF2: db $30
 L1647C1: db $00
 L1647C2: db $30
 L1647C3: db $00
@@ -2238,7 +2238,7 @@ L1648BC: db $00
 L1648BD: db $00
 L1648BE: db $00
 L1648BF: db $00
-L1648C0: db $1F
+GFX_Char_MrBig_JumpN1: db $1F
 L1648C1: db $00
 L1648C2: db $1C
 L1648C3: db $03
@@ -2494,7 +2494,7 @@ L1649BC: db $00
 L1649BD: db $00
 L1649BE: db $00
 L1649BF: db $00
-L1649C0: db $03
+GFX_Char_MrBig_JumpN3: db $03
 L1649C1: db $00
 L1649C2: db $07
 L1649C3: db $00
@@ -2686,7 +2686,7 @@ L164A7C: db $CC
 L164A7D: db $80
 L164A7E: db $C4
 L164A7F: db $00
-L164A80: db $09
+GFX_Char_MrBig_BlockG0_A: db $09
 L164A81: db $06
 L164A82: db $0D
 L164A83: db $02
@@ -2846,7 +2846,7 @@ L164B1C: db $9E
 L164B1D: db $00
 L164B1E: db $61
 L164B1F: db $9E
-L164B20: db $03
+GFX_Char_MrBig_BlockG0_B: db $03
 L164B21: db $00
 L164B22: db $00
 L164B23: db $00
@@ -2942,7 +2942,7 @@ L164B7C: db $FC
 L164B7D: db $78
 L164B7E: db $FC
 L164B7F: db $00
-L164B80: db $0B
+GFX_Char_MrBig_BlockC0_B: db $0B
 L164B81: db $04
 L164B82: db $08
 L164B83: db $07
@@ -3038,7 +3038,7 @@ L164BDC: db $00
 L164BDD: db $00
 L164BDE: db $00
 L164BDF: db $00
-L164BE0: db $58;X
+GFX_Char_MrBig_BlockA0_B: db $58;X
 L164BE1: db $27;X
 L164BE2: db $40;X
 L164BE3: db $3F;X
@@ -3134,7 +3134,7 @@ L164C3C: db $00;X
 L164C3D: db $00;X
 L164C3E: db $00;X
 L164C3F: db $00;X
-L164C40: db $00
+GFX_Char_MrBig_PunchL1_A: db $00
 L164C41: db $00
 L164C42: db $00
 L164C43: db $00
@@ -3326,7 +3326,7 @@ L164CFC: db $00
 L164CFD: db $00
 L164CFE: db $0C
 L164CFF: db $00
-L164D00: db $1E
+GFX_Char_MrBig_PunchL1_B: db $1E
 L164D01: db $01
 L164D02: db $1F
 L164D03: db $00
@@ -3422,7 +3422,7 @@ L164D5C: db $00
 L164D5D: db $00
 L164D5E: db $00
 L164D5F: db $00
-L164D60: db $00
+GFX_Char_MrBig_WinA0_A: db $00
 L164D61: db $00
 L164D62: db $00
 L164D63: db $00
@@ -3582,7 +3582,7 @@ L164DFC: db $00
 L164DFD: db $00
 L164DFE: db $3C
 L164DFF: db $00
-L164E00: db $3F
+GFX_Char_MrBig_WinA0_B: db $3F
 L164E01: db $00
 L164E02: db $03
 L164E03: db $00
@@ -3678,7 +3678,7 @@ L164E5C: db $FC
 L164E5D: db $38
 L164E5E: db $7C
 L164E5F: db $00
-L164E60: db $00
+GFX_Char_MrBig_PunchH0: db $00
 L164E61: db $00
 L164E62: db $00
 L164E63: db $00
@@ -3934,7 +3934,7 @@ L164F5C: db $00
 L164F5D: db $00
 L164F5E: db $00
 L164F5F: db $00
-L164F60: db $00
+GFX_Char_MrBig_PunchH1: db $00
 L164F61: db $00
 L164F62: db $00
 L164F63: db $00
@@ -4222,7 +4222,7 @@ L16507C: db $00
 L16507D: db $00
 L16507E: db $00
 L16507F: db $00
-L165080: db $FF
+GFX_Char_MrBig_PunchH2_B: db $FF
 L165081: db $00
 L165082: db $0F
 L165083: db $00
@@ -4350,7 +4350,7 @@ L1650FC: db $00
 L1650FD: db $00
 L1650FE: db $00
 L1650FF: db $00
-L165100: db $3C
+GFX_Char_MrBig_PunchH3_B: db $3C
 L165101: db $03
 L165102: db $1F
 L165103: db $00
@@ -4478,7 +4478,7 @@ L16517C: db $00
 L16517D: db $00
 L16517E: db $00
 L16517F: db $00
-L165180: db $00
+GFX_Char_MrBig_KickL1_A: db $00
 L165181: db $00
 L165182: db $00
 L165183: db $00
@@ -4702,7 +4702,7 @@ L16525C: db $04
 L16525D: db $03
 L16525E: db $04
 L16525F: db $03
-L165260: db $3D
+GFX_Char_MrBig_KickL1_B: db $3D
 L165261: db $02
 L165262: db $3F
 L165263: db $00
@@ -4766,7 +4766,7 @@ L16529C: db $3F
 L16529D: db $0E
 L16529E: db $3F
 L16529F: db $00
-L1652A0: db $0C
+GFX_Char_MrBig_KickL0: db $0C
 L1652A1: db $00
 L1652A2: db $0E
 L1652A3: db $00
@@ -4990,7 +4990,7 @@ L16537C: db $00
 L16537D: db $00
 L16537E: db $00
 L16537F: db $00
-L165380: db $03
+GFX_Char_MrBig_KickH0_B: db $03
 L165381: db $00
 L165382: db $02
 L165383: db $01
@@ -5118,7 +5118,7 @@ L1653FC: db $FC
 L1653FD: db $60
 L1653FE: db $F8
 L1653FF: db $00
-L165400: db $03
+GFX_Char_MrBig_KickH1_B: db $03
 L165401: db $00
 L165402: db $07
 L165403: db $00
@@ -5310,7 +5310,7 @@ L1654BC: db $00
 L1654BD: db $00
 L1654BE: db $00
 L1654BF: db $00
-L1654C0: db $00
+GFX_Char_MrBig_PunchCL1: db $00
 L1654C1: db $00
 L1654C2: db $00
 L1654C3: db $00
@@ -5566,7 +5566,7 @@ L1655BC: db $00
 L1655BD: db $00
 L1655BE: db $00
 L1655BF: db $00
-L1655C0: db $7F
+GFX_Char_MrBig_PunchCL0_B: db $7F
 L1655C1: db $00
 L1655C2: db $7E
 L1655C3: db $01
@@ -5662,7 +5662,7 @@ L16561C: db $00
 L16561D: db $00
 L16561E: db $00
 L16561F: db $00
-L165620: db $01
+GFX_Char_MrBig_PunchCH0: db $01
 L165621: db $00
 L165622: db $03
 L165623: db $01
@@ -5886,7 +5886,7 @@ L1656FC: db $3E
 L1656FD: db $00
 L1656FE: db $00
 L1656FF: db $00
-L165700: db $3F
+GFX_Char_MrBig_PunchCH1_A: db $3F
 L165701: db $1F
 L165702: db $3F
 L165703: db $1F
@@ -6142,7 +6142,7 @@ L1657FC: db $E2
 L1657FD: db $FC
 L1657FE: db $03
 L1657FF: db $FC
-L165800: db $02
+GFX_Char_MrBig_PunchCH1_B: db $02
 L165801: db $01
 L165802: db $03
 L165803: db $00
@@ -6270,7 +6270,7 @@ L16587C: db $82
 L16587D: db $7C
 L16587E: db $FC
 L16587F: db $00
-L165880: db $00
+GFX_Char_MrBig_PunchCH2_A: db $00
 L165881: db $00
 L165882: db $00
 L165883: db $00
@@ -6398,7 +6398,7 @@ L1658FC: db $10
 L1658FD: db $00
 L1658FE: db $20
 L1658FF: db $10
-L165900: db $00
+GFX_Char_MrBig_KickCL1_A: db $00
 L165901: db $00
 L165902: db $00
 L165903: db $00
@@ -6558,7 +6558,7 @@ L16599C: db $E2
 L16599D: db $1C
 L16599E: db $FC
 L16599F: db $00
-L1659A0: db $00
+GFX_Char_MrBig_KickCL1_B: db $00
 L1659A1: db $00
 L1659A2: db $00
 L1659A3: db $00
@@ -6654,7 +6654,7 @@ L1659FC: db $FF
 L1659FD: db $00
 L1659FE: db $01
 L1659FF: db $00
-L165A00: db $00
+GFX_Char_MrBig_KickCL0: db $00
 L165A01: db $00
 L165A02: db $01
 L165A03: db $00
@@ -6878,7 +6878,7 @@ L165ADC: db $00
 L165ADD: db $00
 L165ADE: db $00
 L165ADF: db $00
-L165AE0: db $00
+GFX_Char_MrBig_KickCH0_A: db $00
 L165AE1: db $00
 L165AE2: db $00
 L165AE3: db $00
@@ -7006,7 +7006,7 @@ L165B5C: db $00
 L165B5D: db $00
 L165B5E: db $00
 L165B5F: db $00
-L165B60: db $03
+GFX_Char_MrBig_KickCH0_B: db $03
 L165B61: db $00
 L165B62: db $02
 L165B63: db $01
@@ -7102,7 +7102,7 @@ L165BBC: db $00
 L165BBD: db $00
 L165BBE: db $00
 L165BBF: db $00
-L165BC0: db $00
+GFX_Char_MrBig_KickCH1_A: db $00
 L165BC1: db $00
 L165BC2: db $00
 L165BC3: db $00
@@ -7230,7 +7230,7 @@ L165C3C: db $00
 L165C3D: db $00
 L165C3E: db $CF
 L165C3F: db $00
-L165C40: db $00
+GFX_Char_MrBig_KickCH1_B: db $00
 L165C41: db $00
 L165C42: db $00
 L165C43: db $00
@@ -7358,7 +7358,7 @@ L165CBC: db $00
 L165CBD: db $00
 L165CBE: db $00
 L165CBF: db $00
-L165CC0: db $00
+GFX_Char_MrBig_PunchA1: db $00
 L165CC1: db $00
 L165CC2: db $00
 L165CC3: db $00
@@ -7646,7 +7646,7 @@ L165DDC: db $00
 L165DDD: db $00
 L165DDE: db $00
 L165DDF: db $00
-L165DE0: db $00
+GFX_Char_MrBig_PunchA0: db $00
 L165DE1: db $00
 L165DE2: db $00
 L165DE3: db $00
@@ -7966,7 +7966,7 @@ L165F1C: db $0E
 L165F1D: db $04
 L165F1E: db $06
 L165F1F: db $00
-L165F20: db $F0
+GFX_Char_MrBig_KickA0_B: db $F0
 L165F21: db $0F
 L165F22: db $40
 L165F23: db $3F
@@ -8030,7 +8030,7 @@ L165F5C: db $00
 L165F5D: db $00
 L165F5E: db $00
 L165F5F: db $00
-L165F60: db $07
+GFX_Char_MrBig_AttackG0_A: db $07
 L165F61: db $00
 L165F62: db $1F
 L165F63: db $06
@@ -8318,7 +8318,7 @@ L16607C: db $00
 L16607D: db $00
 L16607E: db $01
 L16607F: db $00
-L166080: db $08
+GFX_Char_MrBig_AttackG0_B: db $08
 L166081: db $07
 L166082: db $11
 L166083: db $0E
@@ -8414,7 +8414,7 @@ L1660DC: db $00
 L1660DD: db $00
 L1660DE: db $00
 L1660DF: db $00
-L1660E0: db $00
+GFX_Char_MrBig_AttackG2: db $00
 L1660E1: db $00
 L1660E2: db $00
 L1660E3: db $00
@@ -8766,7 +8766,7 @@ L16623C: db $00
 L16623D: db $00
 L16623E: db $00
 L16623F: db $00
-L166240: db $03
+GFX_Char_MrBig_AttackA1: db $03
 L166241: db $00
 L166242: db $0F
 L166243: db $03
@@ -9054,7 +9054,7 @@ L16635C: db $00
 L16635D: db $00
 L16635E: db $00
 L16635F: db $00
-L166360: db $01
+GFX_Char_MrBig_TimeOver2_A: db $01
 L166361: db $00
 L166362: db $03
 L166363: db $00
@@ -9214,7 +9214,7 @@ L1663FC: db $FE
 L1663FD: db $7C
 L1663FE: db $FE
 L1663FF: db $FC
-L166400: db $00
+GFX_Char_MrBig_GuardBreakG0_A: db $00
 L166401: db $00
 L166402: db $00
 L166403: db $00
@@ -9374,7 +9374,7 @@ L16649C: db $3C
 L16649D: db $00
 L16649E: db $42
 L16649F: db $3C
-L1664A0: db $71
+GFX_Char_MrBig_GuardBreakG0_B: db $71
 L1664A1: db $00
 L1664A2: db $03
 L1664A3: db $00
@@ -9470,7 +9470,7 @@ L1664FC: db $3E
 L1664FD: db $1C
 L1664FE: db $1E
 L1664FF: db $00
-L166500: db $E3;X
+GFX_Char_MrBig_Hitlow0_B: db $E3;X
 L166501: db $00;X
 L166502: db $03;X
 L166503: db $00;X
@@ -9566,7 +9566,7 @@ L16655C: db $00;X
 L16655D: db $00;X
 L16655E: db $00;X
 L16655F: db $00;X
-L166560: db $01
+GFX_Char_MrBig_DropMain1: db $01
 L166561: db $00
 L166562: db $01
 L166563: db $00
@@ -9822,7 +9822,7 @@ L16665C: db $00
 L16665D: db $00
 L16665E: db $00
 L16665F: db $00
-L166660: db $01
+GFX_Char_MrBig_DropMain2: db $01
 L166661: db $00
 L166662: db $01
 L166663: db $00
@@ -9982,7 +9982,7 @@ L1666FC: db $00
 L1666FD: db $00
 L1666FE: db $00
 L1666FF: db $00
-L166700: db $01
+GFX_Char_MrBig_ChargeMeter0_A: db $01
 L166701: db $00
 L166702: db $03
 L166703: db $01
@@ -10110,7 +10110,7 @@ L16677C: db $00
 L16677D: db $00
 L16677E: db $00
 L16677F: db $00
-L166780: db $0C
+GFX_Char_MrBig_ChargeMeter0_B: db $0C
 L166781: db $03
 L166782: db $11
 L166783: db $0E
@@ -10270,7 +10270,7 @@ L16681C: db $03
 L16681D: db $00
 L16681E: db $01
 L16681F: db $00
-L166820: db $00
+GFX_Char_MrBig_ChargeMeter1_A: db $00
 L166821: db $00
 L166822: db $00
 L166823: db $00
@@ -10430,7 +10430,7 @@ L1668BC: db $00
 L1668BD: db $00
 L1668BE: db $00
 L1668BF: db $00
-L1668C0: db $00
+GFX_Char_MrBig_Taunt0_A: db $00
 L1668C1: db $00
 L1668C2: db $C0
 L1668C3: db $00
@@ -10622,7 +10622,7 @@ L16697C: db $F0
 L16697D: db $00
 L16697E: db $E8
 L16697F: db $10
-L166980: db $C8
+GFX_Char_MrBig_Taunt0_B: db $C8
 L166981: db $37
 L166982: db $4B
 L166983: db $34
@@ -10718,7 +10718,7 @@ L1669DC: db $00
 L1669DD: db $00
 L1669DE: db $00
 L1669DF: db $00
-L1669E0: db $00
+GFX_Char_MrBig_Taunt1_A: db $00
 L1669E1: db $00
 L1669E2: db $00
 L1669E3: db $00
@@ -10942,7 +10942,7 @@ L166ABC: db $C0
 L166ABD: db $00
 L166ABE: db $A0
 L166ABF: db $40
-L166AC0: db $00
+GFX_Char_MrBig_WinA1_A: db $00
 L166AC1: db $00
 L166AC2: db $00
 L166AC3: db $00
@@ -11198,7 +11198,7 @@ L166BBC: db $19
 L166BBD: db $06
 L166BBE: db $19
 L166BBF: db $06
-L166BC0: db $FD
+GFX_Char_MrBig_WinB0_A: db $FD
 L166BC1: db $7E
 L166BC2: db $7F
 L166BC3: db $3C
@@ -11422,7 +11422,7 @@ L166C9C: db $00
 L166C9D: db $00
 L166C9E: db $00
 L166C9F: db $00
-L166CA0: db $FA
+GFX_Char_MrBig_WinB1_A: db $FA
 L166CA1: db $FD
 L166CA2: db $FF
 L166CA3: db $78
@@ -11614,7 +11614,7 @@ L166D5C: db $00
 L166D5D: db $00
 L166D5E: db $00
 L166D5F: db $00
-L166D60: db $00
+GFX_Char_MrBig_ThrowG0_A: db $00
 L166D61: db $00
 L166D62: db $00
 L166D63: db $00
@@ -11774,7 +11774,7 @@ L166DFC: db $E2
 L166DFD: db $1C
 L166DFE: db $FD
 L166DFF: db $A2
-L166E00: db $00
+GFX_Char_MrBig_ThrowG1_A: db $00
 L166E01: db $00
 L166E02: db $00
 L166E03: db $00
@@ -11934,7 +11934,7 @@ L166E9C: db $00
 L166E9D: db $00
 L166E9E: db $38
 L166E9F: db $00
-L166EA0: db $03
+GFX_Char_MrBig_ThrowG2: db $03
 L166EA1: db $00
 L166EA2: db $03
 L166EA3: db $00
@@ -12158,7 +12158,7 @@ L166F7C: db $00
 L166F7D: db $00
 L166F7E: db $00
 L166F7F: db $00
-L166F80: db $8D
+GFX_Char_MrBig_RunF0_A: db $8D
 L166F81: db $02
 L166F82: db $8F
 L166F83: db $01
@@ -12414,7 +12414,7 @@ L16707C: db $B9
 L16707D: db $06
 L16707E: db $97
 L16707F: db $08
-L167080: db $04
+GFX_Char_MrBig_RunF0_B: db $04
 L167081: db $03
 L167082: db $C8
 L167083: db $07
@@ -12542,7 +12542,7 @@ L1670FC: db $00
 L1670FD: db $00
 L1670FE: db $00
 L1670FF: db $00
-L167100: db $00
+GFX_Char_MrBig_RunF1: db $00
 L167101: db $00
 L167102: db $00
 L167103: db $00
@@ -12766,7 +12766,7 @@ L1671DC: db $00
 L1671DD: db $00
 L1671DE: db $00
 L1671DF: db $00
-L1671E0: db $01
+GFX_Char_MrBig_RunF2_A: db $01
 L1671E1: db $00
 L1671E2: db $03
 L1671E3: db $00
@@ -13022,7 +13022,7 @@ L1672DC: db $8C
 L1672DD: db $03
 L1672DE: db $88
 L1672DF: db $07
-L1672E0: db $00
+GFX_Char_MrBig_AttackG1_A: db $00
 L1672E1: db $00
 L1672E2: db $00
 L1672E3: db $00
@@ -13214,7 +13214,7 @@ L16739C: db $80
 L16739D: db $00
 L16739E: db $80
 L16739F: db $00
-L1673A0: db $01
+GFX_Char_MrBig_AttackG1_B: db $01
 L1673A1: db $00
 L1673A2: db $01
 L1673A3: db $00
@@ -13342,7 +13342,7 @@ L16741C: db $FC
 L16741D: db $78
 L16741E: db $FC
 L16741F: db $00
-L167420: db $01
+GFX_Char_MrBig_GroundBlasterL2_A: db $01
 L167421: db $00
 L167422: db $03
 L167423: db $00
@@ -13534,7 +13534,7 @@ L1674DC: db $7F
 L1674DD: db $BE
 L1674DE: db $FE
 L1674DF: db $54
-L1674E0: db $8D
+GFX_Char_MrBig_GroundBlasterL2_B: db $8D
 L1674E1: db $73
 L1674E2: db $47
 L1674E3: db $39
@@ -13630,7 +13630,7 @@ L16753C: db $00
 L16753D: db $00
 L16753E: db $00
 L16753F: db $00
-L167540: db $60
+GFX_Char_MrBig_CrossDivingL1: db $60
 L167541: db $00
 L167542: db $70
 L167543: db $00
@@ -13854,7 +13854,7 @@ L16761C: db $7F
 L16761D: db $86
 L16761E: db $C6
 L16761F: db $00
-L167620: db $C0
+GFX_Char_MrBig_CrossDivingL2: db $C0
 L167621: db $00
 L167622: db $E0
 L167623: db $00
@@ -14078,7 +14078,7 @@ L1676FC: db $00
 L1676FD: db $00
 L1676FE: db $00
 L1676FF: db $00
-L167700: db $C0
+GFX_Char_MrBig_CrossDivingL4: db $C0
 L167701: db $00
 L167702: db $E0
 L167703: db $00
@@ -14302,7 +14302,7 @@ L1677DC: db $FF
 L1677DD: db $7E
 L1677DE: db $FE
 L1677DF: db $00
-L1677E0: db $07
+GFX_Char_MrBig_SpinningLancerL1: db $07
 L1677E1: db $00
 L1677E2: db $1C
 L1677E3: db $03
@@ -14622,7 +14622,7 @@ L16791C: db $00
 L16791D: db $00
 L16791E: db $00
 L16791F: db $00
-L167920: db $03
+GFX_Char_MrBig_SpinningLancerL2: db $03
 L167921: db $00
 L167922: db $FD
 L167923: db $02
@@ -14878,7 +14878,7 @@ L167A1C: db $00
 L167A1D: db $00
 L167A1E: db $00
 L167A1F: db $00
-L167A20: db $00
+GFX_Char_MrBig_SpinningLancerL3: db $00
 L167A21: db $00
 L167A22: db $00
 L167A23: db $00
@@ -15198,7 +15198,7 @@ L167B5C: db $00
 L167B5D: db $00
 L167B5E: db $00
 L167B5F: db $00
-L167B60: db $00
+GFX_Char_MrBig_CaliforniaRomanceH0_A: db $00
 L167B61: db $00
 L167B62: db $00
 L167B63: db $00
@@ -15358,7 +15358,7 @@ L167BFC: db $00
 L167BFD: db $00
 L167BFE: db $00
 L167BFF: db $00
-L167C00: db $18
+GFX_Char_MrBig_CaliforniaRomanceH0_B: db $18
 L167C01: db $07
 L167C02: db $1F
 L167C03: db $00
@@ -15454,7 +15454,7 @@ L167C5C: db $00
 L167C5D: db $00
 L167C5E: db $00
 L167C5F: db $00
-L167C60: db $18
+GFX_Char_MrBig_CaliforniaRomanceH1_B: db $18
 L167C61: db $07
 L167C62: db $1F
 L167C63: db $00
@@ -15550,7 +15550,7 @@ L167CBC: db $00
 L167CBD: db $00
 L167CBE: db $00
 L167CBF: db $00
-L167CC0: db $E0
+GFX_Char_MrBig_CaliforniaRomanceL2: db $E0
 L167CC1: db $00
 L167CC2: db $F8
 L167CC3: db $00
@@ -15806,7 +15806,7 @@ L167DBC: db $00
 L167DBD: db $00
 L167DBE: db $18
 L167DBF: db $00
-L167DC0: db $FF
+GFX_Char_MrBig_DrumShotL0_A: db $FF
 L167DC1: db $1D
 L167DC2: db $1F
 L167DC3: db $00
@@ -15998,7 +15998,7 @@ L167E7C: db $FE
 L167E7D: db $FC
 L167E7E: db $FF
 L167E7F: db $FA
-L167E80: db $03
+GFX_Char_MrBig_DrumShotL1_A: db $03
 L167E81: db $01
 L167E82: db $03
 L167E83: db $01
@@ -16254,7 +16254,7 @@ L167F7C: db $C4
 L167F7D: db $38
 L167F7E: db $1E
 L167F7F: db $E0
-L167F80: db $00
+GFX_Char_MrBig_BlasterWaveS1_A: db $00
 L167F81: db $00
 L167F82: db $01
 L167F83: db $00

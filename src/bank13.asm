@@ -1,4 +1,4 @@
-L134000: db $00
+GFX_Char_Leona_Idle0: db $00
 L134001: db $00
 L134002: db $01
 L134003: db $00
@@ -190,7 +190,7 @@ L1340BC: db $00
 L1340BD: db $00
 L1340BE: db $00
 L1340BF: db $00
-L1340C0: db $01
+GFX_Char_Leona_Idle1: db $01
 L1340C1: db $00
 L1340C2: db $03
 L1340C3: db $00
@@ -382,7 +382,7 @@ L13417C: db $00
 L13417D: db $00
 L13417E: db $00
 L13417F: db $00
-L134180: db $01
+GFX_Char_Leona_Idle2: db $01
 L134181: db $00
 L134182: db $01
 L134183: db $00
@@ -574,7 +574,7 @@ L13423C: db $00
 L13423D: db $00
 L13423E: db $00
 L13423F: db $00
-L134240: db $00
+GFX_Char_Leona_WalkF0: db $00
 L134241: db $00
 L134242: db $00
 L134243: db $00
@@ -734,7 +734,7 @@ L1342DC: db $FF
 L1342DD: db $D2
 L1342DE: db $F3
 L1342DF: db $0C
-L1342E0: db $3F
+GFX_Char_Leona_WalkF1_A: db $3F
 L1342E1: db $00
 L1342E2: db $7F
 L1342E3: db $00
@@ -894,7 +894,7 @@ L13437C: db $00
 L13437D: db $00
 L13437E: db $00
 L13437F: db $00
-L134380: db $01
+GFX_Char_Leona_WalkF1_B: db $01
 L134381: db $00
 L134382: db $01
 L134383: db $00
@@ -958,7 +958,7 @@ L1343BC: db $09
 L1343BD: db $06
 L1343BE: db $0F
 L1343BF: db $00
-L1343C0: db $1F
+GFX_Char_Leona_WalkF2: db $1F
 L1343C1: db $00
 L1343C2: db $3F
 L1343C3: db $00
@@ -1150,7 +1150,7 @@ L13447C: db $38
 L13447D: db $00
 L13447E: db $00
 L13447F: db $00
-L134480: db $0F
+GFX_Char_Leona_WalkF3_B: db $0F
 L134481: db $07
 L134482: db $0F
 L134483: db $00
@@ -1214,7 +1214,7 @@ L1344BC: db $00
 L1344BD: db $00
 L1344BE: db $00
 L1344BF: db $00
-L1344C0: db $00
+GFX_Char_Leona_Crouch0: db $00
 L1344C1: db $00
 L1344C2: db $00
 L1344C3: db $00
@@ -1342,7 +1342,7 @@ L13453C: db $00
 L13453D: db $00
 L13453E: db $00
 L13453F: db $00
-L134540: db $03
+GFX_Char_Leona_Intro5: db $03
 L134541: db $00
 L134542: db $0C
 L134543: db $03
@@ -1502,7 +1502,7 @@ L1345DC: db $00
 L1345DD: db $00
 L1345DE: db $00
 L1345DF: db $00
-L1345E0: db $E0
+GFX_Char_Leona_Intro6: db $E0
 L1345E1: db $00
 L1345E2: db $B8
 L1345E3: db $60
@@ -1598,7 +1598,7 @@ L13463C: db $00
 L13463D: db $00
 L13463E: db $00
 L13463F: db $00
-L134640: db $1C
+GFX_Char_Leona_JumpN1: db $1C
 L134641: db $00
 L134642: db $3C
 L134643: db $00
@@ -1758,7 +1758,7 @@ L1346DC: db $80
 L1346DD: db $00
 L1346DE: db $80
 L1346DF: db $00
-L1346E0: db $00
+GFX_Char_Leona_JumpN2: db $00
 L1346E1: db $00
 L1346E2: db $00
 L1346E3: db $00
@@ -1982,7 +1982,7 @@ L1347BC: db $00
 L1347BD: db $00
 L1347BE: db $00
 L1347BF: db $00
-L1347C0: db $18
+GFX_Char_Leona_JumpN4: db $18
 L1347C1: db $00
 L1347C2: db $0F
 L1347C3: db $00
@@ -2206,7 +2206,7 @@ L13489C: db $00
 L13489D: db $00
 L13489E: db $00
 L13489F: db $00
-L1348A0: db $00
+GFX_Char_Leona_BlockG0: db $00
 L1348A1: db $00
 L1348A2: db $00
 L1348A3: db $00
@@ -2334,7 +2334,7 @@ L13491C: db $C8
 L13491D: db $70
 L13491E: db $F8
 L13491F: db $00
-L134920: db $00
+GFX_Char_Leona_BlockC0_A: db $00
 L134921: db $00
 L134922: db $00
 L134923: db $00
@@ -2430,7 +2430,7 @@ L13497C: db $F8
 L13497D: db $10
 L13497E: db $F0
 L13497F: db $60
-L134980: db $01
+GFX_Char_Leona_BlockC0_B: db $01
 L134981: db $00
 L134982: db $03
 L134983: db $01
@@ -2526,7 +2526,7 @@ L1349DC: db $00
 L1349DD: db $00
 L1349DE: db $00
 L1349DF: db $00
-L1349E0: db $5F;X
+GFX_Char_Leona_BlockA0_B: db $5F;X
 L1349E1: db $80;X
 L1349E2: db $7A;X
 L1349E3: db $95;X
@@ -2622,7 +2622,7 @@ L134A3C: db $00;X
 L134A3D: db $00;X
 L134A3E: db $00;X
 L134A3F: db $00;X
-L134A40: db $0F
+GFX_Char_Leona_PunchL1_A: db $0F
 L134A41: db $00
 L134A42: db $07
 L134A43: db $00
@@ -2750,7 +2750,7 @@ L134ABC: db $FE
 L134ABD: db $C0
 L134ABE: db $D6
 L134ABF: db $00
-L134AC0: db $01
+GFX_Char_Leona_PunchL0_B: db $01
 L134AC1: db $00
 L134AC2: db $03
 L134AC3: db $00
@@ -2846,7 +2846,7 @@ L134B1C: db $00
 L134B1D: db $00
 L134B1E: db $00
 L134B1F: db $00
-L134B20: db $03
+GFX_Char_Leona_PunchL0_A: db $03
 L134B21: db $00
 L134B22: db $01
 L134B23: db $00
@@ -2942,7 +2942,7 @@ L134B7C: db $80
 L134B7D: db $00
 L134B7E: db $80
 L134B7F: db $00
-L134B80: db $0F
+GFX_Char_Leona_PunchH1_A: db $0F
 L134B81: db $00
 L134B82: db $07
 L134B83: db $00
@@ -3070,7 +3070,7 @@ L134BFC: db $C0
 L134BFD: db $00
 L134BFE: db $40
 L134BFF: db $80
-L134C00: db $00
+GFX_Char_Leona_PunchH2: db $00
 L134C01: db $00
 L134C02: db $00
 L134C03: db $00
@@ -3262,7 +3262,7 @@ L134CBC: db $01
 L134CBD: db $00
 L134CBE: db $01
 L134CBF: db $00
-L134CC0: db $00
+GFX_Char_Leona_KickL1: db $00
 L134CC1: db $00
 L134CC2: db $00
 L134CC3: db $00
@@ -3454,7 +3454,7 @@ L134D7C: db $1E
 L134D7D: db $00
 L134D7E: db $00
 L134D7F: db $00
-L134D80: db $00
+GFX_Char_Leona_KickH0: db $00
 L134D81: db $00
 L134D82: db $00
 L134D83: db $00
@@ -3614,7 +3614,7 @@ L134E1C: db $FE
 L134E1D: db $00
 L134E1E: db $00
 L134E1F: db $00
-L134E20: db $07
+GFX_Char_Leona_KickH1: db $07
 L134E21: db $00
 L134E22: db $3F
 L134E23: db $00
@@ -3806,7 +3806,7 @@ L134EDC: db $00
 L134EDD: db $00
 L134EDE: db $00
 L134EDF: db $00
-L134EE0: db $00
+GFX_Char_Leona_KickH2: db $00
 L134EE1: db $00
 L134EE2: db $00
 L134EE3: db $00
@@ -4062,7 +4062,7 @@ L134FDC: db $C0
 L134FDD: db $00
 L134FDE: db $80
 L134FDF: db $00
-L134FE0: db $00
+GFX_Char_Leona_PunchCL0: db $00
 L134FE1: db $00
 L134FE2: db $00
 L134FE3: db $00
@@ -4222,7 +4222,7 @@ L13507C: db $00
 L13507D: db $00
 L13507E: db $00
 L13507F: db $00
-L135080: db $3F
+GFX_Char_Leona_PunchCL1_B: db $3F
 L135081: db $03
 L135082: db $47
 L135083: db $3B
@@ -4318,7 +4318,7 @@ L1350DC: db $00
 L1350DD: db $00
 L1350DE: db $00
 L1350DF: db $00
-L1350E0: db $00
+GFX_Char_Leona_PunchCH1_A: db $00
 L1350E1: db $00
 L1350E2: db $03
 L1350E3: db $00
@@ -4382,7 +4382,7 @@ L13511C: db $FC
 L13511D: db $38
 L13511E: db $38
 L13511F: db $C0
-L135120: db $00
+GFX_Char_OLeona_Taunt1: db $00
 L135121: db $00
 L135122: db $02
 L135123: db $00
@@ -4574,7 +4574,7 @@ L1351DC: db $F0
 L1351DD: db $00
 L1351DE: db $F8
 L1351DF: db $00
-L1351E0: db $7F
+GFX_Char_Leona_PunchCH3_A: db $7F
 L1351E1: db $00
 L1351E2: db $79
 L1351E3: db $06
@@ -4702,7 +4702,7 @@ L13525C: db $F8
 L13525D: db $00
 L13525E: db $F0
 L13525F: db $00
-L135260: db $01
+GFX_Char_Leona_PunchCH3_B: db $01
 L135261: db $00
 L135262: db $01
 L135263: db $00
@@ -4766,7 +4766,7 @@ L13529C: db $9A
 L13529D: db $04
 L13529E: db $0E
 L13529F: db $00
-L1352A0: db $00
+GFX_Char_Leona_KickCL1_A: db $00
 L1352A1: db $00
 L1352A2: db $00
 L1352A3: db $00
@@ -4862,7 +4862,7 @@ L1352FC: db $00
 L1352FD: db $00
 L1352FE: db $00
 L1352FF: db $00
-L135300: db $01
+GFX_Char_Leona_KickCL1_B: db $01
 L135301: db $00
 L135302: db $01
 L135303: db $00
@@ -5054,7 +5054,7 @@ L1353BC: db $00
 L1353BD: db $00
 L1353BE: db $00
 L1353BF: db $00
-L1353C0: db $07
+GFX_Char_Leona_KickCL0_A: db $07
 L1353C1: db $00
 L1353C2: db $07
 L1353C3: db $00
@@ -5182,7 +5182,7 @@ L13543C: db $F0
 L13543D: db $00
 L13543E: db $E0
 L13543F: db $00
-L135440: db $01
+GFX_Char_Leona_KickCL0_B: db $01
 L135441: db $00
 L135442: db $06
 L135443: db $01
@@ -5310,7 +5310,7 @@ L1354BC: db $00
 L1354BD: db $00
 L1354BE: db $00
 L1354BF: db $00
-L1354C0: db $00
+GFX_Char_Leona_KickCH0: db $00
 L1354C1: db $00
 L1354C2: db $00
 L1354C3: db $00
@@ -5502,7 +5502,7 @@ L13557C: db $00
 L13557D: db $00
 L13557E: db $00
 L13557F: db $00
-L135580: db $00
+GFX_Char_Leona_KickCH1: db $00
 L135581: db $00
 L135582: db $00
 L135583: db $00
@@ -5694,7 +5694,7 @@ L13563C: db $9E
 L13563D: db $00
 L13563E: db $7C
 L13563F: db $00
-L135640: db $05
+GFX_Char_Leona_PunchA0: db $05
 L135641: db $00
 L135642: db $07
 L135643: db $00
@@ -5918,7 +5918,7 @@ L13571C: db $F8
 L13571D: db $00
 L13571E: db $F8
 L13571F: db $00
-L135720: db $03
+GFX_Char_Leona_KickA0_B: db $03
 L135721: db $00
 L135722: db $0F
 L135723: db $00
@@ -6110,7 +6110,7 @@ L1357DC: db $00
 L1357DD: db $00
 L1357DE: db $00
 L1357DF: db $00
-L1357E0: db $00
+GFX_Char_Leona_AttackG0: db $00
 L1357E1: db $00
 L1357E2: db $00
 L1357E3: db $00
@@ -6302,7 +6302,7 @@ L13589C: db $00
 L13589D: db $00
 L13589E: db $00
 L13589F: db $00
-L1358A0: db $03
+GFX_Char_Leona_AttackG1: db $03
 L1358A1: db $00
 L1358A2: db $0F
 L1358A3: db $00
@@ -6494,7 +6494,7 @@ L13595C: db $00
 L13595D: db $00
 L13595E: db $00
 L13595F: db $00
-L135960: db $03
+GFX_Char_Leona_AttackG2: db $03
 L135961: db $00
 L135962: db $01
 L135963: db $00
@@ -6686,7 +6686,7 @@ L135A1C: db $00
 L135A1D: db $00
 L135A1E: db $00
 L135A1F: db $00
-L135A20: db $00
+GFX_Char_Leona_AttackA1: db $00
 L135A21: db $00
 L135A22: db $00
 L135A23: db $00
@@ -6878,7 +6878,7 @@ L135ADC: db $F8
 L135ADD: db $80
 L135ADE: db $B8
 L135ADF: db $00
-L135AE0: db $10
+GFX_Char_Leona_TimeOver2: db $10
 L135AE1: db $00
 L135AE2: db $0C
 L135AE3: db $00
@@ -7070,7 +7070,7 @@ L135B9C: db $00
 L135B9D: db $00
 L135B9E: db $00
 L135B9F: db $00
-L135BA0: db $03
+GFX_Char_Leona_GuardBreakG0: db $03
 L135BA1: db $00
 L135BA2: db $07
 L135BA3: db $00
@@ -7262,7 +7262,7 @@ L135C5C: db $00
 L135C5D: db $00
 L135C5E: db $00
 L135C5F: db $00
-L135C60: db $01;X
+GFX_Char_Leona_Hitlow0: db $01;X
 L135C61: db $00;X
 L135C62: db $06;X
 L135C63: db $01;X
@@ -7422,7 +7422,7 @@ L135CFC: db $00;X
 L135CFD: db $00;X
 L135CFE: db $00;X
 L135CFF: db $00;X
-L135D00: db $01
+GFX_Char_Leona_DropMain1: db $01
 L135D01: db $00
 L135D02: db $03
 L135D03: db $00
@@ -7614,7 +7614,7 @@ L135DBC: db $00
 L135DBD: db $00
 L135DBE: db $00
 L135DBF: db $00
-L135DC0: db $01
+GFX_Char_Leona_DropMain2: db $01
 L135DC1: db $00
 L135DC2: db $07
 L135DC3: db $00
@@ -7774,7 +7774,7 @@ L135E5C: db $00
 L135E5D: db $00
 L135E5E: db $00
 L135E5F: db $00
-L135E60: db $08
+GFX_Char_Leona_ChargeMeter0_A: db $08
 L135E61: db $07
 L135E62: db $04
 L135E63: db $03
@@ -7902,7 +7902,7 @@ L135EDC: db $FE
 L135EDD: db $00
 L135EDE: db $7E
 L135EDF: db $80
-L135EE0: db $08
+GFX_Char_Leona_ChargeMeter1_A: db $08
 L135EE1: db $07
 L135EE2: db $04
 L135EE3: db $03
@@ -8030,7 +8030,7 @@ L135F5C: db $C0
 L135F5D: db $00
 L135F5E: db $C0
 L135F5F: db $00
-L135F60: db $1F
+GFX_Char_Leona_Intro0_A: db $1F
 L135F61: db $00
 L135F62: db $1F
 L135F63: db $00
@@ -8158,7 +8158,7 @@ L135FDC: db $00
 L135FDD: db $00
 L135FDE: db $00
 L135FDF: db $00
-L135FE0: db $00
+GFX_Char_Leona_Intro0_B: db $00
 L135FE1: db $00
 L135FE2: db $00
 L135FE3: db $00
@@ -8222,7 +8222,7 @@ L13601C: db $90
 L13601D: db $60
 L13601E: db $90
 L13601F: db $60
-L136020: db $00
+GFX_Char_Leona_Intro1_B: db $00
 L136021: db $00
 L136022: db $00
 L136023: db $00
@@ -8318,7 +8318,7 @@ L13607C: db $00
 L13607D: db $00
 L13607E: db $00
 L13607F: db $00
-L136080: db $00
+GFX_Char_Leona_Intro2_B: db $00
 L136081: db $00
 L136082: db $00
 L136083: db $00
@@ -8382,7 +8382,7 @@ L1360BC: db $90
 L1360BD: db $60
 L1360BE: db $90
 L1360BF: db $60
-L1360C0: db $03
+GFX_Char_Leona_Intro3_A: db $03
 L1360C1: db $00
 L1360C2: db $07
 L1360C3: db $03
@@ -8510,7 +8510,7 @@ L13613C: db $00
 L13613D: db $00
 L13613E: db $00
 L13613F: db $00
-L136140: db $00
+GFX_Char_Leona_Taunt0_A: db $00
 L136141: db $00
 L136142: db $00
 L136143: db $00
@@ -8574,7 +8574,7 @@ L13617C: db $70
 L13617D: db $80
 L13617E: db $F8
 L13617F: db $10
-L136180: db $7F
+GFX_Char_Leona_Taunt0_B: db $7F
 L136181: db $37
 L136182: db $5F
 L136183: db $37
@@ -8702,7 +8702,7 @@ L1361FC: db $00
 L1361FD: db $00
 L1361FE: db $00
 L1361FF: db $00
-L136200: db $01
+GFX_Char_Leona_Taunt1_A: db $01
 L136201: db $00
 L136202: db $07
 L136203: db $00
@@ -8830,7 +8830,7 @@ L13627C: db $00
 L13627D: db $00
 L13627E: db $00
 L13627F: db $00
-L136280: db $C8
+GFX_Char_Leona_Taunt1_B: db $C8
 L136281: db $30
 L136282: db $A8
 L136283: db $50
@@ -8862,7 +8862,7 @@ L13629C: db $00
 L13629D: db $00
 L13629E: db $00
 L13629F: db $00
-L1362A0: db $01
+GFX_Char_Leona_Taunt3_A: db $01
 L1362A1: db $00
 L1362A2: db $07
 L1362A3: db $00
@@ -8990,7 +8990,7 @@ L13631C: db $00
 L13631D: db $00
 L13631E: db $00
 L13631F: db $00
-L136320: db $FE
+GFX_Char_Leona_Taunt7_A: db $FE
 L136321: db $7B
 L136322: db $FF
 L136323: db $7B
@@ -9086,7 +9086,7 @@ L13637C: db $FE
 L13637D: db $DC
 L13637E: db $FC
 L13637F: db $E0
-L136380: db $FE
+GFX_Char_Leona_Taunt10_A: db $FE
 L136381: db $7B
 L136382: db $FF
 L136383: db $7B
@@ -9182,7 +9182,7 @@ L1363DC: db $FE
 L1363DD: db $DC
 L1363DE: db $FC
 L1363DF: db $E0
-L1363E0: db $0F
+GFX_Char_Leona_Taunt13_A: db $0F
 L1363E1: db $06
 L1363E2: db $1F
 L1363E3: db $0A
@@ -9342,7 +9342,7 @@ L13647C: db $FC
 L13647D: db $C0
 L13647E: db $FE
 L13647F: db $34
-L136480: db $FE
+GFX_Char_Leona_Taunt2_A: db $FE
 L136481: db $7B
 L136482: db $FF
 L136483: db $7B
@@ -9470,7 +9470,7 @@ L1364FC: db $C0
 L1364FD: db $80
 L1364FE: db $C0
 L1364FF: db $00
-L136500: db $00
+GFX_Char_OLeona_Taunt2_A: db $00
 L136501: db $00
 L136502: db $00
 L136503: db $00
@@ -9662,7 +9662,7 @@ L1365BC: db $03
 L1365BD: db $00
 L1365BE: db $03
 L1365BF: db $00
-L1365C0: db $7F
+GFX_Char_OLeona_Taunt2_B: db $7F
 L1365C1: db $25
 L1365C2: db $7F
 L1365C3: db $33
@@ -9694,7 +9694,7 @@ L1365DC: db $4D
 L1365DD: db $36
 L1365DE: db $7F
 L1365DF: db $00
-L1365E0: db $0F
+GFX_Char_Leona_WinA2: db $0F
 L1365E1: db $00
 L1365E2: db $7F
 L1365E3: db $00
@@ -9854,7 +9854,7 @@ L13667C: db $00
 L13667D: db $00
 L13667E: db $00
 L13667F: db $00
-L136680: db $3F
+GFX_Char_Leona_WinA3_A: db $3F
 L136681: db $00
 L136682: db $7F
 L136683: db $00
@@ -9982,7 +9982,7 @@ L1366FC: db $40
 L1366FD: db $00
 L1366FE: db $40
 L1366FF: db $00
-L136700: db $3F
+GFX_Char_Leona_WinA4_A: db $3F
 L136701: db $00
 L136702: db $7F
 L136703: db $00
@@ -10110,7 +10110,7 @@ L13677C: db $40
 L13677D: db $00
 L13677E: db $40
 L13677F: db $00
-L136780: db $00
+GFX_Char_Leona_WinB2_A: db $00
 L136781: db $00
 L136782: db $00
 L136783: db $00
@@ -10174,7 +10174,7 @@ L1367BC: db $E0
 L1367BD: db $00
 L1367BE: db $F0
 L1367BF: db $C0
-L1367C0: db $05
+GFX_Char_Leona_ThrowG0_A: db $05
 L1367C1: db $02
 L1367C2: db $0C
 L1367C3: db $03
@@ -10206,7 +10206,7 @@ L1367DC: db $00
 L1367DD: db $00
 L1367DE: db $00
 L1367DF: db $00
-L1367E0: db $00
+GFX_Char_Leona_ThrowG0_B: db $00
 L1367E1: db $00
 L1367E2: db $00
 L1367E3: db $00
@@ -10366,7 +10366,7 @@ L13687C: db $00
 L13687D: db $00
 L13687E: db $00
 L13687F: db $00
-L136880: db $0F
+GFX_Char_Leona_ThrowG1_A: db $0F
 L136881: db $00
 L136882: db $1F
 L136883: db $00
@@ -10430,7 +10430,7 @@ L1368BC: db $FF
 L1368BD: db $1D
 L1368BE: db $FF
 L1368BF: db $3D
-L1368C0: db $39
+GFX_Char_Leona_ThrowG1_B: db $39
 L1368C1: db $00
 L1368C2: db $2F
 L1368C3: db $18
@@ -10558,7 +10558,7 @@ L13693C: db $00
 L13693D: db $00
 L13693E: db $00
 L13693F: db $00
-L136940: db $03
+GFX_Char_Leona_ThrowG2_A: db $03
 L136941: db $00
 L136942: db $01
 L136943: db $00
@@ -10622,7 +10622,7 @@ L13697C: db $FF
 L13697D: db $1D
 L13697E: db $FF
 L13697F: db $3D
-L136980: db $01;X
+GFX_Char_Leona_ThrowA2: db $01;X
 L136981: db $00;X
 L136982: db $0E;X
 L136983: db $01;X
@@ -10814,7 +10814,7 @@ L136A3C: db $00;X
 L136A3D: db $00;X
 L136A3E: db $00;X
 L136A3F: db $00;X
-L136A40: db $00
+GFX_Char_Leona_RunF0_A: db $00
 L136A41: db $00
 L136A42: db $00
 L136A43: db $00
@@ -10942,7 +10942,7 @@ L136ABC: db $1F
 L136ABD: db $E0
 L136ABE: db $FE
 L136ABF: db $00
-L136AC0: db $71
+GFX_Char_Leona_RunF0_B: db $71
 L136AC1: db $E0
 L136AC2: db $F0
 L136AC3: db $E0
@@ -11070,7 +11070,7 @@ L136B3C: db $00
 L136B3D: db $00
 L136B3E: db $00
 L136B3F: db $00
-L136B40: db $71
+GFX_Char_Leona_RunF1_B: db $71
 L136B41: db $E0
 L136B42: db $FF
 L136B43: db $E0
@@ -11166,7 +11166,7 @@ L136B9C: db $00
 L136B9D: db $00
 L136B9E: db $00
 L136B9F: db $00
-L136BA0: db $71
+GFX_Char_Leona_RunF2_B: db $71
 L136BA1: db $E0
 L136BA2: db $F0
 L136BA3: db $E0
@@ -11294,7 +11294,7 @@ L136C1C: db $00
 L136C1D: db $00
 L136C1E: db $00
 L136C1F: db $00
-L136C20: db $00
+GFX_Char_OLeona_WinA2: db $00
 L136C21: db $00
 L136C22: db $00
 L136C23: db $00
@@ -11486,7 +11486,7 @@ L136CDC: db $00
 L136CDD: db $00
 L136CDE: db $00
 L136CDF: db $00
-L136CE0: db $00
+GFX_Char_Leona_BalticLauncherL1_A: db $00
 L136CE1: db $00
 L136CE2: db $00
 L136CE3: db $00
@@ -11614,7 +11614,7 @@ L136D5C: db $00
 L136D5D: db $00
 L136D5E: db $00
 L136D5F: db $00
-L136D60: db $00
+GFX_Char_OLeona_WinA3_A: db $00
 L136D61: db $00
 L136D62: db $00
 L136D63: db $00
@@ -11742,7 +11742,7 @@ L136DDC: db $00
 L136DDD: db $00
 L136DDE: db $00
 L136DDF: db $00
-L136DE0: db $00
+GFX_Char_Leona_BalticLauncherL3_A: db $00
 L136DE1: db $00
 L136DE2: db $00
 L136DE3: db $00
@@ -11870,7 +11870,7 @@ L136E5C: db $00
 L136E5D: db $00
 L136E5E: db $00
 L136E5F: db $00
-L136E60: db $00
+GFX_Char_Leona_BalticLauncherL4_A: db $00
 L136E61: db $00
 L136E62: db $00
 L136E63: db $00
@@ -11998,7 +11998,7 @@ L136EDC: db $00
 L136EDD: db $00
 L136EDE: db $00
 L136EDF: db $00
-L136EE0: db $01
+GFX_Char_Leona_BalticLauncherH1: db $01
 L136EE1: db $00
 L136EE2: db $01
 L136EE3: db $00
@@ -12158,7 +12158,7 @@ L136F7C: db $00
 L136F7D: db $00
 L136F7E: db $00
 L136F7F: db $00
-L136F80: db $0F
+GFX_Char_Leona_BalticLauncherH2: db $0F
 L136F81: db $00
 L136F82: db $1F
 L136F83: db $0F
@@ -12318,7 +12318,7 @@ L13701C: db $00
 L13701D: db $00
 L13701E: db $00
 L13701F: db $00
-L137020: db $00
+GFX_Char_Leona_GrandSabreL6: db $00
 L137021: db $00
 L137022: db $00
 L137023: db $00
@@ -12606,7 +12606,7 @@ L13713C: db $00
 L13713D: db $00
 L13713E: db $00
 L13713F: db $00
-L137140: db $01
+GFX_Char_Leona_GrandSabreL7_A: db $01
 L137141: db $00
 L137142: db $03
 L137143: db $01
@@ -12862,7 +12862,7 @@ L13723C: db $00
 L13723D: db $00
 L13723E: db $00
 L13723F: db $00
-L137240: db $CE
+GFX_Char_Leona_GrandSabreL7_B: db $CE
 L137241: db $31
 L137242: db $7B
 L137243: db $04
@@ -12958,7 +12958,7 @@ L13729C: db $00
 L13729D: db $00
 L13729E: db $00
 L13729F: db $00
-L1372A0: db $00
+GFX_Char_Leona_GrandSabreL8_A: db $00
 L1372A1: db $00
 L1372A2: db $00
 L1372A3: db $00
@@ -13150,7 +13150,7 @@ L13735C: db $00
 L13735D: db $00
 L13735E: db $00
 L13735F: db $00
-L137360: db $FC
+GFX_Char_Leona_GrandSabreL10_A: db $FC
 L137361: db $7E
 L137362: db $FC
 L137363: db $7E
@@ -13406,7 +13406,7 @@ L13745C: db $00
 L13745D: db $00
 L13745E: db $80
 L13745F: db $00
-L137460: db $01
+GFX_Char_Leona_GrandSabreL10_B: db $01
 L137461: db $00
 L137462: db $02
 L137463: db $01
@@ -13534,7 +13534,7 @@ L1374DC: db $00
 L1374DD: db $00
 L1374DE: db $00
 L1374DF: db $00
-L1374E0: db $00
+GFX_Char_Leona_GrandSabreL11_A: db $00
 L1374E1: db $00
 L1374E2: db $00
 L1374E3: db $00
@@ -13726,7 +13726,7 @@ L13759C: db $00
 L13759D: db $00
 L13759E: db $00
 L13759F: db $00
-L1375A0: db $0C
+GFX_Char_Leona_XCaliburL3: db $0C
 L1375A1: db $00
 L1375A2: db $1C
 L1375A3: db $00
@@ -13918,7 +13918,7 @@ L13765C: db $00
 L13765D: db $00
 L13765E: db $00
 L13765F: db $00
-L137660: db $00
+GFX_Char_Leona_XCaliburL4_A: db $00
 L137661: db $00
 L137662: db $00
 L137663: db $00
@@ -14046,7 +14046,7 @@ L1376DC: db $60
 L1376DD: db $80
 L1376DE: db $20
 L1376DF: db $C0
-L1376E0: db $07
+GFX_Char_Leona_XCaliburL4_B: db $07
 L1376E1: db $01
 L1376E2: db $07
 L1376E3: db $02
@@ -14206,7 +14206,7 @@ L13777C: db $00
 L13777D: db $00
 L13777E: db $00
 L13777F: db $00
-L137780: db $07
+GFX_Char_Leona_XCaliburL5_B: db $07
 L137781: db $00
 L137782: db $05
 L137783: db $02
@@ -14366,7 +14366,7 @@ L13781C: db $00
 L13781D: db $00
 L13781E: db $00
 L13781F: db $00
-L137820: db $04
+GFX_Char_Leona_XCaliburL6: db $04
 L137821: db $00
 L137822: db $0C
 L137823: db $00
@@ -14558,7 +14558,7 @@ L1378DC: db $00
 L1378DD: db $00
 L1378DE: db $00
 L1378DF: db $00
-L1378E0: db $01
+GFX_Char_Leona_MoonSlasherL1: db $01
 L1378E1: db $00
 L1378E2: db $03
 L1378E3: db $01
@@ -15006,7 +15006,7 @@ L137A9C: db $00
 L137A9D: db $00
 L137A9E: db $00
 L137A9F: db $00
-L137AA0: db $01
+GFX_Char_Leona_MoonSlasherL2: db $01
 L137AA1: db $00
 L137AA2: db $06
 L137AA3: db $01
@@ -15422,7 +15422,7 @@ L137C3C: db $00
 L137C3D: db $00
 L137C3E: db $00
 L137C3F: db $00
-L137C40: db $00
+GFX_Char_Leona_MoonSlasherL3_A: db $00
 L137C41: db $00
 L137C42: db $00
 L137C43: db $00
@@ -15582,7 +15582,7 @@ L137CDC: db $00
 L137CDD: db $00
 L137CDE: db $00
 L137CDF: db $00
-L137CE0: db $00
+GFX_Char_Leona_MoonSlasherL3_B: db $00
 L137CE1: db $80
 L137CE2: db $00
 L137CE3: db $80
@@ -15870,7 +15870,7 @@ L137DFC: db $01
 L137DFD: db $02
 L137DFE: db $00
 L137DFF: db $01
-L137E00: db $23
+GFX_Char_Leona_MoonSlasherL4_B: db $23
 L137E01: db $1D
 L137E02: db $41
 L137E03: db $3E
@@ -15966,7 +15966,7 @@ L137E5C: db $00
 L137E5D: db $00
 L137E5E: db $00
 L137E5F: db $00
-L137E60: db $01
+GFX_Char_Leona_VSlasherS0: db $01
 L137E61: db $00
 L137E62: db $01
 L137E63: db $00
@@ -16190,7 +16190,7 @@ L137F3C: db $00
 L137F3D: db $00
 L137F3E: db $00
 L137F3F: db $00
-L137F40: db $20
+GFX_Char_Leona_VSlasherS4: db $20
 L137F41: db $00
 L137F42: db $30
 L137F43: db $00

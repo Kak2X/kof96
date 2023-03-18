@@ -1,4 +1,4 @@
-L124000: db $00
+GFX_Char_Mai_Idle0: db $00
 L124001: db $00
 L124002: db $00
 L124003: db $00
@@ -190,7 +190,7 @@ L1240BC: db $CF
 L1240BD: db $06
 L1240BE: db $4F
 L1240BF: db $00
-L1240C0: db $00
+GFX_Char_Mai_Idle1: db $00
 L1240C1: db $00
 L1240C2: db $00
 L1240C3: db $00
@@ -382,7 +382,7 @@ L12417C: db $00
 L12417D: db $00
 L12417E: db $00
 L12417F: db $00
-L124180: db $01
+GFX_Char_Mai_Idle2: db $01
 L124181: db $00
 L124182: db $0F
 L124183: db $00
@@ -574,7 +574,7 @@ L12423C: db $00
 L12423D: db $00
 L12423E: db $00
 L12423F: db $00
-L124240: db $01
+GFX_Char_Mai_Idle3: db $01
 L124241: db $00
 L124242: db $0F
 L124243: db $00
@@ -766,7 +766,7 @@ L1242FC: db $00
 L1242FD: db $00
 L1242FE: db $00
 L1242FF: db $00
-L124300: db $01
+GFX_Char_Mai_Idle4: db $01
 L124301: db $00
 L124302: db $0F
 L124303: db $00
@@ -958,7 +958,7 @@ L1243BC: db $00
 L1243BD: db $00
 L1243BE: db $00
 L1243BF: db $00
-L1243C0: db $0F
+GFX_Char_Mai_WalkF0: db $0F
 L1243C1: db $04
 L1243C2: db $0D
 L1243C3: db $06
@@ -1150,7 +1150,7 @@ L12447C: db $17
 L12447D: db $0E
 L12447E: db $0F
 L12447F: db $00
-L124480: db $01
+GFX_Char_Mai_WalkF1_A: db $01
 L124481: db $00
 L124482: db $03
 L124483: db $00
@@ -1246,7 +1246,7 @@ L1244DC: db $FE
 L1244DD: db $00
 L1244DE: db $45
 L1244DF: db $3A
-L1244E0: db $00
+GFX_Char_Mai_WalkF1_B: db $00
 L1244E1: db $00
 L1244E2: db $00
 L1244E3: db $00
@@ -1406,7 +1406,7 @@ L12457C: db $0D
 L12457D: db $06
 L12457E: db $0F
 L12457F: db $00
-L124580: db $0C
+GFX_Char_Mai_WalkF2: db $0C
 L124581: db $03
 L124582: db $13
 L124583: db $0C
@@ -1630,7 +1630,7 @@ L12465C: db $00
 L12465D: db $00
 L12465E: db $00
 L12465F: db $00
-L124660: db $03
+GFX_Char_Mai_Crouch0: db $03
 L124661: db $00
 L124662: db $0F
 L124663: db $00
@@ -1822,7 +1822,7 @@ L12471C: db $00
 L12471D: db $00
 L12471E: db $00
 L12471F: db $00
-L124720: db $10
+GFX_Char_Mai_RollF0: db $10
 L124721: db $00
 L124722: db $34
 L124723: db $00
@@ -2046,7 +2046,7 @@ L1247FC: db $00
 L1247FD: db $00
 L1247FE: db $00
 L1247FF: db $00
-L124800: db $03
+GFX_Char_Mai_RollF1: db $03
 L124801: db $00
 L124802: db $07
 L124803: db $00
@@ -2270,7 +2270,7 @@ L1248DC: db $00
 L1248DD: db $00
 L1248DE: db $00
 L1248DF: db $00
-L1248E0: db $01
+GFX_Char_Mai_JumpN1: db $01
 L1248E1: db $00
 L1248E2: db $03
 L1248E3: db $00
@@ -2430,7 +2430,7 @@ L12497C: db $00
 L12497D: db $00
 L12497E: db $00
 L12497F: db $00
-L124980: db $00
+GFX_Char_Mai_JumpN2: db $00
 L124981: db $00
 L124982: db $00
 L124983: db $00
@@ -2558,7 +2558,7 @@ L1249FC: db $1C
 L1249FD: db $08
 L1249FE: db $18
 L1249FF: db $00
-L124A00: db $03
+GFX_Char_Mai_JumpN3: db $03
 L124A01: db $00
 L124A02: db $0F
 L124A03: db $00
@@ -2686,7 +2686,7 @@ L124A7C: db $00
 L124A7D: db $00
 L124A7E: db $00
 L124A7F: db $00
-L124A80: db $00
+GFX_Char_Mai_BlockG0_A: db $00
 L124A81: db $00
 L124A82: db $00
 L124A83: db $00
@@ -2750,7 +2750,7 @@ L124ABC: db $38
 L124ABD: db $C0
 L124ABE: db $70
 L124ABF: db $A0
-L124AC0: db $01
+GFX_Char_Mai_BlockG0_B: db $01
 L124AC1: db $00
 L124AC2: db $01
 L124AC3: db $00
@@ -2846,7 +2846,7 @@ L124B1C: db $AF
 L124B1D: db $46
 L124B1E: db $CF
 L124B1F: db $00
-L124B20: db $02
+GFX_Char_Mai_BlockC0_B: db $02
 L124B21: db $01
 L124B22: db $07
 L124B23: db $00
@@ -2942,7 +2942,7 @@ L124B7C: db $00
 L124B7D: db $00
 L124B7E: db $00
 L124B7F: db $00
-L124B80: db $9E;X
+GFX_Char_Mai_BlockA0_B: db $9E;X
 L124B81: db $65;X
 L124B82: db $67;X
 L124B83: db $02;X
@@ -3038,7 +3038,7 @@ L124BDC: db $00;X
 L124BDD: db $00;X
 L124BDE: db $00;X
 L124BDF: db $00;X
-L124BE0: db $00
+GFX_Char_Mai_PunchL1: db $00
 L124BE1: db $00
 L124BE2: db $00
 L124BE3: db $00
@@ -3262,7 +3262,7 @@ L124CBC: db $00
 L124CBD: db $00
 L124CBE: db $00
 L124CBF: db $00
-L124CC0: db $00
+GFX_Char_Mai_PunchL0: db $00
 L124CC1: db $00
 L124CC2: db $00
 L124CC3: db $02
@@ -3422,7 +3422,7 @@ L124D5C: db $00
 L124D5D: db $00
 L124D5E: db $00
 L124D5F: db $00
-L124D60: db $00
+GFX_Char_Mai_WinB0: db $00
 L124D61: db $00
 L124D62: db $00
 L124D63: db $00
@@ -3646,7 +3646,7 @@ L124E3C: db $00
 L124E3D: db $00
 L124E3E: db $00
 L124E3F: db $00
-L124E40: db $00
+GFX_Char_Mai_PunchH1: db $00
 L124E41: db $00
 L124E42: db $00
 L124E43: db $00
@@ -3934,7 +3934,7 @@ L124F5C: db $40
 L124F5D: db $80
 L124F5E: db $80
 L124F5F: db $00
-L124F60: db $00
+GFX_Char_Mai_Intro8: db $00
 L124F61: db $00
 L124F62: db $00
 L124F63: db $00
@@ -4126,7 +4126,7 @@ L12501C: db $00
 L12501D: db $00
 L12501E: db $00
 L12501F: db $00
-L125020: db $03
+GFX_Char_Mai_KickL1_A: db $03
 L125021: db $00
 L125022: db $03
 L125023: db $00
@@ -4222,7 +4222,7 @@ L12507C: db $04
 L12507D: db $03
 L12507E: db $05
 L12507F: db $02
-L125080: db $00
+GFX_Char_Mai_KickL1_B: db $00
 L125081: db $00
 L125082: db $00
 L125083: db $00
@@ -4382,7 +4382,7 @@ L12511C: db $00
 L12511D: db $00
 L12511E: db $00
 L12511F: db $00
-L125120: db $03
+GFX_Char_Mai_HopB0: db $03
 L125121: db $00
 L125122: db $1F
 L125123: db $00
@@ -4574,7 +4574,7 @@ L1251DC: db $00
 L1251DD: db $00
 L1251DE: db $00
 L1251DF: db $00
-L1251E0: db $04
+GFX_Char_Mai_KickH1_A: db $04
 L1251E1: db $00
 L1251E2: db $06
 L1251E3: db $00
@@ -4670,7 +4670,7 @@ L12523C: db $04
 L12523D: db $03
 L12523E: db $05
 L12523F: db $02
-L125240: db $00
+GFX_Char_Mai_PunchCL1_A: db $00
 L125241: db $00
 L125242: db $00
 L125243: db $00
@@ -4734,7 +4734,7 @@ L12527C: db $00
 L12527D: db $00
 L12527E: db $00
 L12527F: db $00
-L125280: db $03
+GFX_Char_Mai_PunchCL1_B: db $03
 L125281: db $00
 L125282: db $07
 L125283: db $00
@@ -4926,7 +4926,7 @@ L12533C: db $00
 L12533D: db $00
 L12533E: db $00
 L12533F: db $00
-L125340: db $03
+GFX_Char_Mai_PunchCL0: db $03
 L125341: db $00
 L125342: db $0F
 L125343: db $00
@@ -5118,7 +5118,7 @@ L1253FC: db $00
 L1253FD: db $00
 L1253FE: db $00
 L1253FF: db $00
-L125400: db $01
+GFX_Char_Mai_PunchCH0: db $01
 L125401: db $04
 L125402: db $0D
 L125403: db $02
@@ -5310,7 +5310,7 @@ L1254BC: db $00
 L1254BD: db $00
 L1254BE: db $00
 L1254BF: db $00
-L1254C0: db $06
+GFX_Char_Mai_PunchCH1: db $06
 L1254C1: db $00
 L1254C2: db $0F
 L1254C3: db $06
@@ -5502,7 +5502,7 @@ L12557C: db $00
 L12557D: db $00
 L12557E: db $00
 L12557F: db $00
-L125580: db $01
+GFX_Char_Mai_KickCL1: db $01
 L125581: db $00
 L125582: db $3E
 L125583: db $01
@@ -5694,7 +5694,7 @@ L12563C: db $FF
 L12563D: db $70
 L12563E: db $77
 L12563F: db $88
-L125640: db $00
+GFX_Char_Mai_KickCL0: db $00
 L125641: db $00
 L125642: db $00
 L125643: db $01
@@ -5854,7 +5854,7 @@ L1256DC: db $00
 L1256DD: db $00
 L1256DE: db $00
 L1256DF: db $00
-L1256E0: db $01
+GFX_Char_Mai_KickCH1: db $01
 L1256E1: db $00
 L1256E2: db $7F
 L1256E3: db $01
@@ -6078,7 +6078,7 @@ L1257BC: db $60
 L1257BD: db $00
 L1257BE: db $00
 L1257BF: db $00
-L1257C0: db $01
+GFX_Char_Mai_PunchA0: db $01
 L1257C1: db $00
 L1257C2: db $02
 L1257C3: db $01
@@ -6334,7 +6334,7 @@ L1258BC: db $00
 L1258BD: db $00
 L1258BE: db $00
 L1258BF: db $00
-L1258C0: db $01
+GFX_Char_Mai_KickA0: db $01
 L1258C1: db $00
 L1258C2: db $07
 L1258C3: db $01
@@ -6590,7 +6590,7 @@ L1259BC: db $00
 L1259BD: db $00
 L1259BE: db $00
 L1259BF: db $00
-L1259C0: db $00
+GFX_Char_Mai_WinA0: db $00
 L1259C1: db $00
 L1259C2: db $00
 L1259C3: db $00
@@ -6814,7 +6814,7 @@ L125A9C: db $00
 L125A9D: db $00
 L125A9E: db $00
 L125A9F: db $00
-L125AA0: db $1C
+GFX_Char_Mai_AttackG1: db $1C
 L125AA1: db $00
 L125AA2: db $7B
 L125AA3: db $04
@@ -7070,7 +7070,7 @@ L125B9C: db $00
 L125B9D: db $00
 L125B9E: db $00
 L125B9F: db $00
-L125BA0: db $01
+GFX_Char_Mai_AttackA0: db $01
 L125BA1: db $00
 L125BA2: db $06
 L125BA3: db $01
@@ -7326,7 +7326,7 @@ L125C9C: db $58
 L125C9D: db $A0
 L125C9E: db $E0
 L125C9F: db $00
-L125CA0: db $01
+GFX_Char_Mai_TimeOver2: db $01
 L125CA1: db $00
 L125CA2: db $07
 L125CA3: db $00
@@ -7518,7 +7518,7 @@ L125D5C: db $00
 L125D5D: db $00
 L125D5E: db $00
 L125D5F: db $00
-L125D60: db $03
+GFX_Char_Mai_GuardBreakG0: db $03
 L125D61: db $00
 L125D62: db $05
 L125D63: db $02
@@ -7678,7 +7678,7 @@ L125DFC: db $78
 L125DFD: db $30
 L125DFE: db $78
 L125DFF: db $00
-L125E00: db $00;X
+GFX_Char_Mai_Hitlow0: db $00;X
 L125E01: db $00;X
 L125E02: db $00;X
 L125E03: db $00;X
@@ -7870,7 +7870,7 @@ L125EBC: db $00;X
 L125EBD: db $00;X
 L125EBE: db $00;X
 L125EBF: db $00;X
-L125EC0: db $C1
+GFX_Char_Mai_DropMain1: db $C1
 L125EC1: db $00
 L125EC2: db $E2
 L125EC3: db $41
@@ -8030,7 +8030,7 @@ L125F5C: db $00
 L125F5D: db $00
 L125F5E: db $00
 L125F5F: db $00
-L125F60: db $03
+GFX_Char_Mai_DropMain2: db $03
 L125F61: db $00
 L125F62: db $0F
 L125F63: db $03
@@ -8190,7 +8190,7 @@ L125FFC: db $00
 L125FFD: db $00
 L125FFE: db $00
 L125FFF: db $00
-L126000: db $00
+GFX_Char_Mai_ChargeMeter0_A: db $00
 L126001: db $00
 L126002: db $07
 L126003: db $00
@@ -8350,7 +8350,7 @@ L12609C: db $FE
 L12609D: db $00
 L12609E: db $FF
 L12609F: db $00
-L1260A0: db $02
+GFX_Char_Mai_ChargeMeter0_B: db $02
 L1260A1: db $01
 L1260A2: db $04
 L1260A3: db $03
@@ -8446,7 +8446,7 @@ L1260FC: db $00
 L1260FD: db $00
 L1260FE: db $00
 L1260FF: db $00
-L126100: db $00
+GFX_Char_Mai_ChargeMeter1_A: db $00
 L126101: db $00
 L126102: db $00
 L126103: db $00
@@ -8606,7 +8606,7 @@ L12619C: db $F0
 L12619D: db $00
 L12619E: db $E0
 L12619F: db $00
-L1261A0: db $03
+GFX_Char_Mai_Intro0: db $03
 L1261A1: db $00
 L1261A2: db $07
 L1261A3: db $00
@@ -8830,7 +8830,7 @@ L12627C: db $00
 L12627D: db $00
 L12627E: db $00
 L12627F: db $00
-L126280: db $01
+GFX_Char_Mai_Intro1: db $01
 L126281: db $00
 L126282: db $07
 L126283: db $00
@@ -9054,7 +9054,7 @@ L12635C: db $00
 L12635D: db $00
 L12635E: db $00
 L12635F: db $00
-L126360: db $00
+GFX_Char_Mai_Intro2: db $00
 L126361: db $00
 L126362: db $00
 L126363: db $00
@@ -9246,7 +9246,7 @@ L12641C: db $AD
 L12641D: db $F2
 L12641E: db $FF
 L12641F: db $00
-L126420: db $F8
+GFX_Char_Mai_Intro3_A: db $F8
 L126421: db $00
 L126422: db $D6
 L126423: db $78
@@ -9374,7 +9374,7 @@ L12649C: db $91
 L12649D: db $6E
 L12649E: db $99
 L12649F: db $66
-L1264A0: db $00
+GFX_Char_Mai_Intro3_B: db $00
 L1264A1: db $00
 L1264A2: db $00
 L1264A3: db $00
@@ -9662,7 +9662,7 @@ L1265BC: db $00
 L1265BD: db $00
 L1265BE: db $00
 L1265BF: db $00
-L1265C0: db $07
+GFX_Char_Mai_Intro4: db $07
 L1265C1: db $00
 L1265C2: db $1A
 L1265C3: db $05
@@ -9918,7 +9918,7 @@ L1266BC: db $60
 L1266BD: db $C0
 L1266BE: db $E0
 L1266BF: db $00
-L1266C0: db $00
+GFX_Char_Mai_Intro5: db $00
 L1266C1: db $00
 L1266C2: db $00
 L1266C3: db $00
@@ -10174,7 +10174,7 @@ L1267BC: db $1B
 L1267BD: db $0E
 L1267BE: db $1F
 L1267BF: db $00
-L1267C0: db $00
+GFX_Char_Mai_Intro7_A: db $00
 L1267C1: db $00
 L1267C2: db $00
 L1267C3: db $00
@@ -10270,7 +10270,7 @@ L12681C: db $91
 L12681D: db $6E
 L12681E: db $99
 L12681F: db $66
-L126820: db $01
+GFX_Char_Mai_Taunt0_A: db $01
 L126821: db $00
 L126822: db $03
 L126823: db $00
@@ -10334,7 +10334,7 @@ L12685C: db $FE
 L12685D: db $00
 L12685E: db $45
 L12685F: db $3A
-L126860: db $00
+GFX_Char_Mai_Taunt1_A: db $00
 L126861: db $00
 L126862: db $00
 L126863: db $00
@@ -10398,7 +10398,7 @@ L12689C: db $04
 L12689D: db $03
 L12689E: db $82
 L12689F: db $01
-L1268A0: db $00
+GFX_Char_Mai_Taunt1_B: db $00
 L1268A1: db $00
 L1268A2: db $00
 L1268A3: db $00
@@ -10590,7 +10590,7 @@ L12695C: db $00
 L12695D: db $00
 L12695E: db $00
 L12695F: db $00
-L126960: db $18
+GFX_Char_Mai_Taunt2_A: db $18
 L126961: db $00
 L126962: db $28
 L126963: db $10
@@ -10654,7 +10654,7 @@ L12699C: db $04
 L12699D: db $03
 L12699E: db $82
 L12699F: db $01
-L1269A0: db $00
+GFX_Char_Mai_Taunt11_A: db $00
 L1269A1: db $00
 L1269A2: db $00
 L1269A3: db $00
@@ -10718,7 +10718,7 @@ L1269DC: db $04
 L1269DD: db $03
 L1269DE: db $82
 L1269DF: db $01
-L1269E0: db $03
+GFX_Char_Mai_WinA2: db $03
 L1269E1: db $00
 L1269E2: db $0F
 L1269E3: db $03
@@ -10974,7 +10974,7 @@ L126ADC: db $00
 L126ADD: db $00
 L126ADE: db $00
 L126ADF: db $00
-L126AE0: db $00
+GFX_Char_Mai_WinA6: db $00
 L126AE1: db $01
 L126AE2: db $00
 L126AE3: db $01
@@ -11230,7 +11230,7 @@ L126BDC: db $00
 L126BDD: db $00
 L126BDE: db $00
 L126BDF: db $00
-L126BE0: db $03
+GFX_Char_Mai_WinA7: db $03
 L126BE1: db $00
 L126BE2: db $07
 L126BE3: db $00
@@ -11486,7 +11486,7 @@ L126CDC: db $00
 L126CDD: db $00
 L126CDE: db $00
 L126CDF: db $00
-L126CE0: db $00
+GFX_Char_Mai_WinB1: db $00
 L126CE1: db $00
 L126CE2: db $00
 L126CE3: db $00
@@ -11710,7 +11710,7 @@ L126DBC: db $00
 L126DBD: db $00
 L126DBE: db $00
 L126DBF: db $00
-L126DC0: db $00
+GFX_Char_Mai_WinB2_A: db $00
 L126DC1: db $00
 L126DC2: db $18
 L126DC3: db $00
@@ -11870,7 +11870,7 @@ L126E5C: db $00
 L126E5D: db $00
 L126E5E: db $80
 L126E5F: db $00
-L126E60: db $09
+GFX_Char_Mai_WinB2_B: db $09
 L126E61: db $06
 L126E62: db $0B
 L126E63: db $05
@@ -11934,7 +11934,7 @@ L126E9C: db $00
 L126E9D: db $00
 L126E9E: db $00
 L126E9F: db $00
-L126EA0: db $00
+GFX_Char_Mai_WinB3_A: db $00
 L126EA1: db $00
 L126EA2: db $00
 L126EA3: db $00
@@ -12094,7 +12094,7 @@ L126F3C: db $00
 L126F3D: db $00
 L126F3E: db $00
 L126F3F: db $00
-L126F40: db $00
+GFX_Char_Mai_WinB4: db $00
 L126F41: db $02
 L126F42: db $01
 L126F43: db $02
@@ -12286,7 +12286,7 @@ L126FFC: db $00
 L126FFD: db $00
 L126FFE: db $00
 L126FFF: db $00
-L127000: db $3E
+GFX_Char_Mai_WinB5_A: db $3E
 L127001: db $01
 L127002: db $5C
 L127003: db $2B
@@ -12350,7 +12350,7 @@ L12703C: db $00
 L12703D: db $00
 L12703E: db $00
 L12703F: db $00
-L127040: db $00
+GFX_Char_Mai_WinB5_B: db $00
 L127041: db $00
 L127042: db $00
 L127043: db $00
@@ -12542,7 +12542,7 @@ L1270FC: db $DB
 L1270FD: db $6E
 L1270FE: db $FF
 L1270FF: db $00
-L127100: db $3E
+GFX_Char_Mai_WinB6_A: db $3E
 L127101: db $01
 L127102: db $59
 L127103: db $26
@@ -12606,7 +12606,7 @@ L12713C: db $00
 L12713D: db $00
 L12713E: db $00
 L12713F: db $00
-L127140: db $03
+GFX_Char_Mai_ThrowG0: db $03
 L127141: db $00
 L127142: db $C7
 L127143: db $00
@@ -12798,7 +12798,7 @@ L1271FC: db $00
 L1271FD: db $00
 L1271FE: db $00
 L1271FF: db $00
-L127200: db $03
+GFX_Char_Mai_CHoHissatsuShinobibachiD2: db $03
 L127201: db $00
 L127202: db $0F
 L127203: db $00
@@ -13022,7 +13022,7 @@ L1272DC: db $00
 L1272DD: db $00
 L1272DE: db $00
 L1272DF: db $00
-L1272E0: db $00
+GFX_Char_Mai_CHoHissatsuShinobibachiD1_A: db $00
 L1272E1: db $00
 L1272E2: db $00
 L1272E3: db $00
@@ -13054,7 +13054,7 @@ L1272FC: db $1F
 L1272FD: db $00
 L1272FE: db $3F
 L1272FF: db $08
-L127300: db $02
+GFX_Char_Mai_HishoRyuEnJinL2_B: db $02
 L127301: db $01
 L127302: db $03
 L127303: db $00
@@ -13278,7 +13278,7 @@ L1273DC: db $00
 L1273DD: db $00
 L1273DE: db $00
 L1273DF: db $00
-L1273E0: db $03
+GFX_Char_Mai_ThrowG4: db $03
 L1273E1: db $00
 L1273E2: db $0F
 L1273E3: db $00
@@ -13470,7 +13470,7 @@ L12749C: db $00
 L12749D: db $00
 L12749E: db $00
 L12749F: db $00
-L1274A0: db $03
+GFX_Char_Mai_RunF0_A: db $03
 L1274A1: db $00
 L1274A2: db $07
 L1274A3: db $00
@@ -13566,7 +13566,7 @@ L1274FC: db $00
 L1274FD: db $00
 L1274FE: db $70
 L1274FF: db $00
-L127500: db $FC
+GFX_Char_Mai_RunF0_B: db $FC
 L127501: db $07
 L127502: db $6F
 L127503: db $DF
@@ -13726,7 +13726,7 @@ L12759C: db $00
 L12759D: db $00
 L12759E: db $00
 L12759F: db $00
-L1275A0: db $FC
+GFX_Char_Mai_RunF1_B: db $FC
 L1275A1: db $07
 L1275A2: db $6F
 L1275A3: db $DF
@@ -13886,7 +13886,7 @@ L12763C: db $00
 L12763D: db $00
 L12763E: db $00
 L12763F: db $00
-L127640: db $00
+GFX_Char_Mai_KaCHoSenL0: db $00
 L127641: db $14
 L127642: db $20
 L127643: db $14
@@ -14078,7 +14078,7 @@ L1276FC: db $00
 L1276FD: db $00
 L1276FE: db $00
 L1276FF: db $00
-L127700: db $0B
+GFX_Char_Mai_KaCHoSenL2: db $0B
 L127701: db $00
 L127702: db $2F
 L127703: db $00
@@ -14302,7 +14302,7 @@ L1277DC: db $00
 L1277DD: db $00
 L1277DE: db $00
 L1277DF: db $00
-L1277E0: db $00
+GFX_Char_Mai_KaCHoSenL3: db $00
 L1277E1: db $00
 L1277E2: db $00
 L1277E3: db $00
@@ -14494,7 +14494,7 @@ L12789C: db $1F
 L12789D: db $00
 L12789E: db $00
 L12789F: db $00
-L1278A0: db $0F
+GFX_Char_Mai_KuuchuuMusasabiL1: db $0F
 L1278A1: db $00
 L1278A2: db $7F
 L1278A3: db $00
@@ -14686,7 +14686,7 @@ L12795C: db $05
 L12795D: db $02
 L12795E: db $0B
 L12795F: db $06
-L127960: db $03
+GFX_Char_Mai_HissatsuShinobibachiL3: db $03
 L127961: db $00
 L127962: db $0F
 L127963: db $00
@@ -14910,7 +14910,7 @@ L127A3C: db $00
 L127A3D: db $00
 L127A3E: db $00
 L127A3F: db $00
-L127A40: db $00
+GFX_Char_Mai_HishoRyuEnJinL1: db $00
 L127A41: db $00
 L127A42: db $00
 L127A43: db $00
@@ -15166,7 +15166,7 @@ L127B3C: db $00
 L127B3D: db $00
 L127B3E: db $00
 L127B3F: db $00
-L127B40: db $00
+GFX_Char_Mai_HishoRyuEnJinL2_A: db $00
 L127B41: db $00
 L127B42: db $00
 L127B43: db $00
@@ -15390,7 +15390,7 @@ L127C1C: db $0C
 L127C1D: db $04
 L127C1E: db $04
 L127C1F: db $00
-L127C20: db $5E
+GFX_Char_Mai_HishoRyuEnJinL3_B: db $5E
 L127C21: db $5F
 L127C22: db $4B
 L127C23: db $4F
@@ -15518,7 +15518,7 @@ L127C9C: db $95
 L127C9D: db $95
 L127C9E: db $40
 L127C9F: db $C0
-L127CA0: db $06
+GFX_Char_Mai_RyuEnBuL2_A: db $06
 L127CA1: db $06
 L127CA2: db $03
 L127CA3: db $03
@@ -15646,7 +15646,7 @@ L127D1C: db $00
 L127D1D: db $00
 L127D1E: db $00
 L127D1F: db $00
-L127D20: db $00
+GFX_Char_Mai_RyuEnBuL3_A: db $00
 L127D21: db $00
 L127D22: db $00
 L127D23: db $00
@@ -15902,7 +15902,7 @@ L127E1C: db $00
 L127E1D: db $00
 L127E1E: db $00
 L127E1F: db $00
-L127E20: db $BF
+GFX_Char_Mai_RyuEnBuL3_B: db $BF
 L127E21: db $40
 L127E22: db $FF
 L127E23: db $03
@@ -16030,7 +16030,7 @@ L127E9C: db $00
 L127E9D: db $00
 L127E9E: db $00
 L127E9F: db $00
-L127EA0: db $0C
+GFX_Char_Mai_RyuEnBuL4_A: db $0C
 L127EA1: db $0C
 L127EA2: db $00
 L127EA3: db $00
@@ -16190,7 +16190,7 @@ L127F3C: db $00
 L127F3D: db $00
 L127F3E: db $00
 L127F3F: db $00
-L127F40: db $C7
+GFX_Char_Mai_CHoHissatsuShinobibachiS3_B: db $C7
 L127F41: db $7D
 L127F42: db $E7
 L127F43: db $7C

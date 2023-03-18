@@ -1,4 +1,4 @@
-L114000: db $00
+GFX_Char_Athena_Idle0: db $00
 L114001: db $00
 L114002: db $00
 L114003: db $00
@@ -222,7 +222,7 @@ L1140DC: db $00
 L1140DD: db $00
 L1140DE: db $00
 L1140DF: db $00
-L1140E0: db $00
+GFX_Char_Athena_Idle1: db $00
 L1140E1: db $00
 L1140E2: db $00
 L1140E3: db $00
@@ -446,7 +446,7 @@ L1141BC: db $00
 L1141BD: db $00
 L1141BE: db $00
 L1141BF: db $00
-L1141C0: db $00
+GFX_Char_Athena_Idle2: db $00
 L1141C1: db $00
 L1141C2: db $00
 L1141C3: db $00
@@ -670,7 +670,7 @@ L11429C: db $00
 L11429D: db $00
 L11429E: db $00
 L11429F: db $00
-L1142A0: db $00
+GFX_Char_Athena_Idle3_A: db $00
 L1142A1: db $00
 L1142A2: db $00
 L1142A3: db $00
@@ -830,7 +830,7 @@ L11433C: db $D8
 L11433D: db $A0
 L11433E: db $88
 L11433F: db $70
-L114340: db $01
+GFX_Char_Athena_Idle3_B: db $01
 L114341: db $00
 L114342: db $01
 L114343: db $00
@@ -926,7 +926,7 @@ L11439C: db $00
 L11439D: db $00
 L11439E: db $00
 L11439F: db $00
-L1143A0: db $0F
+GFX_Char_Athena_WalkF0: db $0F
 L1143A1: db $00
 L1143A2: db $3F
 L1143A3: db $0E
@@ -1118,7 +1118,7 @@ L11445C: db $00
 L11445D: db $00
 L11445E: db $00
 L11445F: db $00
-L114460: db $01
+GFX_Char_Athena_WalkF1: db $01
 L114461: db $00
 L114462: db $07
 L114463: db $01
@@ -1278,7 +1278,7 @@ L1144FC: db $3C
 L1144FD: db $18
 L1144FE: db $3C
 L1144FF: db $00
-L114500: db $04
+GFX_Char_Athena_WalkF2: db $04
 L114501: db $00
 L114502: db $03
 L114503: db $00
@@ -1470,7 +1470,7 @@ L1145BC: db $00
 L1145BD: db $00
 L1145BE: db $00
 L1145BF: db $00
-L1145C0: db $E0
+GFX_Char_Athena_Crouch0: db $E0
 L1145C1: db $00
 L1145C2: db $B0
 L1145C3: db $60
@@ -1662,7 +1662,7 @@ L11467C: db $C0
 L11467D: db $80
 L11467E: db $C0
 L11467F: db $00
-L114680: db $05
+GFX_Char_Athena_JumpN1: db $05
 L114681: db $00
 L114682: db $03
 L114683: db $00
@@ -1854,7 +1854,7 @@ L11473C: db $00
 L11473D: db $00
 L11473E: db $00
 L11473F: db $00
-L114740: db $03
+GFX_Char_Athena_JumpN3: db $03
 L114741: db $00
 L114742: db $01
 L114743: db $00
@@ -2014,7 +2014,7 @@ L1147DC: db $00
 L1147DD: db $00
 L1147DE: db $00
 L1147DF: db $00
-L1147E0: db $07
+GFX_Char_Athena_JumpF2: db $07
 L1147E1: db $00
 L1147E2: db $0F
 L1147E3: db $07
@@ -2142,7 +2142,7 @@ L11485C: db $00
 L11485D: db $00
 L11485E: db $00
 L11485F: db $00
-L114860: db $01
+GFX_Char_Athena_JumpF5: db $01
 L114861: db $00
 L114862: db $01
 L114863: db $00
@@ -2334,7 +2334,7 @@ L11491C: db $00
 L11491D: db $00
 L11491E: db $00
 L11491F: db $00
-L114920: db $00
+GFX_Char_Athena_BlockG0_A: db $00
 L114921: db $00
 L114922: db $00
 L114923: db $00
@@ -2398,7 +2398,7 @@ L11495C: db $3E
 L11495D: db $D0
 L11495E: db $7E
 L11495F: db $B0
-L114960: db $01
+GFX_Char_Athena_BlockG0_B: db $01
 L114961: db $00
 L114962: db $00
 L114963: db $00
@@ -2494,7 +2494,7 @@ L1149BC: db $0F
 L1149BD: db $06
 L1149BE: db $0F
 L1149BF: db $00
-L1149C0: db $03
+GFX_Char_Athena_BlockC0_B: db $03
 L1149C1: db $00
 L1149C2: db $1F
 L1149C3: db $03
@@ -2590,7 +2590,7 @@ L114A1C: db $00
 L114A1D: db $00
 L114A1E: db $00
 L114A1F: db $00
-L114A20: db $5F;X
+GFX_Char_Athena_BlockA0_B: db $5F;X
 L114A21: db $26;X
 L114A22: db $3F;X
 L114A23: db $03;X
@@ -2686,7 +2686,7 @@ L114A7C: db $00;X
 L114A7D: db $00;X
 L114A7E: db $00;X
 L114A7F: db $00;X
-L114A80: db $00
+GFX_Char_Athena_GuardBreakG0: db $00
 L114A81: db $00
 L114A82: db $00
 L114A83: db $00
@@ -2846,7 +2846,7 @@ L114B1C: db $00
 L114B1D: db $00
 L114B1E: db $00
 L114B1F: db $00
-L114B20: db $07
+GFX_Char_Athena_TimeOver2: db $07
 L114B21: db $00
 L114B22: db $0F
 L114B23: db $00
@@ -3006,7 +3006,7 @@ L114BBC: db $00
 L114BBD: db $00
 L114BBE: db $00
 L114BBF: db $00
-L114BC0: db $01;X
+GFX_Char_Athena_Hitlow0: db $01;X
 L114BC1: db $00;X
 L114BC2: db $01;X
 L114BC3: db $00;X
@@ -3166,7 +3166,7 @@ L114C5C: db $00;X
 L114C5D: db $00;X
 L114C5E: db $00;X
 L114C5F: db $00;X
-L114C60: db $00
+GFX_Char_Athena_DropMain1: db $00
 L114C61: db $00
 L114C62: db $01
 L114C63: db $00
@@ -3358,7 +3358,7 @@ L114D1C: db $E0
 L114D1D: db $C0
 L114D1E: db $C0
 L114D1F: db $00
-L114D20: db $07
+GFX_Char_Athena_DropMain2: db $07
 L114D21: db $00
 L114D22: db $1F
 L114D23: db $07
@@ -3518,7 +3518,7 @@ L114DBC: db $00
 L114DBD: db $00
 L114DBE: db $00
 L114DBF: db $00
-L114DC0: db $00
+GFX_Char_Athena_PunchL1: db $00
 L114DC1: db $00
 L114DC2: db $00
 L114DC3: db $00
@@ -3742,7 +3742,7 @@ L114E9C: db $00
 L114E9D: db $00
 L114E9E: db $00
 L114E9F: db $00
-L114EA0: db $00
+GFX_Char_Athena_PunchL0_A: db $00
 L114EA1: db $00
 L114EA2: db $00
 L114EA3: db $00
@@ -3838,7 +3838,7 @@ L114EFC: db $F2
 L114EFD: db $7C
 L114EFE: db $3C
 L114EFF: db $E0
-L114F00: db $7F
+GFX_Char_Athena_PunchL0_B: db $7F
 L114F01: db $0F
 L114F02: db $0F
 L114F03: db $07
@@ -3934,7 +3934,7 @@ L114F5C: db $00
 L114F5D: db $00
 L114F5E: db $00
 L114F5F: db $00
-L114F60: db $00
+GFX_Char_Athena_PunchH1_A: db $00
 L114F61: db $00
 L114F62: db $00
 L114F63: db $00
@@ -4062,7 +4062,7 @@ L114FDC: db $60
 L114FDD: db $80
 L114FDE: db $90
 L114FDF: db $60
-L114FE0: db $00
+GFX_Char_Athena_PunchH1_B: db $00
 L114FE1: db $00
 L114FE2: db $00
 L114FE3: db $00
@@ -4222,7 +4222,7 @@ L11507C: db $00
 L11507D: db $00
 L11507E: db $00
 L11507F: db $00
-L115080: db $00
+GFX_Char_Athena_KickL1_A: db $00
 L115081: db $00
 L115082: db $00
 L115083: db $00
@@ -4382,7 +4382,7 @@ L11511C: db $00
 L11511D: db $00
 L11511E: db $F0
 L11511F: db $00
-L115120: db $0F
+GFX_Char_Athena_KickL1_B: db $0F
 L115121: db $00
 L115122: db $1F
 L115123: db $0F
@@ -4510,7 +4510,7 @@ L11519C: db $00
 L11519D: db $00
 L11519E: db $00
 L11519F: db $00
-L1151A0: db $07
+GFX_Char_Athena_KickL0: db $07
 L1151A1: db $00
 L1151A2: db $0F
 L1151A3: db $00
@@ -4638,7 +4638,7 @@ L11521C: db $00
 L11521D: db $00
 L11521E: db $00
 L11521F: db $00
-L115220: db $00
+GFX_Char_Athena_KickH0: db $00
 L115221: db $00
 L115222: db $00
 L115223: db $00
@@ -4830,7 +4830,7 @@ L1152DC: db $00
 L1152DD: db $00
 L1152DE: db $00
 L1152DF: db $00
-L1152E0: db $00
+GFX_Char_Athena_KickH1: db $00
 L1152E1: db $00
 L1152E2: db $00
 L1152E3: db $00
@@ -5086,7 +5086,7 @@ L1153DC: db $00
 L1153DD: db $00
 L1153DE: db $00
 L1153DF: db $00
-L1153E0: db $01
+GFX_Char_Athena_KickH2: db $01
 L1153E1: db $00
 L1153E2: db $02
 L1153E3: db $01
@@ -5246,7 +5246,7 @@ L11547C: db $00
 L11547D: db $00
 L11547E: db $00
 L11547F: db $00
-L115480: db $3F
+GFX_Char_Athena_PunchCL0_B: db $3F
 L115481: db $07
 L115482: db $7F
 L115483: db $03
@@ -5342,7 +5342,7 @@ L1154DC: db $00
 L1154DD: db $00
 L1154DE: db $00
 L1154DF: db $00
-L1154E0: db $C0
+GFX_Char_Athena_PunchCL1: db $C0
 L1154E1: db $00
 L1154E2: db $A0
 L1154E3: db $40
@@ -5566,7 +5566,7 @@ L1155BC: db $00
 L1155BD: db $00
 L1155BE: db $00
 L1155BF: db $00
-L1155C0: db $00
+GFX_Char_Athena_PunchCH1_A: db $00
 L1155C1: db $00
 L1155C2: db $00
 L1155C3: db $00
@@ -5694,7 +5694,7 @@ L11563C: db $F8
 L11563D: db $00
 L11563E: db $F0
 L11563F: db $00
-L115640: db $7F
+GFX_Char_Athena_PunchCH1_B: db $7F
 L115641: db $07
 L115642: db $87
 L115643: db $79
@@ -5790,7 +5790,7 @@ L11569C: db $00
 L11569D: db $00
 L11569E: db $00
 L11569F: db $00
-L1156A0: db $03
+GFX_Char_Athena_KickCL1: db $03
 L1156A1: db $00
 L1156A2: db $1F
 L1156A3: db $03
@@ -6014,7 +6014,7 @@ L11577C: db $00
 L11577D: db $00
 L11577E: db $00
 L11577F: db $00
-L115780: db $01
+GFX_Char_Athena_KickCL0: db $01
 L115781: db $00
 L115782: db $03
 L115783: db $00
@@ -6142,7 +6142,7 @@ L1157FC: db $00
 L1157FD: db $00
 L1157FE: db $00
 L1157FF: db $00
-L115800: db $70
+GFX_Char_Athena_KickCH1: db $70
 L115801: db $00
 L115802: db $7C
 L115803: db $30
@@ -6366,7 +6366,7 @@ L1158DC: db $00
 L1158DD: db $00
 L1158DE: db $00
 L1158DF: db $00
-L1158E0: db $00
+GFX_Char_Athena_PunchA0: db $00
 L1158E1: db $00
 L1158E2: db $00
 L1158E3: db $00
@@ -6558,7 +6558,7 @@ L11599C: db $00
 L11599D: db $00
 L11599E: db $00
 L11599F: db $00
-L1159A0: db $00
+GFX_Char_Athena_KickA0: db $00
 L1159A1: db $00
 L1159A2: db $00
 L1159A3: db $00
@@ -6782,7 +6782,7 @@ L115A7C: db $00
 L115A7D: db $00
 L115A7E: db $00
 L115A7F: db $00
-L115A80: db $01
+GFX_Char_Athena_RollF1: db $01
 L115A81: db $00
 L115A82: db $03
 L115A83: db $01
@@ -7038,7 +7038,7 @@ L115B7C: db $00
 L115B7D: db $00
 L115B7E: db $00
 L115B7F: db $00
-L115B80: db $00
+GFX_Char_Athena_RollF3_A: db $00
 L115B81: db $00
 L115B82: db $00
 L115B83: db $00
@@ -7166,7 +7166,7 @@ L115BFC: db $86
 L115BFD: db $00
 L115BFE: db $40
 L115BFF: db $80
-L115C00: db $00
+GFX_Char_Athena_ThrowG0_A: db $00
 L115C01: db $00
 L115C02: db $00
 L115C03: db $00
@@ -7326,7 +7326,7 @@ L115C9C: db $98
 L115C9D: db $60
 L115C9E: db $F8
 L115C9F: db $00
-L115CA0: db $1F
+GFX_Char_Athena_ThrowG1_A: db $1F
 L115CA1: db $00
 L115CA2: db $7E
 L115CA3: db $0F
@@ -7422,7 +7422,7 @@ L115CFC: db $00
 L115CFD: db $00
 L115CFE: db $0F
 L115CFF: db $00
-L115D00: db $1F
+GFX_Char_Athena_Intro9_B: db $1F
 L115D01: db $0F
 L115D02: db $1F
 L115D03: db $07
@@ -7518,7 +7518,7 @@ L115D5C: db $00
 L115D5D: db $00
 L115D5E: db $00
 L115D5F: db $00
-L115D60: db $18
+GFX_Char_Athena_ThrowG5_A: db $18
 L115D61: db $00
 L115D62: db $14
 L115D63: db $08
@@ -7646,7 +7646,7 @@ L115DDC: db $00
 L115DDD: db $00
 L115DDE: db $00
 L115DDF: db $00
-L115DE0: db $C4
+GFX_Char_Athena_PsychoReflectorL2_B: db $C4
 L115DE1: db $3B
 L115DE2: db $FF
 L115DE3: db $00
@@ -7742,7 +7742,7 @@ L115E3C: db $00
 L115E3D: db $00
 L115E3E: db $00
 L115E3F: db $00
-L115E40: db $07;X
+GFX_Char_Athena_ThrowA0: db $07;X
 L115E41: db $00;X
 L115E42: db $0F;X
 L115E43: db $00;X
@@ -7870,7 +7870,7 @@ L115EBC: db $00;X
 L115EBD: db $00;X
 L115EBE: db $00;X
 L115EBF: db $00;X
-L115EC0: db $E0;X
+GFX_Char_Athena_ThrowA3: db $E0;X
 L115EC1: db $00;X
 L115EC2: db $B0;X
 L115EC3: db $60;X
@@ -8062,7 +8062,7 @@ L115F7C: db $E0;X
 L115F7D: db $40;X
 L115F7E: db $E0;X
 L115F7F: db $00;X
-L115F80: db $01
+GFX_Char_Athena_RunF0: db $01
 L115F81: db $00
 L115F82: db $07
 L115F83: db $00
@@ -8286,7 +8286,7 @@ L11605C: db $00
 L11605D: db $00
 L11605E: db $00
 L11605F: db $00
-L116060: db $1E
+GFX_Char_Athena_RunF1: db $1E
 L116061: db $00
 L116062: db $7F
 L116063: db $00
@@ -8446,7 +8446,7 @@ L1160FC: db $00
 L1160FD: db $00
 L1160FE: db $00
 L1160FF: db $00
-L116100: db $00
+GFX_Char_Athena_RunF2: db $00
 L116101: db $00
 L116102: db $01
 L116103: db $00
@@ -8670,7 +8670,7 @@ L1161DC: db $00
 L1161DD: db $00
 L1161DE: db $00
 L1161DF: db $00
-L1161E0: db $FF
+GFX_Char_Athena_ChargeMeter0_A: db $FF
 L1161E1: db $00
 L1161E2: db $7E
 L1161E3: db $0F
@@ -8830,7 +8830,7 @@ L11627C: db $FE
 L11627D: db $00
 L11627E: db $FE
 L11627F: db $00
-L116280: db $02
+GFX_Char_Athena_ChargeMeter0_B: db $02
 L116281: db $01
 L116282: db $07
 L116283: db $03
@@ -8926,7 +8926,7 @@ L1162DC: db $3C
 L1162DD: db $18
 L1162DE: db $3C
 L1162DF: db $00
-L1162E0: db $FF
+GFX_Char_Athena_ChargeMeter1_A: db $FF
 L1162E1: db $00
 L1162E2: db $FC
 L1162E3: db $1F
@@ -9054,7 +9054,7 @@ L11635C: db $FC
 L11635D: db $00
 L11635E: db $FC
 L11635F: db $00
-L116360: db $FF
+GFX_Char_Athena_AttackG1_B: db $FF
 L116361: db $7F
 L116362: db $7E
 L116363: db $1F
@@ -9182,7 +9182,7 @@ L1163DC: db $00
 L1163DD: db $00
 L1163DE: db $00
 L1163DF: db $00
-L1163E0: db $03
+GFX_Char_Athena_AttackA0_B: db $03
 L1163E1: db $00
 L1163E2: db $0F
 L1163E3: db $03
@@ -9278,7 +9278,7 @@ L11643C: db $00
 L11643D: db $00
 L11643E: db $00
 L11643F: db $00
-L116440: db $FE
+GFX_Char_Athena_Intro0_A: db $FE
 L116441: db $01
 L116442: db $F7
 L116443: db $08
@@ -9406,7 +9406,7 @@ L1164BC: db $80
 L1164BD: db $00
 L1164BE: db $C0
 L1164BF: db $00
-L1164C0: db $FF
+GFX_Char_Athena_Intro0_B: db $FF
 L1164C1: db $2A
 L1164C2: db $FF
 L1164C3: db $00
@@ -9470,7 +9470,7 @@ L1164FC: db $00
 L1164FD: db $00
 L1164FE: db $00
 L1164FF: db $00
-L116500: db $FF
+GFX_Char_Athena_Intro1_B: db $FF
 L116501: db $2A
 L116502: db $FF
 L116503: db $00
@@ -9566,7 +9566,7 @@ L11655C: db $00
 L11655D: db $00
 L11655E: db $00
 L11655F: db $00
-L116560: db $00
+GFX_Char_Athena_Intro3: db $00
 L116561: db $00
 L116562: db $00
 L116563: db $00
@@ -9726,7 +9726,7 @@ L1165FC: db $00
 L1165FD: db $00
 L1165FE: db $00
 L1165FF: db $00
-L116600: db $01
+GFX_Char_Athena_Intro4: db $01
 L116601: db $00
 L116602: db $06
 L116603: db $01
@@ -9950,7 +9950,7 @@ L1166DC: db $80
 L1166DD: db $00
 L1166DE: db $80
 L1166DF: db $00
-L1166E0: db $0C
+GFX_Char_Athena_Intro5_A: db $0C
 L1166E1: db $02
 L1166E2: db $18
 L1166E3: db $47
@@ -10078,7 +10078,7 @@ L11675C: db $C0
 L11675D: db $80
 L11675E: db $80
 L11675F: db $00
-L116760: db $00
+GFX_Char_Athena_Intro6_A: db $00
 L116761: db $00
 L116762: db $00
 L116763: db $00
@@ -10174,7 +10174,7 @@ L1167BC: db $00
 L1167BD: db $C0
 L1167BE: db $00
 L1167BF: db $A0
-L1167C0: db $0F
+GFX_Char_Athena_Intro16: db $0F
 L1167C1: db $00
 L1167C2: db $1F
 L1167C3: db $00
@@ -10302,7 +10302,7 @@ L11683C: db $E0
 L11683D: db $C0
 L11683E: db $E0
 L11683F: db $00
-L116840: db $00
+GFX_Char_Athena_Intro9_A: db $00
 L116841: db $00
 L116842: db $00
 L116843: db $00
@@ -10430,7 +10430,7 @@ L1168BC: db $00
 L1168BD: db $00
 L1168BE: db $0F
 L1168BF: db $00
-L1168C0: db $05
+GFX_Char_Athena_Taunt1: db $05
 L1168C1: db $33
 L1168C2: db $06
 L1168C3: db $73
@@ -10558,7 +10558,7 @@ L11693C: db $FF
 L11693D: db $5C
 L11693E: db $FF
 L11693F: db $00
-L116940: db $07
+GFX_Char_Athena_Taunt2: db $07
 L116941: db $00
 L116942: db $0F
 L116943: db $00
@@ -10686,7 +10686,7 @@ L1169BC: db $FF
 L1169BD: db $5C
 L1169BE: db $FF
 L1169BF: db $00
-L1169C0: db $00
+GFX_Char_Athena_Intro10_A: db $00
 L1169C1: db $00
 L1169C2: db $00
 L1169C3: db $00
@@ -10750,7 +10750,7 @@ L1169FC: db $4F
 L1169FD: db $87
 L1169FE: db $3F
 L1169FF: db $C0
-L116A00: db $BF
+GFX_Char_Athena_Intro10_B: db $BF
 L116A01: db $40
 L116A02: db $9B
 L116A03: db $64
@@ -10910,7 +10910,7 @@ L116A9C: db $00
 L116A9D: db $00
 L116A9E: db $00
 L116A9F: db $00
-L116AA0: db $07
+GFX_Char_Athena_WinA5: db $07
 L116AA1: db $00
 L116AA2: db $0F
 L116AA3: db $00
@@ -11070,7 +11070,7 @@ L116B3C: db $00
 L116B3D: db $00
 L116B3E: db $00
 L116B3F: db $00
-L116B40: db $C6
+GFX_Char_Athena_WinA6_A: db $C6
 L116B41: db $39
 L116B42: db $B2
 L116B43: db $0D
@@ -11198,7 +11198,7 @@ L116BBC: db $F3
 L116BBD: db $0C
 L116BBE: db $BF
 L116BBF: db $40
-L116BC0: db $01
+GFX_Char_Athena_WinA6_B: db $01
 L116BC1: db $00
 L116BC2: db $03
 L116BC3: db $01
@@ -11326,7 +11326,7 @@ L116C3C: db $00
 L116C3D: db $00
 L116C3E: db $00
 L116C3F: db $00
-L116C40: db $B2
+GFX_Char_Athena_WinA7_A: db $B2
 L116C41: db $0D
 L116C42: db $E1
 L116C43: db $1E
@@ -11454,7 +11454,7 @@ L116CBC: db $7E
 L116CBD: db $80
 L116CBE: db $37
 L116CBF: db $C8
-L116CC0: db $00
+GFX_Char_Athena_WinB1_A: db $00
 L116CC1: db $00
 L116CC2: db $00
 L116CC3: db $00
@@ -11646,7 +11646,7 @@ L116D7C: db $00
 L116D7D: db $00
 L116D7E: db $3C
 L116D7F: db $00
-L116D80: db $00
+GFX_Char_Athena_WinB2: db $00
 L116D81: db $00
 L116D82: db $00
 L116D83: db $00
@@ -11838,7 +11838,7 @@ L116E3C: db $00
 L116E3D: db $00
 L116E3E: db $00
 L116E3F: db $00
-L116E40: db $C0
+GFX_Char_Athena_WinB3: db $C0
 L116E41: db $00
 L116E42: db $B0
 L116E43: db $40
@@ -12030,7 +12030,7 @@ L116EFC: db $00
 L116EFD: db $00
 L116EFE: db $00
 L116EFF: db $00
-L116F00: db $00
+GFX_Char_Athena_WinB5_A: db $00
 L116F01: db $00
 L116F02: db $00
 L116F03: db $00
@@ -12158,7 +12158,7 @@ L116F7C: db $00
 L116F7D: db $00
 L116F7E: db $0F
 L116F7F: db $00
-L116F80: db $01
+GFX_Char_Athena_PsychoBallL0: db $01
 L116F81: db $00
 L116F82: db $06
 L116F83: db $01
@@ -12414,7 +12414,7 @@ L11707C: db $00
 L11707D: db $00
 L11707E: db $00
 L11707F: db $00
-L117080: db $00
+GFX_Char_Athena_PsychoBallL1: db $00
 L117081: db $00
 L117082: db $00
 L117083: db $00
@@ -12606,7 +12606,7 @@ L11713C: db $00
 L11713D: db $00
 L11713E: db $00
 L11713F: db $00
-L117140: db $80
+GFX_Char_Athena_PhoenixArrowL1: db $80
 L117141: db $80
 L117142: db $01
 L117143: db $01
@@ -12798,7 +12798,7 @@ L1171FC: db $00
 L1171FD: db $00
 L1171FE: db $00
 L1171FF: db $00
-L117200: db $10
+GFX_Char_Athena_PhoenixArrowL2: db $10
 L117201: db $10
 L117202: db $18
 L117203: db $18
@@ -13022,7 +13022,7 @@ L1172DC: db $00
 L1172DD: db $00
 L1172DE: db $00
 L1172DF: db $00
-L1172E0: db $09
+GFX_Char_Athena_PhoenixArrowL4: db $09
 L1172E1: db $00
 L1172E2: db $07
 L1172E3: db $00
@@ -13182,7 +13182,7 @@ L11737C: db $00
 L11737D: db $00
 L11737E: db $00
 L11737F: db $00
-L117380: db $00
+GFX_Char_Athena_PhoenixArrowL5: db $00
 L117381: db $00
 L117382: db $00
 L117383: db $00
@@ -13406,7 +13406,7 @@ L11745C: db $00
 L11745D: db $00
 L11745E: db $00
 L11745F: db $00
-L117460: db $01
+GFX_Char_Athena_PsychoReflectorL1: db $01
 L117461: db $00
 L117462: db $03
 L117463: db $01
@@ -13694,7 +13694,7 @@ L11757C: db $00
 L11757D: db $00
 L11757E: db $00
 L11757F: db $00
-L117580: db $00
+GFX_Char_Athena_PsychoReflectorL2_A: db $00
 L117581: db $00
 L117582: db $00
 L117583: db $00
@@ -14110,7 +14110,7 @@ L11771C: db $2C
 L11771D: db $3C
 L11771E: db $9E
 L11771F: db $9E
-L117720: db $00
+GFX_Char_Athena_PsychoReflectorL3_A: db $00
 L117721: db $20
 L117722: db $00
 L117723: db $10
@@ -14494,7 +14494,7 @@ L11789C: db $0F
 L11789D: db $06
 L11789E: db $0F
 L11789F: db $00
-L1178A0: db $00
+GFX_Char_Athena_PsychoReflectorL4_A: db $00
 L1178A1: db $00
 L1178A2: db $00
 L1178A3: db $00
@@ -14750,7 +14750,7 @@ L11799C: db $00
 L11799D: db $00
 L11799E: db $00
 L11799F: db $00
-L1179A0: db $00
+GFX_Char_Athena_PsychoSwordL0: db $00
 L1179A1: db $00
 L1179A2: db $00
 L1179A3: db $00
@@ -14974,7 +14974,7 @@ L117A7C: db $00
 L117A7D: db $00
 L117A7E: db $00
 L117A7F: db $00
-L117A80: db $40
+GFX_Char_Athena_PsychoSwordL1_A: db $40
 L117A81: db $00
 L117A82: db $E0
 L117A83: db $40
@@ -15102,7 +15102,7 @@ L117AFC: db $00
 L117AFD: db $00
 L117AFE: db $00
 L117AFF: db $00
-L117B00: db $00
+GFX_Char_Athena_PsychoSwordL2_A: db $00
 L117B01: db $00
 L117B02: db $04
 L117B03: db $04
@@ -15198,7 +15198,7 @@ L117B5C: db $4F
 L117B5D: db $87
 L117B5E: db $3F
 L117B5F: db $C0
-L117B60: db $00
+GFX_Char_Athena_PsychoSwordL4_A: db $00
 L117B61: db $04
 L117B62: db $00
 L117B63: db $04
@@ -15294,7 +15294,7 @@ L117BBC: db $00
 L117BBD: db $00
 L117BBE: db $00
 L117BBF: db $00
-L117BC0: db $03
+GFX_Char_Athena_Intro6_B: db $03
 L117BC1: db $00
 L117BC2: db $03
 L117BC3: db $01
@@ -15550,7 +15550,7 @@ L117CBC: db $00
 L117CBD: db $00
 L117CBE: db $00
 L117CBF: db $00
-L117CC0: db $01
+GFX_Char_Athena_Intro5_B: db $01
 L117CC1: db $00
 L117CC2: db $01
 L117CC3: db $00
@@ -15742,7 +15742,7 @@ L117D7C: db $00
 L117D7D: db $00
 L117D7E: db $00
 L117D7F: db $00
-L117D80: db $01
+GFX_Char_Athena_PsychoTeleportL2: db $01
 L117D81: db $00
 L117D82: db $07
 L117D83: db $00
@@ -15966,7 +15966,7 @@ L117E5C: db $00
 L117E5D: db $00
 L117E5E: db $00
 L117E5F: db $00
-L117E60: db $02
+GFX_Char_Athena_ShiningCrystalBitAS0_B: db $02
 L117E61: db $01
 L117E62: db $07
 L117E63: db $03
@@ -16126,7 +16126,7 @@ L117EFC: db $00
 L117EFD: db $00
 L117EFE: db $00
 L117EFF: db $00
-L117F00: db $1F
+GFX_Char_Athena_ShiningCrystalBitGS4_A: db $1F
 L117F01: db $00
 L117F02: db $7E
 L117F03: db $0F
@@ -16254,7 +16254,7 @@ L117F7C: db $70
 L117F7D: db $80
 L117F7E: db $60
 L117F7F: db $C0
-L117F80: db $3F
+GFX_Char_Athena_ShiningCrystalBitAS4_B: db $3F
 L117F81: db $0D
 L117F82: db $2F
 L117F83: db $18

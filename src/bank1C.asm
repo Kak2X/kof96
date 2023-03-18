@@ -1,4 +1,4 @@
-L1C4000: db $00
+GFX_Char_Kyo_RedKickL4: db $00
 L1C4001: db $00
 L1C4002: db $00
 L1C4003: db $00
@@ -190,7 +190,7 @@ L1C40BC: db $00
 L1C40BD: db $00
 L1C40BE: db $00
 L1C40BF: db $00
-L1C40C0: db $00
+GFX_Char_Kyo_OniyakiL3: db $00
 L1C40C1: db $00
 L1C40C2: db $00
 L1C40C3: db $00
@@ -478,7 +478,7 @@ L1C41DC: db $00
 L1C41DD: db $00
 L1C41DE: db $00
 L1C41DF: db $00
-L1C41E0: db $11
+GFX_Char_Kyo_OniyakiL4: db $11
 L1C41E1: db $0E
 L1C41E2: db $27
 L1C41E3: db $18
@@ -702,7 +702,7 @@ L1C42BC: db $00
 L1C42BD: db $00
 L1C42BE: db $00
 L1C42BF: db $00
-L1C42C0: db $00
+GFX_Char_Kyo_KototsukiYouL0: db $00
 L1C42C1: db $00
 L1C42C2: db $00
 L1C42C3: db $00

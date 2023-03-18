@@ -1,4 +1,4 @@
-L1A4000: db $00
+GFX_Char_Goenitz_Idle0_A: db $00
 L1A4001: db $00
 L1A4002: db $00
 L1A4003: db $00
@@ -94,7 +94,7 @@ L1A405C: db $BC
 L1A405D: db $40
 L1A405E: db $BE
 L1A405F: db $40
-L1A4060: db $0F
+GFX_Char_Goenitz_Idle0_B: db $0F
 L1A4061: db $06
 L1A4062: db $0F
 L1A4063: db $06
@@ -254,7 +254,7 @@ L1A40FC: db $00
 L1A40FD: db $00
 L1A40FE: db $00
 L1A40FF: db $00
-L1A4100: db $01
+GFX_Char_Goenitz_Idle1_A: db $01
 L1A4101: db $00
 L1A4102: db $03
 L1A4103: db $00
@@ -318,7 +318,7 @@ L1A413C: db $00
 L1A413D: db $00
 L1A413E: db $00
 L1A413F: db $00
-L1A4140: db $1E
+GFX_Char_Goenitz_Idle1_B: db $1E
 L1A4141: db $00
 L1A4142: db $39
 L1A4143: db $06
@@ -510,7 +510,7 @@ L1A41FC: db $00
 L1A41FD: db $00
 L1A41FE: db $00
 L1A41FF: db $00
-L1A4200: db $1E
+GFX_Char_Goenitz_Idle2: db $1E
 L1A4201: db $00
 L1A4202: db $39
 L1A4203: db $06
@@ -734,7 +734,7 @@ L1A42DC: db $00
 L1A42DD: db $00
 L1A42DE: db $00
 L1A42DF: db $00
-L1A42E0: db $06
+GFX_Char_Goenitz_WalkF0_A: db $06
 L1A42E1: db $00
 L1A42E2: db $0B
 L1A42E3: db $04
@@ -862,7 +862,7 @@ L1A435C: db $0F
 L1A435D: db $F0
 L1A435E: db $3F
 L1A435F: db $C0
-L1A4360: db $01
+GFX_Char_Goenitz_WalkF0_B: db $01
 L1A4361: db $00
 L1A4362: db $00
 L1A4363: db $00
@@ -958,7 +958,7 @@ L1A43BC: db $0F
 L1A43BD: db $00
 L1A43BE: db $1E
 L1A43BF: db $00
-L1A43C0: db $00
+GFX_Char_Goenitz_WalkF1: db $00
 L1A43C1: db $00
 L1A43C2: db $00
 L1A43C3: db $00
@@ -1150,7 +1150,7 @@ L1A447C: db $00
 L1A447D: db $00
 L1A447E: db $00
 L1A447F: db $00
-L1A4480: db $01
+GFX_Char_Goenitz_WalkF2_B: db $01
 L1A4481: db $00
 L1A4482: db $03
 L1A4483: db $00
@@ -1246,7 +1246,7 @@ L1A44DC: db $0F
 L1A44DD: db $00
 L1A44DE: db $1E
 L1A44DF: db $00
-L1A44E0: db $01
+GFX_Char_Goenitz_Crouch0_A: db $01
 L1A44E1: db $00
 L1A44E2: db $01
 L1A44E3: db $00
@@ -1374,7 +1374,7 @@ L1A455C: db $72
 L1A455D: db $0C
 L1A455E: db $A3
 L1A455F: db $5C
-L1A4560: db $3F
+GFX_Char_Goenitz_Crouch0_B: db $3F
 L1A4561: db $1E
 L1A4562: db $3F
 L1A4563: db $1E
@@ -1470,7 +1470,7 @@ L1A45BC: db $00
 L1A45BD: db $00
 L1A45BE: db $00
 L1A45BF: db $00
-L1A45C0: db $3E
+GFX_Char_Goenitz_JumpN1: db $3E
 L1A45C1: db $00
 L1A45C2: db $21
 L1A45C3: db $1E
@@ -1694,7 +1694,7 @@ L1A469C: db $00
 L1A469D: db $00
 L1A469E: db $00
 L1A469F: db $00
-L1A46A0: db $00
+GFX_Char_Goenitz_JumpN3: db $00
 L1A46A1: db $00
 L1A46A2: db $00
 L1A46A3: db $00
@@ -1918,7 +1918,7 @@ L1A477C: db $00
 L1A477D: db $00
 L1A477E: db $00
 L1A477F: db $00
-L1A4780: db $00
+GFX_Char_Goenitz_JumpN5: db $00
 L1A4781: db $00
 L1A4782: db $01
 L1A4783: db $00
@@ -2142,7 +2142,7 @@ L1A485C: db $00
 L1A485D: db $00
 L1A485E: db $00
 L1A485F: db $00
-L1A4860: db $00
+GFX_Char_Goenitz_BlockG0_A: db $00
 L1A4861: db $00
 L1A4862: db $00
 L1A4863: db $00
@@ -2238,7 +2238,7 @@ L1A48BC: db $5C
 L1A48BD: db $A0
 L1A48BE: db $FC
 L1A48BF: db $80
-L1A48C0: db $FF
+GFX_Char_Goenitz_BlockG0_B: db $FF
 L1A48C1: db $1F
 L1A48C2: db $3F
 L1A48C3: db $18
@@ -2398,7 +2398,7 @@ L1A495C: db $00
 L1A495D: db $00
 L1A495E: db $00
 L1A495F: db $00
-L1A4960: db $07
+GFX_Char_Goenitz_BlockC0_B: db $07
 L1A4961: db $00
 L1A4962: db $01
 L1A4963: db $00
@@ -2494,7 +2494,7 @@ L1A49BC: db $E0
 L1A49BD: db $00
 L1A49BE: db $00
 L1A49BF: db $00
-L1A49C0: db $03;X
+GFX_Char_Goenitz_BlockA0_B: db $03;X
 L1A49C1: db $00;X
 L1A49C2: db $00;X
 L1A49C3: db $00;X
@@ -2622,7 +2622,7 @@ L1A4A3C: db $00;X
 L1A4A3D: db $00;X
 L1A4A3E: db $00;X
 L1A4A3F: db $00;X
-L1A4A40: db $00
+GFX_Char_Goenitz_PunchL0: db $00
 L1A4A41: db $00
 L1A4A42: db $00
 L1A4A43: db $00
@@ -2846,7 +2846,7 @@ L1A4B1C: db $00
 L1A4B1D: db $00
 L1A4B1E: db $00
 L1A4B1F: db $00
-L1A4B20: db $00
+GFX_Char_Goenitz_PunchL1: db $00
 L1A4B21: db $00
 L1A4B22: db $00
 L1A4B23: db $00
@@ -3070,7 +3070,7 @@ L1A4BFC: db $00
 L1A4BFD: db $00
 L1A4BFE: db $00
 L1A4BFF: db $00
-L1A4C00: db $01
+GFX_Char_Goenitz_PunchH0_A: db $01
 L1A4C01: db $00
 L1A4C02: db $07
 L1A4C03: db $00
@@ -3198,7 +3198,7 @@ L1A4C7C: db $F0
 L1A4C7D: db $A0
 L1A4C7E: db $F0
 L1A4C7F: db $60
-L1A4C80: db $FF
+GFX_Char_Goenitz_PunchH0_B: db $FF
 L1A4C81: db $05
 L1A4C82: db $7F
 L1A4C83: db $0E
@@ -3294,7 +3294,7 @@ L1A4CDC: db $00
 L1A4CDD: db $00
 L1A4CDE: db $00
 L1A4CDF: db $00
-L1A4CE0: db $00
+GFX_Char_Goenitz_PunchH1: db $00
 L1A4CE1: db $00
 L1A4CE2: db $01
 L1A4CE3: db $00
@@ -3486,7 +3486,7 @@ L1A4D9C: db $00
 L1A4D9D: db $00
 L1A4D9E: db $00
 L1A4D9F: db $00
-L1A4DA0: db $00
+GFX_Char_Goenitz_ShinyaotomeThrowL0_A: db $00
 L1A4DA1: db $00
 L1A4DA2: db $00
 L1A4DA3: db $00
@@ -3582,7 +3582,7 @@ L1A4DFC: db $FF
 L1A4DFD: db $03
 L1A4DFE: db $FF
 L1A4DFF: db $0F
-L1A4E00: db $0F
+GFX_Char_Goenitz_PunchH2_B: db $0F
 L1A4E01: db $07
 L1A4E02: db $1F
 L1A4E03: db $0F
@@ -3742,7 +3742,7 @@ L1A4E9C: db $00
 L1A4E9D: db $00
 L1A4E9E: db $00
 L1A4E9F: db $00
-L1A4EA0: db $00
+GFX_Char_Goenitz_PunchH3: db $00
 L1A4EA1: db $00
 L1A4EA2: db $01
 L1A4EA3: db $00
@@ -3934,7 +3934,7 @@ L1A4F5C: db $00
 L1A4F5D: db $00
 L1A4F5E: db $00
 L1A4F5F: db $00
-L1A4F60: db $00
+GFX_Char_Goenitz_PunchH4_A: db $00
 L1A4F61: db $00
 L1A4F62: db $01
 L1A4F63: db $00
@@ -4062,7 +4062,7 @@ L1A4FDC: db $F8
 L1A4FDD: db $30
 L1A4FDE: db $F4
 L1A4FDF: db $68
-L1A4FE0: db $0F
+GFX_Char_Goenitz_PunchH4_B: db $0F
 L1A4FE1: db $00
 L1A4FE2: db $0F
 L1A4FE3: db $07
@@ -4126,7 +4126,7 @@ L1A501C: db $E7
 L1A501D: db $00
 L1A501E: db $83
 L1A501F: db $00
-L1A5020: db $03
+GFX_Char_Goenitz_PunchH5_A: db $03
 L1A5021: db $00
 L1A5022: db $0F
 L1A5023: db $03
@@ -4190,7 +4190,7 @@ L1A505C: db $FC
 L1A505D: db $E8
 L1A505E: db $FC
 L1A505F: db $C8
-L1A5060: db $F9
+GFX_Char_Goenitz_KickL1_A: db $F9
 L1A5061: db $00
 L1A5062: db $FF
 L1A5063: db $F8
@@ -4254,7 +4254,7 @@ L1A509C: db $1F
 L1A509D: db $00
 L1A509E: db $07
 L1A509F: db $00
-L1A50A0: db $03
+GFX_Char_Goenitz_KickL1_B: db $03
 L1A50A1: db $00
 L1A50A2: db $07
 L1A50A3: db $00
@@ -4446,7 +4446,7 @@ L1A515C: db $00
 L1A515D: db $00
 L1A515E: db $00
 L1A515F: db $00
-L1A5160: db $01
+GFX_Char_Goenitz_KickL0: db $01
 L1A5161: db $00
 L1A5162: db $03
 L1A5163: db $00
@@ -4670,7 +4670,7 @@ L1A523C: db $00
 L1A523D: db $00
 L1A523E: db $00
 L1A523F: db $00
-L1A5240: db $01
+GFX_Char_Goenitz_KickH1: db $01
 L1A5241: db $00
 L1A5242: db $02
 L1A5243: db $01
@@ -4862,7 +4862,7 @@ L1A52FC: db $1C
 L1A52FD: db $00
 L1A52FE: db $00
 L1A52FF: db $00
-L1A5300: db $30
+GFX_Char_Goenitz_KickH2: db $30
 L1A5301: db $00
 L1A5302: db $70
 L1A5303: db $00
@@ -5086,7 +5086,7 @@ L1A53DC: db $00
 L1A53DD: db $00
 L1A53DE: db $00
 L1A53DF: db $00
-L1A53E0: db $01
+GFX_Char_Goenitz_KickH3_A: db $01
 L1A53E1: db $00
 L1A53E2: db $01
 L1A53E3: db $00
@@ -5150,7 +5150,7 @@ L1A541C: db $01
 L1A541D: db $00
 L1A541E: db $00
 L1A541F: db $00
-L1A5420: db $01
+GFX_Char_Goenitz_PunchCL0_A: db $01
 L1A5421: db $00
 L1A5422: db $01
 L1A5423: db $00
@@ -5278,7 +5278,7 @@ L1A549C: db $72
 L1A549D: db $0C
 L1A549E: db $A3
 L1A549F: db $5C
-L1A54A0: db $00
+GFX_Char_Goenitz_PunchCL1_A: db $00
 L1A54A1: db $00
 L1A54A2: db $00
 L1A54A3: db $00
@@ -5438,7 +5438,7 @@ L1A553C: db $72
 L1A553D: db $0C
 L1A553E: db $A3
 L1A553F: db $5C
-L1A5540: db $03
+GFX_Char_Goenitz_PunchCH0: db $03
 L1A5541: db $01
 L1A5542: db $07
 L1A5543: db $03
@@ -5598,7 +5598,7 @@ L1A55DC: db $00
 L1A55DD: db $00
 L1A55DE: db $00
 L1A55DF: db $00
-L1A55E0: db $0E
+GFX_Char_Goenitz_PunchCH1: db $0E
 L1A55E1: db $00
 L1A55E2: db $15
 L1A55E3: db $0A
@@ -5822,7 +5822,7 @@ L1A56BC: db $00
 L1A56BD: db $00
 L1A56BE: db $00
 L1A56BF: db $00
-L1A56C0: db $01
+GFX_Char_Goenitz_PunchCH2: db $01
 L1A56C1: db $00
 L1A56C2: db $02
 L1A56C3: db $01
@@ -6046,7 +6046,7 @@ L1A579C: db $00
 L1A579D: db $00
 L1A579E: db $00
 L1A579F: db $00
-L1A57A0: db $17
+GFX_Char_Goenitz_KickCL0_B: db $17
 L1A57A1: db $05
 L1A57A2: db $3F
 L1A57A3: db $1D
@@ -6142,7 +6142,7 @@ L1A57FC: db $00
 L1A57FD: db $00
 L1A57FE: db $00
 L1A57FF: db $00
-L1A5800: db $03
+GFX_Char_Goenitz_KickCL1: db $03
 L1A5801: db $00
 L1A5802: db $0F
 L1A5803: db $00
@@ -6398,7 +6398,7 @@ L1A58FC: db $00
 L1A58FD: db $00
 L1A58FE: db $00
 L1A58FF: db $00
-L1A5900: db $01
+GFX_Char_Goenitz_KickCH0: db $01
 L1A5901: db $00
 L1A5902: db $0F
 L1A5903: db $00
@@ -6558,7 +6558,7 @@ L1A599C: db $00
 L1A599D: db $00
 L1A599E: db $00
 L1A599F: db $00
-L1A59A0: db $06
+GFX_Char_Goenitz_KickCH1: db $06
 L1A59A1: db $00
 L1A59A2: db $0B
 L1A59A3: db $04
@@ -6782,7 +6782,7 @@ L1A5A7C: db $00
 L1A5A7D: db $00
 L1A5A7E: db $00
 L1A5A7F: db $00
-L1A5A80: db $01
+GFX_Char_Goenitz_KickCH2: db $01
 L1A5A81: db $00
 L1A5A82: db $02
 L1A5A83: db $01
@@ -6942,7 +6942,7 @@ L1A5B1C: db $00
 L1A5B1D: db $00
 L1A5B1E: db $00
 L1A5B1F: db $00
-L1A5B20: db $1F;X
+GFX_Char_Goenitz_Unused0_0_B: db $1F;X
 L1A5B21: db $00;X
 L1A5B22: db $0F;X
 L1A5B23: db $01;X
@@ -7070,7 +7070,7 @@ L1A5B9C: db $00;X
 L1A5B9D: db $00;X
 L1A5B9E: db $00;X
 L1A5B9F: db $00;X
-L1A5BA0: db $01
+GFX_Char_Goenitz_AttackG0_A: db $01
 L1A5BA1: db $00
 L1A5BA2: db $03
 L1A5BA3: db $00
@@ -7166,7 +7166,7 @@ L1A5BFC: db $ED
 L1A5BFD: db $D2
 L1A5BFE: db $F7
 L1A5BFF: db $C8
-L1A5C00: db $1F
+GFX_Char_Goenitz_AttackG0_B: db $1F
 L1A5C01: db $07
 L1A5C02: db $1F
 L1A5C03: db $0F
@@ -7262,7 +7262,7 @@ L1A5C5C: db $00
 L1A5C5D: db $00
 L1A5C5E: db $00
 L1A5C5F: db $00
-L1A5C60: db $00
+GFX_Char_Goenitz_AttackG1_A: db $00
 L1A5C61: db $00
 L1A5C62: db $00
 L1A5C63: db $00
@@ -7358,7 +7358,7 @@ L1A5CBC: db $80
 L1A5CBD: db $00
 L1A5CBE: db $80
 L1A5CBF: db $00
-L1A5CC0: db $03
+GFX_Char_Goenitz_AttackG1_B: db $03
 L1A5CC1: db $00
 L1A5CC2: db $07
 L1A5CC3: db $00
@@ -7518,7 +7518,7 @@ L1A5D5C: db $00
 L1A5D5D: db $00
 L1A5D5E: db $00
 L1A5D5F: db $00
-L1A5D60: db $00
+GFX_Char_Goenitz_AttackG3_B: db $00
 L1A5D61: db $00
 L1A5D62: db $03
 L1A5D63: db $00
@@ -7678,7 +7678,7 @@ L1A5DFC: db $00
 L1A5DFD: db $00
 L1A5DFE: db $00
 L1A5DFF: db $00
-L1A5E00: db $7F
+GFX_Char_Goenitz_AttackA0_B: db $7F
 L1A5E01: db $3D
 L1A5E02: db $3F
 L1A5E03: db $03
@@ -7774,7 +7774,7 @@ L1A5E5C: db $00
 L1A5E5D: db $00
 L1A5E5E: db $00
 L1A5E5F: db $00
-L1A5E60: db $03
+GFX_Char_Goenitz_HopB0_B: db $03
 L1A5E61: db $00
 L1A5E62: db $07
 L1A5E63: db $00
@@ -7934,7 +7934,7 @@ L1A5EFC: db $00
 L1A5EFD: db $00
 L1A5EFE: db $00
 L1A5EFF: db $00
-L1A5F00: db $00
+GFX_Char_Goenitz_GuardBreakG0: db $00
 L1A5F01: db $00
 L1A5F02: db $1E
 L1A5F03: db $00
@@ -8158,7 +8158,7 @@ L1A5FDC: db $00
 L1A5FDD: db $00
 L1A5FDE: db $00
 L1A5FDF: db $00
-L1A5FE0: db $01
+GFX_Char_Goenitz_TimeOver2: db $01
 L1A5FE1: db $00
 L1A5FE2: db $02
 L1A5FE3: db $01
@@ -8382,7 +8382,7 @@ L1A60BC: db $00
 L1A60BD: db $00
 L1A60BE: db $00
 L1A60BF: db $00
-L1A60C0: db $01;X
+GFX_Char_Goenitz_Hitlow0: db $01;X
 L1A60C1: db $00;X
 L1A60C2: db $03;X
 L1A60C3: db $00;X
@@ -8574,7 +8574,7 @@ L1A617C: db $00;X
 L1A617D: db $00;X
 L1A617E: db $00;X
 L1A617F: db $00;X
-L1A6180: db $01
+GFX_Char_Goenitz_DropMain1: db $01
 L1A6181: db $00
 L1A6182: db $03
 L1A6183: db $00
@@ -8766,7 +8766,7 @@ L1A623C: db $00
 L1A623D: db $00
 L1A623E: db $00
 L1A623F: db $00
-L1A6240: db $02
+GFX_Char_Goenitz_DropMain2: db $02
 L1A6241: db $00
 L1A6242: db $03
 L1A6243: db $00
@@ -8926,7 +8926,7 @@ L1A62DC: db $00
 L1A62DD: db $00
 L1A62DE: db $00
 L1A62DF: db $00
-L1A62E0: db $00
+GFX_Char_Goenitz_ChargeMeter0_A: db $00
 L1A62E1: db $00
 L1A62E2: db $00
 L1A62E3: db $00
@@ -9150,7 +9150,7 @@ L1A63BC: db $00
 L1A63BD: db $00
 L1A63BE: db $00
 L1A63BF: db $00
-L1A63C0: db $01
+GFX_Char_Goenitz_ChargeMeter0_B: db $01
 L1A63C1: db $00
 L1A63C2: db $01
 L1A63C3: db $00
@@ -9214,7 +9214,7 @@ L1A63FC: db $00
 L1A63FD: db $00
 L1A63FE: db $00
 L1A63FF: db $00
-L1A6400: db $7D
+GFX_Char_Goenitz_ChargeMeter1_A: db $7D
 L1A6401: db $3E
 L1A6402: db $7B
 L1A6403: db $3D
@@ -9438,7 +9438,7 @@ L1A64DC: db $07
 L1A64DD: db $03
 L1A64DE: db $03
 L1A64DF: db $00
-L1A64E0: db $03
+GFX_Char_Goenitz_Intro0_A: db $03
 L1A64E1: db $00
 L1A64E2: db $04
 L1A64E3: db $03
@@ -9502,7 +9502,7 @@ L1A651C: db $00
 L1A651D: db $00
 L1A651E: db $00
 L1A651F: db $00
-L1A6520: db $FE
+GFX_Char_Goenitz_Intro1_A: db $FE
 L1A6521: db $00
 L1A6522: db $FE
 L1A6523: db $00
@@ -9534,7 +9534,7 @@ L1A653C: db $E0
 L1A653D: db $C0
 L1A653E: db $E0
 L1A653F: db $C0
-L1A6540: db $01
+GFX_Char_Goenitz_Taunt1_B: db $01
 L1A6541: db $00
 L1A6542: db $03
 L1A6543: db $00
@@ -9758,7 +9758,7 @@ L1A661C: db $00
 L1A661D: db $00
 L1A661E: db $00
 L1A661F: db $00
-L1A6620: db $0F
+GFX_Char_Goenitz_Intro2_B: db $0F
 L1A6621: db $06
 L1A6622: db $0F
 L1A6623: db $06
@@ -9918,7 +9918,7 @@ L1A66BC: db $00
 L1A66BD: db $00
 L1A66BE: db $00
 L1A66BF: db $00
-L1A66C0: db $01
+GFX_Char_Goenitz_Intro3_B: db $01
 L1A66C1: db $00
 L1A66C2: db $03
 L1A66C3: db $01
@@ -10110,7 +10110,7 @@ L1A677C: db $00
 L1A677D: db $00
 L1A677E: db $00
 L1A677F: db $00
-L1A6780: db $03
+GFX_Char_Goenitz_Taunt0_B: db $03
 L1A6781: db $01
 L1A6782: db $03
 L1A6783: db $01
@@ -10302,7 +10302,7 @@ L1A683C: db $00
 L1A683D: db $00
 L1A683E: db $00
 L1A683F: db $00
-L1A6840: db $FE
+GFX_Char_Goenitz_Taunt1_A: db $FE
 L1A6841: db $00
 L1A6842: db $FC
 L1A6843: db $08
@@ -10334,7 +10334,7 @@ L1A685C: db $E0
 L1A685D: db $C0
 L1A685E: db $E0
 L1A685F: db $C0
-L1A6860: db $1E
+GFX_Char_Goenitz_Taunt2: db $1E
 L1A6861: db $00
 L1A6862: db $39
 L1A6863: db $06
@@ -10558,7 +10558,7 @@ L1A693C: db $00
 L1A693D: db $00
 L1A693E: db $00
 L1A693F: db $00
-L1A6940: db $00
+GFX_Char_Goenitz_Taunt3: db $00
 L1A6941: db $00
 L1A6942: db $00
 L1A6943: db $00
@@ -10782,7 +10782,7 @@ L1A6A1C: db $3F
 L1A6A1D: db $C0
 L1A6A1E: db $73
 L1A6A1F: db $AC
-L1A6A20: db $43
+GFX_Char_Goenitz_WinA0_A: db $43
 L1A6A21: db $3C
 L1A6A22: db $FB
 L1A6A23: db $04
@@ -10846,7 +10846,7 @@ L1A6A5C: db $00
 L1A6A5D: db $00
 L1A6A5E: db $00
 L1A6A5F: db $00
-L1A6A60: db $00
+GFX_Char_Goenitz_WinA0_B: db $00
 L1A6A61: db $00
 L1A6A62: db $00
 L1A6A63: db $00
@@ -11006,7 +11006,7 @@ L1A6AFC: db $00
 L1A6AFD: db $00
 L1A6AFE: db $00
 L1A6AFF: db $00
-L1A6B00: db $43
+GFX_Char_Goenitz_WinA1_A: db $43
 L1A6B01: db $3C
 L1A6B02: db $EB
 L1A6B03: db $14
@@ -11070,7 +11070,7 @@ L1A6B3C: db $00
 L1A6B3D: db $00
 L1A6B3E: db $00
 L1A6B3F: db $00
-L1A6B40: db $00
+GFX_Char_Goenitz_Intro3_A: db $00
 L1A6B41: db $00
 L1A6B42: db $00
 L1A6B43: db $00
@@ -11166,7 +11166,7 @@ L1A6B9C: db $07
 L1A6B9D: db $00
 L1A6B9E: db $07
 L1A6B9F: db $00
-L1A6BA0: db $07
+GFX_Char_Goenitz_Intro4_B: db $07
 L1A6BA1: db $02
 L1A6BA2: db $07
 L1A6BA3: db $03
@@ -11326,7 +11326,7 @@ L1A6C3C: db $00
 L1A6C3D: db $00
 L1A6C3E: db $00
 L1A6C3F: db $00
-L1A6C40: db $07
+GFX_Char_Goenitz_WinA3_B: db $07
 L1A6C41: db $00
 L1A6C42: db $03
 L1A6C43: db $01
@@ -11486,7 +11486,7 @@ L1A6CDC: db $00
 L1A6CDD: db $00
 L1A6CDE: db $00
 L1A6CDF: db $00
-L1A6CE0: db $01
+GFX_Char_Goenitz_WinB2: db $01
 L1A6CE1: db $00
 L1A6CE2: db $02
 L1A6CE3: db $01
@@ -11678,7 +11678,7 @@ L1A6D9C: db $00
 L1A6D9D: db $00
 L1A6D9E: db $00
 L1A6D9F: db $00
-L1A6DA0: db $00
+GFX_Char_Goenitz_WinB3_A: db $00
 L1A6DA1: db $00
 L1A6DA2: db $00
 L1A6DA3: db $00
@@ -11870,7 +11870,7 @@ L1A6E5C: db $FF
 L1A6E5D: db $F6
 L1A6E5E: db $FF
 L1A6E5F: db $B6
-L1A6E60: db $00
+GFX_Char_Goenitz_WinB3_B: db $00
 L1A6E61: db $00
 L1A6E62: db $00
 L1A6E63: db $00
@@ -11966,7 +11966,7 @@ L1A6EBC: db $00
 L1A6EBD: db $00
 L1A6EBE: db $00
 L1A6EBF: db $00
-L1A6EC0: db $00
+GFX_Char_Goenitz_WinB4_A: db $00
 L1A6EC1: db $00
 L1A6EC2: db $00
 L1A6EC3: db $00
@@ -12094,7 +12094,7 @@ L1A6F3C: db $0F
 L1A6F3D: db $04
 L1A6F3E: db $1F
 L1A6F3F: db $00
-L1A6F40: db $FE
+GFX_Char_Goenitz_ShinyaotomeThrowL1_A: db $FE
 L1A6F41: db $41
 L1A6F42: db $7F
 L1A6F43: db $00
@@ -12222,7 +12222,7 @@ L1A6FBC: db $F8
 L1A6FBD: db $00
 L1A6FBE: db $F8
 L1A6FBF: db $00
-L1A6FC0: db $1F
+GFX_Char_Goenitz_ShinyaotomeThrowL1_B: db $1F
 L1A6FC1: db $0A
 L1A6FC2: db $1F
 L1A6FC3: db $0D
@@ -12286,7 +12286,7 @@ L1A6FFC: db $9E
 L1A6FFD: db $00
 L1A6FFE: db $8E
 L1A6FFF: db $00
-L1A7000: db $FE
+GFX_Char_Goenitz_ShinyaotomeThrowL2_A: db $FE
 L1A7001: db $41
 L1A7002: db $7F
 L1A7003: db $00
@@ -12414,7 +12414,7 @@ L1A707C: db $F0
 L1A707D: db $00
 L1A707E: db $F0
 L1A707F: db $00
-L1A7080: db $00
+GFX_Char_Goenitz_HyougaL2: db $00
 L1A7081: db $00
 L1A7082: db $00
 L1A7083: db $00
@@ -12670,7 +12670,7 @@ L1A717C: db $00
 L1A717D: db $00
 L1A717E: db $00
 L1A717F: db $00
-L1A7180: db $1E
+GFX_Char_Goenitz_RunF0: db $1E
 L1A7181: db $00
 L1A7182: db $39
 L1A7183: db $06
@@ -12926,7 +12926,7 @@ L1A727C: db $00
 L1A727D: db $00
 L1A727E: db $00
 L1A727F: db $00
-L1A7280: db $07
+GFX_Char_Goenitz_Yonokaze10: db $07
 L1A7281: db $03
 L1A7282: db $07
 L1A7283: db $03
@@ -13182,7 +13182,7 @@ L1A737C: db $00
 L1A737D: db $00
 L1A737E: db $00
 L1A737F: db $00
-L1A7380: db $18
+GFX_Char_Goenitz_Yonokaze11_A: db $18
 L1A7381: db $00
 L1A7382: db $74
 L1A7383: db $08
@@ -13278,7 +13278,7 @@ L1A73DC: db $00
 L1A73DD: db $00
 L1A73DE: db $00
 L1A73DF: db $00
-L1A73E0: db $3E
+GFX_Char_Goenitz_Yonokaze11_B: db $3E
 L1A73E1: db $00
 L1A73E2: db $41
 L1A73E3: db $3E
@@ -13470,7 +13470,7 @@ L1A749C: db $00
 L1A749D: db $00
 L1A749E: db $00
 L1A749F: db $00
-L1A74A0: db $00
+GFX_Char_Goenitz_Yonokaze12_A: db $00
 L1A74A1: db $00
 L1A74A2: db $06
 L1A74A3: db $00
@@ -13566,7 +13566,7 @@ L1A74FC: db $00
 L1A74FD: db $00
 L1A74FE: db $00
 L1A74FF: db $00
-L1A7500: db $01
+GFX_Char_Goenitz_Yonokaze13: db $01
 L1A7501: db $00
 L1A7502: db $02
 L1A7503: db $01
@@ -13854,7 +13854,7 @@ L1A761C: db $00
 L1A761D: db $00
 L1A761E: db $00
 L1A761F: db $00
-L1A7620: db $F7
+GFX_Char_Goenitz_Yonokaze14_A: db $F7
 L1A7621: db $FE
 L1A7622: db $FF
 L1A7623: db $E1
@@ -14046,7 +14046,7 @@ L1A76DC: db $01
 L1A76DD: db $01
 L1A76DE: db $01
 L1A76DF: db $01
-L1A76E0: db $0C
+GFX_Char_Goenitz_Yonokaze14_B: db $0C
 L1A76E1: db $04
 L1A76E2: db $0C
 L1A76E3: db $04
@@ -14110,7 +14110,7 @@ L1A771C: db $00
 L1A771D: db $00
 L1A771E: db $00
 L1A771F: db $00
-L1A7720: db $00
+GFX_Char_Goenitz_Yonokaze15_A: db $00
 L1A7721: db $00
 L1A7722: db $00
 L1A7723: db $00
@@ -14270,7 +14270,7 @@ L1A77BC: db $C2
 L1A77BD: db $BC
 L1A77BE: db $FF
 L1A77BF: db $80
-L1A77C0: db $19
+GFX_Char_Goenitz_WanpyouTokobuseL0_A: db $19
 L1A77C1: db $00
 L1A77C2: db $16
 L1A77C3: db $09
@@ -14398,7 +14398,7 @@ L1A783C: db $E7
 L1A783D: db $00
 L1A783E: db $FF
 L1A783F: db $00
-L1A7840: db $FF
+GFX_Char_Goenitz_WanpyouTokobuseL0_B: db $FF
 L1A7841: db $03
 L1A7842: db $FF
 L1A7843: db $00
@@ -14558,7 +14558,7 @@ L1A78DC: db $00
 L1A78DD: db $00
 L1A78DE: db $00
 L1A78DF: db $00
-L1A78E0: db $03
+GFX_Char_Goenitz_WanpyouTokobuseL1_A: db $03
 L1A78E1: db $00
 L1A78E2: db $3F
 L1A78E3: db $03
@@ -14686,7 +14686,7 @@ L1A795C: db $00
 L1A795D: db $00
 L1A795E: db $00
 L1A795F: db $00
-L1A7960: db $03
+GFX_Char_Goenitz_WanpyouTokobuseL2_A: db $03
 L1A7961: db $00
 L1A7962: db $3F
 L1A7963: db $03
@@ -14782,7 +14782,7 @@ L1A79BC: db $E7
 L1A79BD: db $00
 L1A79BE: db $FF
 L1A79BF: db $00
-L1A79C0: db $01
+GFX_Char_Goenitz_WanpyouTokobuseL3: db $01
 L1A79C1: db $00
 L1A79C2: db $02
 L1A79C3: db $01
@@ -15006,7 +15006,7 @@ L1A7A9C: db $00
 L1A7A9D: db $00
 L1A7A9E: db $00
 L1A7A9F: db $00
-L1A7AA0: db $03
+GFX_Char_Goenitz_WanpyouTokobuseH0_A: db $03
 L1A7AA1: db $00
 L1A7AA2: db $03
 L1A7AA3: db $01
@@ -15102,7 +15102,7 @@ L1A7AFC: db $00
 L1A7AFD: db $00
 L1A7AFE: db $00
 L1A7AFF: db $00
-L1A7B00: db $00
+GFX_Char_Goenitz_WanpyouTokobuseH1_A: db $00
 L1A7B01: db $00
 L1A7B02: db $00
 L1A7B03: db $00
@@ -15198,7 +15198,7 @@ L1A7B5C: db $F7
 L1A7B5D: db $00
 L1A7B5E: db $FF
 L1A7B5F: db $00
-L1A7B60: db $00
+GFX_Char_Goenitz_WanpyouTokobuseH2_A: db $00
 L1A7B61: db $00
 L1A7B62: db $00
 L1A7B63: db $00
@@ -15294,7 +15294,7 @@ L1A7BBC: db $F7
 L1A7BBD: db $00
 L1A7BBE: db $FF
 L1A7BBF: db $00
-L1A7BC0: db $00
+GFX_Char_Goenitz_YamidoukokuSl1_A: db $00
 L1A7BC1: db $00
 L1A7BC2: db $00
 L1A7BC3: db $00
@@ -15422,7 +15422,7 @@ L1A7C3C: db $E0
 L1A7C3D: db $00
 L1A7C3E: db $C0
 L1A7C3F: db $80
-L1A7C40: db $07
+GFX_Char_Goenitz_YamidoukokuSl1_B: db $07
 L1A7C41: db $03
 L1A7C42: db $03
 L1A7C43: db $00
@@ -15550,7 +15550,7 @@ L1A7CBC: db $00
 L1A7CBD: db $00
 L1A7CBE: db $00
 L1A7CBF: db $00
-L1A7CC0: db $00
+GFX_Char_Goenitz_YamidoukokuSl2_A: db $00
 L1A7CC1: db $00
 L1A7CC2: db $00
 L1A7CC3: db $00
@@ -15678,7 +15678,7 @@ L1A7D3C: db $E0
 L1A7D3D: db $00
 L1A7D3E: db $C0
 L1A7D3F: db $80
-L1A7D40: db $00
+GFX_Char_Goenitz_YamidoukokuSl3_A: db $00
 L1A7D41: db $00
 L1A7D42: db $00
 L1A7D43: db $00
@@ -15806,7 +15806,7 @@ L1A7DBC: db $E0
 L1A7DBD: db $00
 L1A7DBE: db $C0
 L1A7DBF: db $80
-L1A7DC0: db $02
+GFX_Char_Goenitz_YamidoukokuSl4_A: db $02
 L1A7DC1: db $01
 L1A7DC2: db $0E
 L1A7DC3: db $01
@@ -15934,7 +15934,7 @@ L1A7E3C: db $D0
 L1A7E3D: db $20
 L1A7E3E: db $B0
 L1A7E3F: db $60
-L1A7E40: db $1C
+GFX_Char_Goenitz_ShinyaotomeMizuchiSl0: db $1C
 L1A7E41: db $00
 L1A7E42: db $12
 L1A7E43: db $0C
@@ -16222,7 +16222,7 @@ L1A7F5C: db $00
 L1A7F5D: db $00
 L1A7F5E: db $00
 L1A7F5F: db $00
-L1A7F60: db $00
+GFX_Char_Goenitz_HyougaL1: db $00
 L1A7F61: db $04
 L1A7F62: db $00
 L1A7F63: db $08
@@ -16350,7 +16350,7 @@ L1A7FDC: db $00
 L1A7FDD: db $00
 L1A7FDE: db $00
 L1A7FDF: db $00
-L1A7FE0: db $00
+GFX_Char_MrKarate_WinA10_A: db $00
 L1A7FE1: db $00
 L1A7FE2: db $1C
 L1A7FE3: db $00
