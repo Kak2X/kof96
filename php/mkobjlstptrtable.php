@@ -191,7 +191,7 @@ for ($i = 0; $i < count($lines);) {
 			
 			$header_a_basename = "L{$banknum}{$header_a_high}{$header_a_low}";
 			if (AUTONAME) {
-				$newname = $obj_names[$header_a_basename] ?? $obj_name.$j.($header_b_high == "FF" ? "" : "A");
+				$newname = $obj_names[$header_a_basename] ?? $obj_name.$j.($header_b_high == "FF" ? "" : "_A");
 				$obj_names[$header_a_basename] = $newname;
 				$objlst_a[] = $header_a_basename;
 				$header_a_basename = $newname;
@@ -207,7 +207,7 @@ for ($i = 0; $i < count($lines);) {
 			} else {
 				$header_b_basename = "L{$banknum}{$header_b_high}{$header_b_low}";
 				if (AUTONAME) {
-					$newname = $obj_names[$header_b_basename] ?? $obj_name.$j."B";
+					$newname = $obj_names[$header_b_basename] ?? $obj_name.$j."_B";
 					$obj_names[$header_b_basename] = $newname;
 					$objlst_b[] = $header_b_basename;
 					$header_b_basename = $newname;

@@ -1,25 +1,25 @@
 
 OBJLstPtrTable_Daimon_Idle:
-	dw OBJLstHdrA_Daimon_Idle0A, OBJLstHdrB_Daimon_Idle0B
-	dw OBJLstHdrA_Daimon_Idle1A, OBJLstHdrB_Daimon_Idle0B
-	dw OBJLstHdrA_Daimon_Idle2A, OBJLstHdrB_Daimon_Idle0B
-	dw OBJLstHdrA_Daimon_Idle3A, OBJLstHdrB_Daimon_Idle0B
+	dw OBJLstHdrA_Daimon_Idle0_A, OBJLstHdrB_Daimon_Idle0_B
+	dw OBJLstHdrA_Daimon_Idle1_A, OBJLstHdrB_Daimon_Idle0_B
+	dw OBJLstHdrA_Daimon_Idle2_A, OBJLstHdrB_Daimon_Idle0_B
+	dw OBJLstHdrA_Daimon_Idle3_A, OBJLstHdrB_Daimon_Idle0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_WalkF:
-	dw OBJLstHdrA_Daimon_WalkF0A, OBJLstHdrB_Daimon_WalkF0B
-	dw OBJLstHdrA_Daimon_WalkF1A, OBJLstHdrB_Daimon_WalkF1B
+	dw OBJLstHdrA_Daimon_WalkF0_A, OBJLstHdrB_Daimon_WalkF0_B
+	dw OBJLstHdrA_Daimon_WalkF1_A, OBJLstHdrB_Daimon_WalkF1_B
 	dw OBJLstHdrA_Daimon_WalkF2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_WalkF1A, OBJLstHdrB_Daimon_WalkF1B
+	dw OBJLstHdrA_Daimon_WalkF1_A, OBJLstHdrB_Daimon_WalkF1_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_WalkB:
-	dw OBJLstHdrA_Daimon_WalkF1A, OBJLstHdrB_Daimon_WalkF1B
+	dw OBJLstHdrA_Daimon_WalkF1_A, OBJLstHdrB_Daimon_WalkF1_B
 	dw OBJLstHdrA_Daimon_WalkF2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_WalkF1A, OBJLstHdrB_Daimon_WalkF1B
-	dw OBJLstHdrA_Daimon_WalkF0A, OBJLstHdrB_Daimon_WalkF0B
+	dw OBJLstHdrA_Daimon_WalkF1_A, OBJLstHdrB_Daimon_WalkF1_B
+	dw OBJLstHdrA_Daimon_WalkF0_A, OBJLstHdrB_Daimon_WalkF0_B
 	dw OBJLSTPTR_NONE
 		
 
@@ -30,88 +30,88 @@ OBJLstPtrTable_Daimon_Crouch:
 
 OBJLstPtrTable_Daimon_JumpN:
 	dw OBJLstHdrA_Daimon_Crouch0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_JumpN1A, OBJLstHdrB_Daimon_JumpN1B
-	dw OBJLstHdrA_Daimon_JumpN1A, OBJLstHdrB_Daimon_JumpN1B
+	dw OBJLstHdrA_Daimon_JumpN1_A, OBJLstHdrB_Daimon_JumpN1_B
+	dw OBJLstHdrA_Daimon_JumpN1_A, OBJLstHdrB_Daimon_JumpN1_B
 	dw OBJLstHdrA_Daimon_JumpN3, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_JumpN3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_JumpN1A, OBJLstHdrB_Daimon_JumpN1B
-	dw OBJLstHdrA_Daimon_JumpN1A, OBJLstHdrB_Daimon_JumpN1B
+	dw OBJLstHdrA_Daimon_JumpN1_A, OBJLstHdrB_Daimon_JumpN1_B
+	dw OBJLstHdrA_Daimon_JumpN1_A, OBJLstHdrB_Daimon_JumpN1_B
 	dw OBJLstHdrA_Daimon_Crouch0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_BlockG:
-	dw OBJLstHdrA_Daimon_BlockG0A, OBJLstHdrB_Daimon_BlockG0B
+	dw OBJLstHdrA_Daimon_BlockG0_A, OBJLstHdrB_Daimon_BlockG0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_BlockC:
-	dw OBJLstHdrA_Daimon_BlockC0A, OBJLstHdrB_Daimon_BlockC0B
+	dw OBJLstHdrA_Daimon_BlockC0_A, OBJLstHdrB_Daimon_BlockC0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_BlockA:
-	dw OBJLstHdrA_Daimon_BlockG0A, OBJLstHdrB_Daimon_BlockA0B ;X
+	dw OBJLstHdrA_Daimon_BlockG0_A, OBJLstHdrB_Daimon_BlockA0_B ;X
 	dw OBJLstHdrA_Daimon_Crouch0, OBJLSTPTR_NONE ;X
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_RunF:
 	dw OBJLstHdrA_Daimon_RunF0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_RunF1A, OBJLstHdrB_Daimon_WalkF1B
+	dw OBJLstHdrA_Daimon_RunF1_A, OBJLstHdrB_Daimon_WalkF1_B
 	dw OBJLstHdrA_Daimon_RunF2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_RunF3A, OBJLstHdrB_Daimon_WalkF1B
+	dw OBJLstHdrA_Daimon_RunF3_A, OBJLstHdrB_Daimon_WalkF1_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_HopB:
 	dw OBJLstHdrA_Daimon_HopB0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_HopB1A, OBJLstHdrB_Daimon_HopB1B
+	dw OBJLstHdrA_Daimon_HopB1_A, OBJLstHdrB_Daimon_HopB1_B
 	dw OBJLstHdrA_Daimon_Crouch0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_ChargeMeter:
-	dw OBJLstHdrA_Daimon_ChargeMeter0A, OBJLstHdrB_Daimon_ChargeMeter0B
-	dw OBJLstHdrA_Daimon_ChargeMeter1A, OBJLstHdrB_Daimon_ChargeMeter0B
+	dw OBJLstHdrA_Daimon_ChargeMeter0_A, OBJLstHdrB_Daimon_ChargeMeter0_B
+	dw OBJLstHdrA_Daimon_ChargeMeter1_A, OBJLstHdrB_Daimon_ChargeMeter0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_Taunt:
 	dw OBJLstHdrA_Daimon_Taunt0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_Taunt0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_HopB1A, OBJLstHdrB_Daimon_HopB1B
-	dw OBJLstHdrA_Daimon_Taunt3A, OBJLstHdrB_Daimon_HopB1B
-	dw OBJLstHdrA_Daimon_Taunt3A, OBJLstHdrB_Daimon_HopB1B
+	dw OBJLstHdrA_Daimon_HopB1_A, OBJLstHdrB_Daimon_HopB1_B
+	dw OBJLstHdrA_Daimon_Taunt3_A, OBJLstHdrB_Daimon_HopB1_B
+	dw OBJLstHdrA_Daimon_Taunt3_A, OBJLstHdrB_Daimon_HopB1_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_WinA:
 	dw OBJLstHdrA_Daimon_Taunt0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_Taunt0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_WinA2A, OBJLstHdrB_Daimon_HopB1B
+	dw OBJLstHdrA_Daimon_WinA2_A, OBJLstHdrB_Daimon_HopB1_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_WinB:
-	dw OBJLstHdrA_Daimon_WinB0A, OBJLstHdrB_Daimon_WinB0B
-	dw OBJLstHdrA_Daimon_WinB1A, OBJLstHdrB_Daimon_WinB0B
-	dw OBJLstHdrA_Daimon_WinB2A, OBJLstHdrB_Daimon_WinB0B
+	dw OBJLstHdrA_Daimon_WinB0_A, OBJLstHdrB_Daimon_WinB0_B
+	dw OBJLstHdrA_Daimon_WinB1_A, OBJLstHdrB_Daimon_WinB0_B
+	dw OBJLstHdrA_Daimon_WinB2_A, OBJLstHdrB_Daimon_WinB0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_PunchL:
-	dw OBJLstHdrA_Daimon_WalkF1A, OBJLstHdrB_Daimon_WalkF0B
-	dw OBJLstHdrA_Daimon_PunchL1A, OBJLstHdrB_Daimon_WalkF0B
-	dw OBJLstHdrA_Daimon_WalkF1A, OBJLstHdrB_Daimon_WalkF0B
+	dw OBJLstHdrA_Daimon_WalkF1_A, OBJLstHdrB_Daimon_WalkF0_B
+	dw OBJLstHdrA_Daimon_PunchL1_A, OBJLstHdrB_Daimon_WalkF0_B
+	dw OBJLstHdrA_Daimon_WalkF1_A, OBJLstHdrB_Daimon_WalkF0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_PunchH:
-	dw OBJLstHdrA_Daimon_PunchH0A, OBJLstHdrB_Daimon_PunchH0B
+	dw OBJLstHdrA_Daimon_PunchH0_A, OBJLstHdrB_Daimon_PunchH0_B
 	dw OBJLstHdrA_Daimon_PunchH1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_PunchH1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_PunchH0A, OBJLstHdrB_Daimon_PunchH0B
+	dw OBJLstHdrA_Daimon_PunchH0_A, OBJLstHdrB_Daimon_PunchH0_B
 	dw OBJLSTPTR_NONE
 		
 
@@ -131,40 +131,40 @@ OBJLstPtrTable_Daimon_KickH:
 		
 
 OBJLstPtrTable_Daimon_PunchCL:
-	dw OBJLstHdrA_Daimon_PunchCL0A, OBJLstHdrB_Daimon_PunchCL0B
+	dw OBJLstHdrA_Daimon_PunchCL0_A, OBJLstHdrB_Daimon_PunchCL0_B
 	dw OBJLstHdrA_Daimon_PunchCL1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_PunchCL0A, OBJLstHdrB_Daimon_PunchCL0B
+	dw OBJLstHdrA_Daimon_PunchCL0_A, OBJLstHdrB_Daimon_PunchCL0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_PunchCH:
-	dw OBJLstHdrA_Daimon_PunchCL0A, OBJLstHdrB_Daimon_PunchCH0B
+	dw OBJLstHdrA_Daimon_PunchCL0_A, OBJLstHdrB_Daimon_PunchCH0_B
 	dw OBJLstHdrA_Daimon_PunchCH1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_PunchCH2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_PunchCL0A, OBJLstHdrB_Daimon_PunchCH0B ;X
+	dw OBJLstHdrA_Daimon_PunchCL0_A, OBJLstHdrB_Daimon_PunchCH0_B ;X
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_KickCL:
 	dw OBJLstHdrA_Daimon_KickCL0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_KickCL1A, OBJLstHdrB_Daimon_KickCL1B
+	dw OBJLstHdrA_Daimon_KickCL1_A, OBJLstHdrB_Daimon_KickCL1_B
 	dw OBJLstHdrA_Daimon_KickCL0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_KickCH:
 	dw OBJLstHdrA_Daimon_KickCL0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_KickCH1A, OBJLstHdrB_Daimon_KickCL1B
-	dw OBJLstHdrA_Daimon_KickCH1A, OBJLstHdrB_Daimon_KickCL1B
+	dw OBJLstHdrA_Daimon_KickCH1_A, OBJLstHdrB_Daimon_KickCL1_B
+	dw OBJLstHdrA_Daimon_KickCH1_A, OBJLstHdrB_Daimon_KickCL1_B
 	dw OBJLstHdrA_Daimon_KickCH3, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_PunchA:
-	dw OBJLstHdrA_Daimon_JumpN1A, OBJLstHdrB_Daimon_PunchA0B
+	dw OBJLstHdrA_Daimon_JumpN1_A, OBJLstHdrB_Daimon_PunchA0_B
 	dw OBJLstHdrA_Daimon_PunchA1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_JumpN3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_JumpN1A, OBJLstHdrB_Daimon_JumpN1B ;X
+	dw OBJLstHdrA_Daimon_JumpN1_A, OBJLstHdrB_Daimon_JumpN1_B ;X
 	dw OBJLstHdrA_Daimon_Crouch0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
@@ -173,25 +173,25 @@ OBJLstPtrTable_Daimon_KickA:
 	dw OBJLstHdrA_Daimon_KickA0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_KickA1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_JumpN3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_JumpN1A, OBJLstHdrB_Daimon_JumpN1B ;X
+	dw OBJLstHdrA_Daimon_JumpN1_A, OBJLstHdrB_Daimon_JumpN1_B ;X
 	dw OBJLstHdrA_Daimon_Crouch0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_AttackA:
-	dw OBJLstHdrA_Daimon_AttackA0A, OBJLstHdrB_Daimon_JumpN1B
-	dw OBJLstHdrA_Daimon_AttackA1A, OBJLstHdrB_Daimon_AttackA1B
+	dw OBJLstHdrA_Daimon_AttackA0_A, OBJLstHdrB_Daimon_JumpN1_B
+	dw OBJLstHdrA_Daimon_AttackA1_A, OBJLstHdrB_Daimon_AttackA1_B
 	dw OBJLstHdrA_Daimon_JumpN3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_JumpN1A, OBJLstHdrB_Daimon_JumpN1B ;X
+	dw OBJLstHdrA_Daimon_JumpN1_A, OBJLstHdrB_Daimon_JumpN1_B ;X
 	dw OBJLstHdrA_Daimon_Crouch0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_AttackG:
-	dw OBJLstHdrA_Daimon_PunchH0A, OBJLstHdrB_Daimon_PunchH0B
-	dw OBJLstHdrA_Daimon_AttackG1A, OBJLstHdrB_Daimon_AttackG1B
-	dw OBJLstHdrA_Daimon_AttackG1A, OBJLstHdrB_Daimon_AttackG1B
-	dw OBJLstHdrA_Daimon_PunchL1A, OBJLstHdrB_Daimon_WalkF0B ;X
+	dw OBJLstHdrA_Daimon_PunchH0_A, OBJLstHdrB_Daimon_PunchH0_B
+	dw OBJLstHdrA_Daimon_AttackG1_A, OBJLstHdrB_Daimon_AttackG1_B
+	dw OBJLstHdrA_Daimon_AttackG1_A, OBJLstHdrB_Daimon_AttackG1_B
+	dw OBJLstHdrA_Daimon_PunchL1_A, OBJLstHdrB_Daimon_WalkF0_B ;X
 	dw OBJLSTPTR_NONE
 		
 
@@ -214,42 +214,42 @@ OBJLstPtrTable_Daimon_RollB:
 		
 
 OBJLstPtrTable_Daimon_GuardBreakG:
-	dw OBJLstHdrA_Daimon_GuardBreakG0A, OBJLstHdrB_Daimon_GuardBreakG0B
+	dw OBJLstHdrA_Daimon_GuardBreakG0_A, OBJLstHdrB_Daimon_GuardBreakG0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_Dizzy:
-	dw OBJLstHdrA_Daimon_Idle0A, OBJLstHdrB_Daimon_Idle0B
-	dw OBJLstHdrA_Daimon_GuardBreakG0A, OBJLstHdrB_Daimon_GuardBreakG0B
+	dw OBJLstHdrA_Daimon_Idle0_A, OBJLstHdrB_Daimon_Idle0_B
+	dw OBJLstHdrA_Daimon_GuardBreakG0_A, OBJLstHdrB_Daimon_GuardBreakG0_B
 OBJLstPtrTable_Daimon_TimeOver:
 	dw OBJLstHdrA_Daimon_HopB0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_Hitlow:
-	dw OBJLstHdrA_Daimon_Hitlow0A, OBJLstHdrB_Daimon_Hitlow0B
+	dw OBJLstHdrA_Daimon_Hitlow0_A, OBJLstHdrB_Daimon_Hitlow0_B
 	dw OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE;X
 
 OBJLstPtrTable_Daimon_GuardBreakA:
-	dw OBJLstHdrA_Daimon_GuardBreakG0A, OBJLstHdrB_Daimon_GuardBreakG0B ;X
+	dw OBJLstHdrA_Daimon_GuardBreakG0_A, OBJLstHdrB_Daimon_GuardBreakG0_B ;X
 	dw OBJLstHdrA_Daimon_Crouch0, OBJLSTPTR_NONE ;X
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_BackjumpRecA:
-	dw OBJLstHdrA_Daimon_GuardBreakG0A, OBJLstHdrB_Daimon_GuardBreakG0B
-	dw OBJLstHdrA_Daimon_JumpN1A, OBJLstHdrB_Daimon_JumpN1B
-	dw OBJLstHdrA_Daimon_JumpN1A, OBJLstHdrB_Daimon_JumpN1B
-	dw OBJLstHdrA_Daimon_JumpN1A, OBJLstHdrB_Daimon_JumpN1B
-	dw OBJLstHdrA_Daimon_JumpN1A, OBJLstHdrB_Daimon_JumpN1B
+	dw OBJLstHdrA_Daimon_GuardBreakG0_A, OBJLstHdrB_Daimon_GuardBreakG0_B
+	dw OBJLstHdrA_Daimon_JumpN1_A, OBJLstHdrB_Daimon_JumpN1_B
+	dw OBJLstHdrA_Daimon_JumpN1_A, OBJLstHdrB_Daimon_JumpN1_B
+	dw OBJLstHdrA_Daimon_JumpN1_A, OBJLstHdrB_Daimon_JumpN1_B
+	dw OBJLstHdrA_Daimon_JumpN1_A, OBJLstHdrB_Daimon_JumpN1_B
 	dw OBJLstHdrA_Daimon_JumpN3, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_Crouch0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Daimon_DropMain:
-	dw OBJLstHdrA_Daimon_GuardBreakG0A, OBJLstHdrB_Daimon_GuardBreakG0B
+	dw OBJLstHdrA_Daimon_GuardBreakG0_A, OBJLstHdrB_Daimon_GuardBreakG0_B
 	dw OBJLstHdrA_Daimon_DropMain1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_DropMain2, OBJLSTPTR_NONE
 OBJLstPtrTable_Daimon_HitMultigs:
@@ -271,7 +271,7 @@ OBJLstPtrTable_Daimon_ThrowEndA:
 		
 
 OBJLstPtrTable_Daimon_DropDbg:
-	dw OBJLstHdrA_Daimon_GuardBreakG0A, OBJLstHdrB_Daimon_GuardBreakG0B
+	dw OBJLstHdrA_Daimon_GuardBreakG0_A, OBJLstHdrB_Daimon_GuardBreakG0_B
 	dw OBJLstHdrA_Daimon_DropMain1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_DropMain2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
@@ -290,7 +290,7 @@ OBJLstPtrTable_Daimon_Wakeup:
 
 OBJLstPtrTable_Daimon_JiraiShin:
 	dw OBJLstHdrA_Daimon_Taunt0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_JiraiShin1A, OBJLstHdrB_Daimon_HopB1B
+	dw OBJLstHdrA_Daimon_JiraiShin1_A, OBJLstHdrB_Daimon_HopB1_B
 	dw OBJLstHdrA_Daimon_JiraiShin2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_Taunt0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
@@ -305,12 +305,12 @@ OBJLstPtrTable_Daimon_CHouUkemiL:
 		
 
 OBJLstPtrTable_Daimon_CHouOosotoGariL:
-	dw OBJLstHdrA_Daimon_WalkF1A, OBJLstHdrB_Daimon_WalkF1B
-	dw OBJLstHdrA_Daimon_PunchL1A, OBJLstHdrB_Daimon_WalkF0B
+	dw OBJLstHdrA_Daimon_WalkF1_A, OBJLstHdrB_Daimon_WalkF1_B
+	dw OBJLstHdrA_Daimon_PunchL1_A, OBJLstHdrB_Daimon_WalkF0_B
 	dw OBJLstHdrA_Daimon_PunchCH2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_CHouOosotoGariL3A, OBJLstHdrB_Daimon_WalkF0B
-	dw OBJLstHdrA_Daimon_CHouOosotoGariL4A, OBJLstHdrB_Daimon_CHouOosotoGariL4B
-	dw OBJLstHdrA_Daimon_CHouOosotoGariL4A, OBJLstHdrB_Daimon_CHouOosotoGariL5B
+	dw OBJLstHdrA_Daimon_CHouOosotoGariL3_A, OBJLstHdrB_Daimon_WalkF0_B
+	dw OBJLstHdrA_Daimon_CHouOosotoGariL4_A, OBJLstHdrB_Daimon_CHouOosotoGariL4_B
+	dw OBJLstHdrA_Daimon_CHouOosotoGariL4_A, OBJLstHdrB_Daimon_CHouOosotoGariL5_B
 	dw OBJLstHdrA_Daimon_CHouOosotoGariL6, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_CHouOosotoGariL7, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_Taunt0, OBJLSTPTR_NONE
@@ -322,7 +322,7 @@ OBJLstPtrTable_Daimon_CLoudTosser:
 	dw OBJLstHdrA_Daimon_CLoudTosser1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_CLoudTosser2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_Taunt0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_CLoudTosser4A, OBJLstHdrB_Daimon_CLoudTosser4B
+	dw OBJLstHdrA_Daimon_CLoudTosser4_A, OBJLstHdrB_Daimon_CLoudTosser4_B
 	dw OBJLstHdrA_Daimon_CLoudTosser5, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_CLoudTosser6, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_CLoudTosser7, OBJLSTPTR_NONE
@@ -335,7 +335,7 @@ OBJLstPtrTable_Daimon_StumpThrow:
 	dw OBJLstHdrA_Daimon_StumpThrow1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_PunchCH2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_Crouch0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_CLoudTosser4A, OBJLstHdrB_Daimon_CLoudTosser4B
+	dw OBJLstHdrA_Daimon_CLoudTosser4_A, OBJLstHdrB_Daimon_CLoudTosser4_B
 	dw OBJLstHdrA_Daimon_CLoudTosser5, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_CLoudTosser6, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_CLoudTosser7, OBJLSTPTR_NONE
@@ -346,10 +346,10 @@ OBJLstPtrTable_Daimon_StumpThrow:
 OBJLstPtrTable_Daimon_HeavenDropL:
 	dw OBJLstHdrA_Daimon_HeavenDropL0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_HeavenDropL1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_CLoudTosser4A, OBJLstHdrB_Daimon_CLoudTosser4B
+	dw OBJLstHdrA_Daimon_CLoudTosser4_A, OBJLstHdrB_Daimon_CLoudTosser4_B
 	dw OBJLstHdrA_Daimon_HeavenDropL3, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_HeavenDropL4, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_HeavenDropL5A, OBJLstHdrB_Daimon_PunchH0B
+	dw OBJLstHdrA_Daimon_HeavenDropL5_A, OBJLstHdrB_Daimon_PunchH0_B
 	dw OBJLstHdrA_Daimon_HeavenDropL6, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_HeavenDropL7, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_CLoudTosser2, OBJLSTPTR_NONE
@@ -359,20 +359,20 @@ OBJLstPtrTable_Daimon_HeavenDropL:
 
 OBJLstPtrTable_Daimon_HeavenHellDropS:
 	dw OBJLstHdrA_Daimon_HeavenDropL0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_CHouOosotoGariL4A, OBJLstHdrB_Daimon_CHouOosotoGariL4B
-	dw OBJLstHdrA_Daimon_CHouOosotoGariL4A, OBJLstHdrB_Daimon_CHouOosotoGariL5B
+	dw OBJLstHdrA_Daimon_CHouOosotoGariL4_A, OBJLstHdrB_Daimon_CHouOosotoGariL4_B
+	dw OBJLstHdrA_Daimon_CHouOosotoGariL4_A, OBJLstHdrB_Daimon_CHouOosotoGariL5_B
 	dw OBJLstHdrA_Daimon_CHouOosotoGariL6, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_HeavenHellDropS4, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_HeavenHellDropS5, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_CLoudTosser4A, OBJLstHdrB_Daimon_CLoudTosser4B
+	dw OBJLstHdrA_Daimon_CLoudTosser4_A, OBJLstHdrB_Daimon_CLoudTosser4_B
 	dw OBJLstHdrA_Daimon_CLoudTosser5, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_CLoudTosser6, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_HeavenDropL4, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_HeavenDropL5A, OBJLstHdrB_Daimon_PunchH0B
+	dw OBJLstHdrA_Daimon_HeavenDropL5_A, OBJLstHdrB_Daimon_PunchH0_B
 	dw OBJLstHdrA_Daimon_HeavenDropL6, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_HeavenDropL7, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_HeavenHellDropS5, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_CLoudTosser4A, OBJLstHdrB_Daimon_CLoudTosser4B
+	dw OBJLstHdrA_Daimon_CLoudTosser4_A, OBJLstHdrB_Daimon_CLoudTosser4_B
 	dw OBJLstHdrA_Daimon_CLoudTosser5, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_CLoudTosser6, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_CLoudTosser7, OBJLSTPTR_NONE
@@ -381,13 +381,13 @@ OBJLstPtrTable_Daimon_HeavenHellDropS:
 		
 
 OBJLstPtrTable_Daimon_ThrowG:
-	dw OBJLstHdrA_Daimon_PunchL1A, OBJLstHdrB_Daimon_WalkF0B
+	dw OBJLstHdrA_Daimon_PunchL1_A, OBJLstHdrB_Daimon_WalkF0_B
 	dw OBJLstHdrA_Daimon_HeavenDropL1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Daimon_ThrowG2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Daimon_ThrowG3A, OBJLstHdrB_Daimon_ThrowG3B
+	dw OBJLstHdrA_Daimon_ThrowG3_A, OBJLstHdrB_Daimon_ThrowG3_B
 	dw OBJLSTPTR_NONE
 		
-OBJLstHdrA_Daimon_Idle0A:
+OBJLstHdrA_Daimon_Idle0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -405,7 +405,7 @@ OBJLstHdrA_Daimon_Idle0A:
 	db $10,$FB,$08 ; $04
 	db $10,$03,$0A ; $05
 		
-OBJLstHdrB_Daimon_Idle0B:
+OBJLstHdrB_Daimon_Idle0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0C40C0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -418,7 +418,7 @@ OBJLstHdrB_Daimon_Idle0B:
 	db $30,$FB,$02 ; $01
 	db $30,$03,$04 ; $02
 		
-OBJLstHdrA_Daimon_Idle1A:
+OBJLstHdrA_Daimon_Idle1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -436,7 +436,7 @@ OBJLstHdrA_Daimon_Idle1A:
 	db $20,$FB,$08 ; $04
 	db $20,$03,$0A ; $05
 		
-OBJLstHdrA_Daimon_Idle2A:
+OBJLstHdrA_Daimon_Idle2_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -454,7 +454,7 @@ OBJLstHdrA_Daimon_Idle2A:
 	db $10,$FB,$08 ; $04
 	db $10,$03,$0A ; $05
 		
-OBJLstHdrA_Daimon_Idle3A:
+OBJLstHdrA_Daimon_Idle3_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -472,7 +472,7 @@ OBJLstHdrA_Daimon_Idle3A:
 	db $10,$FB,$08 ; $04
 	db $10,$03,$0A ; $05
 		
-OBJLstHdrA_Daimon_WalkF0A:
+OBJLstHdrA_Daimon_WalkF0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -490,7 +490,7 @@ OBJLstHdrA_Daimon_WalkF0A:
 	db $0F,$EF,$08 ; $04
 	db $10,$F7,$0A ; $05
 		
-OBJLstHdrB_Daimon_WalkF0B:
+OBJLstHdrB_Daimon_WalkF0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0C4420 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -503,16 +503,16 @@ OBJLstHdrB_Daimon_WalkF0B:
 	db $30,$F9,$02 ; $01
 	db $33,$01,$04 ; $02
 		
-OBJLstHdrA_Daimon_WalkF1A:
+OBJLstHdrA_Daimon_WalkF1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
 	dpr L0C4480 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Daimon_ThrowG3A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Daimon_ThrowG3_A.bin ; iOBJLstHdrA_DataPtr
 	db $04 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Daimon_ThrowG3A:
+OBJLstHdrA_Daimon_ThrowG3_A:
 	db OLF_XFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -528,14 +528,14 @@ OBJLstHdrA_Daimon_ThrowG3A:
 	db $10,$F3,$04 ; $02
 	db $10,$FB,$06 ; $03
 		
-OBJLstHdrB_Daimon_WalkF1B:
+OBJLstHdrB_Daimon_WalkF1_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0C4500 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrB_Daimon_ThrowG3B.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrB_Daimon_ThrowG3_B.bin ; iOBJLstHdrA_DataPtr
 	db $04 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrB_Daimon_ThrowG3B:
+OBJLstHdrB_Daimon_ThrowG3_B:
 	db OLF_XFLIP ; iOBJLstHdrA_Flags
 	dpr L0C4500 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -596,7 +596,7 @@ OBJLstHdrA_Daimon_Unused_CrouchXFlip0: ;X
 	db $33,$03,$08 ; $04
 	db $3B,$0B,$0A ; $05
 		
-OBJLstHdrA_Daimon_BlockG0A:
+OBJLstHdrA_Daimon_BlockG0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -612,7 +612,7 @@ OBJLstHdrA_Daimon_BlockG0A:
 	db $11,$FB,$04 ; $02
 	db $21,$FB,$06 ; $03
 		
-OBJLstHdrA_Daimon_BlockC0A:
+OBJLstHdrA_Daimon_BlockC0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -628,7 +628,7 @@ OBJLstHdrA_Daimon_BlockC0A:
 	db $11,$FB,$04 ; $02
 	db $21,$FB,$06 ; $03
 		
-OBJLstHdrB_Daimon_BlockG0B:
+OBJLstHdrB_Daimon_BlockG0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0C4940 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -643,7 +643,7 @@ OBJLstHdrB_Daimon_BlockG0B:
 	db $39,$F3,$06 ; $03
 	db $39,$FB,$08 ; $04
 		
-OBJLstHdrB_Daimon_BlockC0B:
+OBJLstHdrB_Daimon_BlockC0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0C49E0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -656,7 +656,7 @@ OBJLstHdrB_Daimon_BlockC0B:
 	db $30,$F2,$02 ; $01
 	db $30,$FA,$04 ; $02
 		
-OBJLstHdrB_Daimon_BlockA0B: ;X
+OBJLstHdrB_Daimon_BlockA0_B: ;X
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0C4A40 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -671,7 +671,7 @@ OBJLstHdrB_Daimon_BlockA0B: ;X
 	db $40,$EA,$06 ; $03
 	db $40,$F2,$08 ; $04
 		
-OBJLstHdrA_Daimon_JumpN1A:
+OBJLstHdrA_Daimon_JumpN1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -687,7 +687,7 @@ OBJLstHdrA_Daimon_JumpN1A:
 	db $10,$03,$04 ; $02
 	db $00,$FB,$06 ; $03
 		
-OBJLstHdrB_Daimon_JumpN1B:
+OBJLstHdrB_Daimon_JumpN1_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0C4780 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -719,7 +719,7 @@ OBJLstHdrA_Daimon_JumpN3:
 	db $1A,$F6,$08 ; $04
 	db $1A,$FE,$0A ; $05
 		
-OBJLstHdrA_Daimon_ChargeMeter0A:
+OBJLstHdrA_Daimon_ChargeMeter0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -737,7 +737,7 @@ OBJLstHdrA_Daimon_ChargeMeter0A:
 	db $27,$0B,$08 ; $04
 	db $10,$FB,$0A ; $05
 		
-OBJLstHdrB_Daimon_ChargeMeter0B:
+OBJLstHdrB_Daimon_ChargeMeter0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0C62C0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -751,7 +751,7 @@ OBJLstHdrB_Daimon_ChargeMeter0B:
 	db $30,$05,$04 ; $02
 	db $3D,$0D,$06 ; $03
 		
-OBJLstHdrA_Daimon_ChargeMeter1A:
+OBJLstHdrA_Daimon_ChargeMeter1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -790,7 +790,7 @@ OBJLstHdrA_Daimon_RunF0:
 	db $34,$05,$0E ; $07
 	db $39,$F5,$10 ; $08
 		
-OBJLstHdrA_Daimon_RunF1A:
+OBJLstHdrA_Daimon_RunF1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -827,7 +827,7 @@ OBJLstHdrA_Daimon_RunF2:
 	db $29,$FB,$0C ; $06
 	db $33,$03,$0E ; $07
 		
-OBJLstHdrA_Daimon_RunF3A:
+OBJLstHdrA_Daimon_RunF3_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -871,7 +871,7 @@ OBJLstHdrA_Daimon_CLoudTosser8:
 	db $30,$F4,$08 ; $04
 	db $30,$FC,$0A ; $05
 		
-OBJLstHdrA_Daimon_HopB1A:
+OBJLstHdrA_Daimon_HopB1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -889,7 +889,7 @@ OBJLstHdrA_Daimon_HopB1A:
 	db $08,$F8,$08 ; $04
 	db $06,$02,$0A ; $05
 		
-OBJLstHdrB_Daimon_HopB1B:
+OBJLstHdrB_Daimon_HopB1_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0C6700 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -904,7 +904,7 @@ OBJLstHdrB_Daimon_HopB1B:
 	db $38,$FD,$06 ; $03
 	db $3D,$05,$08 ; $04
 		
-OBJLstHdrA_Daimon_Taunt3A:
+OBJLstHdrA_Daimon_Taunt3_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -922,7 +922,7 @@ OBJLstHdrA_Daimon_Taunt3A:
 	db $08,$F5,$08 ; $04
 	db $06,$FF,$0A ; $05
 		
-OBJLstHdrA_Daimon_WinA2A:
+OBJLstHdrA_Daimon_WinA2_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -940,7 +940,7 @@ OBJLstHdrA_Daimon_WinA2A:
 	db $1D,$FF,$08 ; $04
 	db $08,$EF,$0A ; $05
 		
-OBJLstHdrA_Daimon_WinB0A:
+OBJLstHdrA_Daimon_WinB0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -954,7 +954,7 @@ OBJLstHdrA_Daimon_WinB0A:
 	db $18,$EB,$00 ; $00
 	db $18,$F3,$02 ; $01
 		
-OBJLstHdrB_Daimon_WinB0B:
+OBJLstHdrB_Daimon_WinB0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0C6960 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -971,7 +971,7 @@ OBJLstHdrB_Daimon_WinB0B:
 	db $2F,$FB,$0A ; $05
 	db $3A,$01,$0C ; $06
 		
-OBJLstHdrA_Daimon_WinB1A:
+OBJLstHdrA_Daimon_WinB1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -986,7 +986,7 @@ OBJLstHdrA_Daimon_WinB1A:
 	db $10,$F3,$02 ; $01
 	db $20,$F3,$04 ; $02
 		
-OBJLstHdrA_Daimon_WinB2A:
+OBJLstHdrA_Daimon_WinB2_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -1001,16 +1001,16 @@ OBJLstHdrA_Daimon_WinB2A:
 	db $10,$F3,$02 ; $01
 	db $20,$F3,$04 ; $02
 		
-OBJLstHdrA_Daimon_PunchL1A:
+OBJLstHdrA_Daimon_PunchL1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_02 ; iOBJLstHdrA_HitboxId
 	dpr L0C4F60 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Daimon_CHouOosotoGariL3A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Daimon_CHouOosotoGariL3_A.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Daimon_CHouOosotoGariL3A:
+OBJLstHdrA_Daimon_CHouOosotoGariL3_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -1028,34 +1028,34 @@ OBJLstHdrA_Daimon_CHouOosotoGariL3A:
 	db $10,$F5,$08 ; $04
 	db $10,$FD,$0A ; $05
 		
-OBJLstHdrA_Daimon_PunchH0A:
+OBJLstHdrA_Daimon_PunchH0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
 	dpr L0C5020 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Daimon_HeavenDropL5A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Daimon_HeavenDropL5_A.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Daimon_CLoudTosser4A:
+OBJLstHdrA_Daimon_CLoudTosser4_A:
 	db OLF_XFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_05 ; iOBJLstHdrA_HitboxId
 	dpr L0C5020 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Daimon_HeavenDropL5A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Daimon_HeavenDropL5_A.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Daimon_AttackA0A:
+OBJLstHdrA_Daimon_AttackA0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
 	dpr L0C5020 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Daimon_HeavenDropL5A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Daimon_HeavenDropL5_A.bin ; iOBJLstHdrA_DataPtr
 	db $FE ; iOBJLstHdrA_XOffset
 	db $05 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Daimon_HeavenDropL5A:
+OBJLstHdrA_Daimon_HeavenDropL5_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_05 ; iOBJLstHdrA_HitboxId
@@ -1070,14 +1070,14 @@ OBJLstHdrA_Daimon_HeavenDropL5A:
 	db $18,$04,$02 ; $01
 	db $0C,$0B,$04 ; $02
 		
-OBJLstHdrB_Daimon_PunchH0B:
+OBJLstHdrB_Daimon_PunchH0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0C5080 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrB_Daimon_CLoudTosser4B.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrB_Daimon_CLoudTosser4_B.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrB_Daimon_CLoudTosser4B:
+OBJLstHdrB_Daimon_CLoudTosser4_B:
 	db OLF_XFLIP ; iOBJLstHdrA_Flags
 	dpr L0C5080 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -1210,7 +1210,7 @@ OBJLstHdrA_Daimon_PunchCL1:
 	db $33,$FC,$0A ; $05
 	db $38,$04,$0C ; $06
 		
-OBJLstHdrA_Daimon_PunchCL0A:
+OBJLstHdrA_Daimon_PunchCL0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -1228,7 +1228,7 @@ OBJLstHdrA_Daimon_PunchCL0A:
 	db $38,$F3,$08 ; $04
 	db $18,$F3,$0A ; $05
 		
-OBJLstHdrB_Daimon_PunchCL0B:
+OBJLstHdrB_Daimon_PunchCL0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0C57A0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -1279,7 +1279,7 @@ OBJLstHdrA_Daimon_PunchCH1:
 	db $38,$F3,$0C ; $06
 	db $18,$E3,$0E ; $07
 		
-OBJLstHdrB_Daimon_PunchCH0B:
+OBJLstHdrB_Daimon_PunchCH0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0C59C0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -1291,7 +1291,7 @@ OBJLstHdrB_Daimon_PunchCH0B:
 	db $28,$F3,$00 ; $00
 	db $28,$EB,$02 ; $01
 		
-OBJLstHdrA_Daimon_KickCL1A:
+OBJLstHdrA_Daimon_KickCL1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_4C ; iOBJLstHdrA_HitboxId
@@ -1308,7 +1308,7 @@ OBJLstHdrA_Daimon_KickCL1A:
 	db $29,$06,$06 ; $03
 	db $30,$03,$08 ; $04
 		
-OBJLstHdrB_Daimon_KickCL1B:
+OBJLstHdrB_Daimon_KickCL1_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0C5AA0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -1348,7 +1348,7 @@ OBJLstHdrA_Daimon_KickA0:
 	db $25,$03,$08 ; $04
 	db $35,$03,$0A ; $05
 		
-OBJLstHdrA_Daimon_KickCH1A:
+OBJLstHdrA_Daimon_KickCH1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_4C ; iOBJLstHdrA_HitboxId
@@ -1403,7 +1403,7 @@ OBJLstHdrA_Daimon_HeavenHellDropS5:
 	db $30,$FB,$0A ; $05
 	db $30,$03,$0C ; $06
 		
-OBJLstHdrB_Daimon_PunchA0B:
+OBJLstHdrB_Daimon_PunchA0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0C5D60 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -1454,16 +1454,16 @@ OBJLstHdrA_Daimon_KickA1:
 	db $18,$F4,$0A ; $05
 	db $18,$FC,$0C ; $06
 		
-OBJLstHdrA_Daimon_AttackG1A:
+OBJLstHdrA_Daimon_AttackG1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_51 ; iOBJLstHdrA_HitboxId
 	dpr L0C6400 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Daimon_AttackA1A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Daimon_AttackA1_A.bin ; iOBJLstHdrA_DataPtr
 	db $03 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Daimon_AttackA1A:
+OBJLstHdrA_Daimon_AttackA1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_02 ; iOBJLstHdrA_HitboxId
@@ -1482,7 +1482,7 @@ OBJLstHdrA_Daimon_AttackA1A:
 	db $37,$03,$0A ; $05
 	db $10,$F3,$0C ; $06
 		
-OBJLstHdrB_Daimon_AttackG1B:
+OBJLstHdrB_Daimon_AttackG1_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0C64E0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -1495,7 +1495,7 @@ OBJLstHdrB_Daimon_AttackG1B:
 	db $30,$F3,$02 ; $01
 	db $38,$EB,$04 ; $02
 		
-OBJLstHdrB_Daimon_AttackA1B:
+OBJLstHdrB_Daimon_AttackA1_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0C6540 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -1610,7 +1610,7 @@ OBJLstHdrA_Daimon_HitSwoopup1:
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Daimon_GuardBreakG0A:
+OBJLstHdrA_Daimon_GuardBreakG0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -1627,16 +1627,16 @@ OBJLstHdrA_Daimon_GuardBreakG0A:
 	db $10,$0B,$06 ; $03
 	db $20,$0B,$08 ; $04
 		
-OBJLstHdrA_Daimon_Hitlow0A:
+OBJLstHdrA_Daimon_Hitlow0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
 	dpr L0C4AE0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Daimon_GuardBreakG0A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Daimon_GuardBreakG0_A.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $08 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrB_Daimon_GuardBreakG0B:
+OBJLstHdrB_Daimon_GuardBreakG0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0C4B80 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -1651,7 +1651,7 @@ OBJLstHdrB_Daimon_GuardBreakG0B:
 	db $38,$03,$06 ; $03
 	db $38,$F6,$08 ; $04
 		
-OBJLstHdrB_Daimon_Hitlow0B:
+OBJLstHdrB_Daimon_Hitlow0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0C4D20 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -1712,7 +1712,7 @@ OBJLstHdrA_Daimon_DropMain2:
 	db $31,$0B,$08 ; $04
 	db $33,$13,$0A ; $05
 		
-OBJLstHdrA_Daimon_JiraiShin1A:
+OBJLstHdrA_Daimon_JiraiShin1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -1809,7 +1809,7 @@ OBJLstHdrA_Daimon_CHouUkemiL2:
 	db $37,$F8,$0C ; $06
 	db $30,$00,$0E ; $07
 		
-OBJLstHdrA_Daimon_CHouOosotoGariL4A:
+OBJLstHdrA_Daimon_CHouOosotoGariL4_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_05 ; iOBJLstHdrA_HitboxId
@@ -1825,7 +1825,7 @@ OBJLstHdrA_Daimon_CHouOosotoGariL4A:
 	db $2B,$03,$04 ; $02
 	db $3B,$07,$06 ; $03
 		
-OBJLstHdrB_Daimon_CHouOosotoGariL4B:
+OBJLstHdrB_Daimon_CHouOosotoGariL4_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0C7380 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -1839,7 +1839,7 @@ OBJLstHdrB_Daimon_CHouOosotoGariL4B:
 	db $23,$F3,$04 ; $02
 	db $33,$F3,$06 ; $03
 		
-OBJLstHdrB_Daimon_CHouOosotoGariL5B:
+OBJLstHdrB_Daimon_CHouOosotoGariL5_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0C7400 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -2118,32 +2118,32 @@ OBJLstPtrTable_Terry_Idle:
 
 OBJLstPtrTable_Terry_WalkF:
 	dw OBJLstHdrA_Terry_WalkF0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_WalkF1B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_WalkF1_B
 	dw OBJLstHdrA_Terry_Idle1, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Terry_WalkB:
 	dw OBJLstHdrA_Terry_Idle1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_WalkF1B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_WalkF1_B
 	dw OBJLstHdrA_Terry_WalkF0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Terry_Crouch:
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Terry_JumpN:
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_WalkF1B
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_WalkF1B
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_JumpN3B
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_JumpN3B
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_WalkF1B
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_WalkF1B
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_WalkF1_B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_WalkF1_B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_JumpN3_B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_JumpN3_B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_WalkF1_B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_WalkF1_B
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B
 	dw OBJLSTPTR_NONE
 		
 
@@ -2153,13 +2153,13 @@ OBJLstPtrTable_Terry_BlockG:
 		
 
 OBJLstPtrTable_Terry_BlockC:
-	dw OBJLstHdrA_Terry_BlockC0A, OBJLstHdrB_Terry_Crouch0B
+	dw OBJLstHdrA_Terry_BlockC0_A, OBJLstHdrB_Terry_Crouch0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Terry_BlockA:
-	dw OBJLstHdrA_Terry_BlockA0A, OBJLstHdrB_Terry_BlockA0B ;X
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B ;X
+	dw OBJLstHdrA_Terry_BlockA0_A, OBJLstHdrB_Terry_BlockA0_B ;X
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B ;X
 	dw OBJLSTPTR_NONE
 		
 
@@ -2172,54 +2172,54 @@ OBJLstPtrTable_Terry_RunF:
 		
 
 OBJLstPtrTable_Terry_HopB:
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_WalkF1B
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_WalkF1B
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_WalkF1_B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_WalkF1_B
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Terry_ChargeMeter:
-	dw OBJLstHdrA_Terry_ChargeMeter0A, OBJLstHdrB_Terry_ChargeMeter0B
-	dw OBJLstHdrA_Terry_ChargeMeter1A, OBJLstHdrB_Terry_ChargeMeter0B
+	dw OBJLstHdrA_Terry_ChargeMeter0_A, OBJLstHdrB_Terry_ChargeMeter0_B
+	dw OBJLstHdrA_Terry_ChargeMeter1_A, OBJLstHdrB_Terry_ChargeMeter0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Terry_Taunt:
-	dw OBJLstHdrA_Terry_Taunt0A, OBJLstHdrB_Terry_Taunt0B
-	dw OBJLstHdrA_Terry_Taunt1A, OBJLstHdrB_Terry_Taunt0B
-	dw OBJLstHdrA_Terry_Taunt0A, OBJLstHdrB_Terry_Taunt0B
-	dw OBJLstHdrA_Terry_Taunt1A, OBJLstHdrB_Terry_Taunt0B
-	dw OBJLstHdrA_Terry_Taunt4A, OBJLstHdrB_Terry_Taunt4B
-	dw OBJLstHdrA_Terry_Taunt5A, OBJLstHdrB_Terry_Taunt4B
-	dw OBJLstHdrA_Terry_Taunt4A, OBJLstHdrB_Terry_Taunt4B
-	dw OBJLstHdrA_Terry_Taunt5A, OBJLstHdrB_Terry_Taunt4B
+	dw OBJLstHdrA_Terry_Taunt0_A, OBJLstHdrB_Terry_Taunt0_B
+	dw OBJLstHdrA_Terry_Taunt1_A, OBJLstHdrB_Terry_Taunt0_B
+	dw OBJLstHdrA_Terry_Taunt0_A, OBJLstHdrB_Terry_Taunt0_B
+	dw OBJLstHdrA_Terry_Taunt1_A, OBJLstHdrB_Terry_Taunt0_B
+	dw OBJLstHdrA_Terry_Taunt4_A, OBJLstHdrB_Terry_Taunt4_B
+	dw OBJLstHdrA_Terry_Taunt5_A, OBJLstHdrB_Terry_Taunt4_B
+	dw OBJLstHdrA_Terry_Taunt4_A, OBJLstHdrB_Terry_Taunt4_B
+	dw OBJLstHdrA_Terry_Taunt5_A, OBJLstHdrB_Terry_Taunt4_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Terry_WinA:
-	dw OBJLstHdrA_Terry_WinA0A, OBJLstHdrB_Terry_WinA0B
-	dw OBJLstHdrA_Terry_WinA1A, OBJLstHdrB_Terry_WinA0B
-	dw OBJLstHdrA_Terry_WinA2A, OBJLstHdrB_Terry_WinA2B
-	dw OBJLstHdrA_Terry_WinA2A, OBJLstHdrB_Terry_WinA3B
-	dw OBJLstHdrA_Terry_WinA2A, OBJLstHdrB_Terry_WinA2B
-	dw OBJLstHdrA_Terry_WinA2A, OBJLstHdrB_Terry_WinA3B
-	dw OBJLstHdrA_Terry_WinA1A, OBJLstHdrB_Terry_WinA0B
+	dw OBJLstHdrA_Terry_WinA0_A, OBJLstHdrB_Terry_WinA0_B
+	dw OBJLstHdrA_Terry_WinA1_A, OBJLstHdrB_Terry_WinA0_B
+	dw OBJLstHdrA_Terry_WinA2_A, OBJLstHdrB_Terry_WinA2_B
+	dw OBJLstHdrA_Terry_WinA2_A, OBJLstHdrB_Terry_WinA3_B
+	dw OBJLstHdrA_Terry_WinA2_A, OBJLstHdrB_Terry_WinA2_B
+	dw OBJLstHdrA_Terry_WinA2_A, OBJLstHdrB_Terry_WinA3_B
+	dw OBJLstHdrA_Terry_WinA1_A, OBJLstHdrB_Terry_WinA0_B
 	dw OBJLstHdrA_Terry_WinA7, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Terry_WinB:
-	dw OBJLstHdrA_Terry_WinB0A, OBJLstHdrB_Terry_WinB0B
+	dw OBJLstHdrA_Terry_WinB0_A, OBJLstHdrB_Terry_WinB0_B
 	dw OBJLstHdrA_Terry_WinB1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_WinB2A, OBJLstHdrB_Terry_WinB2B
-	dw OBJLstHdrA_Terry_WinB3A, OBJLstHdrB_Terry_WinB2B
+	dw OBJLstHdrA_Terry_WinB2_A, OBJLstHdrB_Terry_WinB2_B
+	dw OBJLstHdrA_Terry_WinB3_A, OBJLstHdrB_Terry_WinB2_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Terry_PunchL:
-	dw OBJLstHdrA_Terry_PunchL0A, OBJLstHdrB_Terry_PunchL0B
-	dw OBJLstHdrA_Terry_PunchL1A, OBJLstHdrB_Terry_PunchL0B
-	dw OBJLstHdrA_Terry_PunchL0A, OBJLstHdrB_Terry_PunchL0B
+	dw OBJLstHdrA_Terry_PunchL0_A, OBJLstHdrB_Terry_PunchL0_B
+	dw OBJLstHdrA_Terry_PunchL1_A, OBJLstHdrB_Terry_PunchL0_B
+	dw OBJLstHdrA_Terry_PunchL0_A, OBJLstHdrB_Terry_PunchL0_B
 	dw OBJLSTPTR_NONE
 		
 
@@ -2232,9 +2232,9 @@ OBJLstPtrTable_Terry_PunchH:
 		
 
 OBJLstPtrTable_Terry_KickL:
-	dw OBJLstHdrA_Terry_PunchL0A, OBJLstHdrB_Terry_PunchL0B
+	dw OBJLstHdrA_Terry_PunchL0_A, OBJLstHdrB_Terry_PunchL0_B
 	dw OBJLstHdrA_Terry_KickL1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_PunchL0A, OBJLstHdrB_Terry_PunchL0B
+	dw OBJLstHdrA_Terry_PunchL0_A, OBJLstHdrB_Terry_PunchL0_B
 	dw OBJLSTPTR_NONE
 		
 
@@ -2246,23 +2246,23 @@ OBJLstPtrTable_Terry_KickH:
 		
 
 OBJLstPtrTable_Terry_PunchCL:
-	dw OBJLstHdrA_Terry_PunchCL0A, OBJLstHdrB_Terry_Crouch0B
-	dw OBJLstHdrA_Terry_PunchCL1A, OBJLstHdrB_Terry_Crouch0B
-	dw OBJLstHdrA_Terry_PunchCL0A, OBJLstHdrB_Terry_Crouch0B
+	dw OBJLstHdrA_Terry_PunchCL0_A, OBJLstHdrB_Terry_Crouch0_B
+	dw OBJLstHdrA_Terry_PunchCL1_A, OBJLstHdrB_Terry_Crouch0_B
+	dw OBJLstHdrA_Terry_PunchCL0_A, OBJLstHdrB_Terry_Crouch0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Terry_PunchCH:
-	dw OBJLstHdrA_Terry_PunchCL0A, OBJLstHdrB_Terry_Crouch0B
-	dw OBJLstHdrA_Terry_PunchCH1A, OBJLstHdrB_Terry_Crouch0B
-	dw OBJLstHdrA_Terry_PunchCL0A, OBJLstHdrB_Terry_Crouch0B
+	dw OBJLstHdrA_Terry_PunchCL0_A, OBJLstHdrB_Terry_Crouch0_B
+	dw OBJLstHdrA_Terry_PunchCH1_A, OBJLstHdrB_Terry_Crouch0_B
+	dw OBJLstHdrA_Terry_PunchCL0_A, OBJLstHdrB_Terry_Crouch0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Terry_KickCL:
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B
 	dw OBJLstHdrA_Terry_KickCL1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B
 	dw OBJLSTPTR_NONE
 		
 
@@ -2277,32 +2277,32 @@ OBJLstPtrTable_Terry_KickCH:
 OBJLstPtrTable_Terry_PunchA:
 	dw OBJLstHdrA_Terry_PunchA0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Terry_PunchA0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_JumpN3B
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_WalkF1B
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_JumpN3_B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_WalkF1_B
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Terry_KickA:
 	dw OBJLstHdrA_Terry_KickA0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Terry_KickA0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_JumpN3B
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_WalkF1B
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_JumpN3_B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_WalkF1_B
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Terry_AttackA:
 	dw OBJLstHdrA_Terry_AttackA0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Terry_AttackA0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_JumpN3B
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_WalkF1B ;X
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_JumpN3_B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_WalkF1_B ;X
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Terry_AttackG:
-	dw OBJLstHdrA_Terry_WinB0A, OBJLstHdrB_Terry_WinB0B
+	dw OBJLstHdrA_Terry_WinB0_A, OBJLstHdrB_Terry_WinB0_B
 	dw OBJLstHdrA_Terry_AttackG1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Terry_AttackG2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Terry_AttackG1, OBJLSTPTR_NONE
@@ -2314,7 +2314,7 @@ OBJLstPtrTable_Terry_RollF:
 	dw OBJLstHdrA_Terry_RollF1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Terry_RollF2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Terry_KickCH0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B
 	dw OBJLSTPTR_NONE
 		
 
@@ -2323,7 +2323,7 @@ OBJLstPtrTable_Terry_RollB:
 	dw OBJLstHdrA_Terry_RollF2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Terry_RollF1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Terry_RollF0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B
 	dw OBJLSTPTR_NONE
 		
 
@@ -2347,18 +2347,18 @@ OBJLstPtrTable_Terry_Hitlow:
 
 OBJLstPtrTable_Terry_GuardBreakA:
 	dw OBJLstHdrA_Terry_GuardBreakG0, OBJLSTPTR_NONE ;X
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B ;X
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B ;X
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Terry_BackjumpRecA:
 	dw OBJLstHdrA_Terry_GuardBreakG0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_JumpN3B
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_JumpN3B
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_JumpN3B
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_JumpN3B
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_WalkF1B
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_JumpN3_B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_JumpN3_B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_JumpN3_B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_JumpN3_B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_WalkF1_B
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B
 	dw OBJLSTPTR_NONE
 		
 
@@ -2397,8 +2397,8 @@ OBJLstPtrTable_Terry_ThrowRotL:
 		
 
 OBJLstPtrTable_Terry_Wakeup:
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B
 	dw OBJLSTPTR_NONE
 		
 
@@ -2413,11 +2413,11 @@ OBJLstPtrTable_Terry_PowerWaveL:
 OBJLstPtrTable_Terry_BurnKnuckleL:
 	dw OBJLstHdrA_Terry_BlockG0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Terry_BurnKnuckleL1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B
 	dw OBJLstHdrA_Terry_BurnKnuckleL3, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Terry_BurnKnuckleL4, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Terry_BurnKnuckleL3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B
 	dw OBJLSTPTR_NONE
 		
 
@@ -2426,7 +2426,7 @@ OBJLstPtrTable_Terry_CrackShotL:
 	dw OBJLstHdrA_Terry_CrackShotL1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Terry_CrackShotL1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Terry_CrackShotL3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B
 	dw OBJLSTPTR_NONE
 		
 
@@ -2437,19 +2437,19 @@ OBJLstPtrTable_Terry_RisingTackleL:
 	dw OBJLstHdrA_Terry_RisingTackleL3, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Terry_RisingTackleL4, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Terry_RisingTackleL5, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_WalkF1A, OBJLstHdrB_Terry_WalkF1B
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B
+	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_WalkF1_B
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Terry_PowerDunkL:
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B
 	dw OBJLstHdrA_Terry_PowerDunkL1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Terry_PowerDunkL2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_PowerDunkL3A, OBJLstHdrB_Terry_PowerDunkL3B
+	dw OBJLstHdrA_Terry_PowerDunkL3_A, OBJLstHdrB_Terry_PowerDunkL3_B
 	dw OBJLstHdrA_Terry_PowerDunkL4, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_PowerDunkL5A, OBJLstHdrB_Terry_PowerDunkL3B
-	dw OBJLstHdrA_Terry_Crouch0A, OBJLstHdrB_Terry_Crouch0B
+	dw OBJLstHdrA_Terry_PowerDunkL5_A, OBJLstHdrB_Terry_PowerDunkL3_B
+	dw OBJLstHdrA_Terry_Crouch0_A, OBJLstHdrB_Terry_Crouch0_B
 	dw OBJLSTPTR_NONE
 		
 
@@ -2570,7 +2570,7 @@ OBJLstHdrA_Terry_WalkF0:
 	db $30,$00,$08 ; $04
 	db $10,$F8,$0A ; $05
 		
-OBJLstHdrA_Terry_WalkF1A:
+OBJLstHdrA_Terry_WalkF1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -2585,16 +2585,16 @@ OBJLstHdrA_Terry_WalkF1A:
 	db $18,$F7,$02 ; $01
 	db $18,$FF,$04 ; $02
 		
-OBJLstHdrA_Terry_WinB0A:
+OBJLstHdrA_Terry_WinB0_A:
 	db OLF_XFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
 	dpr L0D4300 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Terry_WalkF1A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Terry_WalkF1_A.bin ; iOBJLstHdrA_DataPtr
 	db $FC ; iOBJLstHdrA_XOffset
 	db $03 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrB_Terry_WalkF1B:
+OBJLstHdrB_Terry_WalkF1_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0D4360 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -2608,14 +2608,14 @@ OBJLstHdrB_Terry_WalkF1B:
 	db $28,$FC,$04 ; $02
 	db $38,$FC,$06 ; $03
 		
-OBJLstHdrB_Terry_WinB0B:
+OBJLstHdrB_Terry_WinB0_B:
 	db OLF_XFLIP ; iOBJLstHdrA_Flags
 	dpr L0D4360 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrB_Terry_WalkF1B.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrB_Terry_WalkF1_B.bin ; iOBJLstHdrA_DataPtr
 	db $FC ; iOBJLstHdrA_XOffset
 	db $03 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Terry_Crouch0A:
+OBJLstHdrA_Terry_Crouch0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -2631,7 +2631,7 @@ OBJLstHdrA_Terry_Crouch0A:
 	db $28,$01,$04 ; $02
 	db $18,$F9,$06 ; $03
 		
-OBJLstHdrB_Terry_Crouch0B:
+OBJLstHdrB_Terry_Crouch0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0D4460 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -2662,7 +2662,7 @@ OBJLstHdrA_Terry_BlockG0:
 	db $30,$FA,$08 ; $04
 	db $30,$02,$0A ; $05
 		
-OBJLstHdrA_Terry_BlockC0A:
+OBJLstHdrA_Terry_BlockC0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -2678,16 +2678,16 @@ OBJLstHdrA_Terry_BlockC0A:
 	db $28,$06,$04 ; $02
 	db $18,$FE,$06 ; $03
 		
-OBJLstHdrA_Terry_BlockA0A: ;X
+OBJLstHdrA_Terry_BlockA0_A: ;X
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
 	dpr L0D4600 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Terry_BlockC0A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Terry_BlockC0_A.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $F8 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrB_Terry_BlockA0B: ;X
+OBJLstHdrB_Terry_BlockA0_B: ;X
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0D4680 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -2700,7 +2700,7 @@ OBJLstHdrB_Terry_BlockA0B: ;X
 	db $20,$FE,$02 ; $01
 	db $24,$06,$04 ; $02
 		
-OBJLstHdrB_Terry_JumpN3B:
+OBJLstHdrB_Terry_JumpN3_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0D44C0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -2714,29 +2714,29 @@ OBJLstHdrB_Terry_JumpN3B:
 	db $20,$FF,$04 ; $02
 	db $30,$F7,$06 ; $03
 		
-; [TCRF] Flipped versions of OBJLstHdrB_Terry_JumpN3B.
-OBJLstHdrB_Terry_Unused_JumpN3XFlipB: ;X
+; [TCRF] Flipped versions of OBJLstHdrB_Terry_JumpN3_B.
+OBJLstHdrB_Terry_Unused_JumpN3XFlip_B: ;X
 	db OLF_XFLIP ; iOBJLstHdrA_Flags
 	dpr L0D44C0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrB_Terry_JumpN3B.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrB_Terry_JumpN3_B.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrB_Terry_Unused_JumpN3YFlipB: ;X
+OBJLstHdrB_Terry_Unused_JumpN3YFlip_B: ;X
 	db OLF_YFLIP ; iOBJLstHdrA_Flags
 	dpr L0D44C0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrB_Terry_JumpN3B.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrB_Terry_JumpN3_B.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $F8 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrB_Terry_Unused_JumpN3XYFlipB: ;X
+OBJLstHdrB_Terry_Unused_JumpN3XYFlip_B: ;X
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	dpr L0D44C0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrB_Terry_JumpN3B.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrB_Terry_JumpN3_B.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $F8 ; iOBJLstHdrA_YOffset
 	
-OBJLstHdrA_Terry_ChargeMeter0A:
+OBJLstHdrA_Terry_ChargeMeter0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -2754,7 +2754,7 @@ OBJLstHdrA_Terry_ChargeMeter0A:
 	db $18,$FB,$08 ; $04
 	db $18,$03,$0A ; $05
 		
-OBJLstHdrB_Terry_ChargeMeter0B:
+OBJLstHdrB_Terry_ChargeMeter0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0D5940 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -2767,7 +2767,7 @@ OBJLstHdrB_Terry_ChargeMeter0B:
 	db $38,$FC,$02 ; $01
 	db $38,$04,$04 ; $02
 		
-OBJLstHdrA_Terry_ChargeMeter1A:
+OBJLstHdrA_Terry_ChargeMeter1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -2832,7 +2832,7 @@ OBJLstHdrA_Terry_RunF2:
 	db $27,$02,$0C ; $06
 	db $27,$0A,$0E ; $07
 		
-OBJLstHdrA_Terry_Taunt0A:
+OBJLstHdrA_Terry_Taunt0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -2847,7 +2847,7 @@ OBJLstHdrA_Terry_Taunt0A:
 	db $20,$0B,$02 ; $01
 	db $10,$09,$04 ; $02
 		
-OBJLstHdrB_Terry_Taunt0B:
+OBJLstHdrB_Terry_Taunt0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0D56E0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -2859,7 +2859,7 @@ OBJLstHdrB_Terry_Taunt0B:
 	db $30,$03,$00 ; $00
 	db $30,$0B,$02 ; $01
 		
-OBJLstHdrA_Terry_Taunt1A:
+OBJLstHdrA_Terry_Taunt1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -2874,7 +2874,7 @@ OBJLstHdrA_Terry_Taunt1A:
 	db $20,$0C,$02 ; $01
 	db $10,$09,$04 ; $02
 		
-OBJLstHdrA_Terry_Taunt4A:
+OBJLstHdrA_Terry_Taunt4_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -2887,7 +2887,7 @@ OBJLstHdrA_Terry_Taunt4A:
 	;    Y   X  ID
 	db $23,$F7,$00 ; $00
 		
-OBJLstHdrB_Terry_Taunt4B:
+OBJLstHdrB_Terry_Taunt4_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0D57A0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -2903,7 +2903,7 @@ OBJLstHdrB_Terry_Taunt4B:
 	db $30,$05,$08 ; $04
 	db $38,$0D,$0A ; $05
 		
-OBJLstHdrA_Terry_Taunt5A:
+OBJLstHdrA_Terry_Taunt5_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -2916,7 +2916,7 @@ OBJLstHdrA_Terry_Taunt5A:
 	;    Y   X  ID
 	db $22,$F7,$00 ; $00
 		
-OBJLstHdrA_Terry_WinA0A:
+OBJLstHdrA_Terry_WinA0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -2932,7 +2932,7 @@ OBJLstHdrA_Terry_WinA0A:
 	db $21,$0F,$04 ; $02
 	db $10,$07,$06 ; $03
 		
-OBJLstHdrB_Terry_WinA0B:
+OBJLstHdrB_Terry_WinA0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0D5AE0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -2946,7 +2946,7 @@ OBJLstHdrB_Terry_WinA0B:
 	db $30,$07,$04 ; $02
 	db $3D,$0F,$06 ; $03
 		
-OBJLstHdrA_Terry_WinA1A:
+OBJLstHdrA_Terry_WinA1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -2963,7 +2963,7 @@ OBJLstHdrA_Terry_WinA1A:
 	db $10,$03,$06 ; $03
 	db $12,$10,$08 ; $04
 		
-OBJLstHdrA_Terry_WinA2A:
+OBJLstHdrA_Terry_WinA2_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -2979,7 +2979,7 @@ OBJLstHdrA_Terry_WinA2A:
 	db $18,$0C,$04 ; $02
 	db $10,$04,$06 ; $03
 		
-OBJLstHdrB_Terry_WinA2B:
+OBJLstHdrB_Terry_WinA2_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0D5C80 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -2994,7 +2994,7 @@ OBJLstHdrB_Terry_WinA2B:
 	db $38,$07,$06 ; $03
 	db $38,$0F,$08 ; $04
 		
-OBJLstHdrB_Terry_WinA3B:
+OBJLstHdrB_Terry_WinA3_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0D5D20 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -3045,7 +3045,7 @@ OBJLstHdrA_Terry_WinB1:
 	db $31,$FC,$08 ; $04
 	db $31,$04,$0A ; $05
 		
-OBJLstHdrA_Terry_WinB2A:
+OBJLstHdrA_Terry_WinB2_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -3062,7 +3062,7 @@ OBJLstHdrA_Terry_WinB2A:
 	db $10,$F6,$06 ; $03
 	db $10,$FE,$08 ; $04
 		
-OBJLstHdrB_Terry_WinB2B:
+OBJLstHdrB_Terry_WinB2_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0D5FE0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -3075,7 +3075,7 @@ OBJLstHdrB_Terry_WinB2B:
 	db $30,$FB,$02 ; $01
 	db $30,$03,$04 ; $02
 		
-OBJLstHdrA_Terry_WinB3A:
+OBJLstHdrA_Terry_WinB3_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -3092,7 +3092,7 @@ OBJLstHdrA_Terry_WinB3A:
 	db $20,$04,$06 ; $03
 	db $10,$00,$08 ; $04
 		
-OBJLstHdrA_Terry_PunchL0A:
+OBJLstHdrA_Terry_PunchL0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -3107,7 +3107,7 @@ OBJLstHdrA_Terry_PunchL0A:
 	db $20,$F8,$02 ; $01
 	db $20,$00,$04 ; $02
 		
-OBJLstHdrB_Terry_PunchL0B:
+OBJLstHdrB_Terry_PunchL0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0D4740 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -3120,7 +3120,7 @@ OBJLstHdrB_Terry_PunchL0B:
 	db $30,$FD,$02 ; $01
 	db $39,$05,$04 ; $02
 		
-OBJLstHdrA_Terry_PunchL1A:
+OBJLstHdrA_Terry_PunchL1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_02 ; iOBJLstHdrA_HitboxId
@@ -3136,12 +3136,12 @@ OBJLstHdrA_Terry_PunchL1A:
 	db $20,$F8,$04 ; $02
 	db $20,$00,$06 ; $03
 		
-OBJLstHdrA_Terry_PunchCL1A:
+OBJLstHdrA_Terry_PunchCL1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_02 ; iOBJLstHdrA_HitboxId
 	dpr L0D47A0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Terry_PunchL1A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Terry_PunchL1_A.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $08 ; iOBJLstHdrA_YOffset
 		
@@ -3239,7 +3239,7 @@ OBJLstHdrA_Terry_KickH1:
 	db $31,$FC,$0A ; $05
 	db $31,$04,$0C ; $06
 		
-OBJLstHdrA_Terry_PunchCL0A:
+OBJLstHdrA_Terry_PunchCL0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -3255,7 +3255,7 @@ OBJLstHdrA_Terry_PunchCL0A:
 	db $28,$01,$04 ; $02
 	db $18,$F9,$06 ; $03
 		
-OBJLstHdrA_Terry_PunchCH1A:
+OBJLstHdrA_Terry_PunchCH1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_02 ; iOBJLstHdrA_HitboxId
@@ -3916,7 +3916,7 @@ OBJLstHdrA_Terry_PowerDunkL2:
 	db $23,$05,$0A ; $05
 	db $04,$F6,$0C ; $06
 		
-OBJLstHdrA_Terry_PowerDunkL3A:
+OBJLstHdrA_Terry_PowerDunkL3_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_1E ; iOBJLstHdrA_HitboxId
@@ -3934,7 +3934,7 @@ OBJLstHdrA_Terry_PowerDunkL3A:
 	db $30,$F7,$08 ; $04
 	db $20,$E7,$0A ; $05
 		
-OBJLstHdrB_Terry_PowerDunkL3B:
+OBJLstHdrB_Terry_PowerDunkL3_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L0D73E0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -3973,7 +3973,7 @@ OBJLstHdrA_Terry_PowerDunkL4:
 	db $00,$00,$14 ; $0A
 	db $00,$08,$16 ; $0B
 		
-OBJLstHdrA_Terry_PowerDunkL5A:
+OBJLstHdrA_Terry_PowerDunkL5_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_1E ; iOBJLstHdrA_HitboxId
@@ -4019,10 +4019,10 @@ OBJLstHdrA_Terry_PowerGeyserE2: ;X
 		
 
 OBJLstPtrTable_Krauser_Idle:
-	dw OBJLstHdrA_Krauser_Idle0A, OBJLstHdrB_Krauser_Idle0B
-	dw OBJLstHdrA_Krauser_Idle1A, OBJLstHdrB_Krauser_Idle0B
+	dw OBJLstHdrA_Krauser_Idle0_A, OBJLstHdrB_Krauser_Idle0_B
+	dw OBJLstHdrA_Krauser_Idle1_A, OBJLstHdrB_Krauser_Idle0_B
 	dw OBJLstHdrA_Krauser_Idle2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Krauser_Idle1A, OBJLstHdrB_Krauser_Idle0B
+	dw OBJLstHdrA_Krauser_Idle1_A, OBJLstHdrB_Krauser_Idle0_B
 	dw OBJLSTPTR_NONE
 		
 
@@ -4030,7 +4030,7 @@ OBJLstPtrTable_Krauser_WalkF:
 	dw OBJLstHdrA_Krauser_WalkF0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Krauser_WalkF1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Krauser_WalkF0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Krauser_Idle1A, OBJLstHdrB_Krauser_Idle0B
+	dw OBJLstHdrA_Krauser_Idle1_A, OBJLstHdrB_Krauser_Idle0_B
 	dw OBJLSTPTR_NONE
 		
 
@@ -4043,8 +4043,8 @@ OBJLstPtrTable_Krauser_JumpN:
 	dw OBJLstHdrA_Krauser_Crouch0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Krauser_JumpN1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Krauser_JumpN1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Krauser_JumpN3A, OBJLstHdrB_Krauser_JumpN3B
-	dw OBJLstHdrA_Krauser_JumpN3A, OBJLstHdrB_Krauser_JumpN3B
+	dw OBJLstHdrA_Krauser_JumpN3_A, OBJLstHdrB_Krauser_JumpN3_B
+	dw OBJLstHdrA_Krauser_JumpN3_A, OBJLstHdrB_Krauser_JumpN3_B
 	dw OBJLstHdrA_Krauser_JumpN1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Krauser_JumpN1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Krauser_Crouch0, OBJLSTPTR_NONE
@@ -4062,7 +4062,7 @@ OBJLstPtrTable_Krauser_BlockC:
 		
 
 OBJLstPtrTable_Krauser_BlockA:
-	dw OBJLstHdrA_Krauser_BlockA0A, OBJLstHdrB_Krauser_JumpN3B ;X
+	dw OBJLstHdrA_Krauser_BlockA0_A, OBJLstHdrB_Krauser_JumpN3_B ;X
 	dw OBJLstHdrA_Krauser_Crouch0, OBJLSTPTR_NONE ;X
 	dw OBJLSTPTR_NONE
 		
@@ -4083,34 +4083,34 @@ OBJLstPtrTable_Krauser_HopB:
 		
 
 OBJLstPtrTable_Krauser_ChargeMeter:
-	dw OBJLstHdrA_Krauser_ChargeMeter0A, OBJLstHdrB_Krauser_ChargeMeter0B
-	dw OBJLstHdrA_Krauser_ChargeMeter1A, OBJLstHdrB_Krauser_ChargeMeter0B
+	dw OBJLstHdrA_Krauser_ChargeMeter0_A, OBJLstHdrB_Krauser_ChargeMeter0_B
+	dw OBJLstHdrA_Krauser_ChargeMeter1_A, OBJLstHdrB_Krauser_ChargeMeter0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Krauser_Taunt:
-	dw OBJLstHdrA_Krauser_Taunt0A, OBJLstHdrB_Krauser_Taunt0B
-	dw OBJLstHdrA_Krauser_Taunt1A, OBJLstHdrB_Krauser_Taunt0B
-	dw OBJLstHdrA_Krauser_Taunt0A, OBJLstHdrB_Krauser_Taunt0B
-	dw OBJLstHdrA_Krauser_Taunt3A, OBJLstHdrB_Krauser_Taunt0B
+	dw OBJLstHdrA_Krauser_Taunt0_A, OBJLstHdrB_Krauser_Taunt0_B
+	dw OBJLstHdrA_Krauser_Taunt1_A, OBJLstHdrB_Krauser_Taunt0_B
+	dw OBJLstHdrA_Krauser_Taunt0_A, OBJLstHdrB_Krauser_Taunt0_B
+	dw OBJLstHdrA_Krauser_Taunt3_A, OBJLstHdrB_Krauser_Taunt0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Krauser_WinA:
-	dw OBJLstHdrA_Krauser_WinA0A, OBJLstHdrB_Krauser_WinA0B
-	dw OBJLstHdrA_Krauser_WinA1A, OBJLstHdrB_Krauser_WinA0B
-	dw OBJLstHdrA_Krauser_WinA2A, OBJLstHdrB_Krauser_WinA0B
-	dw OBJLstHdrA_Krauser_WinA3A, OBJLstHdrB_Krauser_WinA0B
+	dw OBJLstHdrA_Krauser_WinA0_A, OBJLstHdrB_Krauser_WinA0_B
+	dw OBJLstHdrA_Krauser_WinA1_A, OBJLstHdrB_Krauser_WinA0_B
+	dw OBJLstHdrA_Krauser_WinA2_A, OBJLstHdrB_Krauser_WinA0_B
+	dw OBJLstHdrA_Krauser_WinA3_A, OBJLstHdrB_Krauser_WinA0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Krauser_WinB:
-	dw OBJLstHdrA_Krauser_Taunt0A, OBJLstHdrB_Krauser_Taunt0B
-	dw OBJLstHdrA_Krauser_Taunt1A, OBJLstHdrB_Krauser_Taunt0B
-	dw OBJLstHdrA_Krauser_Taunt0A, OBJLstHdrB_Krauser_Taunt0B
-	dw OBJLstHdrA_Krauser_Taunt3A, OBJLstHdrB_Krauser_Taunt0B
-	dw OBJLstHdrA_Krauser_Taunt0A, OBJLstHdrB_Krauser_Taunt0B
-	dw OBJLstHdrA_Krauser_WinB5A, OBJLstHdrB_Krauser_Taunt0B
+	dw OBJLstHdrA_Krauser_Taunt0_A, OBJLstHdrB_Krauser_Taunt0_B
+	dw OBJLstHdrA_Krauser_Taunt1_A, OBJLstHdrB_Krauser_Taunt0_B
+	dw OBJLstHdrA_Krauser_Taunt0_A, OBJLstHdrB_Krauser_Taunt0_B
+	dw OBJLstHdrA_Krauser_Taunt3_A, OBJLstHdrB_Krauser_Taunt0_B
+	dw OBJLstHdrA_Krauser_Taunt0_A, OBJLstHdrB_Krauser_Taunt0_B
+	dw OBJLstHdrA_Krauser_WinB5_A, OBJLstHdrB_Krauser_Taunt0_B
 	dw OBJLSTPTR_NONE
 		
 
@@ -4119,14 +4119,14 @@ OBJLstPtrTable_Krauser_Intro:
 	dw OBJLstHdrA_Krauser_Intro1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Krauser_Intro2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Krauser_Intro3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Krauser_Intro4A, OBJLstHdrB_Krauser_ChargeMeter0B
+	dw OBJLstHdrA_Krauser_Intro4_A, OBJLstHdrB_Krauser_ChargeMeter0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Krauser_PunchL:
-	dw OBJLstHdrA_Krauser_PunchL0A, OBJLstHdrB_Krauser_PunchL0B
-	dw OBJLstHdrA_Krauser_PunchL1A, OBJLstHdrB_Krauser_PunchL1B
-	dw OBJLstHdrA_Krauser_PunchL2A, OBJLstHdrB_Krauser_PunchL1B
+	dw OBJLstHdrA_Krauser_PunchL0_A, OBJLstHdrB_Krauser_PunchL0_B
+	dw OBJLstHdrA_Krauser_PunchL1_A, OBJLstHdrB_Krauser_PunchL1_B
+	dw OBJLstHdrA_Krauser_PunchL2_A, OBJLstHdrB_Krauser_PunchL1_B
 	dw OBJLSTPTR_NONE
 		
 
@@ -4154,48 +4154,48 @@ OBJLstPtrTable_Krauser_KickH:
 		
 
 OBJLstPtrTable_Krauser_PunchCL:
-	dw OBJLstHdrA_Krauser_PunchCL0A, OBJLstHdrB_Krauser_PunchCL0B
-	dw OBJLstHdrA_Krauser_PunchCL1A, OBJLstHdrB_Krauser_PunchCL0B
-	dw OBJLstHdrA_Krauser_PunchCL0A, OBJLstHdrB_Krauser_PunchCL0B
+	dw OBJLstHdrA_Krauser_PunchCL0_A, OBJLstHdrB_Krauser_PunchCL0_B
+	dw OBJLstHdrA_Krauser_PunchCL1_A, OBJLstHdrB_Krauser_PunchCL0_B
+	dw OBJLstHdrA_Krauser_PunchCL0_A, OBJLstHdrB_Krauser_PunchCL0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Krauser_PunchCH:
-	dw OBJLstHdrA_Krauser_PunchCL0A, OBJLstHdrB_Krauser_PunchCL0B
+	dw OBJLstHdrA_Krauser_PunchCL0_A, OBJLstHdrB_Krauser_PunchCL0_B
 	dw OBJLstHdrA_Krauser_PunchCH1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Krauser_PunchCH1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Krauser_PunchCL0A, OBJLstHdrB_Krauser_PunchCL0B
+	dw OBJLstHdrA_Krauser_PunchCL0_A, OBJLstHdrB_Krauser_PunchCL0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Krauser_KickCL:
-	dw OBJLstHdrA_Krauser_PunchCL0A, OBJLstHdrB_Krauser_PunchCL0B
-	dw OBJLstHdrA_Krauser_KickCL1A, OBJLstHdrB_Krauser_KickCL1B
-	dw OBJLstHdrA_Krauser_PunchCL0A, OBJLstHdrB_Krauser_PunchCL0B
+	dw OBJLstHdrA_Krauser_PunchCL0_A, OBJLstHdrB_Krauser_PunchCL0_B
+	dw OBJLstHdrA_Krauser_KickCL1_A, OBJLstHdrB_Krauser_KickCL1_B
+	dw OBJLstHdrA_Krauser_PunchCL0_A, OBJLstHdrB_Krauser_PunchCL0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Krauser_KickCH:
-	dw OBJLstHdrA_Krauser_PunchCL0A, OBJLstHdrB_Krauser_PunchCL0B
-	dw OBJLstHdrA_Krauser_KickCL1A, OBJLstHdrB_Krauser_KickCL1B
-	dw OBJLstHdrA_Krauser_KickCL1A, OBJLstHdrB_Krauser_KickCL1B
-	dw OBJLstHdrA_Krauser_PunchCL0A, OBJLstHdrB_Krauser_PunchCL0B
+	dw OBJLstHdrA_Krauser_PunchCL0_A, OBJLstHdrB_Krauser_PunchCL0_B
+	dw OBJLstHdrA_Krauser_KickCL1_A, OBJLstHdrB_Krauser_KickCL1_B
+	dw OBJLstHdrA_Krauser_KickCL1_A, OBJLstHdrB_Krauser_KickCL1_B
+	dw OBJLstHdrA_Krauser_PunchCL0_A, OBJLstHdrB_Krauser_PunchCL0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Krauser_PunchA:
-	dw OBJLstHdrA_Krauser_PunchA0A, OBJLstHdrB_Krauser_PunchA0B
-	dw OBJLstHdrA_Krauser_PunchA0A, OBJLstHdrB_Krauser_PunchA0B
-	dw OBJLstHdrA_Krauser_JumpN3A, OBJLstHdrB_Krauser_JumpN3B
+	dw OBJLstHdrA_Krauser_PunchA0_A, OBJLstHdrB_Krauser_PunchA0_B
+	dw OBJLstHdrA_Krauser_PunchA0_A, OBJLstHdrB_Krauser_PunchA0_B
+	dw OBJLstHdrA_Krauser_JumpN3_A, OBJLstHdrB_Krauser_JumpN3_B
 	dw OBJLstHdrA_Krauser_JumpN1, OBJLSTPTR_NONE ;X
 	dw OBJLstHdrA_Krauser_Crouch0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Krauser_KickA:
-	dw OBJLstHdrA_Krauser_KickA0A, OBJLstHdrB_Krauser_KickA0B
-	dw OBJLstHdrA_Krauser_KickA0A, OBJLstHdrB_Krauser_KickA0B
-	dw OBJLstHdrA_Krauser_JumpN3A, OBJLstHdrB_Krauser_JumpN3B
+	dw OBJLstHdrA_Krauser_KickA0_A, OBJLstHdrB_Krauser_KickA0_B
+	dw OBJLstHdrA_Krauser_KickA0_A, OBJLstHdrB_Krauser_KickA0_B
+	dw OBJLstHdrA_Krauser_JumpN3_A, OBJLstHdrB_Krauser_JumpN3_B
 	dw OBJLstHdrA_Krauser_JumpN1, OBJLSTPTR_NONE ;X
 	dw OBJLstHdrA_Krauser_Crouch0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
@@ -4204,7 +4204,7 @@ OBJLstPtrTable_Krauser_KickA:
 OBJLstPtrTable_Krauser_AttackA:
 	dw OBJLstHdrA_Krauser_AttackA0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Krauser_AttackA0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Krauser_JumpN3A, OBJLstHdrB_Krauser_JumpN3B
+	dw OBJLstHdrA_Krauser_JumpN3_A, OBJLstHdrB_Krauser_JumpN3_B
 	dw OBJLstHdrA_Krauser_JumpN1, OBJLSTPTR_NONE ;X
 	dw OBJLstHdrA_Krauser_Crouch0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
@@ -4212,9 +4212,9 @@ OBJLstPtrTable_Krauser_AttackA:
 
 OBJLstPtrTable_Krauser_AttackG:
 	dw OBJLstHdrA_Krauser_KickH0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Krauser_AttackG1A, OBJLstHdrB_Krauser_AttackG1B
-	dw OBJLstHdrA_Krauser_AttackG1A, OBJLstHdrB_Krauser_AttackG2B
-	dw OBJLstHdrA_Krauser_AttackG1A, OBJLstHdrB_Krauser_AttackG2B ;X
+	dw OBJLstHdrA_Krauser_AttackG1_A, OBJLstHdrB_Krauser_AttackG1_B
+	dw OBJLstHdrA_Krauser_AttackG1_A, OBJLstHdrB_Krauser_AttackG2_B
+	dw OBJLstHdrA_Krauser_AttackG1_A, OBJLstHdrB_Krauser_AttackG2_B ;X
 	dw OBJLstHdrA_Krauser_KickH0, OBJLSTPTR_NONE ;X
 	dw OBJLSTPTR_NONE
 		
@@ -4238,15 +4238,15 @@ OBJLstPtrTable_Krauser_RollB:
 		
 
 OBJLstPtrTable_Krauser_GuardBreakG:
-	dw OBJLstHdrA_Krauser_GuardBreakG0A, OBJLstHdrB_Krauser_GuardBreakG0B
+	dw OBJLstHdrA_Krauser_GuardBreakG0_A, OBJLstHdrB_Krauser_GuardBreakG0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Krauser_Dizzy:
-	dw OBJLstHdrA_Krauser_Idle0A, OBJLstHdrB_Krauser_Idle0B
-	dw OBJLstHdrA_Krauser_GuardBreakG0A, OBJLstHdrB_Krauser_GuardBreakG0B ;X
+	dw OBJLstHdrA_Krauser_Idle0_A, OBJLstHdrB_Krauser_Idle0_B
+	dw OBJLstHdrA_Krauser_GuardBreakG0_A, OBJLstHdrB_Krauser_GuardBreakG0_B ;X
 OBJLstPtrTable_Krauser_TimeOver:
-	dw OBJLstHdrA_Krauser_TimeOver2A, OBJLstHdrB_Krauser_GuardBreakG0B
+	dw OBJLstHdrA_Krauser_TimeOver2_A, OBJLstHdrB_Krauser_GuardBreakG0_B
 	dw OBJLSTPTR_NONE
 		
 
@@ -4256,24 +4256,24 @@ OBJLstPtrTable_Krauser_Hitlow:
 		
 
 OBJLstPtrTable_Krauser_GuardBreakA:
-	dw OBJLstHdrA_Krauser_GuardBreakG0A, OBJLstHdrB_Krauser_GuardBreakG0B ;X
+	dw OBJLstHdrA_Krauser_GuardBreakG0_A, OBJLstHdrB_Krauser_GuardBreakG0_B ;X
 	dw OBJLstHdrA_Krauser_Crouch0, OBJLSTPTR_NONE ;X
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Krauser_BackjumpRecA:
-	dw OBJLstHdrA_Krauser_GuardBreakG0A, OBJLstHdrB_Krauser_GuardBreakG0B
-	dw OBJLstHdrA_Krauser_JumpN3A, OBJLstHdrB_Krauser_JumpN3B
-	dw OBJLstHdrA_Krauser_JumpN3A, OBJLstHdrB_Krauser_JumpN3B
-	dw OBJLstHdrA_Krauser_JumpN3A, OBJLstHdrB_Krauser_JumpN3B
-	dw OBJLstHdrA_Krauser_JumpN3A, OBJLstHdrB_Krauser_JumpN3B
+	dw OBJLstHdrA_Krauser_GuardBreakG0_A, OBJLstHdrB_Krauser_GuardBreakG0_B
+	dw OBJLstHdrA_Krauser_JumpN3_A, OBJLstHdrB_Krauser_JumpN3_B
+	dw OBJLstHdrA_Krauser_JumpN3_A, OBJLstHdrB_Krauser_JumpN3_B
+	dw OBJLstHdrA_Krauser_JumpN3_A, OBJLstHdrB_Krauser_JumpN3_B
+	dw OBJLstHdrA_Krauser_JumpN3_A, OBJLstHdrB_Krauser_JumpN3_B
 	dw OBJLstHdrA_Krauser_JumpN1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Krauser_Crouch0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Krauser_DropMain:
-	dw OBJLstHdrA_Krauser_GuardBreakG0A, OBJLstHdrB_Krauser_GuardBreakG0B
+	dw OBJLstHdrA_Krauser_GuardBreakG0_A, OBJLstHdrB_Krauser_GuardBreakG0_B
 	dw OBJLstHdrA_Krauser_RollF2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Krauser_DropMain2, OBJLSTPTR_NONE
 OBJLstPtrTable_Krauser_HitMultigs:
@@ -4283,19 +4283,19 @@ OBJLstPtrTable_Krauser_HitMultigs:
 		
 
 OBJLstPtrTable_Krauser_HitSwoopup:
-	dw OBJLstHdrA_Krauser_TimeOver2A, OBJLstHdrB_Krauser_GuardBreakG0B
-	dw OBJLstHdrA_Krauser_HitSwoopup1A, OBJLstHdrB_Krauser_HitSwoopup1B
-	dw OBJLstHdrA_Krauser_HitSwoopup2A, OBJLstHdrB_Krauser_HitSwoopup2B
+	dw OBJLstHdrA_Krauser_TimeOver2_A, OBJLstHdrB_Krauser_GuardBreakG0_B
+	dw OBJLstHdrA_Krauser_HitSwoopup1_A, OBJLstHdrB_Krauser_HitSwoopup1_B
+	dw OBJLstHdrA_Krauser_HitSwoopup2_A, OBJLstHdrB_Krauser_HitSwoopup2_B
 OBJLstPtrTable_Krauser_ThrowEndA:
-	dw OBJLstHdrA_Krauser_ThrowEndA3A, OBJLstHdrB_Krauser_ThrowEndA3B
-	dw OBJLstHdrA_Krauser_ThrowEndA3A, OBJLstHdrB_Krauser_ThrowEndA3B
+	dw OBJLstHdrA_Krauser_ThrowEndA3_A, OBJLstHdrB_Krauser_ThrowEndA3_B
+	dw OBJLstHdrA_Krauser_ThrowEndA3_A, OBJLstHdrB_Krauser_ThrowEndA3_B
 	dw OBJLstHdrA_Krauser_RollF2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Krauser_DropMain2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Krauser_DropDbg:
-	dw OBJLstHdrA_Krauser_TimeOver2A, OBJLstHdrB_Krauser_GuardBreakG0B
+	dw OBJLstHdrA_Krauser_TimeOver2_A, OBJLstHdrB_Krauser_GuardBreakG0_B
 	dw OBJLstHdrA_Krauser_RollF2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Krauser_DropMain2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
@@ -4313,9 +4313,9 @@ OBJLstPtrTable_Krauser_Wakeup:
 		
 
 OBJLstPtrTable_Krauser_ThrowG:
-	dw OBJLstHdrA_Krauser_PunchL1A, OBJLstHdrB_Krauser_PunchL1B
-	dw OBJLstHdrA_Krauser_ThrowG1A, OBJLstHdrB_Krauser_ChargeMeter0B
-	dw OBJLstHdrA_Krauser_ThrowG2A, OBJLstHdrB_Krauser_ThrowG2B
+	dw OBJLstHdrA_Krauser_PunchL1_A, OBJLstHdrB_Krauser_PunchL1_B
+	dw OBJLstHdrA_Krauser_ThrowG1_A, OBJLstHdrB_Krauser_ChargeMeter0_B
+	dw OBJLstHdrA_Krauser_ThrowG2_A, OBJLstHdrB_Krauser_ThrowG2_B
 	dw OBJLstHdrA_Krauser_ThrowG3, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Krauser_ThrowG3, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
@@ -4323,25 +4323,25 @@ OBJLstPtrTable_Krauser_ThrowG:
 
 OBJLstPtrTable_Krauser_HighBlitzBallL:
 	dw OBJLstHdrA_Krauser_HighBlitzBallL0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Krauser_HighBlitzBallL1A, OBJLstHdrB_Krauser_PunchL0B
-	dw OBJLstHdrA_Krauser_PunchL2A, OBJLstHdrB_Krauser_PunchL1B
+	dw OBJLstHdrA_Krauser_HighBlitzBallL1_A, OBJLstHdrB_Krauser_PunchL0_B
+	dw OBJLstHdrA_Krauser_PunchL2_A, OBJLstHdrB_Krauser_PunchL1_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Krauser_LowBlitzBallL:
 	dw OBJLstHdrA_Krauser_HighBlitzBallL0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Krauser_LowBlitzBallL1A, OBJLstHdrB_Krauser_PunchL1B
-	dw OBJLstHdrA_Krauser_PunchL2A, OBJLstHdrB_Krauser_PunchL1B
+	dw OBJLstHdrA_Krauser_LowBlitzBallL1_A, OBJLstHdrB_Krauser_PunchL1_B
+	dw OBJLstHdrA_Krauser_PunchL2_A, OBJLstHdrB_Krauser_PunchL1_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Krauser_LegTomahawkL:
 	dw OBJLstHdrA_Krauser_KickL0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Krauser_LegTomahawkL1A, OBJLstHdrB_Krauser_LegTomahawkL1B
-	dw OBJLstHdrA_Krauser_LegTomahawkL2A, OBJLstHdrB_Krauser_LegTomahawkL1B
+	dw OBJLstHdrA_Krauser_LegTomahawkL1_A, OBJLstHdrB_Krauser_LegTomahawkL1_B
+	dw OBJLstHdrA_Krauser_LegTomahawkL2_A, OBJLstHdrB_Krauser_LegTomahawkL1_B
 	dw OBJLstHdrA_Krauser_LegTomahawkL3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Krauser_LegTomahawkL4A, OBJLstHdrB_Krauser_LegTomahawkL4B
-	dw OBJLstHdrA_Krauser_LegTomahawkL5A, OBJLstHdrB_Krauser_LegTomahawkL4B
+	dw OBJLstHdrA_Krauser_LegTomahawkL4_A, OBJLstHdrB_Krauser_LegTomahawkL4_B
+	dw OBJLstHdrA_Krauser_LegTomahawkL5_A, OBJLstHdrB_Krauser_LegTomahawkL4_B
 	dw OBJLstHdrA_Krauser_Crouch0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
@@ -4363,12 +4363,12 @@ OBJLstPtrTable_Krauser_KaiserDuelSobatL:
 		
 
 OBJLstPtrTable_Krauser_KaiserSuplexL:
-	dw OBJLstHdrA_Krauser_KaiserSuplexL0A, OBJLstHdrB_Krauser_PunchL0B
-	dw OBJLstHdrA_Krauser_KaiserSuplexL1A, OBJLstHdrB_Krauser_KaiserSuplexL1B
-	dw OBJLstHdrA_Krauser_KaiserSuplexL2A, OBJLstHdrB_Krauser_KaiserSuplexL2B
-	dw OBJLstHdrA_Krauser_KaiserSuplexL3A, OBJLstHdrB_Krauser_KaiserSuplexL3B
+	dw OBJLstHdrA_Krauser_KaiserSuplexL0_A, OBJLstHdrB_Krauser_PunchL0_B
+	dw OBJLstHdrA_Krauser_KaiserSuplexL1_A, OBJLstHdrB_Krauser_KaiserSuplexL1_B
+	dw OBJLstHdrA_Krauser_KaiserSuplexL2_A, OBJLstHdrB_Krauser_KaiserSuplexL2_B
+	dw OBJLstHdrA_Krauser_KaiserSuplexL3_A, OBJLstHdrB_Krauser_KaiserSuplexL3_B
 	dw OBJLstHdrA_Krauser_KaiserSuplexL4, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Krauser_KaiserSuplexL5A, OBJLstHdrB_Krauser_KaiserSuplexL5B
+	dw OBJLstHdrA_Krauser_KaiserSuplexL5_A, OBJLstHdrB_Krauser_KaiserSuplexL5_B
 	dw OBJLstHdrA_Krauser_KaiserSuplexL4, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Krauser_KaiserSuplexL7, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Krauser_KaiserSuplexL8, OBJLSTPTR_NONE
@@ -4377,15 +4377,15 @@ OBJLstPtrTable_Krauser_KaiserSuplexL:
 		
 
 OBJLstPtrTable_Krauser_KaiserWaveS:
-	dw OBJLstHdrA_Krauser_PunchL0A, OBJLstHdrB_Krauser_PunchL0B
-	dw OBJLstHdrA_Krauser_KaiserWaveS1A, OBJLstHdrB_Krauser_ChargeMeter0B
-	dw OBJLstHdrA_Krauser_KaiserWaveS2A, OBJLstHdrB_Krauser_ChargeMeter0B
-	dw OBJLstHdrA_Krauser_KaiserWaveS3A, OBJLstHdrB_Krauser_KaiserWaveS3B
-	dw OBJLstHdrA_Krauser_KaiserWaveS4A, OBJLstHdrB_Krauser_KaiserWaveS3B
-	dw OBJLstHdrA_Krauser_PunchL0A, OBJLstHdrB_Krauser_PunchL0B
+	dw OBJLstHdrA_Krauser_PunchL0_A, OBJLstHdrB_Krauser_PunchL0_B
+	dw OBJLstHdrA_Krauser_KaiserWaveS1_A, OBJLstHdrB_Krauser_ChargeMeter0_B
+	dw OBJLstHdrA_Krauser_KaiserWaveS2_A, OBJLstHdrB_Krauser_ChargeMeter0_B
+	dw OBJLstHdrA_Krauser_KaiserWaveS3_A, OBJLstHdrB_Krauser_KaiserWaveS3_B
+	dw OBJLstHdrA_Krauser_KaiserWaveS4_A, OBJLstHdrB_Krauser_KaiserWaveS3_B
+	dw OBJLstHdrA_Krauser_PunchL0_A, OBJLstHdrB_Krauser_PunchL0_B
 	dw OBJLSTPTR_NONE
 		
-OBJLstHdrA_Krauser_Idle0A:
+OBJLstHdrA_Krauser_Idle0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -4403,7 +4403,7 @@ OBJLstHdrA_Krauser_Idle0A:
 	db $10,$FA,$08 ; $04
 	db $10,$02,$0A ; $05
 		
-OBJLstHdrB_Krauser_Idle0B:
+OBJLstHdrB_Krauser_Idle0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L1540C0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -4416,7 +4416,7 @@ OBJLstHdrB_Krauser_Idle0B:
 	db $30,$FA,$02 ; $01
 	db $30,$02,$04 ; $02
 		
-OBJLstHdrA_Krauser_Idle1A:
+OBJLstHdrA_Krauser_Idle1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -4567,7 +4567,7 @@ OBJLstHdrA_Krauser_KaiserSuplexL8:
 	db $00 ; iOBJLstHdrA_XOffset
 	db $08 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Krauser_JumpN3A:
+OBJLstHdrA_Krauser_JumpN3_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -4584,16 +4584,16 @@ OBJLstHdrA_Krauser_JumpN3A:
 	db $10,$00,$06 ; $03
 	db $00,$F8,$08 ; $04
 		
-OBJLstHdrA_Krauser_KaiserSuplexL5A:
+OBJLstHdrA_Krauser_KaiserSuplexL5_A:
 	db OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_05 ; iOBJLstHdrA_HitboxId
 	dpr L154680 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Krauser_JumpN3A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Krauser_JumpN3_A.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $EE ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrB_Krauser_JumpN3B:
+OBJLstHdrB_Krauser_JumpN3_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L154720 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -4607,10 +4607,10 @@ OBJLstHdrB_Krauser_JumpN3B:
 	db $30,$FE,$04 ; $02
 	db $24,$EE,$06 ; $03
 		
-OBJLstHdrB_Krauser_KaiserSuplexL5B:
+OBJLstHdrB_Krauser_KaiserSuplexL5_B:
 	db OLF_YFLIP ; iOBJLstHdrA_Flags
 	dpr L154720 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrB_Krauser_JumpN3B.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrB_Krauser_JumpN3_B.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $EE ; iOBJLstHdrA_YOffset
 		
@@ -4651,7 +4651,7 @@ OBJLstHdrA_Krauser_BlockC0:
 	db $32,$FD,$08 ; $04
 	db $35,$05,$0A ; $05
 		
-OBJLstHdrA_Krauser_BlockA0A: ;X
+OBJLstHdrA_Krauser_BlockA0_A: ;X
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -4727,7 +4727,7 @@ OBJLstHdrA_Krauser_RunF2:
 	db $29,$FF,$0E ; $07
 	db $2E,$07,$10 ; $08
 		
-OBJLstHdrA_Krauser_ChargeMeter0A:
+OBJLstHdrA_Krauser_ChargeMeter0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -4744,7 +4744,7 @@ OBJLstHdrA_Krauser_ChargeMeter0A:
 	db $08,$ED,$06 ; $03
 	db $08,$F5,$08 ; $04
 		
-OBJLstHdrA_Krauser_ChargeMeter1A:
+OBJLstHdrA_Krauser_ChargeMeter1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -4761,7 +4761,7 @@ OBJLstHdrA_Krauser_ChargeMeter1A:
 	db $08,$ED,$06 ; $03
 	db $08,$F5,$08 ; $04
 		
-OBJLstHdrA_Krauser_Taunt0A:
+OBJLstHdrA_Krauser_Taunt0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -4778,7 +4778,7 @@ OBJLstHdrA_Krauser_Taunt0A:
 	db $10,$F5,$06 ; $03
 	db $10,$FD,$08 ; $04
 		
-OBJLstHdrB_Krauser_Taunt0B:
+OBJLstHdrB_Krauser_Taunt0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L154EA0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -4791,7 +4791,7 @@ OBJLstHdrB_Krauser_Taunt0B:
 	db $30,$FA,$02 ; $01
 	db $3E,$EA,$04 ; $02
 		
-OBJLstHdrA_Krauser_Taunt1A:
+OBJLstHdrA_Krauser_Taunt1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -4809,7 +4809,7 @@ OBJLstHdrA_Krauser_Taunt1A:
 	db $1E,$EC,$08 ; $04
 	db $0E,$EC,$0A ; $05
 		
-OBJLstHdrA_Krauser_Taunt3A:
+OBJLstHdrA_Krauser_Taunt3_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -4826,7 +4826,7 @@ OBJLstHdrA_Krauser_Taunt3A:
 	db $10,$FD,$06 ; $03
 	db $17,$ED,$08 ; $04
 		
-OBJLstHdrA_Krauser_WinA0A:
+OBJLstHdrA_Krauser_WinA0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -4841,7 +4841,7 @@ OBJLstHdrA_Krauser_WinA0A:
 	db $18,$FB,$02 ; $01
 	db $08,$FB,$04 ; $02
 		
-OBJLstHdrB_Krauser_WinA0B:
+OBJLstHdrB_Krauser_WinA0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L1550C0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -4857,7 +4857,7 @@ OBJLstHdrB_Krauser_WinA0B:
 	db $38,$FA,$08 ; $04
 	db $3E,$F2,$0A ; $05
 		
-OBJLstHdrA_Krauser_WinA1A:
+OBJLstHdrA_Krauser_WinA1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -4872,7 +4872,7 @@ OBJLstHdrA_Krauser_WinA1A:
 	db $18,$FB,$02 ; $01
 	db $08,$FB,$04 ; $02
 		
-OBJLstHdrA_Krauser_WinA2A:
+OBJLstHdrA_Krauser_WinA2_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -4888,7 +4888,7 @@ OBJLstHdrA_Krauser_WinA2A:
 	db $08,$FB,$04 ; $02
 	db $21,$F3,$06 ; $03
 		
-OBJLstHdrA_Krauser_WinA3A:
+OBJLstHdrA_Krauser_WinA3_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -4904,7 +4904,7 @@ OBJLstHdrA_Krauser_WinA3A:
 	db $08,$FB,$04 ; $02
 	db $1D,$F3,$06 ; $03
 		
-OBJLstHdrA_Krauser_WinB5A:
+OBJLstHdrA_Krauser_WinB5_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -5010,7 +5010,7 @@ OBJLstHdrA_Krauser_Intro3:
 	db $0F,$06,$16 ; $0B
 	db $3F,$EB,$18 ; $0C
 		
-OBJLstHdrA_Krauser_Intro4A:
+OBJLstHdrA_Krauser_Intro4_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -5028,25 +5028,25 @@ OBJLstHdrA_Krauser_Intro4A:
 	db $08,$F3,$08 ; $04
 	db $17,$E3,$0A ; $05
 		
-OBJLstHdrA_Krauser_PunchL0A:
+OBJLstHdrA_Krauser_PunchL0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
 	dpr L155960 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Krauser_KaiserSuplexL1A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Krauser_KaiserSuplexL1_A.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Krauser_KaiserSuplexL0A:
+OBJLstHdrA_Krauser_KaiserSuplexL0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_05 ; iOBJLstHdrA_HitboxId
 	dpr L155960 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Krauser_KaiserSuplexL1A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Krauser_KaiserSuplexL1_A.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Krauser_KaiserSuplexL1A:
+OBJLstHdrA_Krauser_KaiserSuplexL1_A:
 	db OLF_XFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_05 ; iOBJLstHdrA_HitboxId
@@ -5064,14 +5064,14 @@ OBJLstHdrA_Krauser_KaiserSuplexL1A:
 	db $10,$01,$08 ; $04
 	db $1E,$09,$0A ; $05
 		
-OBJLstHdrB_Krauser_PunchL0B:
+OBJLstHdrB_Krauser_PunchL0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L155A20 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrB_Krauser_KaiserSuplexL1B.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrB_Krauser_KaiserSuplexL1_B.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrB_Krauser_KaiserSuplexL1B:
+OBJLstHdrB_Krauser_KaiserSuplexL1_B:
 	db OLF_XFLIP ; iOBJLstHdrA_Flags
 	dpr L155A20 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -5084,16 +5084,16 @@ OBJLstHdrB_Krauser_KaiserSuplexL1B:
 	db $30,$FB,$02 ; $01
 	db $30,$03,$04 ; $02
 		
-OBJLstHdrA_Krauser_PunchL1A:
+OBJLstHdrA_Krauser_PunchL1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_02 ; iOBJLstHdrA_HitboxId
 	dpr L155A80 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Krauser_KaiserSuplexL2A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Krauser_KaiserSuplexL2_A.bin ; iOBJLstHdrA_DataPtr
 	db $01 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Krauser_KaiserSuplexL2A:
+OBJLstHdrA_Krauser_KaiserSuplexL2_A:
 	db OLF_XFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_05 ; iOBJLstHdrA_HitboxId
@@ -5111,23 +5111,23 @@ OBJLstHdrA_Krauser_KaiserSuplexL2A:
 	db $18,$02,$08 ; $04
 	db $12,$F2,$0A ; $05
 		
-OBJLstHdrA_Krauser_LowBlitzBallL1A:
+OBJLstHdrA_Krauser_LowBlitzBallL1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
 	dpr L155A80 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Krauser_KaiserSuplexL2A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Krauser_KaiserSuplexL2_A.bin ; iOBJLstHdrA_DataPtr
 	db $01 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrB_Krauser_PunchL1B:
+OBJLstHdrB_Krauser_PunchL1_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L155B40 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrB_Krauser_KaiserSuplexL2B.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrB_Krauser_KaiserSuplexL2_B.bin ; iOBJLstHdrA_DataPtr
 	db $01 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrB_Krauser_KaiserSuplexL2B:
+OBJLstHdrB_Krauser_KaiserSuplexL2_B:
 	db OLF_XFLIP ; iOBJLstHdrA_Flags
 	dpr L155B40 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -5142,7 +5142,7 @@ OBJLstHdrB_Krauser_KaiserSuplexL2B:
 	db $35,$03,$06 ; $03
 	db $1B,$FB,$08 ; $04
 		
-OBJLstHdrA_Krauser_PunchL2A:
+OBJLstHdrA_Krauser_PunchL2_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -5300,7 +5300,7 @@ OBJLstHdrA_Krauser_KickH1:
 	db $23,$04,$0E ; $07
 	db $30,$FC,$10 ; $08
 		
-OBJLstHdrA_Krauser_PunchCL0A:
+OBJLstHdrA_Krauser_PunchCL0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -5315,7 +5315,7 @@ OBJLstHdrA_Krauser_PunchCL0A:
 	db $18,$F3,$02 ; $01
 	db $24,$EB,$04 ; $02
 		
-OBJLstHdrB_Krauser_PunchCL0B:
+OBJLstHdrB_Krauser_PunchCL0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L156340 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -5332,7 +5332,7 @@ OBJLstHdrB_Krauser_PunchCL0B:
 	db $38,$F3,$0A ; $05
 	db $3D,$EB,$0C ; $06
 		
-OBJLstHdrA_Krauser_PunchCL1A:
+OBJLstHdrA_Krauser_PunchCL1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_57 ; iOBJLstHdrA_HitboxId
@@ -5369,7 +5369,7 @@ OBJLstHdrA_Krauser_PunchCH1:
 	db $35,$FE,$0E ; $07
 	db $39,$06,$10 ; $08
 		
-OBJLstHdrA_Krauser_KickCL1A:
+OBJLstHdrA_Krauser_KickCL1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_52 ; iOBJLstHdrA_HitboxId
@@ -5388,16 +5388,16 @@ OBJLstHdrA_Krauser_KickCL1A:
 	db $35,$F0,$0A ; $05
 	db $39,$E8,$0C ; $06
 		
-OBJLstHdrA_Krauser_KickA0A:
+OBJLstHdrA_Krauser_KickA0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_02 ; iOBJLstHdrA_HitboxId
 	dpr L1565C0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Krauser_KickCL1A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Krauser_KickCL1_A.bin ; iOBJLstHdrA_DataPtr
 	db $01 ; iOBJLstHdrA_XOffset
 	db $F8 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrB_Krauser_KickCL1B:
+OBJLstHdrB_Krauser_KickCL1_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L1566A0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -5410,7 +5410,7 @@ OBJLstHdrB_Krauser_KickCL1B:
 	db $30,$03,$02 ; $01
 	db $30,$0B,$04 ; $02
 		
-OBJLstHdrA_Krauser_PunchA0A:
+OBJLstHdrA_Krauser_PunchA0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_02 ; iOBJLstHdrA_HitboxId
@@ -5429,7 +5429,7 @@ OBJLstHdrA_Krauser_PunchA0A:
 	db $0F,$FB,$0A ; $05
 	db $10,$03,$0C ; $06
 		
-OBJLstHdrB_Krauser_PunchA0B:
+OBJLstHdrB_Krauser_PunchA0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L1567E0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -5442,14 +5442,14 @@ OBJLstHdrB_Krauser_PunchA0B:
 	db $20,$0B,$02 ; $01
 	db $20,$13,$04 ; $02
 		
-OBJLstHdrB_Krauser_KaiserSuplexL3B:
+OBJLstHdrB_Krauser_KaiserSuplexL3_B:
 	db OLF_YFLIP ; iOBJLstHdrA_Flags
 	dpr L1567E0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrB_Krauser_PunchA0B.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrB_Krauser_PunchA0_B.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $F8 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrB_Krauser_KickA0B:
+OBJLstHdrB_Krauser_KickA0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L156840 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -5462,7 +5462,7 @@ OBJLstHdrB_Krauser_KickA0B:
 	db $30,$03,$02 ; $01
 	db $30,$0B,$04 ; $02
 		
-OBJLstHdrA_Krauser_AttackG1A:
+OBJLstHdrA_Krauser_AttackG1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_68 ; iOBJLstHdrA_HitboxId
@@ -5482,7 +5482,7 @@ OBJLstHdrA_Krauser_AttackG1A:
 	db $33,$EE,$0C ; $06
 	db $3C,$FE,$0E ; $07
 		
-OBJLstHdrB_Krauser_AttackG1B:
+OBJLstHdrB_Krauser_AttackG1_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L1569A0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -5494,7 +5494,7 @@ OBJLstHdrB_Krauser_AttackG1B:
 	db $18,$0B,$00 ; $00
 	db $18,$13,$02 ; $01
 		
-OBJLstHdrB_Krauser_AttackG2B:
+OBJLstHdrB_Krauser_AttackG2_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L1569E0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -5527,7 +5527,7 @@ OBJLstHdrA_Krauser_AttackA0:
 	db $0C,$FC,$0E ; $07
 	db $03,$04,$10 ; $08
 		
-OBJLstHdrA_Krauser_GuardBreakG0A:
+OBJLstHdrA_Krauser_GuardBreakG0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -5545,21 +5545,21 @@ OBJLstHdrA_Krauser_GuardBreakG0A:
 	db $10,$F9,$08 ; $04
 	db $10,$01,$0A ; $05
 		
-OBJLstHdrB_Krauser_GuardBreakG0B:
+OBJLstHdrB_Krauser_GuardBreakG0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L156C00 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrB_Krauser_HitSwoopup2B.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrB_Krauser_HitSwoopup2_B.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrB_Krauser_HitSwoopup1B:
+OBJLstHdrB_Krauser_HitSwoopup1_B:
 	db OLF_XFLIP ; iOBJLstHdrA_Flags
 	dpr L156C00 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrB_Krauser_HitSwoopup2B.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrB_Krauser_HitSwoopup2_B.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrB_Krauser_HitSwoopup2B:
+OBJLstHdrB_Krauser_HitSwoopup2_B:
 	db OLF_YFLIP ; iOBJLstHdrA_Flags
 	dpr L156C00 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -5572,32 +5572,32 @@ OBJLstHdrB_Krauser_HitSwoopup2B:
 	db $30,$FA,$02 ; $01
 	db $30,$02,$04 ; $02
 		
-OBJLstHdrB_Krauser_ThrowEndA3B:
+OBJLstHdrB_Krauser_ThrowEndA3_B:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	dpr L156C00 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrB_Krauser_HitSwoopup2B.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrB_Krauser_HitSwoopup2_B.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Krauser_TimeOver2A:
+OBJLstHdrA_Krauser_TimeOver2_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
 	dpr L156C60 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Krauser_HitSwoopup2A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Krauser_HitSwoopup2_A.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Krauser_HitSwoopup1A:
+OBJLstHdrA_Krauser_HitSwoopup1_A:
 	db OLF_XFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
 	dpr L156C60 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Krauser_HitSwoopup2A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Krauser_HitSwoopup2_A.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Krauser_HitSwoopup2A:
+OBJLstHdrA_Krauser_HitSwoopup2_A:
 	db OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -5614,12 +5614,12 @@ OBJLstHdrA_Krauser_HitSwoopup2A:
 	db $1C,$F7,$06 ; $03
 	db $1B,$EF,$08 ; $04
 		
-OBJLstHdrA_Krauser_ThrowEndA3A:
+OBJLstHdrA_Krauser_ThrowEndA3_A:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
 	dpr L156C60 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Krauser_HitSwoopup2A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Krauser_HitSwoopup2_A.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
@@ -5709,7 +5709,7 @@ OBJLstHdrA_Krauser_DropMain2:
 	db $3A,$E4,$0A ; $05
 	db $3D,$F4,$0C ; $06
 		
-OBJLstHdrA_Krauser_ThrowG1A:
+OBJLstHdrA_Krauser_ThrowG1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_05 ; iOBJLstHdrA_HitboxId
@@ -5727,16 +5727,16 @@ OBJLstHdrA_Krauser_ThrowG1A:
 	db $12,$FE,$08 ; $04
 	db $FF,$FE,$0A ; $05
 		
-OBJLstHdrA_Krauser_ThrowG2A:
+OBJLstHdrA_Krauser_ThrowG2_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_05 ; iOBJLstHdrA_HitboxId
 	dpr L156FE0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Krauser_ThrowG1A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Krauser_ThrowG1_A.bin ; iOBJLstHdrA_DataPtr
 	db $09 ; iOBJLstHdrA_XOffset
 	db $FF ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrB_Krauser_ChargeMeter0B:
+OBJLstHdrB_Krauser_ChargeMeter0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L1570A0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -5750,7 +5750,7 @@ OBJLstHdrB_Krauser_ChargeMeter0B:
 	db $38,$F1,$04 ; $02
 	db $38,$F9,$06 ; $03
 		
-OBJLstHdrB_Krauser_ThrowG2B:
+OBJLstHdrB_Krauser_ThrowG2_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L157120 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -5784,7 +5784,7 @@ OBJLstHdrA_Krauser_HighBlitzBallL0:
 	db $2A,$FF,$0C ; $06
 	db $30,$03,$0E ; $07
 		
-OBJLstHdrA_Krauser_HighBlitzBallL1A:
+OBJLstHdrA_Krauser_HighBlitzBallL1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -5802,7 +5802,7 @@ OBJLstHdrA_Krauser_HighBlitzBallL1A:
 	db $10,$01,$08 ; $04
 	db $18,$09,$0A ; $05
 		
-OBJLstHdrA_Krauser_LegTomahawkL1A:
+OBJLstHdrA_Krauser_LegTomahawkL1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_02 ; iOBJLstHdrA_HitboxId
@@ -5821,7 +5821,7 @@ OBJLstHdrA_Krauser_LegTomahawkL1A:
 	db $0D,$FC,$0A ; $05
 	db $08,$04,$0C ; $06
 		
-OBJLstHdrB_Krauser_LegTomahawkL1B:
+OBJLstHdrB_Krauser_LegTomahawkL1_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L157440 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -5835,7 +5835,7 @@ OBJLstHdrB_Krauser_LegTomahawkL1B:
 	db $30,$0B,$04 ; $02
 	db $30,$13,$06 ; $03
 		
-OBJLstHdrA_Krauser_LegTomahawkL2A:
+OBJLstHdrA_Krauser_LegTomahawkL2_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_02 ; iOBJLstHdrA_HitboxId
@@ -5876,7 +5876,7 @@ OBJLstHdrA_Krauser_LegTomahawkL3:
 	db $27,$FE,$10 ; $08
 	db $36,$06,$12 ; $09
 		
-OBJLstHdrA_Krauser_LegTomahawkL4A:
+OBJLstHdrA_Krauser_LegTomahawkL4_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_02 ; iOBJLstHdrA_HitboxId
@@ -5891,7 +5891,7 @@ OBJLstHdrA_Krauser_LegTomahawkL4A:
 	db $20,$F3,$02 ; $01
 	db $1B,$FB,$04 ; $02
 		
-OBJLstHdrB_Krauser_LegTomahawkL4B:
+OBJLstHdrB_Krauser_LegTomahawkL4_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L157740 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -5907,7 +5907,7 @@ OBJLstHdrB_Krauser_LegTomahawkL4B:
 	db $22,$DE,$08 ; $04
 	db $39,$FE,$0A ; $05
 		
-OBJLstHdrA_Krauser_LegTomahawkL5A:
+OBJLstHdrA_Krauser_LegTomahawkL5_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -5922,7 +5922,7 @@ OBJLstHdrA_Krauser_LegTomahawkL5A:
 	db $20,$F3,$02 ; $01
 	db $1B,$FB,$04 ; $02
 		
-OBJLstHdrA_Krauser_KaiserSuplexL3A:
+OBJLstHdrA_Krauser_KaiserSuplexL3_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_05 ; iOBJLstHdrA_HitboxId
@@ -5942,7 +5942,7 @@ OBJLstHdrA_Krauser_KaiserSuplexL3A:
 	db $28,$0B,$0C ; $06
 	db $0B,$EB,$0E ; $07
 		
-OBJLstHdrA_Krauser_KaiserWaveS1A:
+OBJLstHdrA_Krauser_KaiserWaveS1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -5959,7 +5959,7 @@ OBJLstHdrA_Krauser_KaiserWaveS1A:
 	db $13,$0C,$06 ; $03
 	db $08,$FC,$08 ; $04
 		
-OBJLstHdrA_Krauser_KaiserWaveS2A:
+OBJLstHdrA_Krauser_KaiserWaveS2_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -5976,7 +5976,7 @@ OBJLstHdrA_Krauser_KaiserWaveS2A:
 	db $13,$0F,$06 ; $03
 	db $08,$FD,$08 ; $04
 		
-OBJLstHdrA_Krauser_KaiserWaveS3A:
+OBJLstHdrA_Krauser_KaiserWaveS3_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -5990,7 +5990,7 @@ OBJLstHdrA_Krauser_KaiserWaveS3A:
 	db $18,$FB,$00 ; $00
 	db $10,$03,$02 ; $01
 		
-OBJLstHdrB_Krauser_KaiserWaveS3B:
+OBJLstHdrB_Krauser_KaiserWaveS3_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L157AE0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -6009,7 +6009,7 @@ OBJLstHdrB_Krauser_KaiserWaveS3B:
 	db $3E,$F1,$0E ; $07
 	db $38,$03,$10 ; $08
 		
-OBJLstHdrA_Krauser_KaiserWaveS4A:
+OBJLstHdrA_Krauser_KaiserWaveS4_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -6024,7 +6024,7 @@ OBJLstHdrA_Krauser_KaiserWaveS4A:
 		
 
 OBJLstPtrTable_Mature_Idle:
-	dw OBJLstHdrA_Mature_Idle0A, OBJLstHdrB_Mature_Idle0B
+	dw OBJLstHdrA_Mature_Idle0_A, OBJLstHdrB_Mature_Idle0_B
 	dw OBJLstHdrA_Mature_Idle1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_Idle2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
@@ -6032,18 +6032,18 @@ OBJLstPtrTable_Mature_Idle:
 
 OBJLstPtrTable_Mature_WalkF:
 	dw OBJLstHdrA_Mature_WalkF0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mature_WalkF1A, OBJLstHdrB_Mature_WalkF1B
+	dw OBJLstHdrA_Mature_WalkF1_A, OBJLstHdrB_Mature_WalkF1_B
 	dw OBJLstHdrA_Mature_WalkF2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_WalkF3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mature_WalkF1A, OBJLstHdrB_Mature_WalkF4B
+	dw OBJLstHdrA_Mature_WalkF1_A, OBJLstHdrB_Mature_WalkF4_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Mature_WalkB:
-	dw OBJLstHdrA_Mature_WalkF1A, OBJLstHdrB_Mature_WalkF4B
+	dw OBJLstHdrA_Mature_WalkF1_A, OBJLstHdrB_Mature_WalkF4_B
 	dw OBJLstHdrA_Mature_WalkF3, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_WalkF2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mature_WalkF1A, OBJLstHdrB_Mature_WalkF1B
+	dw OBJLstHdrA_Mature_WalkF1_A, OBJLstHdrB_Mature_WalkF1_B
 	dw OBJLstHdrA_Mature_WalkF0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
@@ -6057,8 +6057,8 @@ OBJLstPtrTable_Mature_JumpN:
 	dw OBJLstHdrA_Mature_Crouch0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_JumpN1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_JumpN2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mature_JumpN3A, OBJLstHdrB_Mature_JumpN3B
-	dw OBJLstHdrA_Mature_JumpN3A, OBJLstHdrB_Mature_JumpN3B
+	dw OBJLstHdrA_Mature_JumpN3_A, OBJLstHdrB_Mature_JumpN3_B
+	dw OBJLstHdrA_Mature_JumpN3_A, OBJLstHdrB_Mature_JumpN3_B
 	dw OBJLstHdrA_Mature_JumpN2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_JumpN1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_Crouch0, OBJLSTPTR_NONE
@@ -6066,17 +6066,17 @@ OBJLstPtrTable_Mature_JumpN:
 		
 
 OBJLstPtrTable_Mature_BlockG:
-	dw OBJLstHdrA_Mature_BlockG0A, OBJLstHdrB_Mature_BlockG0B
+	dw OBJLstHdrA_Mature_BlockG0_A, OBJLstHdrB_Mature_BlockG0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Mature_BlockC:
-	dw OBJLstHdrA_Mature_BlockC0A, OBJLstHdrB_Mature_BlockC0B
+	dw OBJLstHdrA_Mature_BlockC0_A, OBJLstHdrB_Mature_BlockC0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Mature_BlockA:
-	dw OBJLstHdrA_Mature_BlockA0A, OBJLstHdrB_Mature_JumpN3B ;X
+	dw OBJLstHdrA_Mature_BlockA0_A, OBJLstHdrB_Mature_JumpN3_B ;X
 	dw OBJLstHdrA_Mature_Crouch0, OBJLSTPTR_NONE ;X
 	dw OBJLSTPTR_NONE
 		
@@ -6095,8 +6095,8 @@ OBJLstPtrTable_Mature_HopB:
 		
 
 OBJLstPtrTable_Mature_ChargeMeter:
-	dw OBJLstHdrA_Mature_ChargeMeter0A, OBJLstHdrB_Mature_Idle0B
-	dw OBJLstHdrA_Mature_ChargeMeter1A, OBJLstHdrB_Mature_Idle0B
+	dw OBJLstHdrA_Mature_ChargeMeter0_A, OBJLstHdrB_Mature_Idle0_B
+	dw OBJLstHdrA_Mature_ChargeMeter1_A, OBJLstHdrB_Mature_Idle0_B
 	dw OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE;X
 
@@ -6107,12 +6107,12 @@ OBJLstPtrTable_Mature_Taunt:
 		
 
 OBJLstPtrTable_Mature_Intro:
-	dw OBJLstHdrA_Mature_Intro0A, OBJLstHdrB_Mature_Intro0B
-	dw OBJLstHdrA_Mature_Intro1A, OBJLstHdrB_Mature_Intro0B
+	dw OBJLstHdrA_Mature_Intro0_A, OBJLstHdrB_Mature_Intro0_B
+	dw OBJLstHdrA_Mature_Intro1_A, OBJLstHdrB_Mature_Intro0_B
 	dw OBJLstHdrA_Mature_Intro2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mature_Intro1A, OBJLstHdrB_Mature_Intro0B
-	dw OBJLstHdrA_Mature_Intro4A, OBJLstHdrB_Mature_Intro0B
-	dw OBJLstHdrA_Mature_Intro0A, OBJLstHdrB_Mature_Intro0B
+	dw OBJLstHdrA_Mature_Intro1_A, OBJLstHdrB_Mature_Intro0_B
+	dw OBJLstHdrA_Mature_Intro4_A, OBJLstHdrB_Mature_Intro0_B
+	dw OBJLstHdrA_Mature_Intro0_A, OBJLstHdrB_Mature_Intro0_B
 	dw OBJLstHdrA_Mature_WalkF0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
@@ -6131,24 +6131,24 @@ OBJLstPtrTable_Mature_WinB:
 		
 
 OBJLstPtrTable_Mature_PunchL:
-	dw OBJLstHdrA_Mature_PunchL0A, OBJLstHdrB_Mature_PunchL0B
-	dw OBJLstHdrA_Mature_PunchL1A, OBJLstHdrB_Mature_PunchL1B
-	dw OBJLstHdrA_Mature_PunchL0A, OBJLstHdrB_Mature_PunchL0B
+	dw OBJLstHdrA_Mature_PunchL0_A, OBJLstHdrB_Mature_PunchL0_B
+	dw OBJLstHdrA_Mature_PunchL1_A, OBJLstHdrB_Mature_PunchL1_B
+	dw OBJLstHdrA_Mature_PunchL0_A, OBJLstHdrB_Mature_PunchL0_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Mature_PunchH:
 	dw OBJLstHdrA_Mature_PunchH0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mature_PunchH1A, OBJLstHdrB_Mature_PunchH1B
+	dw OBJLstHdrA_Mature_PunchH1_A, OBJLstHdrB_Mature_PunchH1_B
 	dw OBJLstHdrA_Mature_PunchH2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mature_PunchH3A, OBJLstHdrB_Mature_PunchH3B
+	dw OBJLstHdrA_Mature_PunchH3_A, OBJLstHdrB_Mature_PunchH3_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Mature_KickL:
-	dw OBJLstHdrA_Mature_KickL0A, OBJLstHdrB_Mature_KickL0B
+	dw OBJLstHdrA_Mature_KickL0_A, OBJLstHdrB_Mature_KickL0_B
 	dw OBJLstHdrA_Mature_KickL1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mature_KickL2A, OBJLstHdrB_Mature_KickL2B
+	dw OBJLstHdrA_Mature_KickL2_A, OBJLstHdrB_Mature_KickL2_B
 	dw OBJLstHdrA_Mature_KickL1, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
@@ -6156,15 +6156,15 @@ OBJLstPtrTable_Mature_KickL:
 OBJLstPtrTable_Mature_KickH:
 	dw OBJLstHdrA_Mature_Crouch0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_KickH1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mature_KickH2A, OBJLstHdrB_Mature_KickH2B
+	dw OBJLstHdrA_Mature_KickH2_A, OBJLstHdrB_Mature_KickH2_B
 	dw OBJLstHdrA_Mature_KickH3, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Mature_PunchCL:
-	dw OBJLstHdrA_Mature_PunchCL0A, OBJLstHdrB_Mature_PunchCL0B
-	dw OBJLstHdrA_Mature_PunchCL1A, OBJLstHdrB_Mature_PunchCL1B
-	dw OBJLstHdrA_Mature_PunchCL0A, OBJLstHdrB_Mature_PunchCL0B
+	dw OBJLstHdrA_Mature_PunchCL0_A, OBJLstHdrB_Mature_PunchCL0_B
+	dw OBJLstHdrA_Mature_PunchCL1_A, OBJLstHdrB_Mature_PunchCL1_B
+	dw OBJLstHdrA_Mature_PunchCL0_A, OBJLstHdrB_Mature_PunchCL0_B
 	dw OBJLSTPTR_NONE
 		
 
@@ -6184,16 +6184,16 @@ OBJLstPtrTable_Mature_KickCL:
 		
 
 OBJLstPtrTable_Mature_KickCH:
-	dw OBJLstHdrA_Mature_WalkF1A, OBJLstHdrB_Mature_WalkF4B
+	dw OBJLstHdrA_Mature_WalkF1_A, OBJLstHdrB_Mature_WalkF4_B
 	dw OBJLstHdrA_Mature_KickCH1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_KickCH2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mature_WalkF1A, OBJLstHdrB_Mature_WalkF4B
+	dw OBJLstHdrA_Mature_WalkF1_A, OBJLstHdrB_Mature_WalkF4_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Mature_PunchA:
-	dw OBJLstHdrA_Mature_PunchA0A, OBJLstHdrB_Mature_PunchA0B
-	dw OBJLstHdrA_Mature_PunchA0A, OBJLstHdrB_Mature_PunchA0B
+	dw OBJLstHdrA_Mature_PunchA0_A, OBJLstHdrB_Mature_PunchA0_B
+	dw OBJLstHdrA_Mature_PunchA0_A, OBJLstHdrB_Mature_PunchA0_B
 	dw OBJLstHdrA_Mature_JumpN2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_JumpN1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_Crouch0, OBJLSTPTR_NONE
@@ -6201,8 +6201,8 @@ OBJLstPtrTable_Mature_PunchA:
 		
 
 OBJLstPtrTable_Mature_KickA:
-	dw OBJLstHdrA_Mature_KickL0A, OBJLstHdrB_Mature_KickA0B
-	dw OBJLstHdrA_Mature_KickL0A, OBJLstHdrB_Mature_KickA1B
+	dw OBJLstHdrA_Mature_KickL0_A, OBJLstHdrB_Mature_KickA0_B
+	dw OBJLstHdrA_Mature_KickL0_A, OBJLstHdrB_Mature_KickA1_B
 	dw OBJLstHdrA_Mature_JumpN2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_JumpN1, OBJLSTPTR_NONE ;X
 	dw OBJLstHdrA_Mature_Crouch0, OBJLSTPTR_NONE
@@ -6250,7 +6250,7 @@ OBJLstPtrTable_Mature_GuardBreakG:
 		
 
 OBJLstPtrTable_Mature_Dizzy:
-	dw OBJLstHdrA_Mature_Idle0A, OBJLstHdrB_Mature_Idle0B
+	dw OBJLstHdrA_Mature_Idle0_A, OBJLstHdrB_Mature_Idle0_B
 	dw OBJLstHdrA_Mature_GuardBreakG0, OBJLSTPTR_NONE
 OBJLstPtrTable_Mature_TimeOver:
 	dw OBJLstHdrA_Mature_TimeOver2, OBJLSTPTR_NONE
@@ -6270,9 +6270,9 @@ OBJLstPtrTable_Mature_GuardBreakA:
 
 OBJLstPtrTable_Mature_BackjumpRecA:
 	dw OBJLstHdrA_Mature_GuardBreakG0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mature_JumpN3A, OBJLstHdrB_Mature_JumpN3B
+	dw OBJLstHdrA_Mature_JumpN3_A, OBJLstHdrB_Mature_JumpN3_B
 	dw OBJLstHdrA_Mature_JumpN2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mature_JumpN3A, OBJLstHdrB_Mature_JumpN3B
+	dw OBJLstHdrA_Mature_JumpN3_A, OBJLstHdrB_Mature_JumpN3_B
 	dw OBJLstHdrA_Mature_JumpN2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_JumpN1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_Crouch0, OBJLSTPTR_NONE
@@ -6322,11 +6322,11 @@ OBJLstPtrTable_Mature_Wakeup:
 OBJLstPtrTable_Mature_DecideL:
 	dw OBJLstHdrA_Mature_PunchH2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_DecideL1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mature_DecideL2A, OBJLstHdrB_Mature_PunchH3B
+	dw OBJLstHdrA_Mature_DecideL2_A, OBJLstHdrB_Mature_PunchH3_B
 	dw OBJLstHdrA_Mature_DecideL1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_DecideL4, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mature_DecideL5A, OBJLstHdrB_Mature_DecideL5B
-	dw OBJLstHdrA_Mature_DecideL6A, OBJLstHdrB_Mature_DecideL5B
+	dw OBJLstHdrA_Mature_DecideL5_A, OBJLstHdrB_Mature_DecideL5_B
+	dw OBJLstHdrA_Mature_DecideL6_A, OBJLstHdrB_Mature_DecideL5_B
 	dw OBJLstHdrA_Mature_DecideL7, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
@@ -6337,25 +6337,25 @@ OBJLstPtrTable_Mature_MetalMassacreL:
 	dw OBJLstHdrA_Mature_RunF0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_WalkF0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_PunchH2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mature_MetalMassacreL5A, OBJLstHdrB_Mature_PunchH3B
-	dw OBJLstHdrA_Mature_MetalMassacreL6A, OBJLstHdrB_Mature_PunchH3B
-	dw OBJLstHdrA_Mature_MetalMassacreL5A, OBJLstHdrB_Mature_PunchH3B
-	dw OBJLstHdrA_Mature_DecideL2A, OBJLstHdrB_Mature_PunchH3B
+	dw OBJLstHdrA_Mature_MetalMassacreL5_A, OBJLstHdrB_Mature_PunchH3_B
+	dw OBJLstHdrA_Mature_MetalMassacreL6_A, OBJLstHdrB_Mature_PunchH3_B
+	dw OBJLstHdrA_Mature_MetalMassacreL5_A, OBJLstHdrB_Mature_PunchH3_B
+	dw OBJLstHdrA_Mature_DecideL2_A, OBJLstHdrB_Mature_PunchH3_B
 	dw OBJLSTPTR_NONE
 		
 
 OBJLstPtrTable_Mature_DeathRowL:
 	dw OBJLstHdrA_Mature_DeathRowL0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_DeathRowL1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mature_DeathRowL2A, OBJLstHdrB_Mature_DeathRowL2B
-	dw OBJLstHdrA_Mature_DecideL2A, OBJLstHdrB_Mature_PunchH3B
-	dw OBJLstHdrA_Mature_DeathRowL4A, OBJLstHdrB_Mature_PunchH1B
-	dw OBJLstHdrA_Mature_DeathRowL5A, OBJLstHdrB_Mature_PunchH1B
+	dw OBJLstHdrA_Mature_DeathRowL2_A, OBJLstHdrB_Mature_DeathRowL2_B
+	dw OBJLstHdrA_Mature_DecideL2_A, OBJLstHdrB_Mature_PunchH3_B
+	dw OBJLstHdrA_Mature_DeathRowL4_A, OBJLstHdrB_Mature_PunchH1_B
+	dw OBJLstHdrA_Mature_DeathRowL5_A, OBJLstHdrB_Mature_PunchH1_B
 	dw OBJLstHdrA_Mature_PunchH2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mature_MetalMassacreL5A, OBJLstHdrB_Mature_PunchH3B
-	dw OBJLstHdrA_Mature_MetalMassacreL6A, OBJLstHdrB_Mature_PunchH3B
-	dw OBJLstHdrA_Mature_DecideL2A, OBJLstHdrB_Mature_PunchH3B
-	dw OBJLstHdrA_Mature_PunchL0A, OBJLstHdrB_Mature_PunchL0B
+	dw OBJLstHdrA_Mature_MetalMassacreL5_A, OBJLstHdrB_Mature_PunchH3_B
+	dw OBJLstHdrA_Mature_MetalMassacreL6_A, OBJLstHdrB_Mature_PunchH3_B
+	dw OBJLstHdrA_Mature_DecideL2_A, OBJLstHdrB_Mature_PunchH3_B
+	dw OBJLstHdrA_Mature_PunchL0_A, OBJLstHdrB_Mature_PunchL0_B
 	dw OBJLSTPTR_NONE
 		
 
@@ -6363,7 +6363,7 @@ OBJLstPtrTable_Mature_DespairL:
 	dw OBJLstHdrA_Mature_Crouch0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_DespairL1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_DespairL2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mature_DespairL3A, OBJLstHdrB_Mature_KickH2B
+	dw OBJLstHdrA_Mature_DespairL3_A, OBJLstHdrB_Mature_KickH2_B
 	dw OBJLstHdrA_Mature_KickH3, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_DespairL5, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mature_Crouch0, OBJLSTPTR_NONE
@@ -6387,7 +6387,7 @@ OBJLstPtrTable_Mature_ThrowG:
 	dw OBJLstHdrA_Mature_ThrowG2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
-OBJLstHdrA_Mature_Idle0A:
+OBJLstHdrA_Mature_Idle0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -6404,7 +6404,7 @@ OBJLstHdrA_Mature_Idle0A:
 	db $18,$FB,$06 ; $03
 	db $18,$03,$08 ; $04
 		
-OBJLstHdrB_Mature_Idle0B:
+OBJLstHdrB_Mature_Idle0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L1840A0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -6479,7 +6479,7 @@ OBJLstHdrA_Mature_DecideL7:
 	db $FC ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Mature_WalkF1A:
+OBJLstHdrA_Mature_WalkF1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -6494,7 +6494,7 @@ OBJLstHdrA_Mature_WalkF1A:
 	db $20,$FC,$02 ; $01
 	db $10,$F4,$04 ; $02
 		
-OBJLstHdrB_Mature_WalkF1B:
+OBJLstHdrB_Mature_WalkF1_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L184380 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -6539,7 +6539,7 @@ OBJLstHdrA_Mature_WalkF3:
 	db $30,$F4,$04 ; $02
 	db $30,$FC,$06 ; $03
 		
-OBJLstHdrB_Mature_WalkF4B:
+OBJLstHdrB_Mature_WalkF4_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L1844E0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -6568,7 +6568,7 @@ OBJLstHdrA_Mature_Crouch0:
 	db $37,$04,$06 ; $03
 	db $37,$0C,$08 ; $04
 		
-OBJLstHdrA_Mature_BlockG0A:
+OBJLstHdrA_Mature_BlockG0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -6582,16 +6582,16 @@ OBJLstHdrA_Mature_BlockG0A:
 	db $20,$FE,$00 ; $00
 	db $20,$06,$02 ; $01
 		
-OBJLstHdrA_Mature_BlockC0A:
+OBJLstHdrA_Mature_BlockC0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
 	dpr L1849C0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Mature_BlockG0A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Mature_BlockG0_A.bin ; iOBJLstHdrA_DataPtr
 	db $FD ; iOBJLstHdrA_XOffset
 	db $03 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrB_Mature_BlockG0B:
+OBJLstHdrB_Mature_BlockG0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L184A00 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -6604,7 +6604,7 @@ OBJLstHdrB_Mature_BlockG0B:
 	db $30,$FC,$02 ; $01
 	db $30,$04,$04 ; $02
 		
-OBJLstHdrB_Mature_BlockC0B:
+OBJLstHdrB_Mature_BlockC0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L184A60 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -6617,7 +6617,7 @@ OBJLstHdrB_Mature_BlockC0B:
 	db $30,$FC,$02 ; $01
 	db $30,$04,$04 ; $02
 		
-OBJLstHdrA_Mature_BlockA0A: ;X
+OBJLstHdrA_Mature_BlockA0_A: ;X
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -6669,7 +6669,7 @@ OBJLstHdrA_Mature_JumpN2:
 	db $2C,$FC,$08 ; $04
 	db $2C,$04,$0A ; $05
 		
-OBJLstHdrA_Mature_JumpN3A:
+OBJLstHdrA_Mature_JumpN3_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -6684,7 +6684,7 @@ OBJLstHdrA_Mature_JumpN3A:
 	db $0E,$F4,$02 ; $01
 	db $10,$FC,$04 ; $02
 		
-OBJLstHdrB_Mature_JumpN3B:
+OBJLstHdrB_Mature_JumpN3_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L184940 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -6698,7 +6698,7 @@ OBJLstHdrB_Mature_JumpN3B:
 	db $19,$04,$04 ; $02
 	db $12,$0C,$06 ; $03
 		
-OBJLstHdrA_Mature_ChargeMeter0A:
+OBJLstHdrA_Mature_ChargeMeter0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -6714,7 +6714,7 @@ OBJLstHdrA_Mature_ChargeMeter0A:
 	db $18,$FC,$04 ; $02
 	db $18,$04,$06 ; $03
 		
-OBJLstHdrA_Mature_ChargeMeter1A:
+OBJLstHdrA_Mature_ChargeMeter1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -6836,7 +6836,7 @@ OBJLstHdrA_Mature_WinB2:
 	db $2E,$04,$06 ; $03
 	db $3E,$00,$08 ; $04
 		
-OBJLstHdrA_Mature_Intro0A:
+OBJLstHdrA_Mature_Intro0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -6851,7 +6851,7 @@ OBJLstHdrA_Mature_Intro0A:
 	db $28,$F4,$02 ; $01
 	db $28,$FC,$04 ; $02
 		
-OBJLstHdrB_Mature_Intro0B:
+OBJLstHdrB_Mature_Intro0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L186300 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -6866,7 +6866,7 @@ OBJLstHdrB_Mature_Intro0B:
 	db $30,$FC,$06 ; $03
 	db $30,$04,$08 ; $04
 		
-OBJLstHdrA_Mature_Intro1A:
+OBJLstHdrA_Mature_Intro1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -6897,7 +6897,7 @@ OBJLstHdrA_Mature_Intro2:
 	db $30,$FA,$06 ; $03
 	db $30,$02,$08 ; $04
 		
-OBJLstHdrA_Mature_Intro4A:
+OBJLstHdrA_Mature_Intro4_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -6912,7 +6912,7 @@ OBJLstHdrA_Mature_Intro4A:
 	db $28,$F4,$02 ; $01
 	db $28,$FC,$04 ; $02
 		
-OBJLstHdrA_Mature_PunchL1A:
+OBJLstHdrA_Mature_PunchL1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_02 ; iOBJLstHdrA_HitboxId
@@ -6929,25 +6929,25 @@ OBJLstHdrA_Mature_PunchL1A:
 	db $20,$04,$06 ; $03
 	db $10,$FC,$08 ; $04
 		
-OBJLstHdrA_Mature_PunchCL1A:
+OBJLstHdrA_Mature_PunchCL1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_02 ; iOBJLstHdrA_HitboxId
 	dpr L184B20 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Mature_PunchL1A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Mature_PunchL1_A.bin ; iOBJLstHdrA_DataPtr
 	db $FB ; iOBJLstHdrA_XOffset
 	db $06 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Mature_DecideL6A:
+OBJLstHdrA_Mature_DecideL6_A:
 	db OLF_XFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_02 ; iOBJLstHdrA_HitboxId
 	dpr L184B20 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Mature_PunchL1A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Mature_PunchL1_A.bin ; iOBJLstHdrA_DataPtr
 	db $08 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrB_Mature_PunchL1B:
+OBJLstHdrB_Mature_PunchL1_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L184BC0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -6959,14 +6959,14 @@ OBJLstHdrB_Mature_PunchL1B:
 	db $30,$00,$00 ; $00
 	db $30,$08,$02 ; $01
 		
-OBJLstHdrB_Mature_DecideL5B:
+OBJLstHdrB_Mature_DecideL5_B:
 	db OLF_XFLIP ; iOBJLstHdrA_Flags
 	dpr L184BC0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrB_Mature_PunchL1B.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrB_Mature_PunchL1_B.bin ; iOBJLstHdrA_DataPtr
 	db $08 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Mature_PunchL0A:
+OBJLstHdrA_Mature_PunchL0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -6981,16 +6981,16 @@ OBJLstHdrA_Mature_PunchL0A:
 	db $20,$05,$02 ; $01
 	db $1F,$0D,$04 ; $02
 		
-OBJLstHdrA_Mature_PunchCL0A:
+OBJLstHdrA_Mature_PunchCL0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
 	dpr L184C00 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Mature_PunchL0A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Mature_PunchL0_A.bin ; iOBJLstHdrA_DataPtr
 	db $FA ; iOBJLstHdrA_XOffset
 	db $06 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrB_Mature_PunchL0B:
+OBJLstHdrB_Mature_PunchL0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L184C60 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -7039,14 +7039,14 @@ OBJLstHdrA_Mature_DecideL4:
 	db $08 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrB_Mature_DeathRowL2B:
+OBJLstHdrB_Mature_DeathRowL2_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L184CC0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw OBJLstHdrA_Mature_ThrowG1.bin ; iOBJLstHdrA_DataPtr
 	db $F7 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Mature_PunchH1A:
+OBJLstHdrA_Mature_PunchH1_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_02 ; iOBJLstHdrA_HitboxId
@@ -7062,7 +7062,7 @@ OBJLstHdrA_Mature_PunchH1A:
 	db $20,$FB,$04 ; $02
 	db $20,$03,$06 ; $03
 		
-OBJLstHdrB_Mature_PunchH1B:
+OBJLstHdrB_Mature_PunchH1_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L184E00 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -7093,25 +7093,25 @@ OBJLstHdrA_Mature_PunchH2:
 	db $32,$04,$08 ; $04
 	db $3A,$0C,$0A ; $05
 		
-OBJLstHdrA_Mature_PunchH3A:
+OBJLstHdrA_Mature_PunchH3_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_02 ; iOBJLstHdrA_HitboxId
 	dpr L184F20 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Mature_PunchA0A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Mature_PunchA0_A.bin ; iOBJLstHdrA_DataPtr
 	db $FA ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Mature_DecideL2A:
+OBJLstHdrA_Mature_DecideL2_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
 	dpr L184F20 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Mature_PunchA0A.bin ; iOBJLstHdrA_DataPtr
+	dw OBJLstHdrA_Mature_PunchA0_A.bin ; iOBJLstHdrA_DataPtr
 	db $FA ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Mature_PunchA0A:
+OBJLstHdrA_Mature_PunchA0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_02 ; iOBJLstHdrA_HitboxId
@@ -7128,7 +7128,7 @@ OBJLstHdrA_Mature_PunchA0A:
 	db $18,$FB,$06 ; $03
 	db $18,$03,$08 ; $04
 		
-OBJLstHdrB_Mature_PunchH3B:
+OBJLstHdrB_Mature_PunchH3_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L184FC0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -7141,7 +7141,7 @@ OBJLstHdrB_Mature_PunchH3B:
 	db $38,$03,$02 ; $01
 	db $38,$0B,$04 ; $02
 		
-OBJLstHdrA_Mature_KickL0A:
+OBJLstHdrA_Mature_KickL0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_6C ; iOBJLstHdrA_HitboxId
@@ -7158,7 +7158,7 @@ OBJLstHdrA_Mature_KickL0A:
 	db $18,$FC,$06 ; $03
 	db $10,$04,$08 ; $04
 		
-OBJLstHdrB_Mature_KickL0B:
+OBJLstHdrB_Mature_KickL0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L1850C0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -7188,7 +7188,7 @@ OBJLstHdrA_Mature_KickL1:
 	db $25,$F7,$08 ; $04
 	db $3D,$07,$0A ; $05
 		
-OBJLstHdrA_Mature_KickL2A:
+OBJLstHdrA_Mature_KickL2_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_55 ; iOBJLstHdrA_HitboxId
@@ -7206,7 +7206,7 @@ OBJLstHdrA_Mature_KickL2A:
 	db $18,$03,$08 ; $04
 	db $1D,$0A,$0A ; $05
 		
-OBJLstHdrB_Mature_KickL2B:
+OBJLstHdrB_Mature_KickL2_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L185280 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -7235,7 +7235,7 @@ OBJLstHdrA_Mature_KickH1:
 	db $31,$04,$06 ; $03
 	db $31,$0C,$08 ; $04
 		
-OBJLstHdrA_Mature_KickH2A:
+OBJLstHdrA_Mature_KickH2_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_02 ; iOBJLstHdrA_HitboxId
@@ -7250,7 +7250,7 @@ OBJLstHdrA_Mature_KickH2A:
 	db $2A,$F4,$02 ; $01
 	db $3A,$F4,$04 ; $02
 		
-OBJLstHdrB_Mature_KickH2B:
+OBJLstHdrB_Mature_KickH2_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L1853C0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -7283,7 +7283,7 @@ OBJLstHdrA_Mature_KickH3:
 	db $3B,$11,$0A ; $05
 	db $2D,$04,$0C ; $06
 		
-OBJLstHdrB_Mature_PunchCL1B:
+OBJLstHdrB_Mature_PunchCL1_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L185520 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -7296,7 +7296,7 @@ OBJLstHdrB_Mature_PunchCL1B:
 	db $36,$01,$02 ; $01
 	db $3C,$09,$04 ; $02
 		
-OBJLstHdrB_Mature_PunchCL0B:
+OBJLstHdrB_Mature_PunchCL0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L185580 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -7428,7 +7428,7 @@ OBJLstHdrA_Mature_KickCH2:
 	db $2F,$FE,$0A ; $05
 	db $30,$06,$0C ; $06
 		
-OBJLstHdrB_Mature_PunchA0B:
+OBJLstHdrB_Mature_PunchA0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L185AA0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -7441,7 +7441,7 @@ OBJLstHdrB_Mature_PunchA0B:
 	db $28,$02,$02 ; $01
 	db $28,$0A,$04 ; $02
 		
-OBJLstHdrB_Mature_KickA0B:
+OBJLstHdrB_Mature_KickA0_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L185B00 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -7454,7 +7454,7 @@ OBJLstHdrB_Mature_KickA0B:
 	db $20,$04,$02 ; $01
 	db $24,$0C,$04 ; $02
 		
-OBJLstHdrB_Mature_KickA1B:
+OBJLstHdrB_Mature_KickA1_B:
 	db $00 ; iOBJLstHdrA_Flags
 	dpr L185B60 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
@@ -7831,7 +7831,7 @@ OBJLstHdrA_Mature_DecideL1:
 	db $35,$FC,$0C ; $06
 	db $3D,$04,$0E ; $07
 		
-OBJLstHdrA_Mature_DecideL5A:
+OBJLstHdrA_Mature_DecideL5_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_05 ; iOBJLstHdrA_HitboxId
@@ -7849,7 +7849,7 @@ OBJLstHdrA_Mature_DecideL5A:
 	db $10,$FC,$08 ; $04
 	db $10,$04,$0A ; $05
 		
-OBJLstHdrA_Mature_MetalMassacreL5A:
+OBJLstHdrA_Mature_MetalMassacreL5_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_45 ; iOBJLstHdrA_HitboxId
@@ -7870,7 +7870,7 @@ OBJLstHdrA_Mature_MetalMassacreL5A:
 	db $10,$04,$0E ; $07
 	db $10,$0C,$10 ; $08
 		
-OBJLstHdrA_Mature_MetalMassacreL6A:
+OBJLstHdrA_Mature_MetalMassacreL6_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_45 ; iOBJLstHdrA_HitboxId
@@ -7942,7 +7942,7 @@ OBJLstHdrA_Mature_DeathRowL1:
 	db $38,$0B,$14 ; $0A
 	db $38,$FB,$16 ; $0B
 		
-OBJLstHdrA_Mature_DeathRowL2A:
+OBJLstHdrA_Mature_DeathRowL2_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_46 ; iOBJLstHdrA_HitboxId
@@ -7957,7 +7957,7 @@ OBJLstHdrA_Mature_DeathRowL2A:
 	db $18,$F4,$02 ; $01
 	db $18,$FC,$04 ; $02
 		
-OBJLstHdrA_Mature_DeathRowL4A:
+OBJLstHdrA_Mature_DeathRowL4_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_47 ; iOBJLstHdrA_HitboxId
@@ -7976,7 +7976,7 @@ OBJLstHdrA_Mature_DeathRowL4A:
 	db $39,$F4,$0A ; $05
 	db $35,$FC,$0C ; $06
 		
-OBJLstHdrA_Mature_DeathRowL5A:
+OBJLstHdrA_Mature_DeathRowL5_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_47 ; iOBJLstHdrA_HitboxId
@@ -8017,7 +8017,7 @@ OBJLstHdrA_Mature_DespairL2:
 	db $28,$04,$12 ; $09
 	db $28,$0C,$14 ; $0A
 		
-OBJLstHdrA_Mature_DespairL3A:
+OBJLstHdrA_Mature_DespairL3_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
