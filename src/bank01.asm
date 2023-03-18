@@ -2574,7 +2574,7 @@ Play_Unpause:
 	jp   nz, .loop		; If not, loop
 	ret
 	
-; =============== Play_Unpause ===============
+; =============== Play_FrameAdv ===============
 ; Advances the game by a single frame.
 Play_FrameAdv:
 	; This unpauses the game, and executes gameplay code for a frame.

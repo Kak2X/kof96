@@ -1,5 +1,6 @@
 ; =============== Sound_Do ===============
 ; Entry point of the main sound code.
+; This is an improved version of the sound driver used in KOF95.
 Sound_Do:
 	; Check if there's anything new that we want to play
 	call Sound_ChkNewSnd
@@ -218,7 +219,7 @@ Sound_SndStartActionPtrTable:
 ; IN
 ; - BC: Ptr to song data
 Sound_StartNewBGM:
-	xor  a							; ???
+	xor  a
 	ld   [wSnd_Unused_ChUsed], a
 	push bc
 	call Sound_StopAll
@@ -229,15 +230,18 @@ Sound_StartNewBGM:
 ; =============== Sound_PauseAll ===============
 ; Handles the sound pause command during gameplay.
 Sound_PauseAll:
+	; Pause everything except SFXCh1 and SFXCh2
 	call Sound_PauseChPlayback
-	; Kill any remaining sound effect channels (???)
+	; Kill SFXCh1 and SFXCh2 with a silent SFX (SndHeader_Pause) that overrides whatever's still playing.
+	; This SFX doesn't play notes, all it does is set the sound length to 0, then end itself.
+	; It also pretends to be a BGM, so that once it ends, so the game will mute the channel instead of attempting to resume the BGM.
 	jr   Sound_StartNewSFX1234
 	
 ; =============== Sound_UnpauseAll ===============
 ; Handles the sound unpause command during gameplay.
 Sound_UnpauseAll:
 	call Sound_UnpauseChPlayback
-	; Kill any remaining sound effect channels (???)
+	; No purpose here.
 	jr   Sound_StartNewSFX1234
 	
 ; =============== Sound_PauseChPlayback ===============	
@@ -287,9 +291,9 @@ Sound_Unused_StartNewSFX1234WithStat:
 	ld   [wSnd_Unused_ChUsed], a
 	jr   Sound_StartNewSFX1234
 	
-; =============== Sound_StartNewSFX1234IfChNotUsed ===============
+; =============== Sound_Unused_StartNewSFX1234IfChNotUsed ===============
 ; [TCRF] Unreferenced code.
-Sound_StartNewSFX1234IfChNotUsed:
+Sound_Unused_StartNewSFX1234IfChNotUsed:
 	ld   a, [wSnd_Unused_ChUsed]
 	bit  7, a
 	jp   nz, Sound_StartNothing
@@ -322,7 +326,7 @@ Sound_Unused_StartNewSFX234WithStat:
 ; =============== Sound_StartNewSFX234 ===============
 ; Starts playback for a multi-channel SFX (uses ch2-3-4)
 Sound_StartNewSFX234:
-	; [TCRF?] Bit never set
+	; [TCRF] Bit never set
 	ld   a, [wSnd_Unused_ChUsed]
 	bit  7, a							; Is the channel used?
 	jp   nz, Sound_StartNothing			; If so, jump (don't start SFX)
@@ -347,7 +351,7 @@ Sound_Unused_StartNewSFX4WithStat:
 ; =============== Sound_StartNewSFX4 ===============
 ; Starts playback for a channel-4 only SFX (SFX4).
 Sound_StartNewSFX4:
-	; [TCRF?] Bit never set
+	; [TCRF] Bit never set
 	ld   a, [wSnd_Unused_ChUsed]
 	bit  6, a							; Is the channel used?
 	jp   nz, Sound_StartNothing			; If so, jump (don't start SFX)
@@ -413,7 +417,8 @@ ENDR
 	
 	; Fall-through
 Sound_StartNothing:
-	ld   a, $80			; ???
+	; [TCRF] Some kind of marker?
+	ld   a, $80
 	ld   [wSnd_Unk_Unused_D480], a
 	ret
 	
@@ -998,8 +1003,7 @@ Sound_DecDataPtr:
 	sub  a, $01
 	ldi  [hl], a			; Save val
 	ret  nc					; Underflowed? If not, return
-	; [POI] Unreachable?
-	dec  [hl]				; Subtract high byte
+	dec  [hl]				; Subtract high byte (we never get here)
 	ret
 
 ; =============== Sound_Cmd_SetCh3StopLength ===============
@@ -1044,8 +1048,8 @@ Sound_Cmd_AddToBaseFreqId:
 	ret
 	
 ; =============== Sound_Cmd_Unknown_Unused_SetStat6 ===============
-; [TCRF] Unused subroutine ???
-;        Writes to otherwise unused SndInfo field.
+; [TCRF] Unused subroutine.
+;        Sets otherwise unused SndInfo field.
 Sound_Cmd_Unknown_Unused_SetStat6:
 	; Set status flag 6
 	ld   a, [de]
@@ -1061,7 +1065,8 @@ Sound_Cmd_Unknown_Unused_SetStat6:
 	jp   Sound_DecDataPtr
 	
 ; =============== Sound_Cmd_Unknown_Unused_ClrStat6 ===============
-; [TCRF] Unused subroutine ???
+; [TCRF] Unused subroutine.
+;        Clears otherwise unused SndInfo field.
 Sound_Cmd_Unknown_Unused_ClrStat6:
 	; Clear status flag 6
 	ld   a, [de]
@@ -1274,7 +1279,7 @@ Sound_Cmd_WriteToNRx1:
 	jp   Sound_WriteToReg
 	
 ; =============== Sound_Cmd_Unused_WriteToNR10 ===============
-; [TCRF] Unused ???
+; [TCRF] Unused command.
 ; Writes the current sound channel data to rNR10 and updates the bookkeeping value.
 ;
 ; Command data format:
@@ -1560,7 +1565,7 @@ Sound_Cmd_SetWaveData:
 	
 	; Index the ptr table with wave sets
 	ld   hl, Sound_WaveSetPtrTable
-	call Sound_IndexPtrTable				; HL = ??? Ptr
+	call Sound_IndexPtrTable				; HL = Wave table entry ptr
 	
 	; Replace the current wave data
 	ld   c, LOW(rWave)						; C = Ptr to start of wave ram
@@ -1586,7 +1591,7 @@ Sound_SetWaveDataCustom:
 	; Index the ptr table with wave sets
 	ld   a, [hl]
 	ld   hl, Sound_WaveSetPtrTable
-	call Sound_IndexPtrTable
+	call Sound_IndexPtrTable				; HL = Wave table entry ptr
 	
 	; Replace the current wave data
 	ld   c, LOW(rWave)						; C = Ptr to start of wave ram
@@ -1600,7 +1605,7 @@ Sound_SetWaveDataCustom:
 	ret
 	
 ; =============== Sound_Cmd_Unused_EndChFlagBF ===============
-; [TCRF] Unused?
+; [TCRF] Unused command.
 Sound_Cmd_Unused_EndChFlagBF:
 	ld   a, [wSnd_Unused_ChUsed]
 	and  a, $BF
@@ -1608,7 +1613,7 @@ Sound_Cmd_Unused_EndChFlagBF:
 	jr   Sound_Cmd_EndCh
 	
 ; =============== Sound_Cmd_Unused_EndChFlag7F ===============
-; [TCRF] Unused?
+; [TCRF] Unused command.
 Sound_Cmd_Unused_EndChFlag7F:
 	ld   a, [wSnd_Unused_ChUsed]
 	and  a, $7F
@@ -1616,10 +1621,11 @@ Sound_Cmd_Unused_EndChFlag7F:
 	
 ; =============== Sound_Cmd_EndCh ===============
 ; Called to permanently stop channel playback (ie: the song/sfx ended and didn't loop).
-; This either stops the sound channel
+; This either stops the sound channel or resumes playback of the BGM.
 Sound_Cmd_EndCh:
 	
-	; This may not happen when handling BGM SndInfo.
+	; Mute the sound channel if there isn't a SFX playing on here, for good measure.
+	; This isn't really needed.
 	call Sound_SilenceCh
 	
 	; HL = SndInfo base
@@ -1630,7 +1636,8 @@ Sound_Cmd_EndCh:
 	
 	;
 	; Check if a BGM is currently playing.
-	; If not, just mute the channel and disable this SndInfo. 
+	; Checking if wBGMCh1Info is enabled should be enough, given it's the main channel and every song defines/enables it.
+	; If nothing is playing (BGM just ended, or SFX ended with no music), only mute the channel and disable this SndInfo. 
 	;
 	ld   a, [wBGMCh1Info]
 	bit  SISB_ENABLED, a		; Is playback enabled for ch1?
@@ -1776,7 +1783,7 @@ Sound_Cmd_EndCh:
 
 	;--
 	; Write $00 to the sound register NR*2 to silence it.
-	; (just like Sound_SilenceCh. ??? is this here just in case Sound_SilenceCh doesn't mute playback?)
+	; This is also done in Sound_SilenceCh, but it's repeated here just in case Sound_SilenceCh doesn't mute playback?)
 	ld   hl, iSndInfo_RegPtr
 	add  hl, de
 	
@@ -2014,7 +2021,7 @@ Sound_StopAll:
 	ldh  [rNR30], a		; Stop Ch3
 	ldh  [rNR51], a		; Silence all channels
 	
-	ld   a, $80			; ???
+	ld   a, $80
 	ld   [wSnd_Unk_Unused_D480], a
 	ret
 	
@@ -13774,7 +13781,7 @@ Sound_ActTbl:
 .act0B: db SND_ID_17, SGB_SND_A_ATTACK_A, $03
 .act0C: db SND_ID_14, SGB_SND_A_WINOPEN, $03
 .act0D: db SND_ID_1A, SGB_SND_A_PUNCH_B, $01
-.act0E: db SND_ID_2D, SGB_SND_A_WATERFALL, $03 ; [TCRF] Unused?
+.act0E: db SND_ID_2D, SGB_SND_A_WATERFALL, $03 ; [TCRF] Unused
 .act0F: db SND_ID_2B, SGB_SND_A_SWORDSWING, $03
 .act10: db SND_ID_2A, SGB_SND_A_ATTACK_B, $01
 .act11: db SND_ID_2C, SGB_SND_A_ATTACK_B, $01
@@ -13782,7 +13789,7 @@ Sound_ActTbl:
 .act13: db SND_ID_29, SGB_SND_A_PUNCH_A, $00
 .act14: db SND_ID_29, SGB_SND_A_FIRE, $02
 .act15: db SND_ID_29, SGB_SND_A_FIRE, ($01 << 2)|$03
-.act16: db SFX_HEAVY, SGB_SND_A_SWORDSWING, $02 ; [TCRF] Unused?
+.act16: db SFX_HEAVY, SGB_SND_A_SWORDSWING, $02 ; [TCRF] Unused
 .act17: db SND_ID_2B, SGB_SND_A_JETSTART, $01
 .act18: db SND_ID_2B, SGB_SND_A_PICTFLOAT, $03
 .act19: db SND_ID_2D, SGB_SND_A_JETPROJ_B, $03

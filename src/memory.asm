@@ -775,9 +775,9 @@ iSndInfo_Unused05 EQU $05 ; Unused. Always $81 unless audio is interrupted.
 iSndInfo_DataPtrStackIdx EQU $06 ; Stack index for data pointers saved and restored by Sound_Cmd_Call and Sound_Cmd_Ret. Initialized to $20 (end of SndInfo) and decremented on pushes.
 iSndInfo_LengthTarget EQU $07 ; Handles delays -- the current sound register settings are kept until it matches iSndInfo_LengthTarget Set by song data.
 iSndInfo_LengthTimer EQU $08 ; Increases every time a SndInfo isn't paused/disabled. Once it reaches iSndInfo_LengthTarget it resets.
-iSndInfo_Unknown_Unused_9 EQU $09 ; ??? unused ?
+iSndInfo_Unknown_Unused_9 EQU $09 ; Used only by the unused sound command Sound_Cmd_Unknown_Unused_SetStat6.
 iSndInfo_RegNRx1Data EQU $0A ; Last value written to rNR*1 | $FF00+(iSndInfo_RegPtr-2). Only written by Command IDs -- this isn't updated by the standard Sound_UpdateCustomRegs.
-iSndInfo_Unknown_Unused_NR10Data EQU $0B ; ??? Last value written to NR10 by the (unused?) sound command
+iSndInfo_Unknown_Unused_NR10Data EQU $0B ; Last value written to NR10 by the unused sound command Sound_Cmd_Unused_WriteToNR10.
 iSndInfo_VolPredict EQU $0C ; "Volume timer" which predicts the effective volume level (due to sweeps) at any given frame, used when restoring BGM playback. Low nybble is the timer, upper nybble is the predicted volume.
 iSndInfo_RegNRx2Data EQU $0D ; Last value written to rNR*2 | $FF00+(iSndInfo_RegPtr-1)
 iSndInfo_RegNRx3Data EQU $0E  ; Last value written to rNR*3 | $FF00+(iSndInfo_RegPtr)
