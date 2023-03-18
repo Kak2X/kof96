@@ -2572,7 +2572,7 @@ OBJLstHdrA_Iori_ScumGaleL3_A:
 ; [TCRF] Unreferenced sprite mapping for Iori's lower body.
 OBJLstHdrB_Iori_Unused0__B:
 	db $00 ; iOBJLstHdrA_Flags
-	dpr GFX_Char_Iori_Unused0__B ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Iori_Unused0_B ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
