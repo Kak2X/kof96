@@ -8903,7 +8903,7 @@ ENDR
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo	
 ProjInit_Leona_BalticLauncher:
-	mMvC_PlaySound SCT_15
+	mMvC_PlaySound SCT_PROJ_LG_B
 	push bc
 		push de
 			; --------------- common projectile init code ---------------
@@ -9103,7 +9103,7 @@ ProjInit_Leona_VSlasher:
 				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
 				
 				; This also plays a SFX
-				mMvC_PlaySound SND_ID_28
+				mMvC_PlaySound SFX_FIREHIT_A
 				jp   .setAnimSpeed
 				;--
 			.setAnimSpeed:
@@ -9151,7 +9151,7 @@ ProjInit_Leona_VSlasher:
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
 ProjInit_MrKarate_KoOuKen:
-	mMvC_PlaySound SND_ID_28
+	mMvC_PlaySound SFX_FIREHIT_A
 	
 	push bc
 		push de
@@ -9256,7 +9256,7 @@ ProjInit_MrKarate_KoOuKen:
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
 ProjInit_HaohShokohKenS:
-	mMvC_PlaySound SCT_15
+	mMvC_PlaySound SCT_PROJ_LG_B
 	push bc
 		push de
 		
@@ -9314,7 +9314,7 @@ ProjInit_HaohShokohKenS:
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
 ProjInit_HaohShokohKenD:
-	mMvC_PlaySound SCT_13
+	mMvC_PlaySound SCT_PROJ_LG_A
 	
 	push bc
 		push de
@@ -9424,7 +9424,7 @@ ProjInit_HaohShokohKenD:
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
 ProjInit_Iori_YamiBarai:
-	mMvC_PlaySound SCT_15
+	mMvC_PlaySound SCT_PROJ_LG_B
 	
 	push bc
 		push de
@@ -11405,7 +11405,7 @@ ENDC
 		ld   a, SFX_STEP		; A = Normal step SFX ID
 		jp   .playSFX
 	.unused_daimon:
-		ld   a, SND_ID_26		; A = Step SFX ID for DAIMON
+		ld   a, SFX_STEP_HEAVY	; A = Step SFX ID for DAIMON
 	.playSFX:
 		call HomeCall_Sound_ReqPlayExId
 		
@@ -12769,7 +12769,7 @@ Play_Pl_DoBasicMoveInput:
 			ld   [wPlayPlThrowActId], a
 			jp   BasicInput_End
 		.throwFail:
-			; Play the SFX
+			; Reuse the guard break SFX
 			ld   a, SCT_BREAK
 			call HomeCall_Sound_ReqPlayExId
 			; We're on the receiving end of the throw tech.
@@ -14355,7 +14355,7 @@ Play_StartThrowEffect:
 	ld   a, $FF
 	ld   [wStageBGP], a
 	; Play SFX
-	ld   a, SCT_THROW
+	ld   a, SCT_GRAB
 	call HomeCall_Sound_ReqPlayExId
 	ret
 	

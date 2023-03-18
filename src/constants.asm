@@ -379,19 +379,19 @@ BGM_WIND              EQU SND_BASE+$0A
 BGM_TOTHESKY          EQU SND_BASE+$0B
 SNC_PAUSE             EQU SND_BASE+$0C
 SNC_UNPAUSE           EQU SND_BASE+$0D
-SFX_CHARCURSORMOVE    EQU SND_BASE+$0E
+SFX_CURSORMOVE        EQU SND_BASE+$0E
 SFX_CHARSELECTED      EQU SND_BASE+$0F
-SFX_METERCHARGE       EQU SND_BASE+$10
+SFX_CHARGEMETER       EQU SND_BASE+$10
 SFX_SUPERMOVE         EQU SND_BASE+$11
 SFX_LIGHT             EQU SND_BASE+$12
 SFX_HEAVY             EQU SND_BASE+$13
-SND_ID_14             EQU SND_BASE+$14
+SFX_BLOCK             EQU SND_BASE+$14
 SFX_TAUNT             EQU SND_BASE+$15
 SFX_HIT               EQU SND_BASE+$16
-SND_ID_17             EQU SND_BASE+$17
+SFX_MULTIHIT          EQU SND_BASE+$17
 BGM_PROTECTOR         EQU SND_BASE+$18
 BGM_MRKARATE          EQU SND_BASE+$19
-SND_ID_1A             EQU SND_BASE+$1A
+SFX_GROUNDHIT         EQU SND_BASE+$1A
 SFX_DROP              EQU SND_BASE+$1B
 SFX_SUPERJUMP         EQU SND_BASE+$1C
 SFX_STEP              EQU SND_BASE+$1D
@@ -403,52 +403,52 @@ BGM_MRKARATECUTSCENE  EQU SND_BASE+$1F
 ;SND_ID_23            EQU SND_BASE+$23
 ;SND_ID_24            EQU SND_BASE+$24
 ;SND_ID_25            EQU SND_BASE+$25
-SND_ID_26             EQU SND_BASE+$26
-SFX_GRABSTART         EQU SND_BASE+$27
-SND_ID_28             EQU SND_BASE+$28
-SND_ID_29             EQU SND_BASE+$29
-SND_ID_2A             EQU SND_BASE+$2A
-SND_ID_2B             EQU SND_BASE+$2B
-SND_ID_2C             EQU SND_BASE+$2C
-SND_ID_2D             EQU SND_BASE+$2D
-SND_ID_2E             EQU SND_BASE+$2E
-SND_ID_2F             EQU SND_BASE+$2F
-SND_ID_30             EQU SND_BASE+$30
+SFX_STEP_HEAVY        EQU SND_BASE+$26
+SFX_GRAB              EQU SND_BASE+$27
+SFX_FIREHIT_A         EQU SND_BASE+$28
+SFX_FIREHIT_B         EQU SND_BASE+$29
+SFX_MOVEJUMP_A        EQU SND_BASE+$2A
+SFX_PROJ_SM           EQU SND_BASE+$2B
+SFX_MOVEJUMP_B        EQU SND_BASE+$2C
+SFX_REFLECT           EQU SND_BASE+$2D
+SFX_UNUSED_SIREN      EQU SND_BASE+$2E ; [TCRF] Not used by anything, only playable in the sound test.
+SFX_UNUSED_NULL       EQU SND_BASE+$2F ; [TCRF] Not used by anything, only playable in the sound test.
+SFX_PSYCTEL           EQU SND_BASE+$30
 SFX_GAMEOVER          EQU SND_BASE+$31
 ;SND_ID_32            EQU SND_BASE+$32
 ;SND_ID_33            EQU SND_BASE+$33
 SND_LAST_VALID        EQU SND_BASE+$45 ; Dunno why this late
 
 ; Sound Action List (offset by 1, since $00 is handled as SND_NONE) 
-SCT_DIZZY             EQU $01
-SCT_TAUNT_A           EQU $02
-SCT_TAUNT_B           EQU $03
-SCT_TAUNT_C           EQU $04
-SCT_TAUNT_D           EQU $05
-SCT_CHARGEMETER       EQU $06
-SCT_MAXPOWSTART       EQU $07
-SCT_LIGHT             EQU $08
-SCT_HEAVY             EQU $09
-SCT_BLOCK             EQU $0A
-SCT_0A                EQU $0B
-SCT_0B                EQU $0C
-SCT_AUTOBLOCK         EQU $0D
-SCT_0D                EQU $0E
-SCT_REFLECT           EQU $0F
-SCT_0F                EQU $10
-SCT_ATTACKG           EQU $11
-SCT_11                EQU $12 ; Andy Throw, Mai air throw, Kyo's RED kick
-SCT_12                EQU $13
-SCT_13                EQU $14 ; (Large?) Projectile spawned
-SCT_14                EQU $15
-SCT_15                EQU $16 ; (Large?) Projectile spawned
-SCT_16                EQU $17
-SCT_17                EQU $18
-SCT_18                EQU $19
-SCT_19                EQU $1A
-SCT_THROW             EQU $1B
+SCT_DIZZY             EQU $01 ; Dizzy effect
+SCT_TAUNT_A           EQU $02 ; The four taunts sound the same on the DMG, but different on the SGB
+SCT_TAUNT_B           EQU $03 ; ""
+SCT_TAUNT_C           EQU $04 ; ""
+SCT_TAUNT_D           EQU $05 ; ""
+SCT_CHARGEMETER       EQU $06 ; Charging meter
+SCT_CHARGEFULL        EQU $07 ; Meter fully charged
+SCT_LIGHT             EQU $08 ; Generic light attack
+SCT_HEAVY             EQU $09 ; Generic heavy attack
+SCT_BLOCK             EQU $0A ; Blocking
+SCT_HIT               EQU $0B ; Generic hit
+SCT_MULTIHIT          EQU $0C ; In-between hits for move that hit multiple times
+SCT_AUTOBLOCK         EQU $0D ; Blocking during specials (autoguard)
+SCT_GROUNDHIT         EQU $0E ; Hitting the ground and rebounding off it
+SCT_REFLECT           EQU $0F ; Projectile reflected
+SCT_PROJ_SM           EQU $10 ; Medium Projectile thrown
+SCT_MOVEJUMP_A        EQU $11 ; Automatic jump as part of a special move
+SCT_MOVEJUMP_B        EQU $12 ; ""
+SCT_FIREHIT           EQU $13 ; Hit with PF3B_FIRE
+SCT_PROJ_LG_A         EQU $14 ; Large projectile spawned
+SCT_PHYSFIRE          EQU $15 ; Fire atttack
+SCT_PROJ_LG_B         EQU $16 ; Large projectile spawned
+SCT_UNUSED_16         EQU $17 ; Heavy attack #2
+SCT_SHCRYSTSPAWN      EQU $18 ; Shining Crystal Bit projectile spawned
+SCT_PSYCREFLAND       EQU $19 ; Landing from the jump during an heavy Psycho Reflector
+SCT_HISHOKEN          EQU $1A ; Andy's Hi Sho Ken move
+SCT_GRAB              EQU $1B ; Grab started
 SCT_BREAK             EQU $1C ; Guard break, throw tech
-SCT_1C                EQU $1D
+SCT_PSYCTEL           EQU $1D ; Oval effect spawned during Athena's Psycho Teleport
 
 ; Screen Palette IDs, passed to SGB_ApplyScreenPalSet 
 SCRPAL_INTRO EQU $00

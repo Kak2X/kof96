@@ -6417,7 +6417,7 @@ Play_UpdatePowBars:
 	; Otherwise, we're done moving the bar
 	ld   a, PLAY_MAXPOWFADE_NONE	; Disable fade
 	ld   [wPlayMaxPowScroll1P], a
-	ld   a, SCT_MAXPOWSTART			; Play max power SFX
+	ld   a, SCT_CHARGEFULL			; Play max power SFX
 	call HomeCall_Sound_ReqPlayExId
 	jp   .chk2P
 	
@@ -6640,7 +6640,7 @@ Play_UpdatePowBars:
 	; Otherwise, we're done moving the bar
 	ld   a, PLAY_MAXPOWFADE_NONE	; Disable fade
 	ld   [wPlayMaxPowScroll2P], a
-	ld   a, SCT_MAXPOWSTART			; Play max power SFX
+	ld   a, SCT_CHARGEFULL			; Play max power SFX
 	call HomeCall_Sound_ReqPlayExId
 	jp   .ret
 	

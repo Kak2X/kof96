@@ -1130,7 +1130,7 @@ Win_Continue:
 	ld   [wWinContinueTimer], a
 	
 	; Play sound when second ticks away
-	ld   a, SFX_CHARCURSORMOVE
+	ld   a, SFX_CURSORMOVE
 	call HomeCall_Sound_ReqPlayExId
 	
 	;

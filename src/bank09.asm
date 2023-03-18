@@ -8297,7 +8297,7 @@ MoveC_Krauser_LegTomahawk:
 ; --------------- frame #1 ---------------
 .obj1:
 	mMvC_ValFrameStart .obj1_cont
-		mMvC_PlaySound SCT_11
+		mMvC_PlaySound SCT_MOVEJUMP_B
 		mMvIn_ChkLHE .setJumpH, .setJumpE
 	.setJumpL: ; Light
 		mMvC_SetSpeedH +$0300
@@ -8373,7 +8373,7 @@ MoveC_Krauser_KaiserKick:
 ; --------------- frame #1 ---------------
 .obj1:
 	mMvC_ValFrameStart .obj1_cont
-		mMvC_PlaySound SCT_11
+		mMvC_PlaySound SCT_MOVEJUMP_B
 		mMvIn_ChkLHE .setJumpH, .setJumpE
 	.setJumpL: ; Light
 		mMvC_SetSpeedH +$0400
@@ -8430,7 +8430,7 @@ MoveC_Krauser_KaiserDuelSobat:
 ; --------------- frame #0 ---------------
 .obj0:
 	mMvC_ValFrameStart .obj0_cont
-		mMvC_PlaySound SCT_11
+		mMvC_PlaySound SCT_MOVEJUMP_B
 		mMvIn_ChkLHE .setJumpH, .setJumpE
 	.setJumpL: ; Light
 		mMvC_SetSpeedH +$0400
@@ -8524,7 +8524,7 @@ MoveC_Krauser_KaiserSuplex:
 ; Player jumps holding the opponent.
 .obj3:
 	mMvC_ValFrameStart .obj3_cont
-		mMvC_PlaySound SCT_11
+		mMvC_PlaySound SCT_MOVEJUMP_B
 		mMvC_SetSpeedH +$0400
 		mMvC_SetSpeedV -$0400
 		mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_HEAVYHIT
@@ -8648,7 +8648,7 @@ ProjInit_Krauser_BlitzBall:
 		push de
 			push hl	; Save vertical offset
 	
-				mMvC_PlaySound SCT_14
+				mMvC_PlaySound SCT_PHYSFIRE
 	
 				; --------------- common projectile init code ---------------
 				
@@ -8755,7 +8755,7 @@ ProjInit_Krauser_BlitzBall:
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
 ProjInit_Krauser_KaiserWave:
-	mMvC_PlaySound SCT_15
+	mMvC_PlaySound SCT_PROJ_LG_B
 	push bc
 		push de
 		

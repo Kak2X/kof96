@@ -1081,31 +1081,31 @@ Options_Item_SFXTest:;I
 ; =============== Options_SFXIdMapTbl ===============
 ; Maps the SFX Ids to the sound IDs used by the sound driver.
 Options_SFXIdMapTbl:
-	db SFX_CHARCURSORMOVE ; $01
+	db SFX_CURSORMOVE     ; $01
 	db SFX_CHARSELECTED   ; $02
-	db SFX_METERCHARGE    ; $03
+	db SFX_CHARGEMETER    ; $03
 	db SFX_SUPERMOVE      ; $04
 	db SFX_LIGHT          ; $05
 	db SFX_HEAVY          ; $06
-	db SND_ID_14          ; $07
+	db SFX_BLOCK          ; $07
 	db SFX_TAUNT          ; $08
 	db SFX_HIT            ; $09
-	db SND_ID_17          ; $0A
-	db SND_ID_1A          ; $0B
+	db SFX_MULTIHIT       ; $0A
+	db SFX_GROUNDHIT      ; $0B
 	db SFX_DROP           ; $0C
 	db SFX_SUPERJUMP      ; $0D
 	db SFX_STEP           ; $0E
-	db SND_ID_26          ; $0F
-	db SFX_GRABSTART      ; $10
-	db SND_ID_28          ; $11
-	db SND_ID_29          ; $12
-	db SND_ID_2A          ; $13
-	db SND_ID_2B          ; $14
-	db SND_ID_2C          ; $15
-	db SND_ID_2D          ; $16
-	db SND_ID_2E          ; $17
-	db SND_ID_2F          ; $18
-	db SND_ID_30          ; $19
+	db SFX_STEP_HEAVY     ; $0F
+	db SFX_GRAB      ; $10
+	db SFX_FIREHIT_A          ; $11
+	db SFX_FIREHIT_B          ; $12
+	db SFX_MOVEJUMP_A          ; $13
+	db SFX_PROJ_SM          ; $14
+	db SFX_MOVEJUMP_B          ; $15
+	db SFX_REFLECT        ; $16
+	db SFX_UNUSED_SIREN          ; $17
+	db SFX_UNUSED_NULL          ; $18
+	db SFX_PSYCTEL          ; $19
 	db SFX_GAMEOVER       ; $1A
 .end:
  

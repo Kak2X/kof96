@@ -4,7 +4,7 @@
 Sound_Do:
 	; Check if there's anything new that we want to play
 	call Sound_ChkNewSnd
-	
+
 	; Update the "SFX playing, mute BGM" flag for each channel
 	ld   de, wSFXCh1Info
 	ld   hl, wBGMCh1Info
@@ -18,8 +18,8 @@ Sound_Do:
 	ld   de, wSFXCh4Info
 	ld   hl, wBGMCh4Info
 	call Sound_MarkSFXChUse
-	
-	; 
+
+	;
 	; Handle all of the sound channels.
 	;
 	ld   hl, wBGMCh1Info	; HL = Ptr to first SndInfo structure
@@ -31,21 +31,21 @@ Sound_Do:
 	ldh  [hSndInfoCurPtr_Low], a
 	ld   a, h
 	ldh  [hSndInfoCurPtr_High], a
-	
+
 	push hl						; Save ptr to SndInfo
 		ld   a, [hl]			; Read iSndInfo_Status
 		bit  SISB_ENABLED, a	; Processing for the channel enabled?
 		call nz, Sound_DoChSndInfo	; If so, call
 		ld   hl, wSndChProcLeft ; SndInfoLeft--
-		dec  [hl]				;  
+		dec  [hl]				;
 	pop  hl						; Restore SndInfo ptr
-	
+
 	; Seek to the next channel
-	ld   de, SNDINFO_SIZE	; Ptr += SNDINFO_SIZE	
-	add  hl, de				
-	
+	ld   de, SNDINFO_SIZE	; Ptr += SNDINFO_SIZE
+	add  hl, de
+
 	jr   nz, .loop			; If there are channels left to process, jump
-	
+
 	; Update the volume level timer
 	ld   hl, wBGMCh1Info + iSndInfo_VolPredict
 	ld   de, wBGMCh1Info + iSndInfo_RegNRx2Data
@@ -56,7 +56,7 @@ Sound_Do:
 	ld   hl, wBGMCh4Info + iSndInfo_VolPredict
 	ld   de, wBGMCh4Info + iSndInfo_RegNRx2Data
 	jp   Sound_UpdateVolPredict
-	
+
 ; =============== Sound_ChkNewSnd ===============
 ; Checks if we're trying to start a new BGM or SFX.
 Sound_ChkNewSnd:
@@ -69,28 +69,28 @@ Sound_ChkNewSnd:
 	ldi  a, [hl]		; Read request counter
 	cp   a, [hl]		; Does it match the playback counter?
 	jr   z, .noReq		; If so, there's nothing new to play
-	
+
 	dec  l			; Seek back to hSndPlayCnt
-	
-	
+
+
 	; Increase the sound playback index/counter, looping it back to $00 if it would index past the end of the table
 	; hSndPlayCnt = (hSndPlayCnt + 1) & $07
-	ld   a, [hl]		
+	ld   a, [hl]
 	inc  a						; TblId++
 	and  a, (SNDIDREQ_SIZE-1)	; Keep range
 	ld   [hl], a				; Write it to hSndPlayCnt
-	
+
 	; To determine the ID of the music track to play, use the counter as index to the table at wSndIdReqTbl.
 	; The value written there is treated as the BGM ID.
-	
+
 	; A = wSndIdReqTbl[hSndPlayCnt]
 	add  a, LOW(wSndIdReqTbl)		; L = hSndPlayCnt + $F8
-	ld   l, a		
+	ld   l, a
 	ld   h, HIGH(wSndIdReqTbl)		; H = $D5
 	ld   a, [hl]					; Read the sound ID
-	
-	
-	
+
+
+
 	; In the master sound list, the valid sounds have IDs >= $00 && < $46.
 	; The entries written into the sound id request table have the MSB set, so the actual range check
 	; is ID >= $80 && ID < $C6. Everything outside the range is rejected and stops all currently playing BGM/SFX.
@@ -104,7 +104,7 @@ Sound_ChkNewSnd:
 	; When code executes this instruction, it prevents Sound_StopAll from being called and directly returns
 	ld   a, SND_NONE
 	;--
-	
+
 	; Range validation
 	bit  7, a						; SndId < $80?
 	jp   z, Sound_StopAll	; If so, jump
@@ -122,7 +122,7 @@ Sound_ChkNewSnd:
 	;
 	; 1: BC = Sound_SndHeaderPtrTable[DE*2]
 	;
-	
+
 	; HL = Ptr table to song header
 	ld   hl, Sound_SndHeaderPtrTable
 	; Add index twice (each entry is 2 bytes)
@@ -132,13 +132,13 @@ Sound_ChkNewSnd:
 	ldi  a, [hl]
 	ld   b, [hl]
 	ld   c, a
-	
+
 	;--
 	;
 	; Get the code ptr for the init code for the sound.
 	; 2: HL = Sound_SndStartActionPtrTable[DE*2]
 	;
-	
+
 	; HL = Ptr table to code
 	ld   hl, Sound_SndStartActionPtrTable
 	; Add index twice (each entry is 2 bytes)
@@ -148,11 +148,11 @@ Sound_ChkNewSnd:
 	ldi  a, [hl]
 	ld   h, [hl]
 	ld   l, a
-	
+
 	; Jump there
 	jp   hl
-	
-	; Sound command codes assignments. BGM always uses Sound_StartNewBGM, while sound effects pick it 
+
+	; Sound command codes assignments. BGM always uses Sound_StartNewBGM, while sound effects pick it
 	; depending on the sound channel(s) the SFX needs to be played on.
 	; This is important because various subroutines pick a different base address for channel info,
 	; and you can only move down from there.
@@ -226,7 +226,7 @@ Sound_StartNewBGM:
 	pop  bc
 	ld   de, wBGMCh1Info
 	jp   Sound_InitSongFromHeader
-	
+
 ; =============== Sound_PauseAll ===============
 ; Handles the sound pause command during gameplay.
 Sound_PauseAll:
@@ -236,15 +236,15 @@ Sound_PauseAll:
 	; This SFX doesn't play notes, all it does is set the sound length to 0, then end itself.
 	; It also pretends to be a BGM, so that once it ends, so the game will mute the channel instead of attempting to resume the BGM.
 	jr   Sound_StartNewSFX1234
-	
+
 ; =============== Sound_UnpauseAll ===============
 ; Handles the sound unpause command during gameplay.
 Sound_UnpauseAll:
 	call Sound_UnpauseChPlayback
 	; No purpose here.
 	jr   Sound_StartNewSFX1234
-	
-; =============== Sound_PauseChPlayback ===============	
+
+; =============== Sound_PauseChPlayback ===============
 ; Pauses sound playback.
 Sound_PauseChPlayback:
 	; Disable all sound channels
@@ -264,7 +264,7 @@ Sound_PauseChPlayback:
 	ld   hl, wSFXCh4Info
 	set  SISB_PAUSE, [hl]
 	ret
-	
+
 ; =============== Sound_UnpauseChPlayback ===============
 Sound_UnpauseChPlayback:
 	; [BUG] 'A' value is undefined garbage ($15), and this gets overwritten later on anyway.
@@ -283,21 +283,21 @@ Sound_UnpauseChPlayback:
 	ld   hl, wSFXCh4Info
 	res  SISB_PAUSE, [hl]
 	ret
-	
+
 ; =============== Sound_Unused_StartNewSFX1234WithStat ===============
 ; [TCRF] Unreferenced code.
-Sound_Unused_StartNewSFX1234WithStat: 
+Sound_Unused_StartNewSFX1234WithStat:
 	ld   a, $80
 	ld   [wSnd_Unused_ChUsed], a
 	jr   Sound_StartNewSFX1234
-	
+
 ; =============== Sound_Unused_StartNewSFX1234IfChNotUsed ===============
 ; [TCRF] Unreferenced code.
 Sound_Unused_StartNewSFX1234IfChNotUsed:
 	ld   a, [wSnd_Unused_ChUsed]
 	bit  7, a
 	jp   nz, Sound_StartNothing
-  
+
 ; =============== Sound_StartNewSFX1234 ===============
 ; Starts playback for a multi-channel SFX (uses ch1-2-3-4)
 Sound_StartNewSFX1234:
@@ -305,7 +305,7 @@ Sound_StartNewSFX1234:
 	ldh  [rNR10], a
 	ld   de, wSFXCh1Info
 	jr   Sound_InitSongFromHeader
-	
+
 ; =============== Sound_Unused_StopSFXCh1 ===============
 ; [TCRF] Unreferenced code.
 Sound_Unused_StopSFXCh1:
@@ -314,7 +314,7 @@ Sound_Unused_StopSFXCh1:
 	ld   [wSFXCh1Info], a
 	call Sound_StopAll.initNR
 	jr   Sound_StartNothing
-	
+
 ; =============== Sound_Unused_StartNewSFX234WithStat ===============
 ; [TCRF] Unreferenced code.
 Sound_Unused_StartNewSFX234WithStat:
@@ -322,7 +322,7 @@ Sound_Unused_StartNewSFX234WithStat:
 	or   a, $80
 	ld   [wSnd_Unused_ChUsed], a
 	jr   Sound_StartNewSFX234.initSong
-	
+
 ; =============== Sound_StartNewSFX234 ===============
 ; Starts playback for a multi-channel SFX (uses ch2-3-4)
 Sound_StartNewSFX234:
@@ -333,21 +333,21 @@ Sound_StartNewSFX234:
 .initSong:
 	ld   de, wSFXCh2Info
 	jr   Sound_InitSongFromHeader
-	
+
 ; =============== Sound_Unused_InitSongFromHeaderToCh3 ===============
 ; [TCRF] Unreferenced code.
 Sound_Unused_InitSongFromHeaderToCh3:
 	ld   de, wSFXCh3Info
 	jr   Sound_InitSongFromHeader
-	
+
 ; =============== Sound_Unused_StartNewSFX4WithStat ===============
-; [TCRF] Unreferenced code.	
+; [TCRF] Unreferenced code.
 Sound_Unused_StartNewSFX4WithStat:
 	ld   a, [wSnd_Unused_ChUsed]
 	or   a, $40
 	ld   [wSnd_Unused_ChUsed], a
 	jr   Sound_StartNewSFX4.initSong
-	
+
 ; =============== Sound_StartNewSFX4 ===============
 ; Starts playback for a channel-4 only SFX (SFX4).
 Sound_StartNewSFX4:
@@ -358,8 +358,8 @@ Sound_StartNewSFX4:
 .initSong:
 	ld   de, wSFXCh4Info
 	jr   Sound_InitSongFromHeader
-	
-	
+
+
 ; =============== Sound_InitSongFromHeader ===============
 ; Copies song data from its header to multiple SndInfo.
 ; IN
@@ -369,10 +369,10 @@ Sound_InitSongFromHeader:
 	; HL = BC
 	ld   l, c
 	ld   h, b
-	
+
 	; A sound can take up multiple channels -- and channel info is stored into a $20 byte struct.
 	; The first byte from the sound header marks how many channels ($20 byte blocks) need to be initialized.
-	
+
 	; B = Channels used
 	ldi  a, [hl]
 	ld   b, a
@@ -386,21 +386,21 @@ REPT 6
 	ld   [de], a	; Copy it over
 	inc  de
 ENDR
-	
+
 	;
 	; Then initialize other fields
 	;
-	
+
 	; Point data "stack index" to the very end of the SndInfo structure
 	ld   a, iSndInfo_End
 	ld   [de], a			; Write to iSndInfo_DataPtrStackIdx
 	inc  de
-	
+
 	; Set the lowest possible length target to handle new sound commands as soon as possible.
 	ld   a, $01
 	ld   [de], a			; Write to iSndInfo_LengthTarget
 	inc  de
-	
+
 	;
 	; Clear rest of the SndInfo ($18 bytes)
 	;
@@ -408,20 +408,20 @@ ENDR
 	ld   c, SNDINFO_SIZE-iSndInfo_LengthTimer	; C = Bytes left
 .clrLoop:
 	ld   [de], a		; Clear
-	inc  de				
+	inc  de
 	dec  c				; Cleared all bytes?
 	jr   nz, .clrLoop	; If not, loop
-	
+
 	dec  b				; Finished all loops?
 	jr   nz, .chLoop	; If not, jump
-	
+
 	; Fall-through
 Sound_StartNothing:
 	; [TCRF] Some kind of marker?
 	ld   a, $80
 	ld   [wSnd_Unk_Unused_D480], a
 	ret
-	
+
 ; =============== Sound_DoChSndInfo ===============
 ; IN
 ; - HL: Ptr to start of the current sound channel info (iSndInfo_Status)
@@ -429,29 +429,29 @@ Sound_DoChSndInfo:
 	; If the sound channel is paused, return immediately
 	bit  SISB_PAUSE, a
 	ret  nz
-	
+
 	;------------
 	;
 	; HANDLE LENGTH.
 	; Until the length timer reaches the target, return immediately to avoid updating the sound register settings.
 	; When the values match, later on the timer is reset and a new length will be set.
 	;
-	
+
 	; Seek to the timer
 	ld   bc, iSndInfo_LengthTimer
 	add  hl, bc
-	
+
 	; Timer++
 	ld   a, [hl]
 	inc  a
 	ldd  [hl], a	; iSndInfo_LengthTimer++, seek back to iSndInfo_LengthTarget
-	
+
 	; If it doesn't match the target, return
 	cp   a, [hl]	; iSndInfo_LengthTarget == iSndInfo_LengthTimer?
 	ret  nz			; If not, return
-	
+
 	;------------
-	
+
 	; DE = Channel header ptr
 	; (would have been like doing DE = HL at the start of the function).
 	; This value is the base for SndInfo indexing and won't be changed again.
@@ -459,7 +459,7 @@ Sound_DoChSndInfo:
 	ld   e, a
 	ldh  a, [hSndInfoCurPtr_High]
 	ld   d, a
-	
+
 	; Copy the data ptr field from the SndInfo to HRAM
 	; Seek to the channel data ptr
 	ld   hl, iSndInfo_DataPtr_Low
@@ -469,7 +469,7 @@ Sound_DoChSndInfo:
 	ldh  [hSndInfoCurDataPtr_Low], a
 	ld   a, [hl]
 	ldh  [hSndInfoCurDataPtr_High], a
-	
+
 ; =============== Sound_DoChSndInfo_Loop ===============
 Sound_DoChSndInfo_Loop:
 
@@ -480,7 +480,7 @@ Sound_DoChSndInfo_Loop:
 	ld   l, a
 	ldh  a, [hSndInfoCurDataPtr_High]
 	ld   h, a
-	
+
 	;
 	; Read out a "command byte" from the data.
 	; This can be either register data, a sound length, an index to frequency data or a command ID.
@@ -492,7 +492,7 @@ Sound_DoChSndInfo_Loop:
 	; (which, again, will get applied immediately on the same frame).
 	;
 	ld   a, [hl]						; A = Data value
-	
+
 	;
 	; Point to the next data byte.
 	; Later on we may be checking the new data byte.
@@ -504,13 +504,13 @@ Sound_DoChSndInfo_Loop:
 	inc  l								; Seek to high byte
 	inc  [hl]							; Increase high byte
 .chkIsCmd:
-	
+
 	;
 	; If the value is higher than $E0, treat the "command byte" as a command ID.
 	;
 	cp   SNDCMD_BASE					; A >= $E0?
 	jp   nc, Sound_DoCommandId			; If so, jump
-	
+
 .notCmd:
 	;--
 	;
@@ -518,12 +518,12 @@ Sound_DoChSndInfo_Loop:
 	;
 	; Sound channel 4 is handled in a different way compared to the others since it does not have frequency
 	; options at NR43 and NR44, meaning it should never use Sound_FreqDataTbl.
-	; 
+	;
 	; Checking if the 5th bit is set is enough (range >= $FF20 && < $FF40).
 	;
-	
+
 	; Seek to the sound register ptr
-	ld   hl, iSndInfo_RegPtr						
+	ld   hl, iSndInfo_RegPtr
 	add  hl, de
 	bit  5, [hl]			; ptr >= $FF20?
 	jr   z, .isCh123		; If not, jump
@@ -534,11 +534,11 @@ Sound_DoChSndInfo_Loop:
 	; Write A to the data for iSndInfo_RegPtr (NR43)
 	ld   hl, iSndInfo_RegNRx3Data
 	add  hl, de
-	ldi  [hl], a				
+	ldi  [hl], a
 	; Write $00 to the data for iSndInfo_RegPtr+1 (NR44)
 	xor  a
 	ld   [hl], a
-	
+
 	; Perform the register update
 	jr   .updateRegs
 ;--
@@ -550,20 +550,20 @@ Sound_DoChSndInfo_Loop:
 	;
 	cp   SNDNOTE_BASE	; A < $80? (MSB clear?)
 	jp   c, .setLength	; If so, skip ahead a lot
-	
+
 	;------
 
 	;
 	; Otherwise, clear the MSB and treat it as a secondary index to a table of NR*3/NR*4 register data.
 	; If the index is != 0, add the contents of iSndInfo_FreqDataIdBase to the index.
 	;
-	
+
 	sub  a, SNDNOTE_BASE	; Clear MSB
 	jr   z, .readRegData	; If the index is $00, don't add anything else
 	ld   hl, iSndInfo_FreqDataIdBase
 	add  hl, de				; Seek to iSndInfo_FreqDataIdBase
 	add  a, [hl]			; A += *iSndInfo_FreqDataIdBase
-	
+
 .readRegData:
 
 	;
@@ -577,12 +577,12 @@ Sound_DoChSndInfo_Loop:
 	ld   b, $00
 	add  hl, bc			; HL += BC * 2
 	add  hl, bc
-	
+
 	; Read the entries from the table in ROM
 	ld   c, [hl]		; Read out iSndInfo_RegNRx3Data
 	inc  hl
 	ld   b, [hl]		; Read out iSndInfo_RegNRx4Data
-	
+
 	; and write them over to the Frequency SndInfo in RAM
 	ld   hl, iSndInfo_RegNRx3Data
 	add  hl, de
@@ -590,7 +590,7 @@ Sound_DoChSndInfo_Loop:
 	inc  hl
 	ld   [hl], b		; Save iSndInfo_RegNRx4Data
 	;------
-	
+
 .updateRegs:
 
 	;--
@@ -603,61 +603,61 @@ Sound_DoChSndInfo_Loop:
 	;
 
 	ld   a, [de]			; Read iSndInfo_Status
-	
+
 	;
 	; If a SFX is marked as currently playing for the channel, skip updating the sound registers.
 	; This can only jump if the current handled SndInfo set is for a BGM.
 	;
 	bit  SISB_USEDBYSFX, a		; Is the bit set?
 	jr   nz, .chkNewLength		; If so, skip ahead
-;##	
+;##
 	;
 	; Set the 'z' flag for a later check.
 	; If set, we won't be updating rNR*2 (C-1).
 	;
-	
+
 	bit  SISB_SKIPNRx2, a			; ### Is the bit set?...
-	
+
 	;
 	; Read out the current 1-byte register pointer from iSndInfo_RegPtr to C.
 	;
-	
+
 	ld   hl, iSndInfo_RegPtr		; Seek to iSndInfo_RegPtr
 	add  hl, de
 	ld   a, [hl]					; Read out the ptr
 	ld   c, a						; Store it to C for $FF00+C access
-	
+
 	; Check if we're skipping NR*2
 	jr   nz, .updateNRx3			; ### ...if so, skip
-	
+
 .updateNRx2:
-	
+
 	;
 	; Update NR*2 with the contents of iSndInfo_RegNRx2Data
 	;
-	
+
 	dec  c				; C--
-	
+
 	ld   hl, iSndInfo_RegNRx2Data	; Seek to iSndInfo_RegNRx2Data
 	add  hl, de
-	
+
 	ld   a, [hl]		; Read out iSndInfo_RegNRx2Data
 	ld   [c], a			; Write to sound register
-	
+
 	inc  c				; C++
-	
+
 .updateNRx3:
 
 	;
 	; Update NR*3 with the contents of iSndInfo_RegNRx3Data
 	;
-	
+
 	ld   hl, iSndInfo_RegNRx3Data	; Seek to iSndInfo_RegNRx3Data
 	add  hl, de
 	ldi  a, [hl]	; Read iSndInfo_RegNRx3Data, seek to iSndInfo_RegNRx4Data
 	ld   [c], a		; Write to sound register
 	inc  c			; Next register
-	
+
 .updateNRx4:
 	;
 	; Update NR*4 with the contents of iSndInfo_RegNRx4Data
@@ -665,9 +665,9 @@ Sound_DoChSndInfo_Loop:
 	ld   a, [hl]	; Read out iSndInfo_RegNRx4Data
 	ld   [c], a		; Write to sound register
 ;##
-	
+
 .chkNewLength:
-	
+
 	;
 	; HL = Song data ptr
 	;
@@ -675,36 +675,36 @@ Sound_DoChSndInfo_Loop:
 	ld   l, a
 	ldh  a, [hSndInfoCurDataPtr_High]
 	ld   h, a
-	
-	
+
+
 	;
 	; NOTE: At the start of the loop, we incremented the data byte.
 	;
 	; After passing through the custom register update, an additional byte
 	; may be used to specify a new length target.
 	;
-	
+
 	;
 	; If the (new) data byte is < $80, treat it as a new length target.
 	; Otherwise, ignore it completely.
 	;
-	
+
 	ld   a, [hl]			; Read data byte
 	cp   $80				; A >= $80?
 	jr   nc, .saveDataPtr	; If so, skip
-	
+
 	;
 	; hSndInfoCurDataPtr++
 	;
 	ld   hl, hSndInfoCurDataPtr_Low
 	inc  [hl]				; LowByte++
 	jr   nz, .setLength		; If no overflow, skip
-	inc  l							
+	inc  l
 	inc  [hl]				; HighByte++
-	
+
 	;------
 .setLength:
-	
+
 	; Write the updated length value to iSndInfo_LengthTarget
 	ld   hl, iSndInfo_LengthTarget
 	add  hl, de
@@ -716,13 +716,13 @@ Sound_DoChSndInfo_Loop:
 	;
 	; Save back the updated data pointer from HRAM back to the SndInfo
 	;
-	ld   hl, iSndInfo_DataPtr_Low		
+	ld   hl, iSndInfo_DataPtr_Low
 	add  hl, de							; HL = Data ptr in SndInfo
 	ldh  a, [hSndInfoCurDataPtr_Low]	; Save low byte to SndInfo
 	ldi  [hl], a
 	ldh  a, [hSndInfoCurDataPtr_High]	; Save high byte to SndInfo
 	ld   [hl], a
-	
+
 	;
 	; Reset the length timer
 	;
@@ -730,7 +730,7 @@ Sound_DoChSndInfo_Loop:
 	add  hl, de
 	xor  a
 	ld   [hl], a
-	
+
 	;
 	; Reset the volume prediction timer
 	;
@@ -739,37 +739,37 @@ Sound_DoChSndInfo_Loop:
 	ld   a, [hl]		; Read the byte
 	and  a, $F0			; Remove low nybble
 	ld   [hl], a		; Write it back
-	
+
 	;---------------------------
-	
+
 	; [POI] It's not possible to get here with the flag SISB_USEDBYSFX set.
 	;       If somehow we got here, return immediately
 	ld   a, [de]					; Read iSndInfo_Status
 	bit  SISB_USEDBYSFX, a			; Is a sound effect playing on the channel?
 	jp   nz, Sound_DoChSndInfo_End	; If so, return (jumps to ret)
-	
+
 	;---------------------------
-	
+
 	;
 	; If both frequency bytes are zero, mute the sound channel.
 	;
 .chkMuteMode:
 	ld   hl, iSndInfo_RegNRx3Data
-	add  hl, de					; 
+	add  hl, de					;
 	ldi  a, [hl]				; iSndInfo_RegNRx3Data != 0
 	or   a, [hl]				; || iSndInfo_RegNRx4Data != 0?
 	jr   nz, .chkReinit			; If so, skip ahead
-	
+
 .chkMuteCh:
-	
+
 	; Depending on the currently modified channel, decide which channel to mute.
 	;
 	; This is done by checking at the register ptr, which doubles as channel marker.
 	; It will only ever point to the 4th register (rNR*3) of any given sound channel, thankfully.
-	
+
 	ld   hl, iSndInfo_RegPtr
 	add  hl, de
-	
+
 	; If we were changing the frequency of any of these channels, jump
 	ld   a, [hl]
 	cp   SND_CH1_PTR
@@ -799,13 +799,13 @@ Sound_DoChSndInfo_Loop:
 	ldh  [rNR51], a
 	jp   Sound_DoChSndInfo_End
 	;---------------------------
-	
+
 .chkReinit:
 	; If we skipped the NR*2 update (volume + ...), return immediately
 	ld   a, [de]
 	bit  SISB_SKIPNRx2, a
 	jp   nz, Sound_DoChSndInfo_End
-	
+
 	;
 	; Determine which sound channel has to be re-initialized (rNR51 status + extra registers).
 	;
@@ -814,7 +814,7 @@ Sound_DoChSndInfo_Loop:
 	;
 	ld   hl, iSndInfo_ChEnaMask
 	add  hl, de
-	
+
 	; Seek BC to iSndInfo_RegPtr
 	ld   bc, iSndInfo_RegPtr
 	ldh  a, [hSndInfoCurPtr_Low]	; LowByte += 1
@@ -823,14 +823,14 @@ Sound_DoChSndInfo_Loop:
 	ldh  a, [hSndInfoCurPtr_High]	; HighByte += (Carry)
 	adc  b
 	ld   b, a
-	
+
 	; Read iSndInfo_RegPtr to A for the upcoming check
 	ld   a, [bc]
 	; C = A+1 for later
 	; Increased by 1 since the high byte of the frequency is what contains extra flags
 	ld   c, a
 	inc  c
-	
+
 	; Depending on the source address enable the correct sound registers
 	cp   SND_CH1_PTR	; A == SND_CH1_PTR? Handling channel 1?
 	jr   z, .setCh1Ena	; If so, jump
@@ -844,7 +844,7 @@ Sound_DoChSndInfo_Loop:
 	ldh  [rNR30], a
 	ld   a, SNDCH3_ON
 	ldh  [rNR30], a
-	
+
 	; Get the bits to OR over rNR51 from the initial sound output status
 	; A = iSndInfo_ChEnaMask & $44
 	ld   a, [hl]		; Read iSndInfo_ChEnaMask
@@ -861,43 +861,43 @@ Sound_DoChSndInfo_Loop:
 .setCh1Ena:
 	ld   a, [hl]
 	and  a, %00010001
-	
+
 .setChEna:
 	; OR the bits from before with rNR51 to re-enable (if needed) the sound channel playback
 	ld   b, a
 	ldh  a, [rNR51]
 	or   b
 	ldh  [rNR51], a
-	
+
 	;-----------
-	
+
 .chkCh3EndType:
 	;
 	; Determine how we want to handle the end of channel playback when the length in ch3 expires.
 	; If the checks all pass, wSnd_Ch3StopLength is used as channel length (after which, the channel mutes itself).
 	;
-	
+
 	; Not applicable if we aren't editing ch3
 	ld   hl, iSndInfo_RegPtr
 	add  hl, de					; Seek to register ptr
 	ld   a, [hl]				; Read it
 	cp   SND_CH3_PTR			; Does it point to ch3?
 	jr   nz, .noStop			; If not, jump
-	
+
 	; If we're processing a sound effect, jump
 	ld   a, [de]				; Read iOBJInfo_Status
 	bit  SISB_SFX, a			; Is the bit set?
 	jr   nz, .noStop			; If so, jump
-	
+
 	; If the target length is marked as "none" ($FF), jump
 	ld   a, [wSnd_Ch3StopLength]
 	cp   SNDLEN_INFINITE
 	jr   z, .noStop
-	
+
 .ch3StopOnEnd:
 	; Set the new ch3 length
 	ldh  [rNR31], a
-	
+
 	; Restart the channel playback
 	ld   hl, iSndInfo_RegNRx4Data
 	add  hl, de
@@ -905,7 +905,7 @@ Sound_DoChSndInfo_Loop:
 	set  SNDCHFB_RESTART, a			; Restart channel
 	or   a, SNDCHF_LENSTOP			; Stop channel playback when length expires
 	ld   [c], a
-	
+
 	jr   Sound_DoChSndInfo_End
 .noStop:
 	; Restart the sound channel playback
@@ -916,7 +916,7 @@ Sound_DoChSndInfo_Loop:
 	ld   [c], a
 Sound_DoChSndInfo_End:
 	ret
-	
+
 ; =============== Sound_DoCommandId ===============
 ; Handles the specified command ID, which mostly involves different ways of writing out data to the SndInfo.
 ; IN
@@ -929,15 +929,15 @@ Sound_DoCommandId:
 	; Make the next 'ret' instruction jump to Sound_IncDataPtr
 	ld   hl, Sound_IncDataPtr
 	push hl
-	
+
 	;
 	; Index the command fetch ptr table.
 	;
-	 
+
 	; Get rid of the upper three bits of the command id (essentially subtracting $E0).
 	; The resulting value is perfectly in range of the command table at Sound_CmdPtrTbl.
 	and  a, $1F				; A -= SNDCMD_BASE
-	
+
 	ld   hl, Sound_CmdPtrTbl; HL = Ptr table
 	ld   c, a				; BC = A * 2
 	ld   b, $00
@@ -947,7 +947,7 @@ Sound_DoCommandId:
 	ld   h, [hl]
 	ld   l, a
 	jp   hl					; Jump there
-	
+
 ; =============== Sound_IncDataPtr ===============
 ; Increases the word value at hSndInfoCurDataPtr, then returns to the loop.
 Sound_IncDataPtr:
@@ -957,8 +957,8 @@ Sound_IncDataPtr:
 	inc  hl							; Seek to hSndInfoCurDataPtr_High
 	inc  [hl]						; Increase high byte
 	jp   Sound_DoChSndInfo_Loop
-	
-Sound_CmdPtrTbl: 
+
+Sound_CmdPtrTbl:
 	dw Sound_DecDataPtr;X					; $00
 	dw Sound_DecDataPtr;X
 	dw Sound_DecDataPtr;X
@@ -1016,18 +1016,18 @@ Sound_Cmd_SetCh3StopLength:
 	ldh  a, [hSndInfoCurDataPtr_Low]	; Read out to HL
 	ld   l, a
 	ldh  a, [hSndInfoCurDataPtr_High]
-	ld   h, a							
+	ld   h, a
 	ld   a, [hl]						; Read value off current data ptr
 	cpl									; Invert the bits
 	ld   [wSnd_Ch3StopLength], a		; Write it
-	
+
 	; If the length isn't "none" ($FF), write the value to the register immediately.
-	; This also means other attempts to write wSnd_Ch3StopLength need to be guarded by a $FF check. 
+	; This also means other attempts to write wSnd_Ch3StopLength need to be guarded by a $FF check.
 	cp   SNDLEN_INFINITE
 	ret  z
 	ldh  [rNR31], a
 	ret
-	
+
 ; =============== Sound_Cmd_AddToBaseFreqId ===============
 ; Increases the base frequency index by the read amount.
 ; Command data format:
@@ -1039,14 +1039,14 @@ Sound_Cmd_AddToBaseFreqId:
 	ldh  a, [hSndInfoCurDataPtr_High]
 	ld   h, a
 	ld   a, [hl]
-	
+
 	; Add the value to iSndInfo_FreqDataIdBase
 	ld   hl, iSndInfo_FreqDataIdBase
 	add  hl, de				; Seek to the value
 	add  a, [hl]			; A += iSndInfo_FreqDataIdBase
 	ld   [hl], a			; Save it back
 	ret
-	
+
 ; =============== Sound_Cmd_Unknown_Unused_SetStat6 ===============
 ; [TCRF] Unused subroutine.
 ;        Sets otherwise unused SndInfo field.
@@ -1055,15 +1055,15 @@ Sound_Cmd_Unknown_Unused_SetStat6:
 	ld   a, [de]
 	set  SISB_UNK_UNUSED_6, a
 	ld   [de], a
-	
+
 	; Write $00 to byte9
 	ld   hl, iSndInfo_Unknown_Unused_9
 	add  hl, de
 	ld   [hl], $00
-	
+
 	; Don't increase data ptr
 	jp   Sound_DecDataPtr
-	
+
 ; =============== Sound_Cmd_Unknown_Unused_ClrStat6 ===============
 ; [TCRF] Unused subroutine.
 ;        Clears otherwise unused SndInfo field.
@@ -1072,19 +1072,19 @@ Sound_Cmd_Unknown_Unused_ClrStat6:
 	ld   a, [de]
 	res  SISB_UNK_UNUSED_6, a
 	ld   [de], a
-	
+
 	; Don't increase data ptr
 	jp   Sound_DecDataPtr
-	
+
 ; =============== Sound_Cmd_ClrSkipNRx2 ===============
 ; Clears disable flag for NR*2 writes
 Sound_Cmd_ClrSkipNRx2:
 	ld   a, [de]
 	res  SISB_SKIPNRx2, a
 	ld   [de], a
-	
+
 	jp   Sound_DecDataPtr
-	
+
 ; =============== Sound_Cmd_SetSkipNRx2 ===============
 ; Sets disable flag for NR*2 writes
 Sound_Cmd_SetSkipNRx2:
@@ -1092,7 +1092,7 @@ Sound_Cmd_SetSkipNRx2:
 	set  SISB_SKIPNRx2, a
 	ld   [de], a
 	jp   Sound_DecDataPtr
-	
+
 ; =============== Sound_Cmd_SetLength ===============
 ; Sets a new channel length target, which also resets the timer.
 ; This doesn't return to the sync loop, unlike the other way to set the length.
@@ -1102,7 +1102,7 @@ Sound_Cmd_SetLength:
 
 	; Do not return to Sound_IncDataPtr
 	pop  hl
-	
+
 	;
 	; The current data byte is a length target.
 	; Write it over.
@@ -1111,12 +1111,12 @@ Sound_Cmd_SetLength:
 	ld   l, a
 	ldh  a, [hSndInfoCurDataPtr_High]
 	ld   h, a
-	
+
 	ld   a, [hl]						; Read length target
 	ld   hl, iSndInfo_LengthTarget
 	add  hl, de							; Seek to iSndInfo_LengthTarget
 	ld   [hl], a						; Write the value there
-	
+
 	;
 	; Increment the data ptr
 	;
@@ -1130,20 +1130,20 @@ Sound_Cmd_SetLength:
 	;
 	; Save back the updated value to the SndInfo
 	;
-	ld   hl, iSndInfo_DataPtr_Low		
+	ld   hl, iSndInfo_DataPtr_Low
 	add  hl, de							; Seek to iSndInfo_DataPtr_Low
 	ldh  a, [hSndInfoCurDataPtr_Low]	; Write hSndInfoCurDataPtr there
-	ldi  [hl], a					
+	ldi  [hl], a
 	ldh  a, [hSndInfoCurDataPtr_High]
 	ld   [hl], a
-	
+
 	;
 	; Reset the length timer.
 	;
 	ld   hl, iSndInfo_LengthTimer
 	add  hl, de
 	ld   [hl], $00
-	
+
 	; ret
 	jp   Sound_DoChSndInfo_End
 
@@ -1153,7 +1153,7 @@ Sound_Cmd_SetLength:
 ; Command data format:
 ; - 0: Sound channels to enable
 Sound_Cmd_SetChEna:
-	
+
 	; C = Enabled channels
 	ldh  a, [rNR51]
 	ld   c, a
@@ -1162,7 +1162,7 @@ Sound_Cmd_SetChEna:
 	ld   l, a
 	ldh  a, [hSndInfoCurDataPtr_High]
 	ld   h, a
-	
+
 	;--
 	; Merge the enabled channels with the existing settings
 	;
@@ -1177,13 +1177,13 @@ Sound_Cmd_SetChEna:
 	and  a, c		; A = (A & C) | B
 	or   b
 	;--
-	
+
 	; Set the updated NR51 value
 	ld   hl, iSndInfo_ChEnaMask
 	add  hl, de
 	ld   [hl], a
 	ldh  [rNR51], a
-	
+
 	; If we did this in the context of a BGM, copy the NR51 value to another address
 	ld   hl, iSndInfo_Status
 	add  hl, de
@@ -1191,7 +1191,7 @@ Sound_Cmd_SetChEna:
 	ret  nz					; If so, return
 	ld   [wSndEnaChBGM], a
 	ret
-	
+
 ; =============== Sound_Cmd_WriteToNRx2 ===============
 ; Writes the current sound channel data to NR*2, and updates the additional SndInfo fields.
 ; Should only be used by BGM.
@@ -1205,47 +1205,47 @@ Sound_Cmd_WriteToNRx2:
 	;
 	; First read the location we have to write to
 	;
-	
+
 	; Seek to iSndInfo_RegPtr
 	ld   hl, iSndInfo_RegPtr
 	add  hl, de
-	
+
 	; Read the ptr to NR*2
 	ld   a, [hl]		; A = NR*3
 	dec  a
 	ld   c, a
-	
+
 	;--
 	; SOUND REG VALUE
 	;
 	; Then read the value we will be writing.
 	; This will be written to multiple locations.
 	;
-	
+
 	; Dereference value at hSndInfoCurDataPtr and...
 	ldh  a, [hSndInfoCurDataPtr_Low]
 	ld   l, a
 	ldh  a, [hSndInfoCurDataPtr_High]
 	ld   h, a
 	ld   a, [hl]
-	
+
 	; -> write it to iSndInfo_RegNRx2Data
 	;    (since we decremented C before, that's the correct place)
 	ld   hl, iSndInfo_RegNRx2Data
 	add  hl, de
 	ld   [hl], a
-	
+
 	; -> write it to the aforemented sound register if possible
 	call Sound_WriteToReg
-	
+
 	; -> write it to iSndInfo_VolPredict, with the low nybble cleared
 	;    (since we have set a new volume value, the prediction should restart)
 	and  a, $F0									; Erase timer nybble
-	ld   hl, iSndInfo_VolPredict		
+	ld   hl, iSndInfo_VolPredict
 	add  hl, de
-	ld   [hl], a				
+	ld   [hl], a
 	ret
-	
+
 ; =============== Sound_Cmd_WriteToNRx1 ===============
 ; Writes the current sound channel data to NR*1, and updates the additional SndInfo fields.
 ; Should only be used by BGM.
@@ -1257,27 +1257,27 @@ Sound_Cmd_WriteToNRx1:
 	; Seek to iSndInfo_RegPtr
 	ld   hl, iSndInfo_RegPtr
 	add  hl, de
-	
+
 	; Read the sound register ptr - 2 to C
 	ld   a, [hl]
 	sub  a, $02
 	ld   c, a
-	
+
 	; Dereference value at hSndInfoCurDataPtr and...
 	ldh  a, [hSndInfoCurDataPtr_Low]
 	ld   l, a
 	ldh  a, [hSndInfoCurDataPtr_High]
 	ld   h, a
 	ld   a, [hl]
-	
+
 	; -> write it to iSndInfo_RegNRx1Data
 	ld   hl, iSndInfo_RegNRx1Data
 	add  hl, de
 	ld   [hl], a
-	
+
 	; -> write it to the aforemented sound register if possible
 	jp   Sound_WriteToReg
-	
+
 ; =============== Sound_Cmd_Unused_WriteToNR10 ===============
 ; [TCRF] Unused command.
 ; Writes the current sound channel data to rNR10 and updates the bookkeeping value.
@@ -1292,16 +1292,16 @@ Sound_Cmd_Unused_WriteToNR10:
 	ldh  a, [hSndInfoCurDataPtr_High]
 	ld   h, a
 	ld   a, [hl]
-	
+
 	; Update the bookkeeping value
 	ld   hl, iSndInfo_Unknown_Unused_NR10Data
 	add  hl, de
 	ld   [hl], a
-	
+
 	; Write to the sound register if possible
 	ld   c, LOW(rNR10)
 	jp   Sound_WriteToReg
-	
+
 ; =============== Sound_Cmd_JpFromLoopByTimer ===============
 ; Loops the sound channel a certain amount of times.
 ; Depending on the loop timer table index in data byte 0, bytes 1-2 may be set as the new hSndInfoCurDataPtr.
@@ -1318,36 +1318,36 @@ Sound_Cmd_JpFromLoopByTimer:
 
 	; The first byte is the index to the table at iSndInfo_LoopTimerTbl
 	; After indexing the value, that gets decremented. If it's already 0 the next data byte is treated as new table value.
-	
+
 	; byte0 - Read the timer ID to C
 	ldh  a, [hSndInfoCurDataPtr_Low]
 	ld   l, a
 	ldh  a, [hSndInfoCurDataPtr_High]
 	ld   h, a
 	ld   c, [hl]
-	
+
 	; Increment hSndInfoCurDataPtr for later
 	inc  hl
 	ld   a, l
 	ldh  [hSndInfoCurDataPtr_Low], a
 	ld   a, h
 	ldh  [hSndInfoCurDataPtr_High], a
-	
+
 	;--
 	; Seek to iSndInfo_LoopTimerTbl[C]
-	
+
 	; BC = iSndInfo_LoopTimerTbl + C
 	ld   a, c
 	add  a, iSndInfo_LoopTimerTbl
 	ld   b, $00
 	ld   c, a
-	
+
 	; HL = SndInfo + BC
 	ld   hl, $0000
 	add  hl, bc
 	add  hl, de
 	;--
-	
+
 	; Determine if an existing looping point was already set.
 	ld   a, [hl]			; Read loop timer
 	or   a					; Is it 0?
@@ -1355,24 +1355,24 @@ Sound_Cmd_JpFromLoopByTimer:
 .firstLoop:
 	; If the loop timer is 0, this is the first time we reached this looping point.
 	; Set the initial loop timer and loop the song (set the data ptr to what's specified).
-	
+
 	; BC = Ptr to sound channel data (second value)
 	ldh  a, [hSndInfoCurDataPtr_Low]
 	ld   c, a
 	ldh  a, [hSndInfoCurDataPtr_High]
 	ld   b, a
-	
+
 	; Write the second data value to the table entry
 	ld   a, [bc]
 	ld   [hl], a
-	
+
 	; hSndInfoCurDataPtr++
 	inc  bc
 	ld   a, c
 	ldh  [hSndInfoCurDataPtr_Low], a
 	ld   a, b
 	ldh  [hSndInfoCurDataPtr_High], a
-	
+
 	dec  [hl]							; Decrement loop timer
 	jp   nz, Sound_Cmd_JpFromLoop	; Is it 0 now? If not, jump
 	;--
@@ -1387,7 +1387,7 @@ Sound_Cmd_JpFromLoopByTimer:
 	;--
 .contLoop:
 	; If the loop timer isn't 0, it's been already initialized.
-	
+
 	; Skip initial timer value
 	; hSndInfoCurDataPtr++
 	ldh  a, [hSndInfoCurDataPtr_Low]
@@ -1396,10 +1396,10 @@ Sound_Cmd_JpFromLoopByTimer:
 	ldh  a, [hSndInfoCurDataPtr_High]
 	adc  a, $00
 	ldh  [hSndInfoCurDataPtr_High], a
-	
+
 	dec  [hl]							; Decrement loop timer
 	jr   nz, Sound_Cmd_JpFromLoop	; Is it 0 now? If not, jump
-	
+
 	; Otherwise, the looping is over. Seek past the end of the data for this command.
 	; While there are two bytes to to seek past, we're only incrementing by 1 due to Sound_IncDataPtr being called automatically at the end.
 	ldh  a, [hSndInfoCurDataPtr_Low]
@@ -1409,7 +1409,7 @@ Sound_Cmd_JpFromLoopByTimer:
 	adc  a, $00
 	ldh  [hSndInfoCurDataPtr_High], a
 	ret
-	
+
 ; =============== Sound_Cmd_JpFromLoop ===============
 ; If called directly as a sound command, this will always loop the sound channel without loop limit.
 
@@ -1423,7 +1423,7 @@ Sound_Cmd_JpFromLoop:
 	ld   l, a
 	ldh  a, [hSndInfoCurDataPtr_High]
 	ld   h, a
-	
+
 	; BC = *hSndInfoCurDataPtr_Low - 1
 	; -1 to balance out the automatic call to Sound_IncDataPtr when the subroutine returns.
 	ldi  a, [hl]
@@ -1431,14 +1431,14 @@ Sound_Cmd_JpFromLoop:
 	ld   a, [hl]
 	ld   b, a
 	dec  bc
-	
+
 	; Write it back
 	ld   a, c
 	ldh  [hSndInfoCurDataPtr_Low], a
 	ld   a, b
 	ldh  [hSndInfoCurDataPtr_High], a
 	ret
-	
+
 ; =============== Sound_Cmd_Call ===============
 ; Saves the current data ptr, then sets a new one.
 ; This is handled like code calling a subroutine.
@@ -1447,27 +1447,27 @@ Sound_Cmd_JpFromLoop:
 ; - 1: Sound data ptr (high byte)
 Sound_Cmd_Call:
 	;
-	; Read 2 bytes of sound data to BC, and increment the data ptr 
+	; Read 2 bytes of sound data to BC, and increment the data ptr
 	;
-	
+
 	; HL = hSndInfoCurDataPtr
 	ldh  a, [hSndInfoCurDataPtr_Low]
 	ld   l, a
 	ldh  a, [hSndInfoCurDataPtr_High]
 	ld   h, a
-	
+
 	; Read out the word value (jump target) to BC
 	ldi  a, [hl]						; hSndInfoCurDataPtr++
 	ld   c, a
 	ld   a, [hl] 						; Not ldi because Sound_IncDataPtr, so it won't be needed to do it on Sound_Cmd_Ret
 	ld   b, a
-	
+
 	; For now write back the original incremented hSndInfoCurDataPtr, which is what will be written to the "stack".
 	ld   a, l
 	ldh  [hSndInfoCurDataPtr_Low], a
 	ld   a, h
 	ldh  [hSndInfoCurDataPtr_High], a
-	
+
 	;
 	; Save the current sound data pointer in a stack-like way.
 	;
@@ -1475,22 +1475,22 @@ Sound_Cmd_Call:
 		; Seek to the stack index value
 		ld   hl, iSndInfo_DataPtrStackIdx
 		add  hl, de
-		
+
 		; Decrement the stack index twice, since we're writing a pointer (2 bytes).
 		; Also, read it out to A, but since we'll be writing the data ptr to the "stack" with ldd,
 		; the value in A will only be decremented by one.
 		; (could have also used ldi, it isn't any slower)
-		dec  [hl]		
+		dec  [hl]
 		ld   a, [hl]
 		dec  [hl]
-		
+
 		; HL = A
 		ld   l, a
 		ld   h, $00
-		
+
 		; Index the stack location (at the second byte of the word entry)
 		add  hl, de
-		
+
 		; Write the second byte first
 		ldh  a, [hSndInfoCurDataPtr_High]
 		ldd  [hl], a						; HL--
@@ -1498,7 +1498,7 @@ Sound_Cmd_Call:
 		ldh  a, [hSndInfoCurDataPtr_Low]
 		ld   [hl], a
 	pop  bc
-	
+
 	; Replace the current data ptr with BC-1 (to account for Sound_IncDataPtr)
 	dec  bc
 	ld   a, c
@@ -1506,7 +1506,7 @@ Sound_Cmd_Call:
 	ld   a, b
 	ldh  [hSndInfoCurDataPtr_High], a
 	ret
-	
+
 ; =============== Sound_Cmd_Ret ===============
 ; Restores the data ptr previously saved in Sound_Cmd_Call.
 ; This acts like code returning from a subroutine.
@@ -1515,26 +1515,26 @@ Sound_Cmd_Ret:
 	ld   hl, iSndInfo_DataPtrStackIdx
 	add  hl, de
 	ld   a, [hl]
-	
+
 	; Use it to index the stack location with the data ptr
 	ld   l, a
 	ld   h, $00
 	add  hl, de
-	
+
 	; Restore the data ptr
 	; NOTE: What is stored at HL already accounts for Sound_IncDataPtr.
 	ldi  a, [hl]
 	ldh  [hSndInfoCurDataPtr_Low], a
 	ld   a, [hl]
 	ldh  [hSndInfoCurDataPtr_High], a
-	
+
 	; Increment the stack index twice
 	ld   hl, iSndInfo_DataPtrStackIdx
 	add  hl, de
 	inc  [hl]
 	inc  [hl]
 	ret
-	
+
 ; =============== Sound_Cmd_SetWaveData ===============
 ; Writes a complete set of wave data. This will disable ch3 playback.
 ;
@@ -1546,27 +1546,27 @@ Sound_Cmd_SetWaveData:
 	ld   a, [de]
 	bit  SISB_USEDBYSFX, a
 	ret  nz
-	
+
 	; Disable wave ch
 	xor  a
 	ldh  [rNR30], a
-	
+
 	; Read wave set id from data
 	ldh  a, [hSndInfoCurDataPtr_Low]
 	ld   l, a
 	ldh  a, [hSndInfoCurDataPtr_High]
 	ld   h, a
 	ld   a, [hl]
-	
+
 	; Write it to the SndInfo
 	ld   hl, iSndInfo_WaveSetId
 	add  hl, de
 	ld   [hl], a
-	
+
 	; Index the ptr table with wave sets
 	ld   hl, Sound_WaveSetPtrTable
 	call Sound_IndexPtrTable				; HL = Wave table entry ptr
-	
+
 	; Replace the current wave data
 	ld   c, LOW(rWave)						; C = Ptr to start of wave ram
 	ld   b, rWave_End-rWave					; B = Bytes to copy
@@ -1577,7 +1577,7 @@ Sound_Cmd_SetWaveData:
 	dec  b									; Copied all bytes?
 	jr   nz, .loop							; If not, loop
 	ret
-	
+
 ; =============== Sound_SetWaveDataCustom ===============
 ; Writes a complete set of wave data. This will disable ch3 playback.
 ;
@@ -1587,12 +1587,12 @@ Sound_SetWaveDataCustom:
 	; Disable wave ch
 	ld   a, $00
 	ldh  [rNR30], a
-	
+
 	; Index the ptr table with wave sets
 	ld   a, [hl]
 	ld   hl, Sound_WaveSetPtrTable
 	call Sound_IndexPtrTable				; HL = Wave table entry ptr
-	
+
 	; Replace the current wave data
 	ld   c, LOW(rWave)						; C = Ptr to start of wave ram
 	ld   b, rWave_End-rWave					; B = Bytes to copy
@@ -1603,7 +1603,7 @@ Sound_SetWaveDataCustom:
 	dec  b									; Copied all bytes?
 	jr   nz, .loop							; If not, loop
 	ret
-	
+
 ; =============== Sound_Cmd_Unused_EndChFlagBF ===============
 ; [TCRF] Unused command.
 Sound_Cmd_Unused_EndChFlagBF:
@@ -1611,38 +1611,38 @@ Sound_Cmd_Unused_EndChFlagBF:
 	and  a, $BF
 	ld   [wSnd_Unused_ChUsed], a
 	jr   Sound_Cmd_EndCh
-	
+
 ; =============== Sound_Cmd_Unused_EndChFlag7F ===============
 ; [TCRF] Unused command.
 Sound_Cmd_Unused_EndChFlag7F:
 	ld   a, [wSnd_Unused_ChUsed]
 	and  a, $7F
 	ld   [wSnd_Unused_ChUsed], a
-	
+
 ; =============== Sound_Cmd_EndCh ===============
 ; Called to permanently stop channel playback (ie: the song/sfx ended and didn't loop).
 ; This either stops the sound channel or resumes playback of the BGM.
 Sound_Cmd_EndCh:
-	
+
 	; Mute the sound channel if there isn't a SFX playing on here, for good measure.
 	; This isn't really needed.
 	call Sound_SilenceCh
-	
+
 	; HL = SndInfo base
 	ldh  a, [hSndInfoCurPtr_Low]
 	ld   l, a
 	ldh  a, [hSndInfoCurPtr_High]
 	ld   h, a
-	
+
 	;
 	; Check if a BGM is currently playing.
 	; Checking if wBGMCh1Info is enabled should be enough, given it's the main channel and every song defines/enables it.
-	; If nothing is playing (BGM just ended, or SFX ended with no music), only mute the channel and disable this SndInfo. 
+	; If nothing is playing (BGM just ended, or SFX ended with no music), only mute the channel and disable this SndInfo.
 	;
 	ld   a, [wBGMCh1Info]
 	bit  SISB_ENABLED, a		; Is playback enabled for ch1?
 	jr   z, .stopCh				; If not, skip to the end
-	
+
 .bgmPlaying:
 
 	ld   a, [hl]
@@ -1653,18 +1653,18 @@ Sound_Cmd_EndCh:
 	; If this is a BGM SndInfo, completely disable this SndInfo (but don't mute the channel)
 	xor  a				; Erase the status flags
 	ld   [hl], a
-	
+
 	; Prevent Sound_IncDataPtr from being executed
 	pop  hl
 	ret
-	
+
 .isSFX:
 	; If this is a SFX SndInfo, reapply the BGM SndInfo to the sound registers.
-	
+
 	; Disable this SndInfo
 	xor  a
 	ld   [hl], a
-	
+
 	; Seek to the NR*1 info of the BGM SndInfo of the current channel.
 	; The SFX SndInfo are right after the ones for the BGM, which is why we move back.
 	ld   bc, -(SNDINFO_SIZE * 4) + iSndInfo_RegNRx1Data
@@ -1675,12 +1675,12 @@ Sound_Cmd_EndCh:
 		add  hl, de
 		ld   a, [hl]
 	pop  hl
-	
+
 	; Read it out to C (-1)
 	ld   c, a
 	dec  c
-	
-	
+
+
 .ch1ExtraClr:
 	;
 	; If we're processing ch1, clear NR10.
@@ -1697,39 +1697,39 @@ Sound_Cmd_EndCh:
 	; This is because ch3 doesn't go through the volume prediction system in Sound_UpdateVolPredict,
 	; so it'd be useless.
 	;
-	
+
 	cp   SND_CH3_PTR		; Processing ch3?
 	jr   nz, .cpAll			; If not, jump
-	
+
 	; A = iSndInfo_RegNRx2Data
 	inc  hl			; Seek to iSndInfo_Unknown_Unused_NR10Data
 	inc  hl			; Seek to iSndInfo_VolPredict
 	inc  hl			; Seek to iSndInfo_RegNRx2Data
 	ldi  a, [hl] 	; Read it
-	
+
 	jr   .cpNRx2
-	
+
 .cpAll:
 	; Now copy over all of the BGM SndInfo to the registers.
-	
+
 	;
 	; NR*1
 	;
 	dec  c				; Decrease C again since HL is pointing to iSndInfo_RegNRx1Data
-	
+
 	; Write the value of the BGM iSndInfo_RegNRx1Data to NR*1
 	ldi  a, [hl]		; Seek to iSndInfo_Unknown_Unused_NR10Data
 	ld   [c], a
-	
+
 	;
 	; NR*2
 	;
-	
+
 	;
 	; Merge the volume settings from iSndInfo_VolPredict with the existing
 	; low byte of iSndInfo_RegNRx2Data.
 	;
-	
+
 	inc  hl				; Seek to BGM iSndInfo_VolPredict
 	inc  c				; seek to NR*2
 	; B = BGM Volume info
@@ -1742,15 +1742,15 @@ Sound_Cmd_EndCh:
 	add  b					; Merge it with the one from iSndInfo_VolPredict
 .cpNRx2:
 	ld   [c], a				; Write it to NR*2
-	
-	
+
+
 	;
 	; NR*3
 	;
 	inc  c
-	ldi  a, [hl]			; Seek to NR*4 too	
+	ldi  a, [hl]			; Seek to NR*4 too
 	ld   [c], a
-	
+
 	;
 	; NR*4
 	;
@@ -1761,20 +1761,20 @@ Sound_Cmd_EndCh:
 		add  hl, de
 		ld   a, [hl]
 	pop  hl
-	
+
 	; Ch3 is stopped in a different way
 	cp   SND_CH3_PTR	; Processing ch3?
 	jr   z, .stopCh3	; If so, jump
-	
+
 	; Write BGM iSndInfo_RegNRx4Data to NR*4, and restart the tone
 	ldi  a, [hl]
 	or   a, SNDCHF_RESTART
 	ld   [c], a
-	
+
 	; Restore the "enabled channels" register from the BGM-only copy
 	ld   a, [wSndEnaChBGM]
 	ldh  [rNR51], a
-	
+
 .stopCh:
 
 	;
@@ -1786,32 +1786,32 @@ Sound_Cmd_EndCh:
 	; This is also done in Sound_SilenceCh, but it's repeated here just in case Sound_SilenceCh doesn't mute playback?)
 	ld   hl, iSndInfo_RegPtr
 	add  hl, de
-	
+
 	ld   a, [hl]			; C = iSndInfo_RegPtr-1
 	dec  a
 	ld   c, a
 	xor  a					; A = $00
 	ld   [c], a				; Write it to C
 	;--
-	
+
 	;
 	; Write $00 to the status byte of the current SndInfo.
 	; This outright stops its playback.
 	;
-	
+
 	; HL = SndInfo base
 	ldh  a, [hSndInfoCurPtr_Low]
 	ld   l, a
 	ldh  a, [hSndInfoCurPtr_High]
 	ld   h, a
-	
+
 	xor  a
 	ld   [hl], a
-	
+
 	; Prevent Sound_IncDataPtr from being executed, since we disabled the channel playback
 	pop  hl
 	ret
-	
+
 .stopCh3:
 	;--
 	;
@@ -1819,27 +1819,27 @@ Sound_Cmd_EndCh:
 	; [POI] Weirdly organized code. The first two lines are pointless,
 	;       as is the useless $FF check.
 	;
-	
+
 	ld   a, [wSnd_Ch3StopLength]
 	or   a
 	;--
 	ldi  a, [hl]			; Read from iSndInfo_RegNRx4Data, seek to iSndInfo_ChEnaMask
-	cp   $FF				
-	jr   z, .isFF			
+	cp   $FF
+	jr   z, .isFF
 	or   a, SNDCHF_LENSTOP	; Set kill flag
 .isFF:
 	ld   [c], a				; Write to rNR34
-	
+
 	;
 	; Restore the BGM wave set
 	;
 	inc  hl					; Seek to iSndInfo_WaveSetId
 	call Sound_SetWaveDataCustom
-	
+
 	; Prevent Sound_IncDataPtr from being executed
 	pop  hl
 	ret
-	
+
 ; =============== Sound_UpdateVolPredict ===============
 ; Updates the volume prediction value.
 ;
@@ -1854,7 +1854,7 @@ Sound_Cmd_EndCh:
 ; - DE: Ptr to iSndInfo_RegNRx2Data field
 Sound_UpdateVolPredict:
 	inc  [hl]			; iSndInfo_VolPredict++
-	
+
 	; If the timers don't match yet, return
 	ld   a, [hl]		; C = iSndInfo_VolPredict & $0F
 	and  a, $0F
@@ -1863,7 +1863,7 @@ Sound_UpdateVolPredict:
 	and  a, $0F
 	cp   a, c			; A != C?
 	ret  nz				; If so, return
-	
+
 	; Either increase or decrease the volume depending on the envelope direction
 	bit  SNDENVB_INC, a	; Is bit 3 set?
 	jr   z, .dec		; If not, decrease the volume
@@ -1883,7 +1883,7 @@ Sound_UpdateVolPredict:
 	sub  a, $10			; A -= $10
 	ld   [hl], a		; Save it to iSndInfo_VolPredict
 	ret
-	
+
 ; =============== Sound_SilenceCh ===============
 ; Writes $00 to the sound register NR*2, which silences the volume the sound channel (but doesn't disable it).
 ; This checks if the sound channel is being used by a sound effect, and if so, doesn't perform the write.
@@ -1894,22 +1894,22 @@ Sound_SilenceCh:
 	; C = Destination register (RegPtr - 1)
 	ld   hl, iSndInfo_RegPtr
 	add  hl, de
-	ld   a, [hl]				
+	ld   a, [hl]
 	dec  a
 	ld   c, a
-	
+
 	; A = Value to write
 	xor  a
-	
+
 	; Seek to SndInfo status
 	ld   hl, iSndInfo_Status
 	add  hl, de
-	
+
 	bit  SISB_USEDBYSFX, [hl]	; Is the sound channel being used by a sound effect?
 	ret  nz						; If so, return
 	ld   [c], a					; Otherwise, write the $00 value to the register
 	ret
-	
+
 ; =============== Sound_WriteToReg ===============
 ; Writes a value to the specified sound register.
 ; This checks if the sound channel is being used by a sound effect, and if so, doesn't perform the write.
@@ -1921,7 +1921,7 @@ Sound_WriteToReg:
 	; Seek to SndInfo status
 	ld   hl, iSndInfo_Status
 	add  hl, de
-	
+
 	bit  SISB_USEDBYSFX, [hl]	; Is the sound channel being used a sound effect?
 	ret  nz						; If so, return
 	ld   [c], a					; Otherwise, write the value to the register
@@ -1943,7 +1943,7 @@ Sound_MarkSFXChUse:
 .clrSFXPlay:
 	res  SISB_USEDBYSFX, [hl]		; Mark as free
 	ret
-	
+
 ; =============== Sound_IndexPtrTable ===============
 ; Indexes a pointer table.
 ;
@@ -1966,14 +1966,14 @@ Sound_IndexPtrTable:
 	ld   h, [hl]
 	ld   l, a
 	ret
-	
+
 ; =============== Sound_Init ===============
 ; Initializes the sound driver.
 Sound_Init:
 	; Enable sound hardware
-	ld   a, SNDCTRL_ON	
+	ld   a, SNDCTRL_ON
 	ldh  [rNR52], a
-	
+
 	;
 	; Clear channel registers.
 	; This zeroes out addresses in the list at Sound_ChRegAddrTable.
@@ -1987,7 +1987,7 @@ Sound_Init:
 	inc  hl				; Ptr++
 	dec  b				; Copied all bytes?
 	jr   nz, .loop		; If not, loop
-	
+
 ; =============== Sound_StopAll ===============
 ; Reloads the sound driver, which stops any currently playing song.
 Sound_StopAll:
@@ -2005,26 +2005,26 @@ Sound_StopAll:
 	jr   nz, .loopL		; If not, loop
 	dec  c				; C == 0?
 	jr   nz, .loopH		; If not, loop
-	
+
 	;
 	; Initialize other regs
 	;
 	ld   a, %1110111	; Set max volume for both left/right speakers
 	ldh  [rNR50], a
-	
-	xor  a				
+
+	xor  a
 	ld   [wSnd_Unused_ChUsed], a
 .initNR:
 	ld   a, $08			; Use downwards sweep for ch1 (standard)
 	ldh  [rNR10], a
-	xor  a				
+	xor  a
 	ldh  [rNR30], a		; Stop Ch3
 	ldh  [rNR51], a		; Silence all channels
-	
+
 	ld   a, $80
 	ld   [wSnd_Unk_Unused_D480], a
 	ret
-	
+
 ; =============== Sound_Unused_InitCh1Regs ===============
 ; [TCRF] Unreferenced code.
 Sound_Unused_InitCh1Regs:
@@ -2038,8 +2038,8 @@ Sound_Unused_InitCh1Regs:
 	ldh  [rNR13], a
 	ld   a, $86
 	ldh  [rNR14], a
-	ret 
-	
+	ret
+
 ; =============== Sound_Unused_InitCh2Regs ===============
 ; [TCRF] Unreferenced code.
 Sound_Unused_InitCh2Regs:
@@ -2049,7 +2049,7 @@ Sound_Unused_InitCh2Regs:
 	ldh  [rNR23], a
 	ld   a, $87
 	ldh  [rNR24], a
-	ret  
+	ret
 
 ; =============== Sound_ChRegAddrTable ===============
 ; List of memory adddresses cleared by Sound_Init.
@@ -2079,64 +2079,64 @@ Sound_ChRegAddrTable:
 ; Each of the valid ones follows the format as specified in iSndHeader_*
 ;
 ; Unused entries in the table mostly point to code, which is in no way a valid header.
-Sound_SndHeaderPtrTable:	
-	dw SndHeader_BGM_Roulette;X
-	dw SndHeader_BGM_Roulette
-	dw SndHeader_BGM_StageClear
-	dw SndHeader_BGM_BigShot
-	dw SndHeader_BGM_Esaka
-	dw SndHeader_BGM_RisingRed
-	dw SndHeader_BGM_Geese
-	dw SndHeader_BGM_Arashi
-	dw SndHeader_BGM_Fairy
-	dw SndHeader_BGM_TrashHead
-	dw SndHeader_BGM_Wind
-	dw SndHeader_BGM_ToTheSky
-	dw SndHeader_Pause
-	dw SndHeader_Unpause
-	dw SndHeader_SFX_CharCursorMove
-	dw SndHeader_SFX_CharSelected
-	dw SndHeader_SFX_MeterCharge
-	dw SndHeader_SFX_SuperMove
-	dw SndHeader_SFX_Light
-	dw SndHeader_SFX_Heavy
-	dw SndHeader_SFX_Unknown_Block
-	dw SndHeader_SFX_Taunt
-	dw SndHeader_SFX_Hit
-	dw SndHeader_SFX_Unknown_Hit1
-	dw SndHeader_BGM_Protector
-	dw SndHeader_BGM_MrKarate
-	dw SndHeader_SFX_Unknown_SuperFireHit
-	dw SndHeader_SFX_Drop
-	dw SndHeader_SFX_SuperJump
-	dw SndHeader_SFX_Step
-	dw SndHeader_BGM_In1996
-	dw SndHeader_BGM_MrKarateCutscene
-	dw Sound_StartNothing;X
-	dw Sound_StartNothing;X
-	dw Sound_StartNothing;X
-	dw Sound_StartNothing;X
-	dw Sound_StartNothing;X
-	dw Sound_StartNothing;X
-	dw SndHeader_SFX_Unknown_Hit2
-	dw SndHeader_SFX_GrabStart
-	dw SndHeader_SFX_Unknown_Fire2
-	dw SndHeader_SFX_FireSmall
-	dw SndHeader_SFX_Unknown_Fire4
-	dw SndHeader_SFX_FireLarge
-	dw SndHeader_SFX_Unknown_Fire3
-	dw SndHeader_SFX_Unknown_Wind
-	dw SndHeader_SFX_Unknown_Alarm
-	dw SndHeader_SFX_Unknown_Null
-	dw SndHeader_SFX_Unknown_SpecialMove
-	dw SndHeader_SFX_GameOver
-	dw Sound_StartNothing;X
-	dw Sound_StartNothing;X
+Sound_SndHeaderPtrTable:
+	dw SndHeader_BGM_Roulette;X         ; SND_NONE
+	dw SndHeader_BGM_Roulette           ; BGM_ROULETTE
+	dw SndHeader_BGM_StageClear         ; BGM_STAGECLEAR
+	dw SndHeader_BGM_BigShot            ; BGM_BIGSHOT
+	dw SndHeader_BGM_Esaka              ; BGM_ESAKA
+	dw SndHeader_BGM_RisingRed          ; BGM_RISINGRED
+	dw SndHeader_BGM_Geese              ; BGM_GEESE
+	dw SndHeader_BGM_Arashi             ; BGM_ARASHI
+	dw SndHeader_BGM_Fairy              ; BGM_FAIRY
+	dw SndHeader_BGM_TrashHead          ; BGM_TRASHHEAD
+	dw SndHeader_BGM_Wind               ; BGM_WIND
+	dw SndHeader_BGM_ToTheSky           ; BGM_TOTHESKY
+	dw SndHeader_Pause                  ; SNC_PAUSE
+	dw SndHeader_Unpause                ; SNC_UNPAUSE
+	dw SndHeader_SFX_CursorMove         ; SFX_CURSORMOVE
+	dw SndHeader_SFX_CharSelected       ; SFX_CHARSELECTED
+	dw SndHeader_SFX_ChargeMeter        ; SFX_CHARGEMETER
+	dw SndHeader_SFX_SuperMove          ; SFX_SUPERMOVE
+	dw SndHeader_SFX_Light              ; SFX_LIGHT
+	dw SndHeader_SFX_Heavy              ; SFX_HEAVY
+	dw SndHeader_SFX_Block              ; SFX_BLOCK
+	dw SndHeader_SFX_Taunt              ; SFX_TAUNT
+	dw SndHeader_SFX_Hit                ; SFX_HIT
+	dw SndHeader_SFX_MultiHit           ; SFX_MULTIHIT
+	dw SndHeader_BGM_Protector          ; BGM_PROTECTOR
+	dw SndHeader_BGM_MrKarate           ; BGM_MRKARATE
+	dw SndHeader_SFX_GroundHit          ; SFX_GROUNDHIT
+	dw SndHeader_SFX_Drop               ; SFX_DROP
+	dw SndHeader_SFX_SuperJump          ; SFX_SUPERJUMP
+	dw SndHeader_SFX_Step               ; SFX_STEP
+	dw SndHeader_BGM_In1996             ; BGM_IN1996
+	dw SndHeader_BGM_MrKarateCutscene   ; BGM_MRKARATECUTSCENE
+	dw Sound_StartNothing;X             ; #SND_ID_20
+	dw Sound_StartNothing;X             ; #SND_ID_21
+	dw Sound_StartNothing;X             ; #SND_ID_22
+	dw Sound_StartNothing;X             ; #SND_ID_23
+	dw Sound_StartNothing;X             ; #SND_ID_24
+	dw Sound_StartNothing;X             ; #SND_ID_25
+	dw SndHeader_SFX_StepHeavy          ; SFX_STEP_HEAVY
+	dw SndHeader_SFX_Grab               ; SFX_GRAB
+	dw SndHeader_SFX_FireHitA           ; SFX_FIREHIT_A
+	dw SndHeader_SFX_FireHitB           ; SFX_FIREHIT_B
+	dw SndHeader_SFX_MoveJumpA          ; SFX_MOVEJUMP_A
+	dw SndHeader_SFX_ProjSm             ; SFX_PROJ_SM
+	dw SndHeader_SFX_MoveJumpB          ; SFX_MOVEJUMP_B
+	dw SndHeader_SFX_Reflect            ; SFX_REFLECT
+	dw SndHeader_SFX_Unused_Siren       ; SFX_UNUSED_SIREN
+	dw SndHeader_SFX_Unused_Null        ; SFX_UNUSED_NULL
+	dw SndHeader_SFX_PsychoTeleport     ; SFX_PSYCTEL
+	dw SndHeader_SFX_GameOver           ; SFX_GAMEOVER
+	dw Sound_StartNothing;X             ; #SND_ID_32
+	dw Sound_StartNothing;X             ; #SND_ID_33
 
 ; =============== Sound_FreqDataTbl ===============
 ; Table with pairs of frequency values for the frequency registers (sound channels 1-2-3).
 ; Essentially these are "musical notes" ordered from lowest to highest.
-Sound_FreqDataTbl: 
+Sound_FreqDataTbl:
 	dw $0000
 	dw $002C
 	dw $009C
@@ -2228,7 +2228,7 @@ Sound_WaveSetPtrTable:
 	dw Sound_WaveSet_Unused_7
 	dw Sound_WaveSet_Unused_8
 	dw Sound_WaveSet_Unused_9
-	
+
 Sound_WaveSet0: db $01,$23,$45,$67,$89,$AB,$CD,$EF,$ED,$CB,$A9,$87,$65,$43,$21,$00
 Sound_WaveSet1: db $FF,$EE,$DD,$CC,$BB,$AA,$99,$88,$77,$66,$55,$44,$33,$22,$11,$00
 Sound_WaveSet2: db $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00,$00,$00,$00,$00,$00,$00,$00
@@ -2240,15 +2240,15 @@ Sound_WaveSet_Unused_7: db $87,$76,$65,$54,$43,$32,$21,$10,$0F,$FE,$ED,$DC,$CB,$
 Sound_WaveSet_Unused_8: db $18,$F2,$68,$4E,$18,$76,$1A,$4C,$85,$43,$2E,$DC,$FF,$12,$84,$48
 Sound_WaveSet_Unused_9: db $CC,$6B,$93,$77,$28,$BA,$6E,$35,$51,$C3,$9C,$ED,$B8,$2B,$29,$E2
 
-SndHeader_SFX_CharCursorMove:
+SndHeader_SFX_CursorMove:
 	db $01 ; Number of channels
 .ch2:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_SFX_CharCursorMove_Ch2 ; Data ptr
+	dw SndData_SFX_CURSORMOVE_Ch2 ; Data ptr
 	db $0C ; Base freq/note id
 	db $81 ; Unused
-SndData_SFX_CharCursorMove_Ch2:
+SndData_SFX_CURSORMOVE_Ch2:
 	sndenv 12, SNDENV_DEC, 3
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 3, 0
@@ -2325,7 +2325,7 @@ SndData_SFX_CharSelected_Ch2:
 	sndnote $29
 	sndnote $31
 	sndendch
-SndHeader_SFX_MeterCharge:
+SndHeader_SFX_ChargeMeter:
 	db $01 ; Number of channels
 .ch2:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
@@ -2491,7 +2491,7 @@ SndData_SFX_Heavy_Ch4:
 	sndlen 2
 	sndclrskip
 	sndendch
-SndHeader_SFX_Unknown_Block:
+SndHeader_SFX_Block:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
@@ -2556,7 +2556,7 @@ SndData_SFX_Hit_Ch4:
 	sndch4 3, 0, 5
 	sndlen 6
 	sndendch
-SndHeader_SFX_Unknown_Hit1:
+SndHeader_SFX_MultiHit:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
@@ -2598,7 +2598,7 @@ SndData_SFX_Unknown_Hit1_Ch4:
 	sndlen 1
 	sndch4 3, 0, 0
 	sndendch
-SndHeader_SFX_Unknown_SuperFireHit:
+SndHeader_SFX_GroundHit:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
@@ -2718,7 +2718,7 @@ SndData_SFX_Step_Ch4:
 	sndch4 5, 0, 5
 	sndlen 1
 	sndendch
-SndHeader_SFX_Unknown_Hit2:
+SndHeader_SFX_StepHeavy:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
@@ -2744,7 +2744,7 @@ SndData_SFX_Unknown_Hit2_Ch4:
 	sndch4 0, 0, 0
 	sndlen 1
 	sndendch
-SndHeader_SFX_GrabStart:
+SndHeader_SFX_Grab:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
@@ -2762,7 +2762,7 @@ SndData_SFX_GrabStart_Ch4:
 	sndch4 2, 0, 5
 	sndlen 4
 	sndendch
-SndHeader_SFX_Unknown_Fire2:
+SndHeader_SFX_FireHitA:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
@@ -2799,7 +2799,7 @@ SndData_SFX_Unknown_Fire2_Ch4:
 	sndch4 3, 0, 2
 	sndlen 30
 	sndendch
-SndHeader_SFX_FireSmall:
+SndHeader_SFX_FireHitB:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
@@ -2813,7 +2813,7 @@ SndData_SFX_FireSmall_Ch4:
 	sndch4 5, 0, 5
 	sndlen 70
 	sndendch
-SndHeader_SFX_Unknown_Fire4:
+SndHeader_SFX_MoveJumpA:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
@@ -2851,7 +2851,7 @@ SndData_SFX_Unknown_Fire4_Ch4:
 	sndlen 3
 	sndclrskip
 	sndendch
-SndHeader_SFX_FireLarge:
+SndHeader_SFX_ProjSm:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
@@ -2934,7 +2934,7 @@ SndData_SFX_FireLarge_Ch4:
 	sndch4 3, 0, 7
 	sndlen 1
 	sndendch
-SndHeader_SFX_Unknown_Fire3:
+SndHeader_SFX_MoveJumpB:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
@@ -2958,7 +2958,7 @@ SndData_SFX_Unknown_Fire3_Ch4:
 	sndch4 7, 0, 1
 	sndlen 30
 	sndendch
-SndHeader_SFX_Unknown_Wind:
+SndHeader_SFX_Reflect:
 	db $01 ; Number of channels
 .ch4:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
@@ -3007,7 +3007,7 @@ SndData_SFX_Unknown_Wind_Ch4:
 	sndclrskip
 	sndloopcnt $00, 3, SndData_SFX_Unknown_Wind_Ch4
 	sndendch
-SndHeader_SFX_Unknown_Alarm:
+SndHeader_SFX_Unused_Siren:
 	db $01 ; Number of channels
 .ch2:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
@@ -3037,7 +3037,7 @@ SndData_SFX_Unknown_Alarm_Ch2:
 	sndnote $25
 	sndnote $27
 	sndloop SndData_SFX_Unknown_Alarm_Ch2
-SndHeader_SFX_Unknown_Null:
+SndHeader_SFX_Unused_Null:
 	db $01 ; Number of channels
 .ch2:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
@@ -3047,7 +3047,7 @@ SndHeader_SFX_Unknown_Null:
 	db $81 ; Unused
 SndData_SFX_Unknown_Null_Ch2:
 	sndendch
-SndHeader_SFX_Unknown_SpecialMove:
+SndHeader_SFX_PsychoTeleport:
 	db $01 ; Number of channels
 .ch2:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
@@ -3110,7 +3110,7 @@ SndHeader_Pause:
 	dw SndData_PauseUnpause_Ch3 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-	
+
 SndHeader_Unpause:
 	db $03 ; Number of channels
 .ch1:
@@ -13680,26 +13680,26 @@ SndData_BGM_Roulette_Ch4:
 ; IN
 ; - D: Sound ID to play
 Sound_ReqPlayId:
-	
+
 	; Increment request counter
 	ldh  a, [hSndPlaySetCnt]	; E = hSndPlaySetCnt+1 % 8
 	inc  a
 	and  a, $07
 	ld   e, a					; Save val
-	
+
 	; Use request counter as index to wSndIdReqTbl
 	; and write the Sound ID there
 	add  a, LOW(wSndIdReqTbl)	; HL = wSndIdReqTbl + A
 	ld   l, a
-	ld   h, HIGH(wSndIdReqTbl)	
+	ld   h, HIGH(wSndIdReqTbl)
 	ld   [hl], d				; Write ID there
-	
+
 	; Save request counter
 	ld   a, e					; Restore val
 	ldh  [hSndPlaySetCnt], a
 	ret
 	mIncJunk "L1F7D4B"
-	
+
 ; =============== Sound_ReqPlayExId ===============
 ; Requests playback for the sound associated with the specified action.
 ; Some may be played on the SGB side if possible.
@@ -13711,24 +13711,24 @@ Sound_ReqPlayExId:
 	jp   nz, .dmgPlay	; If so, this is a DMG sound ID. Always handle it on the DMG side.
 	or   a				; A == $00?
 	jp   z, .dmgPlay	; If so, it's a stop command. Handle it on the DMG side.
-	
+
 	ld   b, a			; Save for later in case of SGB mode
-	
+
 	; Offset the table entry
 	dec  a					; Offset by 1
 	ld   hl, Sound_ActTbl	; HL = Base table ptr
 	ld   d, $00				; DE = A * 3 (table entry size)
 	ld   e, a
-	sla  a			
+	sla  a
 	add  a, e
 	ld   e, a
 	add  hl, de				; HL = Start of table entry
-	
+
 
 	; Determine which of the 3 bytes to pick and what to do with it
 	ld   a, [wMisc_C025]
 	bit  MISCB_IS_SGB, a	; SGB hardware?
-IF NO_SGB_SOUND	
+IF NO_SGB_SOUND
 	jp   .dmg
 ELSE
 	jp   z, .dmg			; If not, jump
@@ -13736,13 +13736,13 @@ ENDC
 .sgb:
 	; On the SGB side use bytes 1-2 as a 16bit word
 	ld   a, b				; A = Action ID
-	inc  hl					
+	inc  hl
 	ld   d, [hl]			; D = Sound Effect ID
 	inc  hl
 	ld   e, [hl]			; E = Sound Effect Attributes
-	push de					
+	push de
 	pop  hl					; HL = DE
-	
+
 	; With action $01, randomize the SFX pitch.
 	cp   a, $01				; Action ID == $01?
 	jp   nz, .sgbPlay		; If not, jump
@@ -13753,7 +13753,7 @@ ENDC
 	ld   l, a
 .sgbPlay:
 	call SGB_PrepareSoundPacketA
-	ret 	
+	ret
 .dmg:
 	; On the DMG side use byte0 as sound ID
 	ld   a, [hl]			; A = DMG sound ID
@@ -13766,36 +13766,36 @@ ENDC
 ; - 0: DMG Sound ID
 ; - 1: SGB Sound ID (Set A)
 ; - 2: SGB Sound Attributes (Set A)
-Sound_ActTbl: 
-.act00: db SFX_DROP, SGB_SND_A_LASER_SM, $00
-.act01: db SFX_TAUNT, SGB_SND_A_FASTJUMP, $00
-.act02: db SFX_TAUNT, SGB_SND_A_FASTJUMP, $01
-.act03: db SFX_TAUNT, SGB_SND_A_FASTJUMP, $02
-.act04: db SFX_TAUNT, SGB_SND_A_FASTJUMP, $03
-.act05: db SFX_METERCHARGE, SGB_SND_A_FADEIN, $03
-.act06: db SFX_CHARSELECTED, SGB_SND_A_GLASSBREAK, $03
-.act07: db SFX_LIGHT, SGB_SND_A_ATTACK_B, $03
-.act08: db SFX_HEAVY, SGB_SND_A_ATTACK_B, $02
-.act09: db SND_ID_14, SGB_SND_A_GATE, $03
-.act0A: db SFX_HIT, SGB_SND_A_PUNCH_A, $03
-.act0B: db SND_ID_17, SGB_SND_A_ATTACK_A, $03
-.act0C: db SND_ID_14, SGB_SND_A_WINOPEN, $03
-.act0D: db SND_ID_1A, SGB_SND_A_PUNCH_B, $01
-.act0E: db SND_ID_2D, SGB_SND_A_WATERFALL, $03 ; [TCRF] Unused
-.act0F: db SND_ID_2B, SGB_SND_A_SWORDSWING, $03
-.act10: db SND_ID_2A, SGB_SND_A_ATTACK_B, $01
-.act11: db SND_ID_2C, SGB_SND_A_ATTACK_B, $01
-.act12: db SND_ID_29, SGB_SND_A_PUNCH_A, $01
-.act13: db SND_ID_29, SGB_SND_A_PUNCH_A, $00
-.act14: db SND_ID_29, SGB_SND_A_FIRE, $02
-.act15: db SND_ID_29, SGB_SND_A_FIRE, ($01 << 2)|$03
-.act16: db SFX_HEAVY, SGB_SND_A_SWORDSWING, $02 ; [TCRF] Unused
-.act17: db SND_ID_2B, SGB_SND_A_JETSTART, $01
-.act18: db SND_ID_2B, SGB_SND_A_PICTFLOAT, $03
-.act19: db SND_ID_2D, SGB_SND_A_JETPROJ_B, $03
-.act1A: db SFX_GRABSTART, SGB_SND_A_SELECT_B, $03
-.act1B: db SFX_TAUNT, SGB_SND_A_PUNCH_B, $03
-.act1C: db SND_ID_30, SGB_SND_A_SELECT_C, $03
+Sound_ActTbl:
+.act00: db SFX_DROP,         SGB_SND_A_LASER_SM,   $00            ; SCT_DIZZY
+.act01: db SFX_TAUNT,        SGB_SND_A_FASTJUMP,   $00            ; SCT_TAUNT_A
+.act02: db SFX_TAUNT,        SGB_SND_A_FASTJUMP,   $01            ; SCT_TAUNT_B
+.act03: db SFX_TAUNT,        SGB_SND_A_FASTJUMP,   $02            ; SCT_TAUNT_C
+.act04: db SFX_TAUNT,        SGB_SND_A_FASTJUMP,   $03            ; SCT_TAUNT_D
+.act05: db SFX_CHARGEMETER,  SGB_SND_A_FADEIN,     $03            ; SCT_CHARGEMETER
+.act06: db SFX_CHARSELECTED, SGB_SND_A_GLASSBREAK, $03            ; SCT_CHARGEFULL
+.act07: db SFX_LIGHT,        SGB_SND_A_ATTACK_B,   $03            ; SCT_LIGHT
+.act08: db SFX_HEAVY,        SGB_SND_A_ATTACK_B,   $02            ; SCT_HEAVY
+.act09: db SFX_BLOCK,        SGB_SND_A_GATE,       $03            ; SCT_BLOCK
+.act0A: db SFX_HIT,          SGB_SND_A_PUNCH_A,    $03            ; SCT_HIT
+.act0B: db SFX_MULTIHIT,     SGB_SND_A_ATTACK_A,   $03            ; SCT_MULTIHIT
+.act0C: db SFX_BLOCK,        SGB_SND_A_WINOPEN,    $03            ; SCT_AUTOBLOCK
+.act0D: db SFX_GROUNDHIT,    SGB_SND_A_PUNCH_B,    $01            ; SCT_GROUNDHIT
+.act0E: db SFX_REFLECT,      SGB_SND_A_WATERFALL,  $03            ; SCT_REFLECT
+.act0F: db SFX_PROJ_SM,      SGB_SND_A_SWORDSWING, $03            ; SCT_PROJ_SM
+.act10: db SFX_MOVEJUMP_A,   SGB_SND_A_ATTACK_B,   $01            ; SCT_MOVEJUMP_A
+.act11: db SFX_MOVEJUMP_B,   SGB_SND_A_ATTACK_B,   $01            ; SCT_MOVEJUMP_B
+.act12: db SFX_FIREHIT_B,    SGB_SND_A_PUNCH_A,    $01            ; SCT_FIREHIT
+.act13: db SFX_FIREHIT_B,    SGB_SND_A_PUNCH_A,    $00            ; SCT_PROJ_LG_A
+.act14: db SFX_FIREHIT_B,    SGB_SND_A_FIRE,       $02            ; SCT_PHYSFIRE
+.act15: db SFX_FIREHIT_B,    SGB_SND_A_FIRE,       $03|($01 << 2) ; SCT_PROJ_LG_B
+.act16: db SFX_HEAVY,        SGB_SND_A_SWORDSWING, $02            ; SCT_UNUSED_16 [TCRF]
+.act17: db SFX_PROJ_SM,      SGB_SND_A_JETSTART,   $01            ; SCT_SHCRYSTSPAWN
+.act18: db SFX_PROJ_SM,      SGB_SND_A_PICTFLOAT,  $03            ; SCT_PSYCREFLAND
+.act19: db SFX_REFLECT,      SGB_SND_A_JETPROJ_B,  $03            ; SCT_HISHOKEN
+.act1A: db SFX_GRAB,         SGB_SND_A_SELECT_B,   $03            ; SCT_GRAB
+.act1B: db SFX_TAUNT,        SGB_SND_A_PUNCH_B,    $03            ; SCT_BREAK
+.act1C: db SFX_PSYCTEL,      SGB_SND_A_SELECT_C,   $03            ; SCT_PSYCTEL
 
 ; =============== GFXS_XFlipTbl ===============
 ; Conversion table for CopyTilesHBlankFlipX.flipX.
@@ -13819,11 +13819,11 @@ GFXS_XFlipTbl:
 	db $0F,$8F,$4F,$CF,$2F,$AF,$6F,$EF,$1F,$9F,$5F,$DF,$3F,$BF,$7F,$FF ; $F0
 
 ; =============== TextPrinter_CharsetToTileTbl ===============
-; Maps the 8-bit character set used for strings in the ROM to tile IDs. 
+; Maps the 8-bit character set used for strings in the ROM to tile IDs.
 ; The tile IDs correspond to the standard 1bpp font (FontDef_Default).
 ;
 ; Every possible character is accounted for, though most point to $00, the blank space.
-TextPrinter_CharsetToTileTbl: 
+TextPrinter_CharsetToTileTbl:
 	db $30 ; $00 ;X ; ↑ ; [TCRF] Never used, even the graphic.
 	db $31 ; $01 ;X ; → ; [TCRF] Never used, even the graphic.
 	db $32 ; $02 ;X ; ↓ ; [TCRF] Never used, even the graphic.
@@ -13871,7 +13871,7 @@ TextPrinter_CharsetToTileTbl:
 	db $2D ; $2C    ; ,
 	db $29 ; $2D    ; -
 	db $1D ; $2E    ; .
-	db $00 ; $2F ;X ; 
+	db $00 ; $2F ;X ;
 	db $1F ; $30    ; 0
 	db $20 ; $31    ; 1
 	db $21 ; $32    ; 2
@@ -13883,10 +13883,10 @@ TextPrinter_CharsetToTileTbl:
 	db $27 ; $38    ; 8
 	db $28 ; $39    ; 9
 	db $2A ; $3A ;X ; :
-	db $00 ; $3B ;X ; 
-	db $00 ; $3C ;X ; 
-	db $00 ; $3D ;X ; 
-	db $00 ; $3E ;X ; 
+	db $00 ; $3B ;X ;
+	db $00 ; $3C ;X ;
+	db $00 ; $3D ;X ;
+	db $00 ; $3E ;X ;
 	db $2C ; $3F    ; ?
 	db $1C ; $40    ; r.
 	db $02 ; $41    ; A
@@ -13915,11 +13915,11 @@ TextPrinter_CharsetToTileTbl:
 	db $19 ; $58    ; X
 	db $1A ; $59    ; Y
 	db $1B ; $5A    ; Z
-	db $00 ; $5B ;X ; 
-	db $00 ; $5C ;X ; 
-	db $00 ; $5D ;X ; 
-	db $00 ; $5E ;X ; 
-	db $00 ; $5F ;X ; 
+	db $00 ; $5B ;X ;
+	db $00 ; $5C ;X ;
+	db $00 ; $5D ;X ;
+	db $00 ; $5E ;X ;
+	db $00 ; $5F ;X ;
 	db $1E ; $60    ; ` ; Points to same tile as '
 	db $34 ; $61 ;X ; ッ
 	db $35 ; $62 ;X ; ア
@@ -13947,55 +13947,55 @@ TextPrinter_CharsetToTileTbl:
 	db $4B ; $78 ;X ; ・ ; Duplicate
 	db $4C ; $79 ;X ; を ; Duplicate
 	db $4D ; $7A ;X ; ぁ ; Duplicate
-	db $00 ; $7B ;X ; 
-	db $00 ; $7C ;X ; 
-	db $00 ; $7D ;X ; 
-	db $00 ; $7E ;X ; 
-	db $00 ; $7F ;X ; 
-	db $00 ; $80 ;X ; 
-	db $00 ; $81 ;X ; 
-	db $00 ; $82 ;X ; 
-	db $00 ; $83 ;X ; 
-	db $00 ; $84 ;X ; 
-	db $00 ; $85 ;X ; 
-	db $00 ; $86 ;X ; 
-	db $00 ; $87 ;X ; 
-	db $00 ; $88 ;X ; 
-	db $00 ; $89 ;X ; 
-	db $00 ; $8A ;X ; 
-	db $00 ; $8B ;X ; 
-	db $00 ; $8C ;X ; 
-	db $00 ; $8D ;X ; 
-	db $00 ; $8E ;X ; 
-	db $00 ; $8F ;X ; 
-	db $00 ; $90 ;X ; 
-	db $00 ; $91 ;X ; 
-	db $00 ; $92 ;X ; 
-	db $00 ; $93 ;X ; 
-	db $00 ; $94 ;X ; 
-	db $00 ; $95 ;X ; 
-	db $00 ; $96 ;X ; 
-	db $00 ; $97 ;X ; 
-	db $00 ; $98 ;X ; 
-	db $00 ; $99 ;X ; 
-	db $00 ; $9A ;X ; 
-	db $00 ; $9B ;X ; 
-	db $00 ; $9C ;X ; 
-	db $00 ; $9D ;X ; 
-	db $00 ; $9E ;X ; 
-	db $00 ; $9F ;X ; 
-	db $00 ; $A0 ;X ; 
+	db $00 ; $7B ;X ;
+	db $00 ; $7C ;X ;
+	db $00 ; $7D ;X ;
+	db $00 ; $7E ;X ;
+	db $00 ; $7F ;X ;
+	db $00 ; $80 ;X ;
+	db $00 ; $81 ;X ;
+	db $00 ; $82 ;X ;
+	db $00 ; $83 ;X ;
+	db $00 ; $84 ;X ;
+	db $00 ; $85 ;X ;
+	db $00 ; $86 ;X ;
+	db $00 ; $87 ;X ;
+	db $00 ; $88 ;X ;
+	db $00 ; $89 ;X ;
+	db $00 ; $8A ;X ;
+	db $00 ; $8B ;X ;
+	db $00 ; $8C ;X ;
+	db $00 ; $8D ;X ;
+	db $00 ; $8E ;X ;
+	db $00 ; $8F ;X ;
+	db $00 ; $90 ;X ;
+	db $00 ; $91 ;X ;
+	db $00 ; $92 ;X ;
+	db $00 ; $93 ;X ;
+	db $00 ; $94 ;X ;
+	db $00 ; $95 ;X ;
+	db $00 ; $96 ;X ;
+	db $00 ; $97 ;X ;
+	db $00 ; $98 ;X ;
+	db $00 ; $99 ;X ;
+	db $00 ; $9A ;X ;
+	db $00 ; $9B ;X ;
+	db $00 ; $9C ;X ;
+	db $00 ; $9D ;X ;
+	db $00 ; $9E ;X ;
+	db $00 ; $9F ;X ;
+	db $00 ; $A0 ;X ;
 	db $47 ; $A1    ; 。
-	db $00 ; $A2 ;X ; 
-	db $00 ; $A3 ;X ; 
+	db $00 ; $A2 ;X ;
+	db $00 ; $A3 ;X ;
 	db $48 ; $A4    ; 、
 	db $4B ; $A5    ; ・
 	db $4C ; $A6    ; を
 	db $4D ; $A7 ;X ; ぁ
 	db $4E ; $A8    ; ぃ
-	db $00 ; $A9 ;X ; 
-	db $00 ; $AA ;X ; 
-	db $00 ; $AB ;X ; 
+	db $00 ; $A9 ;X ;
+	db $00 ; $AA ;X ;
+	db $00 ; $AB ;X ;
 	db $4F ; $AC    ; ゃ
 	db $50 ; $AD    ; ゅ
 	db $51 ; $AE    ; ょ
@@ -14048,41 +14048,41 @@ TextPrinter_CharsetToTileTbl:
 	db $7F ; $DD    ; ん
 	db $4A ; $DE    ; ﾞ
 	db $49 ; $DF    ; ﾟ
-	db $00 ; $E0 ;X ; 
-	db $00 ; $E1 ;X ; 
-	db $00 ; $E2 ;X ; 
-	db $00 ; $E3 ;X ; 
-	db $00 ; $E4 ;X ; 
-	db $00 ; $E5 ;X ; 
-	db $00 ; $E6 ;X ; 
-	db $00 ; $E7 ;X ; 
-	db $00 ; $E8 ;X ; 
-	db $00 ; $E9 ;X ; 
-	db $00 ; $EA ;X ; 
-	db $00 ; $EB ;X ; 
-	db $00 ; $EC ;X ; 
-	db $00 ; $ED ;X ; 
-	db $00 ; $EE ;X ; 
-	db $00 ; $EF ;X ; 
-	db $00 ; $F0 ;X ; 
-	db $00 ; $F1 ;X ; 
-	db $00 ; $F2 ;X ; 
-	db $00 ; $F3 ;X ; 
-	db $00 ; $F4 ;X ; 
-	db $00 ; $F5 ;X ; 
-	db $00 ; $F6 ;X ; 
-	db $00 ; $F7 ;X ; 
-	db $00 ; $F8 ;X ; 
-	db $00 ; $F9 ;X ; 
-	db $00 ; $FA ;X ; 
-	db $00 ; $FB ;X ; 
-	db $00 ; $FC ;X ; 
-	db $00 ; $FD ;X ; 
-	db $00 ; $FE ;X ; 
-	db $00 ; $FF ;X ; 
+	db $00 ; $E0 ;X ;
+	db $00 ; $E1 ;X ;
+	db $00 ; $E2 ;X ;
+	db $00 ; $E3 ;X ;
+	db $00 ; $E4 ;X ;
+	db $00 ; $E5 ;X ;
+	db $00 ; $E6 ;X ;
+	db $00 ; $E7 ;X ;
+	db $00 ; $E8 ;X ;
+	db $00 ; $E9 ;X ;
+	db $00 ; $EA ;X ;
+	db $00 ; $EB ;X ;
+	db $00 ; $EC ;X ;
+	db $00 ; $ED ;X ;
+	db $00 ; $EE ;X ;
+	db $00 ; $EF ;X ;
+	db $00 ; $F0 ;X ;
+	db $00 ; $F1 ;X ;
+	db $00 ; $F2 ;X ;
+	db $00 ; $F3 ;X ;
+	db $00 ; $F4 ;X ;
+	db $00 ; $F5 ;X ;
+	db $00 ; $F6 ;X ;
+	db $00 ; $F7 ;X ;
+	db $00 ; $F8 ;X ;
+	db $00 ; $F9 ;X ;
+	db $00 ; $FA ;X ;
+	db $00 ; $FB ;X ;
+	db $00 ; $FC ;X ;
+	db $00 ; $FD ;X ;
+	db $00 ; $FE ;X ;
+	db $00 ; $FF ;X ;
 ; =============== TextPrinter_DigitToTileTbl ===============
 ; Maps the number digits to tile IDs.
-; The tile IDs correspond to the standard 1bpp font (FontDef_Default). 
+; The tile IDs correspond to the standard 1bpp font (FontDef_Default).
 TextPrinter_DigitToTileTbl:
 	db $1F
 	db $20

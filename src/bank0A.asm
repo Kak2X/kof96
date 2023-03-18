@@ -7529,7 +7529,7 @@ TakaraLogo_CheckCheat:
 	push hl
 		ld   hl, (SGB_SND_A_CUPBREAK << 8)|$01
 		call SGB_PrepareSoundPacketA
-		ld   a, SFX_CHARCURSORMOVE
+		ld   a, SFX_CURSORMOVE
 		call HomeCall_Sound_ReqPlayExId
 	pop  hl
 	
@@ -7607,7 +7607,7 @@ TakaraLogo_CheckCheat:
 	push hl
 		ld   hl, (SGB_SND_A_PUNCH_A << 8)|$01
 		call SGB_PrepareSoundPacketA
-		ld   a, SND_ID_29
+		ld   a, SFX_FIREHIT_B
 		call HomeCall_Sound_ReqPlayExId
 	pop  hl
 .end:
@@ -7852,7 +7852,7 @@ MoveC_Goenitz_HyougaL:
 ; --------------- frame #2 ---------------
 .obj2:
 	mMvC_ValFrameStart .obj2_cont
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		mMvC_SetSpeedH +$0700
 .obj2_cont:
 	; Remove invulnerability when the timer elapses.
@@ -7941,7 +7941,7 @@ MoveC_Goenitz_HyougaH:
 ; --------------- frame #2 ---------------
 .obj2:
 	mMvC_ValFrameStart .obj2_cont
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		
 		;
 		; Determine by how much to move the player up, while the player is hidden
@@ -8029,7 +8029,7 @@ MoveC_Goenitz_WanpyouTokobuse:
 ; --------------- frame #1 ---------------
 .obj1:
 	mMvC_ValFrameStart .obj1_cont
-		mMvC_PlaySound SCT_THROW
+		mMvC_PlaySound SCT_GRAB
 .obj1_cont:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $1E
@@ -8253,7 +8253,7 @@ MoveC_Goenitz_ShinyaotomeThrowH:
 ; --------------- frame #3 ---------------
 .rotU4Jump:
 	mMvC_ValFrameStart .rotU4Jump_cont
-		mMvC_PlaySound SCT_11
+		mMvC_PlaySound SCT_MOVEJUMP_B
 		mMvC_SetSpeedH +$0000
 		mMvC_SetSpeedV -$0600
 		mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_HEAVYHIT
@@ -8836,7 +8836,7 @@ MoveC_Goenitz_ShinyaotomeJissoukokuDH:
 ; - H: Horizontal offset, relative to the player's origin
 ; - L: Horizontal movement speed
 ProjInit_Goenitz_Yonokaze:
-	mMvC_PlaySound SND_ID_28
+	mMvC_PlaySound SFX_FIREHIT_A
 	push bc
 		push de
 			push hl
@@ -8906,7 +8906,7 @@ ENDR
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
 ProjInit_Goenitz_Yamidoukoku:
-	mMvC_PlaySound SND_ID_28
+	mMvC_PlaySound SFX_FIREHIT_A
 	push bc
 		push de
 			push hl
@@ -8964,7 +8964,7 @@ ProjInit_Goenitz_Yamidoukoku:
 ; - H: Horizontal offset
 ; - L: Vertical offset
 ProjInit_Goenitz_WanpyouTokobuse:
-	mMvC_PlaySound SND_ID_28
+	mMvC_PlaySound SFX_FIREHIT_A
 	push bc
 		push de
 			push hl ; Save coords

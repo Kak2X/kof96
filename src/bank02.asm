@@ -119,7 +119,7 @@ MoveC_Base_RunF:
 	ld   a, SFX_STEP		; A = Default step SFX
 	jp   .playSFX
 .daimon:
-	ld   a, SND_ID_26		; A = Step SFX for Daimon
+	ld   a, SFX_STEP_HEAVY	; A = Step SFX for Daimon
 .playSFX:
 	call HomeCall_Sound_ReqPlayExId	; Play that
 	
@@ -2236,10 +2236,10 @@ MoveS_PlayHitSFX:
 	bit  PF3B_FIRE, [hl]	; Is this a firey move?
 	jp   nz, .slowFlash				; If so, jump
 .noFlash:
-	ld   a, SCT_0A					; A = SFX ID for normal hits
+	ld   a, SCT_HIT					; A = SFX ID for normal hits
 	jp   .playSFX
 .slowFlash:
-	ld   a, SCT_12					; A = SFX ID for firey hits
+	ld   a, SCT_FIREHIT					; A = SFX ID for firey hits
 .playSFX:
 	call HomeCall_Sound_ReqPlayExId
 	ret
@@ -2281,7 +2281,7 @@ HitTypeC_Hit_Multi1:
 .main:
 	; Play SGB/DMG drop SFX
 	push af
-		ld   a, SCT_0B
+		ld   a, SCT_MULTIHIT
 		call HomeCall_Sound_ReqPlayExId
 	pop  af
 	; Switch to move A
@@ -2311,7 +2311,7 @@ HitTypeC_Hit_MultiGS:
 	ld   a, MOVE_SHARED_HIT_MULTIGS
 	; Play SGB/DMG drop SFX
 	push af
-		ld   a, SCT_0B
+		ld   a, SCT_MULTIHIT
 		call HomeCall_Sound_ReqPlayExId
 	; Set move
 	pop  af
@@ -2566,7 +2566,7 @@ HitTypeC_ThrowStart:
 	ld   [wPlayPlThrowTechTimer], a
 	
 	; Play throw SGB/DMG SFX
-	ld   a, SCT_THROW
+	ld   a, SCT_GRAB
 	call HomeCall_Sound_ReqPlayExId
 	
 	; Face the opponent and lock the direction again
@@ -4440,7 +4440,7 @@ MoveC_Hit_Throw_End:
 		add  hl, bc
 		set  PF1B_INVULN, [hl]
 	
-		ld   a, SCT_0D
+		ld   a, SCT_GROUNDHIT
 		call HomeCall_Sound_ReqPlayExId
 		
 		; Stop flashing as well
@@ -4494,7 +4494,7 @@ MoveC_Hit_DropDBG:
 	; Show #1 for 5 frames (+ load)
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $05
-		mMvC_PlaySound SCT_0D
+		mMvC_PlaySound SCT_GROUNDHIT
 		jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
@@ -4774,7 +4774,7 @@ MoveC_Hit_SwoopUp:
 		jp   z, .ret									; Did it work? If not (ie: already set it before), return
 		
 			; Play a sound effect for hitting the ground
-			ld   a, SCT_0D
+			ld   a, SCT_GROUNDHIT
 			call HomeCall_Sound_ReqPlayExId
 			
 			; If we got hit by Daimon, do not turn invulnerability back on.
@@ -5612,7 +5612,7 @@ MoveC_Ryo_KoOuKen:
 		mMvC_SetMoveH $0700
 .obj1_cont:
 	mMvC_ValFrameEnd .anim
-		mMvC_PlaySound SCT_15
+		mMvC_PlaySound SCT_PROJ_LG_B
 		jp   .anim
 ; --------------- frame #2 ---------------
 ; Nothing!
@@ -5665,7 +5665,7 @@ MoveC_Ryo_MouKoRaiJinGou:
 ; --------------- frame #1 ---------------
 .obj1:
 	mMvC_ValFrameStart .obj1_cont
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		ld   hl, iPlInfo_Flags1
 		add  hl, bc
 		res  PF1B_INVULN, [hl]
@@ -5746,7 +5746,7 @@ MoveC_Ryo_HienShippuKyaku:
 ; --------------- frame #1 ---------------	
 .obj1:
 	mMvC_ValFrameStart .obj1_cont
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		mMvIn_ChkLHE .obj1_setJumpH, .obj1_setJumpE
 	.obj1_setJumpL: ; Light
 		mMvC_SetSpeedH $0300
@@ -5856,7 +5856,7 @@ MoveC_Ryo_RyuKoRanbuS:
 ; --------------- frame #1 ---------------
 .obj1:
 	mMvC_ValFrameStart .obj1_chkGuard
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		; Set different jump speed depending on light / heavy version.
 		mMvIn_ChkLH .obj1_setJumpH
 	.obj1_setJumpL:
@@ -6047,7 +6047,7 @@ MoveC_Ryo_RyuKoRanbuD:
 ; --------------- frame #1 ---------------
 .obj1:
 	mMvC_ValFrameStart .obj1_chkGuard
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		; Set different jump speed depending on light / heavy version.
 		mMvIn_ChkLH .obj1_setJumpH
 	.obj1_setJumpL:
@@ -6127,9 +6127,9 @@ MoveC_Ryo_RyuKoRanbuD:
 		add  hl, bc
 		ld   a, [hl]
 		cp   HITTYPE_HIT_MULTI0	; A == HITTYPE_HIT_MULTI0?
-		jp   z, .anim				; If so, skip
+		jp   z, .anim			; If so, skip
 		cp   HITTYPE_HIT_MULTI1	; A == HITTYPE_HIT_MULTI1?
-		jp   z, .anim				; If so, skip
+		jp   z, .anim			; If so, skip
 		; Otherwise, transition to hop
 		ld   a, MOVE_SHARED_HOP_B
 		call Pl_SetMove_StopSpeed
@@ -6309,7 +6309,7 @@ MoveC_Robert_RyuuGekiKen:
 		mMvC_SetMoveH +$0700
 .obj1_cont:
 	mMvC_ValFrameEnd .anim
-		mMvC_PlaySound SCT_15
+		mMvC_PlaySound SCT_PROJ_LG_B
 		jp   .anim
 ; --------------- frame #2 ---------------	
 .obj2:
@@ -6364,7 +6364,7 @@ MoveC_Robert_HienShippuKyaku:
 ; --------------- frame #1 ---------------	
 .obj1:
 	mMvC_ValFrameStart .obj1_cont
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		mMvIn_ChkLHE .obj1_setJumpH, .obj1_setJumpE
 	.obj1_setJumpL: ; Light
 		mMvC_SetSpeedH +$0300
@@ -6383,7 +6383,7 @@ MoveC_Robert_HienShippuKyaku:
 .obj2:
 	mMvC_ValFrameEnd .doGravity
 		mMvC_SetDamageNext $04, HITTYPE_HIT_MID1, PF3_LASTHIT
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		jp   .doGravity
 ; --------------- frame #3 ---------------	
 .obj3:
@@ -6392,7 +6392,7 @@ MoveC_Robert_HienShippuKyaku:
 .obj4:
 	mMvC_ValFrameEnd .doGravity
 		mMvC_SetDamageNext $04, HITTYPE_HIT_MID0, PF3_LASTHIT
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		jp   .doGravity
 ; --------------- frame #5 ---------------	
 .obj5:
@@ -6457,7 +6457,7 @@ MoveC_Robert_HienRyuuShinKya:
 ; --------------- frame #1 ---------------	
 .obj1:
 	mMvC_ValFrameStart .obj1_cont
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		mMvIn_ChkLHE .obj1_setArcH, .obj1_setArcE
 	.obj1_setArcL: ; Light
 		mMvC_SetSpeedH +$0300
@@ -6576,7 +6576,7 @@ MoveC_Robert_RyuuGa:
 .obj1:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
-		mMvC_PlaySound SND_ID_28
+		mMvC_PlaySound SFX_FIREHIT_A
 		mMvIn_ChkLHE .obj1_setHitH, .obj1_setHitE
 	.obj1_setHitL: ; Light
 		mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_HEAVYHIT
@@ -6674,7 +6674,7 @@ MoveC_Terry_RisingTackle:
 .obj0:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
-		mMvC_PlaySound SND_ID_28
+		mMvC_PlaySound SFX_FIREHIT_A
 		mMvC_SetDamageNext $02, HITTYPE_DROP_MAIN, PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #1 ---------------	
@@ -6864,7 +6864,7 @@ MoveC_Robert_RyuKoRanbuS:
 ; --------------- frame #1 ---------------
 .obj1:
 	mMvC_ValFrameStart .obj1_chkGuard
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		; Set different jump speed depending on light / heavy version.
 		mMvIn_ChkLH .obj1_setJumpH
 	.obj1_setJumpL:
@@ -7045,7 +7045,7 @@ MoveC_Robert_RyuKoRanbuD:
 ; --------------- frame #1 ---------------
 .obj1:
 	mMvC_ValFrameStart .obj1_chkGuard
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		; Set different jump speed depending on light / heavy version.
 		mMvIn_ChkLH .obj1_setJumpH
 	.obj1_setJumpL:
@@ -7771,7 +7771,7 @@ MoveC_Leona_MoonSlasher:
 	mMvC_ValFrameEnd .anim
 		; If we're at max power, deal extra damage
 		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
-		mMvC_PlaySound SND_ID_28
+		mMvC_PlaySound SFX_FIREHIT_A
 		mMvC_ChkNotMaxPow .anim ; Jump to .anim if not at max power
 			mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_LASTHIT
 			jp   .anim
@@ -8361,7 +8361,7 @@ MoveC_MrKarate_KoOuKen:
 .obj1:
 	mMvC_SetDamage $01, HITTYPE_DROP_MAIN, PF3_LASTHIT|PF3_LIGHTHIT
 	mMvC_ValFrameEnd .anim
-		mMvC_PlaySound SCT_15
+		mMvC_PlaySound SCT_PROJ_LG_B
 		jp   .anim
 ; --------------- [TCRF] unused frame #2 ---------------
 ; This should have been assigned to #2 to make the recovery frame last more, but it isn't.
@@ -8529,7 +8529,7 @@ MoveC_MrKarate_HienShippuuKyaku:
 ; --------------- frame #1 ---------------
 .obj1:
 	mMvC_ValFrameStart .obj1_cont
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		
 		; Set forward jump settings
 		ld   hl, iPlInfo_MoveId
@@ -8603,7 +8603,7 @@ MoveC_MrKarate_HienShippuuKyaku:
 	
 ; =============== MoveC_MrKarate_Zenretsuken ===============
 ; Move code for Mr.Karate's Zenretsuken (MOVE_MRKARATE_ZENRETSUKEN_L, MOVE_MRKARATE_ZENRETSUKEN_H).
-MoveC_MrKarate_Zenretsuken:;I
+MoveC_MrKarate_Zenretsuken:
 	call Play_Pl_MoveByColiBoxOverlapX
 	mMvC_ValLoaded .ret
 	
@@ -8633,7 +8633,7 @@ MoveC_MrKarate_Zenretsuken:;I
 	mMvC_SetDamage $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT|PF3_LIGHTHIT
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
-		mMvC_PlaySound SND_ID_28
+		mMvC_PlaySound SFX_FIREHIT_A
 		ld   hl, iPlInfo_MrKarate_Zenretsuken_LoopCount
 		add  hl, bc
 		ld   [hl], $04
@@ -8646,7 +8646,7 @@ MoveC_MrKarate_Zenretsuken:;I
 .obj2:
 	mMvC_SetDamage $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT|PF3_LIGHTHIT
 	mMvC_ValFrameEnd .anim
-		mMvC_PlaySound SND_ID_28
+		mMvC_PlaySound SFX_FIREHIT_A
 		
 		; Loop to #1 until the timer elapses
 		ld   hl, iPlInfo_MrKarate_Zenretsuken_LoopCount
@@ -8676,7 +8676,7 @@ MoveC_MrKarate_Zenretsuken:;I
 .obj5:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $1E
-		mMvC_PlaySound SND_ID_28
+		mMvC_PlaySound SFX_FIREHIT_A
 		mMvC_SetDamageNext $01, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #6 ---------------
@@ -8746,7 +8746,7 @@ MoveC_MrKarate_RyukoRanbuS:
 ; --------------- frame #1 ---------------
 .obj1:
 	mMvC_ValFrameStart .obj1_chkGuard
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		; Set different jump speed depending on light / heavy version.
 		mMvIn_ChkLH .obj1_setJumpH
 	.obj1_setJumpL:
@@ -8937,7 +8937,7 @@ MoveC_MrKarate_Unused_RyukoRanbuD:
 ; --------------- frame #1 ---------------
 .obj1:
 	mMvC_ValFrameStart .obj1_chkGuard
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		; Set different jump speed depending on light / heavy version.
 		mMvIn_ChkLH .obj1_setJumpH
 	.obj1_setJumpL:
@@ -9238,7 +9238,7 @@ ENDC
 	mMvC_ValFrameStart .obj1_move
 	
 	; Play SGB/DMG SFX
-	ld   a, SCT_11
+	ld   a, SCT_MOVEJUMP_B
 	call HomeCall_Sound_ReqPlayExId
 	
 	; Start neutral jump
@@ -9642,7 +9642,7 @@ ENDC
 	mMvC_ValFrameStart .obj1_move
 	
 	; Play SGB/DMG SFX
-	ld   a, SCT_11
+	ld   a, SCT_MOVEJUMP_B
 	call HomeCall_Sound_ReqPlayExId
 	
 	; (nothing)

@@ -967,7 +967,7 @@ CharSel_Select_DoCtrl_Right:
 	; Fall-through
 ; =============== CharSel_PlayCursorMoveSFX ===============
 CharSel_PlayCursorMoveSFX:
-	ld   a, SFX_CHARCURSORMOVE
+	ld   a, SFX_CURSORMOVE
 	call HomeCall_Sound_ReqPlayExId
 	ret
 	
@@ -1582,8 +1582,8 @@ CharSel_AnimPortraitFlip:
 .end:
 	ld   [hl], OST_VISIBLE					; Set visibility flag
 	
-	; Play a sound effect
-	ld   a, SND_ID_26
+	; Reuse this sound effect once the flip is done
+	ld   a, SFX_STEP_HEAVY
 	call HomeCall_Sound_ReqPlayExId
 	ret
 	

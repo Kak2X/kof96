@@ -31,7 +31,7 @@ MoveC_Base_AttackG_SF04M0040:
 	; The first time we get here, set the initial speed
 	mMvC_ValFrameStart .tryEnd
 	; Play SFX for it
-	ld   a, SCT_ATTACKG
+	ld   a, SCT_MOVEJUMP_A
 	call HomeCall_Sound_ReqPlayExId
 	; Move 4px/frame forward
 	mMvC_SetSpeedH $0400
@@ -258,7 +258,7 @@ MoveC_Kyo_AraKami:
 .araKami_obj0_chkEnd:
 	; Play SFX when switching to #2
 	mMvC_ValFrameEnd .anim
-		mMvC_PlaySound SND_ID_28
+		mMvC_PlaySound SFX_FIREHIT_A
 		jp   .anim
 ; --------------- 114 Shiki Ara Kami - frame #1 ---------------
 .araKami_obj1:
@@ -475,34 +475,34 @@ ENDM
 .startKonoKizu:
 	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_LASTHIT
 	mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, $00
-	mMvC_PlaySound SND_ID_28
+	mMvC_PlaySound SFX_FIREHIT_A
 	jp   .ret
 	
 ; Starts 127 Shiki Yano Sabi
 .startYanoSabi:
 	mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_HEAVYHIT|PF3_FIRE|PF3_OVERHEAD|PF3_LASTHIT
 	mMvC_SetFrame $08*OBJLSTPTR_ENTRYSIZE, $00
-	mMvC_PlaySound SND_ID_28
+	mMvC_PlaySound SFX_FIREHIT_A
 	jp   .ret
 ; Starts 127 Shiki Yano Sabi from 128 Shiki Kono Kizu
 .startYanoSabiFromKonoKizu:
 	mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_HEAVYHIT|PF3_FIRE|PF3_OVERHEAD|PF3_LASTHIT
 	mMvC_SetFrame $0C*OBJLSTPTR_ENTRYSIZE, $00
-	mMvC_PlaySound SND_ID_28
+	mMvC_PlaySound SFX_FIREHIT_A
 	jp   .ret
 	
 ; Starts Ge Shiki Migiri Ugachi
 .startMigiriUgachi:
 	mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_HEAVYHIT|PF3_FIRE|PF3_LASTHIT
 	mMvC_SetFrame $10*OBJLSTPTR_ENTRYSIZE, $00
-	mMvC_PlaySound SND_ID_28
+	mMvC_PlaySound SFX_FIREHIT_A
 	jp   .ret
 	
 ; Starts 125 Shiki Nana Se
 .startNanaSe:
 	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
 	mMvC_SetFrame $14*OBJLSTPTR_ENTRYSIZE, $00
-	mMvC_PlaySound SND_ID_28
+	mMvC_PlaySound SFX_FIREHIT_A
 	jp   .ret
 	
 ; --------------- common ---------------
@@ -581,7 +581,7 @@ MoveC_Kyo_DokuKami:
 	call MoveC_Kyo_DokuKami_ChkTumiYomiInput
 	; When switching to #1, play SFX
 	mMvC_ValFrameEnd .anim
-		mMvC_PlaySound SND_ID_28
+		mMvC_PlaySound SFX_FIREHIT_A
 		jp   .anim
 ; --------------- 115 Shiki Doku Kami - frame #1 ---------------
 .dokuKami_obj1:
@@ -691,7 +691,7 @@ ENDM
 	; When switching to #1, get manual control and play SFX
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
-		mMvC_PlaySound SND_ID_28
+		mMvC_PlaySound SFX_FIREHIT_A
 		jp   .anim
 ; --------------- 402 Shiki Batu Yomi - frame #1 ---------------	
 .batuYomi_obj1:
@@ -753,7 +753,7 @@ ENDM
 	mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, $00	; Was the frame set already?
 	jp   z, .ret								; If so, return
 	mMvC_SetDamageNext $08, HITTYPE_HIT_MID0, PF3_HEAVYHIT|PF3_FIRE|PF3_LASTHIT
-	mMvC_PlaySound SND_ID_28
+	mMvC_PlaySound SFX_FIREHIT_A
 	; Reset the LH status for the next keypress
 	ld   hl, iPlInfo_JoyBufKeysLH
 	add  hl, bc
@@ -764,7 +764,7 @@ ENDM
 	mMvC_SetFrame $07*OBJLSTPTR_ENTRYSIZE, $00	; Was the frame set already?
 	jp   z, .ret								; If so, return
 	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
-	mMvC_PlaySound SND_ID_28
+	mMvC_PlaySound SFX_FIREHIT_A
 	; Reset the LH status for the next keypress (not needed)
 	ld   hl, iPlInfo_JoyBufKeysLH
 	add  hl, bc
@@ -917,7 +917,7 @@ MoveC_Kyo_OniYaki:
 	; depend on the Y speed / touching the ground) and set the move damage.
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
-		mMvC_PlaySound SND_ID_28
+		mMvC_PlaySound SFX_FIREHIT_A
 		
 		; Deal 4 lines of damage on contact.
 		; Light and heavy do identical damage, there's no point in checking it.
@@ -1039,7 +1039,7 @@ MoveC_Kyo_RedKick:
 ; --------------- frame #1 ---------------
 .obj1:
 	mMvC_ValFrameStart .obj1_cont
-		mMvC_PlaySound SCT_11
+		mMvC_PlaySound SCT_MOVEJUMP_B
 		mMvIn_ChkLHE .obj1_jumpH, .obj1_jumpE
 	.obj1_jumpL: ; Light
 		mMvC_SetSpeedH +$0400
@@ -1549,7 +1549,7 @@ MoveC_Kyo_UraOrochiNagi:
 .obj4:
 	; Set the initial movement speed the first time we get here.
 	mMvC_ValFrameStart .obj4_cont
-		mMvC_PlaySound SCT_14
+		mMvC_PlaySound SCT_PHYSFIRE
 		mMvC_SetSpeedH +$07C0
 		; [BUG] The animation speed is currently set to ANIMSPEED_INSTANT.
 		;       That means mMvC_ValFrameEnd will also trigger this frame, but we're skipping it. 
@@ -1870,7 +1870,7 @@ MoveC_Terry_PowerGeyserE:
 .obj1:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $08
-		mMvC_PlaySound SCT_13
+		mMvC_PlaySound SCT_PROJ_LG_A
 		jp   .anim
 ; --------------- frame #2 ---------------
 .obj2:
@@ -1969,7 +1969,7 @@ MoveC_Terry_BurnKnuckle:
 ; --------------- frame #3 ---------------
 .obj3:
 	mMvC_ValFrameStart .obj3_cont
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		; Set jump speed
 		mMvIn_ChkLHE .obj3_setJumpH, .obj3_setJumpE
 	.obj3_setJumpL: ; Light
@@ -2054,7 +2054,7 @@ MoveC_Terry_CrackShot:
 ; --------------- frame #1 ---------------
 .obj1:
 	mMvC_ValFrameStart .obj1_cont
-		mMvC_PlaySound SCT_11
+		mMvC_PlaySound SCT_MOVEJUMP_B
 		mMvIn_ChkLHE .obj1_setJumpH, .obj1_setJumpE
 	.obj1_setJumpL: ; Light
 		mMvC_SetSpeedH +$0400
@@ -2155,7 +2155,7 @@ MoveC_Terry_PowerDunk:
 .obj2:
 	mMvC_ValFrameEnd .doGravity
 		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
-		mMvC_PlaySound SCT_12
+		mMvC_PlaySound SCT_FIREHIT
 		; Heavy version shakes opponent longer
 		mMvIn_ChkLH .obj2_setDamageH
 	.obj2_setDamageL:
@@ -2197,7 +2197,7 @@ MoveC_Terry_PowerDunk:
 ; - DE: Ptr to respective wOBJInfo
 ; - HL: Horizontal offset, relative to origin
 ProjInit_Terry_PowerWave:
-	mMvC_PlaySound SCT_0F
+	mMvC_PlaySound SCT_PROJ_SM
 	
 	push bc
 		push de
@@ -2305,7 +2305,7 @@ ProjInit_Terry_PowerWave:
 ; - DE: Ptr to respective wOBJInfo
 ; - HL: Horizontal offset, relative to the player origin
 ProjInit_Terry_PowerGeyser:
-	mMvC_PlaySound SCT_13
+	mMvC_PlaySound SCT_PROJ_LG_A
 	push bc
 		push de
 			push hl	; Save X offset
@@ -2593,7 +2593,7 @@ MoveC_Mai_HissatsuShinobibachi:
 ; --------------- frame #3 ---------------
 .obj3:;J
 	mMvC_ValFrameStart .obj3_cont
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		mMvIn_ChkLHE .obj3_setJumpH, .obj3_setJumpE
 	.obj3_setJumpL: ; Light
 		mMvC_SetSpeedH +$0500
@@ -2650,7 +2650,7 @@ MoveC_Mai_RyuEnBu:
 ; --------------- frame #0 ---------------
 .obj0:
 	mMvC_ValFrameEnd .anim
-		mMvC_PlaySound SCT_14
+		mMvC_PlaySound SCT_PHYSFIRE
 		mMvC_SetDamageNext $09, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED
 		jp   .anim
 ; --------------- frame #1 ---------------
@@ -2725,7 +2725,7 @@ MoveC_Mai_HishoRyuEnJin:
 ; --------------- frame #2 ---------------
 .obj2:
 	mMvC_ValFrameStart .obj2_cont
-		mMvC_PlaySound SCT_14
+		mMvC_PlaySound SCT_PHYSFIRE
 		ld   hl, iPlInfo_Flags0
 		add  hl, bc
 		inc  hl			; Seek to iPlInfo_Flags1
@@ -2982,7 +2982,7 @@ MoveC_Mai_KuuchuuMusasabi:
 ; --------------- frame #1 ---------------
 .obj1:
 	mMvC_ValFrameStart .doGravity
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		mMvIn_ChkLHE .obj1_setDiveH, .obj1_setDiveE
 	.obj1_setDiveL: ; Light
 		mMvC_SetSpeedH +$0300
@@ -3072,7 +3072,7 @@ MoveC_Mai_ChoHissatsuShinobibachiS:
 ; Jump.
 .obj3:
 	mMvC_ValFrameStart .obj3_cont
-		mMvC_PlaySound SCT_14
+		mMvC_PlaySound SCT_PHYSFIRE
 		ld   hl, iPlInfo_Flags0
 		add  hl, bc
 		inc  hl	; Seek to iPlInfo_Flags1
@@ -3207,7 +3207,7 @@ MoveC_Mai_ChoHissatsuShinobibachiD:
 ; Jump.
 .obj7:
 	mMvC_ValFrameStart .obj7_cont
-		mMvC_PlaySound SCT_14
+		mMvC_PlaySound SCT_PHYSFIRE
 		ld   hl, iPlInfo_Flags0
 		add  hl, bc
 		inc  hl	; Seek to iPlInfo_Flags1
@@ -3559,7 +3559,7 @@ MoveC_Athena_PhoenixArrow:
 ; Diagonal forward-down dive from the air.
 .obj1:
 	mMvC_ValFrameStart .obj1_cont
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		mMvIn_ChkLHE .obj1_setDashH, .obj1_setDashE
 	.obj1_setDashL: ; Light
 		mMvC_SetSpeedH +$0300
@@ -3707,7 +3707,7 @@ MoveC_Athena_PsychoReflector:
 	; Switch to #2 when landing on the ground
 	mMvC_ChkGravityHV $0060, .anim
 		mMvC_SetLandFrame $02*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
-		mMvC_PlaySound SCT_18
+		mMvC_PlaySound SCT_PSYCREFLAND
 		jp   .ret
 ; --------------- frame #2 ---------------
 .obj2:
@@ -3776,7 +3776,7 @@ MoveC_Athena_PsychoTeleport:
 ; --------------- frame #0 ---------------
 .obj0:
 	mMvC_ValFrameEnd .anim
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
@@ -3894,7 +3894,7 @@ MoveC_Athena_ShCryst:
 		call Task_PassControlFar
 		
 		; Play ching SGB/DMG SFX
-		mMvC_PlaySound SCT_17
+		mMvC_PlaySound SCT_SHCRYSTSPAWN
 		call Task_PassControlFar
 		jp   .anim
 ; --------------- frame #1-2 / Phase 1 input check macro ---------------
@@ -4212,7 +4212,7 @@ ENDM
 	.obj5_setDamageNorm:
 		; Normal size.
 		; This delivers a single hit, with the sphere despawning on hit.
-		mMvC_PlaySound SCT_0F
+		mMvC_PlaySound SCT_PROJ_SM
 		mkhl $14, HITTYPE_DROP_MAIN
 		ld   hl, CHL
 		ld   a, PF3_HEAVYHIT|PF3_SUPERALT
@@ -4220,7 +4220,7 @@ ENDM
 	.obj5_setDamage1:
 		; Size 1.
 		; Single hit, more damage than the normal projectile.
-		mMvC_PlaySound SCT_0F
+		mMvC_PlaySound SCT_PROJ_SM
 		mkhl $19, HITTYPE_DROP_MAIN
 		ld   hl, CHL
 		ld   a, PF3_HEAVYHIT|PF3_SUPERALT
@@ -4228,19 +4228,19 @@ ENDM
 	.obj5_setDamage2:
 		; Sizes 2 - 4
 		; These are all the same and deal low, continuous damage.
-		mMvC_PlaySound SCT_15
+		mMvC_PlaySound SCT_PROJ_LG_B
 		mkhl $03, HITTYPE_DROP_MAIN
 		ld   hl, CHL
 		ld   a, PF3_LASTHIT|PF3_SUPERALT|PF3_LIGHTHIT
 		jp   .obj5_setDamage
 	.obj5_setDamage3:
-		mMvC_PlaySound SCT_15
+		mMvC_PlaySound SCT_PROJ_LG_B
 		mkhl $03, HITTYPE_DROP_MAIN
 		ld   hl, CHL
 		ld   a, PF3_LASTHIT|PF3_SUPERALT|PF3_LIGHTHIT
 		jp   .obj5_setDamage
 	.obj5_setDamage4:
-		mMvC_PlaySound SCT_15
+		mMvC_PlaySound SCT_PROJ_LG_B
 		mkhl $03, HITTYPE_DROP_MAIN
 		ld   hl, CHL
 		ld   a, PF3_LASTHIT|PF3_SUPERALT|PF3_LIGHTHIT
@@ -4305,7 +4305,7 @@ ENDM
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo	
 ProjInit_Athena_PsychoTeleport:
-	mMvC_PlaySound SCT_1C
+	mMvC_PlaySound SCT_PSYCTEL
 
 	push bc
 		push de
@@ -4366,7 +4366,7 @@ ProjInit_Athena_PsychoTeleport:
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
 ProjInit_Athena_PsychoBall:
-	mMvC_PlaySound SCT_15
+	mMvC_PlaySound SCT_PROJ_LG_B
 	
 	push bc
 		push de
@@ -6135,7 +6135,7 @@ MoveC_Andy_HiShoKen:
 		mMvC_SetMoveH $0700
 .obj0_cont:
 	mMvC_ValFrameEnd .anim
-		mMvC_PlaySound SCT_19
+		mMvC_PlaySound SCT_HISHOKEN
 		jp   .anim
 ; --------------- frame #1 ---------------	
 .obj1:
@@ -6321,7 +6321,7 @@ MoveC_Andy_KuHaDan:
 ; --------------- frame #2 ---------------	
 .obj2:
 	mMvC_ValFrameStart .obj2_cont
-		mMvC_PlaySound SCT_11
+		mMvC_PlaySound SCT_MOVEJUMP_B
 		mMvC_SetMoveH +$0700
 		; Set jump speed depending on move strength
 		mMvIn_ChkLHE .obj2_setJumpH, .obj2_setJumpE
@@ -6400,7 +6400,7 @@ MoveC_Andy_ShoRyuDan:
 .obj0:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
-		mMvC_PlaySound SND_ID_28
+		mMvC_PlaySound SFX_FIREHIT_A
 		mMvC_SetDamageNext $02, HITTYPE_DROP_MAIN, PF3_LASTHIT
 		jp   .anim
 ; --------------- frame #1 ---------------	
@@ -6583,7 +6583,7 @@ MoveC_Andy_GeneiShiranui:
 ; Air movement.
 .obj0:
 	mMvC_ValFrameStart .obj0_chkGravity
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		; Depending on the attack strength, set different diagonal down angles
 		mMvIn_ChkLHE .obj0_setJumpH, .obj0_setJumpE
 	.obj0_setJumpL: ; Light
@@ -6752,7 +6752,7 @@ MoveC_Andy_ChoReppaDan:;I
 .obj2:
 	mMvC_ValFrameStart .obj2_cont
 		; Set initial jump settings
-		mMvC_PlaySound SCT_11
+		mMvC_PlaySound SCT_MOVEJUMP_B
 		mMvC_SetMoveH +$0700
 		
 		; Desperation version moves less vertically
@@ -7403,7 +7403,7 @@ MoveC_MrBig_BlasterWave:
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
 ProjInit_MrBig_BlasterWave:
-	mMvC_PlaySound SCT_13
+	mMvC_PlaySound SCT_PROJ_LG_A
 	
 	push bc
 		push de
@@ -7667,7 +7667,7 @@ MoveC_Geese_ReppukenL:
 ; --------------- frame #0 ---------------
 .obj0:
 	mMvC_ValFrameEnd .anim
-		mMvC_PlaySound SND_ID_28
+		mMvC_PlaySound SFX_FIREHIT_A
 		jp   .anim
 ; --------------- frame #3 ---------------
 .obj3:
@@ -7710,7 +7710,7 @@ MoveC_Geese_ReppukenH:
 		mMvC_SetMoveH +$0700
 .obj3_cont:
 	mMvC_ValFrameEnd .anim
-		mMvC_PlaySound SND_ID_28
+		mMvC_PlaySound SFX_FIREHIT_A
 		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT
 		jp   .anim
 ; --------------- frame #6 ---------------
@@ -7871,7 +7871,7 @@ MoveC_Geese_HishouNichirinZan:
 ; --------------- frame #2 ---------------
 .obj2:
 	mMvC_ValFrameStart .obj2_cont
-		mMvC_PlaySound SND_ID_28
+		mMvC_PlaySound SFX_FIREHIT_A
 		mMvIn_ChkLHE .obj2_setJumpH, .obj2_setJumpE
 	.obj2_setJumpL: ; Light
 		mMvC_SetSpeedH +$0100
@@ -8138,7 +8138,7 @@ MoveC_Geese_RagingStorm:
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
 ProjInit_Geese_ShippuKen:
-	mMvC_PlaySound SND_ID_28
+	mMvC_PlaySound SFX_FIREHIT_A
 	
 	push bc
 		push de
@@ -8243,7 +8243,7 @@ ProjInit_Geese_ShippuKen:
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
 ProjInit_Geese_RagingStormS:
-	mMvC_PlaySound SCT_13
+	mMvC_PlaySound SCT_PROJ_LG_A
 	push bc
 		push de
 			push hl
@@ -8298,7 +8298,7 @@ ProjInit_Geese_RagingStormS:
 ; - DE: Ptr to respective wOBJInfo
 ; - HL: Horizontal offset. Always $00.
 ProjInit_Geese_RagingStormD:
-	mMvC_PlaySound SCT_13
+	mMvC_PlaySound SCT_PROJ_LG_A
 	push bc
 		push de
 			push hl

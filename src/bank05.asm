@@ -5075,7 +5075,7 @@ MoveC_Iori_OniYaki:
 ; Jump setup.
 .obj2:
 	mMvC_ValFrameStart .obj2_cont
-		mMvC_PlaySound SND_ID_28
+		mMvC_PlaySound SFX_FIREHIT_A
 		ld   hl, iPlInfo_Flags0
 		add  hl, bc
 		inc  hl	; Seek to iPlInfo_Flags1
@@ -5174,7 +5174,7 @@ MoveC_OIori_OniYaki:
 ; Jump setup.
 .obj2:
 	mMvC_ValFrameStart .obj2_cont
-		mMvC_PlaySound SND_ID_28
+		mMvC_PlaySound SFX_FIREHIT_A
 		ld   hl, iPlInfo_Flags0
 		add  hl, bc
 		inc  hl	; Seek to iPlInfo_Flags1
@@ -6601,7 +6601,7 @@ MoveC_Mature_DeathRow:
 ; --------------- frame #0 ---------------
 .initDash:
 	mMvC_ValFrameStart .initDash_cont
-		mMvC_PlaySound SND_ID_28
+		mMvC_PlaySound SFX_FIREHIT_A
 		call Play_Pl_ClearJoyDirBuffer
 		call Play_Pl_ClearJoyBufKeysLH
 		; Initialize this
@@ -6790,7 +6790,7 @@ MoveC_Mature_Despair:
 ; Jump setup.
 .obj1:
 	mMvC_ValFrameStart .obj1_cont
-		mMvC_PlaySound SCT_11
+		mMvC_PlaySound SCT_MOVEJUMP_B
 		mMvIn_ChkLHE .obj1_setJumpH, .obj1_setJumpE
 	.obj1_setJumpL: ; Light
 		mMvC_SetSpeedH +$0300
@@ -6880,7 +6880,7 @@ MoveC_Mature_HeavensGate:
 	bit  OSTB_GFXNEWLOAD, [hl]
 	jp   z, .obj2
 	;--
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		; Set different movement speed depending on
 		mMvIn_ChkLHE .obj1_setDashH, .obj1_setDashE
 	.obj1_setDashL: ; Light
@@ -7118,7 +7118,7 @@ MoveC_Mature_HeavensGate:
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
 ProjInit_Mature_HeavensGateS:
-	mMvC_PlaySound SCT_13
+	mMvC_PlaySound SCT_PROJ_LG_A
 	
 	push bc
 		push de
@@ -7194,7 +7194,7 @@ ProjInit_Mature_HeavensGateD:
 	bit  OSTB_VISIBLE, [hl]
 	ret  nz
 	
-	mMvC_PlaySound SCT_13
+	mMvC_PlaySound SCT_PROJ_LG_A
 	
 	push bc
 		push de
@@ -7679,7 +7679,7 @@ MoveC_Chizuru_TamayuraShitsuneL:
 ; Would have played the attack SFX, likely somewhere between #0 and #3.
 .unused0:
 	mMvC_ValFrameStart .unused0_cont
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 .unused0_cont:
 	jp   .anim
 ; --------------- frame #4 ---------------
@@ -7734,7 +7734,7 @@ MoveC_Chizuru_TamayuraShitsuneH:
 		ld   hl, iPlInfo_Flags1
 		add  hl, bc
 		res  PF1B_INVULN, [hl]
-		mMvC_PlaySound SCT_ATTACKG
+		mMvC_PlaySound SCT_MOVEJUMP_A
 		jp   .anim
 ; --------------- common horz movement ---------------
 .moveH:
@@ -7850,7 +7850,7 @@ MoveC_Chizuru_ReijiIshizue:
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
 ProjInit_Chizuru_ReigiIshizue:
-	mMvC_PlaySound SCT_15
+	mMvC_PlaySound SCT_PROJ_LG_B
 	
 	push bc
 		push de
@@ -8085,7 +8085,7 @@ MoveC_Daimon_JiraiShin:
 		cp   MOVE_DAIMON_JIRAI_SHIN_FAKE	; iPlInfo_MoveId == MOVE_DAIMON_JIRAI_SHIN_FAKE
 		jp   z, .end						; If so, we're done
 		
-		mMvC_PlaySound SCT_0D
+		mMvC_PlaySound SCT_GROUNDHIT
 		jp   .anim
 ; --------------- frame #2 ---------------	
 .obj2:
