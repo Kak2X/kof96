@@ -2073,7 +2073,7 @@ HitTypeC_SwoopUp_ToProj:
 	add  hl, bc
 	bit  PF3B_HEAVYHIT, [hl]
 	jp   nz, .setSpeedH
-.setSpeedN: ; [TCRF?] Do we even get here?
+.setSpeedN:
 	ld   hl, +$0000
 	jp   .setSpeed
 .setSpeedH:
@@ -2162,7 +2162,6 @@ HitTypeC_DropCH:
 	ld   hl, -$0300				; 3px/frame up for light hits
 	jp   .setSpeed
 .setSpeedH:
-	; [TCRF?] Do we get here?
 	ld   hl, -$0400				; 4px/frame up for light hits
 .setSpeed:
 	call Play_OBJLstS_SetSpeedV	; Start the jump!
@@ -3241,12 +3240,9 @@ Play_Pl_SetHitType:
 			jp   z, .useDrop0C			; If so, jump
 			cp   HITTYPE_THROW_END		; ...
 			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
-			;--
-			; [TCRF?] Unreachable code?
 			cp   a, HITTYPE_DROP_SWOOPUP
 			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
 			jp   .useStdDrop
-			;--
 		.deadSpecHit:
 			; Whitelist of allowed hit effects when getting KO'd by a hit.
 			; Otherwise, default to HITTYPE_DROP_MAIN.

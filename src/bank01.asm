@@ -2301,17 +2301,17 @@ Play_CheckColi:
 	or   a		; Clear carry
 	ret
 Play_ColiBoxTbl:
-	; [TCRF?] The ones marked by ;X MAY be unused (needs further checks)
+	; [TCRF] The ones marked by  be unused (needs further checks)
 	db $00,$00,$00,$00 ; $00 [POI] Dummy, unused
 	db $00,$FC,$08,$10 ; $01 
 	db $F7,$00,$0D,$09 ; $02 
 	db $00,$00,$10,$10 ; $03 
 	db $00,$00,$10,$12 ; $04 
 	db $00,$00,$A0,$7F ; $05 
-	db $0D,$02,$10,$08 ; $06 ;X
+	db $0D,$02,$10,$08 ; $06 ; [TCRF] Never used
 	db $00,$09,$08,$08 ; $07 
 	db $FE,$F0,$12,$20 ; $08 
-	db $00,$EE,$10,$20 ; $09 ;X
+	db $00,$EE,$10,$20 ; $09 ; [TCRF] Never used
 	db $00,$00,$08,$08 ; $0A 
 	db $00,$00,$06,$12 ; $0B 
 	db $03,$00,$08,$1D ; $0C 
@@ -2325,12 +2325,12 @@ Play_ColiBoxTbl:
 	db $EA,$FC,$08,$0E ; $14 
 	db $F2,$FC,$0E,$14 ; $15 
 	db $F9,$F9,$19,$14 ; $16 
-	db $00,$FC,$0B,$0B ; $17 ;X
-	db $00,$F5,$12,$12 ; $18 ;X
-	db $00,$EE,$18,$18 ; $19 ;X
-	db $00,$0C,$0B,$0B ; $1A 
-	db $00,$05,$12,$12 ; $1B ;X
-	db $00,$FE,$18,$18 ; $1C ;X
+	db $00,$FC,$0B,$0B ; $17
+	db $00,$F5,$12,$12 ; $18
+	db $00,$EE,$18,$18 ; $19
+	db $00,$0C,$0B,$0B ; $1A
+	db $00,$05,$12,$12 ; $1B
+	db $00,$FE,$18,$18 ; $1C
 	db $F5,$FB,$11,$09 ; $1D 
 	db $F5,$02,$13,$11 ; $1E 
 	db $EA,$FA,$0F,$0D ; $1F 
