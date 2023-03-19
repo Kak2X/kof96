@@ -23,5 +23,5 @@ shell.cmd
 shell.lnk
 temp.asm
 kof96.asm
-.template.asm
-regexlog.txt
+docs/.template.asm
+docs/regexlog.txt
