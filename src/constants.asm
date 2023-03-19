@@ -59,8 +59,8 @@ MODE_SINGLEVS EQU $02
 MODE_TEAMVS   EQU $03
 
 ; Player IDs used across multiple variables
-PL1 EQU $00		
-PL2 EQU $01
+PL1  EQU $00		
+PL2  EQU $01
 PLB1 EQU 0 ; $01
 PLB2 EQU 1 ; $02
 
@@ -96,7 +96,6 @@ STAGE_ID_STADIUM_KAGURA   EQU $04
 STAGE_ID_STADIUM_GOENITZ  EQU $05
 STAGE_ID_STADIUM_EXTRA    EQU $06
 
-
 ; Special hardcoded stages for bosses or secrets.
 ; These are special indexes to wCharSeqTbl that return CHAR_ID_* instead of CHARSEL_ID_*
 STAGESEQ_KAGURA   EQU $0F
@@ -105,33 +104,31 @@ STAGESEQ_BONUS    EQU $11
 STAGESEQ_MRKARATE EQU $12
 
 ; Special Teams
-TEAM_ID_SACRED_TREASURES EQU $01 ; Iori, Kyo and Chizuru
-TEAM_ID_OLEONA           EQU $02 ; Leona, Iori, and Mature
-TEAM_ID_FFGEESE          EQU $03 ; Terry, Andy and Geese
-TEAM_ID_AOFMRBIG         EQU $04 ; Ryo, Robert and Mr.Big
-TEAM_ID_KTR              EQU $05 ; Kyo, Terry and Ryo
-TEAM_ID_BOSS             EQU $06 ; Geese, Krauser and Mr.Big
-TEAM_ID_NONE             EQU $FF
+TEAM_ID_SACTREAS  EQU $01 ; Iori, Kyo and Chizuru
+TEAM_ID_OLEONA    EQU $02 ; Leona, Iori, and Mature
+TEAM_ID_FFGEESE   EQU $03 ; Terry, Andy and Geese
+TEAM_ID_AOFMRBIG  EQU $04 ; Ryo, Robert and Mr.Big
+TEAM_ID_KTR       EQU $05 ; Kyo, Terry and Ryo
+TEAM_ID_BOSS      EQU $06 ; Geese, Krauser and Mr.Big
+TEAM_ID_NONE      EQU $FF
 
 ; Bonus Fight Type ID (wBonusFightId)
 ; Each of these has its own team character definitions.
-BONUS_ID_I_KC EQU $00 ; Iori vs Kyo and Chizuru
-BONUS_ID_KC_I EQU $01 ; ...
-BONUS_ID_L_IM EQU $02
-BONUS_ID_IM_L EQU $03
-BONUS_ID_TA_G EQU $04
-BONUS_ID_G_TA EQU $05
-BONUS_ID_RR_B EQU $06
-BONUS_ID_B_RR EQU $07
-BONUS_ID_K_TR EQU $08
-BONUS_ID_T_KR EQU $09
-BONUS_ID_R_KT EQU $0A
-BONUS_ID_G_KB EQU $0B
-BONUS_ID_K_GB EQU $0C
-BONUS_ID_B_GK EQU $0D
-
-BONUS_ID_NONE EQU $FF
-
+BONUS_ID_I_KC     EQU $00 ; Iori vs Kyo and Chizuru
+BONUS_ID_KC_I     EQU $01 ; ...
+BONUS_ID_L_IM     EQU $02
+BONUS_ID_IM_L     EQU $03
+BONUS_ID_TA_G     EQU $04
+BONUS_ID_G_TA     EQU $05
+BONUS_ID_RR_B     EQU $06
+BONUS_ID_B_RR     EQU $07
+BONUS_ID_K_TR     EQU $08
+BONUS_ID_T_KR     EQU $09
+BONUS_ID_R_KT     EQU $0A
+BONUS_ID_G_KB     EQU $0B
+BONUS_ID_K_GB     EQU $0C
+BONUS_ID_B_GK     EQU $0D
+BONUS_ID_NONE     EQU $FF
 
 C_NL EQU $FF ; Newline character in strings
 
@@ -259,21 +256,20 @@ PLINFO_SIZE EQU $100
 ; - PF1B_HITRECV = 1 and PF1B_GUARD = 1 -> opponent blocked the attack (from last frame)
 ; - PF1B_HITRECV = 1 and PF1B_GUARD = 0 -> opponent got hit successfully (from last frame)
 
-
 ; iPlInfo_Flags0 flags
-PF0B_PROJ         EQU 0 ; If set, a projectile is active on-screen (ie: a new one can't be thrown)
-PF0B_SPECMOVE     EQU 1 ; If set, the player is performing a special move
-PF0B_AIR          EQU 2 ; If set, the player is in the air
-PF0B_PROJHIT      EQU 3 ; If set, the player got hit by a projectile
-PF0B_PROJREM      EQU 4 ; If set, the player can currently remove projectiles with its hitbox
-PF0B_PROJREFLECT  EQU 5 ; If set, the player can currently reflect projectiles with its hitbox
-PF0B_SUPERMOVE    EQU 6 ; If set, the player is performing a super move
-PF0B_CPU          EQU 7 ; If set, the player is CPU-controlled (1P mode) or autopicks characters (VS mode)
-PF0_SPECMOVE    EQU 1 << PF0B_SPECMOVE
-PF0_PROJREM     EQU 1 << PF0B_PROJREM
-PF0_PROJREFLECT EQU 1 << PF0B_PROJREFLECT
-PF0_SUPERMOVE   EQU 1 << PF0B_SUPERMOVE
-PF0_CPU         EQU 1 << PF0B_CPU
+PF0B_PROJ           EQU 0 ; If set, a projectile is active on-screen (ie: a new one can't be thrown)
+PF0B_SPECMOVE       EQU 1 ; If set, the player is performing a special move
+PF0B_AIR            EQU 2 ; If set, the player is in the air
+PF0B_PROJHIT        EQU 3 ; If set, the player got hit by a projectile
+PF0B_PROJREM        EQU 4 ; If set, the player can currently remove projectiles with its hitbox
+PF0B_PROJREFLECT    EQU 5 ; If set, the player can currently reflect projectiles with its hitbox
+PF0B_SUPERMOVE      EQU 6 ; If set, the player is performing a super move
+PF0B_CPU            EQU 7 ; If set, the player is CPU-controlled (1P mode) or autopicks characters (VS mode)
+PF0_SPECMOVE        EQU 1 << PF0B_SPECMOVE
+PF0_PROJREM         EQU 1 << PF0B_PROJREM
+PF0_PROJREFLECT     EQU 1 << PF0B_PROJREFLECT
+PF0_SUPERMOVE       EQU 1 << PF0B_SUPERMOVE
+PF0_CPU             EQU 1 << PF0B_CPU
 
 ; iPlInfo_Flags1 flags
 PF1B_NOBASICINPUT   EQU 0 ; Prevents basic input from being handled. See also: BasicInput_ChkDDDDDDDDD
@@ -1219,7 +1215,6 @@ COLIBOX_6E EQU $6E
 COLIBOX_6F EQU $6F
 COLIBOX_70 EQU $70
 COLIBOX_71 EQU $71
-
 
 PROJ_PRIORITY_NODESPAWN EQU $03
 PROJ_PRIORITY_ALTSPEED EQU $04 ; Athena only

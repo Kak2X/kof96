@@ -69,7 +69,7 @@ MoveInputReader_Kyo:
 	mMvIn_ChkGA Kyo, .chkPunch, .chkKick
 	
 .chkPunch:
-	mMvIn_ValidateSuper .chkPunchNoSuper
+	mMvIn_ValSuper .chkPunchNoSuper
 	; DBDF+P -> Ura 108 Shiki Orochi Nagi
 	mMvIn_ChkDir MoveInput_DBDF, MoveInit_Kyo_UraOrochiNagi
 .chkPunchNoSuper:
@@ -1169,7 +1169,7 @@ MoveC_Kyo_KototsukiYou:
 ; --------------- distance check for run -> hit transition ---------------
 .chkNearPl:
 	; Continue running until we get close to the opponent.
-	mMvIn_ValidateClose .moveH_anim
+	mMvIn_ValClose .moveH_anim
 		mMvC_SetFrame $05*OBJLSTPTR_ENTRYSIZE, $01
 		call OBJLstS_ApplyXSpeed
 		jp   .ret
@@ -1618,7 +1618,7 @@ MoveInputReader_Terry:
 	mMvIn_ChkGA Terry, .chkPunch, .chkKick
 	
 .chkPunch:
-	mMvIn_ValidateSuper .chkPunchNoSuper
+	mMvIn_ValSuper .chkPunchNoSuper
 	
 	; DBDF+P -> Power Geyser
 	mMvIn_ChkDir MoveInput_DBDF, MoveInit_Terry_PowerGeyser
@@ -2430,7 +2430,7 @@ MoveInputReader_Mai:
 	; FDB+P -> Chijou Musasabi no Mai 
 	mMvIn_ChkDir MoveInput_FDB, MoveInit_Mai_ChijouMusasabiMai
 	; DF+P -> Ka Cho Sen
-	mMvIn_ValidateProjActive .chkPunchNoProj
+	mMvIn_ValProjActive .chkPunchNoProj
 	mMvIn_ChkDir MoveInput_DF, MoveInit_Mai_KaChoSen
 .chkPunchNoProj:
 	; DB+P -> Ryu En Bu
@@ -2438,7 +2438,7 @@ MoveInputReader_Mai:
 	jp   MoveInputReader_Mai_NoMove
 .chkKick:
 	; DBDF+K -> Cho Hissatsu Shinobibachi
-	mMvIn_ValidateSuper .chkKickNoSuper
+	mMvIn_ValSuper .chkKickNoSuper
 	mMvIn_ChkDir MoveInput_DBDF, MoveInit_Mai_ChoHissatsuShinobibachi
 .chkKickNoSuper:
 	; BDF+K -> Hissatsu Shinobibachi
@@ -3373,7 +3373,7 @@ MoveInputReader_Athena:
 	mMvIn_ChkEasy MoveInit_Athena_ShCrystAir, MoveInit_Athena_PhoenixArrow
 	mMvIn_ChkGA Athena, .chkAirPunch, .chkAirKick
 .chkAirPunch:
-	mMvIn_ValidateSuper .chkAirPunchNoSuper
+	mMvIn_ValSuper .chkAirPunchNoSuper
 	; BFDB+P (air) -> Shining Crystal Bit
 	mMvIn_ChkDir MoveInput_BFDB, MoveInit_Athena_ShCrystAir
 .chkAirPunchNoSuper:
@@ -3387,7 +3387,7 @@ MoveInputReader_Athena:
 	; DF+K (air) -> Psycho Teleport
 	; [POI] With the powerup cheat enabled, this move can be pulled off mid-air.
 	;       Though since it wasn't designed for this, as soon as the move ends Athena snaps to the ground.
-	mMvIn_ValidateDipPowerup MoveInputReader_Athena_NoMove
+	mMvIn_ValDipPowerup MoveInputReader_Athena_NoMove
 	mMvIn_ChkDir MoveInput_DF, MoveInit_Athena_PsychoTeleport
 	; End
 	jp   MoveInputReader_Athena_NoMove
@@ -3397,7 +3397,7 @@ MoveInputReader_Athena:
 	mMvIn_ChkEasy MoveInit_Athena_ShCrystGround, MoveInit_Athena_PsychoReflector
 	mMvIn_ChkGA Athena, .chkPunch, .chkKick
 .chkPunch:
-	mMvIn_ValidateSuper .chkPunchNoSuper
+	mMvIn_ValSuper .chkPunchNoSuper
 	; BFDB+P -> Shining Crystal Bit
 	mMvIn_ChkDir MoveInput_BFDB, MoveInit_Athena_ShCrystGround
 .chkPunchNoSuper:
@@ -3416,7 +3416,7 @@ MoveInputReader_Athena:
 	jp   MoveInputReader_Athena_NoMove
 ; =============== MoveInit_Athena_PsychoBall ===============	
 MoveInit_Athena_PsychoBall:
-	mMvIn_ValidateProjActive Athena
+	mMvIn_ValProjActive Athena
 	call Play_Pl_ClearJoyDirBuffer
 	mMvIn_GetLH MOVE_ATHENA_PSYCHO_BALL_L, MOVE_ATHENA_PSYCHO_BALL_H
 	call MoveInputS_SetSpecMove_StopSpeed
@@ -3459,8 +3459,8 @@ MoveInit_Athena_PsychoTeleport:
 	jp   MoveInputReader_Athena_SetMove
 ; =============== MoveInit_Athena_ShCrystGround ===============
 MoveInit_Athena_ShCrystGround:
-	mMvIn_ValidateProjActive Athena
-	mMvIn_ValidateProjVisible Athena
+	mMvIn_ValProjActive Athena
+	mMvIn_ValProjVisible Athena
 	call Play_Pl_ClearJoyDirBuffer
 	mMvIn_GetSD MOVE_ATHENA_SHINING_CRYSTAL_BIT_GS, MOVE_ATHENA_SHINING_CRYSTAL_BIT_GD
 	call MoveInputS_SetSpecMove_StopSpeed
@@ -3468,8 +3468,8 @@ MoveInit_Athena_ShCrystGround:
 	jp   MoveInputReader_Athena_SetMove
 ; =============== MoveInit_Athena_ShCrystAir ===============
 MoveInit_Athena_ShCrystAir:
-	mMvIn_ValidateProjActive Athena
-	mMvIn_ValidateProjVisible Athena
+	mMvIn_ValProjActive Athena
+	mMvIn_ValProjVisible Athena
 	call Play_Pl_ClearJoyDirBuffer
 	mMvIn_GetSD MOVE_ATHENA_SHINING_CRYSTAL_BIT_AS, MOVE_ATHENA_SHINING_CRYSTAL_BIT_AD
 	call MoveInputS_SetSpecMove_StopSpeed
@@ -6026,7 +6026,7 @@ MoveInputReader_Andy:
 
 .chkPunch:
 	; BDF+P (close) -> Geki Heki Hai Sui Sho
-	mMvIn_ValidateClose .chkPunchNoClose
+	mMvIn_ValClose .chkPunchNoClose
 	mMvIn_ChkDir MoveInput_BDF, MoveInit_Andy_GekiHekiHaiSuiSho
 .chkPunchNoClose:
 	; BF+P -> Zan Ei Ken
@@ -6038,7 +6038,7 @@ MoveInputReader_Andy:
 	; End
 	jp   MoveInputReader_Andy_NoMove
 .chkKick:
-	mMvIn_ValidateSuper .chkKickNoSuper
+	mMvIn_ValSuper .chkKickNoSuper
 	; DBDF+K -> Cho Reppa Dan
 	mMvIn_ChkDir MoveInput_DBDF, MoveInit_Andy_ChoReppaDan
 .chkKickNoSuper:
@@ -6843,7 +6843,7 @@ MoveInputReader_MrBig:
 	mMvIn_ChkGA MrBig, .chkPunch, .chkKick
 .chkPunch:
 	; DFDF+P -> Blaster Wave
-	mMvIn_ValidateSuper .chkPunchNoSuper
+	mMvIn_ValSuper .chkPunchNoSuper
 	mMvIn_ChkDir MoveInput_DFDF, MoveInit_MrBig_BlasterWave
 .chkPunchNoSuper:
 	; FDF+P -> California Romance
@@ -7540,7 +7540,7 @@ MoveInputReader_Geese:
 	mMvIn_ChkEasy MoveInit_Geese_RagingStorm, MoveInit_Geese_AtemiNage
 	mMvIn_ChkGA Geese, .chkPunch, .chkKick
 .chkPunch:
-	mMvIn_ValidateSuper .chkPunchNoSuper
+	mMvIn_ValSuper .chkPunchNoSuper
 	; BFDBF+P -> Raging Storm
 	mMvIn_ChkDir MoveInput_BFDBF, MoveInit_Geese_RagingStorm
 .chkPunchNoSuper:

@@ -325,7 +325,7 @@ Win_EndingCutscene:
 	; A = Speciala Team ID
 	call Win_GetSpecTeamId
 	; Depending on that...
-	cp   TEAM_ID_SACRED_TREASURES
+	cp   TEAM_ID_SACTREAS
 	jp   z, .teamSacTre
 	cp   TEAM_ID_OLEONA
 	jp   z, .teamOLeona
@@ -526,7 +526,7 @@ Win_GetSpecTeamId:
 .chk1:
 	call Win_IsSpecTeamSacTre			; Playing as spec. team #1?
 	jr   nc, .chk2						; If not, check the next one
-	ld   a, TEAM_ID_SACRED_TREASURES	; Otherwise, return this group id
+	ld   a, TEAM_ID_SACTREAS	; Otherwise, return this group id
 	jp   .ret
 .chk2:
 	call Win_IsSpecTeamOLeona			; ...

@@ -20,7 +20,7 @@ MoveInputReader_Iori:
 	mMvIn_ChkGA Iori, .chkPunch, .chkKick
 .chkPunch:
 	; DBDF+P -> Kin 1201 Shiki Ya Otome
-	mMvIn_ValidateSuper .chkPunchNoSuper
+	mMvIn_ValSuper .chkPunchNoSuper
 	mMvIn_ChkDir MoveInput_DBDF, MoveInit_Iori_KinYaOtome
 .chkPunchNoSuper:
 	; FDF+P -> 100 Shiki Oni Yaki
@@ -37,7 +37,7 @@ MoveInputReader_Iori:
 	; O.Iori only!
 	;##
 	; DBDF+K -> Kin 1201 Shiki Ya Otome (Alt)
-	mMvIn_ValidateSuper .chkKickNoSuper
+	mMvIn_ValSuper .chkKickNoSuper
 	mMvIn_ChkDir MoveInput_DBDF, MoveInit_OIori_KinYaOtome
 	;##
 .chkKickNoSuper:
@@ -46,7 +46,7 @@ MoveInputReader_Iori:
 	jp   MoveInputReader_Iori_NoMove
 ; =============== MoveInit_Iori_YamiBarai ===============
 MoveInit_Iori_YamiBarai:
-	mMvIn_ValidateProjActive Iori
+	mMvIn_ValProjActive Iori
 	call Play_Pl_ClearJoyDirBuffer
 	mMvIn_GetLH MOVE_IORI_YAMI_BARAI_L, MOVE_IORI_YAMI_BARAI_H
 	call MoveInputS_SetSpecMove_StopSpeed
@@ -560,7 +560,7 @@ MoveC_Iori_KotoTsukiIn:
 ; --------------- frames #0-3 / player distance check ---------------
 .chkNear:
 	; Advances to #5 if we get near
-	mMvIn_ValidateClose .moveH
+	mMvIn_ValClose .moveH
 		mMvC_SetFrame $05*OBJLSTPTR_ENTRYSIZE, $01
 		call OBJLstS_ApplyXSpeed
 		jp   .ret
@@ -1415,7 +1415,7 @@ MoveInputReader_Mature:
 	jp   MoveInputReader_Mature_NoMove
 .chkKick:
 	; DBDF+K -> Heaven's Gate
-	mMvIn_ValidateSuper .chkKickNoSuper
+	mMvIn_ValSuper .chkKickNoSuper
 	mMvIn_ChkDir MoveInput_DBDF, MoveInit_Mature_HeavensGate
 .chkKickNoSuper:
 	; DB+K -> Metal Massacre
@@ -1639,7 +1639,7 @@ MoveC_Mature_MetalMassacre:
 ; Switch to #4 as soon as we get near the opponent.
 ; If by the end of #2 we don't, the animation switches to #3 and the move ends there.
 .chkPlNear:
-	mMvIn_ValidateClose .moveH, $30
+	mMvIn_ValClose .moveH, $30
 		mMvC_SetFrame $10, $00
 		call OBJLstS_ApplyXSpeed
 		IF FIX_BUGS == 1
@@ -2396,7 +2396,7 @@ ProjC_NoMove:
 MoveInputReader_Chizuru:
 	; Normal Chizuru can't use any specials if one of her projectiles is active on-screen.
 	; This doesn't apply to the boss version "KAGURA".
-	mMvIn_ValidateProjActive MoveInputReader_Chizuru_NoMove
+	mMvIn_ValProjActive MoveInputReader_Chizuru_NoMove
 ; =============== MoveInputReader_Kagura ===============
 MoveInputReader_Kagura:
 	mMvIn_Validate Chizuru
@@ -2410,7 +2410,7 @@ MoveInputReader_Kagura:
 	mMvIn_ChkGA Chizuru, .chkPunch, .chkKick
 .chkPunch:
 	; DBDF+P -> Ichimen Ikatsu San Rai no Fui Jin 
-	mMvIn_ValidateSuper .chkPunchNoSuper
+	mMvIn_ValSuper .chkPunchNoSuper
 	mMvIn_ChkDir MoveInput_DBDF, MoveInit_Chizuru_SanRaiFuiJin
 .chkPunchNoSuper:
 	; FDF+P -> 100 Katso Tenjin no Kotowari 
@@ -2422,8 +2422,8 @@ MoveInputReader_Kagura:
 	jp   MoveInputReader_Chizuru_NoMove
 .chkKick:
 	; DBDB+K -> Ichimen 85 Katsu Reigi no Ishizue 
-	mMvIn_ValidateProjActive .chkKickNoSuper
-	mMvIn_ValidateSuper .chkKickNoSuper
+	mMvIn_ValProjActive .chkKickNoSuper
+	mMvIn_ValSuper .chkKickNoSuper
 	mMvIn_ChkDir MoveInput_DBDB, MoveInit_Chizuru_ReigiIshizue 
 .chkKickNoSuper:
 	; FDB+K -> 212 Katsu Shinsoku no Noroti (Low)
@@ -2490,7 +2490,7 @@ MoveInit_Chizuru_SanRaiFuiJin:
 	jp   MoveInputReader_Chizuru_SetMove
 ; =============== MoveInit_Chizuru_ReigiIshizue ===============
 MoveInit_Chizuru_ReigiIshizue:
-	mMvIn_ValidateProjActive Chizuru
+	mMvIn_ValProjActive Chizuru
 	call Play_Pl_ClearJoyDirBuffer
 	mMvIn_GetSD MOVE_CHIZURU_REIGI_ISHIZUE_S, MOVE_CHIZURU_REIGI_ISHIZUE_D
 	call MoveInputS_SetSpecMove_StopSpeed
@@ -3088,7 +3088,7 @@ MoveInputReader_Daimon:
 	mMvIn_ChkGA Daimon, .chkPunch, .chkKick
 	
 .chkPunch:
-	mMvIn_ValidateSuper .chkPunchNoSuper
+	mMvIn_ValSuper .chkPunchNoSuper
 	; FDBx2+P -> Heaven to Hell Drop
 	mMvIn_ChkDir MoveInput_FDBFDB, MoveInit_Daimon_HeavenHellDrop
 	

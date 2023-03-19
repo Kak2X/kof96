@@ -5487,7 +5487,7 @@ MoveInputReader_Ryo:
 	mMvIn_ChkGA Ryo, .chkPunch, .chkKick
 	
 .chkPunch:
-	mMvIn_ValidateSuper .chkPunchNoSuper
+	mMvIn_ValSuper .chkPunchNoSuper
 	; DFDB+P -> Ryu Ko Ranbu
 	mMvIn_ChkDir MoveInput_DFDB, MoveInit_Ryo_RyuKoRanbu
 	; FBDF+P -> Haoh Shokoh Ken 
@@ -5548,7 +5548,7 @@ MoveInit_Ryo_KoHou:
 ; =============== MoveInit_Ryo_KyokukenRyuRenbuKen ===============
 MoveInit_Ryo_KyokukenRyuRenbuKen:
 	call Play_Pl_ClearJoyDirBuffer
-	mMvIn_ValidateClose MoveInputReader_Ryo_NoMove
+	mMvIn_ValClose MoveInputReader_Ryo_NoMove
 	mMvIn_GetLH MOVE_RYO_KYOKUKEN_RYU_RENBU_KEN_L, MOVE_RYO_KYOKUKEN_RYU_RENBU_KEN_H
 	call MoveInputS_SetSpecMove_StopSpeed
 	jp   MoveInputReader_Ryo_SetMove
@@ -5571,7 +5571,7 @@ MoveInit_Ryo_RyuKoRanbu:
 	jp   MoveInputReader_Ryo_SetMove
 ; =============== MoveInit_Ryo_HaohShokohKen ===============
 MoveInit_Ryo_HaohShokohKen:
-	mMvIn_ValidateProjActive Ryo
+	mMvIn_ValProjActive Ryo
 	call Play_Pl_ClearJoyDirBuffer
 	mMvIn_GetSD MOVE_RYO_HAOH_SHOKOH_KEN_S, MOVE_RYO_HAOH_SHOKOH_KEN_D
 	call MoveInputS_SetSpecMove_StopSpeed
@@ -6193,7 +6193,7 @@ MoveInputReader_Robert:
 	mMvIn_ChkEasy MoveInit_Robert_RyuKoRanbu, MoveInit_Robert_RyuuGa_Hidden
 	mMvIn_ChkGA Robert, .chkPunch, .chkKick
 .chkPunch:
-	mMvIn_ValidateSuper .chkPunchNoSuper
+	mMvIn_ValSuper .chkPunchNoSuper
 	; DFDB+P -> Ryu Ko Ranbu
 	mMvIn_ChkDir MoveInput_DFDB, MoveInit_Robert_RyuKoRanbu
 	; FBDF+P -> Haoh Shokoh Ken 
@@ -6247,7 +6247,7 @@ MoveInit_Robert_RyuuGa:
 ; =============== MoveInit_Robert_KyokugenRyuRanbuKyaku ===============
 MoveInit_Robert_KyokugenRyuRanbuKyaku:
 	call Play_Pl_ClearJoyDirBuffer
-	mMvIn_ValidateClose MoveInputReader_Robert_NoMove
+	mMvIn_ValClose MoveInputReader_Robert_NoMove
 	mMvIn_GetLH MOVE_ROBERT_KYOKUGEN_RYU_RANBU_KYAKU_L, MOVE_ROBERT_KYOKUGEN_RYU_RANBU_KYAKU_H
 	call MoveInputS_SetSpecMove_StopSpeed
 	jp   MoveInputReader_Robert_SetMove
@@ -6268,7 +6268,7 @@ MoveInit_Robert_RyuKoRanbu:
 	jp   MoveInputReader_Robert_SetMove
 ; =============== MoveInit_Robert_HaohShokohKen ===============
 MoveInit_Robert_HaohShokohKen:
-	mMvIn_ValidateProjActive Robert
+	mMvIn_ValProjActive Robert
 	call Play_Pl_ClearJoyDirBuffer
 	mMvIn_GetSD MOVE_ROBERT_HAOH_SHOKOH_KEN_S, MOVE_ROBERT_HAOH_SHOKOH_KEN_D
 	call MoveInputS_SetSpecMove_StopSpeed
@@ -7235,7 +7235,7 @@ MoveInputReader_Leona:
 	mMvIn_ChkGA Leona, .chkAirPunch, .chkAirKick
 .chkAirPunch:
 	; DFDB+P (air) -> V Slasher
-	mMvIn_ValidateSuper .chkAirPunchNoSuper
+	mMvIn_ValSuper .chkAirPunchNoSuper
 	mMvIn_ChkDir MoveInput_DFDB, MoveInit_Leona_VSlasher
 .chkAirPunchNoSuper:
 	jp   MoveInputReader_Leona_NoMove
@@ -7251,7 +7251,7 @@ MoveInputReader_Leona:
 	mMvIn_ValSkipWithChar CHAR_ID_LEONA, .chkPunchNorm
 	;##
 	; DFDB+P -> Super Moon Slasher
-	mMvIn_ValidateSuper .chkPunchNoSuper
+	mMvIn_ValSuper .chkPunchNoSuper
 	mMvIn_ChkDir MoveInput_DFDB, MoveInit_OLeona_SuperMoonSlasher
 .chkPunchNoSuper:
 	; FDB+P -> Storm Bringer
@@ -7528,7 +7528,7 @@ MoveC_Leona_GrandSabre:
 .chkDistance:
 	; Getting close to the opponent switches to #6.
 	; If we don't, #5 makes sure to end the move before it automatically switches to #6.
-	mMvIn_ValidateClose .chkDistance_far, $20
+	mMvIn_ValClose .chkDistance_far, $20
 		mMvC_SetFrame $06*OBJLSTPTR_ENTRYSIZE, $01
 		call OBJLstS_ApplyXSpeed
 		jp   .ret
@@ -8256,7 +8256,7 @@ MoveInputReader_MrKarate:
 	mMvIn_ChkEasy MoveInit_MrKarate_RyukoRanbu, MoveInit_MrKarate_Zenretsuken
 	mMvIn_ChkGA MrKarate, .chkPunch, .chkKick
 .chkPunch:
-	mMvIn_ValidateSuper .chkPunchNoSuper
+	mMvIn_ValSuper .chkPunchNoSuper
 	; DFDB+P -> Ryuko Ranbu
 	mMvIn_ChkDir MoveInput_DFDB, MoveInit_MrKarate_RyukoRanbu
 	; FBDF+P -> Haoh Sho Koh Ken
@@ -8310,7 +8310,7 @@ MoveInit_MrKarate_Zenretsuken:
 ; =============== MoveInit_MrKarate_KyokukenRyuRenbuKen ===============
 MoveInit_MrKarate_KyokukenRyuRenbuKen:
 	call Play_Pl_ClearJoyDirBuffer
-	mMvIn_ValidateClose MoveInputReader_MrKarate_NoMove
+	mMvIn_ValClose MoveInputReader_MrKarate_NoMove
 	mMvIn_GetLH MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_L, MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_H
 	call MoveInputS_SetSpecMove_StopSpeed
 	jp   MoveInputReader_MrKarate_SetMove
@@ -8325,7 +8325,7 @@ MoveInit_MrKarate_RyukoRanbu:
 	jp   MoveInputReader_MrKarate_SetMove
 ; =============== MoveInit_MrKarate_HaohShoKohKen ===============
 MoveInit_MrKarate_HaohShoKohKen:
-	mMvIn_ValidateProjActive MrKarate
+	mMvIn_ValProjActive MrKarate
 	call Play_Pl_ClearJoyDirBuffer
 	mMvIn_GetSD MOVE_MRKARATE_HAOH_SHO_KOH_KEN_S, MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D
 	call MoveInputS_SetSpecMove_StopSpeed

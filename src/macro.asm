@@ -113,6 +113,8 @@ ENDM
 
 ; =============== Special move list definition macros ===============
 ; For MoveInputReader_*
+;
+; However, some are also used by the move code itself.
 
 ; =============== mMvIn_Validate ===============
 ; Performs initial validation at the start of an input reader,
@@ -153,21 +155,21 @@ mMvIn_ChkGA: MACRO
 	jp   MoveInputReader_\<1>_NoMove ; We never get here
 ENDM
 
-; =============== mMvIn_ValidateSuper ===============
+; =============== mMvIn_ValSuper ===============
 ; Guards against checking super move inputs if we can't start super moves.
 ; IN
 ; - 1: Label to skip the super move inputs
-mMvIn_ValidateSuper: MACRO
+mMvIn_ValSuper: MACRO
 	call MoveInputS_CanStartSuperMove	; Can we start a super?
 	jp   c, \1							; If not, skip
 ENDM
 
-; =============== mMvIn_ValidateProjActive ===============
+; =============== mMvIn_ValProjActive ===============
 ; Guards against starting moves that spawn projectiles if another
 ; projectile associated to the same player is still active.
 ; IN
 ; - 1: Char Key or Label to skip the input
-mMvIn_ValidateProjActive: MACRO
+mMvIn_ValProjActive: MACRO
 	call MoveInputS_CanStartProjMove			; Can we start this move?
 	IF DEF(MoveInputReader_\<1>_NoMove)
 		jp   nz, MoveInputReader_\<1>_NoMove	; If not, skip
@@ -176,12 +178,12 @@ mMvIn_ValidateProjActive: MACRO
 	ENDC
 ENDM
 
-; =============== mMvIn_ValidateProjVisible ===============
+; =============== mMvIn_ValProjVisible ===============
 ; Guards against starting moves that spawn projectiles if another
 ; projectile associated to the same player is still *visible*.
 ; IN
 ; - 1: Char Key
-mMvIn_ValidateProjVisible: MACRO
+mMvIn_ValProjVisible: MACRO
 	; Seek to the status field of the projectile associated to this player.
 	; This is always 2 slots after the one for the current player.
 	ld   hl, (OBJINFO_SIZE * 2)+iOBJInfo_Status
@@ -191,12 +193,12 @@ mMvIn_ValidateProjVisible: MACRO
 	jp   nz, MoveInputReader_\<1>_NoMove
 ENDM
 
-; =============== mMvIn_ValidateClose ===============
+; =============== mMvIn_ValClose ===============
 ; Verifies that the move is performed close to the opponent.
 ; IN
 ; - 1: Label to skip the input
 ; - 2: [OPTIONAL] Player distance threshold. By default, it's $18
-mMvIn_ValidateClose: MACRO
+mMvIn_ValClose: MACRO
 	; The move must be done within $18px of the other player
 	ld   hl, iPlInfo_PlDistance
 	add  hl, bc
@@ -210,11 +212,11 @@ ENDC
 	; If we got here, we can continue
 ENDM
 
-; =============== mMvIn_ValidateDipPowerup ===============
+; =============== mMvIn_ValDipPowerup ===============
 ; Guards against checking move inputs if they require the powerup cheat
 ; IN
 ; - 1: Label to skip the move inputs
-mMvIn_ValidateDipPowerup: MACRO
+mMvIn_ValDipPowerup: MACRO
 	ld   a, [wDipSwitch]
 	bit  DIPB_POWERUP, a		; Is the cheat enabled?
 	jp   z, \1					; If not, skip
@@ -461,8 +463,8 @@ mMvIn_JpSD: MACRO
 	jp   \1 	; Otherwise, jump to the normal version
 ENDM
 
-; =============== Move code macros (new?) ===============
-; For MoveC_*
+; =============== Move code macros ===============
+; Only For MoveC_*
 ;
 ; For all of these:
 ; IN

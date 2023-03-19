@@ -26,7 +26,7 @@ MoveInputReader_Krauser:
 	mMvIn_JpIfStartCmdThrow_StdColi MoveInit_Krauser_KaiserSuplex ; Jump here on success
 .chkPunchSuper:
 	; FBDF+P -> Kaiser Wave
-	mMvIn_ValidateSuper .chkPunchNoSuper
+	mMvIn_ValSuper .chkPunchNoSuper
 	mMvIn_ChkDir MoveInput_FBDF, MoveInit_Krauser_KaiserWave
 .chkPunchNoSuper:
 	; DB+P -> High Blitz Ball
@@ -45,7 +45,7 @@ MoveInputReader_Krauser:
 	
 ; =============== MoveInit_Krauser_HighBlitzBall ===============	
 MoveInit_Krauser_HighBlitzBall:
-	mMvIn_ValidateProjActive Krauser
+	mMvIn_ValProjActive Krauser
 	call Play_Pl_ClearJoyDirBuffer
 	mMvIn_GetLH MOVE_KRAUSER_HIGH_BLITZ_BALL_L, MOVE_KRAUSER_HIGH_BLITZ_BALL_H
 	call MoveInputS_SetSpecMove_StopSpeed
@@ -53,7 +53,7 @@ MoveInit_Krauser_HighBlitzBall:
 	jp   MoveInputReader_Krauser_SetMove
 ; =============== MoveInit_Krauser_LowBlitzBall ===============	
 MoveInit_Krauser_LowBlitzBall:
-	mMvIn_ValidateProjActive Krauser
+	mMvIn_ValProjActive Krauser
 	call Play_Pl_ClearJoyDirBuffer
 	mMvIn_GetLH MOVE_KRAUSER_LOW_BLITZ_BALL_L, MOVE_KRAUSER_LOW_BLITZ_BALL_H
 	call MoveInputS_SetSpecMove_StopSpeed
@@ -99,7 +99,7 @@ MoveInit_Krauser_KaiserSuplex:
 	jp   MoveInputReader_Krauser_SetMove
 ; =============== MoveInit_Krauser_KaiserWave ===============	
 MoveInit_Krauser_KaiserWave:
-	mMvIn_ValidateProjActive Krauser
+	mMvIn_ValProjActive Krauser
 	call Play_Pl_ClearJoyDirBuffer
 	mMvIn_GetSD MOVE_KRAUSER_KAISER_WAVE_S, MOVE_KRAUSER_KAISER_WAVE_D
 	call MoveInputS_SetSpecMove_StopSpeed

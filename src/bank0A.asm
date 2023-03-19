@@ -276,7 +276,7 @@ MoveInputReader_Goenitz:
 	mMvIn_ChkGA Goenitz, .chkAirPunch, .chkAirKick
 .chkAirPunch:
 	; DBDF+P (air) -> Shinyaotome Mizuchi / Shinyaotome Jissoukoku (always heavy)
-	mMvIn_ValidateSuper .chkAirPunchNoSuper
+	mMvIn_ValSuper .chkAirPunchNoSuper
 	mMvIn_ChkDirNot MoveInput_DBDF, .chkAirPunchNoSuper
 .startAirPunchSuper:
 	mMvIn_JpSD MoveInit_Goenitz_ShinyaotomeMizuchi.heavy, MoveInit_Goenitz_ShinyaotomeJissoukoku.heavy
@@ -293,7 +293,7 @@ MoveInputReader_Goenitz:
 	mMvIn_ChkGA Goenitz, .chkPunch, .chkKick
 .chkPunch:
 	; DBDF+P -> Shinyaotome Mizuchi / Shinyaotome Jissoukoku 
-	mMvIn_ValidateSuper .chkPunchNoSuper
+	mMvIn_ValSuper .chkPunchNoSuper
 	mMvIn_ChkDirNot MoveInput_DBDF, .chkPunchNoSuper
 .startPunchSuper:
 	mMvIn_JpSD MoveInit_Goenitz_ShinyaotomeMizuchi, MoveInit_Goenitz_ShinyaotomeJissoukoku
