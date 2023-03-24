@@ -54,6 +54,9 @@ TILEMAP_V EQU BG_TILECOUNT_V * TILE_V ; $100
 ; Bytes in a tile
 TILESIZE EQU $10
 
+OBJ_SIZE     EQU 4		; Size of one OBJ
+OBJCOUNT_MAX EQU $28	; Max number of OBJ
+
 ; interrupt flags
 IB_VBLANK        EQU 0
 IB_STAT          EQU 1

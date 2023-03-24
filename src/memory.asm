@@ -18,315 +18,375 @@ vBGPowBar2P_Left        EQU $9C8C
 
 wBGMaxPowBarRow         EQU $9CA0
 
+; EQUs relative to the Japanese version
+SECTION "Settings RAM", WRAM0[$C000]
+wDipSwitch              :db ; EQU $C000 ; DIP-SWITCH options
+wDifficulty             :db ; EQU $C001
+wMatchStartTime         :db ; EQU $C002
 
-wDipSwitch              EQU $C000 ; DIP-SWITCH options
-wDifficulty             EQU $C001
-wMatchStartTime         EQU $C002
-wTimer                  EQU $C005 ; Global timer
-wLCDCSectId             EQU $C006 ; Starts at $00 on every frame, incremented when LCDC hits (to determine the parallax sections)
-wVBlankNotDone          EQU $C007 ; If != 0, the VBlank handler hasn't finished
-wPlayTimer              EQU $C008 ; Timer that increments every frame of gameplay (but not when pausing or in the intro)
-wRand                   EQU $C009 ; Last random value for the Rand function not using LY
-wRandLY                 EQU $C00A ; Last random value for the Rand function using LY
+SECTION "Main RAM", WRAM0[$C005]
+wTimer                  :db ; EQU $C005 ; Global timer
+wLCDCSectId             :db ; EQU $C006 ; Starts at $00 on every frame, incremented when LCDC hits (to determine the parallax sections)
+wVBlankNotDone          :db ; EQU $C007 ; If != 0, the VBlank handler hasn't finished
+wPlayTimer              :db ; EQU $C008 ; Timer that increments every frame of gameplay (but not when pausing or in the intro)
+wRand                   :db ; EQU $C009 ; Last random value for the Rand function not using LY
+wRandLY                 :db ; EQU $C00A ; Last random value for the Rand function using LY
 
-wNoCopyGFXBuf           EQU $C00E ; If set, disables the GFX copy during VBlank
-wOBJLstCurHeaderFlags   EQU $C00F ; Raw flags value from the OBJLst header
+ds $C00E-$C00B
 
-wWorkOAMCurPtr_Low      EQU $C010 ; Next OBJ will be written at this location
-wWorkOAMCurPtr_High     EQU $C011 ; 
-wOBJLstTmpROMFlags      EQU $C012 ; Calculated status flags for the sprite mapping
-wOBJLstCurStatus        EQU $C013 ; Temporary copy of iOBJInfo_Status
-wOBJLstTmpStatusNew     EQU $C012 ; For OBJLstS_UpdateGFXBufInfo
-wOBJLstTmpStatusOld     EQU $C014 ; For OBJLstS_UpdateGFXBufInfo
+wNoCopyGFXBuf           :db ; EQU $C00E ; If set, disables the GFX copy during VBlank
+wOBJLstCurHeaderFlags   :db ; EQU $C00F ; Raw flags value from the OBJLst header
+wWorkOAMCurPtr_Low      :db ; EQU $C010 ; Next OBJ will be written at this location
+wWorkOAMCurPtr_High     :db ; EQU $C011 ; 
+UNION
+wOBJLstTmpROMFlags      :db ; EQU $C012 ; Calculated status flags for the sprite mapping
+NEXTU
+wOBJLstTmpStatusNew     :db ; EQU $C012 ; For OBJLstS_UpdateGFXBufInfo
+ENDU
+wOBJLstCurStatus        :db ; EQU $C013 ; Temporary copy of iOBJInfo_Status
+wOBJLstTmpStatusOld     :db ; EQU $C014 ; For OBJLstS_UpdateGFXBufInfo
 
-wOBJLstOrigFlags        EQU $C015 ; Original copy of the correct iOBJInfo_OBJLstFlags* field for the currently processed sprite mapping
+
+wOBJLstOrigFlags        :db ; EQU $C015 ; Original copy of the correct iOBJInfo_OBJLstFlags* field for the currently processed sprite mapping
 ; wOBJLstCurDispX = wOBJLstCurRelX + wOBJLstCurXOffset
-wOBJLstCurRelX          EQU $C016 ; Calculated relative position/origin of the sprite mapping
-wOBJLstCurRelY          EQU $C017 ; Calculated relative position/origin of the sprite mapping
-wOBJLstCurDispX         EQU $C018 ; Effective X position of the displayed sprite mapping, relative to the screen
-wOBJLstCurDispY         EQU $C019 ; Effective Y position of the displayed sprite mapping, relative to the screen
-wOBJLstCurFlags         EQU $C01A ; Calculated flags for the sprite mapping (merge of wOBJLstCurFlags and wOBJLstOrigFlags)
-wOBJLstCurXOffset       EQU $C01B ; Offset added to wOBJLstCurRelX, and the result goes to wOBJLstCurDispX
-wOBJLstCurYOffset       EQU $C01C ; Offset added to wOBJLstCurRelX, and the result goes to wOBJLstCurDispY
-
-; Option flags
-wMisc_C025              EQU $C025 ; Serial + SGB
-wMisc_C026              EQU $C026 ; Task
-wMisc_C027              EQU $C027 ; Gameplay
-wMisc_C028              EQU $C028 ; Sect
+wOBJLstCurRelX          :db ; EQU $C016 ; Calculated relative position/origin of the sprite mapping
+wOBJLstCurRelY          :db ; EQU $C017 ; Calculated relative position/origin of the sprite mapping
+wOBJLstCurDispX         :db ; EQU $C018 ; Effective X position of the displayed sprite mapping, relative to the screen
+wOBJLstCurDispY         :db ; EQU $C019 ; Effective Y position of the displayed sprite mapping, relative to the screen
+wOBJLstCurFlags         :db ; EQU $C01A ; Calculated flags for the sprite mapping (merge of wOBJLstCurFlags and wOBJLstOrigFlags)
+wOBJLstCurXOffset       :db ; EQU $C01B ; Offset added to wOBJLstCurRelX, and the result goes to wOBJLstCurDispX
+wOBJLstCurYOffset       :db ; EQU $C01C ; Offset added to wOBJLstCurRelX, and the result goes to wOBJLstCurDispY
 
 
-wIntroScene             EQU $C029 ; Offset to scene ID in scene pointer table (some scenes have different parts)
-wIntroCharScene         EQU $C02A ; Offset to the subscene ID when animating player sprites
+ds $C025-$C01D
 
-wTitleMode              EQU $C029
+wMisc_C025              :db ; EQU $C025 ; Serial + SGB
+wMisc_C026              :db ; EQU $C026 ; Task
+wMisc_C027              :db ; EQU $C027 ; Gameplay
+wMisc_C028              :db ; EQU $C028 ; Sect
 
-wSGBSendPacketAtFrameEnd    EQU $C02B ; If set, there are SGB packets to send after all tasks are processed
-wSGBSoundPacket             EQU $C02C ; Data for the sound effect packet to be sent at the end of the frame.
+UNION
+wTitleMode              :db ; EQU $C029
+NEXTU
+wIntroScene             :db ; EQU $C029 ; Offset to scene ID in scene pointer table (some scenes have different parts)
+ENDU
+wIntroCharScene         :db ; EQU $C02A ; Offset to the subscene ID when animating player sprites
 
-wSerialIntPtr_Low                  EQU $C03C
-wSerialIntPtr_High                 EQU $C03D
-wSerialDataReceiveBuffer           EQU $C03E
-wSerialDataReceiveBuffer_End       EQU $C0BE
-wSerialDataSendBuffer              EQU $C0BE
-wSerialDataSendBuffer_End          EQU $C13E
-wSerialDataReceiveBufferIndex_Head EQU $C13E
-wSerialDataReceiveBufferIndex_Tail EQU $C13F
-wSerialDataSendBufferIndex_Head    EQU $C140 ; Index of most recent buffer entry
-wSerialDataSendBufferIndex_Tail    EQU $C141 ; Index of last buffer entry - used for current player input in VS serial
+
+
+wSGBSendPacketAtFrameEnd    :db     ; EQU $C02B ; If set, there are SGB packets to send after all tasks are processed
+wSGBSoundPacket             :ds $10 ; EQU $C02C ; Data for the sound effect packet to be sent at the end of the frame.
+
+wSerialIntPtr_Low                  :db     ; EQU $C03C
+wSerialIntPtr_High                 :db     ; EQU $C03D
+wSerialDataReceiveBuffer           :ds $80 ; EQU $C03E
+UNION
+wSerialDataReceiveBuffer_End       :db     ; EQU $C0BE
+NEXTU
+wSerialDataSendBuffer              :ds $80 ; EQU $C0BE
+ENDU
+UNION
+wSerialDataSendBuffer_End          :db     ; EQU $C13E
+NEXTU
+wSerialDataReceiveBufferIndex_Head :db     ; EQU $C13E
+ENDU
+wSerialDataReceiveBufferIndex_Tail :db     ; EQU $C13F
+wSerialDataSendBufferIndex_Head    :db     ; EQU $C140 ; Index of most recent buffer entry
+wSerialDataSendBufferIndex_Tail    :db     ; EQU $C141 ; Index of last buffer entry - used for current player input in VS serial
 ; These mark the balance for increasing the head/tail indexes
-wSerialReceivedLeft                EQU $C142 ; Number of received bytes wSerialDataReceiveBufferIndex_Tail is behind of. 
-wSerialSentLeft                    EQU $C143 ; Number of sent bytes wSerialDataReceiveBufferIndex_Tail is behind of.
-wSerial_Unknown_Unused_C144        EQU $C144
-wSerialPlayerId                    EQU $C145 ; Determines who is 1P/2P due to an implementation detail of how MODESELECT_SBCMD_* is sent.
-wSerialTransferDone                EQU $C146 ; Marks if the serial handler was executed for the frame? otherwise waits
-wSerialPendingJoyKeys              EQU $C147 ; Player 1 Only - Next inputs to send after receiving a byte
-wSerialPendingJoyNewKeys           EQU $C148
-wSerialPendingJoyKeys2             EQU $C149 ; Player 2 Only - Next inputs to send after receiving a byte
-wSerialPendingJoyNewKeys2          EQU $C14A ;
-wSerialInputMode                   EQU $C14B ; If set, controls are enabled during serial mode
-wSGBBorderType                     EQU $C14C ; Current border type loaded 
-wFontLoadBit1Col                   EQU $C14D ; 2pp color mapped to bit1 on 1bpp graphics
-wFontLoadBit0Col                   EQU $C14E ; 2pp color mapped to bit0 on 1bpp graphics
-wFontLoadTmpGFX                    EQU $C14F ; 2 bytes (size of a line)
+wSerialReceivedLeft                :db     ; EQU $C142 ; Number of received bytes wSerialDataReceiveBufferIndex_Tail is behind of. 
+wSerialSentLeft                    :db     ; EQU $C143 ; Number of sent bytes wSerialDataReceiveBufferIndex_Tail is behind of.
+wSerial_Unknown_Unused_C144        :db     ; EQU $C144
+wSerialPlayerId                    :db     ; EQU $C145 ; Determines who is 1P/2P due to an implementation detail of how MODESELECT_SBCMD_* is sent.
+wSerialTransferDone                :db     ; EQU $C146 ; Marks if the serial handler was executed for the frame? otherwise waits
+wSerialPendingJoyKeys              :db     ; EQU $C147 ; Player 1 Only - Next inputs to send after receiving a byte
+wSerialPendingJoyNewKeys           :db     ; EQU $C148
+wSerialPendingJoyKeys2             :db     ; EQU $C149 ; Player 2 Only - Next inputs to send after receiving a byte
+wSerialPendingJoyNewKeys2          :db     ; EQU $C14A ;
+wSerialInputMode                   :db     ; EQU $C14B ; If set, controls are enabled during serial mode
+wSGBBorderType                     :db     ; EQU $C14C ; Current border type loaded 
+wFontLoadBit1Col                   :db     ; EQU $C14D ; 2pp color mapped to bit1 on 1bpp graphics
+wFontLoadBit0Col                   :db     ; EQU $C14E ; 2pp color mapped to bit0 on 1bpp graphics
+wFontLoadTmpGFX                    :ds 2   ; EQU $C14F ; 2 bytes (size of a line)
 
-wTextPrintFlags             EQU $C151
-wTextPrintFrameCodeBank     EQU $C152 ; Bank number of the custom code
-wTextPrintFrameCodePtr_Low  EQU $C153 ; Ptr to the code itself
-wTextPrintFrameCodePtr_High EQU $C154
+wTextPrintFlags             :db ; EQU $C151
+wTextPrintFrameCodeBank     :db ; EQU $C152 ; Bank number of the custom code
+wTextPrintFrameCodePtr_Low  :db ; EQU $C153 ; Ptr to the code itself
+wTextPrintFrameCodePtr_High :db ; EQU $C154
 
 
-wOBJScrollX                 EQU $C155 ; X position *subtracted* to every OBJ.
-wOBJScrollY                 EQU $C157 ; Y position *subtracted* to every OBJ.
-wScreenShakeY               EQU $C159 ; Y offset "subtracted" from hScrollY, for vertical screen shake effects. won't alter sprites.
+wOBJScrollX                 :db ; EQU $C155 ; X position *subtracted* to every OBJ.
+ds 1 ; Missing subpixel position
+wOBJScrollY                 :db ; EQU $C157 ; Y position *subtracted* to every OBJ.
+ds 1 ; Missing subpixel position
+wScreenShakeY               :db ; EQU $C159 ; Y offset "subtracted" from hScrollY, for vertical screen shake effects. won't alter sprites.
 ; a supposed wScreenSect0LYC for the first section is fixed, and always starts at $00
-wScreenSect1LYC             EQU $C15A ; Scanline number the second screen section starts. During gameplay, it's the playfield.
-wScreenSect2LYC             EQU $C15B ; Scanline number the third screen section starts. During gameplay, it's the meter HUD
-wBonusFightId               EQU $C15C ; If set, the ID of the special team. (BONUS_ID_*) These receive special endings and/or bonus matches.
+wScreenSect1LYC             :db ; EQU $C15A ; Scanline number the second screen section starts. During gameplay, it's the playfield.
+wScreenSect2LYC             :db ; EQU $C15B ; Scanline number the third screen section starts. During gameplay, it's the meter HUD
+wBonusFightId               :db ; EQU $C15C ; If set, the ID of the special team. (BONUS_ID_*) These receive special endings and/or bonus matches.
 ; Temporary copy of the team char id table (iPlInfo_TeamCharId*) for the active player side.
 ; Character ID checks to determine wBonusFightId are made on this.
-wSpecTeamActiveCharId0      EQU $C15D ; 1st team member ID 
-wSpecTeamActiveCharId1      EQU $C15E ; 2nd team member ID 
-wSpecTeamActiveCharId2      EQU $C15F ; 2nd team member ID 
+wSpecTeamActiveCharId0      :db ; EQU $C15D ; 1st team member ID 
+wSpecTeamActiveCharId1      :db ; EQU $C15E ; 2nd team member ID 
+wSpecTeamActiveCharId2      :db ; EQU $C15F ; 2nd team member ID 
 
 
-wRoundFinal                 EQU $C160 ; If set, this is the "FINAL!!" round, displayed when all characters in both sides are marked as defeated (requires a draw)
-wStageDraw                  EQU $C161 ; If set, forces the "DRAW" screen to appear in single mode when the stage ends. Single-mode specific.
-wLastWinner                 EQU $C162 ; Marks using bits the player who won the last round.
-wPlayMode                   EQU $C163 ; Single/Team 1P/VS
-wRoundTotal                 EQU $C164 ; Total number of rounds played since the system was on. Never read back.
-wJoyActivePl                EQU $C165 ; Determines the active SGB pad, generally for 1P modes.
-wStageId                    EQU $C166 ; Stage ID. Determines music, backdrop and palette.
-wRoundNum                   EQU $C167 ; Round number in a stage
-wRoundTime                  EQU $C169 ; Round timer
-wRoundTimeSub               EQU $C16A ; Round subsecond timer
+wRoundFinal                 :db ; EQU $C160 ; If set, this is the "FINAL!!" round, displayed when all characters in both sides are marked as defeated (requires a draw)
+wStageDraw                  :db ; EQU $C161 ; If set, forces the "DRAW" screen to appear in single mode when the stage ends. Single-mode specific.
+wLastWinner                 :db ; EQU $C162 ; Marks using bits the player who won the last round.
+wPlayMode                   :db ; EQU $C163 ; Single/Team 1P/VS
+wRoundTotal                 :db ; EQU $C164 ; Total number of rounds played since the system was on. Never read back.
+wJoyActivePl                :db ; EQU $C165 ; Determines the active SGB pad, generally for 1P modes.
+wStageId                    :db ; EQU $C166 ; Stage ID. Determines music, backdrop and palette.
+wRoundNum                   :db ; EQU $C167 ; Round number in a stage
+ds 1
+wRoundTime                  :db ; EQU $C169 ; Round timer
+wRoundTimeSub               :db ; EQU $C16A ; Round subsecond timer
 
-wPlayMaxPowScroll1P         EQU $C16B ; Scrolls on-screen or off-screen the 1P MAX Power bar
-wPlayMaxPowScrollBGOffset1P EQU $C16C ; Tilemap offset, determines where the 1P MAX Power bar starts (special version of iPlInfo_MaxPowBGPtr)
-wPlayMaxPowScrollTimer1P    EQU $C16D ; Countdown. When it elapses, the scroll animation ends
-wPlayMaxPowScroll2P         EQU $C16E ; Scrolls on-screen or off-screen the 2P MAX Power bar
-wPlayMaxPowScrollBGOffset2P EQU $C16F ; Tilemap offset, determines where the 2P MAX Power bar starts (special version of iPlInfo_MaxPowBGPtr)
-wPlayMaxPowScrollTimer2P    EQU $C170 ; Countdown. When it elapses, the scroll animation ends
-wPlayHitstopSet             EQU $C171 ; Requests hitstop for the next frame.
-wPlayHitstop                EQU $C172 ; If set, hitstop is applied. Due to how tasks are carefully managed, this is only applied to 
-wPlayPlThrowActId           EQU $C173 ; Act ID for a throw. This is global since two throws can't be active at once.
-wPlayPlThrowOpMode          EQU $C174 ; PLAY_THROWOP_*
-wPlayPlThrowDir             EQU $C175 ; Sets the throw's direction. (PLAY_THROWDIR_*)
+wPlayMaxPowScroll1P         :db ; EQU $C16B ; Scrolls on-screen or off-screen the 1P MAX Power bar
+wPlayMaxPowScrollBGOffset1P :db ; EQU $C16C ; Tilemap offset, determines where the 1P MAX Power bar starts (special version of iPlInfo_MaxPowBGPtr)
+wPlayMaxPowScrollTimer1P    :db ; EQU $C16D ; Countdown. When it elapses, the scroll animation ends
+wPlayMaxPowScroll2P         :db ; EQU $C16E ; Scrolls on-screen or off-screen the 2P MAX Power bar
+wPlayMaxPowScrollBGOffset2P :db ; EQU $C16F ; Tilemap offset, determines where the 2P MAX Power bar starts (special version of iPlInfo_MaxPowBGPtr)
+wPlayMaxPowScrollTimer2P    :db ; EQU $C170 ; Countdown. When it elapses, the scroll animation ends
+wPlayHitstopSet             :db ; EQU $C171 ; Requests hitstop for the next frame.
+wPlayHitstop                :db ; EQU $C172 ; If set, hitstop is applied. Due to how tasks are carefully managed, this is only applied to 
+wPlayPlThrowActId           :db ; EQU $C173 ; Act ID for a throw. This is global since two throws can't be active at once.
+wPlayPlThrowOpMode          :db ; EQU $C174 ; PLAY_THROWOP_*
+wPlayPlThrowDir             :db ; EQU $C175 ; Sets the throw's direction. (PLAY_THROWDIR_*)
 ;--
 ; Movement amounts set by Play_Pl_MoveRotThrown, used to move the opponent at fixed relative positions,
 ; mostly during the "rotation frames" before the throw arc starts.
 ; This avoids having to define the offsets in the sprite mapping itself.
-wPlayPlThrowRotMoveH        EQU $C176 ; Relative X position
-wPlayPlThrowRotMoveV        EQU $C177 ; Relative Y position
-wPlayPlThrowRotSync         EQU $C178 ; If set, allows few moves in the "attacked" group to use the above two
+wPlayPlThrowRotMoveH        :db ; EQU $C176 ; Relative X position
+wPlayPlThrowRotMoveV        :db ; EQU $C177 ; Relative Y position
+wPlayPlThrowRotSync         :db ; EQU $C178 ; If set, allows few moves in the "attacked" group to use the above two
 ;--
-wPlayPlThrowTechTimer       EQU $C179 ; Countdown timer, window of opportunity for doing a throw tech.
-wPlaySlowdownTimer          EQU $C17A ; Countdown timer. When it's > 0, slowdown is enabled during gameplay. When it reaches 0, the slowdown stops.
-wPlaySlowdownSpeed          EQU $C17B ; Determines how much the game should slow down. Execution is 1 every (wPlaySlowdownSpeed) frames.
-wStageBGP                   EQU $C17C ; Determines palette for playfield (used to handle screen flashing)
-wPauseFlags                 EQU $C17D ; Contains flags the pause state
-wUnused_ContinueUsed        EQU $C17E ; If set, a continue was used. Not read by anything.
-wCharSeqId                  EQU $C17F ; "Stage sequence number". Index to the char sequence table, essentially the number of beat opponents after clearing a stage
-wCharSeqTbl                 EQU $C180 ; "Stage sequence". Sequence of CPU opponents in order, containing initially CHARSEL_ID_* for normal rounds and CHAR_ID_* for bosses
-wCharSelIdMapTbl            EQU $C194 ; Maps cursor locations in the char select screen (CHARSEL_ID_*) to actual character IDs (CHAR_ID_*)
+wPlayPlThrowTechTimer       :db ; EQU $C179 ; Countdown timer, window of opportunity for doing a throw tech.
+wPlaySlowdownTimer          :db ; EQU $C17A ; Countdown timer. When it's > 0, slowdown is enabled during gameplay. When it reaches 0, the slowdown stops.
+wPlaySlowdownSpeed          :db ; EQU $C17B ; Determines how much the game should slow down. Execution is 1 every (wPlaySlowdownSpeed) frames.
+wStageBGP                   :db ; EQU $C17C ; Determines palette for playfield (used to handle screen flashing)
+wPauseFlags                 :db ; EQU $C17D ; Contains flags the pause state
+wUnused_ContinueUsed        :db ; EQU $C17E ; If set, a continue was used. Not read by anything.
+wCharSeqId                  :db ; EQU $C17F ; "Stage sequence number". Index to the char sequence table, essentially the number of beat opponents after clearing a stage
+wCharSeqTbl                 :ds $14 ; EQU $C180 ; "Stage sequence". Sequence of CPU opponents in order, containing initially CHARSEL_ID_* for normal rounds and CHAR_ID_* for bosses
+wCharSelIdMapTbl            :ds $15 ; EQU $C194 ; Maps cursor locations in the char select screen (CHARSEL_ID_*) to actual character IDs (CHAR_ID_*)
                                       ; $15 bytes ($C194-$C1A8), this is updated when flipping a tile.
 
+
+
+; Mode-specific block starting from $C1A9
+
+UNION
 ;
 ; GENERAL
 ;
-wSerialLagCounter           EQU $C1C5 ; Amount of frames the serial lags for the slave
-wSerial_Unknown_Unused_C1C6 EQU $C1C6
-wLZSS_CurCmdMask            EQU $C1C7
-wLZSS_SplitNum              EQU $C1C8
-wLZSS_SplitMask             EQU $C1C9
-wLZSS_Buffer                EQU $C1CA
+ds $C1C5-$C1A9
+wSerialLagCounter           :db ; EQU $C1C5 ; Amount of frames the serial lags for the slave
+wSerial_Unknown_Unused_C1C6 :db ; EQU $C1C6
+wLZSS_CurCmdMask            :db ; EQU $C1C7
+wLZSS_SplitNum              :db ; EQU $C1C8
+wLZSS_SplitMask             :db ; EQU $C1C9
+wLZSS_Buffer                :db ; EQU $C1CA
 
+NEXTU
 ;
 ; TAKARA LOGO
 ;
-wCheatGoenitzKeysLeft       EQU $C1CA ; Amount of times to press the button before cheat activates
-wCheatAllCharKeysLeft       EQU $C1CB ; each for the 4 cheats
-wCheat_Unused_KeysLeft      EQU $C1CC
-wCheatEasyMovesKeysLeft     EQU $C1CD
+ds $C1CA-$C1A9
+wCheatGoenitzKeysLeft       :db ; EQU $C1CA ; Amount of times to press the button before cheat activates
+wCheatAllCharKeysLeft       :db ; EQU $C1CB ; each for the 4 cheats
+wCheat_Unused_KeysLeft      :db ; EQU $C1CC
+wCheatEasyMovesKeysLeft     :db ; EQU $C1CD
 
+NEXTU
 ;
 ; INTRO
 ;
-wIntroLoopOBJAnim EQU $C1B3 ; If set in the intro, sprite animations are set to loop
+ds $C1B3-$C1A9
+wIntroLoopOBJAnim           :db ; EQU $C1B3 ; If set in the intro, sprite animations are set to loop
 
 ;
 ; TITLE / OPTIONS
 ;
-wTitleMenuOptId             EQU $C1B4 ; Cursor location in title screen
-wTitleMenuCursorXBak        EQU $C1B5 ; Backup location of cursor X position
-wTitleMenuCursorYBak        EQU $C1B6 ; Backup location of cursor Y position
-wTitleSubMenuOptId          EQU $C1B7 ; Cursor location for Game Select / Option menus
-wOptionsSGBSndOptId         EQU $C1B8 ; Vertical cursor location in the SGB Sound Test
-wOptionsBGMId               EQU $C1B9 ; ID of the selected music in the BGM Test
-wOptionsSFXId               EQU $C1BA ; ID of the selected sound effect in the SFX Test
-wOptionsMenuMode            EQU $C1BB ; $00 -> Normal, $02 -> SGB Sound Test
-wTitleBlinkTimer            EQU $C1BC ; Increments in the title screen, determines when to hide or show blinking sprites
-wOptionsSGBBase             EQU $C1BD ; These are ordered in the same way as OPTION_SITEM_*
-wOptionsSGBSndIdA           EQU $C1BD ; Selected SGB Sound Id - Set A
-wOptionsSGBSndBankA         EQU $C1BE ; Selected SGB Bank number Id - Set A
-wOptionsSGBSndIdB           EQU $C1BF ; Selected SGB Sound Id - Set B
-wOptionsSGBSndBankB         EQU $C1C0 ; Selected SGB Bank number Id - Set B
-wTitleResetTimer_High       EQU $C1C1
-wTitleResetTimer_Low        EQU $C1C2
-wTitleParallaxBaseSpeed     EQU $C1C3 ; Extra cloud speed - Pixels
-wTitleParallaxBaseSpeedSub  EQU $C1C4 ; Extra cloud speed - Subpixels
-wOptionsSGBPacketSnd        EQU $C1CA ; Start of SGB packet used when selecting a song in the sound test
-wOptionsSGBPacketSndIdA     EQU $C1CB ; Byte 1 determines Sound ID A
-wOptionsSGBPacketSndIdB     EQU $C1CC ; Byte 2 determines Sound ID B
-wOptionsSGBPacketSndBank    EQU $C1CC ; Byte 3 determines Sound Bank
+wTitleMenuOptId             :db ; EQU $C1B4 ; Cursor location in title screen
+wTitleMenuCursorXBak        :db ; EQU $C1B5 ; Backup location of cursor X position
+wTitleMenuCursorYBak        :db ; EQU $C1B6 ; Backup location of cursor Y position
+wTitleSubMenuOptId          :db ; EQU $C1B7 ; Cursor location for Game Select / Option menus
+wOptionsSGBSndOptId         :db ; EQU $C1B8 ; Vertical cursor location in the SGB Sound Test
+wOptionsBGMId               :db ; EQU $C1B9 ; ID of the selected music in the BGM Test
+wOptionsSFXId               :db ; EQU $C1BA ; ID of the selected sound effect in the SFX Test
+wOptionsMenuMode            :db ; EQU $C1BB ; $00 -> Normal, $02 -> SGB Sound Test
+wTitleBlinkTimer            :db ; EQU $C1BC ; Increments in the title screen, determines when to hide or show blinking sprites
+; These are ordered in the same way as OPTION_SITEM_*
+wOptionsSGBSndIdA           :db ; EQU $C1BD ; Selected SGB Sound Id - Set A
+wOptionsSGBSndBankA         :db ; EQU $C1BE ; Selected SGB Bank number Id - Set A
+wOptionsSGBSndIdB           :db ; EQU $C1BF ; Selected SGB Sound Id - Set B
+wOptionsSGBSndBankB         :db ; EQU $C1C0 ; Selected SGB Bank number Id - Set B
+wOptionsSGBBase             EQU wOptionsSGBSndIdA
+wTitleResetTimer_High       :db ; EQU $C1C1
+wTitleResetTimer_Low        :db ; EQU $C1C2
+wTitleParallaxBaseSpeed     :db ; EQU $C1C3 ; Extra cloud speed - Pixels
+wTitleParallaxBaseSpeedSub  :db ; EQU $C1C4 ; Extra cloud speed - Subpixels
+ds $C1CA-$C1C5
+wOptionsSGBPacketSnd        :db ; EQU $C1CA ; Start of SGB packet used when selecting a song in the sound test
+wOptionsSGBPacketSndIdA     :db ; EQU $C1CB ; Byte 1 determines Sound ID A
+wOptionsSGBPacketSndIdB     :db ; EQU $C1CC ; Byte 2 determines Sound ID B
+wOptionsSGBPacketSndBank    :db ; EQU $C1CD ; Byte 3 determines Sound Bank
 
+NEXTU
 ;
 ; CHARACTER SELECT
 ;
-wCharSelP1CursorPos         EQU $C1A9 ; Player 1 cursor position, CHARSEL_ID_*
-wCharSelP2CursorPos         EQU $C1AA ; Player 2 cursor position, CHARSEL_ID_*
+wCharSelP1CursorPos         :db ; EQU $C1A9 ; Player 1 cursor position, CHARSEL_ID_*
+wCharSelP2CursorPos         :db ; EQU $C1AA ; Player 2 cursor position, CHARSEL_ID_*
 ; Character ID selected for both players
-wCharSelP1Char0             EQU $C1AB
-wCharSelP1Char1             EQU $C1AC
-wCharSelP1Char2             EQU $C1AD
-wCharSelP2Char0             EQU $C1AE
-wCharSelP2Char1             EQU $C1AF
-wCharSelP2Char2             EQU $C1B0
-wCharSelRandom1P            EQU $C1B1 ; Randomize team on 1P side
-wCharSelRandom2P            EQU $C1B2 ; Randomize team on 2P side
-wCharSelTeamFull            EQU $C1B3 ; Temporary value when adding characters, determines if more can be added
-wCharSelP1CursorMode        EQU $C1B4
-wCharSelP2CursorMode        EQU $C1B5
-wCharSelCurPl               EQU $C1B6 ; Player num currently handled in the character select screen.
-wCharSelRandomDelay1P       EQU $C1B7 ; Delay until the CPU autopicks the next character
-wCharSelRandomDelay2P       EQU $C1B8 ; Delay until the CPU autopicks the next character
+wCharSelP1Char0             :db ; EQU $C1AB
+wCharSelP1Char1             :db ; EQU $C1AC
+wCharSelP1Char2             :db ; EQU $C1AD
+wCharSelP2Char0             :db ; EQU $C1AE
+wCharSelP2Char1             :db ; EQU $C1AF
+wCharSelP2Char2             :db ; EQU $C1B0
+wCharSelRandom1P            :db ; EQU $C1B1 ; Randomize team on 1P side
+wCharSelRandom2P            :db ; EQU $C1B2 ; Randomize team on 2P side
+wCharSelTeamFull            :db ; EQU $C1B3 ; Temporary value when adding characters, determines if more can be added
+wCharSelP1CursorMode        :db ; EQU $C1B4
+wCharSelP2CursorMode        :db ; EQU $C1B5
+wCharSelCurPl               :db ; EQU $C1B6 ; Player num currently handled in the character select screen.
+wCharSelRandomDelay1P       :db ; EQU $C1B7 ; Delay until the CPU autopicks the next character
+wCharSelRandomDelay2P       :db ; EQU $C1B8 ; Delay until the CPU autopicks the next character
 
+NEXTU
 ;
 ; ORDER SELECT
 ;
-wOrdSelCPUDelay1P           EQU $C1B1 ; Delay between CPU picks
-wOrdSelCPUDelay2P           EQU $C1B2 ; Delay between CPU picks
-wOrdSelP1CharsSelected      EQU $C1B4
-wOrdSelP2CharsSelected      EQU $C1B5
-wOrdSelCurPl                EQU $C1B6 ; Player num currently handled in the character select screen.
-wOrdSelP1CursorPos          EQU $C1CA
-wOrdSelP2CursorPos          EQU $C1CB
-wOrdSelTmpP1CharId          EQU $C1CC ; Temporary value containing selected character ID
-wOrdSelTmpP2CharId          EQU $C1CD
+ds $C1B1-$C1A9
+wOrdSelCPUDelay1P           :db ; EQU $C1B1 ; Delay between CPU picks
+wOrdSelCPUDelay2P           :db ; EQU $C1B2 ; Delay between CPU picks
+ds 1
+wOrdSelP1CharsSelected      :db ; EQU $C1B4
+wOrdSelP2CharsSelected      :db ; EQU $C1B5
+wOrdSelCurPl                :db ; EQU $C1B6 ; Player num currently handled in the character select screen.
+ds $C1CA-$C1B7
+wOrdSelP1CursorPos          :db ; EQU $C1CA
+wOrdSelP2CursorPos          :db ; EQU $C1CB
+wOrdSelTmpP1CharId          :db ; EQU $C1CC ; Temporary value containing selected character ID
+wOrdSelTmpP2CharId          :db ; EQU $C1CD
 ; The last number of these labels doesn't have the same meaning in these pairs.
 ; wOrdSelP*CharSel -> number of the character slot (ie: 0 is leftmost for 1P, rightmost for 2P)
 ; wOrdSelP*CharId -> team member order (ie: at 0 is the first picked character)
-wOrdSelP1CharSel0           EQU $C1CE
-wOrdSelP1CharId0            EQU $C1CF
-wOrdSelP1CharSel1           EQU $C1D0
-wOrdSelP1CharId1            EQU $C1D1
-wOrdSelP1CharSel2           EQU $C1D2
-wOrdSelP1CharId2            EQU $C1D3
-wOrdSelP2CharSel0           EQU $C1D4
-wOrdSelP2CharId0            EQU $C1D5
-wOrdSelP2CharSel1           EQU $C1D6
-wOrdSelP2CharId1            EQU $C1D7
-wOrdSelP2CharSel2           EQU $C1D8
-wOrdSelP2CharId2            EQU $C1D9
+wOrdSelP1CharSel0           :db ; EQU $C1CE
+wOrdSelP1CharId0            :db ; EQU $C1CF
+wOrdSelP1CharSel1           :db ; EQU $C1D0
+wOrdSelP1CharId1            :db ; EQU $C1D1
+wOrdSelP1CharSel2           :db ; EQU $C1D2
+wOrdSelP1CharId2            :db ; EQU $C1D3
+wOrdSelP2CharSel0           :db ; EQU $C1D4
+wOrdSelP2CharId0            :db ; EQU $C1D5
+wOrdSelP2CharSel1           :db ; EQU $C1D6
+wOrdSelP2CharId1            :db ; EQU $C1D7
+wOrdSelP2CharSel2           :db ; EQU $C1D8
+wOrdSelP2CharId2            :db ; EQU $C1D9
 ; Backup copies of the wOrdSelP*CursorPos, used by OrdSel_Ctrl_SelChar
-wOrdSelP1CursorPosBak       EQU $C1DA
-wOrdSelP2CursorPosBak       EQU $C1DB
+wOrdSelP1CursorPosBak       :db ; EQU $C1DA
+wOrdSelP2CursorPosBak       :db ; EQU $C1DB
+NEXTU
 
 ;
 ; GAMEPLAY
 ;
-wPlaySecIconBuffer          EQU $C1CA ; Buffer for drawing the overlapping secondary icons in team mode
+ds $C1CA-$C1A9
+wPlaySecIconBuffer          :db ; EQU $C1CA ; Buffer for drawing the overlapping secondary icons in team mode
 wPlayCrossBuffer            EQU wPlaySecIconBuffer+$100
 wPlayCrossMaskBuffer        EQU wPlaySecIconBuffer+$140
+
+NEXTU
+ds $C1CA-$C1A9
 ; Temporary variables used for collision box overlap checks between two boxes (marked as A and B)
-wPlayTmpColiA_OBJLstFlags   EQU $C1CA ; Sprite mapping flags, to determine if it should be flipped
-wPlayTmpColiB_OBJLstFlags   EQU $C1CB
-wPlayTmpColiA               EQU $C1D4
-wPlayTmpColiA_OriginH       EQU $C1D4 ; Left side of collision box, relative to player X pos (usually negative or 0)
-wPlayTmpColiA_OriginV       EQU $C1D5 ; Top side of collision box, relative to player Y pos (usually negative or 0)
-wPlayTmpColiA_RadH          EQU $C1D6 ; Collision box horizontal radius (extends to both sides of origin)
-wPlayTmpColiA_RadV          EQU $C1D7 ; Collision box vertical radius (extends to both sides of origin)
+wPlayTmpColiA_OBJLstFlags   :db ; EQU $C1CA ; Sprite mapping flags, to determine if it should be flipped
+wPlayTmpColiB_OBJLstFlags   :db ; EQU $C1CB
+ds $C1D4-$C1CC
+wPlayTmpColiA_OriginH       :db ; EQU $C1D4 ; Left side of collision box, relative to player X pos (usually negative or 0)
+wPlayTmpColiA_OriginV       :db ; EQU $C1D5 ; Top side of collision box, relative to player Y pos (usually negative or 0)
+wPlayTmpColiA_RadH          :db ; EQU $C1D6 ; Collision box horizontal radius (extends to both sides of origin)
+wPlayTmpColiA_RadV          :db ; EQU $C1D7 ; Collision box vertical radius (extends to both sides of origin)
+wPlayTmpColiA               EQU wPlayTmpColiA_OriginH
 
 ; See above, but for other player
-wPlayTmpColiB               EQU $C1DE
-wPlayTmpColiB_OriginH       EQU $C1DE
-wPlayTmpColiB_OriginV       EQU $C1DF
-wPlayTmpColiB_RadH          EQU $C1E0
-wPlayTmpColiB_RadV          EQU $C1E1
+ds $C1DE-$C1D8
+wPlayTmpColiB_OriginH       :db ; EQU $C1DE
+wPlayTmpColiB_OriginV       :db ; EQU $C1DF
+wPlayTmpColiB_RadH          :db ; EQU $C1E0
+wPlayTmpColiB_RadV          :db ; EQU $C1E1
+wPlayTmpColiB               EQU wPlayTmpColiB_OriginH
 
+NEXTU
 ;
 ; WIN SCREEN / CUTSCENES
 ;
-wWinPlInfoPtr_Low           EQU $C1B3 ; Ptr to the wPlInfo that won the stage (low byte)
-wWinPlInfoPtr_High          EQU $C1B4 ; "" (high byte)
-wCutMoveLargeChars          EQU $C1CA ; If enabled, the large Kagura and Goenitz cutscene characters will be moved
-wCutFlashTimer              EQU $C1CB ; Timer that handles the palette flash effect during cutscenes.
-wCutFlash2Timer             EQU $C1CC ; Timer that handles the secondary palette flash during the ending cutscene.
+ds $C1B3-$C1A9
+wWinPlInfoPtr_Low           :db ; EQU $C1B3 ; Ptr to the wPlInfo that won the stage (low byte)
+wWinPlInfoPtr_High          :db ; EQU $C1B4 ; "" (high byte)
+ds $C1CA-$C1B5
+wCutMoveLargeChars          :db ; EQU $C1CA ; If enabled, the large Kagura and Goenitz cutscene characters will be moved
+wCutFlashTimer              :db ; EQU $C1CB ; Timer that handles the palette flash effect during cutscenes.
+wCutFlash2Timer             :db ; EQU $C1CC ; Timer that handles the secondary palette flash during the ending cutscene.
 
-
+NEXTU
 ;
 ; CONTINUE
 ;
-wWinContinueTimer           EQU $C1B3 ; Continue timer - seconds left
-wWinContinueTimerSub        EQU $C1B4 ; Continue timer - frames left before decrementing second
+ds $C1B3-$C1A9
+wWinContinueTimer           :db ; EQU $C1B3 ; Continue timer - seconds left
+wWinContinueTimerSub        :db ; EQU $C1B4 ; Continue timer - frames left before decrementing second
+ENDU
 
 
+SECTION "Audio RAM", WRAM0[$D480]
 ;
 ; SOUND DRIVER
 ;
-wSnd_Unk_Unused_D480        EQU $D480 ; $80 is always written here, but never read back
-wSnd_Unused_ChUsed          EQU $D481 ; Appears to be a bitmask intended to mark the used sound channels, but it is only set properly in unreachable code.
-wSndEnaChBGM                EQU $D482 ; Keeps track of the last rNR51 value used modified by a BGM SndInfo.
-wSnd_Ch3StopLength          EQU $D483 ; This is set to rNR31 sometimes (see logic)
-wSndChProcLeft              EQU $D485 ; Number of remaining wBGMCh*Info/wSFXCh*Info structs to process
+wSnd_Unk_Unused_D480        :db ; EQU $D480 ; $80 is always written here, but never read back
+wSnd_Unused_ChUsed          :db ; EQU $D481 ; Appears to be a bitmask intended to mark the used sound channels, but it is only set properly in unreachable code.
+wSndEnaChBGM                :db ; EQU $D482 ; Keeps track of the last rNR51 value used modified by a BGM SndInfo.
+wSnd_Ch3StopLength          :db ; EQU $D483 ; This is set to rNR31 sometimes (see logic)
+ds 1
+wSndChProcLeft              :db ; EQU $D485 ; Number of remaining wBGMCh*Info/wSFXCh*Info structs to process
+
 ; Channel playback status (separate lanes for BGM and SFX)
-wBGMCh1Info                 EQU $D4A6
-wBGMCh2Info                 EQU $D4C6
-wBGMCh3Info                 EQU $D4E6
-wBGMCh4Info                 EQU $D506
-wSFXCh1Info                 EQU $D526
-wSFXCh2Info                 EQU $D546
-wSFXCh3Info                 EQU $D566
-wSFXCh4Info                 EQU $D586
+ds $20
+wBGMCh1Info                 :ds $20 ; EQU $D4A6
+wBGMCh2Info                 :ds $20 ; EQU $D4C6
+wBGMCh3Info                 :ds $20 ; EQU $D4E6
+wBGMCh4Info                 :ds $20 ; EQU $D506
+wSFXCh1Info                 :ds $20 ; EQU $D526
+wSFXCh2Info                 :ds $20 ; EQU $D546
+wSFXCh3Info                 :ds $20 ; EQU $D566
+wSFXCh4Info                 :ds $20 ; EQU $D586
 
-wSndIdReqTbl                EQU $D5F8 ; Sound IDs to play are written here
+ds $D5F8-$D5A6
+wSndIdReqTbl                :ds $08 ; EQU $D5F8 ; Sound IDs to play are written here
 
+
+SECTION "OBJLst / Player RAM", WRAM0[$D680]
 ;
 ; SPRITE MAPPINGS
 ;
-wOBJInfo0                   EQU $D680
-wOBJInfo_Pl1                EQU $D680
-wOBJInfo1                   EQU $D6C0
-wOBJInfo_Pl2                EQU $D6C0
-wOBJInfo2                   EQU $D700
-wOBJInfo3                   EQU $D740
-wOBJInfo4                   EQU $D780
-wOBJInfo5                   EQU $D7C0
-wOBJInfo6                   EQU $D800
-wOBJInfo7                   EQU $D840
-wOBJInfo8                   EQU $D880
+wOBJInfo0                   :ds $40 ; EQU $D680
+wOBJInfo1                   :ds $40 ; EQU $D6C0
+wOBJInfo2                   :ds $40 ; EQU $D700
+wOBJInfo3                   :ds $40 ; EQU $D740
+wOBJInfo4                   :ds $40 ; EQU $D780
+wOBJInfo5                   :ds $40 ; EQU $D7C0
+wOBJInfo6                   :ds $40 ; EQU $D800
+wOBJInfo7                   :ds $40 ; EQU $D840
+wOBJInfo8                   :ds $40 ; EQU $D880
 
 ; Special purpose mappings
+; General
+wOBJInfo_Pl1                EQU wOBJInfo0
+wOBJInfo_Pl2                EQU wOBJInfo1
+
 ; Intro
 wOBJInfo_IIoriH             EQU wOBJInfo2
 wOBJInfo_IIoriL             EQU wOBJInfo3
@@ -354,62 +414,68 @@ wOBJInfo_Winner             EQU wOBJInfo_Pl1
 ; Cutscene
 wOBJInfo_Kagura             EQU wOBJInfo_Pl1
 
-wGFXBufInfo_Pl1             EQU $D8C0
-wGFXBufInfo_Pl2             EQU $D8E0
+wGFXBufInfo_Pl1             :ds $20 ; EQU $D8C0
+wGFXBufInfo_Pl2             :ds $20 ; EQU $D8E0
 
-wPlInfo_Pl1                 EQU $D900
-wPlInfo_Pl2                 EQU $DA00
+wPlInfo_Pl1                 :ds $100 ; EQU $D900
+wPlInfo_Pl2                 :ds $100 ; EQU $DA00
 
-wWorkOAM                    EQU $DF00
-wWorkOAM_End                EQU $DFA0
+SECTION "OAM Mirror", WRAM0[$DF00]
+wWorkOAM                    :ds OBJ_SIZE*OBJCOUNT_MAX ; EQU $DF00
+wWorkOAM_End                EQU wWorkOAM+OBJ_SIZE*OBJCOUNT_MAX ; $DFA0
 
+
+SECTION "HRAM", HRAM[$FF80]
 ;
 ; HIGH RAM
 ;
+hOAMDMA                     :ds $18 ; EQU $FF80 ; OAMDMA routine
+hJoyKeys                    :db     ; EQU $FF98 ; Player 1 - (Held) Joypad keys
+hJoyNewKeys                 :db     ; EQU $FF99 ; Player 1 - Newly pressed keys
+ds 1
+hJoyKeysDelayTbl            :ds $10 ; EQU $FF9B ; Player 1 - Menu hold delay info ($10 bytes, 2 for each KEY_*)
 
-hOAMDMA                     EQU $FF80 ; OAMDMA routine
-hJoyKeys                    EQU $FF98 ; Player 1 - Joypad keys
-hJoyNewKeys                 EQU $FF99 ; Player 1 - Newly pressed keys
-hJoyKeysDelayTbl            EQU $FF9B ; Player 1 - Menu hold delay info ($10 bytes, 2 for each KEY_*)
+hJoyKeys2                   :db     ; EQU $FFAB ; Player 2 - (Held) Joypad keys
+hJoyNewKeys2                :db     ; EQU $FFAC ; Player 2 - Newly pressed keys
+ds 1
+hJoyKeys2DelayTbl           :ds $10 ; EQU $FFAE
 
-hJoyKeys2                   EQU $FFAB ; Player 2 - Joypad keys
-hJoyNewKeys2                EQU $FFAC ; Player 2 - Newly pressed keys
-hJoyKeys2DelayTbl           EQU $FFAE
+ds 2
+hTaskStats                  :db     ; EQU $FFC0 ; Global task system info
+hCurTaskId                  :db     ; EQU $FFC1 ; Current task id ($01-$03)
+ds 6
+hTaskTbl                    :ds $03*TASK_SIZE ; EQU $FFC8 ; Task struct list
 
-hTaskStats                  EQU $FFC0 ; Global task system info
-hCurTaskId                  EQU $FFC1 ; $01-$03 ?
-hTaskTbl                    EQU $FFC8 ; Task struct list
-
-
-hROMBank                    EQU $FFE0 ; Currently loaded ROM bank
+hROMBank                    :db     ; EQU $FFE0 ; Currently loaded ROM bank
 
 
+ds 1
+hScrollY                    :db ; EQU $FFE2 ; Y screen position
+hScrollYSub                 :db ; EQU $FFE3 ; Y screen subpixel position
+hScrollX                    :db ; EQU $FFE4 ; X screen position
+hScrollXSub                 :db ; EQU $FFE5 ; X screen subpixel position
+hTitleParallax1X            :db ; EQU $FFE6 ; X screen position
+hTitleParallax1XSub         :db ; EQU $FFE7
+hTitleParallax2X            :db ; EQU $FFE8
+hTitleParallax2XSub         :db ; EQU $FFE9
+hTitleParallax3X            :db ; EQU $FFEA
+hTitleParallax3XSub         :db ; EQU $FFEB
+hTitleParallax4X            :db ; EQU $FFEC
+hTitleParallax4XSub         :db ; EQU $FFED
+hTitleParallax5X            :db ; EQU $FFEE
+hTitleParallax5XSub         :db ; EQU $FFEF
 
-hScrollY                    EQU $FFE2 ; Y screen position
-hScrollYSub                 EQU $FFE3 ; Y screen subpixel position
-hScrollX                    EQU $FFE4 ; X screen position
-hScrollXSub                 EQU $FFE5 ; X screen subpixel position
-hTitleParallax1X            EQU $FFE6 ; X screen position
-hTitleParallax1XSub         EQU $FFE7
-hTitleParallax2X            EQU $FFE8
-hTitleParallax2XSub         EQU $FFE9
-hTitleParallax3X            EQU $FFEA
-hTitleParallax3XSub         EQU $FFEB
-hTitleParallax4X            EQU $FFEC
-hTitleParallax4XSub         EQU $FFED
-hTitleParallax5X            EQU $FFEE
-hTitleParallax5XSub         EQU $FFEF
+hScreenSect0BGP             :db ; EQU $FFF0 ; BG Palette for the first screen section
+hScreenSect1BGP             :db ; EQU $FFF1 ; ...
+hScreenSect2BGP             :db ; EQU $FFF2
+ds 5
+hSndInfoCurPtr_Low          :db ; EQU $FFF8 ; Ptr to Currently processed SNDInfo structure
+hSndInfoCurPtr_High         :db ; EQU $FFF9 ; Ptr to Currently processed SNDInfo structure
 
-hScreenSect0BGP             EQU $FFF0 ; BG Palette for the first screen section
-hScreenSect1BGP             EQU $FFF1 ; ...
-hScreenSect2BGP             EQU $FFF2
-hSndInfoCurPtr_Low          EQU $FFF8 ; Ptr to Currently processed SNDInfo structure
-hSndInfoCurPtr_High         EQU $FFF9 ; Ptr to Currently processed SNDInfo structure
-
-hSndPlayCnt                 EQU $FFFA ; Sound Played Counter (bits3-0)
-hSndPlaySetCnt              EQU $FFFB ; Sound Req Counter (bits3-0) (if != hSndPlaySetCnt, start a new track)
-hSndInfoCurDataPtr_Low      EQU $FFFC ; Ptr to current sound channel data (initially copied from iSndInfo_DataPtr)
-hSndInfoCurDataPtr_High     EQU $FFFD ; Ptr to current sound channel data (initially copied from iSndInfo_DataPtr)
+hSndPlayCnt                 :db ; EQU $FFFA ; Sound Played Counter (bits3-0)
+hSndPlaySetCnt              :db ; EQU $FFFB ; Sound Req Counter (bits3-0) (if != hSndPlaySetCnt, start a new track)
+hSndInfoCurDataPtr_Low      :db ; EQU $FFFC ; Ptr to current sound channel data (initially copied from iSndInfo_DataPtr)
+hSndInfoCurDataPtr_High     :db ; EQU $FFFD ; Ptr to current sound channel data (initially copied from iSndInfo_DataPtr)
 
 
 ;--------------------------
