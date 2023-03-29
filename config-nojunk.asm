@@ -6,5 +6,6 @@ LABEL_JUNK   EQU 0 ; If SKIP_JUNK isn't set, labels the padding areas.
 FIX_BUGS     EQU 0 ; Self explainatory
 NO_CPU_AI    EQU 0 ; Disable CPU Opponent AI (but not the CPU-specific actions inside moves)
 INF_TIMER    EQU 0 ; Default with infinite timer 
+ENGLISH      EQU 0 ; 0 -> JPN, 1 -> EU
 
 INCLUDE "main.asm"

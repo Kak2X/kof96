@@ -5,7 +5,11 @@
 ;
 
 ; Include the basics
+IF ENGLISH == 0
 INCLUDE "src/jis.asm"
+ELSE
+INCLUDE "src/ascii.asm"
+ENDC
 INCLUDE "src/hardware.asm"
 INCLUDE "src/constants.asm"
 INCLUDE "src/macro.asm"

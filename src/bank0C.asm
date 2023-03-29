@@ -86,4 +86,6 @@ GFX_Char_Daimon_HeavenDropL0: INCBIN "data/gfx/char/daimon_heavendropl0.bin"
 GFX_Char_Daimon_HeavenDropL1: INCBIN "data/gfx/char/daimon_heavendropl1.bin"
 GFX_Char_Daimon_HeavenDropL3: INCBIN "data/gfx/char/daimon_heavendropl3.bin"
 GFX_Char_MrKarate_HaohShoKohKenS3_A: INCBIN "data/gfx/char/mrkarate_haohshokohkens3_a.bin"
-GFX_Char_MrKarate_Unused: INCBIN "data/gfx/char/mrkarate_unused.bin"
+; =============== END OF BANK ===============
+; Partial duplicate of GFX_Char_MrKarate_HaohShoKohKenS3_A below.
+	mIncJunk "L0C7FE0"

@@ -799,6 +799,14 @@ MoveC_Base_WakeUp_End:
 	res  PF1B_HITRECV, [hl] ; Damage string ended
 	res  PF1B_ALLOWHITCANCEL, [hl] ; Disable override
 	res  PF1B_INVULN, [hl] ; Not invulnerable
+
+IF ENGLISH == 1
+	; ???
+	ld   hl, iPlInfo_Unk_CustomDizzy
+	add  hl, bc
+	ld   [hl], $00
+ENDC
+	
 	; New move
 	ld   a, MOVE_SHARED_DIZZY
 	call Pl_SetMove_StopSpeed
@@ -844,6 +852,15 @@ MoveC_Base_Dizzy:
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
 Play_Pl_DecDizzyTime:
+
+IF ENGLISH == 1
+	; ???
+	ld   hl, iPlInfo_Unk_CustomDizzy
+	add  hl, bc
+	ld   a, [hl]
+	or   a			; iPlInfo_Unk_CustomDizzy != 0?
+	ret  nz			; If so, return
+ENDC
 
 	; On time over, the dizzy state ends abruptly
 	ld   a, [wRoundTime]
@@ -1159,7 +1176,7 @@ Play_Pl_DoHit:
 	pop  af
 	
 	; HITTYPE_DROP_SWOOPUP, HITTYPE_THROW_END and the throw parts do not increment the combo counter.
-	cp   HITTYPE_DROP_SWOOPUP*2	; HitTypeId >= $0E?
+	cp   (HITTYPE_THROW_END-1)*2	; HitTypeId >= $0E?
 	jp   nc, .updateFlags			; If so, skip
 	
 	push af
@@ -1262,6 +1279,9 @@ Play_HitTypePtrTable:
 	dw HitTypeC_Hit_MultiGS
 	dw HitTypeC_Drop_DB_A
 	dw HitTypeC_Drop_DB_G
+IF ENGLISH == 1
+	dw HitTypeC_Dizzy
+ENDC
 	dw HitTypeC_SwoopUp
 	dw HitTypeC_Throw_End
 	dw HitTypeC_ThrowStart
@@ -1825,7 +1845,50 @@ HitTypeC_Drop_DB_G:
 	
 	scf	; C flag set
 	ret
+
+IF ENGLISH == 1	
+; =============== HitTypeC_Dizzy ===============
+; ID: HITTYPE_DIZZY
+;
+; Hit effect for getting dizzy, only used in the English version of the game.
+;
+; ??? IS THIS FOR MANUAL DIZZYIES
+;
+; The Japanese version doesn't have any specific hit type for the dizzy state,
+; as it's something that only gets checked after waking up, well after the hit effect is done.
+HitTypeC_Dizzy:
+
+	; Don't dizzy on the next drop to ground
+	ld   hl, iPlInfo_DizzyNext
+	add  hl, bc
+	ld   [hl], $00
+	; Reset the countdown timer for exiting the dizzy state to $FF
+	ld   hl, iPlInfo_DizzyTimeLeft
+	add  hl, bc
+	ld   [hl], $FF
 	
+	; Mark that we're in the middle of the ??? custom ??? dizzy state 
+	; ||||| here, since iPlInfo_DizzyNext has to be cleared for ???
+	ld   hl, iPlInfo_Unk_CustomDizzy
+	add  hl, bc
+	ld   [hl], $01
+	
+	; Set the continuation for the hit, which is used after hitstun ends.
+	; This shakes the ground.
+	ld   a, MOVE_SHARED_DIZZY
+	call Pl_SetMove_ShakeScreenReset
+	
+	; Flash playfield if applicable
+	call Play_Pl_FlashPlayfieldOnSuperHit
+	
+	; Do it
+	call Play_Pl_DoHitstun
+	; Once the hitstun is over, prevent the collision boxes from overlapping
+	call Play_Pl_MoveByColiBoxOverlapX
+	scf  
+	ret  
+ENDC
+
 ; =============== HitTypeC_Throw_End ===============
 ; ID: HITTYPE_THROW_END
 ;
@@ -2564,6 +2627,13 @@ HitTypeC_ThrowStart:
 	ld   a, $14
 	ld   [wPlayPlThrowTechTimer], a
 	
+IF ENGLISH == 1
+	; In case we tech the throw, there's an 80 frame window where we can't be thrown again
+	ld   hl, iPlInfo_NoThrowTimer
+	add  hl, bc
+	ld   [hl], $50
+ENDC
+	
 	; Play throw SGB/DMG SFX
 	ld   a, SCT_GRAB
 	call HomeCall_Sound_ReqPlayExId
@@ -3187,9 +3257,9 @@ Play_Pl_SetHitType:
 			;
 			
 			; These type IDs can always be used
-			cp   HITTYPE_HIT_MULTI0				; E == $09?
+			cp   HITTYPE_HIT_MULTI0						; E == $09?
 			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId	; If so, jump
-			cp   HITTYPE_HIT_MULTI1				; ...
+			cp   HITTYPE_HIT_MULTI1						; ...
 			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
 			cp   HITTYPE_HIT_MULTIGS
 			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
@@ -3197,7 +3267,10 @@ Play_Pl_SetHitType:
 			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
 			cp   HITTYPE_DROP_SWOOPUP
 			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
-		
+IF ENGLISH == 1
+			cp   HITTYPE_DIZZY						
+			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
+ENDC
 		.chkDead:
 			;
 			; Getting KO'd restricts the number of allowed hit effects, as the player
@@ -3997,6 +4070,7 @@ MoveS_ChkHalfSpeedHit:
 	pop  af
 	ret
 	
+IF ENGLISH == 0
 ; =============== Play_Pl_Unused_DecThrowKeyTimer ===============
 ; [TCRF] Weird unreferenced code that decrements a counter related to throws
 ;        when any of these conditions pass:
@@ -4039,6 +4113,7 @@ Play_Pl_Unused_DecThrowKeyTimer:
 	ld   [hl], a
 .ret:
 	ret
+ENDC
 	
 ; =============== Play_Pl_FlashPlayfieldOnSuperHit ===============
 ; Flashes the playfield if the player got hit by a super move.
@@ -5582,7 +5657,7 @@ MoveInputReader_Ryo_NoMove:
 	or   a
 	ret
 	
-; =============== MoveC_MrKarate_KoOuKen ===============
+; =============== MoveC_Ryo_KoOuKen ===============
 ; Move code for Ryo's Ko-Ou Ken (MOVE_RYO_KO_OU_KEN_L, MOVE_RYO_KO_OU_KEN_H).	
 MoveC_Ryo_KoOuKen:
 	call Play_Pl_MoveByColiBoxOverlapX
@@ -5865,6 +5940,7 @@ MoveC_Ryo_RyuKoRanbuS:
 		jp   .doGravity
 .obj1_chkGuard:
 
+IF ENGLISH == 0
 	;
 	; Continue the jump until hitting the opponent.
 	;
@@ -5881,16 +5957,20 @@ MoveC_Ryo_RyuKoRanbuS:
 	
 	bit  PF1B_GUARD, [hl]				; Is the opponent blocking?
 	jp   nz, .obj1_chkGuard_guard		; If so, jump
-.obj1_chkGuard_noGuard:
-	; Otherwise, continue to #2
-	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
-	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
-	mMvC_SetSpeedH $0000
-	; Force player on the ground
-	ld   hl, iOBJInfo_Y
-	add  hl, de
-	ld   [hl], PL_FLOOR_POS
-	jp   .ret
+ELSE
+	; Identical check, but calling the copy in BANK 0 to save space.
+	mMvC_ValHit .obj1_chkGuard_doGravity, .obj1_chkGuard_guard
+ENDC
+	.obj1_chkGuard_noGuard:
+		; Otherwise, continue to #2
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
+		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
+		mMvC_SetSpeedH $0000
+		; Force player on the ground
+		ld   hl, iOBJInfo_Y
+		add  hl, de
+		ld   [hl], PL_FLOOR_POS
+		jp   .ret
 .obj1_chkGuard_guard:
 	; If the opponent blocked the hit, slow down considerably.
 	; This will still moves us back for overlapping with the opponent.
@@ -5922,6 +6002,7 @@ MoveC_Ryo_RyuKoRanbuS:
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
+IF ENGLISH == 0
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -5932,13 +6013,16 @@ MoveC_Ryo_RyuKoRanbuS:
 		add  hl, bc
 		ld   a, [hl]
 		cp   HITTYPE_HIT_MULTI0	; A == HITTYPE_HIT_MULTI0?
-		jp   z, .anim				; If so, skip
+		jp   z, .anim			; If so, skip
 		cp   HITTYPE_HIT_MULTI1	; A == HITTYPE_HIT_MULTI1?
-		jp   z, .anim				; If so, skip
-		; Otherwise, transition to hop
-		ld   a, MOVE_SHARED_HOP_B
-		call Pl_SetMove_StopSpeed
-		jp   .ret
+		jp   z, .anim			; If so, skip
+ELSE
+		mMvC_ValEscape .anim
+ENDC
+			; Otherwise, transition to hop
+			ld   a, MOVE_SHARED_HOP_B
+			call Pl_SetMove_StopSpeed
+			jp   .ret
 ; --------------- frame #15 ---------------
 ; Transitions to Ko Hou at the end of the frame.	
 .startKoHou:
@@ -6055,7 +6139,7 @@ MoveC_Ryo_RyuKoRanbuD:
 		mMvC_SetSpeedV -$0280
 		jp   .doGravity
 .obj1_chkGuard:
-
+IF ENGLISH == 0
 	;
 	; Continue the jump until hitting the opponent.
 	;
@@ -6068,20 +6152,24 @@ MoveC_Ryo_RyuKoRanbuD:
 	bit  PF1B_INVULN, [hl]				; Is the opponent invulnerable?
 	jp   nz, .obj1_chkGuard_doGravity	; If so, skip
 	bit  PF1B_HITRECV, [hl]				; Did the opponent get hit?
-	jp   z, .obj1_chkGuard_doGravity	; If not, skip
+	jp   z, .obj1_chkGuard_doGravity	; If not, skip	
 	
 	bit  PF1B_GUARD, [hl]				; Is the opponent blocking?
 	jp   nz, .obj1_chkGuard_guard		; If so, jump
-.obj1_chkGuard_noGuard:
-	; Otherwise, continue to #2
-	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
-	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
-	mMvC_SetSpeedH $0000
-	; Force player on the ground
-	ld   hl, iOBJInfo_Y
-	add  hl, de
-	ld   [hl], PL_FLOOR_POS
-	jp   .ret
+ELSE
+	; Identical check, but calling the copy in BANK 0 to save space.
+	mMvC_ValHit .obj1_chkGuard_doGravity, .obj1_chkGuard_guard
+ENDC
+	.obj1_chkGuard_noGuard:
+		; Otherwise, continue to #2
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
+		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
+		mMvC_SetSpeedH $0000
+		; Force player on the ground
+		ld   hl, iOBJInfo_Y
+		add  hl, de
+		ld   [hl], PL_FLOOR_POS
+		jp   .ret
 .obj1_chkGuard_guard:
 	; If the opponent blocked the hit, slow down considerably.
 	; This will still moves us back for overlapping with the opponent.
@@ -6113,6 +6201,7 @@ MoveC_Ryo_RyuKoRanbuD:
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
+IF ENGLISH == 0
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -6126,10 +6215,13 @@ MoveC_Ryo_RyuKoRanbuD:
 		jp   z, .anim			; If so, skip
 		cp   HITTYPE_HIT_MULTI1	; A == HITTYPE_HIT_MULTI1?
 		jp   z, .anim			; If so, skip
-		; Otherwise, transition to hop
-		ld   a, MOVE_SHARED_HOP_B
-		call Pl_SetMove_StopSpeed
-		jp   .ret
+ELSE
+		mMvC_ValEscape .anim
+ENDC
+			; Otherwise, transition to hop
+			ld   a, MOVE_SHARED_HOP_B
+			call Pl_SetMove_StopSpeed
+			jp   .ret
 		
 ; --------------- frame #2C ---------------
 ; Transitions to an hidden version of Ko Ou Ken at the end of the frame.
@@ -6470,11 +6562,10 @@ MoveC_Robert_HienRyuuShinKya:
 		jp   .doGravity
 .obj1_cont:
 
-
+IF ENGLISH == 0
 	;
 	; If the opponent blocks the attack, do an hyper jump backwards.
 	;
-	
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
 	bit  PCF_HITOTHER, [hl]			; Did we reach?
@@ -6485,8 +6576,16 @@ MoveC_Robert_HienRyuuShinKya:
 	jp   nz, .obj1_cont_doGravity	; If so, skip
 	bit  PF1B_HITRECV, [hl]			; Did the opponent get hit?
 	jp   z, .obj1_cont_doGravity	; If not, skip
+	; (shortcut, usually this is a nz check)
 	bit  PF1B_GUARD, [hl]			; Is the opponent blocking?
 	jp   z, .obj1_cont_doGravity	; If not, skip
+ELSE
+	; Identical check, but calling the copy in BANK 0 to save space.
+	; However, because it's using the standard check, the shortcut is no longer
+	; there and the jump is structured differently.
+	mMvC_ValHit .obj1_cont_doGravity, .obj1_cont_onBlock
+	jp   .obj1_cont_doGravity
+ENDC
 .obj1_cont_onBlock:
 	mMvC_SetFrame $03*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_NONE
 	mMvC_SetSpeedH +$0000
@@ -6872,7 +6971,7 @@ MoveC_Robert_RyuKoRanbuS:
 		mMvC_SetSpeedV -$0280
 		jp   .doGravity
 .obj1_chkGuard:
-
+IF ENGLISH == 0
 	;
 	; Continue the jump until hitting the opponent.
 	;
@@ -6889,16 +6988,20 @@ MoveC_Robert_RyuKoRanbuS:
 	
 	bit  PF1B_GUARD, [hl]				; Is the opponent blocking?
 	jp   nz, .obj1_chkGuard_guard		; If so, jump
-.obj1_chkGuard_noGuard:
-	; Otherwise, continue to #2
-	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
-	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
-	mMvC_SetSpeedH $0000
-	; Force player on the ground
-	ld   hl, iOBJInfo_Y
-	add  hl, de
-	ld   [hl], PL_FLOOR_POS
-	jp   .ret
+ELSE
+	; Identical check, but calling the copy in BANK 0 to save space.
+	mMvC_ValHit .obj1_chkGuard_doGravity, .obj1_chkGuard_guard
+ENDC
+	.obj1_chkGuard_noGuard:
+		; Otherwise, continue to #2
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
+		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
+		mMvC_SetSpeedH $0000
+		; Force player on the ground
+		ld   hl, iOBJInfo_Y
+		add  hl, de
+		ld   [hl], PL_FLOOR_POS
+		jp   .ret
 .obj1_chkGuard_guard:
 	; If the opponent blocked the hit, slow down considerably.
 	; This will still moves us back for overlapping with the opponent.
@@ -6930,6 +7033,7 @@ MoveC_Robert_RyuKoRanbuS:
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
+IF ENGLISH == 0
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -6940,13 +7044,16 @@ MoveC_Robert_RyuKoRanbuS:
 		add  hl, bc
 		ld   a, [hl]
 		cp   HITTYPE_HIT_MULTI0	; A == HITTYPE_HIT_MULTI0?
-		jp   z, .anim				; If so, skip
+		jp   z, .anim			; If so, skip
 		cp   HITTYPE_HIT_MULTI1	; A == HITTYPE_HIT_MULTI1?
-		jp   z, .anim				; If so, skip
-		; Otherwise, transition to hop
-		ld   a, MOVE_SHARED_HOP_B
-		call Pl_SetMove_StopSpeed
-		jp   .ret
+		jp   z, .anim			; If so, skip
+ELSE
+		mMvC_ValEscape .anim
+ENDC
+			; Otherwise, transition to hop
+			ld   a, MOVE_SHARED_HOP_B
+			call Pl_SetMove_StopSpeed
+			jp   .ret
 ; --------------- frame #10 ---------------
 ; Transitions to Ryuu Ga at the end of the frame.	
 .startRyuuGa:
@@ -7053,7 +7160,7 @@ MoveC_Robert_RyuKoRanbuD:
 		mMvC_SetSpeedV -$0280
 		jp   .doGravity
 .obj1_chkGuard:
-
+IF ENGLISH == 0
 	;
 	; Continue the jump until hitting the opponent.
 	;
@@ -7066,20 +7173,24 @@ MoveC_Robert_RyuKoRanbuD:
 	bit  PF1B_INVULN, [hl]				; Is the opponent invulnerable?
 	jp   nz, .obj1_chkGuard_doGravity	; If so, skip
 	bit  PF1B_HITRECV, [hl]				; Did the opponent get hit?
-	jp   z, .obj1_chkGuard_doGravity	; If not, skip
+	jp   z, .obj1_chkGuard_doGravity	; If not, skip	
 	
 	bit  PF1B_GUARD, [hl]				; Is the opponent blocking?
 	jp   nz, .obj1_chkGuard_guard		; If so, jump
-.obj1_chkGuard_noGuard:
-	; Otherwise, continue to #2
-	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
-	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
-	mMvC_SetSpeedH $0000
-	; Force player on the ground
-	ld   hl, iOBJInfo_Y
-	add  hl, de
-	ld   [hl], PL_FLOOR_POS
-	jp   .ret
+ELSE
+	; Identical check, but calling the copy in BANK 0 to save space.
+	mMvC_ValHit .obj1_chkGuard_doGravity, .obj1_chkGuard_guard
+ENDC
+	.obj1_chkGuard_noGuard:
+		; Otherwise, continue to #2
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
+		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
+		mMvC_SetSpeedH $0000
+		; Force player on the ground
+		ld   hl, iOBJInfo_Y
+		add  hl, de
+		ld   [hl], PL_FLOOR_POS
+		jp   .ret
 .obj1_chkGuard_guard:
 	; If the opponent blocked the hit, slow down considerably.
 	; This will still moves us back for overlapping with the opponent.
@@ -7111,6 +7222,7 @@ MoveC_Robert_RyuKoRanbuD:
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
+IF ENGLISH == 0
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -7121,13 +7233,16 @@ MoveC_Robert_RyuKoRanbuD:
 		add  hl, bc
 		ld   a, [hl]
 		cp   HITTYPE_HIT_MULTI0	; A == HITTYPE_HIT_MULTI0?
-		jp   z, .anim				; If so, skip
+		jp   z, .anim			; If so, skip
 		cp   HITTYPE_HIT_MULTI1	; A == HITTYPE_HIT_MULTI1?
-		jp   z, .anim				; If so, skip
-		; Otherwise, transition to hop
-		ld   a, MOVE_SHARED_HOP_B
-		call Pl_SetMove_StopSpeed
-		jp   .ret
+		jp   z, .anim			; If so, skip
+ELSE
+		mMvC_ValEscape .anim
+ENDC
+			; Otherwise, transition to hop
+			ld   a, MOVE_SHARED_HOP_B
+			call Pl_SetMove_StopSpeed
+			jp   .ret
 ; --------------- frame #10 ---------------
 ; Transitions to Ryuu Ga at the end of the frame.	
 .startRyuuGa:
@@ -8142,6 +8257,7 @@ MoveC_OLeona_SuperMoonSlasher:
 		jp   .anim
 ; --------------- frames #4-6 / common escape check ---------------
 	.chkOtherEscape:
+IF ENGLISH == 0
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -8152,13 +8268,16 @@ MoveC_OLeona_SuperMoonSlasher:
 		add  hl, bc
 		ld   a, [hl]
 		cp   HITTYPE_HIT_MULTI0	; A == HITTYPE_HIT_MULTI0?
-		jp   z, .anim				; If so, skip
+		jp   z, .anim			; If so, skip
 		cp   HITTYPE_HIT_MULTI1	; A == HITTYPE_HIT_MULTI1?
-		jp   z, .anim				; If so, skip
-		; Otherwise, transition to hop
-		ld   a, MOVE_SHARED_HOP_B
-		call Pl_SetMove_StopSpeed
-		jp   .ret
+		jp   z, .anim			; If so, skip
+ELSE
+		mMvC_ValEscape .anim
+ENDC
+			; Otherwise, transition to hop
+			ld   a, MOVE_SHARED_HOP_B
+			call Pl_SetMove_StopSpeed
+			jp   .ret
 ; --------------- frame #7 ---------------
 .obj7:
 	mMvC_ValFrameStart .obj7_cont
@@ -8302,6 +8421,11 @@ MoveInit_MrKarate_Zenretsuken:
 	call Play_Pl_ClearJoyDirBuffer
 	mMvIn_GetLH MOVE_MRKARATE_ZENRETSUKEN_L, MOVE_MRKARATE_ZENRETSUKEN_H
 	call MoveInputS_SetSpecMove_StopSpeed
+IF ENGLISH == 1
+	ld   hl, iPlInfo_MrKarate_Zenretsuken_84
+	add  hl, bc
+	ld   [hl], $00
+ENDC
 	jp   MoveInputReader_MrKarate_SetMove
 ; =============== MoveInit_MrKarate_KyokukenRyuRenbuKen ===============
 MoveInit_MrKarate_KyokukenRyuRenbuKen:
@@ -8313,11 +8437,39 @@ MoveInit_MrKarate_KyokukenRyuRenbuKen:
 ; =============== MoveInit_MrKarate_RyukoRanbu ===============
 MoveInit_MrKarate_RyukoRanbu:
 	call Play_Pl_ClearJoyDirBuffer
+IF ENGLISH == 0
 	; [TCRF] Suspicious use of mMvIn_GetSD.
 	;        Very likely that that a reference to MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D got
 	;        quickly patched out since it didn't work properly.
 	mMvIn_GetSD MOVE_MRKARATE_RYUKO_RANBU_S, MOVE_MRKARATE_RYUKO_RANBU_S
 	call MoveInputS_SetSpecMove_StopSpeed
+ELSE
+	; Still no MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D, but the desperation version sets its own flag.
+	call MoveInputS_CheckSuperDesperation
+	jp   nc, .normal		; Was a super desperation *NOT* triggered? If so, jump
+	jp   nz, .desperation	; Was the hidden desperation *NOT* triggered? If so, jump
+	jp   .hidden			; Otherwise, jump
+.normal:
+	ld   hl, iPlInfo_MrKarate_RyukoRanbuD
+	add  hl, bc
+	ld   [hl], $00
+	ld   a, MOVE_MRKARATE_RYUKO_RANBU_S
+	jp   .setMove
+.desperation:
+	ld   hl, iPlInfo_MrKarate_RyukoRanbuD
+	add  hl, bc
+	ld   [hl], $01
+	ld   a, MOVE_MRKARATE_RYUKO_RANBU_S
+.setMove:
+	call MoveInputS_SetSpecMove_StopSpeed
+	jp   MoveInputReader_MrKarate_SetMove
+.hidden:
+	ld   hl, iPlInfo_MrKarate_RyukoRanbuD
+	add  hl, bc
+	ld   [hl], $01
+	ld   a, MOVE_MRKARATE_RYUKO_RANBU_S
+	call MoveInputS_SetSpecMove_StopSpeed
+ENDC
 	jp   MoveInputReader_MrKarate_SetMove
 ; =============== MoveInit_MrKarate_HaohShoKohKen ===============
 MoveInit_MrKarate_HaohShoKohKen:
@@ -8450,20 +8602,20 @@ MoveC_MrKarate_ShouranKyaku:
 ; --------------- frame #3 ---------------
 ; Damage loop.
 .obj3:
-	mMvC_ValFrameEnd .anim
+	mMvC_ValFrameEnd .chkEscape
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
-		jp   .anim
+		jp   .chkEscape
 ; --------------- frame #4 ---------------
 ; Damage loop.
 ; Alternates between HITTYPE_HIT_MULTI0 and HITTYPE_HIT_MULTI1 to view different frames.
 .obj4:
-	mMvC_ValFrameEnd .anim
+	mMvC_ValFrameEnd .chkEscape
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
-		jp   .anim
+		jp   .chkEscape
 ; --------------- frame #5 ---------------
 ; Damage loop.
 .obj5:
-	mMvC_ValFrameEnd .anim
+	mMvC_ValFrameEnd .chkEscape
 	; Loop to #3 if the counter didn't expire yet.
 	ld   hl, iPlInfo_MrKarate_ShouranKyaku_LoopCount
 	add  hl, bc
@@ -8473,7 +8625,7 @@ MoveC_MrKarate_ShouranKyaku:
 	ld   hl, iOBJInfo_OBJLstPtrTblOffset
 	add  hl, de
 	ld   [hl], $02*OBJLSTPTR_ENTRYSIZE	; offset by -1
-	jp   .anim
+	jp   .chkEscape
 .obj5_noLoop:
 	; If it expired, hyper jump back
 	ld   a, MOVE_SHARED_BACKJUMP_REC_A
@@ -8481,12 +8633,28 @@ MoveC_MrKarate_ShouranKyaku:
 	mMvC_SetSpeedH -$0300
 	mMvC_SetSpeedV -$0500
 	jp   .ret
+	
+
+
+IF ENGLISH == 1
+; --------------- frames #3-#5 / common escape check ---------------
+; If the opponent somehow escaped, hop back as usual.
+.chkEscape:
+	mMvC_ValEscape .anim
+		ld   a, MOVE_SHARED_HOP_B
+		call Pl_SetMove_StopSpeed
+		jp   .ret
+ENDC
+		
 ; --------------- frame #6 ---------------
 ; Recovery, only if the move didn't hit/got blocked.
 .chkEnd:
 	mMvC_ValFrameEnd .anim
 		call Play_Pl_EndMove
 		jr   .ret
+IF ENGLISH == 0
+.chkEscape: ; dummy
+ENDC
 .anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 .ret:
@@ -8674,6 +8842,23 @@ MoveC_MrKarate_Zenretsuken:
 		mMvC_SetAnimSpeed $1E
 		mMvC_PlaySound SFX_FIREHIT_A
 		mMvC_SetDamageNext $01, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
+IF ENGLISH == 1
+		; The desperation and hidden versions of the move cause a dizzy,
+		; ??? and it's the only point manual dizzys are used.
+		; These kinds of dizzies only exist in the English version, in the
+		; Japanese version the dizzies only happen naturally.
+		ld   hl, iPlInfo_MrKarate_RyukoRanbuD
+		add  hl, bc
+		ld   a, [hl]
+		or   a			; Desperation mode?
+		jr   z, .anim	; If not, skip
+		
+			ld   hl, iOBJInfo_FrameTotal	; Set animation speed to $01
+			add  hl, de
+			ld   [hl], $01
+			; Trigger dizzy
+			mMvC_SetDamageNext $01, HITTYPE_DIZZY, PF3_HEAVYHIT|PF3_LASTHIT
+ENDC
 		jp   .anim
 ; --------------- frame #6 ---------------
 .obj6:
@@ -8683,6 +8868,21 @@ MoveC_MrKarate_Zenretsuken:
 ; --------------- frame #7 ---------------
 .chkEnd:
 	mMvC_ValFrameEnd .anim
+IF ENGLISH == 1
+		; If ?????, transition to ????
+		ld   hl, iPlInfo_MrKarate_Zenretsuken_84
+		add  hl, bc
+		ld   a, [hl]
+		or   a			; iPlInfo_MrKarate_Zenretsuken_84 == 0?
+		jr   z, .end	; If so, skip
+		
+		ld   a, MOVE_MRKARATE_5E
+		call MoveInputS_SetSpecMove_StopSpeed
+		; Copy move damage settings to projectile, since ???
+		call Play_Proj_CopyMoveDamageFromPl
+		jr   .ret
+	.end:
+ENDC
 		call Play_Pl_EndMove
 		jr   .ret
 ; --------------- common ---------------
@@ -8690,6 +8890,63 @@ MoveC_MrKarate_Zenretsuken:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 .ret:
 	ret
+	
+IF ENGLISH == 1
+; =============== MoveC_MrKarate_??? ===============
+; Move code for ??????? the initial part of Mr.Karate's Haoh Sho Koh Ken (MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D).
+; This is only in the English version. The Japanese version starts directly from the second part.
+;
+MoveC_MrKarate_Unk_HaohShokohKenD:
+	call Play_Pl_MoveByColiBoxOverlapX
+	mMvC_ValLoaded .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+	add  hl, de
+	ld   a, [hl]
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .doGravity
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .chkEnd
+	jp   .doGravity
+	
+; [TCRF] Unreferenced code to enable manual control.
+.unused_setManualCtrl:
+	ld   hl, iOBJInfo_FrameTotal
+	add  hl, de
+	ld   [hl], ANIMSPEED_NONE
+	jp   .anim
+; --------------- frame #0 ---------------
+.obj0:
+	; Set initial backjump speed
+	mMvC_ValFrameStartFast .obj0_cont
+		mMvC_SetSpeedH -$0600
+		mMvC_SetSpeedV -$0300
+		jp   .doGravity
+.obj0_cont:
+	mMvC_NextFrameOnGtYSpeed -$03, ANIMSPEED_NONE
+	jp   .doGravity
+; --------------- frames #0-1 / common gravity check ---------------
+.doGravity:
+	; Move down at $00.60px/frame, switching to #2 when touching the ground
+	mMvC_ChkGravityHV $0060, .anim
+		mMvC_SetLandFrame $02*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+		jp   .ret
+; --------------- frame #2 ---------------
+.chkEnd:
+	; Switch to the second part of the move when the frame ends.
+	mMvC_ValFrameEnd .anim
+		ld   a, MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D
+		call MoveInputS_SetSpecMove_StopSpeed
+		jr   .ret
+; --------------- common ---------------
+.anim:
+	call OBJLstS_DoAnimTiming_Loop_by_DE
+.ret:
+	ret
+ENDC
 	
 ; =============== MoveC_MrKarate_RyukoRanbuS ===============
 ; Move code for Mr.Karate's Ryuko Ranbu (MOVE_MRKARATE_RYUKO_RANBU_S).
@@ -8754,7 +9011,7 @@ MoveC_MrKarate_RyukoRanbuS:
 		mMvC_SetSpeedV -$0280
 		jp   .doGravity
 .obj1_chkGuard:
-
+IF ENGLISH == 0
 	;
 	; Continue the jump until hitting the opponent.
 	;
@@ -8771,16 +9028,24 @@ MoveC_MrKarate_RyukoRanbuS:
 	
 	bit  PF1B_GUARD, [hl]				; Is the opponent blocking?
 	jp   nz, .obj1_chkGuard_guard		; If so, jump
-.obj1_chkGuard_noGuard:
-	; Otherwise, continue to #2
-	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
-	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
-	mMvC_SetSpeedH $0000
-	; Force player on the ground
-	ld   hl, iOBJInfo_Y
-	add  hl, de
-	ld   [hl], PL_FLOOR_POS
-	jp   .ret
+ELSE
+	; Identical check, but calling the copy in BANK 0 to save space.
+	mMvC_ValHit .obj1_chkGuard_doGravity, .obj1_chkGuard_guard
+ENDC
+	.obj1_chkGuard_noGuard:
+		; Otherwise, continue to #2
+IF ENGLISH == 0
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
+ELSE
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT|PF3_LIGHTHIT
+ENDC
+		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
+		mMvC_SetSpeedH $0000
+		; Force player on the ground
+		ld   hl, iOBJInfo_Y
+		add  hl, de
+		ld   [hl], PL_FLOOR_POS
+		jp   .ret
 .obj1_chkGuard_guard:
 	; If the opponent blocked the hit, slow down considerably.
 	; This will still moves us back for overlapping with the opponent.
@@ -8793,14 +9058,22 @@ MoveC_MrKarate_RyukoRanbuS:
 .objOdd:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
+IF ENGLISH == 0
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
+ELSE
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT|PF3_LIGHTHIT
+ENDC
 		jp   .chkOtherEscape
 ; --------------- frame #2 ---------------
 ; Initial frame before the odd/even switching.
 ; This sets the initial jump speed and doesn't check for block yet.
 .obj2:
 	mMvC_ValFrameStart .anim
+IF ENGLISH == 0
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
+ELSE
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT|PF3_LIGHTHIT
+ENDC
 		mMvC_SetSpeedH $0080
 		jp   .anim
 ; --------------- frames #4,6,8,A,... ---------------
@@ -8808,10 +9081,15 @@ MoveC_MrKarate_RyukoRanbuS:
 .objEven:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
+IF ENGLISH == 0
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
+ELSE
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT|PF3_LIGHTHIT
+ENDC
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
+IF ENGLISH == 0
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -8822,13 +9100,16 @@ MoveC_MrKarate_RyukoRanbuS:
 		add  hl, bc
 		ld   a, [hl]
 		cp   HITTYPE_HIT_MULTI0	; A == HITTYPE_HIT_MULTI0?
-		jp   z, .anim				; If so, skip
+		jp   z, .anim			; If so, skip
 		cp   HITTYPE_HIT_MULTI1	; A == HITTYPE_HIT_MULTI1?
-		jp   z, .anim				; If so, skip
-		; Otherwise, transition to hop
-		ld   a, MOVE_SHARED_HOP_B
-		call Pl_SetMove_StopSpeed
-		jp   .ret
+		jp   z, .anim			; If so, skip
+ELSE
+		mMvC_ValEscape .anim
+ENDC
+			; Otherwise, transition to hop
+			ld   a, MOVE_SHARED_HOP_B
+			call Pl_SetMove_StopSpeed
+			jp   .ret
 ; --------------- frame #14 ---------------
 ; Transitions to Zenretsuken at the end of the frame.	
 .startZenretsuken:
@@ -8841,7 +9122,11 @@ MoveC_MrKarate_RyukoRanbuS:
 		ld   a, MOVE_MRKARATE_ZENRETSUKEN_H
 	.startZenretsuken_setMove:
 		call MoveInputS_SetSpecMove_StopSpeed
+IF ENGLISH == 0
 		mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_LASTHIT
+ELSE
+		mMvC_SetDamageNext $01, HITTYPE_DROP_MAIN, PF3_LASTHIT|PF3_LIGHTHIT
+ENDC
 		jp   .ret
 ; --------------- common gravity check ---------------	
 .doGravity:
@@ -8863,9 +9148,11 @@ MoveC_MrKarate_RyukoRanbuS:
 .ret:
 	ret
 	
+IF ENGLISH == 0
 ; =============== MoveC_MrKarate_Unused_RyukoRanbuD ===============
 ; [TCRF] Unused desperation version of Mr.Karate's Ryuko Ranbu (MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D).
 ; Almost identical to MoveC_Ryo_RyuKoRanbuD.
+; This is completely gone in the English version.
 MoveC_MrKarate_Unused_RyukoRanbuD:
 	call Play_Pl_MoveByColiBoxOverlapX
 	mMvC_ValLoaded .ret
@@ -8945,7 +9232,7 @@ MoveC_MrKarate_Unused_RyukoRanbuD:
 		mMvC_SetSpeedV -$0280
 		jp   .doGravity
 .obj1_chkGuard:
-
+IF ENGLISH == 0
 	;
 	; Continue the jump until hitting the opponent.
 	;
@@ -8958,20 +9245,24 @@ MoveC_MrKarate_Unused_RyukoRanbuD:
 	bit  PF1B_INVULN, [hl]				; Is the opponent invulnerable?
 	jp   nz, .obj1_chkGuard_doGravity	; If so, skip
 	bit  PF1B_HITRECV, [hl]				; Did the opponent get hit?
-	jp   z, .obj1_chkGuard_doGravity	; If not, skip
+	jp   z, .obj1_chkGuard_doGravity	; If not, skip	
 	
 	bit  PF1B_GUARD, [hl]				; Is the opponent blocking?
 	jp   nz, .obj1_chkGuard_guard		; If so, jump
-.obj1_chkGuard_noGuard:
-	; Otherwise, continue to #2
-	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
-	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
-	mMvC_SetSpeedH $0000
-	; Force player on the ground
-	ld   hl, iOBJInfo_Y
-	add  hl, de
-	ld   [hl], PL_FLOOR_POS
-	jp   .ret
+ELSE
+	; Identical check, but calling the copy in BANK 0 to save space.
+	mMvC_ValHit .obj1_chkGuard_doGravity, .obj1_chkGuard_guard
+ENDC
+	.obj1_chkGuard_noGuard:
+		; Otherwise, continue to #2
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
+		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
+		mMvC_SetSpeedH $0000
+		; Force player on the ground
+		ld   hl, iOBJInfo_Y
+		add  hl, de
+		ld   [hl], PL_FLOOR_POS
+		jp   .ret
 .obj1_chkGuard_guard:
 	; If the opponent blocked the hit, slow down considerably.
 	; This will still moves us back for overlapping with the opponent.
@@ -9003,6 +9294,7 @@ MoveC_MrKarate_Unused_RyukoRanbuD:
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
+IF ENGLISH == 0
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -9013,13 +9305,16 @@ MoveC_MrKarate_Unused_RyukoRanbuD:
 		add  hl, bc
 		ld   a, [hl]
 		cp   HITTYPE_HIT_MULTI0	; A == HITTYPE_HIT_MULTI0?
-		jp   z, .anim				; If so, skip
+		jp   z, .anim			; If so, skip
 		cp   HITTYPE_HIT_MULTI1	; A == HITTYPE_HIT_MULTI1?
-		jp   z, .anim				; If so, skip
-		; Otherwise, transition to hop
-		ld   a, MOVE_SHARED_HOP_B
-		call Pl_SetMove_StopSpeed
-		jp   .ret
+		jp   z, .anim			; If so, skip
+ELSE
+		mMvC_ValEscape .anim
+ENDC
+			; Otherwise, transition to hop
+			ld   a, MOVE_SHARED_HOP_B
+			call Pl_SetMove_StopSpeed
+			jp   .ret
 		
 ; --------------- frame #2C ---------------
 ; Transitions to what would have been hidden version of Ko Ou Ken at the end of the frame.
@@ -9054,6 +9349,7 @@ MoveC_MrKarate_Unused_RyukoRanbuD:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 .ret:
 	ret
+ENDC
 
 ; =============== MoveC_*_ThrowG ===============
 ; Move code for ground throws, character-specific.
@@ -9739,7 +10035,300 @@ MoveC_Leona_ThrowG:
 .ret:
 	ret
 	
+IF ENGLISH == 1
+
+; This was in Bank $1C in the Japanese version
+
+; =============== MoveC_Base_NormL_2Hit_D06_A03 ===============
+; Generic move code used for light normals that hit twice.
+; See also: MoveC_Base_NormH_2Hit_D06_A04
+MoveC_Base_NormL_2Hit_D06_A03:
+	call Play_Pl_MoveByColiBoxOverlapX
+	mMvC_ValLoaded .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+	add  hl, de
+	ld   a, [hl]		; A = OBJLst ID
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+; --------------- frame #1-(end) ---------------
+	mMvC_ChkTarget .chkEnd
+	jp   .anim
+; --------------- frame #0 ---------------
+; When visually switching to #1, use new damage info.
+.obj0:
+	mMvC_ValFrameEnd .anim ; About to advance the anim? If not, skip to .anim
+	; Otherwise, request new damage fields to apply when visually switching frames
+	mMvC_SetDamageNext $06, HITTYPE_HIT_MID0, PF3_HEAVYHIT
+	jp   .anim
+; --------------- common ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+	call Play_Pl_EndMove
+	jr   .ret
+.anim:
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
+.ret:
+	ret
+	
+; =============== MoveC_Base_NormH_2Hit_D06_A04 ===============
+; Generic move code used for heavy normals that hit twice.
+MoveC_Base_NormH_2Hit_D06_A04:
+	call Play_Pl_MoveByColiBoxOverlapX
+	mMvC_ValLoaded .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+	add  hl, de
+	ld   a, [hl]		; A = OBJLst ID
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+; --------------- frame #0,2-(end) ---------------
+	mMvC_ChkTarget .chkEnd
+	jp   .anim
+; --------------- frame #1 ---------------
+; When visually switching to #2, use new damage info.
+; Doing this allows the move to hit twice, since hitting the opponent removes
+; the damage value for the move, to avoid multiple hits.
+; So, if we hit the opponent before the the new damage gets applied (ie: pretty much always)
+; the move will hit twice.
+.obj1:
+	mMvC_ValFrameEnd .anim ; About to advance the anim? If not, skip to .anim
+	; Otherwise, request new damage fields to apply when visually switching frames
+	mMvC_SetDamageNext $06, HITTYPE_HIT_MID1, PF3_HEAVYHIT
+	jp   .anim
+; --------------- common ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+	call Play_Pl_EndMove
+	jr   .ret
+.anim:
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
+.ret:
+	ret
+	
+; =============== MoveC_MrBig_PunchH ===============
+; Move code used for Mr.Big's heavy punch. 
+; This is like MoveC_Base_NormH_2Hit_D06_A04, except the player moves
+; forward 7px at the start of #0 and #1.
+MoveC_MrBig_PunchH:
+	call Play_Pl_MoveByColiBoxOverlapX
+	mMvC_ValLoaded .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+	add  hl, de
+	ld   a, [hl]		; A = OBJLst ID
+	cp   $00*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj0
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+; --------------- frame #2-(end) ---------------
+	mMvC_ChkTarget .chkEnd
+	jp   .anim
+; --------------- frame #0 ---------------
+; The first time we get here, move 7px forward.
+.obj0:
+	mMvC_ValFrameStart .anim					; If not, jump
+	mMvC_SetMoveH $0700
+	jp   .anim
+; --------------- frame #1 ---------------
+.obj1:
+	;
+	; The first time we get here, move 7px forward.
+	;
+	mMvC_ValFrameStart .obj1_chkAdv			; If not, jump
+	mMvC_SetMoveH $0700
+.obj1_chkAdv:
+	;
+	; When visually switching to #2, use new damage info.
+	;
+	mMvC_ValFrameEnd .anim ; About to advance the anim? If not, skip to .anim
+	; Otherwise, request new damage fields to apply when visually switching frames
+	mMvC_SetDamageNext $06, HITTYPE_HIT_MID1, PF3_HEAVYHIT
+	jp   .anim
+; --------------- common ---------------	
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+	call Play_Pl_EndMove
+	jr   .ret
+.anim:
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
+.ret:
+	ret
+	
+; =============== MoveC_Mature_PunchH ===============
+; Move code used for Mature's heavy punch, this is almost the same
+; as the one for Mr.Big's heavy punch, except for the logic of #0 being moved to #3,
+; and different code to account for it.
+;
+; See also: MoveC_MrBig_PunchH
+MoveC_Mature_PunchH:
+	call Play_Pl_MoveByColiBoxOverlapX
+	mMvC_ValLoaded .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+	add  hl, de
+	ld   a, [hl]
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	
+; --------------- frame #0,#2 ---------------
+	; [POI] Could have been just "jp .anim". We get to .chkEnd anyway in #3
+	mMvC_ChkTarget .chkEnd
+	jp   .anim
+; --------------- frame #3 ---------------
+; The first time we get here, move 7px forward.
+; When attempting to visually switch to #4, end the move instead.
+.obj3:
+	mMvC_ValFrameStart .obj3_chkAdv		; If not, jump
+	mMvC_SetMoveH $0700				; Otherwise move forward
+.obj3_chkAdv:
+	;--
+	; [POI] This is pointless, as .chkEnd checks it anyway.
+	mMvC_ValFrameEnd .anim
+	;--
+	jp   .chkEnd
+; --------------- frame #1 ---------------
+.obj1:
+	;
+	; The first time we get here, move 7px forward.
+	;
+	mMvC_ValFrameStart .obj1_chkAdv
+	mMvC_SetMoveH $0700
+.obj1_chkAdv:
+	;
+	; When visually switching to #2, use new damage info.
+	;
+	mMvC_ValFrameEnd .anim ; About to advance the anim? If not, skip to .anim
+	; Otherwise, request new damage fields to apply when visually switching frames
+	mMvC_SetDamageNext $06, HITTYPE_HIT_MID1, PF3_HEAVYHIT
+	jp   .anim
+; --------------- common ---------------	
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+	call Play_Pl_EndMove
+	jr   .ret
+.anim:
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
+.ret:
+	ret
+	
+; =============== MoveC_Goenitz_PunchH ===============
+; Move code used for Goenitz's heavy punch, which hits 3 times.
+;
+; This is like Mature's heavy punch except for the extra hit on #4.
+;
+; See also: MoveC_Mature_PunchH	
+MoveC_Goenitz_PunchH:
+	call Play_Pl_MoveByColiBoxOverlapX
+	mMvC_ValLoaded .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+	add  hl, de
+	ld   a, [hl]
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $03*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj3
+	cp   $04*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj4
+; --------------- frame #0,#2,#5-(end) ---------------
+	mMvC_ChkTarget .chkEnd
+	jp   .anim
+; --------------- frame #1 ---------------
+.obj1:
+	; The first time we get here, move 7px forward.
+	mMvC_ValFrameStart .obj1_chkAdv
+	mMvC_SetMoveH $0700
+.obj1_chkAdv:
+	; When visually switching to #2, use new damage info.
+	mMvC_ValFrameEnd .anim ; About to advance the anim? If not, skip to .anim
+	; Otherwise, request new damage fields to apply when visually switching frames
+	mMvC_SetDamageNext $06, HITTYPE_HIT_MID1, $00
+	jp   .anim
+; --------------- frame #3 ---------------
+.obj3:
+	; The first time we get here, move 7px forward.
+	mMvC_ValFrameStart .obj3_chkAdv
+	mMvC_SetMoveH $0700
+.obj3_chkAdv:
+	; When visually switching to #2, use new damage info.
+	mMvC_ValFrameEnd .anim ; About to advance the anim? If not, skip to .anim
+	; Otherwise, request new damage fields to apply when visually switching frames
+	mMvC_SetDamageNext $06, HITTYPE_HIT_MID0, PF3_HEAVYHIT
+	jp   .anim
+; --------------- frame #4 ---------------
+.obj4:
+	; The first time we get here, move 7px forward.
+	mMvC_ValFrameStart .anim
+	mMvC_SetMoveH $0700
+	jp   .anim
+; --------------- common ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+	call Play_Pl_EndMove
+	jr   .ret
+.anim:
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
+.ret:
+	ret
+	
+; =============== MoveC_Goenitz_PunchH ===============
+; Move code used for Goenitz's heavy kick, which hits 2 times.	
+MoveC_Goenitz_KickH:
+	call Play_Pl_MoveByColiBoxOverlapX
+	mMvC_ValLoaded .ret
+	
+	; Depending on the visible frame...
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+	add  hl, de
+	ld   a, [hl]
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+	cp   $02*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj2
+; --------------- frame #0,#3-(end) ---------------
+	mMvC_ChkTarget .chkEnd
+	jp   .anim
+; --------------- frame #1 ---------------
+.obj1:
+	; The first time we get here, move 7px forward.
+	mMvC_ValFrameStart .anim
+	mMvC_SetMoveH $0700
+	jp   .anim
+; --------------- frame #2 ---------------
+.obj2:
+	; The first time we get here, move 7px forward.
+	mMvC_ValFrameStart .obj2_chkAdv
+	mMvC_SetMoveH $0700
+.obj2_chkAdv:
+	mMvC_ValFrameEnd .anim ; About to advance the anim? If not, skip to .anim
+	; Otherwise, request new damage fields to apply when visually switching frames
+	mMvC_SetDamageNext $06, HITTYPE_HIT_MID1, PF3_HEAVYHIT
+	jp   .anim
+; --------------- common ---------------
+.chkEnd:
+	mMvC_ValFrameEnd .anim
+	call Play_Pl_EndMove
+	jr   .ret
+.anim:
+	jp   OBJLstS_DoAnimTiming_Loop_by_DE
+.ret:
+	ret
+	
+ENDC
+
 ; =============== END OF BANK ===============
 ; Junk area below.
 ; Contains duplicate move code.
+IF ENGLISH == 0
 	mIncJunk "L027EBF"
+ELSE
+	mIncJunk "L027F70"
+ENDC

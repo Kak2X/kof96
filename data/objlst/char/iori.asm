@@ -432,8 +432,13 @@ OBJLstPtrTable_Iori_ScumGaleL:
 		
 
 OBJLstPtrTable_Iori_KinYaOtomeEscapeL:
+IF ENGLISH == 0
 	dw OBJLstHdrA_Iori_KinYaOtomeEscapeL0_A, OBJLstHdrB_Iori_KinYaOtomeEscapeL0_B
 	dw OBJLstHdrA_Iori_KinYaOtomeEscapeL0_A, OBJLstHdrB_Iori_KinYaOtomeEscapeL0_B
+ELSE
+	dw OBJLstHdrA_Iori_KinYaOtomeEscapeNoHitboxL0_A, OBJLstHdrB_Iori_KinYaOtomeEscapeL0_B
+	dw OBJLstHdrA_Iori_KinYaOtomeEscapeNoHitboxL0_A, OBJLstHdrB_Iori_KinYaOtomeEscapeL0_B
+ENDC
 	dw OBJLstHdrA_Iori_KinYaOtomeEscapeL2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Iori_KinYaOtomeEscapeL2, OBJLstHdrB_Iori_KinYaOtomeEscapeL3_B
 	dw OBJLstHdrA_Iori_KinYaOtomeEscapeL2, OBJLstHdrB_Iori_KinYaOtomeEscapeL4_B
@@ -2814,15 +2819,31 @@ OBJLstHdrA_Iori_KinYaOtomeEscapeL0_A:
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_02 ; iOBJLstHdrA_HitboxId
 	dpr GFX_Char_Iori_KinYaOtomeEscapeL0_A ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw OBJLstHdrA_Iori_KinYaOtomeEscapeNoHitboxL0_A.bin ; iOBJLstHdrA_DataPtr
+	db $00 ; iOBJLstHdrA_XOffset
+	db $00 ; iOBJLstHdrA_YOffset
+	
+; This alternate sprite mapping got inserted in the English version.
+; It's identical to OBJLstHdrA_Iori_KinYaOtomeEscapeL0_A, except it has no hitbox.
+OBJLstHdrA_Iori_KinYaOtomeEscapeNoHitboxL0_A: ; OBJLstHdrA_Iori_KinYaOtomeEscapeNoHitboxL0_A
+IF ENGLISH == 1
+	db $00 ; iOBJLstHdrA_Flags
+	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
+	db COLIBOX_00 ; iOBJLstHdrA_HitboxId
+	dpr GFX_Char_Iori_KinYaOtomeEscapeL0_A ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
+ENDC
+
 .bin:
 	db $03 ; OBJ Count
 	;    Y   X  ID
 	db $28,$F6,$00 ; $00
 	db $28,$FE,$02 ; $01
 	db $28,$06,$04 ; $02
+	
+
 		
 OBJLstHdrA_Iori_KinYaOtomeEscapeL7_A:
 	db $00 ; iOBJLstHdrA_Flags

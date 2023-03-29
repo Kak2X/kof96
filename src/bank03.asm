@@ -97,7 +97,11 @@ MoveAnimTbl_Kyo:
 	mMvAnDef OBJLstPtrTable_Kyo_Idle, $00, $02, $00, $00, $00 ;X ; BANK $07 ; MOVE_KYO_SPEC_6_H
 	mMvAnDef OBJLstPtrTable_Kyo_UraOrochiNagiS, $18, $00, $18, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ; BANK $07 ; MOVE_KYO_URA_OROCHI_NAGI_S
 	mMvAnDef OBJLstPtrTable_Kyo_UraOrochiNagiD, $18, $00, $01, HITTYPE_HIT_MID0, PF3_FIRE|PF3_LASTHIT ; BANK $07 ; MOVE_KYO_URA_OROCHI_NAGI_D
+IF ENGLISH == 0
 	mMvAnDef OBJLstPtrTable_Kyo_Idle, $18, $01, $14, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ;X ; BANK $07 ; MOVE_KYO_SUPER_1_S
+ELSE
+	mMvAnDef OBJLstPtrTable_Kyo_UraOrochiNagiD, $18, $00, $01, HITTYPE_HIT_MID0, PF3_FIRE|PF3_LASTHIT ; BANK $07 ; MOVE_KYO_URA_OROCHI_NAGI_E
+ENDC
 	mMvAnDef OBJLstPtrTable_Kyo_Idle, $18, $01, $14, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ;X ; BANK $07 ; MOVE_KYO_SUPER_1_D
 	mMvAnDef OBJLstPtrTable_Kyo_ThrowG, $0C, $0A, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_THROW_G
 	mMvAnDef OBJLstPtrTable_Kyo_Idle, $00, $00, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_THROW_A
@@ -1495,8 +1499,13 @@ MoveAnimTbl_MrKarate:
 	mMvAnDef OBJLstPtrTable_MrKarate_ZenretsukenL, $18, $01, $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT ; BANK $0A ; MOVE_MRKARATE_ZENRETSUKEN_H
 	mMvAnDef OBJLstPtrTable_MrKarate_KyokukenRyuRenbuKenL, $14, $01, $04, HITTYPE_HIT_MID1, PF3_HITLOW|PF3_OVERHEAD|PF3_LASTHIT ; BANK $0A ; MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_L
 	mMvAnDef OBJLstPtrTable_MrKarate_KyokukenRyuRenbuKenL, $14, $01, $04, HITTYPE_HIT_MID1, PF3_HITLOW|PF3_OVERHEAD|PF3_LASTHIT ; BANK $0A ; MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_H
+IF ENGLISH == 0
 	mMvAnDef OBJLstPtrTable_MrKarate_Idle, $00, $02, $0A, HITTYPE_DUMMY, $00 ;X ; BANK $0A ; MOVE_MRKARATE_KO_OU_KEN_UNUSED_EL
 	mMvAnDef OBJLstPtrTable_MrKarate_Idle, $00, $02, $0A, HITTYPE_DUMMY, $00 ;X ; BANK $0A ; MOVE_MRKARATE_KO_OU_KEN_UNUSED_EH
+ELSE
+	mMvAnDef OBJLstPtrTable_MrKarate_HopB, $18, $FF, $0C, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ; BANK $0A ; MOVE_MRKARATE_5C
+	mMvAnDef OBJLstPtrTable_MrKarate_HopB, $18, $FF, $0C, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ; BANK $0A ; MOVE_MRKARATE_5E
+ENDC
 	mMvAnDef OBJLstPtrTable_MrKarate_Idle, $00, $02, $0A, HITTYPE_DUMMY, $00 ;X ; BANK $0A ; MOVE_MRKARATE_SPEC_6_L
 	mMvAnDef OBJLstPtrTable_MrKarate_Idle, $00, $02, $0A, HITTYPE_DUMMY, $00 ;X ; BANK $0A ; MOVE_MRKARATE_SPEC_6_H
 	mMvAnDef OBJLstPtrTable_MrKarate_RyukoRanbuS, $18, $01, $01, HITTYPE_HIT_MULTI1, PF3_HEAVYHIT|PF3_LASTHIT ; BANK $0A ; MOVE_MRKARATE_RYUKO_RANBU_S
@@ -2048,12 +2057,29 @@ MoveCodePtrTbl_MrKarate:
 	dpr MoveC_MrKarate_Zenretsuken ; BANK $02 ; MOVE_MRKARATE_ZENRETSUKEN_H
 	dpr MoveC_Robert_KyokugenRyuRanbuKyaku ; BANK $02 ; MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_L
 	dpr MoveC_Robert_KyokugenRyuRanbuKyaku ; BANK $02 ; MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_H
+IF ENGLISH == 0
 	dpr MoveC_Terry_RisingTackle ;X ; BANK $02 ; MOVE_MRKARATE_KO_OU_KEN_UNUSED_EL ; [TCRF] Would be an hidden version of Ko Ou Ken, likely cloned from Ryo's entry. Its respective animation is a placeholder one.
 	dpr MoveC_Terry_RisingTackle ;X ; BANK $02 ; MOVE_MRKARATE_KO_OU_KEN_UNUSED_EH
 	dpr MoveC_Ryo_KoOuKen ;X ; BANK $02 ; MOVE_MRKARATE_SPEC_6_L ; [POI] This placeholder entry is using the one for Ryo, hinting that at some point Mr. Karate didn't have its own code for KoOuKen.
-	dpr MoveC_Ryo_KoOuKen ;X ; BANK $02 ; MOVE_MRKARATE_SPEC_6_H
+	dpr MoveC_Ryo_KoOuKen ;X ; BANK $02 ; MOVE_MRKARATE_SPEC_6_H	
+ELSE
+	; The English version replaced some slots with working moves
+	dpr MoveC_MrKarate_Unk_HaohShokohKenD ; BANK $02 ; MOVE_MRKARATE_5C
+	dpr MoveC_MrKarate_Unk_HaohShokohKenD ; BANK $02 ; MOVE_MRKARATE_5E
+	; ??? Is this used? They updated the placeholder entry 
+	dpr MoveC_MrKarate_KoOuKen ;X ; BANK $02 ; MOVE_MRKARATE_60
+	dpr MoveC_MrKarate_KoOuKen ;X ; BANK $02 ; MOVE_MRKARATE_62	
+ENDC
+
 	dpr MoveC_MrKarate_RyukoRanbuS ; BANK $02 ; MOVE_MRKARATE_RYUKO_RANBU_S
+IF ENGLISH == 0
+	; [TCRF] Mr.Karate's desperation super is unused and incomplete.
 	dpr MoveC_MrKarate_Unused_RyukoRanbuD ;X ; BANK $02 ; MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D
+ELSE
+	; In the English version, the code for MoveC_MrKarate_Unused_RyukoRanbuD got deleted
+	; and MoveC_MrKarate_RyukoRanbuS now has desperation-specific checks.
+	dpr MoveC_MrKarate_RyukoRanbuS ; BANK $02 ; MOVE_MRKARATE_RYUKO_RANBU_D
+ENDC
 	dpr MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_MRKARATE_HAOH_SHO_KOH_KEN_S
 	dpr MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D
 	dpr MoveC_Ryo_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
@@ -3544,7 +3570,11 @@ CPU_MoveInputList_Daimon:
 	; FDF+P -> Jirai Shin
 	dw MoveInput_FDF
 	db KEP_B_LIGHT
+IF ENGLISH == 0
 	db KEP_B_HEAVY
+ELSE
+	db KEP_B_LIGHT ; Changed to prevent the CPU from using Fake Jirai Shin
+ENDC
 	; DB+K -> Chou Ukemi
 	dw MoveInput_DB
 	db KEP_A_LIGHT
@@ -4121,7 +4151,285 @@ ENDC
 ; 
 ; =============== END OF SUBMODULE Play->CPU ===============
 ;
-	
+
+IF ENGLISH == 0	
 ; =============== END OF BANK ===============
 ; Junk area below.
 	mIncJunk "L037E3B"
+ELSE
+
+; TODO: TextC_
+TextC_CutsceneMrKarate0: db $53
+L037E3C: db $48
+L037E3D: db $61
+L037E3E: db $2C
+L037E3F: db $68
+L037E40: db $61
+L037E41: db $2C
+L037E42: db $68
+L037E43: db $61
+L037E44: db $21
+L037E45: db $FF
+L037E46: db $57
+L037E47: db $68
+L037E48: db $61
+L037E49: db $74
+L037E4A: db $20
+L037E4B: db $68
+L037E4C: db $61
+L037E4D: db $76
+L037E4E: db $65
+L037E4F: db $20
+L037E50: db $77
+L037E51: db $65
+L037E52: db $20
+L037E53: db $68
+L037E54: db $65
+L037E55: db $72
+L037E56: db $65
+L037E57: db $3F
+L037E58: db $FF
+L037E59: db $41
+L037E5A: db $20
+L037E5B: db $62
+L037E5C: db $61
+L037E5D: db $74
+L037E5E: db $74
+L037E5F: db $6C
+L037E60: db $65
+L037E61: db $21
+L037E62: db $20
+L037E63: db $57
+L037E64: db $61
+L037E65: db $74
+L037E66: db $63
+L037E67: db $68
+L037E68: db $20
+L037E69: db $6F
+L037E6A: db $75
+L037E6B: db $74
+L037E6C: db $2D
+L037E6D: db $FF
+L037E6E: db $20
+L037E6F: db $68
+L037E70: db $65
+L037E71: db $72
+L037E72: db $65
+L037E73: db $20
+L037E74: db $63
+L037E75: db $6F
+L037E76: db $6D
+L037E77: db $65
+L037E78: db $73
+L037E79: db $FF
+L037E7A: db $20
+L037E7B: db $20
+L037E7C: db $20
+L037E7D: db $20
+L037E7E: db $20
+L037E7F: db $20
+L037E80: db $20
+L037E81: db $20
+L037E82: db $20
+L037E83: db $20
+L037E84: db $4D
+L037E85: db $72
+L037E86: db $20
+L037E87: db $4B
+L037E88: db $61
+L037E89: db $72
+L037E8A: db $61
+L037E8B: db $72
+L037E8C: db $65
+L037E8D: db $21
+L037E8E: db $FF
+TextC_CutsceneMrKarate1: db $59
+L037E90: db $49
+L037E91: db $60
+L037E92: db $76
+L037E93: db $65
+L037E94: db $20
+L037E95: db $62
+L037E96: db $65
+L037E97: db $65
+L037E98: db $6E
+L037E99: db $20
+L037E9A: db $77
+L037E9B: db $61
+L037E9C: db $74 ; M
+L037E9D: db $63
+L037E9E: db $68 ; M
+L037E9F: db $69
+L037EA0: db $6E ; M
+L037EA1: db $67
+L037EA2: db $FF ; M
+L037EA3: db $20
+L037EA4: db $79
+L037EA5: db $6F
+L037EA6: db $75
+L037EA7: db $20
+L037EA8: db $66
+L037EA9: db $69
+L037EAA: db $67
+L037EAB: db $68
+L037EAC: db $74
+L037EAD: db $FF
+L037EAE: db $20
+L037EAF: db $20
+L037EB0: db $20
+L037EB1: db $20
+L037EB2: db $20
+L037EB3: db $20
+L037EB4: db $20 ; M
+L037EB5: db $20
+L037EB6: db $61
+L037EB7: db $6C
+L037EB8: db $6C
+L037EB9: db $20
+L037EBA: db $61
+L037EBB: db $6C
+L037EBC: db $6F ; M
+L037EBD: db $6E
+L037EBE: db $67 ; M
+L037EBF: db $2E
+L037EC0: db $FF
+L037EC1: db $55
+L037EC2: db $6E
+L037EC3: db $62
+L037EC4: db $72
+L037EC5: db $6F
+L037EC6: db $6B
+L037EC7: db $65
+L037EC8: db $6E ; M
+L037EC9: db $20
+L037ECA: db $76
+L037ECB: db $69
+L037ECC: db $63
+L037ECD: db $74
+L037ECE: db $6F
+L037ECF: db $72
+L037ED0: db $79 ; M
+L037ED1: db $20
+L037ED2: db $2D
+L037ED3: db $FF ; M
+L037ED4: db $20 ; M
+L037ED5: db $20
+L037ED6: db $20 ; M
+L037ED7: db $20
+L037ED8: db $6D ; M
+L037ED9: db $6F ; M
+L037EDA: db $73
+L037EDB: db $74
+L037EDC: db $20
+L037EDD: db $69
+L037EDE: db $6D
+L037EDF: db $70
+L037EE0: db $72
+L037EE1: db $65
+L037EE2: db $73
+L037EE3: db $73
+L037EE4: db $69
+L037EE5: db $76
+L037EE6: db $65
+L037EE7: db $2E
+L037EE8: db $FF
+TextC_CutsceneMrKarate2: db $60
+L037EEA: db $42
+L037EEB: db $75
+L037EEC: db $74
+L037EED: db $20
+L037EEE: db $74
+L037EEF: db $68
+L037EF0: db $65
+L037EF1: db $72
+L037EF2: db $65
+L037EF3: db $60
+L037EF4: db $73
+L037EF5: db $20
+L037EF6: db $73
+L037EF7: db $74
+L037EF8: db $69 ; M
+L037EF9: db $6C
+L037EFA: db $6C
+L037EFB: db $20
+L037EFC: db $61
+L037EFD: db $FF
+L037EFE: db $20
+L037EFF: db $6C
+L037F00: db $6F ; M
+L037F01: db $74
+L037F02: db $20
+L037F03: db $66
+L037F04: db $6F
+L037F05: db $72
+L037F06: db $20
+L037F07: db $79
+L037F08: db $6F
+L037F09: db $75
+L037F0A: db $20
+L037F0B: db $6C
+L037F0C: db $65
+L037F0D: db $61
+L037F0E: db $72
+L037F0F: db $6E ; M
+L037F10: db $21
+L037F11: db $FF
+L037F12: db $49
+L037F13: db $74
+L037F14: db $60
+L037F15: db $73
+L037F16: db $20
+L037F17: db $74
+L037F18: db $69
+L037F19: db $6D
+L037F1A: db $65
+L037F1B: db $20
+L037F1C: db $66
+L037F1D: db $6F
+L037F1E: db $72 ; M
+L037F1F: db $20
+L037F20: db $6D
+L037F21: db $65
+L037F22: db $20
+L037F23: db $74
+L037F24: db $6F
+L037F25: db $FF
+L037F26: db $20
+L037F27: db $67
+L037F28: db $69
+L037F29: db $76
+L037F2A: db $65
+L037F2B: db $20
+L037F2C: db $79
+L037F2D: db $6F
+L037F2E: db $75
+L037F2F: db $20
+L037F30: db $73
+L037F31: db $6F
+L037F32: db $6D
+L037F33: db $65
+L037F34: db $FF
+L037F35: db $20
+L037F36: db $20
+L037F37: db $20
+L037F38: db $73
+L037F39: db $70
+L037F3A: db $65
+L037F3B: db $63
+L037F3C: db $69
+L037F3D: db $61
+L037F3E: db $6C
+L037F3F: db $20
+L037F40: db $74
+L037F41: db $72 ; M
+L037F42: db $61
+L037F43: db $69
+L037F44: db $6E
+L037F45: db $69
+L037F46: db $6E
+L037F47: db $67 ; M
+L037F48: db $21
+L037F49: db $FF
+; =============== END OF BANK ===============
+	mIncJunk "L037F4A"
+ENDC

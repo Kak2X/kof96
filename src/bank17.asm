@@ -100,4 +100,6 @@ GFX_Char_Iori_KinYaOtomeEscapeL7_B: INCBIN "data/gfx/char/iori_kinyaotomeescapel
 GFX_Char_Iori_KinYaOtomeD7_A: INCBIN "data/gfx/char/iori_kinyaotomed7_a.bin"
 GFX_Char_Iori_KinYaOtomeEscapeL0_B: INCBIN "data/gfx/char/iori_kinyaotomeescapel0_b.bin"
 GFX_Char_MrKarate_Taunt1_A: INCBIN "data/gfx/char/mrkarate_taunt1_a.bin"
-GFX_Char_MrKarate_Unused1: INCBIN "data/gfx/char/mrkarate_unused1.bin"
+; =============== END OF BANK ===============
+; Duplicate of GFX_Char_MrKarate_Taunt1_A below.
+	mIncJunk "L177FE0"

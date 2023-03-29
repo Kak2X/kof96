@@ -1144,12 +1144,17 @@ mDecPlPow: MACRO
 	jp   z, .end		; If so, skip
 	
 	; If the other player is taunting, decrease the meter at 0.25px/frame
+	; In the English version, this got upped to 1px/frame for some reason, meaning
+	; one single taunt can wipe out the entire POW bar.
 	ld   a, [\2+iPlInfo_MoveId]
 	cp   MOVE_SHARED_TAUNT	; Is the other player taunting?
 	jp   nz, .end			; If not, skip
+IF ENGLISH == 0
 	ld   a, [wPlayTimer]
 	and  a, $03				; wPlayTimer % 4 != 0?
 	jp   nz, .end			; If so, skip
+ENDC
+
 .doDec:
 	ld   hl, \1+iPlInfo_Pow	; Otherwise, Pow--
 	dec  [hl]
@@ -5751,4 +5756,8 @@ Play_WriteBtnKeysToBuffer1P: mWriteBtnKeysToBuffer wPlInfo_Pl1
 Play_WriteBtnKeysToBuffer2P: mWriteBtnKeysToBuffer wPlInfo_Pl2
 ; =============== END OF BANK ===============
 ; Junk area below with incomplete copies of the above subroutines.
+IF ENGLISH == 0
 	mIncJunk "L017FA8"
+ELSE
+	mIncJunk "L017F98"
+ENDC

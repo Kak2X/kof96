@@ -2,7 +2,307 @@ INCLUDE "data/objlst/char/andy.asm"
 INCLUDE "data/objlst/char/athena.asm"		
 INCLUDE "data/objlst/char/mai.asm"
 INCLUDE "data/objlst/char/goenitz.asm"
-	
+IF ENGLISH == 0
 ; =============== END OF BANK ===============
 ; Junk area below.
 	mIncJunk "L087EC8"
+ELSE
+; TODO: TextC_
+TextC_Ending_KaguraGeneric0: db $1B
+L087EC9: db $54
+L087ECA: db $68
+L087ECB: db $61
+L087ECC: db $6E
+L087ECD: db $6B
+L087ECE: db $20
+L087ECF: db $79
+L087ED0: db $6F
+L087ED1: db $75
+L087ED2: db $20
+L087ED3: db $61
+L087ED4: db $6C
+L087ED5: db $6C
+L087ED6: db $2E
+L087ED7: db $FF
+L087ED8: db $48
+L087ED9: db $65
+L087EDA: db $20
+L087EDB: db $69
+L087EDC: db $73
+L087EDD: db $20
+L087EDE: db $67
+L087EDF: db $6F
+L087EE0: db $6E
+L087EE1: db $65
+L087EE2: db $2E
+L087EE3: db $FF
+TextC_Ending_KaguraGeneric1: db $5D
+L087EE5: db $42
+L087EE6: db $75
+L087EE7: db $74
+L087EE8: db $20
+L087EE9: db $68
+L087EEA: db $69
+L087EEB: db $73
+L087EEC: db $20
+L087EED: db $66
+L087EEE: db $6F
+L087EEF: db $6C
+L087EF0: db $6C
+L087EF1: db $6F
+L087EF2: db $77
+L087EF3: db $65
+L087EF4: db $72
+L087EF5: db $73
+L087EF6: db $FF
+L087EF7: db $20
+L087EF8: db $77
+L087EF9: db $68
+L087EFA: db $6F
+L087EFB: db $20
+L087EFC: db $6C
+L087EFD: db $75
+L087EFE: db $72
+L087EFF: db $6B
+L087F00: db $20
+L087F01: db $69
+L087F02: db $6E
+L087F03: db $20
+L087F04: db $74
+L087F05: db $68
+L087F06: db $65
+L087F07: db $FF
+L087F08: db $20
+L087F09: db $73
+L087F0A: db $68
+L087F0B: db $61
+L087F0C: db $64
+L087F0D: db $6F
+L087F0E: db $77
+L087F0F: db $73
+L087F10: db $20
+L087F11: db $6D
+L087F12: db $61
+L087F13: db $79
+L087F14: db $20
+L087F15: db $64
+L087F16: db $72
+L087F17: db $61
+L087F18: db $77
+L087F19: db $FF
+L087F1A: db $20
+L087F1B: db $68
+L087F1C: db $75
+L087F1D: db $6D
+L087F1E: db $61
+L087F1F: db $6E
+L087F20: db $69
+L087F21: db $74
+L087F22: db $79
+L087F23: db $20
+L087F24: db $69
+L087F25: db $6E
+L087F26: db $74
+L087F27: db $6F
+L087F28: db $20
+L087F29: db $64
+L087F2A: db $61
+L087F2B: db $72
+L087F2C: db $6B
+L087F2D: db $2D
+L087F2E: db $FF
+L087F2F: db $20
+L087F30: db $6E
+L087F31: db $65
+L087F32: db $73
+L087F33: db $73
+L087F34: db $20
+L087F35: db $61
+L087F36: db $74
+L087F37: db $20
+L087F38: db $61
+L087F39: db $6E
+L087F3A: db $79
+L087F3B: db $20
+L087F3C: db $74
+L087F3D: db $69
+L087F3E: db $6D
+L087F3F: db $65
+L087F40: db $2E
+L087F41: db $FF
+TextC_Ending_KaguraGeneric2: db $40
+L087F43: db $41
+L087F44: db $6E
+L087F45: db $64 ; M
+L087F46: db $20 ; M
+L087F47: db $69
+L087F48: db $74
+L087F49: db $20 ; M
+L087F4A: db $63
+L087F4B: db $6F
+L087F4C: db $75
+L087F4D: db $6C
+L087F4E: db $64
+L087F4F: db $20
+L087F50: db $62
+L087F51: db $65
+L087F52: db $FF ; M
+L087F53: db $20
+L087F54: db $20
+L087F55: db $20
+L087F56: db $20
+L087F57: db $20
+L087F58: db $20
+L087F59: db $20
+L087F5A: db $20
+L087F5B: db $20
+L087F5C: db $20
+L087F5D: db $20
+L087F5E: db $20
+L087F5F: db $20
+L087F60: db $73
+L087F61: db $6F
+L087F62: db $6F
+L087F63: db $6E
+L087F64: db $2E
+L087F65: db $2E
+L087F66: db $2E
+L087F67: db $FF
+L087F68: db $57
+L087F69: db $65 ; M
+L087F6A: db $20
+L087F6B: db $73
+L087F6C: db $68
+L087F6D: db $61
+L087F6E: db $6C
+L087F6F: db $6C
+L087F70: db $20 ; M
+L087F71: db $6D
+L087F72: db $65
+L087F73: db $65
+L087F74: db $74
+L087F75: db $20 ; M
+L087F76: db $61
+L087F77: db $67 ; M
+L087F78: db $61
+L087F79: db $69 ; M
+L087F7A: db $6E ; M
+L087F7B: db $FF ; M
+L087F7C: db $20
+L087F7D: db $74
+L087F7E: db $68
+L087F7F: db $65 ; M
+L087F80: db $6E
+L087F81: db $2E
+L087F82: db $FF
+TextC_CheatList: db $6F
+L087F84: db $FF ; M
+L087F85: db $20
+L087F86: db $50
+L087F87: db $72
+L087F88: db $65
+L087F89: db $73
+L087F8A: db $73
+L087F8B: db $20
+L087F8C: db $74
+L087F8D: db $68
+L087F8E: db $65 ; M
+L087F8F: db $20
+L087F90: db $53
+L087F91: db $45
+L087F92: db $4C
+L087F93: db $45
+L087F94: db $43
+L087F95: db $54
+L087F96: db $FF
+L087F97: db $20 ; M
+L087F98: db $62
+L087F99: db $75
+L087F9A: db $74 ; M
+L087F9B: db $74
+L087F9C: db $6F
+L087F9D: db $6E
+L087F9E: db $20
+L087F9F: db $33
+L087FA0: db $20
+L087FA1: db $74
+L087FA2: db $69
+L087FA3: db $6D
+L087FA4: db $65
+L087FA5: db $73
+L087FA6: db $20
+L087FA7: db $77
+L087FA8: db $68
+L087FA9: db $65
+L087FAA: db $6E
+L087FAB: db $FF
+L087FAC: db $20
+L087FAD: db $74
+L087FAE: db $68 ; M
+L087FAF: db $65
+L087FB0: db $20
+L087FB1: db $54
+L087FB2: db $41
+L087FB3: db $4B ; M
+L087FB4: db $41
+L087FB5: db $52
+L087FB6: db $41
+L087FB7: db $20
+L087FB8: db $6C
+L087FB9: db $6F
+L087FBA: db $67
+L087FBB: db $6F
+L087FBC: db $20
+L087FBD: db $69
+L087FBE: db $73
+L087FBF: db $FF
+L087FC0: db $20
+L087FC1: db $64
+L087FC2: db $69
+L087FC3: db $73
+L087FC4: db $70
+L087FC5: db $6C
+L087FC6: db $61
+L087FC7: db $79
+L087FC8: db $65
+L087FC9: db $64
+L087FCA: db $20
+L087FCB: db $74
+L087FCC: db $6F
+L087FCD: db $20
+L087FCE: db $62
+L087FCF: db $65
+L087FD0: db $FF
+L087FD1: db $20
+L087FD2: db $61
+L087FD3: db $62 ; M
+L087FD4: db $6C ; M
+L087FD5: db $65
+L087FD6: db $20
+L087FD7: db $74
+L087FD8: db $6F ; M
+L087FD9: db $FF
+L087FDA: db $20
+L087FDB: db $20
+L087FDC: db $20
+L087FDD: db $20
+L087FDE: db $70
+L087FDF: db $6C ; M
+L087FE0: db $61
+L087FE1: db $79
+L087FE2: db $20
+L087FE3: db $61
+L087FE4: db $73 ; M
+L087FE5: db $20
+L087FE6: db $47
+L087FE7: db $6F
+L087FE8: db $65
+L087FE9: db $6E
+L087FEA: db $69
+L087FEB: db $74
+L087FEC: db $7A
+L087FED: db $2E
+L087FEE: db $FF
+; =============== END OF BANK ===============
+	mIncJunk "L087FEF"
+ENDC

@@ -49,8 +49,8 @@ for ($i = 0; $i < count($lines);) {
 		} else {
 			$fullptr = "L{$bank}{$obj_high}{$obj_low}";
 			// HACK HACK
-			if ($fullptr == "L094EAE")
-				$fullptr = "OBJLstPtrTable_Terry_WinA";
+			//if ($fullptr == "L094EAE")
+			//	$fullptr = "OBJLstPtrTable_Terry_WinA";
 
 			$b .= "\r\n\tmMvAnDef $fullptr, \${$target}, \${$speed}, \${$damage}, {$hitanim}, {$flags}$unused_marker ; BANK \${$bank}$movedesc";
 

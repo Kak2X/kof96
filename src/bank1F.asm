@@ -2403,8 +2403,11 @@ Sound_ActTbl:
 .act19: db SFX_REFLECT,      SGB_SND_A_JETPROJ_B,  $03            ; SCT_HISHOKEN
 .act1A: db SFX_GRAB,         SGB_SND_A_SELECT_B,   $03            ; SCT_GRAB
 .act1B: db SFX_TAUNT,        SGB_SND_A_PUNCH_B,    $03            ; SCT_BREAK
+IF ENGLISH == 0
 .act1C: db SFX_PSYCTEL,      SGB_SND_A_SELECT_C,   $03            ; SCT_PSYCTEL
-
+ELSE
+.act1C: db SFX_FIREHIT_A,    SGB_SND_A_SELECT_C,   $03            ; SCT_PSYCTEL
+ENDC
 ; =============== GFXS_XFlipTbl ===============
 ; Conversion table for CopyTilesHBlankFlipX.flipX.
 ; This maps every possible byte (an half-plane 1bpp line) of a GFX to its flipped version.
@@ -2431,11 +2434,26 @@ GFXS_XFlipTbl:
 ; The tile IDs correspond to the standard 1bpp font (FontDef_Default).
 ;
 ; Every possible character is accounted for, though most point to $00, the blank space.
+; The table is also mostly unchanged between Japanese and English versions, because of
+; the Katakana characters being placed in the lowercase ASCII slots.
+; There are still entries for the Hirigana characters, unchanged from the Japanese version,
+; but they won't display correctly since the font GFX got truncated.
 TextPrinter_CharsetToTileTbl:
-	db $30 ; $00 ;X ; ↑ ; [TCRF] Never used, even the graphic.
-	db $31 ; $01 ;X ; → ; [TCRF] Never used, even the graphic.
-	db $32 ; $02 ;X ; ↓ ; [TCRF] Never used, even the graphic.
-	db $33 ; $03 ;X ; ← ; [TCRF] Never used, even the graphic.
+; [TCRF] These arrows are leftovers from KOF95, which told you the move inputs
+;        of the unlockable characters
+;          ; $ID ;U ;JP ;EN ; NOTES
+IF ENGLISH == 0
+	db $30 ; $00 ;X ; ↑ ; ↓
+	db $31 ; $01 ;X ; → ; ←
+	db $32 ; $02 ;X ; ↓ 
+	db $33 ; $03 ;X ; ← 
+ELSE
+	; $30 and $31 got overwritten by ( and )
+	db $32 ; $00 ;X ; ↑ ; ↓
+	db $33 ; $01 ;X ; → ; ←
+	db $00 ; $02 ;X ; ↓ 
+	db $00 ; $03 ;X ; ← 
+ENDC
 	db $00 ; $04 ;X ;
 	db $00 ; $05 ;X ;
 	db $00 ; $06 ;X ;
@@ -2465,96 +2483,101 @@ TextPrinter_CharsetToTileTbl:
 	db $00 ; $1E ;X ;
 	db $00 ; $1F ;X ;
 	db $00 ; $20    ; (space)
-	db $2B ; $21    ; !
-	db $2E ; $22 ;X ; "
+	db $2B ; $21    ; ! ; !
+	db $2E ; $22 ;X ; " ; "
 	db $00 ; $23 ;X ;
 	db $00 ; $24 ;X ;
 	db $00 ; $25 ;X ;
 	db $00 ; $26 ;X ;
-	db $1E ; $27 ;X ; '
-	db $00 ; $28 ;X ;
-	db $00 ; $29 ;X ;
+	db $1E ; $27 ;X ; '	; '
+IF ENGLISH == 0
+	db $00 ; $28 ;X ;  	; (
+	db $00 ; $29 ;X ;  	; )
+ELSE
+	db $30 ; $28 ;X ;  	; (
+	db $31 ; $29 ;X ;  	; )
+ENDC
 	db $00 ; $2A ;X ;
-	db $2F ; $2B ;X ; +
-	db $2D ; $2C    ; ,
-	db $29 ; $2D    ; -
-	db $1D ; $2E    ; .
+	db $2F ; $2B ;X ; + ; +
+	db $2D ; $2C    ; , ; ,
+	db $29 ; $2D    ; - ; -
+	db $1D ; $2E    ; . ; .
 	db $00 ; $2F ;X ;
-	db $1F ; $30    ; 0
-	db $20 ; $31    ; 1
-	db $21 ; $32    ; 2
-	db $22 ; $33    ; 3
-	db $23 ; $34 ;X ; 4
-	db $24 ; $35 ;X ; 5
-	db $25 ; $36 ;X ; 6
-	db $26 ; $37 ;X ; 7
-	db $27 ; $38    ; 8
-	db $28 ; $39    ; 9
-	db $2A ; $3A ;X ; :
+	db $1F ; $30    ; 0 ; 0
+	db $20 ; $31    ; 1 ; 1
+	db $21 ; $32    ; 2 ; 2
+	db $22 ; $33    ; 3 ; 3
+	db $23 ; $34 ;X ; 4 ; 4
+	db $24 ; $35 ;X ; 5 ; 5
+	db $25 ; $36 ;X ; 6 ; 6
+	db $26 ; $37 ;X ; 7 ; 7
+	db $27 ; $38    ; 8 ; 8
+	db $28 ; $39    ; 9 ; 9
+	db $2A ; $3A ;X ; : ; :
 	db $00 ; $3B ;X ;
 	db $00 ; $3C ;X ;
 	db $00 ; $3D ;X ;
 	db $00 ; $3E ;X ;
-	db $2C ; $3F    ; ?
-	db $1C ; $40    ; r.
-	db $02 ; $41    ; A
-	db $03 ; $42    ; B
-	db $04 ; $43    ; C
-	db $05 ; $44    ; D
-	db $06 ; $45    ; E
-	db $07 ; $46    ; F
-	db $08 ; $47    ; G
-	db $09 ; $48    ; H
-	db $0A ; $49    ; I
-	db $0B ; $4A    ; J
-	db $0C ; $4B    ; K
-	db $0D ; $4C    ; L
-	db $0E ; $4D    ; M
-	db $0F ; $4E    ; N
-	db $10 ; $4F    ; O
-	db $11 ; $50    ; P
-	db $12 ; $51 ;X ; Q
-	db $13 ; $52    ; R
-	db $14 ; $53    ; S
-	db $15 ; $54    ; T
-	db $16 ; $55    ; U
-	db $17 ; $56    ; V
-	db $18 ; $57    ; W
-	db $19 ; $58    ; X
-	db $1A ; $59    ; Y
-	db $1B ; $5A    ; Z
+	db $2C ; $3F    ; ? ; ? 
+	db $1C ; $40    ; r.; r.
+	db $02 ; $41    ; A ; A
+	db $03 ; $42    ; B ; B
+	db $04 ; $43    ; C ; C
+	db $05 ; $44    ; D ; D
+	db $06 ; $45    ; E ; E
+	db $07 ; $46    ; F ; F
+	db $08 ; $47    ; G ; G
+	db $09 ; $48    ; H ; H
+	db $0A ; $49    ; I ; I
+	db $0B ; $4A    ; J ; J
+	db $0C ; $4B    ; K ; K
+	db $0D ; $4C    ; L ; L
+	db $0E ; $4D    ; M ; M
+	db $0F ; $4E    ; N ; N
+	db $10 ; $4F    ; O ; O
+	db $11 ; $50    ; P ; P
+	db $12 ; $51 ;X ; Q ; Q
+	db $13 ; $52    ; R ; R
+	db $14 ; $53    ; S ; S
+	db $15 ; $54    ; T ; T
+	db $16 ; $55    ; U ; U
+	db $17 ; $56    ; V ; V
+	db $18 ; $57    ; W ; W
+	db $19 ; $58    ; X ; X
+	db $1A ; $59    ; Y ; Y
+	db $1B ; $5A    ; Z ; Z
 	db $00 ; $5B ;X ;
 	db $00 ; $5C ;X ;
 	db $00 ; $5D ;X ;
 	db $00 ; $5E ;X ;
 	db $00 ; $5F ;X ;
-	db $1E ; $60    ; ` ; Points to same tile as '
-	db $34 ; $61 ;X ; ッ
-	db $35 ; $62 ;X ; ア
-	db $36 ; $63    ; オ
-	db $37 ; $64 ;X ; カ
-	db $38 ; $65    ; コ
-	db $39 ; $66 ;X ; シ
-	db $3A ; $67    ; チ
-	db $3B ; $68 ;X ; テ
-	db $3C ; $69    ; ト
-	db $3D ; $6A    ; ナ
-	db $3E ; $6B ;X ; ハ
-	db $3F ; $6C    ; ヒ
-	db $40 ; $6D ;X ; フ
-	db $41 ; $6E    ; メ
-	db $42 ; $6F    ; ロ
-	db $43 ; $70 ;X ; ワ
-	db $44 ; $71    ; ン
-	db $45 ; $72    ; ホ
-	db $46 ; $73    ; タ
-	db $47 ; $74 ;X ; 。 ; Duplicate
-	db $48 ; $75 ;X ; 、 ; Duplicate
-	db $49 ; $76 ;X ; ゜ ; Duplicate
-	db $4A ; $77 ;X ; ﾞ ; Duplicate
-	db $4B ; $78 ;X ; ・ ; Duplicate
-	db $4C ; $79 ;X ; を ; Duplicate
-	db $4D ; $7A ;X ; ぁ ; Duplicate
+	db $1E ; $60    ; `	; ` ; Points to same tile as '
+	db $34 ; $61 ;X ; ッ	; a
+	db $35 ; $62 ;X ; ア	; b
+	db $36 ; $63    ; オ	; c
+	db $37 ; $64 ;X ; カ	; d
+	db $38 ; $65    ; コ	; e
+	db $39 ; $66 ;X ; シ	; f
+	db $3A ; $67    ; チ	; g
+	db $3B ; $68 ;X ; テ	; h
+	db $3C ; $69    ; ト	; i
+	db $3D ; $6A    ; ナ	; j
+	db $3E ; $6B ;X ; ハ	; k
+	db $3F ; $6C    ; ヒ	; l
+	db $40 ; $6D ;X ; フ	; m
+	db $41 ; $6E    ; メ	; n
+	db $42 ; $6F    ; ロ	; o
+	db $43 ; $70 ;X ; ワ	; p
+	db $44 ; $71    ; ン	; q
+	db $45 ; $72    ; ホ	; r
+	db $46 ; $73    ; タ	; s
+	db $47 ; $74 ;X ; 。	; t ; Duplicate in JP
+	db $48 ; $75 ;X ; 、	; u ; Duplicate in JP
+	db $49 ; $76 ;X ; ゜	; v ; Duplicate in JP
+	db $4A ; $77 ;X ; ﾞ	; w ; Duplicate in JP
+	db $4B ; $78 ;X ; ・	; x ; Duplicate in JP
+	db $4C ; $79 ;X ; を	; y ; Duplicate in JP
+	db $4D ; $7A ;X ; ぁ	; z ; Duplicate in JP
 	db $00 ; $7B ;X ;
 	db $00 ; $7C ;X ;
 	db $00 ; $7D ;X ;
@@ -2607,8 +2630,8 @@ TextPrinter_CharsetToTileTbl:
 	db $4F ; $AC    ; ゃ
 	db $50 ; $AD    ; ゅ
 	db $51 ; $AE    ; ょ
-	db $52 ; $AF    ; っ
-	db $29 ; $B0    ; ｰ ; Reuses "-" symbol to save space
+	db $52 ; $AF    ; っ 
+	db $29 ; $B0    ; ｰ	;   ; Reuses "-" symbol to save space
 	db $53 ; $B1    ; あ
 	db $54 ; $B2    ; い
 	db $55 ; $B3    ; う

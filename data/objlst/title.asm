@@ -15,6 +15,8 @@ OBJLstHdrA_Title_PushStart:
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 .bin:
+IF ENGLISH == 0
+; "PUSH START"
 	db $09 ; OBJ Count
 	;    Y   X  ID+FLAG
 	db $34,$00,$10 ; $00
@@ -26,6 +28,21 @@ OBJLstHdrA_Title_PushStart:
 	db $34,$38,$00 ; $06
 	db $34,$40,$12 ; $07
 	db $34,$48,$16 ; $08
+ELSE
+; "PRESS START"
+	db $0A ; OBJ Count
+	;    Y   X  ID+FLAG
+	db $34,$FC,$10 ; $00
+	db $34,$04,$12 ; $01
+	db $34,$0C,$02 ; $02
+	db $34,$14,$14 ; $03
+	db $34,$1C,$14 ; $04
+	db $34,$2C,$14 ; $05
+	db $34,$34,$16 ; $06
+	db $34,$3C,$00 ; $07
+	db $34,$44,$12 ; $08
+	db $34,$4C,$16 ; $09
+ENDC
 		
 OBJLstHdrA_Title_Menu:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags

@@ -92,4 +92,6 @@ GFX_Char_Mai_RyuEnBuL3_A: INCBIN "data/gfx/char/mai_ryuenbul3_a.bin"
 GFX_Char_Mai_RyuEnBuL3_B: INCBIN "data/gfx/char/mai_ryuenbul3_b.bin"
 GFX_Char_Mai_RyuEnBuL4_A: INCBIN "data/gfx/char/mai_ryuenbul4_a.bin"
 GFX_Char_Mai_CHoHissatsuShinobibachiS3_B: INCBIN "data/gfx/char/mai_chohissatsushinobibachis3_b.bin"
-GFX_Char_Mai_Unused: INCBIN "data/gfx/char/mai_unused.bin"
+; =============== END OF BANK ===============
+; Partial duplicate of GFX_Char_Mai_CHoHissatsuShinobibachiS3_B below.
+	mIncJunk "L127FA0"

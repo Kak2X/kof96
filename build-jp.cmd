@@ -1,6 +1,6 @@
 @echo off
 echo Assembling...
-rgbds\rgbasm -h -L -vo -v -o kof96.o config.asm
+rgbds\rgbasm -h -L -vo -v -o kof96.o config-jp.asm
 if %ERRORLEVEL% neq 0 goto assemble_fail
 
 echo Linking...
@@ -12,7 +12,7 @@ echo   Build Success.
 echo ==========================
 echo Fixing header checksum...
 rgbds\rgbfix -v kof96.gb
-if EXIST original.gb ( fc /B kof96.gb original.gb )
+if EXIST original_jp.gb ( fc /B kof96.gb original_jp.gb | more )
 
 goto end
 

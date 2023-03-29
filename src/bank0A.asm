@@ -9,6 +9,11 @@ INCLUDE "data/objlst/char/leona.asm"
 Module_TakaraLogo:
 	ld   sp, $DD00
 	
+IF ENGLISH == 1
+	; LAGUNA ENTERTAINMENT PROUDLY PRESENT
+	; a game without 96 in the title
+	call LagunaLogo_Do
+ENDC
 	call TakaraLogo_Do
 	
 	; Determine which SGB border to load.
@@ -24,9 +29,87 @@ Module_TakaraLogo:
 	ld   b, BANK(Module_Intro)
 	ld   hl, Module_Intro
 	rst  $00
+
+IF ENGLISH == 1
+; =============== LagunaLogo_Do ===============
+; Main code for displaying the Laguna logo.
+LagunaLogo_Do:
+	di
+	; Set base bank (self)
+	ld   a, BANK(Module_TakaraLogo) 
+	ld   [MBC1RomBank], a
+	ldh  [hROMBank], a
+	;-----------------------------------
+	rst  $10				; Stop LCD
+	
+	; Use screen continuously
+	ld   hl, wMisc_C028
+	ld   [hl], $00
+	
+	; Reset DMG Pal
+	xor  a
+	ldh  [rBGP], a
+	ldh  [rOBP0], a
+	ldh  [rOBP1], a
+	
+	ld   de, SCRPAL_LAGUNALOGO
+	call HomeCall_SGB_ApplyScreenPalSet
+	
+	call ClearBGMap
+	call ClearWINDOWMap
+	
+	; Reset coords
+	xor  a
+	ldh  [hScrollX], a
+	ldh  [hScrollY], a
+	
+	; Load the graphics/tilemap for the screen, which were thrown elsewhere
+	ld   b, BANK(LagunaLogo_LoadVRAM) ; BANK $1D
+	ld   hl, LagunaLogo_LoadVRAM
+	rst  $08
+
+	; Wipe sprites
+	call ClearOBJInfo
+	
+	; Disable window 
+	xor  a
+	ldh  [rWY], a
+	ldh  [rWX], a
+	ldh  [rSTAT], a
+	
+	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_WTILEMAP|LCDC_ENABLE
+	rst  $18				; Resume LCD
+	;-----------------------------------
+	ei
+	; (VBlank will hit now) 
+	call Task_PassControl_NoDelay
+	
+	; Set DMG palettes
+	ld   a, $E4
+	ldh  [rOBP0], a
+	ld   a, $FF
+	ldh  [rOBP1], a
+	ld   a, $E4
+	ldh  [rBGP], a
+	
+	; Mute sound
+	ld   a, SND_MUTE
+	call HomeCall_Sound_ReqPlayExId_Stub
+	
+	; Show this screen for 180 frames
+	ld   bc, $00B4
+.mainLoop:	
+	call Task_PassControl_NoDelay	; Pass control
+	dec  bc						; FramesLeft--
+	ld   a, b
+	or   a, c					; FramesLeft == 0?
+	jp   nz, .mainLoop			; If not, loop
+.end:
+	ret							; Otherwise we're done
+ENDC
 	
 ; =============== TakaraLogo_Do ===============
-; Main code.
+; Main code for displaying the Takara logo.
 TakaraLogo_Do:
 
 	di
@@ -54,10 +137,17 @@ TakaraLogo_Do:
 	call ClearWINDOWMap
 	
 	; Reset coords
+IF ENGLISH == 0
 	xor  a
 	ldh  [hScrollX], a 
 	ldh  [hScrollY], a 
-	
+ELSE
+	xor  a
+	ldh  [hScrollX], a
+	ld   a, -$04
+	ldh  [hScrollY], a
+ENDC
+
 	; Copy logo GFX
 	ld   hl, GFXLZ_TakaraLogo
 	ld   de, wLZSS_Buffer
@@ -66,11 +156,17 @@ TakaraLogo_Do:
 	ld   de, $9000
 	call CopyTiles
 	
-	; Copy logo tilemap
+	; Copy logo tilemap. The newer logo is shorter.
 	ld   de, BG_TakaraLogo
-	ld   hl, $98C2
-	ld   b, $10
-	ld   c, $05
+IF ENGLISH == 0
+	ld   hl, $98C2	; VRAM Destination
+	ld   b, $10		; Width
+	ld   c, $05		; Height
+ELSE
+	ld   hl, $98E2	; VRAM Destination
+	ld   b, $10		; Width
+	ld   c, $03		; Height
+ENDC
 	call CopyBGToRect
 	
 	; Wipe sprites
@@ -89,14 +185,38 @@ TakaraLogo_Do:
 	; (VBlank will hit now)
 	call Task_PassControl_NoDelay
 	
-	; Set DMG palette
+	; Set DMG palette for sprites
 	ld   a, $E4
 	ldh  [rOBP0], a
 	ld   a, $FF
 	ldh  [rOBP1], a
+	
+	; And for the logo itself
+IF ENGLISH == 0
+	; Always white text on black background
 	ld   a, $93
 	ldh  [rBGP], a
+ELSE
 	
+	;
+	; The palette depends on the hardware.
+	;
+	; On a DMG, it uses black text on a white background for some reason,
+	; while the proper palette is used for SGB mode (to have red text on black background).
+	;
+	
+	ld   a, [wMisc_C025]
+	bit  MISCB_IS_SGB, a	; Running on SGB?
+	jp   z, .setDMGPal		; If not, jump
+.setSGBPal:
+	ld   a, $93				; W on B
+	jp   .setPal
+.setDMGPal:
+	ld   a, $6C				; B on W
+.setPal:
+	ldh  [rBGP], a
+ENDC
+
 	; Mute sound
 	ld   a, SND_MUTE
 	call HomeCall_Sound_ReqPlayExId_Stub
@@ -118,14 +238,18 @@ TakaraLogo_Do:
 .mainLoop:
 	call TakaraLogo_CheckCheat
 	
+	
 	; When pressing START from either controller, skip the delay
+	; This got removed in the English version!
+IF ENGLISH == 0
 	ldh  a, [hJoyNewKeys]
 	ld   d, a
 	ldh  a, [hJoyNewKeys2]
 	or   a, d
 	bit  KEYB_START, a			; Start pressed?
 	jp   nz, .end				; If so, jump
-	
+ENDC
+
 .chkWait:	
 	call Task_PassControl_NoDelay	; Pass control
 	dec  bc						; FramesLeft--
@@ -248,8 +372,13 @@ TakaraLogo_CheckCheat:
 	pop  hl
 .end:
 	ret
-GFXLZ_TakaraLogo: INCBIN "data/gfx/takaralogo.lzc"
-BG_TakaraLogo: INCBIN "data/bg/takaralogo.bin"
+IF ENGLISH == 0
+GFXLZ_TakaraLogo: INCBIN "data/gfx/jp/takaralogo.lzc"
+BG_TakaraLogo: INCBIN "data/bg/jp/takaralogo.bin"
+ELSE
+GFXLZ_TakaraLogo: INCBIN "data/gfx/en/takaralogo.lzc"
+BG_TakaraLogo: INCBIN "data/bg/en/takaralogo.bin"
+ENDC
 ; 
 ; =============== END OF MODULE TakaraLogo ===============
 ;
@@ -1025,22 +1154,26 @@ MoveC_Goenitz_ShinyaotomePart2:
 			jp   .ret
 ; --------------- frames #0-2 / common escape check ---------------
 .chkOtherEscape:
-	;
-	; [POI] If the opponent somehow isn't in one of the hit effects 
-	;       this move sets, hop back instead of continuing.
-	;       This can happen if the opponent gets hit by a previously thrown
-	;       fireball in the middle of the move.
-	;
-	ld   hl, iPlInfo_HitTypeIdOther
-	add  hl, bc
-	ld   a, [hl]
-	cp   HITTYPE_HIT_MULTI0	; A == HITTYPE_HIT_MULTI0?
-	jp   z, .anim				; If so, skip
-	cp   HITTYPE_HIT_MULTI1	; A == HITTYPE_HIT_MULTI1?
-	jp   z, .anim				; If so, skip
-	ld   a, MOVE_SHARED_HOP_B
-	call Pl_SetMove_StopSpeed
-	jp   .ret
+IF ENGLISH == 0
+		;
+		; [POI] If the opponent somehow isn't in one of the hit effects 
+		;       this move sets, hop back instead of continuing.
+		;       This can happen if the opponent gets hit by a previously thrown
+		;       fireball in the middle of the move.
+		;
+		ld   hl, iPlInfo_HitTypeIdOther
+		add  hl, bc
+		ld   a, [hl]
+		cp   HITTYPE_HIT_MULTI0	; A == HITTYPE_HIT_MULTI0?
+		jp   z, .anim			; If so, skip
+		cp   HITTYPE_HIT_MULTI1	; A == HITTYPE_HIT_MULTI1?
+		jp   z, .anim			; If so, skip
+ELSE
+		mMvC_ValEscape .anim
+ENDC
+			ld   a, MOVE_SHARED_HOP_B
+			call Pl_SetMove_StopSpeed
+			jp   .ret
 ; --------------- common ---------------
 .unused_end: ; [TCRF] Unreferenced code, this isn't used here
 	call Play_Pl_EndMove
@@ -1831,6 +1964,367 @@ ProjC_Goenitz_WanpyouTokobuse:
 .despawn:
 	call OBJLstS_Hide
 	ret
+	
+IF ENGLISH == 0
 ; =============== END OF BANK ===============
 ; Junk area below.
 	mIncJunk "L0A7F58"
+ELSE
+; TODO: TextC_
+
+TextC_EndingPost_Boss0: db $35
+L0A7E6A: db $54
+L0A7E6B: db $68
+L0A7E6C: db $65
+L0A7E6D: db $20
+L0A7E6E: db $4F
+L0A7E6F: db $72
+L0A7E70: db $6F
+L0A7E71: db $63
+L0A7E72: db $68
+L0A7E73: db $69
+L0A7E74: db $2E
+L0A7E75: db $2E
+L0A7E76: db $2E
+L0A7E77: db $FF
+L0A7E78: db $49
+L0A7E79: db $74
+L0A7E7A: db $20
+L0A7E7B: db $77
+L0A7E7C: db $61
+L0A7E7D: db $73
+L0A7E7E: db $6E
+L0A7E7F: db $60
+L0A7E80: db $74
+L0A7E81: db $20
+L0A7E82: db $6D
+L0A7E83: db $75
+L0A7E84: db $63
+L0A7E85: db $68
+L0A7E86: db $20
+L0A7E87: db $6F
+L0A7E88: db $66
+L0A7E89: db $FF
+L0A7E8A: db $20
+L0A7E8B: db $20
+L0A7E8C: db $20
+L0A7E8D: db $20
+L0A7E8E: db $20
+L0A7E8F: db $20
+L0A7E90: db $20
+L0A7E91: db $20
+L0A7E92: db $61
+L0A7E93: db $6E
+L0A7E94: db $20
+L0A7E95: db $6F
+L0A7E96: db $70
+L0A7E97: db $70
+L0A7E98: db $6F
+L0A7E99: db $6E
+L0A7E9A: db $65
+L0A7E9B: db $6E
+L0A7E9C: db $74
+L0A7E9D: db $2E
+L0A7E9E: db $FF
+TextC_EndingPost_Boss1: db $30
+L0A7EA0: db $28
+L0A7EA1: db $42
+L0A7EA2: db $69
+L0A7EA3: db $67
+L0A7EA4: db $29
+L0A7EA5: db $FF
+L0A7EA6: db $47
+L0A7EA7: db $65
+L0A7EA8: db $65
+L0A7EA9: db $73
+L0A7EAA: db $65
+L0A7EAB: db $21
+L0A7EAC: db $21
+L0A7EAD: db $FF
+L0A7EAE: db $57 ; M
+L0A7EAF: db $68
+L0A7EB0: db $61 ; M
+L0A7EB1: db $74
+L0A7EB2: db $20 ; M
+L0A7EB3: db $61
+L0A7EB4: db $72
+L0A7EB5: db $65
+L0A7EB6: db $20
+L0A7EB7: db $79
+L0A7EB8: db $6F
+L0A7EB9: db $75
+L0A7EBA: db $FF
+L0A7EBB: db $20
+L0A7EBC: db $20
+L0A7EBD: db $20
+L0A7EBE: db $20
+L0A7EBF: db $20
+L0A7EC0: db $20
+L0A7EC1: db $20
+L0A7EC2: db $20
+L0A7EC3: db $70
+L0A7EC4: db $6C
+L0A7EC5: db $61
+L0A7EC6: db $79
+L0A7EC7: db $69
+L0A7EC8: db $6E
+L0A7EC9: db $67 ; M
+L0A7ECA: db $20
+L0A7ECB: db $61
+L0A7ECC: db $74
+L0A7ECD: db $3F
+L0A7ECE: db $21
+L0A7ECF: db $FF
+TextC_EndingPost_Boss2: db $0F
+L0A7ED1: db $28
+L0A7ED2: db $47
+L0A7ED3: db $65
+L0A7ED4: db $65
+L0A7ED5: db $73
+L0A7ED6: db $65
+L0A7ED7: db $29
+L0A7ED8: db $FF
+L0A7ED9: db $57
+L0A7EDA: db $68
+L0A7EDB: db $61
+L0A7EDC: db $74
+L0A7EDD: db $3F ; M
+L0A7EDE: db $21
+L0A7EDF: db $FF
+TextC_EndingPost_Boss3: db $4E
+L0A7EE1: db $28 ; M
+L0A7EE2: db $42
+L0A7EE3: db $69 ; M
+L0A7EE4: db $67
+L0A7EE5: db $29
+L0A7EE6: db $FF
+L0A7EE7: db $59
+L0A7EE8: db $6F
+L0A7EE9: db $75
+L0A7EEA: db $20
+L0A7EEB: db $77
+L0A7EEC: db $65
+L0A7EED: db $72
+L0A7EEE: db $65
+L0A7EEF: db $20
+L0A7EF0: db $64
+L0A7EF1: db $72
+L0A7EF2: db $61
+L0A7EF3: db $77 ; M
+L0A7EF4: db $6E
+L0A7EF5: db $20
+L0A7EF6: db $69
+L0A7EF7: db $6E ; M
+L0A7EF8: db $74
+L0A7EF9: db $6F
+L0A7EFA: db $FF
+L0A7EFB: db $20
+L0A7EFC: db $74
+L0A7EFD: db $68
+L0A7EFE: db $69
+L0A7EFF: db $73
+L0A7F00: db $20
+L0A7F01: db $74
+L0A7F02: db $6F
+L0A7F03: db $75
+L0A7F04: db $72
+L0A7F05: db $6E ; M
+L0A7F06: db $61
+L0A7F07: db $6D
+L0A7F08: db $65
+L0A7F09: db $6E
+L0A7F0A: db $74
+L0A7F0B: db $2C
+L0A7F0C: db $61
+L0A7F0D: db $6E
+L0A7F0E: db $64
+L0A7F0F: db $FF
+L0A7F10: db $20
+L0A7F11: db $75
+L0A7F12: db $73
+L0A7F13: db $65
+L0A7F14: db $64
+L0A7F15: db $20 ; M
+L0A7F16: db $66
+L0A7F17: db $6F
+L0A7F18: db $72
+L0A7F19: db $20
+L0A7F1A: db $61
+L0A7F1B: db $6E
+L0A7F1C: db $6F
+L0A7F1D: db $74
+L0A7F1E: db $68
+L0A7F1F: db $65
+L0A7F20: db $72
+L0A7F21: db $60
+L0A7F22: db $73
+L0A7F23: db $FF
+L0A7F24: db $20
+L0A7F25: db $70
+L0A7F26: db $75
+L0A7F27: db $72
+L0A7F28: db $70
+L0A7F29: db $6F
+L0A7F2A: db $73
+L0A7F2B: db $65
+L0A7F2C: db $73
+L0A7F2D: db $2E ; M
+L0A7F2E: db $FF
+TextC_EndingPost_Boss4: db $4B
+L0A7F30: db $41
+L0A7F31: db $6E ; M
+L0A7F32: db $64
+L0A7F33: db $20
+L0A7F34: db $73
+L0A7F35: db $6F
+L0A7F36: db $6F
+L0A7F37: db $6E
+L0A7F38: db $20
+L0A7F39: db $74
+L0A7F3A: db $68
+L0A7F3B: db $65
+L0A7F3C: db $20
+L0A7F3D: db $74
+L0A7F3E: db $69
+L0A7F3F: db $6D
+L0A7F40: db $65
+L0A7F41: db $FF
+L0A7F42: db $20
+L0A7F43: db $77
+L0A7F44: db $69
+L0A7F45: db $6C
+L0A7F46: db $6C
+L0A7F47: db $20
+L0A7F48: db $63
+L0A7F49: db $6F
+L0A7F4A: db $6D
+L0A7F4B: db $65
+L0A7F4C: db $20
+L0A7F4D: db $66
+L0A7F4E: db $6F
+L0A7F4F: db $72
+L0A7F50: db $20
+L0A7F51: db $6D
+L0A7F52: db $65
+L0A7F53: db $20
+L0A7F54: db $74
+L0A7F55: db $6F ; M
+L0A7F56: db $FF
+L0A7F57: db $20
+L0A7F58: db $70
+L0A7F59: db $75
+L0A7F5A: db $74
+L0A7F5B: db $20
+L0A7F5C: db $61
+L0A7F5D: db $6E
+L0A7F5E: db $20
+L0A7F5F: db $65
+L0A7F60: db $6E ; M
+L0A7F61: db $64
+L0A7F62: db $20
+L0A7F63: db $74
+L0A7F64: db $6F
+L0A7F65: db $FF
+L0A7F66: db $20
+L0A7F67: db $20
+L0A7F68: db $20
+L0A7F69: db $20
+L0A7F6A: db $20
+L0A7F6B: db $20
+L0A7F6C: db $20
+L0A7F6D: db $20
+L0A7F6E: db $20
+L0A7F6F: db $20
+L0A7F70: db $20
+L0A7F71: db $20
+L0A7F72: db $20
+L0A7F73: db $74
+L0A7F74: db $68
+L0A7F75: db $69
+L0A7F76: db $6E ; M
+L0A7F77: db $67
+L0A7F78: db $73
+L0A7F79: db $2E
+L0A7F7A: db $FF
+TextC_EndingPost_Boss5: db $32
+L0A7F7C: db $28 ; M
+L0A7F7D: db $47
+L0A7F7E: db $65
+L0A7F7F: db $65
+L0A7F80: db $73
+L0A7F81: db $65
+L0A7F82: db $29
+L0A7F83: db $FF
+L0A7F84: db $54
+L0A7F85: db $68
+L0A7F86: db $65
+L0A7F87: db $72 ; M
+L0A7F88: db $65 ; M
+L0A7F89: db $60
+L0A7F8A: db $73 ; M
+L0A7F8B: db $20
+L0A7F8C: db $6E
+L0A7F8D: db $6F
+L0A7F8E: db $20 ; M
+L0A7F8F: db $74
+L0A7F90: db $69 ; M
+L0A7F91: db $6D
+L0A7F92: db $65 ; M
+L0A7F93: db $20
+L0A7F94: db $6C
+L0A7F95: db $69
+L0A7F96: db $6B ; M
+L0A7F97: db $65
+L0A7F98: db $FF
+L0A7F99: db $20
+L0A7F9A: db $20
+L0A7F9B: db $20
+L0A7F9C: db $20
+L0A7F9D: db $74
+L0A7F9E: db $68
+L0A7F9F: db $65
+L0A7FA0: db $20
+L0A7FA1: db $70
+L0A7FA2: db $72
+L0A7FA3: db $65
+L0A7FA4: db $73
+L0A7FA5: db $65
+L0A7FA6: db $6E
+L0A7FA7: db $74
+L0A7FA8: db $2C ; M
+L0A7FA9: db $42
+L0A7FAA: db $69
+L0A7FAB: db $67
+L0A7FAC: db $21 ; M
+L0A7FAD: db $FF
+TextC_EndingPost_Boss6: db $1A
+L0A7FAF: db $28
+L0A7FB0: db $4B
+L0A7FB1: db $72
+L0A7FB2: db $61 ; M
+L0A7FB3: db $75
+L0A7FB4: db $73 ; M
+L0A7FB5: db $65
+L0A7FB6: db $72
+L0A7FB7: db $29
+L0A7FB8: db $FF
+L0A7FB9: db $48
+L0A7FBA: db $61
+L0A7FBB: db $2C ; M
+L0A7FBC: db $68
+L0A7FBD: db $61 ; M
+L0A7FBE: db $2C ; M
+L0A7FBF: db $68 ; M
+L0A7FC0: db $61
+L0A7FC1: db $21
+L0A7FC2: db $20
+L0A7FC3: db $47
+L0A7FC4: db $6F
+L0A7FC5: db $6F ; M
+L0A7FC6: db $64
+L0A7FC7: db $21
+L0A7FC8: db $FF
+
+; =============== END OF BANK ===============
+	mIncJunk "L0A7FC9"
+ENDC

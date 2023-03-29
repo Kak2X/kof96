@@ -155,7 +155,12 @@ MoveInit_Kyo_NueTumi:
 ; =============== MoveInit_Kyo_UraOrochiNagi ===============
 MoveInit_Kyo_UraOrochiNagi:
 	call Play_Pl_ClearJoyDirBuffer
+IF ENGLISH == 0
 	mMvIn_GetSD MOVE_KYO_URA_OROCHI_NAGI_S, MOVE_KYO_URA_OROCHI_NAGI_D
+ELSE
+	; [POI] Hidden version of the move added in the English version.
+	mMvIn_GetSDE MOVE_KYO_URA_OROCHI_NAGI_S, MOVE_KYO_URA_OROCHI_NAGI_D, MOVE_KYO_URA_OROCHI_NAGI_E
+ENDC
 	call MoveInputS_SetSpecMove_StopSpeed
 	
 	ld   hl, iPlInfo_Flags0
@@ -1479,6 +1484,10 @@ MoveC_Kyo_UraOrochiNagi:
 	ld   a, [hl]
 	cp   $00*OBJLSTPTR_ENTRYSIZE
 	jp   z, .obj0
+IF ENGLISH == 1
+	cp   $01*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj1
+ENDC
 	cp   $02*OBJLSTPTR_ENTRYSIZE
 	jp   z, .obj2
 	cp   $03*OBJLSTPTR_ENTRYSIZE
@@ -1499,11 +1508,33 @@ MoveC_Kyo_UraOrochiNagi:
 		; Initialize number of ticks until we automatically stop releasing B.
 		ld   hl, iPlInfo_Kyo_UraOrochiNagi_ChargeTimer
 		add  hl, bc
+IF ENGLISH == 0
 		ld   [hl], $14
+ELSE
+		; The English version reduces this, possibly to avoid being able to waste too much time
+		ld   [hl], $0F
+ENDC
 		jp   .anim
+IF ENGLISH == 1
+; --------------- frame #1 ---------------
+.obj1:
+	; [POI] The hidden version deals continuous damage here.
+	ld   hl, iPlInfo_MoveId
+	add  hl, bc
+	ld   a, [hl]
+	cp   MOVE_KYO_URA_OROCHI_NAGI_E		; Doing the hidden super?
+	jp   nz, .anim						; If not, skip	
+		mMvC_SetDamage $01, HITTYPE_HIT_MID0, PF3_FIRE|PF3_LASTHIT
+		jp   .anim
+ENDC
 ; --------------- frame #2 ---------------	
 ; Charge frame (along with #1)
 .obj2:
+IF ENGLISH == 1
+	; The English version deals continuous damage here, even outside of the hidden version.
+	; It more or less moved the line from below here.
+	mMvC_SetDamage $01, HITTYPE_HIT_MID0, PF3_FIRE|PF3_LASTHIT
+ENDC
 	mMvC_ValFrameEnd .anim
 	
 		;
@@ -1529,14 +1560,31 @@ MoveC_Kyo_UraOrochiNagi:
 		
 		; Otherwise, loop back to #1
 		mMvC_SetFrame $01*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+IF ENGLISH == 0
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MID0, PF3_FIRE|PF3_LASTHIT
+ENDC
 		jp   .ret
 ; --------------- frame #3 ---------------
 .obj3:
 	; When switching to #4, initialize the move damage.
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
+IF ENGLISH == 0
 		mMvC_SetDamageNext $18, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED
+ELSE
+		; [POI] Hidden version deals way less damage for this hit, since from #4 it deals continuous damage.
+		ld   hl, iPlInfo_MoveId
+		add  hl, bc
+		ld   a, [hl]
+		cp   MOVE_KYO_URA_OROCHI_NAGI_E		; Doing the hidden super?
+		jp   z, .obj3_setDamageE			; If so, jump
+	.obj3_setDamageN:
+		mMvC_SetDamageNext $18, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED
+		jr   .obj3_anim
+	.obj3_setDamageE:
+		mMvC_SetDamageNext $01, HITTYPE_DROP_MAIN, PF3_FIRE|PF3_LASTHIT|PF3_LIGHTHIT	
+	.obj3_anim:
+ENDC
 		;--
 		; [POI] Where does this come from? We didn't have this set to begin with.
 		ld   hl, iPlInfo_Flags2
@@ -1575,10 +1623,31 @@ MoveC_Kyo_UraOrochiNagi:
 ; --------------- frames #4-5 common friction check ---------------	
 ; Continue moving horizontally and slow down.
 .doFriction:
+	; [POI] The hidden version deals continuous damage during these frames, 5 lines at a time.
+IF ENGLISH == 1
+	ld   hl, iPlInfo_MoveId
+	add  hl, bc
+	ld   a, [hl]
+	cp   MOVE_KYO_URA_OROCHI_NAGI_E	; Doing the hidden super?
+	jp   nz, .doFriction_main		; If so, jump
+	mMvC_SetDamage $05, HITTYPE_DROP_MAIN, PF3_FIRE|PF3_LASTHIT|PF3_LIGHTHIT
+.doFriction_main:
+ENDC
 	mMvC_DoFrictionH $0060
 	jp   .anim
 ; --------------- frame #6 ---------------	
 .obj6:
+	; [POI] And here too, one line less.
+IF ENGLISH == 1
+	ld   hl, iPlInfo_MoveId
+	add  hl, bc
+	ld   a, [hl]
+	cp   MOVE_KYO_URA_OROCHI_NAGI_E	; Doing the hidden super?
+	jp   nz, .obj6_main		; If so, jump
+	mMvC_SetDamage $04, HITTYPE_DROP_MAIN, PF3_FIRE|PF3_LASTHIT|PF3_LIGHTHIT
+.obj6_main:
+ENDC	
+
 	; Slow down even faster
 	mMvC_DoFrictionH $0080
 	jp   nc, .ret
@@ -3544,8 +3613,14 @@ MoveC_Athena_PhoenixArrow:
 	jp   z, .obj3
 	cp   $04*OBJLSTPTR_ENTRYSIZE
 	jp   z, .obj4
+	; [BUG] The Japanese version repeats .obj4 here, leaving unreferenced .obj5.
+IF ENGLISH == 0
 	cp   $05*OBJLSTPTR_ENTRYSIZE
 	jp   z, .obj4
+ELSE
+	cp   $05*OBJLSTPTR_ENTRYSIZE
+	jp   z, .obj5
+ENDC
 	cp   $06*OBJLSTPTR_ENTRYSIZE
 	jp   z, .chkEnd
 	jp   .anim ; We never get here
@@ -3608,7 +3683,7 @@ MoveC_Athena_PhoenixArrow:
 	.doGravity_setNextL:
 		mMvC_SetLandFrame $06*OBJLSTPTR_ENTRYSIZE, $0C
 		jp   .ret
-; --------------- frame #4-5 ---------------
+; --------------- frame #4 ---------------
 ; Kick.
 .obj4:
 	mMvC_ValFrameStart .obj4_cont
@@ -3617,14 +3692,22 @@ MoveC_Athena_PhoenixArrow:
 .obj4_cont:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $10
-		; Note this won't hit twice since HITTYPE_DROP_MAIN makes the opponent unhittable
+		; Note this won't hit twice since HITTYPE_DROP_MAIN makes the opponent unhittable.
+		; (while the English version uses .obj5 properly, so this only gets executed once.
+IF ENGLISH == 0
 		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, $00
+ELSE
+		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_HEAVYHIT ; Longer shake
+ENDC
 		jp   .anim
-; --------------- [TCRF] unreferenced frame ---------------
-; Likely meant to be the original version of #5.
-.unused_obj5:
+; --------------- frame #5 ---------------
+.obj5:
 	mMvC_ValFrameEnd .anim
+IF ENGLISH == 0
 		mMvC_SetAnimSpeed $06
+ELSE
+		mMvC_SetAnimSpeed $0E ; Not that much faster for the one that's used
+ENDC
 		jp   .anim
 ; --------------- frame #6 ---------------
 ; Recovery.
@@ -3912,6 +3995,8 @@ MoveC_Athena_ShCryst:
 ; Doing so causes the MoveInputS_CheckGAType call below to set the heavy flag anyway!
 ;
 ; So, the only real way to use the light speed versions is to perform the DF motions.
+; IN
+; - \1: [Optional] If set, enable easy move shortcuts
 mShCr0_ChkInpt: MACRO
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
@@ -3937,7 +4022,13 @@ mShCr0_ChkInpt: MACRO
 	;
 	; Humans do the input check.
 	;
-	
+IF _NARG > 0
+IF \1 == 1
+	; If enabled, allow shortcuts for the move inputs below
+	;             SELECT + B          SELECT + A
+	mMvIn_ChkEasy .part1_startPart2L, .part1_startPart2H
+ENDC
+ENDC
 	; Must have pressed the punch button.
 	call MoveInputS_CheckGAType
 	jp   nc, ._noCont_\@	; Was an attack button pressed? If not, return
@@ -3959,7 +4050,8 @@ ENDM
 ; --------------- frame #2 ---------------
 ; Phase 1 - double small sphere + loop check.
 .obj2:
-	mShCr0_ChkInpt
+	; [POI] The English version has easy move shortcuts for this
+	mShCr0_ChkInpt ENGLISH
 	mMvC_ValFrameEnd .anim
 		; If we got here by the end of #2, check if we're looping back to #1.
 		
@@ -4112,6 +4204,19 @@ ENDM
 		jp   z, .obj4_enlarge	; If so, enlarge it
 		jp   .obj4_ret			; Otherwise, return
 	.obj4_chkEnlargeHuman:
+	
+	
+
+IF ENGLISH == 1
+		; [POI] Easy move shortcut in the English version.
+		;       Pressing SELECT + B gives a 12.5% chance of enlarging the sphere.
+		call MoveInputS_CheckEasyMoveKeys
+		jp   nc, .obj4_chkEnlargeHumanNoEasy	; SELECT + B pressed? If not, skip
+		ld   a, [wTimer]
+		and  $1F				; wTimer % $20 == 0?
+		jp   z, .obj4_enlarge	; If so, jump
+	.obj4_chkEnlargeHumanNoEasy:
+ENDC
 		; Human players must perform the input:
 		; Backwards 360 -> Increase sphere size
 		mMvIn_ChkDirNot MoveInput_DFUBD, .obj4_ret
@@ -4724,7 +4829,7 @@ ProjC_Athena_ShCrystThrown:
 	
 ; --------------- GROUND/AIR - HEAVY ---------------
 .typeH:
-	; Only handle gravity if Priority != $04
+	; Use simple settings if Priority != $04
 	ld   hl, iOBJInfo_Play_Priority
 	add  hl, de
 	ld   a, [hl]
@@ -4734,11 +4839,17 @@ ProjC_Athena_ShCrystThrown:
 	; If the projectile didn't collide, move it at 4px/frame.
 	; Otherwise, move it at 0.5px/frame and set its gravity to 2px/frame down.
 	; This has the effect of these "heavy" projectiles that normally curve up to switch direction.
+	
+	; The English version uses completely different speed settings, which makes the direction
+	; switching seen in the Japanese version impossible to do (but they still curve).
 	ld   hl, iOBJInfo_Play_HitMode
 	add  hl, de
 	ld   a, [hl]
 	cp   a, PHM_NONE			; Did the projectile collide with the opponent?
 	jp   z, .typeH_noHit		; If not, jump
+	
+IF ENGLISH == 0
+
 .typeH_hit:
 	mMvC_SetSpeedH +$0080
 	mMvC_DoGravityV +$0200
@@ -4751,6 +4862,25 @@ ProjC_Athena_ShCrystThrown:
 	mMvC_DoGravityV -$0060
 	jp   .ret
 	
+ELSE	
+	
+.typeH_hit:
+	mMvC_SetSpeedH +$0040
+	mMvC_DoGravityV +$0000
+	jp   .ret
+.typeH_noHit:
+	; The projectile slows down when it touches the ground
+	mMvC_ChkGravityV -$0030, .typeH_noHit_groundHit
+		mMvC_SetSpeedH +$0300
+		jp   .ret
+.typeH_noHit_groundHit:
+	mMvC_SetSpeedH +$0080
+	jp   .ret
+.typeH_norm:
+	mMvC_DoGravityV -$0060
+	jp   .ret
+ENDC
+
 ; --------------- AIR - LIGHT ---------------
 .typeAL:
 	; Only handle downwards movement if Priority != $04
@@ -4762,11 +4892,17 @@ ProjC_Athena_ShCrystThrown:
 
 	; If the projectile didn't collide, move it at 3px/frame forward, 2px/frame down.
 	; Otherwise, move it at 0.5px/frame forward, and at 2px/frame *up*.
+	;
+	; Like with Heavy projectiles, the English version uses different speed settings
+	; that prevent the direction from switching -- the sphere keeps moving down.
+	; They also move diagonally down at fixed 45° angles.
 	ld   hl, iOBJInfo_Play_HitMode
 	add  hl, de
 	ld   a, [hl]
 	cp   a, PHM_NONE			; Did the projectile collide with the opponent?
 	jp   z, .typeAL_noHit		; If not, jump
+	
+IF ENGLISH == 0
 .typeAL_hit:
 	mMvC_SetSpeedH +$0080
 	mMvC_SetSpeedV -$0200
@@ -4781,6 +4917,22 @@ ProjC_Athena_ShCrystThrown:
 	; Despawn the projectile when it moves off-screen below
 	mMvC_ChkGravityV $0000, .despawn
 	jp   .ret
+ELSE
+.typeAL_hit:
+	mMvC_SetSpeedH +$0040
+	mMvC_SetSpeedV +$0040
+	mMvC_DoGravityV +$0000
+	jp   .ret
+.typeAL_noHit:
+	mMvC_SetSpeedH +$0200
+	mMvC_SetSpeedV +$0200
+	mMvC_DoGravityV +$0000
+	jp   .ret
+.typeAL_norm:
+	; Despawn the projectile when it moves off-screen below
+	mMvC_ChkGravityV $0000, .despawn
+	jp   .ret
+ENDC
 	
 ; --------------- common ---------------
 .ret:
@@ -8401,4 +8553,264 @@ ProjC_Geese_RagingStorm:
 	ret
 ; =============== END OF BANK ===============
 ; Junk area with broken copies of the above subroutines.
+IF ENGLISH == 0
 	mIncJunk "L067E72"
+ELSE
+; TODO: TextC_
+TextC_EndingPost_FFGeese0: db $1E
+L067EED: db $49
+L067EEE: db $60
+L067EEF: db $6C
+L067EF0: db $6C
+L067EF1: db $20
+L067EF2: db $68
+L067EF3: db $61
+L067EF4: db $6E
+L067EF5: db $64
+L067EF6: db $6C
+L067EF7: db $65
+L067EF8: db $20
+L067EF9: db $74
+L067EFA: db $68
+L067EFB: db $69
+L067EFC: db $73
+L067EFD: db $20
+L067EFE: db $6F
+L067EFF: db $6E
+L067F00: db $65
+L067F01: db $FF
+L067F02: db $20
+L067F03: db $6D
+L067F04: db $79
+L067F05: db $20
+L067F06: db $6F
+L067F07: db $77
+L067F08: db $6E
+L067F09: db $2E
+L067F0A: db $FF
+TextC_EndingPost_FFGeese1: db $3E
+L067F0C: db $47
+L067F0D: db $65
+L067F0E: db $65
+L067F0F: db $73
+L067F10: db $65
+L067F11: db $21
+L067F12: db $FF
+L067F13: db $54
+L067F14: db $68
+L067F15: db $69
+L067F16: db $73
+L067F17: db $20
+L067F18: db $74
+L067F19: db $69
+L067F1A: db $6D
+L067F1B: db $65
+L067F1C: db $20
+L067F1D: db $77
+L067F1E: db $65
+L067F1F: db $60
+L067F20: db $72
+L067F21: db $65
+L067F22: db $FF
+L067F23: db $20
+L067F24: db $67
+L067F25: db $6F
+L067F26: db $69
+L067F27: db $6E
+L067F28: db $67
+L067F29: db $20
+L067F2A: db $74
+L067F2B: db $6F
+L067F2C: db $20
+L067F2D: db $67
+L067F2E: db $65
+L067F2F: db $74
+L067F30: db $20
+L067F31: db $79
+L067F32: db $6F
+L067F33: db $75
+L067F34: db $FF
+L067F35: db $20
+L067F36: db $20
+L067F37: db $20
+L067F38: db $20
+L067F39: db $20
+L067F3A: db $20
+L067F3B: db $20
+L067F3C: db $20
+L067F3D: db $20
+L067F3E: db $20
+L067F3F: db $20
+L067F40: db $66
+L067F41: db $6F
+L067F42: db $72
+L067F43: db $20
+L067F44: db $67
+L067F45: db $6F
+L067F46: db $6F
+L067F47: db $64
+L067F48: db $21
+L067F49: db $FF
+TextC_EndingPost_AOFMrBig0: db $38
+L067F4B: db $52
+L067F4C: db $79
+L067F4D: db $6F
+L067F4E: db $20
+L067F4F: db $61
+L067F50: db $6E
+L067F51: db $64
+L067F52: db $20
+L067F53: db $52
+L067F54: db $6F
+L067F55: db $62
+L067F56: db $65
+L067F57: db $72 ; M
+L067F58: db $74
+L067F59: db $2E ; M
+L067F5A: db $2E
+L067F5B: db $2E ; M
+L067F5C: db $FF
+L067F5D: db $49 ; M
+L067F5E: db $74
+L067F5F: db $60 ; M
+L067F60: db $73
+L067F61: db $20
+L067F62: db $74
+L067F63: db $69
+L067F64: db $6D
+L067F65: db $65
+L067F66: db $20
+L067F67: db $66
+L067F68: db $6F
+L067F69: db $72
+L067F6A: db $20
+L067F6B: db $79
+L067F6C: db $6F
+L067F6D: db $75
+L067F6E: db $20 ; M
+L067F6F: db $74
+L067F70: db $6F
+L067F71: db $FF ; M
+L067F72: db $20
+L067F73: db $70
+L067F74: db $61
+L067F75: db $79
+L067F76: db $20 ; M
+L067F77: db $79
+L067F78: db $6F
+L067F79: db $75
+L067F7A: db $72
+L067F7B: db $20
+L067F7C: db $64
+L067F7D: db $65
+L067F7E: db $62
+L067F7F: db $74
+L067F80: db $73
+L067F81: db $21
+L067F82: db $FF
+TextC_EndingPost_AOFMrBig1: db $09
+L067F84: db $43
+L067F85: db $6F
+L067F86: db $6D
+L067F87: db $65
+L067F88: db $20
+L067F89: db $6F
+L067F8A: db $6E
+L067F8B: db $21
+L067F8C: db $FF
+TextC_EndingPost_KTR0: db $5C
+L067F8E: db $49
+L067F8F: db $20
+L067F90: db $61
+L067F91: db $6D
+L067F92: db $20
+L067F93: db $67
+L067F94: db $6F
+L067F95: db $69 ; M
+L067F96: db $6E
+L067F97: db $67
+L067F98: db $20
+L067F99: db $74
+L067F9A: db $6F
+L067F9B: db $20
+L067F9C: db $77
+L067F9D: db $69
+L067F9E: db $6E
+L067F9F: db $21 ; M
+L067FA0: db $FF
+L067FA1: db $49
+L067FA2: db $20
+L067FA3: db $61
+L067FA4: db $6D
+L067FA5: db $20
+L067FA6: db $74
+L067FA7: db $68 ; M
+L067FA8: db $65
+L067FA9: db $20
+L067FAA: db $73
+L067FAB: db $74 ; M
+L067FAC: db $72 ; M
+L067FAD: db $6F
+L067FAE: db $6E
+L067FAF: db $67
+L067FB0: db $65
+L067FB1: db $73 ; M
+L067FB2: db $74
+L067FB3: db $21
+L067FB4: db $FF
+L067FB5: db $4E
+L067FB6: db $6F
+L067FB7: db $77
+L067FB8: db $20
+L067FB9: db $69
+L067FBA: db $74
+L067FBB: db $60
+L067FBC: db $73
+L067FBD: db $20
+L067FBE: db $74
+L067FBF: db $69
+L067FC0: db $6D
+L067FC1: db $65
+L067FC2: db $20
+L067FC3: db $74
+L067FC4: db $6F
+L067FC5: db $FF
+L067FC6: db $20
+L067FC7: db $73
+L067FC8: db $65
+L067FC9: db $74
+L067FCA: db $74
+L067FCB: db $6C
+L067FCC: db $65
+L067FCD: db $20
+L067FCE: db $74
+L067FCF: db $68
+L067FD0: db $69
+L067FD1: db $6E
+L067FD2: db $67
+L067FD3: db $73
+L067FD4: db $FF
+L067FD5: db $20
+L067FD6: db $20
+L067FD7: db $20 ; M
+L067FD8: db $20
+L067FD9: db $20
+L067FDA: db $20
+L067FDB: db $20
+L067FDC: db $20
+L067FDD: db $20
+L067FDE: db $20
+L067FDF: db $20
+L067FE0: db $66
+L067FE1: db $6F ; M
+L067FE2: db $72
+L067FE3: db $20
+L067FE4: db $67
+L067FE5: db $6F ; M
+L067FE6: db $6F
+L067FE7: db $64
+L067FE8: db $21
+L067FE9: db $FF
+; =============== END OF BANK ===============
+	mIncJunk "L067FEA"
+ENDC

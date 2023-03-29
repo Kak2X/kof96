@@ -64,7 +64,11 @@ IF LABEL_JUNK == 1
 Padding_\@:
 ENDC
 	IF SKIP_JUNK == 0
-		INCBIN STRCAT("padding/", \1, ".bin")
+		IF ENGLISH == 0
+			INCBIN STRCAT("padding/", \1, ".bin")
+		ELSE
+			INCBIN STRCAT("padding_en/", \1, ".bin")
+		ENDC
 	ENDC
 ENDM
 
@@ -755,10 +759,7 @@ ENDM
 
 
 ; =============== mMvC_ValHit ===============
-; Executes code below only if the opponent got hit already in the damage string.
-; This can happen in two ways:
-; - The move was combo'd from something else (ie: jumpkick cancel)
-; - The move hits multiple times (so it gets used for executing code from the second hit)
+; Executes code below only if the opponent got hit in the damage string.
 ; IN
 ; - 1: Ptr to code for not hitting yet
 ; - 2: Ptr to code for the opponent blocking the attack
@@ -819,6 +820,16 @@ ENDM
 ; - HL: Ptr to iOBJInfo_FrameLeft
 mMvC_ValFrameEnd: MACRO
 	call OBJLstS_IsInternalFrameAboutToEnd
+	jp   nc, \1
+ENDM
+
+; =============== mMvC_ValEscape ===============
+; Executes the code below only if the opponent escaped from a multi-hit special move.
+; English version only.
+; IN
+; - 1: Where to jump if validation fails
+mMvC_ValEscape: MACRO
+	call Play_Pl_IsMoveEscape
 	jp   nc, \1
 ENDM
 

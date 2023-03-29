@@ -4,7 +4,7 @@
 // ==============================
 set_error_handler('error_reporter');
 const REMOVE_FILE = "GFX_Char_";	// Label part to remove when generating file name
-const INCBIN_PATH = "data/gfx/char/"; // folder of incbin files
+const INCBIN_PATH = "data/gfx/en/"; // folder of incbin files
 const LOCK_WRITE = false; // Preview file names; don't write
 const OPERATOR = "INCBIN";
 const SKIP_FIRST = 0;

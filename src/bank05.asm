@@ -16,7 +16,11 @@ MoveInputReader_Iori:
 	
 .chkGround:
 	;             SELECT + B                SELECT + A
+IF ENGLISH == 0
 	mMvIn_ChkEasy MoveInit_Iori_KinYaOtome, MoveInit_Iori_KinYaOtomeEscapeD
+ELSE
+	mMvIn_ChkEasy MoveInit_Iori_KinYaOtome, MoveInit_Iori_ScumGale
+ENDC
 	mMvIn_ChkGA Iori, .chkPunch, .chkKick
 .chkPunch:
 	; DBDF+P -> Kin 1201 Shiki Ya Otome
@@ -885,26 +889,32 @@ MoveC_Iori_KinYaOtomeS:
 	mMvC_ValFrameEnd .obj1_chkGuard
 		jp   .end
 .obj1_chkGuard:
+IF ENGLISH == 0
 	;
 	; Continue moving forwards until we collided (last frame) with the opponent.
 	; If the opponent blocked the hit, switch to #14. Otherwise, continue to #2.
 	;
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]			; Did we reach?
-	jp   z, .obj1_chkGuard_noHit	; If not, skip
+	bit  PCF_HITOTHER, [hl]				; Did we reach?
+	jp   z, .obj1_chkGuard_noHit		; If not, skip
 	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
-	bit  PF1B_INVULN, [hl]			; Is the opponent invulnerable?
-	jp   nz, .obj1_chkGuard_noHit	; If so, skip
-	bit  PF1B_HITRECV, [hl]			; Did the opponent get hit?
-	jp   z, .obj1_chkGuard_noHit	; If not, skip
-	bit  PF1B_GUARD, [hl]			; Is the opponent blocking?
-	jp   nz, .obj1_chkGuard_guard	; If so, jump
-.obj1_chkGuard_noGuard:
-	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FIRE
-	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
-	jp   .ret
+	bit  PF1B_INVULN, [hl]				; Is the opponent invulnerable?
+	jp   nz, .obj1_chkGuard_noHit		; If so, skip
+	bit  PF1B_HITRECV, [hl]				; Did the opponent get hit?
+	jp   z, .obj1_chkGuard_noHit		; If not, skip	
+	
+	bit  PF1B_GUARD, [hl]				; Is the opponent blocking?
+	jp   nz, .obj1_chkGuard_guard		; If so, jump
+ELSE
+	; Identical check, but calling the copy in BANK 0 to save space.
+	mMvC_ValHit .obj1_chkGuard_noHit, .obj1_chkGuard_guard
+ENDC
+	.obj1_chkGuard_noGuard:
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FIRE
+		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
+		jp   .ret
 .obj1_chkGuard_noHit:
 	jp   .moveH
 .obj1_chkGuard_guard:
@@ -933,6 +943,7 @@ MoveC_Iori_KinYaOtomeS:
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
+IF ENGLISH == 0
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -943,12 +954,15 @@ MoveC_Iori_KinYaOtomeS:
 		add  hl, bc
 		ld   a, [hl]
 		cp   HITTYPE_HIT_MULTI0	; A == HITTYPE_HIT_MULTI0?
-		jp   z, .anim				; If so, skip
+		jp   z, .anim			; If so, skip
 		cp   HITTYPE_HIT_MULTI1	; A == HITTYPE_HIT_MULTI1?
-		jp   z, .anim				; If so, skip
-		ld   a, MOVE_SHARED_HOP_B
-		call Pl_SetMove_StopSpeed
-		jp   .ret
+		jp   z, .anim			; If so, skip
+ELSE
+		mMvC_ValEscape .anim
+ENDC
+			ld   a, MOVE_SHARED_HOP_B
+			call Pl_SetMove_StopSpeed
+			jp   .ret
 ; --------------- frame #12 ---------------
 ; Deals the big boy damage.
 .setDamageFinisher:
@@ -1035,27 +1049,33 @@ MoveC_Iori_KinYaOtomeD:
 	mMvC_ValFrameEnd .obj1_chkGuard
 		jp   .end
 .obj1_chkGuard:
+IF ENGLISH == 0
 	;
 	; Continue moving forwards until we collided (last frame) with the opponent.
 	; If the opponent blocked the hit, switch to #1B. Otherwise, continue to #2.
 	;
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]			; Did we reach?
-	jp   z, .obj1_chkGuard_noHit	; If not, skip
+	bit  PCF_HITOTHER, [hl]				; Did we reach?
+	jp   z, .obj1_chkGuard_noHit		; If not, skip
 	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
-	bit  PF1B_INVULN, [hl]			; Is the opponent invulnerable?
-	jp   nz, .obj1_chkGuard_noHit	; If so, skip
-	bit  PF1B_HITRECV, [hl]			; Did the opponent get hit?
-	jp   z, .obj1_chkGuard_noHit	; If not, skip
-	bit  PF1B_GUARD, [hl]			; Is the opponent blocking?
-	jp   nz, .obj1_chkGuard_guard	; If so, jump
-.obj1_chkGuard_noGuard:
-	; Damage confirmed, switch to #2
-	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FIRE
-	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
-	jp   .ret
+	bit  PF1B_INVULN, [hl]				; Is the opponent invulnerable?
+	jp   nz, .obj1_chkGuard_noHit		; If so, skip
+	bit  PF1B_HITRECV, [hl]				; Did the opponent get hit?
+	jp   z, .obj1_chkGuard_noHit		; If not, skip	
+	
+	bit  PF1B_GUARD, [hl]				; Is the opponent blocking?
+	jp   nz, .obj1_chkGuard_guard		; If so, jump
+ELSE
+	; Identical check, but calling the copy in BANK 0 to save space.
+	mMvC_ValHit .obj1_chkGuard_noHit, .obj1_chkGuard_guard
+ENDC
+	.obj1_chkGuard_noGuard:
+		; Damage confirmed, switch to #2
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FIRE
+		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
+		jp   .ret
 .obj1_chkGuard_noHit:
 	; Not hit yet, continue moving
 	jp   .moveH
@@ -1126,29 +1146,33 @@ MoveC_Iori_KinYaOtomeD:
 		mMvC_SetDamageNext $05, HITTYPE_HIT_MULTIGS, $00
 		jp   .chkOtherEscape
 	.chkOtherEscape:
+IF ENGLISH == 0
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, switch to an alternate version of the move.
 		;       This can happen if the opponent gets hit by a previously thrown
-		;       fireball in the middle of the move.
+		;       fireball in the middle of the move.		
 		;
 		ld   hl, iPlInfo_HitTypeIdOther
 		add  hl, bc
 		ld   a, [hl]
-		cp   HITTYPE_HIT_MULTI0	; A == HITTYPE_HIT_MULTI0?
+		cp   HITTYPE_HIT_MULTI0		; A == HITTYPE_HIT_MULTI0?
 		jp   z, .anim				; If so, skip
-		cp   HITTYPE_HIT_MULTI1	; A == HITTYPE_HIT_MULTI1?
+		cp   HITTYPE_HIT_MULTI1		; A == HITTYPE_HIT_MULTI1?
 		jp   z, .anim				; If so, skip
 		cp   HITTYPE_HIT_MULTIGS	; A == HITTYPE_HIT_MULTIGS?
 		jp   z, .anim				; If so, skip
-		call Play_Pl_EmptyPowOnSuperEnd
-		ld   hl, iPlInfo_Flags0
-		add  hl, bc
-		res  PF0B_SPECMOVE, [hl]
-		res  PF0B_SUPERMOVE, [hl]
-		ld   a, MOVE_IORI_KIN_YA_OTOME_ESCAPE_L
-		call Pl_SetMove_StopSpeed
-		jp   .ret
+ELSE
+		mMvC_ValEscape .anim
+ENDC
+			call Play_Pl_EmptyPowOnSuperEnd
+			ld   hl, iPlInfo_Flags0
+			add  hl, bc
+			res  PF0B_SPECMOVE, [hl]
+			res  PF0B_SUPERMOVE, [hl]
+			ld   a, MOVE_IORI_KIN_YA_OTOME_ESCAPE_L
+			call Pl_SetMove_StopSpeed
+			jp   .ret
 ; --------------- frame #19 ---------------
 .setLongDelay:
 	; The first time get here, set big boy damage
@@ -1245,32 +1269,38 @@ MoveC_OIori_KinYaOtome:
 		jp   .end
 .obj1_chkGuard:
 
+IF ENGLISH == 0
 	;
 	; Continue moving forwards until we collided (last frame) with the opponent.
 	; If the opponent blocked the hit, switch to #F. Otherwise, continue to #2.
 	;
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]			; Did we reach?
-	jp   z, .obj1_chkGuard_noHit	; If not, skip
+	bit  PCF_HITOTHER, [hl]				; Did we reach?
+	jp   z, .obj1_chkGuard_noHit		; If not, skip
 	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
-	bit  PF1B_INVULN, [hl]			; Is the opponent invulnerable?
-	jp   nz, .obj1_chkGuard_noHit	; If so, skip
-	bit  PF1B_HITRECV, [hl]			; Did the opponent get hit?
-	jp   z, .obj1_chkGuard_noHit	; If not, skip
-	bit  PF1B_GUARD, [hl]			; Is the opponent blocking?
-	jp   nz, .obj1_chkGuard_guard	; If so, jump
-.obj1_chkGuard_noGuard:
-	; Damage confirmed, switch to #2
-	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FIRE|PF3_LIGHTHIT
-	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $00
+	bit  PF1B_INVULN, [hl]				; Is the opponent invulnerable?
+	jp   nz, .obj1_chkGuard_noHit		; If so, skip
+	bit  PF1B_HITRECV, [hl]				; Did the opponent get hit?
+	jp   z, .obj1_chkGuard_noHit		; If not, skip	
 	
-	; Loop the damage frames (#2-#5) 4 times
-	ld   hl, iPlInfo_OIori_KinYaOtome_LoopCount
-	add  hl, bc
-	ld   [hl], $04
-	jp   .ret
+	bit  PF1B_GUARD, [hl]				; Is the opponent blocking?
+	jp   nz, .obj1_chkGuard_guard		; If so, jump
+ELSE
+	; Identical check, but calling the copy in BANK 0 to save space.
+	mMvC_ValHit .obj1_chkGuard_noHit, .obj1_chkGuard_guard
+ENDC
+	.obj1_chkGuard_noGuard:
+		; Damage confirmed, switch to #2
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FIRE|PF3_LIGHTHIT
+		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $00
+		
+		; Loop the damage frames (#2-#5) 4 times
+		ld   hl, iPlInfo_OIori_KinYaOtome_LoopCount
+		add  hl, bc
+		ld   [hl], $04
+		jp   .ret
 .obj1_chkGuard_noHit:
 	; Nothing hit yet, continue moving
 	jp   .moveH
@@ -1354,6 +1384,7 @@ MoveC_OIori_KinYaOtome:
 		jp   .anim
 	; --------------- common escape check ---------------
 	.chkOtherEscape:
+IF ENGLISH == 0
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -1363,15 +1394,19 @@ MoveC_OIori_KinYaOtome:
 		ld   hl, iPlInfo_HitTypeIdOther
 		add  hl, bc
 		ld   a, [hl]
-		cp   HITTYPE_HIT_MULTI0	; A == HITTYPE_HIT_MULTI0?
+		cp   HITTYPE_HIT_MULTI0		; A == HITTYPE_HIT_MULTI0?
 		jp   z, .anim				; If so, skip
-		cp   HITTYPE_HIT_MULTI1	; A == HITTYPE_HIT_MULTI1?
+		cp   HITTYPE_HIT_MULTI1		; A == HITTYPE_HIT_MULTI1?
 		jp   z, .anim				; If so, skip
 		cp   HITTYPE_HIT_MULTIGS	; A == HITTYPE_HIT_MULTIGS?
 		jp   z, .anim				; If so, skip
-		ld   a, MOVE_SHARED_HOP_B
-		call Pl_SetMove_StopSpeed
-		jp   .ret
+ELSE
+		mMvC_ValEscape .anim
+ENDC
+			; Otherwise, transition to hop
+			ld   a, MOVE_SHARED_HOP_B
+			call Pl_SetMove_StopSpeed
+			jp   .ret
 ; --------------- common horizontal movement ---------------
 .moveH:
 	call OBJLstS_ApplyXSpeed
@@ -2046,41 +2081,44 @@ MoveC_Mature_HeavensGate:
 ; - Z flag: If set, the move got blocked
 .chkOtherHit:
 
+IF 1 ; ENGLISH == 0
 	;
-	; If we didn't hit the opponent twice yet, return without doing anything.
+	; If we didn't hit the opponent yet, return without doing anything.
 	; 
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]			; Did we reach yet?	
-	jp   z, .chkOtherHit_wait		; If not, jump
+	bit  PCF_HITOTHER, [hl]				; Did we reach?
+	jp   z, .chkOtherHit_wait			; If not, skip
 	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
-	bit  PF1B_INVULN, [hl]			; Is the opponent invulnerable?
-	jp   nz, .chkOtherHit_wait		; If so, jump
-	bit  PF1B_HITRECV, [hl]			; Did the opponent get hit?
-	jp   z, .chkOtherHit_wait		; If not, jump
-	
+	bit  PF1B_INVULN, [hl]				; Is the opponent invulnerable?
+	jp   nz, .chkOtherHit_wait			; If so, skip
+	bit  PF1B_HITRECV, [hl]				; Did the opponent get hit?
+	jp   z, .chkOtherHit_wait			; If not, skip	
 	;
 	; If the hit is blocked, skip directly to the end of the move,
 	; where the player backhops away.
-	;
-	bit  PF1B_GUARD, [hl]			; Did the attack get blocked?
-	jp   nz, .chkOtherHit_blocked	; If so, jump
-	
-.chkOtherHit_ok:
-	;
-	; The second hit wasn't blocked, so switch to #4 to continue the attack.
-	;
-	mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_NONE
-	ld   a, PLAY_THROWACT_NEXT03
-	ld   [wPlayPlThrowActId], a
-	mMvC_SetDamageNext $01, HITTYPE_THROW_ROTU, PF3_HEAVYHIT
-	mMvC_SetDamage $01, HITTYPE_THROW_ROTU, PF3_HEAVYHIT
-	mMvC_MoveThrowOp -$08, +$00 ; Move back 8px
-	mMvC_MoveThrowOpSync
-	call OBJLstS_ApplyXSpeed
-	scf			; C flag set
-	ret
+	;	
+	bit  PF1B_GUARD, [hl]				; Is the opponent blocking?
+	jp   nz, .chkOtherHit_blocked		; If so, jump
+ELSE
+	; Identical check, but calling the copy in BANK 0 to save space.
+	mMvC_ValHit .chkOtherHit_wait, .chkOtherHit_blocked
+ENDC
+	.chkOtherHit_ok:
+		;
+		; The hit wasn't blocked, so switch to #4 to continue the attack.
+		;
+		mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_NONE
+		ld   a, PLAY_THROWACT_NEXT03
+		ld   [wPlayPlThrowActId], a
+		mMvC_SetDamageNext $01, HITTYPE_THROW_ROTU, PF3_HEAVYHIT
+		mMvC_SetDamage $01, HITTYPE_THROW_ROTU, PF3_HEAVYHIT
+		mMvC_MoveThrowOp -$08, +$00 ; Move back 8px
+		mMvC_MoveThrowOpSync
+		call OBJLstS_ApplyXSpeed
+		scf			; C flag set
+		ret
 .chkOtherHit_blocked:
 	xor  a		; Z flag set
 	ret
@@ -3832,4 +3870,379 @@ MoveC_Daimon_HeavenHellDrop:
 	ret
 ; =============== END OF BANK ===============
 ; Junk area below, with partial copy of the code above.
+IF ENGLISH == 0
 	mIncJunk "L057ED2"
+ELSE
+	; TODO: TextC_
+	
+TextC_CutsceneKagura0: db $30
+L057E7F: db $43
+L057E80: db $6F
+L057E81: db $6E
+L057E82: db $67
+L057E83: db $72
+L057E84: db $61
+L057E85: db $74
+L057E86: db $75
+L057E87: db $6C
+L057E88: db $61
+L057E89: db $74
+L057E8A: db $69
+L057E8B: db $6F
+L057E8C: db $6E
+L057E8D: db $73
+L057E8E: db $2E
+L057E8F: db $FF
+L057E90: db $54
+L057E91: db $68
+L057E92: db $61
+L057E93: db $74
+L057E94: db $20
+L057E95: db $77
+L057E96: db $61
+L057E97: db $73
+L057E98: db $20
+L057E99: db $61
+L057E9A: db $6E
+L057E9B: db $FF
+L057E9C: db $20
+L057E9D: db $69
+L057E9E: db $6D
+L057E9F: db $70
+L057EA0: db $72
+L057EA1: db $65
+L057EA2: db $73
+L057EA3: db $73
+L057EA4: db $69
+L057EA5: db $76
+L057EA6: db $65
+L057EA7: db $20
+L057EA8: db $6D
+L057EA9: db $61
+L057EAA: db $74
+L057EAB: db $63
+L057EAC: db $68
+L057EAD: db $2E
+L057EAE: db $FF
+TextC_CutsceneKagura1: db $44
+L057EB0: db $4D
+L057EB1: db $79
+L057EB2: db $20
+L057EB3: db $6E
+L057EB4: db $61
+L057EB5: db $6D
+L057EB6: db $65
+L057EB7: db $20
+L057EB8: db $69
+L057EB9: db $73
+L057EBA: db $FF
+L057EBB: db $20
+L057EBC: db $4B
+L057EBD: db $61
+L057EBE: db $67
+L057EBF: db $75
+L057EC0: db $72
+L057EC1: db $61
+L057EC2: db $20
+L057EC3: db $43
+L057EC4: db $68
+L057EC5: db $69
+L057EC6: db $7A
+L057EC7: db $75
+L057EC8: db $72
+L057EC9: db $75
+L057ECA: db $2E
+L057ECB: db $FF
+L057ECC: db $49
+L057ECD: db $20
+L057ECE: db $61
+L057ECF: db $6D
+L057ED0: db $20
+L057ED1: db $74
+L057ED2: db $68
+L057ED3: db $65
+L057ED4: db $20
+L057ED5: db $6F
+L057ED6: db $72
+L057ED7: db $67
+L057ED8: db $61
+L057ED9: db $6E
+L057EDA: db $69
+L057EDB: db $7A
+L057EDC: db $65
+L057EDD: db $72
+L057EDE: db $FF
+L057EDF: db $20
+L057EE0: db $6F
+L057EE1: db $66
+L057EE2: db $20
+L057EE3: db $74
+L057EE4: db $68
+L057EE5: db $69
+L057EE6: db $73
+L057EE7: db $20
+L057EE8: db $74
+L057EE9: db $6F
+L057EEA: db $75
+L057EEB: db $72
+L057EEC: db $6E
+L057EED: db $61
+L057EEE: db $6D
+L057EEF: db $65
+L057EF0: db $6E
+L057EF1: db $74
+L057EF2: db $2E
+L057EF3: db $FF
+TextC_CutsceneKagura2: db $4A
+L057EF5: db $49
+L057EF6: db $20
+L057EF7: db $77
+L057EF8: db $69
+L057EF9: db $73
+L057EFA: db $68
+L057EFB: db $65 ; M
+L057EFC: db $64
+L057EFD: db $20
+L057EFE: db $74
+L057EFF: db $6F
+L057F00: db $20
+L057F01: db $73
+L057F02: db $65
+L057F03: db $65
+L057F04: db $20
+L057F05: db $74
+L057F06: db $68
+L057F07: db $65 ; M
+L057F08: db $FF ; M
+L057F09: db $20
+L057F0A: db $6F
+L057F0B: db $6E
+L057F0C: db $65
+L057F0D: db $20 ; M
+L057F0E: db $77
+L057F0F: db $68
+L057F10: db $6F
+L057F11: db $20
+L057F12: db $68
+L057F13: db $61
+L057F14: db $64
+L057F15: db $FF
+L057F16: db $20 ; M
+L057F17: db $73
+L057F18: db $74
+L057F19: db $72
+L057F1A: db $65
+L057F1B: db $6E
+L057F1C: db $67
+L057F1D: db $74
+L057F1E: db $68
+L057F1F: db $20
+L057F20: db $65
+L057F21: db $6E
+L057F22: db $6F ; M
+L057F23: db $75
+L057F24: db $67
+L057F25: db $68
+L057F26: db $20
+L057F27: db $74
+L057F28: db $6F
+L057F29: db $FF
+L057F2A: db $20
+L057F2B: db $20
+L057F2C: db $20
+L057F2D: db $20
+L057F2E: db $20
+L057F2F: db $20
+L057F30: db $20 ; M
+L057F31: db $64
+L057F32: db $65
+L057F33: db $66
+L057F34: db $65
+L057F35: db $61
+L057F36: db $74
+L057F37: db $20
+L057F38: db $52
+L057F39: db $75
+L057F3A: db $67
+L057F3B: db $61
+L057F3C: db $6C
+L057F3D: db $2E
+L057F3E: db $FF
+TextC_CutsceneKagura3: db $36
+L057F40: db $41
+L057F41: db $6E
+L057F42: db $64
+L057F43: db $20
+L057F44: db $6E
+L057F45: db $6F ; M
+L057F46: db $77 ; M
+L057F47: db $20
+L057F48: db $49
+L057F49: db $20
+L057F4A: db $77
+L057F4B: db $69
+L057F4C: db $73 ; M
+L057F4D: db $68
+L057F4E: db $20 ; M
+L057F4F: db $74
+L057F50: db $6F ; M
+L057F51: db $FF
+L057F52: db $20
+L057F53: db $73
+L057F54: db $65
+L057F55: db $65
+L057F56: db $20
+L057F57: db $79
+L057F58: db $6F ; M
+L057F59: db $75
+L057F5A: db $72
+L057F5B: db $20
+L057F5C: db $74
+L057F5D: db $72 ; M
+L057F5E: db $75
+L057F5F: db $65
+L057F60: db $FF
+L057F61: db $20
+L057F62: db $20
+L057F63: db $20
+L057F64: db $20
+L057F65: db $20
+L057F66: db $20
+L057F67: db $20
+L057F68: db $20
+L057F69: db $20
+L057F6A: db $20
+L057F6B: db $20
+L057F6C: db $73
+L057F6D: db $74
+L057F6E: db $72
+L057F6F: db $65 ; M
+L057F70: db $6E
+L057F71: db $67
+L057F72: db $74
+L057F73: db $68 ; M
+L057F74: db $2E
+L057F75: db $FF
+TextC_CutsceneKagura4: db $53
+L057F77: db $49
+L057F78: db $20
+L057F79: db $73
+L057F7A: db $68 ; M
+L057F7B: db $61 ; M
+L057F7C: db $6C
+L057F7D: db $6C
+L057F7E: db $20
+L057F7F: db $62
+L057F80: db $65
+L057F81: db $FF
+L057F82: db $20
+L057F83: db $64
+L057F84: db $69
+L057F85: db $73 ; M
+L057F86: db $61 ; M
+L057F87: db $70 ; M
+L057F88: db $70
+L057F89: db $6F ; M
+L057F8A: db $69
+L057F8B: db $6E ; M
+L057F8C: db $74
+L057F8D: db $65
+L057F8E: db $64
+L057F8F: db $20
+L057F90: db $69
+L057F91: db $66
+L057F92: db $20 ; M
+L057F93: db $74
+L057F94: db $68
+L057F95: db $65
+L057F96: db $FF ; M
+L057F97: db $20
+L057F98: db $73
+L057F99: db $74
+L057F9A: db $72
+L057F9B: db $65
+L057F9C: db $6E ; M
+L057F9D: db $67
+L057F9E: db $74
+L057F9F: db $68
+L057FA0: db $20
+L057FA1: db $79
+L057FA2: db $6F
+L057FA3: db $75
+L057FA4: db $FF
+L057FA5: db $20
+L057FA6: db $64
+L057FA7: db $69
+L057FA8: db $73
+L057FA9: db $70
+L057FAA: db $6C
+L057FAB: db $61
+L057FAC: db $79
+L057FAD: db $65
+L057FAE: db $64
+L057FAF: db $20
+L057FB0: db $64
+L057FB1: db $75
+L057FB2: db $72
+L057FB3: db $69 ; M
+L057FB4: db $6E
+L057FB5: db $67
+L057FB6: db $FF
+L057FB7: db $20
+L057FB8: db $74
+L057FB9: db $68
+L057FBA: db $65
+L057FBB: db $20
+L057FBC: db $74
+L057FBD: db $6F
+L057FBE: db $75
+L057FBF: db $72
+L057FC0: db $6E
+L057FC1: db $61
+L057FC2: db $6D ; M
+L057FC3: db $65
+L057FC4: db $6E ; M
+L057FC5: db $74
+L057FC6: db $20
+L057FC7: db $69
+L057FC8: db $73
+L057FC9: db $FF
+TextC_CutsceneKagura5: db $23
+L057FCB: db $20
+L057FCC: db $74
+L057FCD: db $68
+L057FCE: db $65
+L057FCF: db $20
+L057FD0: db $6C
+L057FD1: db $69 ; M
+L057FD2: db $6D
+L057FD3: db $69
+L057FD4: db $74
+L057FD5: db $20
+L057FD6: db $6F
+L057FD7: db $66
+L057FD8: db $FF
+L057FD9: db $20
+L057FDA: db $20
+L057FDB: db $20
+L057FDC: db $20
+L057FDD: db $20
+L057FDE: db $20
+L057FDF: db $79
+L057FE0: db $6F ; M
+L057FE1: db $75
+L057FE2: db $72 ; M
+L057FE3: db $20
+L057FE4: db $70
+L057FE5: db $6F
+L057FE6: db $77
+L057FE7: db $65
+L057FE8: db $72 ; M
+L057FE9: db $73
+L057FEA: db $2E
+L057FEB: db $2E
+L057FEC: db $2E
+L057FED: db $FF
+
+	mIncJunk "L057FEE"
+ENDC

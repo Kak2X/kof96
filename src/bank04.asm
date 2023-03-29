@@ -253,7 +253,10 @@ SGB_ApplyScreenPalSet:
 	dw SGBPacket_Stage_Yagami_Pal01,    SGBPacket_StageMeter_Pal23, SGBPacket_Stage_Pat,      $0000
 	dw SGBPacket_Stage_Boss_Pal01,      SGBPacket_StageMeter_Pal23, SGBPacket_Stage_Pat,      $0000
 	dw SGBPacket_Stage_Stadium_Pal01,   SGBPacket_StageMeter_Pal23, SGBPacket_Stage_Pat,      $0000
-	
+IF ENGLISH == 1
+	dw SGBPacket_LagunaLogo_Pal01,      $0000,                      SGBPacket_Pat_AllPal0,    $0000
+ENDC
+
 SGBPacket_Intro_Pal01: 
 	pkg SGB_PACKET_PAL01, $01
 	dw $7FFF ; 0-0
@@ -265,6 +268,8 @@ SGBPacket_Intro_Pal01:
 	dw $0000 ; 1-3
 	db $00
 
+IF ENGLISH == 0
+; Black/White Takara logo
 SGBPacket_TakaraLogo_Pal01:
 	pkg SGB_PACKET_PAL01, $01
 	dw $7FFF ; 0-0
@@ -275,7 +280,33 @@ SGBPacket_TakaraLogo_Pal01:
 	dw $0000 ; 1-2
 	dw $0000 ; 1-3
 	db $00
+ELSE
+; New Red/Black Takara logo
+SGBPacket_TakaraLogo_Pal01:
+	pkg SGB_PACKET_PAL01, $01
+	dw $009C ; 0-0
+	dw $0014 ; 0-1
+	dw $000C ; 0-2WW
+	dw $0000 ; 0-3
+	dw $0000 ; 1-1
+	dw $0000 ; 1-2
+	dw $0000 ; 1-3
+	db $00
+	
+; LAGUNA PROUDLY PRESENT
+SGBPacket_LagunaLogo_Pal01: 
+	pkg SGB_PACKET_PAL01, $01
+	dw $739C ; 0-0
+	dw $011C ; 0-1
+	dw $7380 ; 0-2
+	dw $0000 ; 0-3
+	dw $0000 ; 1-1
+	dw $0000 ; 1-2
+	dw $0000 ; 1-3
+	db $00
+ENDC
 
+IF ENGLISH == 0
 SGBPacket_Title_Pal01:
 	pkg SGB_PACKET_PAL01, $01
 	dw $7BDE ; 0-0
@@ -296,7 +327,28 @@ SGBPacket_Title_Pal23:
 	dw $0010 ; 3-2
 	dw $1807 ; 3-3
 	db $00
-	
+ELSE
+SGBPacket_Title_Pal01:
+	pkg SGB_PACKET_PAL01, $01
+	dw $6B5A ; 0-0
+	dw $031F ; 0-1
+	dw $001E ; 0-2
+	dw $1807 ; 0-3
+	dw $031F ; 1-1
+	dw $0094 ; 1-2
+	dw $1807 ; 1-3
+	db $00
+SGBPacket_Title_Pal23:
+	pkg SGB_PACKET_PAL23, $01	
+	dw $6F7A ; 0-0
+	dw $031F ; 2-1
+	dw $6252 ; 2-2
+	dw $1807 ; 2-3
+	dw $0198 ; 3-1
+	dw $0010 ; 3-2
+	dw $1807 ; 3-3
+	db $00
+ENDC
 SGBPacket_CharSelect_Pal01:
 	pkg SGB_PACKET_PAL01, $01
 	dw $739C ; 0-0
@@ -477,6 +529,7 @@ SGBPacket_CharSelect_Pat:
 
 	mIncJunk "L0442A1"
 	
+IF ENGLISH == 0
 SGBPacket_Title_Pat: 
 	pkg SGB_PACKET_ATTR_BLK, $04
 	db $09 ; 9 sets
@@ -563,7 +616,50 @@ SGBPacket_Title_Pat:
 	db $00
 	
 	mIncJunk "L0442E9"
-	
+ELSE
+; The English version has its own title
+SGBPacket_Title_Pat:
+	pkg SGB_PACKET_ATTR_BLK, $02
+	db $03 ; 3 sets
+	;--
+	; Fill with red palette
+	db %00000011 ; Change inside/box border
+	ads 0,0,0 ; Pals
+	db $00 ; X1
+	db $00 ; Y1
+	db $13 ; X2
+	db $11 ; Y2
+	;--
+	; Brown clouds at the bottom
+	db %00000011 ; Change inside/box border
+	ads 3,3,3 ; Pals
+	db $00 ; X1
+	db $0C ; Y1
+	db $13 ; X2
+	db $11 ; Y2
+	;--
+	; Color "Heat of Battle" with a browner palette
+	db %00000010 ; Change box border
+	ads 1,1,1 ; Pals
+	db $09 ; X1
+	db $08 ; Y1
+	db $13 ; X2
+	db $09 ; Y2
+	;--
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	db $00
+	mIncJunk "L0442E1"
+ENDC
 SGBPacket_Stage_Pat:
 	pkg SGB_PACKET_ATTR_BLK, $03
 	db $06 ; 6 sets
@@ -767,6 +863,7 @@ SGB_SendBorderData:
 	ld   bc, $0010
 	call SGB_SendBorderData_WaitAfterSend
 	
+IF FIX_BUGS == 0
 	;
 	; Attempt to erase the GFX area we've used for the transfers.
 	; [BUG] Not only this is pointless, but it's done while the display is enabled,
@@ -783,6 +880,7 @@ SGB_SendBorderData:
 	ld   a, b
 	or   c				; Are we done?
 	jr   nz, .clrLoop	; If not, loop
+ENDC
 	;-----------------------------------
 	rst  $10			; Stop LCD
 	ret
@@ -941,21 +1039,44 @@ SGB_SendBorderData_WaitAfterSend:
 	jr   nz, SGB_SendBorderData_WaitAfterSend	; If not, loop
 	ret
 	
-GFXLZ_SGB_Border0: INCBIN "data/gfx/sgb_border0.lzc"
-GFXLZ_SGB_Border1: INCBIN "data/gfx/sgb_border1.lzc"
-BGLZ_SGB_Border: INCBIN "data/bg/sgb_border.lzs"
+IF ENGLISH == 0
+GFXLZ_SGB_Border0: INCBIN "data/gfx/jp/sgb_border0.lzc"
+GFXLZ_SGB_Border1: INCBIN "data/gfx/jp/sgb_border1.lzc"
+BGLZ_SGB_Border: INCBIN "data/bg/jp/sgb_border.lzs"
 SGBPalDef_Border_Normal:
 	dw SGBPal_Border_Normal.end-SGBPal_Border_Normal ; $0060
 SGBPal_Border_Normal:
-	INCBIN "data/pal/sgb_border_normal.bin"
+	INCBIN "data/pal/jp/sgb_border_normal.bin"
 .end:
 SGBPalDef_Border_Alt:
 	dw SGBPal_Border_Alt.end-SGBPal_Border_Alt ; $0060
 SGBPal_Border_Alt:
-	INCBIN "data/pal/sgb_border_alt.bin"
+	INCBIN "data/pal/jp/sgb_border_alt.bin"
 .end:
+ELSE
+GFXLZ_SGB_Border0: INCBIN "data/gfx/en/sgb_border0.lzc"
+GFXLZ_SGB_Border1: INCBIN "data/gfx/en/sgb_border1.lzc"
+BGLZ_SGB_Border: INCBIN "data/bg/en/sgb_border.lzs"
+SGBPalDef_Border_Normal:
+	dw SGBPal_Border_Normal.end-SGBPal_Border_Normal ; $0040
+SGBPal_Border_Normal:
+	INCBIN "data/pal/en/sgb_border_normal.bin"
+.end:
+SGBPalDef_Border_Alt:
+	dw SGBPal_Border_Alt.end-SGBPal_Border_Alt ; $0040
+SGBPal_Border_Alt:
+	INCBIN "data/pal/en/sgb_border_alt.bin"
+.end:
+ENDC
 
-GFXLZ_Play_Stage_Hero: INCBIN "data/gfx/play_stage_hero.lzc"
+; This stage contains a sign saying "KOF96", so it got changed
+GFXLZ_Play_Stage_Hero:
+IF ENGLISH == 0
+	INCBIN "data/gfx/jp/play_stage_hero.lzc"
+ELSE
+	INCBIN "data/gfx/en/play_stage_hero.lzc"
+ENDC
+
 BGLZ_Play_Stage_Hero: INCBIN "data/bg/play_stage_hero.lzs"
 GFXLZ_Play_Stage_FatalFury: INCBIN "data/gfx/play_stage_fatalfury.lzc"
 BGLZ_Play_Stage_FatalFury: INCBIN "data/bg/play_stage_fatalfury.lzs"
@@ -969,5 +1090,199 @@ BGLZ_Play_Stage_Boss: INCBIN "data/bg/play_stage_boss.lzs"
 GFXLZ_Play_Stage_Stadium: INCBIN "data/gfx/play_stage_stadium.lzc"
 BGLZ_Play_Stage_Stadium: INCBIN "data/bg/play_stage_stadium.lzs"
 
-; =============== END OF BANK ===============
+IF ENGLISH == 0
+	; =============== END OF BANK ===============
 	mIncJunk "L047E37"
+ELSE
+; TODO: TextC_ structures
+L047AA5: db $00
+TextC_CutsceneMrKarateDefeat0: db $48 ; M
+L047AA7: db $48
+L047AA8: db $6D
+L047AA9: db $6D
+L047AAA: db $2E
+L047AAB: db $2E
+L047AAC: db $2E
+L047AAD: db $20
+L047AAE: db $50
+L047AAF: db $72
+L047AB0: db $65
+L047AB1: db $74
+L047AB2: db $74
+L047AB3: db $79
+L047AB4: db $20
+L047AB5: db $67
+L047AB6: db $6F
+L047AB7: db $6F
+L047AB8: db $64
+L047AB9: db $2E
+L047ABA: db $FF
+L047ABB: db $59
+L047ABC: db $6F
+L047ABD: db $75
+L047ABE: db $60
+L047ABF: db $76
+L047AC0: db $65
+L047AC1: db $20
+L047AC2: db $67
+L047AC3: db $6F
+L047AC4: db $74
+L047AC5: db $20
+L047AC6: db $73
+L047AC7: db $74
+L047AC8: db $72
+L047AC9: db $6F
+L047ACA: db $6E
+L047ACB: db $67
+L047ACC: db $65
+L047ACD: db $72
+L047ACE: db $FF
+L047ACF: db $20
+L047AD0: db $73
+L047AD1: db $69
+L047AD2: db $6E
+L047AD3: db $63
+L047AD4: db $65
+L047AD5: db $20
+L047AD6: db $74
+L047AD7: db $68
+L047AD8: db $65
+L047AD9: db $FF
+L047ADA: db $20
+L047ADB: db $20
+L047ADC: db $20
+L047ADD: db $20
+L047ADE: db $20
+L047ADF: db $20
+L047AE0: db $20
+L047AE1: db $74
+L047AE2: db $6F
+L047AE3: db $75
+L047AE4: db $72
+L047AE5: db $6E
+L047AE6: db $61
+L047AE7: db $6D
+L047AE8: db $65
+L047AE9: db $6E
+L047AEA: db $74
+L047AEB: db $2E
+L047AEC: db $2E
+L047AED: db $2E
+L047AEE: db $FF
+TextC_CutsceneMrKarateDefeat1: db $22
+L047AF0: db $54
+L047AF1: db $68
+L047AF2: db $65
+L047AF3: db $20
+L047AF4: db $6C
+L047AF5: db $61
+L047AF6: db $73
+L047AF7: db $74
+L047AF8: db $20
+L047AF9: db $74
+L047AFA: db $6F
+L047AFB: db $75
+L047AFC: db $72 ; M
+L047AFD: db $6E
+L047AFE: db $61 ; M
+L047AFF: db $6D
+L047B00: db $65 ; M
+L047B01: db $6E
+L047B02: db $74
+L047B03: db $3F
+L047B04: db $FF
+L047B05: db $53
+L047B06: db $6F
+L047B07: db $20
+L047B08: db $79
+L047B09: db $6F
+L047B0A: db $75
+L047B0B: db $60
+L047B0C: db $72
+L047B0D: db $65
+L047B0E: db $2E
+L047B0F: db $2E
+L047B10: db $2E
+L047B11: db $FF
+TextC_CutsceneMrKarateDefeat2: db $4E
+L047B13: db $4E
+L047B14: db $6F
+L047B15: db $21
+L047B16: db $20
+L047B17: db $41
+L047B18: db $62
+L047B19: db $73
+L047B1A: db $6F
+L047B1B: db $6C
+L047B1C: db $75
+L047B1D: db $74 ; M
+L047B1E: db $65
+L047B1F: db $6C
+L047B20: db $79
+L047B21: db $20
+L047B22: db $6E
+L047B23: db $6F
+L047B24: db $74
+L047B25: db $21
+L047B26: db $FF
+L047B27: db $49
+L047B28: db $20
+L047B29: db $61
+L047B2A: db $6D ; M
+L047B2B: db $20
+L047B2C: db $74
+L047B2D: db $68
+L047B2E: db $65
+L047B2F: db $20
+L047B30: db $6C
+L047B31: db $65
+L047B32: db $67
+L047B33: db $65
+L047B34: db $6E
+L047B35: db $64
+L047B36: db $61
+L047B37: db $72
+L047B38: db $79
+L047B39: db $FF
+L047B3A: db $20 ; M
+L047B3B: db $20
+L047B3C: db $66
+L047B3D: db $69
+L047B3E: db $67
+L047B3F: db $68
+L047B40: db $74
+L047B41: db $65
+L047B42: db $72
+L047B43: db $2C
+L047B44: db $4D ; M
+L047B45: db $72
+L047B46: db $20
+L047B47: db $4B
+L047B48: db $61
+L047B49: db $72
+L047B4A: db $61
+L047B4B: db $74 ; M
+L047B4C: db $65
+L047B4D: db $2E
+L047B4E: db $FF
+L047B4F: db $49
+L047B50: db $20
+L047B51: db $61
+L047B52: db $6D
+L047B53: db $20
+L047B54: db $6E
+L047B55: db $6F
+L047B56: db $74 ; M
+L047B57: db $20
+L047B58: db $54
+L047B59: db $61
+L047B5A: db $6B
+L047B5B: db $75
+L047B5C: db $6D ; M
+L047B5D: db $61
+L047B5E: db $21
+L047B5F: db $21
+L047B60: db $FF
+; =============== END OF BANK ===============
+	mIncJunk "L047B60"
+ENDC
