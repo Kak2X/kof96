@@ -206,8 +206,8 @@ Module_Win:
 Win_Mode_VS:
 	; Show win screen with the character who won
 	call Win_DoWinScr
-	; .
-	call Win_ResetCharsOnUnusedVsModeCpuVsCpu
+	; Clear both team members to vary up watch mode
+	call Win_ResetCharsOnEndlessCpuVsCpu
 	; We're done
 	jp   Win_SwitchToCharSel
 ; =============== Win_Mode_SingleWon ===============
@@ -1088,20 +1088,26 @@ Win_Mode_VSDraw:
 	;--
 	; [TCRF] Unreferenced code
 .unused_resetChar:
-	call Win_ResetCharsOnUnusedVsModeCpuVsCpu
+	call Win_ResetCharsOnEndlessCpuVsCpu
 	;--
 .toCharSel:
 	jp   Win_SwitchToCharSel
 	
-; =============== Win_ResetCharsOnUnusedVsModeCpuVsCpu ===============
-; [TCRF] In a CPU vs CPU battle in VS mode, force the game to pick new characters for both teams.
-Win_ResetCharsOnUnusedVsModeCpuVsCpu:
-	; Not applicable if not in VS mode
+; =============== Win_ResetCharsOnEndlessCpuVsCpu ===============
+; In an endless CPU vs CPU battle, force the game to pick new characters for both teams.
+Win_ResetCharsOnEndlessCpuVsCpu:
+
+	;
+	; Not applicable if we aren't in endless CPU vs CPU mode.
+	; This is a special case for CPU vs CPU battles done in VS mode.
+	;
+	
+	; Must be in VS mode
 	ld   a, [wPlayMode]
 	bit  MODEB_VS, a
 	ret  z
 	
-	; Not applicable if
+	; Must be two CPUs
 	ld   a, [wPlInfo_Pl1+iPlInfo_Flags0]
 	ld   b, a								; B = 1P Flags
 	ld   a, [wPlInfo_Pl2+iPlInfo_Flags0]	; A = 2P Flags
@@ -1109,7 +1115,9 @@ Win_ResetCharsOnUnusedVsModeCpuVsCpu:
 	bit  PF0B_CPU, a						; Are both players CPUs?
 	ret  z									; If not, return
 	
+	;
 	; Clear selected team characters
+	;
 	ld   a, $FF
 	ld   [wCharSelP1Char0], a
 	ld   [wCharSelP1Char1], a

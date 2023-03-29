@@ -659,8 +659,8 @@ Title_Mode_ModeSelect:
 	; Verify that there's a second player
 	;
 IF ENGLISH == 1
-	call ModeSelect_CheckWatchMode		; Full watch mode?
-	jp   c, .startSingleVS					; If so, skip the serial checks (no 2P inputs required)
+	call ModeSelect_CheckEndlessCpuVsCpuMode		; Full watch mode?
+	jp   c, .startSingleVS							; If so, skip the serial checks (no 2P inputs required)
 ENDC
 	ld   a, [wMisc_C025]
 	bit  MISCB_IS_SGB, a		; Playing on SGB?
@@ -686,8 +686,8 @@ ENDC
 	
 .teamVS:
 IF ENGLISH == 1
-	call ModeSelect_CheckWatchMode		; Full watch mode?
-	jp   c, .startTeamVS					; If so, skip the serial checks (no 2P inputs required)
+	call ModeSelect_CheckEndlessCpuVsCpuMode		; Full watch mode?
+	jp   c, .startTeamVS							; If so, skip the serial checks (no 2P inputs required)
 ENDC
 	ld   a, [wMisc_C025]
 	bit  MISCB_IS_SGB, a		; Playing on SGB?
@@ -752,8 +752,8 @@ ENDC
 
 IF ENGLISH == 0	
 ; [TCRF] Unreferenced code.
-;        Sets up a CPU vs CPU battle in VS mode, which in the Japanese version can't be triggered
-;        by one player.
+;        Sets up a CPU vs CPU battle in VS mode, which in the Japanese version
+;        can't be triggered by one player.
 ModeSelect_Unused_PrepVSCPU:
 	; P1: CPU, P2: CPU
 	ld   hl, wPlInfo_Pl1+iPlInfo_Flags0
@@ -1835,23 +1835,30 @@ ModeSelect_CheckCPUvsCPU:
 	ret
 	
 IF ENGLISH == 1
-; =============== ModeSelect_CheckWatchMode ===============
+; =============== ModeSelect_CheckEndlessCpuVsCpuMode ===============
 ; Initializes the CPU/Human player status for VS mode.
 ;
-; [POI] Also handles the secret where holding LEFT+B enables the CPU vs CPU battle in VS mode / Watch Mode.
-;       This allows accessing the mode without having to rely on two players, and most importantly 
-;       makes it accessible outside of SGB mode.
+; [POI] Also handles the secret where holding LEFT+B enables alternate CPU vs CPU battle in VS mode (aka Watch Mode).
 ;
-;       This way of accessing it wasn't in the Japanese version (the code to set the mode was unreferenced),
-;       BUT it could still be done in SGB mode by having both players hold B.
-;       
-;       |||| which rendered unused the various checks for this mode.
+;       Having both players set as CPU in a VS mode triggers a special case that causes the following:
+;       - Both players automatically pick their team members.
+;         Normally, even with a single CPU player, both sides have to manually pick their characters.
+;       - Team order is autoselected
+;       - When a round ends, both teams are cleared, forcing to autopick new ones.
+;         In VS mode, normally, both teams stay as-is between matches unless you explicitly select new ones.
 ;
-; TODO: I was wrong as it wasn't unused, remove the TCRF and rename to Watch Mode
+;       While the code to handle the mode existed in the Japanese version, it could only be done
+;       by having both players hold B when selecting a VS mode, and even then it was disallowed on
+;       the DMG/serial cable since the normal CPU vs CPU code is disabled there.
 ;
+;       The existing checks are still in the English version, but since this mode doesn't require
+;       a second player, a new code was added that allows to enter the mode with a single DMG.
+;
+;       Newer games using this engine (ie: Real Bout Fatal Fury) would use an invisible menu option
+;       enabled through dipswitches instead of a code, but worked identically otherwise.
 ; OUT
-; - C flag: If set, this is a CPU vs CPU battle / Watch mode.
-ModeSelect_CheckWatchMode:
+; - C flag: If set, CPU vs CPU is enabled.
+ModeSelect_CheckEndlessCpuVsCpuMode:
 	; Default with both human players
 	ld   hl, wPlInfo_Pl1+iPlInfo_Flags0
 	res  PF0B_CPU, [hl]
@@ -1859,10 +1866,8 @@ ModeSelect_CheckWatchMode:
 	res  PF0B_CPU, [hl]
 	
 	; If we're holding LEFT+B, turn both players into a CPU.
-	; Since such a mode requires no inputs from the other side, it is allowed even if
-	; no DMG is connected.
-	; The return value has the purpose of telling whoever's calling this to skip
-	; the serial cable checks.
+	; Since such a mode requires no inputs from the other side, it is allowed even if no DMG is connected.
+	; The return value has the purpose of telling whoever's calling this to skip the serial cable checks.
 	ldh  a, [hJoyKeys]
 	and  KEY_LEFT|KEY_B		; Holding Left+B?
 	cp   KEY_LEFT|KEY_B

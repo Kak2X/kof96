@@ -208,10 +208,8 @@ Module_CharSel:
 	jp   .chkInitialMode
 	
 .initVSMode:
-	;
-	; [TCRF] In a CPU vs CPU battle in VS mode, set the randomizer flag for both players.
-	;
-	call CharSel_IsUnusedVsModeCpuVsCpu
+	; In an endless CPU vs CPU battle, the game autopicks characters for both players.
+	call CharSel_IsEndlessCpuVsCpu
 	jp   nc, .chkInitialMode
 	ld   a, $01						
 	ld   [wCharSelRandom1P], a
@@ -749,8 +747,8 @@ CharSel_Mode_Ready:
 	jp   c, .confirm					; If so, autoconfirm the choice
 	call CharSelect_IsLastWinner		; Did we win last time? (single mode only)
 	jp   c, .confirm					; If so, autoconfirm
-	call CharSel_IsUnusedVsModeCpuVsCpu	; [TCRF] Both players CPUs in a VS match?
-	jp   c, .confirm					; If so, autoconfirm
+	call CharSel_IsEndlessCpuVsCpu		; Is this an endless CPU vs CPU match?
+	jp   c, .confirm					; If so, autoconfirm (the player should never need to input anything)
 	
 	; Input checks
 	call CharSel_GetInput
@@ -3174,17 +3172,14 @@ CharSel_IdBGMapTbl:
 	dw $9930 ; CHARSEL_ID_SPEC_OLEONA
 	dw $9924 ; CHARSEL_ID_SPEC_KAGURA
 
-; =============== CharSel_IsUnusedVsModeCpuVsCpu ===============
-; [TCRF] Checks if both players are set as CPU during VS mode.
-;        This will always return clear since the code to set up such thing
-;        is unreferenced (ModeSelect_Unused_PrepVSCPU).
+; =============== CharSel_IsEndlessCpuVsCpu ===============
+; Checks if both players are set as CPU during VS mode.
 ; OUT
 ; - C flag: If set, the checks passed
-CharSel_IsUnusedVsModeCpuVsCpu:
+CharSel_IsEndlessCpuVsCpu:
 	ld   a, [wPlayMode]
 	bit  MODEB_VS, a						; Are we in VS mode?
 	jp   z, .retClear						; If not, jump
-	; Unreachable code
 	ld   a, [wPlInfo_Pl1+iPlInfo_Flags0]
 	ld   b, a								; B = P1 status
 	ld   a, [wPlInfo_Pl2+iPlInfo_Flags0]	; A = P2 status
@@ -3203,8 +3198,8 @@ CharSel_IsUnusedVsModeCpuVsCpu:
 ; Checks if the current player is a CPU opponent, meaning it's not actively
 ; controlled by the GB's joypad input.
 ;
-; Note that this is separate from a player being CPU-controlled, as in CPU vs CPU matches
-; the player does get to control one of the cursors.
+; Note that this is separate from a player being CPU-controlled, as in non-endless
+; CPU vs CPU matches the player does get to control one of the cursors.
 ;
 ; OUT
 ; - C flag: If set, this player is the CPU opponent
@@ -3416,7 +3411,7 @@ Module_OrdSel:
 	;
 	ld   a, [wPlayMode]
 	cp   MODE_TEAM1P		; Playing in 1P mode?				
-	jp   nz, .teamMode		; If not, jump
+	jp   nz, .vsMode		; If not, jump
 .singleMode:
 	; In single mode, randomize the inactive side
 	ld   a, [wJoyActivePl]
@@ -3432,11 +3427,10 @@ Module_OrdSel:
 	ld   a, $01
 	ld   [wOrdSelCPUDelay2P], a
 	jp   .loadVRAM
-.teamMode:
-	;
-	; [TCRF] In a CPU vs CPU battle in VS mode, set the same delay since the autopicker is on
-	;
-	call CharSel_IsUnusedVsModeCpuVsCpu	
+.vsMode:
+	; In an endless CPU vs CPU battle in VS mode, set the same delay since the autopicker is on.
+	; Otherwise, skip to .loadVRAM since both players manually have to choose (including if only one player is a CPU).
+	call CharSel_IsEndlessCpuVsCpu	
 	jp   nc, .loadVRAM
 	ld   a, $01
 	ld   [wOrdSelCPUDelay1P], a
