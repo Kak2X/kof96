@@ -1077,21 +1077,15 @@ MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_L EQU $58
 MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_H EQU $5A
 IF ENGLISH == 0
 MOVE_MRKARATE_KO_OU_KEN_UNUSED_EL      EQU $5C ; [TCRF] Counterpart of MOVE_RYO_KO_HOU_EL that is incomplete.
-MOVE_MRKARATE_KO_OU_KEN_UNUSED_EH      EQU $5E ; ??? REUSED in EN ???
+MOVE_MRKARATE_KO_OU_KEN_UNUSED_EH      EQU $5E
+ELSE
+MOVE_MRKARATE_ZENRETSUKEN_UNUSED_EL2   EQU $5C
+MOVE_MRKARATE_ZENRETSUKEN_UNUSED_EH2   EQU $5E ; [TCRF] Second part of MOVE_MRKARATE_ZENRETSUKEN_H when doing the hidden version.
+ENDC
 MOVE_MRKARATE_SPEC_6_L                 EQU $60
 MOVE_MRKARATE_SPEC_6_H                 EQU $62
-ELSE
-MOVE_MRKARATE_5C EQU $5C
-MOVE_MRKARATE_5E EQU $5E
-MOVE_MRKARATE_60 EQU $60
-MOVE_MRKARATE_62 EQU $62
-ENDC
 MOVE_MRKARATE_RYUKO_RANBU_S            EQU $64
-IF ENGLISH == 0
-MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D     EQU $66 ; [TCRF] Unused desperation super that doesn't work properly
-ELSE
-MOVE_MRKARATE_RYUKO_D                  EQU $66
-ENDC
+MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D     EQU $66 ; [TCRF] Unused desperation super that doesn't work properly in the Japanese version
 MOVE_MRKARATE_HAOH_SHO_KOH_KEN_S       EQU $68
 MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D       EQU $6A
 
@@ -1119,7 +1113,7 @@ HITTYPE_THROW_ROTL          EQU $12 ; Throw rotation frame, head left
 HITTYPE_THROW_ROTD          EQU $13 ; Throw rotation frame, head down
 HITTYPE_THROW_ROTR          EQU $14 ; Throw rotation frame, head right
 ELSE
-HITTYPE_DIZZY               EQU $0E ; English-only, Manual dizzy.
+HITTYPE_UNUSED_DIZZY        EQU $0E ; English-only, Manual dizzy. 
 HITTYPE_DROP_SWOOPUP        EQU $0F ; Very high throw or swept up above
 HITTYPE_THROW_END           EQU $10 ; End of the throw. The actual part where the player is launched.
 HITTYPE_THROW_START         EQU $11 ; Start of the throw anim

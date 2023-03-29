@@ -788,8 +788,8 @@ iPlInfo_Goenitz_Shinyaotome_LoopTimer       EQU $83 ; Attack loop for all supers
 iPlInfo_Goenitz_Jissoukoku_InvulnTimer      EQU $83 ; When this elapses, the player isn't invulnerable anymore
 iPlInfo_MrKarate_ShouranKyaku_LoopCount     EQU $83
 iPlInfo_MrKarate_Zenretsuken_LoopCount      EQU $83
-iPlInfo_MrKarate_Zenretsuken_84             EQU $84 ; ???
-iPlInfo_MrKarate_RyukoRanbuD                EQU $84 ; If set, the move counts as the desperation version. Instead of fixing the unused desperation move, they did this.
+iPlInfo_MrKarate_Zenretsuken_Unused_E       EQU $84 ; If set, the enables the hidden version of the move. This is never set.
+iPlInfo_MrKarate_RyukoRanbu_Unused_D        EQU $84 ; If set, the move counts as the desperation version. This is never read, only written to.
 iPlInfo_Terry_PowerGeyserE_LastXPos         EQU $83 ; Last random X position generated for a projectile
 iPlInfo_Athena_PsychoTeleport_InvulnTimer   EQU $83 ; When this elapses, the player isn't invulnerable anymore
 iPlInfo_Athena_ShCryst_LoopTimer            EQU $83 ; Phase 1 loop timer
@@ -799,7 +799,7 @@ iPlInfo_Iori_Mystery_OBJLstFlagsOrig        EQU $83 ; Untouched copy of iOBJInfo
 iPlInfo_OIori_KinYaOtome_LoopCount          EQU $83
 iPlInfo_Ryo_HienShippuKyaku_Unused_83       EQU $83 ; Nonexisting
 iPlInfo_Hit_SwoopUp_OkSpeedY                EQU $83
-iPlInfo_Unk_CustomDizzy EQU $83 ; ???
+iPlInfo_CustomDizzy                         EQU $83 ; If set, marks that a custom dizzy is about to start
 ; CPU block
 iPlInfo_CPUIdleTimer               EQU $86 ; Delays picking a new idle move. Until it elapses, the existing iPlInfo_CPUIdleMove is valid.
 iPlInfo_CPUIdleMove                EQU $87 ; ID of the idle movement mode. (CMA_*)

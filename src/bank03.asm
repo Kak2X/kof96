@@ -1503,8 +1503,8 @@ IF ENGLISH == 0
 	mMvAnDef OBJLstPtrTable_MrKarate_Idle, $00, $02, $0A, HITTYPE_DUMMY, $00 ;X ; BANK $0A ; MOVE_MRKARATE_KO_OU_KEN_UNUSED_EL
 	mMvAnDef OBJLstPtrTable_MrKarate_Idle, $00, $02, $0A, HITTYPE_DUMMY, $00 ;X ; BANK $0A ; MOVE_MRKARATE_KO_OU_KEN_UNUSED_EH
 ELSE
-	mMvAnDef OBJLstPtrTable_MrKarate_HopB, $18, $FF, $0C, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ; BANK $0A ; MOVE_MRKARATE_5C
-	mMvAnDef OBJLstPtrTable_MrKarate_HopB, $18, $FF, $0C, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ; BANK $0A ; MOVE_MRKARATE_5E
+	mMvAnDef OBJLstPtrTable_MrKarate_HopB, $18, $FF, $0C, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ; BANK $0A ; MOVE_MRKARATE_ZENRETSUKEN_UNUSED_EL2
+	mMvAnDef OBJLstPtrTable_MrKarate_HopB, $18, $FF, $0C, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ; BANK $0A ; MOVE_MRKARATE_ZENRETSUKEN_UNUSED_EH2
 ENDC
 	mMvAnDef OBJLstPtrTable_MrKarate_Idle, $00, $02, $0A, HITTYPE_DUMMY, $00 ;X ; BANK $0A ; MOVE_MRKARATE_SPEC_6_L
 	mMvAnDef OBJLstPtrTable_MrKarate_Idle, $00, $02, $0A, HITTYPE_DUMMY, $00 ;X ; BANK $0A ; MOVE_MRKARATE_SPEC_6_H
@@ -2063,12 +2063,12 @@ IF ENGLISH == 0
 	dpr MoveC_Ryo_KoOuKen ;X ; BANK $02 ; MOVE_MRKARATE_SPEC_6_L ; [POI] This placeholder entry is using the one for Ryo, hinting that at some point Mr. Karate didn't have its own code for KoOuKen.
 	dpr MoveC_Ryo_KoOuKen ;X ; BANK $02 ; MOVE_MRKARATE_SPEC_6_H	
 ELSE
-	; The English version replaced some slots with working moves
-	dpr MoveC_MrKarate_Unk_HaohShokohKenD ; BANK $02 ; MOVE_MRKARATE_5C
-	dpr MoveC_MrKarate_Unk_HaohShokohKenD ; BANK $02 ; MOVE_MRKARATE_5E
-	; ??? Is this used? They updated the placeholder entry 
-	dpr MoveC_MrKarate_KoOuKen ;X ; BANK $02 ; MOVE_MRKARATE_60
-	dpr MoveC_MrKarate_KoOuKen ;X ; BANK $02 ; MOVE_MRKARATE_62	
+	; The English version replaced this with the second part of MOVE_MRKARATE_ZENRETSUKEN_* that is unreachable.
+	dpr MoveC_MrKarate_Unused_Zenretsuken_E2 ;X ; BANK $02 ; MOVE_MRKARATE_ZENRETSUKEN_UNUSED_EL2
+	dpr MoveC_MrKarate_Unused_Zenretsuken_E2 ;X ; BANK $02 ; MOVE_MRKARATE_ZENRETSUKEN_UNUSED_EH2
+	; They updated the placeholder entry, but the move is still not used.
+	dpr MoveC_MrKarate_KoOuKen ;X ; BANK $02 ; MOVE_MRKARATE_SPEC_6_L
+	dpr MoveC_MrKarate_KoOuKen ;X ; BANK $02 ; MOVE_MRKARATE_SPEC_6_H	
 ENDC
 
 	dpr MoveC_MrKarate_RyukoRanbuS ; BANK $02 ; MOVE_MRKARATE_RYUKO_RANBU_S
@@ -2076,9 +2076,9 @@ IF ENGLISH == 0
 	; [TCRF] Mr.Karate's desperation super is unused and incomplete.
 	dpr MoveC_MrKarate_Unused_RyukoRanbuD ;X ; BANK $02 ; MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D
 ELSE
-	; In the English version, the code for MoveC_MrKarate_Unused_RyukoRanbuD got deleted
-	; and MoveC_MrKarate_RyukoRanbuS now has desperation-specific checks.
-	dpr MoveC_MrKarate_RyukoRanbuS ; BANK $02 ; MOVE_MRKARATE_RYUKO_RANBU_D
+	; In the English version, the code for MoveC_MrKarate_Unused_RyukoRanbuD got deleted.
+	; The move itself is still unused.
+	dpr MoveC_MrKarate_RyukoRanbuS ;X ; BANK $02 ; MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D
 ENDC
 	dpr MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_MRKARATE_HAOH_SHO_KOH_KEN_S
 	dpr MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D

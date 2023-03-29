@@ -801,8 +801,8 @@ MoveC_Base_WakeUp_End:
 	res  PF1B_INVULN, [hl] ; Not invulnerable
 
 IF ENGLISH == 1
-	; ???
-	ld   hl, iPlInfo_Unk_CustomDizzy
+	; Clear the manual dizzy flag here for some reason
+	ld   hl, iPlInfo_CustomDizzy
 	add  hl, bc
 	ld   [hl], $00
 ENDC
@@ -854,11 +854,11 @@ MoveC_Base_Dizzy:
 Play_Pl_DecDizzyTime:
 
 IF ENGLISH == 1
-	; ???
-	ld   hl, iPlInfo_Unk_CustomDizzy
+	; Not necessary if we're going to get dizzy soon by request
+	ld   hl, iPlInfo_CustomDizzy
 	add  hl, bc
 	ld   a, [hl]
-	or   a			; iPlInfo_Unk_CustomDizzy != 0?
+	or   a			; iPlInfo_CustomDizzy != 0?
 	ret  nz			; If so, return
 ENDC
 
@@ -1280,7 +1280,7 @@ Play_HitTypePtrTable:
 	dw HitTypeC_Drop_DB_A
 	dw HitTypeC_Drop_DB_G
 IF ENGLISH == 1
-	dw HitTypeC_Dizzy
+	dw HitTypeC_Unused_Dizzy
 ENDC
 	dw HitTypeC_SwoopUp
 	dw HitTypeC_Throw_End
@@ -1837,7 +1837,7 @@ HitTypeC_Drop_DB_G:
 	; Flash playfield if applicable
 	call Play_Pl_FlashPlayfieldOnSuperHit
 	
-	; Do it
+	; Do the standard hitstun effect
 	call Play_Pl_DoHitstunOnce
 	
 	; Once the hitstun is over, prevent the collision boxes from overlapping
@@ -1847,16 +1847,17 @@ HitTypeC_Drop_DB_G:
 	ret
 
 IF ENGLISH == 1	
-; =============== HitTypeC_Dizzy ===============
-; ID: HITTYPE_DIZZY
+; =============== HitTypeC_Unused_Dizzy ===============
+; ID: HITTYPE_UNUSED_DIZZY
 ;
-; Hit effect for getting dizzy, only used in the English version of the game.
+; Hit effect for moves that manually deliver dizzies after hitstun.
 ;
-; ??? IS THIS FOR MANUAL DIZZYIES
+; [TCRF] Even though this got added for the English version of the game,
+;        the only move version that uses it is impossible to trigger.
 ;
 ; The Japanese version doesn't have any specific hit type for the dizzy state,
 ; as it's something that only gets checked after waking up, well after the hit effect is done.
-HitTypeC_Dizzy:
+HitTypeC_Unused_Dizzy:
 
 	; Don't dizzy on the next drop to ground
 	ld   hl, iPlInfo_DizzyNext
@@ -1867,14 +1868,17 @@ HitTypeC_Dizzy:
 	add  hl, bc
 	ld   [hl], $FF
 	
-	; Mark that we're in the middle of the ??? custom ??? dizzy state 
-	; ||||| here, since iPlInfo_DizzyNext has to be cleared for ???
-	ld   hl, iPlInfo_Unk_CustomDizzy
+	; Mark that we're in the middle of the custom dizzy state.
+	; In practice, this only tells Play_Pl_DecDizzyTime to not decrement the timer on further hits,
+	; which isn't really necessary.
+	; Curiously, this value is kept like this until the player drops to the ground, meaning
+	; you can't get dizzied the normal way until you get knocked down.
+	ld   hl, iPlInfo_CustomDizzy
 	add  hl, bc
 	ld   [hl], $01
 	
 	; Set the continuation for the hit, which is used after hitstun ends.
-	; This shakes the ground.
+	; This is the standard dizzy effect.
 	ld   a, MOVE_SHARED_DIZZY
 	call Pl_SetMove_ShakeScreenReset
 	
@@ -3268,7 +3272,7 @@ Play_Pl_SetHitType:
 			cp   HITTYPE_DROP_SWOOPUP
 			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
 IF ENGLISH == 1
-			cp   HITTYPE_DIZZY						
+			cp   HITTYPE_UNUSED_DIZZY						
 			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
 ENDC
 		.chkDead:
@@ -5875,7 +5879,7 @@ MoveC_Ryo_HienShippuKyaku:
 .ret:
 	ret
 	
-; =============== MoveC_MrKarate_RyuKoRanbuS ===============
+; =============== MoveC_Ryo_RyuKoRanbuS ===============
 ; Move code for the normal version of Ryo's Ryu Ko Ranbu (MOVE_RYO_RYU_KO_RANBU_S).
 MoveC_Ryo_RyuKoRanbuS:
 	call Play_Pl_MoveByColiBoxOverlapX
@@ -8422,7 +8426,8 @@ MoveInit_MrKarate_Zenretsuken:
 	mMvIn_GetLH MOVE_MRKARATE_ZENRETSUKEN_L, MOVE_MRKARATE_ZENRETSUKEN_H
 	call MoveInputS_SetSpecMove_StopSpeed
 IF ENGLISH == 1
-	ld   hl, iPlInfo_MrKarate_Zenretsuken_84
+	; Never enable the hidden version
+	ld   hl, iPlInfo_MrKarate_Zenretsuken_Unused_E
 	add  hl, bc
 	ld   [hl], $00
 ENDC
@@ -8444,19 +8449,20 @@ IF ENGLISH == 0
 	mMvIn_GetSD MOVE_MRKARATE_RYUKO_RANBU_S, MOVE_MRKARATE_RYUKO_RANBU_S
 	call MoveInputS_SetSpecMove_StopSpeed
 ELSE
-	; Still no MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D, but the desperation version sets its own flag.
+	; [TCRF] Still no MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D, but the desperation version sets
+	; its own flag... which is not read back by anything.
 	call MoveInputS_CheckSuperDesperation
 	jp   nc, .normal		; Was a super desperation *NOT* triggered? If so, jump
 	jp   nz, .desperation	; Was the hidden desperation *NOT* triggered? If so, jump
 	jp   .hidden			; Otherwise, jump
 .normal:
-	ld   hl, iPlInfo_MrKarate_RyukoRanbuD
+	ld   hl, iPlInfo_MrKarate_RyukoRanbu_Unused_D
 	add  hl, bc
 	ld   [hl], $00
 	ld   a, MOVE_MRKARATE_RYUKO_RANBU_S
 	jp   .setMove
 .desperation:
-	ld   hl, iPlInfo_MrKarate_RyukoRanbuD
+	ld   hl, iPlInfo_MrKarate_RyukoRanbu_Unused_D
 	add  hl, bc
 	ld   [hl], $01
 	ld   a, MOVE_MRKARATE_RYUKO_RANBU_S
@@ -8464,7 +8470,7 @@ ELSE
 	call MoveInputS_SetSpecMove_StopSpeed
 	jp   MoveInputReader_MrKarate_SetMove
 .hidden:
-	ld   hl, iPlInfo_MrKarate_RyukoRanbuD
+	ld   hl, iPlInfo_MrKarate_RyukoRanbu_Unused_D
 	add  hl, bc
 	ld   [hl], $01
 	ld   a, MOVE_MRKARATE_RYUKO_RANBU_S
@@ -8843,21 +8849,22 @@ MoveC_MrKarate_Zenretsuken:
 		mMvC_PlaySound SFX_FIREHIT_A
 		mMvC_SetDamageNext $01, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
 IF ENGLISH == 1
-		; The desperation and hidden versions of the move cause a dizzy,
-		; ??? and it's the only point manual dizzys are used.
-		; These kinds of dizzies only exist in the English version, in the
-		; Japanese version the dizzies only happen naturally.
-		ld   hl, iPlInfo_MrKarate_RyukoRanbuD
+		; [TCRF] The hidden versions of the move cause a manual dizzy.
+		;        ...but it's impossible to trigger those versions of the move. 
+		;        They added manual dizzies to the English version, but the only point where they are used is unreachable.
+		ld   hl, iPlInfo_MrKarate_Zenretsuken_Unused_E
 		add  hl, bc
 		ld   a, [hl]
 		or   a			; Desperation mode?
-		jr   z, .anim	; If not, skip
-		
+		jr   z, .anim	; If not, skip (always jumps)
+			;--
+			; Unreachable code
 			ld   hl, iOBJInfo_FrameTotal	; Set animation speed to $01
 			add  hl, de
 			ld   [hl], $01
 			; Trigger dizzy
-			mMvC_SetDamageNext $01, HITTYPE_DIZZY, PF3_HEAVYHIT|PF3_LASTHIT
+			mMvC_SetDamageNext $01, HITTYPE_UNUSED_DIZZY, PF3_HEAVYHIT|PF3_LASTHIT
+			;--
 ENDC
 		jp   .anim
 ; --------------- frame #6 ---------------
@@ -8869,18 +8876,21 @@ ENDC
 .chkEnd:
 	mMvC_ValFrameEnd .anim
 IF ENGLISH == 1
-		; If ?????, transition to ????
-		ld   hl, iPlInfo_MrKarate_Zenretsuken_84
+		; [TCRF] The hidden version of the move transitions to a hop, then fires the large projectile.
+		ld   hl, iPlInfo_MrKarate_Zenretsuken_Unused_E
 		add  hl, bc
 		ld   a, [hl]
-		or   a			; iPlInfo_MrKarate_Zenretsuken_84 == 0?
-		jr   z, .end	; If so, skip
-		
-		ld   a, MOVE_MRKARATE_5E
+		or   a			; Desperation mode?
+		jr   z, .end	; If not, skip (always jumps)
+		;--
+		; Unreachable code
+		ld   a, MOVE_MRKARATE_ZENRETSUKEN_UNUSED_EH2
 		call MoveInputS_SetSpecMove_StopSpeed
-		; Copy move damage settings to projectile, since ???
+		; Copy move damage settings to projectile, since MOVE_MRKARATE_ZENRETSUKEN_UNUSED_EH2
+		; starts MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D, which requires the projectile damage to be init'd.
 		call Play_Proj_CopyMoveDamageFromPl
 		jr   .ret
+		;--
 	.end:
 ENDC
 		call Play_Pl_EndMove
@@ -8892,11 +8902,12 @@ ENDC
 	ret
 	
 IF ENGLISH == 1
-; =============== MoveC_MrKarate_??? ===============
-; Move code for ??????? the initial part of Mr.Karate's Haoh Sho Koh Ken (MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D).
-; This is only in the English version. The Japanese version starts directly from the second part.
+; =============== MoveC_MrKarate_Unused_Zenretsuken_E2 ===============
+; [TCRF] Unreachable code.
 ;
-MoveC_MrKarate_Unk_HaohShokohKenD:
+; Move code for second part of the unused hidden version of Zenretsuken. (MOVE_MRKARATE_ZENRETSUKEN_UNUSED_EL2, MOVE_MRKARATE_ZENRETSUKEN_UNUSED_EH2)
+; This triggers a back hop, then transitions to MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D.
+MoveC_MrKarate_Unused_Zenretsuken_E2:
 	call Play_Pl_MoveByColiBoxOverlapX
 	mMvC_ValLoaded .ret
 	
@@ -8926,6 +8937,7 @@ MoveC_MrKarate_Unk_HaohShokohKenD:
 		mMvC_SetSpeedV -$0300
 		jp   .doGravity
 .obj0_cont:
+	; Switch to #1 when Y Speed > -$03
 	mMvC_NextFrameOnGtYSpeed -$03, ANIMSPEED_NONE
 	jp   .doGravity
 ; --------------- frames #0-1 / common gravity check ---------------
