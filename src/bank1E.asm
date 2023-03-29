@@ -2697,71 +2697,111 @@ CharSel_CharNamePtrTable:
 
 ; Empty line used to clear out the old character name.
 TextC_Char_None:
-	db $08 ; String length
+	db .end-.start
+.start:
 	db "        "
+.end:
 ; Actual player names.
-; @ is a stand-in for "r.".
 TextC_Char_Kyo:
-	db $03
+	db .end-.start
+.start:
 	db "KYO"
+.end:
 TextC_Char_Daimon:
-	db $06
+	db .end-.start
+.start:
 	db "DAIMON"
+.end:
 TextC_Char_Terry:
-	db $05
+	db .end-.start
+.start:
 	db "TERRY"
+.end:
 TextC_Char_Andy:
-	db $04
+	db .end-.start
+.start:
 	db "ANDY"
+.end:
 TextC_Char_Ryo:
-	db $03
+	db .end-.start
+.start:
 	db "RYO"
+.end:
 TextC_Char_Robert:
-	db $06
+	db .end-.start
+.start:
 	db "ROBERT"
+.end:
 TextC_Char_Athena:
-	db $06
+	db .end-.start
+.start:
 	db "ATHENA"
+.end:
 TextC_Char_Mai:
-	db $03
+	db .end-.start
+.start:
 	db "MAI"
+.end:
 TextC_Char_Leona:
-	db $05
+	db .end-.start
+.start:
 	db "LEONA"
+.end:
 TextC_Char_Geese:
-	db $05
+	db .end-.start
+.start:
 	db "GEESE"
+.end:
 TextC_Char_Krauser:
-	db $07
+	db .end-.start
+.start:
 	db "KRAUSER"
+.end:
 TextC_Char_MrBig:
-	db $05
+	db .end-.start
+.start:
 	db "M@BIG"
+.end:
 TextC_Char_Iori:
-	db $04
+	db .end-.start
+.start:
 	db "IORI"
+.end:
 TextC_Char_Mature:
-	db $06
+	db .end-.start
+.start:
 	db "MATURE"
+.end:
 TextC_Char_Chizuru:
-	db $07
+	db .end-.start
+.start:
 	db "CHIZURU"
+.end:
 TextC_Char_Goenitz:
-	db $07
+	db .end-.start
+.start:
 	db "GOENITZ"
+.end:
 TextC_Char_MrKarate:
-	db $08
-	db "M@KARATE"
+	db .end-.start
+.start:
+	db "M<r.>KARATE"
+.end:
 TextC_Char_OIori:
-	db $05
+	db .end-.start
+.start:
 	db "IORI`"
+.end:
 TextC_Char_OLeona:
-	db $06
+	db .end-.start
+.start:
 	db "LEONA`"
+.end:
 TextC_Char_Kagura:
-	db $06
+	db .end-.start
+.start:
 	db "KAGURA"
-	
+.end:
 ; =============== CharSel_AnimCursorPalFast ===============
 ; Cycles the cursor palette fast, used when still selecting something.
 ; OUT
@@ -2880,11 +2920,15 @@ CharSel_PrintStartText:
 	ret
 	
 TextC_CharSel_Start:
-	db $05
+	db .end-.start
+.start:
 	db "START"
+.end:
 TextC_CharSel_StartBlank:
-	db $05
+	db .end-.start
+.start:
 	db "     "
+.end:
 	
 ; =============== CharSel_HideCursor ===============
 ; Hides the cursor for the current player.
@@ -3269,12 +3313,16 @@ BG_CharSel_Portrait: INCBIN "data/bg/charsel_portrait.bin"
 BG_CharSel_EmptyPortrait: INCBIN "data/bg/charsel_emptyportrait.bin"
 TextDef_CharSel_SingleTitle:
 	dw $9823
-	db $0E
+	db .end-.start
+.start:
 	db "PLAYER  SELECT"
+.end:
 TextDef_CharSel_TeamTitle:
 	dw $9824
-	db $0C
+	db .end-.start
+.start:
 	db "TEAM  SELECT"
+.end:
 GFX_CharSel_BG0: INCBIN "data/gfx/charsel_bg0.bin"
 GFXLZ_CharSel_BG1: INCBIN "data/gfx/charsel_bg1.lzc"
 GFXLZ_CharSel_OBJ: INCBIN "data/gfx/charsel_obj.lzc"

@@ -1094,195 +1094,31 @@ IF ENGLISH == 0
 	; =============== END OF BANK ===============
 	mIncJunk "L047E37"
 ELSE
-; TODO: TextC_ structures
-L047AA5: db $00
-TextC_CutsceneMrKarateDefeat0: db $48 ; M
-L047AA7: db $48
-L047AA8: db $6D
-L047AA9: db $6D
-L047AAA: db $2E
-L047AAB: db $2E
-L047AAC: db $2E
-L047AAD: db $20
-L047AAE: db $50
-L047AAF: db $72
-L047AB0: db $65
-L047AB1: db $74
-L047AB2: db $74
-L047AB3: db $79
-L047AB4: db $20
-L047AB5: db $67
-L047AB6: db $6F
-L047AB7: db $6F
-L047AB8: db $64
-L047AB9: db $2E
-L047ABA: db $FF
-L047ABB: db $59
-L047ABC: db $6F
-L047ABD: db $75
-L047ABE: db $60
-L047ABF: db $76
-L047AC0: db $65
-L047AC1: db $20
-L047AC2: db $67
-L047AC3: db $6F
-L047AC4: db $74
-L047AC5: db $20
-L047AC6: db $73
-L047AC7: db $74
-L047AC8: db $72
-L047AC9: db $6F
-L047ACA: db $6E
-L047ACB: db $67
-L047ACC: db $65
-L047ACD: db $72
-L047ACE: db $FF
-L047ACF: db $20
-L047AD0: db $73
-L047AD1: db $69
-L047AD2: db $6E
-L047AD3: db $63
-L047AD4: db $65
-L047AD5: db $20
-L047AD6: db $74
-L047AD7: db $68
-L047AD8: db $65
-L047AD9: db $FF
-L047ADA: db $20
-L047ADB: db $20
-L047ADC: db $20
-L047ADD: db $20
-L047ADE: db $20
-L047ADF: db $20
-L047AE0: db $20
-L047AE1: db $74
-L047AE2: db $6F
-L047AE3: db $75
-L047AE4: db $72
-L047AE5: db $6E
-L047AE6: db $61
-L047AE7: db $6D
-L047AE8: db $65
-L047AE9: db $6E
-L047AEA: db $74
-L047AEB: db $2E
-L047AEC: db $2E
-L047AED: db $2E
-L047AEE: db $FF
-TextC_CutsceneMrKarateDefeat1: db $22
-L047AF0: db $54
-L047AF1: db $68
-L047AF2: db $65
-L047AF3: db $20
-L047AF4: db $6C
-L047AF5: db $61
-L047AF6: db $73
-L047AF7: db $74
-L047AF8: db $20
-L047AF9: db $74
-L047AFA: db $6F
-L047AFB: db $75
-L047AFC: db $72 ; M
-L047AFD: db $6E
-L047AFE: db $61 ; M
-L047AFF: db $6D
-L047B00: db $65 ; M
-L047B01: db $6E
-L047B02: db $74
-L047B03: db $3F
-L047B04: db $FF
-L047B05: db $53
-L047B06: db $6F
-L047B07: db $20
-L047B08: db $79
-L047B09: db $6F
-L047B0A: db $75
-L047B0B: db $60
-L047B0C: db $72
-L047B0D: db $65
-L047B0E: db $2E
-L047B0F: db $2E
-L047B10: db $2E
-L047B11: db $FF
-TextC_CutsceneMrKarateDefeat2: db $4E
-L047B13: db $4E
-L047B14: db $6F
-L047B15: db $21
-L047B16: db $20
-L047B17: db $41
-L047B18: db $62
-L047B19: db $73
-L047B1A: db $6F
-L047B1B: db $6C
-L047B1C: db $75
-L047B1D: db $74 ; M
-L047B1E: db $65
-L047B1F: db $6C
-L047B20: db $79
-L047B21: db $20
-L047B22: db $6E
-L047B23: db $6F
-L047B24: db $74
-L047B25: db $21
-L047B26: db $FF
-L047B27: db $49
-L047B28: db $20
-L047B29: db $61
-L047B2A: db $6D ; M
-L047B2B: db $20
-L047B2C: db $74
-L047B2D: db $68
-L047B2E: db $65
-L047B2F: db $20
-L047B30: db $6C
-L047B31: db $65
-L047B32: db $67
-L047B33: db $65
-L047B34: db $6E
-L047B35: db $64
-L047B36: db $61
-L047B37: db $72
-L047B38: db $79
-L047B39: db $FF
-L047B3A: db $20 ; M
-L047B3B: db $20
-L047B3C: db $66
-L047B3D: db $69
-L047B3E: db $67
-L047B3F: db $68
-L047B40: db $74
-L047B41: db $65
-L047B42: db $72
-L047B43: db $2C
-L047B44: db $4D ; M
-L047B45: db $72
-L047B46: db $20
-L047B47: db $4B
-L047B48: db $61
-L047B49: db $72
-L047B4A: db $61
-L047B4B: db $74 ; M
-L047B4C: db $65
-L047B4D: db $2E
-L047B4E: db $FF
-L047B4F: db $49
-L047B50: db $20
-L047B51: db $61
-L047B52: db $6D
-L047B53: db $20
-L047B54: db $6E
-L047B55: db $6F
-L047B56: db $74 ; M
-L047B57: db $20
-L047B58: db $54
-L047B59: db $61
-L047B5A: db $6B
-L047B5B: db $75
-L047B5C: db $6D ; M
-L047B5D: db $61
-L047B5E: db $21
-L047B5F: db $21
-L047B60: db $FF
+
+	mIncJunk "L047AA5"
+
+TextC_CutsceneMrKarateDefeat0:
+	db .end-.start
+.start:
+	db "Hmm... Pretty good.", C_NL
+	db "You`ve got stronger", C_NL
+	db " since the", C_NL
+	db "       tournament...", C_NL
+.end:
+TextC_CutsceneMrKarateDefeat1:
+	db .end-.start
+.start:
+	db "The last tournament?", C_NL
+	db "So you`re...", C_NL
+.end:
+TextC_CutsceneMrKarateDefeat2:
+	db .end-.start
+.start:
+	db "No! Absolutely not!", C_NL
+	db "I am the legendary", C_NL
+	db "  fighter,Mr Karate.", C_NL
+	db "I am not Takuma!!", C_NL
+.end:
 ; =============== END OF BANK ===============
 	mIncJunk "L047B60"
 ENDC

@@ -8556,261 +8556,42 @@ ProjC_Geese_RagingStorm:
 IF ENGLISH == 0
 	mIncJunk "L067E72"
 ELSE
-; TODO: TextC_
-TextC_EndingPost_FFGeese0: db $1E
-L067EED: db $49
-L067EEE: db $60
-L067EEF: db $6C
-L067EF0: db $6C
-L067EF1: db $20
-L067EF2: db $68
-L067EF3: db $61
-L067EF4: db $6E
-L067EF5: db $64
-L067EF6: db $6C
-L067EF7: db $65
-L067EF8: db $20
-L067EF9: db $74
-L067EFA: db $68
-L067EFB: db $69
-L067EFC: db $73
-L067EFD: db $20
-L067EFE: db $6F
-L067EFF: db $6E
-L067F00: db $65
-L067F01: db $FF
-L067F02: db $20
-L067F03: db $6D
-L067F04: db $79
-L067F05: db $20
-L067F06: db $6F
-L067F07: db $77
-L067F08: db $6E
-L067F09: db $2E
-L067F0A: db $FF
-TextC_EndingPost_FFGeese1: db $3E
-L067F0C: db $47
-L067F0D: db $65
-L067F0E: db $65
-L067F0F: db $73
-L067F10: db $65
-L067F11: db $21
-L067F12: db $FF
-L067F13: db $54
-L067F14: db $68
-L067F15: db $69
-L067F16: db $73
-L067F17: db $20
-L067F18: db $74
-L067F19: db $69
-L067F1A: db $6D
-L067F1B: db $65
-L067F1C: db $20
-L067F1D: db $77
-L067F1E: db $65
-L067F1F: db $60
-L067F20: db $72
-L067F21: db $65
-L067F22: db $FF
-L067F23: db $20
-L067F24: db $67
-L067F25: db $6F
-L067F26: db $69
-L067F27: db $6E
-L067F28: db $67
-L067F29: db $20
-L067F2A: db $74
-L067F2B: db $6F
-L067F2C: db $20
-L067F2D: db $67
-L067F2E: db $65
-L067F2F: db $74
-L067F30: db $20
-L067F31: db $79
-L067F32: db $6F
-L067F33: db $75
-L067F34: db $FF
-L067F35: db $20
-L067F36: db $20
-L067F37: db $20
-L067F38: db $20
-L067F39: db $20
-L067F3A: db $20
-L067F3B: db $20
-L067F3C: db $20
-L067F3D: db $20
-L067F3E: db $20
-L067F3F: db $20
-L067F40: db $66
-L067F41: db $6F
-L067F42: db $72
-L067F43: db $20
-L067F44: db $67
-L067F45: db $6F
-L067F46: db $6F
-L067F47: db $64
-L067F48: db $21
-L067F49: db $FF
-TextC_EndingPost_AOFMrBig0: db $38
-L067F4B: db $52
-L067F4C: db $79
-L067F4D: db $6F
-L067F4E: db $20
-L067F4F: db $61
-L067F50: db $6E
-L067F51: db $64
-L067F52: db $20
-L067F53: db $52
-L067F54: db $6F
-L067F55: db $62
-L067F56: db $65
-L067F57: db $72 ; M
-L067F58: db $74
-L067F59: db $2E ; M
-L067F5A: db $2E
-L067F5B: db $2E ; M
-L067F5C: db $FF
-L067F5D: db $49 ; M
-L067F5E: db $74
-L067F5F: db $60 ; M
-L067F60: db $73
-L067F61: db $20
-L067F62: db $74
-L067F63: db $69
-L067F64: db $6D
-L067F65: db $65
-L067F66: db $20
-L067F67: db $66
-L067F68: db $6F
-L067F69: db $72
-L067F6A: db $20
-L067F6B: db $79
-L067F6C: db $6F
-L067F6D: db $75
-L067F6E: db $20 ; M
-L067F6F: db $74
-L067F70: db $6F
-L067F71: db $FF ; M
-L067F72: db $20
-L067F73: db $70
-L067F74: db $61
-L067F75: db $79
-L067F76: db $20 ; M
-L067F77: db $79
-L067F78: db $6F
-L067F79: db $75
-L067F7A: db $72
-L067F7B: db $20
-L067F7C: db $64
-L067F7D: db $65
-L067F7E: db $62
-L067F7F: db $74
-L067F80: db $73
-L067F81: db $21
-L067F82: db $FF
-TextC_EndingPost_AOFMrBig1: db $09
-L067F84: db $43
-L067F85: db $6F
-L067F86: db $6D
-L067F87: db $65
-L067F88: db $20
-L067F89: db $6F
-L067F8A: db $6E
-L067F8B: db $21
-L067F8C: db $FF
-TextC_EndingPost_KTR0: db $5C
-L067F8E: db $49
-L067F8F: db $20
-L067F90: db $61
-L067F91: db $6D
-L067F92: db $20
-L067F93: db $67
-L067F94: db $6F
-L067F95: db $69 ; M
-L067F96: db $6E
-L067F97: db $67
-L067F98: db $20
-L067F99: db $74
-L067F9A: db $6F
-L067F9B: db $20
-L067F9C: db $77
-L067F9D: db $69
-L067F9E: db $6E
-L067F9F: db $21 ; M
-L067FA0: db $FF
-L067FA1: db $49
-L067FA2: db $20
-L067FA3: db $61
-L067FA4: db $6D
-L067FA5: db $20
-L067FA6: db $74
-L067FA7: db $68 ; M
-L067FA8: db $65
-L067FA9: db $20
-L067FAA: db $73
-L067FAB: db $74 ; M
-L067FAC: db $72 ; M
-L067FAD: db $6F
-L067FAE: db $6E
-L067FAF: db $67
-L067FB0: db $65
-L067FB1: db $73 ; M
-L067FB2: db $74
-L067FB3: db $21
-L067FB4: db $FF
-L067FB5: db $4E
-L067FB6: db $6F
-L067FB7: db $77
-L067FB8: db $20
-L067FB9: db $69
-L067FBA: db $74
-L067FBB: db $60
-L067FBC: db $73
-L067FBD: db $20
-L067FBE: db $74
-L067FBF: db $69
-L067FC0: db $6D
-L067FC1: db $65
-L067FC2: db $20
-L067FC3: db $74
-L067FC4: db $6F
-L067FC5: db $FF
-L067FC6: db $20
-L067FC7: db $73
-L067FC8: db $65
-L067FC9: db $74
-L067FCA: db $74
-L067FCB: db $6C
-L067FCC: db $65
-L067FCD: db $20
-L067FCE: db $74
-L067FCF: db $68
-L067FD0: db $69
-L067FD1: db $6E
-L067FD2: db $67
-L067FD3: db $73
-L067FD4: db $FF
-L067FD5: db $20
-L067FD6: db $20
-L067FD7: db $20 ; M
-L067FD8: db $20
-L067FD9: db $20
-L067FDA: db $20
-L067FDB: db $20
-L067FDC: db $20
-L067FDD: db $20
-L067FDE: db $20
-L067FDF: db $20
-L067FE0: db $66
-L067FE1: db $6F ; M
-L067FE2: db $72
-L067FE3: db $20
-L067FE4: db $67
-L067FE5: db $6F ; M
-L067FE6: db $6F
-L067FE7: db $64
-L067FE8: db $21
-L067FE9: db $FF
+
+TextC_EndingPost_FFGeese0:
+	db .end-.start
+.start:
+	db "I`ll handle this one", C_NL
+	db " my own.", C_NL
+.end:
+TextC_EndingPost_FFGeese1:
+	db .end-.start
+.start:
+	db "Geese!", C_NL
+	db "This time we`re", C_NL
+	db " going to get you", C_NL
+	db "           for good!", C_NL
+.end:
+TextC_EndingPost_AOFMrBig0:
+	db .end-.start
+.start:
+	db "Ryo and Robert...", C_NL
+	db "It`s time for you to", C_NL
+	db " pay your debts!", C_NL
+.end:
+TextC_EndingPost_AOFMrBig1:
+	db .end-.start
+.start:
+	db "Come on!", C_NL
+.end:
+TextC_EndingPost_KTR0:
+	db .end-.start
+.start:
+	db "I am going to win!", C_NL
+	db "I am the strongest!", C_NL
+	db "Now it`s time to", C_NL
+	db " settle things", C_NL
+	db "           for good!", C_NL
+.end:
 ; =============== END OF BANK ===============
 	mIncJunk "L067FEA"
 ENDC

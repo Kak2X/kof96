@@ -14,7 +14,7 @@ CHARMAP "↓", $02
 CHARMAP "←", $03
 
 ; "r." from Mr.Karate
-CHARMAP "r.", $03
+CHARMAP "<r.>", $40
 
 ; `
 CHARMAP "`", $60
