@@ -1079,8 +1079,8 @@ IF REV_VER_2 == 0
 MOVE_MRKARATE_KO_OU_KEN_UNUSED_EL      EQU $5C ; [TCRF] Counterpart of MOVE_RYO_KO_HOU_EL that is incomplete.
 MOVE_MRKARATE_KO_OU_KEN_UNUSED_EH      EQU $5E
 ELSE
-MOVE_MRKARATE_ZENRETSUKEN_UNUSED_EL2   EQU $5C
-MOVE_MRKARATE_ZENRETSUKEN_UNUSED_EH2   EQU $5E ; [TCRF] Second part of MOVE_MRKARATE_ZENRETSUKEN_H when doing the hidden version.
+MOVE_MRKARATE_SPEC_5_L                 EQU $5C
+MOVE_MRKARATE_RYUKO_RANBU_D3           EQU $5E ; Third part of MOVE_MRKARATE_RYUKO_RANBU_S when handling the desperation super.
 ENDC
 MOVE_MRKARATE_SPEC_6_L                 EQU $60
 MOVE_MRKARATE_SPEC_6_H                 EQU $62
@@ -1113,7 +1113,7 @@ HITTYPE_THROW_ROTL          EQU $12 ; Throw rotation frame, head left
 HITTYPE_THROW_ROTD          EQU $13 ; Throw rotation frame, head down
 HITTYPE_THROW_ROTR          EQU $14 ; Throw rotation frame, head right
 ELSE
-HITTYPE_UNUSED_DIZZY        EQU $0E ; English-only, Manual dizzy. 
+HITTYPE_DIZZY               EQU $0E ; English-only, Manual dizzy. 
 HITTYPE_DROP_SWOOPUP        EQU $0F ; Very high throw or swept up above
 HITTYPE_THROW_END           EQU $10 ; End of the throw. The actual part where the player is launched.
 HITTYPE_THROW_START         EQU $11 ; Start of the throw anim

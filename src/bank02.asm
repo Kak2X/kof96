@@ -801,8 +801,9 @@ MoveC_Base_WakeUp_End:
 	res  PF1B_INVULN, [hl] ; Not invulnerable
 
 IF REV_VER_2 == 1
-	; Clear the manual dizzy flag here for some reason
-	ld   hl, iPlInfo_CustomDizzy
+	; Disable the forced dizzy as soon as we get up.
+	; This works because these dizzies are used by moves that automatically knock down.
+	ld   hl, iPlInfo_ForceDizzy
 	add  hl, bc
 	ld   [hl], $00
 ENDC
@@ -854,11 +855,11 @@ MoveC_Base_Dizzy:
 Play_Pl_DecDizzyTime:
 
 IF REV_VER_2 == 1
-	; Not necessary if we're going to get dizzy soon by request
-	ld   hl, iPlInfo_CustomDizzy
+	; If we're being forced into the dizzy state, there's no escape
+	ld   hl, iPlInfo_ForceDizzy
 	add  hl, bc
 	ld   a, [hl]
-	or   a			; iPlInfo_CustomDizzy != 0?
+	or   a			; iPlInfo_ForceDizzy != 0?
 	ret  nz			; If so, return
 ENDC
 
@@ -1280,7 +1281,7 @@ Play_HitTypePtrTable:
 	dw HitTypeC_Drop_DB_A
 	dw HitTypeC_Drop_DB_G
 IF REV_VER_2 == 1
-	dw HitTypeC_Unused_Dizzy
+	dw HitTypeC_Dizzy
 ENDC
 	dw HitTypeC_SwoopUp
 	dw HitTypeC_Throw_End
@@ -1847,17 +1848,15 @@ HitTypeC_Drop_DB_G:
 	ret
 
 IF REV_VER_2 == 1	
-; =============== HitTypeC_Unused_Dizzy ===============
-; ID: HITTYPE_UNUSED_DIZZY
+; =============== HitTypeC_Dizzy ===============
+; ID: HITTYPE_DIZZY
 ;
-; Hit effect for moves that manually deliver dizzies after hitstun.
+; Hit effect for moves that manually deliver forced dizzies after hitstun.
+; These are dizzies that the player can't escape from until he gets knocked down.
 ;
-; [TCRF] Even though this got added for the English version of the game,
-;        the only move version that uses it is impossible to trigger.
-;
-; The Japanese version doesn't have any specific hit type for the dizzy state,
-; as it's something that only gets checked after waking up, well after the hit effect is done.
-HitTypeC_Unused_Dizzy:
+; Because of this, it's only used for special sequences by special moves that 
+; guarantee that the player does get knocked down at the end, ending the dizzy state. 
+HitTypeC_Dizzy:
 
 	; Don't dizzy on the next drop to ground
 	ld   hl, iPlInfo_DizzyNext
@@ -1868,12 +1867,9 @@ HitTypeC_Unused_Dizzy:
 	add  hl, bc
 	ld   [hl], $FF
 	
-	; Mark that we're in the middle of the custom dizzy state.
-	; In practice, this only tells Play_Pl_DecDizzyTime to not decrement the timer on further hits,
-	; which isn't really necessary.
-	; Curiously, this value is kept like this until the player drops to the ground, meaning
-	; you can't get dizzied the normal way until you get knocked down.
-	ld   hl, iPlInfo_CustomDizzy
+	; Mark that we're in the middle of the forced dizzy state.
+	; This prevents the player from being able to escape.
+	ld   hl, iPlInfo_ForceDizzy
 	add  hl, bc
 	ld   [hl], $01
 	
@@ -3272,7 +3268,7 @@ Play_Pl_SetHitType:
 			cp   HITTYPE_DROP_SWOOPUP
 			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
 IF REV_VER_2 == 1
-			cp   HITTYPE_UNUSED_DIZZY						
+			cp   HITTYPE_DIZZY						
 			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
 ENDC
 		.chkDead:
@@ -8426,8 +8422,8 @@ MoveInit_MrKarate_Zenretsuken:
 	mMvIn_GetLH MOVE_MRKARATE_ZENRETSUKEN_L, MOVE_MRKARATE_ZENRETSUKEN_H
 	call MoveInputS_SetSpecMove_StopSpeed
 IF REV_VER_2 == 1
-	; Never enable the hidden version
-	ld   hl, iPlInfo_MrKarate_Zenretsuken_Unused_E
+	; This can only be enabled by the desperation super
+	ld   hl, iPlInfo_MrKarate_RyukoRanbuD
 	add  hl, bc
 	ld   [hl], $00
 ENDC
@@ -8449,20 +8445,24 @@ IF REV_VER_2 == 0
 	mMvIn_GetSD MOVE_MRKARATE_RYUKO_RANBU_S, MOVE_MRKARATE_RYUKO_RANBU_S
 	call MoveInputS_SetSpecMove_StopSpeed
 ELSE
-	; [TCRF] Still no MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D, but the desperation version sets
-	; its own flag... which is not read back by anything.
+	; [POI] Still no MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D, but the desperation version is properly implemented now.
+	; The super move itself doesn't use iPlInfo_MrKarate_RyukoRanbuD, but it *is* used by MOVE_MRKARATE_ZENRETSUKEN_*,
+	; which the super move does transition to.
+	; So, everything guarded by a iPlInfo_MrKarate_RyukoRanbuD check is specific to the desperation super.
 	call MoveInputS_CheckSuperDesperation
 	jp   nc, .normal		; Was a super desperation *NOT* triggered? If so, jump
 	jp   nz, .desperation	; Was the hidden desperation *NOT* triggered? If so, jump
 	jp   .hidden			; Otherwise, jump
 .normal:
-	ld   hl, iPlInfo_MrKarate_RyukoRanbu_Unused_D
+	; Normal super
+	ld   hl, iPlInfo_MrKarate_RyukoRanbuD
 	add  hl, bc
 	ld   [hl], $00
 	ld   a, MOVE_MRKARATE_RYUKO_RANBU_S
 	jp   .setMove
 .desperation:
-	ld   hl, iPlInfo_MrKarate_RyukoRanbu_Unused_D
+	; Desperation super
+	ld   hl, iPlInfo_MrKarate_RyukoRanbuD
 	add  hl, bc
 	ld   [hl], $01
 	ld   a, MOVE_MRKARATE_RYUKO_RANBU_S
@@ -8470,7 +8470,8 @@ ELSE
 	call MoveInputS_SetSpecMove_StopSpeed
 	jp   MoveInputReader_MrKarate_SetMove
 .hidden:
-	ld   hl, iPlInfo_MrKarate_RyukoRanbu_Unused_D
+	; Hidden desperation super
+	ld   hl, iPlInfo_MrKarate_RyukoRanbuD
 	add  hl, bc
 	ld   [hl], $01
 	ld   a, MOVE_MRKARATE_RYUKO_RANBU_S
@@ -8849,22 +8850,19 @@ MoveC_MrKarate_Zenretsuken:
 		mMvC_PlaySound SFX_FIREHIT_A
 		mMvC_SetDamageNext $01, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
 IF REV_VER_2 == 1
-		; [TCRF] The hidden versions of the move cause a manual dizzy.
-		;        ...but it's impossible to trigger those versions of the move. 
-		;        They added manual dizzies to the English version, but the only point where they are used is unreachable.
-		ld   hl, iPlInfo_MrKarate_Zenretsuken_Unused_E
+		; [POI] If we got here from the desperation version of Ryuko Ranbu, force the opponent into an infinite dizzy.
+		;       This is in preparation of transitioning to MOVE_MRKARATE_RYUKO_RANBU_D3 (see .chkEnd),
+		;       to give enough time for Mr.Karate to jump back, then fire a large projectile.
+		ld   hl, iPlInfo_MrKarate_RyukoRanbuD
 		add  hl, bc
 		ld   a, [hl]
 		or   a			; Desperation mode?
-		jr   z, .anim	; If not, skip (always jumps)
-			;--
-			; Unreachable code
+		jr   z, .anim	; If not, skip
 			ld   hl, iOBJInfo_FrameTotal	; Set animation speed to $01
 			add  hl, de
 			ld   [hl], $01
 			; Trigger dizzy
-			mMvC_SetDamageNext $01, HITTYPE_UNUSED_DIZZY, PF3_HEAVYHIT|PF3_LASTHIT
-			;--
+			mMvC_SetDamageNext $01, HITTYPE_DIZZY, PF3_HEAVYHIT|PF3_LASTHIT
 ENDC
 		jp   .anim
 ; --------------- frame #6 ---------------
@@ -8876,21 +8874,18 @@ ENDC
 .chkEnd:
 	mMvC_ValFrameEnd .anim
 IF REV_VER_2 == 1
-		; [TCRF] The hidden version of the move transitions to a hop, then fires the large projectile.
-		ld   hl, iPlInfo_MrKarate_Zenretsuken_Unused_E
+		; [POI] The desperation super of the move transitions to a hop, then fires the large projectile.
+		ld   hl, iPlInfo_MrKarate_RyukoRanbuD
 		add  hl, bc
 		ld   a, [hl]
 		or   a			; Desperation mode?
 		jr   z, .end	; If not, skip (always jumps)
-		;--
-		; Unreachable code
-		ld   a, MOVE_MRKARATE_ZENRETSUKEN_UNUSED_EH2
-		call MoveInputS_SetSpecMove_StopSpeed
-		; Copy move damage settings to projectile, since MOVE_MRKARATE_ZENRETSUKEN_UNUSED_EH2
-		; starts MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D, which requires the projectile damage to be init'd.
-		call Play_Proj_CopyMoveDamageFromPl
-		jr   .ret
-		;--
+			ld   a, MOVE_MRKARATE_RYUKO_RANBU_D3
+			call MoveInputS_SetSpecMove_StopSpeed
+			; Copy move damage settings to projectile, since MOVE_MRKARATE_RYUKO_RANBU_D3
+			; starts MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D, which requires the projectile damage to be init'd.
+			call Play_Proj_CopyMoveDamageFromPl
+			jr   .ret
 	.end:
 ENDC
 		call Play_Pl_EndMove
@@ -8902,12 +8897,11 @@ ENDC
 	ret
 	
 IF REV_VER_2 == 1
-; =============== MoveC_MrKarate_Unused_Zenretsuken_E2 ===============
-; [TCRF] Unreachable code.
-;
-; Move code for second part of the unused hidden version of Zenretsuken. (MOVE_MRKARATE_ZENRETSUKEN_UNUSED_EL2, MOVE_MRKARATE_ZENRETSUKEN_UNUSED_EH2)
-; This triggers a back hop, then transitions to MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D.
-MoveC_MrKarate_Unused_Zenretsuken_E2:
+; =============== MoveC_MrKarate_RyukoRanbuD3 ===============
+; Move code for third part of the desperation version of Haoh Sho Koh Ken. (MOVE_MRKARATE_SPEC_5_L, MOVE_MRKARATE_RYUKO_RANBU_D3)
+; This triggers a long back hop, long enough to reach the edge of the screen, then transitions to MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D.
+; While this happens the other player is forced into a dizzy state.
+MoveC_MrKarate_RyukoRanbuD3:
 	call Play_Pl_MoveByColiBoxOverlapX
 	mMvC_ValLoaded .ret
 	
@@ -8948,7 +8942,8 @@ MoveC_MrKarate_Unused_Zenretsuken_E2:
 		jp   .ret
 ; --------------- frame #2 ---------------
 .chkEnd:
-	; Switch to the second part of the move when the frame ends.
+	; Switch to the fourth part of the move when the frame ends.
+	; This move will spawn a large projectile, hitting the opponent out of the endless dizzy state.
 	mMvC_ValFrameEnd .anim
 		ld   a, MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D
 		call MoveInputS_SetSpecMove_StopSpeed
