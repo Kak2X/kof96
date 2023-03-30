@@ -36,7 +36,7 @@ ds $C00E-$C00B
 
 wNoCopyGFXBuf           :db ; EQU $C00E ; If set, disables the GFX copy during VBlank
 wOBJLstCurHeaderFlags   :db ; EQU $C00F ; Raw flags value from the OBJLst header
-IF ENGLISH == 1 || FIX_BUGS == 1
+IF REV_VER_2 == 1 || FIX_BUGS == 1
 wOBJCount               :db ; EQU $C010 ; Number of OBJ written to the OAM mirror.
 ENDC
 wWorkOAMCurPtr_Low      :db ; EQU $C010 ; Next OBJ will be written at this location

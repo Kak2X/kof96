@@ -3,12 +3,8 @@ INCLUDE "data/objlst/char/robert.asm"
 INCLUDE "data/objlst/char/geese.asm"
 INCLUDE "data/objlst/char/mrbig.asm"
 
-IF ENGLISH == 0
-; =============== END OF BANK ===============
+IF REV_LANG_EN == 1
 	mIncJunk "L077E43"
-ELSE
-	mIncJunk "L077E43"
-
 TextC_CutsceneMrKarateDefeat3:
 	db .end-.start
 .start:
@@ -53,8 +49,12 @@ TextC_CutsceneMrKarateDefeat8:
 	db " battle your way to", C_NL
 	db "            the top!", C_NL
 .end:
+ENDC
 
+IF REV_VER_2 == 0
 ; =============== END OF BANK ===============
+	mIncJunk "L077E43"
+ELSE
 	mIncJunk "L077FC5"
 ENDC
 	

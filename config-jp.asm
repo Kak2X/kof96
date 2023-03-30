@@ -4,8 +4,13 @@ CPU_USAGE    EQU 0 ; Uses different code for VBlank waiting to make the CPU Usag
 SKIP_JUNK    EQU 0 ; Removes padding areas
 LABEL_JUNK   EQU 0 ; If SKIP_JUNK isn't set, labels the padding areas.
 FIX_BUGS     EQU 0 ; Self explainatory
+OPTIMIZE     EQU 0 ; Additional optimizations
 NO_CPU_AI    EQU 0 ; Disable CPU Opponent AI (but not the CPU-specific actions inside moves)
 INF_TIMER    EQU 0 ; Default with infinite timer 
-ENGLISH      EQU 0 ; 0 -> JPN, 1 -> EU
+
+REV_VER_2    EQU 0 ; If set, use the second revision of the game.
+REV_TAUNT    EQU 0 ; If set, use the ridiculous taunt logic of the English version
+REV_LOGO_EN  EQU 0 ; Use Laguna logo and english-style copyright/logo changes.
+REV_LANG_EN  EQU 0 ; Use English text.
 
 INCLUDE "main.asm"

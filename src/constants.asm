@@ -458,7 +458,7 @@ SCRPAL_STAGE_FATALFURY EQU $07
 SCRPAL_STAGE_YAGAMI EQU $08
 SCRPAL_STAGE_BOSS EQU $09
 SCRPAL_STAGE_STADIUM EQU $0A
-IF ENGLISH == 1
+IF REV_LOGO_EN == 1
 SCRPAL_LAGUNALOGO EQU $0B
 ENDC
 ;
@@ -774,7 +774,7 @@ MOVE_KYO_SPEC_6_L                      EQU $60
 MOVE_KYO_SPEC_6_H                      EQU $62
 MOVE_KYO_URA_OROCHI_NAGI_S             EQU $64 ; Super
 MOVE_KYO_URA_OROCHI_NAGI_D             EQU $66 ; Desperation super
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 MOVE_KYO_URA_OROCHI_NAGI_E             EQU $68 ; Hidden desperation super
 ENDC
 MOVE_KYO_SUPER_1_S                     EQU $68
@@ -1075,7 +1075,7 @@ MOVE_MRKARATE_ZENRETSUKEN_L            EQU $54
 MOVE_MRKARATE_ZENRETSUKEN_H            EQU $56
 MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_L EQU $58
 MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_H EQU $5A
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 MOVE_MRKARATE_KO_OU_KEN_UNUSED_EL      EQU $5C ; [TCRF] Counterpart of MOVE_RYO_KO_HOU_EL that is incomplete.
 MOVE_MRKARATE_KO_OU_KEN_UNUSED_EH      EQU $5E
 ELSE
@@ -1104,7 +1104,7 @@ HITTYPE_HIT_MULTIGS         EQU $0B ; Mid-super move, player pushed on the groun
 HITTYPE_DROP_DB_A           EQU $0C ; Hit (not throw) that sends the player to the ground with screen shake - from air
 HITTYPE_DROP_DB_G           EQU $0D ; Hit (not throw) that sends the player to the ground with screen shake - from ground
 
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 HITTYPE_DROP_SWOOPUP        EQU $0E ; Very high throw or swept up above
 HITTYPE_THROW_END           EQU $0F ; End of the throw. The actual part where the player is launched.
 HITTYPE_THROW_START         EQU $10 ; Start of the throw anim

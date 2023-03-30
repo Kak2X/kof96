@@ -253,7 +253,7 @@ SGB_ApplyScreenPalSet:
 	dw SGBPacket_Stage_Yagami_Pal01,    SGBPacket_StageMeter_Pal23, SGBPacket_Stage_Pat,      $0000
 	dw SGBPacket_Stage_Boss_Pal01,      SGBPacket_StageMeter_Pal23, SGBPacket_Stage_Pat,      $0000
 	dw SGBPacket_Stage_Stadium_Pal01,   SGBPacket_StageMeter_Pal23, SGBPacket_Stage_Pat,      $0000
-IF ENGLISH == 1
+IF REV_LOGO_EN == 1
 	dw SGBPacket_LagunaLogo_Pal01,      $0000,                      SGBPacket_Pat_AllPal0,    $0000
 ENDC
 
@@ -268,7 +268,7 @@ SGBPacket_Intro_Pal01:
 	dw $0000 ; 1-3
 	db $00
 
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 ; Black/White Takara logo
 SGBPacket_TakaraLogo_Pal01:
 	pkg SGB_PACKET_PAL01, $01
@@ -306,7 +306,7 @@ SGBPacket_LagunaLogo_Pal01:
 	db $00
 ENDC
 
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 SGBPacket_Title_Pal01:
 	pkg SGB_PACKET_PAL01, $01
 	dw $7BDE ; 0-0
@@ -529,7 +529,7 @@ SGBPacket_CharSelect_Pat:
 
 	mIncJunk "L0442A1"
 	
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 SGBPacket_Title_Pat: 
 	pkg SGB_PACKET_ATTR_BLK, $04
 	db $09 ; 9 sets
@@ -1039,7 +1039,7 @@ SGB_SendBorderData_WaitAfterSend:
 	jr   nz, SGB_SendBorderData_WaitAfterSend	; If not, loop
 	ret
 	
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 GFXLZ_SGB_Border0: INCBIN "data/gfx/jp/sgb_border0.lzc"
 GFXLZ_SGB_Border1: INCBIN "data/gfx/jp/sgb_border1.lzc"
 BGLZ_SGB_Border: INCBIN "data/bg/jp/sgb_border.lzs"
@@ -1071,7 +1071,7 @@ ENDC
 
 ; This stage contains a sign saying "KOF96", so it got changed
 GFXLZ_Play_Stage_Hero:
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 	INCBIN "data/gfx/jp/play_stage_hero.lzc"
 ELSE
 	INCBIN "data/gfx/en/play_stage_hero.lzc"
@@ -1090,13 +1090,8 @@ BGLZ_Play_Stage_Boss: INCBIN "data/bg/play_stage_boss.lzs"
 GFXLZ_Play_Stage_Stadium: INCBIN "data/gfx/play_stage_stadium.lzc"
 BGLZ_Play_Stage_Stadium: INCBIN "data/bg/play_stage_stadium.lzs"
 
-IF ENGLISH == 0
-	; =============== END OF BANK ===============
-	mIncJunk "L047E37"
-ELSE
-
+IF REV_LANG_EN == 1
 	mIncJunk "L047AA5"
-
 TextC_CutsceneMrKarateDefeat0:
 	db .end-.start
 .start:
@@ -1119,6 +1114,11 @@ TextC_CutsceneMrKarateDefeat2:
 	db "  fighter,Mr Karate.", C_NL
 	db "I am not Takuma!!", C_NL
 .end:
-; =============== END OF BANK ===============
+ENDC
+
+IF REV_VER_2 == 0
+	; =============== END OF BANK ===============
+	mIncJunk "L047E37"
+ELSE
 	mIncJunk "L047B60"
 ENDC

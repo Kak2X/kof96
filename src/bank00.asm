@@ -221,7 +221,7 @@ SECTION "EntryPoint", ROM0[$0100]
 	db   $BB,$BB,$67,$63,$6E,$0E,$EC,$CC,$DD,$DC,$99,$9F,$BB,$B9,$33,$3E
 	
 	
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 	db   "NETTOU KOF 96",$00,$00	; title
 	db   $00			; DMG - classic gameboy
 	db   $41,$37		; new license
@@ -261,11 +261,12 @@ EntryPoint:
 	ld   [MBC1RomBank], a
 	
 	;
-	; Clear memory range $C000-$C35D
-	; (-$C35F in the EN version)
+	; Clear memory range $C000-$C35D.
+	; This is used by the shared variables, mode-specific variables and LZSS buffer.
+	; (-$C35F in the EN version, for the added wOBJCount)
 	;
 	ld   hl, $C000		; HL = Initial address
-IF ENGLISH == 0
+IF REV_VER_2 == 0 && FIX_BUGS == 0
 	ld   de, $035E		; DE = Bytes to clear
 ELSE
 	ld   de, $035F		; DE = Bytes to clear
@@ -281,6 +282,7 @@ ENDC
 	
 	;
 	; Clear memory range $CC00-$DFFF
+	; This clears the sound driver and sprite mapping / player areas.
 	;
 	ld   hl, $CC00
 	ld   de, $1400
@@ -451,7 +453,7 @@ ENDM
 		mSendPkg SGBPacket_SGB1BiosPatch0
 		
 			
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 		; The English version clears the existing contents of the tilemap, for whatever reason.
 		call ClearBGMap
 		xor  a
@@ -470,7 +472,7 @@ ENDC
 		; Why isn't this part of SGB_SendBorderData, which tries to do something similar with the GFX?
 		call ClearBGMap
 		
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		; Show white palette while this happens
 		xor  a
 		ldh  [rBGP], a
@@ -1155,7 +1157,7 @@ LCDCHandler_Title:
 		ldh  [rLCDC], a
 		ld   a, $01			; Next mode id
 		ld   [wLCDCSectId], a
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 		ld   a, $73			; Next LYC trigger
 ELSE
 		ld   a, $63			; Next LYC trigger
@@ -1170,7 +1172,7 @@ ENDC
 		ld   [wLCDCSectId], a
 		ldh  a, [hTitleParallax1X]	; Set parallax X pos
 		ldh  [rSCX], a
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 		ld   a, $77				; Next LYC trigger
 ELSE
 		ld   a, $67				; Next LYC trigger
@@ -1181,7 +1183,7 @@ ENDC
 		ld   [wLCDCSectId], a
 		ldh  a, [hTitleParallax2X]
 		ldh  [rSCX], a
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 		ld   a, $7B				; Next LYC trigger
 ELSE
 		ld   a, $6B				; Next LYC trigger
@@ -1192,7 +1194,7 @@ ENDC
 		ld   [wLCDCSectId], a
 		ldh  a, [hTitleParallax3X]
 		ldh  [rSCX], a
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 		ld   a, $7F				; Next LYC trigger
 ELSE
 		ld   a, $6F				; Next LYC trigger
@@ -1203,7 +1205,7 @@ ENDC
 		ld   [wLCDCSectId], a
 		ldh  a, [hTitleParallax4X]
 		ldh  [rSCX], a
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 		ld   a, $83				; Next LYC trigger
 ELSE
 		ld   a, $73				; Next LYC trigger
@@ -1214,7 +1216,7 @@ ENDC
 		ld   [wLCDCSectId], a
 		ldh  a, [hTitleParallax5X]
 		ldh  [rSCX], a
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 		ld   a, $87				; Next LYC trigger
 ELSE
 		ld   a, $77				; Next LYC trigger
@@ -1613,7 +1615,7 @@ VBlank_SetInitialSect:
 	jp   z, .noScanlineInt	; If not, ignore this
 	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
 	ldh  [rLCDC], a
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 	ld   a, $6F				; Line where the parallax effect starts
 ELSE
 	; It starts 2 tiles higher in the English version to make space for the extended copyright.
@@ -1699,7 +1701,7 @@ VBlank_LastPart:
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 	; The English version further randomizes the random timer by incrementing it every frame.
 	ld   hl, wRandLY
 	inc  [hl]
@@ -1728,7 +1730,7 @@ OBJLstS_WriteAll:
 	ld   [wWorkOAMCurPtr_Low], a
 	ld   a, HIGH(wWorkOAM)
 	ld   [wWorkOAMCurPtr_High], a
-IF ENGLISH == 1 || FIX_BUGS == 1
+IF REV_VER_2 == 1 || FIX_BUGS == 1
 	; Clear the sprite count before starting the writes
 	xor  a
 	ld   [wOBJCount], a
@@ -1928,7 +1930,7 @@ OBJLstS_DoOBJInfoSlot:
 	ld   [wOBJLstTmpROMFlags], a	
 	ld   [wOBJLstCurStatus], a	; Copy iOBJInfo_Status here
 	
-IF ENGLISH == 1 || FIX_BUGS == 1
+IF REV_VER_2 == 1 || FIX_BUGS == 1
 	; If there are no more OBJ slots left, return.
 	; This nice safety measure prevents corrupting unrelated memory when the sprite limit is hit.
 	; Doing it here also prevents the GFX buffer loader in VBlank from corrupting memory outside VRAM
@@ -2357,7 +2359,7 @@ OBJLstS_WriteToWorkOAM:
 	ld   a, [wWorkOAMCurPtr_High]
 	ld   d, a
 	
-IF ENGLISH == 1 || FIX_BUGS == 1
+IF REV_VER_2 == 1 || FIX_BUGS == 1
 	; This must be checked here because the sprite limit may trigger when writing Set A.
 	; Set A is executed by "call OBJLstS_DoOBJLstHeaderA", meaning that even though the routine
 	; retuns immediately when incrementing the OBJ count to $29, it will still try to process Set B.
@@ -2454,7 +2456,7 @@ OBJLstS_Draw_NoFlip:
 	
 	; Write over the tile ID and flags
 	call OBJLstS_Draw_WriteCommon	; Reached the sprite limit?
-IF ENGLISH == 1 || FIX_BUGS == 1
+IF REV_VER_2 == 1 || FIX_BUGS == 1
 	jp   nc, OBJLstS_Draw_Abort		; If so, jump
 ENDC
 	
@@ -2494,7 +2496,7 @@ OBJLstS_Draw_XFlip:
 	
 	; Write over the tile ID and flags
 	call OBJLstS_Draw_WriteCommon	; Reached the sprite limit?
-IF ENGLISH == 1 || FIX_BUGS == 1
+IF REV_VER_2 == 1 || FIX_BUGS == 1
 	jp   nc, OBJLstS_Draw_Abort		; If so, jump
 ENDC
 	
@@ -2535,7 +2537,7 @@ OBJLstS_Draw_YFlip:
 	
 	; Write over the tile ID and flags
 	call OBJLstS_Draw_WriteCommon	; Reached the sprite limit?
-IF ENGLISH == 1 || FIX_BUGS == 1
+IF REV_VER_2 == 1 || FIX_BUGS == 1
 	jp   nc, OBJLstS_Draw_Abort		; If so, jump
 ENDC
 	
@@ -2577,7 +2579,7 @@ OBJLstS_Draw_XYFlip:
 	
 	; Write over the tile ID and flags
 	call OBJLstS_Draw_WriteCommon	; Reached the sprite limit?
-IF ENGLISH == 1 || FIX_BUGS == 1
+IF REV_VER_2 == 1 || FIX_BUGS == 1
 	jp   nc, OBJLstS_Draw_Abort		; If so, jump
 ENDC
 	
@@ -2586,7 +2588,7 @@ ENDC
 	jr   nz, .loop
 	pop  bc
 
-IF ENGLISH == 1 || FIX_BUGS == 1
+IF REV_VER_2 == 1 || FIX_BUGS == 1
 	; No more fall-through here
 	jp   OBJLstS_UpdateOAMPos
 	
@@ -2718,7 +2720,7 @@ OBJLstS_Draw_WriteCommon:
 	ld   [de], a					; Save the result
 	inc  de
 .incCount:
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 	; Since we finished writing a new tile to WorkOAM
 	ld   a, [wOBJCount]			; wOBJCount++
 	inc  a
@@ -14155,7 +14157,7 @@ Play_Pl_IsMoveHit:
 	ccf		; C flag clear
 	ret
 	
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 ; =============== Play_Pl_IsMoveEscape ===============
 ; Determines if the opponent somehow isn't in the middle of a multi-hit effect.
 ;
@@ -14388,7 +14390,7 @@ MoveInputS_SetSpecMove_StopSpeed:
 	set  PF1B_XFLIPLOCK, [hl] 		; Lock the player's direction until the move is over
 	set  PF1B_NOSPECSTART, [hl] 	; For consistency (PF0B_SPECMOVE takes care of this already)
 	res  PF1B_GUARD, [hl]			; Receive full damage by default if hit out of the special
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 	; Not sure if this fixes anything (though it does make sense to reset it)
 	res  PF1B_HITRECV, [hl]			; If we're starting a special move, we definitely aren't in the hit state anymore 
 ENDC
@@ -16176,7 +16178,7 @@ Play_Pl_TempPauseOtherAnim:
 .pl2:
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_FrameLeft
 .clear:
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	ld   [hl], ANIMSPEED_NONE
 ELSE
 	ld   [hl], $1E
@@ -16690,7 +16692,7 @@ MoveInput_DU_Fast:
 ; =============== END OF BANK ===============
 ; Junk area below.
 ; Contains broken duplicate of the code starting around BasicInput_StartLightKick.
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	mIncJunk "L003EF4"
 ELSE
 	mIncJunk "L003F4E"

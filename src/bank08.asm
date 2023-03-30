@@ -2,13 +2,8 @@ INCLUDE "data/objlst/char/andy.asm"
 INCLUDE "data/objlst/char/athena.asm"		
 INCLUDE "data/objlst/char/mai.asm"
 INCLUDE "data/objlst/char/goenitz.asm"
-IF ENGLISH == 0
-; =============== END OF BANK ===============
-; Junk area below.
-	mIncJunk "L087EC8"
-ELSE
 
-
+IF REV_LANG_EN == 1
 TextC_Ending_KaguraGeneric0:
 	db .end-.start
 .start:
@@ -47,6 +42,12 @@ TextC_CheatList:
 	db C_NL
 	db C_NL
 .end:
+ENDC
+
+IF REV_VER_2 == 0
 ; =============== END OF BANK ===============
+; Junk area below.
+	mIncJunk "L087EC8"
+ELSE
 	mIncJunk "L087FEF"
 ENDC

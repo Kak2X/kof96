@@ -1148,13 +1148,8 @@ MoveC_Unused_ThrowG:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 .ret:
 	ret  
-
-IF ENGLISH == 0
-; =============== END OF BANK ===============
-; Junk area below.
-	mIncJunk "L097EA8"
-ELSE
-
+	
+IF REV_LANG_EN == 1
 TextC_CutsceneGoenitz0E:
 	db .end-.start
 .start:
@@ -1206,7 +1201,12 @@ TextC_CutsceneGoenitz15:
 	db "We`re going to", C_NL
 	db "     fight and WIN!!", C_NL
 .end:
+ENDC
 
+IF REV_VER_2 == 0
 ; =============== END OF BANK ===============
+; Junk area below.
+	mIncJunk "L097EA8"
+ELSE
 	mIncJunk "L097FEA"
 ENDC

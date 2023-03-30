@@ -1071,7 +1071,7 @@ CharSel_SetRandomPortrait:
 	; Since the cursor randomizer can't be done with serial mode anyway,
 	; the English version uses the LY version.
 	;
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	call Rand			; A = Random byte
 ELSE
 	call RandLY
@@ -4853,7 +4853,7 @@ SubModule_WinScr:
 	;       which colors the middle section with a green background.
 	;       The English version reuses the colors of the Order Select screen,
 	;       resulting in a red background. This renders SCRPAL_STAGECLEAR unused.
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	ld   de, SCRPAL_STAGECLEAR
 ELSE
 	; The English version reuses the palette config from the Order Select screen.
@@ -4890,7 +4890,7 @@ ENDC
 	; Set to similar values of Cutscene_SharedInit.
 	ld   a, $60
 	ldh  [rWY], a
-IF ENGLISH == 0
+IF REV_LANG_EN == 0
 	ld   a, $0F
 ELSE
 	ld   a, $07
@@ -4959,7 +4959,7 @@ ENDC
 	ld   de, WINDOWMap_Begin			; Start at the top of the WINDOW layer
 	ld   b, BANK(TextC_Win_Marker)		; The TextC ptr points to BANK $1C
 	ld   c, $04							; 4 frames between between letter printing
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	ld   a, TXT_PLAYSFX|TXT_ALLOWFAST	; Play SGB SFX for every letter + allow speeding up text printing
 ELSE
 	ld   a, TXT_ALLOWFAST				; The English version doesn't play any SFX
@@ -5232,7 +5232,7 @@ WinScr_CharAnimTbl:
 
 	; CHAR_ID_RYO
 	dp OBJLstPtrTable_Ryo_WinB ; BANK $0A
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	db $08
 ELSE
 	db $03
@@ -5244,7 +5244,7 @@ ENDC
 
 	; CHAR_ID_ATHENA
 	dp OBJLstPtrTable_Athena_WinB ; BANK $08
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	db $08
 ELSE
 	db $06
@@ -5252,7 +5252,7 @@ ENDC
 
 	; CHAR_ID_MAI
 	dp OBJLstPtrTable_Mai_WinB ; BANK $08
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	db $08
 ELSE
 	db $04
@@ -5264,7 +5264,7 @@ ENDC
 
 	; CHAR_ID_GEESE
 	dp OBJLstPtrTable_Geese_WinB ; BANK $07
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	db $08
 ELSE
 	db $06
@@ -5296,14 +5296,14 @@ ENDC
 
 	; CHAR_ID_MRKARATE
 	dp OBJLstPtrTable_MrKarate_WinA ; BANK $0A
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	db $08
 ELSE
 	db $03
 ENDC
 
 	; CHAR_ID_OIORI
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	dp OBJLstPtrTable_OIori_WinB ; BANK $05
 	db $08
 ELSE
@@ -5317,7 +5317,7 @@ ENDC
 
 	; CHAR_ID_KAGURA
 	dp OBJLstPtrTable_Kagura_WinB ; BANK $05
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	db $08
 ELSE
 	db $06

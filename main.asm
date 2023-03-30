@@ -4,8 +4,15 @@
 ; THE KING OF FIGHTERS '96
 ;
 
+; Sanity checks for unsupported options
+IF REV_VER_2 == 0 && REV_TAUNT == 0 && REV_TAUNT == 0 && REV_LANG_EN == 0
+ELIF REV_VER_2 == 1 && REV_TAUNT == 1 && REV_TAUNT == 1 && REV_LANG_EN == 1
+ELIF SKIP_JUNK == 0
+	FAIL "SKIP_JUNK must be 1 if not using a fully Japanese or English build."
+ENDC
+
 ; Include the basics
-IF ENGLISH == 0
+IF REV_LANG_EN == 0
 INCLUDE "src/jis.asm"
 ELSE
 INCLUDE "src/ascii.asm"

@@ -800,7 +800,7 @@ MoveC_Base_WakeUp_End:
 	res  PF1B_ALLOWHITCANCEL, [hl] ; Disable override
 	res  PF1B_INVULN, [hl] ; Not invulnerable
 
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 	; Clear the manual dizzy flag here for some reason
 	ld   hl, iPlInfo_CustomDizzy
 	add  hl, bc
@@ -853,7 +853,7 @@ MoveC_Base_Dizzy:
 ; - DE: Ptr to respective wOBJInfo
 Play_Pl_DecDizzyTime:
 
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 	; Not necessary if we're going to get dizzy soon by request
 	ld   hl, iPlInfo_CustomDizzy
 	add  hl, bc
@@ -1279,7 +1279,7 @@ Play_HitTypePtrTable:
 	dw HitTypeC_Hit_MultiGS
 	dw HitTypeC_Drop_DB_A
 	dw HitTypeC_Drop_DB_G
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 	dw HitTypeC_Unused_Dizzy
 ENDC
 	dw HitTypeC_SwoopUp
@@ -1846,7 +1846,7 @@ HitTypeC_Drop_DB_G:
 	scf	; C flag set
 	ret
 
-IF ENGLISH == 1	
+IF REV_VER_2 == 1	
 ; =============== HitTypeC_Unused_Dizzy ===============
 ; ID: HITTYPE_UNUSED_DIZZY
 ;
@@ -2631,7 +2631,7 @@ HitTypeC_ThrowStart:
 	ld   a, $14
 	ld   [wPlayPlThrowTechTimer], a
 	
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 	; In case we tech the throw, there's an 80 frame window where we can't be thrown again
 	ld   hl, iPlInfo_NoThrowTimer
 	add  hl, bc
@@ -3271,7 +3271,7 @@ Play_Pl_SetHitType:
 			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
 			cp   HITTYPE_DROP_SWOOPUP
 			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 			cp   HITTYPE_UNUSED_DIZZY						
 			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
 ENDC
@@ -4074,7 +4074,7 @@ MoveS_ChkHalfSpeedHit:
 	pop  af
 	ret
 	
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 ; =============== Play_Pl_Unused_DecThrowKeyTimer ===============
 ; [TCRF] Weird unreferenced code that decrements a counter related to throws
 ;        when any of these conditions pass:
@@ -5944,7 +5944,7 @@ MoveC_Ryo_RyuKoRanbuS:
 		jp   .doGravity
 .obj1_chkGuard:
 
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	;
 	; Continue the jump until hitting the opponent.
 	;
@@ -6006,7 +6006,7 @@ ENDC
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -6143,7 +6143,7 @@ MoveC_Ryo_RyuKoRanbuD:
 		mMvC_SetSpeedV -$0280
 		jp   .doGravity
 .obj1_chkGuard:
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	;
 	; Continue the jump until hitting the opponent.
 	;
@@ -6205,7 +6205,7 @@ ENDC
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -6566,7 +6566,7 @@ MoveC_Robert_HienRyuuShinKya:
 		jp   .doGravity
 .obj1_cont:
 
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	;
 	; If the opponent blocks the attack, do an hyper jump backwards.
 	;
@@ -6975,7 +6975,7 @@ MoveC_Robert_RyuKoRanbuS:
 		mMvC_SetSpeedV -$0280
 		jp   .doGravity
 .obj1_chkGuard:
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	;
 	; Continue the jump until hitting the opponent.
 	;
@@ -7037,7 +7037,7 @@ ENDC
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -7164,7 +7164,7 @@ MoveC_Robert_RyuKoRanbuD:
 		mMvC_SetSpeedV -$0280
 		jp   .doGravity
 .obj1_chkGuard:
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	;
 	; Continue the jump until hitting the opponent.
 	;
@@ -7226,7 +7226,7 @@ ENDC
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -8261,7 +8261,7 @@ MoveC_OLeona_SuperMoonSlasher:
 		jp   .anim
 ; --------------- frames #4-6 / common escape check ---------------
 	.chkOtherEscape:
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -8425,7 +8425,7 @@ MoveInit_MrKarate_Zenretsuken:
 	call Play_Pl_ClearJoyDirBuffer
 	mMvIn_GetLH MOVE_MRKARATE_ZENRETSUKEN_L, MOVE_MRKARATE_ZENRETSUKEN_H
 	call MoveInputS_SetSpecMove_StopSpeed
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 	; Never enable the hidden version
 	ld   hl, iPlInfo_MrKarate_Zenretsuken_Unused_E
 	add  hl, bc
@@ -8442,7 +8442,7 @@ MoveInit_MrKarate_KyokukenRyuRenbuKen:
 ; =============== MoveInit_MrKarate_RyukoRanbu ===============
 MoveInit_MrKarate_RyukoRanbu:
 	call Play_Pl_ClearJoyDirBuffer
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	; [TCRF] Suspicious use of mMvIn_GetSD.
 	;        Very likely that that a reference to MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D got
 	;        quickly patched out since it didn't work properly.
@@ -8642,7 +8642,7 @@ MoveC_MrKarate_ShouranKyaku:
 	
 
 
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 ; --------------- frames #3-#5 / common escape check ---------------
 ; If the opponent somehow escaped, hop back as usual.
 .chkEscape:
@@ -8658,7 +8658,7 @@ ENDC
 	mMvC_ValFrameEnd .anim
 		call Play_Pl_EndMove
 		jr   .ret
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 .chkEscape: ; dummy
 ENDC
 .anim:
@@ -8848,7 +8848,7 @@ MoveC_MrKarate_Zenretsuken:
 		mMvC_SetAnimSpeed $1E
 		mMvC_PlaySound SFX_FIREHIT_A
 		mMvC_SetDamageNext $01, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 		; [TCRF] The hidden versions of the move cause a manual dizzy.
 		;        ...but it's impossible to trigger those versions of the move. 
 		;        They added manual dizzies to the English version, but the only point where they are used is unreachable.
@@ -8875,7 +8875,7 @@ ENDC
 ; --------------- frame #7 ---------------
 .chkEnd:
 	mMvC_ValFrameEnd .anim
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 		; [TCRF] The hidden version of the move transitions to a hop, then fires the large projectile.
 		ld   hl, iPlInfo_MrKarate_Zenretsuken_Unused_E
 		add  hl, bc
@@ -8901,7 +8901,7 @@ ENDC
 .ret:
 	ret
 	
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 ; =============== MoveC_MrKarate_Unused_Zenretsuken_E2 ===============
 ; [TCRF] Unreachable code.
 ;
@@ -9023,7 +9023,7 @@ MoveC_MrKarate_RyukoRanbuS:
 		mMvC_SetSpeedV -$0280
 		jp   .doGravity
 .obj1_chkGuard:
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	;
 	; Continue the jump until hitting the opponent.
 	;
@@ -9046,7 +9046,7 @@ ELSE
 ENDC
 	.obj1_chkGuard_noGuard:
 		; Otherwise, continue to #2
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
 ELSE
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT|PF3_LIGHTHIT
@@ -9070,7 +9070,7 @@ ENDC
 .objOdd:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
 ELSE
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT|PF3_LIGHTHIT
@@ -9081,7 +9081,7 @@ ENDC
 ; This sets the initial jump speed and doesn't check for block yet.
 .obj2:
 	mMvC_ValFrameStart .anim
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
 ELSE
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT|PF3_LIGHTHIT
@@ -9093,7 +9093,7 @@ ENDC
 .objEven:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
 ELSE
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT|PF3_LIGHTHIT
@@ -9101,7 +9101,7 @@ ENDC
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -9134,7 +9134,7 @@ ENDC
 		ld   a, MOVE_MRKARATE_ZENRETSUKEN_H
 	.startZenretsuken_setMove:
 		call MoveInputS_SetSpecMove_StopSpeed
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_LASTHIT
 ELSE
 		mMvC_SetDamageNext $01, HITTYPE_DROP_MAIN, PF3_LASTHIT|PF3_LIGHTHIT
@@ -9160,7 +9160,7 @@ ENDC
 .ret:
 	ret
 	
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 ; =============== MoveC_MrKarate_Unused_RyukoRanbuD ===============
 ; [TCRF] Unused desperation version of Mr.Karate's Ryuko Ranbu (MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D).
 ; Almost identical to MoveC_Ryo_RyuKoRanbuD.
@@ -9244,7 +9244,7 @@ MoveC_MrKarate_Unused_RyukoRanbuD:
 		mMvC_SetSpeedV -$0280
 		jp   .doGravity
 .obj1_chkGuard:
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	;
 	; Continue the jump until hitting the opponent.
 	;
@@ -9306,7 +9306,7 @@ ENDC
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -10047,7 +10047,7 @@ MoveC_Leona_ThrowG:
 .ret:
 	ret
 	
-IF ENGLISH == 1
+IF REV_LANG_EN == 1
 
 ; This was in Bank $1C in the Japanese version
 
@@ -10339,7 +10339,7 @@ ENDC
 ; =============== END OF BANK ===============
 ; Junk area below.
 ; Contains duplicate move code.
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	mIncJunk "L027EBF"
 ELSE
 	mIncJunk "L027F70"

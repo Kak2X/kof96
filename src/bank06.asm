@@ -155,7 +155,7 @@ MoveInit_Kyo_NueTumi:
 ; =============== MoveInit_Kyo_UraOrochiNagi ===============
 MoveInit_Kyo_UraOrochiNagi:
 	call Play_Pl_ClearJoyDirBuffer
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	mMvIn_GetSD MOVE_KYO_URA_OROCHI_NAGI_S, MOVE_KYO_URA_OROCHI_NAGI_D
 ELSE
 	; [POI] Hidden version of the move added in the English version.
@@ -1484,7 +1484,7 @@ MoveC_Kyo_UraOrochiNagi:
 	ld   a, [hl]
 	cp   $00*OBJLSTPTR_ENTRYSIZE
 	jp   z, .obj0
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 	cp   $01*OBJLSTPTR_ENTRYSIZE
 	jp   z, .obj1
 ENDC
@@ -1508,14 +1508,14 @@ ENDC
 		; Initialize number of ticks until we automatically stop releasing B.
 		ld   hl, iPlInfo_Kyo_UraOrochiNagi_ChargeTimer
 		add  hl, bc
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		ld   [hl], $14
 ELSE
 		; The English version reduces this, possibly to avoid being able to waste too much time
 		ld   [hl], $0F
 ENDC
 		jp   .anim
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 ; --------------- frame #1 ---------------
 .obj1:
 	; [POI] The hidden version deals continuous damage here.
@@ -1530,7 +1530,7 @@ ENDC
 ; --------------- frame #2 ---------------	
 ; Charge frame (along with #1)
 .obj2:
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 	; The English version deals continuous damage here, even outside of the hidden version.
 	; It more or less moved the line from below here.
 	mMvC_SetDamage $01, HITTYPE_HIT_MID0, PF3_FIRE|PF3_LASTHIT
@@ -1560,7 +1560,7 @@ ENDC
 		
 		; Otherwise, loop back to #1
 		mMvC_SetFrame $01*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MID0, PF3_FIRE|PF3_LASTHIT
 ENDC
 		jp   .ret
@@ -1569,7 +1569,7 @@ ENDC
 	; When switching to #4, initialize the move damage.
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		mMvC_SetDamageNext $18, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED
 ELSE
 		; [POI] Hidden version deals way less damage for this hit, since from #4 it deals continuous damage.
@@ -1624,7 +1624,7 @@ ENDC
 ; Continue moving horizontally and slow down.
 .doFriction:
 	; [POI] The hidden version deals continuous damage during these frames, 5 lines at a time.
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 	ld   hl, iPlInfo_MoveId
 	add  hl, bc
 	ld   a, [hl]
@@ -1638,7 +1638,7 @@ ENDC
 ; --------------- frame #6 ---------------	
 .obj6:
 	; [POI] And here too, one line less.
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 	ld   hl, iPlInfo_MoveId
 	add  hl, bc
 	ld   a, [hl]
@@ -3614,7 +3614,7 @@ MoveC_Athena_PhoenixArrow:
 	cp   $04*OBJLSTPTR_ENTRYSIZE
 	jp   z, .obj4
 	; [BUG] The Japanese version repeats .obj4 here, leaving unreferenced .obj5.
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	cp   $05*OBJLSTPTR_ENTRYSIZE
 	jp   z, .obj4
 ELSE
@@ -3694,7 +3694,7 @@ ENDC
 		mMvC_SetAnimSpeed $10
 		; Note this won't hit twice since HITTYPE_DROP_MAIN makes the opponent unhittable.
 		; (while the English version uses .obj5 properly, so this only gets executed once.
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, $00
 ELSE
 		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_HEAVYHIT ; Longer shake
@@ -3703,7 +3703,7 @@ ENDC
 ; --------------- frame #5 ---------------
 .obj5:
 	mMvC_ValFrameEnd .anim
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		mMvC_SetAnimSpeed $06
 ELSE
 		mMvC_SetAnimSpeed $0E ; Not that much faster for the one that's used
@@ -4051,7 +4051,7 @@ ENDM
 ; Phase 1 - double small sphere + loop check.
 .obj2:
 	; [POI] The English version has easy move shortcuts for this
-	mShCr0_ChkInpt ENGLISH
+	mShCr0_ChkInpt REV_VER_2
 	mMvC_ValFrameEnd .anim
 		; If we got here by the end of #2, check if we're looping back to #1.
 		
@@ -4207,7 +4207,7 @@ ENDM
 	
 	
 
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 		; [POI] Easy move shortcut in the English version.
 		;       Pressing SELECT + B gives a 12.5% chance of enlarging the sphere.
 		call MoveInputS_CheckEasyMoveKeys
@@ -4848,7 +4848,7 @@ ProjC_Athena_ShCrystThrown:
 	cp   a, PHM_NONE			; Did the projectile collide with the opponent?
 	jp   z, .typeH_noHit		; If not, jump
 	
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 
 .typeH_hit:
 	mMvC_SetSpeedH +$0080
@@ -4902,7 +4902,7 @@ ENDC
 	cp   a, PHM_NONE			; Did the projectile collide with the opponent?
 	jp   z, .typeAL_noHit		; If not, jump
 	
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 .typeAL_hit:
 	mMvC_SetSpeedH +$0080
 	mMvC_SetSpeedV -$0200
@@ -8551,12 +8551,8 @@ ProjC_Geese_RagingStorm:
 .despawn:
 	call OBJLstS_Hide
 	ret
-; =============== END OF BANK ===============
-; Junk area with broken copies of the above subroutines.
-IF ENGLISH == 0
-	mIncJunk "L067E72"
-ELSE
-
+	
+IF REV_LANG_EN == 1
 TextC_EndingPost_FFGeese0:
 	db .end-.start
 .start:
@@ -8592,6 +8588,12 @@ TextC_EndingPost_KTR0:
 	db " settle things", C_NL
 	db "           for good!", C_NL
 .end:
+ENDC
+
 ; =============== END OF BANK ===============
+; Junk area with broken copies of the above subroutines.
+IF REV_VER_2 == 0
+	mIncJunk "L067E72"
+ELSE
 	mIncJunk "L067FEA"
 ENDC

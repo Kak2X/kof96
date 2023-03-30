@@ -79,7 +79,7 @@ Module_Title:
 	ldh  [hTitleParallax5X], a
 	ld   [wOBJScrollX], a
 	
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 	ld   a, $00
 	ld   [wOBJScrollY], a
 	ld   a, $7C
@@ -163,7 +163,7 @@ ENDC
 	ld   hl, wOBJInfo_SnkText+iOBJInfo_Status
 	ld   de, OBJInfoInit_Title
 	call OBJLstS_InitFrom
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 	; Centered in the Japanese version (like the Takara copyright in the tilemap)
 	ld   hl, wOBJInfo_SnkText+iOBJInfo_X
 	ld   [hl], $34
@@ -188,7 +188,7 @@ ENDC
 	ld   hl, wOBJInfo_MenuText+iOBJInfo_X
 	ld   [hl], $28
 	ld   hl, wOBJInfo_MenuText+iOBJInfo_Y
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 	ld   [hl], $43
 ELSE
 	; Moved 1px down, to avoid having white text touch the white part of the new logo
@@ -205,7 +205,7 @@ ENDC
 	ld   hl, wOBJInfo_CursorR+iOBJInfo_X
 	ld   [hl], $28
 	ld   hl, wOBJInfo_CursorR+iOBJInfo_Y
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 	ld   [hl], $43	; Needs to be aligned with menu text
 ELSE
 	ld   [hl], $44
@@ -240,7 +240,7 @@ ENDC
 	ldh  a, [rSTAT]
 	or   a, STAT_LYC
 	ldh  [rSTAT], a
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 	ld   a, $66
 ELSE
 	ld   a, $56
@@ -274,7 +274,7 @@ ENDC
 	; The English version forces you to wait for a few seconds before enabling controls,
 	; presumably so you're forced to see those copyrights covering more of the screen.
 	; By the time this loop is finished, the cloud layer will have fully scrolled up.
-IF ENGLISH == 1
+IF REV_LOGO_EN == 1
 	ld   b, $78		; B = Number of frames
 .delayLoop:
 	push bc
@@ -332,7 +332,7 @@ Title_Mode_TitleScreen:
 	ld   hl, wOBJInfo_CursorR+iOBJInfo_Status
 	set  OSTB_VISIBLE, [hl]
 	ld   hl, wOBJInfo_CursorR+iOBJInfo_Y
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 	ld   [hl], $43
 ELSE
 	ld   [hl], $44
@@ -658,7 +658,7 @@ Title_Mode_ModeSelect:
 	;
 	; Verify that there's a second player
 	;
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 	call ModeSelect_CheckEndlessCpuVsCpuMode		; Full watch mode?
 	jp   c, .startSingleVS							; If so, skip the serial checks (no 2P inputs required)
 ENDC
@@ -673,7 +673,7 @@ ENDC
 	call ModeSelect_TrySendVSData
 	cp   MODESELECT_SBCMD_IDLE		; Did the other GB listen to the original request? 
 	jr   z, .startSingleVS			; If so, jump
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	ld   a, SFX_GAMEOVER
 ELSE
 	ld   a, SFX_PSYCTEL
@@ -685,7 +685,7 @@ ENDC
 	jp   ModeSelect_PrepVS
 	
 .teamVS:
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 	call ModeSelect_CheckEndlessCpuVsCpuMode		; Full watch mode?
 	jp   c, .startTeamVS							; If so, skip the serial checks (no 2P inputs required)
 ENDC
@@ -700,7 +700,7 @@ ENDC
 	cp   MODESELECT_SBCMD_IDLE		; Did the other GB listen to the original request? 
 	jr   z, .startTeamVS			; If so, jump
 	; Otherwise, play an error sound
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	ld   a, SFX_GAMEOVER
 ELSE
 	ld   a, SFX_PSYCTEL
@@ -737,7 +737,7 @@ ModeSelect_PrepSingle:
 	jp   ModeSelect_SwitchToCharSelect
 	
 ModeSelect_PrepVS:
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	; P1: Player, P2: Player
 	; Removed in the English version since it gets done earlier.
 	ld   hl, wPlInfo_Pl1+iPlInfo_Flags0
@@ -750,7 +750,7 @@ ENDC
 	ld   [hl], $00
 	jp   ModeSelect_SwitchToCharSelect
 
-IF ENGLISH == 0	
+IF REV_VER_2 == 0	
 ; [TCRF] Unreferenced code.
 ;        Sets up a CPU vs CPU battle in VS mode, which in the Japanese version
 ;        can't be triggered by one player.
@@ -1733,7 +1733,7 @@ TitleSubMenu_Exit:
 	
 	; Reset scrolling to make clouds appear already at the final Y pos
 	; without having to move them up again
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 	ld   a, $00
 	ld   [wOBJScrollY], a
 	ld   a, $90 		; Matches with Y target in Title_UpdateParallaxCoords
@@ -1754,7 +1754,7 @@ ENDC
 	ldh  a, [rSTAT]
 	or   a, STAT_LYC
 	ldh  [rSTAT], a
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 	ld   a, $66			; Same as title init code
 ELSE
 	ld   a, $56
@@ -1834,7 +1834,7 @@ ModeSelect_CheckCPUvsCPU:
 .ret:
 	ret
 	
-IF ENGLISH == 1
+IF REV_VER_2 == 1
 ; =============== ModeSelect_CheckEndlessCpuVsCpuMode ===============
 ; Initializes the CPU/Human player status for VS mode.
 ;
@@ -2003,7 +2003,7 @@ Title_UpdateParallaxCoords:
 	; Move clouds up by scrolling the BG down $00.40px/frame until Y $90 is reached.
 	;
 	ldh  a, [hScrollY]
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 	cp   $90				; hScrollY == $90?
 ELSE
 	cp   $A0				; hScrollY == $A0?
@@ -2504,7 +2504,7 @@ ModeSelect_GetCtrlFromSerial:
 	ld   a, [wSerialPlayerId]		; Restore MODESELECT_ACT_* value
 	ret  
 
-IF ENGLISH == 0
+IF REV_LANG_EN == 0
 
 ; Got moved below in the English version for whatever reason.
 
@@ -2572,7 +2572,7 @@ Title_LoadVRAM_Mini:
 	call CopyTilesHBlank
 	ret
 	
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 GFXLZ_Title_Logo0: INCBIN "data/gfx/jp/title_logo0.lzc"
 GFXLZ_Title_Logo1: INCBIN "data/gfx/jp/title_logo1.lzc"
 BGLZ_Title_Logo: INCBIN "data/bg/jp/title_logo.lzs"
@@ -4461,9 +4461,8 @@ BGLZ_Intro_Sun: INCBIN "data/bg/intro_sun.lzs"
 GFXLZ_Intro_IoriRiseOBJ: INCBIN "data/gfx/intro_ioririse_obj.lzc"
 	mIncJunk "L1C6672"
 	
-IF ENGLISH == 0
 TextC_Win_Marker:
-
+IF REV_LANG_EN == 0
 TextC_Win_Kyo:
 	db .end-.start
 .start:
@@ -4916,8 +4915,6 @@ TextC_CheatList:
 	db "GOENITZかﾞしようてﾞきます。", C_NL
 .end:
 ELSE
-
-TextC_Win_Marker:
 TextC_Win_Kyo:
 	db .end-.start
 .start:
@@ -5255,7 +5252,7 @@ TextC_Ending_GoenitzLeave1:
 
 ENDC
 	
-IF ENGLISH == 1
+IF REV_LANG_EN == 1
 
 ; Got moved from above in the English version for whatever reason.
 
@@ -5323,7 +5320,7 @@ Title_LoadVRAM_Mini:
 	call CopyTilesHBlank
 	ret
 	
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 GFXLZ_Title_Logo0: INCBIN "data/gfx/jp/title_logo0.lzc"
 GFXLZ_Title_Logo1: INCBIN "data/gfx/jp/title_logo1.lzc"
 BGLZ_Title_Logo: INCBIN "data/bg/jp/title_logo.lzs"
@@ -5344,7 +5341,7 @@ GFXAuto_TitleOBJ:
 
 ENDC
 
-IF ENGLISH == 0
+IF REV_LANG_EN == 0
 ; Got moved to Bank $02 in the English version
 
 ; =============== MoveC_Base_NormL_2Hit_D06_A03 ===============
@@ -5631,7 +5628,7 @@ MoveC_Goenitz_KickH:
 	ret
 ENDC
 	
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 ; =============== END OF BANK ===============
 ; Junk area below.
 ; [TCRF] Contains win screen text from the English version of KOF95.

@@ -1149,7 +1149,7 @@ mDecPlPow: MACRO
 	ld   a, [\2+iPlInfo_MoveId]
 	cp   MOVE_SHARED_TAUNT	; Is the other player taunting?
 	jp   nz, .end			; If not, skip
-IF ENGLISH == 0
+IF REV_TAUNT == 0
 	ld   a, [wPlayTimer]
 	and  a, $03				; wPlayTimer % 4 != 0?
 	jp   nz, .end			; If so, skip
@@ -5756,7 +5756,7 @@ Play_WriteBtnKeysToBuffer1P: mWriteBtnKeysToBuffer wPlInfo_Pl1
 Play_WriteBtnKeysToBuffer2P: mWriteBtnKeysToBuffer wPlInfo_Pl2
 ; =============== END OF BANK ===============
 ; Junk area below with incomplete copies of the above subroutines.
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	mIncJunk "L017FA8"
 ELSE
 	mIncJunk "L017F98"

@@ -9,7 +9,7 @@ INCLUDE "data/objlst/char/leona.asm"
 Module_TakaraLogo:
 	ld   sp, $DD00
 	
-IF ENGLISH == 1
+IF REV_LOGO_EN == 1
 	; LAGUNA ENTERTAINMENT PROUDLY PRESENT
 	; a game without 96 in the title
 	call LagunaLogo_Do
@@ -30,7 +30,7 @@ ENDC
 	ld   hl, Module_Intro
 	rst  $00
 
-IF ENGLISH == 1
+IF REV_LOGO_EN == 1
 ; =============== LagunaLogo_Do ===============
 ; Main code for displaying the Laguna logo.
 LagunaLogo_Do:
@@ -137,7 +137,7 @@ TakaraLogo_Do:
 	call ClearWINDOWMap
 	
 	; Reset coords
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	xor  a
 	ldh  [hScrollX], a 
 	ldh  [hScrollY], a 
@@ -158,7 +158,7 @@ ENDC
 	
 	; Copy logo tilemap. The newer logo is shorter.
 	ld   de, BG_TakaraLogo
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	ld   hl, $98C2	; VRAM Destination
 	ld   b, $10		; Width
 	ld   c, $05		; Height
@@ -192,7 +192,7 @@ ENDC
 	ldh  [rOBP1], a
 	
 	; And for the logo itself
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	; Always white text on black background
 	ld   a, $93
 	ldh  [rBGP], a
@@ -241,7 +241,7 @@ ENDC
 	
 	; When pressing START from either controller, skip the delay
 	; This got removed in the English version!
-IF ENGLISH == 0
+IF REV_LOGO_EN == 0
 	ldh  a, [hJoyNewKeys]
 	ld   d, a
 	ldh  a, [hJoyNewKeys2]
@@ -372,7 +372,7 @@ TakaraLogo_CheckCheat:
 	pop  hl
 .end:
 	ret
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 GFXLZ_TakaraLogo: INCBIN "data/gfx/jp/takaralogo.lzc"
 BG_TakaraLogo: INCBIN "data/bg/jp/takaralogo.bin"
 ELSE
@@ -1154,7 +1154,7 @@ MoveC_Goenitz_ShinyaotomePart2:
 			jp   .ret
 ; --------------- frames #0-2 / common escape check ---------------
 .chkOtherEscape:
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -1965,12 +1965,7 @@ ProjC_Goenitz_WanpyouTokobuse:
 	call OBJLstS_Hide
 	ret
 	
-IF ENGLISH == 0
-; =============== END OF BANK ===============
-; Junk area below.
-	mIncJunk "L0A7F58"
-ELSE
-
+IF REV_LANG_EN == 1
 TextC_EndingPost_Boss0:
 	db .end-.start
 .start:
@@ -2022,8 +2017,12 @@ TextC_EndingPost_Boss6:
 	db "(Krauser)", C_NL
 	db "Ha,ha,ha! Good!", C_NL
 .end:
+ENDC
 
-
+IF REV_VER_2 == 0
 ; =============== END OF BANK ===============
+; Junk area below.
+	mIncJunk "L0A7F58"
+ELSE
 	mIncJunk "L0A7FC9"
 ENDC

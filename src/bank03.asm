@@ -97,7 +97,7 @@ MoveAnimTbl_Kyo:
 	mMvAnDef OBJLstPtrTable_Kyo_Idle, $00, $02, $00, $00, $00 ;X ; BANK $07 ; MOVE_KYO_SPEC_6_H
 	mMvAnDef OBJLstPtrTable_Kyo_UraOrochiNagiS, $18, $00, $18, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ; BANK $07 ; MOVE_KYO_URA_OROCHI_NAGI_S
 	mMvAnDef OBJLstPtrTable_Kyo_UraOrochiNagiD, $18, $00, $01, HITTYPE_HIT_MID0, PF3_FIRE|PF3_LASTHIT ; BANK $07 ; MOVE_KYO_URA_OROCHI_NAGI_D
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	mMvAnDef OBJLstPtrTable_Kyo_Idle, $18, $01, $14, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ;X ; BANK $07 ; MOVE_KYO_SUPER_1_S
 ELSE
 	mMvAnDef OBJLstPtrTable_Kyo_UraOrochiNagiD, $18, $00, $01, HITTYPE_HIT_MID0, PF3_FIRE|PF3_LASTHIT ; BANK $07 ; MOVE_KYO_URA_OROCHI_NAGI_E
@@ -1499,7 +1499,7 @@ MoveAnimTbl_MrKarate:
 	mMvAnDef OBJLstPtrTable_MrKarate_ZenretsukenL, $18, $01, $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT ; BANK $0A ; MOVE_MRKARATE_ZENRETSUKEN_H
 	mMvAnDef OBJLstPtrTable_MrKarate_KyokukenRyuRenbuKenL, $14, $01, $04, HITTYPE_HIT_MID1, PF3_HITLOW|PF3_OVERHEAD|PF3_LASTHIT ; BANK $0A ; MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_L
 	mMvAnDef OBJLstPtrTable_MrKarate_KyokukenRyuRenbuKenL, $14, $01, $04, HITTYPE_HIT_MID1, PF3_HITLOW|PF3_OVERHEAD|PF3_LASTHIT ; BANK $0A ; MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_H
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	mMvAnDef OBJLstPtrTable_MrKarate_Idle, $00, $02, $0A, HITTYPE_DUMMY, $00 ;X ; BANK $0A ; MOVE_MRKARATE_KO_OU_KEN_UNUSED_EL
 	mMvAnDef OBJLstPtrTable_MrKarate_Idle, $00, $02, $0A, HITTYPE_DUMMY, $00 ;X ; BANK $0A ; MOVE_MRKARATE_KO_OU_KEN_UNUSED_EH
 ELSE
@@ -2057,7 +2057,7 @@ MoveCodePtrTbl_MrKarate:
 	dpr MoveC_MrKarate_Zenretsuken ; BANK $02 ; MOVE_MRKARATE_ZENRETSUKEN_H
 	dpr MoveC_Robert_KyokugenRyuRanbuKyaku ; BANK $02 ; MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_L
 	dpr MoveC_Robert_KyokugenRyuRanbuKyaku ; BANK $02 ; MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_H
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	dpr MoveC_Terry_RisingTackle ;X ; BANK $02 ; MOVE_MRKARATE_KO_OU_KEN_UNUSED_EL ; [TCRF] Would be an hidden version of Ko Ou Ken, likely cloned from Ryo's entry. Its respective animation is a placeholder one.
 	dpr MoveC_Terry_RisingTackle ;X ; BANK $02 ; MOVE_MRKARATE_KO_OU_KEN_UNUSED_EH
 	dpr MoveC_Ryo_KoOuKen ;X ; BANK $02 ; MOVE_MRKARATE_SPEC_6_L ; [POI] This placeholder entry is using the one for Ryo, hinting that at some point Mr. Karate didn't have its own code for KoOuKen.
@@ -2072,7 +2072,7 @@ ELSE
 ENDC
 
 	dpr MoveC_MrKarate_RyukoRanbuS ; BANK $02 ; MOVE_MRKARATE_RYUKO_RANBU_S
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	; [TCRF] Mr.Karate's desperation super is unused and incomplete.
 	dpr MoveC_MrKarate_Unused_RyukoRanbuD ;X ; BANK $02 ; MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D
 ELSE
@@ -3570,7 +3570,7 @@ CPU_MoveInputList_Daimon:
 	; FDF+P -> Jirai Shin
 	dw MoveInput_FDF
 	db KEP_B_LIGHT
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	db KEP_B_HEAVY
 ELSE
 	db KEP_B_LIGHT ; Changed to prevent the CPU from using Fake Jirai Shin
@@ -4152,12 +4152,7 @@ ENDC
 ; =============== END OF SUBMODULE Play->CPU ===============
 ;
 
-IF ENGLISH == 0	
-; =============== END OF BANK ===============
-; Junk area below.
-	mIncJunk "L037E3B"
-ELSE
-
+IF REV_LANG_EN == 1
 TextC_CutsceneMrKarate0:
 	db .end-.start
 .start:
@@ -4185,6 +4180,12 @@ TextC_CutsceneMrKarate2:
 	db " give you some", C_NL
 	db "   special training!", C_NL
 .end:
+ENDC
+
+IF REV_VER_2 == 0	
 ; =============== END OF BANK ===============
+; Junk area below.
+	mIncJunk "L037E3B"
+ELSE
 	mIncJunk "L037F4A"
 ENDC

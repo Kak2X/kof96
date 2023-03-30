@@ -16,7 +16,7 @@ MoveInputReader_Iori:
 	
 .chkGround:
 	;             SELECT + B                SELECT + A
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	mMvIn_ChkEasy MoveInit_Iori_KinYaOtome, MoveInit_Iori_KinYaOtomeEscapeD
 ELSE
 	mMvIn_ChkEasy MoveInit_Iori_KinYaOtome, MoveInit_Iori_ScumGale
@@ -889,7 +889,7 @@ MoveC_Iori_KinYaOtomeS:
 	mMvC_ValFrameEnd .obj1_chkGuard
 		jp   .end
 .obj1_chkGuard:
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	;
 	; Continue moving forwards until we collided (last frame) with the opponent.
 	; If the opponent blocked the hit, switch to #14. Otherwise, continue to #2.
@@ -943,7 +943,7 @@ ENDC
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -1049,7 +1049,7 @@ MoveC_Iori_KinYaOtomeD:
 	mMvC_ValFrameEnd .obj1_chkGuard
 		jp   .end
 .obj1_chkGuard:
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	;
 	; Continue moving forwards until we collided (last frame) with the opponent.
 	; If the opponent blocked the hit, switch to #1B. Otherwise, continue to #2.
@@ -1146,7 +1146,7 @@ ENDC
 		mMvC_SetDamageNext $05, HITTYPE_HIT_MULTIGS, $00
 		jp   .chkOtherEscape
 	.chkOtherEscape:
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, switch to an alternate version of the move.
@@ -1269,7 +1269,7 @@ MoveC_OIori_KinYaOtome:
 		jp   .end
 .obj1_chkGuard:
 
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 	;
 	; Continue moving forwards until we collided (last frame) with the opponent.
 	; If the opponent blocked the hit, switch to #F. Otherwise, continue to #2.
@@ -1384,7 +1384,7 @@ ENDC
 		jp   .anim
 	; --------------- common escape check ---------------
 	.chkOtherEscape:
-IF ENGLISH == 0
+IF REV_VER_2 == 0
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -2081,7 +2081,7 @@ MoveC_Mature_HeavensGate:
 ; - Z flag: If set, the move got blocked
 .chkOtherHit:
 
-IF 1 ; ENGLISH == 0
+IF OPTIMIZE == 0
 	;
 	; If we didn't hit the opponent yet, return without doing anything.
 	; 
@@ -3868,12 +3868,8 @@ MoveC_Daimon_HeavenHellDrop:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 .ret:
 	ret
-; =============== END OF BANK ===============
-; Junk area below, with partial copy of the code above.
-IF ENGLISH == 0
-	mIncJunk "L057ED2"
-ELSE
 	
+IF REV_LANG_EN == 1
 TextC_CutsceneKagura0:
 	db .end-.start
 .start:
@@ -3919,6 +3915,12 @@ TextC_CutsceneKagura5:
 	db " the limit of", C_NL
 	db "      your powers...", C_NL
 .end:
+ENDC
+
 ; =============== END OF BANK ===============
+; Junk area below, with partial copy of the code above.
+IF REV_VER_2 == 0
+	mIncJunk "L057ED2"
+ELSE
 	mIncJunk "L057FEE"
 ENDC
