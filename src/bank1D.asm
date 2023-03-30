@@ -2302,8 +2302,11 @@ SubModule_Ending_Generic:
 	
 	; Wait for start of the frame before continuing
 	ei
-	call Task_PassControl_NoDelay
 	
+	; [BUG] This needs to be below hScrollY, otherwise Goenitz willl look cut off for a frame.
+IF FIX_BUGS == 0
+	call Task_PassControl_NoDelay
+ENDC
 	; Move viewport up so Goenitz is aligned to the end of the sector.
 	; Otherwise he'd visibly look cut off.
 	ld   a, -$05
@@ -2323,6 +2326,10 @@ SubModule_Ending_Generic:
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect2BGP], a
 	
+IF FIX_BUGS == 1
+	call Task_PassControl_NoDelay
+ENDC
+
 	; Play ending cutscene music
 	ld   a, BGM_TOTHESKY
 	call HomeCall_Sound_ReqPlayExId_Stub
