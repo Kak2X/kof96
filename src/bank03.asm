@@ -83,8 +83,8 @@ MoveAnimTbl_Kyo:
 	mMvAnDef OBJLstPtrTable_Kyo_AttackA, $10, $01, $06, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_OVERHEAD ; BANK $07 ; MOVE_SHARED_ATTACK_A
 	mMvAnDef OBJLstPtrTable_Kyo_AraKamiL, $50, $00, $0A, HITTYPE_HIT_MID0, PF3_HEAVYHIT|PF3_FIRE ; BANK $07 ; MOVE_KYO_ARA_KAMI_L
 	mMvAnDef OBJLstPtrTable_Kyo_AraKamiH, $2C, $00, $0A, HITTYPE_HIT_MID1, PF3_HEAVYHIT|PF3_FIRE ; BANK $07 ; MOVE_KYO_ARA_KAMI_H
-	mMvAnDef OBJLstPtrTable_Kyo_OniyakiL, $14, $01, $09, HITTYPE_DROP_MAIN, $00 ; BANK $07 ; MOVE_KYO_ONIYAKI_L
-	mMvAnDef OBJLstPtrTable_Kyo_OniyakiL, $14, $02, $09, HITTYPE_HIT_MID1, $00 ; BANK $07 ; MOVE_KYO_ONIYAKI_H
+	mMvAnDef OBJLstPtrTable_Kyo_OniyakiL, $14, $01, $09, HITTYPE_DROP_MAIN, $00 ; BANK $07 ; MOVE_KYO_ONI_YAKI_L
+	mMvAnDef OBJLstPtrTable_Kyo_OniyakiL, $14, $02, $09, HITTYPE_HIT_MID1, $00 ; BANK $07 ; MOVE_KYO_ONI_YAKI_H
 	mMvAnDef OBJLstPtrTable_Kyo_RedKickL, $20, $01, $04, HITTYPE_DROP_DB_A, $00 ; BANK $07 ; MOVE_KYO_RED_KICK_L
 	mMvAnDef OBJLstPtrTable_Kyo_RedKickL, $20, $01, $04, HITTYPE_DROP_DB_A, PF3_HEAVYHIT ; BANK $07 ; MOVE_KYO_RED_KICK_H
 	mMvAnDef OBJLstPtrTable_Kyo_KototsukiYouL, $18, $02, $09, HITTYPE_HIT_MID1, PF3_LASTHIT ; BANK $07 ; MOVE_KYO_KOTOTSUKI_YOU_L
@@ -401,8 +401,8 @@ MoveAnimTbl_Ryo:
 	mMvAnDef OBJLstPtrTable_Ryo_KoOuKenL, $08, $03, $0A, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_HALFSPEED ; BANK $0A ; MOVE_RYO_KO_OU_KEN_H
 	mMvAnDef OBJLstPtrTable_Ryo_MouKoRaiJinGouL, $14, $01, $04, HITTYPE_HIT_MID1, PF3_LASTHIT ; BANK $0A ; MOVE_RYO_MOU_KO_RAI_JIN_GOU_L
 	mMvAnDef OBJLstPtrTable_Ryo_MouKoRaiJinGouL, $14, $04, $04, HITTYPE_HIT_MID1, PF3_LASTHIT ; BANK $0A ; MOVE_RYO_MOU_KO_RAI_JIN_GOU_H
-	mMvAnDef OBJLstPtrTable_Ryo_HienShippuKyakuL, $5C, $00, $04, HITTYPE_DROP_MAIN, PF3_LASTHIT ; BANK $0A ; MOVE_RYO_HIEN_SHIPPU_KYAKU_L
-	mMvAnDef OBJLstPtrTable_Ryo_HienShippuKyakuL, $5C, $00, $04, HITTYPE_DROP_MAIN, PF3_LASTHIT ; BANK $0A ; MOVE_RYO_HIEN_SHIPPU_KYAKU_H
+	mMvAnDef OBJLstPtrTable_Ryo_HienShippuKyakuL, $5C, $00, $04, HITTYPE_DROP_MAIN, PF3_LASTHIT ; BANK $0A ; MOVE_RYO_HIEN_SHIPPUU_KYAKU_L
+	mMvAnDef OBJLstPtrTable_Ryo_HienShippuKyakuL, $5C, $00, $04, HITTYPE_DROP_MAIN, PF3_LASTHIT ; BANK $0A ; MOVE_RYO_HIEN_SHIPPUU_KYAKU_H
 	mMvAnDef OBJLstPtrTable_Ryo_KoHouL, $18, $00, $06, HITTYPE_DROP_MAIN, PF3_HEAVYHIT ; BANK $0A ; MOVE_RYO_KO_HOU_L
 	mMvAnDef OBJLstPtrTable_Ryo_KoHouL, $18, $00, $06, HITTYPE_HIT_MID1, PF3_LASTHIT ; BANK $0A ; MOVE_RYO_KO_HOU_H
 	mMvAnDef OBJLstPtrTable_Ryo_KyokukenRyuRenbuKenL, $10, $01, $04, HITTYPE_HIT_MID1, PF3_HITLOW|PF3_OVERHEAD|PF3_LASTHIT ; BANK $0A ; MOVE_RYO_KYOKUKEN_RYU_RENBU_KEN_L
@@ -1620,635 +1620,641 @@ MoveAnimTbl_OIori:
 ;
 ; NOTES
 ; - Characters with no air throws reuse MoveC_Base_Idle.
+
+mMvCodeDef: MACRO
+	IF _NARG > 1 ; For those that define an improper bank number
+		dw \1
+		db \2
+	ELSE
+		dpr \1
+	ENDC
+ENDM
+
 MoveCodePtrTbl_Shared_Base:
-	dpr MoveC_Base_None ; BANK $02 ; MOVE_SHARED_NONE         
-	dpr MoveC_Base_Idle ; BANK $02 ; MOVE_SHARED_IDLE         
-	dpr MoveC_Base_WalkH ; BANK $02 ; MOVE_SHARED_WALK_F       
-	dpr MoveC_Base_WalkH ; BANK $02 ; MOVE_SHARED_WALK_B       
-	dpr MoveC_Base_NoAnim ; BANK $02 ; MOVE_SHARED_CROUCH       
-	; Improper bank number defined for these
-	dw MoveC_Base_Jump ; BANK $00 ; MOVE_SHARED_JUMP_N     
-	db $02	
-	dw MoveC_Base_Jump ; BANK $00 ; MOVE_SHARED_JUMP_F       
-	db $02
-	dw MoveC_Base_Jump ; BANK $00 ; MOVE_SHARED_JUMP_B
-	db $02
-	dpr MoveC_Base_NoAnim ; BANK $02 ; MOVE_SHARED_BLOCK_G      
-	dpr MoveC_Base_NoAnim ; BANK $02 ; MOVE_SHARED_BLOCK_C      
-	dpr MoveC_Base_BlockA ; BANK $02 ; MOVE_SHARED_BLOCK_A      
-	dpr MoveC_Base_RunF ; BANK $02 ; MOVE_SHARED_RUN_F       
-	dpr MoveC_Base_DashB ; BANK $02 ; MOVE_SHARED_HOP_B       
-	dpr MoveC_Base_ChargeMeter ; BANK $02 ; MOVE_SHARED_CHARGEMETER  
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_TAUNT        
-	dpr MoveC_Base_Roll ; BANK $02 ; MOVE_SHARED_ROLL_F       
-	dpr MoveC_Base_Roll ; BANK $02 ; MOVE_SHARED_ROLL_B       
-	dpr MoveC_Base_WakeUp ; BANK $02 ; MOVE_SHARED_WAKEUP       
-	dpr MoveC_Base_Dizzy ; BANK $02 ; MOVE_SHARED_DIZZY        
-	dpr MoveC_Base_RoundEnd ; BANK $02 ; MOVE_SHARED_WIN_A     
-	dpr MoveC_Base_RoundEnd ; BANK $02 ; MOVE_SHARED_WIN_B      
-	dpr MoveC_Base_RoundEnd ; BANK $02 ; MOVE_SHARED_LOST_TIMEOVER
-	dpr MoveC_Base_RoundStart ; BANK $02 ; MOVE_SHARED_INTRO        
-	dpr MoveC_Base_RoundStart ; BANK $02 ; MOVE_SHARED_INTRO_SPEC   
+	mMvCodeDef MoveC_Base_None ; BANK $02 ; MOVE_SHARED_NONE         
+	mMvCodeDef MoveC_Base_Idle ; BANK $02 ; MOVE_SHARED_IDLE         
+	mMvCodeDef MoveC_Base_WalkH ; BANK $02 ; MOVE_SHARED_WALK_F       
+	mMvCodeDef MoveC_Base_WalkH ; BANK $02 ; MOVE_SHARED_WALK_B       
+	mMvCodeDef MoveC_Base_NoAnim ; BANK $02 ; MOVE_SHARED_CROUCH       
+	mMvCodeDef MoveC_Base_Jump, $02 ; BANK $00 ; MOVE_SHARED_JUMP_N     
+	mMvCodeDef MoveC_Base_Jump, $02 ; BANK $00 ; MOVE_SHARED_JUMP_F       
+	mMvCodeDef MoveC_Base_Jump, $02 ; BANK $00 ; MOVE_SHARED_JUMP_B
+	mMvCodeDef MoveC_Base_NoAnim ; BANK $02 ; MOVE_SHARED_BLOCK_G      
+	mMvCodeDef MoveC_Base_NoAnim ; BANK $02 ; MOVE_SHARED_BLOCK_C      
+	mMvCodeDef MoveC_Base_BlockA ; BANK $02 ; MOVE_SHARED_BLOCK_A      
+	mMvCodeDef MoveC_Base_RunF ; BANK $02 ; MOVE_SHARED_RUN_F       
+	mMvCodeDef MoveC_Base_HopB ; BANK $02 ; MOVE_SHARED_HOP_B       
+	mMvCodeDef MoveC_Base_ChargeMeter ; BANK $02 ; MOVE_SHARED_CHARGEMETER  
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_TAUNT        
+	mMvCodeDef MoveC_Base_Roll ; BANK $02 ; MOVE_SHARED_ROLL_F       
+	mMvCodeDef MoveC_Base_Roll ; BANK $02 ; MOVE_SHARED_ROLL_B       
+	mMvCodeDef MoveC_Base_WakeUp ; BANK $02 ; MOVE_SHARED_WAKEUP       
+	mMvCodeDef MoveC_Base_Dizzy ; BANK $02 ; MOVE_SHARED_DIZZY        
+	mMvCodeDef MoveC_Base_RoundEnd ; BANK $02 ; MOVE_SHARED_WIN_A     
+	mMvCodeDef MoveC_Base_RoundEnd ; BANK $02 ; MOVE_SHARED_WIN_B      
+	mMvCodeDef MoveC_Base_RoundEnd ; BANK $02 ; MOVE_SHARED_LOST_TIMEOVER
+	mMvCodeDef MoveC_Base_RoundStart ; BANK $02 ; MOVE_SHARED_INTRO        
+	mMvCodeDef MoveC_Base_RoundStart ; BANK $02 ; MOVE_SHARED_INTRO_SPEC   
 MoveCodePtrTbl_Shared_Hit:
-	dpr MoveC_Hit_PostStunKnockback ; BANK $02 ; MOVE_SHARED_POST_BLOCKSTUN
-	dpr MoveC_Hit_PostStunKnockback ; BANK $02 ; MOVE_SHARED_GUARDBREAK_G
-	dpr MoveC_Hit_GuardBreakA ; BANK $02 ; MOVE_SHARED_GUARDBREAK_A
-	dpr MoveC_Hit_PostStunKnockback ; BANK $02 ; MOVE_SHARED_HIT0MID
-	dpr MoveC_Hit_PostStunKnockback ; BANK $02 ; MOVE_SHARED_HIT1MID
-	dpr MoveC_Hit_PostStunKnockback ; BANK $02 ; MOVE_SHARED_HITLOW
-	dpr MoveC_Hit_DropMain ; BANK $02 ; MOVE_SHARED_DROP_MAIN
-	dpr MoveC_Hit_Throw_End ; BANK $02 ; MOVE_SHARED_THROW_END_A
-	dpr MoveC_Hit_DropDBG ; BANK $02 ; MOVE_SHARED_DROP_DBG
-	dpr MoveC_Hit_SwoopUp ; BANK $02 ; MOVE_SHARED_HIT_SWOOPUP
-	dpr MoveC_Hit_DropCH ; BANK $02 ; MOVE_SHARED_DROP_CH
-	dpr MoveC_Hit_BackJumpAirRec ; BANK $02 ; MOVE_SHARED_BACKJUMP_REC_A
-	dpr MoveC_Hit_MultiMidKnockback ; BANK $02 ; MOVE_SHARED_HIT_MULTIMID0
-	dpr MoveC_Hit_MultiMidKnockback ; BANK $02 ; MOVE_SHARED_HIT_MULTIMID1
-	dpr MoveC_Hit_MultiMidGS ; BANK $02 ; MOVE_SHARED_HIT_MULTIGS
-	dpr MoveC_Hit_Throw_End ; BANK $02 ; MOVE_SHARED_THROW_END_G
-	dpr MoveC_Hit_Throw_Start ; BANK $02 ; MOVE_SHARED_THROW_START
-	dpr MoveC_Hit_Throw_Rot ; BANK $02 ; MOVE_SHARED_THROW_ROTU
-	dpr MoveC_Hit_Throw_Rot ; BANK $02 ; MOVE_SHARED_THROW_ROTL
-	dpr MoveC_Hit_Throw_Rot ; BANK $02 ; MOVE_SHARED_THROW_ROTD
-	dpr MoveC_Hit_Throw_Rot ; BANK $02 ; MOVE_SHARED_THROW_ROTR
+	mMvCodeDef MoveC_Hit_PostStunKnockback ; BANK $02 ; MOVE_SHARED_POST_BLOCKSTUN
+	mMvCodeDef MoveC_Hit_PostStunKnockback ; BANK $02 ; MOVE_SHARED_GUARDBREAK_G
+	mMvCodeDef MoveC_Hit_GuardBreakA ; BANK $02 ; MOVE_SHARED_GUARDBREAK_A
+	mMvCodeDef MoveC_Hit_PostStunKnockback ; BANK $02 ; MOVE_SHARED_HIT0MID
+	mMvCodeDef MoveC_Hit_PostStunKnockback ; BANK $02 ; MOVE_SHARED_HIT1MID
+	mMvCodeDef MoveC_Hit_PostStunKnockback ; BANK $02 ; MOVE_SHARED_HITLOW
+	mMvCodeDef MoveC_Hit_DropMain ; BANK $02 ; MOVE_SHARED_DROP_MAIN
+	mMvCodeDef MoveC_Hit_Throw_End ; BANK $02 ; MOVE_SHARED_THROW_END_A
+	mMvCodeDef MoveC_Hit_DropDBG ; BANK $02 ; MOVE_SHARED_DROP_DBG
+	mMvCodeDef MoveC_Hit_SwoopUp ; BANK $02 ; MOVE_SHARED_HIT_SWOOPUP
+	mMvCodeDef MoveC_Hit_DropCH ; BANK $02 ; MOVE_SHARED_DROP_CH
+	mMvCodeDef MoveC_Hit_BackJumpAirRec ; BANK $02 ; MOVE_SHARED_BACKJUMP_REC_A
+	mMvCodeDef MoveC_Hit_MultiMidKnockback ; BANK $02 ; MOVE_SHARED_HIT_MULTIMID0
+	mMvCodeDef MoveC_Hit_MultiMidKnockback ; BANK $02 ; MOVE_SHARED_HIT_MULTIMID1
+	mMvCodeDef MoveC_Hit_MultiMidGS ; BANK $02 ; MOVE_SHARED_HIT_MULTIGS
+	mMvCodeDef MoveC_Hit_Throw_End ; BANK $02 ; MOVE_SHARED_THROW_END_G
+	mMvCodeDef MoveC_Hit_Throw_Start ; BANK $02 ; MOVE_SHARED_THROW_START
+	mMvCodeDef MoveC_Hit_Throw_Rot ; BANK $02 ; MOVE_SHARED_THROW_ROTU
+	mMvCodeDef MoveC_Hit_Throw_Rot ; BANK $02 ; MOVE_SHARED_THROW_ROTL
+	mMvCodeDef MoveC_Hit_Throw_Rot ; BANK $02 ; MOVE_SHARED_THROW_ROTD
+	mMvCodeDef MoveC_Hit_Throw_Rot ; BANK $02 ; MOVE_SHARED_THROW_ROTR
 MoveCodePtrTbl_Kyo:
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
-	dpr MoveC_Base_AttackG_SF04M0040 ; BANK $06 ; MOVE_SHARED_ATTACK_G
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
-	dpr MoveC_Kyo_AraKami ; BANK $06 ; MOVE_KYO_ARA_KAMI_L
-	dpr MoveC_Kyo_DokuKami ; BANK $06 ; MOVE_KYO_ARA_KAMI_H
-	dpr MoveC_Kyo_OniYaki ; BANK $06 ; MOVE_KYO_ONIYAKI_L
-	dpr MoveC_Kyo_OniYaki ; BANK $06 ; MOVE_KYO_ONIYAKI_H
-	dpr MoveC_Kyo_RedKick ; BANK $06 ; MOVE_KYO_RED_KICK_L
-	dpr MoveC_Kyo_RedKick ; BANK $06 ; MOVE_KYO_RED_KICK_H
-	dpr MoveC_Kyo_KototsukiYou ; BANK $06 ; MOVE_KYO_KOTOTSUKI_YOU_L
-	dpr MoveC_Kyo_KototsukiYou ; BANK $06 ; MOVE_KYO_KOTOTSUKI_YOU_H
-	dpr MoveC_Kyo_Kai ; BANK $06 ; MOVE_KYO_KAI_L
-	dpr MoveC_Kyo_Kai ; BANK $06 ; MOVE_KYO_KAI_H
-	dpr MoveC_Kyo_NueTumi ; BANK $06 ; MOVE_KYO_NUE_TUMI_L
-	dpr MoveC_Kyo_NueTumi ; BANK $06 ; MOVE_KYO_NUE_TUMI_H
-	dpr MoveC_Kyo_AraKami ;X ; BANK $06 ; MOVE_KYO_SPEC_6_L
-	dpr MoveC_Kyo_AraKami ;X ; BANK $06 ; MOVE_KYO_SPEC_6_H
-	dpr MoveC_Kyo_UraOrochiNagi ; BANK $06 ; MOVE_KYO_URA_OROCHI_NAGI_S
-	dpr MoveC_Kyo_UraOrochiNagi ; BANK $06 ; MOVE_KYO_URA_OROCHI_NAGI_D
-	dpr MoveC_Kyo_UraOrochiNagi ;X ; BANK $06 ; MOVE_KYO_SUPER_1_S
-	dpr MoveC_Kyo_UraOrochiNagi ;X ; BANK $06 ; MOVE_KYO_SUPER_1_D
-	dpr MoveC_Kyo_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
-	dpr MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
+	mMvCodeDef MoveC_Base_AttackG_SF04M0040 ; BANK $06 ; MOVE_SHARED_ATTACK_G
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
+	mMvCodeDef MoveC_Kyo_AraKami ; BANK $06 ; MOVE_KYO_ARA_KAMI_L
+	mMvCodeDef MoveC_Kyo_DokuKami ; BANK $06 ; MOVE_KYO_ARA_KAMI_H
+	mMvCodeDef MoveC_Kyo_OniYaki ; BANK $06 ; MOVE_KYO_ONI_YAKI_L
+	mMvCodeDef MoveC_Kyo_OniYaki ; BANK $06 ; MOVE_KYO_ONI_YAKI_H
+	mMvCodeDef MoveC_Kyo_RedKick ; BANK $06 ; MOVE_KYO_RED_KICK_L
+	mMvCodeDef MoveC_Kyo_RedKick ; BANK $06 ; MOVE_KYO_RED_KICK_H
+	mMvCodeDef MoveC_Kyo_KototsukiYou ; BANK $06 ; MOVE_KYO_KOTOTSUKI_YOU_L
+	mMvCodeDef MoveC_Kyo_KototsukiYou ; BANK $06 ; MOVE_KYO_KOTOTSUKI_YOU_H
+	mMvCodeDef MoveC_Kyo_Kai ; BANK $06 ; MOVE_KYO_KAI_L
+	mMvCodeDef MoveC_Kyo_Kai ; BANK $06 ; MOVE_KYO_KAI_H
+	mMvCodeDef MoveC_Kyo_NueTumi ; BANK $06 ; MOVE_KYO_NUE_TUMI_L
+	mMvCodeDef MoveC_Kyo_NueTumi ; BANK $06 ; MOVE_KYO_NUE_TUMI_H
+	mMvCodeDef MoveC_Kyo_AraKami ;X ; BANK $06 ; MOVE_KYO_SPEC_6_L
+	mMvCodeDef MoveC_Kyo_AraKami ;X ; BANK $06 ; MOVE_KYO_SPEC_6_H
+	mMvCodeDef MoveC_Kyo_UraOrochiNagi ; BANK $06 ; MOVE_KYO_URA_OROCHI_NAGI_S
+	mMvCodeDef MoveC_Kyo_UraOrochiNagi ; BANK $06 ; MOVE_KYO_URA_OROCHI_NAGI_D
+	mMvCodeDef MoveC_Kyo_UraOrochiNagi ;X ; BANK $06 ; MOVE_KYO_SUPER_1_S
+	mMvCodeDef MoveC_Kyo_UraOrochiNagi ;X ; BANK $06 ; MOVE_KYO_SUPER_1_D
+	mMvCodeDef MoveC_Kyo_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Daimon:
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
-	dpr MoveC_Base_AttackG_SF04M0040 ; BANK $06 ; MOVE_SHARED_ATTACK_G
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
-	dpr MoveC_Daimon_JiraiShin ; BANK $05 ; MOVE_DAIMON_JIRAI_SHIN
-	dpr MoveC_Daimon_JiraiShin ; BANK $05 ; MOVE_DAIMON_JIRAI_SHIN_FAKE
-	dpr MoveC_Daimon_ChouUkemi ; BANK $05 ; MOVE_DAIMON_CHOU_UKEMI_L
-	dpr MoveC_Daimon_ChouUkemi ; BANK $05 ; MOVE_DAIMON_CHOU_UKEMI_H
-	dpr MoveC_Daimon_CmdThrow ; BANK $05 ; MOVE_DAIMON_CHOU_OOSOTO_GARI_L
-	dpr MoveC_Daimon_CmdThrow ; BANK $05 ; MOVE_DAIMON_CHOU_OOSOTO_GARI_H
-	dpr MoveC_Daimon_CmdThrow ; BANK $05 ; MOVE_DAIMON_CLOUD_TOSSER
-	dpr MoveC_Daimon_CmdThrow ; BANK $05 ; MOVE_DAIMON_STUMP_THROW
-	dpr MoveC_Daimon_HeavenDrop ; BANK $05 ; MOVE_DAIMON_HEAVEN_DROP_L
-	dpr MoveC_Daimon_HeavenDrop ; BANK $05 ; MOVE_DAIMON_HEAVEN_DROP_H
-	dpr MoveC_Daimon_JiraiShin ;X ; BANK $05 ; MOVE_DAIMON_SPEC_5_L
-	dpr MoveC_Daimon_JiraiShin ;X ; BANK $05 ; MOVE_DAIMON_SPEC_5_H
-	dpr MoveC_Daimon_JiraiShin ;X ; BANK $05 ; MOVE_DAIMON_SPEC_6_L
-	dpr MoveC_Daimon_JiraiShin ;X ; BANK $05 ; MOVE_DAIMON_SPEC_6_H
-	dpr MoveC_Daimon_HeavenHellDrop ; BANK $05 ; MOVE_DAIMON_HEAVEN_HELL_DROP_S
-	dpr MoveC_Daimon_HeavenHellDrop ; BANK $05 ; MOVE_DAIMON_HEAVEN_HELL_DROP_D
-	dpr MoveC_Daimon_HeavenHellDrop ;X ; BANK $05 ; MOVE_DAIMON_SUPER_1_S
-	dpr MoveC_Daimon_HeavenHellDrop ;X ; BANK $05 ; MOVE_DAIMON_SUPER_1_D
-	dpr MoveC_Daimon_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
-	dpr MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
+	mMvCodeDef MoveC_Base_AttackG_SF04M0040 ; BANK $06 ; MOVE_SHARED_ATTACK_G
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
+	mMvCodeDef MoveC_Daimon_JiraiShin ; BANK $05 ; MOVE_DAIMON_JIRAI_SHIN
+	mMvCodeDef MoveC_Daimon_JiraiShin ; BANK $05 ; MOVE_DAIMON_JIRAI_SHIN_FAKE
+	mMvCodeDef MoveC_Daimon_ChouUkemi ; BANK $05 ; MOVE_DAIMON_CHOU_UKEMI_L
+	mMvCodeDef MoveC_Daimon_ChouUkemi ; BANK $05 ; MOVE_DAIMON_CHOU_UKEMI_H
+	mMvCodeDef MoveC_Daimon_CmdThrow ; BANK $05 ; MOVE_DAIMON_CHOU_OOSOTO_GARI_L
+	mMvCodeDef MoveC_Daimon_CmdThrow ; BANK $05 ; MOVE_DAIMON_CHOU_OOSOTO_GARI_H
+	mMvCodeDef MoveC_Daimon_CmdThrow ; BANK $05 ; MOVE_DAIMON_CLOUD_TOSSER
+	mMvCodeDef MoveC_Daimon_CmdThrow ; BANK $05 ; MOVE_DAIMON_STUMP_THROW
+	mMvCodeDef MoveC_Daimon_HeavenDrop ; BANK $05 ; MOVE_DAIMON_HEAVEN_DROP_L
+	mMvCodeDef MoveC_Daimon_HeavenDrop ; BANK $05 ; MOVE_DAIMON_HEAVEN_DROP_H
+	mMvCodeDef MoveC_Daimon_JiraiShin ;X ; BANK $05 ; MOVE_DAIMON_SPEC_5_L
+	mMvCodeDef MoveC_Daimon_JiraiShin ;X ; BANK $05 ; MOVE_DAIMON_SPEC_5_H
+	mMvCodeDef MoveC_Daimon_JiraiShin ;X ; BANK $05 ; MOVE_DAIMON_SPEC_6_L
+	mMvCodeDef MoveC_Daimon_JiraiShin ;X ; BANK $05 ; MOVE_DAIMON_SPEC_6_H
+	mMvCodeDef MoveC_Daimon_HeavenHellDrop ; BANK $05 ; MOVE_DAIMON_HEAVEN_HELL_DROP_S
+	mMvCodeDef MoveC_Daimon_HeavenHellDrop ; BANK $05 ; MOVE_DAIMON_HEAVEN_HELL_DROP_D
+	mMvCodeDef MoveC_Daimon_HeavenHellDrop ;X ; BANK $05 ; MOVE_DAIMON_SUPER_1_S
+	mMvCodeDef MoveC_Daimon_HeavenHellDrop ;X ; BANK $05 ; MOVE_DAIMON_SUPER_1_D
+	mMvCodeDef MoveC_Daimon_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Andy:
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
-	dpr MoveC_Base_NormH_2Hit_D06_A04 ; BANK $1C ; MOVE_SHARED_PUNCH_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
-	dpr MoveC_Base_NormH_2Hit_D06_A04 ; BANK $1C ; MOVE_SHARED_KICK_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
-	dpr MoveC_Base_AttackG_MF07 ; BANK $06 ; MOVE_SHARED_ATTACK_G
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
-	dpr MoveC_Andy_HiShoKen ; BANK $06 ; MOVE_ANDY_HI_SHO_KEN_L
-	dpr MoveC_Andy_HiShoKen ; BANK $06 ; MOVE_ANDY_HI_SHO_KEN_H
-	dpr MoveC_Andy_ZanEiKen ; BANK $06 ; MOVE_ANDY_ZAN_EI_KEN_L
-	dpr MoveC_Andy_ZanEiKen ; BANK $06 ; MOVE_ANDY_ZAN_EI_KEN_H
-	dpr MoveC_Andy_KuHaDan ; BANK $06 ; MOVE_ANDY_KU_HA_DAN_L
-	dpr MoveC_Andy_KuHaDan ; BANK $06 ; MOVE_ANDY_KU_HA_DAN_H
-	dpr MoveC_Andy_ShoRyuDan ; BANK $06 ; MOVE_ANDY_SHO_RYU_DAN_L
-	dpr MoveC_Andy_ShoRyuDan ; BANK $06 ; MOVE_ANDY_SHO_RYU_DAN_H
-	dpr MoveC_Andy_GekiHekiHaiSuiSho ; BANK $06 ; MOVE_ANDY_GEKI_HEKI_HAI_SUI_SHO_L
-	dpr MoveC_Andy_GekiHekiHaiSuiSho ; BANK $06 ; MOVE_ANDY_GEKI_HEKI_HAI_SUI_SHO_H
-	dpr MoveC_Andy_GeneiShiranui ; BANK $06 ; MOVE_ANDY_GENEI_SHIRANUI_L
-	dpr MoveC_Andy_GeneiShiranui ; BANK $06 ; MOVE_ANDY_GENEI_SHIRANUI_H
-	dpr MoveC_Andy_GeneiShiranuiSubmove ; BANK $06 ; MOVE_ANDY_SHIMO_AGITO
-	dpr MoveC_Andy_GeneiShiranuiSubmove ; BANK $06 ; MOVE_ANDY_UWA_AGITO
-	dpr MoveC_Andy_ChoReppaDan ; BANK $06 ; MOVE_ANDY_CHO_REPPA_DAN_S
-	dpr MoveC_Andy_ChoReppaDan ; BANK $06 ; MOVE_ANDY_CHO_REPPA_DAN_D
-	dpr MoveC_Andy_ChoReppaDan ;X ; BANK $06 ; MOVE_ANDY_SUPER_1_S
-	dpr MoveC_Andy_ChoReppaDan ;X ; BANK $06 ; MOVE_ANDY_SUPER_1_D
-	dpr MoveC_Andy_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
-	dpr MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
+	mMvCodeDef MoveC_Base_NormH_2Hit_D06_A04 ; BANK $1C ; MOVE_SHARED_PUNCH_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
+	mMvCodeDef MoveC_Base_NormH_2Hit_D06_A04 ; BANK $1C ; MOVE_SHARED_KICK_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
+	mMvCodeDef MoveC_Base_AttackG_MF07 ; BANK $06 ; MOVE_SHARED_ATTACK_G
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
+	mMvCodeDef MoveC_Andy_HiShoKen ; BANK $06 ; MOVE_ANDY_HI_SHO_KEN_L
+	mMvCodeDef MoveC_Andy_HiShoKen ; BANK $06 ; MOVE_ANDY_HI_SHO_KEN_H
+	mMvCodeDef MoveC_Andy_ZanEiKen ; BANK $06 ; MOVE_ANDY_ZAN_EI_KEN_L
+	mMvCodeDef MoveC_Andy_ZanEiKen ; BANK $06 ; MOVE_ANDY_ZAN_EI_KEN_H
+	mMvCodeDef MoveC_Andy_KuHaDan ; BANK $06 ; MOVE_ANDY_KU_HA_DAN_L
+	mMvCodeDef MoveC_Andy_KuHaDan ; BANK $06 ; MOVE_ANDY_KU_HA_DAN_H
+	mMvCodeDef MoveC_Andy_ShoRyuDan ; BANK $06 ; MOVE_ANDY_SHO_RYU_DAN_L
+	mMvCodeDef MoveC_Andy_ShoRyuDan ; BANK $06 ; MOVE_ANDY_SHO_RYU_DAN_H
+	mMvCodeDef MoveC_Andy_GekiHekiHaiSuiSho ; BANK $06 ; MOVE_ANDY_GEKI_HEKI_HAI_SUI_SHO_L
+	mMvCodeDef MoveC_Andy_GekiHekiHaiSuiSho ; BANK $06 ; MOVE_ANDY_GEKI_HEKI_HAI_SUI_SHO_H
+	mMvCodeDef MoveC_Andy_GeneiShiranui ; BANK $06 ; MOVE_ANDY_GENEI_SHIRANUI_L
+	mMvCodeDef MoveC_Andy_GeneiShiranui ; BANK $06 ; MOVE_ANDY_GENEI_SHIRANUI_H
+	mMvCodeDef MoveC_Andy_GeneiShiranuiSubmove ; BANK $06 ; MOVE_ANDY_SHIMO_AGITO
+	mMvCodeDef MoveC_Andy_GeneiShiranuiSubmove ; BANK $06 ; MOVE_ANDY_UWA_AGITO
+	mMvCodeDef MoveC_Andy_ChoReppaDan ; BANK $06 ; MOVE_ANDY_CHO_REPPA_DAN_S
+	mMvCodeDef MoveC_Andy_ChoReppaDan ; BANK $06 ; MOVE_ANDY_CHO_REPPA_DAN_D
+	mMvCodeDef MoveC_Andy_ChoReppaDan ;X ; BANK $06 ; MOVE_ANDY_SUPER_1_S
+	mMvCodeDef MoveC_Andy_ChoReppaDan ;X ; BANK $06 ; MOVE_ANDY_SUPER_1_D
+	mMvCodeDef MoveC_Andy_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Robert:
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
-	dpr MoveC_Base_AttackG_MF07 ; BANK $06 ; MOVE_SHARED_ATTACK_G
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
-	dpr MoveC_Robert_RyuuGekiKen ; BANK $02 ; MOVE_ROBERT_RYUU_GEKI_KEN_L
-	dpr MoveC_Robert_RyuuGekiKen ; BANK $02 ; MOVE_ROBERT_RYUU_GEKI_KEN_H
-	dpr MoveC_Robert_HienShippuKyaku ; BANK $02 ; MOVE_ROBERT_HIEN_SHIPPU_KYAKU_L
-	dpr MoveC_Robert_HienShippuKyaku ; BANK $02 ; MOVE_ROBERT_HIEN_SHIPPU_KYAKU_H
-	dpr MoveC_Robert_HienRyuuShinKya ; BANK $02 ; MOVE_ROBERT_HIEN_RYUU_SHIN_KYA_L
-	dpr MoveC_Robert_HienRyuuShinKya ; BANK $02 ; MOVE_ROBERT_HIEN_RYUU_SHIN_KYA_H
-	dpr MoveC_Robert_RyuuGa ; BANK $02 ; MOVE_ROBERT_RYUU_GA_L
-	dpr MoveC_Robert_RyuuGa ; BANK $02 ; MOVE_ROBERT_RYUU_GA_H
-	dpr MoveC_Robert_KyokugenRyuRanbuKyaku ; BANK $02 ; MOVE_ROBERT_KYOKUGEN_RYU_RANBU_KYAKU_L
-	dpr MoveC_Robert_KyokugenRyuRanbuKyaku ; BANK $02 ; MOVE_ROBERT_KYOKUGEN_RYU_RANBU_KYAKU_H
-	dpr MoveC_Terry_RisingTackle ; BANK $02 ; MOVE_ROBERT_RYUU_GA_HIDDEN_L
-	dpr MoveC_Terry_RisingTackle ; BANK $02 ; MOVE_ROBERT_RYUU_GA_HIDDEN_H
-	dpr MoveC_Robert_RyuuGekiKen ;X ; BANK $02 ; MOVE_ROBERT_SPEC_6_L
-	dpr MoveC_Robert_RyuuGekiKen ;X ; BANK $02 ; MOVE_ROBERT_SPEC_6_H
-	dpr MoveC_Robert_RyuKoRanbuS ; BANK $02 ; MOVE_ROBERT_RYU_KO_RANBU_S
-	dpr MoveC_Robert_RyuKoRanbuD ; BANK $02 ; MOVE_ROBERT_RYU_KO_RANBU_D
-	dpr MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_ROBERT_HAOH_SHOKOH_KEN_S
-	dpr MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_ROBERT_HAOH_SHOKOH_KEN_D
-	dpr MoveC_Robert_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
-	dpr MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
+	mMvCodeDef MoveC_Base_AttackG_MF07 ; BANK $06 ; MOVE_SHARED_ATTACK_G
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
+	mMvCodeDef MoveC_Robert_RyuuGekiKen ; BANK $02 ; MOVE_ROBERT_RYUU_GEKI_KEN_L
+	mMvCodeDef MoveC_Robert_RyuuGekiKen ; BANK $02 ; MOVE_ROBERT_RYUU_GEKI_KEN_H
+	mMvCodeDef MoveC_Robert_HienShippuKyaku ; BANK $02 ; MOVE_ROBERT_HIEN_SHIPPU_KYAKU_L
+	mMvCodeDef MoveC_Robert_HienShippuKyaku ; BANK $02 ; MOVE_ROBERT_HIEN_SHIPPU_KYAKU_H
+	mMvCodeDef MoveC_Robert_HienRyuuShinKya ; BANK $02 ; MOVE_ROBERT_HIEN_RYUU_SHIN_KYA_L
+	mMvCodeDef MoveC_Robert_HienRyuuShinKya ; BANK $02 ; MOVE_ROBERT_HIEN_RYUU_SHIN_KYA_H
+	mMvCodeDef MoveC_Robert_RyuuGa ; BANK $02 ; MOVE_ROBERT_RYUU_GA_L
+	mMvCodeDef MoveC_Robert_RyuuGa ; BANK $02 ; MOVE_ROBERT_RYUU_GA_H
+	mMvCodeDef MoveC_Robert_KyokugenRyuRanbuKyaku ; BANK $02 ; MOVE_ROBERT_KYOKUGEN_RYU_RANBU_KYAKU_L
+	mMvCodeDef MoveC_Robert_KyokugenRyuRanbuKyaku ; BANK $02 ; MOVE_ROBERT_KYOKUGEN_RYU_RANBU_KYAKU_H
+	mMvCodeDef MoveC_Terry_RisingTackle ; BANK $02 ; MOVE_ROBERT_RYUU_GA_HIDDEN_L
+	mMvCodeDef MoveC_Terry_RisingTackle ; BANK $02 ; MOVE_ROBERT_RYUU_GA_HIDDEN_H
+	mMvCodeDef MoveC_Robert_RyuuGekiKen ;X ; BANK $02 ; MOVE_ROBERT_SPEC_6_L
+	mMvCodeDef MoveC_Robert_RyuuGekiKen ;X ; BANK $02 ; MOVE_ROBERT_SPEC_6_H
+	mMvCodeDef MoveC_Robert_RyuKoRanbuS ; BANK $02 ; MOVE_ROBERT_RYU_KO_RANBU_S
+	mMvCodeDef MoveC_Robert_RyuKoRanbuD ; BANK $02 ; MOVE_ROBERT_RYU_KO_RANBU_D
+	mMvCodeDef MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_ROBERT_HAOH_SHOKOH_KEN_S
+	mMvCodeDef MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_ROBERT_HAOH_SHOKOH_KEN_D
+	mMvCodeDef MoveC_Robert_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Leona:
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
-	dpr MoveC_Base_NormH_2Hit_D06_A04 ; BANK $1C ; MOVE_SHARED_PUNCH_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
-	dpr MoveC_Base_AttackG_MF07 ; BANK $06 ; MOVE_SHARED_ATTACK_G
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
-	dpr MoveC_Leona_BalticLauncherL ; BANK $02 ; MOVE_LEONA_BALTIC_LAUNCHER_L
-	dpr MoveC_Leona_BalticLauncherH ; BANK $02 ; MOVE_LEONA_BALTIC_LAUNCHER_H
-	dpr MoveC_Leona_GrandSabre ; BANK $02 ; MOVE_LEONA_GRAND_SABRE_L
-	dpr MoveC_Leona_GrandSabre ; BANK $02 ; MOVE_LEONA_GRAND_SABRE_H
-	dpr MoveC_Leona_XCalibur ; BANK $02 ; MOVE_LEONA_X_CALIBUR_L
-	dpr MoveC_Leona_XCalibur ; BANK $02 ; MOVE_LEONA_X_CALIBUR_H
-	dpr MoveC_Leona_MoonSlasher ; BANK $02 ; MOVE_LEONA_MOON_SLASHER_L
-	dpr MoveC_Leona_MoonSlasher ; BANK $02 ; MOVE_LEONA_MOON_SLASHER_H
-	dpr MoveC_OLeona_StormBringer ; BANK $02 ; MOVE_OLEONA_STORM_BRINGER_L
-	dpr MoveC_OLeona_StormBringer ; BANK $02 ; MOVE_OLEONA_STORM_BRINGER_H
-	dpr MoveC_Leona_BalticLauncherL ;X ; BANK $02 ; MOVE_LEONA_SPEC_5_L
-	dpr MoveC_Leona_BalticLauncherL ;X ; BANK $02 ; MOVE_LEONA_SPEC_5_H
-	dpr MoveC_Leona_BalticLauncherL ;X ; BANK $02 ; MOVE_LEONA_SPEC_6_L
-	dpr MoveC_Leona_BalticLauncherL ;X ; BANK $02 ; MOVE_LEONA_SPEC_6_H
-	dpr MoveC_Leona_VSlasher ; BANK $02 ; MOVE_LEONA_V_SLASHER_S
-	dpr MoveC_Leona_VSlasher ; BANK $02 ; MOVE_LEONA_V_SLASHER_D
-	dpr MoveC_OLeona_SuperMoonSlasher ; BANK $02 ; MOVE_OLEONA_SUPER_MOON_SLASHER_S
-	dpr MoveC_OLeona_SuperMoonSlasher ; BANK $02 ; MOVE_OLEONA_SUPER_MOON_SLASHER_D
-	dpr MoveC_Leona_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
-	dpr MoveC_Base_ThrowA_DiagF ; BANK $02 ; MOVE_SHARED_THROW_A
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
+	mMvCodeDef MoveC_Base_NormH_2Hit_D06_A04 ; BANK $1C ; MOVE_SHARED_PUNCH_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
+	mMvCodeDef MoveC_Base_AttackG_MF07 ; BANK $06 ; MOVE_SHARED_ATTACK_G
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
+	mMvCodeDef MoveC_Leona_BalticLauncherL ; BANK $02 ; MOVE_LEONA_BALTIC_LAUNCHER_L
+	mMvCodeDef MoveC_Leona_BalticLauncherH ; BANK $02 ; MOVE_LEONA_BALTIC_LAUNCHER_H
+	mMvCodeDef MoveC_Leona_GrandSabre ; BANK $02 ; MOVE_LEONA_GRAND_SABRE_L
+	mMvCodeDef MoveC_Leona_GrandSabre ; BANK $02 ; MOVE_LEONA_GRAND_SABRE_H
+	mMvCodeDef MoveC_Leona_XCalibur ; BANK $02 ; MOVE_LEONA_X_CALIBUR_L
+	mMvCodeDef MoveC_Leona_XCalibur ; BANK $02 ; MOVE_LEONA_X_CALIBUR_H
+	mMvCodeDef MoveC_Leona_MoonSlasher ; BANK $02 ; MOVE_LEONA_MOON_SLASHER_L
+	mMvCodeDef MoveC_Leona_MoonSlasher ; BANK $02 ; MOVE_LEONA_MOON_SLASHER_H
+	mMvCodeDef MoveC_OLeona_StormBringer ; BANK $02 ; MOVE_OLEONA_STORM_BRINGER_L
+	mMvCodeDef MoveC_OLeona_StormBringer ; BANK $02 ; MOVE_OLEONA_STORM_BRINGER_H
+	mMvCodeDef MoveC_Leona_BalticLauncherL ;X ; BANK $02 ; MOVE_LEONA_SPEC_5_L
+	mMvCodeDef MoveC_Leona_BalticLauncherL ;X ; BANK $02 ; MOVE_LEONA_SPEC_5_H
+	mMvCodeDef MoveC_Leona_BalticLauncherL ;X ; BANK $02 ; MOVE_LEONA_SPEC_6_L
+	mMvCodeDef MoveC_Leona_BalticLauncherL ;X ; BANK $02 ; MOVE_LEONA_SPEC_6_H
+	mMvCodeDef MoveC_Leona_VSlasher ; BANK $02 ; MOVE_LEONA_V_SLASHER_S
+	mMvCodeDef MoveC_Leona_VSlasher ; BANK $02 ; MOVE_LEONA_V_SLASHER_D
+	mMvCodeDef MoveC_OLeona_SuperMoonSlasher ; BANK $02 ; MOVE_OLEONA_SUPER_MOON_SLASHER_S
+	mMvCodeDef MoveC_OLeona_SuperMoonSlasher ; BANK $02 ; MOVE_OLEONA_SUPER_MOON_SLASHER_D
+	mMvCodeDef MoveC_Leona_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_ThrowA_DiagF ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Geese:
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
-	dpr MoveC_Base_NormL_2Hit_D06_A03 ; BANK $1C ; MOVE_SHARED_KICK_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
-	dpr MoveC_Base_NormL_2Hit_D06_A03 ; BANK $1C ; MOVE_SHARED_PUNCH_CH
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
-	dpr MoveC_Base_AttackG_MF07 ; BANK $06 ; MOVE_SHARED_ATTACK_G
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
-	dpr MoveC_Geese_ReppukenL ; BANK $06 ; MOVE_GEESE_REPPUKEN_L
-	dpr MoveC_Geese_ReppukenH ; BANK $06 ; MOVE_GEESE_REPPUKEN_H
-	dpr MoveC_Geese_JaEiKen ; BANK $06 ; MOVE_GEESE_JA_EI_KEN_L
-	dpr MoveC_Geese_JaEiKen ; BANK $06 ; MOVE_GEESE_JA_EI_KEN_H
-	dpr MoveC_Geese_HishouNichirinZan ; BANK $06 ; MOVE_GEESE_HISHOU_NICHIRIN_ZAN_L
-	dpr MoveC_Geese_HishouNichirinZan ; BANK $06 ; MOVE_GEESE_HISHOU_NICHIRIN_ZAN_H
-	dpr MoveC_Geese_ShippuKen ; BANK $06 ; MOVE_GEESE_SHIPPU_KEN_L
-	dpr MoveC_Geese_ShippuKen ; BANK $06 ; MOVE_GEESE_SHIPPU_KEN_H
-	dpr MoveC_Geese_AtemiNage ; BANK $06 ; MOVE_GEESE_ATEMI_NAGE_L
-	dpr MoveC_Geese_AtemiNage ; BANK $06 ; MOVE_GEESE_ATEMI_NAGE_H
-	dpr MoveC_Geese_ReppukenL ;X ; BANK $06 ; MOVE_GEESE_SPEC_5_L
-	dpr MoveC_Geese_ReppukenL ;X ; BANK $06 ; MOVE_GEESE_SPEC_5_H
-	dpr MoveC_Geese_ReppukenL ;X ; BANK $06 ; MOVE_GEESE_SPEC_6_L
-	dpr MoveC_Geese_ReppukenL ;X ; BANK $06 ; MOVE_GEESE_SPEC_6_H
-	dpr MoveC_Geese_RagingStorm ; BANK $06 ; MOVE_GEESE_RAGING_STORM_S
-	dpr MoveC_Geese_RagingStorm ; BANK $06 ; MOVE_GEESE_RAGING_STORM_D
-	dpr MoveC_Geese_RagingStorm ;X ; BANK $06 ; MOVE_GEESE_SUPER_1_S
-	dpr MoveC_Geese_RagingStorm ;X ; BANK $06 ; MOVE_GEESE_SUPER_1_D
-	dpr MoveC_Geese_ThrowG ; BANK $09 ; MOVE_SHARED_THROW_G
-	dpr MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
+	mMvCodeDef MoveC_Base_NormL_2Hit_D06_A03 ; BANK $1C ; MOVE_SHARED_KICK_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
+	mMvCodeDef MoveC_Base_NormL_2Hit_D06_A03 ; BANK $1C ; MOVE_SHARED_PUNCH_CH
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
+	mMvCodeDef MoveC_Base_AttackG_MF07 ; BANK $06 ; MOVE_SHARED_ATTACK_G
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
+	mMvCodeDef MoveC_Geese_ReppukenL ; BANK $06 ; MOVE_GEESE_REPPUKEN_L
+	mMvCodeDef MoveC_Geese_ReppukenH ; BANK $06 ; MOVE_GEESE_REPPUKEN_H
+	mMvCodeDef MoveC_Geese_JaEiKen ; BANK $06 ; MOVE_GEESE_JA_EI_KEN_L
+	mMvCodeDef MoveC_Geese_JaEiKen ; BANK $06 ; MOVE_GEESE_JA_EI_KEN_H
+	mMvCodeDef MoveC_Geese_HishouNichirinZan ; BANK $06 ; MOVE_GEESE_HISHOU_NICHIRIN_ZAN_L
+	mMvCodeDef MoveC_Geese_HishouNichirinZan ; BANK $06 ; MOVE_GEESE_HISHOU_NICHIRIN_ZAN_H
+	mMvCodeDef MoveC_Geese_ShippuKen ; BANK $06 ; MOVE_GEESE_SHIPPU_KEN_L
+	mMvCodeDef MoveC_Geese_ShippuKen ; BANK $06 ; MOVE_GEESE_SHIPPU_KEN_H
+	mMvCodeDef MoveC_Geese_AtemiNage ; BANK $06 ; MOVE_GEESE_ATEMI_NAGE_L
+	mMvCodeDef MoveC_Geese_AtemiNage ; BANK $06 ; MOVE_GEESE_ATEMI_NAGE_H
+	mMvCodeDef MoveC_Geese_ReppukenL ;X ; BANK $06 ; MOVE_GEESE_SPEC_5_L
+	mMvCodeDef MoveC_Geese_ReppukenL ;X ; BANK $06 ; MOVE_GEESE_SPEC_5_H
+	mMvCodeDef MoveC_Geese_ReppukenL ;X ; BANK $06 ; MOVE_GEESE_SPEC_6_L
+	mMvCodeDef MoveC_Geese_ReppukenL ;X ; BANK $06 ; MOVE_GEESE_SPEC_6_H
+	mMvCodeDef MoveC_Geese_RagingStorm ; BANK $06 ; MOVE_GEESE_RAGING_STORM_S
+	mMvCodeDef MoveC_Geese_RagingStorm ; BANK $06 ; MOVE_GEESE_RAGING_STORM_D
+	mMvCodeDef MoveC_Geese_RagingStorm ;X ; BANK $06 ; MOVE_GEESE_SUPER_1_S
+	mMvCodeDef MoveC_Geese_RagingStorm ;X ; BANK $06 ; MOVE_GEESE_SUPER_1_D
+	mMvCodeDef MoveC_Geese_ThrowG ; BANK $09 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Krauser:
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
-	dpr MoveC_Base_AttackG_SF04M0040 ; BANK $06 ; MOVE_SHARED_ATTACK_G
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
-	dpr MoveC_Krauser_BlitzBall ; BANK $09 ; MOVE_KRAUSER_HIGH_BLITZ_BALL_L
-	dpr MoveC_Krauser_BlitzBall ; BANK $09 ; MOVE_KRAUSER_HIGH_BLITZ_BALL_H
-	dpr MoveC_Krauser_BlitzBall ; BANK $09 ; MOVE_KRAUSER_LOW_BLITZ_BALL_L
-	dpr MoveC_Krauser_BlitzBall ; BANK $09 ; MOVE_KRAUSER_LOW_BLITZ_BALL_H
-	dpr MoveC_Krauser_LegTomahawk ; BANK $09 ; MOVE_KRAUSER_LEG_TOMAHAWK_L
-	dpr MoveC_Krauser_LegTomahawk ; BANK $09 ; MOVE_KRAUSER_LEG_TOMAHAWK_H
-	dpr MoveC_Krauser_KaiserKick ; BANK $09 ; MOVE_KRAUSER_KAISER_KICK_L
-	dpr MoveC_Krauser_KaiserKick ; BANK $09 ; MOVE_KRAUSER_KAISER_KICK_H
-	dpr MoveC_Krauser_KaiserDuelSobat ; BANK $09 ; MOVE_KRAUSER_KAISER_DUEL_SOBAT_L
-	dpr MoveC_Krauser_KaiserDuelSobat ; BANK $09 ; MOVE_KRAUSER_KAISER_DUEL_SOBAT_H
-	dpr MoveC_Krauser_KaiserSuplex ; BANK $09 ; MOVE_KRAUSER_KAISER_SUPLEX_L
-	dpr MoveC_Krauser_KaiserSuplex ; BANK $09 ; MOVE_KRAUSER_KAISER_SUPLEX_H
-	dpr MoveC_Krauser_BlitzBall ;X ; BANK $09 ; MOVE_KRAUSER_SPEC_6_L
-	dpr MoveC_Krauser_BlitzBall ;X ; BANK $09 ; MOVE_KRAUSER_SPEC_6_H
-	dpr MoveC_Krauser_KaiserWave ; BANK $09 ; MOVE_KRAUSER_KAISER_WAVE_S
-	dpr MoveC_Krauser_KaiserWave ; BANK $09 ; MOVE_KRAUSER_KAISER_WAVE_D
-	dpr MoveC_Krauser_KaiserWave ;X ; BANK $09 ; MOVE_KRAUSER_SUPER_1_S
-	dpr MoveC_Krauser_KaiserWave ;X ; BANK $09 ; MOVE_KRAUSER_SUPER_1_D
-	dpr MoveC_Krauser_ThrowG ; BANK $09 ; MOVE_SHARED_THROW_G
-	dpr MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
+	mMvCodeDef MoveC_Base_AttackG_SF04M0040 ; BANK $06 ; MOVE_SHARED_ATTACK_G
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
+	mMvCodeDef MoveC_Krauser_BlitzBall ; BANK $09 ; MOVE_KRAUSER_HIGH_BLITZ_BALL_L
+	mMvCodeDef MoveC_Krauser_BlitzBall ; BANK $09 ; MOVE_KRAUSER_HIGH_BLITZ_BALL_H
+	mMvCodeDef MoveC_Krauser_BlitzBall ; BANK $09 ; MOVE_KRAUSER_LOW_BLITZ_BALL_L
+	mMvCodeDef MoveC_Krauser_BlitzBall ; BANK $09 ; MOVE_KRAUSER_LOW_BLITZ_BALL_H
+	mMvCodeDef MoveC_Krauser_LegTomahawk ; BANK $09 ; MOVE_KRAUSER_LEG_TOMAHAWK_L
+	mMvCodeDef MoveC_Krauser_LegTomahawk ; BANK $09 ; MOVE_KRAUSER_LEG_TOMAHAWK_H
+	mMvCodeDef MoveC_Krauser_KaiserKick ; BANK $09 ; MOVE_KRAUSER_KAISER_KICK_L
+	mMvCodeDef MoveC_Krauser_KaiserKick ; BANK $09 ; MOVE_KRAUSER_KAISER_KICK_H
+	mMvCodeDef MoveC_Krauser_KaiserDuelSobat ; BANK $09 ; MOVE_KRAUSER_KAISER_DUEL_SOBAT_L
+	mMvCodeDef MoveC_Krauser_KaiserDuelSobat ; BANK $09 ; MOVE_KRAUSER_KAISER_DUEL_SOBAT_H
+	mMvCodeDef MoveC_Krauser_KaiserSuplex ; BANK $09 ; MOVE_KRAUSER_KAISER_SUPLEX_L
+	mMvCodeDef MoveC_Krauser_KaiserSuplex ; BANK $09 ; MOVE_KRAUSER_KAISER_SUPLEX_H
+	mMvCodeDef MoveC_Krauser_BlitzBall ;X ; BANK $09 ; MOVE_KRAUSER_SPEC_6_L
+	mMvCodeDef MoveC_Krauser_BlitzBall ;X ; BANK $09 ; MOVE_KRAUSER_SPEC_6_H
+	mMvCodeDef MoveC_Krauser_KaiserWave ; BANK $09 ; MOVE_KRAUSER_KAISER_WAVE_S
+	mMvCodeDef MoveC_Krauser_KaiserWave ; BANK $09 ; MOVE_KRAUSER_KAISER_WAVE_D
+	mMvCodeDef MoveC_Krauser_KaiserWave ;X ; BANK $09 ; MOVE_KRAUSER_SUPER_1_S
+	mMvCodeDef MoveC_Krauser_KaiserWave ;X ; BANK $09 ; MOVE_KRAUSER_SUPER_1_D
+	mMvCodeDef MoveC_Krauser_ThrowG ; BANK $09 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_MrBig:
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
-	dpr MoveC_MrBig_PunchH ; BANK $1C ; MOVE_SHARED_PUNCH_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
-	dpr MoveC_Base_AttackG_SF04M0040 ; BANK $06 ; MOVE_SHARED_ATTACK_G
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
-	dpr MoveC_MrBig_GroundBlaster ; BANK $06 ; MOVE_MRBIG_GROUND_BLASTER_L
-	dpr MoveC_MrBig_GroundBlaster ; BANK $06 ; MOVE_MRBIG_GROUND_BLASTER_H
-	dpr MoveC_MrBig_CrossDiving ; BANK $06 ; MOVE_MRBIG_CROSS_DIVING_L
-	dpr MoveC_MrBig_CrossDiving ; BANK $06 ; MOVE_MRBIG_CROSS_DIVING_H
-	dpr MoveC_MrBig_SpinningLancer ; BANK $06 ; MOVE_MRBIG_SPINNING_LANCER_L
-	dpr MoveC_MrBig_SpinningLancer ; BANK $06 ; MOVE_MRBIG_SPINNING_LANCER_H
-	dpr MoveC_Robert_RyuuGa ; BANK $02 ; MOVE_MRBIG_CALIFORNIA_ROMANCE_L
-	dpr MoveC_MrBig_CaliforniaRomanceH ; BANK $06 ; MOVE_MRBIG_CALIFORNIA_ROMANCE_H
-	dpr MoveC_MrBig_DrumShot ; BANK $06 ; MOVE_MRBIG_DRUM_SHOT_L
-	dpr MoveC_MrBig_DrumShot ; BANK $06 ; MOVE_MRBIG_DRUM_SHOT_H
-	dpr MoveC_MrBig_GroundBlaster ;X ; BANK $06 ; MOVE_MRBIG_SPEC_5_L
-	dpr MoveC_MrBig_GroundBlaster ;X ; BANK $06 ; MOVE_MRBIG_SPEC_5_H
-	dpr MoveC_MrBig_GroundBlaster ;X ; BANK $06 ; MOVE_MRBIG_SPEC_6_L
-	dpr MoveC_MrBig_GroundBlaster ;X ; BANK $06 ; MOVE_MRBIG_SPEC_6_H
-	dpr MoveC_MrBig_BlasterWave ; BANK $06 ; MOVE_MRBIG_BLASTER_WAVE_S
-	dpr MoveC_MrBig_BlasterWave ; BANK $06 ; MOVE_MRBIG_BLASTER_WAVE_D
-	dpr MoveC_MrBig_BlasterWave ;X ; BANK $06 ; MOVE_MRBIG_SUPER_1_S
-	dpr MoveC_MrBig_BlasterWave ;X ; BANK $06 ; MOVE_MRBIG_SUPER_1_D
-	dpr MoveC_MrBig_ThrowG ; BANK $09 ; MOVE_SHARED_THROW_G
-	dpr MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
+	mMvCodeDef MoveC_MrBig_PunchH ; BANK $1C ; MOVE_SHARED_PUNCH_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
+	mMvCodeDef MoveC_Base_AttackG_SF04M0040 ; BANK $06 ; MOVE_SHARED_ATTACK_G
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
+	mMvCodeDef MoveC_MrBig_GroundBlaster ; BANK $06 ; MOVE_MRBIG_GROUND_BLASTER_L
+	mMvCodeDef MoveC_MrBig_GroundBlaster ; BANK $06 ; MOVE_MRBIG_GROUND_BLASTER_H
+	mMvCodeDef MoveC_MrBig_CrossDiving ; BANK $06 ; MOVE_MRBIG_CROSS_DIVING_L
+	mMvCodeDef MoveC_MrBig_CrossDiving ; BANK $06 ; MOVE_MRBIG_CROSS_DIVING_H
+	mMvCodeDef MoveC_MrBig_SpinningLancer ; BANK $06 ; MOVE_MRBIG_SPINNING_LANCER_L
+	mMvCodeDef MoveC_MrBig_SpinningLancer ; BANK $06 ; MOVE_MRBIG_SPINNING_LANCER_H
+	mMvCodeDef MoveC_Robert_RyuuGa ; BANK $02 ; MOVE_MRBIG_CALIFORNIA_ROMANCE_L
+	mMvCodeDef MoveC_MrBig_CaliforniaRomanceH ; BANK $06 ; MOVE_MRBIG_CALIFORNIA_ROMANCE_H
+	mMvCodeDef MoveC_MrBig_DrumShot ; BANK $06 ; MOVE_MRBIG_DRUM_SHOT_L
+	mMvCodeDef MoveC_MrBig_DrumShot ; BANK $06 ; MOVE_MRBIG_DRUM_SHOT_H
+	mMvCodeDef MoveC_MrBig_GroundBlaster ;X ; BANK $06 ; MOVE_MRBIG_SPEC_5_L
+	mMvCodeDef MoveC_MrBig_GroundBlaster ;X ; BANK $06 ; MOVE_MRBIG_SPEC_5_H
+	mMvCodeDef MoveC_MrBig_GroundBlaster ;X ; BANK $06 ; MOVE_MRBIG_SPEC_6_L
+	mMvCodeDef MoveC_MrBig_GroundBlaster ;X ; BANK $06 ; MOVE_MRBIG_SPEC_6_H
+	mMvCodeDef MoveC_MrBig_BlasterWave ; BANK $06 ; MOVE_MRBIG_BLASTER_WAVE_S
+	mMvCodeDef MoveC_MrBig_BlasterWave ; BANK $06 ; MOVE_MRBIG_BLASTER_WAVE_D
+	mMvCodeDef MoveC_MrBig_BlasterWave ;X ; BANK $06 ; MOVE_MRBIG_SUPER_1_S
+	mMvCodeDef MoveC_MrBig_BlasterWave ;X ; BANK $06 ; MOVE_MRBIG_SUPER_1_D
+	mMvCodeDef MoveC_MrBig_ThrowG ; BANK $09 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Mature:
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
-	dpr MoveC_Mature_PunchH ; BANK $1C ; MOVE_SHARED_PUNCH_H
-	dpr MoveC_Base_NormL_2Hit_D06_A03 ; BANK $1C ; MOVE_SHARED_KICK_L
-	dpr MoveC_Base_NormH_2Hit_D06_A04 ; BANK $1C ; MOVE_SHARED_KICK_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
-	dpr MoveC_Base_NormH_2Hit_D06_A04 ; BANK $1C ; MOVE_SHARED_KICK_CH
-	dpr MoveC_Base_AttackG_MF07 ; BANK $06 ; MOVE_SHARED_ATTACK_G
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
-	dpr MoveC_Mature_Decide ; BANK $05 ; MOVE_MATURE_DECIDE_L
-	dpr MoveC_Mature_Decide ; BANK $05 ; MOVE_MATURE_DECIDE_H
-	dpr MoveC_Mature_MetalMassacre ; BANK $05 ; MOVE_MATURE_METAL_MASSACRE_L
-	dpr MoveC_Mature_MetalMassacre ; BANK $05 ; MOVE_MATURE_METAL_MASSACRE_H
-	dpr MoveC_Mature_DeathRow ; BANK $05 ; MOVE_MATURE_DEATH_ROW_L
-	dpr MoveC_Mature_DeathRow ; BANK $05 ; MOVE_MATURE_DEATH_ROW_H
-	dpr MoveC_Mature_Despair ; BANK $05 ; MOVE_MATURE_DESPAIR_L
-	dpr MoveC_Mature_Despair ; BANK $05 ; MOVE_MATURE_DESPAIR_H
-	dpr MoveC_Mature_Decide ;X ; BANK $05 ; MOVE_MATURE_SPEC_4_L
-	dpr MoveC_Mature_Decide ;X ; BANK $05 ; MOVE_MATURE_SPEC_4_H
-	dpr MoveC_Mature_Decide ;X ; BANK $05 ; MOVE_MATURE_SPEC_5_L
-	dpr MoveC_Mature_Decide ;X ; BANK $05 ; MOVE_MATURE_SPEC_5_H
-	dpr MoveC_Mature_Decide ;X ; BANK $05 ; MOVE_MATURE_SPEC_6_L
-	dpr MoveC_Mature_Decide ;X ; BANK $05 ; MOVE_MATURE_SPEC_6_H
-	dpr MoveC_Mature_HeavensGate ; BANK $05 ; MOVE_MATURE_HEAVENS_GATE_S
-	dpr MoveC_Mature_HeavensGate ; BANK $05 ; MOVE_MATURE_HEAVENS_GATE_D
-	dpr MoveC_Mature_HeavensGate ;X ; BANK $05 ; MOVE_MATURE_SUPER_1_S
-	dpr MoveC_Mature_HeavensGate ;X ; BANK $05 ; MOVE_MATURE_SUPER_1_D
-	dpr MoveC_Mature_ThrowG ; BANK $09 ; MOVE_SHARED_THROW_G
-	dpr MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
+	mMvCodeDef MoveC_Mature_PunchH ; BANK $1C ; MOVE_SHARED_PUNCH_H
+	mMvCodeDef MoveC_Base_NormL_2Hit_D06_A03 ; BANK $1C ; MOVE_SHARED_KICK_L
+	mMvCodeDef MoveC_Base_NormH_2Hit_D06_A04 ; BANK $1C ; MOVE_SHARED_KICK_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
+	mMvCodeDef MoveC_Base_NormH_2Hit_D06_A04 ; BANK $1C ; MOVE_SHARED_KICK_CH
+	mMvCodeDef MoveC_Base_AttackG_MF07 ; BANK $06 ; MOVE_SHARED_ATTACK_G
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
+	mMvCodeDef MoveC_Mature_Decide ; BANK $05 ; MOVE_MATURE_DECIDE_L
+	mMvCodeDef MoveC_Mature_Decide ; BANK $05 ; MOVE_MATURE_DECIDE_H
+	mMvCodeDef MoveC_Mature_MetalMassacre ; BANK $05 ; MOVE_MATURE_METAL_MASSACRE_L
+	mMvCodeDef MoveC_Mature_MetalMassacre ; BANK $05 ; MOVE_MATURE_METAL_MASSACRE_H
+	mMvCodeDef MoveC_Mature_DeathRow ; BANK $05 ; MOVE_MATURE_DEATH_ROW_L
+	mMvCodeDef MoveC_Mature_DeathRow ; BANK $05 ; MOVE_MATURE_DEATH_ROW_H
+	mMvCodeDef MoveC_Mature_Despair ; BANK $05 ; MOVE_MATURE_DESPAIR_L
+	mMvCodeDef MoveC_Mature_Despair ; BANK $05 ; MOVE_MATURE_DESPAIR_H
+	mMvCodeDef MoveC_Mature_Decide ;X ; BANK $05 ; MOVE_MATURE_SPEC_4_L
+	mMvCodeDef MoveC_Mature_Decide ;X ; BANK $05 ; MOVE_MATURE_SPEC_4_H
+	mMvCodeDef MoveC_Mature_Decide ;X ; BANK $05 ; MOVE_MATURE_SPEC_5_L
+	mMvCodeDef MoveC_Mature_Decide ;X ; BANK $05 ; MOVE_MATURE_SPEC_5_H
+	mMvCodeDef MoveC_Mature_Decide ;X ; BANK $05 ; MOVE_MATURE_SPEC_6_L
+	mMvCodeDef MoveC_Mature_Decide ;X ; BANK $05 ; MOVE_MATURE_SPEC_6_H
+	mMvCodeDef MoveC_Mature_HeavensGate ; BANK $05 ; MOVE_MATURE_HEAVENS_GATE_S
+	mMvCodeDef MoveC_Mature_HeavensGate ; BANK $05 ; MOVE_MATURE_HEAVENS_GATE_D
+	mMvCodeDef MoveC_Mature_HeavensGate ;X ; BANK $05 ; MOVE_MATURE_SUPER_1_S
+	mMvCodeDef MoveC_Mature_HeavensGate ;X ; BANK $05 ; MOVE_MATURE_SUPER_1_D
+	mMvCodeDef MoveC_Mature_ThrowG ; BANK $09 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Chizuru:
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
-	dpr MoveC_Base_AttackG_SF04M0040 ; BANK $06 ; MOVE_SHARED_ATTACK_G
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
-	dpr MoveC_Terry_RisingTackle ; BANK $02 ; MOVE_CHIZURU_TENJIN_KOTOWARI_L
-	dpr MoveC_Terry_RisingTackle ; BANK $02 ; MOVE_CHIZURU_TENJIN_KOTOWARI_H
-	dpr MoveC_Chizuru_ShinsokuNoroti ; BANK $05 ; MOVE_CHIZURU_SHINSOKU_NOROTI_HIGH_L
-	dpr MoveC_Chizuru_ShinsokuNoroti ; BANK $05 ; MOVE_CHIZURU_SHINSOKU_NOROTI_HIGH_H
-	dpr MoveC_Chizuru_ShinsokuNoroti ; BANK $05 ; MOVE_CHIZURU_SHINSOKU_NOROTI_LOW_L
-	dpr MoveC_Chizuru_ShinsokuNoroti ; BANK $05 ; MOVE_CHIZURU_SHINSOKU_NOROTI_LOW_H
-	dpr MoveC_Chizuru_TenZuiL ; BANK $05 ; MOVE_CHIZURU_TEN_ZUI_L
-	dpr MoveC_Chizuru_TenZuiH ; BANK $05 ; MOVE_CHIZURU_TEN_ZUI_H
-	dpr MoveC_Chizuru_TamayuraShitsuneL ; BANK $05 ; MOVE_CHIZURU_TAMAYURA_SHITSUNE_L
-	dpr MoveC_Chizuru_TamayuraShitsuneH ; BANK $05 ; MOVE_CHIZURU_TAMAYURA_SHITSUNE_H
-	dpr MoveC_Chizuru_ShinsokuNoroti ;X ; BANK $05 ; MOVE_CHIZURU_SPEC_5_L
-	dpr MoveC_Chizuru_ShinsokuNoroti ;X ; BANK $05 ; MOVE_CHIZURU_SPEC_5_H
-	dpr MoveC_Chizuru_ShinsokuNoroti ;X ; BANK $05 ; MOVE_CHIZURU_SPEC_6_L
-	dpr MoveC_Chizuru_ShinsokuNoroti ;X ; BANK $05 ; MOVE_CHIZURU_SPEC_6_H
-	dpr MoveC_Chizuru_SanRaiFuiJin ; BANK $05 ; MOVE_CHIZURU_SAN_RAI_FUI_JIN_S
-	dpr MoveC_Chizuru_SanRaiFuiJin ; BANK $05 ; MOVE_CHIZURU_SAN_RAI_FUI_JIN_D
-	dpr MoveC_Chizuru_ReijiIshizue ; BANK $05 ; MOVE_CHIZURU_REIGI_ISHIZUE_S
-	dpr MoveC_Chizuru_ReijiIshizue ; BANK $05 ; MOVE_CHIZURU_REIGI_ISHIZUE_D
-	dpr MoveC_Chizuru_ThrowG ; BANK $09 ; MOVE_SHARED_THROW_G
-	dpr MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
+	mMvCodeDef MoveC_Base_AttackG_SF04M0040 ; BANK $06 ; MOVE_SHARED_ATTACK_G
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
+	mMvCodeDef MoveC_Terry_RisingTackle ; BANK $02 ; MOVE_CHIZURU_TENJIN_KOTOWARI_L
+	mMvCodeDef MoveC_Terry_RisingTackle ; BANK $02 ; MOVE_CHIZURU_TENJIN_KOTOWARI_H
+	mMvCodeDef MoveC_Chizuru_ShinsokuNoroti ; BANK $05 ; MOVE_CHIZURU_SHINSOKU_NOROTI_HIGH_L
+	mMvCodeDef MoveC_Chizuru_ShinsokuNoroti ; BANK $05 ; MOVE_CHIZURU_SHINSOKU_NOROTI_HIGH_H
+	mMvCodeDef MoveC_Chizuru_ShinsokuNoroti ; BANK $05 ; MOVE_CHIZURU_SHINSOKU_NOROTI_LOW_L
+	mMvCodeDef MoveC_Chizuru_ShinsokuNoroti ; BANK $05 ; MOVE_CHIZURU_SHINSOKU_NOROTI_LOW_H
+	mMvCodeDef MoveC_Chizuru_TenZuiL ; BANK $05 ; MOVE_CHIZURU_TEN_ZUI_L
+	mMvCodeDef MoveC_Chizuru_TenZuiH ; BANK $05 ; MOVE_CHIZURU_TEN_ZUI_H
+	mMvCodeDef MoveC_Chizuru_TamayuraShitsuneL ; BANK $05 ; MOVE_CHIZURU_TAMAYURA_SHITSUNE_L
+	mMvCodeDef MoveC_Chizuru_TamayuraShitsuneH ; BANK $05 ; MOVE_CHIZURU_TAMAYURA_SHITSUNE_H
+	mMvCodeDef MoveC_Chizuru_ShinsokuNoroti ;X ; BANK $05 ; MOVE_CHIZURU_SPEC_5_L
+	mMvCodeDef MoveC_Chizuru_ShinsokuNoroti ;X ; BANK $05 ; MOVE_CHIZURU_SPEC_5_H
+	mMvCodeDef MoveC_Chizuru_ShinsokuNoroti ;X ; BANK $05 ; MOVE_CHIZURU_SPEC_6_L
+	mMvCodeDef MoveC_Chizuru_ShinsokuNoroti ;X ; BANK $05 ; MOVE_CHIZURU_SPEC_6_H
+	mMvCodeDef MoveC_Chizuru_SanRaiFuiJin ; BANK $05 ; MOVE_CHIZURU_SAN_RAI_FUI_JIN_S
+	mMvCodeDef MoveC_Chizuru_SanRaiFuiJin ; BANK $05 ; MOVE_CHIZURU_SAN_RAI_FUI_JIN_D
+	mMvCodeDef MoveC_Chizuru_ReijiIshizue ; BANK $05 ; MOVE_CHIZURU_REIGI_ISHIZUE_S
+	mMvCodeDef MoveC_Chizuru_ReijiIshizue ; BANK $05 ; MOVE_CHIZURU_REIGI_ISHIZUE_D
+	mMvCodeDef MoveC_Chizuru_ThrowG ; BANK $09 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Goenitz:
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
-	dpr MoveC_Goenitz_PunchH ; BANK $1C ; MOVE_SHARED_PUNCH_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
-	dpr MoveC_Goenitz_KickH ; BANK $1C ; MOVE_SHARED_KICK_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
-	dpr MoveC_Base_AttackG_SF04M0040 ; BANK $06 ; MOVE_SHARED_ATTACK_G
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
-	dpr MoveC_Goenitz_Yonokaze ; BANK $0A ; MOVE_GOENITZ_YONOKAZE1
-	dpr MoveC_Goenitz_Yonokaze ; BANK $0A ; MOVE_GOENITZ_YONOKAZE2
-	dpr MoveC_Goenitz_Yonokaze ; BANK $0A ; MOVE_GOENITZ_YONOKAZE3
-	dpr MoveC_Goenitz_Yonokaze ; BANK $0A ; MOVE_GOENITZ_YONOKAZE4
-	dpr MoveC_Goenitz_HyougaL ; BANK $0A ; MOVE_GOENITZ_HYOUGA_L
-	dpr MoveC_Goenitz_HyougaH ; BANK $0A ; MOVE_GOENITZ_HYOUGA_H
-	dpr MoveC_Goenitz_WanpyouTokobuse ; BANK $0A ; MOVE_GOENITZ_WANPYOU_TOKOBUSE_L
-	dpr MoveC_Goenitz_WanpyouTokobuse ; BANK $0A ; MOVE_GOENITZ_WANPYOU_TOKOBUSE_H
-	dpr MoveC_Goenitz_Yamidoukoku ; BANK $0A ; MOVE_GOENITZ_YAMIDOUKOKU_SL
-	dpr MoveC_Goenitz_Yamidoukoku ; BANK $0A ; MOVE_GOENITZ_YAMIDOUKOKU_SH
-	dpr MoveC_Goenitz_ShinyaotomeThrowL ; BANK $0A ; MOVE_GOENITZ_SHINYAOTOME_THROW_L
-	dpr MoveC_Goenitz_ShinyaotomeThrowH ; BANK $0A ; MOVE_GOENITZ_SHINYAOTOME_THROW_H
-	dpr MoveC_Goenitz_ShinyaotomePart2 ; BANK $0A ; MOVE_GOENITZ_SHINYAOTOME_PART2_L
-	dpr MoveC_Goenitz_ShinyaotomePart2 ; BANK $0A ; MOVE_GOENITZ_SHINYAOTOME_PART2_H
-	dpr MoveC_Goenitz_ShinyaotomeMizuchiSL ; BANK $0A ; MOVE_GOENITZ_SHINYAOTOME_MIZUCHI_SL
-	dpr MoveC_Goenitz_ShinyaotomeMizuchiSH ; BANK $0A ; MOVE_GOENITZ_SHINYAOTOME_MIZUCHI_SH
-	dpr MoveC_Goenitz_ShinyaotomeJissoukokuDL ; BANK $0A ; MOVE_GOENITZ_SHINYAOTOME_JISSOUKOKU_DL
-	dpr MoveC_Goenitz_ShinyaotomeJissoukokuDH ; BANK $0A ; MOVE_GOENITZ_SHINYAOTOME_JISSOUKOKU_DH
-	dpr MoveC_Goenitz_ShinyaotomeThrowL ; BANK $0A ; MOVE_SHARED_THROW_G
-	dpr MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
+	mMvCodeDef MoveC_Goenitz_PunchH ; BANK $1C ; MOVE_SHARED_PUNCH_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
+	mMvCodeDef MoveC_Goenitz_KickH ; BANK $1C ; MOVE_SHARED_KICK_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
+	mMvCodeDef MoveC_Base_AttackG_SF04M0040 ; BANK $06 ; MOVE_SHARED_ATTACK_G
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
+	mMvCodeDef MoveC_Goenitz_Yonokaze ; BANK $0A ; MOVE_GOENITZ_YONOKAZE1
+	mMvCodeDef MoveC_Goenitz_Yonokaze ; BANK $0A ; MOVE_GOENITZ_YONOKAZE2
+	mMvCodeDef MoveC_Goenitz_Yonokaze ; BANK $0A ; MOVE_GOENITZ_YONOKAZE3
+	mMvCodeDef MoveC_Goenitz_Yonokaze ; BANK $0A ; MOVE_GOENITZ_YONOKAZE4
+	mMvCodeDef MoveC_Goenitz_HyougaL ; BANK $0A ; MOVE_GOENITZ_HYOUGA_L
+	mMvCodeDef MoveC_Goenitz_HyougaH ; BANK $0A ; MOVE_GOENITZ_HYOUGA_H
+	mMvCodeDef MoveC_Goenitz_WanpyouTokobuse ; BANK $0A ; MOVE_GOENITZ_WANPYOU_TOKOBUSE_L
+	mMvCodeDef MoveC_Goenitz_WanpyouTokobuse ; BANK $0A ; MOVE_GOENITZ_WANPYOU_TOKOBUSE_H
+	mMvCodeDef MoveC_Goenitz_Yamidoukoku ; BANK $0A ; MOVE_GOENITZ_YAMIDOUKOKU_SL
+	mMvCodeDef MoveC_Goenitz_Yamidoukoku ; BANK $0A ; MOVE_GOENITZ_YAMIDOUKOKU_SH
+	mMvCodeDef MoveC_Goenitz_ShinyaotomeThrowL ; BANK $0A ; MOVE_GOENITZ_SHINYAOTOME_THROW_L
+	mMvCodeDef MoveC_Goenitz_ShinyaotomeThrowH ; BANK $0A ; MOVE_GOENITZ_SHINYAOTOME_THROW_H
+	mMvCodeDef MoveC_Goenitz_ShinyaotomePart2 ; BANK $0A ; MOVE_GOENITZ_SHINYAOTOME_PART2_L
+	mMvCodeDef MoveC_Goenitz_ShinyaotomePart2 ; BANK $0A ; MOVE_GOENITZ_SHINYAOTOME_PART2_H
+	mMvCodeDef MoveC_Goenitz_ShinyaotomeMizuchiSL ; BANK $0A ; MOVE_GOENITZ_SHINYAOTOME_MIZUCHI_SL
+	mMvCodeDef MoveC_Goenitz_ShinyaotomeMizuchiSH ; BANK $0A ; MOVE_GOENITZ_SHINYAOTOME_MIZUCHI_SH
+	mMvCodeDef MoveC_Goenitz_ShinyaotomeJissoukokuDL ; BANK $0A ; MOVE_GOENITZ_SHINYAOTOME_JISSOUKOKU_DL
+	mMvCodeDef MoveC_Goenitz_ShinyaotomeJissoukokuDH ; BANK $0A ; MOVE_GOENITZ_SHINYAOTOME_JISSOUKOKU_DH
+	mMvCodeDef MoveC_Goenitz_ShinyaotomeThrowL ; BANK $0A ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_MrKarate:
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
-	dpr MoveC_Base_NormH_2Hit_D06_A04 ; BANK $1C ; MOVE_SHARED_KICK_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
-	dpr MoveC_Base_NormL_2Hit_D06_A03 ; BANK $1C ; MOVE_SHARED_PUNCH_CH
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
-	dpr MoveC_Base_AttackG_SF04M0040 ; BANK $06 ; MOVE_SHARED_ATTACK_G
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
-	dpr MoveC_MrKarate_KoOuKen ; BANK $02 ; MOVE_MRKARATE_KO_OU_KEN_L
-	dpr MoveC_MrKarate_KoOuKen ; BANK $02 ; MOVE_MRKARATE_KO_OU_KEN_H
-	dpr MoveC_MrKarate_ShouranKyaku ; BANK $02 ; MOVE_MRKARATE_SHOURAN_KYAKU_L
-	dpr MoveC_MrKarate_ShouranKyaku ; BANK $02 ; MOVE_MRKARATE_SHOURAN_KYAKU_H
-	dpr MoveC_MrKarate_HienShippuuKyaku ; BANK $02 ; MOVE_MRKARATE_HIEN_SHIPPUU_KYAKU_L
-	dpr MoveC_MrKarate_HienShippuuKyaku ; BANK $02 ; MOVE_MRKARATE_HIEN_SHIPPUU_KYAKU_H
-	dpr MoveC_MrKarate_Zenretsuken ; BANK $02 ; MOVE_MRKARATE_ZENRETSUKEN_L
-	dpr MoveC_MrKarate_Zenretsuken ; BANK $02 ; MOVE_MRKARATE_ZENRETSUKEN_H
-	dpr MoveC_Robert_KyokugenRyuRanbuKyaku ; BANK $02 ; MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_L
-	dpr MoveC_Robert_KyokugenRyuRanbuKyaku ; BANK $02 ; MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
+	mMvCodeDef MoveC_Base_NormH_2Hit_D06_A04 ; BANK $1C ; MOVE_SHARED_KICK_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
+	mMvCodeDef MoveC_Base_NormL_2Hit_D06_A03 ; BANK $1C ; MOVE_SHARED_PUNCH_CH
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
+	mMvCodeDef MoveC_Base_AttackG_SF04M0040 ; BANK $06 ; MOVE_SHARED_ATTACK_G
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
+	mMvCodeDef MoveC_MrKarate_KoOuKen ; BANK $02 ; MOVE_MRKARATE_KO_OU_KEN_L
+	mMvCodeDef MoveC_MrKarate_KoOuKen ; BANK $02 ; MOVE_MRKARATE_KO_OU_KEN_H
+	mMvCodeDef MoveC_MrKarate_ShouranKyaku ; BANK $02 ; MOVE_MRKARATE_SHOURAN_KYAKU_L
+	mMvCodeDef MoveC_MrKarate_ShouranKyaku ; BANK $02 ; MOVE_MRKARATE_SHOURAN_KYAKU_H
+	mMvCodeDef MoveC_MrKarate_HienShippuuKyaku ; BANK $02 ; MOVE_MRKARATE_HIEN_SHIPPUU_KYAKU_L
+	mMvCodeDef MoveC_MrKarate_HienShippuuKyaku ; BANK $02 ; MOVE_MRKARATE_HIEN_SHIPPUU_KYAKU_H
+	mMvCodeDef MoveC_MrKarate_Zenretsuken ; BANK $02 ; MOVE_MRKARATE_ZENRETSUKEN_L
+	mMvCodeDef MoveC_MrKarate_Zenretsuken ; BANK $02 ; MOVE_MRKARATE_ZENRETSUKEN_H
+	mMvCodeDef MoveC_Robert_KyokugenRyuRanbuKyaku ; BANK $02 ; MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_L
+	mMvCodeDef MoveC_Robert_KyokugenRyuRanbuKyaku ; BANK $02 ; MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_H
 IF REV_VER_2 == 0
-	dpr MoveC_Terry_RisingTackle ;X ; BANK $02 ; MOVE_MRKARATE_KO_OU_KEN_UNUSED_EL ; [TCRF] Would be an hidden version of Ko Ou Ken, likely cloned from Ryo's entry. Its respective animation is a placeholder one.
-	dpr MoveC_Terry_RisingTackle ;X ; BANK $02 ; MOVE_MRKARATE_KO_OU_KEN_UNUSED_EH
-	dpr MoveC_Ryo_KoOuKen ;X ; BANK $02 ; MOVE_MRKARATE_SPEC_6_L ; [POI] This placeholder entry is using the one for Ryo, hinting that at some point Mr. Karate didn't have its own code for KoOuKen.
-	dpr MoveC_Ryo_KoOuKen ;X ; BANK $02 ; MOVE_MRKARATE_SPEC_6_H	
+	mMvCodeDef MoveC_Terry_RisingTackle ;X ; BANK $02 ; MOVE_MRKARATE_KO_OU_KEN_UNUSED_EL ; [TCRF] Would be an hidden version of Ko Ou Ken, likely cloned from Ryo's entry. Its respective animation is a placeholder one.
+	mMvCodeDef MoveC_Terry_RisingTackle ;X ; BANK $02 ; MOVE_MRKARATE_KO_OU_KEN_UNUSED_EH
+	mMvCodeDef MoveC_Ryo_KoOuKen ;X ; BANK $02 ; MOVE_MRKARATE_SPEC_6_L ; [POI] This placeholder entry is using the one for Ryo, hinting that at some point Mr. Karate didn't have its own code for KoOuKen.
+	mMvCodeDef MoveC_Ryo_KoOuKen ;X ; BANK $02 ; MOVE_MRKARATE_SPEC_6_H	
 ELSE
 	; The English version replaced this with the third part of the desperation super.
-	dpr MoveC_MrKarate_RyukoRanbuD3 ;X ; BANK $02 ; MOVE_MRKARATE_SPEC_5_L
-	dpr MoveC_MrKarate_RyukoRanbuD3 ; BANK $02 ; MOVE_MRKARATE_RYUKO_RANBU_D3
+	mMvCodeDef MoveC_MrKarate_RyukoRanbuD3 ;X ; BANK $02 ; MOVE_MRKARATE_SPEC_5_L
+	mMvCodeDef MoveC_MrKarate_RyukoRanbuD3 ; BANK $02 ; MOVE_MRKARATE_RYUKO_RANBU_D3
 	; [TCRF] They updated the placeholder entry, but the move is still not used.
-	dpr MoveC_MrKarate_KoOuKen ;X ; BANK $02 ; MOVE_MRKARATE_SPEC_6_L
-	dpr MoveC_MrKarate_KoOuKen ;X ; BANK $02 ; MOVE_MRKARATE_SPEC_6_H	
+	mMvCodeDef MoveC_MrKarate_KoOuKen ;X ; BANK $02 ; MOVE_MRKARATE_SPEC_6_L
+	mMvCodeDef MoveC_MrKarate_KoOuKen ;X ; BANK $02 ; MOVE_MRKARATE_SPEC_6_H	
 ENDC
 
-	dpr MoveC_MrKarate_RyukoRanbuS ; BANK $02 ; MOVE_MRKARATE_RYUKO_RANBU_S
+	mMvCodeDef MoveC_MrKarate_RyukoRanbuS ; BANK $02 ; MOVE_MRKARATE_RYUKO_RANBU_S
 IF REV_VER_2 == 0
 	; [TCRF] Mr.Karate's desperation super is unused and broken in the Japanese version.
-	dpr MoveC_MrKarate_Unused_RyukoRanbuD ;X ; BANK $02 ; MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D
+	mMvCodeDef MoveC_MrKarate_Unused_RyukoRanbuD ;X ; BANK $02 ; MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D
 ELSE
 	; In the English version, the code for MoveC_MrKarate_Unused_RyukoRanbuD got deleted.
 	; The move ID itself is still unused, as MOVE_MRKARATE_RYUKO_RANBU_S is used for that.
-	dpr MoveC_MrKarate_RyukoRanbuS ;X ; BANK $02 ; MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D
+	mMvCodeDef MoveC_MrKarate_RyukoRanbuS ;X ; BANK $02 ; MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D
 ENDC
-	dpr MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_MRKARATE_HAOH_SHO_KOH_KEN_S
-	dpr MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D
-	dpr MoveC_Ryo_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
-	dpr MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	mMvCodeDef MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_MRKARATE_HAOH_SHO_KOH_KEN_S
+	mMvCodeDef MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D
+	mMvCodeDef MoveC_Ryo_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Ryo:
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
-	dpr MoveC_Base_NormH_2Hit_D06_A04 ; BANK $1C ; MOVE_SHARED_KICK_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
-	dpr MoveC_Base_NormL_2Hit_D06_A03 ; BANK $1C ; MOVE_SHARED_PUNCH_CH
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_ATTACK_G
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
-	dpr MoveC_Ryo_KoOuKen ; BANK $02 ; MOVE_RYO_KO_OU_KEN_L
-	dpr MoveC_Ryo_KoOuKen ; BANK $02 ; MOVE_RYO_KO_OU_KEN_H
-	dpr MoveC_Ryo_MouKoRaiJinGou ; BANK $02 ; MOVE_RYO_MOU_KO_RAI_JIN_GOU_L
-	dpr MoveC_Ryo_MouKoRaiJinGou ; BANK $02 ; MOVE_RYO_MOU_KO_RAI_JIN_GOU_H
-	dpr MoveC_Ryo_HienShippuKyaku ; BANK $02 ; MOVE_RYO_HIEN_SHIPPU_KYAKU_L
-	dpr MoveC_Ryo_HienShippuKyaku ; BANK $02 ; MOVE_RYO_HIEN_SHIPPU_KYAKU_H
-	dpr MoveC_Robert_RyuuGa ; BANK $02 ; MOVE_RYO_KO_HOU_L
-	dpr MoveC_Robert_RyuuGa ; BANK $02 ; MOVE_RYO_KO_HOU_H
-	dpr MoveC_Robert_KyokugenRyuRanbuKyaku ; BANK $02 ; MOVE_RYO_KYOKUKEN_RYU_RENBU_KEN_L
-	dpr MoveC_Robert_KyokugenRyuRanbuKyaku ; BANK $02 ; MOVE_RYO_KYOKUKEN_RYU_RENBU_KEN_H
-	dpr MoveC_Terry_RisingTackle ; BANK $02 ; MOVE_RYO_KO_HOU_EL
-	dpr MoveC_Terry_RisingTackle ; BANK $02 ; MOVE_RYO_KO_HOU_EH
-	dpr MoveC_Ryo_KoOuKen ;X ; BANK $02 ; MOVE_RYO_SPEC_6_L
-	dpr MoveC_Ryo_KoOuKen ;X ; BANK $02 ; MOVE_RYO_SPEC_6_H
-	dpr MoveC_Ryo_RyuKoRanbuS ; BANK $02 ; MOVE_RYO_RYU_KO_RANBU_S
-	dpr MoveC_Ryo_RyuKoRanbuD ; BANK $02 ; MOVE_RYO_RYU_KO_RANBU_D
-	dpr MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_RYO_HAOH_SHOKOH_KEN_S
-	dpr MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_RYO_HAOH_SHOKOH_KEN_D
-	dpr MoveC_Ryo_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
-	dpr MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
+	mMvCodeDef MoveC_Base_NormH_2Hit_D06_A04 ; BANK $1C ; MOVE_SHARED_KICK_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
+	mMvCodeDef MoveC_Base_NormL_2Hit_D06_A03 ; BANK $1C ; MOVE_SHARED_PUNCH_CH
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_ATTACK_G
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
+	mMvCodeDef MoveC_Ryo_KoOuKen ; BANK $02 ; MOVE_RYO_KO_OU_KEN_L
+	mMvCodeDef MoveC_Ryo_KoOuKen ; BANK $02 ; MOVE_RYO_KO_OU_KEN_H
+	mMvCodeDef MoveC_Ryo_MouKoRaiJinGou ; BANK $02 ; MOVE_RYO_MOU_KO_RAI_JIN_GOU_L
+	mMvCodeDef MoveC_Ryo_MouKoRaiJinGou ; BANK $02 ; MOVE_RYO_MOU_KO_RAI_JIN_GOU_H
+	mMvCodeDef MoveC_Ryo_HienShippuKyaku ; BANK $02 ; MOVE_RYO_HIEN_SHIPPUU_KYAKU_L
+	mMvCodeDef MoveC_Ryo_HienShippuKyaku ; BANK $02 ; MOVE_RYO_HIEN_SHIPPUU_KYAKU_H
+	mMvCodeDef MoveC_Robert_RyuuGa ; BANK $02 ; MOVE_RYO_KO_HOU_L
+	mMvCodeDef MoveC_Robert_RyuuGa ; BANK $02 ; MOVE_RYO_KO_HOU_H
+	mMvCodeDef MoveC_Robert_KyokugenRyuRanbuKyaku ; BANK $02 ; MOVE_RYO_KYOKUKEN_RYU_RENBU_KEN_L
+	mMvCodeDef MoveC_Robert_KyokugenRyuRanbuKyaku ; BANK $02 ; MOVE_RYO_KYOKUKEN_RYU_RENBU_KEN_H
+	mMvCodeDef MoveC_Terry_RisingTackle ; BANK $02 ; MOVE_RYO_KO_HOU_EL
+	mMvCodeDef MoveC_Terry_RisingTackle ; BANK $02 ; MOVE_RYO_KO_HOU_EH
+	mMvCodeDef MoveC_Ryo_KoOuKen ;X ; BANK $02 ; MOVE_RYO_SPEC_6_L
+	mMvCodeDef MoveC_Ryo_KoOuKen ;X ; BANK $02 ; MOVE_RYO_SPEC_6_H
+	mMvCodeDef MoveC_Ryo_RyuKoRanbuS ; BANK $02 ; MOVE_RYO_RYU_KO_RANBU_S
+	mMvCodeDef MoveC_Ryo_RyuKoRanbuD ; BANK $02 ; MOVE_RYO_RYU_KO_RANBU_D
+	mMvCodeDef MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_RYO_HAOH_SHOKOH_KEN_S
+	mMvCodeDef MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_RYO_HAOH_SHOKOH_KEN_D
+	mMvCodeDef MoveC_Ryo_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Terry:
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
-	dpr MoveC_Base_NormL_2Hit_D06_A03 ; BANK $1C ; MOVE_SHARED_PUNCH_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_ATTACK_G
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
-	dpr MoveC_Terry_PowerWave ; BANK $06 ; MOVE_TERRY_POWER_WAVE_L
-	dpr MoveC_Terry_PowerWave ; BANK $06 ; MOVE_TERRY_POWER_WAVE_H
-	dpr MoveC_Terry_BurnKnuckle ; BANK $06 ; MOVE_TERRY_BURN_KNUCKLE_L
-	dpr MoveC_Terry_BurnKnuckle ; BANK $06 ; MOVE_TERRY_BURN_KNUCKLE_H
-	dpr MoveC_Terry_CrackShot ; BANK $06 ; MOVE_TERRY_CRACK_SHOT_L
-	dpr MoveC_Terry_CrackShot ; BANK $06 ; MOVE_TERRY_CRACK_SHOT_H
-	dpr MoveC_Terry_RisingTackle ; BANK $02 ; MOVE_TERRY_RISING_TACKLE_L
-	dpr MoveC_Terry_RisingTackle ; BANK $02 ; MOVE_TERRY_RISING_TACKLE_H
-	dpr MoveC_Terry_PowerDunk ; BANK $06 ; MOVE_TERRY_POWER_DUNK_L
-	dpr MoveC_Terry_PowerDunk ; BANK $06 ; MOVE_TERRY_POWER_DUNK_H
-	dpr MoveC_Terry_PowerWave ;X ; BANK $06 ; MOVE_TERRY_SPEC_5_L
-	dpr MoveC_Terry_PowerWave ;X ; BANK $06 ; MOVE_TERRY_SPEC_5_H
-	dpr MoveC_Terry_PowerWave ;X ; BANK $06 ; MOVE_TERRY_SPEC_6_L
-	dpr MoveC_Terry_PowerWave ;X ; BANK $06 ; MOVE_TERRY_SPEC_6_H
-	dpr MoveC_Terry_PowerWave ; BANK $06 ; MOVE_TERRY_POWER_GEYSER_S
-	dpr MoveC_Terry_PowerGeyserD ; BANK $06 ; MOVE_TERRY_POWER_GEYSER_D
-	dpr MoveC_Terry_PowerGeyserE ; BANK $06 ; MOVE_TERRY_POWER_GEYSER_E
-	dpr MoveC_Terry_PowerGeyserD ;X ; BANK $06 ; MOVE_TERRY_SUPER_1_D
-	dpr MoveC_Terry_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
-	dpr MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
+	mMvCodeDef MoveC_Base_NormL_2Hit_D06_A03 ; BANK $1C ; MOVE_SHARED_PUNCH_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_ATTACK_G
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
+	mMvCodeDef MoveC_Terry_PowerWave ; BANK $06 ; MOVE_TERRY_POWER_WAVE_L
+	mMvCodeDef MoveC_Terry_PowerWave ; BANK $06 ; MOVE_TERRY_POWER_WAVE_H
+	mMvCodeDef MoveC_Terry_BurnKnuckle ; BANK $06 ; MOVE_TERRY_BURN_KNUCKLE_L
+	mMvCodeDef MoveC_Terry_BurnKnuckle ; BANK $06 ; MOVE_TERRY_BURN_KNUCKLE_H
+	mMvCodeDef MoveC_Terry_CrackShot ; BANK $06 ; MOVE_TERRY_CRACK_SHOT_L
+	mMvCodeDef MoveC_Terry_CrackShot ; BANK $06 ; MOVE_TERRY_CRACK_SHOT_H
+	mMvCodeDef MoveC_Terry_RisingTackle ; BANK $02 ; MOVE_TERRY_RISING_TACKLE_L
+	mMvCodeDef MoveC_Terry_RisingTackle ; BANK $02 ; MOVE_TERRY_RISING_TACKLE_H
+	mMvCodeDef MoveC_Terry_PowerDunk ; BANK $06 ; MOVE_TERRY_POWER_DUNK_L
+	mMvCodeDef MoveC_Terry_PowerDunk ; BANK $06 ; MOVE_TERRY_POWER_DUNK_H
+	mMvCodeDef MoveC_Terry_PowerWave ;X ; BANK $06 ; MOVE_TERRY_SPEC_5_L
+	mMvCodeDef MoveC_Terry_PowerWave ;X ; BANK $06 ; MOVE_TERRY_SPEC_5_H
+	mMvCodeDef MoveC_Terry_PowerWave ;X ; BANK $06 ; MOVE_TERRY_SPEC_6_L
+	mMvCodeDef MoveC_Terry_PowerWave ;X ; BANK $06 ; MOVE_TERRY_SPEC_6_H
+	mMvCodeDef MoveC_Terry_PowerWave ; BANK $06 ; MOVE_TERRY_POWER_GEYSER_S
+	mMvCodeDef MoveC_Terry_PowerGeyserD ; BANK $06 ; MOVE_TERRY_POWER_GEYSER_D
+	mMvCodeDef MoveC_Terry_PowerGeyserE ; BANK $06 ; MOVE_TERRY_POWER_GEYSER_E
+	mMvCodeDef MoveC_Terry_PowerGeyserD ;X ; BANK $06 ; MOVE_TERRY_SUPER_1_D
+	mMvCodeDef MoveC_Terry_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Athena:
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_ATTACK_G
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
-	dpr MoveC_Athena_PsychoBall ; BANK $06 ; MOVE_ATHENA_PSYCHO_BALL_L
-	dpr MoveC_Athena_PsychoBall ; BANK $06 ; MOVE_ATHENA_PSYCHO_BALL_H
-	dpr MoveC_Athena_PhoenixArrow ; BANK $06 ; MOVE_ATHENA_PHOENIX_ARROW_L
-	dpr MoveC_Athena_PhoenixArrow ; BANK $06 ; MOVE_ATHENA_PHOENIX_ARROW_H
-	dpr MoveC_Athena_PsychoReflector ; BANK $06 ; MOVE_ATHENA_PSYCHO_REFLECTOR_L
-	dpr MoveC_Athena_PsychoReflector ; BANK $06 ; MOVE_ATHENA_PSYCHO_REFLECTOR_H
-	dpr MoveC_Andy_ShoRyuDan ; BANK $06 ; MOVE_ATHENA_PSYCHO_SWORD_L
-	dpr MoveC_Andy_ShoRyuDan ; BANK $06 ; MOVE_ATHENA_PSYCHO_SWORD_H
-	dpr MoveC_Athena_PsychoTeleport ; BANK $06 ; MOVE_ATHENA_PSYCHO_TELEPORT_L
-	dpr MoveC_Athena_PsychoTeleport ; BANK $06 ; MOVE_ATHENA_PSYCHO_TELEPORT_H
-	dpr MoveC_Athena_PsychoBall ;X ; BANK $06 ; MOVE_ATHENA_SPEC_5_L
-	dpr MoveC_Athena_PsychoBall ;X ; BANK $06 ; MOVE_ATHENA_SPEC_5_H
-	dpr MoveC_Athena_PsychoBall ;X ; BANK $06 ; MOVE_ATHENA_SPEC_6_L
-	dpr MoveC_Athena_PsychoBall ;X ; BANK $06 ; MOVE_ATHENA_SPEC_6_H
-	dpr MoveC_Athena_ShCryst ; BANK $06 ; MOVE_ATHENA_SHINING_CRYSTAL_BIT_GS
-	dpr MoveC_Athena_ShCryst ; BANK $06 ; MOVE_ATHENA_SHINING_CRYSTAL_BIT_GD
-	dpr MoveC_Athena_ShCryst ; BANK $06 ; MOVE_ATHENA_SHINING_CRYSTAL_BIT_AS
-	dpr MoveC_Athena_ShCryst ; BANK $06 ; MOVE_ATHENA_SHINING_CRYSTAL_BIT_AD
-	dpr MoveC_Athena_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
-	dpr MoveC_Base_ThrowA_DiagF ; BANK $02 ; MOVE_SHARED_THROW_A
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_ATTACK_G
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
+	mMvCodeDef MoveC_Athena_PsychoBall ; BANK $06 ; MOVE_ATHENA_PSYCHO_BALL_L
+	mMvCodeDef MoveC_Athena_PsychoBall ; BANK $06 ; MOVE_ATHENA_PSYCHO_BALL_H
+	mMvCodeDef MoveC_Athena_PhoenixArrow ; BANK $06 ; MOVE_ATHENA_PHOENIX_ARROW_L
+	mMvCodeDef MoveC_Athena_PhoenixArrow ; BANK $06 ; MOVE_ATHENA_PHOENIX_ARROW_H
+	mMvCodeDef MoveC_Athena_PsychoReflector ; BANK $06 ; MOVE_ATHENA_PSYCHO_REFLECTOR_L
+	mMvCodeDef MoveC_Athena_PsychoReflector ; BANK $06 ; MOVE_ATHENA_PSYCHO_REFLECTOR_H
+	mMvCodeDef MoveC_Andy_ShoRyuDan ; BANK $06 ; MOVE_ATHENA_PSYCHO_SWORD_L
+	mMvCodeDef MoveC_Andy_ShoRyuDan ; BANK $06 ; MOVE_ATHENA_PSYCHO_SWORD_H
+	mMvCodeDef MoveC_Athena_PsychoTeleport ; BANK $06 ; MOVE_ATHENA_PSYCHO_TELEPORT_L
+	mMvCodeDef MoveC_Athena_PsychoTeleport ; BANK $06 ; MOVE_ATHENA_PSYCHO_TELEPORT_H
+	mMvCodeDef MoveC_Athena_PsychoBall ;X ; BANK $06 ; MOVE_ATHENA_SPEC_5_L
+	mMvCodeDef MoveC_Athena_PsychoBall ;X ; BANK $06 ; MOVE_ATHENA_SPEC_5_H
+	mMvCodeDef MoveC_Athena_PsychoBall ;X ; BANK $06 ; MOVE_ATHENA_SPEC_6_L
+	mMvCodeDef MoveC_Athena_PsychoBall ;X ; BANK $06 ; MOVE_ATHENA_SPEC_6_H
+	mMvCodeDef MoveC_Athena_ShCryst ; BANK $06 ; MOVE_ATHENA_SHINING_CRYSTAL_BIT_GS
+	mMvCodeDef MoveC_Athena_ShCryst ; BANK $06 ; MOVE_ATHENA_SHINING_CRYSTAL_BIT_GD
+	mMvCodeDef MoveC_Athena_ShCryst ; BANK $06 ; MOVE_ATHENA_SHINING_CRYSTAL_BIT_AS
+	mMvCodeDef MoveC_Athena_ShCryst ; BANK $06 ; MOVE_ATHENA_SHINING_CRYSTAL_BIT_AD
+	mMvCodeDef MoveC_Athena_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_ThrowA_DiagF ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Mai:
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_ATTACK_G
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
-	dpr MoveC_Mai_KaChoSen ; BANK $06 ; MOVE_MAI_KA_CHO_SEN_L
-	dpr MoveC_Mai_KaChoSen ; BANK $06 ; MOVE_MAI_KA_CHO_SEN_H
-	dpr MoveC_Mai_HissatsuShinobibachi ; BANK $06 ; MOVE_MAI_HISSATSU_SHINOBIBACHI_L
-	dpr MoveC_Mai_HissatsuShinobibachi ; BANK $06 ; MOVE_MAI_HISSATSU_SHINOBIBACHI_H
-	dpr MoveC_Mai_RyuEnBu ; BANK $06 ; MOVE_MAI_RYU_EN_BU_L
-	dpr MoveC_Mai_RyuEnBu ; BANK $06 ; MOVE_MAI_RYU_EN_BU_H
-	dpr MoveC_Mai_HishoRyuEnJin ; BANK $06 ; MOVE_MAI_HISHO_RYU_EN_JIN_L
-	dpr MoveC_Mai_HishoRyuEnJin ; BANK $06 ; MOVE_MAI_HISHO_RYU_EN_JIN_H
-	dpr MoveC_Mai_ChijouMusasabi ; BANK $06 ; MOVE_MAI_CHIJOU_MUSASABI_L
-	dpr MoveC_Mai_ChijouMusasabi ; BANK $06 ; MOVE_MAI_CHIJOU_MUSASABI_H
-	dpr MoveC_Mai_KuuchuuMusasabi ; BANK $06 ; MOVE_MAI_KUUCHUU_MUSASABI_L
-	dpr MoveC_Mai_KuuchuuMusasabi ; BANK $06 ; MOVE_MAI_KUUCHUU_MUSASABI_H
-	dpr MoveC_Mai_KaChoSen ;X ; BANK $06 ; MOVE_MAI_SPEC_6_L
-	dpr MoveC_Mai_KaChoSen ;X ; BANK $06 ; MOVE_MAI_SPEC_6_H
-	dpr MoveC_Mai_ChoHissatsuShinobibachiS ; BANK $06 ; MOVE_MAI_CHO_HISSATSU_SHINOBIBACHI_S
-	dpr MoveC_Mai_ChoHissatsuShinobibachiD ; BANK $06 ; MOVE_MAI_CHO_HISSATSU_SHINOBIBACHI_D
-	dpr MoveC_Mai_ChoHissatsuShinobibachiS ;X ; BANK $06 ; MOVE_MAI_SUPER_1_S
-	dpr MoveC_Mai_ChoHissatsuShinobibachiD ;X ; BANK $06 ; MOVE_MAI_SUPER_1_D
-	dpr MoveC_Mai_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
-	dpr MoveC_Base_ThrowA_DirD ; BANK $02 ; MOVE_SHARED_THROW_A
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_ATTACK_G
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
+	mMvCodeDef MoveC_Mai_KaChoSen ; BANK $06 ; MOVE_MAI_KA_CHO_SEN_L
+	mMvCodeDef MoveC_Mai_KaChoSen ; BANK $06 ; MOVE_MAI_KA_CHO_SEN_H
+	mMvCodeDef MoveC_Mai_HissatsuShinobibachi ; BANK $06 ; MOVE_MAI_HISSATSU_SHINOBIBACHI_L
+	mMvCodeDef MoveC_Mai_HissatsuShinobibachi ; BANK $06 ; MOVE_MAI_HISSATSU_SHINOBIBACHI_H
+	mMvCodeDef MoveC_Mai_RyuEnBu ; BANK $06 ; MOVE_MAI_RYU_EN_BU_L
+	mMvCodeDef MoveC_Mai_RyuEnBu ; BANK $06 ; MOVE_MAI_RYU_EN_BU_H
+	mMvCodeDef MoveC_Mai_HishoRyuEnJin ; BANK $06 ; MOVE_MAI_HISHO_RYU_EN_JIN_L
+	mMvCodeDef MoveC_Mai_HishoRyuEnJin ; BANK $06 ; MOVE_MAI_HISHO_RYU_EN_JIN_H
+	mMvCodeDef MoveC_Mai_ChijouMusasabi ; BANK $06 ; MOVE_MAI_CHIJOU_MUSASABI_L
+	mMvCodeDef MoveC_Mai_ChijouMusasabi ; BANK $06 ; MOVE_MAI_CHIJOU_MUSASABI_H
+	mMvCodeDef MoveC_Mai_KuuchuuMusasabi ; BANK $06 ; MOVE_MAI_KUUCHUU_MUSASABI_L
+	mMvCodeDef MoveC_Mai_KuuchuuMusasabi ; BANK $06 ; MOVE_MAI_KUUCHUU_MUSASABI_H
+	mMvCodeDef MoveC_Mai_KaChoSen ;X ; BANK $06 ; MOVE_MAI_SPEC_6_L
+	mMvCodeDef MoveC_Mai_KaChoSen ;X ; BANK $06 ; MOVE_MAI_SPEC_6_H
+	mMvCodeDef MoveC_Mai_ChoHissatsuShinobibachiS ; BANK $06 ; MOVE_MAI_CHO_HISSATSU_SHINOBIBACHI_S
+	mMvCodeDef MoveC_Mai_ChoHissatsuShinobibachiD ; BANK $06 ; MOVE_MAI_CHO_HISSATSU_SHINOBIBACHI_D
+	mMvCodeDef MoveC_Mai_ChoHissatsuShinobibachiS ;X ; BANK $06 ; MOVE_MAI_SUPER_1_S
+	mMvCodeDef MoveC_Mai_ChoHissatsuShinobibachiD ;X ; BANK $06 ; MOVE_MAI_SUPER_1_D
+	mMvCodeDef MoveC_Mai_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_ThrowA_DirD ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Iori:
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
-	dpr MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
-	dpr MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
-	dpr MoveC_Base_AttackG_SF04M0040 ; BANK $06 ; MOVE_SHARED_ATTACK_G
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
-	dpr MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
-	dpr MoveC_Iori_YamiBarai ; BANK $05 ; MOVE_IORI_YAMI_BARAI_L
-	dpr MoveC_Iori_YamiBarai ; BANK $05 ; MOVE_IORI_YAMI_BARAI_H
-	dpr MoveC_Iori_OniYaki ; BANK $05 ; MOVE_IORI_ONI_YAKI_L
-	dpr MoveC_Iori_OniYaki ; BANK $05 ; MOVE_IORI_ONI_YAKI_H
-	dpr MoveC_Iori_AoiHana ; BANK $05 ; MOVE_IORI_AOI_HANA_L
-	dpr MoveC_Iori_AoiHana ; BANK $05 ; MOVE_IORI_AOI_HANA_H
-	dpr MoveC_Iori_KotoTsukiIn ; BANK $05 ; MOVE_IORI_KOTO_TSUKI_IN_L
-	dpr MoveC_Iori_KotoTsukiIn ; BANK $05 ; MOVE_IORI_KOTO_TSUKI_IN_H
-	dpr MoveC_Iori_ScumGale ; BANK $05 ; MOVE_IORI_SCUM_GALE_L
-	dpr MoveC_Iori_ScumGale ; BANK $05 ; MOVE_IORI_SCUM_GALE_H
-	dpr MoveC_Iori_YamiBarai ;X ; BANK $05 ; MOVE_IORI_SPEC_5_L
-	dpr MoveC_Iori_YamiBarai ;X ; BANK $05 ; MOVE_IORI_SPEC_5_H
-	dpr MoveC_Iori_KinYaOtomeEscapeD ; BANK $05 ; MOVE_IORI_KIN_YA_OTOME_ESCAPE_L
-	dpr MoveC_Iori_KinYaOtomeEscapeD ;X ; BANK $05 ; MOVE_IORI_KIN_YA_OTOME_ESCAPE_H
-	dpr MoveC_Iori_KinYaOtomeS ; BANK $05 ; MOVE_IORI_KIN_YA_OTOME_S
-	dpr MoveC_Iori_KinYaOtomeD ; BANK $05 ; MOVE_IORI_KIN_YA_OTOME_D
-	dpr MoveC_OIori_KinYaOtome ; BANK $05 ; MOVE_OIORI_KIN_YA_OTOME_S
-	dpr MoveC_OIori_KinYaOtome ; BANK $05 ; MOVE_OIORI_KIN_YA_OTOME_D
-	dpr MoveC_Iori_ThrowG ; BANK $09 ; MOVE_SHARED_THROW_G
-	dpr MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_L
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_H
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_CH
+	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_KICK_CL
+	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_KICK_CH
+	mMvCodeDef MoveC_Base_AttackG_SF04M0040 ; BANK $06 ; MOVE_SHARED_ATTACK_G
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_PUNCH_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_KICK_A
+	mMvCodeDef MoveC_Base_NormA ; BANK $02 ; MOVE_SHARED_ATTACK_A
+	mMvCodeDef MoveC_Iori_YamiBarai ; BANK $05 ; MOVE_IORI_YAMI_BARAI_L
+	mMvCodeDef MoveC_Iori_YamiBarai ; BANK $05 ; MOVE_IORI_YAMI_BARAI_H
+	mMvCodeDef MoveC_Iori_OniYaki ; BANK $05 ; MOVE_IORI_ONI_YAKI_L
+	mMvCodeDef MoveC_Iori_OniYaki ; BANK $05 ; MOVE_IORI_ONI_YAKI_H
+	mMvCodeDef MoveC_Iori_AoiHana ; BANK $05 ; MOVE_IORI_AOI_HANA_L
+	mMvCodeDef MoveC_Iori_AoiHana ; BANK $05 ; MOVE_IORI_AOI_HANA_H
+	mMvCodeDef MoveC_Iori_KotoTsukiIn ; BANK $05 ; MOVE_IORI_KOTO_TSUKI_IN_L
+	mMvCodeDef MoveC_Iori_KotoTsukiIn ; BANK $05 ; MOVE_IORI_KOTO_TSUKI_IN_H
+	mMvCodeDef MoveC_Iori_ScumGale ; BANK $05 ; MOVE_IORI_SCUM_GALE_L
+	mMvCodeDef MoveC_Iori_ScumGale ; BANK $05 ; MOVE_IORI_SCUM_GALE_H
+	mMvCodeDef MoveC_Iori_YamiBarai ;X ; BANK $05 ; MOVE_IORI_SPEC_5_L
+	mMvCodeDef MoveC_Iori_YamiBarai ;X ; BANK $05 ; MOVE_IORI_SPEC_5_H
+	mMvCodeDef MoveC_Iori_KinYaOtomeEscapeD ; BANK $05 ; MOVE_IORI_KIN_YA_OTOME_ESCAPE_L
+	mMvCodeDef MoveC_Iori_KinYaOtomeEscapeD ;X ; BANK $05 ; MOVE_IORI_KIN_YA_OTOME_ESCAPE_H
+	mMvCodeDef MoveC_Iori_KinYaOtomeS ; BANK $05 ; MOVE_IORI_KIN_YA_OTOME_S
+	mMvCodeDef MoveC_Iori_KinYaOtomeD ; BANK $05 ; MOVE_IORI_KIN_YA_OTOME_D
+	mMvCodeDef MoveC_OIori_KinYaOtome ; BANK $05 ; MOVE_OIORI_KIN_YA_OTOME_S
+	mMvCodeDef MoveC_OIori_KinYaOtome ; BANK $05 ; MOVE_OIORI_KIN_YA_OTOME_D
+	mMvCodeDef MoveC_Iori_ThrowG ; BANK $09 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 	
 ; 
 ; =============== START OF SUBMODULE Play->CPU ===============
@@ -2474,7 +2480,7 @@ ELSE
 	add  hl, bc
 	ld   a, [hl]
 	cp   CMA_MOVEF
-	jp   z, Play_CPU_SetJoyKeysF_RunRand
+	jp   z, Play_CPU_SetJoyKeysF_RunRand_Far
 	cp   CMA_MOVEB
 	jp   z, Play_CPU_SetJoyKeysB_HopRand
 	cp   CMA_CHARGE
@@ -2776,8 +2782,7 @@ Play_CPU_BlockAttack_ByDifficulty:
 	jp   Play_CPU_SetJoyKeysB
 	
 ; =============== Play_CPU_BlockAttack_C15 ===============
-; Performs actions depending on how the opponent's attack hits,
-; with 15% chance of not doing anything.
+; Makes the opponent block the attack, with a 15% chance of not doing anything.
 Play_CPU_BlockAttack_C15:
 	;
 	; ~15.6% chance of not doing anything
@@ -2844,7 +2849,7 @@ Play_CPU_CheckProj:
 	
 	ld   a, [wDifficulty]
 	cp   DIFFICULTY_HARD				; Playing on HARD?
-	jp   nz, .norm		; If not, skip
+	jp   nz, .norm						; If not, skip
 	
 	ld   hl, iPlInfo_CharIdOther
 	add  hl, bc
@@ -2965,7 +2970,7 @@ Play_CPU_SetJoyKeysJumpUF:
 	ld   a, [wTimer]
 	bit  4, a					; (wTimer & $10) == 0?
 	jp   z, .setJumpDir			; If so, skip
-	ld   hl, MoveInput_DU_Fast
+	ld   hl, MoveInput_DU
 	call Play_CPU_ApplyMoveInputDir
 	
 .setJumpDir:
@@ -3020,7 +3025,7 @@ Play_CPU_SetJoyKeysB_HP_C50:
 	jp   Play_CPU_SetJoyKeys
 	
 
-; =============== Play_CPU_SetJoyKeys*_C75 ===============
+; =============== Play_CPU_SetJoyKeys*_C25 ===============
 ; Sets of subroutines that makes the CPU perform a punch/kick input.
 ; These subroutines are affected by difficulty in the same way:
 ; - On EASY and NORMAL difficulties, there's a 75% chance of not moving.
@@ -3167,10 +3172,10 @@ Play_CPU_SetJoyKeysDB:
 	ld   d, $00
 	jp   Play_CPU_SetJoyKeys
 	
-; =============== Play_CPU_SetJoyKeysF_RunRand ===============
+; =============== Play_CPU_SetJoyKeysF_RunRand_Far ===============
 ; Makes the CPU move forward if it's not too close to the opponent.
 ; There's a 50% chance the CPU will run forwards.
-Play_CPU_SetJoyKeysF_RunRand:
+Play_CPU_SetJoyKeysF_RunRand_Far:
 
 	; Don't do anything if we're too close to the opponent
 	ld   hl, iPlInfo_PlDistance
@@ -3648,7 +3653,7 @@ CPU_MoveInputList_Andy:
 	db KEP_B_LIGHT
 	db KEP_B_HEAVY
 	; BF+P -> Zan Ei Ken
-	dw MoveInput_BF_Fast
+	dw MoveInput_BF
 	db KEP_B_LIGHT
 	db KEP_B_HEAVY
 	; BDF+K -> Ku Ha Dan 
@@ -3810,27 +3815,27 @@ CPU_MoveInputList_Mai:
 
 CPU_MoveInputList_Leona:
 	; DU+K -> X-Calibur
-	dw MoveInput_DU_Slow
+	dw MoveInput_DU_Charge
 	db KEP_A_LIGHT
 	db KEP_A_HEAVY
 	; BF+K -> Grand Sabre
-	dw MoveInput_BF_Slow
+	dw MoveInput_BF_Charge
 	db KEP_A_LIGHT
 	db KEP_A_HEAVY
 	; DU+P -> Moon Slasher
-	dw MoveInput_DU_Slow
+	dw MoveInput_DU_Charge
 	db KEP_B_LIGHT
 	db KEP_B_HEAVY
 	; BF+P -> Baltic Launcher
-	dw MoveInput_BF_Slow
+	dw MoveInput_BF_Charge
 	db KEP_B_LIGHT
 	db KEP_B_HEAVY
 	; DU+K -> X-Calibur
-	dw MoveInput_DU_Slow
+	dw MoveInput_DU_Charge
 	db KEP_A_LIGHT
 	db KEP_A_HEAVY
 	; DU+P -> Moon Slasher
-	dw MoveInput_DU_Slow
+	dw MoveInput_DU_Charge
 	db KEP_B_LIGHT
 	db KEP_B_HEAVY
 	; DFDB+P (air) -> V Slasher
@@ -3844,7 +3849,7 @@ CPU_MoveInputList_Leona:
 
 CPU_MoveInputList_OLeona:
 	; DU+K -> X-Calibur
-	dw MoveInput_DU_Slow
+	dw MoveInput_DU_Charge
 	db KEP_A_LIGHT
 	db KEP_A_HEAVY
 	; FDB+P -> Storm Bringer
@@ -3852,19 +3857,19 @@ CPU_MoveInputList_OLeona:
 	db KEP_B_LIGHT
 	db KEP_B_HEAVY
 	; BF+K -> Grand Sabre
-	dw MoveInput_BF_Slow
+	dw MoveInput_BF_Charge
 	db KEP_A_LIGHT
 	db KEP_A_HEAVY
 	; DU+P -> Moon Slasher
-	dw MoveInput_DU_Slow
+	dw MoveInput_DU_Charge
 	db KEP_B_LIGHT
 	db KEP_B_HEAVY
 	; BF+P -> Baltic Launcher
-	dw MoveInput_BF_Slow
+	dw MoveInput_BF_Charge
 	db KEP_B_LIGHT
 	db KEP_B_HEAVY
 	; DU+K -> X-Calibur
-	dw MoveInput_DU_Slow
+	dw MoveInput_DU_Charge
 	db KEP_A_LIGHT
 	db KEP_A_HEAVY
 	; DFDB+P -> Super Moon Slasher (ground) / V Slasher (air)

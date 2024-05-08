@@ -54,7 +54,30 @@ mBinDef: MACRO
 .end:
 ENDM
 
-; =============== mBinDef ===============
+; =============== mGfxDef ===============
+; Generates an include for a binary GfxDef structure.
+; This is like mBinDef, except the size is expressed in tiles.
+; IN
+; - \1: Path to file to INCBIN
+mGfxDef: MACRO
+	db (.end-.bin)/TILESIZE ; Number of tiles
+.bin:
+	INCBIN \1		; Data itself
+.end:
+ENDM
+
+; =============== mTxtDef ===============
+; Generates a counted string.
+; IN
+; - \1: A string
+mTxtDef: MACRO
+	db (.end-.bin) ; Number of letters
+.bin:
+	db \1		   ; Text string
+.end:
+ENDM
+
+; =============== mIncJunk ===============
 ; Generates an include for junk padding data.
 ; IN
 ; - \1: Filename without extension
@@ -595,6 +618,39 @@ mMvC_SetFrame: MACRO
 	ld   a, \1
 	ld   h, \2
 	call Play_Pl_SetAnimFrame
+ENDM
+
+; =============== mMvC_StartChkFrame ===============
+; Starts a list of mMvC_ChkFrame declarations.
+; OUT
+; - HL: Ptr to iOBJInfo_OBJLstPtrTblOffsetView
+; - A: Currently visible sprite mapping ID
+mMvC_StartChkFrame: MACRO
+	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+	add  hl, de
+	ld   a, [hl]
+ENDM
+
+; =============== mMvC_ChkFrame ===============
+; Executes the specified code if the current sprite mapping ID matches what's specified.
+; IN
+; - 1: Sprite mapping ID
+; - 2: Ptr to code for it.
+; - A: Current sprite mapping ID
+mMvC_ChkFrame: MACRO
+	cp   \1*OBJLSTPTR_ENTRYSIZE
+	jp   z, \2
+ENDM
+
+; =============== mMvC_SetFrameOnEnd ===============
+; A faster version of mMvC_SetFrame used inside mMvC_ValFrameEnd branches.
+; IN
+; - 1: Sprite mapping ID
+mMvC_SetFrameOnEnd: MACRO
+	ld   hl, iOBJInfo_OBJLstPtrTblOffset
+	add  hl, de
+	; Offset by 1, because the animation routine will immediately increment it.
+	ld   [hl], (\1 - 1)*OBJLSTPTR_ENTRYSIZE
 ENDM
 
 ; =============== mMvC_SetDamageNext ===============

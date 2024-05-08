@@ -132,7 +132,6 @@ BONUS_ID_NONE     EQU $FF
 
 C_NL EQU $FF ; Newline character in strings
 
-OBJ_OFFSET_X        EQU $08 ; Standard offset used when sprite positions are compared to the screen/scroll
 PLAY_BORDER_X       EQU $08 ; Threshold value for being treated as being on the wall.
 OBJLSTPTR_NONE      EQU $FFFF ; Placeholder pointer that marks the lack of a secondary sprite mapping and the end separator
 OBJLSTPTR_ENTRYSIZE EQU $04 ; Size of each OBJLstPtrTable entry (pair of OBJLstHdrA_* and OBJLstHdrB_* pointers)
@@ -144,7 +143,7 @@ DIPB_EASY_MOVES       EQU 2 ; SELECT + A/B for easy super moves
 DIPB_POWERUP          EQU 3 ; DIPB_POWERUP Powerup mode. POW Meter grows on its own + Unlimited super moves + move changes
 DIPB_SGB_SOUND_TEST   EQU 4 ; Adds SGB S.E TEST to the options menu
 DIPB_TEAM_DUPL        EQU 5 ; Allow duplicate characters in a team
-DIPB_UNLOCK_GOENITZ   EQU 6 ; Unlock Goenitz
+DIPB_UNLOCK_BOSS      EQU 6 ; Unlock Goenitz
 DIPB_UNLOCK_OTHER     EQU 7 ; Unlock everyone else (Mr Karate, Boss Kagura, Orochi Iori and Orochi Leona)
 
 ; $C025
@@ -755,13 +754,13 @@ MOVE_SHARED_THROW_ROTU     EQU $92 ; Throw seq #1 - Rotation frame
 MOVE_SHARED_THROW_ROTL     EQU $94 ; Throw seq #1 - Rotation frame
 MOVE_SHARED_THROW_ROTD     EQU $96 ; Throw seq #1 - Rotation frame
 MOVE_SHARED_THROW_ROTR     EQU $98 ; Throw seq #1 - Rotation frame
-MOVE_FF                    EQU $FF
+MOVE_TASK_REMOVE           EQU $FF ; Magic value - Kill current task
 
 ; Character-specific
 MOVE_KYO_ARA_KAMI_L                    EQU $48
 MOVE_KYO_ARA_KAMI_H                    EQU $4A
-MOVE_KYO_ONIYAKI_L                     EQU $4C
-MOVE_KYO_ONIYAKI_H                     EQU $4E
+MOVE_KYO_ONI_YAKI_L                    EQU $4C
+MOVE_KYO_ONI_YAKI_H                    EQU $4E
 MOVE_KYO_RED_KICK_L                    EQU $50
 MOVE_KYO_RED_KICK_H                    EQU $52
 MOVE_KYO_KOTOTSUKI_YOU_L               EQU $54
@@ -841,8 +840,8 @@ MOVE_RYO_KO_OU_KEN_L                   EQU $48
 MOVE_RYO_KO_OU_KEN_H                   EQU $4A
 MOVE_RYO_MOU_KO_RAI_JIN_GOU_L          EQU $4C
 MOVE_RYO_MOU_KO_RAI_JIN_GOU_H          EQU $4E
-MOVE_RYO_HIEN_SHIPPU_KYAKU_L           EQU $50
-MOVE_RYO_HIEN_SHIPPU_KYAKU_H           EQU $52
+MOVE_RYO_HIEN_SHIPPUU_KYAKU_L          EQU $50
+MOVE_RYO_HIEN_SHIPPUU_KYAKU_H          EQU $52
 MOVE_RYO_KO_HOU_L                      EQU $54
 MOVE_RYO_KO_HOU_H                      EQU $56
 MOVE_RYO_KYOKUKEN_RYU_RENBU_KEN_L      EQU $58
@@ -1107,7 +1106,7 @@ HITTYPE_DROP_DB_G           EQU $0D ; Hit (not throw) that sends the player to t
 IF REV_VER_2 == 0
 HITTYPE_DROP_SWOOPUP        EQU $0E ; Very high throw or swept up above
 HITTYPE_THROW_END           EQU $0F ; End of the throw. The actual part where the player is launched.
-HITTYPE_THROW_START         EQU $10 ; Start of the throw anim
+HITTYPE_THROW_START         EQU $10 ; Start of the grab anim
 HITTYPE_THROW_ROTU          EQU $11 ; Throw rotation frame, head up
 HITTYPE_THROW_ROTL          EQU $12 ; Throw rotation frame, head left
 HITTYPE_THROW_ROTD          EQU $13 ; Throw rotation frame, head down
@@ -1116,7 +1115,7 @@ ELSE
 HITTYPE_DIZZY               EQU $0E ; English-only, Manual dizzy. 
 HITTYPE_DROP_SWOOPUP        EQU $0F ; Very high throw or swept up above
 HITTYPE_THROW_END           EQU $10 ; End of the throw. The actual part where the player is launched.
-HITTYPE_THROW_START         EQU $11 ; Start of the throw anim
+HITTYPE_THROW_START         EQU $11 ; Start of the grab anim
 HITTYPE_THROW_ROTU          EQU $12 ; Throw rotation frame, head up
 HITTYPE_THROW_ROTL          EQU $13 ; Throw rotation frame, head left
 HITTYPE_THROW_ROTD          EQU $14 ; Throw rotation frame, head down
@@ -1130,6 +1129,7 @@ COLIBOX_00 EQU $00 ; None
 COLIBOX_01 EQU $01
 COLIBOX_02 EQU $02
 COLIBOX_03 EQU $03
+COLIBOX_04 EQU $04 ; Throw range
 COLIBOX_05 EQU $05
 COLIBOX_07 EQU $07
 COLIBOX_08 EQU $08
@@ -1323,4 +1323,10 @@ PLAY_POSTROUND1_OBJ_YOULOST  EQU $10
 
 TID_BAR_L EQU $D2 ; Tile ID for left border of bars
 TID_BAR_R EQU $D3 ; Tile ID for right border of bars
-TID_BAR_BASE EQU $DF ; Tile ID base for bars
+TID_BAR_BASE   EQU $DF ; Tile ID base for bars
+TID_BAR_EMPTY  EQU $E0 ; Tile ID for an empty bar
+TID_BAR_FILLED EQU TID_BAR_BASE ; Tile ID for a filled bar
+TID_BAR_SIZE   EQU $08 ; Number of tile IDs for tile parts, mapping to the LGrow/RGrow
+
+TID_BOX_FILL   EQU $74
+TID_BOX_BLANK  EQU $75

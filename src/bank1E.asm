@@ -18,6 +18,8 @@ Module_CharSel:
 	ldh  [rOBP0], a
 	ldh  [rOBP1], a
 	
+	; Moved up from 95
+.loadVRAM:
 	; Apply SGB palette for characters
 	ld   de, SCRPAL_CHARSELECT
 	call HomeCall_SGB_ApplyScreenPalSet
@@ -204,6 +206,7 @@ Module_CharSel:
 	; This is specifically only done while the CPU picks a new set of characters,
 	; presumably because it would be annoying having the crosses cover the portraits
 	; when the player can select them.
+	; 95 always drew the crosses.
 	call CharSel_DrawCrossOnDefeatedChars
 	jp   .chkInitialMode
 	
@@ -225,10 +228,10 @@ Module_CharSel:
 	;
 	ld   a, [wCharSelP1Char0]
 	cp   CHAR_ID_NONE					; Is the first character empty?
-	jp   z, chkInitialModeP2			; If so, skip
+	jp   z, .chkInitialModeP2			; If so, skip
 	ld   a, CHARSEL_MODE_READY			; Otherwise, skip to the next mode for P1
 	ld   [wCharSelP1CursorMode], a
-chkInitialModeP2:
+.chkInitialModeP2:
 	ld   a, [wCharSelP2Char0]			; Same as above, for P2
 	cp   CHAR_ID_NONE
 	jp   z, .drawBG
@@ -428,10 +431,10 @@ chkInitialModeP2:
 	; Player 2 - Icon 1
 	ld   a, [wCharSelP2Char0]
 	cp   CHAR_ID_NONE
-	jp   z, .initDefaultNames
+	jp   z, .initOBJ
 	ld   de, $8FC0
 	ld   hl, BG_CHARSEL_P2ICON0
-	ld   c, $FC
+	ld   c, TILE_CHARSEL_P2ICON0
 	call CharSel_DrawP2CharIcon
 	ld   de, wOBJInfo_Pl2
 	call CharSel_PrintCharName
@@ -458,12 +461,6 @@ chkInitialModeP2:
 	ld   de, wOBJInfo_Pl2
 	call CharSel_PrintCharName
 	
-.initDefaultNames:
-	; NOTE: In KOF95, before .initOBJ there was code to write the default character names
-	;       when no characters are selected yet.
-	;       The removal of this code means that CharSel_Select_DoCtrl_NoAction gets to do 
-	;       it every frame (which didn't exist in 95)
-	
 ;--
 .initOBJ:
 
@@ -483,12 +480,23 @@ chkInitialModeP2:
 	ld   de, OBJInfoInit_CharSel_Cursor
 	call OBJLstS_InitFrom
 	
+	; NOTE: In KOF95, the code that wrote the default character names was here.
+	;       For whatever reason, in 96 that is done when drawing the player icons.
+	;
+	;       Unfortunately, because it's now tied to the player's selected character, no name
+	;       gets written when none are selected unlike in 95, so CharSel_Select_DoCtrl_NoAction
+	;       gets to do it every frame (which didn't exist in 95).
+	;
+	;       The only side effect of doing it the 95 way is that tile flipped names aren't
+	;       preserved when returning to the character select screen (ie: if you last
+	;       selected "KAGURA", after winning a match it would show "CHIZURU").
+	;
+	
+	; Set the correct sprites for the normal/wide 1P/CPU versions
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstPtrTblOffset
 	ld   de, wOBJInfo_Pl1+iOBJInfo_CharSel_CursorOBJId
-	
-	; Set the correct sprites for the normal/wide versions
 	ld   a, [wPlInfo_Pl1+iPlInfo_Flags0]
-	bit  PF0B_CPU, a			; Is this character a CPU?
+	bit  PF0B_CPU, a		; Is this character a CPU?
 	jp   nz, .cursorCPU_1P	; If so, jump
 	
 .cursorPl_1P:
@@ -532,12 +540,11 @@ chkInitialModeP2:
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstFlags
 	ld   [hl], SPR_OBP1
 	
+	; Set the correct sprites for the normal/wide 2P/CPU versions
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_OBJLstPtrTblOffset
 	ld   de, wOBJInfo_Pl2+iOBJInfo_CharSel_CursorOBJId
-	
-	; Set the correct sprites for the normal/wide versions
 	ld   a, [wPlInfo_Pl2+iPlInfo_Flags0]
-	bit  PF0B_CPU, a			; Is this character a CPU?
+	bit  PF0B_CPU, a		; Is this character a CPU?
 	jp   nz, .cursorCPU_2P	; If so, jump
 	
 .cursorPl_2P:
@@ -635,7 +642,7 @@ chkInitialModeP2:
 	;
 	ld   a, [wPlayMode]
 	bit  MODEB_VS, a	; Playing in VS mode? 
-	jp   z, .initEnd		; If not, skip
+	jp   z, .initEnd	; If not, skip
 	call Rand
 	and  a, $03
 	ld   [wStageId], a
@@ -678,7 +685,7 @@ chkInitialModeP2:
 	jp   .mainLoop
 .end:
 
-	; Wait for $3C frames before switching
+	; Wait for 60 frames before switching
 	ld   b, $3C
 .endDelayLoop:
 	call Task_PassControl_NoDelay
@@ -689,8 +696,8 @@ chkInitialModeP2:
 	; If we aren't in team mode, gameplay can start right away.
 	; Otherwise, we've still got to choose the team order.
 	;
-	call IsInTeamMode	; Are we in team mode?
-	jp   nc, Module_Play	; If not, jump
+	call IsInTeamMode			; Are we in team mode?
+	jp   nc, Module_Play		; If not, jump
 	ld   b, BANK(Module_OrdSel) ; BANK $1E
 	ld   hl, Module_OrdSel
 	rst  $00
@@ -808,11 +815,11 @@ CharSel_Mode_Ready:
 	or   a					
 	jp   nz, .confirmPl2
 .confirmPl1:
-	ld   a, $04
+	ld   a, CHARSEL_MODE_CONFIRMED
 	ld   [wCharSelP1CursorMode], a
 	ret
 .confirmPl2:
-	ld   a, $04
+	ld   a, CHARSEL_MODE_CONFIRMED
 	ld   [wCharSelP2CursorMode], a
 	ret
 	
@@ -853,7 +860,7 @@ CharSel_Mode_Select:
 	jp   nz, CharSel_Select_DoCtrl_Start	; If so, jump
 	
 	; SELECT -> Removes all selected characters
-	;           If there are none, returns to the title screen.
+	;           If there are none, returns to the title screen
 	bit  KEYB_SELECT, a						; Pressed SELECT?
 	jp   nz, CharSel_Select_DoCtrl_Select	; If so, jump
 	
@@ -2106,6 +2113,7 @@ CharSel_AddChar:
 ; - C: Portrait ID
 ; OUT
 ; - B: Team slot number the character was added to (0-based)
+; - C: Character ID (as it passes through CharSel_GetCharIdByPortraitId)
 ; - C flag: If set, the character couldn't be added
 CharSel_AddCharToFirstFreeSlot:
 	; C = ID of the character we want to add
@@ -2694,112 +2702,29 @@ CharSel_CharNamePtrTable:
 ; Lite versions of TextDef which lack the tilemap offset, as they are passed to TextPrinter_Instant_CustomPos.
 
 ; Empty line used to clear out the old character name.
-TextC_Char_None:
-	db .end-.start
-.start:
-	db "        "
-.end:
+TextC_Char_None:     mTxtDef "        "
 ; Actual player names.
-TextC_Char_Kyo:
-	db .end-.start
-.start:
-	db "KYO"
-.end:
-TextC_Char_Daimon:
-	db .end-.start
-.start:
-	db "DAIMON"
-.end:
-TextC_Char_Terry:
-	db .end-.start
-.start:
-	db "TERRY"
-.end:
-TextC_Char_Andy:
-	db .end-.start
-.start:
-	db "ANDY"
-.end:
-TextC_Char_Ryo:
-	db .end-.start
-.start:
-	db "RYO"
-.end:
-TextC_Char_Robert:
-	db .end-.start
-.start:
-	db "ROBERT"
-.end:
-TextC_Char_Athena:
-	db .end-.start
-.start:
-	db "ATHENA"
-.end:
-TextC_Char_Mai:
-	db .end-.start
-.start:
-	db "MAI"
-.end:
-TextC_Char_Leona:
-	db .end-.start
-.start:
-	db "LEONA"
-.end:
-TextC_Char_Geese:
-	db .end-.start
-.start:
-	db "GEESE"
-.end:
-TextC_Char_Krauser:
-	db .end-.start
-.start:
-	db "KRAUSER"
-.end:
-TextC_Char_MrBig:
-	db .end-.start
-.start:
-	db "M@BIG"
-.end:
-TextC_Char_Iori:
-	db .end-.start
-.start:
-	db "IORI"
-.end:
-TextC_Char_Mature:
-	db .end-.start
-.start:
-	db "MATURE"
-.end:
-TextC_Char_Chizuru:
-	db .end-.start
-.start:
-	db "CHIZURU"
-.end:
-TextC_Char_Goenitz:
-	db .end-.start
-.start:
-	db "GOENITZ"
-.end:
-TextC_Char_MrKarate:
-	db .end-.start
-.start:
-	db "M<r.>KARATE"
-.end:
-TextC_Char_OIori:
-	db .end-.start
-.start:
-	db "IORI`"
-.end:
-TextC_Char_OLeona:
-	db .end-.start
-.start:
-	db "LEONA`"
-.end:
-TextC_Char_Kagura:
-	db .end-.start
-.start:
-	db "KAGURA"
-.end:
+TextC_Char_Kyo:      mTxtDef "KYO"
+TextC_Char_Daimon:   mTxtDef "DAIMON"
+TextC_Char_Terry:    mTxtDef "TERRY"
+TextC_Char_Andy:     mTxtDef "ANDY"
+TextC_Char_Ryo:      mTxtDef "RYO"
+TextC_Char_Robert:   mTxtDef "ROBERT"
+TextC_Char_Athena:   mTxtDef "ATHENA"
+TextC_Char_Mai:      mTxtDef "MAI"
+TextC_Char_Leona:    mTxtDef "LEONA"
+TextC_Char_Geese:    mTxtDef "GEESE"
+TextC_Char_Krauser:  mTxtDef "KRAUSER"
+TextC_Char_MrBig:    mTxtDef "M@BIG"
+TextC_Char_Iori:     mTxtDef "IORI"
+TextC_Char_Mature:   mTxtDef "MATURE"
+TextC_Char_Chizuru:  mTxtDef "CHIZURU"
+TextC_Char_Goenitz:  mTxtDef "GOENITZ"
+TextC_Char_MrKarate: mTxtDef "M<r.>KARATE"
+TextC_Char_OIori:    mTxtDef "IORI`"
+TextC_Char_OLeona:   mTxtDef "LEONA`"
+TextC_Char_Kagura:   mTxtDef "KAGURA"
+
 ; =============== CharSel_AnimCursorPalFast ===============
 ; Cycles the cursor palette fast, used when still selecting something.
 ; OUT
@@ -2917,16 +2842,8 @@ CharSel_PrintStartText:
 	call TextPrinter_Instant_CustomPos
 	ret
 	
-TextC_CharSel_Start:
-	db .end-.start
-.start:
-	db "START"
-.end:
-TextC_CharSel_StartBlank:
-	db .end-.start
-.start:
-	db "     "
-.end:
+TextC_CharSel_Start:      mTxtDef "START"
+TextC_CharSel_StartBlank: mTxtDef "     "
 	
 ; =============== CharSel_HideCursor ===============
 ; Hides the cursor for the current player.
@@ -2938,7 +2855,7 @@ CharSel_HideCursor:
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	res  OSTB_VISIBLE, [hl]
 	ret
-.pl2:;J
+.pl2:
 	ld   hl, wOBJInfo_Pl2+iOBJInfo_Status
 	res  OSTB_VISIBLE, [hl]
 	ret
@@ -3026,7 +2943,7 @@ CharSel_DrawUnlockedChars:
 	jp   z, .chkUnlockMrKarate	; If so, jump
 	cp   CHARSEL_ID_MRKARATE1	; Trying to draw the second part of Mr. Karate's portrait?
 	jp   z, .chkUnlockMrKarate	; If so, jump
-	jp   .chkGoenitz			; Skip ahead
+	jp   .chkBoss				; Skip ahead
 .chkUnlockMrKarate:
 	ld   a, [wDipSwitch]
 	bit  DIPB_UNLOCK_OTHER, a	; Are all characters unlocked?
@@ -3036,14 +2953,14 @@ CharSel_DrawUnlockedChars:
 	ld   [wCharSelIdMapTbl+CHARSEL_ID_MRKARATE0], a
 	ld   [wCharSelIdMapTbl+CHARSEL_ID_MRKARATE1], a
 	jp   .nextChar
-.chkGoenitz:
+.chkBoss:
 	ld   a, b
 	cp   CHARSEL_ID_GOENITZ		; Trying to draw Goenitz's portrait?
-	jp   z, .chkUnlockGoenitz	; If so, jump
+	jp   z, .chkUnlockBoss		; If so, jump
 	jp   .charOk				; Everything else can be drawn
-.chkUnlockGoenitz:
+.chkUnlockBoss:
 	ld   a, [wDipSwitch]
-	bit  DIPB_UNLOCK_GOENITZ, a	; Is Goenitz unlocked?
+	bit  DIPB_UNLOCK_BOSS, a	; Is Goenitz unlocked?
 	jp   nz, .charOk			; If so, jump
 	; Otherwise, disable his slot and skip him
 	ld   a, CHAR_ID_NONE
@@ -3073,8 +2990,6 @@ CharSel_DrawUnlockedChars:
 ; - B: Portrait ID (CHARSEL_ID_*)
 ;      Determines the portrait position.
 ; - C: Base tile ID.
-;      This is supplied separately because some portraits are used by multiple characters
-;      (ie: Iori / Orochi Iori)
 CharSel_DrawPortrait:
 	;
 	; Index CharSel_IdBGMapTbl with B and read out its pointer to HL.
@@ -3308,22 +3223,14 @@ BG_CharSel_Portrait: INCBIN "data/bg/charsel_portrait.bin"
 BG_CharSel_EmptyPortrait: INCBIN "data/bg/charsel_emptyportrait.bin"
 TextDef_CharSel_SingleTitle:
 	dw $9823
-	db .end-.start
-.start:
-	db "PLAYER  SELECT"
-.end:
+	mTxtDef "PLAYER  SELECT"
 TextDef_CharSel_TeamTitle:
 	dw $9824
-	db .end-.start
-.start:
-	db "TEAM  SELECT"
-.end:
+	mTxtDef "TEAM  SELECT"
 GFX_CharSel_BG0: INCBIN "data/gfx/charsel_bg0.bin"
 GFXLZ_CharSel_BG1: INCBIN "data/gfx/charsel_bg1.lzc"
 GFXLZ_CharSel_OBJ: INCBIN "data/gfx/charsel_obj.lzc"
-GFXDef_CharSel_Cross:
-	db $09 ; Tile count
-GFX_CharSel_Cross: INCBIN "data/gfx/charsel_cross.bin"
+GFXDef_CharSel_Cross: mGfxDef "data/gfx/charsel_cross.bin"
 GFX_CharSel_Cross_Mask: INCBIN "data/gfx/charsel_cross_mask.bin"
 
 OBJInfoInit_CharSel_Cursor:
@@ -3680,7 +3587,7 @@ Module_OrdSel:
 	ld   a, $58
 	ld   [wOBJInfo2+iOBJInfo_Y], a
 	
-	call Pl_InitBeforeStageLoad	; Just in case? This is already done by CharSel
+	call Pl_InitBeforeStageLoad	; In case we skipped the character select screen (ie: after cutscene)
 	call Serial_DoHandshake
 	
 	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WTILEMAP|LCDC_ENABLE
@@ -3727,7 +3634,7 @@ Module_OrdSel:
 .doPl2:
 
 	;
-	; Handle Player 1
+	; Handle Player 2
 	;
 	ld   a, PL2
 	ld   [wOrdSelCurPl], a
@@ -3913,7 +3820,7 @@ OrdSel_Ctrl_SelChar_P1:
 		
 		; If the 2nd character was already selected, move the cursor to the 3rd character.
 		ld   a, [wOrdSelP1CharSel1]
-		and  a, a						; Is the second character selected?
+		and  a							; Is the second character selected?
 		jr   z, .char0Done				; If not, skip
 	.char0Ex:
 		; Otherwise, move cursor sprite right again
@@ -3946,8 +3853,14 @@ OrdSel_Ctrl_SelChar_P1:
 		ld   [wOrdSelP1CursorPos], a
 		
 		; If the 3rd character was already selected, move the cursor back to the 1st character.
+		;
+		; This check and what goes with it (wOrdSelP*CursorPosBak) are new to 96. 
+		; In 95, the act of selecting the second character immediately selected the third one.
+		; The addition of 2 vs 1 battles made that not viable anymore, so here the last character
+		; is selected the normal way (except automatically, the next frame) so the cursor position
+		; must be kept valid.
 		ld   a, [wOrdSelP1CharSel2]
-		and  a, a						; Is the third character selected?
+		and  a							; Is the third character selected?
 		jr   z, .char1Done				; If not, skip
 		; Otherwise, move cursor sprite left 6 tiles
 		ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
@@ -3979,7 +3892,7 @@ OrdSel_Ctrl_SelChar_P1:
 		
 		; If the 2nd character was already selected, move the cursor back to the 1st character.
 		ld   a, [wOrdSelP1CharSel1]
-		and  a, a					; Is the second character selected?
+		and  a						; Is the second character selected?
 		jr   z, .char2Done			; If not, skip
 		ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 		sub  a, TILE_H*3			; iOBJInfo_X -= $18
@@ -4057,10 +3970,12 @@ OrdSel_Ctrl_SelChar_P1:
 	cp   CHAR_ID_NONE			; Is there a second character in the team?		
 	ret  nz						; If not, return
 .endPremature:
-	; Why?
+	;--
+	; [POI] Leftover from 95, was pointless there too.
 	ld   a, [wOBJInfo_Pl1+iOBJInfo_X]
 	sub  a, TILE_H*2			; iOBJInfo_X -= $10
 	ld   [wOBJInfo_Pl1+iOBJInfo_X], a
+	;--
 	; Set that all characters were selected
 	ld   a, ORDSEL_SELDONE
 	ld   [wOrdSelP1CharsSelected], a
@@ -4142,7 +4057,7 @@ OrdSel_Ctrl_SelChar_P2:
 		
 		; If the 2nd character was already selected, move the cursor to the 3rd character.
 		ld   a, [wOrdSelP2CharSel1]
-		and  a, a						; Is the second character selected?
+		and  a							; Is the second character selected?
 		jr   z, .char0Done				; If not, skip
 		;--
 		; Otherwise, move cursor sprite *left* again
@@ -4176,7 +4091,7 @@ OrdSel_Ctrl_SelChar_P2:
 		
 		; If the *1st* character was already selected, move the cursor to the *3rd* character.
 		ld   a, [wOrdSelP2CharSel0]
-		and  a, a						; Is the first character selected?
+		and  a							; Is the first character selected?
 		jr   z, .char1Done				; If not, skip
 		
 		; Otherwise, move cursor sprite left 6 tiles
@@ -4212,7 +4127,7 @@ OrdSel_Ctrl_SelChar_P2:
 		
 		; If the 2nd character was already selected, move the cursor back to the 1st character.
 		ld   a, [wOrdSelP2CharSel1]
-		and  a, a					; Is the second character selected?
+		and  a						; Is the second character selected?
 		jr   z, .char2Done			; If not, skip
 		;--
 		; Otherwise, move cursor sprite *right* 3 tiles
@@ -4278,15 +4193,19 @@ OrdSel_Ctrl_SelChar_P2:
 	ld   c, $03
 	call CopyBGToRect
 	
-	; Stop if this this is a 1-character team
+	; Stop if this is a 1-character team
 	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId1]
 	cp   CHAR_ID_NONE		; Is there a second character in the team?	
 	ret  nz					; If not, return
 .endPremature:
-	; Why?
+	;--
+	; [POI] Leftover from 95, was pointless there too.
+	; Actually, in 95 this was an "add", indicating they copy/pasted the 1P subroutine for
+	; both, which makes sense considering the many edits it received.
 	ld   a, [wOBJInfo_Pl2+iOBJInfo_X]
 	sub  a, TILE_H*2			; iOBJInfo_X -= $10
 	ld   [wOBJInfo_Pl2+iOBJInfo_X], a
+	;--
 	
 	; Set that all characters were selected
 	ld   a, ORDSEL_SELDONE
@@ -4339,7 +4258,7 @@ OrdSel_Ctrl_MoveL_P1:
 	
 	; Decrement cursor position unless it's already at the leftmost one.
 	ld   a, [wOrdSelP1CursorPos]
-	and  a, a						; CursorPos == 0?
+	and  a							; CursorPos == 0?
 	ret  z							; If so, return
 	dec  a							; Otherwise, CursorPos--
 	ld   [wOrdSelP1CursorPos], a
@@ -4352,7 +4271,7 @@ OrdSel_Ctrl_MoveL_P1:
 .chkLeft:
 	; Otherwise, we're on the leftmost one.
 	ld   a, [wOrdSelP1CharSel0]
-	and  a, a						; Is the leftmost char already selected? (wOrdSelP1CharSel0 != 0)
+	and  a							; Is the leftmost char already selected? (wOrdSelP1CharSel0 != 0)
 	jr   z, .moveOk					; If not, jump
 	; Otherwise, increment the cursor position back
 	ld   a, [wOrdSelP1CursorPos]
@@ -4361,16 +4280,18 @@ OrdSel_Ctrl_MoveL_P1:
 	ret
 .chkMid:
 	ld   a, [wOrdSelP1CharSel1]
-	and  a, a						; Is the middle char already selected?	
+	and  a							; Is the middle char already selected?	
 	jr   z, .moveOk					; If not, jump
+	;--
 	ld   a, [wOrdSelP1CharSel0]
-	and  a, a						; Is the leftmost char already selected?	
+	and  a							; Is the leftmost char already selected?	
 	jr   z, .moveSkipOk				; If not, jump (always the case)
 	; [TCRF] Unreachable code. Would be possible to reach it only if the the third character wasn't autoselected.
 	ld   a, [wOrdSelP1CursorPos]
 	inc  a
 	ld   [wOrdSelP1CursorPos], a
-	ret  
+	ret 
+	;--
 .moveSkipOk:
 	; Move cursor again to the left, to skip the middle char
 	ld   a, [wOrdSelP1CursorPos]
@@ -4424,6 +4345,7 @@ OrdSel_Ctrl_MoveL_P2:
 	ld   a, [wOrdSelP2CharSel1]
 	and  a							; Is the middle char already selected?	
 	jr   z, .moveOk					; If not, jump
+	;--
 	ld   a, [wOrdSelP2CharSel2]
 	and  a							; Is the leftmost char already selected?	
 	jr   z, .moveSkipOk				; If not, jump (always the case)
@@ -4433,6 +4355,7 @@ OrdSel_Ctrl_MoveL_P2:
 	dec  a
 	ld   [wOrdSelP2CursorPos], a
 	ret  
+	;--
 .moveSkipOk:
 	; Move cursor again to the left, to skip the middle char
 	ld   a, [wOrdSelP2CursorPos]
@@ -4491,17 +4414,19 @@ OrdSel_Ctrl_MoveR_P1:
 	
 .chkMid:
 	ld   a, [wOrdSelP1CharSel1]
-	and  a, a						; Is the middle char already selected?	
+	and  a							; Is the middle char already selected?	
 	jr   z, .moveOk					; If not, jump
+	;--
 	ld   a, [wOrdSelP1CharSel2]
-	and  a, a						; Is the rightmost char already selected?	
+	and  a							; Is the rightmost char already selected?	
 	jr   z, .moveSkipOk				; If not, jump (always the case)
 	
 	; [TCRF] Unreachable code. Would be possible to reach it only if the the third character wasn't autoselected.
 	ld   a, [wOrdSelP1CursorPos]
 	dec  a
 	ld   [wOrdSelP1CursorPos], a
-	ret  
+	ret
+	;--
 .moveSkipOk:
 	; Move cursor again to the right, to skip the middle char
 	ld   a, [wOrdSelP1CursorPos]
@@ -4551,6 +4476,7 @@ OrdSel_Ctrl_MoveR_P2:
 	ld   a, [wOrdSelP2CharSel1]
 	and  a							; Is the middle char already selected?	
 	jr   z, .moveOk					; If not, jump
+	;--
 	ld   a, [wOrdSelP2CharSel0]
 	and  a							; Is the rightmost char already selected?	
 	jr   z, .moveSkipOk				; If not, jump (always the case)
@@ -4559,6 +4485,7 @@ OrdSel_Ctrl_MoveR_P2:
 	inc  a
 	ld   [wOrdSelP2CursorPos], a
 	ret  
+	;--
 .moveSkipOk:
 	; Move cursor again to the right, to skip the middle char
 	ld   a, [wOrdSelP2CursorPos]

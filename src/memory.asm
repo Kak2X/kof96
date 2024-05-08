@@ -15,8 +15,15 @@ vBGHealthBar2P_Last     EQU vBGHealthBar2P+$08
 vBGPowBar1P_Left        EQU $9C83
 vBGPowBar2P_Left        EQU $9C8C
 
+vBGMaxPowBarRow         EQU $9CA0
 
-wBGMaxPowBarRow         EQU $9CA0
+vBGPause1P              EQU $9C46
+vBGPause2P              EQU $9C4B
+
+vBGBoxWin1P0            EQU $9C42
+vBGBoxWin1P1            EQU $9C43
+vBGBoxWin2P0            EQU $9C51
+vBGBoxWin2P1            EQU $9C50
 
 ; EQUs relative to the Japanese version
 SECTION "Settings RAM", WRAM0[$C000]
@@ -139,7 +146,7 @@ wStageDraw                  :db ; EQU $C161 ; If set, forces the "DRAW" screen t
 wLastWinner                 :db ; EQU $C162 ; Marks using bits the player who won the last round.
 wPlayMode                   :db ; EQU $C163 ; Single/Team 1P/VS
 wRoundTotal                 :db ; EQU $C164 ; Total number of rounds played since the system was on. Never read back.
-wJoyActivePl                :db ; EQU $C165 ; Determines the active SGB pad, generally for 1P modes.
+wJoyActivePl                :db ; EQU $C165 ; Determines the active player side in 1P modes. (PL*)
 wStageId                    :db ; EQU $C166 ; Stage ID. Determines music, backdrop and palette.
 wRoundNum                   :db ; EQU $C167 ; Round number in a stage
 ds 1
@@ -169,12 +176,12 @@ wPlayPlThrowTechTimer       :db ; EQU $C179 ; Countdown timer, window of opportu
 wPlaySlowdownTimer          :db ; EQU $C17A ; Countdown timer. When it's > 0, slowdown is enabled during gameplay. When it reaches 0, the slowdown stops.
 wPlaySlowdownSpeed          :db ; EQU $C17B ; Determines how much the game should slow down. Execution is 1 every (wPlaySlowdownSpeed) frames.
 wStageBGP                   :db ; EQU $C17C ; Determines palette for playfield (used to handle screen flashing)
-wPauseFlags                 :db ; EQU $C17D ; Contains flags the pause state
+wPauseFlags                 :db ; EQU $C17D ; Contains flags for the pause state
 wUnused_ContinueUsed        :db ; EQU $C17E ; If set, a continue was used. Not read by anything.
 wCharSeqId                  :db ; EQU $C17F ; "Stage sequence number". Index to the char sequence table, essentially the number of beat opponents after clearing a stage
 wCharSeqTbl                 :ds $14 ; EQU $C180 ; "Stage sequence". Sequence of CPU opponents in order, containing initially CHARSEL_ID_* for normal rounds and CHAR_ID_* for bosses
 wCharSelIdMapTbl            :ds $15 ; EQU $C194 ; Maps cursor locations in the char select screen (CHARSEL_ID_*) to actual character IDs (CHAR_ID_*)
-                                      ; $15 bytes ($C194-$C1A8), this is updated when flipping a tile.
+                                      ; $15 bytes ($C194-$C1A8), this is updated when flipping a tile. Also used to disable locked characters.
 
 
 
@@ -197,10 +204,10 @@ NEXTU
 ; TAKARA LOGO
 ;
 ds $C1CA-$C1A9
-wCheatGoenitzKeysLeft       :db ; EQU $C1CA ; Amount of times to press the button before cheat activates
-wCheatAllCharKeysLeft       :db ; EQU $C1CB ; each for the 4 cheats
-wCheat_Unused_KeysLeft      :db ; EQU $C1CC
-wCheatEasyMovesKeysLeft     :db ; EQU $C1CD
+wCheatBossKeysLeft             :db ; EQU $C1CA ; Amount of times to press the button before cheat activates
+wCheatAllCharKeysLeft          :db ; EQU $C1CB ; each for the 4 cheats
+wCheat_Unused_InfMeterKeysLeft :db ; EQU $C1CC
+wCheatEasyMovesKeysLeft        :db ; EQU $C1CD
 
 NEXTU
 ;
@@ -349,10 +356,10 @@ SECTION "Audio RAM", WRAM0[$D480]
 ;
 ; SOUND DRIVER
 ;
-wSnd_Unk_Unused_D480        :db ; EQU $D480 ; $80 is always written here, but never read back
+wSnd_Unused_Set             :db ; EQU $D480 ; [TCRF] Leftover from 95, where it was set to play new a sound ID.
 wSnd_Unused_ChUsed          :db ; EQU $D481 ; Appears to be a bitmask intended to mark the used sound channels, but it is only set properly in unreachable code.
 wSndEnaChBGM                :db ; EQU $D482 ; Keeps track of the last rNR51 value used modified by a BGM SndInfo.
-wSnd_Ch3StopLength          :db ; EQU $D483 ; This is set to rNR31 sometimes (see logic)
+wSndCh3StopLength           :db ; EQU $D483 ; This is set to rNR31 sometimes (see logic)
 ds 1
 wSndChProcLeft              :db ; EQU $D485 ; Number of remaining wBGMCh*Info/wSFXCh*Info structs to process
 
@@ -837,7 +844,7 @@ iSndInfo_Unused05                  EQU $05 ; Unused. Always $81 unless audio is 
 iSndInfo_DataPtrStackIdx           EQU $06 ; Stack index for data pointers saved and restored by Sound_Cmd_Call and Sound_Cmd_Ret. Initialized to $20 (end of SndInfo) and decremented on pushes.
 iSndInfo_LengthTarget              EQU $07 ; Handles delays -- the current sound register settings are kept until it matches iSndInfo_LengthTarget Set by song data.
 iSndInfo_LengthTimer               EQU $08 ; Increases every time a SndInfo isn't paused/disabled. Once it reaches iSndInfo_LengthTarget it resets.
-iSndInfo_Unknown_Unused_9          EQU $09 ; Used only by the unused sound command Sound_Cmd_Unknown_Unused_SetStat6.
+iSndInfo_Unknown_Unused_09         EQU $09 ; ???
 iSndInfo_RegNRx1Data               EQU $0A ; Last value written to rNR*1 | $FF00+(iSndInfo_RegPtr-2). Only written by Command IDs -- this isn't updated by the standard Sound_UpdateCustomRegs.
 iSndInfo_Unknown_Unused_NR10Data   EQU $0B ; Last value written to NR10 by the unused sound command Sound_Cmd_Unused_WriteToNR10.
 iSndInfo_VolPredict                EQU $0C ; "Volume timer" which predicts the effective volume level (due to sweeps) at any given frame, used when restoring BGM playback. Low nybble is the timer, upper nybble is the predicted volume.

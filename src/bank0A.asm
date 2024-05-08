@@ -23,7 +23,7 @@ ENDC
 	jr   z, .loadBorder				; If not, jump
 	ld   a, BORDER_ALTERNATE		; Otherwise, use the alternate border
 .loadBorder:
-	call SGB_LoadBorder
+	call SGB_LoadInitial
 	
 	; Switch module
 	ld   b, BANK(Module_Intro)
@@ -222,12 +222,12 @@ ENDC
 	call HomeCall_Sound_ReqPlayExId_Stub
 	
 	; Initialize variables for cheat count (on top of the LZSS buffer)
-	ld   hl, wCheatGoenitzKeysLeft
-	ld   a, 3		; wCheatGoenitzKeysLeft
+	ld   hl, wCheatBossKeysLeft
+	ld   a, 3		; wCheatBossKeysLeft
 	ldi  [hl], a
 	ld   a, 20		; wCheatAllCharKeysLeft
 	ldi  [hl], a
-	ld   a, 25		; wCheat_Unused_KeysLeft [TCRF] Not used, may have been for DIPB_TEAM_DUPL and DIPB_POWERUP
+	ld   a, 25		; wCheat_Unused_InfMeterKeysLeft [TCRF] Leftover from 95, when activating DIPB_POWERUP required SELECTx25
 	ldi  [hl], a
 	ld   a, 30		; wCheatEasyMovesKeysLeft
 	ldi  [hl], a
@@ -275,13 +275,13 @@ TakaraLogo_CheckCheat:
 	; Hold A + B + SELECT
 	;
 	bit  KEYB_SELECT, e					; Pressed SELECT?
-	jp   z, .chkGoenitz					; If not, skip
+	jp   z, .chkBoss					; If not, skip
 	bit  DIPB_TEAM_DUPL, [hl]			; Already unlocked?
-	jp   nz, .chkGoenitz				; If so, skip
+	jp   nz, .chkBoss					; If so, skip
 	ld   a, d
 	and  a, KEY_A|KEY_B|KEY_SELECT		; Holding the button combination?
 	cp   KEY_A|KEY_B|KEY_SELECT
-	jp   nz, .chkGoenitz				; If not, skip
+	jp   nz, .chkBoss					; If not, skip
 	; Set cheats
 	set  DIPB_TEAM_DUPL, [hl]
 	set  DIPB_POWERUP, [hl]
@@ -293,22 +293,22 @@ TakaraLogo_CheckCheat:
 		call HomeCall_Sound_ReqPlayExId
 	pop  hl
 	
-.chkGoenitz:
+.chkBoss:
 	;
 	; Unlock Goenitz
 	; Press SELECT 3 times.
 	;
 	bit  KEYB_SELECT, e					; Pressed SELECT?
 	jp   z, .chkAllChar					; If not, skip
-	bit  DIPB_UNLOCK_GOENITZ, [hl]		; Already unlocked?
+	bit  DIPB_UNLOCK_BOSS, [hl]			; Already unlocked?
 	jp   nz, .chkAllChar				; If so, skip
 	
 	; Decrement key counter. If 0, enable the cheat
-	ld   a, [wCheatGoenitzKeysLeft]
+	ld   a, [wCheatBossKeysLeft]
 	dec  a								
-	ld   [wCheatGoenitzKeysLeft], a		
+	ld   [wCheatBossKeysLeft], a		
 	jp   nz, .chkAllChar				
-	set  DIPB_UNLOCK_GOENITZ, [hl]
+	set  DIPB_UNLOCK_BOSS, [hl]
 	push hl
 		ld   hl, (SGB_SND_A_ESCBUBL << 8)|$00
 		call SGB_PrepareSoundPacketA
@@ -327,7 +327,7 @@ TakaraLogo_CheckCheat:
 	jp   nz, .chkEasyMovesSGB				; If so, skip
 	
 	; Decrement key counter. If 0, enable the cheat
-	; This is decremented simultaneously with the Goenitz counter.
+	; This is decremented simultaneously with the Boss counter.
 	ld   a, [wCheatAllCharKeysLeft]
 	dec  a
 	ld   [wCheatAllCharKeysLeft], a

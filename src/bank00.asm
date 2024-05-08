@@ -1,6 +1,6 @@
 ; =============== RESET VECTOR $00 ===============
 ; Bankswitches to code in a different bank.
-; Because this doesn't return, this is typically used to switch modes 
+; Because this doesn't return, this is typically used to switch modes
 ; -- the code which is jumped to resets the stack and sets up its own main loop.
 ; IN
 ; -  B: Bank number where the code is located
@@ -32,7 +32,7 @@ SECTION "Rst18", ROM0[$0018]
 ;Rst_StartLCDOperation:
 	jp   StartLCDOperation
 	mIncJunk "L00001B"
-	
+
 ; =============== RESET VECTOR $20 ===============
 ; Disables the SERIAL interrupt.
 SECTION "Rst20", ROM0[$0020]
@@ -40,9 +40,9 @@ SECTION "Rst20", ROM0[$0020]
 	ldh  a, [rIE]
 	and  a, $FF^I_SERIAL
 	ldh  [rIE], a
-	ret  
+	ret
 	mIncJunk "L000027"
-	
+
 ; =============== RESET VECTOR $28 ===============
 ; Enables the SERIAL interrupt.
 SECTION "Rst28", ROM0[$0028]
@@ -109,7 +109,7 @@ FarCall:
 	ret
 .exec:
 	jp   hl
-	
+
 ; =============== FarDecompressLZSS ===============
 ; Decompresses the GFX on a different bank to the specified location in memory.
 ; IN
@@ -127,7 +127,7 @@ FarDecompressLZSS:
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	ret  
+	ret
 
 ; =============== StopLCDOperation ===============
 ; Disables the screen output in a safe way.
@@ -137,25 +137,25 @@ StopLCDOperation:
 	ldh  a, [rIE]			; Disable VBlank interrupt to prevent it from firing
 	and  a, $FF^I_VBLANK
 	ldh  [rIE], a
-	
+
 	; If the LCD is already disabled, we're done.
 	ldh  a, [rLCDC]
 	bit  LCDCB_ENABLE, a	; Is the display enabled?
 	jp   z, .end			; If not, skip
-	
+
 	; Otherwise, wait in a loop until the scanline counter reaches what would be VBlank.
 .wait:
 	ldh  a, [rLY]			; Read scanline number
 	cp   LY_VBLANK+1		; Is it 1 after the VBlank trigger?
 	jr   nz, .wait			; If not, loop
-	
+
 	; Now we can safely disable the LCD
-	ldh  a, [rLCDC]			
+	ldh  a, [rLCDC]
 	and  a, $FF^LCDC_ENABLE
 	ldh  [rLCDC], a
 .end:
 	ret
-	
+
 ; =============== StartLCDOperation ===============
 ; Enables the screen output with the specified options.
 ; IN
@@ -168,24 +168,27 @@ StartLCDOperation:
 	ldh  [rIE], a
 	ret
 
-; =============== Bar Data ===============	
+; =============== Bar Data ===============
 ; Tile IDs used for bars that grow from right to left.
 ; Increasing and decreasing pick different ranges of bytes due to the different tile picked as "bar tip".
+; This is the other way around compared to 95 (the left-to-right one is here), because they changed
+; the health bars to grow in the opposite directions.
 Play_Bar_TileIdTbl_RGrow:
 	db $E0 ; Only used when decreasing as last value (completely empty)
 	db $E8,$E9,$EA,$EB,$EC,$ED,$EE
 	db $DF ; Only used when increasing as last value (completely filled)
-; Tilemap offsets for each updatable tile of the bar (from least to most)
-; Not necessarily used in its entirety.
-; The offset used is usually calculated by doing BarValue/8.
+	
+; Table of tilemap offsets, helps determine where the tilemap pointer to the tip.
+; Calculated like this:
+; 	vBGHealthBar1P + Play_Bar_BGOffsetTbl_LGrow[BarValue/8]
 Play_Bar_BGOffsetTbl_RGrow:
 	db $08,$07,$06,$05,$04,$03,$02,$01,$00
-	
+
 ; Like above, but for bars growing from left to right.
 Play_Bar_TileIdTbl_LGrow:
-	db $E0
+	db $E0 ; ""
 	db $E1,$E2,$E3,$E4,$E5,$E6,$E7
-	db $DF
+	db $DF ; ""
 Play_Bar_BGOffsetTbl_LGrow:
 	db $00,$01,$02,$03,$04,$05,$06,$07,$08
 ; =============== Play_HUDTileIdTbl ===============
@@ -201,7 +204,7 @@ Play_HUDTileIdTbl:
 	db $F6 ; 7
 	db $F7 ; 8
 	db $F8 ; 9
-	
+
 ; =============== BG_Play_HUDHit ===============
 ; Tile IDs for the hit count.
 BG_Play_HUDHit:
@@ -213,14 +216,14 @@ SECTION "EntryPoint", ROM0[$0100]
 ; =============== HW ENTRY POINT ===============
 	nop
 	jp   EntryPoint
-	
+
 ; =============== GAME HEADER ===============
 	; logo
 	db   $CE,$ED,$66,$66,$CC,$0D,$00,$0B,$03,$73,$00,$83,$00,$0C,$00,$0D
 	db   $00,$08,$11,$1F,$88,$89,$00,$0E,$DC,$CC,$6E,$E6,$DD,$DD,$D9,$99
 	db   $BB,$BB,$67,$63,$6E,$0E,$EC,$CC,$DD,$DC,$99,$9F,$BB,$B9,$33,$3E
-	
-	
+
+
 IF REV_LOGO_EN == 0
 	db   "NETTOU KOF 96",$00,$00	; title
 	db   $00			; DMG - classic gameboy
@@ -248,8 +251,8 @@ ELSE
 	db   $CD			; header check
 	db   $86,$7A		; global check
 ENDC
-	
-	
+
+
 ; =============== EntryPoint ===============
 EntryPoint:
 	rst  $10				; Stop LCD
@@ -259,7 +262,7 @@ EntryPoint:
 	ld   [MBC1SRamEnable], a
 	ld   a, $01				; Initialize first bank
 	ld   [MBC1RomBank], a
-	
+
 	;
 	; Clear memory range $C000-$C35D.
 	; This is used by the shared variables, mode-specific variables and LZSS buffer.
@@ -279,7 +282,7 @@ ENDC
 	ld   a, d
 	or   a, e
 	jr   nz, .clMem1
-	
+
 	;
 	; Clear memory range $CC00-$DFFF
 	; This clears the sound driver and sprite mapping / player areas.
@@ -294,8 +297,8 @@ ENDC
 	ld   a, d
 	or   a, e
 	jr   nz, .clMem2
-	
-	
+
+
 	;
 	; Clear HRAM ($FF80-$FFFE)
 	;
@@ -309,7 +312,7 @@ ENDC
 	ld   a, d
 	or   a, e
 	jr   nz, .clMem3
-	
+
 	;
 	; Copy the OAMDMA routine.
 	;
@@ -322,12 +325,12 @@ ENDC
 	inc  c
 	dec  b
 	jr   nz, .dccLoop
-	
+
 	;
 	; Misc init
 	;
 	call Serial_Init
-	
+
 	;
 	; Copy over the default settings
 	;
@@ -342,9 +345,9 @@ ENDC
 	ld   a, b
 	or   a, c
 	jr   nz, .dscLoop
-	
+
 	; Initialize screen
-	ld   a, LCDC_ENABLE|LCDC_WTILEMAP				
+	ld   a, LCDC_ENABLE|LCDC_WTILEMAP
 	ldh  [rLCDC], a
 	xor  a
 	ldh  [rSCX], a
@@ -354,10 +357,10 @@ ENDC
 	ldh  [rOBP1], a
 	ldh  [rIF], a
 	ldh  [rSTAT], a
-	
+
 	; Initialize sound
 	call HomeCall_Sound_Init
-	
+
 	; Detect if we're running under the SGB
 	ASSERT(BANK(SGBPacket_EnableMultiJoy_2Pl) == BANK(SGBPacket_DisableMultiJoy))
 	ld   a, BANK(SGBPacket_EnableMultiJoy_2Pl)
@@ -378,31 +381,31 @@ ENDC
 	call SGB_SendPackets
 	ld   bc, $0004					; Wait $04 superticks
 	call SGB_DelayAfterPacketSendCustom
-	
+
 .switchToTakaraLogo:
 	ei
-	
+
 	; Set the main task, which will point to the custom module code.
-	
+
 	; Switch to the bank with the TAKARA logo display
 	ld   a, BANK(Module_TakaraLogo)	; BANK $0A
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	
+
 	; Have this as the first task
 	ld   a, $01						; Task ID
 	ld   bc, Module_TakaraLogo		; HL
 	call Task_CreateAt
-	
+
 	jp   Task_GetNext
-	
-; =============== SGB_LoadBorder ===============
-; Loads the SGB border for the game.
+
+; =============== SGB_LoadInitial ===============
+; Loads the initial SGB data for the game.
 ; IN
 ; - A: Border type
 ;      $01 -> Standard
 ;      $02 -> Alternate
-SGB_LoadBorder:
+SGB_LoadInitial:
 
 	; If we aren't in SGB mode, return
 	ld   hl, wMisc_C025
@@ -414,22 +417,22 @@ SGB_LoadBorder:
 	; - The first time this subroutine is called, the border will always be set.
 	; - After that, the border will only ever be set once, when switching to the Alternate border.
 	;   It is not allowed to load the Standard border once the Alternate one is loaded.
-	
+
 	ld   hl, wSGBBorderType
 	cp   [hl]			; Read current (old) border id
 	ret  c				; NewId < OldId? If so, return (prevents switching back to standard border)
 	ret  z				; NewId == OldId? If so, return (prevents wasting time loading the same border)
 	ld   [hl], a		; Write the border id we're loading
-	
+
 .checksOk:
 	; Send away all of the packets for the border.
-	di   
+	di
 	ldh  a, [hROMBank]
 	push af
 		ld   a, BANK(SGBPacket_FreezeScreen) ; BANK $04
 		ld   [MBC1RomBank], a
 		ldh  [hROMBank], a
-		
+
 mSendPkg: MACRO
 	ld   hl, \1
 	call SGB_SendPackets
@@ -439,7 +442,7 @@ ENDM
 
 		; Stop the screen on the TAKARA logo to prevent it from displaying the data sent to the SGB side through VRAM
 		mSendPkg SGBPacket_FreezeScreen
-		
+
 		; Send 65816 code over to the SNES WRAM from 00:0810 to 00:0868.
 		; Almost every SGB game sends this at startup, apparently it's a bugfix for the original SGB1 BIOS.
 		; (SGB1b and SGB2 already have this code in memory)
@@ -451,8 +454,8 @@ ENDM
 		mSendPkg SGBPacket_SGB1BiosPatch2
 		mSendPkg SGBPacket_SGB1BiosPatch1
 		mSendPkg SGBPacket_SGB1BiosPatch0
-		
-			
+
+
 IF REV_VER_2 == 1
 		; The English version clears the existing contents of the tilemap, for whatever reason.
 		call ClearBGMap
@@ -461,17 +464,17 @@ IF REV_VER_2 == 1
 		ldh  [rSCX], a
 		ldh  [rSCY], a
 ENDC
-		
+
 		;-----------------------------------
 		; FarCall into border loader, which also stops the LCD
 		ld   b, BANK(SGB_SendBorderData) ; BANK $04
 		ld   hl, SGB_SendBorderData
 		rst  $08
-		
+
 		; Clear the tilemap and zero out the BG palette to actually hide the SGB transfer leftovers.
 		; Why isn't this part of SGB_SendBorderData, which tries to do something similar with the GFX?
 		call ClearBGMap
-		
+
 IF REV_VER_2 == 0
 		; Show white palette while this happens
 		xor  a
@@ -489,14 +492,14 @@ ENDC
 		ld   a, LCDC_PRIORITY|LCDC_WTILEMAP|LCDC_ENABLE
 		rst  $18				; Resume LCD
 		;-----------------------------------
-		
+
 		call Task_SkipAllAndWaitVBlank
 		ld   bc, $0078
 		call SGB_DelayAfterPacketSendCustom
-		
+
 		; Resume the screen since we're done now
 		mSendPkg SGBPacket_ResumeScreen
-		
+
 		call HomeCall_Sound_Init
 	pop  af
 	ld   [MBC1RomBank], a
@@ -508,28 +511,28 @@ ENDC
 ; IN
 ; - HL: Ptr to packet structure (format: <number of packets><packet 0>[<packet 1>]...)
 SGB_SendPackets:
-	
+
 	; The first byte marks the number of packets to send in the lower 3 bits.
 	; These are stored one after the other in the ROM.
 	ld   a, [hl]	; A = Number of packets
 	and  a, $07		; SGB supports a max of 7 packets at once.
 	ret  z			; If there are no packets, return
-	
-	
-	ld   b, a		; B = Number of packets 
-	
+
+
+	ld   b, a		; B = Number of packets
+
 	; These packets are sent through the joypad register.
 	ld   c, LOW(rJOYP)	; C = $FF00
-	
+
 .nextPacket:
 	push bc				; Save for later
-	
+
 	; Send out the reset signal
 	ld   a, SGB_BIT_RESET	; Reset
-	ld   [c], a		
+	ld   [c], a
 	ld   a, SGB_BIT_SEP		; Separator
 	ld   [c], a
-	
+
 	; Send out the $10 bytes of the packet.
 	; Each byte is sent out 1 bit at a time, from bit0 to bit7.
 	ld   b, $10			; B = Remaining bytes to send out
@@ -541,7 +544,7 @@ SGB_SendPackets:
 	; Send out the bit.
 	; If it's 0, send $20, otherwise send $10.
 	; After a bit is sent out, a $30 is always sent.
-	
+
 	bit  0, d 			; Is the bit set?
 	ld   a, SGB_BIT_1	; A = Value to send with bit set
 	jr   nz, .sendBit	; If so, jump
@@ -556,17 +559,17 @@ SGB_SendPackets:
 	jr   nz, .nextBit	; If not, loop
 	dec  b				; Sent all $10 bytes?
 	jr   nz, .nextByte	; If not, loop
-	
+
 	ld   a, SGB_BIT_0	; Send last "stop" bit
 	ld   [c], a
 	ld   a, SGB_BIT_SEP
 	ld   [c], a
-	
+
 	pop  bc			; Restore number of packets left
-	
+
 	dec  b			; All packets sent?
 	ret  z			; If so, return
-	
+
 	call SGB_DelayAfterPacketSend
 	jr   .nextPacket
 
@@ -583,7 +586,7 @@ SGB_DelayAfterPacketSend:
 	or   a, e
 	jr   nz, .loop
 	ret
-	
+
 ; =============== IsSGBHardware ===============
 ; Detects if the system is a Super Game Boy.
 ; OUT
@@ -595,21 +598,21 @@ IsSGBHardware:
 	;
 	; If we get the ID we're looking for, it means we're running under the SGB.
 	;
-	
+
 	; Enable 2-player multicontroller support
 	ld   hl, SGBPacket_EnableMultiJoy_2Pl
 	call SGB_SendPackets
 	call SGB_DelayAfterPacketSend
-	
+
 	; Check if this is the Player 2 controller, in case
 	ldh  a, [rJOYP]		; Read the joypad status
-	and  a, $03			
+	and  a, $03
 	cp   $03			; Is the second controller active? (rJOYP == $*E)
 	jr   nz, .isSGB		; If so, we're running under the SGB
-	
+
 	; If it failed, it could be because the first controller may have been active.
 	; Check the next one, hopefully turning the $*F return value (1P) into $*E (2P).
-	
+
 	; Switch to next controller (set bit 0, then 1)
 	ld   a, SGB_BIT_0
 	ldh  [rJOYP], a
@@ -631,7 +634,7 @@ IsSGBHardware:
 	ldh  a, [rJOYP]
 	ldh  a, [rJOYP]
 	ldh  a, [rJOYP]
-	
+
 	; Do the same check again.
 	and  a, $03
 	cp   $03			; Is the second controller active?
@@ -646,15 +649,15 @@ IsSGBHardware:
 	call SGB_DelayAfterPacketSend
 	sub  a				; Return 0
 	ret
-.isSGB: 
+.isSGB:
 	; Reselect back the first controller
-	ld   hl, SGBPacket_DisableMultiJoy	
+	ld   hl, SGBPacket_DisableMultiJoy
 	call SGB_SendPackets
 	call SGB_DelayAfterPacketSend
 	scf  				; Return 1
 	ret
-	
-; =============== SGB_DelayAfterPacketSendCustom ===============	
+
+; =============== SGB_DelayAfterPacketSendCustom ===============
 ; Delays for the specified amount of times after sending a packet.
 ; IN
 ; - BC: Amount of times to wait $06D6 loops.
@@ -662,9 +665,9 @@ SGB_DelayAfterPacketSendCustom:
 	; Total delay = BC * $06D6
 	ld   de, $06D6
 .loop:
-	nop  
-	nop  
-	nop  
+	nop
+	nop
+	nop
 	dec  de
 	ld   a, d
 	or   e
@@ -673,23 +676,23 @@ SGB_DelayAfterPacketSendCustom:
 	ld   a, b
 	or   c
 	jr   nz, SGB_DelayAfterPacketSendCustom
-	ret  
+	ret
 
 ; =============== OAMDMA ROUTINE ===============
 ; Copied in HRAM during init (don't use this directly).
-OAMDMACode: 
+OAMDMACode:
 	; Wait for VBlank before continuing
 	ldh  a, [rSTAT]
 	bit  ST_VBLANK, a		; Are we in VBlank yet?
 	jp   nz, hOAMDMA		; If not, loop
-	
+
 	ld   a, HIGH(wWorkOAM)	; Start DMA copy from WorkOAM ($DF00) to OAM
 	ldh  [rDMA], a
 	ld   a, $28				; Wait $28 ticks
 .wait:
 	dec  a
 	jr   nz, .wait
-	ret 
+	ret
 .end:
 ; =============== DEFAULT SETTINGS ===============
 DefaultSettings:
@@ -719,16 +722,16 @@ Task_GetNext:
 	ld   a, [wMisc_C026]			; Mark this since we should unset this later
 	set  MISCB_LAG_FRAME, a
 	ld   [wMisc_C026], a
-	
-	ld   a, [wMisc_C025]			
+
+	ld   a, [wMisc_C025]
 	bit  MISCB_SERIAL_LAG, a			; Is everything frozen?
 	jp   nz, .execCommon			; If so, skip executing all tasks
-	
+
 	; If we can execute the task (marked as TASK_EXEC_TODO or TASK_EXEC_NEW), then do it
 	ld   a, [hl]
 	cp   TASK_EXEC_TODO				; taskType >= $04?
 	jp   nc, .exec					; If so, execute it
-	
+
 	; Seek to the next task struct
 	add  hl, de						; TaskPtr += sizeof(Task)
 	inc  c							; TaskID++
@@ -739,25 +742,25 @@ Task_GetNext:
 	call Task_ExecCommon
 	; Recycle through them all
 	jp   .reloop
-	
+
 .exec:
 	ld   a, c						; Save the current task ID for later comparison
 	ldh  [hCurTaskId], a			; Mark it as current task. This has an effect when the code we're executing calls the taskman back.
-	
+
 	ld   a, [hl]					; Read the task type
 
 	ld   [hl], TASK_EXEC_CUR 		; Mark the task as executing
 	inc  hl
 	ld   [hl], $00
 	inc  hl
-	
+
 	ld   e, [hl]					; Read out the task/stack ptr
 	inc  hl
 	ld   d, [hl]
-	
+
 	push de							; HL = DE
 	pop  hl
-	
+
 	cp   TASK_EXEC_NEW				; Is this a new task?
 	jp   nz, .oldTask				; If not, jump
 .newTask:
@@ -766,14 +769,14 @@ Task_GetNext:
 
 	; Restore the state from when this task was created.
 	ld   sp, hl						; Restore the stack pointer
-	
+
 	; The stack ptr was saved after pushing all regs into the stack in Task_PassControl.
 	; Pop them all out to restore the original state and return safely.
 	pop  af
 	pop  bc
 	pop  de
 	pop  hl
-	
+
 	ret
 
 ; =============== Task_CreateAt ===============
@@ -838,11 +841,11 @@ Task_RemoveAt:
 ; This is important to allow cycling the same subroutine pointers if they aren't explicitly changed.
 ;
 ; Then the task table is iterated from the beginning until it finds an entry which can be executed.
-; If one is found, the task is marked as being executed, the current slot is set to that, and the code is run. 
+; If one is found, the task is marked as being executed, the current slot is set to that, and the code is run.
 ; This prevents the task from being executed again.
 ;
 ; To continue the cycle, the code which is called must manually call this subroutine again (or one of its stubs).
-; 
+;
 ; The same thing is done as before, until the entire task table is iterated. The common code which also waits for VBLANK
 ; is executed when that happens.
 ;
@@ -858,7 +861,7 @@ Task_PassControlCustom:
 	; will replace the current one. Most of the time it does nothing but mark the task as executed,
 	; but this also does replace the init task (TASK_EXEC_NEW) with the one for the main loop.
 
-	
+
 	;
 	; Save all the status of all registers to the stack.
 	;
@@ -866,7 +869,7 @@ Task_PassControlCustom:
 	push de
 	push bc
 	push af
-	
+
 	;
 	; Replace current task with a new one (for the main loop) marked as executed.
 	;
@@ -875,9 +878,9 @@ Task_PassControlCustom:
 		ld   [hl], TASK_EXEC_DONE	; Set it as type $01
 		inc  hl
 	pop  af
-	
+
 	ldi  [hl], a		; Set pause timer
-	
+
 	;
 	; Copy SP to DE, then write it to the iTaskCodePtr fields.
 	;
@@ -889,7 +892,7 @@ Task_PassControlCustom:
 	ld   [hl], e	; Write it out
 	inc  hl
 	ld   [hl], d
-	
+
 	; The task has been set, now execute the next ones with IDs higher than the current one
 	jp   Task_GetNext
 
@@ -901,17 +904,17 @@ Task_PassControlFar:
 	push af
 	call Task_PassControl_NoDelay
 	pop  af					; Restore bank
-	ld   [MBC1RomBank], a	
+	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-	
+
 ; =============== Task_PassControl_* ===============
 ; Sets of wrappers to Task_PassControl with different pause timers.
 Task_PassControl_NoDelay:
 	ld   a, $01				; Delay for $01-1 frames before next exec
 	jr   Task_PassControlCustom
 ; [TCRF] Unused.
-Task_Unused_PassControl_Delay01: 
+Task_Unused_PassControl_Delay01:
 	ld   a, $02				; Delay for $02-1 frames before next exec
 	jr   Task_PassControlCustom
 Task_PassControl_Delay04:
@@ -926,8 +929,8 @@ Task_PassControl_Delay1D:
 Task_PassControl_Delay3B:
 	ld   a, $3C
 	jr   Task_PassControlCustom
-	
-; =============== Task_RemoveCurAndPassControl ===============	
+
+; =============== Task_RemoveCurAndPassControl ===============
 ; Like Task_PassControl, except the current task is removed before passing control.
 ; Only used when the round ends, to remove player tasks.
 Task_RemoveCurAndPassControl:
@@ -935,12 +938,12 @@ Task_RemoveCurAndPassControl:
 	call Task_IndexTaskAuto		; Index current task
 	ld   [hl], TASK_EXEC_NONE	; Disable it
 	jp   Task_GetNext
-	
+
 ; =============== Task_IndexTaskAuto ===============
 ; Indexes the task struct of the currently executing task.
 Task_IndexTaskAuto:
 	ldh  a, [hCurTaskId]	; A = Index to current task
-	
+
 ; =============== Task_IndexTask ===============
 ; Indexes the specified task struct by ID.
 ; IN
@@ -958,7 +961,7 @@ Task_IndexTask:
 	ld   d, $00
 	add  hl, de		; Seek to the entry
 	ret
-	
+
 ; =============== Task_SkipAllAndWaitVBlank ===============
 ; Waits for VBlank without executing any of the tasks or common code.
 ; Generally used for "paused" frames, where the game should stop animating
@@ -967,9 +970,9 @@ Task_SkipAllAndWaitVBlank:
 	ld   a, $01
 	ld   [wVBlankNotDone], a
 	jp   Task_EndOfFrame
-	
+
 ; =============== Task_Unused_SkipAllAndWaitVBlank_Copy ===============
-; [TCRF] Unused? copy of the above.
+; [TCRF] Unused copy of the above.
 Task_Unused_SkipAllAndWaitVBlank_Copy:
 	ld   a, $01
 	ld   [wVBlankNotDone], a
@@ -982,17 +985,17 @@ Task_ExecCommon:
 	; Mark frame as executed -- wait for the VBlank handler below
 	ld   a, $01
 	ld   [wVBlankNotDone], a
-	
+
 	; If game is frozen, skip over these ones too
 	ld   a, [wMisc_C025]
 	bit  MISCB_SERIAL_LAG, a			; Is it set?
 	jp   nz, Task_EndOfFrame		; If so, skip
-	
+
 	call OBJLstS_WriteAll
 	call SGB_SendSoundPacketAtFrameEnd
 	call HomeCall_Sound_Do
 	; Fall-through
-	
+
 ; =============== Task_EndOfFrame ===============
 Task_EndOfFrame:
 
@@ -1001,15 +1004,15 @@ Task_EndOfFrame:
 	ld   hl, wMisc_C026
 	res  MISCB_LAG_FRAME, [hl]
 	pop  hl
-	
+
 	; Wait in a loop until the VBlank handler triggers, which clears the flag
 	; and marks all tasks for execution.
 	; If we get here too late, the flag ends up not being cleared and we wait
 	; for an extra frame.
 	ei
-	
 
-	
+
+
 .waitVBlank:
 IF CPU_USAGE
 	ld   a, [wVBlankNotDone]
@@ -1038,10 +1041,10 @@ SetSectLYC:
 	ld   a, b
 	ld   [wScreenSect2LYC], a
 	ld   a, [wMisc_C028]
-	or   a, MISC_USE_SECT			
+	or   a, MISC_USE_SECT
 	ld   [wMisc_C028], a
 	ret
-	
+
 ; =============== DisableSectLYC ===============
 ; Disables section mode.
 DisableSectLYC:
@@ -1050,7 +1053,7 @@ DisableSectLYC:
 		res  MISCB_USE_SECT, [hl]
 	pop  hl
 	ret
-	
+
 ; =============== LCDCHandler ===============
 ; Handles parallax effects and screen sections.
 LCDCHandler:
@@ -1069,14 +1072,14 @@ LCDCHandler:
 ; (alongside setting other things) at certain scanlines.
 ; This is additionally used in cutscenes to display the black borders.
 LCDCHandler_Sect:
-		
+
 		; wLCDCSectId is either 0 (Section 1) or 1 (Section 2)
 		; Reminder that Section 0 is set at VBlank, not here.
-		
+
 		ld   a, [wLCDCSectId]
 		or   a						; SectId == 0?
 		jp   nz, .sect3				; If not, jump
-		
+
 		;
 		; Section 1 - Playfield
 		;
@@ -1087,12 +1090,12 @@ LCDCHandler_Sect:
 	.wait2:
 		dec  a
 		jp   nz, .wait2
-		
+
 		ldh  a, [hScreenSect1BGP]		; Set palette for section 1
 		ldh  [rBGP], a
 		; Disable the WINDOW
 		ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WTILEMAP|LCDC_ENABLE
-		ldh  [rLCDC], a					
+		ldh  [rLCDC], a
 		; Set next section ID
 		ld   [wLCDCSectId], a			; It just needs to be != 0
 		; Set next trigger
@@ -1100,7 +1103,7 @@ LCDCHandler_Sect:
 		ldh  [rLYC], a
 	pop  af
 	reti
-	
+
 		;
 		; Section 2 - HUD
 		;
@@ -1110,7 +1113,7 @@ LCDCHandler_Sect:
 	.wait3:
 		dec  a
 		jp   nz, .wait3
-		
+
 		ldh  a, [hScreenSect2BGP]	; Set palette for section 2
 		ldh  [rBGP], a
 		; Enable the WINDOW
@@ -1120,7 +1123,7 @@ LCDCHandler_Sect:
 		ldh  [rLCDC], a
 	pop  af
 	reti
-	
+
 ; =============== LCDCHandler_Title ===============
 ; Handles the scrolling clouds in the title screen.
 ;
@@ -1131,7 +1134,7 @@ LCDCHandler_Title:
 		jp   z, .mode0			; If so, jump
 		dec  a					; ...
 		jp   z, .mode1
-		dec  a					
+		dec  a
 		jp   z, .mode2
 		dec  a
 		jp   z, .mode3
@@ -1140,7 +1143,7 @@ LCDCHandler_Title:
 		dec  a
 		jp   z, .mode5
 		jp   .mode6
-	
+
 	;
 	; Section 0: Prepare the parallax effect
 	;
@@ -1149,10 +1152,10 @@ LCDCHandler_Title:
 		; (the WINDOW can't be used for this effect, so it's also the only way)
 		;
 		; This continues using the hScrollX settings from VBlank.
-		
+
 		; Because the title screen in the English version adds two additional lines
 		; in the copyright text, the entire effect is shifted up by 2 tiles / 16 lines.
-		
+
 		ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WTILEMAP|LCDC_ENABLE
 		ldh  [rLCDC], a
 		ld   a, $01			; Next mode id
@@ -1163,7 +1166,7 @@ ELSE
 		ld   a, $63			; Next LYC trigger
 ENDC
 		jp   .end
-		
+
 	;
 	; Section 1-5: Parallax effect continued
 	;
@@ -1222,7 +1225,7 @@ ELSE
 		ld   a, $77				; Next LYC trigger
 ENDC
 	.end:
-	
+
 		ldh  [rLYC], a
 	pop  af
 	reti
@@ -1236,33 +1239,33 @@ ENDC
 	.wait:
 		dec  a
 		jp   nz, .wait
-		
+
 		; Enable the WINDOW
 		ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
 		ldh  [rLCDC], a
 		pop  af
 		reti
-		
+
 ; =============== VBlankHandler ===============
 ; Long VBLANK handler.
 VBlankHandler:
-	di	
-	
+	di
+
 	push af
 	push bc
 	push de
 	push hl
-	
+
 	ldh  a, [hROMBank]
 	push af
 	;--
-	
+
 	ld   hl, wMisc_C025
 	bit  MISCB_SERIAL_MODE, [hl]	; Is serial mode enabled?
 	jp   z, VBlank_ChkCopyPlTiles	; If not, skip
 .serialVS:
 	res  MISCB_SERIAL_LAG, [hl]			; Default to an unfrozen game
-	
+
 	;
 	; Peculiar logic for resetting the "transfer complete" flag.
 	;
@@ -1276,7 +1279,7 @@ VBlankHandler:
 	ld   a, [wSerialInputMode]
 	or   a							; Buffered serial input enabled?
 	jp   z, .resetSerialDone		; If not, jump
-	
+
 	;
 	; In buffered input mode, never reset wSerialTransferDone to the master.
 	;
@@ -1295,12 +1298,12 @@ VBlankHandler:
 	or   a									; Is the balance of received/processed inputs 0?
 	jp   nz, .resetSerialDone				; If not, jump
 	ld   hl, wMisc_C025						; Freeze game while waiting for serial
-	set  MISCB_SERIAL_LAG, [hl]	
-	
+	set  MISCB_SERIAL_LAG, [hl]
+
 	; Lessen the effect of the lag by always setting the latest input to the head of the send buffer.
 	; (with the index staying as-is)
 	ld   a, START_TRANSFER_EXTERNAL_CLOCK		; Force start listening
-	ldh  [rSC], a					
+	ldh  [rSC], a
 	ld   hl, wSerialLagCounter					; PauseTimer++
 	inc  [hl]
 	ld   hl, wSerialPendingJoyKeys2				; Poll for 2P inputs (since only 2P is slave)
@@ -1310,7 +1313,7 @@ VBlankHandler:
 .resetSerialDone:
 	xor  a
 	ld   [wSerialTransferDone], a
-	
+
 ; =============== VBlank_ChkCopyPlTiles ===============
 ; Determines if the player graphics should be copied to VRAM.
 VBlank_ChkCopyPlTiles:
@@ -1323,7 +1326,7 @@ VBlank_ChkCopyPlTiles:
 	ld   a, [wNoCopyGFXBuf]
 	or   a							; Is the GFX copying outright disabled?
 	jp   nz, VBlank_SetInitialSect	; If so, skip
-	jp   VBlank_CopyPl1Tiles						
+	jp   VBlank_CopyPl1Tiles
 
 ; =============== VBlank_CopyPl*Tiles ===============
 ; Set of subroutines for copying the player graphics across multiple frames during VBLANK.
@@ -1353,7 +1356,7 @@ mVBlank_CopyPlTiles: MACRO
 	or   a					; Any tiles left to transfer to buffer 1?
 	jp   nz, .copyTo1		; If so, jump
 	jp   .end				; If there's nothing, we're done
-		
+
 .copyTo0:
 	;
 	; Prepare the call to CopyTiles
@@ -1368,7 +1371,7 @@ mVBlank_CopyPlTiles: MACRO
 .notLast0:
 	sub  a, b								; TilesLeft -= TilesToCopy
 	ld   [\3+iGFXBufInfo_TilesLeftA], a		; Update stat
-	
+
 	ld   a, [\3+iGFXBufInfo_DestPtr_Low]	; DE = Destination Ptr
 	ld   e, a
 	ld   a, [\3+iGFXBufInfo_DestPtr_High]
@@ -1391,7 +1394,7 @@ mVBlank_CopyPlTiles: MACRO
 	ld   a, h
 	ld   [\3+iGFXBufInfo_SrcPtrA_High], a
 	jp   .chkCopyEnd
-	
+
 .copyTo1:
 	; Same thing as before, but with the other buffer
 	ld   b, MAX_TILE_BUFFER_COPY
@@ -1421,7 +1424,7 @@ mVBlank_CopyPlTiles: MACRO
 	ld   [\3+iGFXBufInfo_SrcPtrB_Low], a
 	ld   a, h
 	ld   [\3+iGFXBufInfo_SrcPtrB_High], a
-	
+
 .chkCopyEnd:
 
 	; If there aren't any tiles left to copy in the buffer,
@@ -1432,16 +1435,16 @@ mVBlank_CopyPlTiles: MACRO
 	ld   a, [\3+iGFXBufInfo_TilesLeftB]
 	or   a								; TilesLeft != 0?
 	jp   nz, .end						; If so, skip
-	
+
 .flagEnd:
 
 	; Mark that the buffer operation is complete
 	ld   hl, \2+iOBJInfo_Status
 	res  OSTB_GFXLOAD, [hl]		; Buffer copied
 	set  OSTB_GFXNEWLOAD, [hl]	; It got loaded this frame (gets reset when calling animation func)
-	
+
 	;--------
-	; 
+	;
 	; Used in conjunction with Play_Pl_SetMoveDamageNext to update the move damage settings mid-move,
 	; syncronized to when the visible frame updates.
 	;
@@ -1452,43 +1455,43 @@ mVBlank_CopyPlTiles: MACRO
 	ld   hl, \1+iPlInfo_Flags2
 	bit  PF2B_MOVESTART, [hl]		; Was a move started?
 	jp   nz, .copySetKey			; If so, skip
-	
+
 	;
 	; Copy the set of pending fields to the current ones if we were told to, and clear the former range.
 	;
 	; As long as iPlInfo_MoveDamageValNext is != 0, it means there are new values to copy over.
 	; Any time the pending move damage fields are copied to the current set they get cleared,
 	; so if they are still 0 it means no new value was set.
-	; 
+	;
 	ld   hl, \1+iPlInfo_MoveDamageValNext	; HL = Source
 	ld   de, \1+iPlInfo_MoveDamageVal		; DE = Destination
 	ld   a, [hl]
 	or   a				; iPlInfo_MoveDamageValNext == 0?
 	jp   z, .copySetKey	; If so, skip
-	
+
 .copyMoveOpt:
-	ld   [de], a	; Copy iPlInfo_MoveDamageValNext to iPlInfo_MoveDamageVal	
+	ld   [de], a	; Copy iPlInfo_MoveDamageValNext to iPlInfo_MoveDamageVal
 	ld   [hl], $00	; Clear iPlInfo_MoveDamageValNext
 	inc  de			; SrcPtr++
 	inc  hl			; DestPtr++
-	
+
 	ld   a, [hl]	; A = iPlInfo_MoveDamageHitTypeIdNext
-	ld   [de], a	; Copy iPlInfo_MoveDamageHitTypeIdNext to iPlInfo_MoveDamageHitTypeId	
+	ld   [de], a	; Copy iPlInfo_MoveDamageHitTypeIdNext to iPlInfo_MoveDamageHitTypeId
 	ld   [hl], $00	; Clear iPlInfo_MoveDamageHitTypeIdNext
 	inc  de			; SrcPtr++
 	inc  hl			; DestPtr++
-	
+
 	ld   a, [hl]	; A = iPlInfo_MoveDamageFlags3Next
-	ld   [de], a	; Copy iPlInfo_MoveDamageFlags3Next to iPlInfo_MoveDamageFlags3	
+	ld   [de], a	; Copy iPlInfo_MoveDamageFlags3Next to iPlInfo_MoveDamageFlags3
 	ld   [hl], $00	; Clear iPlInfo_MoveDamageFlags3Next
-	
+
 	;--------
 .copySetKey:
-	
+
 	;
 	; Sync the sprite mapping settings and unique identifier from the current/pending to displayed fields.
 	;
-	
+
 	; Set key.
 	; This unique identifier tells the wGFXBufInfo init code which settings were the last to be completely applied.
 	; There's a special case there if we're switching to a new sprite mapping that's the same as
@@ -1496,7 +1499,7 @@ mVBlank_CopyPlTiles: MACRO
 	;
 	ld   hl, \3+iGFXBufInfo_SetKey 		; HL = Source
 	ld   de, \3+iGFXBufInfo_SetKeyView 	; DE = Destination
-	
+
 REPT 5
 	ldi  a, [hl]
 	ld   [de], a
@@ -1504,7 +1507,7 @@ REPT 5
 ENDR
 	ld   a, [hl]
 	ld   [de], a
-	
+
 	; Sprite mapping settings.
 	; This isn't necessary for the routine to draw sprite mappings, since it stops using the "*View" fields
 	; when the graphics finish loading.
@@ -1573,7 +1576,7 @@ VBlank_SetInitialSect:
 	bit  MISCB_TITLE_SECT, a	; In the title screen?
 	jp   nz, .titleSect			; If so, jump
 	jp   .singleSect			; Otherwise, we don't do anything special. Skip ahead.
-	
+
 .stdSect:
 	;
 	; Standard 3-section mode.
@@ -1581,22 +1584,22 @@ VBlank_SetInitialSect:
 	ldh  a, [rSTAT]
 	and  a, STAT_LYC		; LYC enabled?
 	jp   z, .noScanlineInt	; If not, ignore this
-	
+
 	; Enable all
 	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
 	ldh  [rLCDC], a
-	
-	ld   a, [wScreenSect1LYC]			; Set starting point for second section 
+
+	ld   a, [wScreenSect1LYC]			; Set starting point for second section
 	ldh  [rLYC], a
 	xor  a								; Reset wLCDCSectId
 	ld   [wLCDCSectId], a
 	ldh  a, [hScreenSect0BGP]			; Set palette for first section
 	ldh  [rBGP], a
-	
+
 	; If we have a lag frame or game is frozen, don't update sprites.
 	; This avoids inconsistencies, even though it doesn't really matter as it's all purely visual.
 	ld   a, [wMisc_C026]
-	bit  MISCB_LAG_FRAME, a				
+	bit  MISCB_LAG_FRAME, a
 	jp   nz, .stdSect_noDMA
 	ld   a, [wMisc_C025]
 	bit  MISCB_SERIAL_LAG, a
@@ -1604,7 +1607,7 @@ VBlank_SetInitialSect:
 	call hOAMDMA
 .stdSect_noDMA:
 	jp   .setFirstSect			; Skip ahead
-	
+
 .titleSect:
 	;
 	; Title screen mode.
@@ -1619,7 +1622,7 @@ IF REV_LOGO_EN == 0
 	ld   a, $6F				; Line where the parallax effect starts
 ELSE
 	; It starts 2 tiles higher in the English version to make space for the extended copyright.
-	ld   a, $5F				
+	ld   a, $5F
 ENDC
 	ldh  [rLYC], a
 	ld   a, $1B
@@ -1635,7 +1638,7 @@ ENDC
 	; No sections
 	;
 	call hOAMDMA
-	
+
 .setFirstSect:
 	;
 	; Shared code for setting up the first section
@@ -1644,10 +1647,10 @@ ENDC
 	ldh  [rSCY], a
 	ldh  a, [hScrollX]
 	ldh  [rSCX], a
-	
+
 ; =============== VBlank_LastPart ===============
 VBlank_LastPart:
-	
+
 	; If the current or other GB is lagging, skip directly to the end.
 	; This prevents unsetting wVBlankNotDone or reading new inputs.
 
@@ -1660,19 +1663,19 @@ VBlank_LastPart:
 	ld   a, [wMisc_C025]
 	bit  MISCB_SERIAL_LAG, a	; Did the other send at least one byte not yet processed?
 	jp   nz, .end				; If not, skip
-	
+
 	call JoyKeys_Get			; Get player input
 	ld   hl, wTimer				; GlobalTimer++
 	inc  [hl]
-	
-	; Clear wVBlankNotDone. 
+
+	; Clear wVBlankNotDone.
 	; (why is this check even here -- it could be using "xor a" directly)
 	ld   a, [wVBlankNotDone]
 	or   a						; Status == 0?
 	jr   z, .resetTasks			; If so, jump
 	dec  a
 	ld   [wVBlankNotDone], a
-	
+
 .resetTasks:
 
 	;
@@ -1684,11 +1687,11 @@ VBlank_LastPart:
 .loop:
 	bit  0, [hl]			; Type == TASK_EXEC_DONE?
 	jp   z, .nextTask		; If not, skip
-	
+
 	inc  hl					; Seek to iTaskPauseTimer
 	dec  [hl]				; PauseTimer--
 	dec  hl					; Seek back
-	
+
 	jp   nz, .nextTask		; Is the PauseTimer != 0? If so, skip
 	ld   [hl], TASK_EXEC_TODO	; Otherwise, mark it for execution
 .nextTask:
@@ -1696,23 +1699,23 @@ VBlank_LastPart:
 	dec  b					; All tasks checked?
 	jp   nz, .loop			; If not, loop
 .end:
-	
+
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	
+
 IF REV_VER_2 == 1
 	; The English version further randomizes the random timer by incrementing it every frame.
 	ld   hl, wRandLY
 	inc  [hl]
 ENDC
-	
+
 	pop  hl
 	pop  de
 	pop  bc
 	pop  af
 	reti
-	
+
 ; =============== OBJLstS_WriteAll ===============
 ; Handles the sprites.
 OBJLstS_WriteAll:
@@ -1720,11 +1723,11 @@ OBJLstS_WriteAll:
 	push bc
 	push de
 	push hl
-	
+
 	; Save the current ROM bank since we'll be bankswitching for sprite mappings
 	ldh  a, [hROMBank]
 	push af
-	
+
 	; Initialize the pointer to the start of WorkOAM
 	ld   a, LOW(wWorkOAM)
 	ld   [wWorkOAMCurPtr_Low], a
@@ -1735,12 +1738,12 @@ IF REV_VER_2 == 1 || FIX_BUGS == 1
 	xor  a
 	ld   [wOBJCount], a
 ENDC
-	
+
 	; If we're outside of gameplay, the priority checks and especially the player range enforcement should not be done.
 	ld   a, [wMisc_C028]
 	bit  MISCB_PL_RANGE_CHECK, a	; Is the bit set (checks enabled)?
 	jp   z, .noGameplay				; If not, jump
-	
+
 .inGameplay:
 	;
 	; Switch player draw order every frame.
@@ -1749,7 +1752,7 @@ ENDC
 	ld   a, [wTimer]
 	bit  0, a						; wTimer % 2 != 0?
 	jp   nz, .pl2Priority			; If so, jump
-	
+
 .pl1Priority:
 	call Pl1_KeepInScreenRange
 	call Pl2_KeepInScreenRange
@@ -1786,8 +1789,8 @@ ENDC
 	;
 	; Clear the rest of the OAM entries, to avoid keeping unused OBJ from the previous frame.
 	;
-	
-	ld   a, [wWorkOAMCurPtr_Low]	; HL = Current location of the OBJ writer	
+
+	ld   a, [wWorkOAMCurPtr_Low]	; HL = Current location of the OBJ writer
 	ld   l, a
 	ld   a, [wWorkOAMCurPtr_High]
 	ld   h, a
@@ -1801,19 +1804,19 @@ ENDC
 	inc  hl
 	inc  hl
 	jp   .clrLoop
-	
+
 .end:
 	; Restore the previous bank
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	
+
 	pop  hl
 	pop  de
 	pop  bc
 	pop  af
 	ret
-	
+
 .noGameplay:
 	ld   hl, wOBJInfo0
 	call OBJLstS_DoOBJInfoSlot
@@ -1845,38 +1848,37 @@ mPL_KeepInScreenRange: MACRO
 	ld   a, [\1+iOBJInfo_Status]
 	bit  OSTB_VISIBLE, a	; Visibility flag set?
 	ret  z					; If not, return
-	
+
 	xor  a					; Clear movement amount
 	ld   [\1+iOBJInfo_RangeMoveAmount], a
-	
+
 	;
 	; Determine the distance between the player position and the viewport's (left) position.
 	; If the distance is too small (player near the left border of the screen) or too large (near the right border),
 	; forcefully try to keep it in range.
 	;
-	; An extra 8px is added to the result because the player origin is always at the center of the player's collision box,
-	; while the screen origin is always at the left corner of the screen.
-	; Perhaps due to this (or the other way around), the collision box for players is almost always 16px large.
+	; These checks go off the player positions as they would appear on-screen, therefore the hardware offset
+	; is taken into account. (+$08px horizontally)
 	;
-	
+
 	; Take the relative X position into account, since that's outside of iOBJInfo_X
 	; B = -OBJScrollX
 	ld   a, [wOBJScrollX]	; Invert as it simulates wScrollX behaviour
 	cpl
 	inc  a
 	ld   b, a
-	
-	; Diff = PlayerX - ScrollX + $08
+
+	; Diff = PlayerX + $08 - ScrollX
 	ld   a, [\1+iOBJInfo_X]
 	add  b				; -= ScrollX
 	add  a, OBJ_OFFSET_X	; + $08
-	
+
 	cp   $10				; Diff < $10?
 	jp   c, .forceRangeL	; If so, jump
 	cp   SCREEN_H			; Diff >= $A0?
 	jp   nc, .forceRangeR	; If so, jump
 	ret						; Otherwise, nothing to do
-	
+
 .forceRangeL:
 	; Determine how many pixels the player is off-screen.
 	; MoveAmount = -(Diff - $10)
@@ -1885,13 +1887,13 @@ mPL_KeepInScreenRange: MACRO
 	inc  a
 	ld   [\1+iOBJInfo_RangeMoveAmount], a		; Save it here
 	ld   b, a
-	
+
 	; PlayerX += MoveAmount
 	ld   a, [\1+iOBJInfo_X]
 	add  b			; Add that positive value here to force it to the left border
 	ld   [\1+iOBJInfo_X], a
 	ret
-	
+
 .forceRangeR:
 	; Determine how many pixels the player is off-screen.
 	; MoveAmount = -(Diff - $A0)
@@ -1900,7 +1902,7 @@ mPL_KeepInScreenRange: MACRO
 	inc  a
 	ld   [\1+iOBJInfo_RangeMoveAmount], a		; Save it here
 	ld   b, a
-	
+
 	; PlayerX -= MoveAmount
 	ld   a, [\1+iOBJInfo_X]
 	add  b			; Add that negative value here to force it to the right border
@@ -1925,11 +1927,11 @@ OBJLstS_DoOBJInfoSlot:
 	ldi  a, [hl]				; Read iOBJInfo_Status
 	bit  OSTB_VISIBLE, a		; Visibility flag set?
 	ret  z						; If not, return
-	
-	ld   b, a						
-	ld   [wOBJLstTmpROMFlags], a	
+
+	ld   b, a
+	ld   [wOBJLstTmpROMFlags], a
 	ld   [wOBJLstCurStatus], a	; Copy iOBJInfo_Status here
-	
+
 IF REV_VER_2 == 1 || FIX_BUGS == 1
 	; If there are no more OBJ slots left, return.
 	; This nice safety measure prevents corrupting unrelated memory when the sprite limit is hit.
@@ -1940,8 +1942,8 @@ IF REV_VER_2 == 1 || FIX_BUGS == 1
 	ret  nc						; If so, return
 	ld   a, b
 ENDC
-	
-	
+
+
 	;
 	; This game uses double buffering, meaning two sets of GFX buffers are used, as well as two copies of the sprite mapping info.
 	; The GFX buffer to use is determined by the flag OST_GFXBUF2, and the buffers work as you'd expect by alternating between
@@ -1956,15 +1958,15 @@ ENDC
 	; If it is, the sprite mapping in the second set must be used. Also, since OST_GFXBUF2 always points to the new buffer,
 	; that flag must be inverted before being used to make it point to the old buffer (see .chkBuf).
 	;
-		
-	; 
+
+	;
 	; If GFX are loading, use the old user-defined sprite mapping flags.
 	; This value will not be changed again in this subroutine -- and will be later xor'd over with wOBJLstCurStatus.
-	; 
+	;
 	bit  OSTB_GFXLOAD, a		; GFX loading for new sprite mapping?
 	jp   nz, .useOldStatus		; If so, jump
-.useCurStatus:	
-	ldi  a, [hl]				; Read iOBJInfo_OBJLstFlags	
+.useCurStatus:
+	ldi  a, [hl]				; Read iOBJInfo_OBJLstFlags
 	ld   [wOBJLstOrigFlags], a
 	inc  hl						; Seek to iOBJInfo_X
 	jp   .calcRelX
@@ -1992,36 +1994,36 @@ ENDC
 	ld   a, [wOBJScrollX]
 	cpl
 	inc  a
-	
+
 	add  c						; A = XPos - BaseX
 	add  a, OBJ_OFFSET_X		; A += OBJ_OFFSET_X
-	
+
 	; Seek to next entry (this has 2 bytes assigned?)
 	inc  hl						; HL += 2
 	inc  hl
 	ld   [wOBJLstCurRelX], a	; Save the result here
-	
-	
+
+
 .calcRelY:
 	;--
 	;
 	; Determine the relative Y position of the sprite mapping.
 	; RelY = AbsoluteY - BaseY
 	;
-	
+
 	; C = Sprite Y position
 	ld   c, [hl]				; Read iOBJInfo_Y
 	; A = -BaseY
 	ld   a, [wOBJScrollY]
 	cpl
 	inc  a
-	
+
 	add  c						; A = YPos - BaseY
 	; Seek to next entry (this has 2 bytes assigned?)
 	inc  hl						; HL += 2
 	inc  hl
 	ld   [wOBJLstCurRelY], a
-	
+
 .setRelPos:
 	;--
 	;
@@ -2032,14 +2034,14 @@ ENDC
 	inc  hl
 	inc  hl
 	inc  hl
-	
+
 	; $0B
 	ld   a, [wOBJLstCurRelX]
 	ldi  [hl], a			; Save to iOBJInfo_RelX
 	; $0C
 	ld   a, [wOBJLstCurRelY]
 	ldi  [hl], a			; Save to iOBJInfo_RelY
-	
+
 
 	;--
 	;
@@ -2047,26 +2049,26 @@ ENDC
 	; All sprites in the sprite mapping have the tileID number relative to this,
 	; since the graphics can be potentially loaded at any position in VRAM.
 	;
-	
+
 	ld   c, [hl]			; Read iOBJInfo_TileIDBase
 	inc  hl
-	
+
 .chkBuf:
 	;
 	; Pick the additional tileID offset depending on the current GFX buffer.
 	; The two buffers are $20 tiles large, and if we're using the second one,
 	; add $20 to the tileID.
-	; 
+	;
 	; Additionally, if GFX are still loading use the old buffer.
 	;
-	
+
 	ld   a, b				; Read back status
 	bit  OSTB_GFXLOAD, a	; GFX loading for new sprite mapping?
 	jr   z, .noInvTileBit	; If not, skip
 	xor  OST_GFXBUF2		; Otherwise, use old buffer
 .noInvTileBit:
 
-	
+
 	bit  OSTB_GFXBUF2, a	; Are we using the second *GFX* buffer?
 	jp   z, .noAdd20		; If not, skip
 	ld   a, $20				; A = iOBJInfo_TileIDBase + $20
@@ -2075,8 +2077,8 @@ ENDC
 .noAdd20:
 	inc  hl
 	inc  hl
-	
-	
+
+
 	;--
 	; If GFX are still loading display the old sprite mapping.
 	;
@@ -2089,11 +2091,11 @@ ENDC
 	; the current set info specified, while having unusable garbage in the old set.
 	;
 ;----------
-	; $10 
+	; $10
 	push bc
 		bit  OSTB_GFXLOAD, b	; GFX loading for new sprite mapping?
 		jr   nz, .useOldOBJLst	; If so, jump
-		
+
 	.useCurOBJLst:
 		ldi  a, [hl]			; Read iOBJInfo_BankNum
 		ld   [MBC1RomBank], a
@@ -2107,7 +2109,7 @@ ENDC
 		; $13
 		ld   c, [hl]			; Read iOBJInfo_OBJLstPtrTblOffset
 		inc  hl
-		
+
 		; Skip to byte18
 		inc  hl
 		inc  hl
@@ -2117,7 +2119,7 @@ ENDC
 		jr   .drawMainOBJ
 	.useOldOBJLst:
 		; Use the secondary set
-		
+
 		; Skip to byte14
 		inc  hl
 		inc  hl
@@ -2137,7 +2139,7 @@ ENDC
 		ld   c, [hl]			; Read iOBJInfo_OBJLstPtrTblOffsetView
 		inc  hl
 		; $18
-		
+
 	.drawMainOBJ:
 
 		; Switch HL and DE
@@ -2145,11 +2147,11 @@ ENDC
 		push hl
 		pop  de
 		pop  hl
-		
+
 		;
 		; Index the sprite mapping table
 		;
-		
+
 		; HL = Start of OBJLstPtrTable (animation/sprite mappings table)
 		ld   b, $00		; BC = Index
 		add  hl, bc		; Offset it
@@ -2164,16 +2166,16 @@ ENDC
 	;
 
 	; The first sprite mapping is always defined
-	push hl	
+	push hl
 	call OBJLstS_DoOBJLstHeaderA
 	pop  hl
-	
+
 .chkDrawSecOBJ:
 	;
 	; Try to draw the secondary sprite mapping, if it's defined.
 	; If it isn't defined, its pointer in the animation table will be set to $FFFF.
 	;
-	
+
 	; Seek to the next sprite mapping pointer.
 	inc  hl
 	inc  hl
@@ -2181,17 +2183,17 @@ ENDC
 	ld   e, [hl]
 	inc  hl
 	ld   a, [hl]
-	
+
 	cp   HIGH(OBJLSTPTR_NONE) ; Is the high byte $FF? ($FFFF)
 	ret  z                    ; If so, there's nothing else to draw
 	ld   d, a
-	
+
 	; HL = DE
 	push de
 	pop  hl
-	
+
 	jp   OBJLstS_DoOBJLstHeaderB
-	
+
 ; =============== OBJLstS_DoOBJLstHeaderA ===============
 ; Parses out the header for the primary sprite mapping before writing it to the OAM mirror.
 ; IN
@@ -2207,83 +2209,83 @@ OBJLstS_DoOBJLstHeaderA:
 	;
 	push de
 		; Read ptr to DE
-		ld   e, [hl]	
+		ld   e, [hl]
 		inc  hl
-		ld   d, [hl]	
+		ld   d, [hl]
 		; HL = DE
-		push de			
+		push de
 		pop  hl
 	pop  de
 	;--
-	
+
 	; Now HL points to the start of a sprite mapping, at the header.
-	
+
 	;
 	; BYTE 0 - Flags
 	;
-	
+
 	; wOBJLstTmpROMFlags |= (iOBJLstHdrA_Flags & OLF_XFLIP|OLF_YFLIP)
 	; Note that it's doing |=, so it's AND'ed over iOBJInfo_Status.
-	
+
 	; Get sprite mapping flags from ROM
 	ldi  a, [hl]					; Read iOBJLstHdrA_Flags
 	ld   [wOBJLstCurHeaderFlags], a	; Save source val for later
-	
+
 	; Add the current X/Y flip flags on top of the existing ones
 	and  a, OLF_XFLIP|OLF_YFLIP		; B = iOBJLstHdrA_Flags & OLF_XFLIP|OLF_YFLIP
 	ld   b, a
 	ld   a, [wOBJLstTmpROMFlags]	; wOBJLstTmpROMFlags |= B
 	or   b
 	ld   [wOBJLstTmpROMFlags], a
-	
+
 	;
 	; BYTE 1 - Collision Box ID
 	;
-	
+
 	; Copy over item1 to byte18
 	ldi  a, [hl]	; Read iOBJLstHdrA_ColiBoxId
 	ld   [de], a	; Write to iOBJInfo_ColiBoxId
 	inc  de
-	
+
 	;
 	; BYTE 2 - Hitbox ID
 	;
-	
+
 	; Copy over item2 to byte19
 	ldi  a, [hl]	; Read iOBJLstHdrA_HitBoxId
 	ld   [de], a	; Write to iOBJInfo_HitboxId
-	
+
 	; $03
 	inc  hl
 	; $04
 	inc  hl
 	; $05
 	inc  hl
-	
+
 	;
 	; BYTE 6-7 - Sprite data pointer (iOBJLst_OBJCount)
 	;
-	
+
 	; Save it to DE for OBJLstS_WriteToWorkOAM
 	ld   e, [hl]
 	inc  hl
 	ld   d, [hl]
 	inc  hl
-	
+
 	;
 	; BYTE 8 - X Offset
 	;
 	ldi  a, [hl]				; Read iOBJLstHdrA_XOffset
 	ld   [wOBJLstCurXOffset], a
-	
+
 	;
 	; BYTE 9 - Y Offset
 	;
 	ld   a, [hl]				; Read iOBJLstHdrA_YOffset
 	ld   [wOBJLstCurYOffset], a
-	
+
 	jp   OBJLstS_WriteToWorkOAM
-	
+
 ; =============== OBJLstS_DoOBJLstHeaderB ===============
 ; Parses out the header for the secondary sprite mapping before writing it to the OAM mirror.
 ; Compared to the primary sprite mapping, this seems to use a different format for the header.
@@ -2295,30 +2297,30 @@ OBJLstS_DoOBJLstHeaderB:
 	;
 	; BYTE 0 - Flags
 	;
-	
-	; wOBJLstTmpROMFlags = iOBJInfo_Status | (wOBJLstCurHeaderFlags & OLF_XFLIP|OLF_YFLIP)
+
+	; wOBJLstTmpROMFlags = iOBJInfo_Status | (iOBJLstHdrB_Flags & OLF_XFLIP|OLF_YFLIP)
 	; The value of wOBJLstTmpROMFlags is contaminated with iOBJLstHdrA_Flags by the time we get here,
 	; which is why it's using the untouched copy of iOBJInfo_Status in wOBJLstCurStatus.
-	; 
-	
+	;
+
 	; Get sprite mapping flags from ROM
 	ldi  a, [hl]					; Read iOBJLstHdrB_Flags
 	ld   [wOBJLstCurHeaderFlags], a	; Save source val for later
-	
+
 	; Add the X/Y flip flags on top of the existing ones
-	and  a, OLF_XFLIP|OLF_YFLIP		
+	and  a, OLF_XFLIP|OLF_YFLIP
 	ld   b, a
 	ld   a, [wOBJLstCurStatus]
 	or   b
 	ld   [wOBJLstTmpROMFlags], a
-	
+
 	; $01
 	inc  hl
 	; $02
 	inc  hl
 	; $03
 	inc  hl
-	
+
 	;
 	; BYTE 4-5 - Sprite data pointer (iOBJLst_OBJCount)
 	;
@@ -2327,19 +2329,19 @@ OBJLstS_DoOBJLstHeaderB:
 	inc  hl
 	ld   d, [hl]
 	inc  hl
-	
+
 	;
 	; BYTE 6 - X Offset
 	;
 	ldi  a, [hl]
 	ld   [wOBJLstCurXOffset], a
-	
+
 	;
 	; BYTE 7 - Y Offset
 	;
 	ld   a, [hl]
 	ld   [wOBJLstCurYOffset], a
-	
+
 ; =============== OBJLstS_WriteToWorkOAM ===============
 ; IN
 ; - DE: Ptr to OBJLst data
@@ -2350,7 +2352,7 @@ OBJLstS_WriteToWorkOAM:
 	; HL = Ptr to start of OBJLst (tile count, then table of "OBJ")
 	push de
 	pop  hl
-	
+
 	;
 	; Read the cursor position for writing to OAM
 	;
@@ -2358,7 +2360,7 @@ OBJLstS_WriteToWorkOAM:
 	ld   e, a
 	ld   a, [wWorkOAMCurPtr_High]
 	ld   d, a
-	
+
 IF REV_VER_2 == 1 || FIX_BUGS == 1
 	; This must be checked here because the sprite limit may trigger when writing Set A.
 	; Set A is executed by "call OBJLstS_DoOBJLstHeaderA", meaning that even though the routine
@@ -2368,32 +2370,32 @@ IF REV_VER_2 == 1 || FIX_BUGS == 1
 	cp   OBJCOUNT_MAX+1			; wOBJCount >= $29?
 	ret  nc						; If so, return
 ENDC
-	
+
 	;--
 	;
 	; Calculate the effective flags value for the sprite mapping.
 	; Merge the sprite mapping X/Y flip options from ROM with the hardware OBJ flags in iOBJInfo_OBJLstFlags
 	;
-	
+
 	; B = Default flip flags for the sprite mapping from ROM*.
 	;     *after some merging with iOBJInfo_Status.
-	ld   a, [wOBJLstTmpROMFlags]		
+	ld   a, [wOBJLstTmpROMFlags]
 	and  a, OLF_XFLIP|OLF_YFLIP
 	ld   b, a
-	
+
 	; A = User-controlled OBJ flags from iOBJInfo_OBJLstFlags*
-	ld   a, [wOBJLstOrigFlags]		
+	ld   a, [wOBJLstOrigFlags]
 	and  a, SPR_OBP1|SPR_XFLIP|SPR_YFLIP|SPR_BGPRIORITY
-	
+
 	; Xor the flags over
-	xor  b			
+	xor  b
 	ld   [wOBJLstCurFlags], a
-	
+
 	;--
 	;
 	; Depending on the X/Y flipping combinations, offset the sprite mappings in a particular way,
 	;
-	
+
 	and  a, OLF_XFLIP|OLF_YFLIP		; Filter X/Y flip options
 	cp   OLF_XFLIP					; Flipped horizontally?
 	jp   z, OBJLstS_Draw_XFlip		; If so, jump
@@ -2402,7 +2404,7 @@ ENDC
 	cp   OLF_XFLIP|OLF_YFLIP		; Flipped horizontally + vertically?
 	jp   z, OBJLstS_Draw_XYFlip		; If so, jump
 									; Otherwise, no flipping
-	
+
 ; =============== OBJLstS_Draw_*Flip ===============
 ; Set of subroutines to draw the individual sprites of a sprite mapping to WorkOAM.
 ; These are almost identical to each other -- the only differences involve the offsetting of the X/Y positions
@@ -2420,13 +2422,13 @@ OBJLstS_Draw_NoFlip:
 	; First, calculate the effective origin of the sprite mapping (DispX/DispY)
 	; All of the single sprites will be relative to this position.
 	call OBJLstS_CalcDispCoords
-	
+
 	; Read the first byte of the OBJLst, which marks how many 8x16 sprites the sprite mapping contains.
 	; After that the rest is a table of 3 byte structs:
 	; - 0: XPos
 	; - 1: YPos
 	; - 2: TileID [+ Flags]
-	
+
 	; B = Number of OBJ left
 	; DE = WorkOAM Target
 	; HL = Source OBJ list
@@ -2435,37 +2437,37 @@ OBJLstS_Draw_NoFlip:
 	push bc			; Save total count for later
 .loop:
 	; The actual array of OBJ data follows
-	
+
 	push bc			; Save remaining count
-	
-	; Byte0: OBJYPos + wOBJLstCurDispY
+
+	; Byte0: wOBJLstCurDispY + OBJYPos
 	ld   b, [hl]				; Read out relative Y pos
 	inc  hl						; SrcPtr++
 	ld   a, [wOBJLstCurDispY]	; Read Y origin
 	add  b						; Add them together
 	ld   [de], a				; Write it out
 	inc  de						; OAMPtr++
-	
-	; Byte1: OBJXPos + wOBJLstCurDispX
+
+	; Byte1: wOBJLstCurDispX + OBJXPos
 	ld   b, [hl]				; Read out relative X pos
 	inc  hl						; SrcPtr++
 	ld   a, [wOBJLstCurDispX]	; Read X origin
 	add  b						; Add them together
 	ld   [de], a				; Write it out
 	inc  de						; OAMPtr++
-	
+
 	; Write over the tile ID and flags
 	call OBJLstS_Draw_WriteCommon	; Reached the sprite limit?
 IF REV_VER_2 == 1 || FIX_BUGS == 1
 	jp   nc, OBJLstS_Draw_Abort		; If so, jump
 ENDC
-	
+
 	pop  bc				; Restore remaining count
 	dec  b				; OBJLeft == 0?
 	jr   nz, .loop		; If not, loop
 	pop  bc				; Restore total OBJ count
 	jp   OBJLstS_UpdateOAMPos		; Add it over to the stats
-	
+
 ; =============== OBJLstS_Draw_XFlip ===============
 ; XOffset: -$08
 ; YOffset: Normal
@@ -2476,15 +2478,15 @@ OBJLstS_Draw_XFlip:
 	push bc
 .loop:
 	push bc
-	; Byte0: OBJYPos + wOBJLstCurDispY
+	; Byte0: wOBJLstCurDispY + OBJYPos
 	ld   b, [hl]
 	inc  hl
 	ld   a, [wOBJLstCurDispY]
 	add  b
 	ld   [de], a
 	inc  de
-	
-	; Byte1: OBJXPos - wOBJLstCurDispX - $08
+
+	; Byte1: wOBJLstCurDispX - OBJXPos - $08
 	ldi  a, [hl]				; Read out relative X pos
 	cpl							; Invert bits (A = -A-1)
 	sub  a, $07					; A -= 7
@@ -2493,22 +2495,22 @@ OBJLstS_Draw_XFlip:
 	add  b
 	ld   [de], a
 	inc  de
-	
+
 	; Write over the tile ID and flags
 	call OBJLstS_Draw_WriteCommon	; Reached the sprite limit?
 IF REV_VER_2 == 1 || FIX_BUGS == 1
 	jp   nc, OBJLstS_Draw_Abort		; If so, jump
 ENDC
-	
+
 	pop  bc
 	dec  b
 	jr   nz, .loop
 	pop  bc
 	jp   OBJLstS_UpdateOAMPos
-	
+
 ; =============== OBJLstS_Draw_YFlip ===============
 ; XOffset: Normal
-; YOffset: -$50
+; YOffset: +$50
 OBJLstS_Draw_YFlip:
 	call OBJLstS_CalcDispCoords
 	ld   b, [hl]
@@ -2516,17 +2518,20 @@ OBJLstS_Draw_YFlip:
 	push bc
 .loop:
 	push bc
-	; Byte0: OBJYPos - wOBJLstCurDispY - $50
-	; $50 seems to be picked for being high enough
-	ldi  a, [hl]
+	; Byte0: wOBJLstCurDispY - OBJYPos + $50
+	; To not break the sprite, this inverts the relative position of the single OBJ.
+	; Because the Y positions of the individual OBJ are positive and never start at 0,
+	; flipping them moves the sprite considerably up.
+	; Moving them down by $50 happens to align them to the ground again.
+	ldi  a, [hl]		; A = -OBJYPos
 	cpl
-	sub  a, $AF
-	ld   b, a
+	sub  a, $AF			; A += $50
+	ld   b, a			; B = A
 	ld   a, [wOBJLstCurDispY]
-	add  b
+	add  b				; byte0 = wOBJLstCurDispY + ($50 - OBJYPos)
 	ld   [de], a
 	inc  de
-	
+
 	; Byte1: OBJXPos + wOBJLstCurDispX
 	ld   b, [hl]
 	inc  hl
@@ -2534,13 +2539,13 @@ OBJLstS_Draw_YFlip:
 	add  b
 	ld   [de], a
 	inc  de
-	
+
 	; Write over the tile ID and flags
 	call OBJLstS_Draw_WriteCommon	; Reached the sprite limit?
 IF REV_VER_2 == 1 || FIX_BUGS == 1
 	jp   nc, OBJLstS_Draw_Abort		; If so, jump
 ENDC
-	
+
 	pop  bc
 	dec  b
 	jr   nz, .loop
@@ -2548,7 +2553,7 @@ ENDC
 	jp   OBJLstS_UpdateOAMPos
 ; =============== OBJLstS_Draw_YFlip ===============
 ; XOffset: -$08
-; YOffset: -$50
+; YOffset: +$50
 OBJLstS_Draw_XYFlip:
 	call OBJLstS_CalcDispCoords
 	ld   b, [hl]
@@ -2556,8 +2561,8 @@ OBJLstS_Draw_XYFlip:
 	push bc
 .loop:
 	push bc
-	
-	; Byte0: OBJYPos - wOBJLstCurDispY - $50
+
+	; Byte0: wOBJLstCurDispY - OBJYPos + $50
 	ldi  a, [hl]
 	cpl
 	sub  a, $AF
@@ -2566,8 +2571,8 @@ OBJLstS_Draw_XYFlip:
 	add  b
 	ld   [de], a
 	inc  de
-	
-	; Byte1: OBJXPos - wOBJLstCurDispX - $08
+
+	; Byte1: wOBJLstCurDispX - OBJXPos - $08
 	ldi  a, [hl]
 	cpl
 	sub  a, $07
@@ -2576,13 +2581,13 @@ OBJLstS_Draw_XYFlip:
 	add  b
 	ld   [de], a
 	inc  de
-	
+
 	; Write over the tile ID and flags
 	call OBJLstS_Draw_WriteCommon	; Reached the sprite limit?
 IF REV_VER_2 == 1 || FIX_BUGS == 1
 	jp   nc, OBJLstS_Draw_Abort		; If so, jump
 ENDC
-	
+
 	pop  bc
 	dec  b
 	jr   nz, .loop
@@ -2591,7 +2596,7 @@ ENDC
 IF REV_VER_2 == 1 || FIX_BUGS == 1
 	; No more fall-through here
 	jp   OBJLstS_UpdateOAMPos
-	
+
 ; =============== OBJLstS_Draw_Abort ===============
 ; Called to end early the tile writing loop for a sprite mapping set.
 OBJLstS_Draw_Abort:
@@ -2599,23 +2604,23 @@ OBJLstS_Draw_Abort:
 	pop  bc
 	; Fall-through
 ENDC
-	
+
 ; =============== OBJLstS_UpdateOAMPos ===============
 OBJLstS_UpdateOAMPos:
 	; Save new WorkOAM position
-	ld   a, e						
+	ld   a, e
 	ld   [wWorkOAMCurPtr_Low], a
 	ld   a, d
 	ld   [wWorkOAMCurPtr_High], a
-	
+
 	; Update the tile ID base, in case there's a secondary sprite mapping at this slot.
 	; C += B*2 (*2 since we're in 8x16 tile mode)
-	ld   a, c	
+	ld   a, c
 	add  b
 	add  b
 	ld   c, a
 	ret
-	
+
 ; =============== OBJLstS_CalcDispCoords ===============
 ; Calculates the "final" origin coordinates for the sprite mapping.
 ;
@@ -2627,20 +2632,20 @@ OBJLstS_CalcDispCoords:
 	;
 	; Calculate the effective Y location of the sprite mapping on-screen.
 	;
-	
+
 	; wOBJLstCurDispY = wOBJLstCurRelY + wOBJLstCurYOffset
 	ld   a, [wOBJLstCurYOffset]
 	ld   b, a
-	
+
 	ld   a, [wOBJLstCurRelY]
 	add  b
 	ld   [wOBJLstCurDispY], a
-	
+
 	;
 	; Calculate the effective X location of the sprite mapping on-screen.
 	; Unlike with the Y location, here flipping the sprite horizontally inverts the X offset.
 	;
-	
+
 	ld   a, [wOBJLstOrigFlags]
 	and  a, OLF_XFLIP			; Is the X flip flag set?
 	jp   nz, .invXOff			; If so, jump
@@ -2653,12 +2658,12 @@ OBJLstS_CalcDispCoords:
 	inc  a
 .setX:
 	; wOBJLstCurDispX = wOBJLstCurRelX + B
-	ld   b, a					
+	ld   b, a
 	ld   a, [wOBJLstCurRelX]
 	add  b
 	ld   [wOBJLstCurDispX], a
 	ret
-	
+
 ; =============== OBJLstS_Draw_WriteCommon ===============
 ; Writes a single tile ID and its flags to the OAM mirror.
 ; This is used inside the loops to copy tiles of a sprite mapping.
@@ -2677,7 +2682,7 @@ OBJLstS_Draw_WriteCommon:
 	ld   a, [wOBJLstCurHeaderFlags]
 	bit  OLFB_USETILEFLAGS, a		; Are tile-specific flags enabled for this sprite mapping?
 	jp   nz, .withFlag				; If so, jump
-	
+
 .noFlag:
 	;--
 	; The upper two bits of the byte are part of the tileID.
@@ -2691,15 +2696,15 @@ OBJLstS_Draw_WriteCommon:
 	;--
 	; byte3 = wOBJLstCurFlags
 	ld   a, [wOBJLstCurFlags]
-	ld   [de], a				
+	ld   [de], a
 	inc  de
-	
+
 	jp   .incCount
 .withFlag:
 	;--
 	; The upper two bits of the byte contain flags.
 	; These must be removed from the tile ID.
-	
+
 	ldi  a, [hl]				; Read Tile ID
 	push af
 	; byte2 = (OBJTileId & $3F) + TileIDBase
@@ -2708,7 +2713,7 @@ OBJLstS_Draw_WriteCommon:
 	ld   [de], a
 	inc  de
 	pop  af
-	
+
 	;--
 	; byte3 = wOBJLstCurFlags ^ (OBJTileId >> 1)
 	; >> 1 because these are shifted by that amount from the proper values of OLFB_XFLIP and OLFB_YFLIP
@@ -2729,7 +2734,7 @@ IF REV_VER_2 == 1
 	cp   OBJCOUNT_MAX+1			; wOBJCount >= $29? (C flag set = yes, sprite limit hit)
 ENDC
 	ret
-	
+
 ; =============== OBJLstS_DoAnimTiming_Initial ===============
 ; Initializes the current animation frame.
 ; Essentially sets up the arguments for OBJLstS_UpdateGFXBufInfo without doing anything else.
@@ -2745,8 +2750,8 @@ OBJLstS_DoAnimTiming_Initial:
 			add  hl, de					; Seek to iOBJInfo_BankNum
 			ldi  a, [hl]				; Get bank num
 			ld   [MBC1RomBank], a		; Go there
-			ldh  [hROMBank], a			
-			
+			ldh  [hROMBank], a
+
 			; Get args
 			ld   e, [hl]				; DE = Ptr to OBJLstPtrTable
 			inc  hl
@@ -2754,13 +2759,13 @@ OBJLstS_DoAnimTiming_Initial:
 			inc  hl
 			ld   c, [hl]				; BC = Offset
 			ld   b, $00
-			
+
 			; Switch DE and HL
 			push de
 			push hl
 			pop  de						; DE = iOBJInfo_OBJLstPtrTblOffset
 			pop  hl						; HL = Ptr to OBJLstPtrTable
-			
+
 			add  hl, bc					; Index it
 										; HL = OBJLstPtrTable entry to OBJLstHdrA_*
 			jp   OBJLstS_UpdateGFXBufInfo
@@ -2769,12 +2774,12 @@ OBJLstS_DoAnimTiming_Initial:
 ; Handles the timing for the current animation for the specified OBJInfo.
 ; When the animation ends, the last frame is repeated indefinitely.
 ; IN
-; - HL: Ptr to wOBJInfo struct		
+; - HL: Ptr to wOBJInfo struct
 OBJLstS_DoAnimTiming_NoLoop:
 	ldh  a, [hROMBank]
 	push af
 		res  OSTB_GFXNEWLOAD, [hl]			; Reset when processing
-			
+
 		;
 		; If the animation is marked as ended or GFX are still being copied to the other buffer,
 		; don't even decrement the frame counter.
@@ -2782,7 +2787,7 @@ OBJLstS_DoAnimTiming_NoLoop:
 		ld   a, [hl]
 		and  a, OST_ANIMEND|OST_GFXLOAD		; Any of the two bits set?
 		jp   nz, OBJLstS_CommonAnim_End		; If so, return immediately
-		
+
 		;
 		; Continue showing the current animation frame until iOBJInfo_FrameLeft elapses.
 		;
@@ -2792,11 +2797,11 @@ OBJLstS_DoAnimTiming_NoLoop:
 			ld   a, [hl]
 			or   a							; Is it $00?
 			jp   z, .setNextFrame			; If so, jump
-			dec  a							; Otherwise, decrement the timer		
+			dec  a							; Otherwise, decrement the timer
 			ld   [hl], a					; And save it back
 		pop  hl
 		jp   OBJLstS_CommonAnim_End			; We're done for now
-		
+
 		.setNextFrame:
 			;
 			; Set the anim timer to the animation speed value.
@@ -2805,37 +2810,37 @@ OBJLstS_DoAnimTiming_NoLoop:
 			ldd  a, [hl]					; Read total frame length; seek back to iOBJInfo_FrameLeft
 			ld   [hl], a					; Set it to the anim timer
 		pop  hl
-		
+
 		;
 		; Set the next sprite mapping in the list, according to the current OBJLstPtrTbl
 		;
 		push hl
 			ld   de, iOBJInfo_BankNum		; Seek to bank number
 			add  hl, de
-			
+
 			ldi  a, [hl]					; Read it
 			ld   [MBC1RomBank], a			; Switch banks there
 			ldh  [hROMBank], a
-			
+
 			; Gets args
 			ld   e, [hl]				; DE = Ptr to OBJLstPtrTable
 			inc  hl
 			ld   d, [hl]
 			inc  hl
-			
+
 			; Seek to the next entry in the table, and also save back the updated value
 			ld   a, [hl]				; A = Offset + $04
 			add  a, OBJLSTPTR_ENTRYSIZE
 			ld   [hl], a
 			ld   b, $00					; BC = New offset
 			ld   c, a
-			
+
 			; Switch DE and HL
 			push de
 			push hl
 			pop  de						; DE = iOBJInfo_OBJLstPtrTblOffset
 			pop  hl						; HL = Ptr to OBJLstPtrTable
-			
+
 			;
 			; Determine if the OBJLstHdrA_* pointer is "null" ($FFFF).
 			; If it is, the animation has ended and should repeat the last frame indefinitely.
@@ -2853,22 +2858,22 @@ OBJLstS_DoAnimTiming_NoLoop:
 				ld   a, [de]			; iOBJInfo_OBJLstPtrTblOffset -= $04
 				sub  a, OBJLSTPTR_ENTRYSIZE
 				ld   [de], a
-			pop  hl						
+			pop  hl
 		pop  hl							; Restore ptr to start of OBJInfo
-		
+
 		; Update the OBJInfo status to mark the end of the animation
-		ld   a, [hl]			
+		ld   a, [hl]
 		or   a, OST_ANIMEND
 		ld   [hl], a
-		
+
 		; We're done
 		jp   OBJLstS_CommonAnim_End
 		;------------------------
 			.nextOk:
-				dec  hl					; Seek back to the low byte of the OBJLst ptr		
+				dec  hl					; Seek back to the low byte of the OBJLst ptr
 			pop  de						; Pull out useless value to sync
 			jp   OBJLstS_UpdateGFXBufInfo ; ...
-			
+
 ; =============== OBJLstS_DoAnimTiming_Loop ===============
 ; Handles the timing for the current animation for the specified OBJInfo.
 ; When the animation ends, the animation loops back to the first frame.
@@ -2876,12 +2881,12 @@ OBJLstS_DoAnimTiming_NoLoop:
 ; See also: OBJLstS_DoAnimTiming_NoLoop
 ;           Essentially identical except the section of code in .finished is different.
 ; IN
-; - HL: Ptr to wOBJInfo struct				
+; - HL: Ptr to wOBJInfo struct
 OBJLstS_DoAnimTiming_Loop:
 	ldh  a, [hROMBank]
 	push af
 		res  OSTB_GFXNEWLOAD, [hl]			; Reset when processing
-			
+
 		;
 		; If the animation is marked as ended or GFX are still being copied to the other buffer,
 		; don't even decrement the frame counter.
@@ -2889,7 +2894,7 @@ OBJLstS_DoAnimTiming_Loop:
 		ld   a, [hl]
 		and  a, OST_ANIMEND|OST_GFXLOAD		; Any of the two bits set?
 		jp   nz, OBJLstS_CommonAnim_End		; If so, return immediately
-		
+
 		;
 		; Continue showing the current animation frame until iOBJInfo_FrameLeft elapses.
 		;
@@ -2899,11 +2904,11 @@ OBJLstS_DoAnimTiming_Loop:
 			ld   a, [hl]
 			or   a							; Is it $00?
 			jp   z, .setNextFrame			; If so, jump
-			dec  a							; Otherwise, decrement the timer		
+			dec  a							; Otherwise, decrement the timer
 			ld   [hl], a					; And save it back
 		pop  hl								; HL = Ptr to wOBJInfo
 		jp   OBJLstS_CommonAnim_End			; We're done for now
-		
+
 		.setNextFrame:
 			;
 			; Set the anim timer to the animation speed value.
@@ -2912,37 +2917,37 @@ OBJLstS_DoAnimTiming_Loop:
 			ldd  a, [hl]					; Read total frame length; seek back to iOBJInfo_FrameLeft
 			ld   [hl], a					; Set it to the anim timer
 		pop  hl								; HL = Ptr to wOBJInfo
-		
+
 		;
 		; Set the next sprite mapping in the list, according to the current OBJLstPtrTbl
 		;
 		push hl
 			ld   de, iOBJInfo_BankNum		; Seek to bank number
 			add  hl, de
-			
+
 			ldi  a, [hl]					; Read it
 			ld   [MBC1RomBank], a			; Switch banks there
 			ldh  [hROMBank], a
-			
+
 			; Gets args
 			ld   e, [hl]				; DE = Ptr to OBJLstPtrTable
 			inc  hl
 			ld   d, [hl]
 			inc  hl
-			
+
 			; Seek to the next entry in the table, and also save back the updated value
 			ld   a, [hl]				; A = Offset + $04
 			add  a, OBJLSTPTR_ENTRYSIZE
 			ld   [hl], a
 			ld   b, $00					; BC = New offset
 			ld   c, a
-			
+
 			; Switch DE and HL
 			push de
 			push hl
 			pop  de						; DE = iOBJInfo_OBJLstPtrTblOffset
 			pop  hl						; HL = Ptr to OBJLstPtrTable entry
-			
+
 			;
 			; Determine if the OBJLstHdrA_* pointer is "null" ($FFFF).
 			; If it is, the animation has ended and should loop.
@@ -2963,9 +2968,9 @@ OBJLstS_DoAnimTiming_Loop:
 			jp   OBJLstS_UpdateGFXBufInfo
 			;------------------------
 			.nextOk:
-				dec  hl					; Seek back to the low byte of the OBJLstHdrA_* ptr		
-			pop  de						; Don't pop to hl, keep the OBJLstPtrTable entry 
-			
+				dec  hl					; Seek back to the low byte of the OBJLstHdrA_* ptr
+			pop  de						; Don't pop to hl, keep the OBJLstPtrTable entry
+
 ; =============== OBJLstS_UpdateGFXBufInfo ===============
 ; Common code for setting up the initial state of new GFX buffer info.
 ;
@@ -2975,32 +2980,32 @@ OBJLstS_DoAnimTiming_Loop:
 ; - (SP+2): Ptr to wOBJInfo struct
 OBJLstS_UpdateGFXBufInfo:
 		pop  bc				; BC = Ptr to wOBJInfo struct
-		
+
 		;
 		; Seek to the first byte of OBJLstHdrA_*
 		;
-		
+
 		; DE = Ptr to OBJLstHdrA_*
 		ld   e, [hl]
 		inc  hl
 		ld   d, [hl]
 		inc  hl				; To second ptr
-		
+
 		; Switch pointers
 		push de
 		push hl
 		pop  de		; DE = OBJLstPtrTable entry to OBJLstHdrB_*
 		pop  hl		; HL = Ptr to OBJLstHdrA_*
-		
+
 		;
 		; If this sprite mapping doesn't use the GFX buffer system, we're done.
 		;
 		bit  OLFB_NOBUF, [hl]			; Is the flag set?
 		jp   nz, OBJLstS_CommonAnim_End	; If so, return
-		
+
 	.useBuf:
 		push bc
-			
+
 			;
 			; Determine if the buffer should be switched or not.
 			;
@@ -3008,37 +3013,37 @@ OBJLstS_UpdateGFXBufInfo:
 			; In that case, switch the buffers and set back the OSTB_GFXLOAD flag, saving the result back.
 			;
 			; However, if we got here with an incomplete buffer, keep using it, so the new GFX will be written at its start.
-			; 
+			;
 
 			; Save the original iOBJInfo_Status value to a temp location.
 			ld   a, [bc]
 			ld   [wOBJLstTmpStatusOld], a
-			
+
 			bit  OSTB_GFXLOAD, a		; Is the buffer ready yet?
 			jp   nz, .gfxNotDone		; If not, jump
 		.gfxDone:
 			xor  OST_GFXBUF2			; Use other buffer
 			or   a, OST_GFXLOAD			; Set loading flag
 			ld   [bc], a				; Save to iOBJInfo_Status
-			
+
 			; Also save to the temp copy we're checking against to determine the buffer's VRAM ptr
-			ld   [wOBJLstTmpStatusNew], a	
+			ld   [wOBJLstTmpStatusNew], a
 			jp   .getArgs
 		.gfxNotDone:
 			; Nothing to change here, just copy it over.
 			ld   [wOBJLstTmpStatusNew], a
-			
+
 			; Invert just in case we get to .identical (by interrupting moves in a certain way).
 			; wOBJLstTmpStatusOld should always point to the opposite buffer of iOBJInfo_Status.
-			xor  OST_GFXBUF2			
-			ld   [wOBJLstTmpStatusOld], a	
+			xor  OST_GFXBUF2
+			ld   [wOBJLstTmpStatusOld], a
 		.getArgs:
 			push de						; DE = OBJLstPtrTable entry to OBJLstHdrB_*
-			
+
 				;
 				; Get the data off the wOBJInfo we need later for writing to the wGFXBufInfo
 				;
-			
+
 				; DE = Ptr to start of wGFXBufInfo
 				push hl
 					ld   hl, iOBJInfo_BufInfoPtr_Low
@@ -3047,12 +3052,12 @@ OBJLstS_UpdateGFXBufInfo:
 					inc  hl
 					ld   d, [hl]					; Read high byte
 				pop  hl
-				
+
 				; Seek to iOBJLstHdrA_GFXPtr_Low
 				inc  hl		; Seek to iOBJLstHdrA_ColiBoxId
 				inc  hl     ; ...
 				inc  hl
-				
+
 				; BC = Ptr to location in VRAM for copying tiles
 				push hl
 					ld   hl, iOBJInfo_VRAMPtr_Low ; Seek to iOBJInfo_VRAMPtr_Low
@@ -3061,8 +3066,8 @@ OBJLstS_UpdateGFXBufInfo:
 					inc  hl
 					ld   b, [hl]					; Read high byte
 				pop  hl
-				
-				
+
+
 				;
 				; If we're using the second buffer, make the VRAM location point $20 tiles ahead,
 				; which is the size of a single buffer.
@@ -3078,14 +3083,14 @@ OBJLstS_UpdateGFXBufInfo:
 				ld   a, HIGH(TILESIZE * GFXBUF_TILECOUNT)						; BC += $0200
 				add  b
 				ld   b, a
-				
+
 			.setBufInfo:
-			
+
 				;
 				; Write the data to the current wGFXBufInfo structure.
 				;
-			
-				
+
+
 				; VRAM destination ptr
 				ld   a, c		; A = iOBJInfo_VRAMPtr_Low
 				ld   [de], a	; Write to iGFXBufInfo_DestPtr_Low
@@ -3093,28 +3098,28 @@ OBJLstS_UpdateGFXBufInfo:
 				ld   a, b		; A = iOBJInfo_VRAMPtr_High
 				ld   [de], a	; Write to iGFXBufInfo_DestPtr_High
 				inc  de			; Seek to iGFXBufInfo_SrcPtrA_Low
-				
+
 				; Source GFX ptr - Set A
 				; HL = Source (iOBJLstHdrA_GFXPtr_Low)
 				; DE = Destination (iGFXBufInfo_SrcPtrA_Low)
 				call OBJLstS_CopyFarPtr
-				
+
 				;--
-				
+
 				; BC = Ptr to OBJLst - Set A
 				ld   c, [hl]	; C = iOBJLstHdrA_DataPtr_Low
 				inc  hl
 				ld   b, [hl]	; B = iOBJLstHdrA_DataPtr_High
-				
+
 				; Tiles remaining - Set A
 				; Multiplied by 2 because OBJ are always 8x16 (so 2 tiles/OBJ)
 				ld   a, [bc]	; A = iOBJLst_OBJCount
 				add  a, a		; A *= 2
 				ld   [de], a	; iGFXBufInfo_TilesLeftA = A
-				
+
 				inc  de			; Seek to iGFXBufInfo_SrcPtrB_Low
 			pop  hl 			; HL = OBJLstPtrTable entry to OBJLstHdrB_*
-			
+
 			; Source GFX ptr - Set B
 			; If high byte is $FF, there's no set B and we can skip this.
 			ld   c, [hl]		; BC = Ptr to OBJLstHdrB_*
@@ -3123,7 +3128,7 @@ OBJLstS_UpdateGFXBufInfo:
 			ld   a, b
 			cp   HIGH(OBJLSTPTR_NONE)	; B != $FF?
 			jp   nz, .hasSetB			; If so, jump
-			
+
 		.noSetB:
 			; Otherwise, null out the Set B info.
 			xor  a
@@ -3135,32 +3140,32 @@ OBJLstS_UpdateGFXBufInfo:
 			ld   [de], a	; iGFXBufInfo_TilesLeftB
 			inc  de			; Seek to iGFXBufInfo_SetKey
 			jp   .chkMatches
-			
+
 		.hasSetB:
-		
+
 			; Source GFX ptr - Set B
 			push bc
 			pop  hl		; HL = iOBJLstHdrB_Flags
 			inc  hl		; HL = Source (iOBJLstHdrB_GFXPtr_Low)
 						; DE = Destination (iGFXBufInfo_SrcPtrB_Low)
 			call OBJLstS_CopyFarPtr
-			
+
 			;--
-			
+
 			; BC = Ptr to OBJLst - Set B
 			ld   c, [hl]	; C = iOBJLstHdrB_DataPtr_Low
 			inc  hl
 			ld   b, [hl]	; B = iOBJLstHdrB_DataPtr_High
-			
+
 			; Tiles remaining - Set B
 			ld   a, [bc]	; A = iOBJLst_OBJCount
 			add  a, a		; A *= 2
 			ld   [de], a	; iGFXBufInfo_TilesLeftB = A
 			inc  de			; Seek to iGFXBufInfo_SetKey
-			
-		;------------------	
+
+		;------------------
 		.chkMatches:
-		
+
 			;
 			; Check if the buffer set settings we just wrote are identical to the last one we fully applied in VBlankHandler.
 			; If this is the case, treat the new frame as a continuation of this one, which also means to keep using
@@ -3169,25 +3174,25 @@ OBJLstS_UpdateGFXBufInfo:
 			; A side effect of this is that the new frame will animate much faster -- since normally the game has to
 			; wait for the graphics to load before decrementing the frame timer, but here the graphics are already loaded.
 			;
-			; Otherwise the settings identifier at iGFXBufInfo_SetKey is updated and we're done. 
+			; Otherwise the settings identifier at iGFXBufInfo_SetKey is updated and we're done.
 			;
-			
+
 			; BC = Ptr to start of wGFXBufInfo struct
 			ld   hl, -(iGFXBufInfo_SetKey-iGFXBufInfo_DestPtr_Low)
 			add  hl, de
 			push hl
 			pop  bc
-			
+
 			; DE = Ptr to iGFXBufInfo_SetKeyView
 			ld   hl, iGFXBufInfo_SetKeyView
 			add  hl, bc
 			push hl
 			pop  de
-			
+
 			; HL = Ptr to iGFXBufInfo_SrcPtrA_Low
 			ld   hl, iGFXBufInfo_SrcPtrA_Low
 			add  hl, bc
-			
+
 			; Check if these match:
 			; - iGFXBufInfo_SrcPtrA_Low  with iGFXBufInfo_SetKeyView
 			; - iGFXBufInfo_SrcPtrA_High with iGFXBufInfo_SetKeyView+1
@@ -3197,16 +3202,16 @@ REPT 3
 			ld   a, [de]		; A = CompInfo byte
 			cp   a, [hl]		; Does it match the source Set A info?
 			jp   nz, .different	; If not, jump
-			inc  de				
+			inc  de
 			inc  hl
 ENDR
 			inc  hl				; Skip comparing iGFXBufInfo_TilesLeftA
-			
+
 			; Check if these match:
 			; - iGFXBufInfo_SrcPtrB_Low  with iGFXBufInfo_SetKeyView+3
 			; - iGFXBufInfo_SrcPtrB_High with iGFXBufInfo_SetKeyView+4
 			; - iGFXBufInfo_BankB        with iGFXBufInfo_SetKeyView+5
-			; If they don't take the jump			
+			; If they don't take the jump
 REPT 2
 			ld   a, [de]		; A = CompInfo byte
 			cp   a, [hl]		; Does it match the source Set A info?
@@ -3217,11 +3222,11 @@ ENDR
 			ld   a, [de]		; A = iGFXBufInfo_SetKeyView+5
 			cp   a, [hl]		; Does it match with iGFXBufInfo_BankB?
 			jp   nz, .different	; If not, jump
-			
+
 		.identical:
 			; The new settings match the old settings.
 			; There's no need to double buffer this.
-			
+
 			; Wipe them out for both sets (iGFXBufInfo_SrcPtrA_Low-iGFXBufInfo_TilesLeftB)
 			ld   hl, iGFXBufInfo_SrcPtrA_Low
 			add  hl, bc
@@ -3230,39 +3235,39 @@ REPT 8
 			ldi  [hl], a
 ENDR
 		pop  bc			; BC = Ptr to wOBJInfo struct
-		
-		
-		
+
+
+
 		;
 		; Act as if we were in VBLANK and just finished copying the GFX to a buffer.
 		; Except that here both player wOBJInfo slots are handled instead of having two
 		; different code paths.
 		; See also: VBlank_CopyPl1Tiles.move1
 		;
-		
-		
+
+
 		; Reload old copy of iOBJInfo_Status with old OSTB_GFXBUF2 flag.
 		ld   a, [wOBJLstTmpStatusOld]	; Get copy of iOBJInfo_Status
 		res  OSTB_GFXLOAD, a			; Mark GFX as already loaded
-		set  OSTB_GFXNEWLOAD, a				
+		set  OSTB_GFXNEWLOAD, a
 		ld   [bc], a
-		
+
 		;
 		; The buffer info is identical if we got here so there's no need to copy the set keys,
 		; but the sprite mapping info in wOBJInfo could still be different.
 		;
-		
+
 		; Copy over the current wOBJInfo slot info to the old one
-		
+
 		; Copy iOBJInfo_OBJLstFlags to iOBJInfo_OBJLstFlagsView
 		ld   hl, iOBJInfo_OBJLstFlags
 		add  hl, bc
 		ldi  a, [hl]
 		ld   [hl], a
-		
+
 		; Copy iOBJInfo_BankNum-iOBJInfo_OBJLstPtrTblOffset to the old fields
 		ld   hl, iOBJInfo_BankNum	; DE = iOBJInfo_BankNum
-		add  hl, bc					
+		add  hl, bc
 		push hl
 		pop  de
 		ld   hl, iOBJInfo_BankNumView	; BC = iOBJInfo_BankNumView
@@ -3270,24 +3275,24 @@ ENDR
 REPT 4
 		ld   a, [de]				; Read from current data
 		ldi  [hl], a				; Write to old data
-		inc  de						; 
+		inc  de						;
 ENDR
 		jp   OBJLstS_CommonAnim_End
-		
+
 		.different:
 			; BC = Ptr to iGFXBufInfo_DestPtr_Low
-			
+
 			;
 			; Update the current settings identifier (iGFXBufInfo_SetKey) by copying over the untouched Set settings we just wrote.
 			;
-			
+
 			ld   hl, iGFXBufInfo_SetKey	; DE = iGFXBufInfo_SetKey
 			add  hl, bc
 			push hl
 			pop  de
 			ld   hl, iGFXBufInfo_SrcPtrA_Low	; HL = iGFXBufInfo_SrcPtrA_Low
 			add  hl, bc
-			
+
 			; iGFXBufInfo_SrcPtrA_Low  -> iGFXBufInfo_SetKey
 			; iGFXBufInfo_SrcPtrA_High -> iGFXBufInfo_SetKey+1
 			; iGFXBufInfo_BankA        -> iGFXBufInfo_SetKey+2
@@ -3297,7 +3302,7 @@ REPT 3
 			inc  de
 ENDR
 			inc  hl
-			
+
 			; iGFXBufInfo_SrcPtrB_Low  with iGFXBufInfo_SetKey+3
 			; iGFXBufInfo_SrcPtrB_High with iGFXBufInfo_SetKey+4
 			; iGFXBufInfo_BankB        with iGFXBufInfo_SetKey+5
@@ -3309,7 +3314,7 @@ ENDR
 			ld   a, [hl]
 			ld   [de], a
 		pop  bc
-		
+
 	OBJLstS_CommonAnim_End:
 	pop  af
 	ld   [MBC1RomBank], a
@@ -3342,7 +3347,7 @@ OBJLstS_InitFrom:
 	ldi  [hl], a				; Write to RAM, DestPtr++
 	dec  b						; Copied all bytes?
 	jr   nz, .loopCp			; If not, loop
-	
+
 	; Clear bytes $1F-$33
 	ld   b, $14
 	xor  a
@@ -3351,7 +3356,7 @@ OBJLstS_InitFrom:
 	dec  b
 	jr   nz, .loopClr
 	ret
-	
+
 ; =============== ClearOBJInfo ===============
 ; Zeroes out all of the nine wOBJInfo structures.
 ClearOBJInfo:
@@ -3380,7 +3385,7 @@ ClearWINDOWMap:
 	ld   hl, WINDOWMap_Begin		; HL = Tilemap Ptr
 	ld   d, $00						; D  = Write $00
 	jp   ClearTilemapCustom
-; =============== ClearBGMapCustom ===============	
+; =============== ClearBGMapCustom ===============
 ; IN
 ; - D: Value to set
 ClearBGMapCustom:
@@ -3395,10 +3400,10 @@ ClearWINDOWMapCustom:
 ; =============== ClearWINDOWMapCustom ===============
 ; IN
 ; - HL: Tilemap ptr
-; -  D: Value to set	
+; -  D: Value to set
 ClearTilemapCustom:
 	ld   bc, $0400					; BC = Bytes to clear
-	
+
 ; =============== MemSetOnHBlank ===============
 ; Fills a memory range during HBlank.
 ; Use for clearing VRAM.
@@ -3407,15 +3412,15 @@ ClearTilemapCustom:
 ; - BC: Bytes to overwrite
 ; -  D: Value to be set
 MemSetOnHBlank:
-	mWaitForHBlank		
-	ld   a, d			; Write D to HL 
+	mWaitForHBlank
+	ld   a, d			; Write D to HL
 	ldi  [hl], a		; HL++
 	dec  bc				; BytesLeft--
 	ld   a, b			; BC == 0?
 	or   a, c
 	jp   nz, MemSetOnHBlank	; If not, loop
 	ret
-	
+
 ; =============== CopyBGToRectWithBase ===============
 ; Copies a partial tilemap to a location in VRAM,
 ; with tile IDs offset by the specified value.
@@ -3428,7 +3433,7 @@ MemSetOnHBlank:
 CopyBGToRectWithBase:
 	push bc			; Save height
 		push hl			; Save tilemap ptr
-		
+
 		.rowLoop:
 			push bc			; Save width
 				push af			; Save tile ID base
@@ -3436,20 +3441,20 @@ CopyBGToRectWithBase:
 						ld   a, [de]	; B = Relative tile ID
 						ld   b, a
 					pop  af
-					
+
 					add  b			; A = tile ID base + relative tile ID
 					inc  de			; Next tile in tilemap
-					
-					push af			
+
+					push af
 					mWaitForHBlank	; In case we're calling it in the middle of the frame
 					pop  af
-					
+
 					ldi  [hl], a
 				pop  af 		; Restore tile ID base
 			pop  bc			; Restore width
 			dec  b				; Printed all tiles in the row?
 			jp   nz, .rowLoop	; If not, jump
-			
+
 		pop  hl					; Rewind ptr to initial X value
 		ld   bc, BG_TILECOUNT_H	; Move down by 1 tile
 		add  hl, bc
@@ -3457,7 +3462,7 @@ CopyBGToRectWithBase:
 	dec  c							; Printed all rows?
 	jr   nz, CopyBGToRectWithBase	; If not, jump
 	ret
-	
+
 ; =============== CopyBGToRect ===============
 ; Copies a partial tilemap to a location in VRAM.
 ; IN
@@ -3468,11 +3473,11 @@ CopyBGToRectWithBase:
 CopyBGToRect:
 	push bc						; Save rect dimensions
 		push hl					; Save main destination ptr since we're moving down later
-.loop:	
+.loop:
 			mWaitForHBlank		; Since we're copying to VRAM
-			
+
 			ld   a, [de]		; Copy the tile over
-			ldi  [hl], a		
+			ldi  [hl], a
 			inc  de				; Dest++, Src++
 			dec  b				; Copied the entire row?
 			jp   nz, .loop		; If not, jump
@@ -3483,7 +3488,7 @@ CopyBGToRect:
 	dec  c						; HeightLeft--
 	jr   nz, CopyBGToRect		; Copied all rows? If not, jump
 	ret
-	
+
 ; =============== FillBGRect ===============
 ; Draws a rectangle in the tilemap.
 ; IN
@@ -3492,7 +3497,7 @@ CopyBGToRect:
 ; - C: Rect Height
 ; - D: Tile ID to use, generally a completely white or black tile
 FillBGRect:
-	ld   a, d					
+	ld   a, d
 .loopV:
 	push bc
 		push hl
@@ -3510,23 +3515,15 @@ FillBGRect:
 	dec  c				; Filled all rows?
 	jr   nz, .loopV		; If not, loop
 	ret
-	
-; =============== FillGFX / FillBGStripPair ===============
+
+; =============== FillGFX ===============
 ; Writes the specified number of tiles to the GFX area consting of the same line pattern repeated vertically.
-; This is also reused to draw continuous strips in the tilemap alternating between two tile IDs.
-;       
-; IN (FillGFX)
+;
+; IN
 ; - DE: Ptr to GFX in VRAM
 ; - B: Number of tiles to overwrite
 ; - HL: 2bpp Line to repeat across the tiles.
-;
-; IN (FillBGStripPair)
-; - DE: Destination tilemap ptr (top left corner of rectangle)
-; - B: Width multiplier. Multiply by $10 for the effective width.
-; - H: Tile ID 1 to use
-; - L: Tile ID 2 to use
 FillGFX:
-FillBGStripPair:
 	push bc
 		; Write a full tile / Write $10 tiles horizontally
 		ld   b, TILESIZE / 2
@@ -3535,20 +3532,20 @@ FillBGStripPair:
 		mWaitForHBlank
 		ld   a, h
 		ld   [de], a
-		inc  de	
+		inc  de
 		; Write tile L to DE
 		mWaitForHBlank
 		ld   a, l
 		ld   [de], a
 		inc  de
-		
+
 		dec  b				; Finished overwriting the tile? / Filled the $10 tile strip?
 		jp   nz, .loopH		; If not, loop
 	pop  bc
-	dec  b						; Are we done repeating it?
-	jp   nz, FillBGStripPair	; If not, loop
+	dec  b					; Are we done repeating it?
+	jp   nz, FillGFX		; If not, loop
 	ret
-	
+
 ; =============== Unused_CopyTilesAuto ===============
 ; [TCRF] Unreferenced code.
 ; Tile copy function.
@@ -3571,7 +3568,7 @@ Unused_CopyTilesAuto:
 CopyTilesAutoNum:
 	ld   b, [hl]	; Read number of tiles to copy
 	inc  hl			; DestPtr++
-	
+
 ; =============== CopyTiles ===============
 ; Tile copy function.
 ; Could be used for other purposes maybe.
@@ -3590,7 +3587,7 @@ ENDR
 	dec  b				; Have we copied all tiles?
 	jp   nz, CopyTiles	; If not, loop
 	ret
-	
+
 ; =============== Unused_CopyTilesHBlankAuto ===============
 ; [TCRF] Unreferenced code.
 ; Tile copy function during HBlank.
@@ -3607,7 +3604,7 @@ Unused_CopyTilesHBlankAuto:
 	ld   b, [hl]	; Read to B
 	inc  hl
 	; byte3+ -> Uncompressed GFX
-	
+
 	; Fall-through
 
 ; =============== CopyTilesHBlank ===============
@@ -3616,7 +3613,7 @@ Unused_CopyTilesHBlankAuto:
 ; - HL: Ptr to uncompressed GFX
 ; - DE: Ptr to destination in VRAM
 ; -  B: Number of tiles to copy
-CopyTilesHBlank:;
+CopyTilesHBlank:
 	push bc
 		ld   b, TILESIZE		; B = Bytes in tile
 	.loop:
@@ -3642,7 +3639,7 @@ Unused_CopyTilesOverAuto:
 	ld   d, [hl]
 	inc  hl
 	; byte2 -> Number of tiles to copy
-	
+
 	; Fall-through
 ; =============== CopyTilesOver ===============
 ; Draws a transparent GFX on top of an existing one.
@@ -3684,7 +3681,7 @@ CopyTilesOver_Custom:
 					ld   a, TILESIZE	; A = Bytes remaining in tile
 				.tileLoop:
 					push af				; Save bytes left
-						
+
 						ld   a, [de]	; Read GFX from VRAM
 						and  a, [hl]	; Filter with mask
 						ld   [de], a	; Save back
@@ -3700,7 +3697,7 @@ CopyTilesOver_Custom:
 			pop  hl
 		pop  de
 	pop  af
-	
+
 	;
 	; Apply the actual GFX now that the transparency mask cleared away pixels.
 	; This is the same as the above, except this other graphic is OR'd over.
@@ -3724,7 +3721,7 @@ CopyTilesOver_Custom:
 	dec  a					; Processed all tiles?
 	jp   nz, .nextOrTile	; If not, loop
 	ret
-	
+
 ; =============== Unused_CopyTilesHBlankFlipXAuto ===============
 ; [TCRF] Unreferenced code.
 ; IN
@@ -3739,7 +3736,7 @@ Unused_CopyTilesHBlankFlipXAuto:
 	ld   b, [hl]	; Read to B
 	inc  hl
 	; byte3+ -> Uncompressed GFX
-	
+
 	; Fall-through
 ; =============== CopyTilesHBlankFlipX ===============
 ; Copies graphics to VRAM and flips them horizontally.
@@ -3756,17 +3753,17 @@ CopyTilesHBlankFlipX:
 		ld   b, TILESIZE	; B = Bytes in a tile
 	.loop:
 		push bc				; Save B
-			
-			ld   b, $00		
+
+			ld   b, $00
 			ld   c, [hl]		; BC = Source GFX
 			inc  hl				; SrcPtr++
 			call .flipX			; Flip it
 			ld   a, b
-			
+
 			push af
 			mWaitForHBlank
 			pop  af
-			
+
 			ld   [de], a	; Write the byte to VRAM
 			inc  de			; DestPtr++
 		pop  bc				; Restore B
@@ -3776,7 +3773,7 @@ CopyTilesHBlankFlipX:
 	dec  b				; Copied all tiles?
 	jp   nz, CopyTilesHBlankFlipX	; If not, loop
 	ret
-	
+
 ; =============== .flipX ===============
 ; Flips an half-plane (1bpp) line horizontally.
 ; IN
@@ -3828,21 +3825,21 @@ DecompressLZSS:
 	; - S -> Bits before split point.
 	;
 	; Because the compressed data can't be larger than a single bank ($4000), the two upper bits of byte1 get reused.
-	
+
 	; The number of command bytes will be strictly stored in BC, after filtering out the other bits.
 	;
 	; The number of bits before the "split point" is used for the variable bitmasks in the compressed data.
 	; The value will be stored to wLZSS_SplitNum (used as counter for shifting right the values above the bits)
 	; and a generated bitmask based on it in wLZSS_SplitMask (used to filter out bits above the split point).
-	; 
-		
-		
+	;
+
+
 .readHeader:
 		; Fill the registers with the two bytes
 		ld   c, [hl]	; Read byte0
 		inc  hl			; HL++
 		ldi  a, [hl]	; Read byte1
-		ld   b, a		; 
+		ld   b, a		;
 
 .readDataLength:
 		;
@@ -3852,18 +3849,18 @@ DecompressLZSS:
 		res  7, b		; Clear bit 7
 		res  6, b		; Clear bit 6
 		inc  bc			; BC++
-		
+
 .getSplitNum:
 		;
 		; SPLIT POINT (number of bits)
 		;
-		
+
 		; Rotate the two bits left to shift them down from bit7-6 to bit 1-0.
-		rlca			
+		rlca
 		rlca				; << 2
 		and  a, $03			; Clear out all other bits
-		
-		
+
+
 		; For some reason, the source value is "inverted". Why is it like this?
 		; wLZSS_SplitNum = $04 - A
 		sub  a, $04					; will become negative
@@ -3875,12 +3872,12 @@ DecompressLZSS:
 		;
 		; SPLIT POINT (bitmask)
 		;
-		
+
 		; Convert the above number to a bitmask with that amount of bits set.
 		; ie: a bitcount of $02 will give 0b00000011
 		;     a bitcount of $01 will give 0b00000001
 		;     etc...
-		
+
 		; To do that, perform this operation:
 		; Mask = (1 << wLZSS_SplitNum) - 1;
 		; And save the result to wLZSS_SplitMask.
@@ -3906,19 +3903,19 @@ DecompressLZSS:
 .nextCmd:
 		push bc					; Save remaining length for later
 
-		
+
 			; Read the command bitmask.
 			;
 			; Instead of using an explicit number to mark how many bytes to copy, this goes off using bitmasks.
 			; Using bitshifts to the left, bits are processed one by one from the MSB to bit0.
-			; 
+			;
 			; This also means $08 commands can be processed with a single byte.
-			
-			
+
+
 			ldi  a, [hl]				; Read command bitmask
 			ld   [wLZSS_CurCmdMask], a	; Save it here
 
-			
+
 			ld   b, $08					; B = Bits left in the command byte
 .loopCmdMask:
 			ld   a, [wLZSS_CurCmdMask]	; Read bitmask
@@ -3926,18 +3923,18 @@ DecompressLZSS:
 			ld   [wLZSS_CurCmdMask], a
 			jp   c, .startDecomp		; Is that carry bit set? If so, perform the dictionary copy
 										; Otherwise, directly copy the next byte to the destination.
-.rawCopy:	
+.rawCopy:
 			ldi  a, [hl]				; Read the byte, SrcPtr++
 			ld   [de], a				; Copy it over
 			inc  de						; DestPtr++
-			
+
 			dec  b						; All 8 commands in the byte processed?
 			jp   nz, .loopCmdMask		; If not, loop
-			
+
 			jp   .chkEnd				; Otherwise, check if we copied all of the bytes
 
 .startDecomp:
-		
+
 			push bc						; Save number of bits left for later
 
 				;
@@ -3947,26 +3944,26 @@ DecompressLZSS:
 				; - An offset relative to the decompressed buffer + 1 (higher bits)
 				; - The amount of bytes to copy - 1 (lower bits)
 				;
-				
+
 				; The bit where the "split" happens depends on a value in the header that was previously stored to wLZSS_SplitNum/wLZSS_SplitMask.
 				;
 				; To get the effective offset to BC, shift right the byte wLZSS_SplitNum times and invert the bits of the resulting value.
 				; To get the amount of bytes to copy, read the bitmask filter from wLZSS_SplitMask and apply it to the byte.
-				; 
-				
+				;
+
 				; Read the bitmask
-				ldi  a, [hl]		
-				push af				
+				ldi  a, [hl]
+				push af
 
 					;--
 					; BYTE OFFSET
-					
+
 					; B = Base amount of shifts
 					push af
 						ld   a, [wLZSS_SplitNum]
-						ld   b, a			
+						ld   b, a
 					pop  af
-					
+
 					; Shift A right by that amount, then convert the number to negative.
 					; Note that the original value has the bits inverted, so it is off by one (ie: an offset of $00 would point to -1).
 					; C = -(A >> B)-1
@@ -3974,7 +3971,7 @@ DecompressLZSS:
 					srl  a				; A = A >> 1
 					dec  b				; Are we done?
 					jp   nz, .rsLoop	; If not, loop
-					
+
 					cpl					; Convert to negative (-1)
 					ld   c, a			; C = -A-1
 
@@ -3982,13 +3979,13 @@ DecompressLZSS:
 					; BYTE COUNT
 					ld   a, [wLZSS_SplitMask]	; B = Mask for byte count bits
 					ld   b, a
-					
+
 				pop  af				; Restore bitmask
 
-				
+
 				and  b				; Filter away the upper bits
 				inc  a				; Because a byte count of $00 is nonsensical, potentially save a bit by adding implicitly 1.
-				
+
 				; Set the high byte for the negative offset
 				ld   b, HIGH(-$01)
 
@@ -4002,10 +3999,10 @@ DecompressLZSS:
 				;
 				; The source data is read from (HL - BC), and the destination is HL.
 				; HL increases over time, while BC stays the same.
-			
+
 				push hl		; Save SourcePtr
-				
-								
+
+
 					; Move the destination buffer to HL
 					push de
 					pop  hl
@@ -4018,7 +4015,7 @@ DecompressLZSS:
 						pop  hl					; Restore DestPtr
 						ldi  [hl], a			; Copy the byte over, DestPtr++
 					pop  af						; Restore BytesLeft
-					dec  a						; Copied all bytes? 
+					dec  a						; Copied all bytes?
 					jp   nz, .dictCopyLoop		; If not, loop
 
 					; Move the destination buffer back to DE
@@ -4028,8 +4025,8 @@ DecompressLZSS:
 				pop  hl				; Restore SourcePtr
 				;--
 			pop  bc					; Restore number of remaining bits in the command.
-			
-			
+
+
 			dec  b					; All 8 commands in the byte processed?
 			jp   nz, .loopCmdMask	; If not, loop
 
@@ -4044,7 +4041,7 @@ DecompressLZSS:
 		or   a, c			; CommandsLeft == 0?
 		jp   nz, .nextCmd	; If so, jump
 							; Otherwise, we're done.
-						
+
 
 	;--
 	;
@@ -4053,13 +4050,13 @@ DecompressLZSS:
 	;
 	; The subroutine that copies graphics needs this number to know how many tiles need to be copied.
 	; Note that this isn't always used, and at times a custom value is passed to that subroutine.
-	
+
 .calcUncSize:
 	; Restore the ptr to the start of the destination buffer (which was "push de"'d at the very start) to *BC*.
 	; This keeps the current position of the destination buffer to DE.
 	; Then, to determine how many bytes were written, those values can be simply subtracted.
-	pop  bc				
-	
+	pop  bc
+
 	push de
 		; HL = DE (Current buffer pos)
 		push de
@@ -4076,32 +4073,32 @@ DecompressLZSS:
 		ld   c, a
 		inc  bc			; +1 cpl account
 		;#
-		
+
 		add  hl, bc
 		;--
-		
-.calcUncTiles:	
+
+.calcUncTiles:
 		; Divide the size by $10 (TILE_SIZE) to get the tile count.
 		; B = HL / $10 (aka: B = HL >> 4)
 		push hl
-		
+
 			; High byte: move the lower nybble to the upper nybble
 			; (with a dubious lack of filtering with "and a, $F0")
 			swap h			; H = SWAP(H)
-			
+
 			; Low byte: move the upper nybble to the lower nybble
 			ld   a, l		; A = SWAP(L)
 			swap a
 			and  a, $0F		; Remove upper nybble.
-			
+
 			; Merge the two nybbles together and save the result to B.
-			or   a, h		
+			or   a, h
 			ld   b, a
 		pop  hl
 	pop  de
 
 	ret
-	
+
 ; =============== HomeCall_Sound_ReqPlayId ===============
 ; IN
 ; - A: Sound ID to play
@@ -4122,7 +4119,7 @@ HomeCall_Sound_ReqPlayId:
 	pop  hl
 	pop  de
 	ret
-	
+
 ; =============== HomeCall_Sound_ReqPlayExId_Stub ===============
 ; IN
 ; - A: Action ID or DMG Sound ID
@@ -4136,21 +4133,21 @@ SGB_SendSoundPacketAtFrameEnd:
 	ld   a, [wSGBSendPacketAtFrameEnd]
 	or   a				; wSGBSendPacketAtFrameEnd == 0?
 	ret  z				; If so, return
-	
+
 	; Don't do it too close to VBlank
 	ldh  a, [rLY]
 	cp   a, $76			; rLY >= $76?
 	ret  nc				; If so, return
-	
+
 	; Send the packet containing the sound ID that was written at wSGBSoundPacket
 	ld   hl, wSGBSoundPacket
 	call SGB_SendPackets
-	
+
 	; Clear marker
 	xor  a
 	ld   [wSGBSendPacketAtFrameEnd], a
 	ret
-	
+
 ; =============== SGB_PrepareSoundPacketA ===============
 ; Sets up the SGB packet to play a sound ID from Set A.
 ; IN
@@ -4164,35 +4161,35 @@ SGB_PrepareSoundPacketA:
 	push de
 		push hl				; BC = HL
 		pop  bc
-		
+
 		; There are 4 bytes in a sound packet, the rest are $00.
 		; 1 08 SOUND    41.10.00.03 00.00.00.00 00.00.00.00 00.00.00.00
-		
+
 		; C = Attributes for Sound Effect A
-		ld   a, $0F			; Filter away the upper nybble (which is for Sound Effect B)			
+		ld   a, $0F			; Filter away the upper nybble (which is for Sound Effect B)
 		and  c
 		ld   c, a
-		
+
 		;
 		; byte0 - command id + packet count
 		;
 		; (already written in HomeCall_Sound_Init)
-		
-		
-		
+
+
+
 		;
 		; byte1 - Sound Effect A
 		;
 		ld   hl, wSGBSoundPacket+1		; Write out
-		ld   [hl], b						
-		inc  hl							
-		
+		ld   [hl], b
+		inc  hl
+
 		;
 		; byte2 - Sound Effect B (always $00)
 		;
-		ld   [hl], $00						
+		ld   [hl], $00
 		inc  hl
-		
+
 		;
 		; byte3 - Attributes
 		;
@@ -4202,7 +4199,7 @@ SGB_PrepareSoundPacketA:
 		and  a, $F0				; Preserve B
 		or   c					; Merge A
 		ld   [hl], a
-		
+
 		; Request later packet transfer
 		ld   a, $01
 		ld   [wSGBSendPacketAtFrameEnd], a
@@ -4210,7 +4207,7 @@ SGB_PrepareSoundPacketA:
 	pop  bc
 .end:
 	ret
-	
+
 ; =============== SGB_PrepareSoundPacketB ===============
 ; Sets up the SGB packet to play a sound ID from Set B.
 ; See also: SGB_PrepareSoundPacketA
@@ -4225,34 +4222,34 @@ SGB_PrepareSoundPacketB:
 	push de
 		push hl				; BC = HL
 		pop  bc
-		
+
 
 		; C = Attributes for Sound Effect B
-		ld   a, $0F				
+		ld   a, $0F
 		and  c
 		swap a				; Move the nybble from low to high (the low nybble is for Sound Effect A)
 		ld   c, a
-		
+
 		;
 		; byte0 - command id + packet count
 		;
 		; (already written in HomeCall_Sound_Init)
-		
-		
-		
+
+
+
 		;
 		; byte1 - Sound Effect A (always $00)
 		;
-		ld   hl, wSGBSoundPacket+1		
+		ld   hl, wSGBSoundPacket+1
 		ld   [hl], $00
-		inc  hl							
-		
+		inc  hl
+
 		;
 		; byte2 - Sound Effect B
 		;
-		ld   [hl], b					; Write out		
+		ld   [hl], b					; Write out
 		inc  hl
-		
+
 		;
 		; byte3 - Attributes
 		;
@@ -4262,7 +4259,7 @@ SGB_PrepareSoundPacketB:
 		and  a, $0F				; Preserve A
 		or   c					; Merge B
 		ld   [hl], a
-		
+
 		; Request later packet transfer
 		ld   a, $01
 		ld   [wSGBSendPacketAtFrameEnd], a
@@ -4293,14 +4290,14 @@ HomeCall_Sound_ReqPlayExId:
 	pop  de
 	pop  hl
 	ret
-	
+
 ; =============== HomeCall_Sound_Init ===============
 HomeCall_Sound_Init:
 	; Set command id for the fixed sound packet location (SGB_SendSoundPacketAtFrameEnd).
 	; This will never be changed again.
 	ld   a, (SGB_PACKET_SOUND * 8) | $01 	; Sound packet, 1 command
 	ld   [wSGBSoundPacket], a
-	
+
 	ldh  a, [hROMBank]
 	push af
 	ld   a, BANK(Sound_Init) ; BANK $1F
@@ -4311,28 +4308,28 @@ HomeCall_Sound_Init:
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-	
+
 ; =============== HomeCall_Sound_Do ===============
 HomeCall_Sound_Do:
 	push af
 	push bc
 	push de
 	push hl
-	ldh  a, [hROMBank]
-	push af
-	ld   a, BANK(Sound_Do) ; BANK $1F
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	call Sound_Do
-	pop  af
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
+		ldh  a, [hROMBank]
+		push af
+			ld   a, BANK(Sound_Do) ; BANK $1F
+			ld   [MBC1RomBank], a
+			ldh  [hROMBank], a
+			call Sound_Do
+		pop  af
+		ld   [MBC1RomBank], a
+		ldh  [hROMBank], a
 	pop  hl
 	pop  de
 	pop  bc
 	pop  af
 	ret
-	
+
 ; =============== JoyKeys_Get ===============
 ; Gets the joypad input for the player.
 JoyKeys_Get:
@@ -4343,17 +4340,17 @@ JoyKeys_Get:
 	ld   a, [wSerialPlayerId]
 	and  a							; Playing in VS mode?
 	jr   nz, JoyKeys_Get_Serial		; If so, jump
-	
+
 ; =============== JoyKeys_Get_Standard ===============
 ; Gets the DMG joypad input for a player.
 ; IN
 ; - HL: Ptr to existing joypad input
 JoyKeys_Get_Standard:
 	; D = Keys not held
-	ld   a, [hl]			
-	cpl						
-	ld   d, a					
-	
+	ld   a, [hl]
+	cpl
+	ld   d, a
+
 	; Get the directional key status
 	ld   a, HKEY_SEL_DPAD
 	ldh  [rJOYP], a
@@ -4361,11 +4358,11 @@ JoyKeys_Get_Standard:
 	ldh  a, [rJOYP]
 	and  a, $0F				; ----DULR | Only use the actual keypress values (stored in the lower nybble)
 	ld   c, a				; Save to C
-	
+
 	; Reset (Not necessary?)
-	ld   a, HKEY_SEL_BTN|HKEY_SEL_DPAD 
+	ld   a, HKEY_SEL_BTN|HKEY_SEL_DPAD
 	ldh  [rJOYP], a
-	
+
 	; Get the button status
 	ld   a, HKEY_SEL_BTN
 	ldh  [rJOYP], a
@@ -4376,13 +4373,13 @@ JoyKeys_Get_Standard:
 	ldh  a, [rJOYP]
 	ldh  a, [rJOYP]
 	and  a, $0F			; ----SCBA
-	
+
 	; Merge the nybbles and mungle them
 	swap a				; Move to upper nybble
-	or   a, c			; Merge with other: 
+	or   a, c			; Merge with other:
 						; This creates this bitmask: SCBADULR
 	cpl					; Reverse the bits as the hardware marks pressed keys as '0'. We need the opposite.
-	
+
 	; Save the result
 	ldi  [hl], a		; Write it to hJoyKeys
 	and  d				; hJoyNewKeys = hJoyKeys & D
@@ -4391,13 +4388,13 @@ JoyKeys_Get_Standard:
 	ld   a, HKEY_SEL_BTN|HKEY_SEL_DPAD
 	ldh  [rJOYP], a
 	ret
-	
+
 ; =============== JoyKeys_Get_Serial ===============
 ; Handles the joypad reader in serial mode.
 ;
 ; HOW IT WORKS
 ;
-; Two buffers with looping indexes keep track of the player inputs 
+; Two buffers with looping indexes keep track of the player inputs
 ; sent to the other player (current player) and those received through serial (other player);
 ;
 ; Input lifetime:
@@ -4436,7 +4433,7 @@ JoyKeys_Get_Serial:
 		and  a							; Do we allow input?
 		ret  z							; If not, return
 	ld   a, c
-	
+
 	; Depending on the player side, pick the correct current/remote addresses
 	ld   de, hJoyKeys				; P1 Side - Current GB
 	ld   hl, wSerialPendingJoyKeys 	; P1 Side - Other GB
@@ -4452,21 +4449,21 @@ JoyKeys_Get_Serial:
 	;
 
 	; C = Keys not currently held on *this frame*
-	ld   a, [de]			
-	cpl						
-	ld   c, a	
-	
+	ld   a, [de]
+	cpl
+	ld   c, a
+
 	; A = Held input at the tail value of the send buffer
 	push de
 		push hl
 			; Get index to the buffer
 			ld   a, [wSerialDataSendBufferIndex_Tail]
-			ld   e, a									
+			ld   e, a
 			; Save back an incremented copy
 			inc  a										; Index++
 			and  a, $7F									; Size of buffer, cyles back
 			ld   [wSerialDataSendBufferIndex_Tail], a	; Save the updated index
-			
+
 			; Index the buffer of sent inputs and read out its value.
 			xor  a
 			ld   d, a
@@ -4474,49 +4471,49 @@ JoyKeys_Get_Serial:
 			add  hl, de							; Offset it
 			ld   a, [hl]						; A = Buffer entry
 			ld   [hl], $00						; Clear what was here
-			
+
 			; Decrement the counter/balance of remaining bytes to process.
 			ld   hl, wSerialSentLeft
-			dec  [hl]			
+			dec  [hl]
 		pop  hl
 	pop  de
-	
+
 	; Set hJoyKeys
 	ld   [de], a
-	inc  de		
-	
+	inc  de
+
 	; Set hJoyNewKeys.
 	; Unlike the normal joypad handler, this has the keys *RELEASED* in the last 2 frames set
-	and  c					
+	and  c
 	ld   [de], a
-	
+
 	;--
-	
+
 	;
 	; [Frame 0] Poll for input to wSerialPendingJoyKeys*
 	;
 	call JoyKeys_Get_Standard
-	
+
 	; Part 2
 	call JoyKeys_Serial_GetActiveOtherInput
-	ret  
-	
+	ret
+
 ; =============== JoyKeys_Get_SGB ===============
 ; Gets input for both players through the SGB (through the joypad registers, that is).
 ; This is almost the same as JoyKeys_Get_Standard.
 JoyKeys_Get_SGB:
 
 	; Cycle to first controller, prepare for controller ID read
-	ld   a, HKEY_SEL_BTN|HKEY_SEL_DPAD 
+	ld   a, HKEY_SEL_BTN|HKEY_SEL_DPAD
 	ldh  [rJOYP], a
-	
+
 	ld   b, $02			; B = Joy count
 .loop:
 	; Pick the target address for storing the joypad info, depending on the controller ID.
 	; On the first run, write PL1 info from hJoyKeys.
 	; On the the second, write PL2 info from hJoyKeys2.
-	
-	ld   hl, hJoyKeys		
+
+	ld   hl, hJoyKeys
 	ldh  a, [rJOYP]			; Read controller ID
 	and  a, $01				; ID % 2 != 0? (will match != $*E)
 	jr   nz, .go			; If so, jump (this is pad 1)
@@ -4524,10 +4521,10 @@ JoyKeys_Get_SGB:
 .go:
 
 	; D = Keys not held
-	ld   a, [hl]			
-	cpl						
-	ld   d, a					
-	
+	ld   a, [hl]
+	cpl
+	ld   d, a
+
 	; Get the directional key status
 	ld   a, HKEY_SEL_DPAD
 	ldh  [rJOYP], a
@@ -4535,11 +4532,11 @@ JoyKeys_Get_SGB:
 	ldh  a, [rJOYP]
 	and  a, $0F				; ----DULR | Only use the actual keypress values (stored in the lower nybble)
 	ld   c, a				; Save to C
-	
+
 	; Reset (Not necessary?)
-	ld   a, HKEY_SEL_BTN|HKEY_SEL_DPAD 
+	ld   a, HKEY_SEL_BTN|HKEY_SEL_DPAD
 	ldh  [rJOYP], a
-	
+
 	; Get the button status
 	ld   a, HKEY_SEL_BTN
 	ldh  [rJOYP], a
@@ -4550,26 +4547,26 @@ JoyKeys_Get_SGB:
 	ldh  a, [rJOYP]
 	ldh  a, [rJOYP]
 	and  a, $0F			; ----SCBA
-	
+
 	; Merge the nybbles and mungle them
 	swap a				; Move to upper nybble
-	or   a, c			; Merge with other: 
+	or   a, c			; Merge with other:
 						; This creates this bitmask: SCBADULR
 	cpl					; Reverse the bits as the hardware marks pressed keys as '0'. We need the opposite.
-	
+
 	; Save the result
 	ldi  [hl], a		; Write it to hJoyKeys
 	and  d				; hJoyNewKeys = hJoyKeys & D
 	ld   [hl], a		; Write it to hJoyNewKeys
-	
+
 	; Reset + Cycle to next controller
 	ld   a, HKEY_SEL_BTN|HKEY_SEL_DPAD
 	ldh  [rJOYP], a
-	
+
 	dec  b				; JoyLeft--
 	jp   nz, .loop	; All pads red? If not, loop
 	ret
-	
+
 ; =============== JoyKeys_DoCursorDelayTimer ===============
 ; Handles the cursor movement delay timers, used to determine when to move the cursor.
 JoyKeys_DoCursorDelayTimer:
@@ -4578,20 +4575,20 @@ JoyKeys_DoCursorDelayTimer:
 	ld   hl, hJoyKeys2
 	call .calcInfo
 	ret
-	
+
 ; =============== .calcInfo ===============
 ; IN
 ; - HL: Ptr to hJoyKeys*
 .calcInfo:
 	ld   d, [hl]	; D = hJoyKeys
-	
+
 	; Seek to hJoyKeysDelayTbl
-	inc  hl			
-	inc  hl			
-	inc  hl			
-	
+	inc  hl
+	inc  hl
+	inc  hl
+
 	; For each KEY_* value, calculate this information, going from MSB to bit 0.
-	
+
 	ld   e, $08		; E = Bits in byte
 .nextPair:
 
@@ -4607,13 +4604,13 @@ JoyKeys_DoCursorDelayTimer:
 	;      This is set to $11 when we start holding a key, then to $06 once it reaches $00.
 	;      When it reaches $00, the upper nybble of byte0 is unmarked by setting the byte to $01,
 	;      which tells Title_GetMenuInput to treat the input as held.
-	;      
+	;
 
 	ld   b, [hl]	; B = Marker (byte0)
-	inc  hl			; 
+	inc  hl			;
 	ld   c, [hl]	; C = Timer (byte1)
 	dec  hl			; Seek back to byte0
-	
+
 	; Move the existing keypress marker to the upper nybble.
 	; If what we had here was $01 and that gets shifted to the upper nybble, it will cause
 	; Title_GetMenuInput to ignore the key unless it gets set to $01 by the time we exit this function.
@@ -4621,14 +4618,14 @@ JoyKeys_DoCursorDelayTimer:
 	sla  b
 	sla  b
 	sla  b
-	
+
 	; Check if the current key was pressed.
 	; If not, the lower nybble will be kept at 0, and next time we get here it will be pushed out.
 	rlc  d			; Push KEY_* to carry
 	jp   nc, .save	; Is the bit set? If not, jump
 .press:
 	set  0, b		; Mark the key as presssed
-	
+
 	; Check if we just started holding a key.
 	; If not, A will be $11 when we get here.
 	ld   a, b
@@ -4636,9 +4633,9 @@ JoyKeys_DoCursorDelayTimer:
 	jp   nz, .decTimer	; If not, jump
 .initTimer:
 	; Set the initial delay to $11 frames.
-	ld   c, $11			
+	ld   c, $11
 	jp   .save
-	
+
 .decTimer:
 
 	; Decrement the key timer.
@@ -4682,7 +4679,7 @@ Rand:
 ; OUT
 ; - A: Random number
 RandLY:
-	; wRandLY += wTimer + (wRandLY * 5) + rLY + 1 
+	; wRandLY += wTimer + (wRandLY * 5) + rLY + 1
 	push bc
 		ld   a, [wRandLY]	; A = wRand
 		ld   b, a			; B = wRand
@@ -4692,10 +4689,10 @@ RandLY:
 		inc  a
 		ld   b, a			; B = A
 		ld   a, [wTimer]	; A = wTimer + B
-		add  b	
+		add  b
 		;--
 		ld   b, a			; B = A
-		ldh  a, [rLY]		; wRand = B + rLY 
+		ldh  a, [rLY]		; wRand = B + rLY
 		add  b
 		;--
 		ld   [wRandLY], a
@@ -4715,9 +4712,10 @@ LoadGFX_1bppFont_Default:
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-; =============== LoadGFX_Unused_1bppFontCustomCol ===============	
+; =============== LoadGFX_Unused_1bppFontCustomCol ===============
 ; [TCRF] Unreferenced code.
 ; Loads the font GFX with custom palette settings.
+; This didn't exist in 95.
 ; IN
 ; - D: Color to map to bit0
 ; - E: Color to map to bit1
@@ -4728,15 +4726,15 @@ LoadGFX_Unused_1bppFontCustomCol:
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ld   hl, FontDef_Default
-	
+
 	; Apply mapped colors
 	ld   a, d
 	ld   [wFontLoadBit0Col], a
 	ld   a, e
 	ld   [wFontLoadBit1Col], a
-	
+
 	; Read the header out
-	
+
 	; DE = Destination ptr in VRAM
 	ld   e, [hl]
 	inc  hl
@@ -4748,18 +4746,19 @@ LoadGFX_Unused_1bppFontCustomCol:
 	; Skip color map entries
 	inc  hl
 	inc  hl
-	
+
 	; Continue normally
 	call LoadGFX_1bppFont.tileLoop
-	
+
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	ret  
-	
+	ret
+
 ; =============== LoadGFX_Unused_1bppFontCustomAddr ===============
 ; [TCRF] Unreferenced code.
 ; Loads the font GFX at a custom location.
+; This also didn't exist in 95.
 ; IN
 ; - DE: Destination ptr in VRAM
 ; -  B: Number of tiles to copy
@@ -4774,7 +4773,7 @@ LoadGFX_Unused_1bppFontCustomAddr:
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	ret 
+	ret
 
 ; =============== LoadGFX_1bppFont ===============
 ; Loads the font graphics depending on the specified settings.
@@ -4788,8 +4787,8 @@ LoadGFX_1bppFont:
 	; Some of the settings can be overridden by calling alternate wrappers to
 	; this function (which don't seem to be used anyway...)
 	;
-	
-	
+
+
 	; Read the header out
 
 	; DE = Destination ptr in VRAM
@@ -4804,18 +4803,18 @@ LoadGFX_1bppFont:
 	inc  hl
 .fromColDef:
 	; wFontLoadBit0Col = bit0 color map
-	ldi  a, [hl]		
+	ldi  a, [hl]
 	ld   [wFontLoadBit0Col], a
 	; wFontLoadBit1Col = bit1 color map
 	ldi  a, [hl]
 	ld   [wFontLoadBit1Col], a
-	
+
 .tileLoop:
 	;
 	; The font graphics are stored in 1bbp inside the ROM.
 	; Convert them to 2bpp with the specified color values.
 	;
-	
+
 	push bc
 		ld   b, TILE_V		; B = Number of lines in a tile
 	.lineLoop:
@@ -4826,40 +4825,40 @@ LoadGFX_1bppFont:
 		ld   [wFontLoadTmpGFX+1], a
 		push bc
 			ldi  a, [hl]		; Read 1bpp color entry
-			
+
 			; For each bit, apply a 2bpp color.
 			; Start from bit0 and move up by rotating the 1bpp entry right.
 			; The rotation guarantees that the current processed bit is always at bit0 of A.
 			;
 			; There also a mask at C which gets shifted left, and is used to apply bits to the 2bpp entries.
-			
+
 			ld   b, $08			; B = Bits left
 			ld   c, $01			; C = Mask to apply current bit
 		.bitLoop:
-		
+
 			; Map the 1bpp color to a 2bpp color.
 			; Depending on the lowest bit in the GFX byte, pick a different color value
 			rrca							; Get lowest bit + rotate others right
 			jr   c, .useCol1				; Was that bit set (C flag set)? If so, jump
 			;--
-		.useCol0:		
-			push af							
+		.useCol0:
+			push af
 				ld   a, [wFontLoadBit0Col]	; Map to wFontLoadBit0Col color
 				call .mapCol
 				jp   .colDone
-				
+
 		.useCol1:
 			push af
 				ld   a, [wFontLoadBit1Col]	; Map to wFontLoadBit1Col color
 				call .mapCol
 		.colDone:
-			pop  af							
+			pop  af
 			;--
-			
+
 			rlc  c							; C << 1
 			dec  b							; All bits processed?
 			jr   nz, .bitLoop				; If not, loop
-			
+
 			; Write over the two temporary tiles
 			mWaitForVBlankOrHBlank
 			ld   a, [wFontLoadTmpGFX]
@@ -4869,15 +4868,15 @@ LoadGFX_1bppFont:
 			ld   a, [wFontLoadTmpGFX+1]
 			ld   [de], a
 			inc  de
-			
-		pop  bc			
+
+		pop  bc
 		dec  b				; Processed all lines in the tile?
 		jr   nz, .lineLoop	; If not, loop
-	pop  bc				
+	pop  bc
 	dec  b					; Processed all tiles?
 	jr   nz, .tileLoop		; If not, loop
 	ret
-	
+
 ; =============== .mapCol ===============
 ; Converts a 1bpp color value to a 2bpp color.
 ; IN
@@ -4886,7 +4885,7 @@ LoadGFX_1bppFont:
 .mapCol:
 	; The 2 bits of the color index are split across two bytes.
 	; Split them into those two bytes at the same bit number.
-	
+
 	; 0 | %00 | wFontLoadTmpGFX = 0, wFontLoadTmpGFX+1 = 0
 	; 1 | %01 | wFontLoadTmpGFX = 1, wFontLoadTmpGFX+1 = 0
 	; 2 | %10 | wFontLoadTmpGFX = 0, wFontLoadTmpGFX+1 = 1
@@ -4909,7 +4908,7 @@ LoadGFX_1bppFont:
 	ld   [wFontLoadTmpGFX+1], a
 .end:
 	ret
-	
+
 ; =============== TextPrinter_Instant ===============
 ; Instantly prints a string to the screen.
 ; Note that newlines aren't supported for string printed this way.
@@ -4934,10 +4933,10 @@ TextPrinter_Instant_CustomPos:
 		ldi  a, [hl]			; A = Letter
 		push hl
 			; Convert letter to tile ID
-			ld   hl, TextPrinter_CharsetToTileTbl	
+			ld   hl, TextPrinter_CharsetToTileTbl
 			ld   c, a								; C = Letter
 			call TextPrinter_GetTileIdFromLetter	; B = Tile ID
-			
+
 			; Write it out to the tilemap
 			mWaitForVBlankOrHBlank
 			ld   a, b
@@ -4948,7 +4947,7 @@ TextPrinter_Instant_CustomPos:
 	dec  b				; All letters printed?
 	jr   nz, .loop		; If not, loop
 	ret
-	
+
 ; =============== TextPrinter_GetTileIdFromLetter ===============
 ; Converts the character text to the correct tile ID.
 ; Note that the latin alphabet are stored in their proper locations, though
@@ -4972,8 +4971,8 @@ TextPrinter_GetTileIdFromLetter:
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-	
-; =============== NumberPrinter_Instant ===============	
+
+; =============== NumberPrinter_Instant ===============
 ; Instantly prints an hex number to the screen.
 ; IN
 ; - A: Number in hex format
@@ -4990,7 +4989,7 @@ NumberPrinter_Instant:
 	and  a, $0F
 	call .writeDigit
 	ret
-	
+
 ; =============== .writeDigit ===============
 ; *DE = TextPrinter_DigitToTileTbl[A] + C
 ; IN
@@ -5005,13 +5004,13 @@ NumberPrinter_Instant:
 		call TextPrinter_GetTileIdFromLetter
 		ld   a, b
 	pop  bc
-	
+
 	; Offset the tile ID if necessary.
 	; This would be necessary in case the normal 1bpp font
 	; isn't loaded, with the numbers having different tile IDs.
 	; [POI] This never happens though.
 	add  c
-	
+
 	; Write it to the tilemap
 	ld   b, a
 	mWaitForVBlankOrHBlank
@@ -5019,7 +5018,7 @@ NumberPrinter_Instant:
 	ld   [de], a
 	inc  de
 	ret
-	
+
 ; =============== TextPrinter_MultiFrameFar ===============
 ; Wrapper for TextPrinter_MultiFrame for printing text stored in an arbitrary bank.
 ; IN
@@ -5031,20 +5030,20 @@ TextPrinter_MultiFrameFar:
 	push af						; Save all args
 	push bc
 	push de
-	
+
 	ld   [wTextPrintFlags], a	; Set flags
 	ldh  a, [hROMBank]			; Save cur bank
 	push af
 	ld   a, b					; Switch to bank with TextDef
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	
+
 	ld   e, [hl]				; DE = Tilemap ptr ptr
 	inc  hl
 	ld   d, [hl]
 	inc  hl
 	jp   TextPrinter_MultiFrame
-	
+
 ; =============== TextPrinter_MultiFrameFarCustomPos ===============
 ; Wrapper for TextPrinter_MultiFrame for printing text stored in an arbitrary bank
 ; starting at a custom tilemap offset.
@@ -5086,31 +5085,31 @@ TextPrinter_MultiFrame:
 			ldi  a, [hl]		; Read letter from string
 			cp   C_NL			; Is it the newline character?
 			jr   z, .doNewline	; If so, jump
-			
+
 			push hl
-			
+
 				;
 				; Write the character to the screen
 				;
-			
+
 				; Convert letter to tile ID
 				ld   hl, TextPrinter_CharsetToTileTbl
 				ld   c, a
 				call TextPrinter_GetTileIdFromLetter ; B = Tile ID
-				
+
 				; Write it out to the tilemap
-				mWaitForVBlankOrHBlankFast	
-				ld   a, b					
+				mWaitForVBlankOrHBlankFast
+				ld   a, b
 				ld   [de], a
 				inc  de						; Move tilemap pos right
-				
+
 				;
 				; Play the typewriter SGB sound if needed
 				;
 				ld   a, [wTextPrintFlags]
 				bit  TXTB_PLAYSFX, a			; Is the bit set?
 				jr   z, .sfxDone				; If not, skip
-				
+
 				; Use a different sound effect when printing the space character
 				ld   a, b
 				or   a							; TileID != 0?
@@ -5132,9 +5131,9 @@ TextPrinter_MultiFrame:
 			;
 		.doNewline:
 			push hl
-			
+
 				; DE += BG_TILECOUNT_H
-				ld   hl, BG_TILECOUNT_H		
+				ld   hl, BG_TILECOUNT_H
 				add  hl, de
 				push hl
 				pop  de
@@ -5142,7 +5141,7 @@ TextPrinter_MultiFrame:
 				ld   a, e
 				and  a, $FF^(BG_TILECOUNT_H-1)
 				ld   e, a
-				
+
 				; Wait 6 frames before continuing
 				call TextPrinter_ExecuteCustomCodeOnWait
 				call Task_PassControl_NoDelay
@@ -5157,27 +5156,27 @@ TextPrinter_MultiFrame:
 			pop  hl
 		pop  bc
 	pop  af				; Restore delay
-	
+
 	;
 	; Handle speedup controls
 	;
-	
+
 	; If we enabled the line skipping mode in the delay counter, that's it.
 	; Instantly print text as fast as possible (but still delay for a bit when printing newlines).
 	bit  TXCB_INSTANT, a		; Instant print enabled?
 	jr   nz, .chkStringEnd		; If so, skip and immediately write the next char
-	push af	
-	
+	push af
+
 	.delayLoop:
 		push af
 			; There are three different ways to handle controls.
-			
+
 			ld   a, [wTextPrintFlags]
 			bit  TXTB_ALLOWSKIP, a		; Is the flag set?
 			jr   nz, .chkCtrlWithSkip	; If so, jump
 			bit  TXTB_ALLOWFAST, a		; Is the flag set?
 			jr   z, .actNone			; If not, jump
-			
+
 			; TXTB_ALLOWFAST mode
 			; Pressing A in this mode will speed up the text printing.
 			; It's also possible to press START to enable instant text mode.
@@ -5190,8 +5189,8 @@ TextPrinter_MultiFrame:
 			jr   nz, .actSpeedup		; If so, jump
 			; Check the same for controller 2
 			ldh  a, [hJoyNewKeys2]
-			bit  KEYB_START, a			
-			jr   nz, .actInstant			
+			bit  KEYB_START, a
+			jr   nz, .actInstant
 			ldh  a, [hJoyKeys2]
 			bit  KEYB_A, a
 			jr   nz, .actSpeedup
@@ -5208,7 +5207,7 @@ TextPrinter_MultiFrame:
 			bit  KEYB_START, a
 			jr   nz, .actAbort
 			jr   .actNone				; Otherwise, no action
-			
+
 		;
 		; Action: Abort
 		; Exit from here, marking the printing as finished
@@ -5216,7 +5215,7 @@ TextPrinter_MultiFrame:
 		.actAbort:
 		pop  af
 	pop  af
-	
+
 	; Pull out the 4 stack values + restore bank
 	pop  af
 	ld   [MBC1RomBank], a
@@ -5228,7 +5227,7 @@ TextPrinter_MultiFrame:
 	ret
 	;--
 		;
-		; Action: Instant text 
+		; Action: Instant text
 		; Enable instant text mode permanently
 		;
 		.actInstant:
@@ -5245,28 +5244,28 @@ TextPrinter_MultiFrame:
 		pop  af
 		ld   a, $01			; A = Frames to wait (temp copy)
 		jr   .waitFrame
-	;--	
+	;--
 		;
 		; Action: None
 		; ...well
 		;
 		.actNone:
 		pop  af				; Restore delay counter
-	;--	
+	;--
 	; Common wait between text printing
 	.waitFrame:
 		push af
 			call TextPrinter_ExecuteCustomCodeOnWait
 			call Task_PassControl_NoDelay
-		pop  af				
+		pop  af
 		dec  a				; Waited all frames?
 		jr   nz, .delayLoop	; If not, loop
 	pop  af					; Restore original text speed
-	
+
 .chkStringEnd:
 	dec  b					; Printed all letters?
 	jp   nz, .loop			; If not, loop
-	
+
 	; Exit from here
 	pop  af
 	ld   [MBC1RomBank], a
@@ -5277,7 +5276,7 @@ TextPrinter_MultiFrame:
 	scf				; C flag = 0, not aborted
 	ccf
 	ret
-	
+
 ; =============== TextPrinter_ExecuteCustomCodeOnWait ===============
 ; If enabled, executes custom code during the printing delay, before passing control to another task.
 TextPrinter_ExecuteCustomCodeOnWait:
@@ -5292,7 +5291,7 @@ TextPrinter_ExecuteCustomCodeOnWait:
 	ld   a, [wTextPrintFrameCodeBank]		; A = Bank num for code
 	cp   TXB_NONE							; Is it set to $FF?
 	jp   z, .noAction						; If so, jump
-	
+
 	; Jump there
 	ld   [MBC1RomBank], a					; Switch to the bank
 	ldh  [hROMBank], a
@@ -5303,7 +5302,7 @@ TextPrinter_ExecuteCustomCodeOnWait:
 	push de									; Move it to HL
 	pop  hl
 	call .jpHL								; Jump there
-	
+
 .noAction:
 	pop  af
 	ld   [MBC1RomBank], a
@@ -5316,7 +5315,7 @@ TextPrinter_ExecuteCustomCodeOnWait:
 	ret
 .jpHL:
 	jp   hl
-	
+
 ; =============== HomeCall_SGB_ApplyScreenPalSet ===============
 HomeCall_SGB_ApplyScreenPalSet:
 	ld   hl, wMisc_C025
@@ -5331,33 +5330,33 @@ HomeCall_SGB_ApplyScreenPalSet:
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	ret  
-	
+	ret
+
 ; =============== Play_LoadStage ===============
 ; Loads the data for the stage/playfield.
 Play_LoadStage:
 	ldh  a, [hROMBank]
 	push af
-		
+
 		; Blank out the line where the hit counters appear, in case the round ended while it was still there
 		ld   hl, $9C65	; BG Ptr
 		ld   b, $0A	; Rect Width
 		ld   c, $01 ; Rect Height
 		ld   d, $00 ; Tile ID
 		call FillBGRect
-		
+
 		; Blank out the line with MAXIMUM at the bottom, for the same reason
 		ld   hl, $9CA0
 		ld   b, $14
 		ld   c, $01
 		ld   d, $00
 		call FillBGRect
-		
+
 		; If this isn't the first round, we have everything already loaded/drawn.
 		ld   a, [wRoundNum]
 		or   a				; RoundNum > 0?
 		jp   nz, .end		; If so, we're done
-		
+
 		;
 		; Determine the stage to load.
 		; In VS mode, the stage ID is already randomized at the stage select screen.
@@ -5365,11 +5364,11 @@ Play_LoadStage:
 		ld   a, [wPlayMode]
 		bit  MODEB_VS, a	; Playing in VS mode?
 		jp   nz, .load		; If so, jump
-		
+
 		;
 		; In single mode, the stage is the one assigned to the first CPU opponent of the team.
 		;
-		
+
 		; A = CPU opponent
 		ld   a, [wJoyActivePl]
 		or   a				; Playing on the 2P side?
@@ -5381,20 +5380,21 @@ Play_LoadStage:
 		ld   hl, wPlInfo_Pl1+iPlInfo_CharId		; HL = Ptr to 1p CPU char id
 	.getIdx:
 		ld   a, [hl]	; A = CharId * 2
-		
+
 		; Index the Char-to-Stage mapping table
 		srl  a				; /2 to balance out the *2
-		
+
 		ld   hl, Play_CharStageMapTbl	; HL = Ptr to map tbl
 		ld   d, $00			; DE = CharId
 		ld   e, a
 		add  hl, de			; Index it
 		ld   a, [hl]		; A = StageId
 		ld   [wStageId], a	; Save it
-		
+
 		;--
 		; The extra round fighting against IORI' or LEONA' uses an hardcoded stage.
 		; [POI] This is pointless, as the correct entries are already set in Play_CharStageMapTbl.
+		;       Likely a leftover from 95,
 		ld   a, [wCharSeqId]
 		cp   STAGESEQ_BONUS	; RoundId == STAGESEQ_BONUS?
 		jp   nz, .load		; If not, skip
@@ -5403,7 +5403,7 @@ Play_LoadStage:
 		jp   .load
 		;--
 	.load:
-		
+
 		;
 		; Index the stage header off the table.
 		;
@@ -5415,18 +5415,18 @@ Play_LoadStage:
 		ld   c, a
 		ld   hl, Play_StageHeaderTbl	; HL = Start of header
 		add  hl, bc						; Offset it
-		
+
 		;--
-		
+
 		;
 		; bytes0-2 Stage GFX
 		;
-		
+
 		; Switch to the bank with both the GFX and tilemap
 		ldi  a, [hl]	; byte0
 		ld   [MBC1RomBank], a
 		ldh  [hROMBank], a
-		
+
 		; Read out the GFX ptr to BC
 		ld   c, [hl]	; byte1
 		inc  hl
@@ -5435,18 +5435,18 @@ Play_LoadStage:
 		push hl
 			; Decompress the data to the third GFX block
 			push bc
-			pop  hl				
+			pop  hl
 			ld   de, wLZSS_Buffer
 			call DecompressLZSS
 			ld   hl, wLZSS_Buffer
 			ld   de, $9000
 			call CopyTiles
 		pop  hl
-		
+
 		;
 		; bytes3-4 Stage tilemap
 		;
-		
+
 		; Read out the BG ptr to DE
 		ld   e, [hl]	; byte3
 		inc  hl
@@ -5458,7 +5458,7 @@ Play_LoadStage:
 			pop  hl
 			ld   de, wLZSS_Buffer
 			call DecompressLZSS
-			
+
 			; The stage tilemaps are long, spanning the full $20 tiles of the hardware tilemap.
 			; Note that they never get redrawn when scrolling, so those 20 tiles are all that's ever visible.
 			ld   de, wLZSS_Buffer
@@ -5466,15 +5466,16 @@ Play_LoadStage:
 			ld   b, $20				; Width
 			ld   c, $0C				; Height
 			call CopyBGToRect
-			
+
 			; Fill with white tiles two rows above the tilemap, in case the playfield moves down too much.
+			; This is because the tilemap height is the same as the one in 95, but this game's HUD is *two* tiles shorter.
 			ld   hl, $9840
 			ld   b, $20
 			ld   c, $02
 			ld   d, $01
 			call FillBGRect
 		pop  hl
-		
+
 		;
 		; byte5 - SGB palette ID
 		;
@@ -5484,7 +5485,7 @@ Play_LoadStage:
 		push hl
 			call HomeCall_SGB_ApplyScreenPalSet
 		pop  hl
-		
+
 		;
 		; byte6 - BGM ID
 		;
@@ -5495,7 +5496,7 @@ Play_LoadStage:
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-	
+
 ; =============== Play_StageHeaderTbl ===============
 ; Defines the stage headers:
 ; FORMAT:
@@ -5513,7 +5514,7 @@ Play_StageHeaderTbl:
 	db SCRPAL_STAGE_HERO
 	db BGM_ESAKA
 	db $00
-	
+
 	; STAGE 1
 	db BANK(GFXLZ_Play_Stage_FatalFury) ; BANK $04
 	dw GFXLZ_Play_Stage_FatalFury
@@ -5521,7 +5522,7 @@ Play_StageHeaderTbl:
 	db SCRPAL_STAGE_FATALFURY
 	db BGM_BIGSHOT
 	db $00
-	
+
 	; STAGE 2
 	db BANK(GFXLZ_Play_Stage_Yagami) ; BANK $04
 	dw GFXLZ_Play_Stage_Yagami
@@ -5529,7 +5530,7 @@ Play_StageHeaderTbl:
 	db SCRPAL_STAGE_YAGAMI
 	db BGM_ARASHI
 	db $00
-	
+
 	; STAGE 3
 	db BANK(GFXLZ_Play_Stage_Boss) ; BANK $04
 	dw GFXLZ_Play_Stage_Boss
@@ -5545,7 +5546,7 @@ Play_StageHeaderTbl:
 	db SCRPAL_STAGE_STADIUM
 	db BGM_FAIRY
 	db $00
-	
+
 	; STAGE 5
 	db BANK(GFXLZ_Play_Stage_Stadium) ; BANK $04
 	dw GFXLZ_Play_Stage_Stadium
@@ -5553,7 +5554,7 @@ Play_StageHeaderTbl:
 	db SCRPAL_STAGE_STADIUM
 	db BGM_TRASHHEAD
 	db $00
-	
+
 	; STAGE 6
 	db BANK(GFXLZ_Play_Stage_Stadium) ; BANK $04
 	dw GFXLZ_Play_Stage_Stadium
@@ -5561,31 +5562,31 @@ Play_StageHeaderTbl:
 	db SCRPAL_STAGE_STADIUM
 	db BGM_MRKARATE
 	db $00
-	
+
 ; =============== Play_CharStageMapTbl ===============
 ; Defines the stage associated with a character, used in single mode.
 Play_CharStageMapTbl:
-	db STAGE_ID_HERO ; CHAR_ID_KYO     
-	db STAGE_ID_HERO ; CHAR_ID_DAIMON  
-	db STAGE_ID_FATALFURY ; CHAR_ID_TERRY   
-	db STAGE_ID_FATALFURY ; CHAR_ID_ANDY    
-	db STAGE_ID_FATALFURY ; CHAR_ID_RYO     
-	db STAGE_ID_FATALFURY ; CHAR_ID_ROBERT  
-	db STAGE_ID_HERO ; CHAR_ID_ATHENA  
-	db STAGE_ID_FATALFURY ; CHAR_ID_MAI     
-	db STAGE_ID_YAGAMI ; CHAR_ID_LEONA   
-	db STAGE_ID_BOSS ; CHAR_ID_GEESE   
-	db STAGE_ID_BOSS ; CHAR_ID_KRAUSER 
-	db STAGE_ID_BOSS ; CHAR_ID_MRBIG   
-	db STAGE_ID_YAGAMI ; CHAR_ID_IORI    
-	db STAGE_ID_YAGAMI ; CHAR_ID_MATURE  
-	db STAGE_ID_HERO ; CHAR_ID_CHIZURU 
-	db STAGE_ID_STADIUM_GOENITZ ; CHAR_ID_GOENITZ 
+	db STAGE_ID_HERO ; CHAR_ID_KYO
+	db STAGE_ID_HERO ; CHAR_ID_DAIMON
+	db STAGE_ID_FATALFURY ; CHAR_ID_TERRY
+	db STAGE_ID_FATALFURY ; CHAR_ID_ANDY
+	db STAGE_ID_FATALFURY ; CHAR_ID_RYO
+	db STAGE_ID_FATALFURY ; CHAR_ID_ROBERT
+	db STAGE_ID_HERO ; CHAR_ID_ATHENA
+	db STAGE_ID_FATALFURY ; CHAR_ID_MAI
+	db STAGE_ID_YAGAMI ; CHAR_ID_LEONA
+	db STAGE_ID_BOSS ; CHAR_ID_GEESE
+	db STAGE_ID_BOSS ; CHAR_ID_KRAUSER
+	db STAGE_ID_BOSS ; CHAR_ID_MRBIG
+	db STAGE_ID_YAGAMI ; CHAR_ID_IORI
+	db STAGE_ID_YAGAMI ; CHAR_ID_MATURE
+	db STAGE_ID_HERO ; CHAR_ID_CHIZURU
+	db STAGE_ID_STADIUM_GOENITZ ; CHAR_ID_GOENITZ
 	db STAGE_ID_STADIUM_EXTRA ; CHAR_ID_MRKARATE
-	db STAGE_ID_STADIUM_EXTRA ; CHAR_ID_OIORI   
-	db STAGE_ID_STADIUM_EXTRA ; CHAR_ID_OLEONA  
-	db STAGE_ID_STADIUM_KAGURA ; CHAR_ID_KAGURA  
-	
+	db STAGE_ID_STADIUM_EXTRA ; CHAR_ID_OIORI
+	db STAGE_ID_STADIUM_EXTRA ; CHAR_ID_OLEONA
+	db STAGE_ID_STADIUM_KAGURA ; CHAR_ID_KAGURA
+
 ; =============== Serial_DoHandshake ===============
 ; Performs an handshake between master and slave GBs.
 ; If it succeeds, the standard serial handlers (master/slave-specific) are set.
@@ -5604,36 +5605,36 @@ Serial_DoHandshake:
 	bit  MISCB_SERIAL_MODE, [hl]	; Are we in VS mode serial?
 	ret  z							; If not, return
 	;--
-	
+
 	;
 	; Prepare system to give exclusive control to the handshake check.
 	;
-	
-	di   
+
+	di
 	; Set the serial handler used for this, which handles both master and slave.
 	ld   a, LOW(SerialHandler_Handshake)
 	ld   [wSerialIntPtr_Low], a
 	ld   a, HIGH(SerialHandler_Handshake)
 	ld   [wSerialIntPtr_High], a
-	
+
 	xor  a
 	ldh  [rSB], a					; Remove sent values from queue
 	ld   [wSerialInputMode], a	; Disable input processing just in case
-	
+
 	; Disable every interrupt except for serial, and discard any existing one.
 	ldh  a, [rIE]
 	push af				; Save rIE
 		xor  a				; Stop all existing interrupts
-		ldh  [rIF], a		
+		ldh  [rIF], a
 		ld   a, I_SERIAL	; Enable Serial interrupt only
 		ldh  [rIE], a
 		ei
-	
-	
+
+
 		; Clear marker to prepare for transfer.
-		xor  a							
+		xor  a
 		ld   [wSerialTransferDone], a
-		
+
 		ld   hl, wMisc_C025
 		bit  MISCB_SERIAL_SLAVE, [hl]	; Are we set as slave?
 		jp   nz, .slave						; If so, jump
@@ -5645,26 +5646,26 @@ Serial_DoHandshake:
 		; [POI] There's a design flaw where if something goes wrong
 		;       after the slave reads $43, the master will infinite loop.
 		;
-	
+
 		; Wait for a bit before starting, to give time to the slave
 		ld   bc, $0010
 		call SGB_DelayAfterPacketSendCustom
-		
+
 		; Reset transfer flag
 		xor  a
 		ld   [wSerialTransferDone], a
 	.trySendToSlave:
 		; Perform Master->Slave transfer
 		;--
-		di   
+		di
 		ld   a, $43								; Send $43 to slave
 		ld   [wSerialDataSendBuffer], a
 		ld   a, START_TRANSFER_INTERNAL_CLOCK	; Start transfer
 		ldh  [rSC], a
-		ei 
+		ei
 		;--
 		; Wait $0600 times in a loop for a reply before retrying.
-		; [POI] This is a point where the master can infinite loop,	as it's possible for the slave 
+		; [POI] This is a point where the master can infinite loop,	as it's possible for the slave
 		;       to receive a byte but not send one back in time. This results in the slave continuing,
 		;       but the master still waiting. There's no timeout here.
 		ld   bc, $0600					; BC = Loop cycles before retry
@@ -5677,7 +5678,7 @@ Serial_DoHandshake:
 		or   c							; CyclesLeft != 0?
 		jp   nz, .waitSlaveReply		; If so, loop
 		jp   .trySendToSlave			; Otherwise, try to send the byte again
-		
+
 	.chkSlaveReply:
 		xor  a							; Reset transfer flag
 		ld   [wSerialTransferDone], a
@@ -5685,7 +5686,7 @@ Serial_DoHandshake:
 		cp   a, $4C						; Did we receive $4C from the slave?
 		jr   nz, .trySendToSlave		; If not, try to send the byte again
 		jp   .handshakeOk				; Otherwise, we're done
-		
+
 	.slave:
 		;
 		; SLAVE
@@ -5693,7 +5694,7 @@ Serial_DoHandshake:
 		;
 		ld   a, $4C						; Set byte we're replying with
 		ld   [wSerialDataSendBuffer], a
-		ld   a, START_TRANSFER_EXTERNAL_CLOCK ; Start listening to master			
+		ld   a, START_TRANSFER_EXTERNAL_CLOCK ; Start listening to master
 		ldh  [rSC], a
 		ld   bc, $0600					; BC = Loop cycles before retry
 	.waitMaster:
@@ -5713,15 +5714,15 @@ Serial_DoHandshake:
 		jr   nz, .slave					; If not, re-listen again
 		; Otherwise, we're done.
 		; Note that the master still has to check our response.
-		
+
 	.handshakeOk:
 		;--
-		di   
-		
+		di
+
 		;
 		; Initialize and clear serial variables
 		;
-		
+
 		; Clear entire buffer of received bytes
 		xor  a
 		ld   b, wSerialDataReceiveBuffer_End-wSerialDataReceiveBuffer ; B = Buffer length
@@ -5730,7 +5731,7 @@ Serial_DoHandshake:
 		ldi  [hl], a
 		dec  b
 		jp   nz, .clrRecvBufLoop
-		
+
 		; Clear entire buffer of sent bytes
 		ld   b, wSerialDataSendBuffer_End-wSerialDataSendBuffer ; B = Buffer length
 		ld   hl, wSerialDataSendBuffer		; HL = Starting ptr
@@ -5738,7 +5739,7 @@ Serial_DoHandshake:
 		ldi  [hl], a
 		dec  b
 		jp   nz, .clrSendBufLoop
-		
+
 		; Reset misc variables
 		ld   [wTimer], a
 		ldh  [rSB], a
@@ -5755,14 +5756,14 @@ Serial_DoHandshake:
 		ld   [wSerial_Unknown_Unused_C144], a
 		ld   [wSerialLagCounter], a
 		ld   [wSerial_Unknown_Unused_C1C6], a
-		
+
 		; By default, listen to the other GB
 		ld   a, START_TRANSFER_EXTERNAL_CLOCK
 		ldh  [rSC], a
 		; Enable input buffer processing since we're ready
 		ld   a, $01
 		ld   [wSerialInputMode], a
-		
+
 		; Set the proper interrupt target between master/slave
 		ld   hl, wMisc_C025
 		bit  MISCB_SERIAL_SLAVE, [hl]	; Are we a slave?
@@ -5773,10 +5774,10 @@ Serial_DoHandshake:
 		ld   [wSerialIntPtr_Low], a
 		ld   a, HIGH(SerialHandler_Master)
 		ld   [wSerialIntPtr_High], a
-		
-		; Initialize head/tail buffer indexes 
+
+		; Initialize head/tail buffer indexes
 		; See also: JoyKeys_Get_Serial
-		
+
 		; Receive buffer offset by 1
 		ld   a, $01
 		ld   [wSerialDataReceiveBufferIndex_Head], a
@@ -5809,7 +5810,7 @@ Serial_DoHandshake:
 		xor  a
 		ldh  [rIF], a
 	; Restore original enabled interrupts
-	pop  af			
+	pop  af
 	ldh  [rIE], a
 	ret
 ; =============== Serial_Unused_NulSend ===============
@@ -5824,13 +5825,13 @@ Serial_Unused_NulSend:
 	push af
 		;--
 		; Send $00 to the other GB
-		di   
+		di
 		xor  a
 		ld   [wSerialDataSendBuffer], a
 		ldh  [rSB], a
 		ld   a, START_TRANSFER_INTERNAL_CLOCK
 		ldh  [rSC], a
-		ei 
+		ei
 		;--
 		call Serial_WaitAfterHandshake
 		;--
@@ -5843,8 +5844,8 @@ Serial_Unused_NulSend:
 	pop  af
 	dec  a				; Sent it $10 times?
 	jp   nz, .loop		; If not, loop
-	ret  
-	
+	ret
+
 ; =============== JoyKeys_Serial_GetActiveOtherInput ===============
 ; Gets the active inputs for the other player in a serial match.
 ; Only called with input balance != 0.
@@ -5856,30 +5857,30 @@ JoyKeys_Serial_GetActiveOtherInput:
 	ld   a, [wSerialPlayerId]
 	and  a						; Playing in serial mode?
 	ret  z						; If not, return
-	
+
 	; Determine the player ID on the other side.
 	; ie: if we're playing on the 1P side, get 2P's joypad inputs
-	ld   hl, hJoyKeys		
+	ld   hl, hJoyKeys
 	cp   a, SERIAL_PL1_ID	; Controlling 1P?
 	jr   nz, .go			; If not, jump
-	ld   hl, hJoyKeys2		
-	
+	ld   hl, hJoyKeys2
+
 .go:
 
 	;
 	; [Frame 2]
 	; Get the active input for the other GB.
 	;
-	
+
 	; C = Keys not held on the other GB
-	ld   a, [hl]			
-	cpl  
+	ld   a, [hl]
+	cpl
 	ld   c, a
-	
+
 	; A = Held input at the tail value of the send buffer
 	; After getting the entry, increase the tail index but don't clear it (unlike JoyKeys_Get_Serial).
 	push hl
-	
+
 		; Get index to the receive buffer tail
 		ld   a, [wSerialDataReceiveBufferIndex_Tail]
 		ld   e, a
@@ -5887,26 +5888,26 @@ JoyKeys_Serial_GetActiveOtherInput:
 		inc  a											; Index++
 		and  a, $7F										; Size of buffer, cyles back
 		ld   [wSerialDataReceiveBufferIndex_Tail], a	; Save the updated index
-		
+
 		; Index the buffer of read inputs and read out its value.
 		xor  a
 		ld   d, a							; Index the data
 		ld   hl, wSerialDataReceiveBuffer
 		add  hl, de
 		ld   a, [hl]
-		
+
 		; Decrement number of remaining inputs to read.
 		ld   hl, wSerialReceivedLeft
 		dec  [hl]
 	pop  hl
-	
+
 	; Set hJoyKeys
 	ldi  [hl], a		; Write entry to hJoyKeys
-	
+
 	; Like in JoyKeys_Get_Serial, set to hJoyNewKeys the keys released since the point hJoyKeys was recorded
 	and  c				; hJoyNewKeys = hJoyKeys & C
 	ld   [hl], a		; Write entry to hJoyNewKeys
-	
+
 	;
 	; [Frame 0]
 	; Set the values to send *after* the *next* transfer completes.
@@ -5914,11 +5915,11 @@ JoyKeys_Serial_GetActiveOtherInput:
 	; In theory it would have been more correct to put this in JoyKeys_Get_Serial.
 	call JoyKeys_Serial_SetNextTransfer
 	ret
-	
+
 ; =============== JoyKeys_Serial_SetNextTransfer ===============
 ; Sets up the next values to send when the current transfer is finished.
 ; This also causes the master to start the transfer.
-JoyKeys_Serial_SetNextTransfer: 
+JoyKeys_Serial_SetNextTransfer:
 	ld   a, [wSerialPlayerId]
 	cp   a, SERIAL_PL1_ID		; Are we player 1?
 	jr   nz, .pl2				; If not, jump
@@ -5931,18 +5932,18 @@ JoyKeys_Serial_SetNextTransfer:
 	ld   d, $00
 	ld   hl, wSerialDataSendBuffer				; HL = SendBuffer
 	add  hl, de									; Index it
-	
-	ld   a, [wSerialPendingJoyKeys]				; A = Latest joypad keys	
+
+	ld   a, [wSerialPendingJoyKeys]				; A = Latest joypad keys
 	call JoyKeys_FixInvalidCombinations			; Fix it
 	ld   [hl], a								; Write it out
-	
+
 	xor  a										; Reset key status
 	ld   [wSerialPendingJoyKeys], a
-	
+
 	; Start transfering what's already set in rSB
 	ld   a, START_TRANSFER_INTERNAL_CLOCK
 	ldh  [rSC], a
-	ret  
+	ret
 .pl2:
 	;
 	; Write wSerialPendingJoyKeys2 (2P) to head send buffer entry
@@ -5952,15 +5953,15 @@ JoyKeys_Serial_SetNextTransfer:
 	ld   d, $00
 	ld   hl, wSerialDataSendBuffer				; HL = SendBuffer
 	add  hl, de									; Index it
-	
-	ld   a, [wSerialPendingJoyKeys2]			; A = Latest joypad keys	
+
+	ld   a, [wSerialPendingJoyKeys2]			; A = Latest joypad keys
 	call JoyKeys_FixInvalidCombinations			; Fix it
 	ld   [hl], a								; Write it out
-	
+
 	xor  a										; Reset key status
 	ld   [wSerialPendingJoyKeys2], a
-	ret  
-	
+	ret
+
 ; =============== JoyKeys_FixInvalidCombinations ===============
 ; Removes keypresses for impossible button combinations.
 ; IN
@@ -5982,7 +5983,7 @@ JoyKeys_FixInvalidCombinations:
 	res  KEYB_UP, b
 .end:
 	ld   a, b
-	ret  
+	ret
 
 ; =============== Serial_Init ===============
 ; Initializes serial.
@@ -6002,8 +6003,8 @@ Serial_Init:
 	ld   a, HIGH(ModeSelect_SerialHandler)
 	ld   [wSerialIntPtr_High], a
 	ret
-	
-; =============== SerialHandler ===============	
+
+; =============== SerialHandler ===============
 ; By default this isn't called.
 ; The handler is called when a byte is received by either the master or slave.
 SerialHandler:
@@ -6026,16 +6027,16 @@ SerialHandler:
 	ld   l, e
 	; Jump there
 	jp   hl
-	
+
 ; =============== ModeSelect_SerialHandler ===============
 ; Serial handler for Module_Title.
 ModeSelect_SerialHandler:
 	; This handler is used to make the game wait at ModeSelect_Serial_Wait
 	; until both DMGs have sent a byte (MODESELECT_SBCMD_*) to each other.
-	
+
 	ldh  a, [rSB]						; Read byte from serial
 	ld   [wSerialDataReceiveBuffer], a	; Copy it here
-	
+
 	; When a byte from serial is received, the transfer flag from rSC gets automatically unset
 	; from both sides.
 	;
@@ -6053,7 +6054,7 @@ ModeSelect_SerialHandler:
 	;
 	; This is only a problem here because the game treats the received data as something
 	; other than joypad input.
-	; 
+	;
 	;
 	; Therefore, if we are set as slave, immediately set START_TRANSFER_EXTERNAL_CLOCK to listen for the next byte.
 	; Normally START_TRANSFER_EXTERNAL_CLOCK would be set at the start of the ModeSelect main loop,
@@ -6079,8 +6080,8 @@ ModeSelect_SerialHandler:
 	; Stop listening for bytes
 	ld   a, $01							; Allow exit from ModeSelect_Serial_Wait
 	ld   [wSerialTransferDone], a
-	ret  
-	
+	ret
+
 ; =============== SerialHandler_Handshake ===============
 ; Simple serial handler used when doing the handshake between master and slave,
 ; typically when a module is initializing.
@@ -6093,7 +6094,7 @@ SerialHandler_Handshake:
 	ldh  [rSB], a						; Send it out
 	ld   a, $01							; Mark transfer as done since we're received the byte
 	ld   [wSerialTransferDone], a
-	
+
 	; If we're set as slave, listen to the next received byte.
 	ld   a, [wMisc_C025]
 	bit  MISCB_SERIAL_SLAVE, a			; Are we set as slave?
@@ -6101,7 +6102,7 @@ SerialHandler_Handshake:
 	ld   a, START_TRANSFER_EXTERNAL_CLOCK	; Listen for new byte
 	ldh  [rSC], a
 	ret
-	
+
 ; =============== SerialHandler_Master ===============
 ; Serial handler for buffered input mode.
 SerialHandler_Master:
@@ -6109,7 +6110,7 @@ SerialHandler_Master:
 	; The master only starts a transfer when it gets to send more data in JoyKeys_Serial_SetNextTransfer
 	ld   a, $01
 	ld   [wSerialTransferDone], a
-	ret  
+	ret
 ; =============== SerialHandler_Slave ===============
 ; Serial handler for buffered input mode.
 SerialHandler_Slave:
@@ -6119,7 +6120,7 @@ SerialHandler_Slave:
 	ldh  [rSC], a
 	ld   a, $01
 	ld   [wSerialTransferDone], a
-	ret 
+	ret
 
 ; =============== SerialHandler_HeadBufferSet ===============
 ; Sets the next serial data to the top of the receive and send buffers.
@@ -6135,16 +6136,16 @@ SerialHandler_HeadBufferSet:
 	inc  a											; Increase RecvHeadIdx
 	and  a, $7F										; Wrap around to $00 if past the buffer
 	ld   [wSerialDataReceiveBufferIndex_Head], a	; Save back the increased index
-	
+
 	ld   d, $00										; DE = RecvHeadIdx
 	ld   hl, wSerialDataReceiveBuffer				; HL = RecvBuffer
 	add  hl, de										; Index the receive buffer table
 	ldh  a, [rSB]									; Read the received byte from the other GB
 	ld   [hl], a									; Write it in the buffer
-	
+
 	ld   hl, wSerialReceivedLeft			; Mark that a byte was received
-	inc  [hl]										
-	
+	inc  [hl]
+
 	;
 	; Write the current byte from the head index of the send buffer to rSB.
 	; Update its index the same way.
@@ -6154,35 +6155,35 @@ SerialHandler_HeadBufferSet:
 	inc  a											; Increase SentHeadIdx
 	and  a, $7F										; Wrap around to $00 if past the buffer
 	ld   [wSerialDataSendBufferIndex_Head], a		; Save back the increased index
-	
+
 	ld   d, $00										; DE = SentHeadIdx
 	ld   hl, wSerialDataSendBuffer					; HL = SentBuffer
 	add  hl, de										; Index the send buffer table
 	ld   a, [hl]									; Read the newest byte to send
 	ldh  [rSB], a									; Send it out
-	
+
 	ld   hl, wSerialSentLeft				; Mark that a byte was sent
 	inc  [hl]
-	ret  
-	
+	ret
+
 ; =============== Serial_WaitAfterHandshake ===============
 ; Waits for a bit after the slave finishes the handshake.
 Serial_WaitAfterHandshake:
 	ld   bc, $0600		; BC = Loop count
 .loop:
 	nop  				; Waste some cycles
-	nop  
+	nop
 	dec  bc				; LoopCount--
 	ld   a, b
 	or   c				; LoopCount == 0?
 	jp   nz, .loop		; If not, loop
-	ret 
-	
+	ret
+
 ; =============== Serial_Unused_Jp4380 ===============
 ; [TCRF] Unreferenced code.
 Serial_Unused_Jp4380:
-	jp   $4380
-	
+	jp   $4380 ; Used to be $4000 in 95
+
 ; =============== Pl_InitBeforeStageLoad ===============
 ; Initializes parts of the player struct (before the first round starts) outside gameplay for both players.
 Pl_InitBeforeStageLoad:
@@ -6190,7 +6191,7 @@ Pl_InitBeforeStageLoad:
 	; At the start of a round, it always gets increased by 1.
 	ld   a, -$01
 	ld   [wRoundNum], a
-	
+
 	; Win streak and losses is stage-specific
 	xor  a
 	ld   [wPlInfo_Pl1+iPlInfo_RoundWinStreak], a
@@ -6206,7 +6207,7 @@ Pl_InitBeforeStageLoad:
 	ld   [wPlInfo_Pl1+iPlInfo_Health], a
 	ld   [wPlInfo_Pl2+iPlInfo_Health], a
 	ret
-	
+
 ; =============== Module_Play ===============
 ; Initializes the module where actual gameplay takes place.
 Module_Play:
@@ -6218,36 +6219,36 @@ Module_Play:
 	ldh  [hROMBank], a
 	;-----------------------------------
 	rst  $10				; Stop LCD
-	
+
 	; Lock controls & timer since the intro plays first
 	ld   hl, wMisc_C027
 	set  MISCB_PLAY_STOP, [hl]
-	
+
 	; Prevent players from moving off-screen
 	inc  hl ; Seek to wMisc_C028
 	set  MISCB_PL_RANGE_CHECK, [hl]
-	
+
 	; The gameplay screen is divided into multiple sections:
 	; - HUD at the top
 	; - Playfield
 	; - HUD at the bottom
-	
+
 	; Specify which scanline range the playfield uses, and enable sect mode.
 	; Note that these values are slightly less than the intended ones... but the
 	; LYC trigger code performs a dubious busy loop which delays it (see LCDCHandler_Sect).
 	ld   a, $1E		; Starts in
 	ld   b, $7F		; Ends in
 	call SetSectLYC
-	
+
 	; Initialize global gameplay timer.
 	; Set to $FF so that first frame of gameplay starts at 0.
 	ld   a, $FF
 	ld   [wPlayTimer], a
-	
+
 	; [TCRF] This is the only place this counter is used.
 	ld   hl, wRoundTotal
 	inc  [hl]
-	
+
 	; Reset DMG pal
 	ld   a, $FF
 	ldh  [rBGP], a
@@ -6256,22 +6257,22 @@ Module_Play:
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect1BGP], a
 	ldh  [hScreenSect2BGP], a
-	
+
 	; Disable scanline interrupt for now
 	xor  a
 	ldh  [rSTAT], a
-	
+
 	; If this is the first round of the stage, clear out any leftovers
 	; in the tilemap from the previous screen.
 	;
-	; Note that this is the *only* point checking the round number before getting incremented, so if the pre-stage 
+	; Note that this is the *only* point checking the round number before getting incremented, so if the pre-stage
 	; defaults from Pl_InitBeforeStageLoad are still set, the round number will still be -1.
 	ld   a, [wRoundNum]
 	cp   -$01				; RoundNum == -1?
 	jp   nz, .setPlayPos	; If not, skip
 	call ClearBGMap
 	call ClearWINDOWMap
-	
+
 .setPlayPos:
 	; Start the round at the center of the playfield.
 	; At the start of a round, it should be possible to scroll the screen to either direction.
@@ -6282,7 +6283,7 @@ Module_Play:
 	ldh  [hScrollY], a
 	ld   a, $40
 	ld   [wOBJScrollY], a
-	
+
 	; Completely clear both GFX buffers
 	ld   hl, wGFXBufInfo_Pl1	; HL = Starting point
 	ld   b, $40					; B = Bytes to clear
@@ -6291,7 +6292,7 @@ Module_Play:
 	ldi  [hl], a
 	dec  b
 	jp   nz, .bufClrLoop
-	
+
 	call ClearOBJInfo
 	call Play_LoadPreRoundTextAndIncRound
 	call Play_DrawHUDBaseAndInitTimer
@@ -6300,7 +6301,7 @@ Module_Play:
 	call Play_HUD_DrawCharNames
 	call Play_DrawCharIcons
 	call Play_LoadStage
-	
+
 	;
 	; Decompress the full set of projectile graphics to the LZSS buffer.
 	;
@@ -6318,49 +6319,49 @@ Module_Play:
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
-	
+
 	; Display the WINDOW at the top, as that's where the status bar is.
 	xor  a
 	ldh  [rWY], a
 	ld   a, $07
 	ldh  [rWX], a
-	
+
 	; Initialize serial connection
 	call Serial_DoHandshake
-	
+
 	ld   a, LCDC_PRIORITY|LCDC_OBJENABLE|LCDC_OBJSIZE|LCDC_WENABLE|LCDC_WTILEMAP|LCDC_ENABLE
 	rst  $18
-	
+
 	; Enable VBLANK & LYC interrupts
 	ldh  a, [rSTAT]		; Enable scanline triggers
 	or   a, STAT_LYC
 	ldh  [rSTAT], a
-	; [POI] Leftover value fron KOF95, which used a smaller HUD at the top. 
+	; [POI] Leftover value fron KOF95, which used a smaller HUD at the top.
 	;       This doesn't have any real effect as the screen is still black,
 	;       and by the next frame it will get reset to what was previously set in SetSectLYC.
-	ld   a, $16			
-	ldh  [rLYC], a	
+	ld   a, $16
+	ldh  [rLYC], a
 	ldh  a, [rIE]
 	or   a, I_VBLANK|I_STAT
 	ldh  [rIE], a
-	
+
 	; Create two separate tasks for handling the two players
 	ld   a, $02
 	ld   bc, Play_DoPl_1P
 	call Task_CreateAt
-	
+
 	ld   a, $03
 	ld   bc, Play_DoPl_2P
 	call Task_CreateAt
-	
+
 	; Set intro move for characters that don't start in their idle anim
 	call Play_Char_SetIntroAnimInstant
 	ei
-	
+
 	; Pass control to initialize the other tasks
 	call Task_PassControlFar
 	call Task_PassControlFar
-	
+
 	;
 	; In single mode, the bosses and extra stages play a sound effect
 	; on the SGB side when a round starts.
@@ -6395,7 +6396,7 @@ Module_Play:
 .playSnd:
 	call SGB_PrepareSoundPacketB
 .noSnd:
-	
+
 	;
 	; Wait $0A frames for the player graphics to load while the DMG palette is black
 	;
@@ -6410,7 +6411,7 @@ Module_Play:
 	call Task_PassControlFar
 	dec  b
 	jp   nz, .waitLoad
-	
+
 	; Show the screen by setting the real DMG palettes
 	ld   a, $8C				; 1P palette
 	ldh  [rOBP0], a
@@ -6422,20 +6423,20 @@ Module_Play:
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect1BGP], a
 	ldh  [hScreenSect2BGP], a
-	
+
 	; Set intro move for characters that start in their idle anim.
 	call Play_Char_SetIntroAnimDelayed
 	; Execute the main intro part
 	call Play_DoPreRoundText
 	; Load projectile graphics over
 	call Play_LoadProjectileOBJInfo
-	
+
 	; Start the main gameplay loop
 	ld   a, BANK(Play_Main) ; BANK $01
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	jp   Play_Main
-	
+
 ; =============== Play_InitRound ===============
 ; Initializes the round variables, including both players.
 Play_InitRound:
@@ -6447,7 +6448,7 @@ Play_InitRound:
 	ld   bc, wPlInfo_Pl2
 	ld   de, wOBJInfo_Pl2+iOBJInfo_Status
 	call Play_LoadChar
-	
+
 	; Initialize other fields
 	xor  a
 	ld   [wPlayHitstop], a
@@ -6457,13 +6458,13 @@ Play_InitRound:
 	ld   [wScreenShakeY], a
 	ld   [wPlayMaxPowScroll1P], a
 	ld   [wPlayMaxPowScroll2P], a
-	
+
 	; Set player numbers, mostly used so projectiles know from which players they come from
 	xor  a ; PL1
 	ld   [wPlInfo_Pl1+iPlInfo_PlId], a
 	ld   a, PL2
 	ld   [wPlInfo_Pl2+iPlInfo_PlId], a
-	
+
 	; Remove every status flag except for the CPU marker
 	ld   a, [wPlInfo_Pl1+iPlInfo_Flags0]
 	and  a, PF0_CPU
@@ -6471,7 +6472,7 @@ Play_InitRound:
 	ld   a, [wPlInfo_Pl2+iPlInfo_Flags0]
 	and  a, PF0_CPU
 	ld   [wPlInfo_Pl2+iPlInfo_Flags0], a
-	
+
 	; Initialize other player fields
 	xor  a
 	ld   [wPlInfo_Pl1+iPlInfo_Flags1], a
@@ -6499,7 +6500,7 @@ Play_InitRound:
 	ld   a, $FF
 	ld   [wPlInfo_Pl1+iPlInfo_PlDistance], a
 	ld   [wPlInfo_Pl2+iPlInfo_PlDistance], a
-	
+
 	; Initialize stun timers at their capped value.
 	ld   a, $67
 	ld   [wPlInfo_Pl1+iPlInfo_DizzyProg], a
@@ -6510,15 +6511,15 @@ Play_InitRound:
 	ld   [wPlInfo_Pl2+iPlInfo_GuardBreakProg], a
 	ld   [wPlInfo_Pl1+iPlInfo_GuardBreakProgCap], a
 	ld   [wPlInfo_Pl2+iPlInfo_GuardBreakProgCap], a
-	
+
 	; Give visibility to the other player's character id
 	ld   a, [wPlInfo_Pl1+iPlInfo_CharId]
 	ld   [wPlInfo_Pl2+iPlInfo_CharIdOther], a
 	ld   a, [wPlInfo_Pl2+iPlInfo_CharId]
 	ld   [wPlInfo_Pl1+iPlInfo_CharIdOther], a
-	
+
 	;##
-	
+
 	;
 	; Determine two things here:
 	; - How much health to assign to players
@@ -6531,7 +6532,7 @@ Play_InitRound:
 	ld   [wRoundFinal], a
 	call IsInTeamMode			; Are we in team mode?
 	jp   nc, .chkHealthSingle	; If not, jump
-	
+
 	;--
 .chkHealthTeam:
 	;
@@ -6543,7 +6544,7 @@ Play_InitRound:
 	; Note that, before the first round starts, the initial health values are set in Pl_InitBeforeStageLoad.
 	; That's needed as wLastWinner doesn't get reset between stages.
 	;
-	
+
 	; If 1P didn't win last round
 	ld   a, [wLastWinner]
 	bit  PLB1, a				; Did 1P win the last round?
@@ -6557,14 +6558,14 @@ Play_InitRound:
 	ld   a, PLAY_HEALTH_MAX		; Otherwise, reset 2P health
 	ld   [wPlInfo_Pl2+iPlInfo_Health], a
 .chkFinalTeam:
-	
+
 	;
 	; TEAM MODE - FINAL ROUND CHECK
 	;
 	; If any team has 3 characters defeated, this is the final round.
 	;
-	
-	; Note that it's not necessary to check both -- if the first team 
+
+	; Note that it's not necessary to check both -- if the first team
 	; doesn't have 3 losses, the second one doesn't either.
 	;
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamLossCount]
@@ -6574,7 +6575,7 @@ Play_InitRound:
 	cp   $03					; Is 2P's team defeated?
 	jp   z, .setFinalRound		; If so, jump
 	jp   .end
-	
+
 .chkHealthSingle:
 
 	;
@@ -6587,7 +6588,7 @@ Play_InitRound:
 	ld   a, [wRoundNum]
 	cp   $03				; wRoundNum == $03? (4th)
 	jp   nz, .setNormRound	; If not, jump
-	
+
 .setFinalRound:
 	; Enable FINAL!! round
 	ld   a, $01
@@ -6599,13 +6600,13 @@ Play_InitRound:
 	jp   .end
 .setNormRound:
 	; Set max health for both players
-	ld   a, PLAY_HEALTH_MAX			
+	ld   a, PLAY_HEALTH_MAX
 	ld   [wPlInfo_Pl1+iPlInfo_Health], a
 	ld   [wPlInfo_Pl2+iPlInfo_Health], a
 .end:
 	;##
-	
-	
+
+
 	; Init other things
 	xor  a
 	ld   [wPlInfo_Pl1+iPlInfo_HealthVisual], a
@@ -6622,7 +6623,7 @@ Play_InitRound:
 	ld   [wPlInfo_Pl2+iPlInfo_MaxPowVisual], a
 	ld   [wPlInfo_Pl1+iPlInfo_MaxPowExtraLen], a
 	ld   [wPlInfo_Pl2+iPlInfo_MaxPowExtraLen], a
-	
+
 	; Load default player sprite mappings.
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
 	ld   de, OBJInfoInit_Pl1
@@ -6650,29 +6651,29 @@ Play_LoadChar:
 	ld   hl, iPlInfo_TeamLossCount
 	add  hl, bc						; Seek to loss count
 	ld   a, [hl]
-	
+
 	; In case this is the final round, use the 3rd character
 	cp   $03						; Did all three characters lose? (final round only)
 	jp   nz, .seekToActive			; If not, skip
 	ld   a, $02						; Otherwise, use third member
-	
+
 .seekToActive:
 	; Index the player struct from iPlInfo_TeamCharId0, where the team member IDs are stored in order.
-	ld   hl, iPlInfo_TeamCharId0	
+	ld   hl, iPlInfo_TeamCharId0
 	add  hl, bc						; Seek to first member
 	; Offset to the active one
 	add  a, l						; HL += A
 	jp   nc, .noInc					; Just in case (this always jumps)
 	inc  h 							; We never get here
 .noInc:
-	ld   l, a							
+	ld   l, a
 	ld   a, [hl]					; A = CharId from team def
 .setActiveChar:
 	; Set what we read out as current character
 	ld   hl, iPlInfo_CharId
 	add  hl, bc				; Seek to char ID
-	ld   [hl], a			
-	
+	ld   [hl], a
+
 .loadCharInfo:
 
 	;
@@ -6681,7 +6682,7 @@ Play_LoadChar:
 	; These settings are stored into a table with $10 byte entries, ordered by character ID.
 	; As CharId is already multiplied by 2, multiply the value by $08 to generate the table offset.
 	;
-	
+
 	; HL = CharId * $08
 	ld   hl, iPlInfo_CharId
 	add  hl, bc			; Seek to CharId * 2
@@ -6697,7 +6698,7 @@ ENDR
 	add  hl, de						; Offset to entry
 	push hl							; Move ptr to DE
 	pop  de
-	
+
 	; Load the settings two bytes at a time.
 	ld   hl, iPlInfo_MoveAnimTblPtr_Low	; byte0-1
 	call .copyPtr
@@ -6733,16 +6734,16 @@ ENDR
 ; - HL: iPlInfo field
 .copyPtr:
 	add  hl, bc		; Seek to the specified field
-	
+
 	ld   a, [de]	; A = Low byte of ptr
 	inc  de			; TablePtr++
 	ldd  [hl], a	; Write it to player struct byte1; PlInfoPtr--
-	
+
 	ld   a, [de]	; A = High byte of ptr
 	inc  de			; TablePtr++
 	ld   [hl], a	; Write it to player struct byte0
 	ret
-	
+
 ; =============== .copyByte ===============
 ; Copies a byte from the header to the player struct.
 ; For alignment purposes (to avoid having to use a separate ptr table), the header pads
@@ -6764,235 +6765,235 @@ ENDR
 Play_CharHeaderTbl:
 	; CHAR_ID_KYO
 	dw MoveAnimTbl_Kyo ; iPlInfo_MoveAnimTblPtr
-	dw MoveCodePtrTbl_Kyo ; iPlInfo_MoveCodePtrTable 
+	dw MoveCodePtrTbl_Kyo ; iPlInfo_MoveCodePtrTable
 	dpr MoveInputReader_Kyo ; iPlInfo_MoveInputCodePtr | BANK $06
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
 	dw -$0700 ; iPlInfo_JumpSpeed
 	dw +$0060 ; iPlInfo_Gravity
-	
+
 	; CHAR_ID_DAIMON
 	dw MoveAnimTbl_Daimon ; iPlInfo_MoveAnimTblPtr
-	dw MoveCodePtrTbl_Daimon ; iPlInfo_MoveCodePtrTable 
+	dw MoveCodePtrTbl_Daimon ; iPlInfo_MoveCodePtrTable
 	dpr MoveInputReader_Daimon ; iPlInfo_MoveInputCodePtr | BANK $05
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
 	dw -$0700 ; iPlInfo_JumpSpeed
 	dw +$0060 ; iPlInfo_Gravity
-	
+
 	; CHAR_ID_TERRY
 	dw MoveAnimTbl_Terry ; iPlInfo_MoveAnimTblPtr
-	dw MoveCodePtrTbl_Terry ; iPlInfo_MoveCodePtrTable 
+	dw MoveCodePtrTbl_Terry ; iPlInfo_MoveCodePtrTable
 	dpr MoveInputReader_Terry ; iPlInfo_MoveInputCodePtr | BANK $06
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
 	dw -$0700 ; iPlInfo_JumpSpeed
 	dw +$0060 ; iPlInfo_Gravity
-	
+
 	; CHAR_ID_ANDY
 	dw MoveAnimTbl_Andy ; iPlInfo_MoveAnimTblPtr
-	dw MoveCodePtrTbl_Andy ; iPlInfo_MoveCodePtrTable 
+	dw MoveCodePtrTbl_Andy ; iPlInfo_MoveCodePtrTable
 	dpr MoveInputReader_Andy ; iPlInfo_MoveInputCodePtr | BANK $06
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
 	dw -$0700 ; iPlInfo_JumpSpeed
 	dw +$0060 ; iPlInfo_Gravity
-	
+
 	; CHAR_ID_RYO
 	dw MoveAnimTbl_Ryo ; iPlInfo_MoveAnimTblPtr
-	dw MoveCodePtrTbl_Ryo ; iPlInfo_MoveCodePtrTable 
+	dw MoveCodePtrTbl_Ryo ; iPlInfo_MoveCodePtrTable
 	dpr MoveInputReader_Ryo ; iPlInfo_MoveInputCodePtr | BANK $02
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
 	dw -$0700 ; iPlInfo_JumpSpeed
 	dw +$0060 ; iPlInfo_Gravity
-	
+
 	; CHAR_ID_ROBERT
 	dw MoveAnimTbl_Robert ; iPlInfo_MoveAnimTblPtr
-	dw MoveCodePtrTbl_Robert ; iPlInfo_MoveCodePtrTable 
+	dw MoveCodePtrTbl_Robert ; iPlInfo_MoveCodePtrTable
 	dpr MoveInputReader_Robert ; iPlInfo_MoveInputCodePtr | BANK $02
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
 	dw -$0700 ; iPlInfo_JumpSpeed
 	dw +$0060 ; iPlInfo_Gravity
-	
+
 	; CHAR_ID_ATHENA
 	dw MoveAnimTbl_Athena ; iPlInfo_MoveAnimTblPtr
-	dw MoveCodePtrTbl_Athena ; iPlInfo_MoveCodePtrTable 
+	dw MoveCodePtrTbl_Athena ; iPlInfo_MoveCodePtrTable
 	dpr MoveInputReader_Athena ; iPlInfo_MoveInputCodePtr | BANK $06
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
 	dw -$0700 ; iPlInfo_JumpSpeed
 	dw +$0060 ; iPlInfo_Gravity
-	
+
 	; CHAR_ID_MAI
 	dw MoveAnimTbl_Mai ; iPlInfo_MoveAnimTblPtr
-	dw MoveCodePtrTbl_Mai ; iPlInfo_MoveCodePtrTable 
+	dw MoveCodePtrTbl_Mai ; iPlInfo_MoveCodePtrTable
 	dpr MoveInputReader_Mai ; iPlInfo_MoveInputCodePtr | BANK $06
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
 	dw -$0700 ; iPlInfo_JumpSpeed
 	dw +$0060 ; iPlInfo_Gravity
-	
+
 	; CHAR_ID_LEONA
 	dw MoveAnimTbl_Leona ; iPlInfo_MoveAnimTblPtr
-	dw MoveCodePtrTbl_Leona ; iPlInfo_MoveCodePtrTable 
+	dw MoveCodePtrTbl_Leona ; iPlInfo_MoveCodePtrTable
 	dpr MoveInputReader_Leona ; iPlInfo_MoveInputCodePtr | BANK $02
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
 	dw -$0700 ; iPlInfo_JumpSpeed
 	dw +$0060 ; iPlInfo_Gravity
-	
+
 	; CHAR_ID_GEESE
 	dw MoveAnimTbl_Geese ; iPlInfo_MoveAnimTblPtr
-	dw MoveCodePtrTbl_Geese ; iPlInfo_MoveCodePtrTable 
+	dw MoveCodePtrTbl_Geese ; iPlInfo_MoveCodePtrTable
 	dpr MoveInputReader_Geese ; iPlInfo_MoveInputCodePtr | BANK $06
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
 	dw -$0700 ; iPlInfo_JumpSpeed
 	dw +$0060 ; iPlInfo_Gravity
-	
+
 	; CHAR_ID_KRAUSER
 	dw MoveAnimTbl_Krauser ; iPlInfo_MoveAnimTblPtr
-	dw MoveCodePtrTbl_Krauser ; iPlInfo_MoveCodePtrTable 
+	dw MoveCodePtrTbl_Krauser ; iPlInfo_MoveCodePtrTable
 	dpr MoveInputReader_Krauser ; iPlInfo_MoveInputCodePtr | BANK $09
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
 	dw -$0700 ; iPlInfo_JumpSpeed
 	dw +$0060 ; iPlInfo_Gravity
-	
+
 	; CHAR_ID_MRBIG
 	dw MoveAnimTbl_MrBig ; iPlInfo_MoveAnimTblPtr
-	dw MoveCodePtrTbl_MrBig ; iPlInfo_MoveCodePtrTable 
+	dw MoveCodePtrTbl_MrBig ; iPlInfo_MoveCodePtrTable
 	dpr MoveInputReader_MrBig ; iPlInfo_MoveInputCodePtr | BANK $06
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
 	dw -$0700 ; iPlInfo_JumpSpeed
 	dw +$0060 ; iPlInfo_Gravity
-	
+
 	; CHAR_ID_IORI
 	dw MoveAnimTbl_Iori ; iPlInfo_MoveAnimTblPtr
-	dw MoveCodePtrTbl_Iori ; iPlInfo_MoveCodePtrTable 
+	dw MoveCodePtrTbl_Iori ; iPlInfo_MoveCodePtrTable
 	dpr MoveInputReader_Iori ; iPlInfo_MoveInputCodePtr | BANK $05
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
 	dw -$0700 ; iPlInfo_JumpSpeed
 	dw +$0060 ; iPlInfo_Gravity
-	
+
 	; CHAR_ID_MATURE
 	dw MoveAnimTbl_Mature ; iPlInfo_MoveAnimTblPtr
-	dw MoveCodePtrTbl_Mature ; iPlInfo_MoveCodePtrTable 
+	dw MoveCodePtrTbl_Mature ; iPlInfo_MoveCodePtrTable
 	dpr MoveInputReader_Mature ; iPlInfo_MoveInputCodePtr | BANK $05
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
 	dw -$0700 ; iPlInfo_JumpSpeed
 	dw +$0060 ; iPlInfo_Gravity
-	
+
 	; CHAR_ID_CHIZURU
 	dw MoveAnimTbl_Chizuru ; iPlInfo_MoveAnimTblPtr
-	dw MoveCodePtrTbl_Chizuru ; iPlInfo_MoveCodePtrTable 
+	dw MoveCodePtrTbl_Chizuru ; iPlInfo_MoveCodePtrTable
 	dpr MoveInputReader_Chizuru ; iPlInfo_MoveInputCodePtr | BANK $05
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
 	dw -$0700 ; iPlInfo_JumpSpeed
 	dw +$0060 ; iPlInfo_Gravity
-	
+
 	; CHAR_ID_GOENITZ
 	dw MoveAnimTbl_Goenitz ; iPlInfo_MoveAnimTblPtr
-	dw MoveCodePtrTbl_Goenitz ; iPlInfo_MoveCodePtrTable 
+	dw MoveCodePtrTbl_Goenitz ; iPlInfo_MoveCodePtrTable
 	dpr MoveInputReader_Goenitz ; iPlInfo_MoveInputCodePtr | BANK $0A
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
 	dw -$0700 ; iPlInfo_JumpSpeed
 	dw +$0060 ; iPlInfo_Gravity
-	
+
 	; CHAR_ID_MRKARATE
 	dw MoveAnimTbl_MrKarate ; iPlInfo_MoveAnimTblPtr
-	dw MoveCodePtrTbl_MrKarate ; iPlInfo_MoveCodePtrTable 
+	dw MoveCodePtrTbl_MrKarate ; iPlInfo_MoveCodePtrTable
 	dpr MoveInputReader_MrKarate ; iPlInfo_MoveInputCodePtr | BANK $02
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
 	dw -$0700 ; iPlInfo_JumpSpeed
 	dw +$0060 ; iPlInfo_Gravity
-	
+
 	; CHAR_ID_OIORI
 	dw MoveAnimTbl_OIori ; iPlInfo_MoveAnimTblPtr
-	dw MoveCodePtrTbl_Iori ; iPlInfo_MoveCodePtrTable 
+	dw MoveCodePtrTbl_Iori ; iPlInfo_MoveCodePtrTable
 	dpr MoveInputReader_Iori ; iPlInfo_MoveInputCodePtr | BANK $05
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
 	dw -$0700 ; iPlInfo_JumpSpeed
 	dw +$0060 ; iPlInfo_Gravity
-	
+
 	; CHAR_ID_OLEONA
 	dw MoveAnimTbl_OLeona ; iPlInfo_MoveAnimTblPtr
-	dw MoveCodePtrTbl_Leona ; iPlInfo_MoveCodePtrTable 
+	dw MoveCodePtrTbl_Leona ; iPlInfo_MoveCodePtrTable
 	dpr MoveInputReader_Leona ; iPlInfo_MoveInputCodePtr | BANK $02
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
 	dw -$0700 ; iPlInfo_JumpSpeed
 	dw +$0060 ; iPlInfo_Gravity
-	
+
 	; CHAR_ID_KAGURA
 	dw MoveAnimTbl_Kagura ; iPlInfo_MoveAnimTblPtr
-	dw MoveCodePtrTbl_Chizuru ; iPlInfo_MoveCodePtrTable 
+	dw MoveCodePtrTbl_Chizuru ; iPlInfo_MoveCodePtrTable
 	dpr MoveInputReader_Kagura ; iPlInfo_MoveInputCodePtr | BANK $05
 	db $00 ; Padding
 	dw +$0180 ; iPlInfo_SpeedX
 	dw -$0100 ; iPlInfo_BackSpeedX
 	dw -$0700 ; iPlInfo_JumpSpeed
 	dw +$0060 ; iPlInfo_Gravity
-	
+
 ; =============== Play_LoadProjectileOBJInfo ===============
 ; Loads the OBJInfo for the projectile (including graphics).
 ; This expects an uncompressed copy of GFXLZ_Projectiles to be in the LZSS buffer,
 ; as the graphics are copied from there.
 Play_LoadProjectileOBJInfo:
 	call Task_PassControlFar
-	
+
 	ldh  a, [hROMBank]
 	push af
 		ld   a, BANK(OBJInfoInit_Projectile) ; BANK $01
 		ld   [MBC1RomBank], a
 		ldh  [hROMBank], a
-		
+
 		;
 		; The sprite mappings for these don't use dynamic buffered graphics.
 		; Instead, they are all loaded to VRAM at the start of the round, loading
 		; over the pre-round text.
 		;
-		
+
 		; Load 1P projectile graphics for current player to $8800
 		ld   a, [wPlInfo_Pl1+iPlInfo_CharId]
 		ld   de, $8800 ; Tile $00
 		call Play_LoadProjectileGFXFromDef
-		
-		; Load 2P projectile graphics for current player to $8A60
 		call Task_PassControlFar
+
+		; Load 2P projectile graphics for current player to $8A60
 		ld   a, [wPlInfo_Pl2+iPlInfo_CharId]
 		ld   de, $8A60 ; Tile $A6
 		call Play_LoadProjectileGFXFromDef
 		call Task_PassControlFar
-		
+
 		; Load the super move sparkles at $8CC0.
 		; This is its own separate uncompressed graphic.
 		ld   hl, GFX_Play_SuperSparkle
@@ -7000,28 +7001,28 @@ Play_LoadProjectileOBJInfo:
 		ld   a, $04
 		call Play_LoadProjectileOBJInfo_CopyGFX
 		call Task_PassControlFar
-		
+
 		; Load all of the OBJInfo and assign their base tile IDs.
 		; Those should be the same as the base GFX ptrs.
 		ld   a, BANK(OBJInfoInit_Projectile) ; BANK $01
 		ld   [MBC1RomBank], a
 		ldh  [hROMBank], a
-		
+
 		; 1P projectile
 		ld   hl, wOBJInfo_Pl1Projectile+iOBJInfo_Status
 		ld   de, OBJInfoInit_Projectile
 		call OBJLstS_InitFrom
 		; Graphics were copied to $8800, leave default $80 as iOBJInfo_TileIDBase
 		call Task_PassControlFar
-		
+
 		; 2P projectile
 		ld   hl, wOBJInfo_Pl2Projectile+iOBJInfo_Status
 		ld   de, OBJInfoInit_Projectile
 		call OBJLstS_InitFrom
-		ld   hl, wOBJInfo3+iOBJInfo_TileIDBase
+		ld   hl, wOBJInfo_Pl2Projectile+iOBJInfo_TileIDBase
 		ld   [hl], $A6 ; Graphics were copied to $8A60
 		call Task_PassControlFar
-		
+
 		; 1P Super Sparkle
 		ld   hl, wOBJInfo_Pl1SuperSparkle+iOBJInfo_Status
 		ld   de, OBJInfoInit_Projectile
@@ -7029,7 +7030,7 @@ Play_LoadProjectileOBJInfo:
 		ld   hl, wOBJInfo_Pl1SuperSparkle+iOBJInfo_TileIDBase
 		ld   [hl], $CC ; Graphics were copied to $8CC0
 		call Task_PassControlFar
-		
+
 		; 2P Super Sparkle
 		ld   hl, wOBJInfo_Pl2SuperSparkle+iOBJInfo_Status
 		ld   de, OBJInfoInit_Projectile
@@ -7041,11 +7042,11 @@ Play_LoadProjectileOBJInfo:
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-	
+
 ; =============== Play_LoadProjectileGFXFromDef ===============
 ; Copies the projectile graphics from the LZSS buffer to VRAM.
 ; IN
-; -  A: Character ID * 2
+; -  A: Character ID
 ; - DE: Ptr to GFX destination in VRAM
 Play_LoadProjectileGFXFromDef:
 
@@ -7055,27 +7056,30 @@ Play_LoadProjectileGFXFromDef:
 	; Multiple tile ranges (relative to the buffer) can be defined in these, with
 	; the GFX they point to being copied to VRAM.
 	;
+	; This is an improvement over 95's system, which assigned a single set of GFX
+	; to each character and didn't allow null entries.
+	;
 
-	; Index the ptr table for those ProjGFXDef structures by character id (*2).
+	; Index the ptr table for those ProjGFXDef structures by character id.
 	ld   hl, Play_ProjGFXDefPtrTbl
 	add  a, l
 	jp   nc, .noInc
 	inc  h ; We never get here
 .noInc:
 	ld   l, a
-	
+
 	; Read out ProjGFXDef ptr to HL
 	ld   c, [hl]
 	inc  hl
 	ld   b, [hl]
 	push bc
 	pop  hl
-	
+
 	; If the ptr is null, there's nothing to copy
 	ld   a, h
 	or   a, l
 	jp   z, .ret
-	
+
 	; The first 2 tiles are always empty.
 	push hl
 		ld   hl, $0000
@@ -7083,7 +7087,7 @@ Play_LoadProjectileGFXFromDef:
 		call FillGFX
 		call Task_PassControlFar
 	pop  hl
-	
+
 	;
 	; Iterate over the ProjGFXDef structure and copy the graphics over.
 	;
@@ -7093,7 +7097,7 @@ Play_LoadProjectileGFXFromDef:
 	push af
 		ld   c, [hl]	; BC = Starting offset
 		inc  hl
-		ld   b, [hl]	
+		ld   b, [hl]
 		inc  hl
 		ldi  a, [hl]	; A = Tiles to copy
 		push hl
@@ -7109,7 +7113,7 @@ Play_LoadProjectileGFXFromDef:
 	call Task_PassControlFar
 .ret:
 	ret
-	
+
 ; =============== Play_LoadProjectileOBJInfo_CopyGFX ===============
 ; Copies the projectile/sparkle graphics during HBlank 2 tiles/frame.
 ; IN
@@ -7118,12 +7122,12 @@ Play_LoadProjectileGFXFromDef:
 ; - DE: Ptr to destination in VRAM
 Play_LoadProjectileOBJInfo_CopyGFX:
 	srl  a	; A = A / 2, since the loop copies 2 tiles at once.
-	
+
 .loopTiles:
 	push af
-	
-		; Copt 2 tiles/frame ($20 bytes total)
-		; This was probably chosen due to using 8x16 sprite size.
+
+		; Copy 2 tiles/frame ($20 bytes total)
+		; This is doubled from 95's 1/tile frame loading.
 		ld   b, (TILESIZE*2)/4 ; $08
 	.loop:
 
@@ -7136,10 +7140,10 @@ Play_LoadProjectileOBJInfo_CopyGFX:
 		ei
 		inc  de
 	ENDR
-		
+
 		dec  b			; Copied the 2 tiles?
 		jp   nz, .loop	; If not, loop
-		
+
 		; After copying the 2 tiles, wait for the next frame
 		call Task_PassControlFar
 	pop  af
@@ -7151,26 +7155,26 @@ Play_LoadProjectileOBJInfo_CopyGFX:
 ; Maps characters to their tile range definitions for projectiles.
 ; All of these pointers point to BANK $01.
 Play_ProjGFXDefPtrTbl:
-	dw $0000   					; CHAR_ID_KYO     
-	dw $0000  					; CHAR_ID_DAIMON  
-	dw ProjGFXDef_Terry 		; CHAR_ID_TERRY   
-	dw $0000   					; CHAR_ID_ANDY    
-	dw ProjGFXDef_RyoRobert 	; CHAR_ID_RYO     
-	dw ProjGFXDef_RyoRobert 	; CHAR_ID_ROBERT  
-	dw ProjGFXDef_Athena 		; CHAR_ID_ATHENA  
-	dw ProjGFXDef_Mai 			; CHAR_ID_MAI     
-	dw ProjGFXDef_Leona			; CHAR_ID_LEONA   
-	dw ProjGFXDef_Geese 		; CHAR_ID_GEESE   
-	dw ProjGFXDef_Krauser 		; CHAR_ID_KRAUSER 
-	dw ProjGFXDef_MrBig 		; CHAR_ID_MRBIG   
-	dw ProjGFXDef_Iori 			; CHAR_ID_IORI    
-	dw ProjGFXDef_Mature 		; CHAR_ID_MATURE  
-	dw ProjGFXDef_ChizuruKagura ; CHAR_ID_CHIZURU 
-	dw ProjGFXDef_Goenitz 		; CHAR_ID_GOENITZ 
+	dw $0000   					; CHAR_ID_KYO
+	dw $0000  					; CHAR_ID_DAIMON
+	dw ProjGFXDef_Terry 		; CHAR_ID_TERRY
+	dw $0000   					; CHAR_ID_ANDY
+	dw ProjGFXDef_RyoRobert 	; CHAR_ID_RYO
+	dw ProjGFXDef_RyoRobert 	; CHAR_ID_ROBERT
+	dw ProjGFXDef_Athena 		; CHAR_ID_ATHENA
+	dw ProjGFXDef_Mai 			; CHAR_ID_MAI
+	dw ProjGFXDef_Leona			; CHAR_ID_LEONA
+	dw ProjGFXDef_Geese 		; CHAR_ID_GEESE
+	dw ProjGFXDef_Krauser 		; CHAR_ID_KRAUSER
+	dw ProjGFXDef_MrBig 		; CHAR_ID_MRBIG
+	dw ProjGFXDef_Iori 			; CHAR_ID_IORI
+	dw ProjGFXDef_Mature 		; CHAR_ID_MATURE
+	dw ProjGFXDef_ChizuruKagura ; CHAR_ID_CHIZURU
+	dw ProjGFXDef_Goenitz 		; CHAR_ID_GOENITZ
 	dw ProjGFXDef_MrKarate 		; CHAR_ID_MRKARATE
-	dw ProjGFXDef_OIori 		; CHAR_ID_OIORI   
-	dw ProjGFXDef_OLeona 		; CHAR_ID_OLEONA  
-	dw ProjGFXDef_ChizuruKagura ; CHAR_ID_KAGURA  
+	dw ProjGFXDef_OIori 		; CHAR_ID_OIORI
+	dw ProjGFXDef_OLeona 		; CHAR_ID_OLEONA
+	dw ProjGFXDef_ChizuruKagura ; CHAR_ID_KAGURA
 
 ; =============== Play_DrawHUDBaseAndInitTimer ===============
 ; Draws the base tilemap (without health bars) for the HUD in the upper section.
@@ -7179,11 +7183,11 @@ Play_DrawHUDBaseAndInitTimer:
 	; Initialize round timer from settings
 	ld   a, [wMatchStartTime]
 	ld   [wRoundTime], a
-	
+
 	;
 	; GFX
 	;
-	
+
 	; When the first round loads, also load the HUD graphics
 	ld   a, [wRoundNum]
 	or   a					; RoundNum == 0?
@@ -7195,15 +7199,17 @@ Play_DrawHUDBaseAndInitTimer:
 	ld   de, $8D00
 	ld   b, $2C
 	call CopyTiles
-	
+
 	;
 	; TILEMAP
 	;
 .drawTimer:
 	; If the timer is set to infinite, make it always display "99".
+	; Unlike 95, we don't have an infinity symbol to draw when the timer is disabled.
 	ld   a, [wRoundTime]
 	cp   TIMER_INFINITE		; Is it infinite?
 	jp   nz, .setSubSec		; If not, jump
+
 	; Temporarily change to "99" to make it draw that
 	ld   a, $99
 	ld   [wRoundTime], a
@@ -7213,82 +7219,85 @@ Play_DrawHUDBaseAndInitTimer:
 	ld   [wRoundTime], a
 	jp   .drawOther
 .setSubSec:
-	; Since the timer will decrements, initialize the subsecond timer to 60 frames.
+	; Since the timer will decrement, initialize the subsecond timer to 60 frames.
 	; This makes the timer tick down every second.
 	ld   a, 60	; $3C
 	ld   [wRoundTimeSub], a
 	call HomeCall_Play_DrawTime
-	
+
 .drawOther:
 	;
 	; Write the other elements of the HUD, which is in the WINDOW
 	;
-	
+
 	; "TIME" string
 	ld   de, BG_Play_HUD_Time
 	ld   hl, $9C09
 	ld   b, $02			; Width
 	ld   c, $01			; Height
 	call CopyBGToRect
-	
+
 	;--
-	
-	; [TCRF] The left and right borders get all overwritten
-	;        when the health bar contents are drawn to the tilemap.
-	;        This is new to 96 -- these borders weren't drawn in 95.
-	
-	; 1P Health Bar - left border
+
+	; [TCRF] Leftover from KOF95.
+	;        This was used in 95 to draw the borders of the POW bars, and the VRAM ptr has been updated accordingly
+	;        to account for the bar being moved down in the tilemap.
+	;        However, this game uses a separate subroutine to draw POW bars, which redraws the borders
+	;        and adds a "POW" graphic to the side.
+	;        Additionally, this is still using the larger bar size from 95 -- in this game they are smaller.
+
+	; 1P Pow Bar - left border
 	ld   de, BG_Play_HUD_HealthBarL
 	ld   hl, $9C80
 	ld   b, $01
 	ld   c, $01
 	call CopyBGToRect
-	
-	; 1P Health Bar - right border
+
+	; 1P Pow Bar - right border
 	ld   de, BG_Play_HUD_HealthBarR
 	ld   hl, $9C88
 	ld   b, $01
 	ld   c, $01
 	call CopyBGToRect
-	
-	; 2P Health Bar - left border
+
+	; 2P Pow Bar - left border
 	ld   de, BG_Play_HUD_HealthBarL
 	ld   hl, $9C8B
 	ld   b, $01
 	ld   c, $01
 	call CopyBGToRect
-	
-	; 2P Health Bar - right border
+
+	; 2P Pow Bar - right border
 	ld   de, BG_Play_HUD_HealthBarR
 	ld   hl, $9C93
 	ld   b, $01
 	ld   c, $01
 	call CopyBGToRect
-	
+
 	;--
-	
+
 	; 1P Marker (tiles)
 	ld   de, BG_Play_HUD_1PMarker
 	ld   hl, $9C00
 	ld   b, $02
 	ld   c, $01
 	call CopyBGToRect
-	
+
 	; 2P Marker (tiles)
 	ld   de, BG_Play_HUD_2PMarker
 	ld   hl, $9C12
 	ld   b, $02
 	ld   c, $01
 	call CopyBGToRect
-	
+
 	;
 	; Determine the graphics to copy for the player markers.
 	; These are copied to the locations BG_Play_HUD_1PMarker and BG_Play_HUD_2PMarker expect them.
 	;
-.p1Draw:	
+.p1Draw:
 	ld   a, [wPlInfo_Pl1+iPlInfo_Flags0]
 	bit  PF0B_CPU, a		; Is 1P a CPU player?
-	jp   nz, .p1CPU		; If so, jump
+	jp   nz, .p1CPU			; If so, jump
 .p1Pl:
 	; Copy 1P marker GFX
 	ld   hl, GFX_Play_HUD_1PHuman
@@ -7300,11 +7309,11 @@ Play_DrawHUDBaseAndInitTimer:
 	ld   hl, GFX_Play_HUD_1PCPU
 	ld   de, $8FC0
 	call CopyTilesAutoNum
-	
+
 .p2Draw:
 	ld   a, [wPlInfo_Pl2+iPlInfo_Flags0]
 	bit  PF0B_CPU, a		; Is 2P a CPU player?
-	jp   nz, .p2CPU		; If so, jump
+	jp   nz, .p2CPU			; If so, jump
 .p2Pl
 	; Copy 2P marker GFX
 	ld   hl, GFX_Play_HUD_2PHuman
@@ -7318,7 +7327,7 @@ Play_DrawHUDBaseAndInitTimer:
 	call CopyTilesAutoNum
 .ret:
 	ret
-	
+
 ; =============== Play_DrawCharIcons ===============
 ; Draws the character icons in the HUD.
 Play_DrawCharIcons:
@@ -7328,21 +7337,21 @@ Play_DrawCharIcons:
 	call IsInTeamMode				; In team mode?
 	jp   c, Play_DrawCharIcons_Team	; If so, jump
 	; Fall-through
-	
+
 ; =============== Play_DrawCharIcons_Single ===============
 Play_DrawCharIcons_Single:
 	;
 	; In single mode, the player portraits are drawn normally, and to their
 	; side there are boxes representing won rounds.
 	;
-	
+
 	; Load GFX for round markers
 	ld   hl, GFX_Play_HUD_SingleWinMarker
 	ld   de, $9740
 	ld   b, $02
 	call CopyTiles
-	
-	
+
+
 	;
 	; PLAYER 1
 	;
@@ -7353,91 +7362,90 @@ Play_DrawCharIcons_Single:
 	ld   hl, $9C41
 	ld   c, $6C
 	call Char_DrawIconFlipX
-	
+
 	;
 	; Determine what to draw in the box for the first round.
 	;
-	; Note that CopyByteIfNotSingleFinalRound is used, meaning that, on the final round,
+	; Note that Play_DrawWinBox is used, meaning that, on the final round,
 	; none of the win markers show up.
 	;
 	; Which makes sense, considering who wins the round wins the stage.
 	;
 	ld   a, [wPlInfo_Pl1+iPlInfo_SingleWinCount]
-	cp   $01			; WinCount < $01?
-	jp   c, .noS1PWin1	; If so, draw the empty box
+	cp   $01				; WinCount < $01?
+	jp   c, .noS1PWin1		; If so, draw the empty box
 .okS1PWin1:
-	ld   hl, $9C42		; Otherwise, draw the filled box
-	ld   c, $74
-	call CopyByteIfNotSingleFinalRound
+	ld   hl, vBGBoxWin1P0	; Otherwise, draw the filled box
+	ld   c, TID_BOX_FILL
+	call Play_DrawWinBox
 	jp   .chkS1PWin2
 .noS1PWin1:
-	ld   hl, $9C42
-	ld   c, $75
-	call CopyByteIfNotSingleFinalRound
-	
+	ld   hl, vBGBoxWin1P0
+	ld   c, TID_BOX_BLANK
+	call Play_DrawWinBox
+
 	;
 	; Determine what to draw in the box for the second round.
-	; Same CopyByteIfNotSingleFinalRound usage applies.
+	; Same Play_DrawWinBox usage applies.
 	; [TCRF] It's impossible to draw a filled second box here, as 2 wins end the round.
 	;
 .chkS1PWin2:
 	ld   a, [wPlInfo_Pl1+iPlInfo_SingleWinCount]
 	cp   $02			; WinCount < $02?
 	jp   c, .noS1PWin2	; If so, draw the empty box
-.unreachable_okS1PWin2:	
-	ld   hl, $9C43		; Otherwise, draw the filled box
-	ld   c, $74
-	call CopyByteIfNotSingleFinalRound
+.unreachable_okS1PWin2:
+	ld   hl, vBGBoxWin1P1	; Otherwise, draw the filled box
+	ld   c, TID_BOX_FILL
+	call Play_DrawWinBox
 	jp   .s2P
 .noS1PWin2:
-	ld   hl, $9C43
-	ld   c, $75
-	call CopyByteIfNotSingleFinalRound
-	
+	ld   hl, vBGBoxWin1P1
+	ld   c, TID_BOX_BLANK
+	call Play_DrawWinBox
+
 	;
 	; PLAYER 2
 	;
 .s2P:
 	; Identical checks to the player 1 side.
-	
+
 	; Draw 2P's character icon
 	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId0]
 	ld   de, $9700
 	ld   hl, $9C52
 	ld   c, $70
 	call Char_DrawIcon
-	
-	
+
 	ld   a, [wPlInfo_Pl2+iPlInfo_SingleWinCount]
 	cp   $01			; WinCount < $01?
 	jp   c, .noS2PWin1	; If so, draw the empty box
 .okS2PWin1:
-	ld   hl, $9C51
-	ld   c, $74
-	call CopyByteIfNotSingleFinalRound
+	ld   hl, vBGBoxWin2P0
+	ld   c, TID_BOX_FILL
+	call Play_DrawWinBox
 	jp   .chkS2PWin2
 .noS2PWin1:
-	ld   hl, $9C51
-	ld   c, $75
-	call CopyByteIfNotSingleFinalRound
-	
+	ld   hl, vBGBoxWin2P0
+	ld   c, TID_BOX_BLANK
+	call Play_DrawWinBox
+
 .chkS2PWin2:
 	ld   a, [wPlInfo_Pl2+iPlInfo_SingleWinCount]
 	cp   $02			; WinCount < $02?
 	jp   c, .noS2PWin2	; If so, draw the empty box
 	; [TCRF] For the same reason as 1P.
 .unreachable_okS2PWin2:
-	ld   hl, $9C50
-	ld   c, $74
-	call CopyByteIfNotSingleFinalRound
+	ld   hl, vBGBoxWin2P1
+	ld   c, TID_BOX_FILL
+	call Play_DrawWinBox
 	jp   .s1P_ret
 .noS2PWin2:
-	ld   hl, $9C50
-	ld   c, $75
-	call CopyByteIfNotSingleFinalRound
+	ld   hl, vBGBoxWin2P1
+	ld   c, TID_BOX_BLANK
+	call Play_DrawWinBox
 .s1P_ret:
 	jp   Play_DrawCharIcons_Ret
-	
+
 ; =============== Play_DrawCharIcons_Team ===============
 ; Draws the character icons for a team.
 ; As team members are defeated, their icon is placed in the back and crossed out,
@@ -7450,14 +7458,14 @@ Play_DrawCharIcons_Team:
 	; which is guaranteed to be correct by now.
 	; Instead, it's using the same logic from Play_LoadChar (which also set iPlInfo_CharId in the first place)
 	;
-	
+
 	ld   hl, wPlInfo_Pl1+iPlInfo_TeamCharId0		; HL = Ptr to start of team
 	; Avoid indexing out of bounds in the final round
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamLossCount]
 	cp   $03										; Is this the "FINAL!!" round? (3 losses)
 	jp   nz, .t1PActiveIdx							; If not, skip
 	ld   a, $02										; Otherwise, use the 3rd team member
-	
+
 .t1PActiveIdx:
 	; Offset the team ptr by the loss count
 	; HL += A
@@ -7465,15 +7473,15 @@ Play_DrawCharIcons_Team:
 	jp   nc, .t1PNoIncH
 	inc  h ; We never get here
 .t1PNoIncH:
-	ld   l, a			
-	
+	ld   l, a
+
 	; Draw the icon
 	ld   a, [hl]		; A = Active char ID
 	ld   de, $96C0		; DE = GFX Destination
 	ld   hl, $9C41		; HL = BG Destination
 	ld   c, $6C			; C = Starting tile ID
 	call Char_DrawIconFlipX
-	
+
 	;
 	; The other two icons are drawn overlapped.
 	;
@@ -7485,7 +7493,7 @@ Play_DrawCharIcons_Team:
 	; - the leftmost icon (wPlaySecIconBuffer) is displayed in the back
 	; - the one on the right (wPlaySecIconBuffer+(4 * TILESIZE)) is displayed in front
 	;
-	
+
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamLossCount]
 	cp   $00			; No losses yet?
 	jp   z, .t1PLoss0	; If so, jump
@@ -7508,7 +7516,7 @@ Play_DrawCharIcons_Team:
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId2]
 	cp   CHAR_ID_NONE			; Is there a character in the third slot?
 	jp   z, .t1PLoss1No3		; If not, jump
-	
+
 	; Draw 1st team member icon crossed out on the back
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId0]
 	ld   de, wPlaySecIconBuffer
@@ -7530,7 +7538,7 @@ Play_DrawCharIcons_Team:
 	jp   .t1PMerge
 .t1PLoss2:
 	; We can only get here with a 3-character team, so no CHAR_ID_NONE check.
-	
+
 	; Draw 2nd team member icon crossed out on the back
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId1]
 	ld   de, wPlaySecIconBuffer
@@ -7545,12 +7553,12 @@ Play_DrawCharIcons_Team:
 	ld   de, $9740	; GFX target
 	ld   c, $74		; Tile ID
 	call Char_CopySecIconsToVRAM_1P
-	
-	
+
+
 	;
 	; Same thing for player 2.
 	;
-	
+
 	;
 	; Draw normally the icon for the active character on the 2P side.
 	;
@@ -7567,14 +7575,14 @@ Play_DrawCharIcons_Team:
 	inc  h ; We never get here
 .t2PNoIncH:
 	ld   l, a
-	
+
 	; Draw the icon
 	ld   a, [hl]		; A = Active char ID
 	ld   de, $9700		; DE = GFX Destination
 	ld   hl, $9C52		; HL = BG Destination
 	ld   c, $70			; C = Starting tile ID
 	call Char_DrawIcon
-	
+
 	;
 	; Draw the other two icons
 	;
@@ -7598,12 +7606,12 @@ Play_DrawCharIcons_Team:
 	ld   a, [wPlInfo_Pl1+iPlInfo_TeamCharId2]
 	cp   CHAR_ID_NONE			; Is there a character in the third slot?
 	jp   z, .t2PLoss1No3		; If not, jump
-	
+
 	; Draw 1st team member icon crossed out on the back
 	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId0]
 	ld   de, wPlaySecIconBuffer
 	call Char_DrawCrossedIconToTmpBuffer2P
-	
+
 	; Draw 3rd team member icon on the front
 	ld   a, [wPlInfo_Pl2+iPlInfo_TeamCharId2]
 	ld   de, wPlaySecIconBuffer+$40
@@ -7637,7 +7645,7 @@ Play_DrawCharIcons_Team:
 	; Fall-through
 Play_DrawCharIcons_Ret:
 	ret
-	
+
 ; =============== IsInTeamMode ===============
 ; OUT
 ; - C flag: If set, Team mode is enabled
@@ -7655,36 +7663,40 @@ IsInTeamMode:
 .yes:
 	scf		; C = 1
 	ret
-	
-; =============== CopyByteIfNotSingleFinalRound ===============
-; Copies the specified value to VRAM only if this is *NOT* the final round.
+
+; =============== Play_DrawWinBox ===============
+; Draws a round/victory marker to the tilemap.
+; As the markers are 8x8 in this game (compared to 95's 16x16) only one tile gets written.
+; This can only be used in Single mode.
 ; IN
-; - C: Value to write
-; - HL: Destination ptr to VRAM
-CopyByteIfNotSingleFinalRound:
-	; The check this uses is only applicable to Single mode.
+; - C: Tile ID of the marker. Points to either an empty or filled box. to write
+; - HL: Destination ptr to the tilemap
+Play_DrawWinBox:
+	; Don't draw any markers during the FINAL!! round.
 	ld   a, [wRoundNum]
-	cp   $03				; wRoundNum == 3? (4th round, the "final!!" round in single mode)
+	cp   $03				; wRoundNum == 3? (4th round, the "FINAL!!" round in single mode)
 	jp   z, .ret			; If so, return
+
+	; Otherwise, draw the box
+	;--
 	mWaitForVBlankOrHBlank
-	ld   a, c				; Otherwise, write C to HL
-	ldi  [hl], a			
+	ld   a, c				; A = Tile ID
+	ldi  [hl], a			; Write it to the tilemap
 .ret:
 	ret
-	
+
 ; =============== Char_DrawIconFlipX ===============
 ; Draws a 16x16 icon for a character flipped horizontally.
 ; This is used to draw icons on the P1 side, which face right.
-; IN	
+; IN
 ; - DE: Ptr to GFX ptr in VRAM
 ; - HL: Ptr to top-*right* corner of the icon in the tilemap
 ; - C: Tile number DE points to
-; - A: Character ID * 2
-;      Multiplied by 2 for convenience when dealing with ptr tables.
+; - A: Character ID
 Char_DrawIconFlipX:
 
 	push bc
-	
+
 		;
 		; Generate offset to GFX_Char_Icons.
 		; Each "entry" in the table contains 4 tiles ($40 bytes), and the entries
@@ -7707,9 +7719,9 @@ ENDR
 			ldh  [hROMBank], a
 			push hl
 				; Offset the GFX table to the location of the needed icon
-				ld   hl, GFX_Char_Icons	
+				ld   hl, GFX_Char_Icons
 				add  hl, bc			; HL = GFX_Char_Icons[BC]
-				
+
 				; Copy the next 4 tiles to VRAM flipped horizontally, from *HL to *DE
 				ld   b, $04			; B = 4
 				call CopyTilesHBlankFlipX	; Copy the tiles over
@@ -7718,7 +7730,7 @@ ENDR
 		ld   [MBC1RomBank], a
 		ldh  [hROMBank], a
 	pop  bc
-	
+
 	;
 	; Update the tilemap to point to the newly copied tiles.
 	;
@@ -7727,25 +7739,29 @@ ENDR
 	;
 	; To account for it, a special subroutine is used which updates the tilemap
 	; in that order, using incrementing tile IDs as needed.
-	; 
+	;
+	; Note that the tiles are arranged differently between 95 and 96 -- in that game
+	; they had to be stored right to left, *then* top to bottom.
+	; They likely changed it so they could reuse CreateRectIncXFlip_2H instead
+	; of having function-specific code.
+	;
 	ld   a, c		; A = Initial tile ID for top-right corner
 	ld   b, $02		; B = Width in tiles, Icons are 2 tiles large
 	call CreateRectIncXFlip_2H ; R to L tilemap set func, 2 tiles high
 	ret
-	
+
 ; =============== Char_DrawIcon ===============
 ; Draws a 16x16 icon for a character.
 ; This is used to draw icons on the P2 side, which face left.
 ; See also: Char_DrawIconFlipX
-; IN	
+; IN
 ; - DE: Ptr to GFX ptr in VRAM
 ; - HL: Ptr to top-left corner of the icon in the tilemap
 ; - C: Tile number DE points to
-; - A: Character ID * 2
-;      Multiplied by 2 for convenience when dealing with ptr tables.
+; - A: Character ID
 Char_DrawIcon:
 	push bc
-	
+
 		; BC = Offset to GFX_Char_Icons.
 		ld   b, $00
 		ld   c, a		; BC = A
@@ -7762,24 +7778,24 @@ ENDR
 			ldh  [hROMBank], a
 			push hl
 				; HL = GFX_Char_Icons[BC]
-				ld   hl, GFX_Char_Icons	
-				add  hl, bc			
-				
+				ld   hl, GFX_Char_Icons
+				add  hl, bc
+
 				; Copy the next 4 tiles to VRAM from *HL to *DE
 				ld   b, $04				; B = Tile count
-				call CopyTilesHBlank	
+				call CopyTilesHBlank
 			pop  hl
 		pop  af
 		ld   [MBC1RomBank], a
 		ldh  [hROMBank], a
 	pop  bc
-	
+
 	; Update the tilemap to point to the newly copied tiles.
 	ld   a, c		; A = Initial tile ID for top-right corner
 	ld   b, $02		; B = Width in tiles, Icons are 2 tiles large
 	call CreateRectInc_2H 	; L to R tilemap set func, 2 tiles high
 	ret
-	
+
 ; =============== Char_DrawCrossedIconToTmpBuffer1P ===============
 ; Draws a character icon to a temporary buffer of $40 bytes, and then draws a cross over it.
 ; Player 1 side only.
@@ -7791,7 +7807,7 @@ Char_DrawCrossedIconToTmpBuffer1P:
 	push de
 		call Char_DrawIconToTmpBuffer
 	pop  de
-	
+
 	;
 	; The cross is a bit special since, unlike the main icon, it shouldn't be flipped on the 1P side.
 	;
@@ -7805,7 +7821,7 @@ Char_DrawCrossedIconToTmpBuffer1P:
 		ld   a, BANK(GFX_Play_HUD_Cross) ; BANK $1D
 		ld   [MBC1RomBank], a
 		ldh  [hROMBank], a
-		
+
 		; Copy + flip the cross data to a separate buffer away from DE
 		push de
 			ld   hl, GFX_Play_HUD_Cross
@@ -7817,20 +7833,20 @@ Char_DrawCrossedIconToTmpBuffer1P:
 			ld   b, $04
 			call CopyTilesHBlankFlipX
 		pop  de
-		
+
 		;
 		; Flipping the graphics has the side effect of rearranging their "column" order. (see CreateRectInc_2H)
 		;
 		; As the icons aren't being flipped yet, we have to rearrange back the cross graphics
 		; by copying them column by column (2 tiles at a time).
 		;
-		
+
 		; Tiles on the right first
 		ld   hl, wPlayCrossBuffer+$20
 		ld   bc, wPlayCrossMaskBuffer+$20
 		ld   a, $02
 		call CopyTilesOver_Custom
-		
+
 		; Then the left side
 		ld   hl, wPlayCrossBuffer
 		ld   bc, wPlayCrossMaskBuffer
@@ -7840,7 +7856,7 @@ Char_DrawCrossedIconToTmpBuffer1P:
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-	
+
 ; =============== Char_DrawCrossedIconToTmpBuffer2P ===============
 ; Draws a character icon to a temporary buffer of $40 bytes, and then draws a cross over it.
 ; Player 2 side only.
@@ -7852,7 +7868,7 @@ Char_DrawCrossedIconToTmpBuffer2P:
 	push de
 		call Char_DrawIconToTmpBuffer
 	pop  de
-	
+
 	; Draw a cross over it.
 	; 2P icons aren't flipped, so nothing special here.
 	ldh  a, [hROMBank]
@@ -7860,7 +7876,7 @@ Char_DrawCrossedIconToTmpBuffer2P:
 		ld   a, BANK(GFX_Play_HUD_Cross) ; BANK $1D
 		ld   [MBC1RomBank], a
 		ldh  [hROMBank], a
-		
+
 		ld   hl, GFX_Play_HUD_Cross			; HL = Main cross GFX
 		ld   bc, GFX_Play_HUD_Cross_Mask	; DE = Transparency mask
 		ld   a, 4*TILESIZE					; A = Tiles to copy
@@ -7869,7 +7885,7 @@ Char_DrawCrossedIconToTmpBuffer2P:
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-	
+
 ; =============== Char_DrawIconToTmpBuffer ===============
 ; Draws a character icon to a temporary buffer of $40 bytes (4 tiles).
 ; This is to copy the full 16x16 icons of inactive team members before
@@ -7888,13 +7904,13 @@ Char_DrawIconToTmpBuffer:
 		ld   b, 4*TILESIZE	; B = Bytes to clear
 		xor  a				; A = Clear with
 	.ncLoop:
-		ld   [de], a		
+		ld   [de], a
 		inc  de
 		dec  b				; Overwrote all 4 tiles?
 		jp   nz, .ncLoop	; If not, loop
 	pop  bc
 	ret
-	
+
 .charOk:
 	;
 	; Otherwise, perform a straight copy of the character icon to the buffer.
@@ -7917,9 +7933,9 @@ ENDR
 			ldh  [hROMBank], a
 			push hl
 				; HL = GFX_Char_Icons[BC]
-				ld   hl, GFX_Char_Icons	
-				add  hl, bc			
-				
+				ld   hl, GFX_Char_Icons
+				add  hl, bc
+
 				;##
 				; This is the part different from Char_DrawIcon
 				;
@@ -7938,7 +7954,7 @@ ENDR
 		ldh  [hROMBank], a
 	pop  bc
 	ret
-	
+
 ; =============== Char_CopySecIconsToVRAM_1P ===============
 ; Merges and copies the character icons for team members "on the back" to VRAM.
 ; IN
@@ -7948,20 +7964,20 @@ ENDR
 Char_CopySecIconsToVRAM_1P:
 	; Generate the merged graphic to wPlaySecIconBuffer
 	call Char_MergeSecIcons
-	
+
 	; Copy the 6 tiles to VRAM
 	push hl
 		ld   hl, wPlaySecIconBuffer
 		ld   b, $06
 		call CopyTilesHBlankFlipX
 	pop  hl
-	
+
 	; Generate the 3x2 tilemap to VRAM
 	ld   a, c		; A = Tile ID
 	ld   b, $03		; B = Rect Width
 	call CreateRectIncXFlip_2H
 	ret
-	
+
 ; =============== Char_CopySecIconsToVRAM_2P ===============
 ; Version of Char_CopySecIconsToVRAM_1P for Player 2.
 ; IN
@@ -7971,26 +7987,26 @@ Char_CopySecIconsToVRAM_1P:
 Char_CopySecIconsToVRAM_2P:
 	; Generate the merged graphic to wPlaySecIconBuffer
 	call Char_MergeSecIcons
-	
+
 	; Copy the 6 tiles to VRAM
 	push hl
 		ld   hl, wPlaySecIconBuffer
 		ld   b, $06
 		call CopyTilesHBlank
 	pop  hl
-	
+
 	; Generate the 3x2 tilemap to VRAM
 	ld   a, c		; A = Tile ID
 	ld   b, $03		; B = Rect Width
 	call CreateRectInc_2H
 	ret
-	
+
 ; =============== Char_MergeSecIcons ===============
 ; Merges the two icons for secondary team players.
 ; This is accomplished by moving the tile graphics to the left by 4px.
 ;
 ; How this works, visually (with pairs representing a tile):
-; AA BB -> AB B# 
+; AA BB -> AB B#
 ;
 ; Meaning that, on repeated loops:
 ; AA BB CC DD -> AB B# CC DD
@@ -8006,7 +8022,7 @@ Char_MergeSecIcons:
 	push de
 	push hl
 	;--
-	
+
 	;
 	; To shift nybbles of graphics across tiles, we must know which tile is on the left, and which one is on the right.
 	; Because these graphics are fed into CreateRectInc_2H or one of its variations, the icon GFX
@@ -8015,13 +8031,13 @@ Char_MergeSecIcons:
 	; As the icons are 2 tiles high, for any tile N, tile N+2 is what will be displayed on its right in the tilemap.
 	; Get pointers to both of these tiles.
 	;
-	
+
 	; Tile on the left - Middle part of the 3rd team member icon
 	ld   hl, wPlaySecIconBuffer+(2*TILESIZE)				; HL = IconL
 	; Tile on the right - Starting part of the 2nd team member icon.
 	; This one starting on a new icon is what prevents the final graphic from looking cut off.
 	ld   de, wPlaySecIconBuffer+(2*TILESIZE)+(2*TILESIZE)	; DE = IconR
-	
+
 	; Only 4 of the 6 tiles need to be changed.
 	; The first two (left border of the 3rd icon on the unflipped 2P side) can be kept as-is.
 	ld   b, 4*TILESIZE			; B = Bytes to process (4 tiles)
@@ -8030,13 +8046,13 @@ Char_MergeSecIcons:
 	;
 	; Shift the tile graphics left by 4px for both IconL and IconR.
 	;
-	
+
 	;
 	; Copy the left half of IconR to the right half of IconL.
 	; The left half of IconL remains unchanged, which allows this operation
 	; to be repeated in a loop.
 	;
-	
+
 	; C = Left half of IconL
 	ld   a, [hl]	; C = IconL & $F0
 	and  a, $F0
@@ -8045,16 +8061,16 @@ Char_MergeSecIcons:
 	ld   a, [de]	; A = (IconR >> 4)
 	and  a, $F0
 	swap a
-	; Merge the two halves 
+	; Merge the two halves
 	or   a, c
 	; Write it to IconL
 	ldi  [hl], a	; IconPtrL++
-	
+
 	;
 	; Move the right half of IconR to the left half.
 	; The right part is replaced by blank space.
 	;
-	
+
 	; A = Right half of IconR moved left
 	ld   a, [de]	; A = IconR << 4
 	and  a, $0F
@@ -8062,10 +8078,10 @@ Char_MergeSecIcons:
 	; Save it back
 	ld   [de], a
 	inc  de			; IconPtrR++
-	
+
 	dec  b			; Processed all bytes?
 	jp   nz, .loop	; If not, loop
-	
+
 	;--
 	pop  hl
 	pop  de
@@ -8083,7 +8099,7 @@ CreateRectIncXFlip_2H:
 	push af
 	mWaitForVBlankOrHBlank
 	pop  af
-	
+
 	ld   [hl], a					; Write TileID at the top
 	inc  a							; TileID++
 	ld   de, BG_TILECOUNT_H			; Move down 1 tile
@@ -8095,7 +8111,7 @@ CreateRectIncXFlip_2H:
 	dec  b							; WidthLeft--
 	jp   nz, CreateRectIncXFlip_2H	; Drawn all columns? If not, loop
 	ret
-	
+
 ; =============== CreateRectInc_2H ===============
 ; Creates a 2 tile high rectangle, drawn top to bottom, left to right
 ; with incrementing tile IDs.
@@ -8109,7 +8125,7 @@ CreateRectInc_2H:
 	push af
 	mWaitForVBlankOrHBlank
 	pop  af
-	
+
 	ld   [hl], a					; Write TileID at the top
 	inc  a							; TileID++
 	ld   de, BG_TILECOUNT_H			; Move down 1 tile
@@ -8121,7 +8137,7 @@ CreateRectInc_2H:
 	dec  b							; WidthLeft--
 	jp   nz, CreateRectInc_2H	; Drawn all columns? If not, loop
 	ret
-	
+
 ; =============== Play_HUD_DrawCharNames ===============
 ; Draws the character names to the HUD.
 ;
@@ -8138,24 +8154,24 @@ Play_HUD_DrawCharNames:
 	ld   b, $06
 	ld   de, $9600	; 1P buffer
 	call FillGFX
-	
+
 	ld   hl, $0000 ; Black line
 	ld   b, $06
 	ld   de, $9660 ; 2P buffer
 	call FillGFX
-	
+
 	; Decompress all of the names into a buffer in WRAM
 	ld   hl, GFXLZ_Play_HUD_CharNames
 	ld   de, wLZSS_Buffer
 	call DecompressLZSS
-	
+
 	; Copy the needed GFX from said buffer into the VRAM buffers.
 	ld   a, [wPlInfo_Pl1+iPlInfo_CharId]
 	call Play_HUD_Draw1PCharName
 	ld   a, [wPlInfo_Pl2+iPlInfo_CharId]
 	call Play_HUD_Draw2PCharName
 	ret
-	
+
 ; =============== Play_HUD_Draw1PCharName ===============
 ; Draws the character name on the 1P side.
 ; IN
@@ -8163,23 +8179,23 @@ Play_HUD_DrawCharNames:
 Play_HUD_Draw1PCharName:
 
 	;
-	; HL = Ptr to character name text entry 
+	; HL = Ptr to character name text entry
 	;      (name length + tile IDs relative to GFXLZ_Play_HUD_CharNames).
 	;
-	
+
 	; Seek to ptr table entry
 	ld   b, $00							; BC = CharId * 2
 	ld   c, a
 	ld   hl, Play_HUD_CharNamesPtrTable ; HL = Ptr table with BGX tilemaps
 	add  hl, bc							; Seek to entry
 	; Read out the ptr to DE
-	ld   e, [hl]	
+	ld   e, [hl]
 	inc  hl
 	ld   d, [hl]
 	; And move it to HL
 	push de
 	pop  hl
-	
+
 	;--
 	;
 	; The 1P side has the character name aligned to the right.
@@ -8190,32 +8206,32 @@ Play_HUD_Draw1PCharName:
 	;
 	; This will leave the skipped tiles black, as the buffer was blanked out before getting here.
 	;
-	
+
 	ld   b, [hl]		; B = Name length
 	inc  hl				; HL = Ptr to "BGX" tilemap
-	
+
 	ld   a, $06			; A = Pad tile count (6 - B)
-	sub  a, b			
+	sub  a, b
 	ld   de, $9600		; DE = Ptr to start of VRAM destination buffer
-	
+
 	; Seek the VRAM dest buffer past the padding.
 	; DE += A * $10 (TILESIZE)
 	push hl		; Save "tilemap" ptr
-REPT 4				
+REPT 4
 		sla  a			; A << 4
 ENDR
 		ld   h, $00		; HL = A
 		ld   l, a
 		add  hl, de		; HL += DE
-		
+
 		push hl			; Move to DE
 		pop  de
 	pop  hl		; Restore "tilemap" ptr
 	;--
-	
+
 	; Copy the GFX to VRAM, according to the "BGX" tilemap HL points to.
 	call Play_HUD_CopyCharNameGFX
-	
+
 	; Copy the standard tilemap for 1P names
 	ld   de, BG_Play_HUD_CharName1P
 	ld   hl, $9C02
@@ -8223,39 +8239,39 @@ ENDR
 	ld   c, $01
 	call CopyBGToRect
 	ret
-	
+
 ; =============== Play_HUD_Draw2PCharName ===============
 ; Draws the character name on the 2P side.
 ; See also: Play_HUD_Draw1PCharName
 Play_HUD_Draw2PCharName:
 
 	;
-	; HL = Ptr to character name text entry 
+	; HL = Ptr to character name text entry
 	;      (name length + tile IDs relative to GFXLZ_Play_HUD_CharNames).
 	;
-	
+
 	; Seek to ptr table entry
 	ld   b, $00							; BC = CharId * 2
 	ld   c, a
 	ld   hl, Play_HUD_CharNamesPtrTable ; HL = Ptr table with BGX tilemaps
 	add  hl, bc							; Seek to entry
 	; Read out the ptr to DE
-	ld   e, [hl]	
+	ld   e, [hl]
 	inc  hl
 	ld   d, [hl]
 	; And move it to HL
 	push de
 	pop  hl
-	
+
 	;--
 	ldi  a, [hl]		; Read name length; HL = Ptr to "BGX" tilemap
 	ld   b, a			; B = Name length
-	
+
 	; Copy the GFX to VRAM, according to the "BGX" tilemap HL points to.
 	; The 2P side has the character name aligned to the left, so no special handling is needed.
 	ld   de, $9660
 	call Play_HUD_CopyCharNameGFX
-	
+
 	; Copy the standard tilemap for 2P names
 	ld   de, BG_Play_HUD_CharName2P
 	ld   hl, $9C0C
@@ -8263,7 +8279,7 @@ Play_HUD_Draw2PCharName:
 	ld   c, $01
 	call CopyBGToRect
 	ret
-	
+
 ; =============== Play_HUD_CopyCharNameGFX ===============
 ; Copies the tile graphics for the character name to VRAM.
 ;
@@ -8274,18 +8290,18 @@ Play_HUD_Draw2PCharName:
 Play_HUD_CopyCharNameGFX:
 	; Copy 1 tile at a time
 	push bc		; Save length
-	
+
 		; A = Tile ID
 		ldi  a, [hl]
 		; Multiply the tile ID by TILESIZE.
 		; BC = A * $10
 		ld   b, $00
 		ld   c, a
-	REPT 4			
+	REPT 4
 		sla  c
 		rl   b
 	ENDR
-	
+
 		push hl
 			; Seek to the tile to copy
 			ld   hl, wLZSS_Buffer
@@ -8298,33 +8314,33 @@ Play_HUD_CopyCharNameGFX:
 	dec  b								; Copied all tiles?
 	jp   nz, Play_HUD_CopyCharNameGFX	; If not, loop
 	ret
-	
+
 BG_Play_HUD_CharName1P: INCBIN "data/bg/play_hud_charname1p.bin"
 ; [TCRF] KOF95 leftover, where the name used to be 8 tiles long
 BG_Play_HUD_CharName1P_Unused_Extra: INCBIN "data/bg/play_hud_charname1p_unused_extra.bin"
 BG_Play_HUD_CharName2P: INCBIN "data/bg/play_hud_charname2p.bin"
 BG_Play_HUD_CharName2P_Unused_Extra: INCBIN "data/bg/play_hud_charname2p_unused_extra.bin"
 Play_HUD_CharNamesPtrTable:
-	dw BGXDef_Play_HUD_CharName_Kyo ; CHAR_ID_KYO     
-	dw BGXDef_Play_HUD_CharName_Daimon ; CHAR_ID_DAIMON  
-	dw BGXDef_Play_HUD_CharName_Terry ; CHAR_ID_TERRY   
-	dw BGXDef_Play_HUD_CharName_Andy ; CHAR_ID_ANDY    
-	dw BGXDef_Play_HUD_CharName_Ryo ; CHAR_ID_RYO     
-	dw BGXDef_Play_HUD_CharName_Robert ; CHAR_ID_ROBERT  
-	dw BGXDef_Play_HUD_CharName_Athena ; CHAR_ID_ATHENA  
-	dw BGXDef_Play_HUD_CharName_Mai ; CHAR_ID_MAI     
-	dw BGXDef_Play_HUD_CharName_Leona ; CHAR_ID_LEONA   
-	dw BGXDef_Play_HUD_CharName_Geese ; CHAR_ID_GEESE   
-	dw BGXDef_Play_HUD_CharName_Krauser ; CHAR_ID_KRAUSER 
-	dw BGXDef_Play_HUD_CharName_MrBig ; CHAR_ID_MRBIG   
-	dw BGXDef_Play_HUD_CharName_Iori ; CHAR_ID_IORI    
-	dw BGXDef_Play_HUD_CharName_Mature ; CHAR_ID_MATURE  
-	dw BGXDef_Play_HUD_CharName_Chizuru ; CHAR_ID_CHIZURU 
-	dw BGXDef_Play_HUD_CharName_Goenitz ; CHAR_ID_GOENITZ 
+	dw BGXDef_Play_HUD_CharName_Kyo ; CHAR_ID_KYO
+	dw BGXDef_Play_HUD_CharName_Daimon ; CHAR_ID_DAIMON
+	dw BGXDef_Play_HUD_CharName_Terry ; CHAR_ID_TERRY
+	dw BGXDef_Play_HUD_CharName_Andy ; CHAR_ID_ANDY
+	dw BGXDef_Play_HUD_CharName_Ryo ; CHAR_ID_RYO
+	dw BGXDef_Play_HUD_CharName_Robert ; CHAR_ID_ROBERT
+	dw BGXDef_Play_HUD_CharName_Athena ; CHAR_ID_ATHENA
+	dw BGXDef_Play_HUD_CharName_Mai ; CHAR_ID_MAI
+	dw BGXDef_Play_HUD_CharName_Leona ; CHAR_ID_LEONA
+	dw BGXDef_Play_HUD_CharName_Geese ; CHAR_ID_GEESE
+	dw BGXDef_Play_HUD_CharName_Krauser ; CHAR_ID_KRAUSER
+	dw BGXDef_Play_HUD_CharName_MrBig ; CHAR_ID_MRBIG
+	dw BGXDef_Play_HUD_CharName_Iori ; CHAR_ID_IORI
+	dw BGXDef_Play_HUD_CharName_Mature ; CHAR_ID_MATURE
+	dw BGXDef_Play_HUD_CharName_Chizuru ; CHAR_ID_CHIZURU
+	dw BGXDef_Play_HUD_CharName_Goenitz ; CHAR_ID_GOENITZ
 	dw BGXDef_Play_HUD_CharName_MrKarate ; CHAR_ID_MRKARATE
-	dw BGXDef_Play_HUD_CharName_OIori ; CHAR_ID_OIORI   
-	dw BGXDef_Play_HUD_CharName_OLeona ; CHAR_ID_OLEONA  
-	dw BGXDef_Play_HUD_CharName_Kagura ; CHAR_ID_KAGURA   
+	dw BGXDef_Play_HUD_CharName_OIori ; CHAR_ID_OIORI
+	dw BGXDef_Play_HUD_CharName_OLeona ; CHAR_ID_OLEONA
+	dw BGXDef_Play_HUD_CharName_Kagura ; CHAR_ID_KAGURA
 
 ; =============== Play_DrawHUDEmptyBars ===============
 ; Draws the tilemaps for all empty bars in the HUD.
@@ -8336,14 +8352,14 @@ Play_DrawHUDEmptyBars:
 	ld   b, $09
 	ld   c, $01
 	call CopyBGToRect
-	
+
 	; 2P Health bar
 	ld   de, BG_Play_HUD_BlankHealthBar
 	ld   hl, $9C2B
 	ld   b, $09
 	ld   c, $01
 	call CopyBGToRect
-	
+
 	; Power meter bars (entire line, including POW text)
 	ld   de, BG_Play_HUD_BlankPowBar
 	ld   hl, $9C80
@@ -8351,7 +8367,7 @@ Play_DrawHUDEmptyBars:
 	ld   c, $01
 	call CopyBGToRect
 	ret
-	
+
 BG_Play_HUD_BlankHealthBar: INCBIN "data/bg/play_hud_blankhealthbar.bin"
 
 ; =============== Play_LoadPreRoundTextAndIncRound ===============
@@ -8362,35 +8378,35 @@ Play_LoadPreRoundTextAndIncRound:
 		ld   a, BANK(GFXLZ_Play_PreRoundText) ; BANK $01
 		ld   [MBC1RomBank], a
 		ldh  [hROMBank], a
-		
+
 		; RoundNum++
 		ld   a, [wRoundNum]
 		inc  a
 		ld   [wRoundNum], a
-		
+
 		;
 		; Load shared graphics
 		;
-		
+
 		; Load to a buffer the complete set of graphics for the pre-round text
 		ld   hl, GFXLZ_Play_PreRoundText
 		ld   de, wLZSS_Buffer
 		call DecompressLZSS
-		
+
 		; Copy everything except for the round numbers to VRAM, which are the
 		; very last thing in the graphics block.
 		ld   hl, wLZSS_Buffer	; Start from the beginning
 		ld   de, $8800			; Destination
 		ld   b, $44				; Copy first $44 tiles
 		call CopyTiles
-		
-		
+
+
 		;
 		; Load one round number graphic
 		;
 		; Every number is made of 8 unique tiles.
 		; With TILESIZE being $10, that makes $80 bytes in total.
-		; As the graphics for the numbers are stored in order, we can treat that part of the 
+		; As the graphics for the numbers are stored in order, we can treat that part of the
 		; uncompressed data as a table of $80 byte entries.
 		;
 
@@ -8406,21 +8422,21 @@ Play_LoadPreRoundTextAndIncRound:
 		sla  e
 		rl   d
 	ENDR
-	
+
 		;; ld   a, [wRoundNum]
 		;; ld   d, a
 		;; ld   e, $00
 		;; sra  d
 		;; rr   e
-	
+
 		; HL = Ptr to number GFX needed
 		ld   hl, wLZSS_Buffer+$0440	; HL = Ptr to start of number GFX in uncompressed buffer
 		add  hl, de					; Offset it
 		; Copy it to VRAM
-		ld   de, $8C40				
+		ld   de, $8C40
 		ld   b, $08
 		call CopyTiles
-		
+
 		;
 		; Load the sprite mapping
 		;
@@ -8431,7 +8447,7 @@ Play_LoadPreRoundTextAndIncRound:
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-	
+
 ; =============== Play_DoPreRoundText ===============
 ; Handles the pre-round text display while the characters continue their intro animations.
 ; The same wOBJInfo is used with different sprite mappings for the text.
@@ -8439,10 +8455,10 @@ Play_DoPreRoundText:
 	; Display the sprite mapping
 	ld   hl, wOBJInfo_RoundText+iOBJInfo_Status
 	ld   [hl], OST_VISIBLE
-	
+
 	; These mappings are displayed in sequence.
 	; The game does nothing else other than animate the sprites.
-	
+
 	; "ROUND *" or "FINAL!!"
 	ld   a, [wRoundFinal]
 	cp   $01			; Is this the final round?
@@ -8454,31 +8470,31 @@ Play_DoPreRoundText:
 	ld   a, PLAY_PREROUND_OBJ_FINAL
 .setRoundTxt:
 	ld   hl, wOBJInfo_RoundText+iOBJInfo_OBJLstPtrTblOffset ; Seek to sprite mapping ID
-	ld   [hl], a	
-	ld   b, $78			; Display for $78 frames
+	ld   [hl], a
+	ld   b, 2*60			; Display for 2 seconds
 	call Play_DoIntro
-	
+
 	; "READY"
 	ld   [hl], PLAY_PREROUND_OBJ_READY
-	ld   b, $3C
+	ld   b, 60				; 1 sec
 	call Play_DoIntro
-	
+
 	; "GO!!" (small)
 	ld   [hl], PLAY_PREROUND_OBJ_GO_SM
 	ld   b, $08
 	call Play_DoIntro
-	
+
 	; "GO!!" (large)
 	ld   [hl], PLAY_PREROUND_OBJ_GO_LG
 	ld   b, $3C
 	call Play_DoIntro
-	
+
 	; Hide the sprite mapping.
 	ld   hl, wOBJInfo_RoundText+iOBJInfo_Status
 	ld   [hl], $00
 	call Task_PassControlFar
 	ret
-	
+
 ; =============== Play_DoIntro ===============
 ; Executes the intro code for the specified amount of frames.
 ; IN
@@ -8497,10 +8513,10 @@ Play_DoIntro:
 			pop  af
 			ld   [MBC1RomBank], a
 			ldh  [hROMBank], a
-			
+
 			; Exec shared subs
 			call Play_Intro_Shared
-			
+
 			; Wait frame end
 			call Task_PassControlFar
 		pop  bc
@@ -8516,7 +8532,7 @@ Play_DoIntro:
 ; That is instead handled by Play_Char_SetIntroAnimDelayed (separate since the screen isn't fully setup yet).
 Play_Char_SetIntroAnimInstant:
 	; Try to set 1P's intro move
-	ld   bc, wPlInfo_Pl1	
+	ld   bc, wPlInfo_Pl1
 	ld   de, wPlInfo_Pl2
 	call .chk
 	; Try to set 2P's intro move
@@ -8531,11 +8547,11 @@ Play_Char_SetIntroAnimInstant:
 .chk:
 	;
 	; All of these characters start their intro animation immediately.
-	; 
+	;
 	ld   hl, iPlInfo_CharId
 	add  hl, bc
 	ld   a, [hl]					; A = Current
-	cp   CHAR_ID_MAI				; Playing as Athena?
+	cp   CHAR_ID_MAI				; Playing as Mai?
 	jp   z, Play_Char_SetIntroAnim	; If so, jump
 	cp   CHAR_ID_ATHENA				; ...
 	jp   z, Play_Char_SetIntroAnim
@@ -8551,10 +8567,10 @@ Play_Char_SetIntroAnimInstant:
 	jp   z, Play_Char_SetIntroAnim
 	cp   CHAR_ID_MRKARATE
 	jp   z, Play_Char_SetIntroAnim
-	
+
 	; Otherwise, don't set the anim yet.
 	ret
-	
+
 ; =============== Play_Char_SetIntroAnim ===============
 ; Sets the intro animation for the player passed throguh BC.
 ; What's passed through DE is only used for comparison purposes.
@@ -8579,7 +8595,7 @@ Play_Char_SetIntroAnim:
 	jr   z, .chkIori		; If so, jump
 	cp   CHAR_ID_GEESE		; Playing as Geese?
 	jr   z, .chkGeese		; If so, jump
-	
+
 	; Everyone else uses the normal intro animation.
 	jr   .noSpec
 .chkKyo:
@@ -8618,16 +8634,15 @@ Play_Char_SetIntroAnim:
 	add  hl, bc						; Seek to iPlInfo_IntroMoveId
 	ld   [hl], a					; Write it there
 	ret
-	
+
 ; =============== Play_Char_SetIntroAnimDelayed ===============
 ; Sets the intro animation for characters that initially start out in their idle anim.
-; See also: Play_Char_SetIntroAnimInstant. 
-
+; See also: Play_Char_SetIntroAnimInstant.
 Play_Char_SetIntroAnimDelayed:
 	; Wait a second in the idle pose before the intro
 	ld   b, 60
 	call Play_DoIntro
-	
+
 	; Try to set 1P's intro move
 	ld   bc, wPlInfo_Pl1
 	ld   de, wPlInfo_Pl2
@@ -8637,7 +8652,7 @@ Play_Char_SetIntroAnimDelayed:
 	ld   de, wPlInfo_Pl1
 	call .chk
 	ret
-	
+
 ; =============== .chk ===============
 ; IN
 ; - BC: wPlInfo for currently handled player
@@ -8646,7 +8661,7 @@ Play_Char_SetIntroAnimDelayed:
 	ld   hl, iPlInfo_CharId
 	add  hl, bc
 	ld   a, [hl]			; A = CharId
-	
+
 	; For all of these characters, we have already set the intro move in Play_Char_SetIntroAnimInstant,
 	; so leave the move value intact.
 	cp   CHAR_ID_ATHENA
@@ -8665,23 +8680,23 @@ Play_Char_SetIntroAnimDelayed:
 	jp   z, .ret
 	cp   CHAR_ID_MRKARATE
 	jp   z, .ret
-	
+
 	; Ok, can set the move ID
 	jp   Play_Char_SetIntroAnim
 .ret:
 	ret
-	
+
 ; =============== Play_Intro_Shared ===============
 ; Executes the subroutines called by the intro that are part of the main gameplay code.
 Play_Intro_Shared:
 	ldh  a, [hROMBank]
 	push af
-	ld   a, BANK(Play_UpdateHealthBars) ; BANK $01 
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	call Play_UpdateHealthBars
-	call Play_UpdatePowBars
-	call Play_DoTime
+		ld   a, BANK(Play_UpdateHealthBars) ; BANK $01
+		ld   [MBC1RomBank], a
+		ldh  [hROMBank], a
+		call Play_UpdateHealthBars
+		call Play_UpdatePowBars
+		call Play_DoTime
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
@@ -8690,22 +8705,22 @@ Play_Intro_Shared:
 HomeCall_Play_DrawTime:
 	ldh  a, [hROMBank]
 	push af
-	ld   a, BANK(Play_DrawTime) ; BANK $01
-	ld   [MBC1RomBank], a
-	ldh  [hROMBank], a
-	call Play_DrawTime
+		ld   a, BANK(Play_DrawTime) ; BANK $01
+		ld   [MBC1RomBank], a
+		ldh  [hROMBank], a
+		call Play_DrawTime
 	pop  af
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-	
+
 OBJInfoInit_Pl1:
 	db OST_VISIBLE ; iOBJInfo_Status
 	db SPR_XFLIP ; iOBJInfo_OBJLstFlags
 	db SPR_XFLIP ; iOBJInfo_OBJLstFlagsView
 	db $60 ; iOBJInfo_X
 	db $00 ; iOBJInfo_XSub
-	db $88 ; iOBJInfo_Y
+	db PL_FLOOR_POS ; iOBJInfo_Y
 	db $00 ; iOBJInfo_YSub
 	db $00 ; iOBJInfo_SpeedX
 	db $00 ; iOBJInfo_SpeedXSub
@@ -8738,7 +8753,7 @@ OBJInfoInit_Pl2:
 	db SPR_OBP1 ; iOBJInfo_OBJLstFlagsView
 	db $A0 ; iOBJInfo_X
 	db $00 ; iOBJInfo_XSub
-	db $88 ; iOBJInfo_Y
+	db PL_FLOOR_POS ; iOBJInfo_Y
 	db $00 ; iOBJInfo_YSub
 	db $00 ; iOBJInfo_SpeedX
 	db $00 ; iOBJInfo_SpeedXSub
@@ -8764,7 +8779,7 @@ OBJInfoInit_Pl2:
 	db $00 ; iOBJInfo_FrameTotal
 	db LOW(wGFXBufInfo_Pl2) ; iOBJInfo_BufInfoPtr_Low
 	db HIGH(wGFXBufInfo_Pl2) ; iOBJInfo_BufInfoPtr_High
-	
+
 ; =============== Play_DoPl_1P ===============
 ; Task for handling Player 1.
 Play_DoPl_1P:
@@ -8775,17 +8790,17 @@ Play_DoPl_1P:
 	ld   bc, wPlInfo_Pl1
 	ld   de, wOBJInfo_Pl1
 	jr   Play_DoPl
-	
+
 ; =============== Play_DoPl_2P ===============
 ; Task for handling Player 2.
 Play_DoPl_2P:
 	; Set unique stack pointer for 2P handler
 	ld   sp, $DF00
 	ei
-	; Set wPlInfo & wOBJInfo combination for 12P
+	; Set wPlInfo & wOBJInfo combination for 2P
 	ld   bc, wPlInfo_Pl2
 	ld   de, wOBJInfo_Pl2
-	
+
 ; =============== Play_DoPl ===============
 ; Common task code for handling a player.
 ; Mostly to run the move code.
@@ -8805,7 +8820,7 @@ Play_DoPl:
 	pop  bc
 	call Task_PassControlFar
 	jp   .mainLoop
-	
+
 .go:
 	; Create LH inputs
 	call Play_Pl_CreateJoyKeysLH
@@ -8833,25 +8848,25 @@ Play_DoPl:
 	; so labeling them can be tricky.
 	;
 	push de
-	
+
 		; All of the move ptr tables are in BANK $03
 		ld   a, BANK(MoveCodePtrTbl_Shared_Base) ; BANK $03
 		ld   [MBC1RomBank], a
 		ldh  [hROMBank], a
-		
+
 		; Read out to DE the move pointer table for the current player.
 		; This will only be used for the character-specific moves (.grp01),
 		; as other groups will replace DE with an hardcoded value.
 		ld   hl, iPlInfo_MoveCodePtrTbl_High
-		add  hl, bc		
+		add  hl, bc
 		ld   d, [hl]
 		inc  hl
 		ld   e, [hl]
 		push de
-		
+
 			;
 			; The move IDs are grouped in three different "ranges".
-			; 
+			;
 			; - Standard moves ($00-$2E)
 			;   (ie: idle, walking, crouch, win anims, ...)
 			;   These are shared with every character (every player uses the same move code).
@@ -8870,20 +8885,20 @@ Play_DoPl:
 			;
 			ld   hl, iPlInfo_MoveId
 			add  hl, bc
-			ld   a, [hl]		; A = Move ID (*2)
+			ld   a, [hl]		; A = Move ID
 
 			cp   $70			; MoveId >= $70?
 			jp   nc, .grp02		; If so, jump
 			cp   $30			; MoveId >= $30?
 			jp   nc, .grp01		; If so, jump
-			
+
 		.grp00:
 		; Use fixed move table MoveCodePtrTbl_Shared_Base
 		pop  de				; Pop out useless value
 		ld   de, MoveCodePtrTbl_Shared_Base	; Set fixed ptr
 		push de				; Put it back in the stack
 			jp   .getMovePtr
-			
+
 		.grp02:
 		; Use fixed move table MoveCodePtrTbl_Shared_Hit
 		pop  de
@@ -8909,9 +8924,9 @@ Play_DoPl:
 		pop  de
 		; Add the offset
 		add  hl, de
-		
+
 		; Read the table entry
-		
+
 		; DE = Move code ptr (bytes0-1)
 		ld   e, [hl]
 		inc  hl
@@ -8924,15 +8939,15 @@ Play_DoPl:
 		push de
 		pop  hl					; Move ptr to HL
 	pop  de						; Restore ptr to wOBJInfo
-	
+
 	;
 	; Every move code (Move_*) uses these parameters:
 	; IN
 	; - BC: Ptr to wPlInfo structure
 	; - DE: Ptr to respective wOBJInfo structure
 	jp   hl
-	
-; =============== HomeCall_Play_CPU_Do ===============	
+
+; =============== HomeCall_Play_CPU_Do ===============
 HomeCall_Play_CPU_Do:
 	ldh  a, [hROMBank]
 	push af
@@ -8944,7 +8959,7 @@ HomeCall_Play_CPU_Do:
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 	ret
-	
+
 ; =============== ProjInitS_InitAndGetOBJInfo ===============
 ; Gets the projectile's wOBJInfo for the current player and initializes its common properties.
 ; IN
@@ -8961,7 +8976,7 @@ ProjInitS_InitAndGetOBJInfo:
 	ld   hl, iPlInfo_PlId
 	add  hl, bc
 	ld   a, [hl]
-	
+
 	;
 	; Seek to the wOBJInfo for the current player's projectile.
 	; This will either be  Ptr to wOBJInfo_Pl1Projectile or  Ptr to wOBJInfo_Pl2Projectile.
@@ -8973,12 +8988,12 @@ ProjInitS_InitAndGetOBJInfo:
 	add  hl, bc		; Seek to 2 slots after
 	push hl
 	pop  de			; Copy it to DE
-	
+
 	;
 	; Show the projectile
 	;
 	ld   [hl], OST_VISIBLE
-	
+
 	;
 	; Set the tile ID base for the projectile depending on the player we're playing as.
 	; The values must be consistent with that's written in Play_LoadProjectileOBJInfo
@@ -8996,7 +9011,7 @@ ProjInitS_InitAndGetOBJInfo:
 	ld   [hl], $A6	; Graphics from $8A60
 .ret:
 	ret
-	
+
 ; =============== OBJLstS_Overlap ===============
 ; Moves an wBJInfo to exactly overlap another one.
 ; This copies the coordinates and OBJLstFlags from the source (BC) to destination (DE).
@@ -9009,17 +9024,17 @@ OBJLstS_Overlap:
 		;
 		; Set up source and destination pointers
 		;
-		
+
 		; BC = Ptr to source iOBJInfo_X
 		ld   hl, iOBJInfo_X
 		add  hl, bc			; HL = BC + iOBJInfo_X
 		push hl
 		pop  bc				; Move back to BC
-		
+
 		; DE = Ptr to destination iOBJInfo_X
 		ld   hl, iOBJInfo_X
 		add  hl, de			; HL = DE + iOBJInfo_X
-		
+
 		;
 		; Copy the next 4 bytes over (iOBJInfo_X-iOBJInfo_YSub)
 		;
@@ -9029,11 +9044,11 @@ REPT 4
 		ldi  [hl], a	; Write to dest; DestPtr++
 ENDR
 	pop  bc
-	
+
 	;
 	; Copy over the byte with sprite mapping flags
 	;
-	
+
 	; A = Source iOBJInfo_OBJLstFlags
 	ld   hl, iOBJInfo_OBJLstFlags
 	add  hl, bc
@@ -9049,13 +9064,13 @@ ENDR
 ; Initializes the projectile for Leona's Baltic Launcher.
 ; IN
 ; - BC: Ptr to wPlInfo
-; - DE: Ptr to respective wOBJInfo	
+; - DE: Ptr to respective wOBJInfo
 ProjInit_Leona_BalticLauncher:
 	mMvC_PlaySound SCT_PROJ_LG_B
 	push bc
 		push de
 			; --------------- common projectile init code ---------------
-			
+
 			;
 			; C flag = If set, we're at max power
 			;
@@ -9077,11 +9092,11 @@ ProjInit_Leona_BalticLauncher:
 				add  hl, bc		; Seek to iPlInfo_Flags2
 			pop  af
 			ld   a, [hl]		; Read out to A
-			
+
 			push af ; Save A & C flag
-				
+
 				call ProjInitS_InitAndGetOBJInfo	; DE = Ptr to wOBJInfo_Pl*Projectile
-				
+
 				; Set code pointer
 				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
@@ -9101,38 +9116,38 @@ ProjInit_Leona_BalticLauncher:
 				ld   [hl], HIGH(OBJLstPtrTable_Leona_BalticLauncher)	; iOBJInfo_OBJLstPtrTbl_High
 				inc  hl
 				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
-				
+
 				; Set animation speed.
 				ld   hl, iOBJInfo_FrameLeft
 				add  hl, de
 				ld   [hl], $01	; iOBJInfo_FrameLeft
 				inc  hl
 				ld   [hl], $01	; iOBJInfo_FrameTotal
-				
+
 				; Set priority value
 				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $00
-				
+
 				; Set initial position relative to the player's origin
 				call OBJLstS_Overlap
 				mMvC_SetMoveH +$1000
 				mMvC_SetMoveV -$0800
-				
+
 			;
 			; Determine projectile properties depending on Max POW / LH attack type.
 			; Projectiles spawned by heavy attacks travel faster and longer.
-			;	
+			;
 			pop  af						; Restore A & C flag
 			jp   nc, .fldNoMaxPow		; Are we at max power? If not, jump
-		.fldMaxPow:	
+		.fldMaxPow:
 			bit  PF2B_HEAVY, a			; Was this an heavy attack?
 			jp   nz, .fldHeavyMaxPow	; If so, jump
 			jp   .fldLight
 		.fldNoMaxPow:
 			bit  PF2B_HEAVY, a			; Was this an heavy attack?
 			jp   nz, .fldHeavy			; If so, jump
-			
+
 		.fldLight:
 			ld   hl, iOBJInfo_Play_EnaTimer
 			add  hl, de
@@ -9155,7 +9170,7 @@ ProjInit_Leona_BalticLauncher:
 		pop  de
 	pop  bc
 	ret
-	
+
 ; =============== ProjInit_Leona_VSlasher ===============
 ; Initializes the projectile for Leona's V Slasher.
 ; This has a fixed position and disappears after 1 second.
@@ -9169,7 +9184,7 @@ ProjInit_Leona_VSlasher:
 			ld   hl, iPlInfo_CharId
 			add  hl, bc
 			ld   a, [hl]
-			
+
 			push af	; Save CharId
 				push af	; Save CharId
 					; A = MoveId
@@ -9177,10 +9192,10 @@ ProjInit_Leona_VSlasher:
 					add  hl, bc
 					ld   a, [hl]
 					push af	; Save MoveId
-					
+
 						; DE = Ptr to wOBJInfo_Pl*Projectile
 						call ProjInitS_InitAndGetOBJInfo
-						
+
 						; Set code pointer
 						ld   hl, iOBJInfo_Play_CodeBank
 						add  hl, de
@@ -9189,7 +9204,7 @@ ProjInit_Leona_VSlasher:
 						ld   [hl], LOW(ProjC_NoMove)	; iOBJInfo_Play_CodePtr_Low
 						inc  hl
 						ld   [hl], HIGH(ProjC_NoMove)	; iOBJInfo_Play_CodePtr_High
-						
+
 					;--
 					;
 					; Write sprite mapping ptr for this projectile.
@@ -9201,11 +9216,11 @@ ProjInit_Leona_VSlasher:
 					cp   MOVE_LEONA_V_SLASHER_D		; Using the desperation super version?
 					jp   z, .objLstD				; If so, jump
 				.objLstS:
-				
+
 				pop  af	; A = CharId
 				cp   CHAR_ID_LEONA		; Playing as normal LEONA?
 				jp   nz, .objLstO		; If not, jump
-				
+
 				; Super -> Normal V
 				ld   hl, iOBJInfo_BankNum
 				add  hl, de
@@ -9216,14 +9231,14 @@ ProjInit_Leona_VSlasher:
 				ld   [hl], HIGH(OBJLstPtrTable_Proj_Leona_VSlasherS)	; iOBJInfo_OBJLstPtrTbl_High
 				inc  hl
 				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
-				
+
 				jp   .setAnimSpeed
-				
+
 				.objLstD:
 				pop  af
 				cp   CHAR_ID_LEONA		; Playing as normal LEONA?
 				jp   nz, .objLstO		; If not, jump
-				
+
 				; Desperation -> Large V
 				ld   hl, iOBJInfo_BankNum
 				add  hl, de
@@ -9234,12 +9249,12 @@ ProjInit_Leona_VSlasher:
 				ld   [hl], HIGH(OBJLstPtrTable_Proj_Leona_VSlasherD)	; iOBJInfo_OBJLstPtrTbl_High
 				inc  hl
 				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
-				
+
 				jp   .setAnimSpeed
-				
+
 			.objLstO:
 				; Orochi -> Skull wall
-				
+
 				ld   hl, iOBJInfo_BankNum
 				add  hl, de
 				ld   [hl], BANK(OBJLstPtrTable_Proj_OLeona_VSlasher)	; BANK $01 ; iOBJInfo_BankNum
@@ -9249,30 +9264,30 @@ ProjInit_Leona_VSlasher:
 				ld   [hl], HIGH(OBJLstPtrTable_Proj_OLeona_VSlasher)	; iOBJInfo_OBJLstPtrTbl_High
 				inc  hl
 				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
-				
+
 				; This also plays a SFX
 				mMvC_PlaySound SFX_FIREHIT_A
 				jp   .setAnimSpeed
 				;--
 			.setAnimSpeed:
-			
+
 				; Set animation speed.
 				ld   hl, iOBJInfo_FrameLeft
 				add  hl, de
 				ld   [hl], $00	; iOBJInfo_FrameLeft
 				inc  hl
 				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
-				
+
 				; Set priority and despawn timer
 				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $00	; iOBJInfo_Play_Priority
 				inc  hl
 				ld   [hl], 60	; iOBJInfo_Play_EnaTimer
-				
+
 				; Set initial position relative to the player's origin
 				call OBJLstS_Overlap
-				
+
 			pop  af ; A = CharId
 			cp   CHAR_ID_LEONA
 			jp   nz, .moveOLeona
@@ -9292,7 +9307,7 @@ ProjInit_Leona_VSlasher:
 		pop  de
 	pop  bc
 	ret
-	
+
 ; =============== ProjInit_MrKarate_KoOuKen ===============
 ; Initializes the projectile for Mr.Karate's Ko Ou Ken.
 ; IN
@@ -9300,12 +9315,12 @@ ProjInit_Leona_VSlasher:
 ; - DE: Ptr to respective wOBJInfo
 ProjInit_MrKarate_KoOuKen:
 	mMvC_PlaySound SFX_FIREHIT_A
-	
+
 	push bc
 		push de
-		
+
 			; --------------- common projectile init code ---------------
-			
+
 			;
 			; C flag = If set, we're at max power
 			;
@@ -9327,13 +9342,13 @@ ProjInit_MrKarate_KoOuKen:
 				add  hl, bc		; Seek to iPlInfo_Flags2
 			pop  af
 			ld   a, [hl]		; Read out to A
-			
+
 			push af ; Save A & C flag
-				
+
 				call ProjInitS_InitAndGetOBJInfo	; DE = Ptr to wOBJInfo_Pl*Projectile
-				
+
 				; --------------- main ---------------
-				
+
 				; Write sprite mapping ptr for this projectile.
 				ld   hl, iOBJInfo_BankNum
 				add  hl, de
@@ -9344,12 +9359,12 @@ ProjInit_MrKarate_KoOuKen:
 				ld   [hl], HIGH(OBJLstPtrTable_Proj_MrKarate_KoOuKen)	; iOBJInfo_OBJLstPtrTbl_High
 				inc  hl
 				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
-				
+
 				; Set priority value
 				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $00
-			
+
 				; Set code pointer
 				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
@@ -9358,23 +9373,23 @@ ProjInit_MrKarate_KoOuKen:
 				ld   [hl], LOW(ProjC_Horz)	; iOBJInfo_Play_CodePtr_Low
 				inc  hl
 				ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Play_CodePtr_High
-				
+
 				; Set animation speed.
 				ld   hl, iOBJInfo_FrameLeft
 				add  hl, de
 				ld   [hl], $00	; iOBJInfo_FrameLeft
 				inc  hl
 				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
-				
+
 				; Set initial position relative to the player's origin
 				call OBJLstS_Overlap
 				mMvC_SetMoveH +$1C00
 				mMvC_SetMoveV -$0400
-				
+
 			;
 			; Determine projectile horizontal speed.
 			;
-		
+
 			pop  af	; Restore A & C flag
 			jp   nc, .spdMaxPow			; Are we at max power? If not, jump
 			bit  PF2B_HEAVY, a			; Was this an heavy attack?
@@ -9393,11 +9408,11 @@ ProjInit_MrKarate_KoOuKen:
 			ld   hl, +$0500
 		.setSpeed:
 			call Play_OBJLstS_SetSpeedH_ByXFlipR
-			
+
 		pop  de
 	pop  bc
 	ret
-	
+
 ; =============== ProjInit_HaohShokohKenS ===============
 ; Initializes the large projectile for the super version of Haoh Shokoh Ken.
 ; IN
@@ -9407,9 +9422,9 @@ ProjInit_HaohShokohKenS:
 	mMvC_PlaySound SCT_PROJ_LG_B
 	push bc
 		push de
-		
+
 			; --------------- common projectile init code ---------------
-			
+
 			;
 			; C flag = If set, we're at max power
 			;
@@ -9431,13 +9446,13 @@ ProjInit_HaohShokohKenS:
 				add  hl, bc		; Seek to iPlInfo_Flags2
 			pop  af
 			ld   a, [hl]		; Read out to A
-			
+
 			push af ; Save A & C
-				
+
 				call ProjInitS_InitAndGetOBJInfo	; DE = Ptr to wOBJInfo_Pl*Projectile
-				
+
 				; --------------- main ---------------
-				
+
 				; Write sprite mapping ptr for this projectile.
 				ld   hl, iOBJInfo_BankNum
 				add  hl, de
@@ -9448,14 +9463,14 @@ ProjInit_HaohShokohKenS:
 				ld   [hl], HIGH(OBJLstPtrTable_Proj_HaohShokohKenS)	; iOBJInfo_OBJLstPtrTbl_High
 				inc  hl
 				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
-				
+
 				; Set priority value
 				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $01
-				
+
 				jp   ProjInit_HaohShokohKenD.initShared
-	
+
 ; =============== ProjInit_HaohShokohKenD ===============
 ; Initializes the large projectile for the super desperation version of Haoh Shokoh Ken.
 ; IN
@@ -9463,12 +9478,12 @@ ProjInit_HaohShokohKenS:
 ; - DE: Ptr to respective wOBJInfo
 ProjInit_HaohShokohKenD:
 	mMvC_PlaySound SCT_PROJ_LG_A
-	
+
 	push bc
 		push de
-		
+
 			; --------------- common projectile init code ---------------
-			
+
 			;
 			; C flag = If set, we're at max power
 			;
@@ -9490,13 +9505,13 @@ ProjInit_HaohShokohKenD:
 				add  hl, bc		; Seek to iPlInfo_Flags2
 			pop  af
 			ld   a, [hl]		; Read out to A
-			
+
 			push af ; Save A & C flag
-				
+
 				call ProjInitS_InitAndGetOBJInfo	; DE = Ptr to wOBJInfo_Pl*Projectile
-				
+
 				; --------------- main ---------------
-				
+
 				; Write sprite mapping ptr for this projectile.
 				ld   hl, iOBJInfo_BankNum
 				add  hl, de
@@ -9507,7 +9522,7 @@ ProjInit_HaohShokohKenD:
 				ld   [hl], HIGH(OBJLstPtrTable_Proj_HaohShokohKenD)	; iOBJInfo_OBJLstPtrTbl_High
 				inc  hl
 				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
-				
+
 				; Set priority value
 				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
@@ -9515,7 +9530,7 @@ ProjInit_HaohShokohKenD:
 
 				; Common code between S and D init
 			.initShared:
-			
+
 				; Set code pointer
 				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
@@ -9524,7 +9539,7 @@ ProjInit_HaohShokohKenD:
 				ld   [hl], LOW(ProjC_Horz)	; iOBJInfo_Play_CodePtr_Low
 				inc  hl
 				ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Play_CodePtr_High
-				
+
 				; Set animation speed.
 				; Since these don't use the GFX buffer, using ANIMSPEED_INSTANT will animate the projectile every frame.
 				ld   hl, iOBJInfo_FrameLeft
@@ -9532,17 +9547,17 @@ ProjInit_HaohShokohKenD:
 				ld   [hl], $00	; iOBJInfo_FrameLeft
 				inc  hl
 				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
-				
+
 				; Set initial position
 				call OBJLstS_Overlap 	; Relative to the player's origin
 				mMvC_SetMoveH +$1000	; $10px forward
 				mMvC_SetMoveV -$0800	; $08px above
-				
+
 			;
 			; Determine projectile horizontal speed.
 			; There are different settings for light, heavy and heavy at max power.
 			;
-		
+
 			pop  af	; Restore A & C flag
 			jp   nc, .spdMaxPow			; Are we at max power? If not, jump
 			bit  PF2B_HEAVY, a			; Was this an heavy attack?
@@ -9561,11 +9576,11 @@ ProjInit_HaohShokohKenD:
 			ld   hl, +$0500
 		.setSpeed:
 			call Play_OBJLstS_SetSpeedH_ByXFlipR
-			
+
 		pop  de
 	pop  bc
 	ret
-	
+
 ; =============== ProjInit_Iori_YamiBarai ===============
 ; Initializes the projectile for Iori's 108 Shiki Yami Barai.
 ; IN
@@ -9573,12 +9588,12 @@ ProjInit_HaohShokohKenD:
 ; - DE: Ptr to respective wOBJInfo
 ProjInit_Iori_YamiBarai:
 	mMvC_PlaySound SCT_PROJ_LG_B
-	
+
 	push bc
 		push de
-		
+
 			; --------------- common projectile init code ---------------
-			
+
 			;
 			; C flag = If set, we're at max power
 			;
@@ -9600,13 +9615,13 @@ ProjInit_Iori_YamiBarai:
 				add  hl, bc		; Seek to iPlInfo_Flags2
 			pop  af
 			ld   a, [hl]		; Read out to A
-			
+
 			push af ; Save A & C flag
-				
+
 				call ProjInitS_InitAndGetOBJInfo	; DE = Ptr to wOBJInfo_Pl*Projectile
-				
+
 				; --------------- main ---------------
-			
+
 				; Set code pointer
 				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
@@ -9615,7 +9630,7 @@ ProjInit_Iori_YamiBarai:
 				ld   [hl], LOW(ProjC_Horz)	; iOBJInfo_Play_CodePtr_Low
 				inc  hl
 				ld   [hl], HIGH(ProjC_Horz)	; iOBJInfo_Play_CodePtr_High
-				
+
 				; Write sprite mapping ptr for this projectile.
 				ld   hl, iOBJInfo_BankNum
 				add  hl, de
@@ -9627,27 +9642,27 @@ ProjInit_Iori_YamiBarai:
 				inc  hl
 				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
 
-				
+
 				; Set animation speed.
 				ld   hl, iOBJInfo_FrameLeft
 				add  hl, de
 				ld   [hl], $00	; iOBJInfo_FrameLeft
 				inc  hl
 				ld   [hl], ANIMSPEED_INSTANT	; iOBJInfo_FrameTotal
-				
+
 				; Set priority value
 				ld   hl, iOBJInfo_Play_Priority
 				add  hl, de
 				ld   [hl], $00
-				
+
 				; Set initial position relative to the player's origin
 				call OBJLstS_Overlap
 				mMvC_SetMoveH +$0800
-				
+
 			;
 			; Determine projectile horizontal speed.
 			;
-		
+
 			pop  af	; Restore A & C flag
 			jp   nc, .fldMaxPow			; Are we at max power? If not, jump
 			bit  PF2B_HEAVY, a			; Was this an heavy attack?
@@ -9666,7 +9681,7 @@ ProjInit_Iori_YamiBarai:
 			ld   hl, +$0400
 		.setSpeed:
 			call Play_OBJLstS_SetSpeedH_ByXFlipR
-			
+
 		pop  de
 	pop  bc
 	ret
@@ -9683,7 +9698,7 @@ Pl_CopyXFlipToOther:
 		ld   a, [hl]
 		and  a, SPR_XFLIP
 		ld   d, a
-		
+
 		; HL = Ptr to opponent's OBJLst flags
 		ld   hl, iPlInfo_PlId
 		add  hl, bc
@@ -9698,7 +9713,7 @@ Pl_CopyXFlipToOther:
 		; 2P gets 1P's flags
 		ld   hl, wOBJInfo_Pl1+iOBJInfo_OBJLstFlags
 	.sync:
-	
+
 		; Replace the opponent's SPR_XFLIP flag with ours
 		ld   a, [hl]			; A = Opponent's OBJLst flags
 		and  a, $FF^SPR_XFLIP	; Remove SPR_XFLIP flag
@@ -9706,7 +9721,7 @@ Pl_CopyXFlipToOther:
 		ld   [hl], a			; Save back updated value
 	pop  de
 	ret
-	
+
 ; =============== Pl_SetNewMove ===============
 ; Shared code for updating the wPlInfo when starting a new move.
 ; IN
@@ -9720,17 +9735,17 @@ Pl_SetNewMove:
 			ld   hl, iPlInfo_Flags2
 			add  hl, bc
 			set  PF2B_MOVESTART, [hl]
-			
+
 			; Set the new move ID
 			ld   hl, iPlInfo_MoveId
 			add  hl, bc
 			ld   [hl], a
-			
+
 			; Blank out iPlInfo_JoyBufKeysLH in case it was used to check for inputs
 			ld   hl, iPlInfo_JoyBufKeysLH
 			add  hl, bc
 			ld   [hl], $00
-			
+
 			;
 			; Update the wOBJInfo fields depending on the move we selected.
 			;
@@ -9739,30 +9754,30 @@ Pl_SetNewMove:
 			;
 			; Most importantly, the sprite mapping pointer gets updated among these.
 			;
-			
+
 			;--
 			;
 			; HL = Ptr to move animation table ptr
 			;
 			ld   hl, iPlInfo_MoveAnimTblPtr_High
-			add  hl, bc					
+			add  hl, bc
 			push hl	; Save HL
-			
+
 				; BC = Starting destination for wPlInfo fields
-				ld   hl, iPlInfo_OBJLstPtrTblOffsetMoveEnd		
-				add  hl, bc				
+				ld   hl, iPlInfo_OBJLstPtrTblOffsetMoveEnd
+				add  hl, bc
 				push hl
 				pop  bc
-				
+
 				; DE = Starting destination for wOBJInfo fields
-				ld   hl, iOBJInfo_BankNum	
+				ld   hl, iOBJInfo_BankNum
 				add  hl, de
 				push hl
 				pop  de
 			pop  hl
-			
+
 			push de ; Restore HL
-			
+
 				;
 				; Switch to BANK $03, as all move animation tables are stored there.
 				; [POI] Unsafe ROM bank switch, will break if VBLANK triggers here.
@@ -9771,14 +9786,14 @@ Pl_SetNewMove:
 					ld   a, BANK(MoveAnimTbl_Marker) ; BANK $03
 					ld   [MBC1RomBank], a
 				pop  af
-			
+
 				;
 				; DE = Ptr to start of the move animation table for this player.
 				;
 				ld   d, [hl]	; D = iPlInfo_MoveAnimTblPtr_High
 				inc  hl
 				ld   e, [hl]	; E = iPlInfo_MoveAnimTblPtr_Low
-				
+
 				;
 				; Generate the offset to the table entry from the Move Id.
 				;
@@ -9790,38 +9805,38 @@ Pl_SetNewMove:
 				ld   l, a		; HL = MoveId (*2)
 				add  hl, hl		; * 2
 				add  hl, hl		; * 2
-				
+
 				; HL = Ptr to table entry
-				add  hl, de		
+				add  hl, de
 			pop  de
-			
+
 			; Copy the data over
-			
+
 			; byte0 -> iOBJInfo_BankNum
 			ldi  a, [hl]
 			ld   [de], a
 			inc  de
-			
+
 			; byte1 -> iOBJInfo_OBJLstPtrTbl_Low
 			ldi  a, [hl]
 			ld   [de], a
 			inc  de
-			
+
 			; byte2 -> iOBJInfo_OBJLstPtrTbl_High
 			ldi  a, [hl]
 			ld   [de], a
 			inc  de
-			
+
 			; byte3 -> iPlInfo_OBJLstPtrTblOffsetMoveEnd
 			ldi  a, [hl]
-			ld   [bc], a	
+			ld   [bc], a
 			inc  bc			; Seek to iPlInfo_MoveDamageVal
-			
+
 			; Always reset the animation from the beginning
 			xor  a
 			ld   [de], a	; iOBJInfo_OBJLstPtrTblOffset = 0
 			inc  de			; Seek to iOBJInfo_BankNumView
-			
+
 			; Seek the wOBJInfo destination ptr (DE) to iOBJInfo_FrameLeft.
 			; As we're currently on iOBJInfo_BankNumView...
 			push hl
@@ -9830,25 +9845,25 @@ Pl_SetNewMove:
 				push hl
 				pop  de			; DE = HL
 			pop  hl
-			
-			
+
+
 			; Initialize animation speed
-			
+
 			; byte4 -> iOBJInfo_FrameLeft
 			ldi  a, [hl]
 			ld   [de], a
 			inc  de
-			
+
 			; byte4 -> iOBJInfo_FrameTotal
 			ld   [de], a
-			
-			
+
+
 			; Prepare the damage-related fields for the new move.
 			; While the graphics for the first sprite mapping in the animation load, prevent the visible
 			; one ("Old Set"), from dealing further damage to avoid inconsistencies.
 			; The move code (MoveC_*) may decide to manually call Play_Pl_IsMoveLoading to check
 			; and copy over the pending damage fields to the visible set when it's ready.
-			
+
 			; Clear current damage fields
 			xor  a
 			ld   [bc], a	; iPlInfo_MoveDamageVal
@@ -9857,30 +9872,30 @@ Pl_SetNewMove:
 			inc  bc
 			ld   [bc], a	; iPlInfo_MoveDamageFlags3
 			inc  bc
-			
+
 			; Set pending damage fields
-	
+
 			; byte5 -> iPlInfo_MoveDamageValNext
 			ldi  a, [hl]
 			ld   [bc], a
 			inc  bc
-			
+
 			; byte6 -> iPlInfo_MoveDamageHitTypeIdNext
 			ldi  a, [hl]
 			ld   [bc], a
 			inc  bc
-			
+
 			; byte7 -> iPlInfo_MoveDamageFlags3Next
 			ld   a, [hl]
 			ld   [bc], a
-			
+
 			; Restore original ROM bank
 			ldh  a, [hROMBank]
 			ld   [MBC1RomBank], a
 		pop  de
 	pop  bc
 	ret
-	
+
 ; =============== ExOBJS_Play_ChkHitModeAndMoveH ===============
 ; Moves the specified projectile horizontally and handles its hit mode.
 ; IN
@@ -9899,7 +9914,7 @@ ExOBJS_Play_ChkHitModeAndMoveH:
 	jp   c, .retSet				; If so, jump
 	cp   OBJ_OFFSET_X+SCREEN_H	; A >= screen width?
 	jp   nc, .retSet			; If so, jump
-	
+
 	;
 	; Handle sprite hit modes, applicable to projectiles only.
 	; These are related to the collision detection against the opponent.
@@ -9911,57 +9926,57 @@ ExOBJS_Play_ChkHitModeAndMoveH:
 	jp   z, .chkRemove	; If so, jump
 	cp   PHM_REFLECT	; Did it get reflected?
 	jp   z, .chkReflect	; If so, jump
-	
+
 	; Otherwise, just move the sprite horizontally
 .move:
 	call OBJLstS_ApplyXSpeed
 .retClear:
 	xor  a	; C flag clear
 	ret
-	
+
 .chkRemove:
 	; Despawn the projectiles only if it has its priority value < $03.
 	; Undespawnable projectiles that deal continuous damage or those for special effects use this value.
 	ld   hl, iOBJInfo_Play_Priority
 	add  hl, de
 	ld   a, [hl]
-	cp   PROJ_PRIORITY_NODESPAWN		; iOBJInfo_Play_Priority >= $03?
-	jp   nc, .move	; If so, jump
+	cp   PROJ_PRIORITY_NODESPAWN	; iOBJInfo_Play_Priority >= $03?
+	jp   nc, .move					; If so, jump
 .retSet:
 	scf		; C flag set
 	ret
 .chkReflect:
-	; 
+	;
 	; Reflecting projectiles moves their OBJInfo to the opponent's slot,
 	; effectively turning it into the opponent's projectile.
 	;
 	; This is due to several hardcoded assumptions with the projectile slots.
-	; For example, wOBJInfo_Pl1Projectile is always "owned" by 1P can only ever hit wOBJInfo_Pl2
-	; and wOBJInfo_Pl2Projectile is always 2P's can only ever hit wOBJInfo_Pl1,
+	; For example, wOBJInfo_Pl1Projectile is always "owned" by 1Pand  can only ever hit wOBJInfo_Pl2
+	; while wOBJInfo_Pl2Projectile is always 2P's and can only ever hit wOBJInfo_Pl1,
 	; so if 2P were to reflect 1P's projectile, the only way to make it work
 	; would be to move wOBJInfo_Pl1Projectile over to wOBJInfo_Pl2Projectile
 	; and changing some of its fields.
 	;
-	
+
 	; Detect which projectile slot got reflected, depending on the wOBJInfo address.
 	ld   a, e
 	cp   a, LOW(wOBJInfo_Pl2Projectile)	; Are we 2P's projectile?
 	jp   z, .reflect2P					; If so, jump
 .reflect1P:
-	; 
+	;
 	; 2P reflected 1P's projectile.
 	;
-	
+
 	; Don't reflect the projectile if 2P's projectile is visible.
 	; Otherwise the one on screen would visibly disappear.
 	; In that case, just flag the projectile for removal (return through .retClear).
 	ld   hl, wOBJInfo_Pl2Projectile+iOBJInfo_Status	; HL = Ptr to target projectile
 	bit  OSTB_VISIBLE, [hl]		; Is 2P's projectile already visible?
 	jp   nz, .retClear			; If so, ignore
-	
+
 	; Reflect it
 	call Play_Proj_Reflect
-	
+
 	; Hide 1P's projectile
 	ld   hl, wOBJInfo_Pl1Projectile+iOBJInfo_Status
 	res  OSTB_VISIBLE, [hl]
@@ -9970,18 +9985,18 @@ ExOBJS_Play_ChkHitModeAndMoveH:
 	ld   [hl], COLIBOX_00
 	jp   .retClear
 .reflect2P:
-	; 
+	;
 	; 1P reflected 2P's projectile.
 	;
-	
+
 	; Don't reflect if 1P's slot is already used
 	ld   hl, wOBJInfo_Pl1Projectile+iOBJInfo_Status	; HL = Ptr to target projectile
 	bit  OSTB_VISIBLE, [hl]
 	jp   nz, .retClear
-	
+
 	; Reflect it
 	call Play_Proj_Reflect
-	
+
 	; Hide 2P's projectile
 	ld   hl, wOBJInfo_Pl2Projectile+iOBJInfo_Status
 	res  OSTB_VISIBLE, [hl]
@@ -9989,7 +10004,7 @@ ExOBJS_Play_ChkHitModeAndMoveH:
 	ld   hl, wOBJInfo_Pl2Projectile+iOBJInfo_HitboxId
 	ld   [hl], COLIBOX_00
 	jp   .retClear
-	
+
 ; =============== Play_Proj_Reflect ===============
 ; Reflects a projectile.
 ; See .chkReflect from the subroutine above.
@@ -9999,46 +10014,46 @@ ExOBJS_Play_ChkHitModeAndMoveH:
 Play_Proj_Reflect:
 	push bc
 		push de
-		
+
 			;
 			; Copy the full wOBJInfo to the opponent's slot
 			;
 			push hl
 				ld   b, OBJINFO_SIZE	; B = Bytes to copy
 			.cpLoop:
-				ld   a, [de]			
-				ldi  [hl], a			
+				ld   a, [de]
+				ldi  [hl], a
 				inc  de
 				dec  b					; Are we done?
 				jp   nz, .cpLoop		; If not, loop
 			pop  bc	; BC = Ptr to destination slot
-			
+
 			; Reset its hit mode, so it won't try to reflect it again
 			ld   hl, iOBJInfo_Play_HitMode
 			add  hl, bc
 			ld   [hl], PHM_NONE
-			
+
 			; Flip it horizontally and switch its palette (1P & 2P have different palettes)
 			ld   hl, iOBJInfo_OBJLstFlags
 			add  hl, bc
 			ld   a, [hl]
 			xor  a, SPR_OBP1|SPR_XFLIP
 			ld   [hl], a
-			
+
 			;
 			; Invert its horizontal speed to make it return back.
 			;
 			push de
 				ld   hl, iOBJInfo_SpeedX
-				add  hl, bc		
+				add  hl, bc
 				ld   d, [hl]	; D = iOBJInfo_SpeedX
 				inc  hl
 				ld   e, [hl]	; E = iOBJInfo_SpeedXSub
 				ld   a, d		; Invert high byte
-				cpl  
+				cpl
 				ld   d, a
-				ld   a, e		; Invert low byte	
-				cpl  
+				ld   a, e		; Invert low byte
+				cpl
 				ld   e, a
 				inc  e			; Account for bitflip
 				jp   nz, .saveSpd
@@ -10048,25 +10063,25 @@ Play_Proj_Reflect:
 				dec  hl
 				ld   [hl], d
 			pop  de
-			
+
 			; Play SGB/DMG SFX
 			ld   a, SCT_REFLECT
 			call HomeCall_Sound_ReqPlayExId
 		pop  de
 	pop  bc
 	ret
-	
+
 ; =============== OBJLstS_Hide ===============
 ; Hides/disables the specified sprite mapping.
 ; IN
 ; - DE: Ptr to wOBJInfo
 OBJLstS_Hide:
-	xor  a			
+	xor  a
 	ld   hl, iOBJInfo_Status
 	add  hl, de		; Seek to status flags
 	ld   [hl], a	; Erase them to hide the sprite mapping
 	ret
-	
+
 ; =============== MoveC_Base_Jump ===============
 ; Move code handler for all jump types.
 ;
@@ -10082,34 +10097,34 @@ MoveC_Base_Jump:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call Play_Pl_AddToJoyBufKeysLH
 	mMvC_ValLoaded .ret
-	
+
 	; Moves use iOBJInfo_OBJLstPtrTblOffsetView to always execute code relevant to the visible frame.
 	; This has the nice result of OSTB_GFXNEWLOAD being only set the very first time we
-	; execute the code for any given .onOBJ*, allowing an easy way to execute code code once.
+	; execute the code for any given .obj*, allowing an easy way to execute code code once.
 	;
 	; For the same reason, OBJLstS_IsInternalFrameAboutToEnd can't be used to determine if we're about
-	; to switch frames since it goes off the *internal* frame ID.	
-	
+	; to switch frames since it goes off the *internal* frame ID.
+
 	; Don't allow executing normals when displaying the first and last frame.
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
-	cp   $00*OBJLSTPTR_ENTRYSIZE	; OBJLstId == 0?		
+	cp   $00*OBJLSTPTR_ENTRYSIZE	; OBJLstId == 0?
 	jp   z, .obj0_init				; If so, jump
 	cp   $07*OBJLSTPTR_ENTRYSIZE	; OBJLstId == 7?
 	jp   z, .obj7_landed			; If so, jump
-	
+
 	;
 	; Move Input Reader
 	;
-	
+
 	; If we've landed, skip this
 	ld   hl, iOBJInfo_Y
 	add  hl, de
 	ld   a, [hl]
 	cp   PL_FLOOR_POS	; iOBJInfo_Y == PL_FLOOR_POS?
 	jr   z, .chkAct		; If so, skip
-	
+
 	; Check if we're starting normals in the middle of the jump
 	ld   hl, iPlInfo_JoyBufKeysLH
 	add  hl, bc
@@ -10122,11 +10137,11 @@ MoveC_Base_Jump:
 	jp   nz, .startAirKick	; If so, jump
 	bit  KEPB_B_HEAVY, [hl]	; Heavy punch?
 	jp   nz, .startAirPunch	; If so, jump
-	
+
 	; Otherwise, skip ahead
 	jp   .chkAct
 
-;	
+;
 ; [TCRF] Unreferenced code to start an air block.
 ;        This code is essentially equivalent to BasicInput_ChkAirBlock, except
 ;        that there's no input check for holding back.
@@ -10144,30 +10159,30 @@ MoveC_Base_Jump:
 	ld   a, [hl]
 	cp   a, MOVE_SHARED_JUMP_F
 	jp   z, .chkAct
-	
+
 	; Projectiles can only be blocked in the air.
 	; So as long as the opponent's projectile is active, try to air block it.
 	ld   hl, iPlInfo_Flags0Other
 	add  hl, bc
 	bit  PF0B_PROJ, [hl]			; Does the other player have an active projectile?
 	jp   nz, .unused_startAirBlock	; If so, jump
-		
+
 	; Ground-based attacks can't be blocked in the air.
 	ld   hl, iPlInfo_MoveDamageValOther
 	add  hl, bc
 	ld   a, [hl]
 	or   a							; Is the other player performing an attack?
 	jp   z, .chkAct					; If not, skip ahead
-	
+
 	ld   hl, iPlInfo_OBJInfoYOther
 	add  hl, bc
-	ld   a, [hl]		
+	ld   a, [hl]
 	cp   PL_FLOOR_POS				; Is the other player on the floor?
 	jp   z, .chkAct					; If so, skip ahead
 	jp   .unused_startAirBlock
-	
+
 .chkAct:
-	
+	; Depending on the visible frame...
 	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
 	add  hl, de
 	ld   a, [hl]
@@ -10194,11 +10209,11 @@ MoveC_Base_Jump:
 .unused_startAirBlock:
 	ld   hl, iPlInfo_Flags1
 	add  hl, bc
-	set  PF1B_GUARD, [hl]			
+	set  PF1B_GUARD, [hl]
 	ld   a, MOVE_SHARED_BLOCK_A
 	call Pl_SetMove_Simple
 	jp   .move
-	
+
 ; Starts the A+B air attack.
 .startAirAttack:
 	ld   a, SCT_HEAVY
@@ -10206,7 +10221,7 @@ MoveC_Base_Jump:
 	ld   a, MOVE_SHARED_ATTACK_A
 	call Pl_SetMove_Simple
 	jp   .move
-	
+
 ; Starts an air punch.
 .startAirPunch:
 	; If A+B are held, start that attack instead
@@ -10218,10 +10233,8 @@ MoveC_Base_Jump:
 	ld   a, MOVE_SHARED_PUNCH_A
 	call Pl_SetMove_Simple
 	jp   .move
-	
-;
+
 ; Starts an air kick.
-;
 .startAirKick:
 	; If A+B are held, start that attack instead
 	call Play_Pl_AreBothBtnHeld
@@ -10233,7 +10246,7 @@ MoveC_Base_Jump:
 	call Pl_SetMove_Simple
 	jp   .move
 
-; --------------- frame #0 ---------------	
+; --------------- frame #0 ---------------
 ; Preparing to jump.
 ;
 ; Get manual control of the animation timing as soon as the internal frame
@@ -10244,44 +10257,41 @@ MoveC_Base_Jump:
 	mMvC_SetAnimSpeed ANIMSPEED_NONE
 	jp   .anim
 
-; --------------- frame #1 ---------------	
+; --------------- frame #1 ---------------
 ; Starting the jump, and determines its "type".
 ;
 ; Jump "types" don't really exist though.
 ; What actually happens is that, through a series of checks that mostly depend
 ; on player input, the vertical and horizontal speed are updated, then the movement physics do the rest.
-; 
+;
 .obj1_setJumpType:
-	
+
 	; Set the jump settings only the first time we get here.
 	; Every time after, jump to .obj1_chkEnd to check if we're done.
-	ld   hl, iOBJInfo_Status
-	add  hl, de
-	bit  OSTB_GFXNEWLOAD, [hl]
-	jp   z, .obj1_chkEnd
-	
+	mMvC_ValFrameStartFast .obj1_chkEnd
+
 .chkSettings:
-	; We're in the air now
+	; [POI] Leftover from before the flag was set automatically.
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
 	set  PF0B_AIR, [hl]
-	
+
 	;
 	; JUMP DIRECTION
 	;
-	
+
 	; Decide the jump direction depending on the input we were holding right before starting the jump move.
 	ld   hl, iPlInfo_JoyKeysPreJump
 	add  hl, bc
 	bit  KEYB_LEFT, [hl]	; Did we hold left?
 	jr   nz, .chkJumpL		; If so, jump
-	bit  KEYB_RIGHT, [hl]	; Did we hold right?	
+	bit  KEYB_RIGHT, [hl]	; Did we hold right?
 	jr   nz, .chkJumpR		; If so, jump
-	
+
 	; Otherwise, it's neutral, and we can skip ahead.
 	; The movement speed and move ID (MOVE_SHARED_JUMP_N) we currently have set
 	; are already correct, as it's not possible to do fast neutral jumps.
-	jp   .neutral			
+	jp   .neutral
 	;--
 .chkJumpL:
 	;
@@ -10289,18 +10299,18 @@ MoveC_Base_Jump:
 	; By default the horizontal speed is read from a player-specific constant in iPlInfo_SpeedX.
 	; With running jumps or when jumping while crouching, that speed is doubled.
 	;
-	
+
 	; Running jumps give hyper hops
 	ld   hl, iPlInfo_RunningJump
 	add  hl, bc
 	ld   a, [hl]
 	or   a
 	jp   nz, .fastL
-	
+
 	; Otherwise, check for the standard move input.
 	; DU + L -> Hyper hop
-	mMvIn_ChkDir MoveInput_DU_Fast, .fastL
-	
+	mMvIn_ChkDir MoveInput_DU, .fastL
+
 .normalL:
 	; HL = iPlInfo_SpeedX
 	ld   hl, iPlInfo_SpeedX
@@ -10315,7 +10325,7 @@ MoveC_Base_Jump:
 	call Pl_GetWord
 	sla  l
 	rl   h
-	
+
 .invSpeedL:
 	; Since we're moving left, SpeedX = -SpeedX
 	ld   a, h	; Invert high byte
@@ -10326,17 +10336,17 @@ MoveC_Base_Jump:
 	ld   l, a
 	inc  l		; HL++ to account for bitflip
 	jp   nz, .setSpeedL
-	inc  h		
+	inc  h
 .setSpeedL:
 	; Set the jump speed
 	call Play_OBJLstS_SetSpeedH
-	
+
 	; Pick the appropriate jump move depending on the direction we're facing.
 	ld   a, MOVE_SHARED_JUMP_B		; A = Default with backwards jump
 	ld   hl, iOBJInfo_OBJLstFlags
 	add  hl, de						; Seek to flags
 	bit  OSTB_XFLIP, [hl]			; Are we visually facing left (1P side)?
-	jr   nz, .setDiagJump				; If so, jump (L is backwards on 1P side)
+	jr   nz, .setDiagJump			; If so, jump (L is backwards on 1P side)
 	ld   a, MOVE_SHARED_JUMP_F		; While it's forwards on 2P side
 	jp   .setDiagJump
 	;--
@@ -10348,7 +10358,7 @@ MoveC_Base_Jump:
 	ld   a, [hl]
 	or   a
 	jp   nz, .fastR
-	mMvIn_ChkDir MoveInput_DU_Fast, .fastR
+	mMvIn_ChkDir MoveInput_DU, .fastR
 .normalR:
 	ld   hl, iPlInfo_SpeedX
 	call Pl_GetWord
@@ -10362,6 +10372,7 @@ MoveC_Base_Jump:
 	rl   h
 .setSpeedR:
 	call Play_OBJLstS_SetSpeedH
+	
 	ld   a, MOVE_SHARED_JUMP_F
 	ld   hl, iOBJInfo_OBJLstFlags
 	add  hl, de
@@ -10377,7 +10388,7 @@ MoveC_Base_Jump:
 	ld   hl, iPlInfo_MoveId
 	add  hl, bc
 	ld   [hl], a
-	
+
 	;
 	; Update the ptr for this animation, reading it from the MoveAnimTbl_* similarly to Pl_SetNewMove.
 	;
@@ -10387,7 +10398,7 @@ MoveC_Base_Jump:
 		add  hl, de
 		push hl
 		pop  de
-		
+
 		push de
 			;
 			; Switch to BANK $03, as all move animation tables are stored there.
@@ -10397,7 +10408,7 @@ MoveC_Base_Jump:
 				ld   a, BANK(MoveAnimTbl_Marker) ; BANK $03
 				ld   [MBC1RomBank], a
 			pop  af
-			
+
 			;
 			; DE = Ptr to start of the move animation table for this player.
 			;
@@ -10406,7 +10417,7 @@ MoveC_Base_Jump:
 			ld   d, [hl]	; D = iPlInfo_MoveAnimTblPtr_High
 			inc  hl
 			ld   e, [hl]	; E = iPlInfo_MoveAnimTblPtr_Low
-			
+
 			;
 			; Generate the offset to the table entry from the Move Id.
 			;
@@ -10418,27 +10429,27 @@ MoveC_Base_Jump:
 			ld   l, a		; HL = MoveId (*2)
 			add  hl, hl		; * 2
 			add  hl, hl		; * 2
-			
+
 			; HL = Ptr to table entry
-			add  hl, de		
+			add  hl, de
 		pop  de
-		
+
 		;
 		; Update both sets of iOBJInfo_OBJLstPtrTbl.
 		;
-		
+
 		; Since the bank number iOBJInfo_BankNum isn't updated, it means
 		; the sprite mappings for the three jump moves must be in the same bank.
 		; In practice, all sprite mappings for any given character are stored in the same bank anyway.
-		
+
 		; byte0 -> (skipped)
-		inc  hl		; Seek to byte1 
-		
+		inc  hl		; Seek to byte1
+
 		; byte1 -> iOBJInfo_OBJLstPtrTbl_Low
 		ldi  a, [hl]
 		ld   [de], a
 		inc  de		; Seek to iOBJInfo_OBJLstPtrTbl_High
-		
+
 		; byte1 -> iOBJInfo_OBJLstPtrTbl_LowView
 		inc  de		; Seek to iOBJInfo_OBJLstPtrTblOffset
 		inc  de		; ...iOBJInfo_BankNumView
@@ -10447,7 +10458,7 @@ MoveC_Base_Jump:
 		dec  de		; and back
 		dec  de
 		dec  de
-		
+
 		; byte2 -> iOBJInfo_OBJLstPtrTbl_High
 		ldi  a, [hl]
 		ld   [de], a
@@ -10456,12 +10467,12 @@ MoveC_Base_Jump:
 		inc  de		; ...iOBJInfo_OBJLstPtrTbl_LowView
 		inc  de		; ...iOBJInfo_OBJLstPtrTbl_HighView
 		ld   [de], a
-		
+
 		; Restore original bank number
 		ldh  a, [hROMBank]
 		ld   [MBC1RomBank], a
 	pop  de
-	
+
 .neutral:
 
 	;
@@ -10471,7 +10482,7 @@ MoveC_Base_Jump:
 	; If we've stopped holding UP by the time we got here, we performed a hop.
 	; With hops, VSpeed = iPlInfo_JumpSpeed / 0.75
 	;
-	
+
 	ld   hl, iPlInfo_JoyKeys
 	add  hl, bc
 	ld   a, [hl]				; A = Currently held keys
@@ -10497,7 +10508,7 @@ MoveC_Base_Jump:
 	mMvC_NextFrameOnGtYSpeed -$07, ANIMSPEED_NONE
 	jp   .chkWallJump
 
-; --------------- frames #2-5 ---------------	
+; --------------- frames #2-5 ---------------
 ; Advance to the next frame when reaching the targets.
 .obj2_air:
 	mMvC_NextFrameOnGtYSpeed -$05, ANIMSPEED_NONE
@@ -10512,7 +10523,7 @@ MoveC_Base_Jump:
 	mMvC_NextFrameOnGtYSpeed +$01, ANIMSPEED_NONE
 	jp   .chkWallJump
 
-; --------------- common frames #2-6 ---------------	
+; --------------- common frames #2-6 ---------------
 ; Handle the wall jump.
 ;
 ; This is allowed for any of the sprite mappings used when we're in the air (#2-6)
@@ -10523,7 +10534,7 @@ MoveC_Base_Jump:
 	; This is because when a wall jump starts it starts a new jump move,
 	; so don't touch anything about it.
 	jp   .ret
-	
+
 ; --------------- common frames #1-6 ---------------
 ; Move the player in the air, applying gravity.
 .move:
@@ -10541,21 +10552,21 @@ MoveC_Base_Jump:
 	; Switch to the landing phase.
 	mMvC_SetLandFrame $07*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
 	jp   .ret
-	
+
 ; --------------- frame #7 ---------------
 ; Landing frame
 ;
 ; Just waits for the frame to end before ending the move.
 .obj7_landed:
-	mMvC_ValFrameEnd .anim				; Is the frame about to finish? ; If not, continue				
+	mMvC_ValFrameEnd .anim				; Is the frame about to finish? ; If not, continue
 	call Play_Pl_EndMove				; Otherwise, we're done
 	jr   .ret
-; --------------- common ---------------	
+; --------------- common ---------------
 .anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 .ret:
 	ret
-	
+
 ; =============== Pl_GetWord ===============
 ; Reads out a word value from the player struct.
 ; IN
@@ -10570,10 +10581,10 @@ Pl_GetWord:
 		inc  hl
 		ld   e, [hl]
 		push de			; Move it to HL
-		pop  hl			
+		pop  hl
 	pop  de				; Restore OBJInfo ptr
 	ret
-	
+
 ; =============== Play_Pl_ChkWallJumpInput ===============
 ; Handles the input for performing a wall jump.
 ; IN
@@ -10594,7 +10605,7 @@ Play_Pl_ChkWallJumpInput:
 	cp   CHAR_ID_ATHENA		; ...
 	jp   z, .chkEdge
 	jp   .retClear			; Otherwise, return
-	
+
 .chkEdge:
 	; The player must be on the edge of the screen.
 	; If iOBJInfo_RangeMoveAmount
@@ -10603,7 +10614,7 @@ Play_Pl_ChkWallJumpInput:
 	ld   a, [hl]
 	or   a				; RangeMoveAmount == 0?
 	jp   z, .retClear	; If so, return
-	
+
 	; Check if we held the direction towards the wall.
 	; This changes depending the side of the screen, and RangeMoveAmount can be used to determine it.
 	; If RangeMoveAmount < 0, it means we got pushed to the left when hugging the right border.
@@ -10615,9 +10626,9 @@ Play_Pl_ChkWallJumpInput:
 	add  hl, bc
 	bit  KEYB_RIGHT, [hl]
 	jp   z, .retClear
-	
+
 	; OK - Jump can start
-	
+
 	; The jump should move us to the right
 	ld   hl, iPlInfo_JoyKeysPreJump
 	add  hl, bc
@@ -10630,9 +10641,9 @@ Play_Pl_ChkWallJumpInput:
 	add  hl, bc
 	bit  KEYB_LEFT, [hl]
 	jp   z, .retClear
-	
+
 	; OK - Jump can start
-	
+
 	; The jump should move us to the left
 	ld   hl, iPlInfo_JoyKeysPreJump
 	add  hl, bc
@@ -10643,7 +10654,7 @@ Play_Pl_ChkWallJumpInput:
 	scf
 	ccf		; C flag cleared
 	ret
-	
+
 .turn:
 	; Flip the player sprite horizontally to jump the other way
 	ld   hl, iOBJInfo_OBJLstFlags
@@ -10661,7 +10672,7 @@ Play_Pl_ChkWallJumpInput:
 	call Pl_SetMove_StopSpeed
 	scf		; C flag set
 	ret
-	
+
 ; =============== Play_ExecExOBJCode ===============
 ; Executes the custom code for the four extra sprite mappings at slots 2-6.
 ; These are for the two projectiles and sparkle effects on super moves.
@@ -10669,7 +10680,7 @@ Play_ExecExOBJCode:
 	; The bank num will jump all over the place when doing this
 	ldh  a, [hROMBank]
 	push af
-		
+
 		ld   bc, wPlInfo_Pl1							; BC = Ptr to starting player
 		ld   de, wOBJInfo_Pl1Projectile+iOBJInfo_Status	; DE = Ptr to respective OBJInfo
 		ld   a, $04										; A = Number of loops
@@ -10683,13 +10694,13 @@ Play_ExecExOBJCode:
 			; Read out the code pointer.
 			; All of these expect the code pointer to be at the same location.
 			ASSERT(iOBJInfo_Play_CodePtr_Low == iOBJInfo_Play_CodePtr_Low)
-			
+
 			xor  a
 			; Read out ptr to HL
-			ld   hl, iOBJInfo_Play_CodePtr_Low	
+			ld   hl, iOBJInfo_Play_CodePtr_Low
 			add  hl, de			; Seek to code ptr
 			push bc
-				ld   c, [hl]	; C = iOBJInfo_Play_CodePtr_Low 
+				ld   c, [hl]	; C = iOBJInfo_Play_CodePtr_Low
 				inc  hl
 				ld   b, [hl]	; B = iOBJInfo_Play_CodePtr_High
 				push bc
@@ -10702,7 +10713,7 @@ Play_ExecExOBJCode:
 			jp   nz, .exec		; If so, execute it
 			; Otherwise, it's a null pointer.
 			; Ignore it and move on.
-			
+
 		.nextObj:
 			; Seek to the next OBJInfo
 			; DE += OBJINFO_SIZE
@@ -10719,7 +10730,7 @@ Play_ExecExOBJCode:
 			add  hl, bc
 			push hl
 			pop  bc
-			
+
 		pop  af			; Restore left count
 		dec  a			; Processed all OBJInfo?
 		jp   nz, .loop	; If not, loop
@@ -10751,7 +10762,7 @@ Play_ExecExOBJCode:
 	pop  hl		; Restore code ptr
 	jp   hl		; Execute it
 	ret ; We never get here
-	
+
 ; =============== MoveInputS_ChkInputBtnStrict ===============
 ; Handler for button input reading that provides no leeway.
 ; (ie: unlike MoveInputS_ChkInputDir, blank inputs in the buffer aren't skipped)
@@ -10770,17 +10781,17 @@ MoveInputS_ChkInputBtnStrict:
 				ld   hl, iPlInfo_JoyBtnBufferOffset
 				add  hl, bc
 				ld   a, [hl]
-				
+
 				; HL = Ptr to start of Button Buffer
 				ld   hl, iPlInfo_JoyBtnBuffer
 				add  hl, bc
-				
+
 				; Offset it by OR'ing the low nybble over
 				or   a, l
 				ld   l, a
-				
+
 				jp   MoveInputS_ChkInputStrict
-				
+
 ; =============== MoveInputS_ChkInputDirStrict ===============
 ; Alternate handler for d-pad input reading that provides no leeway.
 ; (ie: unlike MoveInputS_ChkInputDir, blank inputs in the buffer aren't skipped)
@@ -10799,7 +10810,7 @@ MoveInputS_ChkInputDirStrict:
 				ld   hl, iPlInfo_JoyDirBufferOffset
 				add  hl, bc
 				ld   a, [hl]
-				
+
 				; HL = Ptr to start of D-Pad Buffer
 				ld   hl, iPlInfo_JoyDirBuffer
 				add  hl, bc
@@ -10808,8 +10819,8 @@ MoveInputS_ChkInputDirStrict:
 				ld   l, a
 				;--
 				; Fall-through
-				
-; =============== MoveInputS_ChkInputStrict ===============				
+
+; =============== MoveInputS_ChkInputStrict ===============
 ; IN
 ; - BC: Ptr to wPlInfo structure
 ; - DE: Ptr to respective wOBJInfo structure
@@ -10821,13 +10832,13 @@ MoveInputS_ChkInputStrict:
 				push hl
 				pop  de
 			pop  hl
-			
+
 			;
-			; B = Number of separate inputs (iMoveInputItem_*) to check 
+			; B = Number of separate inputs (iMoveInputItem_*) to check
 			;
 			ldi  a, [hl]
 			ld   b, a		; B = iMoveInput_Length
-			
+
 			; As there's no skipping of blank inputs, the loop is much simpler
 			; and doesn't attempt to detect if we ran out of input buffer.
 		.chkKeyVal:
@@ -10839,11 +10850,11 @@ MoveInputS_ChkInputStrict:
 			ld   c, [hl]	; C = Required d-pad keys (iMoveInputItem_JoyKeys)
 			inc  hl
 			and  a, [hl]	; A = A & iMoveInputItem_JoyMaskKeys
-			
+
 			; Check for an exact match between filtered input and required keypress
 			cp   a, c		; A == C?
 			jp   nz, .retNg
-			
+
 		.chkKeyLen:
 			;
 			; HELD TIMER CHECK
@@ -10851,30 +10862,30 @@ MoveInputS_ChkInputStrict:
 			; The input must be held for a range of frames
 			inc  de			; Seek to buffer KeyTimer
 			ld   a, [de]	; A = KeyTimer
-			
+
 			; KeyTimer must be >= MinLength
 			inc  hl			; Seek to iMoveInputItem_MinLength
 			cp   a, [hl]	; KeyTimer < iMoveInputItem_MinLength?
 			jp   c, .retNg	; If so, return
-			
+
 			; KeyTimer must be <= MaxLength
 			inc  hl			; Seek to iMoveInputItem_MaxLength
-			cp   a, [hl]	
+			cp   a, [hl]
 			jp   z, .chkEnd	; KeyTimer == iMoveInput_MaxKeyLen? If so, continue
 			jp   nc, .retNg	; KeyTimer >= iMoveInput_MaxKeyLen? If so, return
-				
+
 		.chkEnd:
 			;
 			; Check if this is the end of the move input.
 			; If it isn't, prepare to check for the next input
 			; by seeking to the next iMoveInputItem and to the previous buffer entry.
 			;
-			
+
 			; Seek to iMoveInputItem_JoyKeys of the next MoveInputItem
 			inc  hl
-			
+
 			; Seek back to the previous buffer entry.
-			; As each entry is 2 bytes long, decrement the buffer ptr (DE) by 2 + 1 
+			; As each entry is 2 bytes long, decrement the buffer ptr (DE) by 2 + 1
 			; (as we're currently on the second byte of the current entry)
 			; and making sure to wrap the offset from $00 to $0E if needed.
 			ld   a, e
@@ -10883,7 +10894,7 @@ MoveInputS_ChkInputStrict:
 			dec  a
 			; Force valid range, wrapping back from $00 to $0E if needed
 			and  a, $0F
-			
+
 			; Apply the new offset to DE.
 			push af
 				; Get rid of low nybble in E
@@ -10896,10 +10907,10 @@ MoveInputS_ChkInputStrict:
 			ld   e, a
 			;--
 			; DE now points at the start of the previous entry
-			
+
 			dec  b				; Did we process all iMoveInputItem?
 			jp   nz, .chkKeyVal	; If not, loop
-			
+
 		.retOk:
 			scf	; Set carry
 		pop  de
@@ -10910,14 +10921,14 @@ MoveInputS_ChkInputStrict:
 		pop  de
 	pop  bc
 	ret
-	
+
 ; =============== MoveInputS_ChkInputDir ===============
 ; Checks if the directional keys for a move input were pressed correctly in order.
 ; Most moves use this subroutine to check for d-pad input.
 ;
 ; This boils down to checking a list of inputs in order.
 ;
-; The input lists in ROM are stored in backwards order (from last to first input), which simplifies the handling 
+; The input lists in ROM are stored in backwards order (from last to first input), which simplifies the handling
 ; of the joypad buffer -- as we can directly start checking from the latest buffer entry and move down from there.
 ;
 ; Each input "item" checks:
@@ -10938,7 +10949,7 @@ MoveInputS_ChkInputStrict:
 MoveInputS_ChkInputDir:
 	push bc
 		push de
-		
+
 			;
 			; DE = Ptr to current D-Pad buffer offset entry
 			;
@@ -10947,7 +10958,7 @@ MoveInputS_ChkInputDir:
 				ld   hl, iPlInfo_JoyDirBufferOffset
 				add  hl, bc
 				ld   a, [hl]
-				
+
 				; HL = Ptr to start of D-Pad Buffer
 				ld   hl, iPlInfo_JoyDirBuffer
 				add  hl, bc
@@ -10958,13 +10969,13 @@ MoveInputS_ChkInputDir:
 				push hl
 				pop  de
 			pop  hl
-			
+
 			;
-			; B = Number of separate inputs (iMoveInputItem_*) to check 
+			; B = Number of separate inputs (iMoveInputItem_*) to check
 			;
 			ldi  a, [hl]
 			ld   b, a
-			
+
 			;
 			; Keep a count of the remaining buffer size before we "underflow"
 			; from the 8th (earliest) entry to the 1st one (lestest).
@@ -10974,12 +10985,12 @@ MoveInputS_ChkInputDir:
 			; If this reaches 0 and the move isn't complete, we return immediately
 			; and the move won't start.
 			;
-			
+
 			; [BUG] This value is intended to decrement twice every time we seek back to the previous iPlInfo_JoyDirBuffer entry.
 			;       It should keep a count of the remaining buffer size to avoid looping multiple times.
 			;		Problem is, most of the time this is decremented *once*.
 			ld   c, $10			; Size of buffer
-			
+
 			;--
 			;
 			; GET LATEST INPUT
@@ -10997,31 +11008,31 @@ MoveInputS_ChkInputDir:
 			ld   a, [de]		; A = Held d-pad keys
 			or   a				; Were any keys held?
 			jp   nz, .chkKeyValInitial	; If so, skip
-			
+
 			; If we didn't press any keys on the d-pad for $0F frames or more, return.
 			inc  de				; Seek to key length
 			ld   a, [de]		; A = Key length
 			cp   $0F			; A >= $0F?
 			jp   nc, .retNg		; If so, return
-			
+
 			; Otherwise, seek back to the previous buffer entry.
 			; As each entry is 2 bytes long, this requires:
 			; - Decreasing the bytes left (C) by 2
 			; - Decreasing the buffer ptr (DE) by 2 + 1 (as we're currently on the second byte of the current entry)
 			;   and making sure to wrap the offset from $00 to $0E if needed.
-			
+
 			; This is the only time C is decremented correctly.
 			; Even then, there's one "dec c" at the start and one at the end.
-			
+
 			dec  c				; Decrease buffer size remaining (1/2)
 			; Decrease buffer offset by 3
 			ld   a, e			; A = Key offset
 			dec  a				; -= 1, seek back to first byte of current entry
 			dec  a				; -= 2, seek to the start of the previous entry
-			dec  a				
+			dec  a
 			; Force valid range, wrapping back from $00 to $0E if needed
-			and  a, $0F			
-			
+			and  a, $0F
+
 			; Apply the new offset to DE, the d-pad buffer ptr.
 			; This replaces the low nybble of E with the value currently in A,
 			; which works due to the buffer size ($10 bytes) and its alignment.
@@ -11034,14 +11045,14 @@ MoveInputS_ChkInputDir:
 			; And merge the new nybble over.
 			or   a, e
 			ld   e, a
-			
+
 			; A = Buffer entry from previous frame
 			ld   a, [de]
 			dec  c				; Decrease buffer size remaining (2/2)
 			;--
-			
+
 		.chkKeyValInitial:
-		
+
 			;
 			; KEY CHECK (INITIAL)
 			;
@@ -11050,12 +11061,12 @@ MoveInputS_ChkInputDir:
 			;
 			; A very similar check is used in .chkKeyValNext for the other inputs.
 			;
-		
+
 			push bc
 				; C = Required d-pad keys
 				ld   c, [hl]	; C = iMoveInputItem_JoyKeys
 				inc  hl
-				
+
 				;
 				; Filter away inputs excluded from the check.
 				; The second byte ("include filter") dictates which inputs from the buffer can be compared
@@ -11063,7 +11074,7 @@ MoveInputS_ChkInputDir:
 				;
 				; [POI] In 96, this is almost always the same as the required keypress,
 				;       meaning it's equivalent of doing "and c".
-				;       This allows fat-fingering half/quarter-circles, since you don't have to 
+				;       This allows fat-fingering half/quarter-circles, since you don't have to
 				;       press the exact key (ie: RIGHT can be successfully input by DOWN+RIGHT).
 				;       But it wasn't always the case! In 95, the code for this is identical,
 				;       but the filter wouldn't remove all of the extra keypresses.
@@ -11071,39 +11082,39 @@ MoveInputS_ChkInputDir:
 				;       accept DOWN+RIGHT, making them trickier to perform.
 				;
 				and  a, [hl]	; A = A & iMoveInputItem_JoyMaskKeys
-				
+
 				; Check for an exact match between filtered input and required keypress
 				cp   a, c		; A == C?
 			pop  bc
 			jp   z, .chkKeyLen		; If so, jump
-			
+
 			; Unlike .chkKeyValNext, if the last input isn't correct, return immediately.
 			jp   .retNg
-			
+
 		.tryUseKeyNext:
 			;
 			; GET NEXT INPUT
 			;
 			; See also .tryUseLatestKey
-			
+
 			; Attempt to use the current D-Pad entry if there's something here.
 			; (as we've just decremented it)
 			ld   a, [de]
 			or   a
 			jp   nz, .chkKeyValNext
-			
+
 			;--
-			
+
 			; If we didn't press any keys on the d-pad for *$05* frames or more, return.
 			inc  de
 			ld   a, [de]
 			cp   $05
 			jp   nc, .retNg
-			
+
 			; If we ran out of buffer, return
 			dec  c				; [BUG] Should be "dec c" twice
 			jp   z, .retNg
-			
+
 			; Otherwise, seek back to the previous buffer entry.
 			; Decrease buffer offset by 3
 			ld   a, e
@@ -11112,7 +11123,7 @@ MoveInputS_ChkInputDir:
 			dec  a
 			; Force valid range, wrapping back from $00 to $0E if needed
 			and  a, $0F
-			
+
 			; Replace low nybble of DE with it
 			push af
 				; Get rid of low nybble in E
@@ -11124,9 +11135,9 @@ MoveInputS_ChkInputDir:
 			ld   e, a
 			;--
 			; DE now points at the start of the previous entry
-			
+
 			jp   .tryUseKeyNext
-			
+
 		.chkKeyValNext:
 			;
 			; KEY CHECK (NEXT)
@@ -11136,32 +11147,32 @@ MoveInputS_ChkInputDir:
 			; the previous buffer entry is always checked, until the buffer runs out.
 			;
 			; See also: .chkKeyValInitial
-			
+
 			push bc
 				; C = Required d-pad keys
 				ld   c, [hl]	; C = iMoveInputItem_JoyKeys
 				inc  hl			; Seek to iMoveInputItem_JoyMaskKeys (byte1)
-				
+
 				; Filter away inputs excluded from the check.
 				; [POI] Same note applies here.
 				and  a, [hl]	; A = A & iMoveInputItem_JoyMaskKeys
-				
+
 				; Check for an exact match between filtered input and required keypress
 				cp   a, c		; A == C?
 			pop  bc
 			jp   z, .chkKeyLen	; If so, jump
-			
+
 			;--
 			;
 			; Otherwise, decrease the buffer offset by 2, and move back the
 			; iMoveInfo offset to the start of the entry.
 			; See also: .chkEnd
 			;
-			
+
 			dec  hl				; Seek back to iMoveInputItem_JoyKeys (byte0)
 			dec  c				; [BUG] Should be "dec c" twice
 			jp   z, .retNg
-			
+
 			; Seek to previous input buffer entry.
 			; As we're currently on the first byte of the current entry, decrease it by 2.
 			ld   a, e
@@ -11169,7 +11180,7 @@ MoveInputS_ChkInputDir:
 			dec  a
 			; Force valid range, wrapping back from $00 to $0E if needed
 			and  a, $0F
-			
+
 			; Replace low nybble of DE with it
 			push af
 				; Get rid of low nybble in E
@@ -11180,10 +11191,10 @@ MoveInputS_ChkInputDir:
 			or   a, e	; Merge the new nybble over.
 			ld   e, a
 			;--
-			
+
 			jp   .tryUseKeyNext
 		.chkKeyLen:
-			
+
 			;
 			; HELD TIMER CHECK
 			;
@@ -11197,20 +11208,20 @@ MoveInputS_ChkInputDir:
 			;
 			inc  de			; Seek to buffer KeyTimer
 			ld   a, [de]	; A = KeyTimer
-			
+
 			; KeyTimer must be >= MinLength
 			inc  hl			; Seek to iMoveInputItem_MinLength
 			cp   a, [hl]	; KeyTimer < iMoveInputItem_MinLength?
 			jp   c, .retNg	; If so, return
-			
+
 			; KeyTimer must be <= MaxLength
 			inc  hl			; Seek to iMoveInputItem_MaxLength
-			cp   a, [hl]	
+			cp   a, [hl]
 			jp   z, .chkEnd	; KeyTimer == iMoveInput_MaxKeyLen? If so, continue
 			jp   nc, .retNg	; KeyTimer >= iMoveInput_MaxKeyLen? If so, return
-							
+
 		.chkEnd:
-			
+
 			;
 			; Check if this is the end of the input.
 			; Like last time, seek from the current entry to the previous one while
@@ -11219,15 +11230,15 @@ MoveInputS_ChkInputDir:
 			; For reference, the first time we get here, the current buffer entry may point
 			; to the latest one.
 			;
-		
+
 			; Seek to iMoveInputItem_JoyKeys of the next MoveInputItem
-			inc  hl			
-			
-			
+			inc  hl
+
+
 			; Seek back to the previous buffer entry, exactly like last time
 			dec  c			; [BUG] Should be "dec c" twice
 			jp   z, .retNg	; End of buffer? If so, return
-			
+
 			; Seek to previous input buffer entry.
 			ld   a, e
 			dec  a		; A = E - 3
@@ -11235,7 +11246,7 @@ MoveInputS_ChkInputDir:
 			dec  a
 			; Force valid range, wrapping back from $00 to $0E if needed
 			and  a, $0F
-			
+
 			; Replace low nybble of DE with it
 			push af
 				; Get rid of low nybble in E
@@ -11247,7 +11258,7 @@ MoveInputS_ChkInputDir:
 			ld   e, a
 			;--
 			; DE now points at the start of the previous entry
-			
+
 			dec  b					; Did we process all iMoveInputItem?
 			jp   nz, .tryUseKeyNext	; If not, loop
 		.retOk:
@@ -11260,7 +11271,7 @@ MoveInputS_ChkInputDir:
 		pop  de
 	pop  bc
 	ret
-	
+
 ; =============== Play_Pl_ClearJoyDirBuffer ===============
 ; Clears the d-pad input buffer for the specified player.
 ; Meant to be used after successfully completing a move input.
@@ -11281,7 +11292,7 @@ Play_Pl_ClearJoyDirBuffer:
 		pop  bc
 	pop  hl
 	ret
-	
+
 ; =============== Play_Pl_ClearJoyBtnBuffer ===============
 ; Clears the button input buffer for the specified player.
 ; Meant to be used after successfully completing a move input that uses MoveInputS_ChkInputBtnStrict.
@@ -11303,7 +11314,7 @@ Play_Pl_ClearJoyBtnBuffer:
 		pop  bc
 	pop  hl
 	ret
-	
+
 ; =============== Play_Pl_CreateJoyKeysLH ===============
 ; Generates the field iPlInfo_JoyKeysLH for the specified player.
 ;
@@ -11316,16 +11327,16 @@ Play_Pl_ClearJoyBtnBuffer:
 ; For that purpose, iPlInfo_JoyBufKeysLH is also OR'd over, which is a separate field
 ; that contains the buffer of previous LH values, but that only gets updated manually
 ; by calling Play_Pl_AddToJoyBufKeysLH.
-; 
+;
 ; IN
 ; - BC: Ptr to wPlInfo structure
 Play_Pl_CreateJoyKeysLH:
 	; Seek to iPlInfo_JoyKeys
 	ld   hl, iPlInfo_JoyKeys
-	add  hl, bc			
+	add  hl, bc
 	push bc
 		; B = Currently held D-Pad keys
-		ldi  a, [hl]	
+		ldi  a, [hl]
 		and  a, KEY_RIGHT|KEY_LEFT|KEY_UP|KEY_DOWN
 		ld   b, a
 		; A = Light/Heavy button info with everything merged.
@@ -11334,7 +11345,7 @@ Play_Pl_CreateJoyKeysLH:
 		ldi  a, [hl]	; A = iPlInfo_JoyNewKeysLH
 		inc  hl			; Seek to iPlInfo_JoyNewKeysLHPreJump
 		inc  hl			; Seek to iPlInfo_JoyBufKeysLH
-		or   a, [hl]	
+		or   a, [hl]
 		and  a, KEP_A_LIGHT|KEP_B_LIGHT|KEP_A_HEAVY|KEP_B_HEAVY ; Filter valid LK bits
 		or   b ; Merge both variables
 	pop  bc
@@ -11343,7 +11354,7 @@ Play_Pl_CreateJoyKeysLH:
 	add  hl, bc
 	ld   [hl], a
 	ret
-	
+
 ; =============== Play_Pl_AddToJoyBufKeysLH ===============
 ; OR's iPlInfo_JoyNewKeysLH to iPlInfo_JoyBufKeysLH, which will
 ; keep every value until something clears it manually (ie: starting a new move).
@@ -11362,23 +11373,23 @@ Play_Pl_AddToJoyBufKeysLH:
 	ld   hl, iPlInfo_JoyNewKeysLH
 	add  hl, bc		; Seek to iPlInfo_JoyNewKeysLH
 	ld   a, [hl]	; A = iPlInfo_JoyNewKeysLH
-	; If the updated flags are blank, there's no need to update anything 
+	; If the updated flags are blank, there's no need to update anything
 	and  a, KEP_A_LIGHT|KEP_B_LIGHT|KEP_A_HEAVY|KEP_B_HEAVY ; Filter valid LH bits
 	jr   z, .retClear
 .update:
 	; Otherwise, OR them over
 	; iPlInfo_JoyBufKeysLH
 	ld   hl, iPlInfo_JoyBufKeysLH
-	add  hl, bc		
+	add  hl, bc
 	or   a, [hl]	; A |= iPlInfo_JoyBufKeysLH
 	ld   [hl], a	; Save it there
 .retSet:
-	scf				 
+	scf
 	ret
 .retClear:
 	or   a
 	ret
-	
+
 ; =============== Play_Pl_AreBothBtnHeld ===============
 ; Checks if we're holding both the punch and kick buttons at the same time.
 ; IN
@@ -11401,7 +11412,7 @@ Play_Pl_AreBothBtnHeld:
 .retSet:
 	scf		; Set carry
 	ret
-	
+
 ; =============== Play_Pl_GetDirKeys_ByXFlipR ===============
 ; Gets the d-pad keys we're holding, relative to the current player *visually* facing right.
 ; This means L/R are inverted on the 2P side.
@@ -11414,19 +11425,19 @@ Play_Pl_AreBothBtnHeld:
 Play_Pl_GetDirKeys_ByXFlipR:
 	ld   hl, iPlInfo_JoyKeys
 	add  hl, bc		; Seek to iPlInfo_JoyKeys
-	
+
 	;
 	; A = D-Pad Direction keys
 	;
 	ld   a, [hl]
 	and  a, KEY_RIGHT|KEY_LEFT|KEY_UP|KEY_DOWN		; Filter out non d-pad keys
 	jp   z, .retClear								; Holding any of them? If not, return
-	
+
 	;
 	; Invert the left/right inputs if we're visually facing left.
-	; This is because the returned keys are used with manual move input checks 
+	; This is because the returned keys are used with manual move input checks
 	; (the ones that don't use MoveInput_* structs) but should still be affected by switching sides.
-	; 
+	;
 	ld   hl, iOBJInfo_OBJLstFlags
 	add  hl, de
 	bit  SPRB_XFLIP, [hl]	; Is the player facing right?
@@ -11438,13 +11449,13 @@ Play_Pl_GetDirKeys_ByXFlipR:
 .retClear:
 	or   a	; Clear carry
 	ret
-	
+
 ; =============== OBJLST ANIMATION HELPERS ===============
-	
+
 ; =============== OBJLstS_IsGFXLoadDone ===============
 ; Determines if the graphics for the specified wOBJInfo have finished loading.
 ; IN
-; - DE: Ptr to wOBJInfo 
+; - DE: Ptr to wOBJInfo
 ; OUT
 ; - Z flag: If set, the graphics have loaded
 OBJLstS_IsGFXLoadDone:
@@ -11452,7 +11463,7 @@ OBJLstS_IsGFXLoadDone:
 	add  hl, de
 	bit  OSTB_GFXLOAD, [hl]	; Is the flag set?
 	ret
-	
+
 ; =============== OBJLstS_IsFrameNewLoad ===============
 ; Determines if the graphics for the sprite mapping have just finished loading
 ; at the end of the previous frame during VBlank.
@@ -11465,7 +11476,7 @@ OBJLstS_IsFrameNewLoad:
 	add  hl, de
 	bit  OSTB_GFXNEWLOAD, [hl]	; Is the flag set?
 	ret
-	
+
 ; =============== OBJLstS_IsInternalFrameAboutToEnd ===============
 ; Determines if the current sprite mapping ID is about to be updated later on this frame.
 ;
@@ -11486,8 +11497,8 @@ OBJLstS_IsInternalFrameAboutToEnd:
 	; If the GFX aren't fully loaded yet, the animation can't continue
 	call OBJLstS_IsGFXLoadDone
 	jp   nz, .retClear
-	
-	; Otherwise, the frame switches when iOBJInfo_FrameLeft reaches 0. 
+
+	; Otherwise, the frame switches when iOBJInfo_FrameLeft reaches 0.
 	ld   hl, iOBJInfo_FrameLeft
 	add  hl, de
 	ld   a, [hl]		; A = iOBJInfo_FrameLeft
@@ -11499,7 +11510,7 @@ OBJLstS_IsInternalFrameAboutToEnd:
 .retClear:
 	xor  a	; Clear carry (not ending)
 	ret
-	
+
 ; =============== Play_Pl_SetJumpLandAnimFrame ===============
 ; Sets the animation frame/SFX for landing on the ground.
 ; This is meant to be used when landing on the ground during an air move.
@@ -11512,26 +11523,26 @@ OBJLstS_IsInternalFrameAboutToEnd:
 Play_Pl_SetJumpLandAnimFrame:
 	push bc
 		ld   b, h		; B = Animation speed
-		
+
 		; Only do this if we're requesting a different animation frame
 		ld   hl, iOBJInfo_OBJLstPtrTblOffset
 		add  hl, de		; Seek to OBJLstId
 		cp   a, [hl]	; A == OBJLstId?
 		jp   z, .end	; If so, return
-		
+
 		; Otherwise, write the new sprite mapping
 		ld   [hl], a
-		
+
 		; Reset the animation speed to the specified value
 		ld   hl, iOBJInfo_FrameLeft
 		add  hl, de		; Seek iOBJInfo_FrameLeft
 		ld   [hl], b	; Frames remaining before change
 		inc  hl			; Seek to iOBJInfo_FrameTotal
 		ld   [hl], b	; Total count when switching frames
-		
+
 		; Apply the changes
 		call OBJLstS_DoAnimTiming_Initial_by_DE
-		
+
 		;
 		; Play a sound effect whenever we land on the ground.
 		; Daimon is supposed to use a special one, but...
@@ -11545,7 +11556,7 @@ IF FIX_BUGS == 1
 	push bc
 ENDC
 		ld   hl, iPlInfo_CharId
-		add  hl, bc		
+		add  hl, bc
 		ld   a, [hl]			; A = CharId
 		cp   CHAR_ID_DAIMON 	; Playing as DAIMON?
 		jp   z, .unused_daimon	; If so, jump
@@ -11556,14 +11567,14 @@ ENDC
 		ld   a, SFX_STEP_HEAVY	; A = Step SFX ID for DAIMON
 	.playSFX:
 		call HomeCall_Sound_ReqPlayExId
-		
+
 		; Return NZ
 		ld   a, $01
-		or   a		
+		or   a
 	.end:
 	pop  bc
 	ret
-	
+
 ; =============== Play_Pl_SetDropAnimFrame ===============
 ; Sets the animation/SFX for dropping on the ground.
 ; See also: Play_Pl_SetJumpLandAnimFrame
@@ -11576,29 +11587,29 @@ ENDC
 Play_Pl_SetDropAnimFrame:
 	push bc
 		ld   b, h		; B = Animation speed
-		
+
 		; Only do this if we're requesting a different animation frame
 		ld   hl, iOBJInfo_OBJLstPtrTblOffset
 		add  hl, de		; Seek to OBJLstId
 		cp   a, [hl]	; A == OBJLstId?
 		jp   z, .retZ	; If so, return
-		
+
 		; Otherwise, write the new sprite mapping
 		ld   [hl], a
-		
+
 		; Reset the animation speed to the specified value
 		ld   hl, iOBJInfo_FrameLeft
 		add  hl, de		; Seek iOBJInfo_FrameLeft
 		ld   [hl], b	; Frames remaining before change
 		inc  hl			; Seek to iOBJInfo_FrameTotal
 		ld   [hl], b	; Total count when switching frames
-		
+
 		; Apply the changes
 		call OBJLstS_DoAnimTiming_Initial_by_DE
 	pop  bc
 	call Play_Pl_IsDizzyNext
 	jp   nz, .playDizzySFX
-	
+
 .playNormSFX:
 	ld   a, SFX_DROP
 	call HomeCall_Sound_ReqPlayExId
@@ -11613,7 +11624,7 @@ Play_Pl_SetDropAnimFrame:
 .retZ:
 	pop  bc
 	ret
-	
+
 ; =============== Play_Pl_SetAnimFrame ===============
 ; Sets a custom sprite mapping ID for the current animation.
 ; See also: Play_Pl_SetJumpLandAnimFrame
@@ -11626,33 +11637,33 @@ Play_Pl_SetDropAnimFrame:
 Play_Pl_SetAnimFrame:
 	push bc
 		ld   b, h		; B = Animation speed
-		
+
 		; Only do this if we're requesting a different animation frame
 		ld   hl, iOBJInfo_OBJLstPtrTblOffset
 		add  hl, de		; Seek to OBJLstId
 		cp   a, [hl]	; A == OBJLstId?
 		jp   z, .end	; If so, return
-		
+
 		; Otherwise, write the new sprite mapping
 		ld   [hl], a
-		
+
 		; Reset the animation speed to the specified value
 		ld   hl, iOBJInfo_FrameLeft
 		add  hl, de		; Seek iOBJInfo_FrameLeft
 		ld   [hl], b	; Frames remaining before change
 		inc  hl			; Seek to iOBJInfo_FrameTotal
 		ld   [hl], b	; Total count when switching frames
-		
+
 		; Apply the changes
 		call OBJLstS_DoAnimTiming_Initial_by_DE
-		
+
 		; Return NZ
 		ld   a, $01
 		or   a
 	.end:
 	pop  bc
 	ret
-	
+
 ; =============== OBJLstS_ReqAnimOnGtYSpeed ===============
 ; Requests a switch to the next animation frame when passing the Y speed threshold.
 ;
@@ -11662,7 +11673,7 @@ Play_Pl_SetAnimFrame:
 ;
 ; It may also be set to ANIMSPEED_INSTANT or some other value when
 ; ending manual control of the animation.
-; 
+;
 ; For an example, the basic jumps use this subroutine, meaning the animation
 ; switches to the next sprite mapping (+$04) only when the player reaches a specific Y speed.
 ; The sprite mapping ID itself determines the "submode"/"act" of the jump, where
@@ -11679,11 +11690,11 @@ OBJLstS_ReqAnimOnGtYSpeed:
 	push bc
 		; Save this for later
 		ld   b, h		; B = AnimSpeed
-		
+
 		;
 		; The current Y Speed must be larger than the threshold.
 		;
-		
+
 		; Add $40 to both of them to avoid unintented results with the
 		; unsigned comparison on signed values that tend to be close to 0.
 		DEF PADVAL = $40
@@ -11696,18 +11707,18 @@ OBJLstS_ReqAnimOnGtYSpeed:
 			add  a, PADVAL
 			ld   c, a
 		pop  af
-		
+
 		cp   a, c			; YSpeedCur > YSpeedNew?
 		jp   c, .chkChange	; If so, jump
 		jp   .retClear		; Otherwise, return
-		
+
 	.chkChange:
 		; As a side effect of the move code going off the visible frame, this will get called multiple times
 		; even after we successfully request the frame to advance.
 		; Avoid accidentally erasing iOBJInfo_FrameLeft on next calls to this while the same frame is visible.
 		call OBJLstS_IsGFXLoadDone	; Have the frame graphics loaded?
 		jp   nz, .retClear			; If not, return
-		
+
 		; Set iOBJInfo_FrameLeft to 0 to force advance the animation once
 		ld   hl, iOBJInfo_FrameLeft
 		add  hl, de
@@ -11723,7 +11734,7 @@ OBJLstS_ReqAnimOnGtYSpeed:
 		or   a	; C flag clear
 	pop  bc
 	ret
-	
+
 ; =============== Play_Pl_EmptyPowOnSuperEnd ===============
 ; Called at the end of most moves to empty the POW meter when a super move finishes.
 ; IN
@@ -11735,7 +11746,7 @@ Play_Pl_EmptyPowOnSuperEnd:
 	add  hl, bc					; Seek to iPlInfo_Flags0
 	bit  PF0B_SUPERMOVE, [hl]	; Were we just doing a super move?
 	jp   z, .ret				; If not, return
-	
+
 	; Max meter required
 	; It's very possible to have the MAX Power meter run out during
 	; the super move, which is why we must check this.
@@ -11744,12 +11755,12 @@ Play_Pl_EmptyPowOnSuperEnd:
 	ld   a, [hl]
 	cp   PLAY_POW_MAX			; Are we at max power?
 	jp   nz, .ret				; If not, return
-	
+
 	; All ok, empty the POW meter
-	ld   [hl], $00				
+	ld   [hl], $00
 .ret:
 	ret
-	
+
 ; =============== Play_Pl_EndMove ===============
 ; Handles what happens when any move with fixed length ends.
 ; Note this needs to be manually called by the move code.
@@ -11760,20 +11771,20 @@ Play_Pl_EndMove:
 	; In case we ended a super move
 	call Play_Pl_EmptyPowOnSuperEnd
 	xor  a
-	
+
 	; Force align player to floor
 	ld   hl, iOBJInfo_Y
 	add  hl, de
 	ld   [hl], PL_FLOOR_POS
 	inc  hl
 	ldi  [hl], a	; Clear Y subpixels
-	
+
 	; Reset speed
 	ldi  [hl], a	; iOBJInfo_SpeedX
 	ldi  [hl], a	; iOBJInfo_SpeedXSub
 	ldi  [hl], a	; iOBJInfo_SpeedY
 	ld   [hl], a	; iOBJInfo_SpeedYSub
-	
+
 	; If we were performing a special move, clear iPlInfo_JoyBufKeysLH
 	; This causes iPlInfo_JoyKeysLH to lose the "held info" for the LH keys.
 	ld   hl, iPlInfo_Flags0
@@ -11786,7 +11797,7 @@ Play_Pl_EndMove:
 		add  hl, bc
 		ld   [hl], $00
 	pop  hl
-	
+
 .clearFlags:
 	; Reset everything from the flags except:
 	; - PF0B_PROJ: It's independent from the player
@@ -11815,11 +11826,11 @@ Play_Pl_EndMove:
 	res  PF2B_AUTOGUARDLOW, [hl]
 	res  PF2B_NOHURTBOX, [hl]
 	res  PF2B_NOCOLIBOX, [hl]
-	
+
 	; Clear damage flags
 	inc  hl	; Seek to iPlInfo_Flags3
 	ld   [hl], $00
-	
+
 	; Reset the current move to MOVE_SHARED_NONE.
 	; In practice, since PF1B_NOBASICINPUT just got cleared, the basic move handler
 	; will replace it with something else (ie: MOVE_SHARED_IDLE).
@@ -11833,7 +11844,7 @@ Play_Pl_EndMove:
 	add  hl, bc
 	ld   [hl], MOVE_SHARED_NONE
 	ret
-	
+
 ; =============== OBJLstS_SyncXFlip ===============
 ; Syncronizes the sprite's visual X direction with the internal one.
 ; IN
@@ -11850,7 +11861,7 @@ OBJLstS_SyncXFlip:
 	res  SPRB_XFLIP, [hl]		; Visually unflip the sprite
 .ret:
 	ret
-	
+
 ; =============== OBJLstS_DoAnimTiming_Loop_by_DE ===============
 ; Handles the timing for the current animation for the specified OBJInfo.
 ; Wrapper for OBJLstS_DoAnimTiming_Loop.
@@ -11865,7 +11876,7 @@ OBJLstS_DoAnimTiming_Loop_by_DE:
 		pop  de
 	pop  bc
 	ret
-	
+
 ; =============== OBJLstS_DoAnimTiming_Initial_by_DE ===============
 ; Initializes the current animation frame.
 ; Wrapper for OBJLstS_DoAnimTiming_Initial.
@@ -11888,7 +11899,7 @@ OBJLstS_DoAnimTiming_Initial_by_DE:
 ; OUT
 ; - C flag: If set, a move was started
 Play_Pl_ExecSpecMoveInputCode:
-	
+
 	ldh  a, [hROMBank]	; Save current bank
 	push af
 		call .exec		; Run the code. Was a new move started?
@@ -11908,23 +11919,23 @@ Play_Pl_ExecSpecMoveInputCode:
 .exec:
 	; Run the code for it
 	ld   hl, iPlInfo_MoveInputCodePtr_High
-	add  hl, bc			
+	add  hl, bc
 	push de
 		; DE = Code ptr
 		ld   d, [hl]	; iPlInfo_MoveInputCodePtr_High
-		inc  hl			 
+		inc  hl
 		ld   e, [hl]	; iPlInfo_MoveInputCodePtr_Low
-		
+
 		; Switch to the bank for it
-		inc  hl			
+		inc  hl
 		ld   a, [hl]			; iPlInfo_MoveInputCodePtr_Bank
 		ld   [MBC1RomBank], a
 		ldh  [hROMBank], a
-		
+
 		push de			; Move code ptr to HL
 		pop  hl
 	pop  de
-	
+
 	;
 	; Every input reader code (MoveInputS_*) uses these parameters:
 	; IN
@@ -11933,7 +11944,7 @@ Play_Pl_ExecSpecMoveInputCode:
 	; OUT
 	; - C flag: If set, a move was started
 	jp   hl				; Execute it
-	
+
 ; =============== Play_Pl_DoBasicMoveInput ===============
 ; Handles basic player movement, basic attacks, and setting moves
 ; when getting attacked.
@@ -11944,13 +11955,13 @@ Play_Pl_ExecSpecMoveInputCode:
 Play_Pl_DoBasicMoveInput:
 	push bc
 		push de
-		
+
 		;
 		; Handle starting throws
 		;
 		BasicInput_ChkThrowStart:
 
-			call Play_Pl_ChkThrowInput			; Started a throw?		
+			call Play_Pl_ChkThrowInput			; Started a throw?
 			jp   nc, .end						; If not, jump
 			cp   PLAY_THROWOP_GROUND			; Ground throw?
 			jp   z, BasicInput_StartGroundThrow	; If so, jump
@@ -11958,7 +11969,7 @@ Play_Pl_DoBasicMoveInput:
 			jp   z, BasicInput_StartAirThrow	; If so, jump
 			; PLAY_THROWOP_UNUSED_BOTH not handled as a throw, it's for command throws only.
 		.end:
-		
+
 		;
 		; Handle air block input.
 		; This is performed by holding back when doing neutral or backwards jumps.
@@ -11966,10 +11977,10 @@ Play_Pl_DoBasicMoveInput:
 		; This is new to 96, originally it went straight to BasicInput_ChkBaseInput.
 		;
 		BasicInput_ChkAirBlock:
-		
+
 			; Check if we're moving backwards.
 			; Moving backwards uses different keys depending on the side we're in.
-			
+
 			; Determine which key we're pressing first.
 			ld   hl, iPlInfo_JoyKeysLH
 			add  hl, bc
@@ -11992,18 +12003,18 @@ Play_Pl_DoBasicMoveInput:
 			add  hl, de
 			bit  SPRB_XFLIP, [hl]	; Facing right / 1P side? (so R -> forward)
 			jp   nz, .end			; If so, skip ahead
-			
+
 		.chkJumpMove:
 			; We must be doing a neutral or backwards jump.
 			ld   hl, iPlInfo_MoveId
-			add  hl, bc				
-			ld   a, [hl]			
+			add  hl, bc
+			ld   a, [hl]
 			cp   MOVE_SHARED_JUMP_N	; Doing a neutral jump?
 			jp   z, .chkAir			; If so, jump
 			cp   MOVE_SHARED_JUMP_B	; Doing a backwards jump?
 			jp   z, .chkAir			; If so, jump
 			jp   .end				; Otherwise, skip ahead
-			
+
 		.chkAir:
 			; Air blocking of course only works in the air
 			ld   hl, iOBJInfo_Y
@@ -12011,83 +12022,83 @@ Play_Pl_DoBasicMoveInput:
 			ld   a, [hl]
 			cp   PL_FLOOR_POS	; iOBJInfo_Y == PL_FLOOR_POS?
 			jp   z, .end		; If so, skip ahead
-			
+
 			; Projectiles can only be blocked in the air.
 			; So as long as the opponent's projectile is active, try to air block it.
 			ld   hl, iPlInfo_Flags0Other
 			add  hl, bc
 			bit  PF0B_PROJ, [hl]					; Does the other player have an active projectile?
 			jp   nz, BasicInput_StartAirBlock	; If so, jump
-			
+
 			; Ground-based attacks can't be blocked in the air.
 			ld   hl, iPlInfo_MoveDamageValOther
 			add  hl, bc
 			ld   a, [hl]
 			or   a				; Is the other player performing an attack?
 			jp   z, .end		; If not, skip ahead
-			
+
 			ld   hl, iPlInfo_OBJInfoYOther
 			add  hl, bc
-			ld   a, [hl]		
+			ld   a, [hl]
 			cp   PL_FLOOR_POS				; Is the other player on the floor?
 			jp   nz, BasicInput_StartAirBlock	; If not, jump
 		.end:
-		
+
 		BasicInput_ChkBaseInput:
 			; If basic input is disabled, return.
 			;
-			; This is important to prevent moves from being interrupted by
-			; the basic movement actions.
+			; This is important to prevent moves or the intro/outro moves from being
+			; interrupted by the basic movement actions.
 			; ie: normally, the game returns to the idle move when nothing is pressed,
 			;     but that shouldn't happen while performing another move.
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc
 			bit  PF1B_NOBASICINPUT, [hl]
 			jp   nz, BasicInput_End
-			
-			; If an intro/outro animation is playing, which is straight up a MoveId 
+
+			; If an intro/outro animation is playing, which is straight up a MoveId
 			; overriding whatever we're doing, display that.
 			ld   hl, iPlInfo_IntroMoveId
 			add  hl, bc
 			ld   a, [hl]
 			or   a
-			jp   nz, BasicInput_StartIntroMove
-			
+			jp   nz, BasicInput_StartIntroOutroMove
+
 			;
 			; Main input reader
 			;
-			
+		.chkMain:
 			ld   hl, iPlInfo_JoyKeysLH
 			add  hl, bc
 			ld   a, [hl]
 			; Note: jumpkicks are handled by the jump move code, not here.
-			bit  KEYB_UP, a					; Holding up?
-			jp   nz, BasicInput_StartJump	; If so, jump
-			bit  KEYB_DOWN, a			; Holding down?
-			jp   nz, BasicInput_ChkDown	; If so, jump
+			bit  KEYB_UP, a						; Holding up?
+			jp   nz, BasicInput_StartJump		; If so, jump
+			bit  KEYB_DOWN, a					; Holding down?
+			jp   nz, BasicInput_ChkDown			; If so, jump
 			; Normals (ground only)
 			bit  KEPB_A_LIGHT, a				; Light kick?
 			jp   nz, BasicInput_StartLightKick	; If so, jump
 			bit  KEPB_B_LIGHT, a				; Light punch?
 			jp   nz, BasicInput_StartLightPunch	; If so, jump
 			bit  KEPB_A_HEAVY, a				; Heavy kick?
-			jp   nz, BasicInput_ChkHeavyA	; If so, jump
+			jp   nz, BasicInput_ChkHeavyA		; If so, jump
 			bit  KEPB_B_HEAVY, a				; Heavy punch?
-			jp   nz, BasicInput_ChkHeavyB	; If so, jump
+			jp   nz, BasicInput_ChkHeavyB		; If so, jump
 			; Horizontal movement
-			bit  KEYB_LEFT, a	; Holding left?
-			jp   nz, .chkWalkL	; If so, jump
-			bit  KEYB_RIGHT, a	; Holding right?
-			jp   nz, .chkWalkR	; If so, jump
-			
+			bit  KEYB_LEFT, a					; Holding left?
+			jp   nz, .chkWalkL					; If so, jump
+			bit  KEYB_RIGHT, a					; Holding right?
+			jp   nz, .chkWalkR					; If so, jump
+
 			; Taunt
 			ld   hl, iPlInfo_JoyNewKeys
 			add  hl, bc
-			bit  KEYB_SELECT, [hl]			; Did we press SELECT?
-			jp   nz, BasicInput_ChkTaunt	; If so, jump
-			
+			bit  KEYB_SELECT, [hl]				; Did we press SELECT?
+			jp   nz, BasicInput_ChkTaunt		; If so, jump
+
 			jp   BasicInput_StartIdle
-			
+
 			; Determine if we're walking forwards or backwards
 		.chkWalkL:
 			; Left is backwards on the 1P side
@@ -12095,13 +12106,14 @@ Play_Pl_DoBasicMoveInput:
 			add  hl, de
 			bit  SPRB_XFLIP, [hl]				; Facing right / 1P side? (so L -> backward)
 			jp   nz, BasicInput_ChkWalkBack		; If so, jump
-			jp   BasicInput_ChkWalkForward			; Otherwise, skip ahead
+			jp   BasicInput_ChkWalkForward		; Otherwise, skip ahead
 		.chkWalkR:
 			; Right is backwards on the 2P side
 			ld   hl, iOBJInfo_OBJLstFlags
 			add  hl, de
 			bit  SPRB_XFLIP, [hl]				; Facing right / 1P side? (so R -> forward)
-			jp   nz, BasicInput_ChkWalkForward		; If so, skip ahead
+			jp   nz, BasicInput_ChkWalkForward	; If so, skip ahead
+			; Fall-through
 			
 		;
 		; Checks for moves triggered by walking backwards
@@ -12111,33 +12123,33 @@ Play_Pl_DoBasicMoveInput:
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc
 			res  PF1B_CROUCH, [hl]
-			
+
 			; B+B -> Hop Back
 			mMvIn_ChkDirStrict MoveInput_BB, BasicInput_StartHopBack
-			
+
 			; If the other player is attacking, attempting to walk backwards will block instead.
 			ld   hl, iPlInfo_Flags0Other
 			add  hl, bc
 			bit  PF0B_PROJ, [hl]					; Is the other player throwing a projectile?
-			jp   nz, BasicInput_StartGroundBlock	; If so, jump	
+			jp   nz, BasicInput_StartGroundBlock	; If so, jump
 			ld   hl, iPlInfo_MoveDamageValOther
 			add  hl, bc
 			ld   a, [hl]
 			or   a									; Is the other player performing an attack?
 			jp   nz, BasicInput_StartGroundBlock	; If so, jump
-			
+
 			; Otherwise, just walk back
 			jp   BasicInput_StartWalkBack
-			
+
 		;
 		; Checks for moves triggered when holding down.
 		;
 		BasicInput_ChkDown:
-		
+
 			;
 			; D+PK -> Charge POW meter
 			;
-			
+
 			; Ignore if fully charged
 			ld   hl, iPlInfo_Pow
 			add  hl, bc
@@ -12152,13 +12164,13 @@ Play_Pl_DoBasicMoveInput:
 			jp   .chkNormals
 			.noCharge:
 			pop  af
-			
+
 		.chkNormals:
 			; For everything else, holding down means crouching
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc
 			set  PF1B_CROUCH, [hl]
-			
+
 			; Check normals
 			bit  KEPB_A_LIGHT, a
 			jp   nz, BasicInput_StartCrouchLightKick
@@ -12168,17 +12180,17 @@ Play_Pl_DoBasicMoveInput:
 			jp   nz, BasicInput_StartCrouchHeavyKick
 			bit  KEPB_B_HEAVY, a
 			jp   nz, BasicInput_StartCrouchHeavyPunch
-			
+
 			; Check crouch block
-			bit  KEYB_LEFT, a	
+			bit  KEYB_LEFT, a
 			jp   nz, .chkL
 			bit  KEYB_RIGHT, a
 			jp   nz, .chkR
-			
+
 			; D -> Idle crouching
 			jp   BasicInput_StartCrouchIdle
-			
-			
+
+
 			;
 			; Determine if we're holding forwards or backwards, depending on the side we're in.
 			;
@@ -12186,9 +12198,9 @@ Play_Pl_DoBasicMoveInput:
 			; Left is backwards on the 1P side
 			ld   hl, iOBJInfo_OBJLstFlags
 			add  hl, de
-			bit  SPRB_XFLIP, [hl]				; Facing right / 1P side? (so L -> backward)
-			jp   nz, BasicInput_ChkCrouchBack	; If so, jump
-			
+			bit  SPRB_XFLIP, [hl]					; Facing right / 1P side? (so L -> backward)
+			jp   nz, BasicInput_ChkCrouchBack		; If so, jump
+
 			; In 95, this used to jump to somewhere different, as for a few characters,
 			; moving forwards while crouching allowed you to crouch walk.
 			; That code is gone in this game, so instead we jump to the idle code for crouching.
@@ -12197,29 +12209,29 @@ Play_Pl_DoBasicMoveInput:
 			; Right is backwards on the 2P side
 			ld   hl, iOBJInfo_OBJLstFlags
 			add  hl, de
-			bit  SPRB_XFLIP, [hl]				; Facing right / 1P side? (so R -> forward)
-			jp   nz, BasicInput_StartCrouchIdle					; If so, skip ahead
-												; Otherwise, we're holding back
+			bit  SPRB_XFLIP, [hl]					; Facing right / 1P side? (so R -> forward)
+			jp   nz, BasicInput_StartCrouchIdle		; If so, skip ahead
+													; Otherwise, we're holding back
 		;
 		; Checks for blocking while crouching
-		;								
+		;
 		BasicInput_ChkCrouchBack:
 			; We can only block if the other player is attacking.
 			; Otherwise, fall-through into the idle crouch code.
 			ld   hl, iPlInfo_Flags0Other
 			add  hl, bc
-			bit  PF0B_PROJ, [hl]						; Is there an enemy projectile?
+			bit  PF0B_PROJ, [hl]					; Is there an enemy projectile?
 			jp   nz, BasicInput_StartGroundBlock	; If so, block
-			
+
 			ld   hl, iPlInfo_MoveDamageValOther
 			add  hl, bc
 			ld   a, [hl]
 			or   a									; Is the other player attacking?
 			jp   nz, BasicInput_StartGroundBlock	; If so, block
-			
+
 		;
 		; Starts the crouch idle move.
-		;		
+		;
 		BasicInput_StartCrouchIdle:
 			; Don't start crouching if we're already doing so
 			ld   hl, iPlInfo_MoveId
@@ -12227,7 +12239,7 @@ Play_Pl_DoBasicMoveInput:
 			ld   a, [hl]
 			cp   MOVE_SHARED_CROUCH		; iPlInfo_MoveId == MOVE_SHARED_CROUCH
 			jp   z, BasicInput_End		; If so, return
-			
+
 			; Set flags
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc
@@ -12237,7 +12249,7 @@ Play_Pl_DoBasicMoveInput:
 			ld   a, MOVE_SHARED_CROUCH
 			call Pl_SetMove_StopSpeed
 			jp   BasicInput_End
-			
+
 		;
 		; Starts the standing idle move.
 		;
@@ -12248,17 +12260,17 @@ Play_Pl_DoBasicMoveInput:
 			ld   a, [hl]
 			cp   MOVE_SHARED_IDLE
 			jp   z, BasicInput_End
-			
+
 			; Set flags
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc
 			res  PF1B_GUARD, [hl]
 			res  PF1B_CROUCH, [hl]
-			
+
 			; New move
 			ld   a, MOVE_SHARED_IDLE
 			call Pl_SetMove_StopSpeed
-			
+
 			jp   BasicInput_End
 
 		;
@@ -12268,7 +12280,7 @@ Play_Pl_DoBasicMoveInput:
 			; F+F -> Run forwards
 			mMvIn_ChkDirStrict MoveInput_FF, BasicInput_StartRun
 			; Fall-through
-			
+
 		;
 		; Starts walking forwards.
 		;
@@ -12276,26 +12288,26 @@ Play_Pl_DoBasicMoveInput:
 			; Don't start if we're doing it already
 			ld   hl, iPlInfo_MoveId
 			add  hl, bc
-			ld   a, [hl]				; A = MoveId	
+			ld   a, [hl]				; A = MoveId
 			cp   MOVE_SHARED_WALK_F		; MoveId == forwards walking?
 			jp   z, BasicInput_End		; If so, return
-			
+
 			; Update flags
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc
 			res  PF1B_GUARD, [hl]		; Only set when switching to the actual block move
 			res  PF1B_CROUCH, [hl]		; Walking is not crouching
-			
+
 			; New move
 			ld   a, MOVE_SHARED_WALK_F
 			call Pl_SetMove_StopSpeed
-			
+
 			; Apply continuous movement speed since we just nuked it
 			ld   hl, iPlInfo_SpeedX					; HL = Offset to walk speed for this char
 			call Pl_GetWord							; HL = Word value at iPlInfo_SpeedX
 			call Play_OBJLstS_SetSpeedH_ByXFlipR	; Move horizontally by that
 			jp   BasicInput_End
-			
+
 		;
 		; Starts walking backwards.
 		;
@@ -12303,31 +12315,31 @@ Play_Pl_DoBasicMoveInput:
 			; Don't start if we're doing it already
 			ld   hl, iPlInfo_MoveId
 			add  hl, bc
-			ld   a, [hl]				; A = MoveId	
+			ld   a, [hl]				; A = MoveId
 			cp   MOVE_SHARED_WALK_B		; MoveId == backwards walking?
 			jp   z, BasicInput_End		; If so, return
-			
+
 			; Update flags
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc
 			res  PF1B_GUARD, [hl]		; Only set when switching to the actual block move
 			res  PF1B_CROUCH, [hl]		; Walking is not crouching
-			
+
 			; New move
 			ld   a, MOVE_SHARED_WALK_B
 			call Pl_SetMove_StopSpeed
-			
+
 			; Apply continuous movement speed since we just nuked it
 			ld   hl, iPlInfo_BackSpeedX				; HL = Offset to backwalk speed for this char
 			call Pl_GetWord							; HL = Word value at iPlInfo_BackSpeedX
 			call Play_OBJLstS_SetSpeedH_ByXFlipR	; Move horizontally by that
 			jp   BasicInput_End
-			
+
 		;
 		; Starts any kind of jump.
 		;
 		BasicInput_StartJump:
-		
+
 			;
 			; Update the running jump flag.
 			; While the resulting jump is the same as a forward hyper jump from crouching (see .chkJumpR),
@@ -12336,7 +12348,7 @@ Play_Pl_DoBasicMoveInput:
 			ld   hl, iPlInfo_RunningJump
 			add  hl, bc
 			ld   [hl], $00				; iPlInfo_RunningJump = 0
-			
+
 			; MoveC_Base_RunF sets iPlInfo_MoveId to MOVE_SHARED_RUN_F when we stop running.
 			; If we got here, it's because we stopped running by pressing the jump button during a run.
 			ld   hl, iPlInfo_MoveId
@@ -12344,11 +12356,11 @@ Play_Pl_DoBasicMoveInput:
 			ld   a, [hl]
 			cp   MOVE_SHARED_RUN_F		; iPlInfo_MoveId == forward dash?
 			jp   nz, .start				; If not, skip
-			
+
 			ld   hl, iPlInfo_RunningJump
 			add  hl, bc
 			ld   [hl], $01
-			
+
 		.start:
 			; Backup the joypad info from before the jump to here.
 			; It will be used during the jump when deciding which direction/speed to use.
@@ -12361,7 +12373,7 @@ Play_Pl_DoBasicMoveInput:
 				ldi  [hl], a	; iPlInfo_JoyKeysPreJump = iPlInfo_JoyKeys
 				ld   [hl], d	; iPlInfo_JoyNewKeysLHPreJump = iPlInfo_JoyNewKeysLH
 			pop  de
-			
+
 			; Set standard flags except PF1B_NOSPECSTART, otherwise we
 			; couldn't start air specials.
 			ld   hl, iPlInfo_Flags1
@@ -12370,14 +12382,14 @@ Play_Pl_DoBasicMoveInput:
 			res  PF1B_CROUCH, [hl]
 			set  PF1B_NOBASICINPUT, [hl]
 			set  PF1B_XFLIPLOCK, [hl]
-			
+
 			; Always start a neutral jump by default.
 			; The code for it will then detect if it should switch to
 			; either the backwards or forwards jumps.
 			ld   a, MOVE_SHARED_JUMP_N
 			call Pl_SetMove_StopSpeed
 			jp   BasicInput_End
-			
+
 		;
 		; Starts a ground block if we weren't performing one already.
 		;
@@ -12405,7 +12417,7 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_GUARD, [hl]		; Do the block
 			call Pl_SetMove_StopSpeed
 			jp   BasicInput_End
-			
+
 		;
 		; Starts air blocking.
 		;
@@ -12416,15 +12428,15 @@ Play_Pl_DoBasicMoveInput:
 			ld   a, [hl]
 			cp   MOVE_SHARED_BLOCK_A	; In the air block move?
 			jp   z, BasicInput_End		; If so, return
-			
+
 			; Otherwise, switch to it
 			ld   a, MOVE_SHARED_BLOCK_A	; A = Move to start
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc
-			set  PF1B_GUARD, [hl]			; Guard against attacks
-			call Pl_SetMove_Simple	; Switch to move A
+			set  PF1B_GUARD, [hl]		; Guard against attacks
+			call Pl_SetMove_Simple		; Switch to move A
 			jp   BasicInput_End
-			
+
 		;
 		; Starts charging meter.
 		;
@@ -12432,7 +12444,7 @@ Play_Pl_DoBasicMoveInput:
 			; Play SGB/DMG SFX
 			ld   a, SCT_CHARGEMETER
 			call HomeCall_Sound_ReqPlayExId
-			
+
 			; Set standard flags
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc
@@ -12441,12 +12453,12 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_NOBASICINPUT, [hl]	; Not cancellable by movement
 			set  PF1B_XFLIPLOCK, [hl]		; Doesn't turn if opponent jumps over
 			set  PF1B_NOSPECSTART, [hl]		; Not cancellable by specials
-			
+
 			; New move
 			ld   a, MOVE_SHARED_CHARGEMETER
 			call Pl_SetMove_StopSpeed
 			jp   BasicInput_End
-			
+
 		;
 		; Starts a standing light punch.
 		;
@@ -12456,34 +12468,34 @@ Play_Pl_DoBasicMoveInput:
 			add  hl, bc
 			res  PF1B_GUARD, [hl]	; Normals not guarded
 			res  PF1B_CROUCH, [hl]	; From standing
-			set  PF1B_NOBASICINPUT, [hl] 
+			set  PF1B_NOBASICINPUT, [hl]
 			set  PF1B_XFLIPLOCK, [hl]
 			; Normals can't be cancelled into specials.
 			; They can only be cancelled when hitting the opponent (PF1B_ALLOWHITCANCEL)
 			set  PF1B_NOSPECSTART, [hl] ; Can't cancel into special
-			
+
 			; New move
 			ld   a, MOVE_SHARED_PUNCH_L
 			call Pl_SetMove_ResetNewKeysLH
 			jp   BasicInput_End
-			
+
 		;
 		; Checks for input requiring an heavy punch.
 		;
 		BasicInput_ChkHeavyB:
 			call Play_Pl_AreBothBtnHeld				; Holding A+B?
 			jp   nc, BasicInput_StartHeavyPunch		; If not, skip
-			
+
 			; PK -> Heavy Attack
 			call Play_Pl_GetDirKeys_ByXFlipR		; Holding any d-pad key?
 			jp   nc, BasicInput_StartHeavyAttack	; If not, jump
 			; These are relative to the 1P side, so...
-			; F+PK -> Roll forwards 
+			; F+PK -> Roll forwards
 			bit  KEYB_RIGHT, a						; Holding forwards?
 			jp   nz, BasicInput_StartRollForward	; If so, jump
-			; B+PK -> Roll backwards 
+			; B+PK -> Roll backwards
 			jp   BasicInput_StartRollBackward		; Otherwise, assume holding backwards
-			
+
 		;
 		; Starts a standing heavy punch.
 		;
@@ -12491,7 +12503,7 @@ Play_Pl_DoBasicMoveInput:
 			; Play SGB/DMG SFX
 			ld   a, SCT_HEAVY
 			call HomeCall_Sound_ReqPlayExId
-			
+
 			; Set standard attack flags
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc
@@ -12500,15 +12512,15 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_NOBASICINPUT, [hl]
 			set  PF1B_XFLIPLOCK, [hl]
 			set  PF1B_NOSPECSTART, [hl]
-			
+
 			; New move
 			ld   a, MOVE_SHARED_PUNCH_H
 			call Pl_SetMove_ResetNewKeysLH
 			jp   BasicInput_End
-			
+
 		;
 		; Starts a standing light kick.
-		;	
+		;
 		BasicInput_StartLightKick:
 			; Set standard attack flags
 			ld   hl, iPlInfo_Flags1
@@ -12518,12 +12530,12 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_NOBASICINPUT, [hl]
 			set  PF1B_XFLIPLOCK, [hl]
 			set  PF1B_NOSPECSTART, [hl]
-			
+
 			; New move
 			ld   a, MOVE_SHARED_KICK_L
 			call Pl_SetMove_ResetNewKeysLH
 			jp   BasicInput_End
-			
+
 		;
 		; Checks for input requiring an heavy kick.
 		; See also: BasicInput_ChkHeavyB
@@ -12531,17 +12543,17 @@ Play_Pl_DoBasicMoveInput:
 		BasicInput_ChkHeavyA:
 			call Play_Pl_AreBothBtnHeld				; Holding A+B?
 			jp   nc, BasicInput_StartHeavyKick		; If not, skip
-			
+
 			; PK -> Heavy Attack
 			call Play_Pl_GetDirKeys_ByXFlipR		; Holding any d-pad key?
 			jp   nc, BasicInput_StartHeavyAttack	; If not, jump
 			; These are relative to the 1P side, so...
-			; F+PK -> Roll forwards 
+			; F+PK -> Roll forwards
 			bit  KEYB_RIGHT, a						; Holding forwards?
 			jp   nz, BasicInput_StartRollForward	; If so, jump
-			; B+PK -> Roll backwards 
+			; B+PK -> Roll backwards
 			jp   BasicInput_StartRollBackward		; Otherwise, assume holding backwards
-			
+
 		;
 		; Starts a standing heavy kick.
 		;
@@ -12549,7 +12561,7 @@ Play_Pl_DoBasicMoveInput:
 			; Play SGB/DMG SFX
 			ld   a, SCT_HEAVY
 			call HomeCall_Sound_ReqPlayExId
-			
+
 			; Set standard attack flags
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc
@@ -12558,12 +12570,12 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_NOBASICINPUT, [hl]
 			set  PF1B_XFLIPLOCK, [hl]
 			set  PF1B_NOSPECSTART, [hl]
-			
+
 			; New move
 			ld   a, MOVE_SHARED_KICK_H
 			call Pl_SetMove_ResetNewKeysLH
 			jp   BasicInput_End
-			
+
 		;
 		; Starts a crouching light punch.
 		;
@@ -12584,12 +12596,12 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_NOBASICINPUT, [hl]
 			set  PF1B_XFLIPLOCK, [hl]
 			set  PF1B_NOSPECSTART, [hl]
-			
+
 			; New move
 			ld   a, MOVE_SHARED_PUNCH_CL
 			call Pl_SetMove_ResetNewKeysLH
 			jp   BasicInput_End
-			
+
 		;
 		; Starts a crouching heavy punch.
 		;
@@ -12597,7 +12609,7 @@ Play_Pl_DoBasicMoveInput:
 			; Play SGB/DMG SFX
 			ld   a, SCT_HEAVY
 			call HomeCall_Sound_ReqPlayExId
-			
+
 			; [POI] If the powerup cheat is enabled, crouching hps erase projectiles.
 			ld   a, [wDipSwitch]
 			bit  DIPB_POWERUP, a	; Is the cheat set?
@@ -12606,7 +12618,7 @@ Play_Pl_DoBasicMoveInput:
 			add  hl, bc					; Otherwise, make it delete projectiles
 			set  PF0B_PROJREM, [hl]
 		.go:
-		
+
 			; Set standard crouching attack flags.
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc
@@ -12614,12 +12626,12 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_NOBASICINPUT, [hl]
 			set  PF1B_XFLIPLOCK, [hl]
 			set  PF1B_NOSPECSTART, [hl]
-			
+
 			; New move
 			ld   a, MOVE_SHARED_PUNCH_CH
 			call Pl_SetMove_ResetNewKeysLH
 			jp   BasicInput_End
-			
+
 		;
 		; Starts a crouching light kick.
 		;
@@ -12635,7 +12647,7 @@ Play_Pl_DoBasicMoveInput:
 			ld   a, MOVE_SHARED_KICK_CL
 			call Pl_SetMove_ResetNewKeysLH
 			jp   BasicInput_End
-			
+
 		;
 		; Starts a crouching heavy kick.
 		;
@@ -12643,7 +12655,7 @@ Play_Pl_DoBasicMoveInput:
 			; Play SGB/DMG SFX
 			ld   a, SCT_HEAVY
 			call HomeCall_Sound_ReqPlayExId
-			
+
 			; Set standard crouching attack flags.
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc
@@ -12651,12 +12663,12 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_NOBASICINPUT, [hl]
 			set  PF1B_XFLIPLOCK, [hl]
 			set  PF1B_NOSPECSTART, [hl]
-			
+
 			; New move
 			ld   a, MOVE_SHARED_KICK_CH
 			call Pl_SetMove_ResetNewKeysLH
 			jp   BasicInput_End
-			
+
 		;
 		; Starts a forwards roll.
 		;
@@ -12665,7 +12677,7 @@ Play_Pl_DoBasicMoveInput:
 			ld   hl, iPlInfo_RunningJump
 			add  hl, bc
 			ld   [hl], $00
-			
+
 			; Set standard flags
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc
@@ -12674,17 +12686,17 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_NOBASICINPUT, [hl]
 			set  PF1B_XFLIPLOCK, [hl]
 			set  PF1B_NOSPECSTART, [hl]
-			
+
 			; Rolling is invulnerable to everything except throws (ie: moves that use iOBJInfo_ForceHitboxId)
 			inc  hl	; Seek to iPlInfo_Flags2
 			set  PF2B_NOHURTBOX, [hl]
 			set  PF2B_NOCOLIBOX, [hl]
-			
+
 			; New move
 			ld   a, MOVE_SHARED_ROLL_F
 			call Pl_SetMove_StopSpeed
 			jp   BasicInput_End
-			
+
 		;
 		; Starts a backwards roll.
 		;
@@ -12693,7 +12705,7 @@ Play_Pl_DoBasicMoveInput:
 			ld   hl, iPlInfo_RunningJump
 			add  hl, bc
 			ld   [hl], $00
-			
+
 			; Set standard flags
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc
@@ -12702,17 +12714,17 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_NOBASICINPUT, [hl]
 			set  PF1B_XFLIPLOCK, [hl]
 			set  PF1B_NOSPECSTART, [hl]
-			
+
 			; Rolling is invulnerable to everything except throws (ie: moves that use iOBJInfo_ForceHitboxId)
 			inc  hl	; Seek to iPlInfo_Flags2
 			set  PF2B_NOHURTBOX, [hl]
 			set  PF2B_NOCOLIBOX, [hl]
-			
+
 			; New move
 			ld   a, MOVE_SHARED_ROLL_B
 			call Pl_SetMove_StopSpeed
 			jp   BasicInput_End
-			
+
 		;
 		; Starts a standing "heavy attack" (the A+B one)
 		;
@@ -12720,7 +12732,7 @@ Play_Pl_DoBasicMoveInput:
 			; Play SGB/DMG SFX
 			ld   a, SCT_HEAVY
 			call HomeCall_Sound_ReqPlayExId
-			
+
 			; Set standard attack flags
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc
@@ -12729,22 +12741,22 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_NOBASICINPUT, [hl]
 			set  PF1B_XFLIPLOCK, [hl]
 			set  PF1B_NOSPECSTART, [hl]
-			
+
 			; New move
 			ld   a, MOVE_SHARED_ATTACK_G
 			call Pl_SetMove_StopSpeed
 			jp   BasicInput_End
-			
+
 		;
 		; Starts a forwards run (dash forwards).
 		;
 		BasicInput_StartRun:
 			; It's possible to cancel the run into a special move, so...
-			
+
 			; Clear input buffer so only newly pressed inputs count
 			; for starting a special in the middle of the run.
 			call Play_Pl_ClearJoyDirBuffer
-			
+
 			; Set standard flags except for PF1B_NOSPECSTART
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc
@@ -12752,11 +12764,11 @@ Play_Pl_DoBasicMoveInput:
 			res  PF1B_CROUCH, [hl]
 			set  PF1B_NOBASICINPUT, [hl]
 			set  PF1B_XFLIPLOCK, [hl]
-			
+
 			; New move
 			ld   a, MOVE_SHARED_RUN_F
 			call Pl_SetMove_StopSpeed
-			
+
 			; Set continuous running speed
 			ld   hl, iPlInfo_SpeedX					; HL = Offset to walk speed for this char
 			call Pl_GetWord							; HL = Word value at iPlInfo_SpeedX
@@ -12764,14 +12776,14 @@ Play_Pl_DoBasicMoveInput:
 			rl   h
 			call Play_OBJLstS_SetSpeedH_ByXFlipR	; Move horizontally by that
 			jp   BasicInput_End
-			
+
 		;
 		; Starts a backwards hop (dash backwards).
 		;
 		BasicInput_StartHopBack:
 			; Like with the forwards run
 			call Play_Pl_ClearJoyDirBuffer
-			
+
 			; Standard flags except for PF1B_NOSPECSTART, as it's possible
 			; to cancel the run into a special move.
 			ld   hl, iPlInfo_Flags1
@@ -12780,12 +12792,12 @@ Play_Pl_DoBasicMoveInput:
 			res  PF1B_CROUCH, [hl]
 			set  PF1B_NOBASICINPUT, [hl]
 			set  PF1B_XFLIPLOCK, [hl]
-			
+
 			; New move
 			ld   a, MOVE_SHARED_HOP_B
 			call Pl_SetMove_StopSpeed
 			jp   BasicInput_End
-			
+
 		;
 		; Starts a taunt, which reduces meter.
 		;
@@ -12793,7 +12805,7 @@ Play_Pl_DoBasicMoveInput:
 			; Play SGB/DMG SFX.
 			; Each character defines its own sound effect for the move.
 			; Some bootlegs with more characters don't change this list,
-			; causing an invalid command to be played (which kills the music until a new one starts).
+			; causing an invalid command to be played (which can kill the music until a new one starts).
 			ld   hl, iPlInfo_CharId
 			add  hl, bc
 			ld   a, [hl]	; A = CharId*2
@@ -12806,7 +12818,7 @@ Play_Pl_DoBasicMoveInput:
 			pop  de
 			ld   a, [hl]			; A = Sound command ID
 			call HomeCall_Sound_ReqPlayExId
-			
+
 			; Set standard flags except for PF1B_NOSPECSTART.
 			; It's possible to cancel it into a special, though unlike other
 			; versions the meter stops decreasing once that's done.
@@ -12816,40 +12828,40 @@ Play_Pl_DoBasicMoveInput:
 			res  PF1B_CROUCH, [hl]
 			set  PF1B_NOBASICINPUT, [hl]
 			set  PF1B_XFLIPLOCK, [hl]
-			
+
 			; New move
 			ld   a, MOVE_SHARED_TAUNT
 			call Pl_SetMove_StopSpeed
 			jp   BasicInput_End
 		.sndActTbl:
-			db SCT_TAUNT_B ; CHAR_ID_KYO     
-			db SCT_TAUNT_A ; CHAR_ID_DAIMON  
-			db SCT_TAUNT_B ; CHAR_ID_TERRY   
-			db SCT_TAUNT_B ; CHAR_ID_ANDY    
-			db SCT_TAUNT_B ; CHAR_ID_RYO     
-			db SCT_TAUNT_B ; CHAR_ID_ROBERT  
-			db SCT_TAUNT_D ; CHAR_ID_ATHENA  
-			db SCT_TAUNT_D ; CHAR_ID_MAI     
-			db SCT_TAUNT_C ; CHAR_ID_LEONA   
-			db SCT_TAUNT_A ; CHAR_ID_GEESE   
-			db SCT_TAUNT_A ; CHAR_ID_KRAUSER 
-			db SCT_TAUNT_A ; CHAR_ID_MRBIG   
-			db SCT_TAUNT_B ; CHAR_ID_IORI    
-			db SCT_TAUNT_D ; CHAR_ID_MATURE  
-			db SCT_TAUNT_D ; CHAR_ID_CHIZURU 
-			db SCT_TAUNT_A ; CHAR_ID_GOENITZ 
+			db SCT_TAUNT_B ; CHAR_ID_KYO
+			db SCT_TAUNT_A ; CHAR_ID_DAIMON
+			db SCT_TAUNT_B ; CHAR_ID_TERRY
+			db SCT_TAUNT_B ; CHAR_ID_ANDY
+			db SCT_TAUNT_B ; CHAR_ID_RYO
+			db SCT_TAUNT_B ; CHAR_ID_ROBERT
+			db SCT_TAUNT_D ; CHAR_ID_ATHENA
+			db SCT_TAUNT_D ; CHAR_ID_MAI
+			db SCT_TAUNT_C ; CHAR_ID_LEONA
+			db SCT_TAUNT_A ; CHAR_ID_GEESE
+			db SCT_TAUNT_A ; CHAR_ID_KRAUSER
+			db SCT_TAUNT_A ; CHAR_ID_MRBIG
+			db SCT_TAUNT_B ; CHAR_ID_IORI
+			db SCT_TAUNT_D ; CHAR_ID_MATURE
+			db SCT_TAUNT_D ; CHAR_ID_CHIZURU
+			db SCT_TAUNT_A ; CHAR_ID_GOENITZ
 			db SCT_TAUNT_A ; CHAR_ID_MRKARATE
-			db SCT_TAUNT_A ; CHAR_ID_OIORI   
-			db SCT_TAUNT_C ; CHAR_ID_OLEONA  
-			db SCT_TAUNT_C ; CHAR_ID_KAGURA  
-			
+			db SCT_TAUNT_A ; CHAR_ID_OIORI
+			db SCT_TAUNT_C ; CHAR_ID_OLEONA
+			db SCT_TAUNT_C ; CHAR_ID_KAGURA
+
 		;
 		; Starts the intro/outro move to be executed/displayed over whatever
 		; we would normally display (the idle animation).
 		; IN
 		; - A: iPlInfo_IntroMoveId
 		;
-		BasicInput_StartIntroMove:
+		BasicInput_StartIntroOutroMove:
 			; Set standard flags
 			ld   hl, iPlInfo_Flags1
 			add  hl, bc
@@ -12858,11 +12870,11 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_NOBASICINPUT, [hl]
 			set  PF1B_XFLIPLOCK, [hl]
 			set  PF1B_NOSPECSTART, [hl]
-			
+
 			; New move
 			call Pl_SetMove_StopSpeed
 			jp   BasicInput_End
-			
+
 		;
 		; Handles the second part of a ground throw (PLAY_THROWACT_NEXT02 & PLAY_THROWACT_NEXT03),
 		; when the opponent gets grabbed and before he starts rotating (PLAY_THROWACT_NEXT04).
@@ -12880,7 +12892,7 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_NOSPECSTART, [hl]
 			; Completely invulnerable while throwing
 			set  PF1B_INVULN, [hl]
-			
+
 			; New move
 			ld   a, MOVE_SHARED_THROW_G
 			call Pl_SetMove_StopSpeed
@@ -12891,21 +12903,21 @@ Play_Pl_DoBasicMoveInput:
 			ld   [wPlayPlThrowActId], a
 			; Show effects
 			call Play_StartThrowEffect
-			
+
 		.loop:
 			;
 			; Wait in this loop until the grab naturally ends, or if we get throw tech'd.
 			;
-			
+
 			; If we got into PLAY_THROWACT_NEXT04, the grab was confirmed.
 			; The opponent won't be able to cancel this anymore.
 			ld   a, [wPlayPlThrowActId]
 			cp   PLAY_THROWACT_NEXT04	; Did we proceed to the next part?
 			jp   z, .throwOk			; If so, jump
 			; If it's in anything other than PLAY_THROWACT_NEXT03, we got throw tech'd.
-			cp   PLAY_THROWACT_NEXT03	; Did we get throw 
+			cp   PLAY_THROWACT_NEXT03	; Did we get throw
 			jp   nz, .throwFail
-			
+
 			; We're still on PLAY_THROWACT_NEXT03, continue looping
 			call Task_PassControlFar
 			jp   .loop
@@ -12936,7 +12948,7 @@ Play_Pl_DoBasicMoveInput:
 			inc  hl ; Seek to iPlInfo_Flags3
 			set  PF3B_HEAVYHIT, [hl]
 			jp   BasicInput_End
-			
+
 		;
 		; Handles the second part of an air throw.
 		;
@@ -12958,7 +12970,7 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_NOSPECSTART, [hl]
 			; Completely invulnerable while throwing
 			set  PF1B_INVULN, [hl]
-			
+
 			; New move
 			ld   a, MOVE_SHARED_THROW_A
 			call Pl_SetMove_StopSpeed
@@ -12970,12 +12982,12 @@ Play_Pl_DoBasicMoveInput:
 			; Show effects
 			call Play_StartThrowEffect
 			jp   BasicInput_End
-			
+
 		BasicInput_End:
 		pop  de
 	pop  bc
 	ret
-	
+
 ; =============== Pl_SetMove_* ===============
 ; Set of subroutines that start a new move, initialize its animation, and optionally cause a specific effect.
 ; Moves use one of these rather than directly calling Pl_SetNewMove.
@@ -12991,7 +13003,7 @@ Pl_SetMove_StopSpeed:
 	push bc
 		push de
 			call Pl_SetNewMove
-			
+
 			; Reset player speed when starting the move
 			ld   hl, iOBJInfo_SpeedX
 			add  hl, de		; Seek to iOBJInfo_SpeedX
@@ -13000,7 +13012,7 @@ Pl_SetMove_StopSpeed:
 			ldi  [hl], a	; ...iOBJInfo_SpeedXSub
 			ldi  [hl], a	; ...iOBJInfo_SpeedY
 			ld   [hl], a	; ...iOBJInfo_SpeedYSub
-			
+
 			; Set up initial GFX buffer info settings for the animation
 			push de
 			pop  hl
@@ -13008,13 +13020,13 @@ Pl_SetMove_StopSpeed:
 		pop  de
 	pop  bc
 	ret
-	
+
 ; =============== Pl_SetMove_ResetNewKeysLH ===============
 ; Starts a new move and initializes its animation.
 ; This is used for starting basic moves (BasicInput_ChkBaseInput) that depend on the light/heavy status.
 ;
 ; These basic inputs don't kill the player's momentum, but do unmark any other newly pressed key,
-; in case we're starting a move that calls Play_Pl_AddToJoyBufKeysLH to do something 
+; in case we're starting a move that calls Play_Pl_AddToJoyBufKeysLH to do something
 ; (ie: start chained move, end the move early, ...)
 ;
 ; IN
@@ -13025,12 +13037,12 @@ Pl_SetMove_ResetNewKeysLH:
 	push bc
 		push de
 			call Pl_SetNewMove
-			
+
 			; Reset iPlInfo_JoyNewKeysLH
 			ld   hl, iPlInfo_JoyNewKeysLH
 			add  hl, bc
 			ld   [hl], $00
-			
+
 			; Set up initial GFX buffer info settings for the animation
 			push de
 			pop  hl
@@ -13038,8 +13050,8 @@ Pl_SetMove_ResetNewKeysLH:
 		pop  de
 	pop  bc
 	ret
-	
-; =============== Pl_SetMove_Simple ===============	
+
+; =============== Pl_SetMove_Simple ===============
 ; Starts a new move and initializes its animation.
 ; This has no special effect.
 ; IN
@@ -13050,7 +13062,7 @@ Pl_SetMove_Simple:
 	push bc
 		push de
 			call Pl_SetNewMove
-			
+
 			; Set up initial GFX buffer info settings for the animation
 			push de
 			pop  hl
@@ -13058,7 +13070,7 @@ Pl_SetMove_Simple:
 		pop  de
 	pop  bc
 	ret
-	
+
 ; =============== Pl_SetMove_ShakeScreenReset ===============
 ; Starts a new move and initializes its animation.
 ; This one resets the earthquake effect and all move damage fields (in case they were used alongside the former).
@@ -13071,7 +13083,7 @@ Pl_SetMove_ShakeScreenReset:
 	push bc
 		push de
 			call Pl_SetNewMove
-			
+
 			; Reset player speed when starting the move
 			ld   hl, iOBJInfo_SpeedX
 			add  hl, de		; Seek to iOBJInfo_SpeedX
@@ -13080,34 +13092,33 @@ Pl_SetMove_ShakeScreenReset:
 			ldi  [hl], a	; ...iOBJInfo_SpeedXSub
 			ldi  [hl], a	; ...iOBJInfo_SpeedY
 			ld   [hl], a	; ...iOBJInfo_SpeedYSub
-			
+
 			; Set up initial GFX buffer info settings for the animation
 			push de
 			pop  hl
 			call OBJLstS_DoAnimTiming_Initial
 		pop  de
 	pop  bc
-	
+
 	; Reset screen shake effect
 	ld   hl, wScreenShakeY
 	ld   [hl], $00
-	
+
 	; Reset all move damage fields that were just set by Pl_SetNewMove
 	ld   hl, iPlInfo_MoveDamageVal
 	add  hl, bc
 	xor  a			; Clear...
-	ldi  [hl], a	; ...iPlInfo_MoveDamageVal		
-	ldi  [hl], a	; ...iPlInfo_MoveDamageHitTypeId	
-	ld   [hl], a	; ...iPlInfo_MoveDamageFlags3	
+	ldi  [hl], a	; ...iPlInfo_MoveDamageVal
+	ldi  [hl], a	; ...iPlInfo_MoveDamageHitTypeId
+	ld   [hl], a	; ...iPlInfo_MoveDamageFlags3
 	ld   hl, iPlInfo_MoveDamageValNext
 	add  hl, bc
-	ldi  [hl], a	; ...iPlInfo_MoveDamageValNext		
-	ldi  [hl], a	; ...iPlInfo_MoveDamageHitTypeIdNext	
-	ld   [hl], a	; ...iPlInfo_MoveDamageFlags3Next	
+	ldi  [hl], a	; ...iPlInfo_MoveDamageValNext
+	ldi  [hl], a	; ...iPlInfo_MoveDamageHitTypeIdNext
+	ld   [hl], a	; ...iPlInfo_MoveDamageFlags3Next
 	ret
-	
-	
-; =============== Play_Pl_MoveByColiBoxOverlapX ===============	
+
+; =============== Play_Pl_MoveByColiBoxOverlapX ===============
 ; Pushes the player backwards when the collision box overlaps with the opponent's.
 ; IN
 ; - BC: Ptr to wPlInfo
@@ -13117,13 +13128,13 @@ Play_Pl_MoveByColiBoxOverlapX:
 	ld   a, [wPlayPlThrowActId]
 	or   a
 	ret  nz
-	
+
 	; When the main task processed the collision boxes earlier this frame,
 	; it set iPlInfo_ColiBoxOverlapX with the amount we're inside the opponent.
-	
+
 	; We get pushed backwards by half that amount.
 	; This means the movement gradually slows down over time as we get moved out further.
-	
+
 	push bc
 		; A = Overlap amount
 		ld   hl, iPlInfo_ColiBoxOverlapX
@@ -13132,13 +13143,13 @@ Play_Pl_MoveByColiBoxOverlapX:
 		; If there's no overlap, return
 		cp   $00
 		jr   z, .end
-		
+
 		; The overlap amount is an absolute (positive) number.
 		; That would cause us to move right -- and if we are facing left (2P side), that's correct.
 		; If we're facing right however (1P side) we want to be pushed left instead.
 		;
 		; So, if we're facing left invert the number.
-		
+
 		ld   hl, iOBJInfo_OBJLstFlags
 		add  hl, de
 		ld   b, [hl]		; B = iOBJInfo_OBJLstFlags
@@ -13161,12 +13172,12 @@ Play_Pl_MoveByColiBoxOverlapX:
 	.end:
 	pop  bc
 	ret
-	
+
 ; =============== Play_OBJLstS_Move* ===============
 ; Set of movement routines used by the move code.
 ; There are also a few wrappers to the horizontal movement one that invert
 ; the movement amount depending on a condition.
-	
+
 ; =============== Play_OBJLstS_MoveH ===============
 ; Moves the sprite mapping horizontally by the specified amount.
 ; - DE: Ptr to wOBJInfo structure
@@ -13177,15 +13188,15 @@ Play_OBJLstS_MoveH:
 			; BC = Movement amount
 			push hl
 			pop  bc
-			
+
 			; DE = Ptr to player X pos
 			ld   hl, iOBJInfo_X
 			add  hl, de
 			push hl
 			pop  de
-			
+
 			push de				; Save X pos ptr
-			
+
 				; H = iOBJInfo_X
 				ld   a, [de]
 				ld   h, a
@@ -13193,10 +13204,10 @@ Play_OBJLstS_MoveH:
 				; L = iOBJInfo_XSub
 				ld   a, [de]
 				ld   l, a
-				
+
 				;
 				; Determine if we're moving left or right, as there are different cap checks between sides.
-				; 
+				;
 				bit  7, b			; MSB of high byte set? (BC < 0?)
 				jp   nz, .moveL		; If so, jump
 			.moveR:
@@ -13209,19 +13220,19 @@ Play_OBJLstS_MoveH:
 				jp   .saveX
 			.moveL:
 				; BC < 0
-				; XPos = MAX(XPos + BC, $0000)		
-				
+				; XPos = MAX(XPos + BC, $0000)
+
 				ld   a, h		; Save original iOBJInfo_X for underflow check
-				
+
 				; Move the OBJ left by BC
 				add  hl, bc		; HL +-= BC
-				
+
 				; The above instruction doesn't trigger the carry flag like we'd like since we're
 				; using it to subtract words.
 				; So we have to check for the underflow manually:
 				; If the original iOBJInfo_X value is less than the X movement amount, then
 				; we underflowed and should cap at $0000.
-				
+
 				push af			; Save orig iOBJInfo_X
 					; Force the negative movement speed to positive
 					ld   a, b	; XMove = -B
@@ -13232,41 +13243,41 @@ Play_OBJLstS_MoveH:
 				sub  a, b		; iOBJInfo_X >= XMoveAbs?
 				jp   nc, .saveX	; If so, skip (no underflow)
 				ld   hl, $0000	; Otherwise, cap to $0000
-				
+
 			.saveX:
-			
+
 			; Save back the updated X position
 			pop  de			; DE = Ptr to iOBJInfo_X
-			ld   a, h		
+			ld   a, h
 			ld   [de], a	; Save pixel count
 			inc  de			; Seek to iOBJInfo_XSub
-			ld   a, l		
+			ld   a, l
 			ld   [de], a	; Save subpixel count
 		pop  de
 	pop  bc
 	ret
-	
+
 ; =============== Play_OBJLstS_MoveV ===============
 ; Moves the sprite mapping vertically by the specified amount.
 ; - DE: Ptr to wOBJInfo structure
 ; - HL: Movement amount (pixels + subpixels), can be negative
 Play_OBJLstS_MoveV:
 	; This is similar to Play_OBJLstS_MoveH, except it performs no underflow/overflow checks at all.
-	
+
 	push bc
 		push de
 			; BC = Movement amount
 			push hl
 			pop  bc
-			
+
 			; DE = Ptr to player Y pos
 			ld   hl, iOBJInfo_Y
 			add  hl, de
 			push hl
 			pop  de
-			
+
 			push de				; Save Y pos ptr
-			
+
 				; H = iOBJInfo_Y
 				ld   a, [de]
 				ld   h, a
@@ -13274,13 +13285,13 @@ Play_OBJLstS_MoveV:
 				; L = iOBJInfo_YSub
 				ld   a, [de]
 				ld   l, a
-				
+
 				; YPos += YMove
 				add  hl, bc
-				
+
 			; Save back the updated Y position
 			pop  de				; DE = Ptr to iOBJInfo_Y
-			
+
 			ld   a, h
 			ld   [de], a		; Save pixel count
 			inc  de				; Seek to iOBJInfo_YSub
@@ -13289,7 +13300,7 @@ Play_OBJLstS_MoveV:
 		pop  de
 	pop  bc
 	ret
-	
+
 ; =============== Play_OBJLstS_MoveH_ByXFlipR ===============
 ; Moves the specified sprite mapping horizontally, relative to the current player *visually* facing right.
 ; If we're visually facing left, the movement amount is inverted.
@@ -13301,9 +13312,9 @@ Play_OBJLstS_MoveH_ByXFlipR:
 	push bc
 		push de
 			; BC = Movement amount
-			push hl	
+			push hl
 			pop  bc
-			
+
 			; Invert movement when facing left.
 			; Unlike the sprite display which uses the left-facing sprites as base value (SPRB_XFLIP clear),
 			; movement amounts use the right-facing sprites as base (SPRB_XFLIP set).
@@ -13313,7 +13324,7 @@ Play_OBJLstS_MoveH_ByXFlipR:
 			add  hl, de				; Seek to iOBJInfo_OBJLstFlags
 			bit  SPRB_XFLIP, [hl]	; Is the XFlip flag set? (visually facing right)
 			jp   nz, .moveH			; If so, jump
-			
+
 			; Otherwise, BC = -BC
 			ld   a, b	; Invert high byte
 			cpl
@@ -13323,17 +13334,17 @@ Play_OBJLstS_MoveH_ByXFlipR:
 			ld   c, a
 			inc  bc		; Account for cpl
 		.moveH:
-		
+
 			; HL = Updated movement amount
 			push bc
 			pop  hl
-			
+
 			; Perform the movement
 			call Play_OBJLstS_MoveH
 		pop  de
 	pop  bc
 	ret
-	
+
 ; =============== Play_OBJLstS_MoveH_ByXDirR ===============
 ; Moves the specified sprite mapping horizontally, relative to the current player *internally* facing right.
 ; See also: Play_OBJLstS_MoveH_ByXFlipR
@@ -13344,15 +13355,15 @@ Play_OBJLstS_MoveH_ByXDirR:
 	push bc
 		push de
 			; BC = Movement amount
-			push hl	
+			push hl
 			pop  bc
-			
+
 			; Invert movement when internally facing left.
 			ld   hl, iOBJInfo_OBJLstFlags
 			add  hl, de					; Seek to iOBJInfo_OBJLstFlags
 			bit  SPRXB_PLDIR_R, [hl]	; Is the R direction flag set? (internally facing right)
 			jp   nz, .moveH				; If so, jump
-			
+
 			; Otherwise, BC = -BC
 			ld   a, b	; Invert high byte
 			cpl
@@ -13362,17 +13373,17 @@ Play_OBJLstS_MoveH_ByXDirR:
 			ld   c, a
 			inc  bc		; Account for cpl
 		.moveH:
-		
+
 			; HL = Updated movement amount
 			push bc
 			pop  hl
-			
+
 			; Perform the movement
 			call Play_OBJLstS_MoveH
 		pop  de
 	pop  bc
 	ret
-	
+
 ; =============== Play_OBJLstS_MoveH_ByOtherXFlipL ===============
 ; Moves the specified sprite mapping horizontally, relative to the *other* player *visually* facing left.
 ; See also: Play_OBJLstS_MoveH_ByXFlipR
@@ -13386,15 +13397,15 @@ Play_OBJLstS_MoveH_ByOtherXFlipL:
 			; DE = Movement amount
 			push hl
 			pop  de
-			
+
 			; Since the other player is on the other side, the flag check is inverted.
-			
+
 			; Invert the movement speed when the other player faces right.
 			ld   hl, iPlInfo_OBJInfoFlagsOther
 			add  hl, bc				; Seek to iOBJInfo_OBJLstFlags for the other user
 			bit  SPRB_XFLIP, [hl]	; Is the XFlip flag cleared? (other player visually faces left)
 			jp   z, .moveH			; If so, jump
-			
+
 			; Otherwise, DE = -DE
 			ld   a, d
 			cpl
@@ -13408,13 +13419,13 @@ Play_OBJLstS_MoveH_ByOtherXFlipL:
 			push de
 			pop  hl
 		pop  de
-		
+
 		push de
 			call Play_OBJLstS_MoveH
 		pop  de
 	pop  bc
 	ret
-	
+
 ; =============== Play_OBJLstS_MoveH_ByOtherProjOnR ===============
 ; Moves the specified sprite mapping horizontally, relative to an enemy projectile being on the right.
 ; See also: Play_OBJLstS_MoveH_ByXFlipR
@@ -13428,13 +13439,13 @@ Play_OBJLstS_MoveH_ByOtherProjOnR:
 			; BC = Movement amount
 			push hl
 			pop  bc
-			
+
 			; Invert the movement speed when the enemy projectile is on the left
 			ld   hl, iOBJInfo_OBJLstFlags
 			add  hl, de					; Seek to iOBJInfo_OBJLstFlags
 			bit  SPRXB_OTHERPROJR, [hl]	; Is the flag set? (Is an enemy projectile on the right?)
 			jp   nz, .moveH				; If so, jump
-			
+
 			; Otherwise, BC = -BC
 			ld   a, b
 			cpl
@@ -13447,12 +13458,12 @@ Play_OBJLstS_MoveH_ByOtherProjOnR:
 			; HL = Updated movement amount
 			push bc
 			pop  hl
-			
+
 			call Play_OBJLstS_MoveH
 		pop  de
 	pop  bc
 	ret
-	
+
 ; =============== Play_OBJLstS_SetSpeed* ===============
 ; Counterparts of Play_OBJLstS_Move* that, instead of moving the player immediately once,
 ; they only write to the speed field in the OBJInfo, resulting in continuous speed across frames.
@@ -13467,19 +13478,19 @@ Play_OBJLstS_MoveH_ByOtherProjOnR:
 ; - HL: Movement speed (pixels + subpixels), can be negative
 Play_OBJLstS_SetSpeedH_ByXFlipR:
 	push bc
-	
+
 		; Handle movement amount exactly like in Play_OBJLstS_MoveH_ByXFlipR
-	
+
 		; BC = Speed
 		push hl
 		pop  bc
-		
+
 		; Invert the speed when visually facing left.
 		ld   hl, iOBJInfo_OBJLstFlags
 		add  hl, de				; Seek to iOBJInfo_OBJLstFlags
 		bit  SPRB_XFLIP, [hl]	; Is the XFlip flag set? (visually facing right)
 		jp   nz, .setSpd		; If so, jump
-		
+
 		; Otherwise, BC = -BC
 		ld   a, b
 		cpl
@@ -13488,7 +13499,7 @@ Play_OBJLstS_SetSpeedH_ByXFlipR:
 		cpl
 		ld   c, a
 		inc  bc
-		
+
 	.setSpd:
 		; Save updated speed value
 		ld   hl, iOBJInfo_SpeedX
@@ -13498,7 +13509,7 @@ Play_OBJLstS_SetSpeedH_ByXFlipR:
 		ld   [hl], c	; Write iOBJInfo_SpeedXSub
 	pop  bc
 	ret
-	
+
 ; =============== Play_OBJLstS_SetSpeedH_ByXDirL ===============
 ; Sets the horizontal movement speed for the specified sprite mapping, relative to the current player *internally* facing *left*.
 ; There's no reason to have inconsistencies with the other SetSpeedH routines but oh well.
@@ -13511,13 +13522,13 @@ Play_OBJLstS_SetSpeedH_ByXDirL:
 		; BC = Speed
 		push hl
 		pop  bc
-		
+
 		; Invert the speed when internally facing right
 		ld   hl, iOBJInfo_OBJLstFlags
 		add  hl, de					; Seek to iOBJInfo_OBJLstFlags
 		bit  SPRXB_PLDIR_R, [hl]	; Is the R direction flag *clear*? (internally facing left)
 		jp   z, .setSpd				; If so, jump
-		
+
 		; Otherwise, BC = -BC
 		ld   a, b
 		cpl
@@ -13526,7 +13537,7 @@ Play_OBJLstS_SetSpeedH_ByXDirL:
 		cpl
 		ld   c, a
 		inc  bc
-		
+
 	.setSpd:
 		; Save updated speed value
 		ld   hl, iOBJInfo_SpeedX
@@ -13536,7 +13547,7 @@ Play_OBJLstS_SetSpeedH_ByXDirL:
 		ld   [hl], c
 	pop  bc
 	ret
-	
+
 ; =============== Play_OBJLstS_SetSpeedH ===============
 ; Sets the horizontal movement speed as-is for the specified sprite mapping.
 ; IN
@@ -13584,13 +13595,13 @@ Play_OBJLstS_SetSpeedV:
 OBJLstS_ApplyXSpeed:
 	push bc
 		push de
-			
+
 			; DE = Ptr to iOBJInfo_X
 			ld   hl, iOBJInfo_X
 			add  hl, de				; Seek to X position
 			push hl
 			pop  de
-			
+
 			push de
 				; H = X position
 				ld   a, [de]
@@ -13599,11 +13610,11 @@ OBJLstS_ApplyXSpeed:
 				; L = X subpixel position
 				ld   a, [de]
 				ld   l, a
-				
+
 				inc  de				; iOBJInfo_Y
 				inc  de				; iOBJInfo_YSub
 				inc  de				; iOBJInfo_SpeedX
-				
+
 				; B = H speed
 				ld   a, [de]
 				ld   b, a
@@ -13611,11 +13622,11 @@ OBJLstS_ApplyXSpeed:
 				; C = H subpixel speed
 				ld   a, [de]
 				ld   c, a
-				
+
 				; Add the speed values to the X position
 				add  hl, bc
 			pop  de
-			
+
 			; Write the updated result to X & XSub
 			ld   a, h		; Write iOBJInfo_X
 			ld   [de], a
@@ -13629,7 +13640,7 @@ OBJLstS_ApplyXSpeed:
 ; =============== OBJLstS_ApplyFrictionHAndMoveH ===============
 ; Moves the sprite horizontally while under the effect of horizontal friction.
 ;
-; Friction is just a fixed value that gets either added 
+; Friction is just a fixed value that gets either added
 ; or subtracted to the player's speed, depending on the direction he's moving.
 ;
 ; This causes the horizontal speed to gradually reach 0.
@@ -13646,11 +13657,11 @@ OBJLstS_ApplyXSpeed:
 OBJLstS_ApplyFrictionHAndMoveH:
 	push bc
 		push de
-		
+
 			; BC = Friction value
 			push hl
 			pop  bc
-			
+
 			;
 			; If our speed is already 0, we don't need to do anything.
 			;
@@ -13659,7 +13670,7 @@ OBJLstS_ApplyFrictionHAndMoveH:
 			ld   a, [hl]		; A = iOBJInfo_SpeedX
 			or   a				; SpeedX == 0?
 			jp   z, .moveEnd	; If so, return
-			
+
 			;
 			; If our speed is positive (we're moving right), invert the friction
 			; from positive to negative, otherwise we'd be increasing the speed.
@@ -13674,9 +13685,9 @@ OBJLstS_ApplyFrictionHAndMoveH:
 			cpl
 			ld   c, a
 			inc  bc				; Account for bitflip
-			
+
 		.saveSpeed:
-		
+
 			;
 			; Update the horizontal movement speed.
 			;
@@ -13685,7 +13696,7 @@ OBJLstS_ApplyFrictionHAndMoveH:
 				ld   d, [hl]	; D = iOBJInfo_SpeedX
 				inc  hl
 				ld   e, [hl]	; E = iOBJInfo_SpeedXSub
-				
+
 				; Add the friction over to reduce it
 				; DE += Friction
 				push de			; HL = DE
@@ -13694,17 +13705,17 @@ OBJLstS_ApplyFrictionHAndMoveH:
 				push hl			; DE = HL
 				pop  de
 			pop  hl	; Restore ptr to iOBJInfo_SpeedX
-			
+
 			; Write back the updated speed
 			ld   [hl], d	; iOBJInfo_SpeedX = D
 			inc  hl
 			ld   [hl], e	; iOBJInfo_SpeedXSub = E
 			jp   .moveOk
-			
+
 		.moveEnd:
 		pop  de
 	pop  bc
-	
+
 	; Force reset pixel and subpixel speed values
 	ld   hl, iOBJInfo_SpeedX
 	add  hl, de
@@ -13720,7 +13731,7 @@ OBJLstS_ApplyFrictionHAndMoveH:
 	call OBJLstS_ApplyXSpeed
 	or   a			; C flag clear
 	ret
-	
+
 ; =============== OBJLstS_ApplyGravityVAndMoveHV ===============
 ; Moves the sprite horizontally and vertically while under the effect of vertical gravity.
 ;
@@ -13739,19 +13750,19 @@ OBJLstS_ApplyGravityVAndMoveHV:
 		; BC = Gravity value
 		push hl
 		pop  bc
-		
+
 		push de
-		
+
 			;
 			; Update the vertical movement speed.
 			;
-		
+
 			; DE = HL = Ptr to Y speed
 			ld   hl, iOBJInfo_SpeedY
 			add  hl, de
 			push hl
 			pop  de
-			
+
 			; HL = SpeedY + Gravity
 			push de
 				ld   a, [de]	; H = iOBJInfo_SpeedY
@@ -13761,7 +13772,7 @@ OBJLstS_ApplyGravityVAndMoveHV:
 				ld   l, a
 				add  hl, bc		; += Gravity
 			pop  de
-			
+
 			; Write back the updated speed
 			push de
 				ld   a, h		; iOBJInfo_SpeedY = H
@@ -13770,18 +13781,18 @@ OBJLstS_ApplyGravityVAndMoveHV:
 				ld   a, l		; iOBJInfo_SpeedYSub = L
 				ld   [de], a
 			pop  de
-			
+
 			;
 			; Apply the newly updated speed to the player's Y position.
 			;
-			
+
 			push hl	; Save Y Speed
 				; DE = Ptr to Y Position
 				dec  de		; iOBJInfo_SpeedXSub
 				dec  de		; iOBJInfo_SpeedX
 				dec  de		; iOBJInfo_YSub
 				dec  de		; iOBJInfo_Y
-				
+
 				; Y += SpeedY
 				push de
 					ld   a, [de]	; B = iOBJInfo_Y
@@ -13791,7 +13802,7 @@ OBJLstS_ApplyGravityVAndMoveHV:
 					ld   c, a
 					add  hl, bc		; += SpeedY
 				pop  de
-				
+
 				; Write back the updated Y position
 				ld   a, h		; iOBJInfo_Y = H
 				ld   [de], a
@@ -13799,16 +13810,16 @@ OBJLstS_ApplyGravityVAndMoveHV:
 				ld   a, l		; iOBJInfo_YSub = L
 				ld   [de], a
 			pop  hl	; Restore Y Speed
-			
+
 			;
 			; Validate the new Y position.
 			; We always want to be above the ground, and not underflow it.
 			;
-			
+
 			bit  7, h				; MSB set? (YSpeed < 0)
 			jp   z, .chkMoveDown	; If not, jump
 		.chkMoveUp:
-			; 
+			;
 			; When moving up, prevent underflowing the Y position.
 			; If it did, snap it back to the topmost position.
 			;
@@ -13834,7 +13845,7 @@ OBJLstS_ApplyGravityVAndMoveHV:
 			ld   a, [de]
 			cp   PL_FLOOR_POS	; iOBJInfo_Y < $88?
 			jp   c, .moveOk		; If so, jump (we're above the ground)
-			
+
 		.jumpEnd:
 		pop  de
 	pop  bc
@@ -13852,7 +13863,7 @@ OBJLstS_ApplyGravityVAndMoveHV:
 	ldi  [hl], a	; iOBJInfo_SpeedYSub = 0
 	scf			; C flag set
 	ret
-	
+
 		.moveOk:
 		pop  de
 	pop  bc
@@ -13860,12 +13871,12 @@ OBJLstS_ApplyGravityVAndMoveHV:
 	call OBJLstS_ApplyXSpeed
 	xor  a		; C flag clear
 	ret
-	
+
 ; =============== OBJLstS_ApplyGravityVAndMoveV ===============
 ; Moves the sprite vertically while under the effect of vertical gravity.
 ;
 ; Exactly like OBJLstS_ApplyGravityVAndMoveHV, but without moving horizontally.
-; 
+;
 ; IN
 ; - HL: Gravity value
 ; - DE: Ptr to wOBJInfo
@@ -13876,19 +13887,19 @@ OBJLstS_ApplyGravityVAndMoveV:
 		; BC = Gravity value
 		push hl
 		pop  bc
-		
+
 		push de
-		
+
 			;
 			; Update the vertical movement speed.
 			;
-		
+
 			; DE = HL = Ptr to Y speed
 			ld   hl, iOBJInfo_SpeedY
 			add  hl, de
 			push hl
 			pop  de
-			
+
 			; HL = SpeedY + Gravity
 			push de
 				ld   a, [de]	; H = iOBJInfo_SpeedY
@@ -13898,7 +13909,7 @@ OBJLstS_ApplyGravityVAndMoveV:
 				ld   l, a
 				add  hl, bc		; += Gravity
 			pop  de
-			
+
 			; Write back the updated speed
 			push de
 				ld   a, h		; iOBJInfo_SpeedY = H
@@ -13907,18 +13918,18 @@ OBJLstS_ApplyGravityVAndMoveV:
 				ld   a, l		; iOBJInfo_SpeedYSub = L
 				ld   [de], a
 			pop  de
-			
+
 			;
 			; Apply the newly updated speed to the player's Y position.
 			;
-			
+
 			push hl	; Save Y Speed
 				; DE = Ptr to Y Position
 				dec  de		; iOBJInfo_SpeedXSub
 				dec  de		; iOBJInfo_SpeedX
 				dec  de		; iOBJInfo_YSub
 				dec  de		; iOBJInfo_Y
-				
+
 				; Y += SpeedY
 				push de
 					ld   a, [de]	; B = iOBJInfo_Y
@@ -13928,7 +13939,7 @@ OBJLstS_ApplyGravityVAndMoveV:
 					ld   c, a
 					add  hl, bc		; += SpeedY
 				pop  de
-				
+
 				; Write back the updated Y position
 				ld   a, h		; iOBJInfo_Y = H
 				ld   [de], a
@@ -13936,16 +13947,16 @@ OBJLstS_ApplyGravityVAndMoveV:
 				ld   a, l		; iOBJInfo_YSub = L
 				ld   [de], a
 			pop  hl	; Restore Y Speed
-			
+
 			;
 			; Validate the new Y position.
 			; We always want to be above the ground, and not underflow it.
 			;
-			
+
 			bit  7, h				; MSB set? (YSpeed < 0)
 			jp   z, .chkMoveDown	; If not, jump
 		.chkMoveUp:
-			; 
+			;
 			; When moving up, prevent underflowing the Y position.
 			; If it did, snap it back to the topmost position.
 			;
@@ -13971,7 +13982,7 @@ OBJLstS_ApplyGravityVAndMoveV:
 			ld   a, [de]
 			cp   PL_FLOOR_POS	; iOBJInfo_Y < $88?
 			jp   c, .moveOk		; If so, jump (we're above the ground)
-			
+
 		.jumpEnd:
 		pop  de
 	pop  bc
@@ -13987,7 +13998,7 @@ OBJLstS_ApplyGravityVAndMoveV:
 	inc  hl
 	scf			; C flag set
 	ret
-	
+
 		.moveOk:
 		pop  de
 	pop  bc
@@ -14003,7 +14014,7 @@ OBJLstS_ApplyGravityVAndMoveV:
 ; - C flag: If set, validation failed
 ; - Z flag: If set, we're on the ground (only if validation passed)
 MoveInputS_CanStartSpecialMove:
-	
+
 	;
 	; If we got hit by Chizuru's super, we can only use normals.
 	;
@@ -14012,7 +14023,7 @@ MoveInputS_CanStartSpecialMove:
 	ld   a, [hl]
 	or   a				; FlashSpeedTimer != 0?
 	jp   nz, .retNoMove	; If so, return
-	
+
 	;
 	; If a special move is being executed already (PF0_SPECMOVE set), don't allow executing a new one
 	;
@@ -14020,11 +14031,11 @@ MoveInputS_CanStartSpecialMove:
 	add  hl, bc				; Seek to iPlInfo_Flags0
 	bit  PF0B_SPECMOVE, [hl]	; Is the bit set?
 	jp   nz, .retNoMove		; If so, return
-	
-	
+
+
 	ld   hl, iPlInfo_Flags1
-	add  hl, bc				; Seek to iPlInfo_Flags1	
-	
+	add  hl, bc				; Seek to iPlInfo_Flags1
+
 	;
 	; If the player is about to get dizzy or is in a damage string, no special moves can be input...
 	; ...except when blocking, as it's possible to cancel blockstun.
@@ -14037,9 +14048,9 @@ MoveInputS_CanStartSpecialMove:
 	jp   nz, .retNoMove			; If so, return
 	call Play_Pl_IsDizzyNext	; Is the player about to get dizzy?
 	jp   nz, .retNoMove			; If so, return
-	
+
 .chkMoveId:
-	
+
 	;
 	; Can't cancel throws into specials.
 	;
@@ -14050,7 +14061,7 @@ MoveInputS_CanStartSpecialMove:
 	jp   z, .retNoMove
 	cp   MOVE_SHARED_THROW_A
 	jp   z, .retNoMove
-	
+
 	;
 	; Can't cancel if we've been explicitly denied that.
 	;
@@ -14060,7 +14071,7 @@ MoveInputS_CanStartSpecialMove:
 	jp   nz, .moveOk				; If so, jump (skip check)
 	bit  PF1B_NOSPECSTART, [hl]	; Are we allowed to cancel the move into the special?
 	jp   nz, .retNoMove				; If not, return
-	
+
 .moveOk:
 
 	;
@@ -14070,7 +14081,7 @@ MoveInputS_CanStartSpecialMove:
 	;
 	xor  a					; Reset flag
 	ld   hl, iOBJInfo_Y
-	add  hl, de				
+	add  hl, de
 	ld   a, [hl]			; A = Y pos
 	cp   PL_FLOOR_POS		; Are we at ground level? (A == $88)
 	jp   z, .retOkGround	; If so, jump
@@ -14087,7 +14098,7 @@ MoveInputS_CanStartSpecialMove:
 .retNoMove:
 	scf			; Set carry
 	ret
-	
+
 ; =============== MoveInputS_CanStartSuperMove ===============
 ; Validates if it's possible to perform a new super move.
 ; This doesn't distinguish between super or desperation supers.
@@ -14097,19 +14108,19 @@ MoveInputS_CanStartSpecialMove:
 ; OUT
 ; - C flag: If set, we can't start a super
 MoveInputS_CanStartSuperMove:
-	
+
 	; With the meter powerup cheat, you have infinite supers
 	ld   a, [wDipSwitch]
 	bit  DIPB_POWERUP, a	; Is the flag set?
 	jp   nz, .retOk				; If so, return clear
-	
+
 	; If the POW bar is at the maximum value, we can start a super
 	ld   hl, iPlInfo_Pow
 	add  hl, bc
-	ld   a, [hl]		
+	ld   a, [hl]
 	cp   PLAY_POW_MAX			; iPlInfo_Pow == $28?
 	jp   z, .retOk				; If so, jump
-	
+
 	; When health reaches critical level (< $18), we can always start a super
 	ld   hl, iPlInfo_Health
 	add  hl, bc
@@ -14122,7 +14133,7 @@ MoveInputS_CanStartSuperMove:
 .retNg:
 	scf		; Set carry
 	ret
-	
+
 ; =============== Play_Pl_IsMoveHit ===============
 ; Determines if we successfully hit the opponent in the damage string already.
 ; Used for moves that perform certain failsafe actions when the attack whiffs or gets blocked.
@@ -14146,7 +14157,7 @@ Play_Pl_IsMoveHit:
 	jp   nz, .retClear				; If so, skip
 	bit  PF1B_HITRECV, [hl]			; Did we hit the opponent in the damage string so far?
 	jp   z, .retClear				; If not, skip
-	
+
 .retSet:
 	; C flag confirmed.
 	bit  PF1B_GUARD, [hl]			; Is the opponent blocking? (if not, Z flag set)
@@ -14156,12 +14167,12 @@ Play_Pl_IsMoveHit:
 	scf
 	ccf		; C flag clear
 	ret
-	
+
 IF REV_VER_2 == 1
 ; =============== Play_Pl_IsMoveEscape ===============
 ; Determines if the opponent somehow isn't in the middle of a multi-hit effect.
 ;
-; This is called by moves that hit multiple times to check if a failsafe action (usually hopping back) 
+; This is called by moves that hit multiple times to check if a failsafe action (usually hopping back)
 ; should be performed if the opponent escaped in the middle of the special move.
 ;
 ; Normally this won't happen, because moves that hit multiple times lock the opponent,
@@ -14198,7 +14209,7 @@ Play_Pl_IsMoveEscape:
 	ccf		; C flag clear
 	ret
 ENDC
-	
+
 ; =============== MoveInputS_CanStartProjMove ===============
 ; Determines if it's possible to start a special move that throws a projectile.
 ; IN
@@ -14210,7 +14221,7 @@ MoveInputS_CanStartProjMove:
 	add  hl, bc
 	bit  PF0B_PROJ, [hl]	; Is the projectile for this player still active?
 	ret						; (if so, don't start the move)
-	
+
 ; =============== MoveInputS_CheckMoveLHVer ===============
 ; Determines if the heavy version of the move should be started.
 ;
@@ -14232,13 +14243,13 @@ MoveInputS_CheckMoveLHVer:
 	ld   a, [wDipSwitch]
 	bit  DIPB_POWERUP, a	; Is the cheat set?
 	jp   z, .chkNorm			; If not, jump
-	
+
 	ld   hl, iPlInfo_Pow
 	add  hl, bc
 	ld   a, [hl]
 	cp   PLAY_POW_MAX			; At max power?
 	jp   z, .chkHidden			; If so, jump
-	
+
 .chkNorm:
 	;
 	; Perform the heavy flag check, as previously set by MoveInputS_CheckGAType.
@@ -14251,7 +14262,7 @@ MoveInputS_CheckMoveLHVer:
 	ccf							; Clear carry
 	ret
 .chkHidden:
-	
+
 	;
 	; Don't allow "hidden light" attacks (even though they exist...),
 	; so fall back to the normal check if we're not doing an heavy.
@@ -14262,7 +14273,7 @@ MoveInputS_CheckMoveLHVer:
 	jp   z, .chkNorm		; If not, jump
 	scf						; Set carry
 	ret
-	
+
 ; =============== MoveInputS_CheckSuperDesperation ===============
 ; Determines if the desperation version of the super move should be used.
 ;
@@ -14291,7 +14302,7 @@ MoveInputS_CheckSuperDesperation:
 	ld   a, [wDipSwitch]
 	bit  DIPB_POWERUP, a	; Is the cheat set?
 	jp   z, .chkNormal			; If not, jump
-	
+
 .chkCheat:
 	; Desperation supers require max meter as usual.
 	; This is the only requirement with the cheat enabled.
@@ -14308,28 +14319,28 @@ MoveInputS_CheckSuperDesperation:
 	ld   a, [hl]
 	cp   PLAY_HEALTH_CRITICAL	; Health >= CRITICAL?
 	jp   nc, .retDesp			; If so, use desperation
-	
+
 	jp   .retDespHidden			; Otherwise, use hidden desperation
-	
+
 .chkNormal:
-	
+
 	; Desperation supers require max meter.
 	ld   hl, iPlInfo_Pow
 	add  hl, bc
 	ld   a, [hl]
 	cp   PLAY_POW_MAX			; Pow != MAX?
 	jp   nz, .retNorm			; If so, use normal super
-	
+
 	; Desperation supers require critical health.
 	ld   hl, iPlInfo_Health
 	add  hl, bc
 	ld   a, [hl]
 	cp   PLAY_HEALTH_CRITICAL	; Health >= CRITICAL?
 	jp   nc, .retNorm			; If so, use normal super
-	
+
 	; Requirements ok
 	jp   .retDesp
-	
+
 .retNorm:
 	xor  a		; Z flag set, (C flag unusable)
 	ret
@@ -14345,7 +14356,7 @@ MoveInputS_CheckSuperDesperation:
 ; =============== MoveInputS_SetSpecMove_StopSpeed ===============
 ; Makes the specified player start a new special or super move.
 ; Most special moves use this subroutine to start them, and as a result
-; of using Pl_SetMove_StopSpeed, they cancel the player's momentum. 
+; of using Pl_SetMove_StopSpeed, they cancel the player's momentum.
 ; IN
 ; - A: Move ID
 ; - BC: Ptr to wPlInfo structure
@@ -14353,11 +14364,11 @@ MoveInputS_CheckSuperDesperation:
 MoveInputS_SetSpecMove_StopSpeed:
 	; Force syncronize the player's direction before starting the move
 	call OBJLstS_SyncXFlip
-	
+
 	; HL = Ptr to status flag
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
-	
+
 	;
 	; If we're starting a super move, set its respective flag and
 	; display the super sparkle.
@@ -14375,16 +14386,16 @@ MoveInputS_SetSpecMove_StopSpeed:
 			call Play_StartSuperSparkle
 		pop  hl
 	pop  af
-	
+
 .setFlags:
 	;
 	; Set all of the default flags for starting a move.
 	;
-	
+
 	; iPlInfo_Flags0
 	; Mark that a special move is in progress.
 	set  PF0B_SPECMOVE, [hl]
-	
+
 	inc  hl			; Seek to iPlInfo_Flags1
 	set  PF1B_NOBASICINPUT, [hl] 	; Special moves can't be cancelled by normal movement
 	set  PF1B_XFLIPLOCK, [hl] 		; Lock the player's direction until the move is over
@@ -14392,25 +14403,25 @@ MoveInputS_SetSpecMove_StopSpeed:
 	res  PF1B_GUARD, [hl]			; Receive full damage by default if hit out of the special
 IF REV_VER_2 == 1
 	; Not sure if this fixes anything (though it does make sense to reset it)
-	res  PF1B_HITRECV, [hl]			; If we're starting a special move, we definitely aren't in the hit state anymore 
+	res  PF1B_HITRECV, [hl]			; If we're starting a special move, we definitely aren't in the hit state anymore
 ENDC
 	res  PF1B_CROUCH, [hl]			; Remove crouch flag in case we performed the move while crouching
 	res  PF1B_INVULN, [hl] 			; Disable invulnerability in case we got here from guard cancels
-	
+
 	;
 	; Remove any temporary invuln. effect on player
 	;
 	inc  hl			; Seek to iPlInfo_Flags2
 	res  PF2B_NOHURTBOX, [hl]
 	res  PF2B_NOCOLIBOX, [hl]
-	
+
 	;
 	; Actually start the move, stopping the player momentum
 	;
 	push hl
 		call Pl_SetMove_StopSpeed
 	pop  hl
-	
+
 	;
 	; When starting a new special off another hit, flag that we're doing a combo
 	; and animate it much faster by removing the delay.
@@ -14422,7 +14433,7 @@ ENDC
 	bit  PF1B_ALLOWHITCANCEL, [hl]	; Did we combo the move off a previous hit?
 	jp   z, .ret					; If not, return
 	; Set that we started a combo'd move
-	inc  hl						
+	inc  hl
 	set  PF2B_HITCOMBO, [hl]
 	; Note that Pl_SetMove_StopSpeed set us a new FrameLeft/FrameTotal value.
 	; In case of moves that expect manual control by having set ANIMSPEED_NONE ($FF) initially, don't remove the delay.
@@ -14432,11 +14443,11 @@ ENDC
 	bit  7, a		; iOBJInfo_FrameLeft > $7F? (MSB set)
 	jp   nz, .ret	; If so, return
 	ld   [hl], $00	; Otherwise, reset it
-	inc  hl			
+	inc  hl
 	ld   [hl], $00	; and reset iOBJInfo_FrameTotal
 .ret:
 	ret
-	
+
 ; =============== Play_StartSuperSparkle ===============
 ; Starts the super sparkle animation over the specified sprite mapping.
 ; Meant for special or super moves only.
@@ -14449,15 +14460,15 @@ Play_StartSuperSparkle:
 	; Play SFX associated with the sparkle effect
 	ld   a, SFX_SUPERMOVE
 	call HomeCall_Sound_ReqPlayExId
-	
+
 	push bc
 		push de
 			push hl
-	
+
 				; BC = Ptr to wOBJInfo_Pl*
-				push de	
+				push de
 				pop  bc
-				
+
 				;--
 				;
 				; DE = Ptr to the sparkle wOBJInfo.
@@ -14470,26 +14481,26 @@ Play_StartSuperSparkle:
 				;
 				ld   hl, OBJINFO_SIZE*4 ; HL = BC + $100
 				add  hl, bc
-				
+
 				push hl	; DE = HL
 				pop  de
 				;--
 				;
 				; Set up all fields.
 				;
-				
+
 				; Display the sparkle
 				ld   [hl], OST_VISIBLE
-				
+
 				; Set the code pointer
 				ld   hl, iOBJInfo_Play_CodeBank
 				add  hl, de
 				ld   [hl], BANK(ExOBJ_SuperSparkle) ; BANK $02
-				inc  hl			
-				ld   [hl], LOW(ExOBJ_SuperSparkle)	
-				inc  hl			
+				inc  hl
+				ld   [hl], LOW(ExOBJ_SuperSparkle)
+				inc  hl
 				ld   [hl], HIGH(ExOBJ_SuperSparkle)
-				
+
 				; Set sprite mapping
 				ld   hl, iOBJInfo_BankNum
 				add  hl, de
@@ -14500,40 +14511,40 @@ Play_StartSuperSparkle:
 				ld   [hl], HIGH(OBJLstPtrTable_SuperSparkle)
 
 				; Start anim from the beginning
-				inc  hl			
+				inc  hl
 				ld   [hl], $00*OBJLSTPTR_ENTRYSIZE	; iOBJInfo_OBJLstPtrTblOffset = 0
-				
+
 				; Display each animation frame for a single frame each
 				ld   hl, iOBJInfo_FrameLeft
 				add  hl, de
 				ld   [hl], ANIMSPEED_INSTANT
 				inc  hl
 				ld   [hl], ANIMSPEED_INSTANT
-				
+
 				; Display for $14 frames
 				ld   hl, iOBJInfo_Play_EnaTimer
 				add  hl, de
 				ld   [hl], $14
-				
+
 				; Display sparkle over the player.
 				; This will stay this original position, even if the player moves after.
-				
+
 				; BC = Source (wOBJInfo_Pl*)
 				; DE = Destination (wOBJInfo_Pl*SuperSparkle)
 				call OBJLstS_Overlap
 			pop  hl
-			
+
 			;--
 			; [POI] Offset the vertical and horizontal positions of the sprite mapping.
 			;       This is normally 0 by default, but there are manual calls to this
 			;       with HL != 0.
-			
+
 			; XPos += H
 			push hl
 				ld   l, $00 ; 0 subpixels, H pixels
 				call Play_OBJLstS_MoveH_ByXFlipR
 			pop  hl
-			
+
 			; YPos += L
 			ld   h, l	; L pixels
 			ld   l, $00 ; 0 subpixels
@@ -14552,7 +14563,7 @@ Play_StartThrowEffect:
 	ld   a, SCT_GRAB
 	call HomeCall_Sound_ReqPlayExId
 	ret
-	
+
 ; =============== Play_Pl_MoveRotThrown ===============
 ; Moves the position of the thrown opponent during its rotation frames, relative to the *other* player *visually* facing left (2P side).
 ; This is expected to be applied only once, and generally requires a call to Play_Pl_SetMoveDamage
@@ -14572,7 +14583,7 @@ Play_Pl_MoveRotThrown:
 	xor  a
 	ld   [wPlayPlThrowRotSync], a
 	ret
-	
+
 ; =============== Play_Pl_SetMoveDamage ===============
 ; Instantly changes the damage values, without waiting for the next frame to display.
 ; This is meant to be used to update the damage mid-animation, not when the move starts
@@ -14598,7 +14609,7 @@ Play_Pl_SetMoveDamage:
 		ld   [hl], a	; iPlInfo_MoveDamageFlags3 = A
 	pop  de
 	ret
-	
+
 ; =============== Play_Pl_SetMoveDamageNext ===============
 ; Updates the pending damage values, which get applied when the next frame is displayed.
 ; This works in conjunction with the VBlank Handler, since that's what copies the
@@ -14637,7 +14648,7 @@ Play_Pl_SetMoveDamageNext:
 		ld   [hl], a	; iPlInfo_MoveDamageFlags3Next = A
 	pop  de
 	ret
-	
+
 ; =============== Play_Proj_CopyMoveDamageFromPl ===============
 ; Copies the pending move damage fields from the current player over to its respective projectile.
 ; Typically called after mMvC_SetDamageNext.
@@ -14657,19 +14668,19 @@ Play_Proj_CopyMoveDamageFromPl:
 		; Copy over the three bytes.
 		; This works because the move damage fields are stored contiguously
 		; in the same order between player and projectile info.
-		
+
 		; BC = Ptr to source
 		ld   hl, iPlInfo_MoveDamageValNext
 		add  hl, bc
 		push hl
 		pop  bc
-		
+
 		; DE = Ptr to destination
 		; The OBJInfo for the projectile is always 2 slots ahead
 		; of one used by its respective player.
 		ld   hl, (OBJINFO_SIZE*2)+iOBJInfo_Play_DamageVal
 		add  hl, de
-		
+
 		; Copy the data over
 		ld   a, [bc]	; Read iPlInfo_MoveDamageValNext
 		inc  bc
@@ -14681,7 +14692,7 @@ Play_Proj_CopyMoveDamageFromPl:
 		ld   [hl], a	; Copy to iOBJInfo_Play_DamageFlags3
 	pop  bc
 	ret
-	
+
 ; =============== Play_Pl_IsMoveLoading ===============
 ; Checks if the move is "ready", which is when move-specific code is allowed to run (as checked manually in many MoveC_*).
 ;
@@ -14699,8 +14710,8 @@ Play_Pl_IsMoveLoading:
 	;--
 	;
 	; Verify that the visible and pending sprite mapping table pointers are identical.
-	; If they aren't, the move isn't ready, since it means the move animation 
-	; was recently changed (ie: new move) but the graphics for them haven't been 
+	; If they aren't, the move isn't ready, since it means the move animation
+	; was recently changed (ie: new move) but the graphics for them haven't been
 	; fully loaded yet.
 	;
 	; This is the equivalent of checking (PF2B_MOVESTART && !OSTB_GFXLOAD),
@@ -14717,7 +14728,7 @@ Play_Pl_IsMoveLoading:
 			ld   d, [hl]		; D = iOBJInfo_OBJLstPtrTbl_High
 			inc  hl				; Seek to iOBJInfo_OBJLstPtrTblOffset
 			inc  hl				; Seek to iOBJInfo_BankNumView
-			ldi  a, [hl]	
+			ldi  a, [hl]
 			cp   a, b			; iOBJInfo_BankNumView == iOBJInfo_BankNum?
 			jr   nz, .retNotReadyPop	; If not, return
 			ldi  a, [hl]
@@ -14729,23 +14740,23 @@ Play_Pl_IsMoveLoading:
 		pop  bc
 	pop  de
 	;--
-	
+
 	; If we didn't start a new move and the above check passed, then it means we're ready
 	; but we shouldn't update the move damage info since we've already done it.
 	ld   hl, iPlInfo_Flags2
 	add  hl, bc
 	bit  PF2B_MOVESTART, [hl]
 	jr   z, .retReady
-	
+
 	; If the graphics are loading and all previous validations passed, it means the first
 	; frame is still loading, therefore the move isn't ready yet.
 	ld   hl, iOBJInfo_Status
 	add  hl, de
 	bit  OSTB_GFXLOAD, [hl]
 	jp   nz, .retNotReady
-	
+
 	;--
-	
+
 	; If we got here, the first frame has just loaded, so we can update the move damage fields
 	; as long as they've been set.
 	;
@@ -14755,30 +14766,30 @@ Play_Pl_IsMoveLoading:
 	; (it will wait on the last visible frame), wait for that first before copying the
 	; fields over from their pending slots.
 	; This avoids having the old frame visible with the new damage settings applied.
-	
+
 	;--
-	
+
 	; Unmark that we're starting a new move.
 	; This allows the VBlank Handler to perform mid-move damage changes between frames,
 	; and cuts off getting here another time until another move is started.
 	ld   hl, iPlInfo_Flags2
 	add  hl, bc
 	res  PF2B_MOVESTART, [hl]
-	
+
 	;
 	; Copy the set of pending fields to the current ones, and clear the former range.
 	;
 	; This avoids updating the move damage when set to 0, as there's no point to update
 	; the fields when damage was already initialized to 0 when we went though Pl_SetNewMove.
 	;
-	
+
 	; HL = Source
 	ld   hl, iPlInfo_MoveDamageValNext
-	add  hl, bc			
+	add  hl, bc
 	ld   a, [hl]		; A = iPlInfo_MoveDamageValNext
 	or   a				; iPlInfo_MoveDamageValNext == 0?
 	jp   z, .retReady	; If so, skip
-	
+
 	;
 	; Copy over the pending move damage info to the current one.
 	;
@@ -14790,20 +14801,20 @@ Play_Pl_IsMoveLoading:
 			push hl
 			pop  de
 		pop  hl
-		
-		ld   [de], a	; Copy iPlInfo_MoveDamageValNext to iPlInfo_MoveDamageVal	
+
+		ld   [de], a	; Copy iPlInfo_MoveDamageValNext to iPlInfo_MoveDamageVal
 		ld   [hl], $00	; Clear iPlInfo_MoveDamageValNext
 		inc  de			; SrcPtr++
 		inc  hl			; DestPtr++
-		
+
 		ld   a, [hl]	; A = iPlInfo_MoveDamageHitTypeIdNext
-		ld   [de], a	; Copy iPlInfo_MoveDamageHitTypeIdNext to iPlInfo_MoveDamageHitTypeId	
+		ld   [de], a	; Copy iPlInfo_MoveDamageHitTypeIdNext to iPlInfo_MoveDamageHitTypeId
 		ld   [hl], $00	; Clear iPlInfo_MoveDamageHitTypeIdNext
 		inc  de			; SrcPtr++
 		inc  hl			; DestPtr++
-		
+
 		ld   a, [hl]	; A = iPlInfo_MoveDamageFlags3Next
-		ld   [de], a	; Copy iPlInfo_MoveDamageFlags3Next to iPlInfo_MoveDamageFlags3	
+		ld   [de], a	; Copy iPlInfo_MoveDamageFlags3Next to iPlInfo_MoveDamageFlags3
 		ld   [hl], $00	; Clear iPlInfo_MoveDamageFlags3Next
 	pop  de
 .retReady:
@@ -14815,7 +14826,7 @@ Play_Pl_IsMoveLoading:
 .retNotReady:
 	scf		; C flag set
 	ret
-	
+
 ; =============== Play_Pl_ChkThrowInput ===============
 ; Handles the input for throwing the opponent.
 ; IN
@@ -14830,19 +14841,19 @@ Play_Pl_ChkThrowInput:
 	;
 	; Validate if we can start the throw to begin with
 	;
-	
+
 	; Not applicable if we're getting thrown
 	ld   a, [wPlayPlThrowActId]
 	cp   PLAY_THROWACT_NONE		; ThrowActId == 0?
 	jp   nz, .retClear			; If not, return
-	
+
 	; Not applicable when the opponent is waking up
 	ld   hl, iPlInfo_NoThrowTimerOther
 	add  hl, bc
 	ld   a, [hl]
 	or   a						; iPlInfo_NoThrowTimerOther > 0?
 	jp   nz, .retClear			; If so, return
-	
+
 	;
 	; Check for the throw input.
 	; HP/HK + L/R
@@ -14851,37 +14862,37 @@ Play_Pl_ChkThrowInput:
 	jp   c, .retClear			; If so, return
 	call Play_Pl_GetDirKeys_ByXFlipR	; Holding any directional key?
 	jp   nc, .retClear			; If not, return
-	
+
 	push de
 		ld   d, KEP_A_HEAVY|KEP_B_HEAVY	; D = Filter for LH
 		ld   hl, iPlInfo_JoyKeys
 		add  hl, bc
-		
+
 		; Must be holding Left or Right
 		; E = iPlInfo_JoyKeys & (KEY_RIGHT|KEY_LEFT)
-		ld   a, [hl]		
+		ld   a, [hl]
 		and  a, KEY_RIGHT|KEY_LEFT ; Filter L/R keys
 		jp   z, .noPk		; Any of them held? If not, return
 		ld   e, a			; E = A
-		
+
 		; Must be an heavy attack
 		; A = iPlInfo_JoyNewKeysLH & (KEP_A_HEAVY|KEP_B_HEAVY)
 		inc  hl				; Seek to iPlInfo_JoyNewKeysLH
-		ld   a, [hl]		
+		ld   a, [hl]
 		and  a, d			; Filter out non-heavy flags
 		jp   z, .noPk		; Any heavy done? If not, return
 	pop  de
 	;--
-	
+
 	; Success.
 	; We started the throw successfully, now determine its type.
-	
+
 	; Determine the throw's direction.
 	; Pressing B/Punch throws the opponent forwards.
 	; Pressing A/Kick, makes the players switch sides before throwing forwards (backwards throw in practice).
 	bit  KEPB_A_HEAVY, a	; Pressed A?
-	jp   nz, .setThrowBack	; If so, jump	
-.setThrowFwd:	
+	jp   nz, .setThrowBack	; If so, jump
+.setThrowFwd:
 	xor  a ; PLAY_THROWDIR_F
 	ld   [wPlayPlThrowDir], a
 	jp   .chkAir
@@ -14896,29 +14907,29 @@ Play_Pl_ChkThrowInput:
 	bit  PF0B_AIR, [hl]	; Are we in the air?
 	jp   nz, .air	; If so, jump
 	jp   .ground
-	
+
 	.noPk:
 	pop  de
 	jp   .retClear
-	
+
 .ground:
 
 	; When crouching or performing moves not allowing basic movement, throwing will be ignored.
 	inc  hl							; Seek to iPlInfo_Flags1
 	bit  PF1B_NOBASICINPUT, [hl]	; Is basic input denied?
 	jp   nz, .noThrow				; If so, return
-	bit  PF1B_CROUCH, [hl] 		; Crouching?
+	bit  PF1B_CROUCH, [hl] 			; Crouching?
 	jp   nz, .noThrow				; If so, return
-	
+
 .groundOk:
-	
+
 	; Set ground throw type
 	xor  a ; PLAY_THROWOP_GROUND
 	ld   [wPlayPlThrowOpMode], a
-	; Set temporary hitbox $04, overriding whatever hitbox is set by the visible frame.
-	ld   a, $04
+	; Set temporary hitbox $04 for throw range, overriding whatever hitbox is set by the visible frame.
+	ld   a, COLIBOX_04
 	jp   .tryStart
-	
+
 .air:
 	; Only when performing a jump move
 	ld   hl, iPlInfo_MoveId
@@ -14950,10 +14961,9 @@ Play_Pl_ChkThrowInput:
 	ld   a, PLAY_THROWOP_AIR
 	ld   [wPlayPlThrowOpMode], a
 	; Set temporary hitbox $04, same as ground throws.
-	; [POI] Was this once different?
-	ld   a, $04
+	ld   a, COLIBOX_04
 	;--
-	
+
 .tryStart:
 
 	;
@@ -14965,11 +14975,11 @@ Play_Pl_ChkThrowInput:
 	ld   hl, iOBJInfo_ForceHitboxId
 	add  hl, de
 	ld   [hl], a
-	
+
 	; Start the throw sequence, mandatory to let the other player know we're ready.
 	ld   a, PLAY_THROWACT_START
 	ld   [wPlayPlThrowActId], a
-	
+
 	; All throws do $0C lines of damage.
 	; The damage is dealt when the opponent gets thrown at the *end*.
 	; Meaning that if it gets aborted early, no damage is dealt.
@@ -14978,31 +14988,31 @@ Play_Pl_ChkThrowInput:
 	add  hl, bc
 	ld   a, $0C						; 12 lines of damage
 	ld   [hl], a
-	
+
 	; If the grab occurres, the opponent will use hit effect HITTYPE_THROW_START (HitTypeC_ThrowStart)
 	inc  hl							; Seek to iPlInfo_MoveDamageHitTypeId
 	ld   a, HITTYPE_THROW_START
 	ld   [hl], a					; Save value
-	
+
 	; Pass control once with the throw hitbox enabled (+ an extra one to disable it)
 	; and determine if the opponent got grabbed successfully (in range + passed validation).
 	;
 	; If it went all right, the opponent should have gone through Play_Pl_SetHitType.chkThrow
 	; (which required us to set wPlayPlThrowActId to PLAY_THROWACT_START first), which will
 	; cause the hit effect HitTypeC_ThrowStart to update wPlayPlThrowActId to PLAY_THROWACT_NEXT02.
-	
+
 	; Preserve iPlInfo_JoyKeys and iPlInfo_JoyNewKeys while this happens
 	ld   hl, iPlInfo_JoyKeys
 	add  hl, bc
-	ldi  a, [hl]	
+	ldi  a, [hl]
 	push af				; Save iPlInfo_JoyKeys
-		ld   a, [hl]	
+		ld   a, [hl]
 		push af			; Save iPlInfo_JoyNewKeys
 			push hl
 				;--
 				; Pass control, activating the temporary throw hitbox
 				call Task_PassControlFar
-				
+
 				; Disable the throw hitbox and save changes again
 				ld   hl, iOBJInfo_ForceHitboxId
 				add  hl, de
@@ -15015,23 +15025,23 @@ Play_Pl_ChkThrowInput:
 		ldd  [hl], a	; Restore iPlInfo_JoyNewKeys
 	pop  af
 	ld   [hl], a	; Restore iPlInfo_JoyKeys
-	
+
 	; If the opponent didn't get grabbed, return
 	ld   a, [wPlayPlThrowActId]
 	cp   PLAY_THROWACT_NEXT02		; On the second part of the throw?
 	jp   nz, .noThrow				; If not, return
-	
+
 	;
 	; Determine if the throw direction gets inverted
 	;
-	
+
 	; Non-ground throws always get inverted
 	ld   a, [wPlayPlThrowOpMode]
 	or   a							; wPlayPlThrowOpMode != PLAY_THROWOP_GROUND?
 	jp   nz, .invThrow				; If so, jump
 	;--
-	; [POI] In 95, there was a list of character ID checks that would jump to .invThrow.
-	;       It appears wPlayPlThrowDir had a different purpose there though, and it's not applicable anymore.
+	; [TCRF] Leftover from 95.
+	;        A few characters in that game threw opponents the other way around.
 	ld   hl, iPlInfo_CharId
 	add  hl, bc
 	ld   a, [hl]
@@ -15042,9 +15052,9 @@ Play_Pl_ChkThrowInput:
 	ld   a, [wPlayPlThrowDir]
 	xor  a, $01					; Switch PLAY_THROWDIR_F / PLAY_THROWDIR_B
 	ld   [wPlayPlThrowDir], a
-	
+
 .chkDir:
-	
+
 	; If the opponent is being thrown "backwards", first switch the player's positions
 	; before starting the normal throw.
 	ld   a, [wPlayPlThrowDir]
@@ -15076,7 +15086,7 @@ Play_Pl_ChkThrowInput:
 	xor  a	; Clear carry flag
 .ret:
 	ret
-	
+
 ; =============== MoveInputS_TryStartCommandThrow_AllColi ===============
 ; Attempts to start a command throw that:
 ; - Uses collision box $05 as throw range.
@@ -15100,18 +15110,18 @@ MoveInputS_TryStartCommandThrow_AllColi:
 	ld   a, [wPlayPlThrowActId]
 	cp   PLAY_THROWACT_NONE
 	jp   nz, MoveInputS_TryStartCommandThrow.noThrow
-	
+
 	; Throw forward
 	xor  a ; PLAY_THROWDIR_F
 	ld   [wPlayPlThrowDir], a
 	; [POI] Doesn't matter. This is ignored for command throws
 	ld   a, PLAY_THROWOP_UNUSED_BOTH
 	ld   [wPlayPlThrowOpMode], a
-	
+
 	; Use hitbox $05
 	ld   a, $05
 	jp   MoveInputS_TryStartCommandThrow
-	
+
 ; =============== MoveInputS_TryStartCommandThrow_StdColi ===============
 ; Attempts to start a command throw that:
 ; - Uses collision box $04 as throw range
@@ -15130,25 +15140,25 @@ MoveInputS_TryStartCommandThrow_StdColi:
 	ld   a, [wPlayPlThrowActId]
 	cp   PLAY_THROWACT_NONE								; ThrowActId != NONE?
 	jp   nz, MoveInputS_TryStartCommandThrow.noThrow	; If so, jump
-	
+
 	; If the opponent is waking up, return
 	ld   hl, iPlInfo_NoThrowTimerOther
 	add  hl, bc
 	ld   a, [hl]
 	or   a												; iPlInfo_NoThrowTimerOther != 0?
 	jp   nz, MoveInputS_TryStartCommandThrow.noThrow	; If so, return
-	
+
 	; Throw forward
 	xor  a ; PLAY_THROWDIR_F
 	ld   [wPlayPlThrowDir], a
 	; [POI] Doesn't matter. This is ignored for command throws
 	xor  a ; PLAY_THROWOP_GROUND
 	ld   [wPlayPlThrowOpMode], a
-	
+
 	; Use hitbox $04
-	ld   a, $04
+	ld   a, COLIBOX_04
 	; Fall-through
-	
+
 ; =============== MoveInputS_TryStartCommandThrow ===============
 ; Attempts to starts a command throw.
 ; The code for this is identical to Play_Pl_ChkThrowInput.tryStart.
@@ -15159,7 +15169,7 @@ MoveInputS_TryStartCommandThrow_StdColi:
 ; OUT
 ; - C: If set, the command throw can start
 MoveInputS_TryStartCommandThrow:
-	
+
 	;
 	; Setup the throw, and see the opponent's response.
 	;
@@ -15169,11 +15179,11 @@ MoveInputS_TryStartCommandThrow:
 	ld   hl, iOBJInfo_ForceHitboxId
 	add  hl, de
 	ld   [hl], a
-	
+
 	; Start the throw sequence, mandatory to let the other player know we're ready.
 	ld   a, PLAY_THROWACT_START
 	ld   [wPlayPlThrowActId], a
-	
+
 	; All command throws do $0C lines of damage, like normal throws.
 	; The damage is taken when the opponent gets thrown at the *end*.
 	; Meaning that if it gets aborted early, no damage is dealt.
@@ -15182,31 +15192,31 @@ MoveInputS_TryStartCommandThrow:
 	add  hl, bc
 	ld   a, $0C						; 12 lines of damage
 	ld   [hl], a
-	
+
 	; If the grab occurres, the opponent will use hit effect HITTYPE_THROW_START
 	inc  hl							; Seek to iPlInfo_MoveDamageHitTypeId
 	ld   a, HITTYPE_THROW_START
 	ld   [hl], a					; Save value
-	
+
 	; Pass control once with the throw hitbox enabled (+ an extra one to disable it)
 	; and determine if the opponent got grabbed successfully (in range + passed validation).
 	;
 	; If it went all right, the opponent should have gone through Play_Pl_SetHitType.chkThrow
 	; (which required us to set wPlayPlThrowActId to PLAY_THROWACT_START first), which will
 	; cause the hit effect HitTypeC_ThrowStart to update wPlayPlThrowActId to PLAY_THROWACT_NEXT02.
-	
+
 	; Preserve iPlInfo_JoyKeys and iPlInfo_JoyNewKeys while this happens
 	ld   hl, iPlInfo_JoyKeys
 	add  hl, bc
-	ldi  a, [hl]	
+	ldi  a, [hl]
 	push af				; Save iPlInfo_JoyKeys
-		ld   a, [hl]	
+		ld   a, [hl]
 		push af			; Save iPlInfo_JoyNewKeys
 			push hl
 				;--
 				; Pass control, activating the temporary throw hitbox
 				call Task_PassControlFar
-				
+
 				; Disable the throw hitbox and save changes again
 				ld   hl, iOBJInfo_ForceHitboxId
 				add  hl, de
@@ -15219,14 +15229,14 @@ MoveInputS_TryStartCommandThrow:
 		ldd  [hl], a	; Restore iPlInfo_JoyNewKeys
 	pop  af
 	ld   [hl], a	; Restore iPlInfo_JoyKeys
-	
+
 	; If the opponent didn't get grabbed, return
 	ld   a, [wPlayPlThrowActId]
 	cp   PLAY_THROWACT_NEXT02		; On the second part of the throw?
 	jp   nz, .noThrow				; If not, return
-	
+
 	;##
-	
+
 	; The move can start
 	scf			; C flag set
 	jp   .ret
@@ -15246,7 +15256,7 @@ MoveInputS_TryStartCommandThrow:
 ; OUT
 ; - C: If set, a new move was started (and interrupted hitstop early)
 Play_Pl_ChkHitstop:
-	
+
 	;
 	; Handle the horizontal push speed we received from the other player.
 	; Note that if we get into the hitstop loop, the movement gets delayed until
@@ -15259,7 +15269,7 @@ Play_Pl_ChkHitstop:
 	add  hl, bc
 	xor  a
 	ld   [hl], a
-	
+
 	;
 	; If the other player requested us to move out of the way (ie: after a hit when cornered)
 	; do that accordingly.
@@ -15273,7 +15283,7 @@ Play_Pl_ChkHitstop:
 	ld   h, a			; H = iPlInfo_PushSpeedHRecv
 	ld   l, $00
 	call Play_OBJLstS_MoveH
-	
+
 .chkHitstop:
 
 	;
@@ -15289,7 +15299,7 @@ Play_Pl_ChkHitstop:
 	;   meaning Play_Pl_DoHit won't be executed for a number of frames.
 	;
 	; We also don't change the hitstop flag directly -- this is done ONLY by the other player task when it gets hit.
-	; Specifically, the aforemented hitstuns/blockstun subroutines enable hitstop for the entire 
+	; Specifically, the aforemented hitstuns/blockstun subroutines enable hitstop for the entire
 	; duration of their shake effect (ie: see Play_Pl_DoBlockstun). Since they take exclusive control, only the
 	; player who attacked can get here while hitstop is enabled.
 	;
@@ -15300,7 +15310,7 @@ Play_Pl_ChkHitstop:
 	; Generate the light/heavy button info
 	call Play_Pl_AddToJoyBufKeysLH
 	call Play_Pl_CreateJoyKeysLH
-	
+
 	; Check for special move inputs (character-specific)
 	call Play_Pl_ExecSpecMoveInputCode	; Was a special move started?
 	jp   c, .moveSet				; If so, return
@@ -15309,9 +15319,9 @@ Play_Pl_ChkHitstop:
 	; In case of blocking, we can start a new special move (or a roll) when guard canceling.
 	call HomeCall_Play_Pl_DoHit		; Did we get attacked and guard cancelled?
 	jp   c, .moveSet				; If so, return
-	
+
 	call Task_PassControlFar
-	
+
 	; If still locked, loop
 	ld   a, [wPlayHitstop]
 	or   a					; Is hitstop still enabled?
@@ -15321,7 +15331,7 @@ Play_Pl_ChkHitstop:
 	ret
 .moveSet:
 	ret		; C flag was set
-	
+
 ; =============== Play_Pl_GiveKnockbackCornered ===============
 ; Pushes the other player away when hit while cornered.
 ;
@@ -15337,7 +15347,7 @@ Play_Pl_ChkHitstop:
 ; - BC: Ptr to wPlInfo for the player who got hit
 ; - DE: Ptr to respective wOBJInfo structure
 Play_Pl_GiveKnockbackCornered:
-	
+
 	;
 	; Knockback transfer isn't applicable if we got hit by a projectile,
 	; as the player could be anywhere on the screen.
@@ -15346,11 +15356,11 @@ Play_Pl_GiveKnockbackCornered:
 	add  hl, bc
 	bit  PF0B_PROJHIT, [hl]		; Is the flag set?
 	jp   nz, .ret				; If so, return
-	
+
 	; Copy iOBJInfo_RangeMoveAmount to iPlInfo_PushSpeedHReq.
 	;
 	; iOBJInfo_RangeMoveAmount is set when the knockback attempts to move us off-screen.
-	; The game doesn't want that, so we get pushed back to the visible screen range, and 
+	; The game doesn't want that, so we get pushed back to the visible screen range, and
 	; how much we were moved is saved to iOBJInfo_RangeMoveAmount.
 	; That is essentially the knockback we would have received in the frame, and as we can't move
 	; any further, we instead push the other player by that amount.
@@ -15362,7 +15372,7 @@ Play_Pl_GiveKnockbackCornered:
 	ld   [hl], a					; iPlInfo_PushSpeedHReq = A
 .ret:
 	ret
-	
+
 ; =============== Play_Pl_DoHitstun ===============
 ; Generic hitstun handler that doesn't allow guard cancels.
 ;
@@ -15373,7 +15383,7 @@ Play_Pl_GiveKnockbackCornered:
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo structure
 ; OUT
-; - C flag: Always clear, as there's no guard cancel. 
+; - C flag: Always clear, as there's no guard cancel.
 ;           Return value required by Play_Pl_DoBlockstun jumping to here.
 Play_Pl_DoHitstun:
 
@@ -15386,13 +15396,13 @@ Play_Pl_DoHitstun:
 	bit  PF0B_PROJHIT, [hl]			; Did we get hit by a projectile?
 	jp   nz, .go					; If so, skip
 	; Enable opponent hitstop next frame
-	ld   a, $01								
+	ld   a, $01
 	ld   [wPlayHitstopSet], a
 	; Remove the physical damage source next frame.
 	ld   hl, iPlInfo_PhysHitRecv
 	add  hl, bc
 	ld   [hl], a
-	
+
 .go:
 
 	;
@@ -15408,7 +15418,7 @@ Play_Pl_DoHitstun:
 		;--
 		; Can't be hit during blockstun
 		set  PF1B_INVULN, [hl]
-		
+
 		call Play_Pl_GetShakeCount	; Determine for how many frames to do the effect
 		call Play_Pl_ShakeFor		; Do it
 		;--
@@ -15420,7 +15430,7 @@ Play_Pl_DoHitstun:
 	ld   a, $00
 	ld   [wPlayHitstopSet], a
 	ret
-	
+
 ; =============== Play_Pl_ShakeFor ===============
 ; Shakes the player sprite by 1px for the specified amount of frames,
 ; by moving back and forth the sprite horizontally.
@@ -15428,7 +15438,7 @@ Play_Pl_DoHitstun:
 ; This takes control for the entire duration of the normal blockstun.
 ; As this ignores player input, it should't be used when the player
 ; is allowed to guard cancel.
-; 
+;
 ; IN:
 ; - A: Number of frames (*2) the effect is performed
 ; - DE: Ptr to wOBJInfo for the player
@@ -15443,15 +15453,16 @@ Play_Pl_ShakeFor:
 		ld   c, [hl]		; C = Flags
 		ld   hl, iOBJInfo_X
 		add  hl, de			; HL = Ptr to iOBJInfo_X
-		
+
 		;
-		; Even though it doesn't really matter (it's 2 pixels of difference at most), 
+		; Even though it doesn't really matter (it's 2 pixels of difference at most),
 		; the shake effect is done slightly differently depending on the direction the player is facing.
+		; This didn't exist in 95, it always acted like .shakeR.
 		;
 		bit  SPRB_XFLIP, c	; Is the player visually facing right (1P side)?
 		jp   z, .shakeR		; If not, jump
 	.shakeL:
-		; 
+		;
 		; If the player is facing left (2P side, no SPRB_XFLIP),
 		; move the sprite 1px to the left, then move it back.
 		;
@@ -15463,7 +15474,7 @@ Play_Pl_ShakeFor:
 		jp   nz, .shakeL			; If not, loop
 		jp   .end					; Otherwise, we're done
 	.shakeR:
-		; 
+		;
 		; If the player is facing right (1P side, with SPRB_XFLIP),
 		; move the sprite 1px to the right, then move it back.
 		;
@@ -15500,30 +15511,30 @@ Play_Pl_GetShakeCount:
 	jp   .chkDamageFlags
 .base08:
 	ld   a, $08				; ShakeCnt = $08
-	
-	
+
+
 .chkDamageFlags:
 	;
 	; The shake count can be affected by the move we got attacked with.
 	;
-	
+
 	ld   hl, iPlInfo_Flags3
 	add  hl, bc
-	
-	; Some moves shake the player once
+
+	; Light attacks shake the player once
 	bit  PF3B_LIGHTHIT, [hl]	; Is this a light hit?
 	jp   nz, .shakeOnce			; If so, jump
-	
-	; If this isn't set as a long shake, cut in half the shake count
+
+	; Heavy ones *don't* halve the amount of shakes
 	bit  PF3B_HEAVYHIT, [hl]	; Is this an heavy hit?
 	jp   nz, .chkHealth			; If so, jump
 .shakeHalf:
-	srl  a						; ShakeCnt = ShakeCnt / 2				
+	srl  a						; ShakeCnt = ShakeCnt / 2
 	jp   .chkHealth
 .shakeOnce:
 	ld   a, $01					; ShakeCnt = 1
-	
-	
+
+
 .chkHealth:
 	;
 	; If the player has health left, multiply the result by 2 and cap it at $0B.
@@ -15532,7 +15543,7 @@ Play_Pl_GetShakeCount:
 	; This is to cut in half the duration of the shake effect when a player is defeated, possibly
 	; to balance out how the game runs at half speed there. Meaning that, visually, they last as exactly as long.
 	;
-	
+
 	; Only if the player has some health left.
 	ld   hl, iPlInfo_Health
 	add  hl, bc
@@ -15541,7 +15552,7 @@ Play_Pl_GetShakeCount:
 		or   a				; Health == 0?
 		jp   nz, .noChange	; If so, return
 	pop  af
-	
+
 	; Multiply shake count by 2, capping it at $0B
 	sla  a					; A *= 2
 	cp   $0B				; A < $0B?
@@ -15553,7 +15564,7 @@ Play_Pl_GetShakeCount:
 	pop  af
 .ret:
 	ret
-	
+
 ; =============== Play_Pl_DoHitstunOnce ===============
 ; Performs the normal hit shake effect once, for two frames.
 ; For physical hits only.
@@ -15565,17 +15576,17 @@ Play_Pl_DoHitstunOnce:
 	; since this is only called for physical hits.
 	ld   a, $01
 	ld   [wPlayHitstopSet], a
-	
+
 	; Mark that the other player attempted to hit us with a physical move,
 	; to remove the damage source next frame.
 	ld   hl, iPlInfo_PhysHitRecv
 	add  hl, bc
 	ld   [hl], a
-	
+
 	;
 	; Shake the player for 2 frames.
 	;
-	
+
 	; Save flags
 	ld   hl, iPlInfo_Flags1
 	add  hl, bc
@@ -15591,12 +15602,12 @@ Play_Pl_DoHitstunOnce:
 	ld   hl, iPlInfo_Flags1
 	add  hl, bc
 	ld   [hl], a
-	
+
 	; Disable opponent hitstop next frame
 	ld   a, $00
 	ld   [wPlayHitstopSet], a
 	ret
-	
+
 ; =============== Play_Pl_DoBlockstun ===============
 ; Main handler for blockstun.
 ; IN:
@@ -15606,7 +15617,7 @@ Play_Pl_DoHitstunOnce:
 ; - C flag: If set, blockstun ended early as a new move was started
 ;           (ie: guard cancel happened)
 Play_Pl_DoBlockstun:
-	
+
 	;
 	; If not at max power, reuse the normal hitstun handler.
 	;
@@ -15615,12 +15626,12 @@ Play_Pl_DoBlockstun:
 	ld   a, [hl]
 	cp   PLAY_POW_MAX			; iPlInfo_Pow != $28?
 	jp   nz, Play_Pl_DoHitstun	; If so, jump
-	
+
 	;
 	; At max power, both players shakes more visibly during blockstun.
 	; It's also possible to guard cancel by performing a roll or inputing a special move.
 	;
-	
+
 	;
 	; If we haven't been hit by a projectile, mark that we received a physical hit
 	; and enable hitstop to the opponent from the next frame.
@@ -15630,13 +15641,13 @@ Play_Pl_DoBlockstun:
 	bit  PF0B_PROJHIT, [hl]				; Did we get hit by a projectile?
 	jp   nz, .setFlags1					; If so, skip
 	; Enable (opponent) hitstop next frame
-	ld   a, $01								
+	ld   a, $01
 	ld   [wPlayHitstopSet], a
 	; Remove the physical damage source next frame.
 	ld   hl, iPlInfo_PhysHitRecv
 	add  hl, bc
-	ld   [hl], a							
-	
+	ld   [hl], a
+
 .setFlags1:
 	; Save flags
 	ld   hl, iPlInfo_Flags1
@@ -15645,10 +15656,10 @@ Play_Pl_DoBlockstun:
 	push af
 		; Can't be hit during blockstun
 		set  PF1B_INVULN, [hl]
-		
+
 		; A = Shake count
-		call Play_Pl_GetShakeCount		
-		
+		call Play_Pl_GetShakeCount
+
 		;
 		; Shake 2px at a time A times.
 		; This will take A*2 frames.
@@ -15656,17 +15667,17 @@ Play_Pl_DoBlockstun:
 		; While that happens, check if the player has performed a guard cancel,
 		; and if so, break out of the loop.
 		;
-				
+
 		; HL = Ptr to player X position
 		ld   hl, iOBJInfo_X
 		add  hl, de
 	.loop:
 		push af
-			; Move left 2px
+			; Move right 2px
 			inc  [hl]
 			inc  [hl]
 			call Task_PassControlFar
-			
+
 			; Check for input
 			push hl
 				; Generate the light/heavy button info
@@ -15676,12 +15687,12 @@ Play_Pl_DoBlockstun:
 				call Play_Pl_ExecSpecMoveInputCode	; Performed any special move input?
 				jp   c, .endEarly					; If so, return (guard cancel to move)
 			pop  hl
-			
-			; Move right 2px
+
+			; Move left 2px
 			dec  [hl]
 			dec  [hl]
 			call Task_PassControlFar
-			
+
 			; Check for inputs like before
 			push hl
 				call Play_Pl_CreateJoyKeysLH
@@ -15711,13 +15722,13 @@ Play_Pl_DoBlockstun:
 	pop  af
 	; Note that the flags aren't restored, as starting a new move
 	; set new values for many fields, including iPlInfo_Flags1.
-	
+
 	; Disable opponent hitstop next frame
 	ld   a, $00
 	ld   [wPlayHitstopSet], a
 	scf			; C flag set
 	ret
-	
+
 ; =============== Play_Pl_ChkGuardCancelRoll ===============
 ; Checks if the player can roll out of blockstun and is performing the input for it.
 ;
@@ -15740,58 +15751,58 @@ Play_Pl_ChkGuardCancelRoll:
 	ldi  a, [hl]		; A = iOBJInfo_Y, Seek to iOBJInfo_YSub
 	cp   PL_FLOOR_POS	; iOBJInfo_Y != $88?
 	jp   nz, .retClear	; If so, jump
-	
+
 	; Must be exactly aligned to the ground, even at subpixel level
 	ld   a, [hl]
 	or   a				; iOBJInfo_YSub != 0?
 	jp   nz, .retClear	; If so, jump
-	
+
 	;
 	; And they require holding both buttons at the same time
 	;
 	call Play_Pl_AreBothBtnHeld		; Holding A and B?
 	jp   nc, .retClear				; If not, return
-	
+
 	;
 	; If we got here, the roll is guaranteed.
 	; Set a bunch of flags.
 	;
-	
-	
+
+
 	; Holding UP when the guard cancel roll ends should trigger an hyper jump.
 	ld   hl, iPlInfo_RunningJump
-	add  hl, bc			
+	add  hl, bc
 	ld   [hl], $01
-	
-	
+
+
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc			; Seek to iPlInfo_Flags0
-	
+
 	; Pretend that the guard cancel roll is a super move.
 	; This has two effects:
 	; - The player flashes while rolling
 	; - Any normal fireball coming in contact with the player gets erased
 	set  PF0B_SUPERMOVE, [hl]
-	
+
 	inc  hl							; Seek to iPlInfo_Flags1
 	res  PF1B_GUARD, [hl] 			; Can't block when rolling (we are invulnerable instead)
 	res  PF1B_CROUCH, [hl] 			; As rolling starts from crouching, remove the crouch flag
 	set  PF1B_NOBASICINPUT, [hl] 	; Don't override with normal movement
 	set  PF1B_XFLIPLOCK, [hl] 		; Lock player direction during the roll
 	set  PF1B_NOSPECSTART, [hl] 	; Don't allow cancelling the roll into a special
-	
+
 	inc  hl				; Seek to iPlInfo_Flags2
-	
+
 	; Make player completely invulnerable while rolling.
 	; Disabling both hurtbox and hitbox causes every attack collision check to be ignored.
 	set  PF2B_NOHURTBOX, [hl]
 	set  PF2B_NOCOLIBOX, [hl]
-	
+
 	inc  hl				; Seek to iPlInfo_Flags3
 	; Remove these flash bits to let PF0B_SUPERMOVE handle the flashing
 	res  PF3B_FIRE, [hl]
 	res  PF3B_SUPERALT, [hl]
-	
+
 	;
 	; Determine if player should roll forwards or backwards depending on the held directional keys.
 	;
@@ -15803,7 +15814,7 @@ Play_Pl_ChkGuardCancelRoll:
 	;
 	call Play_Pl_GetDirKeys_ByXFlipR	; Check d-pad keys
 	jp   nc, .setRollFront		; Were any keys held? If not, default to front
-	
+
 	; [POI/BUG?] Holding *DOWN* activates the back roll
 	bit  KEYB_DOWN, a			; Holding down?
 	jp   nz, .setRollBack		; If so, back roll
@@ -15822,7 +15833,7 @@ Play_Pl_ChkGuardCancelRoll:
 .retClear:
 	xor  a	; C flag clear
 	ret
-	
+
 ; =============== Play_Pl_DoGroundScreenShake ===============
 ; Shakes the playfield vertically based on the specified OBJInfo animation timer.
 ; The shaken player MUST be on the ground to use this, while
@@ -15843,7 +15854,7 @@ Play_Pl_DoGroundScreenShake:
 	;
 	call OBJLstS_IsGFXLoadDone	; Loading finished?
 	jp   nz, .resetGround		; If not, skip
-	
+
 	;
 	; The shake effect uses a gradual offset that fades out over time:
 	; Offset = -(iOBJInfo_FrameLeft % $10)
@@ -15852,8 +15863,8 @@ Play_Pl_DoGroundScreenShake:
 	;
 	; Alternating between every 2 frames, said offset gets added to one value,
 	; and the other gets reset to default.
-	; 
-	
+	;
+
 	; When (iOBJInfo_FrameLeft % $10) becomes 0, both values are essentially reset to default.
 	; Continue to .resetGround to save time and make sure both values are reset properly.
 	ld   hl, iOBJInfo_FrameLeft
@@ -15861,12 +15872,12 @@ Play_Pl_DoGroundScreenShake:
 	ld   a, [hl]		; A = iOBJInfo_FrameLeft
 	and  a, $0F			; FrameLeft & $0F == 0?
 	jp   nz, .setShake	; If not, jump
-	
+
 .resetGround:
 	; Reset the Y screen offset at normal levels
 	ld   hl, wScreenShakeY
 	ld   [hl], $00		; wScreenShakeY = 0
-	
+
 	; Reset player vertical position to ground
 	ld   hl, iOBJInfo_Y
 	add  hl, de
@@ -15881,12 +15892,12 @@ Play_Pl_DoGroundScreenShake:
 	ld   hl, wScreenShakeY		; HL = iOBJInfo_FrameLeft
 	bit  1, a					; iOBJInfo_FrameLeft & $02 != 0?
 	jp   nz, .setShakeScrn		; If so, jump
-	
+
 .setShakeOBJ:
 	; Reset the screen scroll offset
 	; wScreenShakeY = $00
-	ld   [hl], $00		
-	
+	ld   [hl], $00
+
 	; Move player sprite up by A
 	; iOBJInfo_Y -= A
 	ld   hl, iOBJInfo_Y
@@ -15896,9 +15907,9 @@ Play_Pl_DoGroundScreenShake:
 	add  a, [hl]	; A += iOBJInfo_Y
 	ld   [hl], a	; Save it back
 	jp   .ret
-	
+
 .setShakeScrn:
-	
+
 	; Scroll screen up by A
 	; wScreenShakeY = -A
 	push af
@@ -15906,14 +15917,14 @@ Play_Pl_DoGroundScreenShake:
 		inc  a
 		ld   [hl], a	; wScreenShakeY = A
 	pop  af
-	
+
 	; Reset player sprite to ground
 	ld   hl, iOBJInfo_Y
 	add  hl, de
 	ld   [hl], PL_FLOOR_POS
 .ret:
 	ret
-	
+
 ; =============== Play_Pl_IsDizzyNext ===============
 ; Determines if the specified player was requested to get dizzy.
 ; IN
@@ -15923,11 +15934,11 @@ Play_Pl_DoGroundScreenShake:
 Play_Pl_IsDizzyNext:
 	; Z = iPlInfo_DizzyNext == 0
 	ld   hl, iPlInfo_DizzyNext
-	add  hl, bc		
+	add  hl, bc
 	ld   a, [hl]	; A = iPlInfo_DizzyNext
 	or   a			; A != 0?
 	ret
-	
+
 ; =============== Play_Pl_StartWakeUp ===============
 ; Initializes the wake up move, meant to be used after a player falls on the ground
 ; (see: HitTypeC_Drop* and MoveC_Hit_Drop*).
@@ -15941,7 +15952,7 @@ Play_Pl_IsDizzyNext:
 Play_Pl_StartWakeUp:
 	; Empty Max POW is possible
 	call Play_Pl_EmptyPowOnSuperEnd
-	
+
 	;
 	; If the player has no health, stop player movement/animations by setting MOVE_SHARED_NONE.
 	; This is also important for Play_LoadPostRoundText0, since the game waits for both characters
@@ -15959,38 +15970,38 @@ Play_Pl_StartWakeUp:
 	add  hl, bc
 	ld   [hl], MOVE_SHARED_NONE		; iPlInfo_MoveId = 0
 	jp   .ret
-	
+
 .alive:
 	; Can't be thrown for $1E frames from here.
 	; This covers waking up and a few frames after.
 	ld   hl, iPlInfo_NoThrowTimer
 	add  hl, bc
 	ld   [hl], $1E
-	
+
 	; Update flags
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
 	; Player is on the ground if rolling
 	res  PF0B_AIR, [hl]
-	
+
 	; Reset this for the next time we get hit
 	res  PF0B_PROJHIT, [hl]
 	; On the ground we can't attack indirectly
 	res  PF0B_PROJREM, [hl]
 	res  PF0B_PROJREFLECT, [hl]
-	
+
 	inc  hl							; Seek to iPlInfo_Flags1
 	res  PF1B_HITRECV, [hl] 		; Falling to the ground ends the opponent's combo
 	res  PF1B_ALLOWHITCANCEL, [hl] ; For next time
 	; The player can't be hit on the ground
 	set  PF1B_INVULN, [hl]
-	
+
 	; Set move for getting up
 	ld   a, MOVE_SHARED_WAKEUP
 	call Pl_SetMove_StopSpeed
 .ret:
 	ret
-	
+
 ; =============== HomeCall_Play_Pl_DoHit ===============
 ; This used to be here in BANK $00 in KOF95.
 HomeCall_Play_Pl_DoHit:
@@ -16018,15 +16029,15 @@ MoveInputS_CheckGAType:
 	; A = Held keys + current LH keys
 	ld   hl, iPlInfo_JoyKeysLH
 	add  hl, bc
-	ld   a, [hl]		
-	
+	ld   a, [hl]
+
 	; HL = Ptr to flags
 	ld   hl, iPlInfo_Flags2
-	add  hl, bc			
-	
+	add  hl, bc
+
 	; Determine the combination of returned flags based on the light/heavy info.
 	bit  KEPB_A_LIGHT, a	; Light kick?
-	jr   nz, .lk			
+	jr   nz, .lk
 	bit  KEPB_B_LIGHT, a	; Light punch?
 	jr   nz, .lp
 	bit  KEPB_A_HEAVY, a	; Heavy kick?
@@ -16037,7 +16048,7 @@ MoveInputS_CheckGAType:
 	scf
 	ccf		; Clear carry
 	ret
-	
+
 .lk:
 	res  PF2B_HEAVY, [hl]	; Not an heavy
 	jp   .k
@@ -16048,7 +16059,7 @@ MoveInputS_CheckGAType:
 	inc  a	; Clear zero
 	scf		; Set carry
 	ret
-	
+
 .lp:
 	res  PF2B_HEAVY, [hl]	; Not an heavy
 	jp   .p
@@ -16058,7 +16069,7 @@ MoveInputS_CheckGAType:
 	xor  a	; Set zero
 	scf		; Set carry
 	ret
-	
+
 ; =============== Play_Pl_ClearJoyBufKeysLH ===============
 ; Blank out iPlInfo_JoyBufKeysLH for the specified player.
 ; IN
@@ -16068,7 +16079,7 @@ Play_Pl_ClearJoyBufKeysLH:
 	add  hl, bc
 	ld   [hl], $00
 	ret
-	
+
 ; =============== MoveInputS_CheckPKTypeWithJoyBufKeysLH ===============
 ; Simplified version of MoveInputS_CheckGAType that only determines if the attack
 ; triggered by the buttons is a light or a heavy.
@@ -16085,7 +16096,7 @@ MoveInputS_CheckPKTypeWithJoyBufKeysLH:
 	ld   hl, iPlInfo_JoyBufKeysLH
 	add  hl, bc
 	ld   a, [hl]
-	
+
 	; Determine the combination if it's a punch or kick
 	bit  KEPB_A_LIGHT, a	; Light kick?
 	jr   nz, .k
@@ -16108,7 +16119,7 @@ MoveInputS_CheckPKTypeWithJoyBufKeysLH:
 	xor  a	; Set zero
 	scf		; Set carry
 	ret
-	
+
 ; =============== MoveInputS_CheckEasyMoveKeys ===============
 ; Checks if the player is holding a button combination used for the "Easy Moves" cheat.
 ; These combinations are activated by holding exactly either:
@@ -16126,17 +16137,17 @@ MoveInputS_CheckEasyMoveKeys:
 	ld   a, [wDipSwitch]
 	bit  DIPB_EASY_MOVES, a
 	jp   z, .none
-	
+
 	; Determine which key combination are holding
 	ld   hl, iPlInfo_JoyKeys
-	add  hl, bc					
-	
+	add  hl, bc
+
 	; SELECT + B
 	ld   a, [hl]				; A = Held player keys
 	and  a, KEY_SELECT|KEY_B	; Filter the required keys
 	cp   KEY_SELECT|KEY_B		; Are we holding exactly SELECT+B (and nothing else)?
 	jp   z, .selectB			; If so, jump
-	
+
 	; SELECT + A
 	ld   a, [hl]				; A = Held player keys
 	and  a, KEY_SELECT|KEY_A	; Filter the required keys
@@ -16154,7 +16165,7 @@ MoveInputS_CheckEasyMoveKeys:
 .selectA:
 	xor  a	; C flag clear, Z flag set
 	ret
-	
+
 ; =============== Play_Pl_TempPauseOtherAnim ===============
 ; Temporarily pauses the opponent's animation by setting its iOBJInfo_FrameLeft to ANIMSPEED_NONE.
 ;
@@ -16184,7 +16195,8 @@ ELSE
 	ld   [hl], $1E
 ENDC
 	ret
-	
+
+; =============== MOVE INPUTS ===============
 ; Remember that these inputs are relative to the 2P side!
 
 ; Down  -> D
@@ -16209,7 +16221,7 @@ MoveInput_DF:
 	db KEY_DOWN    ; Include
 	db $01         ; Min len
 	db $FF         ; Max len
-	
+
 MoveInput_DB:
 	db $02         ; Number of inputs
 .i2:
@@ -16222,7 +16234,7 @@ MoveInput_DB:
 	db KEY_DOWN    ; Include
 	db $01         ; Min len
 	db $FF         ; Max len
-	
+
 ; (identical to MoveInput_DB)
 MoveInput_DB_Copy:
 	db $02         ; Number of inputs
@@ -16236,8 +16248,8 @@ MoveInput_DB_Copy:
 	db KEY_DOWN    ; Include
 	db $01         ; Min len
 	db $FF         ; Max len
-	
-MoveInput_DU_Slow:
+
+MoveInput_DU_Charge:
 	db $02         ; Number of inputs
 .i2:
 	db KEY_UP      ; Key
@@ -16295,7 +16307,7 @@ MoveInput_DBDB:
 	db KEY_DOWN    ; Include
 	db $01         ; Min len
 	db $FF         ; Max len
-	
+
 MoveInput_DFDF:
 	db $04         ; Number of inputs
 .i4:
@@ -16318,7 +16330,7 @@ MoveInput_DFDF:
 	db KEY_DOWN    ; Include
 	db $01         ; Min len
 	db $FF         ; Max len
-	
+
 MoveInput_DFDB:
 	db $04         ; Number of inputs
 .i4:
@@ -16341,7 +16353,7 @@ MoveInput_DFDB:
 	db KEY_DOWN    ; Include
 	db $01         ; Min len
 	db $FF         ; Max len
-	
+
 MoveInput_DFUBD:
 	db $05         ; Number of inputs
 .i5:
@@ -16369,7 +16381,7 @@ MoveInput_DFUBD:
 	db KEY_DOWN    ; Include
 	db $01         ; Min len
 	db $FF         ; Max len
-	
+
 MoveInput_FDB:
 	db $03         ; Number of inputs
 .i3:
@@ -16387,7 +16399,7 @@ MoveInput_FDB:
 	db KEY_LEFT    ; Include
 	db $01         ; Min len
 	db $FF         ; Max len
-	
+
 MoveInput_FBDF:
 	db $04         ; Number of inputs
 .i4:
@@ -16410,7 +16422,7 @@ MoveInput_FBDF:
 	db KEY_LEFT    ; Include
 	db $01         ; Min len
 	db $FF         ; Max len
-	
+
 MoveInput_FDF:
 	db $03         ; Number of inputs
 .i3:
@@ -16428,7 +16440,7 @@ MoveInput_FDF:
 	db KEY_LEFT    ; Include
 	db $01         ; Min len
 	db $FF         ; Max len
-	
+
 MoveInput_FDBF:
 	db $04         ; Number of inputs
 .i4:
@@ -16451,7 +16463,7 @@ MoveInput_FDBF:
 	db KEY_LEFT    ; Include
 	db $01         ; Min len
 	db $FF         ; Max len
-	
+
 MoveInput_FDBFDB:
 	db $06         ; Number of inputs
 .i6:
@@ -16484,8 +16496,8 @@ MoveInput_FDBFDB:
 	db KEY_LEFT    ; Include
 	db $01         ; Min len
 	db $FF         ; Max len
-	
-MoveInput_BF_Slow:
+
+MoveInput_BF_Charge:
 	db $02         ; Number of inputs
 .i2:
 	db KEY_LEFT    ; Key
@@ -16497,8 +16509,8 @@ MoveInput_BF_Slow:
 	db KEY_RIGHT   ; Include
 	db $02         ; Min len
 	db $FF         ; Max len
-	
-MoveInput_BF_Fast:
+
+MoveInput_BF:
 	db $02         ; Number of inputs
 .i2:
 	db KEY_LEFT    ; Key
@@ -16510,7 +16522,7 @@ MoveInput_BF_Fast:
 	db KEY_RIGHT   ; Include
 	db $01         ; Min len
 	db $FF         ; Max len
-	
+
 MoveInput_BDF:
 	db $03         ; Number of inputs
 .i3:
@@ -16528,7 +16540,7 @@ MoveInput_BDF:
 	db KEY_RIGHT   ; Include
 	db $01         ; Min len
 	db $FF         ; Max len
-	
+
 MoveInput_BFDB:
 	db $04         ; Number of inputs
 .i4:
@@ -16551,7 +16563,7 @@ MoveInput_BFDB:
 	db KEY_RIGHT   ; Include
 	db $01         ; Min len
 	db $FF         ; Max len
-	
+
 MoveInput_BDB:
 	db $03         ; Number of inputs
 .i3:
@@ -16569,7 +16581,7 @@ MoveInput_BDB:
 	db KEY_RIGHT   ; Include
 	db $01         ; Min len
 	db $FF         ; Max len
-	
+
 MoveInput_BFDBF:
 	db $05         ; Number of inputs
 .i5:
@@ -16597,7 +16609,7 @@ MoveInput_BFDBF:
 	db KEY_RIGHT   ; Include
 	db $01         ; Min len
 	db $FF         ; Max len
-	
+
 MoveInput_PPP:
 	db $06         ; Number of inputs
 .i6:
@@ -16630,7 +16642,7 @@ MoveInput_PPP:
 	db KEY_B       ; Include
 	db $01         ; Min len
 	db $08         ; Max len
-	
+
 MoveInput_BB:
 	db $04         ; Number of inputs
 .i4:
@@ -16653,7 +16665,7 @@ MoveInput_BB:
 	db KEY_RIGHT|KEY_LEFT|KEY_UP|KEY_DOWN ; Include
 	db $01         ; Min len
 	db $FF         ; Max len
-	
+
 MoveInput_FF:
 	db $04         ; Number of inputs
 .i4:
@@ -16676,8 +16688,8 @@ MoveInput_FF:
 	db KEY_RIGHT|KEY_LEFT|KEY_UP|KEY_DOWN ; Include
 	db $01         ; Min len
 	db $FF         ; Max len
-	
-MoveInput_DU_Fast:
+
+MoveInput_DU:
 	db $02         ; Number of inputs
 .i2:
 	db KEY_UP      ; Key

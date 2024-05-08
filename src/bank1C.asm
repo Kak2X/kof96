@@ -93,7 +93,7 @@ ELSE
 	ldh  [hScrollY], a
 ENDC
 	
-	; FarCall to self bank... did it use to be elsewhere?
+	; FarCall to self bank. In 95, this subroutine was in a different bank.
 	ld   b, BANK(Title_LoadVRAM) ; BANK $1C
 	ld   hl, Title_LoadVRAM
 	rst  $08
@@ -1043,7 +1043,7 @@ Options_PrintDifficulty:
 	ret
 	
 ; =============== Options_Item_BGMTest ===============	
-Options_Item_BGMTest:;I
+Options_Item_BGMTest:
 	call Title_BlinkCursorR
 	call Options_DoCtrl
 	ret  nc
@@ -1112,7 +1112,8 @@ Options_PrintBGMId:
 	call NumberPrinter_Instant
 	ret
 	
-Options_Item_SFXTest:;I
+; =============== Options_Item_SFXTest ===============
+Options_Item_SFXTest:
 	call Title_BlinkCursorR
 	call Options_DoCtrl
 	ret  nc
@@ -1263,7 +1264,7 @@ SGBSndTest_SubMenu:
 	jp   z, SGBSndTest_Act_StopSound
 	cp   a, OPTIONS_SACT_SUBEXIT
 	jp   z, SGBSndTest_Act_Exit
-	ret 
+	ret ; We never get here
 	
 ; =============== SGBSndTest_SubMenu =============== 
 ; Returns to the main options selection.
@@ -1850,6 +1851,7 @@ IF REV_VER_2 == 1
 ;       While the code to handle the mode existed in the Japanese version, it could only be done
 ;       by having both players hold B when selecting a VS mode, and even then it was disallowed on
 ;       the DMG/serial cable since the normal CPU vs CPU code is disabled there.
+;       Note that, in 95, the DMG/serial cable wasn't blacklisted.
 ;
 ;       The existing checks are still in the English version, but since this mode doesn't require
 ;       a second player, a new code was added that allows to enter the mode with a single DMG.
@@ -2116,7 +2118,7 @@ ModeSelect_MakeStageSeq:
 .getRand:
 	call RandLY				; A = Random opponent slot
 	and  a, $0F				; Filter valid IDs only
-	cp   $0F				; Did we get Kagura's slot? (15th character in the sequence)
+	cp   $0F				; Did we get Kagura's slot? ($0F's character in the sequence)
 	jr   z, .getRand		; If so, reroll again
 	
 	; HL = Ptr to generated slot
@@ -2513,7 +2515,7 @@ IF REV_LANG_EN == 0
 ; The menus load the 1bpp text over this, and reuse the cursor already loaded here.
 Title_LoadVRAM:
 	; Title screen & menu sprites
-	ld   hl, GFXAuto_TitleOBJ 
+	ld   hl, GFXDef_TitleOBJ 
 	ld   de, Tiles_Begin		
 	call CopyTilesAutoNum
 	
@@ -2584,12 +2586,7 @@ BGLZ_Title_Logo: INCBIN "data/bg/en/title_logo.lzs"
 BG_Title_Clouds: INCBIN "data/bg/en/title_clouds.bin"
 ENDC
 
-
-GFXAuto_TitleOBJ:
-	db (GFXAuto_TitleOBJ.end-GFXAuto_TitleOBJ.start)/TILESIZE ; Number of tiles
-.start:
-	INCBIN "data/gfx/title_obj.bin"
-.end:
+GFXDef_TitleOBJ: mGfxDef "data/gfx/title_obj.bin"
 
 ENDC
 
@@ -2765,7 +2762,7 @@ IntroScene_TextPrint:
 			; Wait $14 frames before clearing the screen, while that happens
 			; still listen to abort requests
 			ld   a, $14
-			call Intro_ChkStartPressed_MultiFrame
+			call Intro_Delay
 			call ClearBGMap
 		pop  hl
 		inc  hl		; Next TextDef ptr
@@ -2776,7 +2773,7 @@ IntroScene_TextPrint:
 .done:
 	; Wait $3C frames on the black screen
 	ld   a, $3C
-	call Intro_ChkStartPressed_MultiFrame
+	call Intro_Delay
 	
 	; Prepare next scene
 	ld   a, BGM_IN1996
@@ -2900,7 +2897,7 @@ Intro_CharScene_Init:
 	ld   [wIntroCharScene], a
 	
 	ld   a, $01
-	call Intro_ChkStartPressed_MultiFrame
+	call Intro_Delay
 	
 	; Enable Terry sprite
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_Status
@@ -3538,7 +3535,7 @@ IntroScene_IoriRise:
 	
 		; Wait 1 frame
 		ld   a, $01
-		call Intro_ChkStartPressed_MultiFrame
+		call Intro_Delay
 	pop  bc
 	
 	dec  bc			; BC--
@@ -3649,14 +3646,14 @@ IntroScene_IoriKyo:
 		
 		; Wait 1 frame
 		ld   a, $01
-		call Intro_ChkStartPressed_MultiFrame
+		call Intro_Delay
 	pop  af
 	dec  a			; Are we done?
 	jr   nz, .loop	; If not, loop
 	
 	; Wait $78 frames
 	ld   a, $78
-	call Intro_ChkStartPressed_MultiFrame
+	call Intro_Delay
 	
 	; End the intro 
 	scf 		; Set C flag
@@ -4024,7 +4021,7 @@ Intro_CharS_WaitVBlank:
 		call OBJLstS_ApplyXSpeed
 		; Wait 1 frame
 		ld   a, $01
-		call Intro_ChkStartPressed_MultiFrame
+		call Intro_Delay
 	pop  af
 	dec  a				; Waited all frames?
 	jr   nz, .delay1	; If not, loop
@@ -4046,7 +4043,7 @@ Intro_CharS_WaitVBlank:
 		call OBJLstS_ApplyXSpeed
 		; Wait 1 frame
 		ld   a, $01
-		call Intro_ChkStartPressed_MultiFrame
+		call Intro_Delay
 	pop  af
 	dec  a				; Waited all frames?
 	jr   nz, .delay2	; If not, loop
@@ -4144,7 +4141,7 @@ Intro_CharS_LoadVRAM:
 	
 	; Delay $14 frames.
 	ld   a, $14
-	call Intro_ChkStartPressed_MultiFrame
+	call Intro_Delay
 	
 	ld   a, $8C		; 1P Pal
 	ldh  [rOBP0], a
@@ -4364,19 +4361,20 @@ Intro_IoriKyo_LoadVRAM:
 	ldh  [rBGP], a
 	ret
 	
-; =============== Intro_ChkStartPressed_MultiFrame ===============
-; Checks if the START button is pressed for the specified amount of frames.
-; While this happens the task is essentially paused.
+; =============== Intro_Delay ===============
+; Pauses/delays the cutscene for the specified amount of frames.
+; While this happens, it checks for the START button, which, if pressed,
+; ends the intro early.
 ; IN
-; - A: Frames to check
-Intro_ChkStartPressed_MultiFrame:
+; - A: Frames to wait
+Intro_Delay:
 	push af
 		call Intro_Base_IsStartPressed			; Pressed START?
 		jp   c, Intro_End						; If so, end the intro
 		call Task_PassControl_NoDelay
 	pop  af
 	dec  a										; Waited all frames?
-	jp   nz, Intro_ChkStartPressed_MultiFrame	; If not, loop
+	jp   nz, Intro_Delay						; If not, loop
 	ret
 	
 ; =============== Intro_Base_IsStartPressed ===============
@@ -5261,7 +5259,7 @@ IF REV_LANG_EN == 1
 ; The menus load the 1bpp text over this, and reuse the cursor already loaded here.
 Title_LoadVRAM:
 	; Title screen & menu sprites
-	ld   hl, GFXAuto_TitleOBJ 
+	ld   hl, GFXDef_TitleOBJ 
 	ld   de, Tiles_Begin		
 	call CopyTilesAutoNum
 	
@@ -5332,12 +5330,7 @@ BGLZ_Title_Logo: INCBIN "data/bg/en/title_logo.lzs"
 BG_Title_Clouds: INCBIN "data/bg/en/title_clouds.bin"
 ENDC
 
-
-GFXAuto_TitleOBJ:
-	db (GFXAuto_TitleOBJ.end-GFXAuto_TitleOBJ.start)/TILESIZE ; Number of tiles
-.start:
-	INCBIN "data/gfx/title_obj.bin"
-.end:
+GFXDef_TitleOBJ: mGfxDef "data/gfx/title_obj.bin"
 
 ENDC
 

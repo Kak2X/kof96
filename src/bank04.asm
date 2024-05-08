@@ -408,6 +408,7 @@ SGBPacket_StageMeter_Pal23:
 ; [TCRF]/[BUG] SGBPacket_StageMeter_Pal23 is applied later than these, and overwrites the stage-specific color 0-0 to be always $6B9E.
 ;              This renders unused the other 0-0 colors, though they are all similar to each other.
 ;              To fix this, apply SGBPacket_StageMeter_Pal23 before these.
+;              This problem was introduced in this game, since 95 lacked SGBPacket_StageMeter_Pal23.
 SGBPacket_Stage_Hero_Pal01: 
 	pkg SGB_PACKET_PAL01, $01
 	dw $6B9E ; 0-0
@@ -726,7 +727,7 @@ SGBPacket_Stage_Pat:
 ;        with every one using a different palette.
 
 ; Center Picture (Active Character)
-SGBPacket_Unused_WinScrPic95C_Pat:
+SGBPacket_Unused_WinScrPic95M_Pat:
 	pkg SGB_PACKET_ATTR_BLK, $01
 	db $01 ; 1 set
 	;--
@@ -924,6 +925,7 @@ SGBPacket_CopyBorderTiles1:
 	mIncJunk "L0443EA"
 SGBPacket_CopyBorderTilemap:
 	pkg SGB_PACKET_PCT_TRN, $01
+	db $00
 	db $00
 	db $00
 	db $00

@@ -81,7 +81,7 @@ Sound_ChkNewSnd:
 	ld   [hl], a				; Write it to hSndPlayCnt
 
 	; To determine the ID of the music track to play, use the counter as index to the table at wSndIdReqTbl.
-	; The value written there is treated as the BGM ID.
+	; The value written there is treated as the sound ID.
 
 	; A = wSndIdReqTbl[hSndPlayCnt]
 	add  a, LOW(wSndIdReqTbl)		; L = hSndPlayCnt + $F8
@@ -114,7 +114,7 @@ Sound_ChkNewSnd:
 	; DE = SndId - $80
 	sub  a, SND_BASE				; Remove SND_BASE from the id
 	ret  z							; Is it $00? (SND_NONE) If so, return
-	ld   e, a
+	ld   e, a						
 	xor  a
 	ld   d, a
 
@@ -152,14 +152,15 @@ Sound_ChkNewSnd:
 	; Jump there
 	jp   hl
 
-	; Sound command codes assignments. BGM always uses Sound_StartNewBGM, while sound effects pick it
-	; depending on the sound channel(s) the SFX needs to be played on.
-	; This is important because various subroutines pick a different base address for channel info,
-	; and you can only move down from there.
-	; (ie: when wSFXCh2Info is picked as base, the SFX can also use wSFXCh3Info and wSFXCh4Info, but not wSFXCh1Info)
-	;
-	; A few special commands are also here, like the Pause/Unpause one.
-	; Unused entries in the all table point to the dummy Sound_StartNothing.
+; =============== Sound_SndStartActionPtrTable ===============
+; Sound command codes assignments. BGM always uses Sound_StartNewBGM, while sound effects pick it
+; depending on the sound channel(s) the SFX needs to be played on.
+; This is important because various subroutines pick a different base address for channel info,
+; and you can only move down from there.
+; (ie: when wSFXCh2Info is picked as base, the SFX can also use wSFXCh3Info and wSFXCh4Info, but not wSFXCh1Info)
+;
+; A few special commands are also here, like the Pause/Unpause one.
+; Unused entries in the all table point to the dummy Sound_StartNothing.
 Sound_SndStartActionPtrTable:
 	dw Sound_StartNothing;X		; $00
 	dw Sound_StartNewBGM
@@ -222,7 +223,7 @@ Sound_StartNewBGM:
 	xor  a
 	ld   [wSnd_Unused_ChUsed], a
 	push bc
-	call Sound_StopAll
+		call Sound_StopAll
 	pop  bc
 	ld   de, wBGMCh1Info
 	jp   Sound_InitSongFromHeader
@@ -366,6 +367,7 @@ Sound_StartNewSFX4:
 ; - BC: Ptr to sound header data
 ; - DE: Ptr to the initial SndInfo (destination)
 Sound_InitSongFromHeader:
+
 	; HL = BC
 	ld   l, c
 	ld   h, b
@@ -416,10 +418,13 @@ ENDR
 	jr   nz, .chLoop	; If not, jump
 
 	; Fall-through
+	
+; =============== Sound_StartNothing ===============
+; Does absolutely nothing.
 Sound_StartNothing:
-	; [TCRF] Some kind of marker?
-	ld   a, $80
-	ld   [wSnd_Unk_Unused_D480], a
+	; [TCRF] Leftover from 95 to clear the requested sound ID, does nothing here.
+	ld   a, SND_NONE
+	ld   [wSnd_Unused_Set], a
 	ret
 
 ; =============== Sound_DoChSndInfo ===============
@@ -554,7 +559,7 @@ Sound_DoChSndInfo_Loop:
 	;------
 
 	;
-	; Otherwise, clear the MSB and treat it as a secondary index to a table of NR*3/NR*4 register data.
+	; Otherwise, clear the MSB and treat it as a secondary index to a table of NRx3/NRx4 register data.
 	; If the index is != 0, add the contents of iSndInfo_FreqDataIdBase to the index.
 	;
 
@@ -573,9 +578,9 @@ Sound_DoChSndInfo_Loop:
 
 	; offset table with 2 byte entries
 	ld   hl, Sound_FreqDataTbl	; HL = Tbl
-	ld   c, a				; BC = A
+	ld   c, a					; BC = A
 	ld   b, $00
-	add  hl, bc			; HL += BC * 2
+	add  hl, bc					; HL += BC * 2
 	add  hl, bc
 
 	; Read the entries from the table in ROM
@@ -613,7 +618,7 @@ Sound_DoChSndInfo_Loop:
 ;##
 	;
 	; Set the 'z' flag for a later check.
-	; If set, we won't be updating rNR*2 (C-1).
+	; If set, we won't be updating rNRx2 (C-1).
 	;
 
 	bit  SISB_SKIPNRx2, a			; ### Is the bit set?...
@@ -627,16 +632,16 @@ Sound_DoChSndInfo_Loop:
 	ld   a, [hl]					; Read out the ptr
 	ld   c, a						; Store it to C for $FF00+C access
 
-	; Check if we're skipping NR*2
+	; Check if we're skipping NRx2
 	jr   nz, .updateNRx3			; ### ...if so, skip
 
 .updateNRx2:
 
 	;
-	; Update NR*2 with the contents of iSndInfo_RegNRx2Data
+	; Update NRx2 with the contents of iSndInfo_RegNRx2Data
 	;
 
-	dec  c				; C--
+	dec  c				; C--, to NRx2
 
 	ld   hl, iSndInfo_RegNRx2Data	; Seek to iSndInfo_RegNRx2Data
 	add  hl, de
@@ -644,12 +649,12 @@ Sound_DoChSndInfo_Loop:
 	ld   a, [hl]		; Read out iSndInfo_RegNRx2Data
 	ld   [c], a			; Write to sound register
 
-	inc  c				; C++
+	inc  c				; C++, to NRx3
 
 .updateNRx3:
 
 	;
-	; Update NR*3 with the contents of iSndInfo_RegNRx3Data
+	; Update NRx3 with the contents of iSndInfo_RegNRx3Data
 	;
 
 	ld   hl, iSndInfo_RegNRx3Data	; Seek to iSndInfo_RegNRx3Data
@@ -660,7 +665,7 @@ Sound_DoChSndInfo_Loop:
 
 .updateNRx4:
 	;
-	; Update NR*4 with the contents of iSndInfo_RegNRx4Data
+	; Update NRx4 with the contents of iSndInfo_RegNRx4Data
 	;
 	ld   a, [hl]	; Read out iSndInfo_RegNRx4Data
 	ld   [c], a		; Write to sound register
@@ -694,7 +699,7 @@ Sound_DoChSndInfo_Loop:
 	jr   nc, .saveDataPtr	; If so, skip
 
 	;
-	; hSndInfoCurDataPtr++
+	; ++
 	;
 	ld   hl, hSndInfoCurDataPtr_Low
 	inc  [hl]				; LowByte++
@@ -740,15 +745,15 @@ Sound_DoChSndInfo_Loop:
 	and  a, $F0			; Remove low nybble
 	ld   [hl], a		; Write it back
 
-	;---------------------------
-
-	; [POI] It's not possible to get here with the flag SISB_USEDBYSFX set.
-	;       If somehow we got here, return immediately
+	;
+	; The remainder of the subroutine involves checks for muting the sound channel.
+	;
+	; If we're a BGM SndInfo and the channel is in use by a sound effect, 
+	; return immediately to avoid interfering.
+	;
 	ld   a, [de]					; Read iSndInfo_Status
 	bit  SISB_USEDBYSFX, a			; Is a sound effect playing on the channel?
 	jp   nz, Sound_DoChSndInfo_End	; If so, return (jumps to ret)
-
-	;---------------------------
 
 	;
 	; If both frequency bytes are zero, mute the sound channel.
@@ -765,12 +770,12 @@ Sound_DoChSndInfo_Loop:
 	; Depending on the currently modified channel, decide which channel to mute.
 	;
 	; This is done by checking at the register ptr, which doubles as channel marker.
-	; It will only ever point to the 4th register (rNR*3) of any given sound channel, thankfully.
+	; It will only ever point to the 4th register (rNRx3) of any given sound channel, thankfully.
 
 	ld   hl, iSndInfo_RegPtr
 	add  hl, de
 
-	; If we were changing the frequency of any of these channels, jump
+	; Depending on the source address...
 	ld   a, [hl]
 	cp   SND_CH1_PTR
 	jr   z, .muteCh1
@@ -801,7 +806,7 @@ Sound_DoChSndInfo_Loop:
 	;---------------------------
 
 .chkReinit:
-	; If we skipped the NR*2 update (volume + ...), return immediately
+	; If we skipped the NRx2 update (volume + ...), return immediately
 	ld   a, [de]
 	bit  SISB_SKIPNRx2, a
 	jp   nz, Sound_DoChSndInfo_End
@@ -874,7 +879,7 @@ Sound_DoChSndInfo_Loop:
 .chkCh3EndType:
 	;
 	; Determine how we want to handle the end of channel playback when the length in ch3 expires.
-	; If the checks all pass, wSnd_Ch3StopLength is used as channel length (after which, the channel mutes itself).
+	; If the checks all pass, wSndCh3StopLength is used as channel length (after which, the channel mutes itself).
 	;
 
 	; Not applicable if we aren't editing ch3
@@ -890,7 +895,7 @@ Sound_DoChSndInfo_Loop:
 	jr   nz, .noStop			; If so, jump
 
 	; If the target length is marked as "none" ($FF), jump
-	ld   a, [wSnd_Ch3StopLength]
+	ld   a, [wSndCh3StopLength]
 	cp   SNDLEN_INFINITE
 	jr   z, .noStop
 
@@ -914,6 +919,9 @@ Sound_DoChSndInfo_Loop:
 	ld   a, [hl]
 	set  SNDCHFB_RESTART, a			; Restart channel
 	ld   [c], a
+	
+; =============== Sound_DoChSndInfo_End ===============
+; Just returns... in this game.
 Sound_DoChSndInfo_End:
 	ret
 
@@ -975,7 +983,7 @@ Sound_CmdPtrTbl:
 	dw Sound_Cmd_Ret
 	dw Sound_Cmd_WriteToNRx1
 	dw Sound_Cmd_SetSkipNRx2
-	dw Sound_Cmd_ClrSkipNRx2					; $10
+	dw Sound_Cmd_ClrSkipNRx2				; $10
 	dw Sound_Cmd_Unknown_Unused_SetStat6;X
 	dw Sound_Cmd_Unknown_Unused_ClrStat6;X
 	dw Sound_Cmd_SetWaveData
@@ -991,7 +999,6 @@ Sound_CmdPtrTbl:
 	dw Sound_DecDataPtr;X
 	dw Sound_DecDataPtr;X
 	dw Sound_DecDataPtr;X					; $1F
-.end:
 
 ; =============== Sound_DecDataPtr ===============
 ; Decrements the data ptr by 1.
@@ -1007,22 +1014,22 @@ Sound_DecDataPtr:
 	ret
 
 ; =============== Sound_Cmd_SetCh3StopLength ===============
-; Sets a new length value for channel 3 (wSnd_Ch3StopLength), and applies it immediately.
+; Sets a new length value for channel 3 (wSndCh3StopLength), and applies it immediately.
 ; Command data format:
 ; - 0: New length value
 Sound_Cmd_SetCh3StopLength:
 	; Read a value off the data ptr.
-	; wSnd_Ch3StopLength = ^(*hSndInfoCurDataPtr)
+	; wSndCh3StopLength = ^(*hSndInfoCurDataPtr)
 	ldh  a, [hSndInfoCurDataPtr_Low]	; Read out to HL
 	ld   l, a
 	ldh  a, [hSndInfoCurDataPtr_High]
 	ld   h, a
 	ld   a, [hl]						; Read value off current data ptr
 	cpl									; Invert the bits
-	ld   [wSnd_Ch3StopLength], a		; Write it
+	ld   [wSndCh3StopLength], a			; Write it
 
 	; If the length isn't "none" ($FF), write the value to the register immediately.
-	; This also means other attempts to write wSnd_Ch3StopLength need to be guarded by a $FF check.
+	; This also means other attempts to write wSndCh3StopLength need to be guarded by a $FF check.
 	cp   SNDLEN_INFINITE
 	ret  z
 	ldh  [rNR31], a
@@ -1049,15 +1056,16 @@ Sound_Cmd_AddToBaseFreqId:
 
 ; =============== Sound_Cmd_Unknown_Unused_SetStat6 ===============
 ; [TCRF] Unused subroutine.
-;        Sets otherwise unused SndInfo field.
+;        Sets an otherwise unused status flag, and clears an otherwise unused SndInfo field.
+;        Bizzarely used in 95.
 Sound_Cmd_Unknown_Unused_SetStat6:
 	; Set status flag 6
 	ld   a, [de]
 	set  SISB_UNUSED_6, a
 	ld   [de], a
 
-	; Write $00 to byte9
-	ld   hl, iSndInfo_Unknown_Unused_9
+	; Clear struct field 9
+	ld   hl, iSndInfo_Unknown_Unused_09
 	add  hl, de
 	ld   [hl], $00
 
@@ -1066,7 +1074,7 @@ Sound_Cmd_Unknown_Unused_SetStat6:
 
 ; =============== Sound_Cmd_Unknown_Unused_ClrStat6 ===============
 ; [TCRF] Unused subroutine.
-;        Clears otherwise unused SndInfo field.
+;        Clears an otherwise unused SndInfo field.
 Sound_Cmd_Unknown_Unused_ClrStat6:
 	; Clear status flag 6
 	ld   a, [de]
@@ -1077,7 +1085,7 @@ Sound_Cmd_Unknown_Unused_ClrStat6:
 	jp   Sound_DecDataPtr
 
 ; =============== Sound_Cmd_ClrSkipNRx2 ===============
-; Clears disable flag for NR*2 writes
+; Clears disable flag for NRx2 writes
 Sound_Cmd_ClrSkipNRx2:
 	ld   a, [de]
 	res  SISB_SKIPNRx2, a
@@ -1086,7 +1094,7 @@ Sound_Cmd_ClrSkipNRx2:
 	jp   Sound_DecDataPtr
 
 ; =============== Sound_Cmd_SetSkipNRx2 ===============
-; Sets disable flag for NR*2 writes
+; Sets disable flag for NRx2 writes
 Sound_Cmd_SetSkipNRx2:
 	ld   a, [de]
 	set  SISB_SKIPNRx2, a
@@ -1187,13 +1195,13 @@ Sound_Cmd_SetChEna:
 	; If we did this in the context of a BGM, copy the NR51 value to another address
 	ld   hl, iSndInfo_Status
 	add  hl, de
-	bit  SISB_SFX, [hl]		; Is the bit set?
+	bit  SISB_SFX, [hl]		; Are we a sound effect?
 	ret  nz					; If so, return
 	ld   [wSndEnaChBGM], a
 	ret
 
 ; =============== Sound_Cmd_WriteToNRx2 ===============
-; Writes the current sound channel data to NR*2, and updates the additional SndInfo fields.
+; Writes the current sound channel data to NRx2, and updates the additional SndInfo fields.
 ; Should only be used by BGM.
 ;
 ; Command data format:
@@ -1210,8 +1218,8 @@ Sound_Cmd_WriteToNRx2:
 	ld   hl, iSndInfo_RegPtr
 	add  hl, de
 
-	; Read the ptr to NR*2
-	ld   a, [hl]		; A = NR*3
+	; Read the ptr to NRx2
+	ld   a, [hl]		; A = NRx3
 	dec  a
 	ld   c, a
 
@@ -1247,7 +1255,7 @@ Sound_Cmd_WriteToNRx2:
 	ret
 
 ; =============== Sound_Cmd_WriteToNRx1 ===============
-; Writes the current sound channel data to NR*1, and updates the additional SndInfo fields.
+; Writes the current sound channel data to NRx1, and updates the additional SndInfo fields.
 ; Should only be used by BGM.
 ;
 ; Command data format:
@@ -1373,7 +1381,7 @@ Sound_Cmd_JpFromLoopByTimer:
 	ld   a, b
 	ldh  [hSndInfoCurDataPtr_High], a
 
-	dec  [hl]							; Decrement loop timer
+	dec  [hl]						; Decrement loop timer
 	jp   nz, Sound_Cmd_JpFromLoop	; Is it 0 now? If not, jump
 	;--
 	; [TCRF] Seemingly unreachable failsafe code, in case the loop timer was 1.
@@ -1412,7 +1420,7 @@ Sound_Cmd_JpFromLoopByTimer:
 
 ; =============== Sound_Cmd_JpFromLoop ===============
 ; If called directly as a sound command, this will always loop the sound channel without loop limit.
-
+;
 ; The next two data bytes will be treated as new hSndInfoCurDataPtr.
 ; Command data format:
 ; - 0: Sound data ptr (low byte)
@@ -1476,19 +1484,16 @@ Sound_Cmd_Call:
 		ld   hl, iSndInfo_DataPtrStackIdx
 		add  hl, de
 
-		; Decrement the stack index twice, since we're writing a pointer (2 bytes).
-		; Also, read it out to A, but since we'll be writing the data ptr to the "stack" with ldd,
-		; the value in A will only be decremented by one.
-		; (could have also used ldi, it isn't any slower)
+		; Get the stack index decremented by one.
+		; This is where the second byte of the old code ptr will get written to.
 		dec  [hl]
 		ld   a, [hl]
+		; The stack index itself has to be decremented twice, since we're writing a pointer (2 bytes).
 		dec  [hl]
 
-		; HL = A
+		; Index the stack location (at the aforemented second byte of the word entry)
 		ld   l, a
 		ld   h, $00
-
-		; Index the stack location (at the second byte of the word entry)
 		add  hl, de
 
 		; Write the second byte first
@@ -1497,9 +1502,10 @@ Sound_Cmd_Call:
 		; Then the first byte
 		ldh  a, [hSndInfoCurDataPtr_Low]
 		ld   [hl], a
+		
+		; Pop out the data ptr for the "subroutine". 
+		; This points to the proper place already, so decrement it once to balance out Sound_IncDataPtr.
 	pop  bc
-
-	; Replace the current data ptr with BC-1 (to account for Sound_IncDataPtr)
 	dec  bc
 	ld   a, c
 	ldh  [hSndInfoCurDataPtr_Low], a
@@ -1585,7 +1591,7 @@ Sound_Cmd_SetWaveData:
 ; - HL: Ptr to a wave set id
 Sound_SetWaveDataCustom:
 	; Disable wave ch
-	ld   a, $00
+	ld   a, SNDCH3_OFF
 	ldh  [rNR30], a
 
 	; Index the ptr table with wave sets
@@ -1665,20 +1671,18 @@ Sound_Cmd_EndCh:
 	xor  a
 	ld   [hl], a
 
-	; Seek to the NR*1 info of the BGM SndInfo of the current channel.
+	; HL -> Seek to the NRx1 info of the BGM SndInfo of the current channel.
 	; The SFX SndInfo are right after the ones for the BGM, which is why we move back.
 	ld   bc, -(SNDINFO_SIZE * 4) + iSndInfo_RegNRx1Data
 	add  hl, bc
 	push hl
-		; Seek to RegPtr of SFX SndInfo
+		; C -> Seek to NRx2
 		ld   hl, iSndInfo_RegPtr
 		add  hl, de
 		ld   a, [hl]
 	pop  hl
-
-	; Read it out to C (-1)
-	ld   c, a
-	dec  c
+	ld   c, a		; NRx3
+	dec  c			; -1 to NRx2
 
 
 .ch1ExtraClr:
@@ -1701,6 +1705,7 @@ Sound_Cmd_EndCh:
 	cp   SND_CH3_PTR		; Processing ch3?
 	jr   nz, .cpAll			; If not, jump
 
+.ch3:
 	; A = iSndInfo_RegNRx2Data
 	inc  hl			; Seek to iSndInfo_Unknown_Unused_NR10Data
 	inc  hl			; Seek to iSndInfo_VolPredict
@@ -1713,16 +1718,15 @@ Sound_Cmd_EndCh:
 	; Now copy over all of the BGM SndInfo to the registers.
 
 	;
-	; NR*1
+	; NRx1
 	;
-	dec  c				; Decrease C again since HL is pointing to iSndInfo_RegNRx1Data
+	dec  c				; Seek back to NRx1, since HL is pointing to iSndInfo_RegNRx1Data
 
-	; Write the value of the BGM iSndInfo_RegNRx1Data to NR*1
-	ldi  a, [hl]		; Seek to iSndInfo_Unknown_Unused_NR10Data
-	ld   [c], a
+	ldi  a, [hl]		; Read iSndInfo_RegNRx1Data, seek to SndInfo_Unknown_Unused_NR10Data
+	ld   [c], a			; Update NRx1
 
 	;
-	; NR*2
+	; NRx2
 	;
 
 	;
@@ -1731,7 +1735,7 @@ Sound_Cmd_EndCh:
 	;
 
 	inc  hl				; Seek to BGM iSndInfo_VolPredict
-	inc  c				; seek to NR*2
+	inc  c				; seek to NRx2
 	; B = BGM Volume info
 	ldi  a, [hl]
 	and  a, $F0				; Only in the upper nybble
@@ -1741,18 +1745,18 @@ Sound_Cmd_EndCh:
 	and  a, $0F				; Get rid of its volume info
 	add  b					; Merge it with the one from iSndInfo_VolPredict
 .cpNRx2:
-	ld   [c], a				; Write it to NR*2
+	ld   [c], a				; Write it to NRx2
 
 
 	;
-	; NR*3
+	; NRx3
 	;
 	inc  c
-	ldi  a, [hl]			; Seek to NR*4 too
+	ldi  a, [hl]			; Seek to NRx4 too
 	ld   [c], a
 
 	;
-	; NR*4
+	; NRx4
 	;
 	inc  c
 	push hl
@@ -1766,7 +1770,7 @@ Sound_Cmd_EndCh:
 	cp   SND_CH3_PTR	; Processing ch3?
 	jr   z, .stopCh3	; If so, jump
 
-	; Write BGM iSndInfo_RegNRx4Data to NR*4, and restart the tone
+	; Write BGM iSndInfo_RegNRx4Data to NRx4, and restart the tone
 	ldi  a, [hl]
 	or   a, SNDCHF_RESTART
 	ld   [c], a
@@ -1782,7 +1786,7 @@ Sound_Cmd_EndCh:
 	;
 
 	;--
-	; Write $00 to the sound register NR*2 to silence it.
+	; Write $00 to the sound register NRx2 to silence it.
 	; This is also done in Sound_SilenceCh, but it's repeated here just in case Sound_SilenceCh doesn't mute playback?)
 	ld   hl, iSndInfo_RegPtr
 	add  hl, de
@@ -1820,7 +1824,7 @@ Sound_Cmd_EndCh:
 	;       as is the useless $FF check.
 	;
 
-	ld   a, [wSnd_Ch3StopLength]
+	ld   a, [wSndCh3StopLength]
 	or   a
 	;--
 	ldi  a, [hl]			; Read from iSndInfo_RegNRx4Data, seek to iSndInfo_ChEnaMask
@@ -1885,7 +1889,7 @@ Sound_UpdateVolPredict:
 	ret
 
 ; =============== Sound_SilenceCh ===============
-; Writes $00 to the sound register NR*2, which silences the volume the sound channel (but doesn't disable it).
+; Writes $00 to the sound register NRx2, which silences the volume the sound channel (but doesn't disable it).
 ; This checks if the sound channel is being used by a sound effect, and if so, doesn't perform the write.
 ; IN
 ; - DE: SndInfo base ptr. Should be a wBGMCh*Info structure.
@@ -1987,7 +1991,8 @@ Sound_Init:
 	inc  hl				; Ptr++
 	dec  b				; Copied all bytes?
 	jr   nz, .loop		; If not, loop
-
+	; Fall-through
+	
 ; =============== Sound_StopAll ===============
 ; Reloads the sound driver, which stops any currently playing song.
 Sound_StopAll:
@@ -2021,8 +2026,9 @@ Sound_StopAll:
 	ldh  [rNR30], a		; Stop Ch3
 	ldh  [rNR51], a		; Silence all channels
 
-	ld   a, $80
-	ld   [wSnd_Unk_Unused_D480], a
+	; [TCRF] Leftover from 95's sound driver.
+	ld   a, SND_NONE
+	ld   [wSnd_Unused_Set], a
 	ret
 
 ; =============== Sound_Unused_InitCh1Regs ===============
@@ -2440,7 +2446,8 @@ GFXS_XFlipTbl:
 ; but they won't display correctly since the font GFX got truncated.
 TextPrinter_CharsetToTileTbl:
 ; [TCRF] These arrows are leftovers from KOF95, which told you the move inputs
-;        of the unlockable characters
+;        of the unlockable characters.
+;        They weren't part of the default fontset though.
 ;          ; $ID ;U ;JP ;EN ; NOTES
 IF REV_LANG_EN == 0
 	db $30 ; $00 ;X ; ↑ ; ↓

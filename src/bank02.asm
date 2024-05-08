@@ -1,15 +1,20 @@
 ; =============== MoveC_Base_None ===============
-; Temporary move used as default value when any move ends.
-; If no new move is set the frame after the move ended, we get here. (ie: when defeating an opponent)
+; *Intended* to be used to delete the KO'd player task when a round ends.
+; Set whenever a move ends, but we only get here when basic input is disabled after getting KO'd.
 MoveC_Base_None:
-	; [POI] Completely pointless code that does nothing.
+	; Wait until the intro/outro move is set
 	ld   hl, iPlInfo_IntroMoveId
 	add  hl, bc
 	ld   a, [hl]
-	or   a
-	jr   z, .ret
+	or   a				; Intro/outro move set?
+	jr   z, .ret		; If not, return
+	
+	; [POI] In 95, there was code here to delete the current task if iPlInfo_IntroMoveId
+	;       was set to MOVE_TASK_REMOVE.
+	;       For some reason, this got replaced by "jp .ret", so the KO'd player task lingers instead.
 	jp   .ret
-.unused: ; [TCRF] Unreferenced code
+	
+.unused_end:
 	call Play_Pl_EndMove
 .ret:
 	ret
@@ -20,6 +25,7 @@ MoveC_Base_Idle:
 	call Play_Pl_MoveByColiBoxOverlapX
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 	ret
+	
 ; =============== MoveC_Base_WalkH ===============
 ; Like MoveC_Base_Idle, but allowing horizontal movement.
 ; Used for walking horizontally.
@@ -61,26 +67,26 @@ MoveC_Base_ChargeMeter:
 	; Syncronize to end of anim frame
 	mMvC_ValFrameEnd .anim
 	
-	; If we reached Max Power, we can't charge anymore.
-	; This is checking iPlInfo_MaxPowDecSpeed since it's the very first
-	; variable that gets updated when we get in MAX Power mode.
-	ld   hl, iPlInfo_MaxPowDecSpeed
-	add  hl, bc
-	ld   a, [hl]
-	or   a				; iPlInfo_MaxPowDecSpeed != 0?
-	jp   nz, .end		; If so, jump
-	
-	; After the charge starts, only holding A+B is needed to continue it.
-	ld   hl, iPlInfo_JoyKeys
-	add  hl, bc
-	ld   a, [hl]
-	and  a, KEY_A|KEY_B	; Holding A+B?
-	cp   KEY_A|KEY_B	
-	jp   z, .anim		; If not, jump
-.end:
-	; If we got here, the charge is over
-	call Play_Pl_EndMove
-	jp   .ret
+		; If we reached Max Power, we can't charge anymore.
+		; This is checking iPlInfo_MaxPowDecSpeed since it's the very first
+		; variable that gets updated when we get in MAX Power mode.
+		ld   hl, iPlInfo_MaxPowDecSpeed
+		add  hl, bc
+		ld   a, [hl]
+		or   a				; iPlInfo_MaxPowDecSpeed != 0?
+		jp   nz, .end		; If so, jump
+		
+		; After the charge starts, only holding A+B is needed to continue it.
+		ld   hl, iPlInfo_JoyKeys
+		add  hl, bc
+		ld   a, [hl]
+		and  a, KEY_A|KEY_B	; Holding A+B?
+		cp   KEY_A|KEY_B	
+		jp   z, .anim		; If not, jump
+	.end:
+		; If we got here, the charge is over
+		call Play_Pl_EndMove
+		jp   .ret
 .anim:
 	; Continue animating it, which means the anim can restart
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
@@ -100,28 +106,28 @@ MoveC_Base_RunF:
 .chkPlaySFX:	
 	mMvC_ValFrameEnd .chkEnd
 
-	; Only when starting frame #1
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $00*OBJLSTPTR_ENTRYSIZE	; About to display #0?
-	jp   z, .chkEnd					; If so, skip
-	cp   $02*OBJLSTPTR_ENTRYSIZE	; About to display #2?
-	jp   z, .chkEnd					; If so, skip
+		; Only when starting frame #1
+		ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
+		add  hl, de
+		ld   a, [hl]
+		cp   $00*OBJLSTPTR_ENTRYSIZE	; About to display #0?
+		jp   z, .chkEnd					; If so, skip
+		cp   $02*OBJLSTPTR_ENTRYSIZE	; About to display #2?
+		jp   z, .chkEnd					; If so, skip
 
-	; Daimon uses its own SFX when running.
-	ld   hl, iPlInfo_CharId
-	add  hl, bc
-	ld   a, [hl]
-	cp   CHAR_ID_DAIMON		; iPlInfo_CharId == CHAR_ID_DAIMON?
-	jp   z, .daimon			; If so, jump
-.norm:
-	ld   a, SFX_STEP		; A = Default step SFX
-	jp   .playSFX
-.daimon:
-	ld   a, SFX_STEP_HEAVY	; A = Step SFX for Daimon
-.playSFX:
-	call HomeCall_Sound_ReqPlayExId	; Play that
+		; Daimon uses its own SFX when running.
+		ld   hl, iPlInfo_CharId
+		add  hl, bc
+		ld   a, [hl]
+		cp   CHAR_ID_DAIMON		; iPlInfo_CharId == CHAR_ID_DAIMON?
+		jp   z, .daimon			; If so, jump
+	.norm:
+		ld   a, SFX_STEP		; A = Default step SFX
+		jp   .playSFX
+	.daimon:
+		ld   a, SFX_STEP_HEAVY	; A = Step SFX for Daimon
+	.playSFX:
+		call HomeCall_Sound_ReqPlayExId	; Play that
 	
 .chkEnd:
 	;
@@ -162,9 +168,9 @@ MoveC_Base_RunF:
 .ret:
 	ret
 	
-; =============== MoveC_Base_DashB ===============
+; =============== MoveC_Base_HopB ===============
 ; Custom code for dashing backwards (MOVE_SHARED_HOP_B).
-MoveC_Base_DashB:
+MoveC_Base_HopB:
 	call Play_Pl_MoveByColiBoxOverlapX
 	mMvC_ValLoaded .ret
 	
@@ -201,34 +207,34 @@ MoveC_Base_DashB:
 .initJump:
 	; Initialize the jump speed the first time we get here.
 	; From the next, only perform the check to switch to the next frame.
-	ld   hl, iOBJInfo_Status
-	add  hl, de
-	bit  OSTB_GFXNEWLOAD, [hl]	; Is this the first time we get here?
-	jp   z, .waitUp				; If not, jump
-.firstInit:
-	; Set jump left 3px/frame
-	mMvC_SetSpeedH -$0300				
-	; Set jump up 3px/frame 
-	mMvC_SetSpeedV -$0300
-	; Already start applying gravity, which will cause OBJLstS_ReqAnimOnGtYSpeed to immediately
-	; request a frame switch as we'll already be moving > -3px/frame.
-	jp   .moveDown
+	mMvC_ValFrameStartFast .waitUp	; If not, jump
+	
+		; 95 checked the jump direction here, going off the the move ID (MOVE_SHARED_HOP_F / MOVE_SHARED_HOP_B).
+		; The forwards hop is gone from this game, so the direction is hardcoded.
+	
+		; Set jump left 3px/frame
+		mMvC_SetSpeedH -$0300				
+		; Set jump up 3px/frame 
+		mMvC_SetSpeedV -$0300
+		; Already start applying gravity, which will cause OBJLstS_ReqAnimOnGtYSpeed to immediately
+		; request a frame switch as we'll already be moving > -3px/frame.
+		jp   .moveDown
 .waitUp:
 	mMvC_NextFrameOnGtYSpeed -$03, ANIMSPEED_NONE
-	; Apply gravity
-	jp   .moveDown
+		; Apply gravity
+		jp   .moveDown
 ; --------------- common frames #0-1 ---------------
 .moveDown:
 	; Move down 0.6px/frame
 	mMvC_ChkGravityHV $0060, .anim				; If not, jump
-	; Otherwise, request the next frame to load as soon as possible
-	mMvC_SetLandFrame $02*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
-	jp   .ret
+		; Otherwise, request the next frame to load as soon as possible
+		mMvC_SetLandFrame $02*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+		jp   .ret
 ; --------------- frame #2 ---------------
 .chkEnd:
 	mMvC_ValFrameEnd .anim
-	call Play_Pl_EndMove
-	jr   .ret
+		call Play_Pl_EndMove
+		jr   .ret
 .anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
 .ret:
@@ -266,41 +272,41 @@ MoveC_Base_NormA:
 ; --------------- frame #0 ---------------
 .obj0:
 	mMvC_ValFrameEnd .move
-	mMvC_SetAnimSpeed $12
-	jp   .move
+		mMvC_SetAnimSpeed $12
+		jp   .move
 ; --------------- frame #1 ---------------
 .obj1:
 	mMvC_ValFrameEnd .move
-	mMvC_SetAnimSpeed $03
-	jp   .move
+		mMvC_SetAnimSpeed $03
+		jp   .move
 ; --------------- frame #2 ---------------
 ; Manual control for #3, as it ends only when touching the ground
 .obj2:
 	mMvC_ValFrameEnd .move
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	jp   .move
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		jp   .move
 ; --------------- common frames #0-3 ---------------
 .move:
 	; Gradually decrease the vertical speed originally set by the jump move
 	mMvC_ChkGravityHV $0060, .anim						; If not, jump
 	
-	; Otherwise, switch to the landing frame.
-	
-	; Like with the jump move, allow starting specials when landing
-	ld   hl, iPlInfo_Flags1
-	add  hl, bc
-	res  PF1B_NOSPECSTART, [hl]
-	
-	; Switch to #4 and stay there for the least possible time
-	mMvC_SetLandFrame $04*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
-	jp   .ret
-	
+		; Otherwise, switch to the landing frame.
+		
+		; Like with the jump move, allow starting specials when landing
+		ld   hl, iPlInfo_Flags1
+		add  hl, bc
+		res  PF1B_NOSPECSTART, [hl]
+		
+		; Switch to #4 and stay there for the least possible time
+		mMvC_SetLandFrame $04*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+		jp   .ret
+		
 ; --------------- frame #4 ---------------
 ; Wait for the animation to advance before ending the move.
 .chkEnd:
 	mMvC_ValFrameEnd .anim
-	call Play_Pl_EndMove
-	jr   .ret
+		call Play_Pl_EndMove
+		jr   .ret
 ; --------------- common ---------------
 .anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
@@ -387,14 +393,13 @@ MoveC_Base_NormL:
 ; --------------- frames #2-(end) ---------------
 .obj2x:
 	mMvC_ChkTarget_jr .chkEnd
-	jr   .anim
+		jr   .anim
 ; --------------- frame #0 ---------------
 ; Play a SGB/DMG SFX when switching to #1.
 .obj0:
 	mMvC_ValFrameEnd .anim
-	ld   a, SCT_LIGHT
-	call HomeCall_Sound_ReqPlayExId
-	jp   .anim
+		mMvC_PlaySound SCT_LIGHT
+		jp   .anim
 ; --------------- frame #1 ---------------
 ; When switching to frame #2, check if we're pressing any punch/kick button.
 ; If so, make the animation immediately jump to its last frame.
@@ -403,37 +408,37 @@ MoveC_Base_NormL:
 	; If not switching yet, continue
 	mMvC_ValFrameEnd .anim
 	
-	; If we aren't pressing a punch/kick button, continue
-	ld   hl, iPlInfo_JoyBufKeysLH
-	add  hl, bc
-	ld   a, [hl]
-	and  a, KEP_A_LIGHT|KEP_B_LIGHT|KEP_A_HEAVY|KEP_B_HEAVY
-	jr   z, .anim
+		; If we aren't pressing a punch/kick button, continue
+		ld   hl, iPlInfo_JoyBufKeysLH
+		add  hl, bc
+		ld   a, [hl]
+		and  a, KEP_A_LIGHT|KEP_B_LIGHT|KEP_A_HEAVY|KEP_B_HEAVY
+		jr   z, .anim
+			
+		; Speed up the rest of the anim as much as possible
+		; and make the next frame start immediately.
+		ld   hl, iOBJInfo_FrameLeft
+		add  hl, de
+		ld   [hl], $00
+		mMvC_SetAnimSpeed ANIMSPEED_INSTANT
 		
-	; Speed up the rest of the anim as much as possible
-	; and make the next frame start immediately.
-	ld   hl, iOBJInfo_FrameLeft
-	add  hl, de
-	ld   [hl], $00
-	mMvC_SetAnimSpeed ANIMSPEED_INSTANT
-	
-	; iOBJInfo_OBJLstPtrTblOffset = iPlInfo_OBJLstPtrTblOffsetMoveEnd - 4.
-	; Because iOBJInfo_FrameLeft was just set to $00, the animation function
-	; will advance iOBJInfo_OBJLstPtrTblOffset by 4, making it reach the target sprite.
-	; Of course the graphics still have to load for .chkEnd to be reached.
-	ld   hl, iPlInfo_OBJLstPtrTblOffsetMoveEnd
-	add  hl, bc
-	ld   a, [hl]						; A = iPlInfo_OBJLstPtrTblOffsetMoveEnd - 4
-	sub  a, $01*OBJLSTPTR_ENTRYSIZE
-	ld   hl, iOBJInfo_OBJLstPtrTblOffset
-	add  hl, de							
-	ld   [hl], a						; iOBJInfo_OBJLstPtrTblOffset = A
-	jr   .anim
+		; iOBJInfo_OBJLstPtrTblOffset = iPlInfo_OBJLstPtrTblOffsetMoveEnd - 4.
+		; Because iOBJInfo_FrameLeft was just set to $00, the animation function
+		; will advance iOBJInfo_OBJLstPtrTblOffset by 4, making it reach the target sprite.
+		; Of course the graphics still have to load for .chkEnd to be reached.
+		ld   hl, iPlInfo_OBJLstPtrTblOffsetMoveEnd
+		add  hl, bc
+		ld   a, [hl]						; A = iPlInfo_OBJLstPtrTblOffsetMoveEnd - 4
+		sub  a, $01*OBJLSTPTR_ENTRYSIZE
+		ld   hl, iOBJInfo_OBJLstPtrTblOffset
+		add  hl, de							
+		ld   [hl], a						; iOBJInfo_OBJLstPtrTblOffset = A
+		jr   .anim
 ; --------------- common ---------------
 .chkEnd:
 	mMvC_ValFrameEnd .anim
-	call Play_Pl_EndMove
-	jr   .ret
+		call Play_Pl_EndMove
+		jr   .ret
 .anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 .ret:
@@ -449,20 +454,21 @@ MoveC_Base_NormH:
 	; Only check when the frame is about to switch, before the
 	; graphics for the next one start loading.
 	mMvC_ValFrameEnd .anim
-	ld   hl, iOBJInfo_OBJLstPtrTblOffset
-	add  hl, de			
-	ld   a, [hl]							; A = Internal frame ID
-	ld   hl, iPlInfo_OBJLstPtrTblOffsetMoveEnd
-	add  hl, bc								; HP = Ptr to target frame ID
-	cp   a, [hl]							; Do they match?
-	jr   nz, .anim							; If not, jump
-	; Otherwise, we're done
-	call Play_Pl_EndMove
-	jr   .ret
+		ld   hl, iOBJInfo_OBJLstPtrTblOffset
+		add  hl, de			
+		ld   a, [hl]							; A = Internal frame ID
+		ld   hl, iPlInfo_OBJLstPtrTblOffsetMoveEnd
+		add  hl, bc								; HP = Ptr to target frame ID
+		cp   a, [hl]							; Do they match?
+		jr   nz, .anim							; If not, jump
+		; Otherwise, we're done
+		call Play_Pl_EndMove
+		jr   .ret
 .anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 .ret:
 	ret
+	
 ; =============== MoveC_Base_Roll ===============
 ; Custom code for rolling. (MOVE_SHARED_ROLL_F, MOVE_SHARED_ROLL_B)
 MoveC_Base_Roll:
@@ -612,50 +618,50 @@ MoveC_Base_RoundStart:
 ; --------------- frames #1-(end) ---------------	
 	; Check if we can end the move when the target ID is reached
 	mMvC_ChkTarget .chkEnd
-	jp   .anim		; Otherwise, just animate normally
+		jp   .anim		; Otherwise, just animate normally
 	
 ; --------------- frame #0 ---------------
 .initAnimSpeed:
 	; Set the animation speed when about to switch to frame #1
 	mMvC_ValFrameEnd .anim
 	
-	; These characters use speed $02 from the second frame.
-	; Everyone else keeps their existing speed settings.
-	ld   hl, iPlInfo_CharId
-	add  hl, bc
-	ld   a, [hl]
-	cp   CHAR_ID_ATHENA
-	jp   z, .spdFast
-	cp   CHAR_ID_LEONA
-	jp   z, .spdFast
-	cp   CHAR_ID_OLEONA
-	jp   z, .spdFast
-	cp   CHAR_ID_IORI
-	jp   z, .spdFast
-	cp   CHAR_ID_OIORI
-	jp   z, .spdFast
-	cp   CHAR_ID_KRAUSER
-	jp   z, .spdFast
-	cp   CHAR_ID_MRKARATE
-	jp   z, .spdFast
-	jp   .anim
-.spdFast:
-	ld   a, $02		; A = Anim speed
-	jp   .setSpeed
-; [TCRF] Unreferenced speed setting.
-.unused_spdSlow:
-	ld   a, $03		; A = Anim speed
-.setSpeed:
-	ld   hl, iOBJInfo_FrameTotal
-	add  hl, de
-	ld   [hl], a	; Save it
-	jp   .anim
+		; These characters use speed $02 from the second frame.
+		; Everyone else keeps their existing speed settings.
+		ld   hl, iPlInfo_CharId
+		add  hl, bc
+		ld   a, [hl]
+		cp   CHAR_ID_ATHENA
+		jp   z, .spdFast
+		cp   CHAR_ID_LEONA
+		jp   z, .spdFast
+		cp   CHAR_ID_OLEONA
+		jp   z, .spdFast
+		cp   CHAR_ID_IORI
+		jp   z, .spdFast
+		cp   CHAR_ID_OIORI
+		jp   z, .spdFast
+		cp   CHAR_ID_KRAUSER
+		jp   z, .spdFast
+		cp   CHAR_ID_MRKARATE
+		jp   z, .spdFast
+		jp   .anim
+	.spdFast:
+		ld   a, $02		; A = Anim speed
+		jp   .setSpeed
+	; [TCRF] Unreferenced speed setting, was used in 95.
+	.unused_spdSlow:
+		ld   a, $03		; A = Anim speed
+	.setSpeed:
+		ld   hl, iOBJInfo_FrameTotal
+		add  hl, de
+		ld   [hl], a	; Save it
+		jp   .anim
 ; --------------- end ---------------	
 .chkEnd:
 	; End the move when the animation advances
 	mMvC_ValFrameEnd .anim
-	call Play_Pl_EndMove
-	jr   .ret
+		call Play_Pl_EndMove
+		jr   .ret
 ; --------------- common ---------------	
 .anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
@@ -735,22 +741,19 @@ MoveC_Base_WakeUp:
 	
 ; --------------- frame #0 ---------------
 .obj0:
-	ld   hl, iOBJInfo_Status
-	add  hl, de
-	bit  OSTB_GFXNEWLOAD, [hl]	; First time we get here?
-	jp   z, .notFirst			; If not, skip
-	; Allow cancelling wakeup into special
-	ld   hl, iPlInfo_Flags1
-	add  hl, bc
-	res  PF1B_NOSPECSTART, [hl]
+	mMvC_ValFrameStartFast .notFirst	; First time we get here? ; If not, skip		
+		; Allow cancelling wakeup into special
+		ld   hl, iPlInfo_Flags1
+		add  hl, bc
+		res  PF1B_NOSPECSTART, [hl]
 .notFirst:
 	jp   .anim
 ; --------------- frame #1 ---------------	
 .chkEnd:
 	; Special version of mMvC_EndMoveOnInternalFrameEnd here
 	mMvC_ValFrameEnd .anim 		; About to advance the anim? If not, skip to .anim
-	call MoveC_Base_WakeUp_End	; Otherwise, end the move
-	jp   .ret					; And return
+		call MoveC_Base_WakeUp_End	; Otherwise, end the move
+		jp   .ret					; And return
 .anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 .ret:
@@ -782,7 +785,7 @@ MoveC_Base_WakeUp_End:
 	; Don't dizzy on the next drop to ground
 	ld   [hl], $00		; iPlInfo_DizzyNext = 0
 	
-	; We can be throw immediately in the dizzy state
+	; We can be thrown immediately in the dizzy state
 	ld   hl, iPlInfo_NoThrowTimer
 	add  hl, bc
 	ld   [hl], $00
@@ -834,9 +837,8 @@ MoveC_Base_Dizzy:
 
 	; Play a SFX every time the animation internally switches to the next frame
 	mMvC_ValFrameEnd .anim
-	ld   a, SCT_DIZZY
-	call HomeCall_Sound_ReqPlayExId
-	jp   .anim
+		mMvC_PlaySound SCT_DIZZY
+		jp   .anim
 .end:
 	call Play_Pl_EndMove
 	jr   .ret
@@ -1056,18 +1058,14 @@ Play_SpawnTerryHat:
 			; - $10px right
 			; - $30px above
 			call OBJLstS_Overlap		; Move on top of player
-			ld   hl, +$1000				; Move $10px forward
-			call Play_OBJLstS_MoveH_ByXFlipR
-			ld   hl, -$3000				; Move $30px up
-			call Play_OBJLstS_MoveV
+			mMvC_SetMoveH +$1000		; Move $10px forward
+			mMvC_SetMoveV -$3000		; Move $30px up
 			
 			; Set throw speed arc:
 			; - $10px forward
 			; - $03px up
-			ld   hl, +$0100
-			call Play_OBJLstS_SetSpeedH_ByXFlipR
-			ld   hl, -$0300
-			call Play_OBJLstS_SetSpeedV
+			mMvC_SetSpeedH +$0100
+			mMvC_SetSpeedV -$0300
 		pop  de
 	pop  bc
 	ret
@@ -1359,18 +1357,10 @@ HitTypeC_Blocked:
 	jp   c, .retMoveStart			; If so, jump
 	
 	;
-	; Considerably slow down if we aren't in the middle of the knockback move (read: still executing MOVE_SHARED_BLOCK_*).
-	; Knockback affects the player's speed, so we don't want to mess with that.
-	; In the case of ground blocking, we set up the knockback.
+	; Now that blockstun is over, determine which move to transition to.
+	; These post-blockstun moves deal knockbacks, pushing away the player.
 	;
-	; This works because this subroutine is called for any blocked hit, but it
-	; does *NOT* set the block move, as that's handled by the basic input handler.
-	; That handler is only executed if there isn't a move in progress already.
-	; Since we're setting MOVE_SHARED_POST_BLOCKSTUN if we're in one of the block moves,
-	; it prevents executing the handler until knockback ends. If we hit the opponent quickly
-	; enough, we'll be getting here with MOVE_SHARED_POST_BLOCKSTUN set, which falls down to .retMoveStart.
-	;
-	; Air blocking doesn't set a different move, so any hit slows down our descent.
+	; Air blocking is special though (see below)
 	;
 	call Play_Pl_MoveByColiBoxOverlapX
 	ld   hl, iPlInfo_MoveId
@@ -1384,17 +1374,18 @@ HitTypeC_Blocked:
 	jp   z, .blockGround		; If so, jump
 	; while air blocks continue as-is
 	cp   MOVE_SHARED_BLOCK_A	; Doing the air block?
-	jp   z, .blockGeneric		; If so, jump
+	jp   z, .blockAir			; If so, jump
 	
-	; We were on the ground and executed the slowdown logic already.
-	; Skip to the end (with .retMoveStart).
+	; Otherwise, we're being hit during a post blockstun move.
+	; This can happen when blocking multiple quick hits, before the knockback move ends.
+	; In that case, just skip to the end and don't interfere.
 	jp   .retMoveStart
 	
 .blockGround:
-	; Directly switch to post ground blockstun move
+	; Directly switch to the post ground blockstun move
 	ld   [hl], MOVE_SHARED_POST_BLOCKSTUN
 	jp   .retNoStart
-.blockGeneric:
+.blockAir:
 	; Delay the block as much as possible.
 	; Especially important for air blocking, where we have to land on the ground first.
 	ld   hl, iOBJInfo_FrameLeft
@@ -1792,7 +1783,7 @@ HitTypeC_Drop_DB_A:
 .setJump:
 	call Play_OBJLstS_SetSpeedH_ByXDirL
 	
-	ld   hl, $0600				; 6px/frame up
+	ld   hl, $0600				; 6px/frame down
 	call Play_OBJLstS_SetSpeedV
 
 	scf	; C flag set
@@ -2036,7 +2027,6 @@ HitTypeC_SwoopUp:
 	ld   a, [hl]
 	cp   CHAR_ID_DAIMON			; Did we get hit by Daimon?
 	jp   nz, HitTypeC_SwoopUp_ToProj	; If not, jump
-	
 	
 ; =============== HitTypeC_SwoopUp_Daimon ===============
 ; Command throw version for Daimon.
@@ -2295,13 +2285,13 @@ MoveS_PlayHitSFX:
 	; The sound effect used is different for "firey" moves (those with PF3B_FIRE set).
 	ld   hl, iPlInfo_Flags3
 	add  hl, bc						; Seek to iPlInfo_Flags3
-	bit  PF3B_FIRE, [hl]	; Is this a firey move?
+	bit  PF3B_FIRE, [hl]			; Is this a firey move?
 	jp   nz, .slowFlash				; If so, jump
 .noFlash:
 	ld   a, SCT_HIT					; A = SFX ID for normal hits
 	jp   .playSFX
 .slowFlash:
-	ld   a, SCT_FIREHIT					; A = SFX ID for firey hits
+	ld   a, SCT_FIREHIT				; A = SFX ID for firey hits
 .playSFX:
 	call HomeCall_Sound_ReqPlayExId
 	ret
@@ -2425,39 +2415,41 @@ HitTypeS_MovePlToOpFront:
 
 	;##
 	;
-	; [TCRF] This whole part is unnecessary.
+	; [TCRF] Leftover from 95.
 	;
-	; There's a separate, code path for getting hit by Ryo's Hien Shippu Kyaku.
-	; This does the same thing as the normal code path, except byte $83 (iPlInfo_Ryo_HienShippuKyaku_Unused_83)
-	; from the opponent's wPlInfo gets subtracted to the vertical position.
-	; It suggests the move would have hit multiple times in the air, using byte $83 to keep track of where to offset the player.
-	; 
-	; However, not only does the move not use byte $83, meaning it wouldn't act any different than the normal code path,
-	; but it also uses HitTypes that never call this subroutine anyway.
+	; This is supposed to vertically shift the player position on each of Ryo's Zanretsuken hits.
+	; Handled by subtracting a field (set by the move code) to the player's position.
+	;
+	; There's a problem however -- while Ryo is still in the game, that move was altered to not
+	; shift the player's position and was given to Mr. Karate instead.
+	;
+	; This means the move ID value checked here is essentially broken, and happened to map to 
+	; Hien Shippu Kyaku, which doesn't even use this hit type (making .unused_ryo unreachable).
 	;
 
 	; Perform the character check
 	ld   hl, iPlInfo_CharIdOther
 	add  hl, bc
 	ld   a, [hl]
-	cp   CHAR_ID_RYO					; Playing as RYO?
+	cp   CHAR_ID_RYO					; Opponent is RYO?
 	jp   z, .chkRyoMove					; If so, jump
 	jp   .norm							; Otherwise, skip
 .chkRyoMove:
+
+	;
+	; RYO
+	;
+	
 	; Perform the move check
 	ld   hl, iPlInfo_MoveIdOther
 	add  hl, bc
 	ld   a, [hl]
-	cp   MOVE_RYO_HIEN_SHIPPU_KYAKU_L	; Performing light version of Hien Shippu Kyaku?
+	cp   MOVE_RYO_HIEN_SHIPPUU_KYAKU_L	; Got hit by the light version of Hien Shippu Kyaku?
 	jp   z, .unused_ryo					; If so, jump
-	cp   MOVE_RYO_HIEN_SHIPPU_KYAKU_H	; Performing heavy version of Hien Shippu Kyaku?
+	cp   MOVE_RYO_HIEN_SHIPPUU_KYAKU_H	; Got hit by the heavy version of Hien Shippu Kyaku?
 	jp   z, .unused_ryo					; If so, jump
 	jp   .norm							; Otherwise, skip
 .unused_ryo:
-	;--
-	;
-	; RYO CASE
-	;
 
 	; Y Position -> Snap to the ground, but offset by the opponent's iPlInfo_Ryo_HienShippuKyaku_Unused_83
 	; iOBJInfo_Y = PL_FLOOR_POS - (opponent's)iPlInfo_Ryo_HienShippuKyaku_Unused_83
@@ -2492,7 +2484,7 @@ HitTypeS_MovePlToOpFront:
 	;##
 
 	;
-	; STANDARD CASE
+	; DEFAULT
 	;
 
 	; Y Position -> Snap to the ground
@@ -2562,7 +2554,7 @@ HitTypeS_SyncPlPosFromOtherPos:
 ; =============== HitTypeC_ThrowStart ===============
 ; ID: HITTYPE_THROW_START
 ;
-; This hit effect handles the second part of getting thrown, after the opponent's throw request was accepted,
+; This hit effect handles the second part of getting thrown, after the opponent's grab was accepted,
 ; and ends when the opponent gets into the second part of the throw (BasicInput_StartGroundThrow or BasicInput_StartAirThrow).
 ;
 ; We get here when the initial validation in Play_Pl_SetHitType.chkThrow passes, meaning we were in throw range
@@ -3385,7 +3377,8 @@ ENDC
 			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
 			
 			;
-			; When getting hit by a normal in the air, the player recovers before touching the ground.
+			; When getting hit by a normal or by a projectile in the air, the player 
+			; recovers before touching the ground.
 			; Otherwise, it's an hard drop.
 			;
 			bit  PF0B_PROJHIT, [hl]	; Did we get hit by a projectile?
@@ -5546,7 +5539,7 @@ MoveInputReader_Ryo:
 	;             SELECT + B               SELECT + A
 	mMvIn_ChkEasy MoveInit_Ryo_RyuKoRanbu, MoveInit_Ryo_KoHou_Hidden
 	
-	; But no actual air moves. This is pointless.
+	; But no actual air moves. This is likely a leftover from 95.
 	mMvIn_ChkGA Ryo, .chkAirPunch, .chkAirKick
 .chkAirPunch:
 .chkAirKick:
@@ -5575,8 +5568,8 @@ MoveInputReader_Ryo:
 	; End
 	jp   MoveInputReader_Ryo_NoMove
 .chkKick:
-	; DB+K -> Hien Shippu Kyaku
-	mMvIn_ChkDir MoveInput_DB, MoveInit_Ryo_HienShippuKyaku
+	; DB+K -> Hien Shippuu Kyaku
+	mMvIn_ChkDir MoveInput_DB, MoveInit_Ryo_HienShippuuKyaku
 	; End
 	jp   MoveInputReader_Ryo_NoMove
 ; =============== MoveInit_Ryo_KoOuKen ===============
@@ -5587,7 +5580,7 @@ MoveInit_Ryo_KoOuKen:
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
 	set  PF0B_PROJREM, [hl]
-	jp   MoveInputReader_Ryo_SetMove
+	jp   MoveInputReader_Ryo_MoveSet
 ; =============== MoveInit_Ryo_MouKoRaiJinGou ===============
 MoveInit_Ryo_MouKoRaiJinGou:
 	call Play_Pl_ClearJoyDirBuffer
@@ -5597,13 +5590,13 @@ MoveInit_Ryo_MouKoRaiJinGou:
 	add  hl, bc
 	set  PF1B_GUARD, [hl]
 	res  PF1B_CROUCH, [hl]
-	jp   MoveInputReader_Ryo_SetMove
-; =============== MoveInit_Ryo_HienShippuKyaku ===============
-MoveInit_Ryo_HienShippuKyaku:
+	jp   MoveInputReader_Ryo_MoveSet
+; =============== MoveInit_Ryo_HienShippuuKyaku ===============
+MoveInit_Ryo_HienShippuuKyaku:
 	call Play_Pl_ClearJoyDirBuffer
-	mMvIn_GetLH MOVE_RYO_HIEN_SHIPPU_KYAKU_L, MOVE_RYO_HIEN_SHIPPU_KYAKU_H
+	mMvIn_GetLH MOVE_RYO_HIEN_SHIPPUU_KYAKU_L, MOVE_RYO_HIEN_SHIPPUU_KYAKU_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	jp   MoveInputReader_Ryo_SetMove
+	jp   MoveInputReader_Ryo_MoveSet
 ; =============== MoveInit_Ryo_KoHou ===============
 MoveInit_Ryo_KoHou:
 	call Play_Pl_ClearJoyDirBuffer
@@ -5615,14 +5608,14 @@ MoveInit_Ryo_KoHou:
 	ld   hl, iPlInfo_Flags1
 	add  hl, bc
 	set  PF1B_INVULN, [hl]
-	jp   MoveInputReader_Ryo_SetMove
+	jp   MoveInputReader_Ryo_MoveSet
 ; =============== MoveInit_Ryo_KyokukenRyuRenbuKen ===============
 MoveInit_Ryo_KyokukenRyuRenbuKen:
 	call Play_Pl_ClearJoyDirBuffer
 	mMvIn_ValClose MoveInputReader_Ryo_NoMove
 	mMvIn_GetLH MOVE_RYO_KYOKUKEN_RYU_RENBU_KEN_L, MOVE_RYO_KYOKUKEN_RYU_RENBU_KEN_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	jp   MoveInputReader_Ryo_SetMove
+	jp   MoveInputReader_Ryo_MoveSet
 ; =============== MoveInit_Ryo_KoHou_Hidden ===============
 MoveInit_Ryo_KoHou_Hidden: 
 	call Play_Pl_ClearJoyDirBuffer
@@ -5633,13 +5626,13 @@ MoveInit_Ryo_KoHou_Hidden:
 	ld   hl, iPlInfo_Flags1
 	add  hl, bc
 	set  PF1B_INVULN, [hl]
-	jp   MoveInputReader_Ryo_SetMove
+	jp   MoveInputReader_Ryo_MoveSet
 ; =============== MoveInit_Ryo_RyuKoRanbu ===============
 MoveInit_Ryo_RyuKoRanbu:
 	call Play_Pl_ClearJoyDirBuffer
 	mMvIn_GetSD MOVE_RYO_RYU_KO_RANBU_S, MOVE_RYO_RYU_KO_RANBU_D
 	call MoveInputS_SetSpecMove_StopSpeed
-	jp   MoveInputReader_Ryo_SetMove
+	jp   MoveInputReader_Ryo_MoveSet
 ; =============== MoveInit_Ryo_HaohShokohKen ===============
 MoveInit_Ryo_HaohShokohKen:
 	mMvIn_ValProjActive Ryo
@@ -5647,9 +5640,9 @@ MoveInit_Ryo_HaohShokohKen:
 	mMvIn_GetSD MOVE_RYO_HAOH_SHOKOH_KEN_S, MOVE_RYO_HAOH_SHOKOH_KEN_D
 	call MoveInputS_SetSpecMove_StopSpeed
 	call Play_Proj_CopyMoveDamageFromPl
-	jp   MoveInputReader_Ryo_SetMove
-; =============== MoveInputReader_Ryo_SetMove ===============
-MoveInputReader_Ryo_SetMove:
+	jp   MoveInputReader_Ryo_MoveSet
+; =============== MoveInputReader_Ryo_MoveSet ===============
+MoveInputReader_Ryo_MoveSet:
 	scf
 	ret
 ; =============== MoveInputReader_Ryo_NoMove ===============
@@ -5787,7 +5780,7 @@ MoveC_Ryo_MouKoRaiJinGou:
 	ret
 	
 ; =============== MoveC_Ryo_HienShippuKyaku ===============
-; Move code for Ryo's Hien Shippu Kyaku  (MOVE_RYO_HIEN_SHIPPU_KYAKU_L, MOVE_RYO_HIEN_SHIPPU_KYAKU_H).
+; Move code for Ryo's Hien Shippu Kyaku  (MOVE_RYO_HIEN_SHIPPUU_KYAKU_L, MOVE_RYO_HIEN_SHIPPUU_KYAKU_H).
 MoveC_Ryo_HienShippuKyaku:
 	call Play_Pl_MoveByColiBoxOverlapX
 	mMvC_ValLoaded .ret
@@ -5843,7 +5836,7 @@ MoveC_Ryo_HienShippuKyaku:
 			ld   hl, iPlInfo_MoveId
 			add  hl, bc
 			ld   a, [hl]
-			cp   MOVE_RYO_HIEN_SHIPPU_KYAKU_H	; Using the heavy version?
+			cp   MOVE_RYO_HIEN_SHIPPUU_KYAKU_H	; Using the heavy version?
 			jp   z, .obj1_setNextH				; If so, jump
 		.obj1_setNextL:
 		pop  hl
@@ -7370,15 +7363,15 @@ MoveInputReader_Leona:
 	;##
 .chkPunchNorm:
 	; DU+P -> Moon Slasher
-	mMvIn_ChkDir MoveInput_DU_Slow, MoveInit_Leona_MoonSlasher
+	mMvIn_ChkDir MoveInput_DU_Charge, MoveInit_Leona_MoonSlasher
 	; BF+P -> Baltic Launcher
-	mMvIn_ChkDir MoveInput_BF_Slow, MoveInit_Leona_BalticLauncher
+	mMvIn_ChkDir MoveInput_BF_Charge, MoveInit_Leona_BalticLauncher
 	jp   MoveInputReader_Leona_NoMove
 .chkKick:
 	; DU+K -> X-Calibur
-	mMvIn_ChkDir MoveInput_DU_Slow, MoveInit_Leona_XCalibur
+	mMvIn_ChkDir MoveInput_DU_Charge, MoveInit_Leona_XCalibur
 	; BF+K -> Grand Sabre
-	mMvIn_ChkDir MoveInput_BF_Slow, MoveInit_Leona_GrandSabre
+	mMvIn_ChkDir MoveInput_BF_Charge, MoveInit_Leona_GrandSabre
 	jp   MoveInputReader_Leona_NoMove
 ; =============== MoveInit_Leona_BalticLauncher ===============
 MoveInit_Leona_BalticLauncher:
@@ -9381,22 +9374,22 @@ MoveC_Kyo_ThrowG:
 	jp   z, .obj1
 ; --------------- frame #0,#1-(end) ---------------
 	mMvC_ChkTarget .chkEnd
-	jp   .anim
+		jp   .anim
 ; --------------- frame #1 ---------------
 ; When visually switching to #2, hit the opponent.
 .obj1:
 	mMvC_ValFrameEnd .anim ; About to advance the anim? If not, skip to .anim
-	mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_HEAVYHIT ; 6 lines of damage on hit, make opponent drop on ground
-	jp   .anim
+		mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_HEAVYHIT ; 6 lines of damage on hit, make opponent drop on ground
+		jp   .anim
 ; --------------- common ---------------
 .chkEnd:
 	; Wait for the animation to advance before ending the move
 	mMvC_ValFrameEnd .anim
-	call Play_Pl_EndMove
-	; And when it does, also reset the throw sequence
-	xor  a
-	ld   [wPlayPlThrowActId], a
-	jr   .ret
+		call Play_Pl_EndMove
+		; And when it does, also reset the throw sequence
+		xor  a
+		ld   [wPlayPlThrowActId], a
+		jr   .ret
 .anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE
 .ret:

@@ -88,8 +88,8 @@ MoveInit_Iori_ScumGale:
 	set  PF1B_INVULN, [hl]
 	jp   MoveInputReader_Iori_SetMove
 ; =============== MoveInit_Iori_KinYaOtomeEscapeD ===============
-; [POI] Part of MoveInit_Iori_KinYaOtomeD used as failsafe, that may be inaccessible by normal means.
-;       No move also ever transitions to MOVE_IORI_KIN_YA_OTOME_ESCAPE_H.
+; [POI] Part of MoveInit_Iori_KinYaOtomeD used as failsafe, in case the opponent escapes.
+;       Triggerable if a projectile hits the opponent during the move.
 MoveInit_Iori_KinYaOtomeEscapeD:
 	call Play_Pl_ClearJoyDirBuffer
 	mMvIn_GetLH MOVE_IORI_KIN_YA_OTOME_ESCAPE_L, MOVE_IORI_KIN_YA_OTOME_ESCAPE_H

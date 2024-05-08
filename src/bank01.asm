@@ -3,7 +3,7 @@ GFXLZ_Play_PostRoundText: INCBIN "data/gfx/play_postroundtext.lzc"
 
 OBJInfoInit_Play_CharCross:
 	db $00 ; iOBJInfo_Status
-	db $10 ; iOBJInfo_OBJLstFlags
+	db OLF_USETILEFLAGS ; iOBJInfo_OBJLstFlags
 	db $00 ; iOBJInfo_OBJLstFlagsView
 	db $60 ; iOBJInfo_X
 	db $00 ; iOBJInfo_XSub
@@ -35,7 +35,7 @@ OBJInfoInit_Play_CharCross:
 	db $00 ; iOBJInfo_BufInfoPtr_High
 OBJInfoInit_Play_RoundText:
 	db $00 ; iOBJInfo_Status
-	db $10 ; iOBJInfo_OBJLstFlags
+	db OLF_USETILEFLAGS ; iOBJInfo_OBJLstFlags
 	db $00 ; iOBJInfo_OBJLstFlagsView
 	db $80 ; iOBJInfo_X
 	db $00 ; iOBJInfo_XSub
@@ -550,10 +550,10 @@ Play_Pause:
 	bit  PLB1, a		; Did 1P pause the game?
 	jp   z, .bg2P		; If not, jump
 .bg1P:
-	ld   hl, $9C46		; HL = Tilemap ptr for 1P side
+	ld   hl, vBGPause1P	; HL = Tilemap ptr for 1P side
 	jp   .drawBG
 .bg2P:
-	ld   hl, $9C4B		; HL = Tilemap ptr for 2P side
+	ld   hl, vBGPause2P	; HL = Tilemap ptr for 2P side
 .drawBG:
 	; This uses tile IDs $F9-$FB.
 	ld   b, $03			; B = Number of tiles
@@ -588,10 +588,10 @@ Play_Unpause:
 	bit  PLB1, a		; Did 1P pause the game?
 	jp   z, .bg2P		; If not, jump
 .bg1P:
-	ld   hl, $9C46		; HL = Tilemap ptr for 1P side
+	ld   hl, vBGPause1P	; HL = Tilemap ptr for 1P side
 	jp   .drawBG
 .bg2P:
-	ld   hl, $9C4B		; HL = Tilemap ptr for 2P side
+	ld   hl, vBGPause2P	; HL = Tilemap ptr for 2P side
 .drawBG:
 	; Fill with blank ($00) tiles
 	ld   b, $03			; B = Number of tiles
@@ -614,17 +614,17 @@ Play_FrameAdv:
 	ld   [wNoCopyGFXBuf], a
 	ld   a, [wPauseFlags]	; Save pause info
 	push af
-	xor  a					; Unpause the game
-	ld   [wPauseFlags], a
-	; Execute gameplay routines
-	call Play_DoPlInput
-	call Play_DoHUD
-	call Play_DoMisc
-	call Play_DoPlColi
-	call Play_WriteKeysToBuffer
-	call Play_DoScrollPos
-	call Play_ExecExOBJCode
-	call Task_PassControlFar
+		xor  a					; Unpause the game
+		ld   [wPauseFlags], a
+		; Execute gameplay routines
+		call Play_DoPlInput
+		call Play_DoHUD
+		call Play_DoMisc
+		call Play_DoPlColi
+		call Play_WriteKeysToBuffer
+		call Play_DoScrollPos
+		call Play_ExecExOBJCode
+		call Task_PassControlFar
 	pop  af					; Repause the game
 	ld   [wPauseFlags], a
 	ld   a, $01				; Pause player animations
@@ -704,7 +704,7 @@ mFlashPlPal: MACRO
 	bit  PF3B_FIRE, a		; bit1 set?	
 	jp   nz, .flashSlowB	; If so, jump
 	bit  PF3B_SUPERALT, a	; bit6 set?	
-	jp   nz, .flashSuperB		; If so, jump
+	jp   nz, .flashSuperB	; If so, jump
 	
 	;
 	; OBJ FLASHING (Set A) - NO SPECIAL RESTRICTION
@@ -1087,12 +1087,12 @@ mIncPlPow: MACRO
 	; When charging meter, increment at 0.5px/frame
 	ld   a, [\1+iPlInfo_MoveId]
 	cp   MOVE_SHARED_CHARGEMETER	; In the charge move?
-	jp   z, .chargeSpeed	; If so, jump
+	jp   z, .chargeSpeed			; If so, jump
 	
 	; If meter charges up automatically, do it at a slower rate (0.1px/frame)
 	ld   a, [wDipSwitch]
 	bit  DIPB_POWERUP, a	; Powerup cheat enabled?
-	jp   z, .end				; If not, jump 
+	jp   z, .end			; If not, jump 
 .autoSpeed:
 	ld   b, $0F		; B = Speed mask, slow (see also: mDecMaxPow)
 	jp   .tryInc
@@ -1481,6 +1481,9 @@ Play_CalcPlDistanceAndXFlip:
 ; This subroutine sets up the flags/fields which tell if the player are overlapping
 ; with something and with what.
 ; How this is actually used is something that the hit code (Pl_DoHit) decides.
+;
+; Identical code to the one in 95, except for a few iOBJInfo_OBJLstFlagsView turning 
+; into iOBJInfo_OBJLstFlags.
 Play_DoPlColi:
 	; Start by clearing out the collision flags from the last frame
 	xor  a
@@ -2451,7 +2454,7 @@ Play_ChkEnd_TimeOver:
 ; =============== Play_ChkEnd_Slowdown ===============
 Play_ChkEnd_Slowdown:
 	;
-	; Handles slowdown effect.
+	; Handles the slowdown effect.
 	; As long as slowdown is active, this takes control as main gameplay loop.
 	;
 	; This is here because the game slows down for a moment when KO'ing an opponent,
@@ -2525,7 +2528,7 @@ Play_ChkEnd_KO:
 .chkWaitPost:
 	; Execute main loop
 	ld   b, $01
-	call Play_MainLoop_PostRoundTextNoDisplay
+	call Play_MainLoop_PostRound
 .chkWaitPost1P:
 	; Players must be either in the idle move (winner/draw) or have no move (lost).
 	; This is to allow any currently executing move to finish.
@@ -2848,9 +2851,9 @@ Play_SetWinLoseMoves:
 	
 	; Add the health over, capping it at the standard value
 	add  a, h				; iPlInfo_Health += H
-	cp   $48				; Is it still < $48?
+	cp   PLAY_HEALTH_MAX	; Is it still < $48?
 	jp   c, .saveHealthInc	; If so, jump
-	ld   a, $48				; Otherwise, cap it
+	ld   a, PLAY_HEALTH_MAX	; Otherwise, cap it
 .saveHealthInc:
 	; Save the new health value
 	ld   hl, iPlInfo_Health
@@ -2872,7 +2875,7 @@ Play_SetWinLoseMoves:
 	ld   a, MOVE_SHARED_WIN_A	; A = Move ID to use
 	jr   .setWinMove
 .winAlt:
-	ld   a, MOVE_SHARED_WIN_B		; A = Move ID to use
+	ld   a, MOVE_SHARED_WIN_B	; A = Move ID to use
 .setWinMove:
 	ld   hl, iPlInfo_IntroMoveId
 	add  hl, bc				; Seek to iPlInfo_IntroMoveId
@@ -2891,10 +2894,10 @@ Play_SetWinLoseMoves:
 	or   a					; iPlInfo_Health != 0?
 	jr   nz, .loseTimeOver	; If so, jump
 .loseNorm:
-	; Otherwise, set a dummy value which gets ignored since the player tasks
-	; for dead players get destroyed.
-	; This really could have returned instead of setting this.
-	ld   a, MOVE_FF						; A = Move ID to use
+	; This is supposed to signal out to the current move (MOVE_SHARED_NONE) to kill the player task.
+	; Except... it doesn't work here. The task for the KO'd player just lingers around doing nothing
+	; until the round ends and both tasks are killed.
+	ld   a, MOVE_TASK_REMOVE			; A = Move ID to use
 	jr   .setLoseMove
 .loseTimeOver:
 	ld   a, MOVE_SHARED_LOST_TIMEOVER	; A = Move ID to use
@@ -2918,10 +2921,11 @@ Play_SetDrawMoves:
 	or   a					; iPlInfo_Health == 0?
 	jr   z, .doubleKo		; If so, it's a double KO (set dummy move)
 .timeOver:					; Otherwise, set a real move
+	; See Play_SetWinLoseMoves
 	ld   a, MOVE_SHARED_LOST_TIMEOVER
 	jr   .setMove
 .doubleKo:
-	ld   a, MOVE_FF
+	ld   a, MOVE_TASK_REMOVE
 .setMove:
 	ld   [wPlInfo_Pl1+iPlInfo_IntroMoveId], a
 	ld   [wPlInfo_Pl2+iPlInfo_IntroMoveId], a
@@ -2991,7 +2995,7 @@ Play_LoadPostRoundText0:
 
 	; Execute once a cut down version of the gameplay loop without the joypad reader.
 	ld   b, $01
-	call Play_MainLoop_PostRoundTextNoDisplay
+	call Play_MainLoop_PostRound
 	
 .chkWait1P:
 	; Players must be either in the idle move (winner/draw) or have no move (lost).
@@ -3026,7 +3030,7 @@ Play_LoadPostRoundText0:
 	
 	; Wait for 2 more frames
 	ld   b, $02
-	call Play_MainLoop_PostRoundTextNoDisplay
+	call Play_MainLoop_PostRound
 	
 .loadGFX:
 
@@ -3049,7 +3053,7 @@ Play_LoadPostRoundText0:
 	ld   [wNoCopyGFXBuf], a
 	call Task_PassControlFar
 	ld   b, $01
-	call Play_MainLoop_PostRoundTextNoDisplay
+	call Play_MainLoop_PostRound
 	
 	; Copy the first set of graphics over during HBlank
 	ld   hl, wLZSS_Buffer+$1E	; HL = Source ptr
@@ -3070,7 +3074,7 @@ Play_LoadPostRoundText0:
 	inc  hl
 	ld   [hl], HIGH(OBJLstPtrTable_PostRoundTextA)
 	ld   b, $01
-	call Play_MainLoop_PostRoundTextNoDisplay
+	call Play_MainLoop_PostRound
 	
 	;
 	; Load the OBJInfo for both crosses.
@@ -3083,14 +3087,14 @@ Play_LoadPostRoundText0:
 	ld   de, OBJInfoInit_Play_CharCross
 	call OBJLstS_InitFrom
 	ld   b, $01
-	call Play_MainLoop_PostRoundTextNoDisplay
+	call Play_MainLoop_PostRound
 	
 	; Over 1P's side
 	ld   hl, wOBJInfo_Pl1Cross+iOBJInfo_Status
 	ld   de, OBJInfoInit_Play_CharCross
 	call OBJLstS_InitFrom
 	ld   b, $01
-	call Play_MainLoop_PostRoundTextNoDisplay
+	call Play_MainLoop_PostRound
 	
 	ret
 	
@@ -3117,7 +3121,7 @@ Play_CopyPostRoundGFXToVRAM:
 		push de
 			push hl
 				ld   b, $01
-				call Play_MainLoop_PostRoundTextNoDisplay
+				call Play_MainLoop_PostRound
 			pop  hl
 		pop  de
 	pop  bc
@@ -3205,20 +3209,20 @@ Play_Set1PWin:
 	; and a round marker is filled on the winner side.
 	;
 	ld   hl, wPlInfo_Pl1+iPlInfo_SingleWinCount
-	inc  [hl]		; 1P Win Count++
+	inc  [hl]	; 1P Win Count++
 	
 	; Determine which of the two markers/boxes in the HUD to draw.
-	ld   a, [hl]		; Read counter
-	cp   $02			; Is this the second win?
-	jp   z, .boxWin2	; If so, jump
+	ld   a, [hl]			; Read counter
+	cp   $02				; Is this the second win?
+	jp   z, .boxWin2		; If so, jump
 .boxWin1:
-	ld   hl, $9C42		; Leftmost box for first win
+	ld   hl, vBGBoxWin1P0	; Leftmost box for first win
 	jp   .drawBox
 .boxWin2:
-	ld   hl, $9C43		; The one on its right for the second
+	ld   hl, vBGBoxWin1P1	; The one on its right for the second
 .drawBox:
-	ld   c, $74			; C = Tile ID for filled box
-	call CopyByteIfNotSingleFinalRound
+	ld   c, TID_BOX_FILL	; C = Tile ID for filled box
+	call Play_DrawWinBox
 	jp   .chkTextType
 	
 .team:
@@ -3326,13 +3330,13 @@ Play_Set2PWin:
 	cp   $02			; Is this the second win?
 	jp   z, .boxWin2	; If so, jump
 .boxWin1:
-	ld   hl, $9C51		; Leftmost box for first win
+	ld   hl, vBGBoxWin2P0	; Leftmost box for first win
 	jp   .drawBox
 .boxWin2:
-	ld   hl, $9C50		; The one on its right for the second
+	ld   hl, vBGBoxWin2P1	; The one on its right for the second
 .drawBox:
-	ld   c, $74			; C = Tile ID for filled box
-	call CopyByteIfNotSingleFinalRound
+	ld   c, TID_BOX_FILL	; C = Tile ID for filled box
+	call Play_DrawWinBox
 	jp   .chkTextType
 	
 .team:
@@ -3485,13 +3489,10 @@ Play_SetDraw:
 	ld   [hl], OST_VISIBLE
 	call Play_CenterRoundText
 	
+	; Set the sprite mapping
 	ld   a, PLAY_POSTROUND1_OBJ_DRAWGAME
-	
-	;--
-	; why
-	jp   .setOBJ
+	jp   .setOBJ ; [POI] Leftover from 95. There was an alternate "DOUBLE KO" sprite condition around here.
 .setOBJ:
-	;--
 
 	ld   [wOBJInfo_RoundText+iOBJInfo_OBJLstPtrTblOffset], a
 	call Task_PassControlFar
@@ -3501,11 +3502,11 @@ Play_SetDraw:
 	ld   b, 60
 	call Play_MainLoop_PostRoundTextDisplay
 	ret
-; =============== Play_MainLoop_PostRoundTextNoDisplay ===============
-; Version of the main loop used post-round when the text isn't visible.
+; =============== Play_MainLoop_PostRound ===============
+; Version of the main loop used post-round.
 ; IN
 ; - B: Frames of execution (usually short)
-Play_MainLoop_PostRoundTextNoDisplay:
+Play_MainLoop_PostRound:
 	push bc
 		call Play_DoPlInput
 		call Play_DoHUD
@@ -3516,11 +3517,12 @@ Play_MainLoop_PostRoundTextNoDisplay:
 		call Play_ExecExOBJCode
 		call Task_PassControlFar
 	pop  bc
-	dec  b											; Done all frames?	
-	jp   nz, Play_MainLoop_PostRoundTextNoDisplay	; If not, loop
+	dec  b								; Done all frames?	
+	jp   nz, Play_MainLoop_PostRound	; If not, loop
 	ret
 ; =============== Play_MainLoop_PostRoundTextDisplay ===============
 ; Version of the main loop used when displaying post-round text.
+; This is new to this game, 95 would use Play_MainLoop_PostRound for everything.
 ; IN
 ; - B: Frames of execution (at least 1 sec)
 Play_MainLoop_PostRoundTextDisplay:
@@ -3931,15 +3933,15 @@ ENDM
 	; Write filled bar to lowest tile
 	di
 	mWaitForVBlankOrHBlank
-	ld   a, TID_BAR_BASE			; Tile ID for filled bar.	
+	ld   a, TID_BAR_FILLED			; Tile ID for filled bar.	
 	ldd  [hl], a
 	ei
 	
 	; Write filled bar to 2nd-lowest tile
-	push af	; Save TID_BAR_BASE
+	push af	; Save TID_BAR_FILLED
 		di
 		mWaitForVBlankOrHBlank
-	pop  af	; Restore TID_BAR_BASE
+	pop  af	; Restore TID_BAR_FILLED
 	ldd  [hl], a			
 	ei
 	; No need to write it to the 3rd-lowest tile, as it's already seen done when the tip
@@ -3962,7 +3964,7 @@ ENDM
 	
 .flashBlank1P:
 	ld   a, [wPlInfo_Pl1+iPlInfo_HealthVisual]	; A = Current health
-	ld   b, $E0						; B = Tile ID for empty bar
+	ld   b, TID_BAR_EMPTY			; B = Tile ID for empty bar
 	ld   hl, vBGHealthBar1P_Last	; HL = Lowest tile of 1P health bar
 	
 	; To save time, only write to the non-empty tiles.	
@@ -3994,7 +3996,7 @@ ENDM
 .flashShow1P:
 	; Display the bar
 	ld   a, [wPlInfo_Pl1+iPlInfo_HealthVisual]	; A = Current health
-	ld   b, TID_BAR_BASE			; B = Tile ID for filled bar
+	ld   b, TID_BAR_FILLED			; B = Tile ID for filled bar
 	ld   hl, vBGHealthBar1P_Last	; HL = Lowest tile of 1P health bar
 	
 	; Move left from the lowest tile of the health bar, drawing completely filled tiles.
@@ -4033,11 +4035,11 @@ ENDM
 	;
 	
 	; TileId = $E7 + (Health % 8)
-	and  a, $07		; A = VisualHealth % 8
+	and  a, (TID_BAR_SIZE-1)			; A = VisualHealth % 8
 	; The tile for the empty tile is $E0, which doesn't work with the formula above
-	or   a						; Is it $00?
-	jp   z, .flashTipEmpty1P	; If so, skip
-	add  a, $E7					; Add tile ID base
+	or   a								; Is it $00?
+	jp   z, .flashTipEmpty1P			; If so, skip
+	add  a, TID_BAR_BASE+TID_BAR_SIZE	; Add tile ID base
 	; Write TileId to the tilemap
 	push af
 		di
@@ -4050,7 +4052,7 @@ ENDM
 	; Write $E0 to the tilemap
 	di
 	mWaitForVBlankOrHBlank
-	ld   a, $E0
+	ld   a, TID_BAR_EMPTY
 	ld   [hl], a
 	ei
 	
@@ -4096,7 +4098,7 @@ ENDM
 	; Write filled bar to lowest tile
 	di
 	mWaitForVBlankOrHBlank
-	ld   a, TID_BAR_BASE
+	ld   a, TID_BAR_FILLED
 	ldi  [hl], a
 	ei
 	
@@ -4122,7 +4124,7 @@ ENDM
 	
 .flashBlank2P:
 	ld   a, [wPlInfo_Pl2+iPlInfo_HealthVisual]	; A = Current health
-	ld   b, $E0				; B = Tile ID for empty bar
+	ld   b, TID_BAR_EMPTY	; B = Tile ID for empty bar
 	ld   hl, vBGHealthBar2P	; HL = Lowest tile of 2P health bar
 	
 	;
@@ -4150,7 +4152,7 @@ ENDM
 .flashShow2P:
 	; Display the bar
 	ld   a, [wPlInfo_Pl2+iPlInfo_HealthVisual]	; A = Current health
-	ld   b, TID_BAR_BASE		; B = Tile ID for filled bar
+	ld   b, TID_BAR_FILLED		; B = Tile ID for filled bar
 	ld   hl, vBGHealthBar2P		; HL = Lowest tile of 2P health bar
 	
 	; Move right from the lowest tile of the health bar, drawing completely filled tiles.
@@ -4162,7 +4164,7 @@ ENDM
 	sub  a, $08				; VisualHealth < $08?
 	jp   c, .flashTip2P		; If so, jump (tip already reached)
 	mDrawHealthBarTile
-	inc  hl					; Move left in tilemap
+	inc  hl					; Move right in tilemap
 	
 	;
 	; 2nd-lowest tile
@@ -4170,7 +4172,7 @@ ENDM
 	sub  a, $08				; VisualHealth < $10?
 	jp   c, .flashTip2P		; If so, jump 
 	mDrawHealthBarTile
-	inc  hl					; Move left in tilemap
+	inc  hl					; Move right in tilemap
 	
 	;
 	; 3rd-lowest tile
@@ -4185,10 +4187,10 @@ ENDM
 .flashTip2P:
 	; Draw the tip of the health bar.
 	; TileId = $E0 + (Health % 8)
-	and  a, $07
+	and  a, TID_BAR_SIZE-1
 	or   a						; This check is unnecessary for the 2P tilemap
 	jp   z, .flashTipEmpty2P	; as the empty bar and tile ID base are the same
-	add  a, $E0
+	add  a, TID_BAR_BASE+1
 	; Write TileId to the tilemap
 	push af
 		di
@@ -4201,7 +4203,7 @@ ENDM
 	; Write $E0 to the tilemap
 	di
 	mWaitForVBlankOrHBlank
-	ld   a, $E0
+	ld   a, TID_BAR_EMPTY
 	ld   [hl], a
 	ei
 .ret:
@@ -4715,7 +4717,7 @@ Play_UpdatePowBars:
 ; Draws part of the MAX Power bar from right to left,
 ; intended to be used when doing the scroll animation.
 ; IN
-; - E: Offset to the right corner of the bar, relative to wBGMaxPowBarRow
+; - E: Offset to the right corner of the bar, relative to vBGMaxPowBarRow
 ; - B: Bar content length (in tiles)
 ; - C: Tile ID for the bar contents.
 Play_DrawMaxPowBarFromR:
@@ -4784,7 +4786,7 @@ Play_DrawMaxPowBarFromR:
 ; intended to be used when doing the scroll animation.
 ; See also: Play_DrawMaxPowBarFromR
 ; IN
-; - E: Offset to the *left* corner of the bar, relative to wBGMaxPowBarRow
+; - E: Offset to the *left* corner of the bar, relative to vBGMaxPowBarRow
 ; - B: Bar content length (in tiles)
 ; - C: Tile ID for the bar contents.
 Play_DrawMaxPowBarFromL:
@@ -4828,7 +4830,7 @@ Play_DrawMaxPowBarFromL:
 ; Writes a tile to the tilemap for the MAX power bar.
 ; IN
 ; - A: Tile ID
-; - DE: Tilemap offset, relative to wBGMaxPowBarRow
+; - DE: Tilemap offset, relative to vBGMaxPowBarRow
 Play_WriteTileToMaxPowBar:
 	; Don't write off-screen tiles.
 	; This is checked because the scroll-in/scroll-out animation
@@ -4842,7 +4844,7 @@ Play_WriteTileToMaxPowBar:
 	pop  af
 	
 	; Get ptr to tilemap
-	ld   hl, wBGMaxPowBarRow	; HL = wBGMaxPowBarRow + DE
+	ld   hl, vBGMaxPowBarRow	; HL = vBGMaxPowBarRow + DE
 	add  hl, de
 	
 	; Wait for VRAM to be writable
@@ -4873,7 +4875,7 @@ Play_WriteTileToMaxPowBar:
 ; portion being filled in with repeated calls.
 ;
 ; IN
-; - HL: wBGMaxPowBarRow
+; - HL: vBGMaxPowBarRow
 ; - BC: Ptr to wPlInfo
 Play_Unused_ScrollInMaxPowBar1P:
 
@@ -5301,31 +5303,34 @@ Play_DrawFilledPowBar:
 ; IN
 ; - HL: Ptr to tilemap
 Play_DrawMaximumText:
+
+; =============== mDrawPowBarTileId ===============
+; IN
+; - \1: Tile ID
+; - \2: [OPTIONAL] Marks the last tile
+; - HL: Ptr to tilemap
+; OUT
+; - HL: Ptr to the tilemap + 1
+mDrawPowBarTileId: MACRO
+	mWaitForVBlankOrHBlank
+	ld   a, \1
+	IF _NARG > 1
+		ld   [hl], a
+	ELSE
+		ldi  [hl], a
+	ENDC
+ENDM
+
 	di
-	mWaitForVBlankOrHBlank
-	ld   a, $D8 ; M
-	ldi  [hl], a
-	mWaitForVBlankOrHBlank
-	ld   a, $D9 ; A
-	ldi  [hl], a
-	mWaitForVBlankOrHBlank
-	ld   a, $DA ; X
-	ldi  [hl], a
-	mWaitForVBlankOrHBlank
-	ld   a, $DB ; IM
-	ldi  [hl], a
-	mWaitForVBlankOrHBlank
-	ld   a, $DC ; M
-	ldi  [hl], a
-	mWaitForVBlankOrHBlank
-	ld   a, $DD ; U
-	ldi  [hl], a
-	mWaitForVBlankOrHBlank
-	ld   a, $DE ; M
-	ld   [hl], a
+	mDrawPowBarTileId $D8    ; M
+	mDrawPowBarTileId $D9    ; A
+	mDrawPowBarTileId $DA    ; X
+	mDrawPowBarTileId $DB    ; IM
+	mDrawPowBarTileId $DC    ; M
+	mDrawPowBarTileId $DD    ; U
+	mDrawPowBarTileId $DE, 1 ; M
 	ei
 	ret
-	
 	
 ; =============== Play_DoTime ===============
 ; Handles the round timer during gameplay.
@@ -5361,12 +5366,14 @@ Play_DoTime:
 	jp   z, .decTime
 	
 	; The rest is to handle the timer flashing with 10 or less seconds.
+	; This used to be a weird "21" threshold in 95.
 	ld   a, [wRoundTime]
 	cp   $11				; Timer < 11?
-	jp   c, .flashTime			; If so, jump
+	jp   c, .flashTime		; If so, jump
 	jp   Play_NoDrawTime	; Otherwise, return
 .flashTime:
-	; Show/hide the timer every 4 frames
+	; Show/hide the timer every 4 frames.
+	; Unlike 95, this uses the gameplay timer so pausing won't affect it.
 	ld   a, [wPlayTimer]
 	bit  2, a				; wPlayTimer & 4 == 0?
 	jp   nz, .flashTimeShow	; If not, jump

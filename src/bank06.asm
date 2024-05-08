@@ -64,7 +64,7 @@ MoveInputReader_Kyo:
 	
 ; GROUND SPECIALS
 .chkGround:
-	;             SELECT + B                       SELECT + A
+	;             SELECT + B                  SELECT + A
 	mMvIn_ChkEasy MoveInit_Kyo_UraOrochiNagi, MoveInit_Kyo_NueTumi
 	mMvIn_ChkGA Kyo, .chkPunch, .chkKick
 	
@@ -107,7 +107,7 @@ MoveInit_Kyo_AraKami:
 ; =============== MoveInit_Kyo_OniYaki ===============	
 MoveInit_Kyo_OniYaki:
 	call Play_Pl_ClearJoyDirBuffer
-	mMvIn_GetLH MOVE_KYO_ONIYAKI_L, MOVE_KYO_ONIYAKI_H
+	mMvIn_GetLH MOVE_KYO_ONI_YAKI_L, MOVE_KYO_ONI_YAKI_H
 	call MoveInputS_SetSpecMove_StopSpeed
 	; Same as above
 	ld   hl, iPlInfo_Flags1
@@ -887,7 +887,7 @@ MoveC_Kyo_DokuKami_ChkBatuYomiInput:
 	ret
 	
 ; =============== MoveC_Kyo_OniYaki ===============
-; Move code for Kyo's 100 Shiki Oni Yaki (MOVE_KYO_ONIYAKI_L, MOVE_KYO_ONIYAKI_H).
+; Move code for Kyo's 100 Shiki Oni Yaki (MOVE_KYO_ONI_YAKI_L, MOVE_KYO_ONI_YAKI_H).
 MoveC_Kyo_OniYaki:
 	call Play_Pl_MoveByColiBoxOverlapX
 	mMvC_ValLoaded .ret
@@ -1065,7 +1065,7 @@ MoveC_Kyo_RedKick:
 	jp   nc, .doGravity
 	jp   .doGravity
 ; --------------- frame #2 ---------------
-.obj2:;J
+.obj2:
 	mMvC_NextFrameOnGtYSpeed -$02, ANIMSPEED_NONE
 	jp   nc, .doGravity
 	mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_HEAVYHIT
@@ -1078,13 +1078,13 @@ MoveC_Kyo_RedKick:
 ; --------------- frame #4 / common gravity check ---------------
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
-	mMvC_SetLandFrame $05*OBJLSTPTR_ENTRYSIZE, $08
-	jp   .ret
+		mMvC_SetLandFrame $05*OBJLSTPTR_ENTRYSIZE, $08
+		jp   .ret
 ; --------------- frame #5 ---------------
 .chkEnd:
 	mMvC_ValFrameEnd .anim
-	call Play_Pl_EndMove
-	jr   .ret
+		call Play_Pl_EndMove
+		jr   .ret
 ; --------------- common ---------------
 .anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
@@ -1707,6 +1707,7 @@ MoveInputReader_Terry:
 	mMvIn_ChkDir MoveInput_FDF, MoveInit_Terry_PowerDunk
 	; End
 	jp   MoveInputReader_Terry_NoMove
+	
 ; =============== MoveInit_Terry_PowerWave ===============
 MoveInit_Terry_PowerWave:
 	call Play_Pl_ClearJoyDirBuffer
@@ -2521,13 +2522,13 @@ MoveInit_Mai_KaChoSen:
 	mMvIn_GetLH MOVE_MAI_KA_CHO_SEN_L, MOVE_MAI_KA_CHO_SEN_H
 	call MoveInputS_SetSpecMove_StopSpeed
 	call Play_Proj_CopyMoveDamageFromPl
-	jp   MoveInputReader_Mai_SetMove
+	jp   MoveInputReader_Mai_MoveSet
 ; =============== MoveInit_Mai_HissatsuShinobibachi ===============
 MoveInit_Mai_HissatsuShinobibachi:
 	call Play_Pl_ClearJoyDirBuffer
 	mMvIn_GetLH MOVE_MAI_HISSATSU_SHINOBIBACHI_L, MOVE_MAI_HISSATSU_SHINOBIBACHI_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	jp   MoveInputReader_Mai_SetMove
+	jp   MoveInputReader_Mai_MoveSet
 ; =============== MoveInit_Mai_RyuEnBu ===============
 MoveInit_Mai_RyuEnBu:
 	call Play_Pl_ClearJoyDirBuffer
@@ -2536,7 +2537,7 @@ MoveInit_Mai_RyuEnBu:
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
 	set  PF0B_PROJREM, [hl]
-	jp   MoveInputReader_Mai_SetMove
+	jp   MoveInputReader_Mai_MoveSet
 ; =============== MoveInit_Mai_HishoRyuEnJin ===============
 MoveInit_Mai_HishoRyuEnJin:
 	call Play_Pl_ClearJoyDirBuffer
@@ -2546,7 +2547,7 @@ MoveInit_Mai_HishoRyuEnJin:
 	add  hl, bc
 	set  PF0B_PROJREM, [hl]
 	inc  hl
-	jp   MoveInputReader_Mai_SetMove
+	jp   MoveInputReader_Mai_MoveSet
 ; =============== MoveInit_Mai_ChijouMusasabiMai ===============
 MoveInit_Mai_ChijouMusasabiMai:
 	call Play_Pl_ClearJoyDirBuffer
@@ -2556,13 +2557,13 @@ MoveInit_Mai_ChijouMusasabiMai:
 	ld   hl, iPlInfo_Flags1
 	add  hl, bc
 	;--
-	jp   MoveInputReader_Mai_SetMove
+	jp   MoveInputReader_Mai_MoveSet
 ; =============== MoveInit_Mai_KuuchuuMusasabiMai ===============
 MoveInit_Mai_KuuchuuMusasabiMai:
 	call Play_Pl_ClearJoyDirBuffer
 	mMvIn_GetLH MOVE_MAI_KUUCHUU_MUSASABI_L, MOVE_MAI_KUUCHUU_MUSASABI_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	jp   MoveInputReader_Mai_SetMove
+	jp   MoveInputReader_Mai_MoveSet
 ; =============== MoveInit_Mai_ChoHissatsuShinobibachi ===============
 MoveInit_Mai_ChoHissatsuShinobibachi:
 	call Play_Pl_ClearJoyDirBuffer
@@ -2572,9 +2573,9 @@ MoveInit_Mai_ChoHissatsuShinobibachi:
 	ld   hl, iPlInfo_Flags1
 	add  hl, bc
 	;--
-	jp   MoveInputReader_Mai_SetMove
-; =============== MoveInputReader_Mai_SetMove ===============
-MoveInputReader_Mai_SetMove:
+	jp   MoveInputReader_Mai_MoveSet
+; =============== MoveInputReader_Mai_MoveSet ===============
+MoveInputReader_Mai_MoveSet:
 	scf
 	ret
 ; =============== MoveInputReader_Mai_NoMove ===============
@@ -3490,13 +3491,13 @@ MoveInit_Athena_PsychoBall:
 	mMvIn_GetLH MOVE_ATHENA_PSYCHO_BALL_L, MOVE_ATHENA_PSYCHO_BALL_H
 	call MoveInputS_SetSpecMove_StopSpeed
 	call Play_Proj_CopyMoveDamageFromPl
-	jp   MoveInputReader_Athena_SetMove
+	jp   MoveInputReader_Athena_MoveSet
 ; =============== MoveInit_Athena_PhoenixArrow ===============
 MoveInit_Athena_PhoenixArrow:
 	call Play_Pl_ClearJoyDirBuffer
 	mMvIn_GetLH MOVE_ATHENA_PHOENIX_ARROW_L, MOVE_ATHENA_PHOENIX_ARROW_H
 	call MoveInputS_SetSpecMove_StopSpeed
-	jp   MoveInputReader_Athena_SetMove
+	jp   MoveInputReader_Athena_MoveSet
 ; =============== MoveInit_Athena_PsychoReflector ===============
 MoveInit_Athena_PsychoReflector:
 	call Play_Pl_ClearJoyDirBuffer
@@ -3505,7 +3506,7 @@ MoveInit_Athena_PsychoReflector:
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
 	set  PF0B_PROJREFLECT, [hl]
-	jp   MoveInputReader_Athena_SetMove
+	jp   MoveInputReader_Athena_MoveSet
 ; =============== MoveInit_Athena_PsychoSword ===============
 MoveInit_Athena_PsychoSword:
 	call Play_Pl_ClearJoyDirBuffer
@@ -3514,7 +3515,7 @@ MoveInit_Athena_PsychoSword:
 	ld   hl, iPlInfo_Flags1
 	add  hl, bc
 	set  PF1B_INVULN, [hl]
-	jp   MoveInputReader_Athena_SetMove
+	jp   MoveInputReader_Athena_MoveSet
 ; =============== MoveInit_Athena_PsychoTeleport ===============
 MoveInit_Athena_PsychoTeleport:
 	call Play_Pl_ClearJoyDirBuffer
@@ -3525,7 +3526,7 @@ MoveInit_Athena_PsychoTeleport:
 	set  PF1B_INVULN, [hl]
 	inc  hl
 	set  PF2B_NOCOLIBOX, [hl]
-	jp   MoveInputReader_Athena_SetMove
+	jp   MoveInputReader_Athena_MoveSet
 ; =============== MoveInit_Athena_ShCrystGround ===============
 MoveInit_Athena_ShCrystGround:
 	mMvIn_ValProjActive Athena
@@ -3534,7 +3535,7 @@ MoveInit_Athena_ShCrystGround:
 	mMvIn_GetSD MOVE_ATHENA_SHINING_CRYSTAL_BIT_GS, MOVE_ATHENA_SHINING_CRYSTAL_BIT_GD
 	call MoveInputS_SetSpecMove_StopSpeed
 	call Play_Proj_CopyMoveDamageFromPl
-	jp   MoveInputReader_Athena_SetMove
+	jp   MoveInputReader_Athena_MoveSet
 ; =============== MoveInit_Athena_ShCrystAir ===============
 MoveInit_Athena_ShCrystAir:
 	mMvIn_ValProjActive Athena
@@ -3543,9 +3544,9 @@ MoveInit_Athena_ShCrystAir:
 	mMvIn_GetSD MOVE_ATHENA_SHINING_CRYSTAL_BIT_AS, MOVE_ATHENA_SHINING_CRYSTAL_BIT_AD
 	call MoveInputS_SetSpecMove_StopSpeed
 	call Play_Proj_CopyMoveDamageFromPl
-	jp   MoveInputReader_Athena_SetMove
-; =============== MoveInputReader_Athena_SetMove ===============
-MoveInputReader_Athena_SetMove:
+	jp   MoveInputReader_Athena_MoveSet
+; =============== MoveInputReader_Athena_MoveSet ===============
+MoveInputReader_Athena_MoveSet:
 	scf
 	ret
 ; =============== MoveInputReader_Athena_NoMove ===============
@@ -6182,7 +6183,7 @@ MoveInputReader_Andy:
 	mMvIn_ChkDir MoveInput_BDF, MoveInit_Andy_GekiHekiHaiSuiSho
 .chkPunchNoClose:
 	; BF+P -> Zan Ei Ken
-	mMvIn_ChkDir MoveInput_BF_Fast, MoveInit_Andy_ZanEiKen
+	mMvIn_ChkDir MoveInput_BF, MoveInit_Andy_ZanEiKen
 	; FDF+P -> Sho Ryu Dan
 	mMvIn_ChkDir MoveInput_FDF, MoveInit_Andy_ShoRyuDan
 	; DB+P -> Hi Sho Ken

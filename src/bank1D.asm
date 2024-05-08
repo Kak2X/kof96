@@ -2678,7 +2678,7 @@ Cutscene_MoveLargeChars:
 
 	; This must be manually enabled
 	ld   a, [wCutMoveLargeChars]
-	and  a, a
+	and  a
 	ret  z
 	
 	; If we reached the target position of $50 already, return.

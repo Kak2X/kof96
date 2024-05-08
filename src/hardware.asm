@@ -56,6 +56,9 @@ TILESIZE EQU $10
 
 OBJ_SIZE     EQU 4		; Size of one OBJ
 OBJCOUNT_MAX EQU $28	; Max number of OBJ
+; The hardware subtracts these from the object positions before displaying them.
+OBJ_OFFSET_X EQU $08
+OBJ_OFFSET_Y EQU $10
 
 ; interrupt flags
 IB_VBLANK        EQU 0
@@ -120,7 +123,7 @@ SNDENV_INC EQU 1 << SNDENVB_INC
 SNDENV_DEC EQU 0 ; Macro purpose only
 
 ; NR*4 Flags
-SNDCHFB_RESTART EQU 7 ; If set, restarts the channel (for new data)
+SNDCHFB_RESTART EQU 7 ; If set, triggers/restarts the channel (to apply certain types of changes)
 SNDCHFB_LENSTOP EQU 6 ; If set, the channel kills itself when the length expires.
 SNDCHF_RESTART EQU 1 << SNDCHFB_RESTART
 SNDCHF_LENSTOP EQU 1 << SNDCHFB_LENSTOP
