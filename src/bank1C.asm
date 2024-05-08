@@ -5345,11 +5345,8 @@ MoveC_Base_NormL_2Hit_D06_A03:
 	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]		; A = OBJLst ID
-	cp   $00*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj0
+	mMvC_StartChkFrame		; A = OBJLst ID
+		mMvC_ChkFrame $00, .obj0
 ; --------------- frame #1-(end) ---------------
 	mMvC_ChkTarget .chkEnd
 	jp   .anim
@@ -5377,11 +5374,8 @@ MoveC_Base_NormH_2Hit_D06_A04:
 	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]		; A = OBJLst ID
-	cp   $01*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj1
+	mMvC_StartChkFrame		; A = OBJLst ID
+		mMvC_ChkFrame $01, .obj1
 ; --------------- frame #0,2-(end) ---------------
 	mMvC_ChkTarget .chkEnd
 	jp   .anim
@@ -5415,13 +5409,9 @@ MoveC_MrBig_PunchH:
 	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]		; A = OBJLst ID
-	cp   $00*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj0
-	cp   $01*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj1
+	mMvC_StartChkFrame		; A = OBJLst ID
+		mMvC_ChkFrame $00, .obj0
+		mMvC_ChkFrame $01, .obj1
 ; --------------- frame #2-(end) ---------------
 	mMvC_ChkTarget .chkEnd
 	jp   .anim
@@ -5467,13 +5457,9 @@ MoveC_Mature_PunchH:
 	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $01*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj1
-	cp   $03*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj3
+	mMvC_StartChkFrame
+		mMvC_ChkFrame $01, .obj1
+		mMvC_ChkFrame $03, .obj3
 	
 ; --------------- frame #0,#2 ---------------
 	; [POI] Could have been just "jp .anim". We get to .chkEnd anyway in #3
@@ -5527,15 +5513,10 @@ MoveC_Goenitz_PunchH:
 	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $01*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj1
-	cp   $03*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj3
-	cp   $04*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj4
+	mMvC_StartChkFrame
+		mMvC_ChkFrame $01, .obj1
+		mMvC_ChkFrame $03, .obj3
+		mMvC_ChkFrame $04, .obj4
 ; --------------- frame #0,#2,#5-(end) ---------------
 	mMvC_ChkTarget .chkEnd
 	jp   .anim
@@ -5584,13 +5565,9 @@ MoveC_Goenitz_KickH:
 	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $01*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj1
-	cp   $02*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj2
+	mMvC_StartChkFrame
+		mMvC_ChkFrame $01, .obj1
+		mMvC_ChkFrame $02, .obj2
 ; --------------- frame #0,#3-(end) ---------------
 	mMvC_ChkTarget .chkEnd
 	jp   .anim

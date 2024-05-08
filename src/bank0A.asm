@@ -524,13 +524,9 @@ MoveC_Goenitz_Yonokaze:
 	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $02*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj2
-	cp   $05*OBJLSTPTR_ENTRYSIZE
-	jp   z, .chkEnd
+	mMvC_StartChkFrame
+		mMvC_ChkFrame $02, .obj2
+		mMvC_ChkFrame $05, .chkEnd
 	jp   .anim
 ; --------------- frame #2 ---------------
 .obj2:
@@ -593,17 +589,11 @@ MoveC_Goenitz_HyougaL:
 	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $01*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj1
-	cp   $02*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj2
-	cp   $03*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj3
-	cp   $04*OBJLSTPTR_ENTRYSIZE
-	jp   z, .chkEnd
+	mMvC_StartChkFrame
+		mMvC_ChkFrame $01, .obj1
+		mMvC_ChkFrame $02, .obj2
+		mMvC_ChkFrame $03, .obj3
+		mMvC_ChkFrame $04, .chkEnd
 	jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
@@ -684,15 +674,10 @@ MoveC_Goenitz_HyougaH:
 	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $01*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj1
-	cp   $02*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj2
-	cp   $03*OBJLSTPTR_ENTRYSIZE
-	jp   z, .chkEnd
+	mMvC_StartChkFrame
+		mMvC_ChkFrame $01, .obj1
+		mMvC_ChkFrame $02, .obj2
+		mMvC_ChkFrame $03, .chkEnd
 	jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
@@ -781,15 +766,10 @@ MoveC_Goenitz_WanpyouTokobuse:
 	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $01*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj1
-	cp   $02*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj2
-	cp   $04*OBJLSTPTR_ENTRYSIZE
-	jp   z, .chkEnd
+	mMvC_StartChkFrame
+		mMvC_ChkFrame $01, .obj1
+		mMvC_ChkFrame $02, .obj2
+		mMvC_ChkFrame $04, .chkEnd
 	jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
@@ -836,19 +816,12 @@ MoveC_Goenitz_Yamidoukoku:
 	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $00*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj0
-	cp   $01*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj1
-	cp   $02*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj2
-	cp   $03*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj3
-	cp   $05*OBJLSTPTR_ENTRYSIZE
-	jp   z, .chkEnd
+	mMvC_StartChkFrame
+		mMvC_ChkFrame $00, .obj0
+		mMvC_ChkFrame $01, .obj1
+		mMvC_ChkFrame $02, .obj2
+		mMvC_ChkFrame $03, .obj3
+		mMvC_ChkFrame $05, .chkEnd
 	jp   .anim
 ; --------------- frame #0 ---------------
 .obj0:
@@ -903,21 +876,13 @@ MoveC_Goenitz_ShinyaotomeThrowL:
 	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $00*OBJLSTPTR_ENTRYSIZE
-	jp   z, .setSpeed06
-	cp   $01*OBJLSTPTR_ENTRYSIZE
-	jp   z, .rotU1
-	cp   $02*OBJLSTPTR_ENTRYSIZE
-	jp   z, .rotU2
-	cp   $03*OBJLSTPTR_ENTRYSIZE
-	jp   z, .rotL
-	cp   $04*OBJLSTPTR_ENTRYSIZE
-	jp   z, .rotD
-	cp   $05*OBJLSTPTR_ENTRYSIZE
-	jp   z, .setDamage
+	mMvC_StartChkFrame
+		mMvC_ChkFrame $00, .setSpeed06
+		mMvC_ChkFrame $01, .rotU1
+		mMvC_ChkFrame $02, .rotU2
+		mMvC_ChkFrame $03, .rotL
+		mMvC_ChkFrame $04, .rotD
+		mMvC_ChkFrame $05, .setDamage
 	jp   .anim ; We never get here
 ; --------------- frame #0 ---------------
 .setSpeed06:
@@ -976,23 +941,14 @@ MoveC_Goenitz_ShinyaotomeThrowH:
 	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $00*OBJLSTPTR_ENTRYSIZE
-	jp   z, .rotU1
-	cp   $01*OBJLSTPTR_ENTRYSIZE
-	jp   z, .rotU2
-	cp   $02*OBJLSTPTR_ENTRYSIZE
-	jp   z, .rotU3
-	cp   $03*OBJLSTPTR_ENTRYSIZE
-	jp   z, .rotU4Jump
-	cp   $04*OBJLSTPTR_ENTRYSIZE
-	jp   z, .rotDJump
-	cp   $05*OBJLSTPTR_ENTRYSIZE
-	jp   z, .setDamage
-	cp   $06*OBJLSTPTR_ENTRYSIZE
-	jp   z, .chkEnd
+	mMvC_StartChkFrame
+		mMvC_ChkFrame $00, .rotU1
+		mMvC_ChkFrame $01, .rotU2
+		mMvC_ChkFrame $02, .rotU3
+		mMvC_ChkFrame $03, .rotU4Jump
+		mMvC_ChkFrame $04, .rotDJump
+		mMvC_ChkFrame $05, .setDamage
+		mMvC_ChkFrame $06, .chkEnd
 	jp   .anim ; We never get here
 ; --------------- frame #0 ---------------
 .rotU1:
@@ -1071,19 +1027,12 @@ MoveC_Goenitz_ShinyaotomePart2:
 	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $00*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj0
-	cp   $01*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj1
-	cp   $02*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj2
-	cp   $03*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj1
-	cp   $04*OBJLSTPTR_ENTRYSIZE
-	jp   z, .chkEnd
+	mMvC_StartChkFrame
+		mMvC_ChkFrame $00, .obj0
+		mMvC_ChkFrame $01, .obj1
+		mMvC_ChkFrame $02, .obj2
+		mMvC_ChkFrame $03, .obj1
+		mMvC_ChkFrame $04, .chkEnd
 	jp   .unused_end ; We never get here
 ; --------------- frame #0 ---------------
 ; Initial loop. Horizontal movement, with speed setup.
@@ -1196,15 +1145,10 @@ MoveC_Goenitz_ShinyaotomeMizuchiSL:
 	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $00*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj0
-	cp   $01*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj1
-	cp   $02*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj2
+	mMvC_StartChkFrame
+		mMvC_ChkFrame $00, .obj0
+		mMvC_ChkFrame $01, .obj1
+		mMvC_ChkFrame $02, .obj2
 	cp   a, $03*OBJLSTPTR_ENTRYSIZE
 	jp   z, .chkEnd
 	jp   .anim ; We never get here
@@ -1282,19 +1226,12 @@ MoveC_Goenitz_ShinyaotomeJissoukokuDL:
 	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $00*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj0
-	cp   $02*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj2
-	cp   $03*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj3
-	cp   $04*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj4
-	cp   $05*OBJLSTPTR_ENTRYSIZE
-	jp   z, .chkEnd
+	mMvC_StartChkFrame
+		mMvC_ChkFrame $00, .obj0
+		mMvC_ChkFrame $02, .obj2
+		mMvC_ChkFrame $03, .obj3
+		mMvC_ChkFrame $04, .obj4
+		mMvC_ChkFrame $05, .chkEnd
 	jp   .anim
 ; --------------- frame #0 ---------------
 ; Startup.
@@ -1408,15 +1345,10 @@ MoveC_Goenitz_ShinyaotomeMizuchiSH:
 	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $00*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj0
-	cp   $01*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj1
-	cp   $02*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj2
+	mMvC_StartChkFrame
+		mMvC_ChkFrame $00, .obj0
+		mMvC_ChkFrame $01, .obj1
+		mMvC_ChkFrame $02, .obj2
 	cp   a, $03*OBJLSTPTR_ENTRYSIZE
 	jp   z, .chkEnd
 	jp   .anim ; We never get here
@@ -1493,17 +1425,11 @@ MoveC_Goenitz_ShinyaotomeJissoukokuDH:
 	mMvC_ValLoaded .ret
 	
 	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $00*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj0
-	cp   $02*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj2
-	cp   $03*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj3
-	cp   $04*OBJLSTPTR_ENTRYSIZE
-	jp   z, .chkEnd
+	mMvC_StartChkFrame
+		mMvC_ChkFrame $00, .obj0
+		mMvC_ChkFrame $02, .obj2
+		mMvC_ChkFrame $03, .obj3
+		mMvC_ChkFrame $04, .chkEnd
 	jp   .anim
 ; --------------- frame #0 ---------------
 ; Startup.	
@@ -1869,12 +1795,9 @@ ProjC_Goenitz_WanpyouTokobuse:
 	ld   hl, iOBJInfo_OBJLstPtrTblOffset
 	add  hl, de
 	ld   a, [hl]
-	cp   $00*OBJLSTPTR_ENTRYSIZE
-	jp   z, .objTopMid
-	cp   $01*OBJLSTPTR_ENTRYSIZE
-	jp   z, .objTopMid
-	cp   $02*OBJLSTPTR_ENTRYSIZE
-	jp   z, .objBottom
+		mMvC_ChkFrame $00, .objTopMid
+		mMvC_ChkFrame $01, .objTopMid
+		mMvC_ChkFrame $02, .objBottom
 	jp   .anim ; We never get here
 ; --------------- frame #0-1 ---------------
 ; Top and mid frame.

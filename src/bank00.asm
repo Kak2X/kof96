@@ -10106,13 +10106,9 @@ MoveC_Base_Jump:
 	; to switch frames since it goes off the *internal* frame ID.
 
 	; Don't allow executing normals when displaying the first and last frame.
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $00*OBJLSTPTR_ENTRYSIZE	; OBJLstId == 0?
-	jp   z, .obj0_init				; If so, jump
-	cp   $07*OBJLSTPTR_ENTRYSIZE	; OBJLstId == 7?
-	jp   z, .obj7_landed			; If so, jump
+	mMvC_StartChkFrame
+		mMvC_ChkFrame $00, .obj0_init
+		mMvC_ChkFrame $07, .obj7_landed
 
 	;
 	; Move Input Reader
@@ -10183,21 +10179,13 @@ MoveC_Base_Jump:
 
 .chkAct:
 	; Depending on the visible frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $01*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj1_setJumpType
-	cp   $02*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj2_air
-	cp   $03*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj3_air
-	cp   $04*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj4_air
-	cp   $05*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj5_air
-	cp   $06*OBJLSTPTR_ENTRYSIZE
-	jp   z, .chkWallJump
+	mMvC_StartChkFrame
+		mMvC_ChkFrame $01, .obj1_setJumpType
+		mMvC_ChkFrame $02, .obj2_air
+		mMvC_ChkFrame $03, .obj3_air
+		mMvC_ChkFrame $04, .obj4_air
+		mMvC_ChkFrame $05, .obj5_air
+		mMvC_ChkFrame $06, .chkWallJump
 	jp   .move ; We never get here
 
 ;
