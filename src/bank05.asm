@@ -227,7 +227,7 @@ MoveC_Iori_OniYaki:
 .doGravity:
 	; Switch to #5 when we touch the ground
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $05*OBJLSTPTR_ENTRYSIZE, $06
+		mMvC_SetLandFrame $05, $06
 		jp   .ret
 ; --------------- frame #5 ---------------
 .chkEnd:
@@ -326,7 +326,7 @@ MoveC_OIori_OniYaki:
 .doGravity:
 	; Switch to #6 when we touch the ground
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $06*OBJLSTPTR_ENTRYSIZE, $06
+		mMvC_SetLandFrame $06, $06
 		jp   .ret
 ; --------------- frame #6 ---------------
 .chkEnd:
@@ -445,7 +445,7 @@ MoveC_Iori_AoiHana:
 ; Switch to #5 when touching the ground.
 .doGravity:
 	mMvC_ChkGravityHV $0030, .anim
-		mMvC_SetLandFrame $05*OBJLSTPTR_ENTRYSIZE, $03
+		mMvC_SetLandFrame $05, $03
 		jp   .ret
 ; --------------- frame #5 ---------------
 ; Recovery after the jump.
@@ -1826,7 +1826,7 @@ MoveC_Mature_Despair:
 ; Switches to #4 when touching the ground.
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $04*OBJLSTPTR_ENTRYSIZE, $02
+		mMvC_SetLandFrame $04, $02
 		jp   .ret
 ; --------------- frame #6 ---------------	
 .chkEnd:
@@ -2606,7 +2606,7 @@ MoveC_Chizuru_TenZuiL:
 ; --------------- frame #0-1 / common gravity check ---------------
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $02*OBJLSTPTR_ENTRYSIZE, $05
+		mMvC_SetLandFrame $02, $05
 		jp   .ret
 ; --------------- frame #2 ---------------
 .chkEnd:

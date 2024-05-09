@@ -235,7 +235,7 @@ MoveC_Krauser_LegTomahawk:
 ; --------------- frames #1-2 / common gravity check ---------------
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $04*OBJLSTPTR_ENTRYSIZE, $06
+		mMvC_SetLandFrame $04, $06
 		mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_HEAVYHIT
 		jp   .ret
 ; --------------- frame #6 ---------------
@@ -339,7 +339,7 @@ MoveC_Krauser_KaiserDuelSobat:
 		mMvC_SetSpeedV -$0300
 .obj0_cont:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $01*OBJLSTPTR_ENTRYSIZE, $00
+		mMvC_SetLandFrame $01, $00
 		jp   .ret
 ; --------------- frame #2 ---------------
 .obj2:
@@ -457,13 +457,13 @@ MoveC_Krauser_KaiserSuplex:
 ; --------------- frames #3-4 / gravity check with damage on land ---------------
 .doGravityDamage:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $05*OBJLSTPTR_ENTRYSIZE, $03
+		mMvC_SetLandFrame $05, $03
 		mMvC_SetDamageNext $0A, HITTYPE_DROP_DB_A, PF3_HEAVYHIT
 		jp   .ret
 ; --------------- frames #6-8 / gravity check ---------------
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $09*OBJLSTPTR_ENTRYSIZE, $06
+		mMvC_SetLandFrame $09, $06
 		jp   .ret
 ; --------------- frame #9 ---------------
 .chkEnd:

@@ -699,7 +699,7 @@ ENDM
 ; As this is called for frames #1-3, touching the ground early will directly skip to #4.
 .batuYomi_doGravity:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $0B*OBJLSTPTR_ENTRYSIZE, $08
+		mMvC_SetLandFrame $0B, $08
 		jp   .ret
 ; --------------- 402 Shiki Batu Yomi - frame #4 ---------------
 ; Landing frame. When this ends, the move ends completely.
@@ -940,7 +940,7 @@ MoveC_Kyo_OniYaki:
 .doGravity:
 	; Move down $00.60px/frame
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $06*OBJLSTPTR_ENTRYSIZE, $0A
+		mMvC_SetLandFrame $06, $0A
 		jp   .ret
 ; --------------- frame #6 ---------------
 ; Landing frame.
@@ -1016,7 +1016,7 @@ MoveC_Kyo_RedKick:
 ; --------------- frame #4 / common gravity check ---------------
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $05*OBJLSTPTR_ENTRYSIZE, $08
+		mMvC_SetLandFrame $05, $08
 		jp   .ret
 ; --------------- frame #5 ---------------
 .chkEnd:
@@ -1232,7 +1232,7 @@ MoveC_Kyo_Kai:
 ; Switches to the landing frame when touching the ground.
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $05*OBJLSTPTR_ENTRYSIZE, $08
+		mMvC_SetLandFrame $05, $08
 		jp   .ret
 ; --------------- frame #5 ---------------	
 .chkEnd:
@@ -1958,7 +1958,7 @@ MoveC_Terry_BurnKnuckle:
 .doGravity:
 	; Switch to #6 when we touch the ground
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $06*OBJLSTPTR_ENTRYSIZE, $06
+		mMvC_SetLandFrame $06, $06
 		jp   .ret
 ; --------------- frame #6 ---------------
 .chkEnd:
@@ -2024,7 +2024,7 @@ MoveC_Terry_CrackShot:
 ; --------------- frame #1-3 / common gravity check ---------------
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $04*OBJLSTPTR_ENTRYSIZE, $0A
+		mMvC_SetLandFrame $04, $0A
 		jp   .ret
 ; --------------- frame #4 ---------------
 .chkEnd:
@@ -2109,7 +2109,7 @@ MoveC_Terry_PowerDunk:
 .doGravity:
 	; Switch to #6 when we land on the floor
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $06*OBJLSTPTR_ENTRYSIZE, $0A
+		mMvC_SetLandFrame $06, $0A
 		jp   .ret
 ; --------------- frame #6 ---------------
 .chkEnd:
@@ -2528,7 +2528,7 @@ MoveC_Mai_HissatsuShinobibachi:
 ; --------------- frame #3 / common gravity check ---------------
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $04*OBJLSTPTR_ENTRYSIZE, $07
+		mMvC_SetLandFrame $04, $07
 		jp   .ret
 ; --------------- frame #4 ---------------
 .chkEnd:
@@ -2665,7 +2665,7 @@ MoveC_Mai_HishoRyuEnJin:
 ; Switches directly to #5 (recovery) when landing on the ground in frames #2-4
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $05*OBJLSTPTR_ENTRYSIZE, $08
+		mMvC_SetLandFrame $05, $08
 		jp   .ret
 ; --------------- frame #5 ---------------
 .chkEnd:
@@ -2830,7 +2830,7 @@ MoveC_Mai_ChijouMusasabi:
 .doGravity:
 	; Switch to #8 if we touched the ground instead of the screen edge
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $08*OBJLSTPTR_ENTRYSIZE, $07
+		mMvC_SetLandFrame $08, $07
 		jp   .ret
 ; --------------- frame #8 ---------------
 ; Ends the move at the end of the frame.
@@ -2883,7 +2883,7 @@ MoveC_Mai_KuuchuuMusasabi:
 ; --------------- frame #1 / common gravity check ---------------
 .doGravity:
 	mMvC_ChkGravityHV $0018, .anim
-		mMvC_SetLandFrame $02*OBJLSTPTR_ENTRYSIZE, $08
+		mMvC_SetLandFrame $02, $08
 		jp   .ret
 ; --------------- frame #2 ---------------
 .obj2:
@@ -2980,7 +2980,7 @@ MoveC_Mai_ChoHissatsuShinobibachiS:
 .doGravity:
 	; Switch to #6 when we touch the ground
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $06*OBJLSTPTR_ENTRYSIZE, $0F
+		mMvC_SetLandFrame $06, $0F
 		jp   .ret
 ; --------------- frame #6 ---------------
 .chkEnd:
@@ -3103,7 +3103,7 @@ MoveC_Mai_ChoHissatsuShinobibachiD:
 .doGravity:
 	; Switch to #A when we touch the ground
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $0A*OBJLSTPTR_ENTRYSIZE, $12
+		mMvC_SetLandFrame $0A, $12
 		jp   .ret
 ; --------------- frame #A ---------------
 .chkEnd:
@@ -3455,10 +3455,10 @@ ENDC
 		cp   MOVE_ATHENA_PHOENIX_ARROW_L	; Using the light version?
 		jp   z, .doGravity_setNextL			; If so, jump
 	.doGravity_setNextH:
-		mMvC_SetLandFrame $04*OBJLSTPTR_ENTRYSIZE, $04
+		mMvC_SetLandFrame $04, $04
 		jp   .ret
 	.doGravity_setNextL:
-		mMvC_SetLandFrame $06*OBJLSTPTR_ENTRYSIZE, $0C
+		mMvC_SetLandFrame $06, $0C
 		jp   .ret
 ; --------------- frame #4 ---------------
 ; Kick.
@@ -3557,7 +3557,7 @@ MoveC_Athena_PsychoReflector:
 .doGravity:
 	; Switch to #2 when landing on the ground
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $02*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+		mMvC_SetLandFrame $02, ANIMSPEED_INSTANT
 		mMvC_PlaySound SCT_PSYCREFLAND
 		jp   .ret
 ; --------------- frame #2 ---------------
@@ -4141,7 +4141,7 @@ ENDC
 ; Exclusively when the move is started in the air.
 .obj7:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $08*OBJLSTPTR_ENTRYSIZE, $03
+		mMvC_SetLandFrame $08, $03
 		jp   .ret
 ; --------------- frame #8 ---------------
 ; Recovery frame, after landing.
@@ -6231,7 +6231,7 @@ MoveC_Andy_KuHaDan:
 .doGravity:
 	; Increase YSpeed at $00.60px/frame
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $05*OBJLSTPTR_ENTRYSIZE, $06
+		mMvC_SetLandFrame $05, $06
 		jp   .ret
 ; --------------- frame #5 ---------------	
 .chkEnd:
@@ -6335,7 +6335,7 @@ MoveC_Andy_ShoRyuDan:
 ; If we touch the ground at any point between #1-#7, switch to #8.
 .chkGravity:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $08*OBJLSTPTR_ENTRYSIZE, $08
+		mMvC_SetLandFrame $08, $08
 		jp   .ret
 ; --------------- frame #8 ---------------	
 .chkEnd:
@@ -6455,11 +6455,11 @@ MoveC_Andy_GeneiShiranui:
 		mMvIn_ChkLH .obj0_setNextH
 	.obj0_setNextL:
 		; The light version starts at #3, which does nothing special.
-		mMvC_SetLandFrame $03*OBJLSTPTR_ENTRYSIZE, $08
+		mMvC_SetLandFrame $03, $08
 		jp   .ret
 	.obj0_setNextH:
 		; The heavy version starts at #1, which makes the player dash forward.
-		mMvC_SetLandFrame $01*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+		mMvC_SetLandFrame $01, ANIMSPEED_INSTANT
 		jp   .ret
 ; --------------- frame #1 ---------------
 ; Landing frame - Heavy version.	
@@ -6653,7 +6653,7 @@ MoveC_Andy_ChoReppaDan:;I
 	; Handle gravity and move until we touch the ground
 	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, .anim
-		mMvC_SetLandFrame $05*OBJLSTPTR_ENTRYSIZE, $12
+		mMvC_SetLandFrame $05, $12
 		jp   .ret
 ; --------------- frame #5 ---------------	
 .chkEnd:
@@ -7675,7 +7675,7 @@ MoveC_Geese_HishouNichirinZan:
 ; --------------- frames #2-5 / common gravity check ---------------
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $06*OBJLSTPTR_ENTRYSIZE, $06
+		mMvC_SetLandFrame $06, $06
 		jp   .ret
 ; --------------- frame #6 ---------------
 .chkEnd:
@@ -7716,7 +7716,7 @@ MoveC_Geese_ShippuKen:
 ; --------------- frames #0-2 / common gravity check ---------------
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $03*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+		mMvC_SetLandFrame $03, ANIMSPEED_INSTANT
 		jp   .ret
 ; --------------- frame #3 ---------------
 .chkEnd:

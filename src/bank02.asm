@@ -223,7 +223,7 @@ MoveC_Base_HopB:
 	; Move down 0.6px/frame
 	mMvC_ChkGravityHV $0060, .anim				; If not, jump
 		; Otherwise, request the next frame to load as soon as possible
-		mMvC_SetLandFrame $02*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+		mMvC_SetLandFrame $02, ANIMSPEED_INSTANT
 		jp   .ret
 ; --------------- frame #2 ---------------
 .chkEnd:
@@ -287,7 +287,7 @@ MoveC_Base_NormA:
 		res  PF1B_NOSPECSTART, [hl]
 		
 		; Switch to #4 and stay there for the least possible time
-		mMvC_SetLandFrame $04*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+		mMvC_SetLandFrame $04, ANIMSPEED_INSTANT
 		jp   .ret
 		
 ; --------------- frame #4 ---------------
@@ -321,7 +321,7 @@ MoveC_Base_BlockA:
 	mMvC_ChkGravityHV $0060, .anim				; Did we land? If not, jump
 	
 	; Switch to the next frame
-	mMvC_SetLandFrame $01*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+	mMvC_SetLandFrame $01, ANIMSPEED_INSTANT
 	
 	; We're not guarding anymore once we land
 	ld   hl, iPlInfo_Flags1
@@ -4913,7 +4913,7 @@ MoveC_Hit_BackJumpAirRec:
 .doGravity:
 	; Switch to #6 when touching the ground
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $06*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+		mMvC_SetLandFrame $06, ANIMSPEED_INSTANT
 		jp   .ret
 ; --------------- frame #6 ---------------
 .chkEnd:
@@ -4943,7 +4943,7 @@ MoveC_Hit_GuardBreakA:
 	; Slow down at $00.60px/frame.
 	; When we touch the ground, switch to #1.
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $01*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+		mMvC_SetLandFrame $01, ANIMSPEED_INSTANT
 		jp   .ret
 ; --------------- frame #1 ---------------
 .chkEnd:
@@ -5754,7 +5754,7 @@ MoveC_Ryo_HienShippuKyaku:
 ; --------------- common gravity check ---------------	
 .doGravity:
 	mMvC_ChkGravityHV $0030, .anim
-		mMvC_SetLandFrame $05*OBJLSTPTR_ENTRYSIZE, $05
+		mMvC_SetLandFrame $05, $05
 		jp   .ret
 ; --------------- frame #5 ---------------
 .chkEnd:
@@ -5915,7 +5915,7 @@ ENDC
 ; --------------- common gravity check ---------------	
 .doGravity:
 	mMvC_ChkGravityHV $0030, .anim
-		mMvC_SetLandFrame $16*OBJLSTPTR_ENTRYSIZE, $07
+		mMvC_SetLandFrame $16, $07
 		jp   .ret
 ; --------------- frame #16 ---------------
 .chkEnd:
@@ -6086,7 +6086,7 @@ ENDC
 ; --------------- common gravity check ---------------	
 .doGravity:
 	mMvC_ChkGravityHV $0030, .anim
-		mMvC_SetLandFrame $2D*OBJLSTPTR_ENTRYSIZE, $07
+		mMvC_SetLandFrame $2D, $07
 		jp   .ret
 ; --------------- frame #2D ---------------
 .chkEnd:
@@ -6326,7 +6326,7 @@ MoveC_Robert_HienShippuKyaku:
 .doGravity:
 	; Only advance to #6 when touching the ground
 	mMvC_ChkGravityHV $0018, .anim
-		mMvC_SetLandFrame $06*OBJLSTPTR_ENTRYSIZE, $08
+		mMvC_SetLandFrame $06, $08
 		jp   .ret
 ; --------------- frame #6 ---------------	
 .chkEnd:
@@ -6430,7 +6430,7 @@ ENDC
 	ld   hl, $0018
 	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, .anim
-		mMvC_SetLandFrame $02*OBJLSTPTR_ENTRYSIZE, $08
+		mMvC_SetLandFrame $02, $08
 		jp   .ret
 ; --------------- backjump - frame #3 ---------------	
 .obj3:
@@ -6464,7 +6464,7 @@ ENDC
 	ld   hl, $0060
 	call OBJLstS_ApplyGravityVAndMoveHV
 	jp   nc, .anim
-		mMvC_SetLandFrame $09*OBJLSTPTR_ENTRYSIZE, $04
+		mMvC_SetLandFrame $09, $04
 		jp   .ret
 ; --------------- frame #9 ---------------	
 .chkEnd:
@@ -6544,7 +6544,7 @@ MoveC_Robert_RyuuGa:
 ; --------------- frame #1-4 / common gravity ---------------	
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $05*OBJLSTPTR_ENTRYSIZE, $03
+		mMvC_SetLandFrame $05, $03
 		jp   .ret
 ; --------------- frame #5 ---------------	
 .chkEnd:
@@ -6654,7 +6654,7 @@ MoveC_Terry_RisingTackle:
 ; --------------- common gravity check ---------------
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $07*OBJLSTPTR_ENTRYSIZE, $08
+		mMvC_SetLandFrame $07, $08
 		jp   .ret
 ; --------------- frame #7 ---------------	
 .chkEnd:
@@ -6865,7 +6865,7 @@ ENDC
 ; --------------- common gravity check ---------------	
 .doGravity:
 	mMvC_ChkGravityHV $0030, .anim
-		mMvC_SetLandFrame $11*OBJLSTPTR_ENTRYSIZE, $07
+		mMvC_SetLandFrame $11, $07
 		jp   .ret
 ; --------------- frame #11 ---------------
 .chkEnd:
@@ -7034,7 +7034,7 @@ ENDC
 ; --------------- common gravity check ---------------	
 .doGravity:
 	mMvC_ChkGravityHV $0030, .anim
-		mMvC_SetLandFrame $21*OBJLSTPTR_ENTRYSIZE, $07
+		mMvC_SetLandFrame $21, $07
 		jp   .ret
 ; --------------- frame #21 ---------------
 .chkEnd:
@@ -7287,7 +7287,7 @@ MoveC_Leona_BalticLauncherH:
 ; --------------- frame #1-2 / common gravity check ---------------	
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $03*OBJLSTPTR_ENTRYSIZE, $08
+		mMvC_SetLandFrame $03, $08
 		jp   .ret
 ; --------------- frame #3 ---------------	
 .chkEnd:
@@ -7451,7 +7451,7 @@ MoveC_Leona_GrandSabre:
 ; Switch to #F when we land on the ground.
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $0F*OBJLSTPTR_ENTRYSIZE, $08
+		mMvC_SetLandFrame $0F, $08
 		jp   .ret
 ; --------------- Gliding Buster - frame #F ---------------
 .chkEnd:
@@ -7567,7 +7567,7 @@ MoveC_Leona_XCalibur:
 ; --------------- frames #1-5 / common gravity check ---------------	
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $06*OBJLSTPTR_ENTRYSIZE, $02
+		mMvC_SetLandFrame $06, $02
 		jp   .ret
 ; --------------- frame #6 ---------------	
 .obj6:
@@ -7819,12 +7819,12 @@ MoveC_Leona_VSlasher:
 	mMvC_ChkGravityHV $0000, .anim
 		mMvC_ValHit .obj1_endMove, .obj1_endMove
 	.obj1_startOk:
-		mMvC_SetLandFrame $03*OBJLSTPTR_ENTRYSIZE, $02
+		mMvC_SetLandFrame $03, $02
 		call Play_Pl_TempPauseOtherAnim
 		jp   .ret
 		;--
 	.obj1_endMove:
-		mMvC_SetLandFrame $06*OBJLSTPTR_ENTRYSIZE, $02
+		mMvC_SetLandFrame $06, $02
 		jp   .ret
 ; --------------- frame #2 - positon check ---------------
 ; Because of how the projectile spawns, wait until we have the same Y position or are
@@ -7841,13 +7841,13 @@ MoveC_Leona_VSlasher:
 	jp   nc, .obj2_setNext	; If so, jump
 	mMvC_ChkGravityHV $0000, .anim
 	.obj2_setNext:
-		mMvC_SetLandFrame $03*OBJLSTPTR_ENTRYSIZE, $02
+		mMvC_SetLandFrame $03, $02
 		jp   .ret
 ; --------------- frame #5 ---------------
 .obj5:
 	mMvC_DoFrictionH $0040
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $06*OBJLSTPTR_ENTRYSIZE, $02
+		mMvC_SetLandFrame $06, $02
 		jp   .ret
 ; --------------- frame #6 ---------------
 .chkEnd:
@@ -7993,7 +7993,7 @@ ENDC
 ; --------------- frame #7-B / common gravity check ---------------
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $0C*OBJLSTPTR_ENTRYSIZE, $08
+		mMvC_SetLandFrame $0C, $08
 		jp   .ret
 ; --------------- frame #C ---------------
 .chkEnd:
@@ -8427,7 +8427,7 @@ MoveC_MrKarate_HienShippuuKyaku:
 ; --------------- common gravity check ---------------	
 .doGravity:
 	mMvC_ChkGravityHV $0030, .anim
-		mMvC_SetLandFrame $06*OBJLSTPTR_ENTRYSIZE, $01
+		mMvC_SetLandFrame $06, $01
 		jp   .ret
 ; --------------- frame #6 ---------------
 .chkEnd:
@@ -8591,7 +8591,7 @@ MoveC_MrKarate_RyukoRanbuD3:
 .doGravity:
 	; Move down at $00.60px/frame, switching to #2 when touching the ground
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $02*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+		mMvC_SetLandFrame $02, ANIMSPEED_INSTANT
 		jp   .ret
 ; --------------- frame #2 ---------------
 .chkEnd:
@@ -8778,7 +8778,7 @@ ENDC
 		jp   .end
 		; [TCRF] Unreferenced leftover from MoveC_Kyo_RyuKoRanbuS, except modified to point
 		;        to the proper last frame for this move.
-		mMvC_SetLandFrame $16*OBJLSTPTR_ENTRYSIZE, $07
+		mMvC_SetLandFrame $16, $07
 		jp   .ret
 ; --------------- frame #15 ---------------
 .chkEnd:
@@ -8953,7 +8953,7 @@ ENDC
 	mMvC_ChkGravityHV $0030, .anim
 		jp   .end
 		; [TCRF] Unreferenced leftover from MoveC_Kyo_RyuKoRanbuD
-		mMvC_SetLandFrame $2D*OBJLSTPTR_ENTRYSIZE, $07
+		mMvC_SetLandFrame $2D, $07
 		jp   .ret
 ; --------------- frame #2D ---------------
 .chkEnd:
@@ -9147,7 +9147,7 @@ ENDC
 	; Fall to the ground at $00.60px/frame
 	mMvC_ChkGravityHV $0060, .anim
 	; Once we touched the ground, switch to the next frame
-	mMvC_SetLandFrame $02*OBJLSTPTR_ENTRYSIZE, $0A
+	mMvC_SetLandFrame $02, $0A
 	jp   .ret
 	
 ; --------------- frame #2 ---------------
@@ -9366,7 +9366,7 @@ MoveC_Base_ThrowA_DiagF:
 	; If at any point while #2 or #3 are displayed, the player touches the ground,
 	; switch directly to the landing sprite.
 	mMvC_ChkGravityHV $0060, .anim		; If not, skip
-	mMvC_SetLandFrame $04*OBJLSTPTR_ENTRYSIZE, $04
+	mMvC_SetLandFrame $04, $04
 	jp   .ret
 ; --------------- frame #4 ---------------
 .chkEnd:
@@ -9515,7 +9515,7 @@ ENDC
 	mMvC_ChkGravityHV $0060, .anim						; If not, jump
 	
 	; Once the ground is touched, switch to #2
-	mMvC_SetLandFrame $02*OBJLSTPTR_ENTRYSIZE, $02
+	mMvC_SetLandFrame $02, $02
 	
 	; Move opponent left 2px, up 1px
 	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_HEAVYHIT ; Same as before, to enable Play_Pl_MoveRotThrown

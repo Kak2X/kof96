@@ -746,7 +746,7 @@ MoveC_Goenitz_HyougaH:
 .doGravity:
 	; Move down at $00.18px/frame, switch to #3 when touching the ground
 	mMvC_ChkGravityHV $0018, .anim
-	mMvC_SetLandFrame $03*OBJLSTPTR_ENTRYSIZE, $03
+	mMvC_SetLandFrame $03, $03
 	jp   .ret
 ; --------------- frame #3 ---------------
 .chkEnd:
@@ -1005,7 +1005,7 @@ MoveC_Goenitz_ShinyaotomeThrowH:
 ; If we land at any point, switch to #5 and deal the damage.
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetLandFrame $05*OBJLSTPTR_ENTRYSIZE, $04
+		mMvC_SetLandFrame $05, $04
 		mMvC_SetDamageNext $0A, HITTYPE_DROP_DB_A, PF3_HEAVYHIT
 		jp   .ret
 ; --------------- frame #6 ---------------
@@ -1402,7 +1402,7 @@ MoveC_Goenitz_ShinyaotomeMizuchiSH:
 ; --------------- common gravity check ---------------
 .doGravity:
 	mMvC_ChkGravityHV $0020, .anim
-		mMvC_SetLandFrame $03*OBJLSTPTR_ENTRYSIZE, $06
+		mMvC_SetLandFrame $03, $06
 		jp   .ret
 ; --------------- frame #3 ---------------
 ; Recovery.
@@ -1509,7 +1509,7 @@ MoveC_Goenitz_ShinyaotomeJissoukokuDH:
 ; --------------- common gravity check ---------------
 .doGravity:
 	mMvC_ChkGravityHV $0018, .anim
-		mMvC_SetLandFrame $04*OBJLSTPTR_ENTRYSIZE, $06
+		mMvC_SetLandFrame $04, $06
 		jp   .ret
 ; --------------- frame #4 ---------------
 .chkEnd:

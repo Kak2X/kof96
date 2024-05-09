@@ -10538,7 +10538,7 @@ MoveC_Base_Jump:
 	add  hl, bc
 	res  PF1B_NOSPECSTART, [hl]			; Allow starting specials when landing
 	; Switch to the landing phase.
-	mMvC_SetLandFrame $07*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+	mMvC_SetLandFrame $07, ANIMSPEED_INSTANT
 	jp   .ret
 
 ; --------------- frame #7 ---------------
