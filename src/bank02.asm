@@ -4278,7 +4278,7 @@ MoveC_Hit_DropMain:
 	
 		; We didn't roll.
 		; Use frame #2 when bouncing off the ground.
-		mMvC_SetDropFrame $02*OBJLSTPTR_ENTRYSIZE, $05
+		mMvC_SetDropFrame $02, $05
 		
 		; Can't be hit until we get up
 		ld   hl, iPlInfo_Flags1
@@ -4348,7 +4348,7 @@ MoveC_Hit_DropMain:
 .doGravity_noRoll:
 	; When touching the ground after the rebound, play the drop SFX and switch to #4
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetDropFrame $04*OBJLSTPTR_ENTRYSIZE, $05
+		mMvC_SetDropFrame $04, $05
 		jp   .ret
 ; --------------- frame #4 ---------------
 .chkEnd:
@@ -4450,7 +4450,7 @@ MoveC_Hit_Throw_End:
 ; Before hitting the ground the first time...
 .doGravity_preRebound:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetDropFrame $01*OBJLSTPTR_ENTRYSIZE, $09
+		mMvC_SetDropFrame $01, $09
 		jp   z, .ret
 		
 		; End the damage string when touching the ground
@@ -4472,7 +4472,7 @@ MoveC_Hit_Throw_End:
 .doGravity_afterRebound:
 	; Handle gravity
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetDropFrame $03*OBJLSTPTR_ENTRYSIZE, $05
+		mMvC_SetDropFrame $03, $05
 		jp   .ret
 ; --------------- frame #3 ---------------
 .chkEnd:
@@ -4774,7 +4774,7 @@ MoveC_Hit_SwoopUp:
 	;
 	call OBJLstS_ApplyGravityVAndMoveHV	; Did we touch the ground?
 	jp   nc, .anim						; If not, jump
-		mMvC_SetDropFrame $04*OBJLSTPTR_ENTRYSIZE, $0B	; Attempt to set the next frame
+		mMvC_SetDropFrame $04, $0B	; Attempt to set the next frame
 		jp   z, .ret									; Did it work? If not (ie: already set it before), return
 		
 			; Play a sound effect for hitting the ground
@@ -4802,7 +4802,7 @@ MoveC_Hit_SwoopUp:
 ; --------------- frame #5 / gravity check ---------------
 .doGravityToChkEnd:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetDropFrame $06*OBJLSTPTR_ENTRYSIZE, $05
+		mMvC_SetDropFrame $06, $05
 		jp   .ret
 ; --------------- frame #6 ---------------
 ; Wake up when the frame ends.
@@ -4846,7 +4846,7 @@ MoveC_Hit_DropCH:
 .doGravity:
 	; Switch to #2 when landing on the ground
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetDropFrame $02*OBJLSTPTR_ENTRYSIZE, $05
+		mMvC_SetDropFrame $02, $05
 		; Stop flashing
 		ld   hl, iPlInfo_Flags3
 		add  hl, bc
@@ -5839,7 +5839,7 @@ ENDC
 	.obj1_chkGuard_noGuard:
 		; Otherwise, continue to #2
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
-		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
+		mMvC_SetFrame $02, $01
 		mMvC_SetSpeedH $0000
 		; Force player on the ground
 		ld   hl, iOBJInfo_Y
@@ -6009,7 +6009,7 @@ ENDC
 	.obj1_chkGuard_noGuard:
 		; Otherwise, continue to #2
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
-		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
+		mMvC_SetFrame $02, $01
 		mMvC_SetSpeedH $0000
 		; Force player on the ground
 		ld   hl, iOBJInfo_Y
@@ -6419,7 +6419,7 @@ ELSE
 	jp   .obj1_cont_doGravity
 ENDC
 .obj1_cont_onBlock:
-	mMvC_SetFrame $03*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_NONE
+	mMvC_SetFrame $03, ANIMSPEED_NONE
 	mMvC_SetSpeedH +$0000
 	mMvC_SetSpeedV +$0000
 .obj1_cont_doGravity:
@@ -6789,7 +6789,7 @@ ENDC
 	.obj1_chkGuard_noGuard:
 		; Otherwise, continue to #2
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
-		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
+		mMvC_SetFrame $02, $01
 		mMvC_SetSpeedH $0000
 		; Force player on the ground
 		ld   hl, iOBJInfo_Y
@@ -6956,7 +6956,7 @@ ENDC
 	.obj1_chkGuard_noGuard:
 		; Otherwise, continue to #2
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
-		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
+		mMvC_SetFrame $02, $01
 		mMvC_SetSpeedH $0000
 		; Force player on the ground
 		ld   hl, iOBJInfo_Y
@@ -7378,7 +7378,7 @@ MoveC_Leona_GrandSabre:
 	; Getting close to the opponent switches to #6.
 	; If we don't, #5 makes sure to end the move before it automatically switches to #6.
 	mMvIn_ValClose .chkDistance_far, $20
-		mMvC_SetFrame $06*OBJLSTPTR_ENTRYSIZE, $01
+		mMvC_SetFrame $06, $01
 		call OBJLstS_ApplyXSpeed
 		jp   .ret
 .chkDistance_far:
@@ -7417,7 +7417,7 @@ MoveC_Leona_GrandSabre:
 	jp   nc, .anim	; Was an attack button pressed? If not, jump
 	jp   z, .anim	; Was the punch button pressed? If so, jump
 	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT
-	mMvC_SetFrame $0A*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_NONE
+	mMvC_SetFrame $0A, ANIMSPEED_NONE
 	jp   .ret
 ; --------------- Gliding Buster - frame #A ---------------
 ; Initialize jump settings.
@@ -7759,7 +7759,7 @@ MoveC_Leona_VSlasher:
 .obj1_cont:
 	; If we successfully hit the opponent through a combo hit, directly switch to #2.
 	mMvC_ValHit .obj1_doGravity, .obj1_doGravity
-		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_NONE
+		mMvC_SetFrame $02, ANIMSPEED_NONE
 		call Play_Pl_TempPauseOtherAnim
 		jp   .ret
 ; --------------- frame #2 ---------------
@@ -7901,7 +7901,7 @@ MoveC_OLeona_SuperMoonSlasher:
 	mMvC_ValHit .obj3_whiff, .obj3_blocked
 	.obj3_hit:
 		; Otherwise, continue to #4
-		mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, $00
+		mMvC_SetFrame $04, $00
 		mMvC_SetSpeedH $0080
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_SUPERALT|PF3_LIGHTHIT
 		jp   .ret
@@ -8260,7 +8260,7 @@ MoveC_MrKarate_ShouranKyaku:
 .obj0_cont:
 	; Switch to #3 when hitting the opponent
 	mMvC_ValHit .obj0_noHit, .obj0_blocked
-		mMvC_SetFrame $03*OBJLSTPTR_ENTRYSIZE, $00
+		mMvC_SetFrame $03, $00
 		; Set initial for damage loop
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, $00
 		
@@ -8281,7 +8281,7 @@ MoveC_MrKarate_ShouranKyaku:
 		ld   a, [hl]
 		cp   $02*OBJLSTPTR_ENTRYSIZE	; FrameId == #2?
 		jp   nz, .anim				; If not, skip
-		mMvC_SetFrame $06*OBJLSTPTR_ENTRYSIZE, $0A
+		mMvC_SetFrame $06, $0A
 		jp   .ret
 ; --------------- frame #3 ---------------
 ; Damage loop.
@@ -8683,7 +8683,7 @@ IF REV_VER_2 == 0
 ELSE
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT|PF3_LIGHTHIT
 ENDC
-		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
+		mMvC_SetFrame $02, $01
 		mMvC_SetSpeedH $0000
 		; Force player on the ground
 		ld   hl, iOBJInfo_Y
@@ -8873,7 +8873,7 @@ ENDC
 	.obj1_chkGuard_noGuard:
 		; Otherwise, continue to #2
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
-		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
+		mMvC_SetFrame $02, $01
 		mMvC_SetSpeedH $0000
 		; Force player on the ground
 		ld   hl, iOBJInfo_Y

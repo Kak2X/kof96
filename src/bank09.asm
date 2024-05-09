@@ -287,7 +287,7 @@ MoveC_Krauser_KaiserKick:
 		mMvC_SetSpeedV -$0480
 .obj1_cont:
 	mMvC_ChkGravityHV $0060, .anim
-		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $0A
+		mMvC_SetFrame $02, $0A
 		mMvC_PlaySound SFX_DROP
 		jp   .ret
 ; --------------- frame #2 ---------------

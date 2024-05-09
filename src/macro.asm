@@ -598,7 +598,7 @@ ENDM
 ; OUT
 ; - Z flag: If set, the new animation frame wasn't set
 mMvC_SetDropFrame: MACRO
-	ld   a, \1
+	ld   a, \1*OBJLSTPTR_ENTRYSIZE
 	ld   h, \2
 	call Play_Pl_SetDropAnimFrame
 ENDM
@@ -615,7 +615,7 @@ ENDM
 ; OUT
 ; - Z flag: If set, the new animation frame wasn't set
 mMvC_SetFrame: MACRO
-	ld   a, \1
+	ld   a, \1*OBJLSTPTR_ENTRYSIZE
 	ld   h, \2
 	call Play_Pl_SetAnimFrame
 ENDM

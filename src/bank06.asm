@@ -449,41 +449,41 @@ ENDM
 ; Starts 128 Shiki Kono Kizu
 .startKonoKizu:
 	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_LASTHIT
-	mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, $00
+	mMvC_SetFrame $04, $00
 	mMvC_PlaySound SFX_FIREHIT_A
 	jp   .ret
 	
 ; Starts 127 Shiki Yano Sabi
 .startYanoSabi:
 	mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_HEAVYHIT|PF3_FIRE|PF3_OVERHEAD|PF3_LASTHIT
-	mMvC_SetFrame $08*OBJLSTPTR_ENTRYSIZE, $00
+	mMvC_SetFrame $08, $00
 	mMvC_PlaySound SFX_FIREHIT_A
 	jp   .ret
 ; Starts 127 Shiki Yano Sabi from 128 Shiki Kono Kizu
 .startYanoSabiFromKonoKizu:
 	mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_HEAVYHIT|PF3_FIRE|PF3_OVERHEAD|PF3_LASTHIT
-	mMvC_SetFrame $0C*OBJLSTPTR_ENTRYSIZE, $00
+	mMvC_SetFrame $0C, $00
 	mMvC_PlaySound SFX_FIREHIT_A
 	jp   .ret
 	
 ; Starts Ge Shiki Migiri Ugachi
 .startMigiriUgachi:
 	mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_HEAVYHIT|PF3_FIRE|PF3_LASTHIT
-	mMvC_SetFrame $10*OBJLSTPTR_ENTRYSIZE, $00
+	mMvC_SetFrame $10, $00
 	mMvC_PlaySound SFX_FIREHIT_A
 	jp   .ret
 	
 ; Starts 125 Shiki Nana Se
 .startNanaSe:
 	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
-	mMvC_SetFrame $14*OBJLSTPTR_ENTRYSIZE, $00
+	mMvC_SetFrame $14, $00
 	mMvC_PlaySound SFX_FIREHIT_A
 	jp   .ret
 	
 ; --------------- common ---------------
 .setLastFrame:
 	; Switches to the last frame of the animation, when the move ends
-	mMvC_SetFrame $16*OBJLSTPTR_ENTRYSIZE, $01
+	mMvC_SetFrame $16, $01
 		jp   .ret
 ; --------------- frame #16 ---------------
 .chkEnd:
@@ -710,7 +710,7 @@ ENDM
 ; --------------- submoves ---------------
 ; 401 Shiki Tumi Yomi
 .startTumiYomi:
-	mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, $00	; Was the frame set already?
+	mMvC_SetFrame $04, $00	; Was the frame set already?
 	jp   z, .ret								; If so, return
 	mMvC_SetDamageNext $08, HITTYPE_HIT_MID0, PF3_HEAVYHIT|PF3_FIRE|PF3_LASTHIT
 	mMvC_PlaySound SFX_FIREHIT_A
@@ -721,7 +721,7 @@ ENDM
 	jp   .ret
 ; 402 Shiki Batu Yomi
 .startBatuYomi:
-	mMvC_SetFrame $07*OBJLSTPTR_ENTRYSIZE, $00	; Was the frame set already?
+	mMvC_SetFrame $07, $00	; Was the frame set already?
 	jp   z, .ret								; If so, return
 	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
 	mMvC_PlaySound SFX_FIREHIT_A
@@ -732,7 +732,7 @@ ENDM
 	jp   .ret
 ; --------------- common ---------------
 .setLastFrame:
-	mMvC_SetFrame $0C*OBJLSTPTR_ENTRYSIZE, $01
+	mMvC_SetFrame $0C, $01
 	jp   .ret
 ; --------------- frame #C ---------------
 ; Recovery frame used when the move ends before 402 Shiki Batu Yomi.
@@ -1104,7 +1104,7 @@ MoveC_Kyo_KototsukiYou:
 .chkNearPl:
 	; Continue running until we get close to the opponent.
 	mMvIn_ValClose .moveH_anim
-		mMvC_SetFrame $05*OBJLSTPTR_ENTRYSIZE, $01
+		mMvC_SetFrame $05, $01
 		call OBJLstS_ApplyXSpeed
 		jp   .ret
 .moveH_anim:
@@ -1135,7 +1135,7 @@ MoveC_Kyo_KototsukiYou:
 	; Immediately switch to the second attack frame.
 	; The second hit will deal 8 lines of damage and drop him on the ground.
 	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE
-	mMvC_SetFrame $06*OBJLSTPTR_ENTRYSIZE, $08
+	mMvC_SetFrame $06, $08
 	jp   .ret
 ; --------------- frame #6 ---------------	
 ; Waits for the second hit to end. No recovery frame here.
@@ -1302,7 +1302,7 @@ MoveC_Kyo_NueTumi:
 	;--
 .obj0_autoguard_setNextFrame:
 	; Immediately switch to frame #4, hitting the opponent
-	mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, $01
+	mMvC_SetFrame $04, $01
 	mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_HEAVYHIT|PF3_FIRE
 	jp   .ret
 .obj0_noAutoguard:
@@ -1350,7 +1350,7 @@ MoveC_Kyo_NueTumi:
 	;--
 .obj1_autoguard_setNextFrame:
 	; Immediately switch to frame #8, hitting the opponent
-	mMvC_SetFrame $08*OBJLSTPTR_ENTRYSIZE, $01
+	mMvC_SetFrame $08, $01
 	mMvC_SetDamageNext $08, HITTYPE_HIT_MID0, PF3_HEAVYHIT|PF3_FIRE
 	jp   .ret
 .obj1_noAutoguard:
@@ -1458,7 +1458,7 @@ ENDC
 		jp   z, .anim	; Did it elapse? If so, animate
 		
 		; Otherwise, loop back to #1
-		mMvC_SetFrame $01*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+		mMvC_SetFrame $01, ANIMSPEED_INSTANT
 IF REV_VER_2 == 0
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MID0, PF3_FIRE|PF3_LASTHIT
 ENDC
@@ -2792,7 +2792,7 @@ MoveC_Mai_ChijouMusasabi:
 		ld   [hl], $01*OBJLSTPTR_ENTRYSIZE ; offset by -1
 		jp   .doGravity
 .obj6_setNext:
-	mMvC_SetFrame $09*OBJLSTPTR_ENTRYSIZE, $03
+	mMvC_SetFrame $09, $03
 	jp   .ret
 ; --------------- frame #9 ---------------
 ; Checks for the input to transition to Kuuchuu Musasabi no Mai.
@@ -2812,7 +2812,7 @@ MoveC_Mai_ChijouMusasabi:
 		jp   nz, .startKuuChuu		; If so, jump
 		
 		; If we didn't hold anything, just continue to #7 where we fall down normally.
-		mMvC_SetFrame $07*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_NONE
+		mMvC_SetFrame $07, ANIMSPEED_NONE
 		jp   .ret
 		
 	.startKuuChuu:
@@ -3819,7 +3819,7 @@ ENDM
 		jp   nz, .part1_earlyEnd	; If so, jump
 		
 		; Loop back to #1
-		mMvC_SetFrame $01*OBJLSTPTR_ENTRYSIZE, $01
+		mMvC_SetFrame $01, $01
 		jp   .ret
 ; --------------- frames #1-2 / common phase 2 switch ---------------
 ; Phase 1 - Switches to the second phase through directional inputs.
@@ -3837,7 +3837,7 @@ ENDM
 	call Play_Pl_ClearJoyDirBuffer
 	
 	; Switch to #4
-	mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, $01
+	mMvC_SetFrame $04, $01
 	
 	; Slow down orbiting speed (new proj mode)
 	call MoveS_Athena_ShCryst_SetOrbitNear
@@ -4131,7 +4131,7 @@ ENDC
 	call Play_Pl_EndMove
 	jr   .ret
 .obj6_setNext:
-	mMvC_SetFrame $07*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_NONE
+	mMvC_SetFrame $07, ANIMSPEED_NONE
 	; In case we get here by having the move end early in Phase 1.
 	; Make the projectile move in a spiral motion, extending outwards.
 	call MoveS_Athena_ShCryst_SetOrbitExpand
@@ -6109,7 +6109,7 @@ MoveC_Andy_ZanEiKen:
 	; will effectively move the player twice as fast / frame.
 	mMvC_DoFrictionH $0100
 	jp   nc, .chkSubInput
-	mMvC_SetFrame $03*OBJLSTPTR_ENTRYSIZE, $0A
+	mMvC_SetFrame $03, $0A
 	jp   .ret
 ; --------------- frames #1,#2 / common submove check ---------------	
 ; Performs checks if the submove (Gadankoh) should start.
@@ -6139,7 +6139,7 @@ MoveC_Andy_ZanEiKen:
 	jp   z, .moveH				; If not, jump
 	
 	; Otherwise, switch to the submove
-	mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, $06
+	mMvC_SetFrame $04, $06
 	call OBJLstS_ApplyXSpeed
 	mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_HEAVYHIT
 	jp   .ret
@@ -7567,7 +7567,7 @@ MoveC_Geese_JaEiKen:
 	; Otherwise, continue to #2 and disable manual control.
 	; The next two frames will deal damage.
 	mMvC_SetDamageNext $08, HITTYPE_HIT_MID1, PF3_HEAVYHIT
-	mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $05
+	mMvC_SetFrame $02, $05
 	call OBJLstS_ApplyXSpeed
 	jp   .ret
 .obj1_moveH:
@@ -7791,7 +7791,7 @@ MoveC_Geese_AtemiNage:
 		add  hl, bc
 		set  PF1B_INVULN, [hl]
 		; Switch to #2
-		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $08
+		mMvC_SetFrame $02, $08
 		jp   .ret
 	
 .obj0_waitEnd:

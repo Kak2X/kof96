@@ -530,7 +530,7 @@ MoveC_Iori_KotoTsukiIn:
 .chkNear:
 	; Advances to #5 if we get near
 	mMvIn_ValClose .moveH
-		mMvC_SetFrame $05*OBJLSTPTR_ENTRYSIZE, $01
+		mMvC_SetFrame $05, $01
 		call OBJLstS_ApplyXSpeed
 		jp   .ret
 ; --------------- frames #0-4 / common run movement ---------------
@@ -561,7 +561,7 @@ MoveC_Iori_KotoTsukiIn:
 		jp   .end
 .obj5_setDamage:
 	; Switch to #6
-	mMvC_SetFrame $06*OBJLSTPTR_ENTRYSIZE, $02
+	mMvC_SetFrame $06, $02
 	; Deal more damage the next frame.
 	; The drop type and PF3_LASTHIT differ between Iori and O.Iori, but damage is the same.
 	ld   hl, iPlInfo_CharId
@@ -832,12 +832,12 @@ ELSE
 ENDC
 	.obj1_chkGuard_noGuard:
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FIRE
-		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
+		mMvC_SetFrame $02, $01
 		jp   .ret
 .obj1_chkGuard_noHit:
 	jp   .moveH
 .obj1_chkGuard_guard:
-	mMvC_SetFrame $14*OBJLSTPTR_ENTRYSIZE, $0A
+	mMvC_SetFrame $14, $0A
 	jp   .ret
 	
 ; --------------- odd frames #3,5,7,9,B,D,F - line damage + block check ---------------
@@ -973,14 +973,14 @@ ENDC
 	.obj1_chkGuard_noGuard:
 		; Damage confirmed, switch to #2
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FIRE
-		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $01
+		mMvC_SetFrame $02, $01
 		jp   .ret
 .obj1_chkGuard_noHit:
 	; Not hit yet, continue moving
 	jp   .moveH
 .obj1_chkGuard_guard:
 	; Blocked, jump to #1B
-	mMvC_SetFrame $1B*OBJLSTPTR_ENTRYSIZE, $0A
+	mMvC_SetFrame $1B, $0A
 	jp   .ret
 ; --------------- frame #2 ---------------
 .obj2:
@@ -1175,7 +1175,7 @@ ENDC
 	.obj1_chkGuard_noGuard:
 		; Damage confirmed, switch to #2
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_FIRE|PF3_LIGHTHIT
-		mMvC_SetFrame $02*OBJLSTPTR_ENTRYSIZE, $00
+		mMvC_SetFrame $02, $00
 		
 		; Loop the damage frames (#2-#5) 4 times
 		ld   hl, iPlInfo_OIori_KinYaOtome_LoopCount
@@ -1187,7 +1187,7 @@ ENDC
 	jp   .moveH
 .obj1_chkGuard_guard:
 	; Blocked, switch to #F, the recovery frame when the opponent blocked it
-	mMvC_SetFrame $0F*OBJLSTPTR_ENTRYSIZE, $0A
+	mMvC_SetFrame $0F, $0A
 	jp   .ret
 	
 ; --------------- frames #2,#4,#6 ---------------
@@ -1451,7 +1451,7 @@ MoveC_Mature_Decide:
 .canStartThrow_yes:	
 	mMvIn_ValStartCmdThrow_AllColi .canStartThrow_no
 		; Switch to #3 once it's confirmed
-		mMvC_SetFrame $03*OBJLSTPTR_ENTRYSIZE, $04
+		mMvC_SetFrame $03, $04
 		scf		; C flag set
 		ret
 .canStartThrow_no:
@@ -1540,7 +1540,7 @@ MoveC_Mature_MetalMassacre:
 ; If by the end of #2 we don't, the animation switches to #3 and the move ends there.
 .chkPlNear:
 	mMvIn_ValClose .moveH, $30
-		mMvC_SetFrame $10, $00
+		mMvC_SetFrame $04, $00
 		call OBJLstS_ApplyXSpeed
 		IF FIX_BUGS == 1
 			jp   .ret
@@ -1680,10 +1680,10 @@ MoveC_Mature_DeathRow:
 		cp   $06*OBJLSTPTR_ENTRYSIZE	; FrameId < $06?
 		jp   c, .hit1_earlyAbort		; If so, jump
 	.hit1_fullDone:
-		mMvC_SetFrame $09*OBJLSTPTR_ENTRYSIZE, $0A
+		mMvC_SetFrame $09, $0A
 		jp   .ret
 	.hit1_earlyAbort:
-		mMvC_SetFrame $0A*OBJLSTPTR_ENTRYSIZE, $0A
+		mMvC_SetFrame $0A, $0A
 		jp   .ret
 	
 ; =============== .chkRepeatInput ===============
@@ -1945,7 +1945,7 @@ ENDC
 		;
 		; The hit wasn't blocked, so switch to #4 to continue the attack.
 		;
-		mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_NONE
+		mMvC_SetFrame $04, ANIMSPEED_NONE
 		ld   a, PLAY_THROWACT_NEXT03
 		ld   [wPlayPlThrowActId], a
 		mMvC_SetDamageNext $01, HITTYPE_THROW_ROTU, PF3_HEAVYHIT
@@ -2022,7 +2022,7 @@ ENDC
 	;
 	; Switch to #5 and setup the damage dealt by the move.
 	;
-	mMvC_SetFrame $05*OBJLSTPTR_ENTRYSIZE, $08
+	mMvC_SetFrame $05, $08
 	ld   hl, iPlInfo_MoveId
 	add  hl, bc
 	ld   a, [hl]
@@ -2420,7 +2420,7 @@ MoveC_Chizuru_ShinsokuNoroti:
 	; Skip the first part and switch to #3 directly if starting a chained move
 	call .chkCM
 	jp   z, .moveH
-		mMvC_SetFrame $03*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+		mMvC_SetFrame $03, ANIMSPEED_INSTANT
 		call OBJLstS_ApplyXSpeed
 		jp   .ret
 ; --------------- frame #1 ---------------
@@ -2429,7 +2429,7 @@ MoveC_Chizuru_ShinsokuNoroti:
 	; Skip the first part and switch to #3 directly if starting a chained move
 	call .chkCM
 	jp   z, .obj1_main
-		mMvC_SetFrame $03*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+		mMvC_SetFrame $03, ANIMSPEED_INSTANT
 		call OBJLstS_ApplyXSpeed
 		jp   .ret
 .obj1_main:
@@ -2443,7 +2443,7 @@ MoveC_Chizuru_ShinsokuNoroti:
 	; Skip the first part and switch to #3 directly if starting a chained move
 	call .chkCM
 	jp   z, .obj2_main
-		mMvC_SetFrame $03*OBJLSTPTR_ENTRYSIZE, ANIMSPEED_INSTANT
+		mMvC_SetFrame $03, ANIMSPEED_INSTANT
 		call OBJLstS_ApplyXSpeed
 		jp   .ret
 .obj2_main:
@@ -3206,7 +3206,7 @@ MoveC_Daimon_CmdThrow:
 		set  PF1B_INVULN, [hl]
 		
 		; Set info for next frame
-		mMvC_SetFrame $04*OBJLSTPTR_ENTRYSIZE, $01
+		mMvC_SetFrame $04, $01
 		mMvC_SetDamageNext $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
 		mMvC_MoveThrowOp -$10, -$18
 		jp   .ret

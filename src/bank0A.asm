@@ -1065,7 +1065,7 @@ MoveC_Goenitz_ShinyaotomePart2:
 		jp   z, .obj2_noLoop
 	.obj2_loop:
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_LASTHIT
-		mMvC_SetFrame $00*OBJLSTPTR_ENTRYSIZE, $00
+		mMvC_SetFrame $00, $00
 		jp   .ret
 	.obj2_noLoop:
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_LASTHIT
