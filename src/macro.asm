@@ -621,7 +621,18 @@ mMvC_SetFrame: MACRO
 ENDM
 
 ; =============== mMvC_StartChkFrame ===============
-; Starts a list of mMvC_ChkFrame declarations.
+; Starts a list of mMvC_ChkFrame declarations. (Going off the internal/updated frame)
+; OUT
+; - HL: Ptr to iOBJInfo_OBJLstPtrTblOffset
+; - A: Currently visible sprite mapping ID
+mMvC_StartChkFrameInt: MACRO
+	ld   hl, iOBJInfo_OBJLstPtrTblOffset
+	add  hl, de
+	ld   a, [hl]
+ENDM
+
+; =============== mMvC_StartChkFrame ===============
+; Starts a list of mMvC_ChkFrame declarations. (Going off the visible frame)
 ; OUT
 ; - HL: Ptr to iOBJInfo_OBJLstPtrTblOffsetView
 ; - A: Currently visible sprite mapping ID
@@ -813,6 +824,19 @@ mMvC_ChkNotMaxPow: MACRO
 	jp   nz, \1			; If so, jump
 ENDM
 
+; =============== mMvC_ChkMove ===============
+; Checks if the move ID matches the specified value.
+; This is mostly used to determine if the move is a light or heavy.
+; IN
+; - 1: Move ID (for the heavy)
+; - 2: Where to jump if it matches (for the heavy)
+mMvC_ChkMove: MACRO
+	ld   hl, iPlInfo_MoveId
+	add  hl, bc
+	ld   a, [hl]
+	cp   \1
+	jp   z, \2
+ENDM
 
 ; =============== mMvC_ValHit ===============
 ; Executes code below only if the opponent got hit in the damage string.

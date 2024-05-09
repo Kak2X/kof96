@@ -1191,11 +1191,7 @@ MoveC_Kyo_Kai:
 	
 	mMvC_SetAnimSpeed $01		; Use fast anim for heavy
 	
-	ld   hl, iPlInfo_MoveId
-	add  hl, bc
-	ld   a, [hl]
-	cp   MOVE_KYO_KAI_H	; Doing the heavy version?
-	jp   z, .anim				; If so, jump
+	mMvC_ChkMove MOVE_KYO_KAI_H, .anim ; Doing the heavy version? If so, jump
 	; Otherwise, get manual control
 	ld   hl, iOBJInfo_FrameTotal
 	add  hl, de
@@ -1505,6 +1501,9 @@ ENDC
 		; [BUG] The animation speed is currently set to ANIMSPEED_INSTANT.
 		;       That means mMvC_ValFrameEnd will also trigger this frame, but we're skipping it. 
 		;       This prevents animation speed from being updated to $01 (not like it makes great difference).
+		;
+		;       Note that 95 had this jp instruction but did not have this problem, because the animation 
+		;       speed was set to $01 already.
 		IF FIX_BUGS == 0
 			jp   .doFriction
 		ENDC
@@ -2303,9 +2302,7 @@ ProjC_Terry_PowerWave:
 	call ExOBJS_Play_ChkHitModeAndMoveH
 	
 	; Depending on the internal frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffset
-	add  hl, de
-	ld   a, [hl]
+	mMvC_StartChkFrameInt
 		mMvC_ChkFrame $0C, .chkEnd
 .anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
@@ -2321,9 +2318,7 @@ ProjC_Terry_PowerWave:
 ProjC_Terry_PowerGeyser:
 	
 	; Depending on the internal frame...
-	ld   hl, iOBJInfo_OBJLstPtrTblOffset
-	add  hl, de
-	ld   a, [hl]
+	mMvC_StartChkFrameInt
 		mMvC_ChkFrame $0A, .chkEnd
 .anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
