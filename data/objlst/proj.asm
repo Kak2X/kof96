@@ -50,18 +50,18 @@ OBJLstPtrTable_Proj_Iori_YamiBarai:
 	dw OBJLstHdrA_Proj_Terry_PowerWave1, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
-OBJLstPtrTable_Proj_HaohShokohKenS:
-	dw OBJLstHdrA_Proj_HaohShokohKenS0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Proj_HaohShokohKenS1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Proj_HaohShokohKenS0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Proj_HaohShokohKenS1, OBJLSTPTR_NONE
+OBJLstPtrTable_Proj_HaohShoukouKenS:
+	dw OBJLstHdrA_Proj_HaohShoukouKenS0, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Proj_HaohShoukouKenS1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Proj_HaohShoukouKenS0, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Proj_HaohShoukouKenS1, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
-OBJLstPtrTable_Proj_HaohShokohKenD:
-	dw OBJLstHdrA_Proj_HaohShokohKenD0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Proj_HaohShokohKenD1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Proj_HaohShokohKenS0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Proj_HaohShokohKenD1, OBJLSTPTR_NONE
+OBJLstPtrTable_Proj_HaohShoukouKenD:
+	dw OBJLstHdrA_Proj_HaohShoukouKenD0, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Proj_HaohShoukouKenD1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Proj_HaohShoukouKenS0, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Proj_HaohShoukouKenD1, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 OBJLstPtrTable_Proj_MrKarate_KoOuKen:
@@ -181,7 +181,7 @@ OBJLstPtrTable_Proj_Krauser_BlitzBall:
 	dw OBJLSTPTR_NONE
 		
 OBJLstPtrTable_Proj_Krauser_KaiserWaveS:
-	dw OBJLstHdrA_Proj_HaohShokohKenD0, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Proj_HaohShoukouKenD0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Proj_Krauser_KaiserWaveS1, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
@@ -576,7 +576,7 @@ OBJLstHdrA_Proj_Mai_KaChoSen3:
 	db $1A ; iOBJLstHdrA_XOffset
 	db $E9 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Proj_HaohShokohKenS1:
+OBJLstHdrA_Proj_HaohShoukouKenS1:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
 	db COLIBOX_00 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_0B ; iOBJLstHdrA_HitboxId
@@ -585,7 +585,7 @@ OBJLstHdrA_Proj_HaohShokohKenS1:
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Proj_HaohShokohKenD1:
+OBJLstHdrA_Proj_HaohShoukouKenD1:
 	db OLF_NOBUF ; iOBJLstHdrA_Flags
 	db COLIBOX_00 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_0C ; iOBJLstHdrA_HitboxId
@@ -594,7 +594,7 @@ OBJLstHdrA_Proj_HaohShokohKenD1:
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Proj_HaohShokohKenS0:
+OBJLstHdrA_Proj_HaohShoukouKenS0:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
 	db COLIBOX_00 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_0B ; iOBJLstHdrA_HitboxId
@@ -1124,7 +1124,7 @@ OBJLstHdrA_Proj_Krauser_KaiserWaveD2:
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Proj_HaohShokohKenD0:
+OBJLstHdrA_Proj_HaohShoukouKenD0:
 	db OLF_USETILEFLAGS|OLF_NOBUF ; iOBJLstHdrA_Flags
 	db COLIBOX_00 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_0C ; iOBJLstHdrA_HitboxId

@@ -245,13 +245,13 @@ PLINFO_SIZE EQU $100
 
 ; Note that there isn't a single flag marking if we got hit and damaged.
 ; A combination of at least one of these is checked:
-; PCF_HIT -> opponent collided with our hitbox (the move can still whiff)
+; PCFB_HIT -> opponent collided with our hitbox (the move can still whiff)
 ; PF1B_INVULN -> Invulnerability
 ; PF1B_HITRECV -> damage string, aka hit received (definitely no whiff)
 ; PF1B_GUARD -> blocked the hit
 ; Moves that manually check for collision tend to handle them like this, generally for
 ; attacks where the player moves forward until colliding with the player:
-; - PCF_HIT = 0 or PF1B_INVULN = 1 -> not hit yet
+; - PCFB_HIT = 0 or PF1B_INVULN = 1 -> not hit yet
 ; - PF1B_HITRECV = 1 and PF1B_GUARD = 1 -> opponent blocked the attack (from last frame)
 ; - PF1B_HITRECV = 1 and PF1B_GUARD = 0 -> opponent got hit successfully (from last frame)
 
@@ -318,14 +318,14 @@ PF3_LIGHTHIT        EQU 1 << PF3B_LIGHTHIT
 ; Flags for iPlInfo_ColiFlags
 ; One half is for our collision status, the other is for the opponent.
 
-PCF_PUSHED       EQU 0 ; Player is being pushed 
-PCF_HITOTHER     EQU 1 ; The other player got hit (hitbox collided, though it can't be used alone as the opponent may be invulnerable)
-PCF_PROJHITOTHER EQU 2 ; The other player got hit by a projectile
-PCF_PROJREMOTHER EQU 3 ; The other player removed/reflected a projectile
-PCF_PUSHEDOTHER  EQU 4 ; The other player is being pushed
-PCF_HIT          EQU 5 ; Player is hit by a physical attack (hitbox collided, though it can't be used alone as the player may be invulnerable)
-PCF_PROJHIT      EQU 6 ; Player is by a projectile
-PCF_PROJREM      EQU 7 ; Player removed/reflected a projectile
+PCFB_PUSHED       EQU 0 ; Player is being pushed 
+PCFB_HITOTHER     EQU 1 ; The other player got hit (hitbox collided, though it can't be used alone as the opponent may be invulnerable)
+PCFB_PROJHITOTHER EQU 2 ; The other player got hit by a projectile
+PCFB_PROJREMOTHER EQU 3 ; The other player removed/reflected a projectile
+PCFB_PUSHEDOTHER  EQU 4 ; The other player is being pushed
+PCFB_HIT          EQU 5 ; Player is hit by a physical attack (hitbox collided, though it can't be used alone as the player may be invulnerable)
+PCFB_PROJHIT      EQU 6 ; Player is by a projectile
+PCFB_PROJREM      EQU 7 ; Player removed/reflected a projectile
 
 
 
@@ -852,8 +852,8 @@ MOVE_RYO_SPEC_6_L                      EQU $60
 MOVE_RYO_SPEC_6_H                      EQU $62
 MOVE_RYO_RYU_KO_RANBU_S                EQU $64
 MOVE_RYO_RYU_KO_RANBU_D                EQU $66
-MOVE_RYO_HAOH_SHOKOH_KEN_S             EQU $68
-MOVE_RYO_HAOH_SHOKOH_KEN_D             EQU $6A
+MOVE_RYO_HAOH_SHOUKOU_KEN_S             EQU $68
+MOVE_RYO_HAOH_SHOUKOU_KEN_D             EQU $6A
 
 MOVE_ROBERT_RYUU_GEKI_KEN_L            EQU $48
 MOVE_ROBERT_RYUU_GEKI_KEN_H            EQU $4A
@@ -871,8 +871,8 @@ MOVE_ROBERT_SPEC_6_L                   EQU $60
 MOVE_ROBERT_SPEC_6_H                   EQU $62
 MOVE_ROBERT_RYU_KO_RANBU_S             EQU $64
 MOVE_ROBERT_RYU_KO_RANBU_D             EQU $66
-MOVE_ROBERT_HAOH_SHOKOH_KEN_S          EQU $68
-MOVE_ROBERT_HAOH_SHOKOH_KEN_D          EQU $6A
+MOVE_ROBERT_HAOH_SHOUKOU_KEN_S          EQU $68
+MOVE_ROBERT_HAOH_SHOUKOU_KEN_D          EQU $6A
 
 MOVE_ATHENA_PSYCHO_BALL_L              EQU $48
 MOVE_ATHENA_PSYCHO_BALL_H              EQU $4A

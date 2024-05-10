@@ -550,7 +550,7 @@ MoveC_Iori_KotoTsukiIn:
 	;
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]				; Did we reach?
+	bit  PCFB_HITOTHER, [hl]				; Did we reach?
 	jp   z, .obj5_chkEnd				; If not, jump
 	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
@@ -638,7 +638,7 @@ MoveC_Iori_ScumGale:
 	
 ; =============== MoveC_Iori_KinYaOtomeEscapeD ===============
 ; [POI] Move code for an alternate continuation of the desperation version of Iori's Kin 1201 Shiki Ya Otome (MOVE_IORI_KIN_YA_OTOME_ESCAPE_L, MOVE_IORI_KIN_YA_OTOME_ESCAPE_H).
-;       This is only triggered if the opponent somehow escapes during the move (though it's also included in the move shortcuts)
+;       This is only triggered if the opponent escapes during the move (ie: hit by a previously thrown projectile)
 MoveC_Iori_KinYaOtomeEscapeD:
 	call Play_Pl_MoveByColiBoxOverlapX
 	mMvC_ValLoaded .ret
@@ -815,7 +815,7 @@ IF REV_VER_2 == 0
 	;
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]				; Did we reach?
+	bit  PCFB_HITOTHER, [hl]				; Did we reach?
 	jp   z, .obj1_chkGuard_noHit		; If not, skip
 	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
@@ -955,7 +955,7 @@ IF REV_VER_2 == 0
 	;
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]				; Did we reach?
+	bit  PCFB_HITOTHER, [hl]				; Did we reach?
 	jp   z, .obj1_chkGuard_noHit		; If not, skip
 	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
@@ -1157,7 +1157,7 @@ IF REV_VER_2 == 0
 	;
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]				; Did we reach?
+	bit  PCFB_HITOTHER, [hl]				; Did we reach?
 	jp   z, .obj1_chkGuard_noHit		; If not, skip
 	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
@@ -1435,7 +1435,7 @@ MoveC_Mature_Decide:
 .canStartThrow:
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]			; Did we reach?
+	bit  PCFB_HITOTHER, [hl]			; Did we reach?
 	jp   z, .canStartThrow_no		; If not, skip (it whiffed)
 	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
@@ -1923,7 +1923,7 @@ IF OPTIMIZE == 0
 	; 
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]				; Did we reach?
+	bit  PCFB_HITOTHER, [hl]				; Did we reach?
 	jp   z, .chkOtherHit_wait			; If not, skip
 	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
@@ -3182,7 +3182,7 @@ MoveC_Daimon_CmdThrow:
 	; Opponent must be in throw range (overlapped with hitbox for throw range)
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]
+	bit  PCFB_HITOTHER, [hl]
 	jp   z, .obj1_anim
 	
 	ld   hl, iPlInfo_Flags1Other

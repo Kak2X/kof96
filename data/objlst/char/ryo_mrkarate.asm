@@ -485,11 +485,11 @@ OBJLstPtrTable_Ryo_RyuKoRanbuD:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Ryo_HaohShokohKenS:
+OBJLstPtrTable_Ryo_HaohShoukouKenS:
 	dw OBJLstHdrA_Ryo_BlockG0_A, OBJLstHdrB_Ryo_BlockG0_B
 	dw OBJLstHdrA_Ryo_BlockG0_A, OBJLstHdrB_Ryo_BlockG0_B
 	dw OBJLstHdrA_Ryo_ChargeMeter0_A, OBJLstHdrB_Ryo_ChargeMeter0_B
-	dw OBJLstHdrA_Ryo_HaohShokohKenS3, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Ryo_HaohShoukouKenS3, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Ryo_AttackG3_A, OBJLstHdrB_Ryo_AttackG3_B
 	dw OBJLSTPTR_NONE
 		
@@ -2902,11 +2902,11 @@ OBJLstHdrA_Ryo_KyokukenRyuRenbuKenL6:
 	db $37,$02,$0C ; $06
 	db $3D,$0A,$0E ; $07
 		
-OBJLstHdrA_Ryo_HaohShokohKenS3:
+OBJLstHdrA_Ryo_HaohShoukouKenS3:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Ryo_HaohShokohKenS3 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Ryo_HaohShoukouKenS3 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $03 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset

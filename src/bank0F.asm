@@ -105,7 +105,7 @@ GFX_Char_Ryo_HienShippuKyakuL4_B: INCBIN "data/gfx/char/ryo_hienshippukyakul4_b.
 GFX_Char_Ryo_KoHouL2: INCBIN "data/gfx/char/ryo_kohoul2.bin"
 GFX_Char_Ryo_KoHouL3: INCBIN "data/gfx/char/ryo_kohoul3.bin"
 GFX_Char_Ryo_KyokukenRyuRenbuKenL6: INCBIN "data/gfx/char/ryo_kyokukenryurenbukenl6.bin"
-GFX_Char_Ryo_HaohShokohKenS3: INCBIN "data/gfx/char/ryo_haohshokohkens3.bin"
+GFX_Char_Ryo_HaohShoukouKenS3: INCBIN "data/gfx/char/ryo_haohshokohkens3.bin"
 GFX_Char_Ryo_KoHouEl2: INCBIN "data/gfx/char/ryo_kohouel2.bin"
 GFX_Char_Ryo_KoHouEl3: INCBIN "data/gfx/char/ryo_kohouel3.bin"
 GFX_Char_Andy_CHoReppaDanD3_A: INCBIN "data/gfx/char/andy_choreppadand3_a.bin"

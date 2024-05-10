@@ -9413,12 +9413,12 @@ ProjInit_MrKarate_KoOuKen:
 	pop  bc
 	ret
 
-; =============== ProjInit_HaohShokohKenS ===============
-; Initializes the large projectile for the super version of Haoh Shokoh Ken.
+; =============== ProjInit_HaohShoukouKenS ===============
+; Initializes the large projectile for the super version of Haoh Shoukou Ken.
 ; IN
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
-ProjInit_HaohShokohKenS:
+ProjInit_HaohShoukouKenS:
 	mMvC_PlaySound SCT_PROJ_LG_B
 	push bc
 		push de
@@ -9456,11 +9456,11 @@ ProjInit_HaohShokohKenS:
 				; Write sprite mapping ptr for this projectile.
 				ld   hl, iOBJInfo_BankNum
 				add  hl, de
-				ld   [hl], BANK(OBJLstPtrTable_Proj_HaohShokohKenS)	; BANK $01 ; iOBJInfo_BankNum
+				ld   [hl], BANK(OBJLstPtrTable_Proj_HaohShoukouKenS)	; BANK $01 ; iOBJInfo_BankNum
 				inc  hl
-				ld   [hl], LOW(OBJLstPtrTable_Proj_HaohShokohKenS)	; iOBJInfo_OBJLstPtrTbl_Low
+				ld   [hl], LOW(OBJLstPtrTable_Proj_HaohShoukouKenS)	; iOBJInfo_OBJLstPtrTbl_Low
 				inc  hl
-				ld   [hl], HIGH(OBJLstPtrTable_Proj_HaohShokohKenS)	; iOBJInfo_OBJLstPtrTbl_High
+				ld   [hl], HIGH(OBJLstPtrTable_Proj_HaohShoukouKenS)	; iOBJInfo_OBJLstPtrTbl_High
 				inc  hl
 				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
 
@@ -9469,14 +9469,14 @@ ProjInit_HaohShokohKenS:
 				add  hl, de
 				ld   [hl], $01
 
-				jp   ProjInit_HaohShokohKenD.initShared
+				jp   ProjInit_HaohShoukouKenD.initShared
 
-; =============== ProjInit_HaohShokohKenD ===============
-; Initializes the large projectile for the super desperation version of Haoh Shokoh Ken.
+; =============== ProjInit_HaohShoukouKenD ===============
+; Initializes the large projectile for the super desperation version of Haoh Shoukou Ken.
 ; IN
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
-ProjInit_HaohShokohKenD:
+ProjInit_HaohShoukouKenD:
 	mMvC_PlaySound SCT_PROJ_LG_A
 
 	push bc
@@ -9515,11 +9515,11 @@ ProjInit_HaohShokohKenD:
 				; Write sprite mapping ptr for this projectile.
 				ld   hl, iOBJInfo_BankNum
 				add  hl, de
-				ld   [hl], BANK(OBJLstPtrTable_Proj_HaohShokohKenD)	; BANK $01 ; iOBJInfo_BankNum
+				ld   [hl], BANK(OBJLstPtrTable_Proj_HaohShoukouKenD)	; BANK $01 ; iOBJInfo_BankNum
 				inc  hl
-				ld   [hl], LOW(OBJLstPtrTable_Proj_HaohShokohKenD)	; iOBJInfo_OBJLstPtrTbl_Low
+				ld   [hl], LOW(OBJLstPtrTable_Proj_HaohShoukouKenD)	; iOBJInfo_OBJLstPtrTbl_Low
 				inc  hl
-				ld   [hl], HIGH(OBJLstPtrTable_Proj_HaohShokohKenD)	; iOBJInfo_OBJLstPtrTbl_High
+				ld   [hl], HIGH(OBJLstPtrTable_Proj_HaohShoukouKenD)	; iOBJInfo_OBJLstPtrTbl_High
 				inc  hl
 				ld   [hl], $00	; iOBJInfo_OBJLstPtrTblOffset
 
@@ -14137,7 +14137,7 @@ Play_Pl_IsMoveHit:
 	;
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]			; Did we collide with the opponent yet?
+	bit  PCFB_HITOTHER, [hl]			; Did we collide with the opponent yet?
 	jp   z, .retClear				; If not, skip
 	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc

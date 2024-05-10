@@ -1571,14 +1571,14 @@ Play_DoPlColi_1PChar2PChar:
 	; to push the player out based on it.
 		
 	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
-	set  PCF_PUSHED, [hl]
-	set  PCF_PUSHEDOTHER, [hl]
+	set  PCFB_PUSHED, [hl]
+	set  PCFB_PUSHEDOTHER, [hl]
 	inc  hl			; Seek to iPlInfo_ColiBoxOverlapX
 	ld   [hl], b	; Save overlap amount
 	
 	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
-	set  PCF_PUSHED, [hl]
-	set  PCF_PUSHEDOTHER, [hl]
+	set  PCFB_PUSHED, [hl]
+	set  PCFB_PUSHEDOTHER, [hl]
 	inc  hl			
 	ld   [hl], b
 .end:
@@ -1636,18 +1636,18 @@ Play_DoPlColi_1PCharHitbox2PChar:
 	call Play_CheckColi
 	jr   nc, .end
 .coliOk:
-	; A common detail across these hit handlers is that when a player is hit, it receives knockback (PCF_PUSHED).
-	; It's also mandatory when receiving physical damage, as both PCF_PUSHED and PCF_HIT must be set.
+	; A common detail across these hit handlers is that when a player is hit, it receives knockback (PCFB_PUSHED).
+	; It's also mandatory when receiving physical damage, as both PCFB_PUSHED and PCFB_HIT must be set.
 	
 	; Signal that 1P has hit the other player.	
 	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
-	set  PCF_HITOTHER, [hl]
-	set  PCF_PUSHEDOTHER, [hl]
+	set  PCFB_HITOTHER, [hl]
+	set  PCFB_PUSHEDOTHER, [hl]
 	
 	; Signal that 2P has received a hit and is being pushed out.
 	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
-	set  PCF_PUSHED, [hl]
-	set  PCF_HIT, [hl]
+	set  PCFB_PUSHED, [hl]
+	set  PCFB_HIT, [hl]
 .end:
 
 Play_DoPlColi_1PChar2PCharHitbox:
@@ -1702,13 +1702,13 @@ Play_DoPlColi_1PChar2PCharHitbox:
 
 	; Signal that 1P has received a hit
 	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
-	set  PCF_PUSHED, [hl]
-	set  PCF_HIT, [hl]
+	set  PCFB_PUSHED, [hl]
+	set  PCFB_HIT, [hl]
 	
 	; Signal that 2P has hit the other player
 	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
-	set  PCF_HITOTHER, [hl]
-	set  PCF_PUSHEDOTHER, [hl]
+	set  PCFB_HITOTHER, [hl]
+	set  PCFB_PUSHEDOTHER, [hl]
 .end:
 
 Play_DoPlColi_1PProj2PChar:
@@ -1768,12 +1768,12 @@ Play_DoPlColi_1PProj2PChar:
 	ld   [wOBJInfo_Pl1Projectile+iOBJInfo_Play_HitMode], a
 	; 1P hit the other player with a projectile
 	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
-	set  PCF_PROJHITOTHER, [hl]
-	set  PCF_PUSHEDOTHER, [hl]
+	set  PCFB_PROJHITOTHER, [hl]
+	set  PCFB_PUSHEDOTHER, [hl]
 	; 2P received a hit by a projectile
 	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
-	set  PCF_PUSHED, [hl]
-	set  PCF_PROJHIT, [hl]
+	set  PCFB_PUSHED, [hl]
+	set  PCFB_PROJHIT, [hl]
 .end:
 
 Play_DoPlColi_1PChar2PProj:
@@ -1831,12 +1831,12 @@ Play_DoPlColi_1PChar2PProj:
 	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Play_HitMode], a
 	; 2P hit the other player with a projectile
 	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
-	set  PCF_PROJHITOTHER, [hl]
-	set  PCF_PUSHEDOTHER, [hl]
+	set  PCFB_PROJHITOTHER, [hl]
+	set  PCFB_PUSHEDOTHER, [hl]
 	; 1P received a hit by a projectile
 	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
-	set  PCF_PUSHED, [hl]
-	set  PCF_PROJHIT, [hl]
+	set  PCFB_PUSHED, [hl]
+	set  PCFB_PROJHIT, [hl]
 .end:
 
 Play_DoPlColi_1PProj2PCharHitbox:
@@ -1922,16 +1922,16 @@ Play_DoPlColi_1PProj2PCharHitbox:
 .setFlags:
 	; [POI] Set the flags for both players... which aren't actually used.
 	;       Only the value at iOBJInfo_Play_HitMode matters.
-	;       Also, inexplicably, this is also setting PCF_HIT/PCF_HITOTHER, which is only
+	;       Also, inexplicably, this is also setting PCFB_HIT/PCFB_HITOTHER, which is only
 	;       intended for physical hits that reach the opponent.
 	;       But because this is being set, code like Play_Pl_SetHitTypeC_ChkHitType still has to account for this.
 	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
-	set  PCF_PROJREMOTHER, [hl]
-	set  PCF_HIT, [hl]
+	set  PCFB_PROJREMOTHER, [hl]
+	set  PCFB_HIT, [hl]
 	
 	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
-	set  PCF_HITOTHER, [hl]
-	set  PCF_PROJREM, [hl]
+	set  PCFB_HITOTHER, [hl]
+	set  PCFB_PROJREM, [hl]
 .end:
 
 Play_DoPlColi_1PCharHitbox2PProj:
@@ -2000,11 +2000,11 @@ Play_DoPlColi_1PCharHitbox2PProj:
 	ld   [wOBJInfo_Pl2Projectile+iOBJInfo_Play_HitMode], a
 .setFlags:
 	ld   hl, wPlInfo_Pl2+iPlInfo_ColiFlags
-	set  PCF_PROJREMOTHER, [hl]
-	set  PCF_HIT, [hl]
+	set  PCFB_PROJREMOTHER, [hl]
+	set  PCFB_HIT, [hl]
 	ld   hl, wPlInfo_Pl1+iPlInfo_ColiFlags
-	set  PCF_HITOTHER, [hl]
-	set  PCF_PROJREM, [hl]
+	set  PCFB_HITOTHER, [hl]
+	set  PCFB_PROJREM, [hl]
 .end:
 
 Play_DoPlColi_1PProj2PProj:

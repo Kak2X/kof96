@@ -413,8 +413,8 @@ MoveAnimTbl_Ryo:
 	mMvAnDef OBJLstPtrTable_Ryo_Idle, $10, $01, $00, $00, $00 ;X ; BANK $0A ; MOVE_RYO_SPEC_6_H
 	mMvAnDef OBJLstPtrTable_Ryo_RyuKoRanbuS, $44, $08, $01, HITTYPE_HIT_MULTI1, PF3_HEAVYHIT|PF3_LASTHIT ; BANK $0A ; MOVE_RYO_RYU_KO_RANBU_S
 	mMvAnDef OBJLstPtrTable_Ryo_RyuKoRanbuD, $44, $08, $01, HITTYPE_HIT_MULTI1, PF3_HEAVYHIT|PF3_LASTHIT ; BANK $0A ; MOVE_RYO_RYU_KO_RANBU_D
-	mMvAnDef OBJLstPtrTable_Ryo_HaohShokohKenS, $08, $01, $10, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_HALFSPEED ; BANK $0A ; MOVE_RYO_HAOH_SHOKOH_KEN_S
-	mMvAnDef OBJLstPtrTable_Ryo_HaohShokohKenS, $08, $01, $14, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ; BANK $0A ; MOVE_RYO_HAOH_SHOKOH_KEN_D
+	mMvAnDef OBJLstPtrTable_Ryo_HaohShoukouKenS, $08, $01, $10, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_HALFSPEED ; BANK $0A ; MOVE_RYO_HAOH_SHOUKOU_KEN_S
+	mMvAnDef OBJLstPtrTable_Ryo_HaohShoukouKenS, $08, $01, $14, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ; BANK $0A ; MOVE_RYO_HAOH_SHOUKOU_KEN_D
 	mMvAnDef OBJLstPtrTable_Ryo_ThrowG, $08, $0A, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_THROW_G
 	mMvAnDef OBJLstPtrTable_Ryo_Idle, $00, $00, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_Ryo_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_POST_BLOCKSTUN
@@ -491,8 +491,8 @@ MoveAnimTbl_Robert:
 	mMvAnDef OBJLstPtrTable_Robert_Idle, $00, $02, $0A, $00, $00 ;X ; BANK $07 ; MOVE_ROBERT_SPEC_6_H
 	mMvAnDef OBJLstPtrTable_Robert_RyuKoRanbuS, $44, $08, $01, HITTYPE_HIT_MULTI1, PF3_HEAVYHIT|PF3_LASTHIT ; BANK $07 ; MOVE_ROBERT_RYU_KO_RANBU_S
 	mMvAnDef OBJLstPtrTable_Robert_RyuKoRanbuD, $44, $08, $01, HITTYPE_HIT_MULTI1, PF3_HEAVYHIT|PF3_LASTHIT ; BANK $07 ; MOVE_ROBERT_RYU_KO_RANBU_D
-	mMvAnDef OBJLstPtrTable_Robert_HaohShokohKenS, $08, $01, $10, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_HALFSPEED ; BANK $07 ; MOVE_ROBERT_HAOH_SHOKOH_KEN_S
-	mMvAnDef OBJLstPtrTable_Robert_HaohShokohKenS, $08, $01, $14, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ; BANK $07 ; MOVE_ROBERT_HAOH_SHOKOH_KEN_D
+	mMvAnDef OBJLstPtrTable_Robert_HaohShoukouKenS, $08, $01, $10, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_HALFSPEED ; BANK $07 ; MOVE_ROBERT_HAOH_SHOUKOU_KEN_S
+	mMvAnDef OBJLstPtrTable_Robert_HaohShoukouKenS, $08, $01, $14, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ; BANK $07 ; MOVE_ROBERT_HAOH_SHOUKOU_KEN_D
 	mMvAnDef OBJLstPtrTable_Robert_ThrowG, $14, $0A, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_THROW_G
 	mMvAnDef OBJLstPtrTable_Robert_Idle, $00, $00, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_Robert_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_POST_BLOCKSTUN
@@ -1805,8 +1805,8 @@ MoveCodePtrTbl_Robert:
 	mMvCodeDef MoveC_Robert_RyuuGekiKen ;X ; BANK $02 ; MOVE_ROBERT_SPEC_6_H
 	mMvCodeDef MoveC_Robert_RyuKoRanbuS ; BANK $02 ; MOVE_ROBERT_RYU_KO_RANBU_S
 	mMvCodeDef MoveC_Robert_RyuKoRanbuD ; BANK $02 ; MOVE_ROBERT_RYU_KO_RANBU_D
-	mMvCodeDef MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_ROBERT_HAOH_SHOKOH_KEN_S
-	mMvCodeDef MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_ROBERT_HAOH_SHOKOH_KEN_D
+	mMvCodeDef MoveC_Robert_HaohShoukouKen ; BANK $02 ; MOVE_ROBERT_HAOH_SHOUKOU_KEN_S
+	mMvCodeDef MoveC_Robert_HaohShoukouKen ; BANK $02 ; MOVE_ROBERT_HAOH_SHOUKOU_KEN_D
 	mMvCodeDef MoveC_Robert_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
 	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Leona:
@@ -2086,8 +2086,8 @@ ELSE
 	; The move ID itself is still unused, as MOVE_MRKARATE_RYUKO_RANBU_S is used for that.
 	mMvCodeDef MoveC_MrKarate_RyukoRanbuS ;X ; BANK $02 ; MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D
 ENDC
-	mMvCodeDef MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_MRKARATE_HAOH_SHO_KOH_KEN_S
-	mMvCodeDef MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D
+	mMvCodeDef MoveC_Robert_HaohShoukouKen ; BANK $02 ; MOVE_MRKARATE_HAOH_SHO_KOH_KEN_S
+	mMvCodeDef MoveC_Robert_HaohShoukouKen ; BANK $02 ; MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D
 	mMvCodeDef MoveC_Ryo_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
 	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Ryo:
@@ -2107,8 +2107,8 @@ MoveCodePtrTbl_Ryo:
 	mMvCodeDef MoveC_Ryo_KoOuKen ; BANK $02 ; MOVE_RYO_KO_OU_KEN_H
 	mMvCodeDef MoveC_Ryo_MouKoRaiJinGou ; BANK $02 ; MOVE_RYO_MOU_KO_RAI_JIN_GOU_L
 	mMvCodeDef MoveC_Ryo_MouKoRaiJinGou ; BANK $02 ; MOVE_RYO_MOU_KO_RAI_JIN_GOU_H
-	mMvCodeDef MoveC_Ryo_HienShippuKyaku ; BANK $02 ; MOVE_RYO_HIEN_SHIPPUU_KYAKU_L
-	mMvCodeDef MoveC_Ryo_HienShippuKyaku ; BANK $02 ; MOVE_RYO_HIEN_SHIPPUU_KYAKU_H
+	mMvCodeDef MoveC_Ryo_HienShippuuKyaku ; BANK $02 ; MOVE_RYO_HIEN_SHIPPUU_KYAKU_L
+	mMvCodeDef MoveC_Ryo_HienShippuuKyaku ; BANK $02 ; MOVE_RYO_HIEN_SHIPPUU_KYAKU_H
 	mMvCodeDef MoveC_Robert_RyuuGa ; BANK $02 ; MOVE_RYO_KO_HOU_L
 	mMvCodeDef MoveC_Robert_RyuuGa ; BANK $02 ; MOVE_RYO_KO_HOU_H
 	mMvCodeDef MoveC_Robert_KyokugenRyuRanbuKyaku ; BANK $02 ; MOVE_RYO_KYOKUKEN_RYU_RENBU_KEN_L
@@ -2119,8 +2119,8 @@ MoveCodePtrTbl_Ryo:
 	mMvCodeDef MoveC_Ryo_KoOuKen ;X ; BANK $02 ; MOVE_RYO_SPEC_6_H
 	mMvCodeDef MoveC_Ryo_RyuKoRanbuS ; BANK $02 ; MOVE_RYO_RYU_KO_RANBU_S
 	mMvCodeDef MoveC_Ryo_RyuKoRanbuD ; BANK $02 ; MOVE_RYO_RYU_KO_RANBU_D
-	mMvCodeDef MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_RYO_HAOH_SHOKOH_KEN_S
-	mMvCodeDef MoveC_Robert_HaohShokohKen ; BANK $02 ; MOVE_RYO_HAOH_SHOKOH_KEN_D
+	mMvCodeDef MoveC_Robert_HaohShoukouKen ; BANK $02 ; MOVE_RYO_HAOH_SHOUKOU_KEN_S
+	mMvCodeDef MoveC_Robert_HaohShoukouKen ; BANK $02 ; MOVE_RYO_HAOH_SHOUKOU_KEN_D
 	mMvCodeDef MoveC_Ryo_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
 	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Terry:
@@ -3702,7 +3702,7 @@ CPU_MoveInputList_Ryo:
 	dw MoveInput_FDF
 	db KEP_A_LIGHT
 	db KEP_A_HEAVY
-	; FBDF+P -> Haoh Shokoh Ken 
+	; FBDF+P -> Haoh Shoukou Ken 
 	dw MoveInput_FBDF
 	db KEP_B_LIGHT
 	db KEP_B_HEAVY
@@ -3736,7 +3736,7 @@ CPU_MoveInputList_Robert:
 	dw MoveInput_FDF
 	db KEP_A_LIGHT
 	db KEP_A_HEAVY
-	; FBDF+P -> Haoh Shokoh Ken 
+	; FBDF+P -> Haoh Shoukou Ken 
 	dw MoveInput_FBDF
 	db KEP_B_LIGHT
 	db KEP_B_HEAVY

@@ -461,11 +461,11 @@ OBJLstPtrTable_Robert_RyuKoRanbuD:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Robert_HaohShokohKenS:
+OBJLstPtrTable_Robert_HaohShoukouKenS:
 	dw OBJLstHdrA_Robert_RyuKoRanbuS0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Robert_RyuuGekiKenL0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Robert_HaohShokohKenS2_A, OBJLstHdrB_Robert_HaohShokohKenS2_B
-	dw OBJLstHdrA_Robert_HaohShokohKenS3, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Robert_HaohShoukouKenS2_A, OBJLstHdrB_Robert_HaohShoukouKenS2_B
+	dw OBJLstHdrA_Robert_HaohShoukouKenS3, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Robert_PunchL0_A, OBJLstHdrB_Robert_PunchL0_B
 	dw OBJLSTPTR_NONE
 		
@@ -1848,9 +1848,9 @@ OBJLstHdrA_Robert_RyuuGekiKenL0:
 	db $2F,$05,$0C ; $06
 	db $36,$0C,$0E ; $07
 		
-OBJLstHdrB_Robert_HaohShokohKenS2_B:
+OBJLstHdrB_Robert_HaohShoukouKenS2_B:
 	db $00 ; iOBJLstHdrA_Flags
-	dpr GFX_Char_Robert_HaohShokohKenS2_B ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Robert_HaohShoukouKenS2_B ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $F8 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
@@ -2118,11 +2118,11 @@ OBJLstHdrA_Robert_RyuuGaHiddenL2:
 	db $1A,$09,$08 ; $04
 	db $31,$01,$0A ; $05
 		
-OBJLstHdrA_Robert_HaohShokohKenS2_A:
+OBJLstHdrA_Robert_HaohShoukouKenS2_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Robert_HaohShokohKenS2_A ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Robert_HaohShoukouKenS2_A ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
@@ -2134,11 +2134,11 @@ OBJLstHdrA_Robert_HaohShokohKenS2_A:
 	db $28,$02,$04 ; $02
 	db $18,$FF,$06 ; $03
 		
-OBJLstHdrA_Robert_HaohShokohKenS3:
+OBJLstHdrA_Robert_HaohShoukouKenS3:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Robert_HaohShokohKenS3 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Robert_HaohShoukouKenS3 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset

@@ -1121,7 +1121,7 @@ MoveC_Kyo_KototsukiYou:
 	; - The opponent is invincible
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]		; Did the opponent get hit/blocked the attack?
+	bit  PCFB_HITOTHER, [hl]		; Did the opponent get hit/blocked the attack?
 	jp   z, .obj5_abort			; If not, end the run
 	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
@@ -6118,7 +6118,7 @@ MoveC_Andy_ZanEiKen:
 	; Set the marker if our hitbox overlapped the player's collision box
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]		; Did we reach?
+	bit  PCFB_HITOTHER, [hl]		; Did we reach?
 	jp   z, .chkSubInput_val	; If not, skip
 	ld   hl, iPlInfo_Andy_ZanEiKen_OtherHit
 	add  hl, bc
@@ -7556,7 +7556,7 @@ MoveC_Geese_JaEiKen:
 	; If the opponent didn't get hit by the time we stop moving, end the move.
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]		; Did we hit the opponent yet?
+	bit  PCFB_HITOTHER, [hl]		; Did we hit the opponent yet?
 	jp   z, .obj1_moveH			; If not, jump
 	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc

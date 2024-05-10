@@ -2748,12 +2748,12 @@ Play_Pl_SetHitType:
 			; The flags checked here were previously set this frame during collision detection by the main task.
 			ld   hl, iPlInfo_ColiFlags
 			add  hl, bc
-			bit  PCF_PROJHIT, [hl]				; Were we hit by a projectile?
+			bit  PCFB_PROJHIT, [hl]				; Were we hit by a projectile?
 			jp   nz, .proj						; If so, jump
-			; Both PCF_PUSHED and PCF_HIT must be set for it to count as a physical hit.
-			; Checking PCF_HIT isn't enough, because PCF_HIT is also used alongside PCF_PROJREMOTHER
+			; Both PCFB_PUSHED and PCFB_HIT must be set for it to count as a physical hit.
+			; Checking PCFB_HIT isn't enough, because PCFB_HIT is also used alongside PCFB_PROJREMOTHER
 			; when the opponent reflects/removes a projectile.
-			bit  PCF_PUSHED, [hl]				; Did we get knockback'd or pushed by the other player?			
+			bit  PCFB_PUSHED, [hl]				; Did we get knockback'd or pushed by the other player?			
 			jp   nz, .phys						; If so, jump
 			
 			; Otherwise, we definitely didn't get hit. Return.
@@ -2788,12 +2788,12 @@ Play_Pl_SetHitType:
 			jp   z, .getProjDamage				; If not, jump
 			
 			;
-			; [POI] This check is pointless, as if a throw is in progress PCF_PUSHED is always set
+			; [POI] This check is pointless, as if a throw is in progress PCFB_PUSHED is always set
 			;       for the duration of the throw until we are actually thrown.
 			;
 			ld   hl, iPlInfo_ColiFlags
 			add  hl, bc							; Seek to iPlInfo_ColiFlags
-			bit  PCF_PUSHED, [hl]				; Did we push another player?	
+			bit  PCFB_PUSHED, [hl]				; Did we push another player?	
 			jp   nz, .phys						; If so, jump (always happens)
 			
 			jp   Play_Pl_SetHitType_RetClear	; We never get here
@@ -2864,7 +2864,7 @@ Play_Pl_SetHitType:
 			;
 			ld   hl, iPlInfo_ColiFlags
 			add  hl, bc							
-			bit  PCF_HIT, [hl]					; Did we get hit?
+			bit  PCFB_HIT, [hl]					; Did we get hit?
 			jp   z, Play_Pl_SetHitType_RetClear	; If not, return
 			
 			;
@@ -5474,8 +5474,8 @@ MoveInputReader_Ryo:
 	mMvIn_ValSuper .chkPunchNoSuper
 	; DFDB+P -> Ryu Ko Ranbu
 	mMvIn_ChkDir MoveInput_DFDB, MoveInit_Ryo_RyuKoRanbu
-	; FBDF+P -> Haoh Shokoh Ken 
-	mMvIn_ChkDir MoveInput_FBDF, MoveInit_Ryo_HaohShokohKen 
+	; FBDF+P -> Haoh Shoukou Ken 
+	mMvIn_ChkDir MoveInput_FBDF, MoveInit_Ryo_HaohShoukouKen 
 .chkPunchNoSuper:
 	; FDF+P -> Ko Hou
 	mMvIn_ChkDir MoveInput_FDF, MoveInit_Ryo_KoHou
@@ -5553,11 +5553,11 @@ MoveInit_Ryo_RyuKoRanbu:
 	mMvIn_GetSD MOVE_RYO_RYU_KO_RANBU_S, MOVE_RYO_RYU_KO_RANBU_D
 	call MoveInputS_SetSpecMove_StopSpeed
 	jp   MoveInputReader_Ryo_MoveSet
-; =============== MoveInit_Ryo_HaohShokohKen ===============
-MoveInit_Ryo_HaohShokohKen:
+; =============== MoveInit_Ryo_HaohShoukouKen ===============
+MoveInit_Ryo_HaohShoukouKen:
 	mMvIn_ValProjActive Ryo
 	call Play_Pl_ClearJoyDirBuffer
-	mMvIn_GetSD MOVE_RYO_HAOH_SHOKOH_KEN_S, MOVE_RYO_HAOH_SHOKOH_KEN_D
+	mMvIn_GetSD MOVE_RYO_HAOH_SHOUKOU_KEN_S, MOVE_RYO_HAOH_SHOUKOU_KEN_D
 	call MoveInputS_SetSpecMove_StopSpeed
 	call Play_Proj_CopyMoveDamageFromPl
 	jp   MoveInputReader_Ryo_MoveSet
@@ -5571,7 +5571,8 @@ MoveInputReader_Ryo_NoMove:
 	ret
 	
 ; =============== MoveC_Ryo_KoOuKen ===============
-; Move code for Ryo's Ko-Ou Ken (MOVE_RYO_KO_OU_KEN_L, MOVE_RYO_KO_OU_KEN_H).	
+; Move code for Ryo's Ko-Ou Ken (MOVE_RYO_KO_OU_KEN_L, MOVE_RYO_KO_OU_KEN_H).
+; This is a neutered version of the move from 95, it doesn't spawn a projectile anymore.
 MoveC_Ryo_KoOuKen:
 	call Play_Pl_MoveByColiBoxOverlapX
 	mMvC_ValLoaded .ret
@@ -5586,8 +5587,7 @@ MoveC_Ryo_KoOuKen:
 .obj1:
 	mMvC_ValFrameStart .obj1_cont
 		; Light version moves forward 7px
-		call MoveInputS_CheckMoveLHVer
-		jp   z, .obj1_cont		; Is the heavy triggered? If not, jump
+		mMvIn_ChkL .obj1_cont		; Is the heavy triggered? If not, jump
 		mMvC_SetMoveH $0700
 .obj1_cont:
 	mMvC_ValFrameEnd .anim
@@ -5597,8 +5597,7 @@ MoveC_Ryo_KoOuKen:
 ; Nothing!
 .obj2:	
 	mMvC_ValFrameStart .obj2_cont
-		call MoveInputS_CheckMoveLHVer
-		jp   z, .obj2_cont		; Is the heavy triggered? If not, jump
+		mMvIn_ChkL .obj2_cont		; Is the heavy triggered? If not, jump
 .obj2_cont:
 	mMvC_ValFrameEnd .anim
 		jp   .anim
@@ -5686,9 +5685,9 @@ MoveC_Ryo_MouKoRaiJinGou:
 .ret:
 	ret
 	
-; =============== MoveC_Ryo_HienShippuKyaku ===============
+; =============== MoveC_Ryo_HienShippuuKyaku ===============
 ; Move code for Ryo's Hien Shippu Kyaku  (MOVE_RYO_HIEN_SHIPPUU_KYAKU_L, MOVE_RYO_HIEN_SHIPPUU_KYAKU_H).
-MoveC_Ryo_HienShippuKyaku:
+MoveC_Ryo_HienShippuuKyaku:
 	call Play_Pl_MoveByColiBoxOverlapX
 	mMvC_ValLoaded .ret
 	
@@ -5821,7 +5820,7 @@ IF REV_VER_2 == 0
 	;
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]				; Did we reach?
+	bit  PCFB_HITOTHER, [hl]				; Did we reach?
 	jp   z, .obj1_chkGuard_doGravity	; If not, skip
 	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
@@ -5991,7 +5990,7 @@ IF REV_VER_2 == 0
 	;
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]				; Did we reach?
+	bit  PCFB_HITOTHER, [hl]				; Did we reach?
 	jp   z, .obj1_chkGuard_doGravity	; If not, skip
 	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
@@ -6130,8 +6129,8 @@ MoveInputReader_Robert:
 	mMvIn_ValSuper .chkPunchNoSuper
 	; DFDB+P -> Ryu Ko Ranbu
 	mMvIn_ChkDir MoveInput_DFDB, MoveInit_Robert_RyuKoRanbu
-	; FBDF+P -> Haoh Shokoh Ken 
-	mMvIn_ChkDir MoveInput_FBDF, MoveInit_Robert_HaohShokohKen
+	; FBDF+P -> Haoh Shoukou Ken 
+	mMvIn_ChkDir MoveInput_FBDF, MoveInit_Robert_HaohShoukouKen
 .chkPunchNoSuper:
 	; FDF+P -> Ryuu Ga
 	mMvIn_ChkDir MoveInput_FDF, MoveInit_Robert_RyuuGa
@@ -6200,11 +6199,11 @@ MoveInit_Robert_RyuKoRanbu:
 	mMvIn_GetSD MOVE_ROBERT_RYU_KO_RANBU_S, MOVE_ROBERT_RYU_KO_RANBU_D
 	call MoveInputS_SetSpecMove_StopSpeed
 	jp   MoveInputReader_Robert_SetMove
-; =============== MoveInit_Robert_HaohShokohKen ===============
-MoveInit_Robert_HaohShokohKen:
+; =============== MoveInit_Robert_HaohShoukouKen ===============
+MoveInit_Robert_HaohShoukouKen:
 	mMvIn_ValProjActive Robert
 	call Play_Pl_ClearJoyDirBuffer
-	mMvIn_GetSD MOVE_ROBERT_HAOH_SHOKOH_KEN_S, MOVE_ROBERT_HAOH_SHOKOH_KEN_D
+	mMvIn_GetSD MOVE_ROBERT_HAOH_SHOUKOU_KEN_S, MOVE_ROBERT_HAOH_SHOUKOU_KEN_D
 	call MoveInputS_SetSpecMove_StopSpeed
 	call Play_Proj_CopyMoveDamageFromPl
 	jp   MoveInputReader_Robert_SetMove
@@ -6400,7 +6399,7 @@ IF REV_VER_2 == 0
 	;
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]			; Did we reach?
+	bit  PCFB_HITOTHER, [hl]			; Did we reach?
 	jp   z, .obj1_cont_doGravity	; If not, skip
 	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
@@ -6771,7 +6770,7 @@ IF REV_VER_2 == 0
 	;
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]				; Did we reach?
+	bit  PCFB_HITOTHER, [hl]				; Did we reach?
 	jp   z, .obj1_chkGuard_doGravity	; If not, skip
 	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
@@ -6938,7 +6937,7 @@ IF REV_VER_2 == 0
 	;
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]				; Did we reach?
+	bit  PCFB_HITOTHER, [hl]				; Did we reach?
 	jp   z, .obj1_chkGuard_doGravity	; If not, skip
 	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
@@ -7047,14 +7046,14 @@ ENDC
 .ret:
 	ret
 	
-; =============== MoveC_Robert_HaohShokohKen ===============
-; Move code for Haoh Shokoh Ken for these characters:
-; - Robert (MOVE_ROBERT_HAOH_SHOKOH_KEN_S, MOVE_ROBERT_HAOH_SHOKOH_KEN_D)
-; - Ryo (MOVE_RYO_HAOH_SHOKOH_KEN_S, MOVE_RYO_HAOH_SHOKOH_KEN_D)
-; - Mr.Karate (MOVE_MRKARATE_HAOH_SHOKOH_KEN_S, MOVE_MRKARATE_HAOH_SHOKOH_KEN_D)
+; =============== MoveC_Robert_HaohShoukouKen ===============
+; Move code for Haoh Shoukou Ken for these characters:
+; - Robert (MOVE_ROBERT_HAOH_SHOUKOU_KEN_S, MOVE_ROBERT_HAOH_SHOUKOU_KEN_D)
+; - Ryo (MOVE_RYO_HAOH_SHOUKOU_KEN_S, MOVE_RYO_HAOH_SHOUKOU_KEN_D)
+; - Mr.Karate (MOVE_MRKARATE_HAOH_SHOUKOU_KEN_S, MOVE_MRKARATE_HAOH_SHOUKOU_KEN_D)
 ;
 ; These must have the same IDs across chars, since there's a super desperation check by move ID. 
-MoveC_Robert_HaohShokohKen:
+MoveC_Robert_HaohShoukouKen:
 	call Play_Pl_MoveByColiBoxOverlapX
 	mMvC_ValLoaded .ret
 	
@@ -7073,16 +7072,12 @@ MoveC_Robert_HaohShokohKen:
 .obj3:
 	mMvC_ValFrameStart .obj3_cont
 		; Spawn a large projectile
-		ld   hl, iPlInfo_MoveId
-		add  hl, bc
-		ld   a, [hl]
-		cp   MOVE_ROBERT_HAOH_SHOKOH_KEN_D	; Using the desperation version?
-		jp   z, .obj3_spawnProjD			; If so, jump
+		mMvC_ChkMove  MOVE_ROBERT_HAOH_SHOUKOU_KEN_D, .obj3_spawnProjD
 	.obj3_spawnProjS:
-		call ProjInit_HaohShokohKenS
+		call ProjInit_HaohShoukouKenS
 		jp   .obj3_cont
 	.obj3_spawnProjD:
-		call ProjInit_HaohShokohKenD
+		call ProjInit_HaohShoukouKenD
 .obj3_cont:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $04
@@ -7404,7 +7399,7 @@ MoveC_Leona_GrandSabre:
 	; If this is allowed to animate, we'll eventually get into #9, which ends the move early.
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]	; Did the opponent get hit?
+	bit  PCFB_HITOTHER, [hl]	; Did the opponent get hit?
 	jp   z, .anim			; If not, jump
 	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
@@ -8661,7 +8656,7 @@ IF REV_VER_2 == 0
 	;
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]				; Did we reach?
+	bit  PCFB_HITOTHER, [hl]				; Did we reach?
 	jp   z, .obj1_chkGuard_doGravity	; If not, skip
 	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc
@@ -8855,7 +8850,7 @@ IF REV_VER_2 == 0
 	;
 	ld   hl, iPlInfo_ColiFlags
 	add  hl, bc
-	bit  PCF_HITOTHER, [hl]				; Did we reach?
+	bit  PCFB_HITOTHER, [hl]				; Did we reach?
 	jp   z, .obj1_chkGuard_doGravity	; If not, skip
 	ld   hl, iPlInfo_Flags1Other
 	add  hl, bc

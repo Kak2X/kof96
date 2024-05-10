@@ -747,7 +747,7 @@ mMvC_ChkTarget_jr: MACRO
 ENDM
 
 ; =============== mMvC_ChkGravityV ===============
-; Handles gravity.
+; Handles gravity, which increases the player speed.
 ; The player is moved only vertically until the ground is reached.
 ; IN
 ; - 1: Gravity value
@@ -759,7 +759,7 @@ mMvC_ChkGravityV: MACRO
 ENDM
 
 ; =============== mMvC_ChkGravityHV ===============
-; Handles gravity.
+; Handles gravity, which increases the player speed.
 ; The player is moved both horizontally and vertically until the ground is reached.
 ; IN
 ; - 1: Gravity value
