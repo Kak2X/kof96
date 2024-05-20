@@ -124,12 +124,9 @@ MoveC_Iori_YamiBarai:
 	
 	mMvC_ValFrameEnd .anim
 		; Depending on the visible frame...
-		ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-		add  hl, de
-		ld   a, [hl]
-		mMvC_ChkTarget .end
-		cp   $02*OBJLSTPTR_ENTRYSIZE
-		jp   z, .spawnProj
+		mMvC_StartChkFrame
+			mMvC_ChkTarget .end
+			mMvC_ChkFrame $02, .spawnProj
 		jp   .anim
 ; --------------- frame #2 ---------------
 .spawnProj:
@@ -377,11 +374,7 @@ MoveC_Iori_AoiHana:
 		; Set damage for heavy version initially
 		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_LASTHIT
 		
-		ld   hl, iPlInfo_MoveId
-		add  hl, bc
-		ld   a, [hl]				
-		cp   MOVE_IORI_AOI_HANA_H	; Using the heavy version?
-		jp   z, .moveH				; If so, skip
+		mMvC_ChkMove MOVE_IORI_AOI_HANA_H, .moveH
 	.obj1_setDamageL:
 		; Otherwise, enable manual control
 		ld   hl, iOBJInfo_FrameTotal
@@ -401,15 +394,10 @@ MoveC_Iori_AoiHana:
 
 	; If we aren't doing the heavy version, slow down at $00.50px/frame.
 	; The move ends if when we stop moving.
-	ld   hl, iPlInfo_MoveId
-	add  hl, bc
-	ld   a, [hl]
-	cp   MOVE_IORI_AOI_HANA_H	; Using the heavy version?
-	jp   z, .moveH				; If so, jump
+	mMvC_ChkMove MOVE_IORI_AOI_HANA_H, .moveH
 	
 	; This counts as our recovery for the light version, since it takes a bit to stop.
-	mMvC_DoFrictionH +$0050
-	jp   nc, .anim
+	mMvC_ChkFrictionH +$0050, .anim
 		jp   .end
 ; --------------- frames #0-2 / common horizontal movement ---------------
 .moveH:
@@ -523,8 +511,7 @@ MoveC_Iori_KotoTsukiIn:
 ; If we got here, we didn't get close enough to the opponent.
 ; Slow down at 1px/frame, and end the move when we stop moving.
 .obj4:
-	mMvC_DoFrictionH $0100
-		jp   nc, .ret
+	mMvC_ChkFrictionH $0100, .ret
 		jp   .end
 ; --------------- frames #0-3 / player distance check ---------------
 .chkNear:
@@ -1841,6 +1828,7 @@ MoveC_Mature_Despair:
 	
 ; =============== MoveC_Mature_HeavensGate ===============
 ; Move code for Mature's Heaven's Gate (MOVE_MATURE_HEAVENS_GATE_S, MOVE_MATURE_HEAVENS_GATE_D).
+; Based on MoveC_Rugal_GiganticPressure from 95.
 MoveC_Mature_HeavensGate:
 	call Play_Pl_MoveByColiBoxOverlapX
 	mMvC_ValLoaded .ret
@@ -2096,8 +2084,7 @@ ENDC
 	jp   c, .ret				; Is the grab confirmed? If so, wait
 	jp   z, .switchToBackHop	; Did the opponent block? If so, backhop away
 	;--
-	mMvC_DoFrictionH $0080
-	jp   nc, .anim
+	mMvC_ChkFrictionH $0080, .anim
 		mMvC_EndThrow_Slow
 		jr   .ret
 ; --------------- common ---------------

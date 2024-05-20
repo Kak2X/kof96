@@ -770,6 +770,17 @@ mMvC_ChkGravityHV: MACRO
 	jp   nc, \2
 ENDM
 
+; =============== mMvC_ChkFrictionH ===============
+; Handles friction and moves the player horizontally until he stops.
+; IN
+; - 1: Friction value
+; - 2: Where to jump if the player hasn't stopped moving yet.
+mMvC_ChkFrictionH: MACRO
+	ld   hl, \1
+	call OBJLstS_ApplyFrictionHAndMoveH
+	jp   nc, \2
+ENDM
+
 ; =============== mMvC_DoGravityV ===============
 ; Handles gravity and moves the OBJInfo vertically.
 ; IN

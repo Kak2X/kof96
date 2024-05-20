@@ -1567,6 +1567,7 @@ HitTypeC_HitGeneric:
 ;
 ; Hit effect that causes the player to drop on the ground.
 ; This is the standard generic drop that can be used by any move.
+; One of the options for ending a throw.
 ;
 ; Features:
 ; - Can optionally end a damage string
@@ -1680,8 +1681,7 @@ HitTypeC_DropMain:
 ; ID: HITTYPE_DROP_DB_A
 ;
 ; Hit effect that knocks the player on the ground from the air.
-; Uses the same continuation code as the air throw, but this hit
-; effect is *not* meant for them, as throws are handled in HITTYPE_THROW_END.
+; One of the options for ending a throw.
 ;
 ; Features:
 ; - Can optionally end a damage string
@@ -1848,9 +1848,10 @@ HitTypeC_Dizzy:
 ENDC
 
 ; =============== HitTypeC_Throw_End ===============
-; ID: HITTYPE_THROW_END
+; ID: HITTYPE_THROW_END (TODO: RENAME, IT'S INACCURATE)
 ;
 ; Used as the last part of throws (including command throws).
+; One of the options for ending a throw.
 ;
 ; When a throw animation ends, it delivers a last hit with this type.
 ; This is where the player gets knocked back with a large backwards jump, away from the opponent,
@@ -4153,9 +4154,8 @@ MoveC_Hit_PostStunKnockback:
 .chkEnd:
 	; Slow down at $00.40px/frame, and end the move when we stop moving.
 	; This doesn't call .anim, preventing iOBJInfo_FrameLeft from resetting back to iOBJInfo_FrameTotal.
-	mMvC_DoFrictionH $0040
-	jp   nc, .ret
-	call Play_Pl_EndMove
+	mMvC_ChkFrictionH $0040, .ret
+		call Play_Pl_EndMove
 ; --------------- common ---------------
 .ret:
 	ret
@@ -4188,9 +4188,9 @@ MoveC_Hit_DropMain:
 .obj0_hitN:
 	; If this is a normal hit, don't do anything special yet.
 	; Treat it as startup.
-	mMvC_ValFrameEnd .doGravity_chkRoll
+	mMvC_ValFrameEnd .doGravity_preRebound
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
-		jp   .doGravity_chkRoll
+		jp   .doGravity_preRebound
 .obj0_hitL:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
@@ -4213,9 +4213,9 @@ MoveC_Hit_DropMain:
 ; --------------- frame #1 ---------------
 .obj1:
 	; Move 1px backwards at the start of the frame
-	mMvC_ValFrameStartFast .doGravity_chkRoll
+	mMvC_ValFrameStartFast .doGravity_preRebound
 		mMvC_SetMoveV -$0100
-		jp   .doGravity_chkRoll
+		jp   .doGravity_preRebound
 ; --------------- frame #2 ---------------
 ; Pre-rebound frame.
 .obj2:
@@ -4248,18 +4248,24 @@ MoveC_Hit_DropMain:
 		call Play_OBJLstS_SetSpeedH	; Set the horizontal speed to that
 		;--
 		mMvC_SetSpeedV -$0300	; 3px/frame up
-		jp   .doGravity_noRoll
+		jp   .doGravity_postRebound
 .obj3_cont:
-	jp   .doGravity_noRoll
-; --------------- frames #0-1 / common gravity check with roll cancel support ---------------	
-; Roll input validation.
+	jp   .doGravity_postRebound
+; --------------- frames #0-1 / common gravity check, before rebound ---------------
+; Gravity check used for the pre-rebound frames, before the player touches the ground the first time.
+; During these frames, the player is vulnerable and can be combo'd off.
+;
+; As soon as we touch the ground, we are set as invulnerable and can't be hit again until we wake up.
+;
+; This also checks for the roll input.
 ;
 ; When we touch the ground, allow roll cancelling when holding A+B (with optionally L or R).
 ; This works as long as the hit didn't KO or get us dizzy.
 ;
-; If the validation succeeds by the time, we switch to the appropriate roll input.
+; If the validation succeeds, we switch to the appropriate roll input.
 ; Otherwise, we continue to #2, where the player rebounds from the ground.
-.doGravity_chkRoll:
+.doGravity_preRebound:
+	; When we touch the ground (the first time)...
 	mMvC_ChkGravityHV $0060, .anim
 	
 		; Can't be dizzy
@@ -4280,6 +4286,7 @@ MoveC_Hit_DropMain:
 		; Use frame #2 when bouncing off the ground.
 		mMvC_SetDropFrame $02, $05
 		
+		; When bouncing on the ground, we are completely invulnerable
 		; Can't be hit until we get up
 		ld   hl, iPlInfo_Flags1
 		add  hl, bc
@@ -4344,8 +4351,8 @@ MoveC_Hit_DropMain:
 		; Switch to the new move
 		call Pl_SetMove_StopSpeed
 		jp   .ret
-; --------------- frame #3, common gravity check ---------------	
-.doGravity_noRoll:
+; --------------- frame #3, common gravity check, after rebound ---------------	
+.doGravity_postRebound:
 	; When touching the ground after the rebound, play the drop SFX and switch to #4
 	mMvC_ChkGravityHV $0060, .anim
 		mMvC_SetDropFrame $04, $05
@@ -4444,7 +4451,7 @@ MoveC_Hit_Throw_End:
 		;--
 		mMvC_SetSpeedV -$0300	; 3px/frame up
 		jp   .doGravity_afterRebound
-.obj2_cont:;J
+.obj2_cont:
 	jp   .doGravity_afterRebound
 ; --------------- frame #0 / common gravity check ---------------
 ; Before hitting the ground the first time...
@@ -4458,8 +4465,7 @@ MoveC_Hit_Throw_End:
 		add  hl, bc
 		set  PF1B_INVULN, [hl]
 	
-		ld   a, SCT_GROUNDHIT
-		call HomeCall_Sound_ReqPlayExId
+		mMvC_PlaySound SCT_GROUNDHIT
 		
 		; Stop flashing as well
 		ld   hl, iPlInfo_Flags3
@@ -4607,8 +4613,7 @@ MoveC_Hit_SwoopUp:
 		jp   nz, .obj1_onUpProj	; If not, skip
 	.obj1_onUpDaimon:
 		; Play SFX
-		ld   a, SCT_LIGHT
-		call HomeCall_Sound_ReqPlayExId
+		mMvC_PlaySound SCT_LIGHT
 		jp   .obj1_switchToChkEnd
 	.obj1_onUpProj:
 		; Allow next hit to happen.
@@ -4778,8 +4783,7 @@ MoveC_Hit_SwoopUp:
 		jp   z, .ret									; Did it work? If not (ie: already set it before), return
 		
 			; Play a sound effect for hitting the ground
-			ld   a, SCT_GROUNDHIT
-			call HomeCall_Sound_ReqPlayExId
+			mMvC_PlaySound SCT_GROUNDHIT
 			
 			; If we got hit by Daimon, do not turn invulnerability back on.
 			; This is because his super move hits the player with an earthquake effect
@@ -5016,39 +5020,49 @@ MoveC_Hit_MultiMidKnockback:
 	; If we're on the ground, we can proceed to .chkEnd from the next frame
 	; to first handle the knockback, and only drop on the ground when we stop moving.
 	
-	; [TCRF] If we're in the air though, drop down immediately using the just set speed settings.
-	;        This will never jump since all moves that use this call HitTypeS_MovePlToOpFront to force
-	;        the attacked player to be on the ground. 
+	;--
+	; If we're in the air though, drop down immediately using the just set speed settings.
+	; [TCRF] Leftover from 95.
+	;        This will never jump since all moves that use this call HitTypeS_MovePlToOpFront.
+	;        In 96, that forces the attacked player to be on the ground, which in 95 wasn't 
+	;        always the case.
 	ld   hl, iOBJInfo_Y
 	add  hl, de
 	ld   a, [hl]			; A = Y Pos
 	cp   PL_FLOOR_POS		; A == PL_FLOOR_POS?
 	jp   nz, .switchToDrop	; If not, jump
+	;--
 	
 	jp   .ret
 ; --------------- last subframe ---------------
 .chkEnd:
 	; Slow down at $00.40px/frame, and switch to the drop move when we stop moving.
 	; This doesn't call .anim, preventing iOBJInfo_FrameLeft from resetting back to iOBJInfo_FrameTotal.
-	mMvC_DoFrictionH $0040
-	jp   nc, .ret
+	mMvC_ChkFrictionH $0040, .ret
 		;--
-		; [TCRF] Useless code, does nothing.
+		; [TCRF] Useless leftover from 95.
+		;        In 95, this move did *NOT* knock down by default, the player would immediately return 
+		;        to the Idle move (.unused_end).
+		;        The 96 behaviour would only happen when getting hit by Kensou, because his ground throw
+		;        was set to end with HITTYPE_HIT_MULTI0.
+		;        (in 95, many throws did not end with HITTYPE_THROW_END).
 		ld   hl, iPlInfo_Health
 		add  hl, bc
 		ld   a, [hl]
 		or   a					; No health left?
-		jp   z, .switchToDrop	; If so, jump
+		jp   z, .switchToDrop	; If so, skip
+		
 		ld   hl, iPlInfo_CharIdOther
 		add  hl, bc
 		ld   a, [hl]			; A = Opponent CharId
+		
 		jp   .switchToDrop
 		;--
 .switchToDrop:
 	ld   a, MOVE_SHARED_DROP_MAIN
 	call Pl_SetMove_StopSpeed
 	jp   .ret
-; --------------- [TCRF] Unreferenced code ---------------
+; --------------- [TCRF] Unreferenced code, leftover from 95 ---------------
 .unused_end:
 	call Play_Pl_EndMove
 .ret:
@@ -5423,8 +5437,7 @@ MoveC_Hit_Throw_Rot:
 .chkEnd:
 	; Slow down at $00.40px/frame, and switch to the drop move when we stop moving.
 	; This doesn't call .anim, preventing iOBJInfo_FrameLeft from resetting back to iOBJInfo_FrameTotal.
-	mMvC_DoFrictionH $0040
-	jp   nc, .ret
+	mMvC_ChkFrictionH $0040, .ret
 		; If we died, just end the move.
 		; Hopefully we are on the ground when this happens.
 		ld   hl, iPlInfo_Health
@@ -7674,35 +7687,35 @@ MoveC_OLeona_StormBringer:
 ; Health restore loop.
 .obj2:
 	mMvC_ValFrameEnd .anim
-	; As long as the loop timer doesn't get to 0, gain health
-	ld   hl, iPlInfo_OLeona_StormBringer_LoopTimer
-	add  hl, bc
-	dec  [hl]					; LoopTimer--
-	jp   z, .obj2_setAnimSpeed	; Did it reach $00? If so, jump
-	
-	; If we get here, we can loop back to #1
-	ld   hl, iOBJInfo_OBJLstPtrTblOffset
-	add  hl, de
-	ld   [hl], $00*OBJLSTPTR_ENTRYSIZE
-	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_SUPERALT|PF3_LIGHTHIT
-	jp   .restoreHealth
-.obj2_setAnimSpeed:
-	; Set animation speed to $0A before switching to #3
-	ld   hl, iOBJInfo_FrameTotal
-	add  hl, de
-	ld   [hl], $0A	
-	jp   .anim
-; --------------- frames #1-2 / common health restore ---------------
-.restoreHealth:
-	; Restores health line by line until we reach the cap
-	ld   hl, iPlInfo_Health
-	add  hl, bc
-	ld   a, [hl]				; A = Health
-	cp   PLAY_HEALTH_MAX		; Health == $48?
-	jp   z, .restoreHealth_anim	; If so, don't increment it anymore
-	inc  [hl]					; Otherwise, Health++
-.restoreHealth_anim:
-	jp   .anim
+		; As long as the loop timer doesn't get to 0, gain health
+		ld   hl, iPlInfo_OLeona_StormBringer_LoopTimer
+		add  hl, bc
+		dec  [hl]					; LoopTimer--
+		jp   z, .obj2_setAnimSpeed	; Did it reach $00? If so, jump
+		
+		; If we get here, we can loop back to #1
+		ld   hl, iOBJInfo_OBJLstPtrTblOffset
+		add  hl, de
+		ld   [hl], $00*OBJLSTPTR_ENTRYSIZE
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_SUPERALT|PF3_LIGHTHIT
+		jp   .restoreHealth
+	.obj2_setAnimSpeed:
+		; Set animation speed to $0A before switching to #3
+		ld   hl, iOBJInfo_FrameTotal
+		add  hl, de
+		ld   [hl], $0A	
+		jp   .anim
+	; --------------- frames #1-2 / common health restore ---------------
+	.restoreHealth:
+		; Restores health line by line until we reach the cap
+		ld   hl, iPlInfo_Health
+		add  hl, bc
+		ld   a, [hl]				; A = Health
+		cp   PLAY_HEALTH_MAX		; Health == $48?
+		jp   z, .restoreHealth_anim	; If so, don't increment it anymore
+		inc  [hl]					; Otherwise, Health++
+	.restoreHealth_anim:
+		jp   .anim
 ; --------------- frames #3-4 ---------------
 .obj3:
 	mMvC_ValFrameEnd .anim
@@ -9330,45 +9343,45 @@ MoveC_Base_ThrowA_DiagF:
 .obj0:
 	; The first time we get here...
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
-	mMvC_MoveThrowOp -$08, -$08 ; 8px left, 8px up
-	jp   .anim
+		mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
+		mMvC_MoveThrowOp -$08, -$08 ; 8px left, 8px up
+		jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
 	; The first time we get here...
 	mMvC_ValFrameStart .anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTD, PF3_HEAVYHIT
-	mMvC_MoveThrowOp -$08, -$08 ; 8px left, 8px up
-	jp   .anim
+		mMvC_SetDamage $06, HITTYPE_THROW_ROTD, PF3_HEAVYHIT
+		mMvC_MoveThrowOp -$08, -$08 ; 8px left, 8px up
+		jp   .anim
 ; --------------- frame #2 ---------------
 .obj2:
 	; The first time we get here...
 	mMvC_ValFrameStart .obj2_setManCtrl
 	
-	; Throw opponent forward, diagonally down + damage for 6 lines
-	mMvC_SetDamage $06, HITTYPE_DROP_DB_A, PF3_HEAVYHIT
-	
-	; Move us 2px back, 2px up
-	mMvC_SetSpeedH -$0200
-	mMvC_SetSpeedV -$0200
+		; Throw opponent forward, diagonally down + damage for 6 lines
+		mMvC_SetDamage $06, HITTYPE_DROP_DB_A, PF3_HEAVYHIT
+		
+		; Move us 2px back, 2px up
+		mMvC_SetSpeedH -$0200
+		mMvC_SetSpeedV -$0200
 .obj2_setManCtrl:
 	; When about to advance to #3, get manual ctrl
 	mMvC_ValFrameEnd .obj3
-	mMvC_SetAnimSpeed ANIMSPEED_NONE
-	jp   .obj3
+		mMvC_SetAnimSpeed ANIMSPEED_NONE
+		jp   .obj3
 ; --------------- frame #2-3 ---------------
 .obj3:
 	; If at any point while #2 or #3 are displayed, the player touches the ground,
 	; switch directly to the landing sprite.
 	mMvC_ChkGravityHV $0060, .anim		; If not, skip
-	mMvC_SetLandFrame $04, $04
-	jp   .ret
+		mMvC_SetLandFrame $04, $04
+		jp   .ret
 ; --------------- frame #4 ---------------
 .chkEnd:
 	; End the move when trying to switch to #5
 	mMvC_ValFrameEnd .anim
-	mMvC_EndThrow
-	jr   .ret
+		mMvC_EndThrow
+		jr   .ret
 ; --------------- common ---------------
 .anim:
 	jp   OBJLstS_DoAnimTiming_Loop_by_DE

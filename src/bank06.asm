@@ -1690,14 +1690,11 @@ MoveC_Terry_PowerWave:
 		; Update the animation speed and spawn the proper projectile.
 		;
 		
-		ld   hl, iPlInfo_MoveId
-		add  hl, bc
-		ld   a, [hl]
-		cp   MOVE_TERRY_POWER_GEYSER_S	; Doing the super?
-		jp   z, .obj2_super				; If so, jump
+		; Doing the super?
+		mMvC_ChkMove MOVE_TERRY_POWER_GEYSER_S, .obj2_super
 		
 	.obj2_pw:
-		; Spawn the prrojectile
+		; Spawn the projectile
 		call ProjInit_Terry_PowerWave
 		
 		; Determine anim speed
@@ -2029,8 +2026,8 @@ MoveC_Terry_CrackShot:
 ; --------------- frame #4 ---------------
 .chkEnd:
 	mMvC_ValFrameEnd .anim
-	call Play_Pl_EndMove
-	jr   .ret
+		call Play_Pl_EndMove
+		jr   .ret
 ; --------------- common ---------------
 .anim:
 	call OBJLstS_DoAnimTiming_Loop_by_DE
@@ -2061,10 +2058,13 @@ MoveC_Terry_PowerDunk:
 .obj1:
 	mMvC_ValFrameStart .obj1_cont
 		mMvC_PlaySound SFX_SUPERJUMP
+		;--
+		; Remove invuln
 		ld   hl, iPlInfo_Flags0
 		add  hl, bc
 		inc  hl	; Seek to iPlInfo_Flags1
 		res  PF1B_INVULN, [hl]
+		;--
 		; Determine jump speed
 		mMvIn_ChkLHE .obj1_setJumpH, .obj1_setJumpE
 	.obj1_setJumpL: ; Light
@@ -2451,7 +2451,7 @@ MoveC_Mai_KaChoSen:
 		mMvC_ChkFrame $04, .chkEnd
 	jp   .anim
 ; --------------- frame #2 ---------------
-.obj2:;J
+.obj2:
 	mMvC_ValFrameStart .obj2_cont
 		call ProjInit_Mai_KaChoSen
 .obj2_cont:
@@ -2506,7 +2506,7 @@ MoveC_Mai_HissatsuShinobibachi:
 	call OBJLstS_ApplyXSpeed
 	jp   .anim
 ; --------------- frame #3 ---------------
-.obj3:;J
+.obj3:
 	mMvC_ValFrameStart .obj3_cont
 		mMvC_PlaySound SCT_MOVEJUMP_A
 		mMvIn_ChkLHE .obj3_setJumpH, .obj3_setJumpE
@@ -2787,9 +2787,7 @@ MoveC_Mai_ChijouMusasabi:
 	or   a				; iOBJInfo_RangeMoveAmount != 0?
 	jp   nz, .obj6_setNext	; If so, jump
 	mMvC_ValFrameEnd .doGravity
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $01*OBJLSTPTR_ENTRYSIZE ; offset by -1
+		mMvC_SetFrameOnEnd $02
 		jp   .doGravity
 .obj6_setNext:
 	mMvC_SetFrame $09, $03
@@ -2971,9 +2969,7 @@ MoveC_Mai_ChoHissatsuShinobibachiS:
 .obj5:
 	; Loop back to #4 if we didn't touch the ground by the end of the frame
 	mMvC_ValFrameEnd .doGravity
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $03*OBJLSTPTR_ENTRYSIZE ; offset by -1
+		mMvC_SetFrameOnEnd $04
 		mMvC_SetDamageNext $02, HITTYPE_DROP_MAIN, PF3_FIRE|PF3_LASTHIT
 		jp   .doGravity
 ; --------------- frames #3-5 / common gravity check ---------------
@@ -3449,11 +3445,7 @@ ENDC
 	mMvC_ChkGravityHV $0018, .anim
 		; The heavy version performs a kick at the end by switching to #4.
 		; The light one doesn't, and skips to #6 instead.
-		ld   hl, iPlInfo_MoveId
-		add  hl, bc
-		ld   a, [hl]
-		cp   MOVE_ATHENA_PHOENIX_ARROW_L	; Using the light version?
-		jp   z, .doGravity_setNextL			; If so, jump
+		mMvC_ChkMove MOVE_ATHENA_PHOENIX_ARROW_L, .doGravity_setNextL
 	.doGravity_setNextH:
 		mMvC_SetLandFrame $04, $04
 		jp   .ret
@@ -3481,9 +3473,9 @@ ENDC
 .obj5:
 	mMvC_ValFrameEnd .anim
 IF REV_VER_2 == 0
-		mMvC_SetAnimSpeed $06
+		mMvC_SetAnimSpeed $06 ; [POI] Old value from 95, curiously.
 ELSE
-		mMvC_SetAnimSpeed $0E ; Not that much faster for the one that's used
+		mMvC_SetAnimSpeed $0E
 ENDC
 		jp   .anim
 ; --------------- frame #6 ---------------
@@ -4761,7 +4753,12 @@ ProjInit_Athena_ShCrystCharge:
 			; Set priority value
 			ld   hl, iOBJInfo_Play_Priority
 			add  hl, de
-			ld   [hl], $02
+			; [BUG?] This is using the same PROJ_PRIORITY_NODESPAWN value as 95, which has since changed.
+			IF FIX_BUGS == 1
+				ld   [hl], PROJ_PRIORITY_NODESPAWN
+			ELSE
+				ld   [hl], $02 
+			ENDC
 				
 			; Initialize the X and Y indexes for the sine coords table.
 			; For the electron-like movement, the indexes are set up so that the projectile
@@ -4857,12 +4854,16 @@ ProjC_Athena_ShCrystCharge:
 	call ProjC_Athena_ShCrystCharge_CanExec
 	ret  c
 	
-	; Just in case, make the projectile move in an expanding spiral motion if the move ended early.
-	; This is already handled by the code calling MoveS_Athena_ShCryst_SetOrbitExpand though.
+	;--
+	; [POI] Altered leftover from 95.
+	;       This makes the projectile move in an expanding spiral motion if the move ended early,
+	;       however that's already handled by the code calling MoveS_Athena_ShCryst_SetOrbitExpand.
+	;       MoveS_Athena_ShCryst_SetOrbitExpand did not exist in 95.
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
 	bit  PF0B_SUPERMOVE, [hl]
 	jp   z, .switchToSpiral
+	;--
 	
 	; Depending on the phase of the projectile...
 	ld   hl, iOBJInfo_Proj_ShCrystCharge_OrbitMode
@@ -6282,16 +6283,16 @@ MoveC_Andy_ShoRyuDan:
 		; Set different jump speed depending on attack strength
 		mMvIn_ChkLHE .obj1_setJumpH, .obj1_setJumpE
 	.obj1_setJumpL: ; Light
-		mMvC_SetSpeedH $0080
-		mMvC_SetSpeedV $FA00
+		mMvC_SetSpeedH +$0080
+		mMvC_SetSpeedV -$0600
 		jp   .obj1_chkGravity
 	.obj1_setJumpH: ; Heavy
-		mMvC_SetSpeedH $0100
-		mMvC_SetSpeedV $F900
+		mMvC_SetSpeedH +$0100
+		mMvC_SetSpeedV -$0700
 		jp   .obj1_chkGravity
 	.obj1_setJumpE: ; [POI] Hidden heavy
-		mMvC_SetSpeedH $01C0
-		mMvC_SetSpeedV $F800
+		mMvC_SetSpeedH +$01C0
+		mMvC_SetSpeedV -$0800
 	.obj1_chkGravity:
 		jp   .chkGravity
 .obj1_cont:
@@ -6305,7 +6306,7 @@ MoveC_Andy_ShoRyuDan:
 	mMvC_ValFrameEnd .chkGravity
 		; If we don't have enough vertical speed, switch to #5
 		mMvC_NextFrameOnGtYSpeed -$03, ANIMSPEED_NONE	; YSpeed > -$03?
-		jp   nc, .chkGravity							; If so, jump
+		jp   nc, .chkGravity							; If not, jump
 		ld   hl, iOBJInfo_OBJLstPtrTblOffset
 		add  hl, de
 		ld   [hl], $04*OBJLSTPTR_ENTRYSIZE ; -1 since .anim will increase it
@@ -6316,7 +6317,7 @@ MoveC_Andy_ShoRyuDan:
 	mMvC_ValFrameEnd .chkGravity
 		; As long as we still have enough vertical speed, loop back to #2
 		mMvC_NextFrameOnGtYSpeed -$03, ANIMSPEED_NONE	; YSpeed < -$03?
-		jp   c, .chkGravity								; If so, jump
+		jp   c, .chkGravity								; If not, jump
 		ld   hl, iOBJInfo_OBJLstPtrTblOffset
 		add  hl, de
 		ld   [hl], $01*OBJLSTPTR_ENTRYSIZE ; -1 since .anim will increase it
