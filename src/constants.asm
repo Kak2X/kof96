@@ -301,7 +301,7 @@ PF3B_HEAVYHIT       EQU 0 ; Used by "heavy" hits (not to be confused with heavy 
 PF3B_FIRE           EQU 1 ; Used by firey hits. Getting hit causes the player to flash slowly.
 PF3B_HITLOW         EQU 2 ; The attack hits low (must block crouching)
 PF3B_OVERHEAD       EQU 3 ; The attack is an overhead (must block standing)
-PF3B_LASTHIT        EQU 4 ; The attack makes the opponent invulnerable (mostly to prevent further hits while falling down)
+PF3B_CONTHIT        EQU 4 ; For HitTypeC_Drop* only. If set, the combo string can continue, otherwise the opponent is made invulnerable until wakeup.
 PF3B_HALFSPEED      EQU 5 ; Getting hit runs the game at half speed
 PF3B_SUPERALT       EQU 6 ; Used by a few super moves to make them use an alternate palette cycle.
 PF3B_LIGHTHIT       EQU 7 ; Used by "light" hits (not to be confused with light moves). Getting attacked shakes the player once.
@@ -310,7 +310,7 @@ PF3_HEAVYHIT        EQU 1 << PF3B_HEAVYHIT
 PF3_FIRE            EQU 1 << PF3B_FIRE
 PF3_HITLOW          EQU 1 << PF3B_HITLOW      
 PF3_OVERHEAD        EQU 1 << PF3B_OVERHEAD      
-PF3_LASTHIT         EQU 1 << PF3B_LASTHIT        
+PF3_CONTHIT         EQU 1 << PF3B_CONTHIT        
 PF3_HALFSPEED       EQU 1 << PF3B_HALFSPEED        
 PF3_SUPERALT        EQU 1 << PF3B_SUPERALT
 PF3_LIGHTHIT        EQU 1 << PF3B_LIGHTHIT   
@@ -672,89 +672,89 @@ ORDSEL_SELDONE EQU $03
 ; - S -> Super
 ; - D -> Desperation Super
 
-MOVE_SHARED_NONE           EQU $00
-MOVE_SHARED_IDLE           EQU $02 ; Stand
-MOVE_SHARED_WALK_F         EQU $04 ; Walk forward
-MOVE_SHARED_WALK_B         EQU $06 ; Walk back
-MOVE_SHARED_CROUCH         EQU $08 ; Crouch
-MOVE_SHARED_JUMP_N         EQU $0A ; Neutral jump
-MOVE_SHARED_JUMP_F         EQU $0C ; forward jump
-MOVE_SHARED_JUMP_B         EQU $0E ; Backwards jump
-MOVE_SHARED_BLOCK_G        EQU $10 ; Ground block / mid
-MOVE_SHARED_BLOCK_C        EQU $12 ; Crouch block / low
-MOVE_SHARED_BLOCK_A        EQU $14 ; Air block
-MOVE_SHARED_RUN_F          EQU $16 ; Run forward
-MOVE_SHARED_HOP_B          EQU $18 ; Hop back
-MOVE_SHARED_CHARGEMETER    EQU $1A ; Charge meter
-MOVE_SHARED_TAUNT          EQU $1C ; Taunt
-MOVE_SHARED_ROLL_F         EQU $1E ; Roll forward
-MOVE_SHARED_ROLL_B         EQU $20 ; Roll back
-MOVE_SHARED_WAKEUP         EQU $22 ; Get up
-MOVE_SHARED_DIZZY          EQU $24 ; Dizzy
-MOVE_SHARED_WIN_A          EQU $26 ; Win (1st)
-MOVE_SHARED_WIN_B          EQU $28 ; Win (2nd+)
-MOVE_SHARED_LOST_TIMEOVER  EQU $2A ; Time over
-MOVE_SHARED_INTRO          EQU $2C ; Intro
-MOVE_SHARED_INTRO_SPEC     EQU $2E ; Special intro
+MOVE_SHARED_NONE            EQU $00
+MOVE_SHARED_IDLE            EQU $02 ; Stand
+MOVE_SHARED_WALK_F          EQU $04 ; Walk forward
+MOVE_SHARED_WALK_B          EQU $06 ; Walk back
+MOVE_SHARED_CROUCH          EQU $08 ; Crouch
+MOVE_SHARED_JUMP_N          EQU $0A ; Neutral jump
+MOVE_SHARED_JUMP_F          EQU $0C ; forward jump
+MOVE_SHARED_JUMP_B          EQU $0E ; Backwards jump
+MOVE_SHARED_BLOCK_G         EQU $10 ; Ground block / mid
+MOVE_SHARED_BLOCK_C         EQU $12 ; Crouch block / low
+MOVE_SHARED_BLOCK_A         EQU $14 ; Air block
+MOVE_SHARED_RUN_F           EQU $16 ; Run forward
+MOVE_SHARED_HOP_B           EQU $18 ; Hop back
+MOVE_SHARED_CHARGEMETER     EQU $1A ; Charge meter
+MOVE_SHARED_TAUNT           EQU $1C ; Taunt
+MOVE_SHARED_ROLL_F          EQU $1E ; Roll forward
+MOVE_SHARED_ROLL_B          EQU $20 ; Roll back
+MOVE_SHARED_WAKEUP          EQU $22 ; Get up
+MOVE_SHARED_DIZZY           EQU $24 ; Dizzy
+MOVE_SHARED_WIN_A           EQU $26 ; Win (1st)
+MOVE_SHARED_WIN_B           EQU $28 ; Win (2nd+)
+MOVE_SHARED_LOST_TIMEOVER   EQU $2A ; Time over
+MOVE_SHARED_INTRO           EQU $2C ; Intro
+MOVE_SHARED_INTRO_SPEC      EQU $2E ; Special intro
 ; Basic attacks
-MOVE_SHARED_PUNCH_L        EQU $30 ; Light punch
-MOVE_SHARED_PUNCH_H        EQU $32 ; Heavy punch
-MOVE_SHARED_KICK_L         EQU $34 ; Light kick
-MOVE_SHARED_KICK_H         EQU $36 ; Heavy kick
-MOVE_SHARED_PUNCH_CL       EQU $38 ; Crouch punch light
-MOVE_SHARED_PUNCH_CH       EQU $3A ; Crouch punch heavy
-MOVE_SHARED_KICK_CL        EQU $3C ; Crouch kick light
-MOVE_SHARED_KICK_CH        EQU $3E ; Crouch kick heavy
-MOVE_SHARED_ATTACK_G       EQU $40 ; Ground A + B 
-MOVE_SHARED_PUNCH_A        EQU $42 ; Air punch
-MOVE_SHARED_KICK_A         EQU $44 ; Air kick
-MOVE_SHARED_ATTACK_A       EQU $46 ; Air A + B
+MOVE_SHARED_PUNCH_L         EQU $30 ; Light punch
+MOVE_SHARED_PUNCH_H         EQU $32 ; Heavy punch
+MOVE_SHARED_KICK_L          EQU $34 ; Light kick
+MOVE_SHARED_KICK_H          EQU $36 ; Heavy kick
+MOVE_SHARED_PUNCH_CL        EQU $38 ; Crouch punch light
+MOVE_SHARED_PUNCH_CH        EQU $3A ; Crouch punch heavy
+MOVE_SHARED_KICK_CL         EQU $3C ; Crouch kick light
+MOVE_SHARED_KICK_CH         EQU $3E ; Crouch kick heavy
+MOVE_SHARED_ATTACK_G        EQU $40 ; Ground A + B 
+MOVE_SHARED_PUNCH_A         EQU $42 ; Air punch
+MOVE_SHARED_KICK_A          EQU $44 ; Air kick
+MOVE_SHARED_ATTACK_A        EQU $46 ; Air A + B
 ; Specials (placeholders)
-MOVE_SPEC_0_L              EQU $48
-MOVE_SPEC_0_H              EQU $4A
-MOVE_SPEC_1_L              EQU $4C
-MOVE_SPEC_1_H              EQU $4E
-MOVE_SPEC_2_L              EQU $50
-MOVE_SPEC_2_H              EQU $52
-MOVE_SPEC_3_L              EQU $54
-MOVE_SPEC_3_H              EQU $56
-MOVE_SPEC_4_L              EQU $58
-MOVE_SPEC_4_H              EQU $5A
-MOVE_SPEC_5_L              EQU $5C
-MOVE_SPEC_5_H              EQU $5E
-MOVE_SPEC_6_L              EQU $60
-MOVE_SPEC_6_H              EQU $62
-MOVE_SUPER_START           EQU $64
-MOVE_SUPER_0_S             EQU $64
-MOVE_SUPER_0_D             EQU $66
-MOVE_SUPER_1_S             EQU $68
-MOVE_SUPER_1_D             EQU $6A
+MOVE_SPEC_0_L               EQU $48
+MOVE_SPEC_0_H               EQU $4A
+MOVE_SPEC_1_L               EQU $4C
+MOVE_SPEC_1_H               EQU $4E
+MOVE_SPEC_2_L               EQU $50
+MOVE_SPEC_2_H               EQU $52
+MOVE_SPEC_3_L               EQU $54
+MOVE_SPEC_3_H               EQU $56
+MOVE_SPEC_4_L               EQU $58
+MOVE_SPEC_4_H               EQU $5A
+MOVE_SPEC_5_L               EQU $5C
+MOVE_SPEC_5_H               EQU $5E
+MOVE_SPEC_6_L               EQU $60
+MOVE_SPEC_6_H               EQU $62
+MOVE_SUPER_START            EQU $64
+MOVE_SUPER_0_S              EQU $64
+MOVE_SUPER_0_D              EQU $66
+MOVE_SUPER_1_S              EQU $68
+MOVE_SUPER_1_D              EQU $6A
 ; Throws
-MOVE_SHARED_THROW_G        EQU $6C ; Ground throw
-MOVE_SHARED_THROW_A        EQU $6E ; Air throw
+MOVE_SHARED_GRAB_G          EQU $6C ; Ground throw
+MOVE_SHARED_GRAB_A          EQU $6E ; Air throw
 ; Attacked
-MOVE_SHARED_POST_BLOCKSTUN EQU $70 ; After blockstun knockback
-MOVE_SHARED_GUARDBREAK_G   EQU $72 ; Guard break - Ground
-MOVE_SHARED_GUARDBREAK_A   EQU $74 ; Guard break - Air
-MOVE_SHARED_HIT0MID        EQU $76 ; Mid Hit #0
-MOVE_SHARED_HIT1MID        EQU $78 ; Mid Hit #1
-MOVE_SHARED_HITLOW         EQU $7A ; Low Hit
-MOVE_SHARED_DROP_MAIN      EQU $7C ; Default drop knockback
-MOVE_SHARED_THROW_END_A    EQU $7E ; Throw seq #2 - Actual air throw
-MOVE_SHARED_DROP_DBG       EQU $80 ; Diag. down drop on the ground
-MOVE_SHARED_HIT_SWOOPUP    EQU $82 ; Player thrown up very high / swooped up
-MOVE_SHARED_DROP_CH        EQU $84 ; Backjump Drop #0 - No Recovery
-MOVE_SHARED_BACKJUMP_REC_A EQU $86 ; Backjump Drop - With Recovery (Air only)
-MOVE_SHARED_HIT_MULTIMID0  EQU $88 ; Multi-hit special move, pre-last hit #0
-MOVE_SHARED_HIT_MULTIMID1  EQU $8A ; Multi-hit special move, pre-last hit #1
-MOVE_SHARED_HIT_MULTIGS    EQU $8C ; Multi-hit special (super) move, pre-last hit to ground
-MOVE_SHARED_THROW_END_G    EQU $8E ; Throw seq #2 - Actual ground throw
-MOVE_SHARED_THROW_START    EQU $90 ; Throw seq #0 - throw tech check
-MOVE_SHARED_THROW_ROTU     EQU $92 ; Throw seq #1 - Rotation frame
-MOVE_SHARED_THROW_ROTL     EQU $94 ; Throw seq #1 - Rotation frame
-MOVE_SHARED_THROW_ROTD     EQU $96 ; Throw seq #1 - Rotation frame
-MOVE_SHARED_THROW_ROTR     EQU $98 ; Throw seq #1 - Rotation frame
-MOVE_TASK_REMOVE           EQU $FF ; Magic value - Kill current task
+MOVE_SHARED_POST_BLOCKSTUN  EQU $70 ; After blockstun knockback
+MOVE_SHARED_GUARDBREAK_G    EQU $72 ; Guard break - Ground
+MOVE_SHARED_GUARDBREAK_A    EQU $74 ; Guard break - Air
+MOVE_SHARED_HIT0MID         EQU $76 ; Mid Hit #0
+MOVE_SHARED_HIT1MID         EQU $78 ; Mid Hit #1
+MOVE_SHARED_HITLOW          EQU $7A ; Low Hit
+MOVE_SHARED_LAUNCH_UB       EQU $7C ; Up-Back launch/throw arc
+MOVE_SHARED_LAUNCH_DB_SHAKE EQU $7E ; Down-Back launch/throw arc, shake screen when hitting the ground
+MOVE_SHARED_GROUND_SHAKE    EQU $80 ; Player shakes while on the ground, ground version of MOVE_SHARED_LAUNCH_DB_SHAKE
+MOVE_SHARED_LAUNCH_SWOOPUP  EQU $82 ; Straight up launch/throw arc
+MOVE_SHARED_HIT_SWEEP       EQU $84 ; Hit by crouching heavy kick (fell off)
+MOVE_SHARED_LAUNCH_UB_REC   EQU $86 ; Up-Back launch with mid-air recovery.
+MOVE_SHARED_HIT_MULTIMID0   EQU $88 ; Multi-hit special move, pre-last hit #0
+MOVE_SHARED_HIT_MULTIMID1   EQU $8A ; Multi-hit special move, pre-last hit #1
+MOVE_SHARED_HIT_MULTIGS     EQU $8C ; Multi-hit special (super) move, pre-last hit to ground
+MOVE_SHARED_LAUNCH_UB_SHAKE EQU $8E ; Up-Back launch/throw arc, shake screen when hitting the ground
+MOVE_SHARED_GRAB_START      EQU $90 ; Throw seq #0 - throw tech check
+MOVE_SHARED_GRAB_ROTU       EQU $92 ; Throw seq #1 - Rotation frame
+MOVE_SHARED_GRAB_ROTL       EQU $94 ; Throw seq #1 - Rotation frame
+MOVE_SHARED_GRAB_ROTD       EQU $96 ; Throw seq #1 - Rotation frame
+MOVE_SHARED_GRAB_ROTR       EQU $98 ; Throw seq #1 - Rotation frame
+MOVE_TASK_REMOVE            EQU $FF ; Magic value - Kill current task
 
 ; Character-specific
 MOVE_KYO_ARA_KAMI_L                    EQU $48
@@ -1088,41 +1088,41 @@ MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D     EQU $66 ; [TCRF] Unused desperation super
 MOVE_MRKARATE_HAOH_SHO_KOH_KEN_S       EQU $68
 MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D       EQU $6A
 
-HITTYPE_BLOCKED             EQU $00 ; Nothing happens
-HITTYPE_GUARDBREAK_G        EQU $01
-HITTYPE_GUARDBREAK_A        EQU $02
-HITTYPE_HIT_MID0            EQU $03 ; Standard hit #0
-HITTYPE_HIT_MID1            EQU $04 ; Standard hit #1
-HITTYPE_HIT_LOW             EQU $05 ; Punched or kicked while crouching
-HITTYPE_DROP_CH             EQU $06 ; Crouching heavy kick (Small drop with no recovery)
-HITTYPE_DROP_A              EQU $07 ; Hit by a normal in the air (Small drop with recovery)
-HITTYPE_DROP_MAIN           EQU $08 ; Standard drop without recovery
-HITTYPE_HIT_MULTI0          EQU $09 ; Mid-special move, chainable hit #0
-HITTYPE_HIT_MULTI1          EQU $0A ; Mid-special move, chainable hit #1
-HITTYPE_HIT_MULTIGS         EQU $0B ; Mid-super move, player pushed on the ground and frozen
-HITTYPE_DROP_DB_A           EQU $0C ; Hit (not throw) that sends the player to the ground with screen shake - from air
-HITTYPE_DROP_DB_G           EQU $0D ; Hit (not throw) that sends the player to the ground with screen shake - from ground
+HITTYPE_BLOCKED              EQU $00 ; Nothing happens
+HITTYPE_GUARDBREAK_G         EQU $01 ; Guard Break, ground
+HITTYPE_GUARDBREAK_A         EQU $02 ; Guard Break, air
+HITTYPE_HIT_MID0             EQU $03 ; Standard hit #0
+HITTYPE_HIT_MID1             EQU $04 ; Standard hit #1
+HITTYPE_HIT_LOW              EQU $05 ; Punched or kicked while crouching
+HITTYPE_SWEEP                EQU $06 ; Hit by a crouching heavy kick
+HITTYPE_HIT_A                EQU $07 ; Hit by a normal while in the air
+HITTYPE_LAUNCH_HIGH_UB       EQU $08 ; High throw arc (relative to the opponent)
+HITTYPE_HIT_MULTI0           EQU $09 ; Mid-special move, chainable hit #0
+HITTYPE_HIT_MULTI1           EQU $0A ; Mid-special move, chainable hit #1
+HITTYPE_HIT_MULTIGS          EQU $0B ; Mid-super move, player pushed on the ground and frozen
+HITTYPE_LAUNCH_FAST_DB       EQU $0C ; Diagonal down throw arc the player to the ground with screen shake - from air
+HITTYPE_LAUNCH_FAST_DB_G     EQU $0D ; Hit (not throw) that sends the player to the ground with screen shake - from ground
 
 IF REV_VER_2 == 0
-HITTYPE_DROP_SWOOPUP        EQU $0E ; Very high throw or swept up above
-HITTYPE_THROW_END           EQU $0F ; End of the throw. The actual part where the player is launched.
-HITTYPE_THROW_START         EQU $10 ; Start of the grab anim
-HITTYPE_THROW_ROTU          EQU $11 ; Throw rotation frame, head up
-HITTYPE_THROW_ROTL          EQU $12 ; Throw rotation frame, head left
-HITTYPE_THROW_ROTD          EQU $13 ; Throw rotation frame, head down
-HITTYPE_THROW_ROTR          EQU $14 ; Throw rotation frame, head right
+HITTYPE_LAUNCH_SWOOPUP       EQU $0E ; Throw arc straight up, to off-screen
+HITTYPE_LAUNCH_MID_UB_NOSTUN EQU $0F ; Medium-far throw arc, without hitstun
+HITTYPE_GRAB_START           EQU $10 ; Start of the grab anim
+HITTYPE_GRAB_ROTU            EQU $11 ; Throw rotation frame, head up
+HITTYPE_GRAB_ROTL            EQU $12 ; Throw rotation frame, head left
+HITTYPE_GRAB_ROTD            EQU $13 ; Throw rotation frame, head down
+HITTYPE_GRAB_ROTR            EQU $14 ; Throw rotation frame, head right
 ELSE
-HITTYPE_DIZZY               EQU $0E ; English-only, Manual dizzy. 
-HITTYPE_DROP_SWOOPUP        EQU $0F ; Very high throw or swept up above
-HITTYPE_THROW_END           EQU $10 ; End of the throw. The actual part where the player is launched.
-HITTYPE_THROW_START         EQU $11 ; Start of the grab anim
-HITTYPE_THROW_ROTU          EQU $12 ; Throw rotation frame, head up
-HITTYPE_THROW_ROTL          EQU $13 ; Throw rotation frame, head left
-HITTYPE_THROW_ROTD          EQU $14 ; Throw rotation frame, head down
-HITTYPE_THROW_ROTR          EQU $15 ; Throw rotation frame, head right
+HITTYPE_DIZZY                EQU $0E ; English-only, Manual dizzy. 
+HITTYPE_LAUNCH_SWOOPUP       EQU $0F ; Throw arc straight up, to off-screen
+HITTYPE_LAUNCH_MID_UB_NOSTUN EQU $10 ; Medium-far throw arc, without hitstun
+HITTYPE_GRAB_START           EQU $11 ; Start of the grab anim / throw sequence
+HITTYPE_GRAB_ROTU            EQU $12 ; Grab rotation frame, head up
+HITTYPE_GRAB_ROTL            EQU $13 ; Grab rotation frame, head left
+HITTYPE_GRAB_ROTD            EQU $14 ; Grab rotation frame, head down
+HITTYPE_GRAB_ROTR            EQU $15 ; Grab rotation frame, head right
 ENDC
 
-HITTYPE_DUMMY               EQU $81 ; Placeholder used for some empty slots in the special move entries
+HITTYPE_DUMMY                EQU $81 ; Placeholder used for empty slots in the special move entries
 
 
 COLIBOX_00 EQU $00 ; None

@@ -182,7 +182,7 @@ MoveC_Iori_OniYaki:
 	; 4 lines of damage at the end
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
-		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE
+		mMvC_SetDamageNext $04, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE
 		jp   .anim
 ; --------------- frame #2 ---------------
 ; Jump setup.
@@ -212,7 +212,7 @@ MoveC_Iori_OniYaki:
 	; Immediately switch to the next frame (YSpeed always > -$09)
 	mMvC_NextFrameOnGtYSpeed -$09, ANIMSPEED_NONE
 	jp   nc, .doGravity
-		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE
+		mMvC_SetDamageNext $04, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE
 		jp   .doGravity
 ; --------------- frame #3 ---------------
 .obj3:
@@ -261,7 +261,7 @@ MoveC_OIori_OniYaki:
 	; 4 lines of damage at the end
 	mMvC_ValFrameEnd .anim
 		; Different hit flags compared to normal version
-		mMvC_SetDamageNext $04, HITTYPE_HIT_MID0, PF3_FIRE|PF3_LASTHIT
+		mMvC_SetDamageNext $04, HITTYPE_HIT_MID0, PF3_FIRE|PF3_CONTHIT
 		jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
@@ -272,7 +272,7 @@ MoveC_OIori_OniYaki:
 	; 4 lines of damage at the end
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $01 ; No manual control, unlike normal version
-		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_LASTHIT
+		mMvC_SetDamageNext $04, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_CONTHIT
 		jp   .anim
 ; --------------- frame #2 ---------------
 ; Jump setup.
@@ -309,7 +309,7 @@ MoveC_OIori_OniYaki:
 ; Launches the opponent on the ground, unique to this version.
 .obj3:
 	mMvC_ValFrameEnd .doGravity
-		mMvC_SetDamageNext $04, HITTYPE_DROP_DB_A, PF3_HEAVYHIT|PF3_FIRE|PF3_LASTHIT
+		mMvC_SetDamageNext $04, HITTYPE_LAUNCH_FAST_DB, PF3_HEAVYHIT|PF3_FIRE|PF3_CONTHIT
 		jp   .doGravity
 ; --------------- frame #4 ---------------
 .obj4:
@@ -372,7 +372,7 @@ MoveC_Iori_AoiHana:
 		;
 		
 		; Set damage for heavy version initially
-		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_LASTHIT
+		mMvC_SetDamageNext $08, HITTYPE_LAUNCH_HIGH_UB, PF3_CONTHIT
 		
 		mMvC_ChkMove MOVE_IORI_AOI_HANA_H, .moveH
 	.obj1_setDamageL:
@@ -381,7 +381,7 @@ MoveC_Iori_AoiHana:
 		add  hl, de
 		ld   [hl], ANIMSPEED_NONE
 		; And shake the opponent for longer
-		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
+		mMvC_SetDamageNext $08, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_CONTHIT
 		jp   .moveH
 ; --------------- frame #2 ---------------
 ; Forward dash #2.
@@ -421,7 +421,7 @@ MoveC_Iori_AoiHana:
 	; This pretty much ends the combo string, so it's better to perform the light version instead.
 	mMvC_ValFrameEnd .doGravity
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
-		mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_HEAVYHIT
+		mMvC_SetDamageNext $08, HITTYPE_LAUNCH_FAST_DB, PF3_HEAVYHIT
 		jp   .doGravity
 ; --------------- frame #4 ---------------
 ; Small jump, mid-jump. Heavy version only.
@@ -550,17 +550,17 @@ MoveC_Iori_KotoTsukiIn:
 	; Switch to #6
 	mMvC_SetFrame $06, $02
 	; Deal more damage the next frame.
-	; The drop type and PF3_LASTHIT differ between Iori and O.Iori, but damage is the same.
+	; The drop type and PF3_CONTHIT differ between Iori and O.Iori, but damage is the same.
 	ld   hl, iPlInfo_CharId
 	add  hl, bc
 	ld   a, [hl]
 	cp   CHAR_ID_OIORI				; Playing as IORI'?
 	jp   z, .obj5_setDamageOIori	; If so, jump
 .obj5_setDamageIori:
-	mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_HEAVYHIT|PF3_FIRE
+	mMvC_SetDamageNext $08, HITTYPE_LAUNCH_FAST_DB, PF3_HEAVYHIT|PF3_FIRE
 	jp   .ret
 .obj5_setDamageOIori:
-	mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_LASTHIT
+	mMvC_SetDamageNext $08, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_CONTHIT
 	jp   .ret
 ; --------------- frame #6 ---------------
 ; Delay after the hit.
@@ -598,19 +598,19 @@ MoveC_Iori_ScumGale:
 ; --------------- frame #0 ---------------
 .obj0:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $06, HITTYPE_THROW_ROTU, PF3_HEAVYHIT
+		mMvC_SetDamageNext $06, HITTYPE_GRAB_ROTU, PF3_HEAVYHIT
 		mMvC_MoveThrowOp -$08, +$00 ; Move back 8px
 		jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $06, HITTYPE_THROW_ROTU, PF3_HEAVYHIT|PF3_LASTHIT
+		mMvC_SetDamageNext $06, HITTYPE_GRAB_ROTU, PF3_HEAVYHIT|PF3_CONTHIT
 		mMvC_MoveThrowOp +$04, +$00 ; Move fwd 4px
 		jp   .anim
 ; --------------- frame #2 ---------------
 .obj2:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_HEAVYHIT|PF3_LASTHIT
+		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_HEAVYHIT|PF3_CONTHIT
 		jp   .anim
 ; --------------- frame #3 ---------------
 .chkEnd:
@@ -727,7 +727,7 @@ MoveC_Iori_KinYaOtomeEscapeD:
 ; Finisher, opponent launched with a backwards jump.
 .setDamageDrop:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $01, HITTYPE_DROP_MAIN, $00
+		mMvC_SetDamageNext $01, HITTYPE_LAUNCH_HIGH_UB, $00
 		jp   .anim
 ; --------------- frame #1B ---------------
 .setAnimSpeed28_2:
@@ -873,7 +873,7 @@ ENDC
 ; Deals the big boy damage.
 .setDamageFinisher:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $10, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE
+		mMvC_SetDamageNext $10, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE
 		jp   .anim
 ; --------------- common horizontal movement ---------------
 .moveH:
@@ -1068,7 +1068,7 @@ ENDC
 			mMvC_SetAnimSpeed $3C
 			jp   .anim
 .setDamageFinish:
-	mMvC_SetDamageNext $10, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE
+	mMvC_SetDamageNext $10, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE
 	jp   .anim
 ; --------------- common horizontal movement ---------------
 .moveH:
@@ -1248,7 +1248,7 @@ ENDC
 ; Damage sequence 2 (no loop). Hits 3,4.
 .setDamage2_seq2:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamageNext $01, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE
+		mMvC_SetDamageNext $01, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE
 		jp   .anim
 	; --------------- common escape check ---------------
 	.chkOtherEscape:
@@ -1449,13 +1449,13 @@ MoveC_Mature_Decide:
 ; --------------- frame #3 ---------------
 .obj3:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $04, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
+		mMvC_SetDamageNext $04, HITTYPE_GRAB_ROTL, PF3_HEAVYHIT
 		mMvC_MoveThrowOp -$08, -$18 ; Move opponent back 8px, up $18px
 		jp   .anim
 ; --------------- frame #4 ---------------
 .obj4:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $04, HITTYPE_THROW_END, PF3_HEAVYHIT
+		mMvC_SetDamageNext $04, HITTYPE_LAUNCH_MID_UB_NOSTUN, PF3_HEAVYHIT
 		jp   .anim
 ; --------------- frame #7 ---------------
 .chkEnd:
@@ -1618,15 +1618,15 @@ MoveC_Mature_DeathRow:
 	jp   .anim
 ; --------------- frame #1 ---------------
 .hitA0:
-	mMvC_SetDamage $03, HITTYPE_HIT_MID0, PF3_LASTHIT|PF3_LIGHTHIT
+	mMvC_SetDamage $03, HITTYPE_HIT_MID0, PF3_CONTHIT|PF3_LIGHTHIT
 	jp   .hit0_main
 ; --------------- frame #4 ---------------
 .hitB0:
-	mMvC_SetDamage $03, HITTYPE_HIT_MID1, PF3_LASTHIT|PF3_LIGHTHIT
+	mMvC_SetDamage $03, HITTYPE_HIT_MID1, PF3_CONTHIT|PF3_LIGHTHIT
 	jp   .hit0_main
 ; --------------- frame #7 ---------------
 .hitC0:
-	mMvC_SetDamage $03, HITTYPE_DROP_MAIN, PF3_LASTHIT|PF3_LIGHTHIT
+	mMvC_SetDamage $03, HITTYPE_LAUNCH_HIGH_UB, PF3_CONTHIT|PF3_LIGHTHIT
 	jp   .hit0_main
 ; --------------- frame #1,4,7 / input repeat check ---------------
 .hit0_main:
@@ -1645,7 +1645,7 @@ MoveC_Mature_DeathRow:
 	jp   .hit1_main
 ; --------------- frame #8 ---------------
 .hitC1:
-	mMvC_SetDamage $01, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LIGHTHIT
+	mMvC_SetDamage $01, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_LIGHTHIT
 	jp   .hit1_main
 ; --------------- frame #2,5,8 / repeat done check ---------------	
 .hit1_main:
@@ -1804,7 +1804,7 @@ MoveC_Mature_Despair:
 	call MoveInputS_CheckMoveLHVer	; Is the the hidden heavy triggered?
 	jp   nc, .obj2_waitNext			; If not, jump
 .obj2_doDamageE:
-	mMvC_SetDamage $02, HITTYPE_HIT_MID0, PF3_LASTHIT|PF3_LIGHTHIT
+	mMvC_SetDamage $02, HITTYPE_HIT_MID0, PF3_CONTHIT|PF3_LIGHTHIT
 .obj2_waitNext:
 	mMvC_NextFrameOnGtYSpeed -$01, ANIMSPEED_NONE
 	jp   nc, .doGravity
@@ -1936,8 +1936,8 @@ ENDC
 		mMvC_SetFrame $04, ANIMSPEED_NONE
 		ld   a, PLAY_THROWACT_NEXT03
 		ld   [wPlayPlThrowActId], a
-		mMvC_SetDamageNext $01, HITTYPE_THROW_ROTU, PF3_HEAVYHIT
-		mMvC_SetDamage $01, HITTYPE_THROW_ROTU, PF3_HEAVYHIT
+		mMvC_SetDamageNext $01, HITTYPE_GRAB_ROTU, PF3_HEAVYHIT
+		mMvC_SetDamage $01, HITTYPE_GRAB_ROTU, PF3_HEAVYHIT
 		mMvC_MoveThrowOp -$08, +$00 ; Move back 8px
 		mMvC_MoveThrowOpSync
 		call OBJLstS_ApplyXSpeed
@@ -1957,7 +1957,7 @@ ENDC
 .obj4:
 
 	;
-	; If the opponent isn't in the intended HITTYPE_THROW_ROTU after 8 frames,
+	; If the opponent isn't in the intended HITTYPE_GRAB_ROTU after 8 frames,
 	; assume that something went wrong and hop back, ending the move.
 	;
 	
@@ -1980,7 +1980,7 @@ ENDC
 		ld   hl, iPlInfo_HitTypeIdOther
 		add  hl, bc
 		ld   a, [hl]
-		cp   HITTYPE_THROW_ROTU		; Opponent's HitType != HITTYPE_THROW_ROTU?
+		cp   HITTYPE_GRAB_ROTU		; Opponent's HitType != HITTYPE_GRAB_ROTU?
 		jp   nz, .switchToBackHop	; If so, jump
 .obj4_chkEdge:
 	; Continuously spawn visual effects for the desperation versions
@@ -2018,11 +2018,11 @@ ENDC
 	jp   z, .obj4_setDamageD			; If so, jump
 .obj4_setDamageS:
 	; This deals more damage since the projectile itself *doesn't*
-	mMvC_SetDamageNext $14, HITTYPE_DROP_MAIN, PF3_HEAVYHIT
+	mMvC_SetDamageNext $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT
 	jp   .ret
 .obj4_setDamageD:
 	; While the super desperation version does deal continuous damage, so the physical hit deals a bit less
-	mMvC_SetDamageNext $0C, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_LASTHIT
+	mMvC_SetDamageNext $0C, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_CONTHIT
 	jp   .ret
 	
 ; --------------- frame #5 ---------------
@@ -2044,13 +2044,13 @@ ENDC
 		jp   z, .obj5_setProjDamageD		; If so, jump
 	.obj5_setProjDamageS:
 		; Super version deals no damage
-		mkhl $00, HITTYPE_DROP_SWOOPUP
+		mkhl $00, HITTYPE_LAUNCH_SWOOPUP
 		ld   hl, CHL
 		ld   a, PF3_HEAVYHIT
 		jp   .obj5_initProj
 	.obj5_setProjDamageD:
 		; Desperation version deals 1 line of continuous damage
-		mkhl $01, HITTYPE_DROP_SWOOPUP
+		mkhl $01, HITTYPE_LAUNCH_SWOOPUP
 		ld   hl, CHL
 		ld   a, PF3_HEAVYHIT
 	.obj5_initProj:
@@ -2537,12 +2537,12 @@ MoveC_Chizuru_ShinsokuNoroti:
 	.switchToTenZuiL:
 		ld   a, MOVE_CHIZURU_TEN_ZUI_L
 		call MoveInputS_SetSpecMove_StopSpeed
-		mMvC_SetDamageNext $02, HITTYPE_DROP_MAIN, PF3_HEAVYHIT
+		mMvC_SetDamageNext $02, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT
 		jp   .ret
 	.switchToTenZuiH:
 		ld   a, MOVE_CHIZURU_TEN_ZUI_H
 		call MoveInputS_SetSpecMove_StopSpeed
-		mMvC_SetDamageNext $02, HITTYPE_DROP_DB_A, PF3_HEAVYHIT
+		mMvC_SetDamageNext $02, HITTYPE_LAUNCH_FAST_DB, PF3_HEAVYHIT
 		jp   .ret
 ; --------------- frame #5 ---------------
 ; Slow down. When the frame ends, the move ends.
@@ -3194,7 +3194,7 @@ MoveC_Daimon_CmdThrow:
 		
 		; Set info for next frame
 		mMvC_SetFrame $04, $01
-		mMvC_SetDamageNext $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
+		mMvC_SetDamageNext $06, HITTYPE_GRAB_ROTL, PF3_HEAVYHIT
 		mMvC_MoveThrowOp -$10, -$18
 		jp   .ret
 .obj1_anim:
@@ -3203,7 +3203,7 @@ MoveC_Daimon_CmdThrow:
 ; Rotation frame 1
 .obj4:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
+		mMvC_SetDamageNext $06, HITTYPE_GRAB_ROTL, PF3_HEAVYHIT
 		
 		; For Cloud Tosser / Stump Throw
 		mMvC_MoveThrowOp -$08, -$18 ; Move opponent back 8px, up $18px
@@ -3221,7 +3221,7 @@ MoveC_Daimon_CmdThrow:
 ; Rotation frame 2
 .obj5:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $06, HITTYPE_THROW_ROTD, PF3_HEAVYHIT
+		mMvC_SetDamageNext $06, HITTYPE_GRAB_ROTD, PF3_HEAVYHIT
 		
 		; Use different opponent position for Chou Oosoto Gari
 		ld   hl, iPlInfo_MoveId
@@ -3248,11 +3248,11 @@ MoveC_Daimon_CmdThrow:
 		cp   MOVE_DAIMON_CLOUD_TOSSER	; MoveId >= MOVE_DAIMON_CLOUD_TOSSER?
 		jp   nc, .obj6_setDamageCt		; If so, jump (not Chou Oosoto Gari)
 	.obj6_setDamageCog:
-		mkhl $06, HITTYPE_DROP_DB_A
+		mkhl $06, HITTYPE_LAUNCH_FAST_DB
 		ld   hl, CHL
 		jp   .obj6_setDamage
 	.obj6_setDamageCt:
-		mkhl $06, HITTYPE_THROW_END
+		mkhl $06, HITTYPE_LAUNCH_MID_UB_NOSTUN
 		ld   hl, CHL
 	.obj6_setDamage:
 		ld   a, $00 ; Flags
@@ -3301,7 +3301,7 @@ MoveC_Daimon_HeavenDrop:
 ; --------------- frame #0 ---------------	
 .obj0:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
+		mMvC_SetDamageNext $06, HITTYPE_GRAB_ROTL, PF3_HEAVYHIT
 		mMvC_MoveThrowOp -$10, -$18
 		jp   .anim
 ; --------------- frames #7-8 ---------------	
@@ -3312,13 +3312,13 @@ MoveC_Daimon_HeavenDrop:
 ; --------------- frame #1 ---------------	
 .obj1:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
+		mMvC_SetDamageNext $06, HITTYPE_GRAB_ROTL, PF3_HEAVYHIT
 		mMvC_MoveThrowOp +$08, -$20
 		jp   .anim
 ; --------------- frame #2 ---------------	
 .obj2:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $06, HITTYPE_HIT_MULTIGS, PF3_LASTHIT|PF3_LIGHTHIT
+		mMvC_SetDamageNext $06, HITTYPE_HIT_MULTIGS, PF3_CONTHIT|PF3_LIGHTHIT
 		jp   .anim
 ; --------------- frame #3 ---------------	
 .obj3:
@@ -3328,20 +3328,20 @@ MoveC_Daimon_HeavenDrop:
 ; --------------- frame #4 ---------------	
 .obj4:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
+		mMvC_SetDamageNext $06, HITTYPE_GRAB_ROTL, PF3_HEAVYHIT
 		mMvC_MoveThrowOp -$10, -$20
 		jp   .anim
 ; --------------- frame #5 ---------------	
 .obj5:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
+		mMvC_SetDamageNext $06, HITTYPE_GRAB_ROTL, PF3_HEAVYHIT
 		mMvC_MoveThrowOp +$04, -$18
 		jp   .anim
 ; --------------- frame #6 ---------------	
 .obj6:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $1E
-		mMvC_SetDamageNext $06, HITTYPE_DROP_SWOOPUP, PF3_HEAVYHIT
+		mMvC_SetDamageNext $06, HITTYPE_LAUNCH_SWOOPUP, PF3_HEAVYHIT
 		jp   .anim
 ; --------------- frame #9 ---------------	
 .chkEnd:
@@ -3393,7 +3393,7 @@ MoveC_Daimon_HeavenHellDrop:
 .init:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $05
-		mMvC_SetDamageNext $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
+		mMvC_SetDamageNext $06, HITTYPE_GRAB_ROTL, PF3_HEAVYHIT
 		
 		; 
 		; This move animation is divided in five parts:
@@ -3434,21 +3434,21 @@ MoveC_Daimon_HeavenHellDrop:
 ; Initial grab frame. Opponent up-front.
 .iGrabUF:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
+		mMvC_SetDamageNext $06, HITTYPE_GRAB_ROTL, PF3_HEAVYHIT
 		mMvC_MoveThrowOp -$0C, -$10
 		jp   .anim
 ; --------------- frame #2 ---------------
 ; Initial grab frame. Opponent is in front.
 .iGrabF:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $06, HITTYPE_THROW_ROTD, PF3_LASTHIT|PF3_LIGHTHIT
+		mMvC_SetDamageNext $06, HITTYPE_GRAB_ROTD, PF3_CONTHIT|PF3_LIGHTHIT
 		mMvC_MoveThrowOp -$10, -$08
 		jp   .anim
 ; --------------- frame #3 ---------------
 ; Initial grab frame. Opponent is in front and slightly below the middle.
 .iGrabDFDamage:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $06, HITTYPE_HIT_MULTIGS, PF3_LASTHIT|PF3_LIGHTHIT
+		mMvC_SetDamageNext $06, HITTYPE_HIT_MULTIGS, PF3_CONTHIT|PF3_LIGHTHIT
 		jp   .anim
 ; --------------- frame #4 ---------------
 ; Initial grab frame. Opponent is on the ground forward.
@@ -3475,7 +3475,7 @@ MoveC_Daimon_HeavenHellDrop:
 .setRotL_XP08_YM18:
 	mMvC_MoveThrowOp +$08, -$18
 .setRotL:
-	mMvC_SetDamageNext $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
+	mMvC_SetDamageNext $06, HITTYPE_GRAB_ROTL, PF3_HEAVYHIT
 	jp   .anim
 .setRotD_XM10YM14:
 	mMvC_MoveThrowOp -$10, -$14
@@ -3483,7 +3483,7 @@ MoveC_Daimon_HeavenHellDrop:
 .setRotD_XP10YM14:
 	mMvC_MoveThrowOp +$10, -$14
 .setRotD:
-	mMvC_SetDamageNext $06, HITTYPE_THROW_ROTD, PF3_HEAVYHIT
+	mMvC_SetDamageNext $06, HITTYPE_GRAB_ROTD, PF3_HEAVYHIT
 	jp   .anim
 ; --------------- frame #5,#D ---------------
 ; Grab loop - Daimon crouching starting the throw. Opponent is on the ground in front.
@@ -3523,7 +3523,7 @@ MoveC_Daimon_HeavenHellDrop:
 .startThrow:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $0A
-		mMvC_SetDamageNext $06, HITTYPE_DROP_SWOOPUP, PF3_HEAVYHIT
+		mMvC_SetDamageNext $06, HITTYPE_LAUNCH_SWOOPUP, PF3_HEAVYHIT
 		jp   .anim
 ; --------------- frame #8 ---------------
 ; Grab loop. Opponent is on the ground backwards.
@@ -3594,7 +3594,7 @@ MoveC_Daimon_HeavenHellDrop:
 		ld   a, MOVE_DAIMON_JIRAI_SHIN
 	.chkEnd_setNextMove:
 		call MoveInputS_SetSpecMove_StopSpeed
-		mMvC_SetDamageNext $08, HITTYPE_DROP_MAIN, PF3_HEAVYHIT|PF3_FIRE|PF3_LIGHTHIT
+		mMvC_SetDamageNext $08, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_LIGHTHIT
 		jp   .ret
 ; --------------- common ---------------	
 .anim:

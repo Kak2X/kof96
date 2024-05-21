@@ -197,7 +197,7 @@ MoveC_Krauser_LegTomahawk:
 	.obj0_noDamage:
 		jp   .anim
 	.obj0_setDamage:
-		mMvC_SetDamageNext $04, HITTYPE_HIT_MID1, PF3_HEAVYHIT|PF3_LASTHIT
+		mMvC_SetDamageNext $04, HITTYPE_HIT_MID1, PF3_HEAVYHIT|PF3_CONTHIT
 		jp   .anim
 ; --------------- frame #1 ---------------
 .obj1:
@@ -221,7 +221,7 @@ MoveC_Krauser_LegTomahawk:
 	; Switch to #2 when YSpeed > -$06 (immediately) and then set its damage
 	mMvC_NextFrameOnGtYSpeed -$06, ANIMSPEED_NONE
 	jp   nc, .doGravity
-		mMvC_SetDamageNext $08, HITTYPE_HIT_MID0, PF3_HEAVYHIT|PF3_LASTHIT
+		mMvC_SetDamageNext $08, HITTYPE_HIT_MID0, PF3_HEAVYHIT|PF3_CONTHIT
 		jp   .doGravity
 ; --------------- frame #2 ---------------
 .obj2:
@@ -230,13 +230,13 @@ MoveC_Krauser_LegTomahawk:
 		ld   hl, iPlInfo_Flags1
 		add  hl, bc
 		res  PF1B_INVULN, [hl]
-		mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_LASTHIT
+		mMvC_SetDamageNext $08, HITTYPE_LAUNCH_FAST_DB, PF3_CONTHIT
 		jp   .doGravity
 ; --------------- frames #1-2 / common gravity check ---------------
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
 		mMvC_SetLandFrame $04, $06
-		mMvC_SetDamageNext $08, HITTYPE_DROP_DB_A, PF3_HEAVYHIT
+		mMvC_SetDamageNext $08, HITTYPE_LAUNCH_FAST_DB, PF3_HEAVYHIT
 		jp   .ret
 ; --------------- frame #6 ---------------
 .chkEnd:;J
@@ -345,7 +345,7 @@ MoveC_Krauser_KaiserDuelSobat:
 .obj2:
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed $10
-		mMvC_SetDamageNext $04, HITTYPE_DROP_MAIN, PF3_HEAVYHIT
+		mMvC_SetDamageNext $04, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT
 		jp   .anim
 ; --------------- frame #3 ---------------
 .chkEnd:
@@ -382,21 +382,21 @@ MoveC_Krauser_KaiserSuplex:
 ; Rotation frame 1.
 .obj0:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_HEAVYHIT
+		mMvC_SetDamage $06, HITTYPE_GRAB_ROTU, PF3_HEAVYHIT
 		mMvC_MoveThrowOp +$08, +$00
 		jp   .anim
 ; --------------- frame #1 ---------------
 ; Rotation frame 2.
 .obj1:
 	mMvC_ValFrameStart .anim
-		mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_HEAVYHIT
+		mMvC_SetDamage $06, HITTYPE_GRAB_ROTU, PF3_HEAVYHIT
 		mMvC_MoveThrowOp +$08, -$04
 		jp   .anim
 ; --------------- frame #2 ---------------
 ; Rotation frame 3.
 .obj2:
 	mMvC_ValFrameStart .obj2_cont
-		mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_HEAVYHIT
+		mMvC_SetDamage $06, HITTYPE_GRAB_ROTR, PF3_HEAVYHIT
 		mMvC_MoveThrowOp +$08, -$18
 .obj2_cont:
 	mMvC_ValFrameEnd .anim
@@ -409,7 +409,7 @@ MoveC_Krauser_KaiserSuplex:
 		mMvC_PlaySound SCT_MOVEJUMP_B
 		mMvC_SetSpeedH +$0400
 		mMvC_SetSpeedV -$0400
-		mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_HEAVYHIT
+		mMvC_SetDamage $06, HITTYPE_GRAB_ROTR, PF3_HEAVYHIT
 		mMvC_MoveThrowOp -$08, -$18 ; Move opponent back 8px, up $18px
 		mMvC_MoveThrowOpSync
 .obj3_cont:
@@ -422,15 +422,15 @@ MoveC_Krauser_KaiserSuplex:
 ; This lasts until .doGravityDamage switches us to #5.
 .obj4:
 	mMvC_ValFrameStart .obj4_cont
-		mMvC_SetDamage $06, HITTYPE_THROW_ROTD, PF3_HEAVYHIT
+		mMvC_SetDamage $06, HITTYPE_GRAB_ROTD, PF3_HEAVYHIT
 		mMvC_MoveThrowOp -$10, -$04
 		mMvC_MoveThrowOpSync
 .obj4_cont:
 	jp   .doGravityDamage
 ; --------------- frame #5 ---------------
-; Deal large amounts of damage once, releasing the opponent with HITTYPE_DROP_DB_A.
+; Deal large amounts of damage once, releasing the opponent with HITTYPE_LAUNCH_FAST_DB.
 .obj5:
-	mMvC_SetDamage $0A, HITTYPE_DROP_DB_A, PF3_HEAVYHIT
+	mMvC_SetDamage $0A, HITTYPE_LAUNCH_FAST_DB, PF3_HEAVYHIT
 	mMvC_ValFrameEnd .anim
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
 		jp   .anim
@@ -458,7 +458,7 @@ MoveC_Krauser_KaiserSuplex:
 .doGravityDamage:
 	mMvC_ChkGravityHV $0060, .anim
 		mMvC_SetLandFrame $05, $03
-		mMvC_SetDamageNext $0A, HITTYPE_DROP_DB_A, PF3_HEAVYHIT
+		mMvC_SetDamageNext $0A, HITTYPE_LAUNCH_FAST_DB, PF3_HEAVYHIT
 		jp   .ret
 ; --------------- frames #6-8 / gravity check ---------------
 .doGravity:
@@ -761,7 +761,7 @@ ProjInit_Krauser_KaiserWave:
 	ret
 	
 ; =============== MoveC_Geese_ThrowG ===============
-; Move code for Geese's throw (MOVE_SHARED_THROW_G).
+; Move code for Geese's throw (MOVE_SHARED_GRAB_G).
 MoveC_Geese_ThrowG:
 	mMvC_ValLoaded .ret
 	
@@ -776,14 +776,14 @@ MoveC_Geese_ThrowG:
 ; Set rot frame when switching to #1
 .obj0:
 	mMvC_ValFrameEnd .anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
+	mMvC_SetDamage $06, HITTYPE_GRAB_ROTL, PF3_HEAVYHIT
 	mMvC_MoveThrowOp -$04, -$20 ; 4px left, $20px up
 	jp   .anim
 ; --------------- frame #1 ---------------
 ; Set rot frame when switching to #2
 .obj1:
 	mMvC_ValFrameEnd .anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
+	mMvC_SetDamage $06, HITTYPE_GRAB_ROTL, PF3_HEAVYHIT
 	mMvC_MoveThrowOp $04, -$20 ; 4px right (reset), $20px up
 	jp   .anim
 ; --------------- frame #2 ---------------
@@ -791,7 +791,7 @@ MoveC_Geese_ThrowG:
 ; (between #3-6 Geese arms move)
 .setDamage:
 	mMvC_ValFrameEnd .anim
-	mMvC_SetDamageNext $06, HITTYPE_THROW_END, PF3_HEAVYHIT
+	mMvC_SetDamageNext $06, HITTYPE_LAUNCH_MID_UB_NOSTUN, PF3_HEAVYHIT
 	jp   .anim
 ; --------------- frame #6 ---------------
 .chkEnd:
@@ -805,7 +805,7 @@ MoveC_Geese_ThrowG:
 	ret
 	
 ; =============== MoveC_Krauser_ThrowG ===============
-; Move code for Krauser's throw (MOVE_SHARED_THROW_G).
+; Move code for Krauser's throw (MOVE_SHARED_GRAB_G).
 MoveC_Krauser_ThrowG:
 	mMvC_ValLoaded .ret
 	
@@ -821,7 +821,7 @@ MoveC_Krauser_ThrowG:
 .obj0:
 	; Set rotation frame when switching to #1
 	mMvC_ValFrameEnd .anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
+	mMvC_SetDamage $06, HITTYPE_GRAB_ROTL, PF3_HEAVYHIT
 	mMvC_MoveThrowOp +$04, -$20
 
 	jp   .anim
@@ -829,7 +829,7 @@ MoveC_Krauser_ThrowG:
 .obj1:
 	; Set rotation frame when switching to #2
 	mMvC_ValFrameEnd .anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
+	mMvC_SetDamage $06, HITTYPE_GRAB_ROTL, PF3_HEAVYHIT
 	mMvC_MoveThrowOp +$04, -$21
 
 	jp   .anim
@@ -837,7 +837,7 @@ MoveC_Krauser_ThrowG:
 .obj2:
 	; Set rotation frame when switching to #3
 	mMvC_ValFrameEnd .anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTD, PF3_HEAVYHIT
+	mMvC_SetDamage $06, HITTYPE_GRAB_ROTD, PF3_HEAVYHIT
 	mMvC_MoveThrowOp -$10, -$01
 
 	jp   .anim
@@ -850,7 +850,7 @@ MoveC_Krauser_ThrowG:
 	;       is skipped they neglect to copy over the move damage fields.
 	;       Because of this, the logic for #4 manually updates the *current* move damage fields
 	;       as soon as possible.
-	mMvC_SetDamageNext $06, HITTYPE_DROP_DB_A, PF3_HEAVYHIT
+	mMvC_SetDamageNext $06, HITTYPE_LAUNCH_FAST_DB, PF3_HEAVYHIT
 	;--	
 	
 	jp   .anim
@@ -858,7 +858,7 @@ MoveC_Krauser_ThrowG:
 .setDamage2:
 	; The first time we get here, damage the opponent
 	mMvC_ValFrameStart .chkEnd
-	mMvC_SetDamage $06, HITTYPE_DROP_DB_A, PF3_HEAVYHIT
+	mMvC_SetDamage $06, HITTYPE_LAUNCH_FAST_DB, PF3_HEAVYHIT
 .chkEnd:
 	; End the move when switching to #4
 	mMvC_ValFrameEnd .anim
@@ -871,7 +871,7 @@ MoveC_Krauser_ThrowG:
 	ret
 	
 ; =============== MoveC_MrBig_ThrowG ===============
-; Move code for Mr.Big's throw (MOVE_SHARED_THROW_G).
+; Move code for Mr.Big's throw (MOVE_SHARED_GRAB_G).
 MoveC_MrBig_ThrowG:
 	mMvC_ValLoaded .ret
 	
@@ -885,7 +885,7 @@ MoveC_MrBig_ThrowG:
 .rotU:
 	mMvC_ValFrameStart .obj0_anim
 	
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_HEAVYHIT
+	mMvC_SetDamage $06, HITTYPE_GRAB_ROTU, PF3_HEAVYHIT
 	
 	mMvC_MoveThrowOp -$10, -$10
 
@@ -895,7 +895,7 @@ MoveC_MrBig_ThrowG:
 .rotL:
 	mMvC_ValFrameStart .obj1_anim
 	
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
+	mMvC_SetDamage $06, HITTYPE_GRAB_ROTL, PF3_HEAVYHIT
 	
 	mMvC_MoveThrowOp +$04, -$20
 
@@ -905,7 +905,7 @@ MoveC_MrBig_ThrowG:
 .setDamage:
 	mMvC_ValFrameStart .chkEnd
 	
-	mMvC_SetDamage $06, HITTYPE_THROW_END, PF3_HEAVYHIT
+	mMvC_SetDamage $06, HITTYPE_LAUNCH_MID_UB_NOSTUN, PF3_HEAVYHIT
 	
 	mMvC_MoveThrowOp +$04, -$20
 
@@ -920,7 +920,7 @@ MoveC_MrBig_ThrowG:
 	ret
 	
 ; =============== MoveC_Iori_ThrowG ===============
-; Move code for Iori's throw (MOVE_SHARED_THROW_G).
+; Move code for Iori's throw (MOVE_SHARED_GRAB_G).
 MoveC_Iori_ThrowG:
 	mMvC_ValLoaded .ret
 	
@@ -934,7 +934,7 @@ MoveC_Iori_ThrowG:
 ; When switching to #2, deal damage.
 .setDamage:
 	mMvC_ValFrameEnd .anim
-	mMvC_SetDamageNext $06, HITTYPE_DROP_MAIN, PF3_HEAVYHIT
+	mMvC_SetDamageNext $06, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT
 	jp   .anim
 ; --------------- frame #3 ---------------
 ; When attempting to switch to #4, end the move.
@@ -949,7 +949,7 @@ MoveC_Iori_ThrowG:
 	ret
 	
 ; =============== MoveC_Mature_ThrowG ===============
-; Move code for Mature's throw (MOVE_SHARED_THROW_G).
+; Move code for Mature's throw (MOVE_SHARED_GRAB_G).
 MoveC_Mature_ThrowG:
 	mMvC_ValLoaded .ret
 	
@@ -962,14 +962,14 @@ MoveC_Mature_ThrowG:
 ; --------------- frame #0 ---------------
 .rotU1:
 	mMvC_ValFrameStart .rotU1_anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_HEAVYHIT
+	mMvC_SetDamage $06, HITTYPE_GRAB_ROTU, PF3_HEAVYHIT
 	mMvC_MoveThrowOp -$08, +$00
 .rotU1_anim:
 	jp   .anim
 ; --------------- frame #1 ---------------
 .rotU2:
 	mMvC_ValFrameStart .rotU2_anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTU, PF3_HEAVYHIT
+	mMvC_SetDamage $06, HITTYPE_GRAB_ROTU, PF3_HEAVYHIT
 	mMvC_MoveThrowOp +$04, +$00
 .rotU2_anim:
 	jp   .anim
@@ -988,7 +988,7 @@ MoveC_Mature_ThrowG:
 	ret
 	
 ; =============== MoveC_Chizuru_ThrowG ===============
-; Move code for Chizuru's throw (MOVE_SHARED_THROW_G).
+; Move code for Chizuru's throw (MOVE_SHARED_GRAB_G).
 MoveC_Chizuru_ThrowG:
 	mMvC_ValLoaded .ret
 	
@@ -1002,28 +1002,28 @@ MoveC_Chizuru_ThrowG:
 ; --------------- frame #0 ---------------
 .rotL:
 	mMvC_ValFrameStart .rotL_anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
+	mMvC_SetDamage $06, HITTYPE_GRAB_ROTL, PF3_HEAVYHIT
 	mMvC_MoveThrowOp -$08, -$10
 .rotL_anim:
 	jp   .anim
 ; --------------- frame #1 ---------------
 .rotD:
 	mMvC_ValFrameStart .rotD_anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTD, PF3_HEAVYHIT
+	mMvC_SetDamage $06, HITTYPE_GRAB_ROTD, PF3_HEAVYHIT
 	mMvC_MoveThrowOp -$08, +$00
 .rotD_anim:
 	jp   .anim
 ; --------------- frame #2 ---------------
 .rotR:
 	mMvC_ValFrameStart .rotR_anim
-	mMvC_SetDamage $06, HITTYPE_THROW_ROTR, PF3_HEAVYHIT
+	mMvC_SetDamage $06, HITTYPE_GRAB_ROTR, PF3_HEAVYHIT
 	mMvC_MoveThrowOp -$08, -$10
 .rotR_anim:
 	jp   .anim
 ; --------------- frame #3 ---------------
 .setDamage:
 	mMvC_ValFrameStart .chkEnd
-	mMvC_SetDamage $06, HITTYPE_THROW_END, PF3_HEAVYHIT
+	mMvC_SetDamage $06, HITTYPE_LAUNCH_MID_UB_NOSTUN, PF3_HEAVYHIT
 .chkEnd:
 	mMvC_ValFrameEnd .anim
 	mMvC_EndThrow
@@ -1051,12 +1051,12 @@ MoveC_Unused_ThrowG:
 ; --------------- frame #0 ---------------
 .rotL:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamageNext $06, HITTYPE_THROW_ROTL, PF3_HEAVYHIT
+		mMvC_SetDamageNext $06, HITTYPE_GRAB_ROTL, PF3_HEAVYHIT
 		jp   .anim
 ; --------------- frame #1 ---------------
 .setDamage:
 	mMvC_ValFrameEnd .anim
-		mMvC_SetDamage $06, HITTYPE_THROW_END, PF3_HEAVYHIT
+		mMvC_SetDamage $06, HITTYPE_LAUNCH_MID_UB_NOSTUN, PF3_HEAVYHIT
 		jp   .anim
 ; --------------- frame #2 ---------------
 .wait:

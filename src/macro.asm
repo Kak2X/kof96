@@ -704,7 +704,7 @@ ENDM
 
 ; =============== mMvC_MoveThrowOp ===============
 ; Moves the grabbed opponent relative to the current location.
-; This is only applied if the the player is set in a rotation frame (mMvC_SetDamage with HITTYPE_THROW_ROT*)
+; This is only applied if the the player is set in a rotation frame (mMvC_SetDamage with HITTYPE_GRAB_ROT*)
 ; IN
 ; - 1: Horz. Movement (relative to the 1P side, negative values move backwards)
 ; - 2: Vert. Movement
@@ -715,7 +715,7 @@ mMvC_MoveThrowOp: MACRO
 ENDM
 
 ; =============== mMvC_MoveThrowSync ===============
-; Always syncs the relative position set in mMvC_MoveThrowOp to be applied every frame of the HITTYPE_THROW_ROT*.
+; Always syncs the relative position set in mMvC_MoveThrowOp to be applied every frame of the HITTYPE_GRAB_ROT*.
 ; Must be used if the player moves during the grab portion of the throw.
 mMvC_MoveThrowOpSync: MACRO
 	ld   a, $01

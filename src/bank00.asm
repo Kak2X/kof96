@@ -12882,7 +12882,7 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_INVULN, [hl]
 
 			; New move
-			ld   a, MOVE_SHARED_THROW_G
+			ld   a, MOVE_SHARED_GRAB_G
 			call Pl_SetMove_StopSpeed
 			; Wait 1 frame
 			call Task_PassControlFar
@@ -12960,7 +12960,7 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_INVULN, [hl]
 
 			; New move
-			ld   a, MOVE_SHARED_THROW_A
+			ld   a, MOVE_SHARED_GRAB_A
 			call Pl_SetMove_StopSpeed
 			; Wait 1 frame
 			call Task_PassControlFar
@@ -14045,9 +14045,9 @@ MoveInputS_CanStartSpecialMove:
 	ld   hl, iPlInfo_MoveId
 	add  hl, bc
 	ld   a, [hl]
-	cp   MOVE_SHARED_THROW_G
+	cp   MOVE_SHARED_GRAB_G
 	jp   z, .retNoMove
-	cp   MOVE_SHARED_THROW_A
+	cp   MOVE_SHARED_GRAB_A
 	jp   z, .retNoMove
 
 	;
@@ -14977,9 +14977,9 @@ Play_Pl_ChkThrowInput:
 	ld   a, $0C						; 12 lines of damage
 	ld   [hl], a
 
-	; If the grab occurres, the opponent will use hit effect HITTYPE_THROW_START (HitTypeC_ThrowStart)
+	; If the grab occurres, the opponent will use hit effect HITTYPE_GRAB_START (HitTypeC_GrabStart)
 	inc  hl							; Seek to iPlInfo_MoveDamageHitTypeId
-	ld   a, HITTYPE_THROW_START
+	ld   a, HITTYPE_GRAB_START
 	ld   [hl], a					; Save value
 
 	; Pass control once with the throw hitbox enabled (+ an extra one to disable it)
@@ -14987,7 +14987,7 @@ Play_Pl_ChkThrowInput:
 	;
 	; If it went all right, the opponent should have gone through Play_Pl_SetHitType.chkThrow
 	; (which required us to set wPlayPlThrowActId to PLAY_THROWACT_START first), which will
-	; cause the hit effect HitTypeC_ThrowStart to update wPlayPlThrowActId to PLAY_THROWACT_NEXT02.
+	; cause the hit effect HitTypeC_GrabStart to update wPlayPlThrowActId to PLAY_THROWACT_NEXT02.
 
 	; Preserve iPlInfo_JoyKeys and iPlInfo_JoyNewKeys while this happens
 	ld   hl, iPlInfo_JoyKeys
@@ -15181,9 +15181,9 @@ MoveInputS_TryStartCommandThrow:
 	ld   a, $0C						; 12 lines of damage
 	ld   [hl], a
 
-	; If the grab occurres, the opponent will use hit effect HITTYPE_THROW_START
+	; If the grab occurres, the opponent will use hit effect HITTYPE_GRAB_START
 	inc  hl							; Seek to iPlInfo_MoveDamageHitTypeId
-	ld   a, HITTYPE_THROW_START
+	ld   a, HITTYPE_GRAB_START
 	ld   [hl], a					; Save value
 
 	; Pass control once with the throw hitbox enabled (+ an extra one to disable it)
@@ -15191,7 +15191,7 @@ MoveInputS_TryStartCommandThrow:
 	;
 	; If it went all right, the opponent should have gone through Play_Pl_SetHitType.chkThrow
 	; (which required us to set wPlayPlThrowActId to PLAY_THROWACT_START first), which will
-	; cause the hit effect HitTypeC_ThrowStart to update wPlayPlThrowActId to PLAY_THROWACT_NEXT02.
+	; cause the hit effect HitTypeC_GrabStart to update wPlayPlThrowActId to PLAY_THROWACT_NEXT02.
 
 	; Preserve iPlInfo_JoyKeys and iPlInfo_JoyNewKeys while this happens
 	ld   hl, iPlInfo_JoyKeys
