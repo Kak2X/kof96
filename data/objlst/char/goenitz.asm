@@ -235,8 +235,8 @@ OBJLstPtrTable_Goenitz_TimeOver:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Goenitz_Hitlow:
-	dw OBJLstHdrA_Goenitz_Hitlow0, OBJLSTPTR_NONE ;X
+OBJLstPtrTable_Goenitz_HitLow:
+	dw OBJLstHdrA_Goenitz_HitLow0, OBJLSTPTR_NONE ;X
 	dw OBJLSTPTR_NONE
 		
 
@@ -246,7 +246,7 @@ OBJLstPtrTable_Goenitz_GuardBreakA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Goenitz_BackjumpRecA:
+OBJLstPtrTable_Goenitz_LaunchUBRec:
 	dw OBJLstHdrA_Goenitz_GuardBreakG0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Goenitz_JumpN1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Goenitz_JumpN1, OBJLSTPTR_NONE
@@ -257,13 +257,13 @@ OBJLstPtrTable_Goenitz_BackjumpRecA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Goenitz_DropMain:
+OBJLstPtrTable_Goenitz_LaunchUB:
 	dw OBJLstHdrA_Goenitz_GuardBreakG0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Goenitz_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Goenitz_DropMain2, OBJLSTPTR_NONE
-OBJLstPtrTable_Goenitz_HitMultigs:
-	dw OBJLstHdrA_Goenitz_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Goenitz_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Goenitz_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Goenitz_LaunchUB2, OBJLSTPTR_NONE
+OBJLstPtrTable_Goenitz_HitMultiGS:
+	dw OBJLstHdrA_Goenitz_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Goenitz_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -271,23 +271,23 @@ OBJLstPtrTable_Goenitz_HitSwoopup:
 	dw OBJLstHdrA_Goenitz_TimeOver2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Goenitz_HitSwoopup1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Goenitz_HitSwoopup2, OBJLSTPTR_NONE
-OBJLstPtrTable_Goenitz_ThrowEndA:
-	dw OBJLstHdrA_Goenitz_ThrowEndA3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Goenitz_ThrowEndA3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Goenitz_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Goenitz_DropMain2, OBJLSTPTR_NONE
+OBJLstPtrTable_Goenitz_LaunchUBShake:
+	dw OBJLstHdrA_Goenitz_LaunchUBShake3, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Goenitz_LaunchUBShake3, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Goenitz_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Goenitz_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Goenitz_DropDbg:
+OBJLstPtrTable_Goenitz_HitSweep:
 	dw OBJLstHdrA_Goenitz_TimeOver2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Goenitz_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Goenitz_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Goenitz_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Goenitz_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Goenitz_ThrowRotL:
-	dw OBJLstHdrA_Goenitz_ThrowRotL0, OBJLSTPTR_NONE
+OBJLstPtrTable_Goenitz_GrabRotL:
+	dw OBJLstHdrA_Goenitz_GrabRotL0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -1774,7 +1774,7 @@ OBJLstHdrA_Goenitz_TimeOver2:
 	db $2F,$02,$0A ; $05
 	db $3E,$FA,$0C ; $06
 		
-OBJLstHdrA_Goenitz_ThrowEndA3:
+OBJLstHdrA_Goenitz_LaunchUBShake3:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -1820,11 +1820,11 @@ OBJLstHdrA_Goenitz_GuardBreakG0:
 	db $2D,$01,$0A ; $05
 	db $3D,$FD,$0C ; $06
 		
-OBJLstHdrA_Goenitz_Hitlow0: ;X
+OBJLstHdrA_Goenitz_HitLow0: ;X
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Goenitz_Hitlow0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Goenitz_HitLow0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
@@ -1838,11 +1838,11 @@ OBJLstHdrA_Goenitz_Hitlow0: ;X
 	db $38,$02,$08 ; $04
 	db $38,$0A,$0A ; $05
 		
-OBJLstHdrA_Goenitz_DropMain1:
+OBJLstHdrA_Goenitz_LaunchUB1:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Goenitz_DropMain1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Goenitz_LaunchUB1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $F7 ; iOBJLstHdrA_XOffset
 	db $12 ; iOBJLstHdrA_YOffset
@@ -1856,20 +1856,20 @@ OBJLstHdrA_Goenitz_DropMain1:
 	db $1F,$15,$08 ; $04
 	db $2F,$0D,$0A ; $05
 		
-OBJLstHdrA_Goenitz_ThrowRotL0:
+OBJLstHdrA_Goenitz_GrabRotL0:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Goenitz_DropMain1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Goenitz_DropMain1.bin ; iOBJLstHdrA_DataPtr
+	dpr GFX_Char_Goenitz_LaunchUB1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw OBJLstHdrA_Goenitz_LaunchUB1.bin ; iOBJLstHdrA_DataPtr
 	db $0C ; iOBJLstHdrA_XOffset
 	db $FD ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Goenitz_DropMain2:
+OBJLstHdrA_Goenitz_LaunchUB2:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Goenitz_DropMain2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Goenitz_LaunchUB2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $F6 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset

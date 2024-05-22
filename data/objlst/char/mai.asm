@@ -269,8 +269,8 @@ OBJLstPtrTable_Mai_TimeOver:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Mai_Hitlow:
-	dw OBJLstHdrA_Mai_Hitlow0, OBJLSTPTR_NONE ;X
+OBJLstPtrTable_Mai_HitLow:
+	dw OBJLstHdrA_Mai_HitLow0, OBJLSTPTR_NONE ;X
 	dw OBJLSTPTR_NONE
 		
 
@@ -280,7 +280,7 @@ OBJLstPtrTable_Mai_GuardBreakA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Mai_BackjumpRecA:
+OBJLstPtrTable_Mai_LaunchUBRec:
 	dw OBJLstHdrA_Mai_GuardBreakG0, OBJLSTPTR_NONE ;X
 	dw OBJLstHdrA_Mai_JumpN5, OBJLSTPTR_NONE ;X
 	dw OBJLstHdrA_Mai_JumpN4, OBJLSTPTR_NONE ;X
@@ -291,13 +291,13 @@ OBJLstPtrTable_Mai_BackjumpRecA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Mai_DropMain:
+OBJLstPtrTable_Mai_LaunchUB:
 	dw OBJLstHdrA_Mai_GuardBreakG0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mai_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mai_DropMain2, OBJLSTPTR_NONE
-OBJLstPtrTable_Mai_HitMultigs:
-	dw OBJLstHdrA_Mai_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mai_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Mai_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Mai_LaunchUB2, OBJLSTPTR_NONE
+OBJLstPtrTable_Mai_HitMultiGS:
+	dw OBJLstHdrA_Mai_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Mai_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -305,23 +305,23 @@ OBJLstPtrTable_Mai_HitSwoopup:
 	dw OBJLstHdrA_Mai_TimeOver2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mai_HitSwoopup1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Mai_HitSwoopup2, OBJLSTPTR_NONE
-OBJLstPtrTable_Mai_ThrowEndA:
-	dw OBJLstHdrA_Mai_ThrowEndA3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mai_ThrowEndA3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mai_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mai_DropMain2, OBJLSTPTR_NONE
+OBJLstPtrTable_Mai_LaunchUBShake:
+	dw OBJLstHdrA_Mai_LaunchUBShake3, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Mai_LaunchUBShake3, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Mai_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Mai_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Mai_DropDbg:
+OBJLstPtrTable_Mai_HitSweep:
 	dw OBJLstHdrA_Mai_TimeOver2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mai_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Mai_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Mai_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Mai_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Mai_ThrowRotL:
-	dw OBJLstHdrA_Mai_ThrowRotL0, OBJLSTPTR_NONE
+OBJLstPtrTable_Mai_GrabRotL:
+	dw OBJLstHdrA_Mai_GrabRotL0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -1753,7 +1753,7 @@ OBJLstHdrA_Mai_HitSwoopup2:
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Mai_ThrowEndA3:
+OBJLstHdrA_Mai_LaunchUBShake3:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -1779,11 +1779,11 @@ OBJLstHdrA_Mai_GuardBreakG0:
 	db $31,$FA,$06 ; $03
 	db $30,$02,$08 ; $04
 		
-OBJLstHdrA_Mai_Hitlow0: ;X
+OBJLstHdrA_Mai_HitLow0: ;X
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Mai_Hitlow0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Mai_HitLow0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $FB ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
@@ -1797,11 +1797,11 @@ OBJLstHdrA_Mai_Hitlow0: ;X
 	db $37,$02,$08 ; $04
 	db $3A,$0A,$0A ; $05
 		
-OBJLstHdrA_Mai_DropMain1:
+OBJLstHdrA_Mai_LaunchUB1:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Mai_DropMain1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Mai_LaunchUB1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $FD ; iOBJLstHdrA_XOffset
 	db $15 ; iOBJLstHdrA_YOffset
@@ -1814,20 +1814,20 @@ OBJLstHdrA_Mai_DropMain1:
 	db $1D,$04,$06 ; $03
 	db $21,$0C,$08 ; $04
 		
-OBJLstHdrA_Mai_ThrowRotL0:
+OBJLstHdrA_Mai_GrabRotL0:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Mai_DropMain1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Mai_DropMain1.bin ; iOBJLstHdrA_DataPtr
+	dpr GFX_Char_Mai_LaunchUB1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw OBJLstHdrA_Mai_LaunchUB1.bin ; iOBJLstHdrA_DataPtr
 	db $03 ; iOBJLstHdrA_XOffset
 	db $FE ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Mai_DropMain2:
+OBJLstHdrA_Mai_LaunchUB2:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Mai_DropMain2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Mai_LaunchUB2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $F7 ; iOBJLstHdrA_XOffset
 	db $02 ; iOBJLstHdrA_YOffset

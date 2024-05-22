@@ -223,8 +223,8 @@ OBJLstPtrTable_MrBig_TimeOver:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_MrBig_Hitlow:
-	dw OBJLstHdrA_MrBig_Hitlow0_A, OBJLstHdrB_MrBig_Hitlow0_B ;X
+OBJLstPtrTable_MrBig_HitLow:
+	dw OBJLstHdrA_MrBig_HitLow0_A, OBJLstHdrB_MrBig_HitLow0_B ;X
 	dw OBJLSTPTR_NONE
 		
 
@@ -234,7 +234,7 @@ OBJLstPtrTable_MrBig_GuardBreakA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_MrBig_BackjumpRecA:
+OBJLstPtrTable_MrBig_LaunchUBRec:
 	dw OBJLstHdrA_MrBig_GuardBreakG0_A, OBJLstHdrB_MrBig_GuardBreakG0_B ;X
 	dw OBJLstHdrA_MrBig_JumpN3, OBJLSTPTR_NONE ;X
 	dw OBJLstHdrA_MrBig_JumpN3, OBJLSTPTR_NONE ;X
@@ -245,13 +245,13 @@ OBJLstPtrTable_MrBig_BackjumpRecA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_MrBig_DropMain:
+OBJLstPtrTable_MrBig_LaunchUB:
 	dw OBJLstHdrA_MrBig_GuardBreakG0_A, OBJLstHdrB_MrBig_GuardBreakG0_B
-	dw OBJLstHdrA_MrBig_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_MrBig_DropMain2, OBJLSTPTR_NONE
-OBJLstPtrTable_MrBig_HitMultigs:
-	dw OBJLstHdrA_MrBig_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_MrBig_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_MrBig_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_MrBig_LaunchUB2, OBJLSTPTR_NONE
+OBJLstPtrTable_MrBig_HitMultiGS:
+	dw OBJLstHdrA_MrBig_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_MrBig_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -259,23 +259,23 @@ OBJLstPtrTable_MrBig_HitSwoopup:
 	dw OBJLstHdrA_MrBig_TimeOver2_A, OBJLstHdrB_MrBig_Idle1_B
 	dw OBJLstHdrA_MrBig_HitSwoopup1_A, OBJLstHdrB_MrBig_HitSwoopup1_B
 	dw OBJLstHdrA_MrBig_HitSwoopup2_A, OBJLstHdrB_MrBig_HitSwoopup2_B
-OBJLstPtrTable_MrBig_ThrowEndA:
-	dw OBJLstHdrA_MrBig_ThrowEndA3_A, OBJLstHdrB_MrBig_ThrowEndA3_B
-	dw OBJLstHdrA_MrBig_ThrowEndA3_A, OBJLstHdrB_MrBig_ThrowEndA3_B
-	dw OBJLstHdrA_MrBig_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_MrBig_DropMain2, OBJLSTPTR_NONE
+OBJLstPtrTable_MrBig_LaunchUBShake:
+	dw OBJLstHdrA_MrBig_LaunchUBShake3_A, OBJLstHdrB_MrBig_LaunchUBShake3_B
+	dw OBJLstHdrA_MrBig_LaunchUBShake3_A, OBJLstHdrB_MrBig_LaunchUBShake3_B
+	dw OBJLstHdrA_MrBig_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_MrBig_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_MrBig_DropDbg:
+OBJLstPtrTable_MrBig_HitSweep:
 	dw OBJLstHdrA_MrBig_TimeOver2_A, OBJLstHdrB_MrBig_Idle1_B
-	dw OBJLstHdrA_MrBig_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_MrBig_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_MrBig_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_MrBig_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_MrBig_ThrowRotL:
-	dw OBJLstHdrA_MrBig_ThrowRotL0, OBJLSTPTR_NONE
+OBJLstPtrTable_MrBig_GrabRotL:
+	dw OBJLstHdrA_MrBig_GrabRotL0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -442,7 +442,7 @@ OBJLstHdrB_MrBig_HitSwoopup2_B:
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrB_MrBig_ThrowEndA3_B:
+OBJLstHdrB_MrBig_LaunchUBShake3_B:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	dpr GFX_Char_MrBig_Idle1_B ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw OBJLstHdrB_MrBig_Idle1_B.bin ; iOBJLstHdrA_DataPtr
@@ -1533,7 +1533,7 @@ OBJLstHdrA_MrBig_HitSwoopup2_A:
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_MrBig_ThrowEndA3_A:
+OBJLstHdrA_MrBig_LaunchUBShake3_A:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -1559,7 +1559,7 @@ OBJLstHdrA_MrBig_GuardBreakG0_A:
 	db $20,$08,$06 ; $03
 	db $10,$00,$08 ; $04
 		
-OBJLstHdrA_MrBig_Hitlow0_A: ;X
+OBJLstHdrA_MrBig_HitLow0_A: ;X
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -1581,9 +1581,9 @@ OBJLstHdrB_MrBig_GuardBreakG0_B:
 	db $30,$F8,$02 ; $01
 	db $30,$00,$04 ; $02
 		
-OBJLstHdrB_MrBig_Hitlow0_B: ;X
+OBJLstHdrB_MrBig_HitLow0_B: ;X
 	db $00 ; iOBJLstHdrA_Flags
-	dpr GFX_Char_MrBig_Hitlow0_B ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_MrBig_HitLow0_B ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $02 ; iOBJLstHdrA_XOffset
 	db $09 ; iOBJLstHdrA_YOffset
@@ -1594,11 +1594,11 @@ OBJLstHdrB_MrBig_Hitlow0_B: ;X
 	db $2C,$F9,$02 ; $01
 	db $2C,$01,$04 ; $02
 		
-OBJLstHdrA_MrBig_DropMain1:
+OBJLstHdrA_MrBig_LaunchUB1:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_MrBig_DropMain1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_MrBig_LaunchUB1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $FB ; iOBJLstHdrA_XOffset
 	db $13 ; iOBJLstHdrA_YOffset
@@ -1614,20 +1614,20 @@ OBJLstHdrA_MrBig_DropMain1:
 	db $24,$04,$0C ; $06
 	db $24,$0C,$0E ; $07
 		
-OBJLstHdrA_MrBig_ThrowRotL0:
+OBJLstHdrA_MrBig_GrabRotL0:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_MrBig_DropMain1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_MrBig_DropMain1.bin ; iOBJLstHdrA_DataPtr
+	dpr GFX_Char_MrBig_LaunchUB1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw OBJLstHdrA_MrBig_LaunchUB1.bin ; iOBJLstHdrA_DataPtr
 	db $07 ; iOBJLstHdrA_XOffset
 	db $FB ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_MrBig_DropMain2:
+OBJLstHdrA_MrBig_LaunchUB2:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_MrBig_DropMain2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_MrBig_LaunchUB2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $F8 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset

@@ -247,8 +247,8 @@ OBJLstPtrTable_Geese_TimeOver:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Geese_Hitlow:
-	dw OBJLstHdrA_Geese_Hitlow0, OBJLSTPTR_NONE
+OBJLstPtrTable_Geese_HitLow:
+	dw OBJLstHdrA_Geese_HitLow0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -258,7 +258,7 @@ OBJLstPtrTable_Geese_GuardBreakA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Geese_BackjumpRecA:
+OBJLstPtrTable_Geese_LaunchUBRec:
 	dw OBJLstHdrA_Geese_GuardBreakG0_A, OBJLstHdrB_Geese_GuardBreakG0_B
 	dw OBJLstHdrA_Geese_JumpN1_A, OBJLstHdrB_Geese_JumpN3_B
 	dw OBJLstHdrA_Geese_JumpN1_A, OBJLstHdrB_Geese_JumpN3_B
@@ -269,13 +269,13 @@ OBJLstPtrTable_Geese_BackjumpRecA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Geese_DropMain:
+OBJLstPtrTable_Geese_LaunchUB:
 	dw OBJLstHdrA_Geese_GuardBreakG0_A, OBJLstHdrB_Geese_GuardBreakG0_B
-	dw OBJLstHdrA_Geese_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Geese_DropMain2, OBJLSTPTR_NONE
-OBJLstPtrTable_Geese_HitMultigs:
-	dw OBJLstHdrA_Geese_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Geese_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Geese_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Geese_LaunchUB2, OBJLSTPTR_NONE
+OBJLstPtrTable_Geese_HitMultiGS:
+	dw OBJLstHdrA_Geese_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Geese_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -283,23 +283,23 @@ OBJLstPtrTable_Geese_HitSwoopup:
 	dw OBJLstHdrA_Geese_WalkF2_A, OBJLstHdrB_Geese_PunchH0_B ;X
 	dw OBJLstHdrA_Geese_HitSwoopup1_A, OBJLstHdrB_Geese_HitSwoopup1_B ;X
 	dw OBJLstHdrA_Geese_HitSwoopup2_A, OBJLstHdrB_Geese_HitSwoopup2_B ;X
-OBJLstPtrTable_Geese_ThrowEndA:
-	dw OBJLstHdrA_Geese_ThrowEndA3_A, OBJLstHdrB_Geese_ThrowEndA3_B
-	dw OBJLstHdrA_Geese_ThrowEndA3_A, OBJLstHdrB_Geese_ThrowEndA3_B
-	dw OBJLstHdrA_Geese_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Geese_DropMain2, OBJLSTPTR_NONE
+OBJLstPtrTable_Geese_LaunchUBShake:
+	dw OBJLstHdrA_Geese_LaunchUBShake3_A, OBJLstHdrB_Geese_LaunchUBShake3_B
+	dw OBJLstHdrA_Geese_LaunchUBShake3_A, OBJLstHdrB_Geese_LaunchUBShake3_B
+	dw OBJLstHdrA_Geese_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Geese_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Geese_DropDbg:
+OBJLstPtrTable_Geese_HitSweep:
 	dw OBJLstHdrA_Geese_WalkF2_A, OBJLstHdrB_Geese_PunchH0_B
-	dw OBJLstHdrA_Geese_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Geese_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Geese_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Geese_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Geese_ThrowRotL:
-	dw OBJLstHdrA_Geese_ThrowRotL0, OBJLSTPTR_NONE
+OBJLstPtrTable_Geese_GrabRotL:
+	dw OBJLstHdrA_Geese_GrabRotL0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -521,7 +521,7 @@ OBJLstHdrA_Geese_WalkF2_A:
 	db $20,$08,$04 ; $02
 	db $10,$00,$06 ; $03
 		
-OBJLstHdrA_Geese_ThrowEndA3_A:
+OBJLstHdrA_Geese_LaunchUBShake3_A:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -1005,7 +1005,7 @@ OBJLstHdrB_Geese_PunchH0_B:
 	db $30,$04,$02 ; $01
 	db $33,$0C,$04 ; $02
 		
-OBJLstHdrB_Geese_ThrowEndA3_B:
+OBJLstHdrB_Geese_LaunchUBShake3_B:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	dpr GFX_Char_Geese_PunchH0_B ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw OBJLstHdrB_Geese_PunchH0_B.bin ; iOBJLstHdrA_DataPtr
@@ -1429,11 +1429,11 @@ OBJLstHdrB_Geese_GuardBreakG0_B:
 	db $30,$01,$02 ; $01
 	db $30,$09,$04 ; $02
 		
-OBJLstHdrA_Geese_Hitlow0:
+OBJLstHdrA_Geese_HitLow0:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Geese_Hitlow0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Geese_HitLow0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $F9 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
@@ -1446,11 +1446,11 @@ OBJLstHdrA_Geese_Hitlow0:
 	db $30,$04,$06 ; $03
 	db $30,$0C,$08 ; $04
 		
-OBJLstHdrA_Geese_DropMain1:
+OBJLstHdrA_Geese_LaunchUB1:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Geese_DropMain1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Geese_LaunchUB1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $0A ; iOBJLstHdrA_YOffset
@@ -1463,30 +1463,30 @@ OBJLstHdrA_Geese_DropMain1:
 	db $2A,$04,$06 ; $03
 	db $2D,$0C,$08 ; $04
 		
-; [TCRF] Unreferenced sprite mapping, identical to OBJLstHdrA_Geese_ThrowRotL0 except horizontally flipped.
-OBJLstHdrA_Geese_Unused_ThrowRotR0:
+; [TCRF] Unreferenced sprite mapping, identical to OBJLstHdrA_Geese_GrabRotL0 except horizontally flipped.
+OBJLstHdrA_Geese_Unused_GrabRotR0:
 	db OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Geese_DropMain1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Geese_DropMain1.bin ; iOBJLstHdrA_DataPtr
+	dpr GFX_Char_Geese_LaunchUB1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw OBJLstHdrA_Geese_LaunchUB1.bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 
-OBJLstHdrA_Geese_ThrowRotL0:
+OBJLstHdrA_Geese_GrabRotL0:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Geese_DropMain1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Geese_DropMain1.bin ; iOBJLstHdrA_DataPtr
+	dpr GFX_Char_Geese_LaunchUB1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw OBJLstHdrA_Geese_LaunchUB1.bin ; iOBJLstHdrA_DataPtr
 	db $03 ; iOBJLstHdrA_XOffset
 	db $08 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Geese_DropMain2:
+OBJLstHdrA_Geese_LaunchUB2:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Geese_DropMain2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Geese_LaunchUB2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $04 ; iOBJLstHdrA_YOffset

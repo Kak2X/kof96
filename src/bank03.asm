@@ -103,29 +103,29 @@ ELSE
 	mMvAnDef OBJLstPtrTable_Kyo_UraOrochiNagiD, $18, $00, $01, HITTYPE_HIT_MID0, PF3_FIRE|PF3_CONTHIT ; BANK $07 ; MOVE_KYO_URA_OROCHI_NAGI_E
 ENDC
 	mMvAnDef OBJLstPtrTable_Kyo_Idle, $18, $01, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ;X ; BANK $07 ; MOVE_KYO_SUPER_1_D
-	mMvAnDef OBJLstPtrTable_Kyo_ThrowG, $0C, $0A, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_G
-	mMvAnDef OBJLstPtrTable_Kyo_Idle, $00, $00, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_GRAB_A
+	mMvAnDef OBJLstPtrTable_Kyo_ThrowG, $0C, $0A, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_THROW_G
+	mMvAnDef OBJLstPtrTable_Kyo_Idle, $00, $00, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_Kyo_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_POST_BLOCKSTUN
 	mMvAnDef OBJLstPtrTable_Kyo_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GUARDBREAK_G
 	mMvAnDef OBJLstPtrTable_Kyo_GuardBreakA, $04, $FF, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_GUARDBREAK_A
 	mMvAnDef OBJLstPtrTable_Kyo_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT0MID
 	mMvAnDef OBJLstPtrTable_Kyo_TimeOver, $00, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT1MID
-	mMvAnDef OBJLstPtrTable_Kyo_Hitlow, $00, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HITLOW
-	mMvAnDef OBJLstPtrTable_Kyo_DropMain, $10, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB
-	mMvAnDef OBJLstPtrTable_Kyo_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_DB_SHAKE
-	mMvAnDef OBJLstPtrTable_Kyo_DropDbg, $00, $00, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GROUND_SHAKE
+	mMvAnDef OBJLstPtrTable_Kyo_HitLow, $00, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HITLOW
+	mMvAnDef OBJLstPtrTable_Kyo_LaunchUB, $10, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB
+	mMvAnDef OBJLstPtrTable_Kyo_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_DB_SHAKE
+	mMvAnDef OBJLstPtrTable_Kyo_HitSweep, $00, $00, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GROUND_SHAKE
 	mMvAnDef OBJLstPtrTable_Kyo_HitSwoopup, $18, $00, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_SWOOPUP
-	mMvAnDef OBJLstPtrTable_Kyo_DropDbg, $08, $02, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_SWEEP
-	mMvAnDef OBJLstPtrTable_Kyo_BackjumpRecA, $18, $02, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB_REC
+	mMvAnDef OBJLstPtrTable_Kyo_HitSweep, $08, $02, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_SWEEP
+	mMvAnDef OBJLstPtrTable_Kyo_LaunchUBRec, $18, $02, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB_REC
 	mMvAnDef OBJLstPtrTable_Kyo_GuardBreakG, $00, $14, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_MULTIMID0
 	mMvAnDef OBJLstPtrTable_Kyo_TimeOver, $00, $14, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_MULTIMID1
-	mMvAnDef OBJLstPtrTable_Kyo_HitMultigs, $04, $00, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_MULTIGS
-	mMvAnDef OBJLstPtrTable_Kyo_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB_SHAKE
+	mMvAnDef OBJLstPtrTable_Kyo_HitMultiGS, $04, $00, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_MULTIGS
+	mMvAnDef OBJLstPtrTable_Kyo_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB_SHAKE
 	mMvAnDef OBJLstPtrTable_Kyo_TimeOver, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_START
 	mMvAnDef OBJLstPtrTable_Kyo_TimeOver, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTU
-	mMvAnDef OBJLstPtrTable_Kyo_ThrowRotL, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTL
-	mMvAnDef OBJLstPtrTable_Kyo_ThrowEndA, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTD
-	mMvAnDef OBJLstPtrTable_Kyo_HitMultigs, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTR
+	mMvAnDef OBJLstPtrTable_Kyo_GrabRotL, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTL
+	mMvAnDef OBJLstPtrTable_Kyo_LaunchUBShake, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTD
+	mMvAnDef OBJLstPtrTable_Kyo_HitMultiGS, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTR
 MoveAnimTbl_Daimon:
 	db $4C, $00, $00, $00, $00, $00, $00, $00 ;X ; MOVE_SHARED_NONE
 	mMvAnDef OBJLstPtrTable_Daimon_Idle, $0C, $02, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_IDLE
@@ -181,29 +181,29 @@ MoveAnimTbl_Daimon:
 	mMvAnDef OBJLstPtrTable_Daimon_HeavenHellDropS, $18, $0A, $00, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ; BANK $09 ; MOVE_DAIMON_HEAVEN_HELL_DROP_D
 	mMvAnDef OBJLstPtrTable_Daimon_HeavenHellDropS, $18, $01, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ;X ; BANK $09 ; MOVE_DAIMON_SUPER_1_S
 	mMvAnDef OBJLstPtrTable_Daimon_HeavenHellDropS, $18, $01, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ;X ; BANK $09 ; MOVE_DAIMON_SUPER_1_D
-	mMvAnDef OBJLstPtrTable_Daimon_ThrowG, $0C, $0A, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_G
-	mMvAnDef OBJLstPtrTable_Daimon_Idle, $00, $00, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_GRAB_A
+	mMvAnDef OBJLstPtrTable_Daimon_ThrowG, $0C, $0A, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_THROW_G
+	mMvAnDef OBJLstPtrTable_Daimon_Idle, $00, $00, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_Daimon_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_POST_BLOCKSTUN
 	mMvAnDef OBJLstPtrTable_Daimon_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GUARDBREAK_G
 	mMvAnDef OBJLstPtrTable_Daimon_GuardBreakA, $04, $FF, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_GUARDBREAK_A
 	mMvAnDef OBJLstPtrTable_Daimon_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT0MID
 	mMvAnDef OBJLstPtrTable_Daimon_TimeOver, $00, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT1MID
-	mMvAnDef OBJLstPtrTable_Daimon_Hitlow, $00, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HITLOW
-	mMvAnDef OBJLstPtrTable_Daimon_DropMain, $10, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB
-	mMvAnDef OBJLstPtrTable_Daimon_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_DB_SHAKE
-	mMvAnDef OBJLstPtrTable_Daimon_DropDbg, $00, $00, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GROUND_SHAKE
+	mMvAnDef OBJLstPtrTable_Daimon_HitLow, $00, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HITLOW
+	mMvAnDef OBJLstPtrTable_Daimon_LaunchUB, $10, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB
+	mMvAnDef OBJLstPtrTable_Daimon_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_DB_SHAKE
+	mMvAnDef OBJLstPtrTable_Daimon_HitSweep, $00, $00, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GROUND_SHAKE
 	mMvAnDef OBJLstPtrTable_Daimon_HitSwoopup, $18, $00, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_SWOOPUP
-	mMvAnDef OBJLstPtrTable_Daimon_DropDbg, $08, $02, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_SWEEP
-	mMvAnDef OBJLstPtrTable_Daimon_BackjumpRecA, $18, $02, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB_REC
+	mMvAnDef OBJLstPtrTable_Daimon_HitSweep, $08, $02, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_SWEEP
+	mMvAnDef OBJLstPtrTable_Daimon_LaunchUBRec, $18, $02, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB_REC
 	mMvAnDef OBJLstPtrTable_Daimon_GuardBreakG, $00, $14, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_MULTIMID0
 	mMvAnDef OBJLstPtrTable_Daimon_TimeOver, $00, $14, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_MULTIMID1
-	mMvAnDef OBJLstPtrTable_Daimon_HitMultigs, $04, $00, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_MULTIGS
-	mMvAnDef OBJLstPtrTable_Daimon_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB_SHAKE
+	mMvAnDef OBJLstPtrTable_Daimon_HitMultiGS, $04, $00, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_MULTIGS
+	mMvAnDef OBJLstPtrTable_Daimon_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB_SHAKE
 	mMvAnDef OBJLstPtrTable_Daimon_TimeOver, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_START
 	mMvAnDef OBJLstPtrTable_Daimon_TimeOver, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTU
-	mMvAnDef OBJLstPtrTable_Daimon_ThrowRotL, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTL
-	mMvAnDef OBJLstPtrTable_Daimon_ThrowEndA, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTD
-	mMvAnDef OBJLstPtrTable_Daimon_HitMultigs, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTR
+	mMvAnDef OBJLstPtrTable_Daimon_GrabRotL, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTL
+	mMvAnDef OBJLstPtrTable_Daimon_LaunchUBShake, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTD
+	mMvAnDef OBJLstPtrTable_Daimon_HitMultiGS, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTR
 MoveAnimTbl_Terry:
 	db $4C, $00, $00, $00, $00, $00, $00, $00 ;X ; MOVE_SHARED_NONE
 	mMvAnDef OBJLstPtrTable_Terry_Idle, $0C, $06, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_IDLE
@@ -259,29 +259,29 @@ MoveAnimTbl_Terry:
 	mMvAnDef OBJLstPtrTable_Terry_PowerGeyserD, $0C, $01, $10, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_CONTHIT|PF3_HALFSPEED ; BANK $09 ; MOVE_TERRY_POWER_GEYSER_D
 	mMvAnDef OBJLstPtrTable_Terry_PowerGeyserE, $0C, $14, $07, HITTYPE_LAUNCH_HIGH_UB, PF3_FIRE|PF3_CONTHIT|PF3_HALFSPEED|PF3_LIGHTHIT ;X ; BANK $09 ; MOVE_TERRY_POWER_GEYSER_E
 	mMvAnDef OBJLstPtrTable_Terry_Idle, $0C, $01, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT ;X ; BANK $09 ; MOVE_TERRY_SUPER_1_D
-	mMvAnDef OBJLstPtrTable_Terry_ThrowG, $08, $0A, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_G
-	mMvAnDef OBJLstPtrTable_Terry_Idle, $00, $00, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_GRAB_A
+	mMvAnDef OBJLstPtrTable_Terry_ThrowG, $08, $0A, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_THROW_G
+	mMvAnDef OBJLstPtrTable_Terry_Idle, $00, $00, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_Terry_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_POST_BLOCKSTUN
 	mMvAnDef OBJLstPtrTable_Terry_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GUARDBREAK_G
 	mMvAnDef OBJLstPtrTable_Terry_GuardBreakA, $04, $FF, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_GUARDBREAK_A
 	mMvAnDef OBJLstPtrTable_Terry_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT0MID
 	mMvAnDef OBJLstPtrTable_Terry_TimeOver, $00, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT1MID
-	mMvAnDef OBJLstPtrTable_Terry_Hitlow, $00, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HITLOW
-	mMvAnDef OBJLstPtrTable_Terry_DropMain, $10, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB
-	mMvAnDef OBJLstPtrTable_Terry_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_DB_SHAKE
-	mMvAnDef OBJLstPtrTable_Terry_DropDbg, $00, $00, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GROUND_SHAKE
+	mMvAnDef OBJLstPtrTable_Terry_HitLow, $00, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HITLOW
+	mMvAnDef OBJLstPtrTable_Terry_LaunchUB, $10, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB
+	mMvAnDef OBJLstPtrTable_Terry_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_DB_SHAKE
+	mMvAnDef OBJLstPtrTable_Terry_HitSweep, $00, $00, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GROUND_SHAKE
 	mMvAnDef OBJLstPtrTable_Terry_HitSwoopup, $18, $00, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_SWOOPUP
-	mMvAnDef OBJLstPtrTable_Terry_DropDbg, $08, $02, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_SWEEP
-	mMvAnDef OBJLstPtrTable_Terry_BackjumpRecA, $18, $02, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB_REC
+	mMvAnDef OBJLstPtrTable_Terry_HitSweep, $08, $02, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_SWEEP
+	mMvAnDef OBJLstPtrTable_Terry_LaunchUBRec, $18, $02, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB_REC
 	mMvAnDef OBJLstPtrTable_Terry_GuardBreakG, $00, $14, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_MULTIMID0
 	mMvAnDef OBJLstPtrTable_Terry_TimeOver, $00, $14, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_MULTIMID1
-	mMvAnDef OBJLstPtrTable_Terry_HitMultigs, $04, $00, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_MULTIGS
-	mMvAnDef OBJLstPtrTable_Terry_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB_SHAKE
+	mMvAnDef OBJLstPtrTable_Terry_HitMultiGS, $04, $00, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_MULTIGS
+	mMvAnDef OBJLstPtrTable_Terry_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB_SHAKE
 	mMvAnDef OBJLstPtrTable_Terry_TimeOver, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_START
 	mMvAnDef OBJLstPtrTable_Terry_TimeOver, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTU
-	mMvAnDef OBJLstPtrTable_Terry_ThrowRotL, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTL
-	mMvAnDef OBJLstPtrTable_Terry_ThrowEndA, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTD
-	mMvAnDef OBJLstPtrTable_Terry_HitMultigs, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTR
+	mMvAnDef OBJLstPtrTable_Terry_GrabRotL, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTL
+	mMvAnDef OBJLstPtrTable_Terry_LaunchUBShake, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTD
+	mMvAnDef OBJLstPtrTable_Terry_HitMultiGS, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTR
 MoveAnimTbl_Andy:
 	db $4C, $00, $00, $00, $00, $00, $00, $00 ;X ; MOVE_SHARED_NONE
 	mMvAnDef OBJLstPtrTable_Andy_Idle, $0C, $0A, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_IDLE
@@ -337,29 +337,29 @@ MoveAnimTbl_Andy:
 	mMvAnDef OBJLstPtrTable_Andy_CHoReppaDanD, $18, $01, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE ; BANK $08 ; MOVE_ANDY_CHO_REPPA_DAN_D
 	mMvAnDef OBJLstPtrTable_Andy_Idle, $18, $01, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ;X ; BANK $08 ; MOVE_ANDY_SUPER_1_S
 	mMvAnDef OBJLstPtrTable_Andy_Idle, $18, $01, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ;X ; BANK $08 ; MOVE_ANDY_SUPER_1_D
-	mMvAnDef OBJLstPtrTable_Andy_ThrowG, $14, $0A, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_G
-	mMvAnDef OBJLstPtrTable_Andy_Idle, $00, $00, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_GRAB_A
+	mMvAnDef OBJLstPtrTable_Andy_ThrowG, $14, $0A, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_THROW_G
+	mMvAnDef OBJLstPtrTable_Andy_Idle, $00, $00, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_Andy_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_POST_BLOCKSTUN
 	mMvAnDef OBJLstPtrTable_Andy_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GUARDBREAK_G
 	mMvAnDef OBJLstPtrTable_Andy_GuardBreakA, $04, $FF, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_GUARDBREAK_A
 	mMvAnDef OBJLstPtrTable_Andy_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT0MID
 	mMvAnDef OBJLstPtrTable_Andy_TimeOver, $00, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT1MID
-	mMvAnDef OBJLstPtrTable_Andy_Hitlow, $00, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HITLOW
-	mMvAnDef OBJLstPtrTable_Andy_DropMain, $10, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB
-	mMvAnDef OBJLstPtrTable_Andy_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_DB_SHAKE
-	mMvAnDef OBJLstPtrTable_Andy_DropDbg, $00, $00, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GROUND_SHAKE
+	mMvAnDef OBJLstPtrTable_Andy_HitLow, $00, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HITLOW
+	mMvAnDef OBJLstPtrTable_Andy_LaunchUB, $10, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB
+	mMvAnDef OBJLstPtrTable_Andy_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_DB_SHAKE
+	mMvAnDef OBJLstPtrTable_Andy_HitSweep, $00, $00, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GROUND_SHAKE
 	mMvAnDef OBJLstPtrTable_Andy_HitSwoopup, $18, $00, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_SWOOPUP
-	mMvAnDef OBJLstPtrTable_Andy_DropDbg, $08, $02, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_SWEEP
-	mMvAnDef OBJLstPtrTable_Andy_BackjumpRecA, $18, $02, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB_REC
+	mMvAnDef OBJLstPtrTable_Andy_HitSweep, $08, $02, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_SWEEP
+	mMvAnDef OBJLstPtrTable_Andy_LaunchUBRec, $18, $02, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB_REC
 	mMvAnDef OBJLstPtrTable_Andy_GuardBreakG, $00, $14, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_MULTIMID0
 	mMvAnDef OBJLstPtrTable_Andy_TimeOver, $00, $14, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_MULTIMID1
-	mMvAnDef OBJLstPtrTable_Andy_HitMultigs, $04, $00, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_MULTIGS
-	mMvAnDef OBJLstPtrTable_Andy_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB_SHAKE
+	mMvAnDef OBJLstPtrTable_Andy_HitMultiGS, $04, $00, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_MULTIGS
+	mMvAnDef OBJLstPtrTable_Andy_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB_SHAKE
 	mMvAnDef OBJLstPtrTable_Andy_TimeOver, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_START
 	mMvAnDef OBJLstPtrTable_Andy_TimeOver, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTU
-	mMvAnDef OBJLstPtrTable_Andy_ThrowRotL, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTL
-	mMvAnDef OBJLstPtrTable_Andy_ThrowEndA, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTD
-	mMvAnDef OBJLstPtrTable_Andy_HitMultigs, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTR
+	mMvAnDef OBJLstPtrTable_Andy_GrabRotL, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTL
+	mMvAnDef OBJLstPtrTable_Andy_LaunchUBShake, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTD
+	mMvAnDef OBJLstPtrTable_Andy_HitMultiGS, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTR
 MoveAnimTbl_Ryo:
 	db $4C, $00, $00, $00, $00, $00, $00, $00 ;X ; MOVE_SHARED_NONE
 	mMvAnDef OBJLstPtrTable_Ryo_Idle, $18, $06, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_IDLE
@@ -415,29 +415,29 @@ MoveAnimTbl_Ryo:
 	mMvAnDef OBJLstPtrTable_Ryo_RyuKoRanbuD, $44, $08, $01, HITTYPE_HIT_MULTI1, PF3_HEAVYHIT|PF3_CONTHIT ; BANK $0A ; MOVE_RYO_RYU_KO_RANBU_D
 	mMvAnDef OBJLstPtrTable_Ryo_HaohShoukouKenS, $08, $01, $10, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_HALFSPEED ; BANK $0A ; MOVE_RYO_HAOH_SHOUKOU_KEN_S
 	mMvAnDef OBJLstPtrTable_Ryo_HaohShoukouKenS, $08, $01, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ; BANK $0A ; MOVE_RYO_HAOH_SHOUKOU_KEN_D
-	mMvAnDef OBJLstPtrTable_Ryo_ThrowG, $08, $0A, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_G
-	mMvAnDef OBJLstPtrTable_Ryo_Idle, $00, $00, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_GRAB_A
+	mMvAnDef OBJLstPtrTable_Ryo_ThrowG, $08, $0A, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_THROW_G
+	mMvAnDef OBJLstPtrTable_Ryo_Idle, $00, $00, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_Ryo_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_POST_BLOCKSTUN
 	mMvAnDef OBJLstPtrTable_Ryo_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GUARDBREAK_G
 	mMvAnDef OBJLstPtrTable_Ryo_GuardBreakA, $04, $FF, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_GUARDBREAK_A
 	mMvAnDef OBJLstPtrTable_Ryo_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT0MID
 	mMvAnDef OBJLstPtrTable_Ryo_TimeOver, $00, $05, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT1MID
-	mMvAnDef OBJLstPtrTable_Ryo_Hitlow, $00, $05, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_HITLOW
-	mMvAnDef OBJLstPtrTable_Ryo_DropMain, $10, $05, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB
-	mMvAnDef OBJLstPtrTable_Ryo_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_DB_SHAKE
-	mMvAnDef OBJLstPtrTable_Ryo_DropDbg, $00, $00, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GROUND_SHAKE
+	mMvAnDef OBJLstPtrTable_Ryo_HitLow, $00, $05, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_HITLOW
+	mMvAnDef OBJLstPtrTable_Ryo_LaunchUB, $10, $05, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB
+	mMvAnDef OBJLstPtrTable_Ryo_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_DB_SHAKE
+	mMvAnDef OBJLstPtrTable_Ryo_HitSweep, $00, $00, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GROUND_SHAKE
 	mMvAnDef OBJLstPtrTable_Ryo_HitSwoopup, $18, $00, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_SWOOPUP
-	mMvAnDef OBJLstPtrTable_Ryo_DropDbg, $08, $02, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT_SWEEP
-	mMvAnDef OBJLstPtrTable_Ryo_BackjumpRecA, $18, $02, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB_REC
+	mMvAnDef OBJLstPtrTable_Ryo_HitSweep, $08, $02, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT_SWEEP
+	mMvAnDef OBJLstPtrTable_Ryo_LaunchUBRec, $18, $02, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB_REC
 	mMvAnDef OBJLstPtrTable_Ryo_GuardBreakG, $00, $14, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT_MULTIMID0
 	mMvAnDef OBJLstPtrTable_Ryo_TimeOver, $00, $14, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT_MULTIMID1
-	mMvAnDef OBJLstPtrTable_Ryo_HitMultigs, $04, $00, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT_MULTIGS
-	mMvAnDef OBJLstPtrTable_Ryo_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB_SHAKE
+	mMvAnDef OBJLstPtrTable_Ryo_HitMultiGS, $04, $00, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT_MULTIGS
+	mMvAnDef OBJLstPtrTable_Ryo_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB_SHAKE
 	mMvAnDef OBJLstPtrTable_Ryo_TimeOver, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_START
 	mMvAnDef OBJLstPtrTable_Ryo_TimeOver, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTU
-	mMvAnDef OBJLstPtrTable_Ryo_ThrowRotL, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTL
-	mMvAnDef OBJLstPtrTable_Ryo_ThrowEndA, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTD
-	mMvAnDef OBJLstPtrTable_Ryo_HitMultigs, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTR
+	mMvAnDef OBJLstPtrTable_Ryo_GrabRotL, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTL
+	mMvAnDef OBJLstPtrTable_Ryo_LaunchUBShake, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTD
+	mMvAnDef OBJLstPtrTable_Ryo_HitMultiGS, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTR
 MoveAnimTbl_Robert:
 	db $4C, $00, $00, $00, $00, $00, $00, $00 ;X ; MOVE_SHARED_NONE
 	mMvAnDef OBJLstPtrTable_Robert_Idle, $0C, $06, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_IDLE
@@ -493,29 +493,29 @@ MoveAnimTbl_Robert:
 	mMvAnDef OBJLstPtrTable_Robert_RyuKoRanbuD, $44, $08, $01, HITTYPE_HIT_MULTI1, PF3_HEAVYHIT|PF3_CONTHIT ; BANK $07 ; MOVE_ROBERT_RYU_KO_RANBU_D
 	mMvAnDef OBJLstPtrTable_Robert_HaohShoukouKenS, $08, $01, $10, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_HALFSPEED ; BANK $07 ; MOVE_ROBERT_HAOH_SHOUKOU_KEN_S
 	mMvAnDef OBJLstPtrTable_Robert_HaohShoukouKenS, $08, $01, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ; BANK $07 ; MOVE_ROBERT_HAOH_SHOUKOU_KEN_D
-	mMvAnDef OBJLstPtrTable_Robert_ThrowG, $14, $0A, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_G
-	mMvAnDef OBJLstPtrTable_Robert_Idle, $00, $00, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_GRAB_A
+	mMvAnDef OBJLstPtrTable_Robert_ThrowG, $14, $0A, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_THROW_G
+	mMvAnDef OBJLstPtrTable_Robert_Idle, $00, $00, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_Robert_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_POST_BLOCKSTUN
 	mMvAnDef OBJLstPtrTable_Robert_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GUARDBREAK_G
 	mMvAnDef OBJLstPtrTable_Robert_GuardBreakA, $04, $FF, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_GUARDBREAK_A
 	mMvAnDef OBJLstPtrTable_Robert_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT0MID
 	mMvAnDef OBJLstPtrTable_Robert_TimeOver, $00, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT1MID
-	mMvAnDef OBJLstPtrTable_Robert_Hitlow, $00, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HITLOW
-	mMvAnDef OBJLstPtrTable_Robert_DropMain, $10, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB
-	mMvAnDef OBJLstPtrTable_Robert_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_DB_SHAKE
-	mMvAnDef OBJLstPtrTable_Robert_DropDbg, $00, $00, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GROUND_SHAKE
+	mMvAnDef OBJLstPtrTable_Robert_HitLow, $00, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HITLOW
+	mMvAnDef OBJLstPtrTable_Robert_LaunchUB, $10, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB
+	mMvAnDef OBJLstPtrTable_Robert_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_DB_SHAKE
+	mMvAnDef OBJLstPtrTable_Robert_HitSweep, $00, $00, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GROUND_SHAKE
 	mMvAnDef OBJLstPtrTable_Robert_HitSwoopup, $18, $00, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_SWOOPUP
-	mMvAnDef OBJLstPtrTable_Robert_DropDbg, $08, $02, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_SWEEP
-	mMvAnDef OBJLstPtrTable_Robert_BackjumpRecA, $18, $02, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB_REC
+	mMvAnDef OBJLstPtrTable_Robert_HitSweep, $08, $02, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_SWEEP
+	mMvAnDef OBJLstPtrTable_Robert_LaunchUBRec, $18, $02, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB_REC
 	mMvAnDef OBJLstPtrTable_Robert_GuardBreakG, $00, $14, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_MULTIMID0
 	mMvAnDef OBJLstPtrTable_Robert_TimeOver, $00, $14, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_MULTIMID1
-	mMvAnDef OBJLstPtrTable_Robert_HitMultigs, $04, $00, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_MULTIGS
-	mMvAnDef OBJLstPtrTable_Robert_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB_SHAKE
+	mMvAnDef OBJLstPtrTable_Robert_HitMultiGS, $04, $00, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_MULTIGS
+	mMvAnDef OBJLstPtrTable_Robert_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB_SHAKE
 	mMvAnDef OBJLstPtrTable_Robert_TimeOver, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_START
 	mMvAnDef OBJLstPtrTable_Robert_TimeOver, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTU
-	mMvAnDef OBJLstPtrTable_Robert_ThrowRotL, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTL
-	mMvAnDef OBJLstPtrTable_Robert_ThrowEndA, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTD
-	mMvAnDef OBJLstPtrTable_Robert_HitMultigs, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTR
+	mMvAnDef OBJLstPtrTable_Robert_GrabRotL, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTL
+	mMvAnDef OBJLstPtrTable_Robert_LaunchUBShake, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTD
+	mMvAnDef OBJLstPtrTable_Robert_HitMultiGS, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTR
 MoveAnimTbl_Athena:
 	db $4C, $00, $00, $00, $00, $00, $00, $00 ;X ; MOVE_SHARED_NONE
 	mMvAnDef OBJLstPtrTable_Athena_Idle, $0C, $02, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_IDLE
@@ -571,29 +571,29 @@ MoveAnimTbl_Athena:
 	mMvAnDef OBJLstPtrTable_Athena_ShiningCrystalBitGD, $14, $08, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_HALFSPEED|PF3_SUPERALT ; BANK $08 ; MOVE_ATHENA_SHINING_CRYSTAL_BIT_GD
 	mMvAnDef OBJLstPtrTable_Athena_ShiningCrystalBitAS, $14, $08, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_HALFSPEED ; BANK $08 ; MOVE_ATHENA_SHINING_CRYSTAL_BIT_AS
 	mMvAnDef OBJLstPtrTable_Athena_ShiningCrystalBitAD, $14, $08, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_HALFSPEED|PF3_SUPERALT ; BANK $08 ; MOVE_ATHENA_SHINING_CRYSTAL_BIT_AD
-	mMvAnDef OBJLstPtrTable_Athena_ThrowG, $0C, $0A, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_G
-	mMvAnDef OBJLstPtrTable_Athena_ThrowA, $0C, $0A, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_GRAB_A
+	mMvAnDef OBJLstPtrTable_Athena_ThrowG, $0C, $0A, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_THROW_G
+	mMvAnDef OBJLstPtrTable_Athena_ThrowA, $0C, $0A, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_Athena_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_POST_BLOCKSTUN
 	mMvAnDef OBJLstPtrTable_Athena_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GUARDBREAK_G
 	mMvAnDef OBJLstPtrTable_Athena_GuardBreakA, $04, $FF, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_GUARDBREAK_A
 	mMvAnDef OBJLstPtrTable_Athena_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT0MID
 	mMvAnDef OBJLstPtrTable_Athena_TimeOver, $00, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT1MID
-	mMvAnDef OBJLstPtrTable_Athena_Hitlow, $00, $05, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_HITLOW
-	mMvAnDef OBJLstPtrTable_Athena_DropMain, $10, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB
-	mMvAnDef OBJLstPtrTable_Athena_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_DB_SHAKE
-	mMvAnDef OBJLstPtrTable_Athena_DropDbg, $00, $00, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GROUND_SHAKE
+	mMvAnDef OBJLstPtrTable_Athena_HitLow, $00, $05, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_HITLOW
+	mMvAnDef OBJLstPtrTable_Athena_LaunchUB, $10, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB
+	mMvAnDef OBJLstPtrTable_Athena_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_DB_SHAKE
+	mMvAnDef OBJLstPtrTable_Athena_HitSweep, $00, $00, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GROUND_SHAKE
 	mMvAnDef OBJLstPtrTable_Athena_HitSwoopup, $18, $00, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_SWOOPUP
-	mMvAnDef OBJLstPtrTable_Athena_DropDbg, $08, $02, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_SWEEP
-	mMvAnDef OBJLstPtrTable_Athena_BackjumpRecA, $18, $02, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB_REC
+	mMvAnDef OBJLstPtrTable_Athena_HitSweep, $08, $02, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_SWEEP
+	mMvAnDef OBJLstPtrTable_Athena_LaunchUBRec, $18, $02, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB_REC
 	mMvAnDef OBJLstPtrTable_Athena_GuardBreakG, $00, $14, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_MULTIMID0
 	mMvAnDef OBJLstPtrTable_Athena_TimeOver, $00, $14, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_MULTIMID1
-	mMvAnDef OBJLstPtrTable_Athena_HitMultigs, $04, $00, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_MULTIGS
-	mMvAnDef OBJLstPtrTable_Athena_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB_SHAKE
+	mMvAnDef OBJLstPtrTable_Athena_HitMultiGS, $04, $00, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_MULTIGS
+	mMvAnDef OBJLstPtrTable_Athena_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB_SHAKE
 	mMvAnDef OBJLstPtrTable_Athena_TimeOver, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_START
 	mMvAnDef OBJLstPtrTable_Athena_TimeOver, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTU
-	mMvAnDef OBJLstPtrTable_Athena_ThrowRotL, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTL
-	mMvAnDef OBJLstPtrTable_Athena_ThrowEndA, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTD
-	mMvAnDef OBJLstPtrTable_Athena_HitMultigs, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTR
+	mMvAnDef OBJLstPtrTable_Athena_GrabRotL, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTL
+	mMvAnDef OBJLstPtrTable_Athena_LaunchUBShake, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTD
+	mMvAnDef OBJLstPtrTable_Athena_HitMultiGS, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTR
 MoveAnimTbl_Mai:
 	db $4C, $00, $00, $00, $00, $00, $00, $00 ;X ; MOVE_SHARED_NONE
 	mMvAnDef OBJLstPtrTable_Mai_Idle, $1C, $04, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_IDLE
@@ -649,29 +649,29 @@ MoveAnimTbl_Mai:
 	mMvAnDef OBJLstPtrTable_Mai_CHoHissatsuShinobibachiD, $18, $00, $0A, HITTYPE_HIT_MID1, PF3_CONTHIT ; BANK $08 ; MOVE_MAI_CHO_HISSATSU_SHINOBIBACHI_D
 	mMvAnDef OBJLstPtrTable_Mai_Idle, $18, $02, $0A, HITTYPE_HIT_MID1, $00 ;X ; BANK $08 ; MOVE_MAI_SUPER_1_S
 	mMvAnDef OBJLstPtrTable_Mai_Idle, $18, $02, $0A, HITTYPE_HIT_MID1, $00 ;X ; BANK $08 ; MOVE_MAI_SUPER_1_D
-	mMvAnDef OBJLstPtrTable_Mai_ThrowG, $0C, $0A, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_G
-	mMvAnDef OBJLstPtrTable_Mai_ThrowA, $08, $0A, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_GRAB_A
+	mMvAnDef OBJLstPtrTable_Mai_ThrowG, $0C, $0A, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_THROW_G
+	mMvAnDef OBJLstPtrTable_Mai_ThrowA, $08, $0A, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_Mai_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_POST_BLOCKSTUN
 	mMvAnDef OBJLstPtrTable_Mai_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GUARDBREAK_G
 	mMvAnDef OBJLstPtrTable_Mai_GuardBreakA, $04, $FF, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_GUARDBREAK_A
 	mMvAnDef OBJLstPtrTable_Mai_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT0MID
 	mMvAnDef OBJLstPtrTable_Mai_TimeOver, $00, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT1MID
-	mMvAnDef OBJLstPtrTable_Mai_Hitlow, $00, $05, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_HITLOW
-	mMvAnDef OBJLstPtrTable_Mai_DropMain, $10, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB
-	mMvAnDef OBJLstPtrTable_Mai_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_DB_SHAKE
-	mMvAnDef OBJLstPtrTable_Mai_DropDbg, $00, $00, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GROUND_SHAKE
+	mMvAnDef OBJLstPtrTable_Mai_HitLow, $00, $05, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_HITLOW
+	mMvAnDef OBJLstPtrTable_Mai_LaunchUB, $10, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB
+	mMvAnDef OBJLstPtrTable_Mai_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_DB_SHAKE
+	mMvAnDef OBJLstPtrTable_Mai_HitSweep, $00, $00, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GROUND_SHAKE
 	mMvAnDef OBJLstPtrTable_Mai_HitSwoopup, $18, $00, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_SWOOPUP
-	mMvAnDef OBJLstPtrTable_Mai_DropDbg, $08, $02, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_SWEEP
-	mMvAnDef OBJLstPtrTable_Mai_BackjumpRecA, $18, $02, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_LAUNCH_UB_REC
+	mMvAnDef OBJLstPtrTable_Mai_HitSweep, $08, $02, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_SWEEP
+	mMvAnDef OBJLstPtrTable_Mai_LaunchUBRec, $18, $02, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_LAUNCH_UB_REC
 	mMvAnDef OBJLstPtrTable_Mai_GuardBreakG, $00, $14, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_MULTIMID0
 	mMvAnDef OBJLstPtrTable_Mai_TimeOver, $00, $14, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_MULTIMID1
-	mMvAnDef OBJLstPtrTable_Mai_HitMultigs, $04, $00, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_MULTIGS
-	mMvAnDef OBJLstPtrTable_Mai_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB_SHAKE
+	mMvAnDef OBJLstPtrTable_Mai_HitMultiGS, $04, $00, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_MULTIGS
+	mMvAnDef OBJLstPtrTable_Mai_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB_SHAKE
 	mMvAnDef OBJLstPtrTable_Mai_TimeOver, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_START
 	mMvAnDef OBJLstPtrTable_Mai_TimeOver, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTU
-	mMvAnDef OBJLstPtrTable_Mai_ThrowRotL, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTL
-	mMvAnDef OBJLstPtrTable_Mai_ThrowEndA, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTD
-	mMvAnDef OBJLstPtrTable_Mai_HitMultigs, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTR
+	mMvAnDef OBJLstPtrTable_Mai_GrabRotL, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTL
+	mMvAnDef OBJLstPtrTable_Mai_LaunchUBShake, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTD
+	mMvAnDef OBJLstPtrTable_Mai_HitMultiGS, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTR
 MoveAnimTbl_Leona:
 	db $4C, $00, $00, $00, $00, $00, $00, $00 ;X ; MOVE_SHARED_NONE
 	mMvAnDef OBJLstPtrTable_Leona_Idle, $0C, $06, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_IDLE
@@ -727,29 +727,29 @@ MoveAnimTbl_Leona:
 	mMvAnDef OBJLstPtrTable_Leona_VSlasherS, $18, $01, $09, HITTYPE_LAUNCH_HIGH_UB, PF3_CONTHIT|PF3_HALFSPEED|PF3_LIGHTHIT ; BANK $0A ; MOVE_LEONA_V_SLASHER_D
 	mMvAnDef OBJLstPtrTable_Leona_Idle, $18, $01, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ;X ; BANK $0A ; MOVE_OLEONA_SUPER_MOON_SLASHER_S
 	mMvAnDef OBJLstPtrTable_Leona_Idle, $18, $01, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ;X ; BANK $0A ; MOVE_OLEONA_SUPER_MOON_SLASHER_D
-	mMvAnDef OBJLstPtrTable_Leona_ThrowG, $14, $0A, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_G
-	mMvAnDef OBJLstPtrTable_Leona_ThrowA, $00, $00, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_GRAB_A
+	mMvAnDef OBJLstPtrTable_Leona_ThrowG, $14, $0A, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_THROW_G
+	mMvAnDef OBJLstPtrTable_Leona_ThrowA, $00, $00, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_Leona_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_POST_BLOCKSTUN
 	mMvAnDef OBJLstPtrTable_Leona_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GUARDBREAK_G
 	mMvAnDef OBJLstPtrTable_Leona_GuardBreakA, $04, $FF, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_GUARDBREAK_A
 	mMvAnDef OBJLstPtrTable_Leona_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT0MID
 	mMvAnDef OBJLstPtrTable_Leona_TimeOver, $00, $05, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT1MID
-	mMvAnDef OBJLstPtrTable_Leona_Hitlow, $00, $05, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_HITLOW
-	mMvAnDef OBJLstPtrTable_Leona_DropMain, $10, $05, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB
-	mMvAnDef OBJLstPtrTable_Leona_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_DB_SHAKE
-	mMvAnDef OBJLstPtrTable_Leona_DropDbg, $00, $00, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_GROUND_SHAKE
+	mMvAnDef OBJLstPtrTable_Leona_HitLow, $00, $05, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_HITLOW
+	mMvAnDef OBJLstPtrTable_Leona_LaunchUB, $10, $05, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB
+	mMvAnDef OBJLstPtrTable_Leona_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_DB_SHAKE
+	mMvAnDef OBJLstPtrTable_Leona_HitSweep, $00, $00, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_GROUND_SHAKE
 	mMvAnDef OBJLstPtrTable_Leona_HitSwoopup, $18, $00, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_SWOOPUP
-	mMvAnDef OBJLstPtrTable_Leona_DropDbg, $08, $02, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT_SWEEP
-	mMvAnDef OBJLstPtrTable_Leona_BackjumpRecA, $18, $02, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB_REC
+	mMvAnDef OBJLstPtrTable_Leona_HitSweep, $08, $02, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT_SWEEP
+	mMvAnDef OBJLstPtrTable_Leona_LaunchUBRec, $18, $02, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB_REC
 	mMvAnDef OBJLstPtrTable_Leona_GuardBreakG, $00, $14, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT_MULTIMID0
 	mMvAnDef OBJLstPtrTable_Leona_TimeOver, $00, $14, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT_MULTIMID1
-	mMvAnDef OBJLstPtrTable_Leona_HitMultigs, $04, $00, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT_MULTIGS
-	mMvAnDef OBJLstPtrTable_Leona_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB_SHAKE
+	mMvAnDef OBJLstPtrTable_Leona_HitMultiGS, $04, $00, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT_MULTIGS
+	mMvAnDef OBJLstPtrTable_Leona_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB_SHAKE
 	mMvAnDef OBJLstPtrTable_Leona_TimeOver, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_START
 	mMvAnDef OBJLstPtrTable_Leona_TimeOver, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTU
-	mMvAnDef OBJLstPtrTable_Leona_ThrowRotL, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTL
-	mMvAnDef OBJLstPtrTable_Leona_ThrowEndA, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTD
-	mMvAnDef OBJLstPtrTable_Leona_HitMultigs, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTR
+	mMvAnDef OBJLstPtrTable_Leona_GrabRotL, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTL
+	mMvAnDef OBJLstPtrTable_Leona_LaunchUBShake, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTD
+	mMvAnDef OBJLstPtrTable_Leona_HitMultiGS, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTR
 MoveAnimTbl_OLeona:
 	db $4C, $00, $00, $00, $00, $00, $00, $00 ;X ; MOVE_SHARED_NONE
 	mMvAnDef OBJLstPtrTable_OLeona_Idle, $0C, $06, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_IDLE
@@ -805,29 +805,29 @@ MoveAnimTbl_OLeona:
 	mMvAnDef OBJLstPtrTable_OLeona_LeonaVSlasherS, $18, $01, $09, HITTYPE_LAUNCH_HIGH_UB, PF3_CONTHIT|PF3_HALFSPEED|PF3_LIGHTHIT ; BANK $0A ; MOVE_LEONA_V_SLASHER_D
 	mMvAnDef OBJLstPtrTable_OLeona_SuperMoonSlasherS, $18, $01, $02, HITTYPE_HIT_MULTI1, PF3_HEAVYHIT ; BANK $0A ; MOVE_OLEONA_SUPER_MOON_SLASHER_S
 	mMvAnDef OBJLstPtrTable_OLeona_SuperMoonSlasherS, $18, $01, $02, HITTYPE_HIT_MULTI1, PF3_HEAVYHIT ; BANK $0A ; MOVE_OLEONA_SUPER_MOON_SLASHER_D
-	mMvAnDef OBJLstPtrTable_OLeona_ThrowG, $14, $0A, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_G
-	mMvAnDef OBJLstPtrTable_Leona_ThrowA, $00, $00, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_GRAB_A
+	mMvAnDef OBJLstPtrTable_OLeona_ThrowG, $14, $0A, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_THROW_G
+	mMvAnDef OBJLstPtrTable_Leona_ThrowA, $00, $00, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_Leona_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_POST_BLOCKSTUN
 	mMvAnDef OBJLstPtrTable_Leona_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GUARDBREAK_G
 	mMvAnDef OBJLstPtrTable_Leona_GuardBreakA, $04, $FF, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_GUARDBREAK_A
 	mMvAnDef OBJLstPtrTable_Leona_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT0MID
 	mMvAnDef OBJLstPtrTable_Leona_TimeOver, $00, $05, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT1MID
-	mMvAnDef OBJLstPtrTable_Leona_Hitlow, $00, $05, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_HITLOW
-	mMvAnDef OBJLstPtrTable_Leona_DropMain, $10, $05, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB
-	mMvAnDef OBJLstPtrTable_Leona_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_DB_SHAKE
-	mMvAnDef OBJLstPtrTable_Leona_DropDbg, $00, $00, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_GROUND_SHAKE
+	mMvAnDef OBJLstPtrTable_Leona_HitLow, $00, $05, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_HITLOW
+	mMvAnDef OBJLstPtrTable_Leona_LaunchUB, $10, $05, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB
+	mMvAnDef OBJLstPtrTable_Leona_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_DB_SHAKE
+	mMvAnDef OBJLstPtrTable_Leona_HitSweep, $00, $00, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_GROUND_SHAKE
 	mMvAnDef OBJLstPtrTable_Leona_HitSwoopup, $18, $00, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_SWOOPUP
-	mMvAnDef OBJLstPtrTable_Leona_DropDbg, $08, $02, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT_SWEEP
-	mMvAnDef OBJLstPtrTable_Leona_BackjumpRecA, $18, $02, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB_REC
+	mMvAnDef OBJLstPtrTable_Leona_HitSweep, $08, $02, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT_SWEEP
+	mMvAnDef OBJLstPtrTable_Leona_LaunchUBRec, $18, $02, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB_REC
 	mMvAnDef OBJLstPtrTable_Leona_GuardBreakG, $00, $14, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT_MULTIMID0
 	mMvAnDef OBJLstPtrTable_Leona_TimeOver, $00, $14, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT_MULTIMID1
-	mMvAnDef OBJLstPtrTable_Leona_HitMultigs, $04, $00, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_HIT_MULTIGS
-	mMvAnDef OBJLstPtrTable_Leona_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB_SHAKE
+	mMvAnDef OBJLstPtrTable_Leona_HitMultiGS, $04, $00, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_HIT_MULTIGS
+	mMvAnDef OBJLstPtrTable_Leona_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB_SHAKE
 	mMvAnDef OBJLstPtrTable_Leona_TimeOver, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_START
 	mMvAnDef OBJLstPtrTable_Leona_TimeOver, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTU
-	mMvAnDef OBJLstPtrTable_Leona_ThrowRotL, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTL
-	mMvAnDef OBJLstPtrTable_Leona_ThrowEndA, $00, $3C, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_GRAB_ROTD
-	mMvAnDef OBJLstPtrTable_Leona_HitMultigs, $00, $3C, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_GRAB_ROTR
+	mMvAnDef OBJLstPtrTable_Leona_GrabRotL, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTL
+	mMvAnDef OBJLstPtrTable_Leona_LaunchUBShake, $00, $3C, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_GRAB_ROTD
+	mMvAnDef OBJLstPtrTable_Leona_HitMultiGS, $00, $3C, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_GRAB_ROTR
 MoveAnimTbl_Geese:
 	db $4C, $00, $00, $00, $00, $00, $00, $00 ;X ; MOVE_SHARED_NONE
 	mMvAnDef OBJLstPtrTable_Geese_Idle, $0C, $02, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_IDLE
@@ -883,29 +883,29 @@ MoveAnimTbl_Geese:
 	mMvAnDef OBJLstPtrTable_Geese_RagingStormS, $18, $14, $1C, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ; BANK $07 ; MOVE_GEESE_RAGING_STORM_D
 	mMvAnDef OBJLstPtrTable_Geese_Idle, $18, $01, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ;X ; BANK $07 ; MOVE_GEESE_SUPER_1_S
 	mMvAnDef OBJLstPtrTable_Geese_Idle, $18, $01, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ;X ; BANK $07 ; MOVE_GEESE_SUPER_1_D
-	mMvAnDef OBJLstPtrTable_Geese_ThrowG, $14, $0A, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_G
-	mMvAnDef OBJLstPtrTable_Geese_Idle, $00, $00, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_GRAB_A
+	mMvAnDef OBJLstPtrTable_Geese_ThrowG, $14, $0A, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_THROW_G
+	mMvAnDef OBJLstPtrTable_Geese_Idle, $00, $00, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_Geese_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_POST_BLOCKSTUN
 	mMvAnDef OBJLstPtrTable_Geese_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GUARDBREAK_G
 	mMvAnDef OBJLstPtrTable_Geese_GuardBreakA, $04, $FF, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_GUARDBREAK_A
 	mMvAnDef OBJLstPtrTable_Geese_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT0MID
 	mMvAnDef OBJLstPtrTable_Geese_TimeOver, $00, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT1MID
-	mMvAnDef OBJLstPtrTable_Geese_Hitlow, $00, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HITLOW
-	mMvAnDef OBJLstPtrTable_Geese_DropMain, $10, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB
-	mMvAnDef OBJLstPtrTable_Geese_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_DB_SHAKE
-	mMvAnDef OBJLstPtrTable_Geese_DropDbg, $00, $00, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GROUND_SHAKE
+	mMvAnDef OBJLstPtrTable_Geese_HitLow, $00, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HITLOW
+	mMvAnDef OBJLstPtrTable_Geese_LaunchUB, $10, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB
+	mMvAnDef OBJLstPtrTable_Geese_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_DB_SHAKE
+	mMvAnDef OBJLstPtrTable_Geese_HitSweep, $00, $00, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GROUND_SHAKE
 	mMvAnDef OBJLstPtrTable_Geese_HitSwoopup, $18, $00, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_LAUNCH_SWOOPUP
-	mMvAnDef OBJLstPtrTable_Geese_DropDbg, $08, $02, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_SWEEP
-	mMvAnDef OBJLstPtrTable_Geese_BackjumpRecA, $18, $02, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB_REC
+	mMvAnDef OBJLstPtrTable_Geese_HitSweep, $08, $02, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_SWEEP
+	mMvAnDef OBJLstPtrTable_Geese_LaunchUBRec, $18, $02, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB_REC
 	mMvAnDef OBJLstPtrTable_Geese_GuardBreakG, $00, $14, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_MULTIMID0
 	mMvAnDef OBJLstPtrTable_Geese_TimeOver, $00, $14, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_MULTIMID1
-	mMvAnDef OBJLstPtrTable_Geese_HitMultigs, $04, $00, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_MULTIGS
-	mMvAnDef OBJLstPtrTable_Geese_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB_SHAKE
+	mMvAnDef OBJLstPtrTable_Geese_HitMultiGS, $04, $00, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_MULTIGS
+	mMvAnDef OBJLstPtrTable_Geese_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB_SHAKE
 	mMvAnDef OBJLstPtrTable_Geese_TimeOver, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_START
 	mMvAnDef OBJLstPtrTable_Geese_TimeOver, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTU
-	mMvAnDef OBJLstPtrTable_Geese_ThrowRotL, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTL
-	mMvAnDef OBJLstPtrTable_Geese_ThrowEndA, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTD
-	mMvAnDef OBJLstPtrTable_Geese_HitMultigs, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTR
+	mMvAnDef OBJLstPtrTable_Geese_GrabRotL, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTL
+	mMvAnDef OBJLstPtrTable_Geese_LaunchUBShake, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTD
+	mMvAnDef OBJLstPtrTable_Geese_HitMultiGS, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTR
 MoveAnimTbl_Krauser:
 	db $4C, $00, $00, $00, $00, $00, $00, $00 ;X ; MOVE_SHARED_NONE
 	mMvAnDef OBJLstPtrTable_Krauser_Idle, $0C, $02, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_IDLE
@@ -961,29 +961,29 @@ MoveAnimTbl_Krauser:
 	mMvAnDef OBJLstPtrTable_Krauser_KaiserWaveS, $18, $03, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ; BANK $09 ; MOVE_KRAUSER_KAISER_WAVE_D
 	mMvAnDef OBJLstPtrTable_Krauser_Idle, $18, $01, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ;X ; BANK $09 ; MOVE_KRAUSER_SUPER_1_S
 	mMvAnDef OBJLstPtrTable_Krauser_Idle, $18, $01, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ;X ; BANK $09 ; MOVE_KRAUSER_SUPER_1_D
-	mMvAnDef OBJLstPtrTable_Krauser_ThrowG, $14, $0A, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_G
-	mMvAnDef OBJLstPtrTable_Krauser_Idle, $00, $00, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_GRAB_A
+	mMvAnDef OBJLstPtrTable_Krauser_ThrowG, $14, $0A, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_THROW_G
+	mMvAnDef OBJLstPtrTable_Krauser_Idle, $00, $00, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_Krauser_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_POST_BLOCKSTUN
 	mMvAnDef OBJLstPtrTable_Krauser_GuardBreakG, $00, $05, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_GUARDBREAK_G
 	mMvAnDef OBJLstPtrTable_Krauser_GuardBreakA, $04, $FF, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_GUARDBREAK_A
 	mMvAnDef OBJLstPtrTable_Krauser_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT0MID
 	mMvAnDef OBJLstPtrTable_Krauser_TimeOver, $00, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT1MID
-	mMvAnDef OBJLstPtrTable_Krauser_Hitlow, $00, $05, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_HITLOW
-	mMvAnDef OBJLstPtrTable_Krauser_DropMain, $10, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB
-	mMvAnDef OBJLstPtrTable_Krauser_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_DB_SHAKE
-	mMvAnDef OBJLstPtrTable_Krauser_DropDbg, $00, $00, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GROUND_SHAKE
+	mMvAnDef OBJLstPtrTable_Krauser_HitLow, $00, $05, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_HITLOW
+	mMvAnDef OBJLstPtrTable_Krauser_LaunchUB, $10, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB
+	mMvAnDef OBJLstPtrTable_Krauser_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_DB_SHAKE
+	mMvAnDef OBJLstPtrTable_Krauser_HitSweep, $00, $00, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GROUND_SHAKE
 	mMvAnDef OBJLstPtrTable_Krauser_HitSwoopup, $18, $00, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_SWOOPUP
-	mMvAnDef OBJLstPtrTable_Krauser_DropDbg, $08, $02, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_SWEEP
-	mMvAnDef OBJLstPtrTable_Krauser_BackjumpRecA, $18, $02, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB_REC
+	mMvAnDef OBJLstPtrTable_Krauser_HitSweep, $08, $02, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_SWEEP
+	mMvAnDef OBJLstPtrTable_Krauser_LaunchUBRec, $18, $02, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB_REC
 	mMvAnDef OBJLstPtrTable_Krauser_GuardBreakG, $00, $14, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_MULTIMID0
 	mMvAnDef OBJLstPtrTable_Krauser_TimeOver, $00, $14, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_MULTIMID1
-	mMvAnDef OBJLstPtrTable_Krauser_HitMultigs, $04, $00, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_MULTIGS
-	mMvAnDef OBJLstPtrTable_Krauser_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB_SHAKE
+	mMvAnDef OBJLstPtrTable_Krauser_HitMultiGS, $04, $00, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_MULTIGS
+	mMvAnDef OBJLstPtrTable_Krauser_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB_SHAKE
 	mMvAnDef OBJLstPtrTable_Krauser_TimeOver, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_START
 	mMvAnDef OBJLstPtrTable_Krauser_TimeOver, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTU
-	mMvAnDef OBJLstPtrTable_Krauser_ThrowRotL, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTL
-	mMvAnDef OBJLstPtrTable_Krauser_ThrowEndA, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTD
-	mMvAnDef OBJLstPtrTable_Krauser_HitMultigs, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTR
+	mMvAnDef OBJLstPtrTable_Krauser_GrabRotL, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTL
+	mMvAnDef OBJLstPtrTable_Krauser_LaunchUBShake, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTD
+	mMvAnDef OBJLstPtrTable_Krauser_HitMultiGS, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTR
 MoveAnimTbl_MrBig:
 	db $4C, $00, $00, $00, $00, $00, $00, $00 ;X ; MOVE_SHARED_NONE
 	mMvAnDef OBJLstPtrTable_MrBig_Idle, $0C, $06, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_IDLE
@@ -1039,29 +1039,29 @@ MoveAnimTbl_MrBig:
 	mMvAnDef OBJLstPtrTable_MrBig_BlasterWaveS, $18, $01, $02, HITTYPE_LAUNCH_HIGH_UB, PF3_CONTHIT|PF3_SUPERALT|PF3_LIGHTHIT ; BANK $07 ; MOVE_MRBIG_BLASTER_WAVE_D
 	mMvAnDef OBJLstPtrTable_MrBig_Idle, $18, $01, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ;X ; BANK $07 ; MOVE_MRBIG_SUPER_1_S
 	mMvAnDef OBJLstPtrTable_MrBig_Idle, $18, $01, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ;X ; BANK $07 ; MOVE_MRBIG_SUPER_1_D
-	mMvAnDef OBJLstPtrTable_MrBig_ThrowG, $14, $0A, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_G
-	mMvAnDef OBJLstPtrTable_MrBig_Idle, $00, $00, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_GRAB_A
+	mMvAnDef OBJLstPtrTable_MrBig_ThrowG, $14, $0A, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_THROW_G
+	mMvAnDef OBJLstPtrTable_MrBig_Idle, $00, $00, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_MrBig_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_POST_BLOCKSTUN
 	mMvAnDef OBJLstPtrTable_MrBig_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GUARDBREAK_G
 	mMvAnDef OBJLstPtrTable_MrBig_GuardBreakA, $04, $FF, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_GUARDBREAK_A
 	mMvAnDef OBJLstPtrTable_MrBig_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT0MID
 	mMvAnDef OBJLstPtrTable_MrBig_TimeOver, $00, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT1MID
-	mMvAnDef OBJLstPtrTable_MrBig_Hitlow, $00, $05, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_HITLOW
-	mMvAnDef OBJLstPtrTable_MrBig_DropMain, $10, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB
-	mMvAnDef OBJLstPtrTable_MrBig_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_DB_SHAKE
-	mMvAnDef OBJLstPtrTable_MrBig_DropDbg, $00, $00, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GROUND_SHAKE
+	mMvAnDef OBJLstPtrTable_MrBig_HitLow, $00, $05, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_HITLOW
+	mMvAnDef OBJLstPtrTable_MrBig_LaunchUB, $10, $05, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB
+	mMvAnDef OBJLstPtrTable_MrBig_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_DB_SHAKE
+	mMvAnDef OBJLstPtrTable_MrBig_HitSweep, $00, $00, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GROUND_SHAKE
 	mMvAnDef OBJLstPtrTable_MrBig_HitSwoopup, $18, $00, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_SWOOPUP
-	mMvAnDef OBJLstPtrTable_MrBig_DropDbg, $08, $02, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_SWEEP
-	mMvAnDef OBJLstPtrTable_MrBig_BackjumpRecA, $18, $02, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_LAUNCH_UB_REC
+	mMvAnDef OBJLstPtrTable_MrBig_HitSweep, $08, $02, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_SWEEP
+	mMvAnDef OBJLstPtrTable_MrBig_LaunchUBRec, $18, $02, $00, $00, $00 ;X ; BANK $07 ; MOVE_SHARED_LAUNCH_UB_REC
 	mMvAnDef OBJLstPtrTable_MrBig_GuardBreakG, $00, $14, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_MULTIMID0
 	mMvAnDef OBJLstPtrTable_MrBig_TimeOver, $00, $14, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_MULTIMID1
-	mMvAnDef OBJLstPtrTable_MrBig_HitMultigs, $04, $00, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_MULTIGS
-	mMvAnDef OBJLstPtrTable_MrBig_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB_SHAKE
+	mMvAnDef OBJLstPtrTable_MrBig_HitMultiGS, $04, $00, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_HIT_MULTIGS
+	mMvAnDef OBJLstPtrTable_MrBig_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_LAUNCH_UB_SHAKE
 	mMvAnDef OBJLstPtrTable_MrBig_TimeOver, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_START
 	mMvAnDef OBJLstPtrTable_MrBig_TimeOver, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTU
-	mMvAnDef OBJLstPtrTable_MrBig_ThrowRotL, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTL
-	mMvAnDef OBJLstPtrTable_MrBig_ThrowEndA, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTD
-	mMvAnDef OBJLstPtrTable_MrBig_HitMultigs, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTR
+	mMvAnDef OBJLstPtrTable_MrBig_GrabRotL, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTL
+	mMvAnDef OBJLstPtrTable_MrBig_LaunchUBShake, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTD
+	mMvAnDef OBJLstPtrTable_MrBig_HitMultiGS, $00, $3C, $00, $00, $00 ; BANK $07 ; MOVE_SHARED_GRAB_ROTR
 MoveAnimTbl_Iori:
 	db $4C, $00, $00, $00, $00, $00, $00, $00 ;X ; MOVE_SHARED_NONE
 	mMvAnDef OBJLstPtrTable_Iori_Idle, $0C, $06, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_IDLE
@@ -1117,29 +1117,29 @@ MoveAnimTbl_Iori:
 	mMvAnDef OBJLstPtrTable_Iori_KinYaOtomeD, $48, $0C, $09, HITTYPE_HIT_MULTI0, PF3_HEAVYHIT|PF3_CONTHIT ; BANK $05 ; MOVE_IORI_KIN_YA_OTOME_D
 	mMvAnDef OBJLstPtrTable_Iori_Idle, $48, $0C, $09, HITTYPE_HIT_MULTI0, PF3_HEAVYHIT|PF3_CONTHIT ;X ; BANK $05 ; MOVE_OIORI_KIN_YA_OTOME_S
 	mMvAnDef OBJLstPtrTable_Iori_Idle, $48, $0C, $09, HITTYPE_HIT_MULTI0, PF3_HEAVYHIT|PF3_CONTHIT ;X ; BANK $05 ; MOVE_OIORI_KIN_YA_OTOME_D
-	mMvAnDef OBJLstPtrTable_Iori_ThrowG, $0C, $0A, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_G
-	mMvAnDef OBJLstPtrTable_Iori_Idle, $00, $00, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_GRAB_A
+	mMvAnDef OBJLstPtrTable_Iori_ThrowG, $0C, $0A, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_THROW_G
+	mMvAnDef OBJLstPtrTable_Iori_Idle, $00, $00, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_Iori_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_POST_BLOCKSTUN
 	mMvAnDef OBJLstPtrTable_Iori_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GUARDBREAK_G
 	mMvAnDef OBJLstPtrTable_Iori_GuardBreakA, $04, $FF, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_GUARDBREAK_A
 	mMvAnDef OBJLstPtrTable_Iori_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT0MID
 	mMvAnDef OBJLstPtrTable_Iori_Hit1mid, $00, $05, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT1MID
-	mMvAnDef OBJLstPtrTable_Iori_Hitlow, $00, $05, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_HITLOW
-	mMvAnDef OBJLstPtrTable_Iori_DropMain, $10, $05, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_UB
-	mMvAnDef OBJLstPtrTable_Iori_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_DB_SHAKE
-	mMvAnDef OBJLstPtrTable_Iori_DropDbg, $00, $00, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GROUND_SHAKE
+	mMvAnDef OBJLstPtrTable_Iori_HitLow, $00, $05, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_HITLOW
+	mMvAnDef OBJLstPtrTable_Iori_LaunchUB, $10, $05, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_UB
+	mMvAnDef OBJLstPtrTable_Iori_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_DB_SHAKE
+	mMvAnDef OBJLstPtrTable_Iori_HitSweep, $00, $00, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GROUND_SHAKE
 	mMvAnDef OBJLstPtrTable_Iori_HitSwoopup, $18, $00, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_SWOOPUP
-	mMvAnDef OBJLstPtrTable_Iori_DropDbg, $08, $02, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT_SWEEP
-	mMvAnDef OBJLstPtrTable_Iori_BackjumpRecA, $18, $02, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_UB_REC
+	mMvAnDef OBJLstPtrTable_Iori_HitSweep, $08, $02, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT_SWEEP
+	mMvAnDef OBJLstPtrTable_Iori_LaunchUBRec, $18, $02, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_UB_REC
 	mMvAnDef OBJLstPtrTable_Iori_GuardBreakG, $00, $14, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT_MULTIMID0
 	mMvAnDef OBJLstPtrTable_Iori_Hit1mid, $00, $14, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT_MULTIMID1
-	mMvAnDef OBJLstPtrTable_Iori_HitMultigs, $04, $00, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT_MULTIGS
-	mMvAnDef OBJLstPtrTable_Iori_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_UB_SHAKE
+	mMvAnDef OBJLstPtrTable_Iori_HitMultiGS, $04, $00, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT_MULTIGS
+	mMvAnDef OBJLstPtrTable_Iori_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_UB_SHAKE
 	mMvAnDef OBJLstPtrTable_Iori_Hit1mid, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_START
 	mMvAnDef OBJLstPtrTable_Iori_Hit1mid, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_ROTU
-	mMvAnDef OBJLstPtrTable_Iori_ThrowRotL, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_ROTL
-	mMvAnDef OBJLstPtrTable_Iori_ThrowEndA, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_ROTD
-	mMvAnDef OBJLstPtrTable_Iori_HitMultigs, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_ROTR
+	mMvAnDef OBJLstPtrTable_Iori_GrabRotL, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_ROTL
+	mMvAnDef OBJLstPtrTable_Iori_LaunchUBShake, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_ROTD
+	mMvAnDef OBJLstPtrTable_Iori_HitMultiGS, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_ROTR
 MoveAnimTbl_Mature:
 	db $4C, $00, $00, $00, $00, $00, $00, $00 ;X ; MOVE_SHARED_NONE
 	mMvAnDef OBJLstPtrTable_Mature_Idle, $08, $06, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_IDLE
@@ -1195,29 +1195,29 @@ MoveAnimTbl_Mature:
 	mMvAnDef OBJLstPtrTable_Mature_HeavensGateS, $18, $04, $01, HITTYPE_HIT_MULTI1, PF3_HEAVYHIT ; BANK $09 ; MOVE_MATURE_HEAVENS_GATE_D
 	mMvAnDef OBJLstPtrTable_Mature_Idle, $18, $01, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ;X ; BANK $09 ; MOVE_MATURE_SUPER_1_S
 	mMvAnDef OBJLstPtrTable_Mature_Idle, $18, $01, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ;X ; BANK $09 ; MOVE_MATURE_SUPER_1_D
-	mMvAnDef OBJLstPtrTable_Mature_ThrowG, $14, $0A, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_G
-	mMvAnDef OBJLstPtrTable_Mature_Idle, $00, $00, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_GRAB_A
+	mMvAnDef OBJLstPtrTable_Mature_ThrowG, $14, $0A, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_THROW_G
+	mMvAnDef OBJLstPtrTable_Mature_Idle, $00, $00, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_Mature_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_POST_BLOCKSTUN
 	mMvAnDef OBJLstPtrTable_Mature_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GUARDBREAK_G
 	mMvAnDef OBJLstPtrTable_Mature_GuardBreakA, $04, $FF, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_GUARDBREAK_A
 	mMvAnDef OBJLstPtrTable_Mature_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT0MID
 	mMvAnDef OBJLstPtrTable_Mature_TimeOver, $00, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT1MID
-	mMvAnDef OBJLstPtrTable_Mature_Hitlow, $00, $05, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_HITLOW
-	mMvAnDef OBJLstPtrTable_Mature_DropMain, $10, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB
-	mMvAnDef OBJLstPtrTable_Mature_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_DB_SHAKE
-	mMvAnDef OBJLstPtrTable_Mature_DropDbg, $00, $00, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GROUND_SHAKE
+	mMvAnDef OBJLstPtrTable_Mature_HitLow, $00, $05, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_HITLOW
+	mMvAnDef OBJLstPtrTable_Mature_LaunchUB, $10, $05, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB
+	mMvAnDef OBJLstPtrTable_Mature_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_DB_SHAKE
+	mMvAnDef OBJLstPtrTable_Mature_HitSweep, $00, $00, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GROUND_SHAKE
 	mMvAnDef OBJLstPtrTable_Mature_HitSwoopup, $18, $00, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_SWOOPUP
-	mMvAnDef OBJLstPtrTable_Mature_DropDbg, $08, $02, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_SWEEP
-	mMvAnDef OBJLstPtrTable_Mature_BackjumpRecA, $18, $02, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB_REC
+	mMvAnDef OBJLstPtrTable_Mature_HitSweep, $08, $02, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_SWEEP
+	mMvAnDef OBJLstPtrTable_Mature_LaunchUBRec, $18, $02, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB_REC
 	mMvAnDef OBJLstPtrTable_Mature_GuardBreakG, $00, $14, $00, $00, $00 ;X ; BANK $09 ; MOVE_SHARED_HIT_MULTIMID0
 	mMvAnDef OBJLstPtrTable_Mature_TimeOver, $00, $14, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_MULTIMID1
-	mMvAnDef OBJLstPtrTable_Mature_HitMultigs, $04, $00, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_MULTIGS
-	mMvAnDef OBJLstPtrTable_Mature_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB_SHAKE
+	mMvAnDef OBJLstPtrTable_Mature_HitMultiGS, $04, $00, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_HIT_MULTIGS
+	mMvAnDef OBJLstPtrTable_Mature_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_LAUNCH_UB_SHAKE
 	mMvAnDef OBJLstPtrTable_Mature_TimeOver, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_START
 	mMvAnDef OBJLstPtrTable_Mature_TimeOver, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTU
-	mMvAnDef OBJLstPtrTable_Mature_ThrowRotL, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTL
-	mMvAnDef OBJLstPtrTable_Mature_ThrowEndA, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTD
-	mMvAnDef OBJLstPtrTable_Mature_HitMultigs, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTR
+	mMvAnDef OBJLstPtrTable_Mature_GrabRotL, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTL
+	mMvAnDef OBJLstPtrTable_Mature_LaunchUBShake, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTD
+	mMvAnDef OBJLstPtrTable_Mature_HitMultiGS, $00, $3C, $00, $00, $00 ; BANK $09 ; MOVE_SHARED_GRAB_ROTR
 MoveAnimTbl_Chizuru:
 	db $4C, $00, $00, $00, $00, $00, $00, $00 ;X ; MOVE_SHARED_NONE
 	mMvAnDef OBJLstPtrTable_Chizuru_Idle, $0C, $02, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_IDLE
@@ -1273,29 +1273,29 @@ MoveAnimTbl_Chizuru:
 	mMvAnDef OBJLstPtrTable_Chizuru_SanRaiFuiJinS, $00, $02, $0A, HITTYPE_HIT_MID1, PF3_HEAVYHIT|PF3_SUPERALT ; BANK $05 ; MOVE_CHIZURU_SAN_RAI_FUI_JIN_D
 	mMvAnDef OBJLstPtrTable_Chizuru_ReigiIshizueS, $40, $01, $03, HITTYPE_HIT_MID0, PF3_CONTHIT ; BANK $05 ; MOVE_CHIZURU_REIGI_ISHIZUE_S
 	mMvAnDef OBJLstPtrTable_Chizuru_ReigiIshizueS, $40, $01, $01, HITTYPE_HIT_MID0, PF3_CONTHIT ; BANK $05 ; MOVE_CHIZURU_REIGI_ISHIZUE_D
-	mMvAnDef OBJLstPtrTable_Chizuru_ThrowG, $18, $0A, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_G
-	mMvAnDef OBJLstPtrTable_Chizuru_Idle, $00, $00, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_GRAB_A
+	mMvAnDef OBJLstPtrTable_Chizuru_ThrowG, $18, $0A, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_THROW_G
+	mMvAnDef OBJLstPtrTable_Chizuru_Idle, $00, $00, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_Chizuru_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_POST_BLOCKSTUN
 	mMvAnDef OBJLstPtrTable_Chizuru_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GUARDBREAK_G
 	mMvAnDef OBJLstPtrTable_Chizuru_GuardBreakA, $04, $FF, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_GUARDBREAK_A
 	mMvAnDef OBJLstPtrTable_Chizuru_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT0MID
 	mMvAnDef OBJLstPtrTable_Chizuru_Hit1mid, $00, $05, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT1MID
-	mMvAnDef OBJLstPtrTable_Chizuru_Hitlow, $00, $05, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_HITLOW
-	mMvAnDef OBJLstPtrTable_Chizuru_DropMain, $10, $05, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_UB
-	mMvAnDef OBJLstPtrTable_Chizuru_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_DB_SHAKE
-	mMvAnDef OBJLstPtrTable_Chizuru_DropDbg, $00, $00, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GROUND_SHAKE
+	mMvAnDef OBJLstPtrTable_Chizuru_HitLow, $00, $05, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_HITLOW
+	mMvAnDef OBJLstPtrTable_Chizuru_LaunchUB, $10, $05, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_UB
+	mMvAnDef OBJLstPtrTable_Chizuru_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_DB_SHAKE
+	mMvAnDef OBJLstPtrTable_Chizuru_HitSweep, $00, $00, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GROUND_SHAKE
 	mMvAnDef OBJLstPtrTable_Chizuru_HitSwoopup, $18, $00, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_SWOOPUP
-	mMvAnDef OBJLstPtrTable_Chizuru_DropDbg, $08, $02, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT_SWEEP
-	mMvAnDef OBJLstPtrTable_Chizuru_BackjumpRecA, $18, $02, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_UB_REC
+	mMvAnDef OBJLstPtrTable_Chizuru_HitSweep, $08, $02, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT_SWEEP
+	mMvAnDef OBJLstPtrTable_Chizuru_LaunchUBRec, $18, $02, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_UB_REC
 	mMvAnDef OBJLstPtrTable_Chizuru_GuardBreakG, $00, $14, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT_MULTIMID0
 	mMvAnDef OBJLstPtrTable_Chizuru_Hit1mid, $00, $14, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT_MULTIMID1
-	mMvAnDef OBJLstPtrTable_Chizuru_HitMultigs, $04, $00, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT_MULTIGS
-	mMvAnDef OBJLstPtrTable_Chizuru_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_UB_SHAKE
+	mMvAnDef OBJLstPtrTable_Chizuru_HitMultiGS, $04, $00, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT_MULTIGS
+	mMvAnDef OBJLstPtrTable_Chizuru_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_UB_SHAKE
 	mMvAnDef OBJLstPtrTable_Chizuru_Hit1mid, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_START
 	mMvAnDef OBJLstPtrTable_Chizuru_Hit1mid, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_ROTU
-	mMvAnDef OBJLstPtrTable_Chizuru_ThrowRotL, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_ROTL
-	mMvAnDef OBJLstPtrTable_Chizuru_ThrowEndA, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_ROTD
-	mMvAnDef OBJLstPtrTable_Chizuru_HitMultigs, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_ROTR
+	mMvAnDef OBJLstPtrTable_Chizuru_GrabRotL, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_ROTL
+	mMvAnDef OBJLstPtrTable_Chizuru_LaunchUBShake, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_ROTD
+	mMvAnDef OBJLstPtrTable_Chizuru_HitMultiGS, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_ROTR
 MoveAnimTbl_Kagura:
 	db $4C, $00, $00, $00, $00, $00, $00, $00 ;X ; MOVE_SHARED_NONE
 	mMvAnDef OBJLstPtrTable_Chizuru_Idle, $0C, $02, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_IDLE
@@ -1351,29 +1351,29 @@ MoveAnimTbl_Kagura:
 	mMvAnDef OBJLstPtrTable_Chizuru_SanRaiFuiJinS, $00, $02, $0A, HITTYPE_HIT_MID1, PF3_HEAVYHIT|PF3_FIRE ; BANK $05 ; MOVE_CHIZURU_SAN_RAI_FUI_JIN_D
 	mMvAnDef OBJLstPtrTable_Chizuru_ReigiIshizueS, $40, $01, $03, HITTYPE_HIT_MID0, PF3_CONTHIT ; BANK $05 ; MOVE_CHIZURU_REIGI_ISHIZUE_S
 	mMvAnDef OBJLstPtrTable_Chizuru_ReigiIshizueS, $40, $01, $01, HITTYPE_HIT_MID0, PF3_CONTHIT ; BANK $05 ; MOVE_CHIZURU_REIGI_ISHIZUE_D
-	mMvAnDef OBJLstPtrTable_Chizuru_ThrowG, $18, $0A, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_G
-	mMvAnDef OBJLstPtrTable_Chizuru_Idle, $00, $00, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_GRAB_A
+	mMvAnDef OBJLstPtrTable_Chizuru_ThrowG, $18, $0A, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_THROW_G
+	mMvAnDef OBJLstPtrTable_Chizuru_Idle, $00, $00, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_Chizuru_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_POST_BLOCKSTUN
 	mMvAnDef OBJLstPtrTable_Chizuru_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GUARDBREAK_G
 	mMvAnDef OBJLstPtrTable_Chizuru_GuardBreakA, $04, $FF, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_GUARDBREAK_A
 	mMvAnDef OBJLstPtrTable_Chizuru_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT0MID
 	mMvAnDef OBJLstPtrTable_Chizuru_Hit1mid, $00, $05, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT1MID
-	mMvAnDef OBJLstPtrTable_Chizuru_Hitlow, $00, $05, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_HITLOW
-	mMvAnDef OBJLstPtrTable_Chizuru_DropMain, $10, $05, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_UB
-	mMvAnDef OBJLstPtrTable_Chizuru_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_DB_SHAKE
-	mMvAnDef OBJLstPtrTable_Chizuru_DropDbg, $00, $00, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_GROUND_SHAKE
+	mMvAnDef OBJLstPtrTable_Chizuru_HitLow, $00, $05, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_HITLOW
+	mMvAnDef OBJLstPtrTable_Chizuru_LaunchUB, $10, $05, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_UB
+	mMvAnDef OBJLstPtrTable_Chizuru_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_DB_SHAKE
+	mMvAnDef OBJLstPtrTable_Chizuru_HitSweep, $00, $00, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_GROUND_SHAKE
 	mMvAnDef OBJLstPtrTable_Chizuru_HitSwoopup, $18, $00, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_SWOOPUP
-	mMvAnDef OBJLstPtrTable_Chizuru_DropDbg, $08, $02, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT_SWEEP
-	mMvAnDef OBJLstPtrTable_Chizuru_BackjumpRecA, $18, $02, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_LAUNCH_UB_REC
+	mMvAnDef OBJLstPtrTable_Chizuru_HitSweep, $08, $02, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT_SWEEP
+	mMvAnDef OBJLstPtrTable_Chizuru_LaunchUBRec, $18, $02, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_LAUNCH_UB_REC
 	mMvAnDef OBJLstPtrTable_Chizuru_GuardBreakG, $00, $14, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT_MULTIMID0
 	mMvAnDef OBJLstPtrTable_Chizuru_Hit1mid, $00, $14, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT_MULTIMID1
-	mMvAnDef OBJLstPtrTable_Chizuru_HitMultigs, $04, $00, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT_MULTIGS
-	mMvAnDef OBJLstPtrTable_Chizuru_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_UB_SHAKE
+	mMvAnDef OBJLstPtrTable_Chizuru_HitMultiGS, $04, $00, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT_MULTIGS
+	mMvAnDef OBJLstPtrTable_Chizuru_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_UB_SHAKE
 	mMvAnDef OBJLstPtrTable_Chizuru_Hit1mid, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_START
 	mMvAnDef OBJLstPtrTable_Chizuru_Hit1mid, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_ROTU
-	mMvAnDef OBJLstPtrTable_Chizuru_ThrowRotL, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_ROTL
-	mMvAnDef OBJLstPtrTable_Chizuru_ThrowEndA, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_ROTD
-	mMvAnDef OBJLstPtrTable_Chizuru_HitMultigs, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_ROTR
+	mMvAnDef OBJLstPtrTable_Chizuru_GrabRotL, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_ROTL
+	mMvAnDef OBJLstPtrTable_Chizuru_LaunchUBShake, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_ROTD
+	mMvAnDef OBJLstPtrTable_Chizuru_HitMultiGS, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_ROTR
 MoveAnimTbl_Goenitz:
 	db $4C, $00, $00, $00, $00, $00, $00, $00 ;X ; MOVE_SHARED_NONE
 	mMvAnDef OBJLstPtrTable_Goenitz_Idle, $0C, $02, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_IDLE
@@ -1429,29 +1429,29 @@ MoveAnimTbl_Goenitz:
 	mMvAnDef OBJLstPtrTable_Goenitz_ShinyaotomeMizuchiSh, $18, $01, $09, HITTYPE_HIT_MULTI0, PF3_HEAVYHIT|PF3_CONTHIT ; BANK $08 ; MOVE_GOENITZ_SHINYAOTOME_MIZUCHI_SH
 	mMvAnDef OBJLstPtrTable_Goenitz_ShinyaotomeJissoukokuDl, $18, $01, $09, HITTYPE_HIT_MULTI1, PF3_HEAVYHIT|PF3_CONTHIT ; BANK $08 ; MOVE_GOENITZ_SHINYAOTOME_JISSOUKOKU_DL
 	mMvAnDef OBJLstPtrTable_Goenitz_ShinyaotomeJissoukokuDh, $18, $01, $09, HITTYPE_HIT_MULTI0, PF3_HEAVYHIT|PF3_CONTHIT ; BANK $08 ; MOVE_GOENITZ_SHINYAOTOME_JISSOUKOKU_DH
-	mMvAnDef OBJLstPtrTable_Goenitz_ShinyaotomeThrowL, $14, $0A, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_G
-	mMvAnDef OBJLstPtrTable_Goenitz_Idle, $00, $00, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_GRAB_A
+	mMvAnDef OBJLstPtrTable_Goenitz_ShinyaotomeThrowL, $14, $0A, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_THROW_G
+	mMvAnDef OBJLstPtrTable_Goenitz_Idle, $00, $00, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_Goenitz_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_POST_BLOCKSTUN
 	mMvAnDef OBJLstPtrTable_Goenitz_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GUARDBREAK_G
 	mMvAnDef OBJLstPtrTable_Goenitz_GuardBreakA, $04, $FF, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_GUARDBREAK_A
 	mMvAnDef OBJLstPtrTable_Goenitz_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT0MID
 	mMvAnDef OBJLstPtrTable_Goenitz_TimeOver, $00, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT1MID
-	mMvAnDef OBJLstPtrTable_Goenitz_Hitlow, $00, $05, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_HITLOW
-	mMvAnDef OBJLstPtrTable_Goenitz_DropMain, $10, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB
-	mMvAnDef OBJLstPtrTable_Goenitz_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_DB_SHAKE
-	mMvAnDef OBJLstPtrTable_Goenitz_DropDbg, $00, $00, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GROUND_SHAKE
+	mMvAnDef OBJLstPtrTable_Goenitz_HitLow, $00, $05, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_HITLOW
+	mMvAnDef OBJLstPtrTable_Goenitz_LaunchUB, $10, $05, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB
+	mMvAnDef OBJLstPtrTable_Goenitz_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_DB_SHAKE
+	mMvAnDef OBJLstPtrTable_Goenitz_HitSweep, $00, $00, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GROUND_SHAKE
 	mMvAnDef OBJLstPtrTable_Goenitz_HitSwoopup, $18, $00, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_SWOOPUP
-	mMvAnDef OBJLstPtrTable_Goenitz_DropDbg, $08, $02, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_HIT_SWEEP
-	mMvAnDef OBJLstPtrTable_Goenitz_BackjumpRecA, $18, $02, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB_REC
+	mMvAnDef OBJLstPtrTable_Goenitz_HitSweep, $08, $02, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_HIT_SWEEP
+	mMvAnDef OBJLstPtrTable_Goenitz_LaunchUBRec, $18, $02, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB_REC
 	mMvAnDef OBJLstPtrTable_Goenitz_GuardBreakG, $00, $14, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_MULTIMID0
 	mMvAnDef OBJLstPtrTable_Goenitz_TimeOver, $00, $14, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_MULTIMID1
-	mMvAnDef OBJLstPtrTable_Goenitz_HitMultigs, $04, $00, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_MULTIGS
-	mMvAnDef OBJLstPtrTable_Goenitz_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB_SHAKE
+	mMvAnDef OBJLstPtrTable_Goenitz_HitMultiGS, $04, $00, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_HIT_MULTIGS
+	mMvAnDef OBJLstPtrTable_Goenitz_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_LAUNCH_UB_SHAKE
 	mMvAnDef OBJLstPtrTable_Goenitz_TimeOver, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_START
 	mMvAnDef OBJLstPtrTable_Goenitz_TimeOver, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTU
-	mMvAnDef OBJLstPtrTable_Goenitz_ThrowRotL, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTL
-	mMvAnDef OBJLstPtrTable_Goenitz_ThrowEndA, $00, $3C, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_GRAB_ROTD
-	mMvAnDef OBJLstPtrTable_Goenitz_HitMultigs, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTR
+	mMvAnDef OBJLstPtrTable_Goenitz_GrabRotL, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTL
+	mMvAnDef OBJLstPtrTable_Goenitz_LaunchUBShake, $00, $3C, $00, $00, $00 ;X ; BANK $08 ; MOVE_SHARED_GRAB_ROTD
+	mMvAnDef OBJLstPtrTable_Goenitz_HitMultiGS, $00, $3C, $00, $00, $00 ; BANK $08 ; MOVE_SHARED_GRAB_ROTR
 MoveAnimTbl_MrKarate:
 	db $4C, $00, $00, $00, $00, $00, $00, $00 ;X ; MOVE_SHARED_NONE
 	mMvAnDef OBJLstPtrTable_MrKarate_Idle, $0C, $02, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_IDLE
@@ -1512,29 +1512,29 @@ ENDC
 	mMvAnDef OBJLstPtrTable_MrKarate_RyukoRanbuUnusedD, $18, $01, $01, HITTYPE_HIT_MULTI1, PF3_HEAVYHIT|PF3_CONTHIT ;X ; BANK $0A ; MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D
 	mMvAnDef OBJLstPtrTable_MrKarate_HaohShoKohKenS, $18, $01, $10, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_HALFSPEED ; BANK $0A ; MOVE_MRKARATE_HAOH_SHO_KOH_KEN_S
 	mMvAnDef OBJLstPtrTable_MrKarate_HaohShoKohKenS, $18, $01, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ; BANK $0A ; MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D
-	mMvAnDef OBJLstPtrTable_MrKarate_ThrowG, $14, $0A, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_G
-	mMvAnDef OBJLstPtrTable_MrKarate_Idle, $00, $00, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_GRAB_A
+	mMvAnDef OBJLstPtrTable_MrKarate_ThrowG, $14, $0A, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_THROW_G
+	mMvAnDef OBJLstPtrTable_MrKarate_Idle, $00, $00, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_MrKarate_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_POST_BLOCKSTUN
 	mMvAnDef OBJLstPtrTable_MrKarate_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GUARDBREAK_G
 	mMvAnDef OBJLstPtrTable_MrKarate_GuardBreakA, $04, $FF, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_GUARDBREAK_A
 	mMvAnDef OBJLstPtrTable_MrKarate_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT0MID
 	mMvAnDef OBJLstPtrTable_MrKarate_TimeOver, $00, $05, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT1MID
-	mMvAnDef OBJLstPtrTable_MrKarate_Hitlow, $00, $05, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_HITLOW
-	mMvAnDef OBJLstPtrTable_MrKarate_DropMain, $10, $05, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB
-	mMvAnDef OBJLstPtrTable_MrKarate_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_DB_SHAKE
-	mMvAnDef OBJLstPtrTable_MrKarate_DropDbg, $00, $00, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GROUND_SHAKE
+	mMvAnDef OBJLstPtrTable_MrKarate_HitLow, $00, $05, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_HITLOW
+	mMvAnDef OBJLstPtrTable_MrKarate_LaunchUB, $10, $05, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB
+	mMvAnDef OBJLstPtrTable_MrKarate_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_DB_SHAKE
+	mMvAnDef OBJLstPtrTable_MrKarate_HitSweep, $00, $00, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GROUND_SHAKE
 	mMvAnDef OBJLstPtrTable_MrKarate_HitSwoopup, $18, $00, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_SWOOPUP
-	mMvAnDef OBJLstPtrTable_MrKarate_DropDbg, $08, $02, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT_SWEEP
-	mMvAnDef OBJLstPtrTable_MrKarate_BackjumpRecA, $18, $02, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB_REC
+	mMvAnDef OBJLstPtrTable_MrKarate_HitSweep, $08, $02, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT_SWEEP
+	mMvAnDef OBJLstPtrTable_MrKarate_LaunchUBRec, $18, $02, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB_REC
 	mMvAnDef OBJLstPtrTable_MrKarate_GuardBreakG, $00, $14, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT_MULTIMID0
 	mMvAnDef OBJLstPtrTable_MrKarate_TimeOver, $00, $14, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_HIT_MULTIMID1
-	mMvAnDef OBJLstPtrTable_MrKarate_HitMultigs, $04, $00, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_HIT_MULTIGS
-	mMvAnDef OBJLstPtrTable_MrKarate_ThrowEndA, $0C, $FF, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB_SHAKE
+	mMvAnDef OBJLstPtrTable_MrKarate_HitMultiGS, $04, $00, $00, $00, $00 ;X ; BANK $0A ; MOVE_SHARED_HIT_MULTIGS
+	mMvAnDef OBJLstPtrTable_MrKarate_LaunchUBShake, $0C, $FF, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_LAUNCH_UB_SHAKE
 	mMvAnDef OBJLstPtrTable_MrKarate_TimeOver, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_START
 	mMvAnDef OBJLstPtrTable_MrKarate_TimeOver, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTU
-	mMvAnDef OBJLstPtrTable_MrKarate_ThrowRotL, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTL
-	mMvAnDef OBJLstPtrTable_MrKarate_ThrowEndA, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTD
-	mMvAnDef OBJLstPtrTable_MrKarate_HitMultigs, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTR
+	mMvAnDef OBJLstPtrTable_MrKarate_GrabRotL, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTL
+	mMvAnDef OBJLstPtrTable_MrKarate_LaunchUBShake, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTD
+	mMvAnDef OBJLstPtrTable_MrKarate_HitMultiGS, $00, $3C, $00, $00, $00 ; BANK $0A ; MOVE_SHARED_GRAB_ROTR
 MoveAnimTbl_OIori:
 	db $4C, $00, $00, $00, $00, $00, $00, $00 ;X ; MOVE_SHARED_NONE
 	mMvAnDef OBJLstPtrTable_OIori_Idle, $0C, $06, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_IDLE
@@ -1590,29 +1590,29 @@ MoveAnimTbl_OIori:
 	mMvAnDef OBJLstPtrTable_Iori_KinYaOtomeD, $48, $0C, $09, HITTYPE_HIT_MULTI0, PF3_HEAVYHIT|PF3_CONTHIT ; BANK $05 ; MOVE_IORI_KIN_YA_OTOME_D
 	mMvAnDef OBJLstPtrTable_OIori_KinYaOtomeS, $48, $0C, $09, HITTYPE_HIT_MULTI0, PF3_HEAVYHIT|PF3_CONTHIT ; BANK $05 ; MOVE_OIORI_KIN_YA_OTOME_S
 	mMvAnDef OBJLstPtrTable_OIori_KinYaOtomeS, $48, $0C, $09, HITTYPE_HIT_MULTI0, PF3_HEAVYHIT|PF3_CONTHIT ; BANK $05 ; MOVE_OIORI_KIN_YA_OTOME_D
-	mMvAnDef OBJLstPtrTable_Iori_ThrowG, $0C, $0A, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_G
-	mMvAnDef OBJLstPtrTable_OIori_Idle, $00, $00, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_GRAB_A
+	mMvAnDef OBJLstPtrTable_Iori_ThrowG, $0C, $0A, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_THROW_G
+	mMvAnDef OBJLstPtrTable_OIori_Idle, $00, $00, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_THROW_A
 	mMvAnDef OBJLstPtrTable_Iori_BlockG, $00, $05, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_POST_BLOCKSTUN
 	mMvAnDef OBJLstPtrTable_Iori_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GUARDBREAK_G
 	mMvAnDef OBJLstPtrTable_Iori_GuardBreakA, $04, $FF, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_GUARDBREAK_A
 	mMvAnDef OBJLstPtrTable_Iori_GuardBreakG, $00, $05, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT0MID
 	mMvAnDef OBJLstPtrTable_Iori_Hit1mid, $00, $05, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT1MID
-	mMvAnDef OBJLstPtrTable_Iori_Hitlow, $00, $05, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_HITLOW
-	mMvAnDef OBJLstPtrTable_Iori_DropMain, $10, $05, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_UB
-	mMvAnDef OBJLstPtrTable_Iori_ThrowEndA, $0C, $FF, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_LAUNCH_DB_SHAKE
-	mMvAnDef OBJLstPtrTable_Iori_DropDbg, $00, $00, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_GROUND_SHAKE
+	mMvAnDef OBJLstPtrTable_Iori_HitLow, $00, $05, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_HITLOW
+	mMvAnDef OBJLstPtrTable_Iori_LaunchUB, $10, $05, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_LAUNCH_UB
+	mMvAnDef OBJLstPtrTable_Iori_LaunchUBShake, $0C, $FF, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_LAUNCH_DB_SHAKE
+	mMvAnDef OBJLstPtrTable_Iori_HitSweep, $00, $00, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_GROUND_SHAKE
 	mMvAnDef OBJLstPtrTable_Iori_HitSwoopup, $18, $00, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_LAUNCH_SWOOPUP
-	mMvAnDef OBJLstPtrTable_Iori_DropDbg, $08, $02, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_HIT_SWEEP
-	mMvAnDef OBJLstPtrTable_Iori_BackjumpRecA, $18, $02, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_LAUNCH_UB_REC
+	mMvAnDef OBJLstPtrTable_Iori_HitSweep, $08, $02, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_HIT_SWEEP
+	mMvAnDef OBJLstPtrTable_Iori_LaunchUBRec, $18, $02, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_LAUNCH_UB_REC
 	mMvAnDef OBJLstPtrTable_Iori_GuardBreakG, $00, $14, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT_MULTIMID0
 	mMvAnDef OBJLstPtrTable_Iori_Hit1mid, $00, $14, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_HIT_MULTIMID1
-	mMvAnDef OBJLstPtrTable_Iori_HitMultigs, $04, $00, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_HIT_MULTIGS
-	mMvAnDef OBJLstPtrTable_Iori_ThrowEndA, $0C, $FF, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_LAUNCH_UB_SHAKE
+	mMvAnDef OBJLstPtrTable_Iori_HitMultiGS, $04, $00, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_HIT_MULTIGS
+	mMvAnDef OBJLstPtrTable_Iori_LaunchUBShake, $0C, $FF, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_LAUNCH_UB_SHAKE
 	mMvAnDef OBJLstPtrTable_Iori_Hit1mid, $00, $3C, $00, $00, $00 ; BANK $05 ; MOVE_SHARED_GRAB_START
 	mMvAnDef OBJLstPtrTable_Iori_Hit1mid, $00, $3C, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_GRAB_ROTU
-	mMvAnDef OBJLstPtrTable_Iori_ThrowRotL, $00, $3C, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_GRAB_ROTL
-	mMvAnDef OBJLstPtrTable_Iori_ThrowEndA, $00, $3C, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_GRAB_ROTD
-	mMvAnDef OBJLstPtrTable_Iori_HitMultigs, $00, $3C, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_GRAB_ROTR
+	mMvAnDef OBJLstPtrTable_Iori_GrabRotL, $00, $3C, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_GRAB_ROTL
+	mMvAnDef OBJLstPtrTable_Iori_LaunchUBShake, $00, $3C, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_GRAB_ROTD
+	mMvAnDef OBJLstPtrTable_Iori_HitMultiGS, $00, $3C, $00, $00, $00 ;X ; BANK $05 ; MOVE_SHARED_GRAB_ROTR
 
 ; =============== MoveCodePtrTbl_* ===============
 ; Code pointers assigned to every move.
@@ -1708,8 +1708,8 @@ MoveCodePtrTbl_Kyo:
 	mMvCodeDef MoveC_Kyo_UraOrochiNagi ; BANK $06 ; MOVE_KYO_URA_OROCHI_NAGI_D
 	mMvCodeDef MoveC_Kyo_UraOrochiNagi ;X ; BANK $06 ; MOVE_KYO_SUPER_1_S
 	mMvCodeDef MoveC_Kyo_UraOrochiNagi ;X ; BANK $06 ; MOVE_KYO_SUPER_1_D
-	mMvCodeDef MoveC_Kyo_ThrowG ; BANK $02 ; MOVE_SHARED_GRAB_G
-	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_GRAB_A
+	mMvCodeDef MoveC_Kyo_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Daimon:
 	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
@@ -1741,8 +1741,8 @@ MoveCodePtrTbl_Daimon:
 	mMvCodeDef MoveC_Daimon_HeavenHellDrop ; BANK $05 ; MOVE_DAIMON_HEAVEN_HELL_DROP_D
 	mMvCodeDef MoveC_Daimon_HeavenHellDrop ;X ; BANK $05 ; MOVE_DAIMON_SUPER_1_S
 	mMvCodeDef MoveC_Daimon_HeavenHellDrop ;X ; BANK $05 ; MOVE_DAIMON_SUPER_1_D
-	mMvCodeDef MoveC_Daimon_ThrowG ; BANK $02 ; MOVE_SHARED_GRAB_G
-	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_GRAB_A
+	mMvCodeDef MoveC_Daimon_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Andy:
 	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	mMvCodeDef MoveC_Base_NormH_2Hit_D06_A04 ; BANK $1C ; MOVE_SHARED_PUNCH_H
@@ -1774,8 +1774,8 @@ MoveCodePtrTbl_Andy:
 	mMvCodeDef MoveC_Andy_ChoReppaDan ; BANK $06 ; MOVE_ANDY_CHO_REPPA_DAN_D
 	mMvCodeDef MoveC_Andy_ChoReppaDan ;X ; BANK $06 ; MOVE_ANDY_SUPER_1_S
 	mMvCodeDef MoveC_Andy_ChoReppaDan ;X ; BANK $06 ; MOVE_ANDY_SUPER_1_D
-	mMvCodeDef MoveC_Andy_ThrowG ; BANK $02 ; MOVE_SHARED_GRAB_G
-	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_GRAB_A
+	mMvCodeDef MoveC_Andy_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Robert:
 	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
@@ -1807,8 +1807,8 @@ MoveCodePtrTbl_Robert:
 	mMvCodeDef MoveC_Robert_RyuKoRanbuD ; BANK $02 ; MOVE_ROBERT_RYU_KO_RANBU_D
 	mMvCodeDef MoveC_Robert_HaohShoukouKen ; BANK $02 ; MOVE_ROBERT_HAOH_SHOUKOU_KEN_S
 	mMvCodeDef MoveC_Robert_HaohShoukouKen ; BANK $02 ; MOVE_ROBERT_HAOH_SHOUKOU_KEN_D
-	mMvCodeDef MoveC_Robert_ThrowG ; BANK $02 ; MOVE_SHARED_GRAB_G
-	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_GRAB_A
+	mMvCodeDef MoveC_Robert_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Leona:
 	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	mMvCodeDef MoveC_Base_NormH_2Hit_D06_A04 ; BANK $1C ; MOVE_SHARED_PUNCH_H
@@ -1840,8 +1840,8 @@ MoveCodePtrTbl_Leona:
 	mMvCodeDef MoveC_Leona_VSlasher ; BANK $02 ; MOVE_LEONA_V_SLASHER_D
 	mMvCodeDef MoveC_OLeona_SuperMoonSlasher ; BANK $02 ; MOVE_OLEONA_SUPER_MOON_SLASHER_S
 	mMvCodeDef MoveC_OLeona_SuperMoonSlasher ; BANK $02 ; MOVE_OLEONA_SUPER_MOON_SLASHER_D
-	mMvCodeDef MoveC_Leona_ThrowG ; BANK $02 ; MOVE_SHARED_GRAB_G
-	mMvCodeDef MoveC_Base_ThrowA_DiagF ; BANK $02 ; MOVE_SHARED_GRAB_A
+	mMvCodeDef MoveC_Leona_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_ThrowA_DiagF ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Geese:
 	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
@@ -1873,8 +1873,8 @@ MoveCodePtrTbl_Geese:
 	mMvCodeDef MoveC_Geese_RagingStorm ; BANK $06 ; MOVE_GEESE_RAGING_STORM_D
 	mMvCodeDef MoveC_Geese_RagingStorm ;X ; BANK $06 ; MOVE_GEESE_SUPER_1_S
 	mMvCodeDef MoveC_Geese_RagingStorm ;X ; BANK $06 ; MOVE_GEESE_SUPER_1_D
-	mMvCodeDef MoveC_Geese_ThrowG ; BANK $09 ; MOVE_SHARED_GRAB_G
-	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_GRAB_A
+	mMvCodeDef MoveC_Geese_ThrowG ; BANK $09 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Krauser:
 	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
@@ -1906,8 +1906,8 @@ MoveCodePtrTbl_Krauser:
 	mMvCodeDef MoveC_Krauser_KaiserWave ; BANK $09 ; MOVE_KRAUSER_KAISER_WAVE_D
 	mMvCodeDef MoveC_Krauser_KaiserWave ;X ; BANK $09 ; MOVE_KRAUSER_SUPER_1_S
 	mMvCodeDef MoveC_Krauser_KaiserWave ;X ; BANK $09 ; MOVE_KRAUSER_SUPER_1_D
-	mMvCodeDef MoveC_Krauser_ThrowG ; BANK $09 ; MOVE_SHARED_GRAB_G
-	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_GRAB_A
+	mMvCodeDef MoveC_Krauser_ThrowG ; BANK $09 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_MrBig:
 	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	mMvCodeDef MoveC_MrBig_PunchH ; BANK $1C ; MOVE_SHARED_PUNCH_H
@@ -1939,8 +1939,8 @@ MoveCodePtrTbl_MrBig:
 	mMvCodeDef MoveC_MrBig_BlasterWave ; BANK $06 ; MOVE_MRBIG_BLASTER_WAVE_D
 	mMvCodeDef MoveC_MrBig_BlasterWave ;X ; BANK $06 ; MOVE_MRBIG_SUPER_1_S
 	mMvCodeDef MoveC_MrBig_BlasterWave ;X ; BANK $06 ; MOVE_MRBIG_SUPER_1_D
-	mMvCodeDef MoveC_MrBig_ThrowG ; BANK $09 ; MOVE_SHARED_GRAB_G
-	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_GRAB_A
+	mMvCodeDef MoveC_MrBig_ThrowG ; BANK $09 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Mature:
 	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	mMvCodeDef MoveC_Mature_PunchH ; BANK $1C ; MOVE_SHARED_PUNCH_H
@@ -1972,8 +1972,8 @@ MoveCodePtrTbl_Mature:
 	mMvCodeDef MoveC_Mature_HeavensGate ; BANK $05 ; MOVE_MATURE_HEAVENS_GATE_D
 	mMvCodeDef MoveC_Mature_HeavensGate ;X ; BANK $05 ; MOVE_MATURE_SUPER_1_S
 	mMvCodeDef MoveC_Mature_HeavensGate ;X ; BANK $05 ; MOVE_MATURE_SUPER_1_D
-	mMvCodeDef MoveC_Mature_ThrowG ; BANK $09 ; MOVE_SHARED_GRAB_G
-	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_GRAB_A
+	mMvCodeDef MoveC_Mature_ThrowG ; BANK $09 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Chizuru:
 	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
@@ -2005,8 +2005,8 @@ MoveCodePtrTbl_Chizuru:
 	mMvCodeDef MoveC_Chizuru_SanRaiFuiJin ; BANK $05 ; MOVE_CHIZURU_SAN_RAI_FUI_JIN_D
 	mMvCodeDef MoveC_Chizuru_ReijiIshizue ; BANK $05 ; MOVE_CHIZURU_REIGI_ISHIZUE_S
 	mMvCodeDef MoveC_Chizuru_ReijiIshizue ; BANK $05 ; MOVE_CHIZURU_REIGI_ISHIZUE_D
-	mMvCodeDef MoveC_Chizuru_ThrowG ; BANK $09 ; MOVE_SHARED_GRAB_G
-	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_GRAB_A
+	mMvCodeDef MoveC_Chizuru_ThrowG ; BANK $09 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Goenitz:
 	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	mMvCodeDef MoveC_Goenitz_PunchH ; BANK $1C ; MOVE_SHARED_PUNCH_H
@@ -2038,8 +2038,8 @@ MoveCodePtrTbl_Goenitz:
 	mMvCodeDef MoveC_Goenitz_ShinyaotomeMizuchiSH ; BANK $0A ; MOVE_GOENITZ_SHINYAOTOME_MIZUCHI_SH
 	mMvCodeDef MoveC_Goenitz_ShinyaotomeJissoukokuDL ; BANK $0A ; MOVE_GOENITZ_SHINYAOTOME_JISSOUKOKU_DL
 	mMvCodeDef MoveC_Goenitz_ShinyaotomeJissoukokuDH ; BANK $0A ; MOVE_GOENITZ_SHINYAOTOME_JISSOUKOKU_DH
-	mMvCodeDef MoveC_Goenitz_ShinyaotomeThrowL ; BANK $0A ; MOVE_SHARED_GRAB_G
-	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_GRAB_A
+	mMvCodeDef MoveC_Goenitz_ShinyaotomeThrowL ; BANK $0A ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_MrKarate:
 	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
@@ -2088,8 +2088,8 @@ ELSE
 ENDC
 	mMvCodeDef MoveC_Robert_HaohShoukouKen ; BANK $02 ; MOVE_MRKARATE_HAOH_SHO_KOH_KEN_S
 	mMvCodeDef MoveC_Robert_HaohShoukouKen ; BANK $02 ; MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D
-	mMvCodeDef MoveC_Ryo_ThrowG ; BANK $02 ; MOVE_SHARED_GRAB_G
-	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_GRAB_A
+	mMvCodeDef MoveC_Ryo_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Ryo:
 	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
@@ -2121,8 +2121,8 @@ MoveCodePtrTbl_Ryo:
 	mMvCodeDef MoveC_Ryo_RyuKoRanbuD ; BANK $02 ; MOVE_RYO_RYU_KO_RANBU_D
 	mMvCodeDef MoveC_Robert_HaohShoukouKen ; BANK $02 ; MOVE_RYO_HAOH_SHOUKOU_KEN_S
 	mMvCodeDef MoveC_Robert_HaohShoukouKen ; BANK $02 ; MOVE_RYO_HAOH_SHOUKOU_KEN_D
-	mMvCodeDef MoveC_Ryo_ThrowG ; BANK $02 ; MOVE_SHARED_GRAB_G
-	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_GRAB_A
+	mMvCodeDef MoveC_Ryo_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Terry:
 	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	mMvCodeDef MoveC_Base_NormL_2Hit_D06_A03 ; BANK $1C ; MOVE_SHARED_PUNCH_H
@@ -2154,8 +2154,8 @@ MoveCodePtrTbl_Terry:
 	mMvCodeDef MoveC_Terry_PowerGeyserD ; BANK $06 ; MOVE_TERRY_POWER_GEYSER_D
 	mMvCodeDef MoveC_Terry_PowerGeyserE ; BANK $06 ; MOVE_TERRY_POWER_GEYSER_E
 	mMvCodeDef MoveC_Terry_PowerGeyserD ;X ; BANK $06 ; MOVE_TERRY_SUPER_1_D
-	mMvCodeDef MoveC_Terry_ThrowG ; BANK $02 ; MOVE_SHARED_GRAB_G
-	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_GRAB_A
+	mMvCodeDef MoveC_Terry_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Athena:
 	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
@@ -2187,8 +2187,8 @@ MoveCodePtrTbl_Athena:
 	mMvCodeDef MoveC_Athena_ShCryst ; BANK $06 ; MOVE_ATHENA_SHINING_CRYSTAL_BIT_GD
 	mMvCodeDef MoveC_Athena_ShCryst ; BANK $06 ; MOVE_ATHENA_SHINING_CRYSTAL_BIT_AS
 	mMvCodeDef MoveC_Athena_ShCryst ; BANK $06 ; MOVE_ATHENA_SHINING_CRYSTAL_BIT_AD
-	mMvCodeDef MoveC_Athena_ThrowG ; BANK $02 ; MOVE_SHARED_GRAB_G
-	mMvCodeDef MoveC_Base_ThrowA_DiagF ; BANK $02 ; MOVE_SHARED_GRAB_A
+	mMvCodeDef MoveC_Athena_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_ThrowA_DiagF ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Mai:
 	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
@@ -2220,8 +2220,8 @@ MoveCodePtrTbl_Mai:
 	mMvCodeDef MoveC_Mai_ChoHissatsuShinobibachiD ; BANK $06 ; MOVE_MAI_CHO_HISSATSU_SHINOBIBACHI_D
 	mMvCodeDef MoveC_Mai_ChoHissatsuShinobibachiS ;X ; BANK $06 ; MOVE_MAI_SUPER_1_S
 	mMvCodeDef MoveC_Mai_ChoHissatsuShinobibachiD ;X ; BANK $06 ; MOVE_MAI_SUPER_1_D
-	mMvCodeDef MoveC_Mai_ThrowG ; BANK $02 ; MOVE_SHARED_GRAB_G
-	mMvCodeDef MoveC_Base_ThrowA_DirD ; BANK $02 ; MOVE_SHARED_GRAB_A
+	mMvCodeDef MoveC_Mai_ThrowG ; BANK $02 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_ThrowA_DirD ; BANK $02 ; MOVE_SHARED_THROW_A
 MoveCodePtrTbl_Iori:
 	mMvCodeDef MoveC_Base_NormL ; BANK $02 ; MOVE_SHARED_PUNCH_L
 	mMvCodeDef MoveC_Base_NormH ; BANK $02 ; MOVE_SHARED_PUNCH_H
@@ -2253,8 +2253,8 @@ MoveCodePtrTbl_Iori:
 	mMvCodeDef MoveC_Iori_KinYaOtomeD ; BANK $05 ; MOVE_IORI_KIN_YA_OTOME_D
 	mMvCodeDef MoveC_OIori_KinYaOtome ; BANK $05 ; MOVE_OIORI_KIN_YA_OTOME_S
 	mMvCodeDef MoveC_OIori_KinYaOtome ; BANK $05 ; MOVE_OIORI_KIN_YA_OTOME_D
-	mMvCodeDef MoveC_Iori_ThrowG ; BANK $09 ; MOVE_SHARED_GRAB_G
-	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_GRAB_A
+	mMvCodeDef MoveC_Iori_ThrowG ; BANK $09 ; MOVE_SHARED_THROW_G
+	mMvCodeDef MoveC_Base_Idle ;X ; BANK $02 ; MOVE_SHARED_THROW_A
 	
 ; 
 ; =============== START OF SUBMODULE Play->CPU ===============

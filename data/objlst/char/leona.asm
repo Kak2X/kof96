@@ -331,8 +331,8 @@ OBJLstPtrTable_Leona_TimeOver:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Leona_Hitlow:
-	dw OBJLstHdrA_Leona_Hitlow0, OBJLSTPTR_NONE ;X
+OBJLstPtrTable_Leona_HitLow:
+	dw OBJLstHdrA_Leona_HitLow0, OBJLSTPTR_NONE ;X
 	dw OBJLSTPTR_NONE
 		
 
@@ -342,7 +342,7 @@ OBJLstPtrTable_Leona_GuardBreakA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Leona_BackjumpRecA:
+OBJLstPtrTable_Leona_LaunchUBRec:
 	dw OBJLstHdrA_Leona_GuardBreakG0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Leona_JumpN4, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Leona_JumpN4, OBJLSTPTR_NONE
@@ -353,13 +353,13 @@ OBJLstPtrTable_Leona_BackjumpRecA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Leona_DropMain:
+OBJLstPtrTable_Leona_LaunchUB:
 	dw OBJLstHdrA_Leona_GuardBreakG0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Leona_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Leona_DropMain2, OBJLSTPTR_NONE
-OBJLstPtrTable_Leona_HitMultigs:
-	dw OBJLstHdrA_Leona_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Leona_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Leona_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Leona_LaunchUB2, OBJLSTPTR_NONE
+OBJLstPtrTable_Leona_HitMultiGS:
+	dw OBJLstHdrA_Leona_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Leona_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -367,23 +367,23 @@ OBJLstPtrTable_Leona_HitSwoopup:
 	dw OBJLstHdrA_Leona_TimeOver2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Leona_HitSwoopup1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Leona_HitSwoopup2, OBJLSTPTR_NONE
-OBJLstPtrTable_Leona_ThrowEndA:
-	dw OBJLstHdrA_Leona_ThrowEndA3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Leona_ThrowEndA3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Leona_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Leona_DropMain2, OBJLSTPTR_NONE
+OBJLstPtrTable_Leona_LaunchUBShake:
+	dw OBJLstHdrA_Leona_LaunchUBShake3, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Leona_LaunchUBShake3, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Leona_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Leona_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Leona_DropDbg:
+OBJLstPtrTable_Leona_HitSweep:
 	dw OBJLstHdrA_Leona_TimeOver2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Leona_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Leona_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Leona_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Leona_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Leona_ThrowRotL:
-	dw OBJLstHdrA_Leona_ThrowRotL0, OBJLSTPTR_NONE
+OBJLstPtrTable_Leona_GrabRotL:
+	dw OBJLstHdrA_Leona_GrabRotL0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -2113,7 +2113,7 @@ OBJLstHdrA_Leona_TimeOver2:
 	db $3F,$F4,$08 ; $04
 	db $3A,$04,$0A ; $05
 		
-OBJLstHdrA_Leona_ThrowEndA3:
+OBJLstHdrA_Leona_LaunchUBShake3:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -2158,11 +2158,11 @@ OBJLstHdrA_Leona_GuardBreakG0:
 	db $30,$FB,$08 ; $04
 	db $3B,$03,$0A ; $05
 		
-OBJLstHdrA_Leona_Hitlow0: ;X
+OBJLstHdrA_Leona_HitLow0: ;X
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Leona_Hitlow0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Leona_HitLow0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $F8 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
@@ -2175,11 +2175,11 @@ OBJLstHdrA_Leona_Hitlow0: ;X
 	db $39,$05,$06 ; $03
 	db $38,$0D,$08 ; $04
 		
-OBJLstHdrA_Leona_DropMain1:
+OBJLstHdrA_Leona_LaunchUB1:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Leona_DropMain1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Leona_LaunchUB1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $F8 ; iOBJLstHdrA_XOffset
 	db $15 ; iOBJLstHdrA_YOffset
@@ -2193,20 +2193,20 @@ OBJLstHdrA_Leona_DropMain1:
 	db $25,$14,$08 ; $04
 	db $30,$0C,$0A ; $05
 		
-OBJLstHdrA_Leona_ThrowRotL0:
+OBJLstHdrA_Leona_GrabRotL0:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Leona_DropMain1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Leona_DropMain1.bin ; iOBJLstHdrA_DataPtr
+	dpr GFX_Char_Leona_LaunchUB1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw OBJLstHdrA_Leona_LaunchUB1.bin ; iOBJLstHdrA_DataPtr
 	db $0A ; iOBJLstHdrA_XOffset
 	db $FF ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Leona_DropMain2:
+OBJLstHdrA_Leona_LaunchUB2:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Leona_DropMain2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Leona_LaunchUB2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $EF ; iOBJLstHdrA_XOffset
 	db $03 ; iOBJLstHdrA_YOffset

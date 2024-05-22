@@ -168,9 +168,9 @@ wPlayPlThrowDir             :db ; EQU $C175 ; Sets the throw's direction. (PLAY_
 ; Movement amounts set by Play_Pl_MoveRotThrown, used to move the opponent at fixed relative positions,
 ; mostly during the "rotation frames" before the throw arc starts.
 ; This avoids having to define the offsets in the sprite mapping itself.
-wPlayPlThrowRotMoveH        :db ; EQU $C176 ; Relative X position
-wPlayPlThrowRotMoveV        :db ; EQU $C177 ; Relative Y position
-wPlayPlThrowRotSync         :db ; EQU $C178 ; If set, allows few moves in the "attacked" group to use the above two
+wPlayPlGrabRotMoveH         :db ; EQU $C176 ; Relative X position
+wPlayPlGrabRotMoveV         :db ; EQU $C177 ; Relative Y position
+wPlayPlGrabRotSync          :db ; EQU $C178 ; If set, allows few moves in the "attacked" group to use the above two
 ;--
 wPlayPlThrowTechTimer       :db ; EQU $C179 ; Countdown timer, window of opportunity for doing a throw tech.
 wPlaySlowdownTimer          :db ; EQU $C17A ; Countdown timer. When it's > 0, slowdown is enabled during gameplay. When it reaches 0, the slowdown stops.

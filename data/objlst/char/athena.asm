@@ -226,8 +226,8 @@ OBJLstPtrTable_Athena_TimeOver:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Athena_Hitlow:
-	dw OBJLstHdrA_Athena_Hitlow0, OBJLSTPTR_NONE ;X
+OBJLstPtrTable_Athena_HitLow:
+	dw OBJLstHdrA_Athena_HitLow0, OBJLSTPTR_NONE ;X
 	dw OBJLSTPTR_NONE
 		
 
@@ -237,7 +237,7 @@ OBJLstPtrTable_Athena_GuardBreakA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Athena_BackjumpRecA:
+OBJLstPtrTable_Athena_LaunchUBRec:
 	dw OBJLstHdrA_Athena_GuardBreakG0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Athena_JumpF5, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Athena_JumpF4, OBJLSTPTR_NONE
@@ -248,13 +248,13 @@ OBJLstPtrTable_Athena_BackjumpRecA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Athena_DropMain:
+OBJLstPtrTable_Athena_LaunchUB:
 	dw OBJLstHdrA_Athena_GuardBreakG0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Athena_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Athena_DropMain2, OBJLSTPTR_NONE
-OBJLstPtrTable_Athena_HitMultigs:
-	dw OBJLstHdrA_Athena_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Athena_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Athena_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Athena_LaunchUB2, OBJLSTPTR_NONE
+OBJLstPtrTable_Athena_HitMultiGS:
+	dw OBJLstHdrA_Athena_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Athena_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -262,23 +262,23 @@ OBJLstPtrTable_Athena_HitSwoopup:
 	dw OBJLstHdrA_Athena_TimeOver2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Athena_HitSwoopup1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Athena_HitSwoopup2, OBJLSTPTR_NONE
-OBJLstPtrTable_Athena_ThrowEndA:
-	dw OBJLstHdrA_Athena_ThrowEndA3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Athena_ThrowEndA3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Athena_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Athena_DropMain2, OBJLSTPTR_NONE
+OBJLstPtrTable_Athena_LaunchUBShake:
+	dw OBJLstHdrA_Athena_LaunchUBShake3, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Athena_LaunchUBShake3, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Athena_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Athena_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Athena_DropDbg:
+OBJLstPtrTable_Athena_HitSweep:
 	dw OBJLstHdrA_Athena_TimeOver2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Athena_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Athena_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Athena_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Athena_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Athena_ThrowRotL:
-	dw OBJLstHdrA_Athena_ThrowRotL0, OBJLSTPTR_NONE
+OBJLstPtrTable_Athena_GrabRotL:
+	dw OBJLstHdrA_Athena_GrabRotL0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -1694,7 +1694,7 @@ OBJLstHdrA_Athena_HitSwoopup2:
 	db $FC ; iOBJLstHdrA_XOffset
 	db $0C ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Athena_ThrowEndA3:
+OBJLstHdrA_Athena_LaunchUBShake3:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -1720,11 +1720,11 @@ OBJLstHdrA_Athena_GuardBreakG0:
 	db $33,$F8,$06 ; $03
 	db $33,$00,$08 ; $04
 		
-OBJLstHdrA_Athena_Hitlow0: ;X
+OBJLstHdrA_Athena_HitLow0: ;X
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Athena_Hitlow0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Athena_HitLow0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
@@ -1737,11 +1737,11 @@ OBJLstHdrA_Athena_Hitlow0: ;X
 	db $3B,$FD,$06 ; $03
 	db $3A,$05,$08 ; $04
 		
-OBJLstHdrA_Athena_DropMain1:
+OBJLstHdrA_Athena_LaunchUB1:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Athena_DropMain1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Athena_LaunchUB1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $FB ; iOBJLstHdrA_XOffset
 	db $19 ; iOBJLstHdrA_YOffset
@@ -1755,20 +1755,20 @@ OBJLstHdrA_Athena_DropMain1:
 	db $28,$FC,$08 ; $04
 	db $1B,$04,$0A ; $05
 		
-OBJLstHdrA_Athena_ThrowRotL0:
+OBJLstHdrA_Athena_GrabRotL0:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Athena_DropMain1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Athena_DropMain1.bin ; iOBJLstHdrA_DataPtr
+	dpr GFX_Char_Athena_LaunchUB1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw OBJLstHdrA_Athena_LaunchUB1.bin ; iOBJLstHdrA_DataPtr
 	db $05 ; iOBJLstHdrA_XOffset
 	db $F8 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Athena_DropMain2:
+OBJLstHdrA_Athena_LaunchUB2:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Athena_DropMain2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Athena_LaunchUB2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $F5 ; iOBJLstHdrA_XOffset
 	db $01 ; iOBJLstHdrA_YOffset

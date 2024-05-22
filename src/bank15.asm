@@ -60,7 +60,7 @@ GFX_Char_Krauser_GuardBreakG0_B: INCBIN "data/gfx/char/krauser_guardbreakg0_b.bi
 GFX_Char_Krauser_TimeOver2_A: INCBIN "data/gfx/char/krauser_timeover2_a.bin"
 GFX_Char_Krauser_RollF3: INCBIN "data/gfx/char/krauser_rollf3.bin"
 GFX_Char_Krauser_RollF2: INCBIN "data/gfx/char/krauser_rollf2.bin"
-GFX_Char_Krauser_DropMain2: INCBIN "data/gfx/char/krauser_dropmain2.bin"
+GFX_Char_Krauser_LaunchUB2: INCBIN "data/gfx/char/krauser_launchub2.bin"
 GFX_Char_Krauser_ThrowG1_A: INCBIN "data/gfx/char/krauser_throwg1_a.bin"
 GFX_Char_Krauser_ChargeMeter0_B: INCBIN "data/gfx/char/krauser_chargemeter0_b.bin"
 GFX_Char_Krauser_ThrowG2_B: INCBIN "data/gfx/char/krauser_throwg2_b.bin"

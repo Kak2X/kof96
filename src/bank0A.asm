@@ -869,7 +869,7 @@ MoveC_Goenitz_Yamidoukoku:
 	ret
 ; =============== MoveC_Goenitz_ShinyaotomeThrowL ===============
 ; Move code for:
-; - Goenitz's throw (MOVE_SHARED_GRAB_G)
+; - Goenitz's throw (MOVE_SHARED_THROW_G)
 ; - The third part of Goenitz's light supers (MOVE_GOENITZ_SHINYAOTOME_THROW_L)
 MoveC_Goenitz_ShinyaotomeThrowL:
 	call Play_Pl_MoveByColiBoxOverlapX

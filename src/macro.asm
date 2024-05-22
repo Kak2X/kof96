@@ -719,7 +719,7 @@ ENDM
 ; Must be used if the player moves during the grab portion of the throw.
 mMvC_MoveThrowOpSync: MACRO
 	ld   a, $01
-	ld   [wPlayPlThrowRotSync], a
+	ld   [wPlayPlGrabRotSync], a
 ENDM
 
 ; =============== mMvC_ChkTarget ===============

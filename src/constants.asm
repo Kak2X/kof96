@@ -730,8 +730,8 @@ MOVE_SUPER_0_D              EQU $66
 MOVE_SUPER_1_S              EQU $68
 MOVE_SUPER_1_D              EQU $6A
 ; Throws
-MOVE_SHARED_GRAB_G          EQU $6C ; Ground throw
-MOVE_SHARED_GRAB_A          EQU $6E ; Air throw
+MOVE_SHARED_THROW_G         EQU $6C ; Ground throw
+MOVE_SHARED_THROW_A         EQU $6E ; Air throw
 ; Attacked
 MOVE_SHARED_POST_BLOCKSTUN  EQU $70 ; After blockstun knockback
 MOVE_SHARED_GUARDBREAK_G    EQU $72 ; Guard break - Ground

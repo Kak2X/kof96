@@ -761,7 +761,7 @@ ProjInit_Krauser_KaiserWave:
 	ret
 	
 ; =============== MoveC_Geese_ThrowG ===============
-; Move code for Geese's throw (MOVE_SHARED_GRAB_G).
+; Move code for Geese's throw (MOVE_SHARED_THROW_G).
 MoveC_Geese_ThrowG:
 	mMvC_ValLoaded .ret
 	
@@ -805,7 +805,7 @@ MoveC_Geese_ThrowG:
 	ret
 	
 ; =============== MoveC_Krauser_ThrowG ===============
-; Move code for Krauser's throw (MOVE_SHARED_GRAB_G).
+; Move code for Krauser's throw (MOVE_SHARED_THROW_G).
 MoveC_Krauser_ThrowG:
 	mMvC_ValLoaded .ret
 	
@@ -871,7 +871,7 @@ MoveC_Krauser_ThrowG:
 	ret
 	
 ; =============== MoveC_MrBig_ThrowG ===============
-; Move code for Mr.Big's throw (MOVE_SHARED_GRAB_G).
+; Move code for Mr.Big's throw (MOVE_SHARED_THROW_G).
 MoveC_MrBig_ThrowG:
 	mMvC_ValLoaded .ret
 	
@@ -920,7 +920,7 @@ MoveC_MrBig_ThrowG:
 	ret
 	
 ; =============== MoveC_Iori_ThrowG ===============
-; Move code for Iori's throw (MOVE_SHARED_GRAB_G).
+; Move code for Iori's throw (MOVE_SHARED_THROW_G).
 MoveC_Iori_ThrowG:
 	mMvC_ValLoaded .ret
 	
@@ -949,7 +949,7 @@ MoveC_Iori_ThrowG:
 	ret
 	
 ; =============== MoveC_Mature_ThrowG ===============
-; Move code for Mature's throw (MOVE_SHARED_GRAB_G).
+; Move code for Mature's throw (MOVE_SHARED_THROW_G).
 MoveC_Mature_ThrowG:
 	mMvC_ValLoaded .ret
 	
@@ -988,7 +988,7 @@ MoveC_Mature_ThrowG:
 	ret
 	
 ; =============== MoveC_Chizuru_ThrowG ===============
-; Move code for Chizuru's throw (MOVE_SHARED_GRAB_G).
+; Move code for Chizuru's throw (MOVE_SHARED_THROW_G).
 MoveC_Chizuru_ThrowG:
 	mMvC_ValLoaded .ret
 	

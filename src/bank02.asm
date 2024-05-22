@@ -1941,7 +1941,7 @@ HitTypeC_LaunchMidUB_NoStun:
 	ld   hl, iPlInfo_MoveIdOther
 	add  hl, bc
 	ld   a, [hl]
-	cp   MOVE_SHARED_GRAB_G	; Doing Mai's ground throw?
+	cp   MOVE_SHARED_THROW_G	; Doing Mai's ground throw?
 	jp   z, .maiThrow			; If so, jump
 	jp   .default				; Otherwise, use the default (we never get here)
 .matureDecide:
@@ -2693,11 +2693,11 @@ HitTypeC_GrabRotCustom:
 	call HitTypeS_SyncPlPosFromOtherPos		; Move over opponent
 	; The position is relative to the opponent facing left, meaning it's more or less equivalent
 	; to the standard "player facing right" relative positioning.
-	ld   a, [wPlayPlThrowRotMoveH]			; Move forward by wPlayPlThrowRotMoveH
+	ld   a, [wPlayPlGrabRotMoveH]			; Move forward by wPlayPlGrabRotMoveH
 	ld   h, a								
 	ld   l, $00
 	call Play_OBJLstS_MoveH_ByOtherXFlipL
-	ld   a, [wPlayPlThrowRotMoveV]			; Move down by wPlayPlThrowRotMoveV
+	ld   a, [wPlayPlGrabRotMoveV]			; Move down by wPlayPlGrabRotMoveV
 	ld   h, a
 	ld   l, $00
 	call Play_OBJLstS_MoveV
@@ -5151,7 +5151,7 @@ MoveC_Hit_Grab_Start:
 	ld   hl, iPlInfo_MoveIdOther
 	add  hl, bc
 	ld   a, [hl]
-	cp   MOVE_SHARED_GRAB_G	; iPlInfo_MoveIdOther == MOVE_SHARED_GRAB_G?
+	cp   MOVE_SHARED_THROW_G	; iPlInfo_MoveIdOther == MOVE_SHARED_THROW_G?
 	jp   nz, .chkFrame			; If not, jump
 	
 	; Decrement the timer for the window of opportunity.
@@ -5291,7 +5291,7 @@ MoveC_Hit_Grab_Start:
 	jp   .ret
 .throwConfirm:
 	; The throw was confirmed.
-	; This tells BasicInput_StartGroundThrow to start MOVE_SHARED_GRAB_G (and reset it back to PLAY_THROWACT_NEXT03).
+	; This tells BasicInput_StartGroundThrow to start MOVE_SHARED_THROW_G (and reset it back to PLAY_THROWACT_NEXT03).
 	ld   a, PLAY_THROWACT_NEXT04
 	ld   [wPlayPlThrowActId], a
 	;--
@@ -5406,17 +5406,17 @@ MoveC_Hit_Grab_Rot:
 	;
 	; If enabled, reposition the player every frame like HitTypeC_GrabRotCustom did once.
 	;
-	ld   a, [wPlayPlThrowRotSync]
+	ld   a, [wPlayPlGrabRotSync]
 	or   a									; Sync enabled?
 	jp   z, .anim							; If not, skip
 	call HitTypeS_SyncPlPosFromOtherPos		; Move over opponent
 	; The position is relative to the opponent facing left, meaning it's more or less equivalent
 	; to the standard "player facing right" relative positioning.
-	ld   a, [wPlayPlThrowRotMoveH]			; Move forward by wPlayPlThrowRotMoveH
+	ld   a, [wPlayPlGrabRotMoveH]			; Move forward by wPlayPlGrabRotMoveH
 	ld   h, a								
 	ld   l, $00
 	call Play_OBJLstS_MoveH_ByOtherXFlipL
-	ld   a, [wPlayPlThrowRotMoveV]			; Move down by wPlayPlThrowRotMoveV
+	ld   a, [wPlayPlGrabRotMoveV]			; Move down by wPlayPlGrabRotMoveV
 	ld   h, a
 	ld   l, $00
 	call Play_OBJLstS_MoveV
@@ -9008,7 +9008,7 @@ ENDC
 ; Hits caused by throws should deal more damage and cause the opponent to drop to the ground.
 
 ; =============== MoveC_Kyo_ThrowG ===============
-; Move code for Kyo's throw (MOVE_SHARED_GRAB_G).
+; Move code for Kyo's throw (MOVE_SHARED_THROW_G).
 MoveC_Kyo_ThrowG:
 	mMvC_ValLoaded .ret
 	
@@ -9039,7 +9039,7 @@ MoveC_Kyo_ThrowG:
 	ret
 	
 ; =============== MoveC_Daimon_ThrowG ===============
-; Move code for Daimon's throw (MOVE_SHARED_GRAB_G).	
+; Move code for Daimon's throw (MOVE_SHARED_THROW_G).	
 MoveC_Daimon_ThrowG:
 	mMvC_ValLoaded .ret
 	
@@ -9085,7 +9085,7 @@ MoveC_Daimon_ThrowG:
 	ret
 	
 ; =============== MoveC_Terry_ThrowG ===============
-; Move code for Terry's throw (MOVE_SHARED_GRAB_G).
+; Move code for Terry's throw (MOVE_SHARED_THROW_G).
 MoveC_Terry_ThrowG:
 	mMvC_ValLoaded .ret
 	
@@ -9113,7 +9113,7 @@ MoveC_Terry_ThrowG:
 .ret:
 	ret
 ; =============== MoveC_Andy_ThrowG ===============
-; Move code for Andy's throw (MOVE_SHARED_GRAB_G).
+; Move code for Andy's throw (MOVE_SHARED_THROW_G).
 MoveC_Andy_ThrowG:
 	mMvC_ValLoaded .ret
 	
@@ -9216,7 +9216,7 @@ ENDC
 	ret
 	
 ; =============== MoveC_Ryo_ThrowG ===============
-; Move code for Ryo's and Mr.Karate's throw (MOVE_SHARED_GRAB_G).
+; Move code for Ryo's and Mr.Karate's throw (MOVE_SHARED_THROW_G).
 MoveC_Ryo_ThrowG:
 	mMvC_ValLoaded .ret
 	
@@ -9256,7 +9256,7 @@ MoveC_Ryo_ThrowG:
 	ret
 	
 ; =============== MoveC_Robert_ThrowG ===============
-; Move code for Robert's throw (MOVE_SHARED_GRAB_G).
+; Move code for Robert's throw (MOVE_SHARED_THROW_G).
 MoveC_Robert_ThrowG:
 	mMvC_ValLoaded .ret
 	
@@ -9292,7 +9292,7 @@ MoveC_Robert_ThrowG:
 	ret
 	
 ; =============== MoveC_Athena_ThrowG ===============
-; Move code for Athena's throw (MOVE_SHARED_GRAB_G).	
+; Move code for Athena's throw (MOVE_SHARED_THROW_G).	
 MoveC_Athena_ThrowG:
 	mMvC_ValLoaded .ret
 	
@@ -9348,7 +9348,7 @@ MoveC_Athena_ThrowG:
 	
 ; =============== MoveC_Base_ThrowA_DiagF ===============
 ; Move code for air throws that launch the opponent forwards, diagonally down.
-; Used for Leona and Athena's air throws (MOVE_SHARED_GRAB_A).
+; Used for Leona and Athena's air throws (MOVE_SHARED_THROW_A).
 MoveC_Base_ThrowA_DiagF:
 	mMvC_ValLoaded .ret
 	
@@ -9410,7 +9410,7 @@ MoveC_Base_ThrowA_DiagF:
 	ret
 	
 ; =============== MoveC_Mai_ThrowG ===============
-; Move code for Mai's throw (MOVE_SHARED_GRAB_G).
+; Move code for Mai's throw (MOVE_SHARED_THROW_G).
 MoveC_Mai_ThrowG:
 	mMvC_ValLoaded .ret
 	
@@ -9485,7 +9485,7 @@ MoveC_Mai_ThrowG:
 	
 ; =============== MoveC_Base_ThrowA_DirD ===============
 ; Move code for air throws that launch the opponent straight down.
-; Used for Mai's air throw (MOVE_SHARED_GRAB_A).
+; Used for Mai's air throw (MOVE_SHARED_THROW_A).
 MoveC_Base_ThrowA_DirD:
 	mMvC_ValLoaded .ret
 	
@@ -9553,7 +9553,7 @@ ENDC
 	;--
 	; Not necessary, already done by Play_Pl_MoveRotThrown
 	ld   a, $00
-	ld   [wPlayPlThrowRotSync], a
+	ld   [wPlayPlGrabRotSync], a
 	;--
 	jp   .ret
 ; --------------- frame #2 ---------------
@@ -9584,7 +9584,7 @@ ENDC
 	ret  
 
 ; =============== MoveC_Leona_ThrowG ===============
-; Move code for Leona's throw (MOVE_SHARED_GRAB_G).
+; Move code for Leona's throw (MOVE_SHARED_THROW_G).
 MoveC_Leona_ThrowG:
 	mMvC_ValLoaded .ret
 	

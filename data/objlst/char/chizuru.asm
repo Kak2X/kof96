@@ -90,8 +90,8 @@ OBJLstPtrTable_Chizuru_Hit1mid:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Chizuru_Hitlow:
-	dw OBJLstHdrA_Chizuru_Hitlow0, OBJLSTPTR_NONE ;X
+OBJLstPtrTable_Chizuru_HitLow:
+	dw OBJLstHdrA_Chizuru_HitLow0, OBJLSTPTR_NONE ;X
 	dw OBJLSTPTR_NONE
 		
 
@@ -101,7 +101,7 @@ OBJLstPtrTable_Chizuru_GuardBreakA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Chizuru_BackjumpRecA:
+OBJLstPtrTable_Chizuru_LaunchUBRec:
 	dw OBJLstHdrA_Chizuru_GuardBreakG0_A, OBJLstHdrB_Chizuru_GuardBreakG0_B
 	dw OBJLstHdrA_Chizuru_JumpF5, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Chizuru_JumpF4, OBJLSTPTR_NONE
@@ -112,13 +112,13 @@ OBJLstPtrTable_Chizuru_BackjumpRecA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Chizuru_DropMain:
+OBJLstPtrTable_Chizuru_LaunchUB:
 	dw OBJLstHdrA_Chizuru_GuardBreakG0_A, OBJLstHdrB_Chizuru_GuardBreakG0_B
-	dw OBJLstHdrA_Chizuru_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Chizuru_DropMain2, OBJLSTPTR_NONE
-OBJLstPtrTable_Chizuru_HitMultigs:
-	dw OBJLstHdrA_Chizuru_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Chizuru_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Chizuru_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Chizuru_LaunchUB2, OBJLSTPTR_NONE
+OBJLstPtrTable_Chizuru_HitMultiGS:
+	dw OBJLstHdrA_Chizuru_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Chizuru_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -126,23 +126,23 @@ OBJLstPtrTable_Chizuru_HitSwoopup:
 	dw OBJLstHdrA_Chizuru_Hit1mid2_A, OBJLstHdrB_Chizuru_GuardBreakG0_B
 	dw OBJLstHdrA_Chizuru_HitSwoopup1_A, OBJLstHdrB_Chizuru_HitSwoopup1_B
 	dw OBJLstHdrA_Chizuru_HitSwoopup2_A, OBJLstHdrB_Chizuru_HitSwoopup2_B
-OBJLstPtrTable_Chizuru_ThrowEndA:
-	dw OBJLstHdrA_Chizuru_ThrowEndA3_A, OBJLstHdrB_Chizuru_ThrowEndA3_B
-	dw OBJLstHdrA_Chizuru_ThrowEndA3_A, OBJLstHdrB_Chizuru_ThrowEndA3_B
-	dw OBJLstHdrA_Chizuru_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Chizuru_DropMain2, OBJLSTPTR_NONE
+OBJLstPtrTable_Chizuru_LaunchUBShake:
+	dw OBJLstHdrA_Chizuru_LaunchUBShake3_A, OBJLstHdrB_Chizuru_LaunchUBShake3_B
+	dw OBJLstHdrA_Chizuru_LaunchUBShake3_A, OBJLstHdrB_Chizuru_LaunchUBShake3_B
+	dw OBJLstHdrA_Chizuru_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Chizuru_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Chizuru_DropDbg:
+OBJLstPtrTable_Chizuru_HitSweep:
 	dw OBJLstHdrA_Chizuru_Hit1mid2_A, OBJLstHdrB_Chizuru_GuardBreakG0_B
-	dw OBJLstHdrA_Chizuru_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Chizuru_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Chizuru_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Chizuru_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Chizuru_ThrowRotL:
-	dw OBJLstHdrA_Chizuru_ThrowRotL0, OBJLSTPTR_NONE
+OBJLstPtrTable_Chizuru_GrabRotL:
+	dw OBJLstHdrA_Chizuru_GrabRotL0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -777,7 +777,7 @@ OBJLstHdrB_Chizuru_GuardBreakG0_B:
 	db $30,$01,$02 ; $01
 	db $30,$09,$04 ; $02
 		
-OBJLstHdrB_Chizuru_ThrowEndA3_B:
+OBJLstHdrB_Chizuru_LaunchUBShake3_B:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	dpr GFX_Char_Chizuru_GuardBreakG0_B ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw OBJLstHdrB_Chizuru_GuardBreakG0_B.bin ; iOBJLstHdrA_DataPtr
@@ -814,7 +814,7 @@ OBJLstHdrA_Chizuru_Hit1mid2_A:
 	db $20,$0B,$04 ; $02
 	db $20,$F3,$06 ; $03
 		
-OBJLstHdrA_Chizuru_ThrowEndA3_A:
+OBJLstHdrA_Chizuru_LaunchUBShake3_A:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -841,11 +841,11 @@ OBJLstHdrA_Chizuru_HitSwoopup1_A:
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Chizuru_Hitlow0: ;X
+OBJLstHdrA_Chizuru_HitLow0: ;X
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Chizuru_Hitlow0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Chizuru_HitLow0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $01 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
@@ -858,11 +858,11 @@ OBJLstHdrA_Chizuru_Hitlow0: ;X
 	db $38,$03,$06 ; $03
 	db $30,$F3,$08 ; $04
 		
-OBJLstHdrA_Chizuru_DropMain1:
+OBJLstHdrA_Chizuru_LaunchUB1:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Chizuru_DropMain1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Chizuru_LaunchUB1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $FE ; iOBJLstHdrA_XOffset
 	db $09 ; iOBJLstHdrA_YOffset
@@ -875,11 +875,11 @@ OBJLstHdrA_Chizuru_DropMain1:
 	db $30,$0A,$06 ; $03
 	db $38,$02,$08 ; $04
 		
-OBJLstHdrA_Chizuru_DropMain2:
+OBJLstHdrA_Chizuru_LaunchUB2:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Chizuru_DropMain2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Chizuru_LaunchUB2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $FD ; iOBJLstHdrA_XOffset
 	db $03 ; iOBJLstHdrA_YOffset
@@ -891,12 +891,12 @@ OBJLstHdrA_Chizuru_DropMain2:
 	db $32,$03,$04 ; $02
 	db $32,$0B,$06 ; $03
 		
-OBJLstHdrA_Chizuru_ThrowRotL0:
+OBJLstHdrA_Chizuru_GrabRotL0:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Chizuru_DropMain2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Chizuru_DropMain2.bin ; iOBJLstHdrA_DataPtr
+	dpr GFX_Char_Chizuru_LaunchUB2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw OBJLstHdrA_Chizuru_LaunchUB2.bin ; iOBJLstHdrA_DataPtr
 	db $05 ; iOBJLstHdrA_XOffset
 	db $12 ; iOBJLstHdrA_YOffset
 		

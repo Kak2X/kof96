@@ -230,8 +230,8 @@ OBJLstPtrTable_Terry_TimeOver:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Terry_Hitlow:
-	dw OBJLstHdrA_Terry_Hitlow0, OBJLSTPTR_NONE
+OBJLstPtrTable_Terry_HitLow:
+	dw OBJLstHdrA_Terry_HitLow0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -241,7 +241,7 @@ OBJLstPtrTable_Terry_GuardBreakA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Terry_BackjumpRecA:
+OBJLstPtrTable_Terry_LaunchUBRec:
 	dw OBJLstHdrA_Terry_GuardBreakG0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_JumpN3_B
 	dw OBJLstHdrA_Terry_WalkF1_A, OBJLstHdrB_Terry_JumpN3_B
@@ -252,13 +252,13 @@ OBJLstPtrTable_Terry_BackjumpRecA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Terry_DropMain:
+OBJLstPtrTable_Terry_LaunchUB:
 	dw OBJLstHdrA_Terry_GuardBreakG0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_DropMain2, OBJLSTPTR_NONE
-OBJLstPtrTable_Terry_HitMultigs:
-	dw OBJLstHdrA_Terry_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Terry_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Terry_LaunchUB2, OBJLSTPTR_NONE
+OBJLstPtrTable_Terry_HitMultiGS:
+	dw OBJLstHdrA_Terry_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Terry_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -266,23 +266,23 @@ OBJLstPtrTable_Terry_HitSwoopup:
 	dw OBJLstHdrA_Terry_TimeOver2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Terry_HitSwoopup1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Terry_HitSwoopup2, OBJLSTPTR_NONE
-OBJLstPtrTable_Terry_ThrowEndA:
-	dw OBJLstHdrA_Terry_ThrowEndA3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_ThrowEndA3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_DropMain2, OBJLSTPTR_NONE
+OBJLstPtrTable_Terry_LaunchUBShake:
+	dw OBJLstHdrA_Terry_LaunchUBShake3, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Terry_LaunchUBShake3, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Terry_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Terry_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Terry_DropDbg:
+OBJLstPtrTable_Terry_HitSweep:
 	dw OBJLstHdrA_Terry_GuardBreakG0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Terry_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Terry_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Terry_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Terry_ThrowRotL:
-	dw OBJLstHdrA_Terry_ThrowRotL0, OBJLSTPTR_NONE
+OBJLstPtrTable_Terry_GrabRotL:
+	dw OBJLstHdrA_Terry_GrabRotL0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -1390,7 +1390,7 @@ OBJLstHdrA_Terry_TimeOver2:
 	db $34,$03,$0A ; $05
 	db $2C,$EB,$0C ; $06
 		
-OBJLstHdrA_Terry_ThrowEndA3:
+OBJLstHdrA_Terry_LaunchUBShake3:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -1436,11 +1436,11 @@ OBJLstHdrA_Terry_GuardBreakG0:
 	db $31,$02,$0A ; $05
 	db $26,$EA,$0C ; $06
 		
-OBJLstHdrA_Terry_Hitlow0:
+OBJLstHdrA_Terry_HitLow0:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Terry_Hitlow0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Terry_HitLow0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
@@ -1454,11 +1454,11 @@ OBJLstHdrA_Terry_Hitlow0:
 	db $37,$00,$08 ; $04
 	db $28,$08,$0A ; $05
 		
-OBJLstHdrA_Terry_DropMain1:
+OBJLstHdrA_Terry_LaunchUB1:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Terry_DropMain1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Terry_LaunchUB1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $04 ; iOBJLstHdrA_XOffset
 	db $11 ; iOBJLstHdrA_YOffset
@@ -1473,20 +1473,20 @@ OBJLstHdrA_Terry_DropMain1:
 	db $2C,$E6,$0A ; $05
 	db $13,$E7,$0C ; $06
 		
-OBJLstHdrA_Terry_ThrowRotL0:
+OBJLstHdrA_Terry_GrabRotL0:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Terry_DropMain1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Terry_DropMain1.bin ; iOBJLstHdrA_DataPtr
+	dpr GFX_Char_Terry_LaunchUB1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw OBJLstHdrA_Terry_LaunchUB1.bin ; iOBJLstHdrA_DataPtr
 	db $FC ; iOBJLstHdrA_XOffset
 	db $02 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Terry_DropMain2:
+OBJLstHdrA_Terry_LaunchUB2:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Terry_DropMain2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Terry_LaunchUB2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $04 ; iOBJLstHdrA_XOffset
 	db $02 ; iOBJLstHdrA_YOffset

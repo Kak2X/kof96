@@ -12882,7 +12882,7 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_INVULN, [hl]
 
 			; New move
-			ld   a, MOVE_SHARED_GRAB_G
+			ld   a, MOVE_SHARED_THROW_G
 			call Pl_SetMove_StopSpeed
 			; Wait 1 frame
 			call Task_PassControlFar
@@ -12960,7 +12960,7 @@ Play_Pl_DoBasicMoveInput:
 			set  PF1B_INVULN, [hl]
 
 			; New move
-			ld   a, MOVE_SHARED_GRAB_A
+			ld   a, MOVE_SHARED_THROW_A
 			call Pl_SetMove_StopSpeed
 			; Wait 1 frame
 			call Task_PassControlFar
@@ -14045,9 +14045,9 @@ MoveInputS_CanStartSpecialMove:
 	ld   hl, iPlInfo_MoveId
 	add  hl, bc
 	ld   a, [hl]
-	cp   MOVE_SHARED_GRAB_G
+	cp   MOVE_SHARED_THROW_G
 	jp   z, .retNoMove
-	cp   MOVE_SHARED_GRAB_A
+	cp   MOVE_SHARED_THROW_A
 	jp   z, .retNoMove
 
 	;
@@ -14561,15 +14561,15 @@ Play_StartThrowEffect:
 ; - L: Vertical position
 Play_Pl_MoveRotThrown:
 	ld   a, h
-	ld   [wPlayPlThrowRotMoveH], a
+	ld   [wPlayPlGrabRotMoveH], a
 	ld   a, l
-	ld   [wPlayPlThrowRotMoveV], a
+	ld   [wPlayPlGrabRotMoveV], a
 	; By default, perform the movment only once.
 	; However, once isn't enough if the player moves in the middle of the throw,
 	; as the opponent needs to be sync'd to the updated position.
 	; Moves that need so manually set this value (mMvC_MoveThrowSync)
 	xor  a
-	ld   [wPlayPlThrowRotSync], a
+	ld   [wPlayPlGrabRotSync], a
 	ret
 
 ; =============== Play_Pl_SetMoveDamage ===============

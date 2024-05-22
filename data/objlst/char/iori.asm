@@ -296,8 +296,8 @@ OBJLstPtrTable_Iori_Hit1mid:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Iori_Hitlow:
-	dw OBJLstHdrA_Iori_Hitlow0, OBJLSTPTR_NONE ;X
+OBJLstPtrTable_Iori_HitLow:
+	dw OBJLstHdrA_Iori_HitLow0, OBJLSTPTR_NONE ;X
 	dw OBJLSTPTR_NONE
 		
 
@@ -307,7 +307,7 @@ OBJLstPtrTable_Iori_GuardBreakA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Iori_BackjumpRecA:
+OBJLstPtrTable_Iori_LaunchUBRec:
 	dw OBJLstHdrA_Iori_GuardBreakG0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Iori_JumpN3, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Iori_JumpN3, OBJLSTPTR_NONE
@@ -318,13 +318,13 @@ OBJLstPtrTable_Iori_BackjumpRecA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Iori_DropMain:
+OBJLstPtrTable_Iori_LaunchUB:
 	dw OBJLstHdrA_Iori_GuardBreakG0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Iori_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Iori_DropMain2, OBJLSTPTR_NONE
-OBJLstPtrTable_Iori_HitMultigs:
-	dw OBJLstHdrA_Iori_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Iori_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Iori_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Iori_LaunchUB2, OBJLSTPTR_NONE
+OBJLstPtrTable_Iori_HitMultiGS:
+	dw OBJLstHdrA_Iori_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Iori_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -332,23 +332,23 @@ OBJLstPtrTable_Iori_HitSwoopup:
 	dw OBJLstHdrA_Iori_Hit1mid2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Iori_HitSwoopup1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Iori_HitSwoopup2, OBJLSTPTR_NONE
-OBJLstPtrTable_Iori_ThrowEndA:
-	dw OBJLstHdrA_Iori_ThrowEndA3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Iori_ThrowEndA3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Iori_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Iori_DropMain2, OBJLSTPTR_NONE
+OBJLstPtrTable_Iori_LaunchUBShake:
+	dw OBJLstHdrA_Iori_LaunchUBShake3, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Iori_LaunchUBShake3, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Iori_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Iori_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Iori_DropDbg:
+OBJLstPtrTable_Iori_HitSweep:
 	dw OBJLstHdrA_Iori_Hit1mid2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Iori_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Iori_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Iori_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Iori_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Iori_ThrowRotL:
-	dw OBJLstHdrA_Iori_ThrowRotL0, OBJLSTPTR_NONE
+OBJLstPtrTable_Iori_GrabRotL:
+	dw OBJLstHdrA_Iori_GrabRotL0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -1973,7 +1973,7 @@ OBJLstHdrA_Iori_HitSwoopup2:
 	db $00 ; iOBJLstHdrA_XOffset
 	db $04 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Iori_ThrowEndA3:
+OBJLstHdrA_Iori_LaunchUBShake3:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -2000,11 +2000,11 @@ OBJLstHdrA_Iori_GuardBreakG0:
 	db $34,$04,$08 ; $04
 	db $26,$0C,$0A ; $05
 		
-OBJLstHdrA_Iori_Hitlow0: ;X
+OBJLstHdrA_Iori_HitLow0: ;X
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Iori_Hitlow0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Iori_HitLow0 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
@@ -2019,11 +2019,11 @@ OBJLstHdrA_Iori_Hitlow0: ;X
 	db $30,$05,$0A ; $05
 	db $29,$0D,$0C ; $06
 		
-OBJLstHdrA_Iori_DropMain1:
+OBJLstHdrA_Iori_LaunchUB1:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Iori_DropMain1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Iori_LaunchUB1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $1E ; iOBJLstHdrA_YOffset
@@ -2038,20 +2038,20 @@ OBJLstHdrA_Iori_DropMain1:
 	db $1E,$EC,$0A ; $05
 	db $20,$FC,$0C ; $06
 		
-OBJLstHdrA_Iori_ThrowRotL0:
+OBJLstHdrA_Iori_GrabRotL0:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Iori_DropMain1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Iori_DropMain1.bin ; iOBJLstHdrA_DataPtr
+	dpr GFX_Char_Iori_LaunchUB1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw OBJLstHdrA_Iori_LaunchUB1.bin ; iOBJLstHdrA_DataPtr
 	db $02 ; iOBJLstHdrA_XOffset
 	db $F2 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Iori_DropMain2:
+OBJLstHdrA_Iori_LaunchUB2:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Iori_DropMain2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Iori_LaunchUB2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset

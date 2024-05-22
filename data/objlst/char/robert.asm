@@ -266,8 +266,8 @@ OBJLstPtrTable_Robert_TimeOver:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Robert_Hitlow:
-	dw OBJLstHdrA_Robert_Hitlow0_A, OBJLstHdrB_Robert_Hitlow0_B
+OBJLstPtrTable_Robert_HitLow:
+	dw OBJLstHdrA_Robert_HitLow0_A, OBJLstHdrB_Robert_HitLow0_B
 	dw OBJLSTPTR_NONE
 		
 
@@ -277,7 +277,7 @@ OBJLstPtrTable_Robert_GuardBreakA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Robert_BackjumpRecA:
+OBJLstPtrTable_Robert_LaunchUBRec:
 	dw OBJLstHdrA_Robert_GuardBreakG0_A, OBJLstHdrB_Robert_GuardBreakG0_B
 	dw OBJLstHdrA_Robert_JumpF5, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Robert_JumpF4, OBJLSTPTR_NONE
@@ -288,13 +288,13 @@ OBJLstPtrTable_Robert_BackjumpRecA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Robert_DropMain:
+OBJLstPtrTable_Robert_LaunchUB:
 	dw OBJLstHdrA_Robert_GuardBreakG0_A, OBJLstHdrB_Robert_GuardBreakG0_B
-	dw OBJLstHdrA_Robert_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Robert_DropMain2, OBJLSTPTR_NONE
-OBJLstPtrTable_Robert_HitMultigs:
-	dw OBJLstHdrA_Robert_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Robert_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Robert_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Robert_LaunchUB2, OBJLSTPTR_NONE
+OBJLstPtrTable_Robert_HitMultiGS:
+	dw OBJLstHdrA_Robert_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Robert_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -302,23 +302,23 @@ OBJLstPtrTable_Robert_HitSwoopup:
 	dw OBJLstHdrA_Robert_TimeOver2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Robert_HitSwoopup1, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Robert_HitSwoopup2, OBJLSTPTR_NONE
-OBJLstPtrTable_Robert_ThrowEndA:
-	dw OBJLstHdrA_Robert_ThrowEndA3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Robert_ThrowEndA3, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Robert_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Robert_DropMain2, OBJLSTPTR_NONE
+OBJLstPtrTable_Robert_LaunchUBShake:
+	dw OBJLstHdrA_Robert_LaunchUBShake3, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Robert_LaunchUBShake3, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Robert_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Robert_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Robert_DropDbg:
+OBJLstPtrTable_Robert_HitSweep:
 	dw OBJLstHdrA_Robert_TimeOver2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Robert_DropMain1, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Robert_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Robert_LaunchUB1, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Robert_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Robert_ThrowRotL:
-	dw OBJLstHdrA_Robert_ThrowRotL0, OBJLSTPTR_NONE
+OBJLstPtrTable_Robert_GrabRotL:
+	dw OBJLstHdrA_Robert_GrabRotL0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -1644,7 +1644,7 @@ OBJLstHdrA_Robert_HitSwoopup2:
 	db $FB ; iOBJLstHdrA_XOffset
 	db $02 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Robert_ThrowEndA3:
+OBJLstHdrA_Robert_LaunchUBShake3:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -1668,7 +1668,7 @@ OBJLstHdrA_Robert_GuardBreakG0_A:
 	db $20,$F9,$02 ; $01
 	db $20,$01,$04 ; $02
 		
-OBJLstHdrA_Robert_Hitlow0_A:
+OBJLstHdrA_Robert_HitLow0_A:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -1690,9 +1690,9 @@ OBJLstHdrB_Robert_GuardBreakG0_B:
 	db $30,$F6,$02 ; $01
 	db $30,$FE,$04 ; $02
 		
-OBJLstHdrB_Robert_Hitlow0_B:
+OBJLstHdrB_Robert_HitLow0_B:
 	db $00 ; iOBJLstHdrA_Flags
-	dpr GFX_Char_Robert_Hitlow0_B ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Robert_HitLow0_B ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
@@ -1703,11 +1703,11 @@ OBJLstHdrB_Robert_Hitlow0_B:
 	db $35,$01,$02 ; $01
 	db $35,$09,$04 ; $02
 		
-OBJLstHdrA_Robert_DropMain1:
+OBJLstHdrA_Robert_LaunchUB1:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Robert_DropMain1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Robert_LaunchUB1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $05 ; iOBJLstHdrA_XOffset
 	db $22 ; iOBJLstHdrA_YOffset
@@ -1722,20 +1722,20 @@ OBJLstHdrA_Robert_DropMain1:
 	db $19,$F4,$0A ; $05
 	db $19,$FC,$0C ; $06
 		
-OBJLstHdrA_Robert_ThrowRotL0:
+OBJLstHdrA_Robert_GrabRotL0:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Robert_DropMain1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
-	dw OBJLstHdrA_Robert_DropMain1.bin ; iOBJLstHdrA_DataPtr
+	dpr GFX_Char_Robert_LaunchUB1 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dw OBJLstHdrA_Robert_LaunchUB1.bin ; iOBJLstHdrA_DataPtr
 	db $FD ; iOBJLstHdrA_XOffset
 	db $EE ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Robert_DropMain2:
+OBJLstHdrA_Robert_LaunchUB2:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Robert_DropMain2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Robert_LaunchUB2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $00 ; iOBJLstHdrA_XOffset
 	db $09 ; iOBJLstHdrA_YOffset

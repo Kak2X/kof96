@@ -230,7 +230,7 @@ OBJLstPtrTable_Krauser_TimeOver:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Krauser_Hitlow:
+OBJLstPtrTable_Krauser_HitLow:
 	dw OBJLstHdrA_Krauser_RollF3, OBJLSTPTR_NONE ;X
 	dw OBJLSTPTR_NONE
 		
@@ -241,7 +241,7 @@ OBJLstPtrTable_Krauser_GuardBreakA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Krauser_BackjumpRecA:
+OBJLstPtrTable_Krauser_LaunchUBRec:
 	dw OBJLstHdrA_Krauser_GuardBreakG0_A, OBJLstHdrB_Krauser_GuardBreakG0_B
 	dw OBJLstHdrA_Krauser_JumpN3_A, OBJLstHdrB_Krauser_JumpN3_B
 	dw OBJLstHdrA_Krauser_JumpN3_A, OBJLstHdrB_Krauser_JumpN3_B
@@ -252,13 +252,13 @@ OBJLstPtrTable_Krauser_BackjumpRecA:
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Krauser_DropMain:
+OBJLstPtrTable_Krauser_LaunchUB:
 	dw OBJLstHdrA_Krauser_GuardBreakG0_A, OBJLstHdrB_Krauser_GuardBreakG0_B
 	dw OBJLstHdrA_Krauser_RollF2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Krauser_DropMain2, OBJLSTPTR_NONE
-OBJLstPtrTable_Krauser_HitMultigs:
+	dw OBJLstHdrA_Krauser_LaunchUB2, OBJLSTPTR_NONE
+OBJLstPtrTable_Krauser_HitMultiGS:
 	dw OBJLstHdrA_Krauser_RollF2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Krauser_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Krauser_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -266,23 +266,23 @@ OBJLstPtrTable_Krauser_HitSwoopup:
 	dw OBJLstHdrA_Krauser_TimeOver2_A, OBJLstHdrB_Krauser_GuardBreakG0_B
 	dw OBJLstHdrA_Krauser_HitSwoopup1_A, OBJLstHdrB_Krauser_HitSwoopup1_B
 	dw OBJLstHdrA_Krauser_HitSwoopup2_A, OBJLstHdrB_Krauser_HitSwoopup2_B
-OBJLstPtrTable_Krauser_ThrowEndA:
-	dw OBJLstHdrA_Krauser_ThrowEndA3_A, OBJLstHdrB_Krauser_ThrowEndA3_B
-	dw OBJLstHdrA_Krauser_ThrowEndA3_A, OBJLstHdrB_Krauser_ThrowEndA3_B
+OBJLstPtrTable_Krauser_LaunchUBShake:
+	dw OBJLstHdrA_Krauser_LaunchUBShake3_A, OBJLstHdrB_Krauser_LaunchUBShake3_B
+	dw OBJLstHdrA_Krauser_LaunchUBShake3_A, OBJLstHdrB_Krauser_LaunchUBShake3_B
 	dw OBJLstHdrA_Krauser_RollF2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Krauser_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Krauser_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Krauser_DropDbg:
+OBJLstPtrTable_Krauser_HitSweep:
 	dw OBJLstHdrA_Krauser_TimeOver2_A, OBJLstHdrB_Krauser_GuardBreakG0_B
 	dw OBJLstHdrA_Krauser_RollF2, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Krauser_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Krauser_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
-OBJLstPtrTable_Krauser_ThrowRotL:
-	dw OBJLstHdrA_Krauser_ThrowRotL0, OBJLSTPTR_NONE
+OBJLstPtrTable_Krauser_GrabRotL:
+	dw OBJLstHdrA_Krauser_GrabRotL0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
 
@@ -329,7 +329,7 @@ OBJLstPtrTable_Krauser_LegTomahawkL:
 OBJLstPtrTable_Krauser_KaiserKickL:
 	dw OBJLstHdrA_Krauser_KickH0, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Krauser_AttackA0, OBJLSTPTR_NONE
-	dw OBJLstHdrA_Krauser_DropMain2, OBJLSTPTR_NONE
+	dw OBJLstHdrA_Krauser_LaunchUB2, OBJLSTPTR_NONE
 	dw OBJLstHdrA_Krauser_Crouch0, OBJLSTPTR_NONE
 	dw OBJLSTPTR_NONE
 		
@@ -1552,7 +1552,7 @@ OBJLstHdrB_Krauser_HitSwoopup2_B:
 	db $30,$FA,$02 ; $01
 	db $30,$02,$04 ; $02
 		
-OBJLstHdrB_Krauser_ThrowEndA3_B:
+OBJLstHdrB_Krauser_LaunchUBShake3_B:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	dpr GFX_Char_Krauser_GuardBreakG0_B ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw OBJLstHdrB_Krauser_HitSwoopup2_B.bin ; iOBJLstHdrA_DataPtr
@@ -1594,7 +1594,7 @@ OBJLstHdrA_Krauser_HitSwoopup2_A:
 	db $1C,$F7,$06 ; $03
 	db $1B,$EF,$08 ; $04
 		
-OBJLstHdrA_Krauser_ThrowEndA3_A:
+OBJLstHdrA_Krauser_LaunchUBShake3_A:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -1661,7 +1661,7 @@ OBJLstHdrA_Krauser_RollF0:
 	db $FE ; iOBJLstHdrA_XOffset
 	db $FE ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Krauser_ThrowRotL0:
+OBJLstHdrA_Krauser_GrabRotL0:
 	db OLF_XFLIP|OLF_YFLIP ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
@@ -1670,11 +1670,11 @@ OBJLstHdrA_Krauser_ThrowRotL0:
 	db $FE ; iOBJLstHdrA_XOffset
 	db $08 ; iOBJLstHdrA_YOffset
 		
-OBJLstHdrA_Krauser_DropMain2:
+OBJLstHdrA_Krauser_LaunchUB2:
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db $00 ; iOBJLstHdrA_HitboxId
-	dpr GFX_Char_Krauser_DropMain2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
+	dpr GFX_Char_Krauser_LaunchUB2 ; iOBJLstHdrA_GFXPtr + iOBJLstHdrA_GFXBank
 	dw .bin ; iOBJLstHdrA_DataPtr
 	db $03 ; iOBJLstHdrA_XOffset
 	db $01 ; iOBJLstHdrA_YOffset
