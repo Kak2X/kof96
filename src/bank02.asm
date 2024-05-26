@@ -767,7 +767,7 @@ MoveC_Base_WakeUp_End:
 	inc  hl		; Seek to iPlInfo_Flags1
 	set  PF1B_NOSPECSTART, [hl] ; Can't cancel dizzies into specials (and since the dizzy state is a move, can't start normals either)
 	res  PF1B_HITRECV, [hl] ; Damage string ended
-	res  PF1B_ALLOWHITCANCEL, [hl] ; Disable override
+	res  PF1B_ALLOWHITCANCEL, [hl] ; In case of a trade
 	res  PF1B_INVULN, [hl] ; Not invulnerable
 
 IF REV_VER_2 == 1

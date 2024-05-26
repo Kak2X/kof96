@@ -283,14 +283,14 @@ PF1B_HITRECV        EQU 4 ; If set, the player is on the receiving end of a dama
                           ; This is set when the player is attacked at least once (hit or blocked), and
                           ; resets on its own if not cancelling the attack into one that hits.
 PF1B_CROUCH         EQU 5 ; If set, the player is crouching
-PF1B_ALLOWHITCANCEL EQU 6 ; If set, it's possible to cancel the move into a new special, usually after hitting the opponent. This still needs to pass the special cancelling check,
+PF1B_ALLOWHITCANCEL EQU 6 ; If set, it's possible to cancel a move into a new special, set after hitting the opponent. This bypasses PF1B_NOSPECSTART.
 PF1B_INVULN         EQU 7 ; If set, the player is completely invulnerable. 
 						  ; This value isn't always checked during collision -- phyisical hurtbox collisions pass,
 						  ; but they are blocked before they can deal damage.
 ; iPlInfo_Flags2 flags
 PF2B_MOVESTART      EQU 0 ; Marks that a new move has been set
 PF2B_HEAVY          EQU 1 ; To distinguish between light/heavy when starting an attack
-PF2B_HITCOMBO       EQU 2 ; If set, the current move was combo'd from another.
+PF2B_NODAMAGERATE   EQU 2 ; [TCRF] Leftover from 95. If set, it would disable the damage rate limit, which is ignored in this game.
 PF2B_AUTOGUARDDONE  EQU 3 ; If set, the autoguard triggered on this frame
 PF2B_AUTOGUARDMID   EQU 4 ; If set, the move automatically blocks lows
 PF2B_AUTOGUARDLOW   EQU 5 ; If set, the move automatically blocks mids

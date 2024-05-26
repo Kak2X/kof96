@@ -976,9 +976,9 @@ Play_DoMisc_ResetDamage:
 	ld   [wPlInfo_Pl2+iPlInfo_MoveDamageVal], a	; Prevent the move from dealing further damage
 	ld   [wPlInfo_Pl1+iPlInfo_PhysHitRecv], a	; Unmark damage received flag
 	ld   hl, wPlInfo_Pl2+iPlInfo_Flags1
-	set  PF1B_ALLOWHITCANCEL, [hl] 			; Allow the opponent to start a new special off the hit
+	set  PF1B_ALLOWHITCANCEL, [hl] 				; Allow the opponent to start a new special off the hit
 	inc  hl
-	res  PF2B_HITCOMBO, [hl]					; Unmark the combo flag for the next time we hit cancel
+	res  PF2B_NODAMAGERATE, [hl]				; Clear on first hit
 	
 .chkHit2P:
 	; Same for the 2P side
@@ -991,7 +991,7 @@ Play_DoMisc_ResetDamage:
 	ld   hl, wPlInfo_Pl1+iPlInfo_Flags1
 	set  PF1B_ALLOWHITCANCEL, [hl]
 	inc  hl
-	res  PF2B_HITCOMBO, [hl]
+	res  PF2B_NODAMAGERATE, [hl]
 	
 .copyDamageVars:
 	; Give visibility to the player-to-player push request

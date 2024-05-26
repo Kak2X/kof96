@@ -1326,7 +1326,7 @@ VBlank_ChkCopyPlTiles:
 	ld   a, [wNoCopyGFXBuf]
 	or   a							; Is the GFX copying outright disabled?
 	jp   nz, VBlank_SetInitialSect	; If so, skip
-	jp   VBlank_CopyPl1Tiles
+	jp   VBlank_CopyPl1Tiles.canCopy
 
 ; =============== VBlank_CopyPl*Tiles ===============
 ; Set of subroutines for copying the player graphics across multiple frames during VBLANK.
@@ -1349,6 +1349,32 @@ MAX_TILE_BUFFER_COPY EQU $03
 ; - 2: Ptr to wOBJInfo structure
 ; - 3: Ptr to wGFXBufInfo structure
 mVBlank_CopyPlTiles: MACRO
+
+	;--
+	;
+	; [TCRF] Unreferenced leftover from 95 that's skipped over.
+	;        This would have reduced the amount of damage dealt by air moves
+	;        by preventing the animation frame from updating if hitstop is enabled.
+	;
+	;        This being skipped over means full damage is always dealt, and that
+	;        PF2B_NODAMAGERATE lost its purpose in this game.
+	;        Moves from that were officially ported from 95 were updated to account 
+	;        for this, while unofficial ones not so much.
+	;
+	;
+	ld   a, [\1+iPlInfo_Flags1]
+	bit  PF1B_HITRECV, a			; Are we the player being hit?
+	jp   nz, .canCopy				; If so, skip
+	ld   a, [\1+iPlInfo_Flags2]
+	bit  PF2B_NODAMAGERATE, a		; Did we *not* hit the opponent yet?
+	jp   nz, .canCopy				; If so, jump
+	ld   a, [wPlayHitstop]
+	or   a							; Is hitstop enabled?
+	jp   nz, .end					; If so, skip the GFX update for this player
+	;--
+
+	; ACTUAL entry point used
+.canCopy:
 	ld   a, [\3+iGFXBufInfo_TilesLeftA]
 	or   a					; Any tiles left to transfer to buffer 0?
 	jp   nz, .copyTo0		; If so, jump
@@ -1530,39 +1556,13 @@ ENDM
 ;
 ; 1P
 ;
-;--
-; [TCRF] Unreferenced code.
-VBlank_Unused_Pl1Checks:
-	ld   a, [wPlInfo_Pl1+iPlInfo_Flags1]
-	bit  PF1B_HITRECV, a
-	jp   nz, VBlank_CopyPl1Tiles
-	ld   a, [wPlInfo_Pl1+iPlInfo_Flags2]
-	bit  PF2B_HITCOMBO, a
-	jp   nz, VBlank_CopyPl1Tiles
-	ld   a, [wPlayHitstop]
-	or   a
-	jp   nz, VBlank_CopyPl1Tiles.end
-;--
 VBlank_CopyPl1Tiles:
 	mVBlank_CopyPlTiles wPlInfo_Pl1, wOBJInfo_Pl1, wGFXBufInfo_Pl1
-	jp   VBlank_CopyPl2Tiles
+	jp   VBlank_CopyPl2Tiles.canCopy
 
 ;
 ; 2P
 ;
-;--
-; [TCRF] Unreferenced code
-VBlank_Unused_Pl2Checks:
-	ld   a, [wPlInfo_Pl2+iPlInfo_Flags1]
-	bit  PF1B_HITRECV, a
-	jp   nz, VBlank_CopyPl2Tiles
-	ld   a, [wPlInfo_Pl2+iPlInfo_Flags2]
-	bit  PF2B_HITCOMBO, a
-	jp   nz, VBlank_CopyPl2Tiles
-	ld   a, [wPlayHitstop]
-	or   a
-	jp   nz, VBlank_CopyPl2Tiles.end
-;--
 VBlank_CopyPl2Tiles:
 	mVBlank_CopyPlTiles wPlInfo_Pl2, wOBJInfo_Pl2, wGFXBufInfo_Pl2
 
@@ -11808,7 +11808,7 @@ Play_Pl_EndMove:
 	res  PF1B_ALLOWHITCANCEL, [hl]
 	res  PF1B_INVULN, [hl]
 	inc  hl	; Seek to iPlInfo_Flags2
-	res  PF2B_HITCOMBO, [hl]
+	res  PF2B_NODAMAGERATE, [hl]
 	res  PF2B_AUTOGUARDDONE, [hl]
 	res  PF2B_AUTOGUARDMID, [hl]
 	res  PF2B_AUTOGUARDLOW, [hl]
@@ -14055,10 +14055,10 @@ MoveInputS_CanStartSpecialMove:
 	;
 	ld   hl, iPlInfo_Flags1
 	add  hl, bc						; Seek to iPlInfo_Flags1
-	bit  PF1B_ALLOWHITCANCEL, [hl]		; Can we combo off the previous hit?
-	jp   nz, .moveOk				; If so, jump (skip check)
-	bit  PF1B_NOSPECSTART, [hl]	; Are we allowed to cancel the move into the special?
-	jp   nz, .retNoMove				; If not, return
+	bit  PF1B_ALLOWHITCANCEL, [hl]	; Can we cancel the current move into a special/super? (off the previous hit)
+	jp   nz, .moveOk				; If so, skip (ok)
+	bit  PF1B_NOSPECSTART, [hl]		; Are we explicitly disallowed to start a new special/super?
+	jp   nz, .retNoMove				; If so, return
 
 .moveOk:
 
@@ -14411,18 +14411,15 @@ ENDC
 	pop  hl
 
 	;
-	; When starting a new special off another hit, flag that we're doing a combo
-	; and animate it much faster by removing the delay.
-	;
-	; This means the move animation will only wait for the player graphics to load
-	; before switching to the next frame.
+	; If we started a new move off another hit, set the initial animation speed to be as fast as possible.
 	;
 	dec  hl							; Seek to iPlInfo_Flags1
 	bit  PF1B_ALLOWHITCANCEL, [hl]	; Did we combo the move off a previous hit?
 	jp   z, .ret					; If not, return
-	; Set that we started a combo'd move
+	; [POI] Leftover from 95, would have forced the GFX load for the new frame even during hitstop
 	inc  hl
-	set  PF2B_HITCOMBO, [hl]
+	set  PF2B_NODAMAGERATE, [hl]
+	; Animate it very fast.
 	; Note that Pl_SetMove_StopSpeed set us a new FrameLeft/FrameTotal value.
 	; In case of moves that expect manual control by having set ANIMSPEED_NONE ($FF) initially, don't remove the delay.
 	ld   hl, iOBJInfo_FrameLeft
@@ -15980,7 +15977,7 @@ Play_Pl_StartWakeUp:
 
 	inc  hl							; Seek to iPlInfo_Flags1
 	res  PF1B_HITRECV, [hl] 		; Falling to the ground ends the opponent's combo
-	res  PF1B_ALLOWHITCANCEL, [hl] ; For next time
+	res  PF1B_ALLOWHITCANCEL, [hl]	; In case of a trade
 	; The player can't be hit on the ground
 	set  PF1B_INVULN, [hl]
 
