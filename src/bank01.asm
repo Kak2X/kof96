@@ -84,7 +84,7 @@ GFX_Play_SuperSparkle: INCBIN "data/gfx/play_supersparkle.bin"
 ; IN
 ; - 1: Starting offset
 ; - 2: Tile count (as 8x8 tiles)
-mProjDef: MACRO
+MACRO mProjDef
 	dw \1
 	db \2
 ENDM
@@ -698,7 +698,7 @@ Play_DoMisc:
 ; - 9: Set B, Id 1 color
 ; - 10: Set B, Id 2 color
 ; - 11: Set B, Id 3 color
-mFlashPlPal: MACRO
+MACRO mFlashPlPal
 	; These two use palette set B
 	ld   a, [\1+iPlInfo_Flags3]
 	bit  PF3B_FIRE, a		; bit1 set?	
@@ -1018,7 +1018,7 @@ Play_DoMisc_ResetDamage:
 ; Generates code to automatically decrement the Max Power meter over time.
 ; IN
 ; - 1: Ptr to player struct
-mDecMaxPow: MACRO
+MACRO mDecMaxPow
 	; Pass the gauntlet of checks before checking if the bar should be decremented.
 	ld   a, [\1+iPlInfo_Pow]
 	
@@ -1078,7 +1078,7 @@ Play_DoMisc_DecMaxPow2P: mDecMaxPow wPlInfo_Pl2
 ;
 ; IN
 ; - 1: Ptr to player struct
-mIncPlPow: MACRO
+MACRO mIncPlPow
 	; Don't increment if the meter is at max value already
 	ld   a, [\1+iPlInfo_Pow]
 	cp   PLAY_POW_MAX		; Pow meter at max value?
@@ -1135,7 +1135,7 @@ Play_DoMisc_IncPow2P: mIncPlPow wPlInfo_Pl2
 ; IN
 ; - 1: Ptr to player struct
 ; - 2: Ptr to other player struct
-mDecPlPow: MACRO
+MACRO mDecPlPow
 	; Only applicable if we're not at Max Power and there's something in the bar
 	ld   a, [\1+iPlInfo_Pow]
 	cp   PLAY_POW_MAX	; Is the current player at max power?
@@ -3860,7 +3860,7 @@ Play_UpdateHealthBars:
 ; IN
 ; - HL: Ptr to tilemap
 ; - B: Tile ID
-mDrawHealthBarTile: MACRO
+MACRO mDrawHealthBarTile
 	push af
 		di
 		mWaitForVBlankOrHBlank
@@ -5311,7 +5311,7 @@ Play_DrawMaximumText:
 ; - HL: Ptr to tilemap
 ; OUT
 ; - HL: Ptr to the tilemap + 1
-mDrawPowBarTileId: MACRO
+MACRO mDrawPowBarTileId
 	mWaitForVBlankOrHBlank
 	ld   a, \1
 	IF _NARG > 1
@@ -5610,7 +5610,7 @@ Play_WriteKeysToBuffer:
 ; IN
 ; - 1: Ptr to wPlInfo
 ; - 2: Ptr to wOBJInfo
-mWriteDirKeysToBuffer: MACRO
+MACRO mWriteDirKeysToBuffer
 	; DE = Offset to buffer entry
 	;      This must be a multiple of 2 as each entry in this table
 	;      is 2 bytes long (key, timer)
@@ -5696,7 +5696,7 @@ ENDM
 ; See also: mWriteDirKeysToBuffer
 ; IN
 ; - 1: Ptr to player struct
-mWriteBtnKeysToBuffer: MACRO
+MACRO mWriteBtnKeysToBuffer
 
 	; This uses its own buffer, separate from the one with directional keys.
 

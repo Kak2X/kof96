@@ -905,7 +905,7 @@ Title_Mode_Options:
 ; - 1: Ptr to value
 ; - 2: Min value
 ; - 3: Target location on fail
-mOptionMin: MACRO
+MACRO mOptionMin
 	ld   a, [\1]
 	cp   \2			; Value == MinValue?
 	jp   z, \3		; If so, skip
@@ -918,7 +918,7 @@ ENDM
 ; - 1: Ptr to value
 ; - 2: Min value
 ; - 3: Target location on fail
-mOptionMax: MACRO
+MACRO mOptionMax
 	ld   a, [\1]
 	cp   \2			; Value == MaxValue?
 	jp   z, \3		; If so, skip
@@ -3471,7 +3471,7 @@ Intro_CharS_SetNextChar:
 	
 .charDefTbl:
 
-mIntroCharDef: MACRO
+MACRO mIntroCharDef
 	db BANK(\1)
 	dw \1
 	db \2,\3,\4

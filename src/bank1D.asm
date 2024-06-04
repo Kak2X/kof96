@@ -689,7 +689,7 @@ Win_MakeSortedCharIdList:
 ; OUT
 ; - C flag: If set, we're using that special team.
 ; - wBonusFightId: Set to the bonus team ID when C is set.
-mWinIsSpecTeam: MACRO
+MACRO mWinIsSpecTeam
 
 IF _NARG < 7
 	;
@@ -3416,7 +3416,7 @@ Cutscene_InitChars:
 ; IN
 ; - 1: Field for the character on the left
 ; - 2: Field for the character on the right
-mCutDrawSecChar: MACRO
+MACRO mCutDrawSecChar
 	;
 	; Draw the character on the left facing right.
 	;

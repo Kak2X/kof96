@@ -433,7 +433,7 @@ SGB_LoadInitial:
 		ld   [MBC1RomBank], a
 		ldh  [hROMBank], a
 
-mSendPkg: MACRO
+MACRO mSendPkg
 	ld   hl, \1
 	call SGB_SendPackets
 	ld   bc, $0004
@@ -1348,7 +1348,7 @@ MAX_TILE_BUFFER_COPY EQU $03
 ; - 1: Ptr to wPlInfo structure
 ; - 2: Ptr to wOBJInfo structure
 ; - 3: Ptr to wGFXBufInfo structure
-mVBlank_CopyPlTiles: MACRO
+MACRO mVBlank_CopyPlTiles
 
 	;--
 	;
@@ -1843,7 +1843,7 @@ ENDC
 ; The viewport range is considered to be the area between $10-$A0 (+$08)
 ; IN
 ; - 1: Ptr to start of OBJInfo
-mPL_KeepInScreenRange: MACRO
+MACRO mPL_KeepInScreenRange
 	; Ignore if the player isn't visible
 	ld   a, [\1+iOBJInfo_Status]
 	bit  OSTB_VISIBLE, a	; Visibility flag set?

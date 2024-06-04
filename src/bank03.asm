@@ -37,7 +37,7 @@ MoveAnimTbl_Marker:
 ;         All of these reuse the idle animation truncated to the first frame.
 ;         For special moves, these are set to deal no damage, while super moves do $14 lines.
 
-mMvAnDef: MACRO
+MACRO mMvAnDef
 	dp \1
 	db \2, \3, \4, \5, \6
 ENDM
@@ -1621,7 +1621,7 @@ MoveAnimTbl_OIori:
 ; NOTES
 ; - Characters with no air throws reuse MoveC_Base_Idle.
 
-mMvCodeDef: MACRO
+MACRO mMvCodeDef
 	IF _NARG > 1 ; For those that define an improper bank number
 		dw \1
 		db \2

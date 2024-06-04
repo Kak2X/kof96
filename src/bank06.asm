@@ -248,7 +248,7 @@ MoveC_Kyo_AraKami:
 	mMvC_ValFrameEnd .anim
 		jp   .anim
 ; --------------- 114 Shiki Ara Kami - input check macro ---------------	
-mAraKami_ChkInpt: MACRO
+MACRO mAraKami_ChkInpt
 	ld   hl, iPlInfo_JoyNewKeysLH
 	add  hl, bc
 	ld   a, [hl]
@@ -286,7 +286,7 @@ ENDM
 	mMvC_ValFrameEnd .anim
 		jp   .anim
 ; --------------- 128 Shiki Kono Kizu - input check macro ---------------
-mKonoKizu_ChkInput: MACRO
+MACRO mKonoKizu_ChkInput
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
 	bit  PF0B_CPU, [hl]			; Current player is a CPU?
@@ -342,7 +342,7 @@ ENDM
 	mMvC_ValFrameEnd .anim
 		jp   .anim
 ; --------------- 127 Shiki Yano Sabi - input check macro ---------------
-mYanoSabi_ChkInpt: MACRO
+MACRO mYanoSabi_ChkInpt
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
 	bit  PF0B_CPU, [hl]
@@ -557,7 +557,7 @@ MoveC_Kyo_DokuKami:
 	mMvC_ValFrameEnd .anim
 		jp   .anim
 ; --------------- 115 Shiki Doku Kami - frame #2-3 input check macro ---------------
-mDokuKami_ChkInput: MACRO
+MACRO mDokuKami_ChkInput
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
 	bit  PF0B_CPU, [hl]	; Current player is CPU?
@@ -607,7 +607,7 @@ ENDM
 	mMvC_ValFrameEnd .anim
 		jp   .anim
 ; --------------- 401 Shiki Tumi Yomi - frame #1-2 input check macro ---------------
-mTumiYomi_ChkInput: MACRO
+MACRO mTumiYomi_ChkInput
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
 	bit  PF0B_CPU, [hl]
@@ -3740,7 +3740,7 @@ MoveC_Athena_ShCryst:
 ; So, the only real way to use the light speed versions is to perform the DF motions.
 ; IN
 ; - \1: [Optional] If set, enable easy move shortcuts
-mShCr0_ChkInpt: MACRO
+MACRO mShCr0_ChkInpt
 	ld   hl, iPlInfo_Flags0
 	add  hl, bc
 	bit  PF0B_CPU, [hl]		; Is this player a CPU?

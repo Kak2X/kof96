@@ -1287,7 +1287,7 @@ CharSel_StartPortraitFlip_CheckChar:
 ; - 5: Alternate char id (CHAR_ID_*)
 ; - 6: Alternate portrait id (CHARSEL_ID_*)
 ; - 7: Alternate tile id base
-mStartFlipPortrait: MACRO
+MACRO mStartFlipPortrait
 
 	; Not applicable if this tile flip is in progress already.
 	push af
@@ -5041,7 +5041,7 @@ WinScr_InitChars:
 ; IN
 ; - 1: Field for the character on the left
 ; - 2: Field for the character on the right
-mWinDrawSecChar: MACRO
+MACRO mWinDrawSecChar
 	;
 	; Draw the character on the left facing right.
 	;
