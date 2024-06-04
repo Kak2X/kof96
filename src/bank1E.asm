@@ -4895,7 +4895,7 @@ ENDC
 	;--
 	
 	; Wait a bit after the printing finishes
-	call WnScr_IdleWait
+	call WinScr_IdleWait
 	
 	; Reset DMG pal
 	ld   a, $FF
@@ -5102,11 +5102,11 @@ ENDM
 .ret:
 	ret
 
-; =============== WnScr_IdleWait ===============
+; =============== WinScr_IdleWait ===============
 ; Waits for $F0 frames showing the Win Screen.
 ; OUT
 ; - C flag: If set, the wait ended prematurely
-WnScr_IdleWait:
+WinScr_IdleWait:
 	ld   b, $F0	; B = Number of frames
 .loop:
 	; If any player presses START, the wait ends early

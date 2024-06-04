@@ -1008,7 +1008,7 @@ Win_Mode_SingleDraw:
 	jp   c, .toContinue
 	;--
 	; [TCRF] C is always set, so we never get here.
-	;        Seems like pressing START would have reset the wait timer.
+	;        Seems like the game would have paused until pressing START.
 	;        See also: other instances of Win_IdleWaitLong calls.
 	call Task_PassControl_NoDelay
 	jp   .wait
@@ -1063,7 +1063,7 @@ Win_Mode_SingleDraw:
 	;-----------------------------------
 	
 	jp   Win_Continue
-; =============== Win_Mode_SingleDraw ===============
+; =============== Win_Mode_VSDraw ===============
 ; Lost in VS mode by ending the stage on a DRAW.
 ; Note that, by the time we get here, "DRAW" should already be in the tilemap.
 Win_Mode_VSDraw:
@@ -1189,6 +1189,7 @@ Win_Continue:
 	ld   a, $01
 	ld   [wUnused_ContinueUsed], a
 	;--
+.jpCharSel:
 	jp   Win_SwitchToCharSel
 	
 .toTitle:
@@ -1210,7 +1211,7 @@ Win_SwitchToCharSel:
 	ld   hl, Module_CharSel
 	rst  $00
 ; =============== Win_DoWinScr ===============
-; Performs initialization of the Win Screen.
+; Handles the Win Screen.
 Win_DoWinScr:
 	ld   b, BANK(SubModule_WinScr) ; BANK $1E
 	ld   hl, SubModule_WinScr
@@ -1219,8 +1220,9 @@ Win_DoWinScr:
 ; =============== Win_Unused_IdleWaitShort ===============
 ; [TCRF] Unreferenced code.
 ; Waits for $F0 frames, or until someone presses START.
+; This is new to this game, not in 95.
 ; OUT
-; - C flag: Always set (leftover from WnScr_IdleWait)
+; - C flag: Always set (leftover from WinScr_IdleWait)
 Win_Unused_IdleWaitShort:
 	ld   b, $F0			; B = Number of frames
 .loop:
@@ -1242,7 +1244,7 @@ Win_Unused_IdleWaitShort:
 ; =============== Win_IdleWaitLong ===============
 ; Waits for $01E0 frames, or until someone presses START.
 ; OUT
-; - C flag: Always set (leftover from WnScr_IdleWait)
+; - C flag: Always set (leftover from WinScr_IdleWait)
 Win_IdleWaitLong:
 	ld   bc, $01E0			; BC = Number of frames
 .loop:
@@ -1352,28 +1354,16 @@ Win_IncStageSeq:
 	
 TextDef_Win_Draw:
 	dw $9888
-	db .end-.start
-.start:
-	db "DRAW"
-.end:
+	mTxtDef "DRAW"
 TextDef_Continue:
 	dw $9AE5
-	db .end-.start
-.start:
-	db "CONTINUE 9"
-.end:
+	mTxtDef "CONTINUE 9"
 TextDef_ContinueNumSpace:
 	dw $9AED
-	db .end-.start
-.start:
-	db " "
-.end:
+	mTxtDef " "
 TextDef_GameOver:
 	dw $9AE5
-	db .end-.start
-.start:
-	db "GAME  OVER"
-.end:
+	mTxtDef "GAME  OVER"
 
 GFXLZ_Cutscene_StadiumBG: INCBIN "data/gfx/cutscene_stadiumbg.lzc"
 BGLZ_Cutscene_StadiumBG: INCBIN "data/bg/cutscene_stadiumbg.lzs"
@@ -4237,298 +4227,151 @@ Cutscene_IsStartPressed:
 IF REV_LANG_EN == 0
 TextDef_Credits0_0:
 	dw $9906
-	db .end-.start
-.start:
-	db "-STAFF-"
-.end:
+	mTxtDef "-STAFF-"
 TextDef_Credits1_0:
 	dw $98C0
-	db .end-.start
-.start:
-	db "-EXECUTIVE PRODUCER-"
-.end:
+	mTxtDef "-EXECUTIVE PRODUCER-"
 TextDef_Credits1_1:
 	dw $9943
-	db .end-.start
-.start:
-	db "HIROHISA SATOH"
-.end:
+	mTxtDef "HIROHISA SATOH"
 TextDef_Credits2_0:
 	dw $98A5
-	db .end-.start
-.start:
-	db "-PRODUCER-"
-.end:
+	mTxtDef "-PRODUCER-"
 TextDef_Credits2_1:
 	dw $9901
-	db .end-.start
-.start:
-	db "MASAHIRO MORIKAWA"
-.end:
+	mTxtDef "MASAHIRO MORIKAWA"
 TextDef_Credits2_2:
 	dw $9942
-	db .end-.start
-.start:
-	db "TAKAYUKI NAKANO"
-.end:
+	mTxtDef "TAKAYUKI NAKANO"
 TextDef_Credits2_3:
 	dw $9985
-	db .end-.start
-.start:
-	db "T.ISHIGAI"
-.end:
+	mTxtDef "T.ISHIGAI"
 TextDef_Credits3_0:
 	dw $98C5
-	db .end-.start
-.start:
-	db "-DIRECTOR-"
-.end:
+	mTxtDef "-DIRECTOR-"
 TextDef_Credits3_1:
 	dw $9921
-	db .end-.start
-.start:
-	db "HIROFUMI KASAKAWA"
-.end:
+	mTxtDef "HIROFUMI KASAKAWA"
 TextDef_Credits4_0:
 	dw $98C3
-	db .end-.start
-.start:
-	db "-ARRANGEMENT-"
-.end:
+	mTxtDef "-ARRANGEMENT-"
 TextDef_Credits4_1:
 	dw $9925
-	db .end-.start
-.start:
-	db "T.SAITOH"
-.end:
+	mTxtDef "T.SAITOH"
 TextDef_Credits4_2:
 	dw $9965
-	db .end-.start
-.start:
-	db "H.KOISO"
-.end:
+	mTxtDef "H.KOISO"
 TextDef_Credits5_0:
 	dw $98C4
-	db .end-.start
-.start:
-	db "-PROGRAMMER-"
-.end:
+	mTxtDef "-PROGRAMMER-"
 TextDef_Credits5_1:
 	dw $9926
-	db .end-.start
-.start:
-	db "H.KOISO"
-.end:
+	mTxtDef "H.KOISO"
 TextDef_Credits5_2:
 	dw $9965
-	db .end-.start
-.start:
-	db "T.ISHIGAI"
-.end:
+	mTxtDef "T.ISHIGAI"
 TextDef_Credits6_0:
 	dw $98A5
-	db .end-.start
-.start:
-	db "-DESIGNER-"
-.end:
+	mTxtDef "-DESIGNER-"
 TextDef_Credits6_1:
 	dw $9906
-	db .end-.start
-.start:
-	db "T.SAITOU"
-.end:
+	mTxtDef "T.SAITOU"
 TextDef_Credits6_2:
 	dw $9946
-	db .end-.start
-.start:
-	db "A.TUYUKI"
-.end:
+	mTxtDef "A.TUYUKI"
 TextDef_Credits6_3:
 	dw $9986
-	db .end-.start
-.start:
-	db "A.HANDA"
-.end:
+	mTxtDef "A.HANDA"
 TextDef_Credits7_0:
 	dw $98C5
-	db .end-.start
-.start:
-	db "MUSIC BY"
-.end:
+	mTxtDef "MUSIC BY"
 TextDef_Credits7_1:
 	dw $9921
-	db .end-.start
-.start:
-	db "STUDIO PJ CO.,LTD"
-.end:
+	mTxtDef "STUDIO PJ CO.,LTD"
 TextDef_Credits9_0:
 	dw $98A1
-	db .end-.start
-.start:
-	db "-SUPER MARKETTER-"
-.end:
+	mTxtDef "-SUPER MARKETTER-"
 TextDef_Credits9_1:
 	dw $9902
-	db .end-.start
-.start:
-	db "TOSHIHIRO MORIOKA"
-.end:
+	mTxtDef "TOSHIHIRO MORIOKA"
 TextDef_Credits9_2:
 	dw $9942
-	db .end-.start
-.start:
-	db "KATUYA TORIHAMA"
-.end:
+	mTxtDef "KATUYA TORIHAMA"
 TextDef_Credits9_3:
 	dw $9982
-	db .end-.start
-.start:
-	db "MASAHIRO IWASAKI"
-.end:
+	mTxtDef "MASAHIRO IWASAKI"
 TextDef_Credits8_0:
 	dw $98C2
-	db .end-.start
-.start:
-	db "-ARTWORK DESIGN-"
-.end:
+	mTxtDef "-ARTWORK DESIGN-"
 TextDef_Credits8_1:
 	dw $9923
-	db .end-.start
-.start:
-	db "DESIGN OFFICE"
-.end:
+	mTxtDef "DESIGN OFFICE"
 TextDef_Credits8_2:
 	dw $9963
-	db .end-.start
-.start:
-	db "SPACE LAP INC."
-.end:
+	mTxtDef "SPACE LAP INC."
 TextDef_CreditsB_0:
 	dw $98A3
-	db .end-.start
-.start:
-	db "SPECIAL THANKS"
-.end:
+	mTxtDef "SPECIAL THANKS"
 TextDef_CreditsB_1:
 	dw $9923
-	db .end-.start
-.start:
-	db "SNK ALL STAFF"
-.end:
+	mTxtDef "SNK ALL STAFF"
 TextDef_CreditsC_0:
 	dw $98E6
-	db .end-.start
-.start:
-	db "PRESENTED"
-.end:
+	mTxtDef "PRESENTED"
 TextDef_CreditsC_1:
 	dw $9949
-	db .end-.start
-.start:
-	db "BY"
-.end:
+	mTxtDef "BY"
 TextDef_CreditsC_2:
 	dw $9987
-	db .end-.start
-.start:
-	db "TAKARA"
-.end:
+	mTxtDef "TAKARA"
 TextDef_CreditsA_0:
 	dw $9821
-	db .end-.start
-.start:
-	db "-SPECIAL THANKS-"
-.end:
+	mTxtDef "-SPECIAL THANKS-"
 TextDef_CreditsA_1:
 	dw $9862
-	db .end-.start
-.start:
-	db "TATUYA HOCHO"
-.end:
+	mTxtDef "TATUYA HOCHO"
 TextDef_CreditsA_2:
 	dw $9882
-	db .end-.start
-.start:
-	db "SHUNICHI OHKUSA"
-.end:
+	mTxtDef "SHUNICHI OHKUSA"
 TextDef_CreditsA_3:
 	dw $98A2
-	db .end-.start
-.start:
-	db "TAKESHI IKENOUE"
-.end:
+	mTxtDef "TAKESHI IKENOUE"
 TextDef_CreditsA_4:
 	dw $98C2
-	db .end-.start
-.start:
-	db "NAOYUKI TAKADA"
-.end:
+	mTxtDef "NAOYUKI TAKADA"
 TextDef_CreditsA_5:
 	dw $98E2
-	db .end-.start
-.start:
-	db "AKIHIKO KIMURA"
-.end:
+	mTxtDef "AKIHIKO KIMURA"
 TextDef_CreditsA_6:
 	dw $9902
-	db .end-.start
-.start:
-	db "NORIHIRO HAYASAKA"
-.end:
+	mTxtDef "NORIHIRO HAYASAKA"
 TextDef_CreditsA_7:
 	dw $9922
-	db .end-.start
-.start:
-	db "S.H"
-.end:
+	mTxtDef "S.H"
 TextDef_CreditsA_8:
 	dw $9942
-	db .end-.start
-.start:
-	db "MITSUNORI SHOJI"
-.end:
+	mTxtDef "MITSUNORI SHOJI"
 TextDef_CreditsA_9:
 	dw $9962
-	db .end-.start
-.start:
-	db "FUMIHIKO OZAWA"
-.end:
+	mTxtDef "FUMIHIKO OZAWA"
 TextDef_CreditsA_A:
 	dw $9982
-	db .end-.start
-.start:
-	db "SATOSHI KUMATA"
-.end:
+	mTxtDef "SATOSHI KUMATA"
 TextDef_CreditsA_B:
 	dw $99A2
-	db .end-.start
-.start:
-	db "TATSUYA YAURA"
-.end:
+	mTxtDef "TATSUYA YAURA"
 TextDef_CreditsA_C:
 	dw $99C2
-	db .end-.start
-.start:
-	db "TETSUYA IIDA"
-.end:
+	mTxtDef "TETSUYA IIDA"
 TextDef_CreditsA_D:
 	dw $99E2
-	db .end-.start
-.start:
-	db "TAKAO SATOU"
-.end:
+	mTxtDef "TAKAO SATOU"
 TextDef_CreditsA_E:
 	dw $9A02
-	db .end-.start
-.start:
-	db "MUTSUMI NAKAMURA"
-.end:
+	mTxtDef "MUTSUMI NAKAMURA"
 TextDef_TheEnd:
 	dw $9906
-	db .end-.start
-.start:
-	db "THE  END"
-.end:	
+	mTxtDef "THE  END"
 	
 ; Text scattered to the four winds in the English version
 TextC_Ending_SacredTreasures00:
@@ -4900,310 +4743,158 @@ ELSE
 
 TextDef_Credits0_0:
 	dw $9906
-	db .end-.start
-.start:
-	db "-STAFF-"
-.end:
+	mTxtDef "-STAFF-"
 TextDef_Credits1_0:
 	dw $98C0
-	db .end-.start
-.start:
-	db "-EXECUTIVE PRODUCER-"
-.end:
+	mTxtDef "-EXECUTIVE PRODUCER-"
 TextDef_Credits1_1:
 	dw $9943
-	db .end-.start
-.start:
-	db "HIROHISA SATOH"
-.end:
+	mTxtDef "HIROHISA SATOH"
 TextDef_Credits2_0:
 	dw $98A5
-	db .end-.start
-.start:
-	db "-PRODUCER-"
-.end:
+	mTxtDef "-PRODUCER-"
 TextDef_Credits2_1:
 	dw $9901
-	db .end-.start
-.start:
-	db "MASAHIRO MORIKAWA"
-.end:
+	mTxtDef "MASAHIRO MORIKAWA"
 TextDef_Credits2_2:
 	dw $9942
-	db .end-.start
-.start:
-	db "TAKAYUKI NAKANO"
-.end:
+	mTxtDef "TAKAYUKI NAKANO"
 TextDef_Credits2_3:
 	dw $9985
-	db .end-.start
-.start:
-	db "T.ISHIGAI"
-.end:
+	mTxtDef "T.ISHIGAI"
 TextDef_Credits3_0:
 	dw $98C5
-	db .end-.start
-.start:
-	db "-DIRECTOR-"
-.end:
+	mTxtDef "-DIRECTOR-"
 TextDef_Credits3_1:
 	dw $9921
-	db .end-.start
-.start:
-	db "HIROFUMI KASAKAWA"
-.end:
+	mTxtDef "HIROFUMI KASAKAWA"
 TextDef_Credits4_0:
 	dw $98A3
-	db .end-.start
-.start:
-	db "-ARRANGEMENT-"
-.end:
+	mTxtDef "-ARRANGEMENT-"
 TextDef_Credits4_1:
 	dw $9905
-	db .end-.start
-.start:
-	db "T.SAITOU"
-.end:
+	mTxtDef "T.SAITOU"
 TextDef_Credits4_2:
 	dw $9945
-	db .end-.start
-.start:
-	db "A.TUYUKI"
-.end:
+	mTxtDef "A.TUYUKI"
 TextDef_Credits4_3:
 	dw $9985
-	db .end-.start
-.start:
-	db "H.KOISO"
-.end:
+	mTxtDef "H.KOISO"
 TextDef_Credits5_0:
 	dw $98C4
-	db .end-.start
-.start:
-	db "-PROGRAMMER-"
-.end:
+	mTxtDef "-PROGRAMMER-"
 TextDef_Credits5_1:
 	dw $9926
-	db .end-.start
-.start:
-	db "H.KOISO"
-.end:
+	mTxtDef "H.KOISO"
 TextDef_Credits5_2:
 	dw $9965
-	db .end-.start
-.start:
-	db "T.ISHIGAI"
-.end:
+	mTxtDef "T.ISHIGAI"
 TextDef_Credits6_0:
 	dw $98A5
-	db .end-.start
-.start:
-	db "-DESIGNER-"
-.end:
+	mTxtDef "-DESIGNER-"
 TextDef_Credits6_1:
 	dw $9906
-	db .end-.start
-.start:
-	db "T.SAITOU"
-.end:
+	mTxtDef "T.SAITOU"
 TextDef_Credits6_2:
 	dw $9946
-	db .end-.start
-.start:
-	db "A.TUYUKI"
-.end:
+	mTxtDef "A.TUYUKI"
 TextDef_Credits6_3:
 	dw $9986
-	db .end-.start
-.start:
-	db "A.HANDA"
-.end:
+	mTxtDef "A.HANDA"
 TextDef_Credits7_0:
 	dw $98C6
-	db .end-.start
-.start:
-	db "MUSIC BY"
-.end:
+	mTxtDef "MUSIC BY"
 TextDef_Credits7_1:
 	dw $9921
-	db .end-.start
-.start:
-	db "STUDIO PJ CO.,LTD"
-.end:
+	mTxtDef "STUDIO PJ CO.,LTD"
 TextDef_Credits9_0:
 	dw $98A1
-	db .end-.start
-.start:
-	db "-SUPER MARKETTER-"
-.end:
+	mTxtDef "-SUPER MARKETTER-"
 TextDef_Credits9_1:
 	dw $9902
-	db .end-.start
-.start:
-	db "TOSHIHIRO MORIOKA"
-.end:
+	mTxtDef "TOSHIHIRO MORIOKA"
 TextDef_Credits9_2:
 	dw $9942
-	db .end-.start
-.start:
-	db "KATUYA TORIHAMA"
-.end:
+	mTxtDef "KATUYA TORIHAMA"
 TextDef_Credits9_3:
 	dw $9982
-	db .end-.start
-.start:
-	db "MASAHIRO IWASAKI"
-.end:
+	mTxtDef "MASAHIRO IWASAKI"
 TextDef_Credits8_0:
 	dw $98C2
-	db .end-.start
-.start:
-	db "-ARTWORK DESIGN-"
-.end:
+	mTxtDef "-ARTWORK DESIGN-"
 TextDef_Credits8_1:
 	dw $9923
-	db .end-.start
-.start:
-	db "DESIGN OFFICE"
-.end:
+	mTxtDef "DESIGN OFFICE"
 TextDef_Credits8_2:
 	dw $9963
-	db .end-.start
-.start:
-	db "SPACE LAP INC."
-.end:
+	mTxtDef "SPACE LAP INC."
 TextDef_CreditsB_0:
 	dw $98A3
-	db .end-.start
-.start:
-	db "SPECIAL THANKS"
-.end:
+	mTxtDef "SPECIAL THANKS"
 TextDef_CreditsB_1:
 	dw $9923
-	db .end-.start
-.start:
-	db "SNK ALL STAFF"
-.end:
+	mTxtDef "SNK ALL STAFF"
 TextDef_CreditsC_0:
 	dw $98E4
-	db .end-.start
-.start:
-	db "PRESENTED BY"
-.end:
+	mTxtDef "PRESENTED BY"
 TextDef_CreditsC_1:
 	dw $9947
-	db .end-.start
-.start:
-	db "TAKARA"
-.end:
+	mTxtDef "TAKARA"
 TextDef_CreditsA_0:
 	dw $9822
-	db .end-.start
-.start:
-	db "-SPECIAL THANKS-"
-.end:
+	mTxtDef "-SPECIAL THANKS-"
 TextDef_CreditsA_1:
 	dw $9864
-	db .end-.start
-.start:
-	db "TATUYA HOCHO"
-.end:
+	mTxtDef "TATUYA HOCHO"
 TextDef_CreditsA_2:
 	dw $9882
-	db .end-.start
-.start:
-	db "SHUNICHI OHKUSA"
-.end:
+	mTxtDef "SHUNICHI OHKUSA"
 TextDef_CreditsA_3:
 	dw $98A3
-	db .end-.start
-.start:
-	db "TAKESHI IKENOUE"
-.end:
+	mTxtDef "TAKESHI IKENOUE"
 TextDef_CreditsA_4:
 	dw $98C3
-	db .end-.start
-.start:
-	db "NAOYUKI TAKADA"
-.end:
+	mTxtDef "NAOYUKI TAKADA"
 TextDef_CreditsA_5:
 	dw $98E3
-	db .end-.start
-.start:
-	db "AKIHIKO KIMURA"
-.end:
+	mTxtDef "AKIHIKO KIMURA"
 TextDef_CreditsA_6:
 	dw $9902
-	db .end-.start
-.start:
-	db "NORIHIRO HAYASAKA"
-.end:
+	mTxtDef "NORIHIRO HAYASAKA"
 TextDef_CreditsA_7:
 	dw $9929
-	db .end-.start
-.start:
-	db "S.H"
-.end:
+	mTxtDef "S.H"
 TextDef_CreditsA_8:
 	dw $9941
-	db .end-.start
-.start:
-	db "MITSUNORI SHOJI"
-.end:
+	mTxtDef "MITSUNORI SHOJI"
 TextDef_CreditsA_9:
 	dw $9962
-	db .end-.start
-.start:
-	db "FUMIHIKO OZAWA"
-.end:
+	mTxtDef "FUMIHIKO OZAWA"
 TextDef_CreditsA_A:
 	dw $9983
-	db .end-.start
-.start:
-	db "SATOSHI KUMATA"
-.end:
+	mTxtDef "SATOSHI KUMATA"
 TextDef_CreditsA_B:
 	dw $99A3
-	db .end-.start
-.start:
-	db "TATSUYA YAURA"
-.end:
+	mTxtDef "TATSUYA YAURA"
 TextDef_CreditsA_C:
 	dw $99C3
-	db .end-.start
-.start:
-	db "TETSUYA IIDA"
-.end:
+	mTxtDef "TETSUYA IIDA"
 TextDef_CreditsA_D:
 	dw $99E5
-	db .end-.start
-.start:
-	db "TAKAO SATOU"
-.end:
+	mTxtDef "TAKAO SATOU"
 TextDef_CreditsA_E:
 	dw $9A03
-	db .end-.start
-.start:
-	db "MUTSUMI NAKAMURA"
-.end:
+	mTxtDef "MUTSUMI NAKAMURA"
 TextDef_TheEnd:
 	dw $9906
-	db .end-.start
-.start:
-	db "THE  END"
-.end:
+	mTxtDef "THE  END"
 TextDef_Credits_Unused_Laguna_0:
 	dw $98C3
-	db .end-.start
-.start:
-	db "-LAGUNA STAFF-"
-.end:
+	mTxtDef "-LAGUNA STAFF-"
 TextDef_Credits_Unused_Laguna_1:
 	dw $9924
-	db .end-.start
-.start:
-	db "FRANK GLASER"
-.end:
+	mTxtDef "FRANK GLASER"
+	
 TextC_Ending_SacredTreasures00:
 	db .end-.start
 .start:
