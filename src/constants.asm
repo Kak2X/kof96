@@ -181,7 +181,7 @@ TXB_NONE EQU $FF ; No custom code when waiting idle
 ;--
 
 
-OBJINFO_SIZE EQU $40 ; wOBJInfo size
+OBJINFO_SIZE     EQU $40 ; wOBJInfo size
 GFXBUF_TILECOUNT EQU $20 ; Number of tiles in a GFX buffer
 
 ; iOBJInfo_Status bits
@@ -301,7 +301,7 @@ PF3B_HEAVYHIT       EQU 0 ; Used by "heavy" hits (not to be confused with heavy 
 PF3B_FIRE           EQU 1 ; Used by firey hits. Getting hit causes the player to flash slowly.
 PF3B_HITLOW         EQU 2 ; The attack hits low (must block crouching)
 PF3B_OVERHEAD       EQU 3 ; The attack is an overhead (must block standing)
-PF3B_CONTHIT        EQU 4 ; For HitTypeC_Drop* only. If set, the combo string can continue, otherwise the opponent is made invulnerable until wakeup.
+PF3B_CONTHIT        EQU 4 ; For HitTypeC_Drop* only. If set, the combo string can continue (can juggle), otherwise the opponent is made invulnerable until wakeup.
 PF3B_HALFSPEED      EQU 5 ; Getting hit runs the game at half speed
 PF3B_SUPERALT       EQU 6 ; Used by a few super moves to make them use an alternate palette cycle.
 PF3B_LIGHTHIT       EQU 7 ; Used by "light" hits (not to be confused with light moves). Getting attacked shakes the player once.
@@ -515,7 +515,7 @@ TITLE_OBJ_SNKCOPYRIGHT  EQU $03
 TITLE_OBJ_CURSOR_U      EQU $04
 
 ; TITLE
-TITLE_RESET_TIMER       EQU (30 * $100) | 60 ; 30 seconds
+TITLE_RESET_TIMER       EQU (30 << 8) | 60 ; 30 seconds
 
 ; TITLEMENU
 TITLEMENU_TO_TITLE      EQU $00
@@ -1279,54 +1279,55 @@ PROJ_SHCRYST2_TYPE_GH EQU $02 ; Ground - heavy
 PROJ_SHCRYST2_TYPE_AL EQU $03 ; Air - light
 PROJ_SHCRYST2_TYPE_AH EQU $04 ; Air - heavy
 
-
 ; iOBJInfo_Proj_ShCrystCharge_OrbitMode
 PROJ_SHCRYST_ORBITMODE_OVAL EQU $00 ; Phase 1 - Projectile orbits in an oval trajectory at constant speeed
 PROJ_SHCRYST_ORBITMODE_SLOW EQU $01 ; Phase 2 - Orbit slows down until it stops moving vertically
 PROJ_SHCRYST_ORBITMODE_HOLD EQU $02 ; Phase 2 - Only horizontal movement
 PROJ_SHCRYST_ORBITMODE_SPIRAL EQU $FF ; Projectile moves in a spiral motion, expanding outwards, when releasing it early before phase 2
 
-PLAY_HEALTH_CRITICAL EQU $18 ; Threshold for critical health (allow infinite super & desperation supers)
-PLAY_HEALTH_MAX EQU $48 ; Health cap
+; Base gameplay
 PL_FLOOR_POS EQU $88
 
-PLAY_MAXMODE_NONE EQU $00
-PLAY_MAXMODE_LENGTH1 EQU $01
-PLAY_MAXMODE_LENGTH2 EQU $02
-PLAY_MAXMODE_LENGTH3 EQU $03
-PLAY_MAXMODE_LENGTH4 EQU $04
+PLAY_HEALTH_CRITICAL EQU $18 ; Threshold for critical health (allow infinite super & desperation supers)
+PLAY_HEALTH_MAX EQU $48 ; Health cap
+
+
+PLAY_MAXMODE_NONE       EQU $00
+PLAY_MAXMODE_LENGTH1    EQU $01
+PLAY_MAXMODE_LENGTH2    EQU $02
+PLAY_MAXMODE_LENGTH3    EQU $03
+PLAY_MAXMODE_LENGTH4    EQU $04
 PLAY_MAXMODE_BASELENGTH EQU $04
 
-PLAY_POW_EMPTY EQU $00
-PLAY_POW_MAX EQU $28 ; Max value for normal POW bar
-
+PLAY_POW_EMPTY       EQU $00
+PLAY_POW_MAX         EQU $28 ; Max value for normal POW bar
 
 PLAY_MAXPOWFADE_NONE EQU $00
-PLAY_MAXPOWFADE_IN EQU $01
-PLAY_MAXPOWFADE_OUT EQU $FF
+PLAY_MAXPOWFADE_IN   EQU $01
+PLAY_MAXPOWFADE_OUT  EQU $FF
 
+PLAY_TID_BAR_L      EQU $D2 ; Tile ID for left border of bars
+PLAY_TID_BAR_R      EQU $D3 ; Tile ID for right border of bars
 
-PLAY_PREROUND_OBJ_ROUNDX EQU $00
-PLAY_PREROUND_OBJ_FINAL EQU $04
-PLAY_PREROUND_OBJ_READY EQU $08
-PLAY_PREROUND_OBJ_GO_SM EQU $0C
-PLAY_PREROUND_OBJ_GO_LG EQU $10
+PLAY_TID_BAR_BASE   EQU $DF ; Tile ID base for bars
+PLAY_TID_BAR_EMPTY  EQU $E0 ; Tile ID for an empty bar
+PLAY_TID_BAR_FILLED EQU PLAY_TID_BAR_BASE ; Tile ID for a filled bar
+PLAY_TID_BAR_SIZE   EQU $08 ; Number of tile IDs for tile parts, mapping to the LGrow/RGrow
 
-PLAY_POSTROUND0_OBJ_KO       EQU $00
-PLAY_POSTROUND0_OBJ_TIMEOVER EQU $04
+PLAY_TID_BOX_FILL   EQU $74
+PLAY_TID_BOX_BLANK  EQU $75
 
-PLAY_POSTROUND1_OBJ_DRAWGAME EQU $00
-PLAY_POSTROUND1_OBJ_1PWON    EQU $04
-PLAY_POSTROUND1_OBJ_2PWON    EQU $08
-PLAY_POSTROUND1_OBJ_YOUWON   EQU $0C
-PLAY_POSTROUND1_OBJ_YOULOST  EQU $10
+PLAY_OBJ_PREROUND_ROUNDX     EQU $00
+PLAY_OBJ_PREROUND_FINAL      EQU $04
+PLAY_OBJ_PREROUND_READY      EQU $08
+PLAY_OBJ_PREROUND_GO_SM      EQU $0C
+PLAY_OBJ_PREROUND_GO_LG      EQU $10
 
-TID_BAR_L EQU $D2 ; Tile ID for left border of bars
-TID_BAR_R EQU $D3 ; Tile ID for right border of bars
-TID_BAR_BASE   EQU $DF ; Tile ID base for bars
-TID_BAR_EMPTY  EQU $E0 ; Tile ID for an empty bar
-TID_BAR_FILLED EQU TID_BAR_BASE ; Tile ID for a filled bar
-TID_BAR_SIZE   EQU $08 ; Number of tile IDs for tile parts, mapping to the LGrow/RGrow
+PLAY_OBJ_POSTROUND0_KO       EQU $00
+PLAY_OBJ_POSTROUND0_TIMEOVER EQU $04
 
-TID_BOX_FILL   EQU $74
-TID_BOX_BLANK  EQU $75
+PLAY_OBJ_POSTROUND1_DRAWGAME EQU $00
+PLAY_OBJ_POSTROUND1_1PWON    EQU $04
+PLAY_OBJ_POSTROUND1_2PWON    EQU $08
+PLAY_OBJ_POSTROUND1_YOUWON   EQU $0C
+PLAY_OBJ_POSTROUND1_YOULOST  EQU $10

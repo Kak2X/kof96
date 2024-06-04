@@ -3133,14 +3133,14 @@ Play_CopyPostRoundGFXToVRAM:
 ; Handles the TIME OVER text display while the characters continue their animations.
 Play_DoTimeOverText:
 	ld   hl, wOBJInfo_RoundText+iOBJInfo_OBJLstPtrTblOffset
-	ld   [hl], PLAY_POSTROUND0_OBJ_TIMEOVER
+	ld   [hl], PLAY_OBJ_POSTROUND0_TIMEOVER
 	jp   Play_DoPostRoundText0
 	
 ; =============== Play_DoKOText ===============
 ; Handles the KO text display while the characters continue their animations.
 Play_DoKOText:
 	ld   hl, wOBJInfo_RoundText+iOBJInfo_OBJLstPtrTblOffset
-	ld   [hl], PLAY_POSTROUND0_OBJ_KO
+	ld   [hl], PLAY_OBJ_POSTROUND0_KO
 	
 ; =============== Play_DoPostRoundText0 ===============
 ; Displays text for the first set of post-round text.
@@ -3221,7 +3221,7 @@ Play_Set1PWin:
 .boxWin2:
 	ld   hl, vBGBoxWin1P1	; The one on its right for the second
 .drawBox:
-	ld   c, TID_BOX_FILL	; C = Tile ID for filled box
+	ld   c, PLAY_TID_BOX_FILL	; C = Tile ID for filled box
 	call Play_DrawWinBox
 	jp   .chkTextType
 	
@@ -3274,18 +3274,18 @@ Play_Set1PWin:
 .vsSerialLost:
 	jp   .lost
 .lost:
-	ld   a, PLAY_POSTROUND1_OBJ_YOULOST
+	ld   a, PLAY_OBJ_POSTROUND1_YOULOST
 	jp   .showText
 .won:
-	ld   a, PLAY_POSTROUND1_OBJ_YOUWON
+	ld   a, PLAY_OBJ_POSTROUND1_YOUWON
 	jp   .showText
 .chkVS_sgb:
 	; On a SGB VS battle, explicitly say that 1P won (since there's a single screen).
-	ld   a, PLAY_POSTROUND1_OBJ_1PWON
+	ld   a, PLAY_OBJ_POSTROUND1_1PWON
 	jp   .showText
 .chkVS_sgb_unused:
 	; [TCRF] Unreachable code "leftover" from Play_Set2PWin.
-	ld   a, PLAY_POSTROUND1_OBJ_2PWON
+	ld   a, PLAY_OBJ_POSTROUND1_2PWON
 .showText:
 	ld   bc, wPlInfo_Pl1
 	call Play_DoPostRoundText1PreWin
@@ -3335,7 +3335,7 @@ Play_Set2PWin:
 .boxWin2:
 	ld   hl, vBGBoxWin2P1	; The one on its right for the second
 .drawBox:
-	ld   c, TID_BOX_FILL	; C = Tile ID for filled box
+	ld   c, PLAY_TID_BOX_FILL	; C = Tile ID for filled box
 	call Play_DrawWinBox
 	jp   .chkTextType
 	
@@ -3387,18 +3387,18 @@ Play_Set2PWin:
 .vsSerialWon:
 	jp   .won
 .lost:
-	ld   a, PLAY_POSTROUND1_OBJ_YOULOST
+	ld   a, PLAY_OBJ_POSTROUND1_YOULOST
 	jp   .showText
 .won:
-	ld   a, PLAY_POSTROUND1_OBJ_YOUWON
+	ld   a, PLAY_OBJ_POSTROUND1_YOUWON
 	jp   .showText
 .chkVS_sgb_unused:
 	; [TCRF] Unreachable code "leftover" from Play_Set1PWin
-	ld   a, PLAY_POSTROUND1_OBJ_1PWON
+	ld   a, PLAY_OBJ_POSTROUND1_1PWON
 	jp   .showText
 .chkVS_sgb:
 	; On a SGB VS battle, explicitly say that 2P won (since there's a single screen).
-	ld   a, PLAY_POSTROUND1_OBJ_2PWON
+	ld   a, PLAY_OBJ_POSTROUND1_2PWON
 .showText:
 	ld   bc, wPlInfo_Pl2
 	call Play_DoPostRoundText1PreWin
@@ -3414,7 +3414,7 @@ Play_Set2PWin:
 ; Note that this doesn't start the win pose -- that's set elsewhere
 ; and has to wait for this to return first.
 ; IN
-; - A: Sprite mapping ID for the text (PLAY_POSTROUND0_OBJ_*)
+; - A: Sprite mapping ID for the text (PLAY_OBJ_POSTROUND0_*)
 ; - BC: Ptr to wPlInfo
 Play_DoPostRoundText1PreWin:
 	; Display the text
@@ -3490,7 +3490,7 @@ Play_SetDraw:
 	call Play_CenterRoundText
 	
 	; Set the sprite mapping
-	ld   a, PLAY_POSTROUND1_OBJ_DRAWGAME
+	ld   a, PLAY_OBJ_POSTROUND1_DRAWGAME
 	jp   .setOBJ ; [POI] Leftover from 95. There was an alternate "DOUBLE KO" sprite condition around here.
 .setOBJ:
 
@@ -3933,15 +3933,15 @@ ENDM
 	; Write filled bar to lowest tile
 	di
 	mWaitForVBlankOrHBlank
-	ld   a, TID_BAR_FILLED			; Tile ID for filled bar.	
+	ld   a, PLAY_TID_BAR_FILLED			; Tile ID for filled bar.	
 	ldd  [hl], a
 	ei
 	
 	; Write filled bar to 2nd-lowest tile
-	push af	; Save TID_BAR_FILLED
+	push af	; Save PLAY_TID_BAR_FILLED
 		di
 		mWaitForVBlankOrHBlank
-	pop  af	; Restore TID_BAR_FILLED
+	pop  af	; Restore PLAY_TID_BAR_FILLED
 	ldd  [hl], a			
 	ei
 	; No need to write it to the 3rd-lowest tile, as it's already seen done when the tip
@@ -3964,7 +3964,7 @@ ENDM
 	
 .flashBlank1P:
 	ld   a, [wPlInfo_Pl1+iPlInfo_HealthVisual]	; A = Current health
-	ld   b, TID_BAR_EMPTY			; B = Tile ID for empty bar
+	ld   b, PLAY_TID_BAR_EMPTY			; B = Tile ID for empty bar
 	ld   hl, vBGHealthBar1P_Last	; HL = Lowest tile of 1P health bar
 	
 	; To save time, only write to the non-empty tiles.	
@@ -3996,7 +3996,7 @@ ENDM
 .flashShow1P:
 	; Display the bar
 	ld   a, [wPlInfo_Pl1+iPlInfo_HealthVisual]	; A = Current health
-	ld   b, TID_BAR_FILLED			; B = Tile ID for filled bar
+	ld   b, PLAY_TID_BAR_FILLED			; B = Tile ID for filled bar
 	ld   hl, vBGHealthBar1P_Last	; HL = Lowest tile of 1P health bar
 	
 	; Move left from the lowest tile of the health bar, drawing completely filled tiles.
@@ -4035,11 +4035,11 @@ ENDM
 	;
 	
 	; TileId = $E7 + (Health % 8)
-	and  a, (TID_BAR_SIZE-1)			; A = VisualHealth % 8
+	and  a, (PLAY_TID_BAR_SIZE-1)			; A = VisualHealth % 8
 	; The tile for the empty tile is $E0, which doesn't work with the formula above
 	or   a								; Is it $00?
 	jp   z, .flashTipEmpty1P			; If so, skip
-	add  a, TID_BAR_BASE+TID_BAR_SIZE	; Add tile ID base
+	add  a, PLAY_TID_BAR_BASE+PLAY_TID_BAR_SIZE	; Add tile ID base
 	; Write TileId to the tilemap
 	push af
 		di
@@ -4052,7 +4052,7 @@ ENDM
 	; Write $E0 to the tilemap
 	di
 	mWaitForVBlankOrHBlank
-	ld   a, TID_BAR_EMPTY
+	ld   a, PLAY_TID_BAR_EMPTY
 	ld   [hl], a
 	ei
 	
@@ -4098,7 +4098,7 @@ ENDM
 	; Write filled bar to lowest tile
 	di
 	mWaitForVBlankOrHBlank
-	ld   a, TID_BAR_FILLED
+	ld   a, PLAY_TID_BAR_FILLED
 	ldi  [hl], a
 	ei
 	
@@ -4124,7 +4124,7 @@ ENDM
 	
 .flashBlank2P:
 	ld   a, [wPlInfo_Pl2+iPlInfo_HealthVisual]	; A = Current health
-	ld   b, TID_BAR_EMPTY	; B = Tile ID for empty bar
+	ld   b, PLAY_TID_BAR_EMPTY	; B = Tile ID for empty bar
 	ld   hl, vBGHealthBar2P	; HL = Lowest tile of 2P health bar
 	
 	;
@@ -4152,7 +4152,7 @@ ENDM
 .flashShow2P:
 	; Display the bar
 	ld   a, [wPlInfo_Pl2+iPlInfo_HealthVisual]	; A = Current health
-	ld   b, TID_BAR_FILLED		; B = Tile ID for filled bar
+	ld   b, PLAY_TID_BAR_FILLED		; B = Tile ID for filled bar
 	ld   hl, vBGHealthBar2P		; HL = Lowest tile of 2P health bar
 	
 	; Move right from the lowest tile of the health bar, drawing completely filled tiles.
@@ -4187,10 +4187,10 @@ ENDM
 .flashTip2P:
 	; Draw the tip of the health bar.
 	; TileId = $E0 + (Health % 8)
-	and  a, TID_BAR_SIZE-1
+	and  a, PLAY_TID_BAR_SIZE-1
 	or   a						; This check is unnecessary for the 2P tilemap
 	jp   z, .flashTipEmpty2P	; as the empty bar and tile ID base are the same
-	add  a, TID_BAR_BASE+1
+	add  a, PLAY_TID_BAR_BASE+1
 	; Write TileId to the tilemap
 	push af
 		di
@@ -4203,7 +4203,7 @@ ENDM
 	; Write $E0 to the tilemap
 	di
 	mWaitForVBlankOrHBlank
-	ld   a, TID_BAR_EMPTY
+	ld   a, PLAY_TID_BAR_EMPTY
 	ld   [hl], a
 	ei
 .ret:
@@ -4437,7 +4437,7 @@ Play_UpdatePowBars:
 	ld   a, [wPlInfo_Pl1+iPlInfo_MaxPowExtraLen]
 	add  a, PLAY_MAXMODE_BASELENGTH		; B = iPlInfo_MaxPowExtraLen + $04
 	ld   b, a
-	ld   c, TID_BAR_BASE				; C = Filled bar tile ID
+	ld   c, PLAY_TID_BAR_BASE				; C = Filled bar tile ID
 	call Play_DrawMaxPowBarFromR
 	
 	;
@@ -4660,7 +4660,7 @@ Play_UpdatePowBars:
 	ld   a, [wPlInfo_Pl2+iPlInfo_MaxPowExtraLen]
 	add  a, PLAY_MAXMODE_BASELENGTH		; B = iPlInfo_MaxPowExtraLen + $04
 	ld   b, a
-	ld   c, TID_BAR_BASE				; C = Filled bar tile ID
+	ld   c, PLAY_TID_BAR_BASE				; C = Filled bar tile ID
 	call Play_DrawMaxPowBarFromL
 	
 	;
@@ -4734,7 +4734,7 @@ Play_DrawMaxPowBarFromR:
 	; Only the 4 edges need to be updated to move the bar.
 
 	; Draw right corner
-	ld   a, TID_BAR_R	; A = TID_BAR_R
+	ld   a, PLAY_TID_BAR_R	; A = PLAY_TID_BAR_R
 	call Play_WriteTileToMaxPowBar
 	dec  de				; Seek left in tilemap
 	
@@ -4772,7 +4772,7 @@ Play_DrawMaxPowBarFromR:
 	pop  de
 	
 	; Draw left corner
-	ld   a, TID_BAR_L
+	ld   a, PLAY_TID_BAR_L
 	call Play_WriteTileToMaxPowBar
 	dec  de
 	
@@ -4800,7 +4800,7 @@ Play_DrawMaxPowBarFromL:
 	
 .draw:
 	; Draw left corner
-	ld   a, TID_BAR_L
+	ld   a, PLAY_TID_BAR_L
 	call Play_WriteTileToMaxPowBar
 	inc  de
 	
@@ -4817,7 +4817,7 @@ Play_DrawMaxPowBarFromL:
 	pop  de
 	
 	; Draw right corner
-	ld   a, TID_BAR_R
+	ld   a, PLAY_TID_BAR_R
 	call Play_WriteTileToMaxPowBar
 	inc  de
 	
@@ -4902,14 +4902,14 @@ Play_Unused_ScrollInMaxPowBar1P:
 			; Draw a filled tile
 			di   
 			mWaitForVBlankOrHBlank
-			ld   a, TID_BAR_BASE
+			ld   a, PLAY_TID_BAR_BASE
 			ldi  [hl], a			; Move to the right
 			ei   
 			
 			; Draw right border
 			di   
 			mWaitForVBlankOrHBlank
-			ld   a, TID_BAR_R
+			ld   a, PLAY_TID_BAR_R
 			ld   [hl], a
 			ei   
 			
@@ -4950,7 +4950,7 @@ Play_Unused_ScrollInMaxPowBar1P:
 	push af
 		di   
 		mWaitForVBlankOrHBlank
-		ld   a, TID_BAR_L
+		ld   a, PLAY_TID_BAR_L
 		ldd  [hl], a		; Move to the left
 		ei   
 	pop  af
@@ -5020,14 +5020,14 @@ Play_Unused_ScrollInMaxPowBar1P_2:
 			; Draw a filled tile
 			di   
 			mWaitForVBlankOrHBlank
-			ld   a, TID_BAR_BASE
+			ld   a, PLAY_TID_BAR_BASE
 			ldi  [hl], a			; Move to the right
 			ei   
 			
 			; Draw right border
 			di   
 			mWaitForVBlankOrHBlank
-			ld   a, TID_BAR_R
+			ld   a, PLAY_TID_BAR_R
 			ld   [hl], a
 			ei   
 			
@@ -5058,7 +5058,7 @@ Play_Unused_ScrollInMaxPowBar1P_2:
 	push af
 		di   
 		mWaitForVBlankOrHBlank
-		ld   a, TID_BAR_L
+		ld   a, PLAY_TID_BAR_L
 		ldd  [hl], a		; Move to the left
 		ei   
 	pop  af
@@ -5117,7 +5117,7 @@ Play_Unused_DrawMaxPowBar:
 	;
 	di   
 	mWaitForVBlankOrHBlank
-	ld   a, TID_BAR_L	; Move right
+	ld   a, PLAY_TID_BAR_L	; Move right
 	ldi  [hl], a
 	ei   
 	
@@ -5136,7 +5136,7 @@ Play_Unused_DrawMaxPowBar:
 .loop:
 	di   
 	mWaitForVBlankOrHBlank
-	ld   a, TID_BAR_BASE
+	ld   a, PLAY_TID_BAR_BASE
 	ldi  [hl], a		; Draw filled bar, move right in the tilemap
 	ei   
 	dec  b				; Are we done?
@@ -5147,7 +5147,7 @@ Play_Unused_DrawMaxPowBar:
 	;
 	di   
 	mWaitForVBlankOrHBlank
-	ld   a, TID_BAR_R
+	ld   a, PLAY_TID_BAR_R
 	ldi  [hl], a
 	ei   
 	ret 
@@ -5275,7 +5275,7 @@ Play_DrawFilledPowBar:
 	; Left corner
 	di
 	mWaitForVBlankOrHBlank
-	ld   a, TID_BAR_L
+	ld   a, PLAY_TID_BAR_L
 	ldi  [hl], a
 	ei
 	
@@ -5284,7 +5284,7 @@ Play_DrawFilledPowBar:
 .loop:
 	di
 	mWaitForVBlankOrHBlank
-	ld   a, TID_BAR_BASE
+	ld   a, PLAY_TID_BAR_BASE
 	ldi  [hl], a
 	ei
 	dec  b			; Copied all tiles?
@@ -5293,7 +5293,7 @@ Play_DrawFilledPowBar:
 	; Right corner
 	di
 	mWaitForVBlankOrHBlank
-	ld   a, TID_BAR_R
+	ld   a, PLAY_TID_BAR_R
 	ldi  [hl], a
 	ei
 	ret

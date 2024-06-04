@@ -210,16 +210,15 @@ MoveC_Iori_OniYaki:
 		jp   .doGravity
 .obj2_cont:
 	; Immediately switch to the next frame (YSpeed always > -$09)
-	mMvC_NextFrameOnGtYSpeed -$09, ANIMSPEED_NONE
-	jp   nc, .doGravity
+	mMvC_ValNextFrameOnGtYSpeed -$09, ANIMSPEED_NONE, .doGravity
 		mMvC_SetDamageNext $04, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE
 		jp   .doGravity
 ; --------------- frame #3 ---------------
 .obj3:
 	; Switch to #4 when YSpeed > -$02
 	mMvC_NextFrameOnGtYSpeed -$02, ANIMSPEED_NONE
-		mMvC_SetSpeedH +$0040
-		jp   .doGravity
+	mMvC_SetSpeedH +$0040
+	jp   .doGravity
 ; --------------- frames #2-4 / common gravity check ---------------
 .doGravity:
 	; Switch to #5 when we touch the ground
@@ -301,10 +300,9 @@ MoveC_OIori_OniYaki:
 		jp   .doGravity
 .obj2_cont:
 	; Immediately switch to the next frame (YSpeed always > -$09)
-	mMvC_NextFrameOnGtYSpeed -$09, ANIMSPEED_INSTANT
 	; No damage dealt here, unlike the normal version.
-	jp   nc, .doGravity
-	jp   .doGravity
+	mMvC_ValNextFrameOnGtYSpeed -$09, ANIMSPEED_INSTANT, .doGravity
+		jp   .doGravity
 ; --------------- frame #3 ---------------
 ; Launches the opponent on the ground, unique to this version.
 .obj3:
@@ -1197,9 +1195,7 @@ ENDC
 		add  hl, bc
 		dec  [hl]
 		jp   z, .chkLoop0_noLoop
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $01*OBJLSTPTR_ENTRYSIZE ; offset by -1
+		mMvC_SetFrameOnEnd $02
 	.chkLoop0_noLoop:
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_FIRE
 		jp   .chkOtherEscape
@@ -1226,9 +1222,7 @@ ENDC
 		add  hl, bc
 		dec  [hl]
 		jp   z, .chkLoop1_noLoop
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $07*OBJLSTPTR_ENTRYSIZE ; offset by -1
+		mMvC_SetFrameOnEnd $08
 	.chkLoop1_noLoop:
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTIGS, PF3_FIRE
 		jp   .chkOtherEscape
@@ -1661,11 +1655,9 @@ MoveC_Mature_DeathRow:
 		jp   nz, .anim
 		
 		; Depending on the visible frame...
-		ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-		add  hl, de
-		ld   a, [hl]
-		cp   $06*OBJLSTPTR_ENTRYSIZE	; FrameId < $06?
-		jp   c, .hit1_earlyAbort		; If so, jump
+		mMvC_StartChkFrame
+			cp   $06*OBJLSTPTR_ENTRYSIZE	; FrameId < $06?
+			jp   c, .hit1_earlyAbort		; If so, jump
 	.hit1_fullDone:
 		mMvC_SetFrame $09, $0A
 		jp   .ret
@@ -1709,11 +1701,9 @@ MoveC_Mature_DeathRow:
 	; However, this could have just returned NZ since we do want to advance to #9 (see: .hit1_fullDone).
 	; By returning Z instead, it needed special logic in .hit1_main to manually set the frame to #9
 	; if we got here with the FrameId >= #6.
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   $06*OBJLSTPTR_ENTRYSIZE		; FrameId < #6?	
-	jp   c, .canMoveRepeat_chkPlType	; If so, jump
+	mMvC_StartChkFrame
+		cp   $06*OBJLSTPTR_ENTRYSIZE		; FrameId < #6?	
+		jp   c, .canMoveRepeat_chkPlType	; If so, jump
 	xor  a								; Z flag set (no repeat)
 	ret
 .canMoveRepeat_chkPlType:
@@ -1794,9 +1784,8 @@ MoveC_Mature_Despair:
 		jp   .doGravity
 .obj1_cont:
 	; Immediate change, as the Y Speed will always be > -$06
-	mMvC_NextFrameOnGtYSpeed -$06, ANIMSPEED_NONE
-	jp   nc, .doGravity
-	jp   .doGravity
+	mMvC_ValNextFrameOnGtYSpeed -$06, ANIMSPEED_NONE, .doGravity
+		jp   .doGravity
 ; --------------- frame #2 ---------------	
 ; Jump, until the near peak of the jump.
 .obj2:
@@ -1806,9 +1795,8 @@ MoveC_Mature_Despair:
 .obj2_doDamageE:
 	mMvC_SetDamage $02, HITTYPE_HIT_MID0, PF3_CONTHIT|PF3_LIGHTHIT
 .obj2_waitNext:
-	mMvC_NextFrameOnGtYSpeed -$01, ANIMSPEED_NONE
-	jp   nc, .doGravity
-	jp   .doGravity
+	mMvC_ValNextFrameOnGtYSpeed -$01, ANIMSPEED_NONE, .doGravity
+		jp   .doGravity
 ; --------------- frame #1-3 / common gravity check ---------------
 ; Switches to #4 when touching the ground.
 .doGravity:
@@ -1891,10 +1879,7 @@ MoveC_Mature_HeavensGate:
 	; switch to #6 where the move will end.
 	mMvC_ValFrameEnd .moveH
 		mMvC_SetAnimSpeed ANIMSPEED_NONE
-		; Switch to the last frame (#6) to end the move if the C flag didn't get set by the end
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $05*OBJLSTPTR_ENTRYSIZE	; offset by -1
+		mMvC_SetFrameOnEnd $06
 		jp   .moveH
 		
 ; =============== .chkOtherHit ===============
@@ -2587,9 +2572,8 @@ MoveC_Chizuru_TenZuiL:
 		mMvC_SetSpeedV -$0400
 		jp   .doGravity
 .obj0_cont:
-	mMvC_NextFrameOnGtYSpeed -$02, ANIMSPEED_NONE
-	jp   nc, .doGravity
-	jp   .doGravity
+	mMvC_ValNextFrameOnGtYSpeed -$02, ANIMSPEED_NONE, .doGravity
+		jp   .doGravity
 ; --------------- frame #0-1 / common gravity check ---------------
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
@@ -3550,10 +3534,7 @@ MoveC_Daimon_HeavenHellDrop:
 		pop  hl	
 		
 		; Otherwise, loop back to #5.
-		; Since .anim will increment the internal sprite mapping ID, this value must be set to #4.
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $04*OBJLSTPTR_ENTRYSIZE
+		mMvC_SetFrameOnEnd $05
 		jp   .anim
 		
 		.lpChkLoop_noLoop:

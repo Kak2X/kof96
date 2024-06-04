@@ -684,10 +684,8 @@ ENDM
 		jp   .batuYomi_doGravity
 .batuYomi_obj1_cont:
 	; Advance animation when moving down faster than -2px/frame
-	mMvC_NextFrameOnGtYSpeed -$02, ANIMSPEED_NONE
-	; What
-	jp   nc, .batuYomi_doGravity
-	jp   .batuYomi_doGravity
+	mMvC_ValNextFrameOnGtYSpeed -$02, ANIMSPEED_NONE, .batuYomi_doGravity
+		jp   .batuYomi_doGravity
 ; --------------- 402 Shiki Batu Yomi - frame #2 ---------------	
 ; Advance animation when moving down faster than -1px/frame
 .batuYomi_obj2:
@@ -910,19 +908,16 @@ MoveC_Kyo_OniYaki:
 	.obj2_doGravity:
 		jp   .doGravity
 .obj2_cont:
-	;--
 	; YSpeed will always be > -$0A, so this advances the animation immediately.
-	mMvC_NextFrameOnGtYSpeed -$0A, ANIMSPEED_NONE
-	jp   nc, .doGravity ; We never take the jump
-	;--
-	; Deal 4 lines of damage on contact.
-	mMvIn_ChkLH .obj2_heavyDamage ; Pointless check, both are the same.
-.obj2_lightDamage:
-	mMvC_SetDamageNext $04, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE
-	jp   .doGravity
-.obj2_heavyDamage:
-	mMvC_SetDamageNext $04, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE
-	jp   .doGravity
+	mMvC_ValNextFrameOnGtYSpeed -$0A, ANIMSPEED_NONE, .doGravity ; We never take the jump
+		; Deal 4 lines of damage on contact.
+		mMvIn_ChkLH .obj2_heavyDamage ; Pointless check, both are the same.
+	.obj2_lightDamage:
+		mMvC_SetDamageNext $04, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE
+		jp   .doGravity
+	.obj2_heavyDamage:
+		mMvC_SetDamageNext $04, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE
+		jp   .doGravity
 ; --------------- frame #3 ---------------
 ; Immediately advances the anim during the jump.
 .obj3:
@@ -999,20 +994,17 @@ MoveC_Kyo_RedKick:
 		jp   .doGravity
 .obj1_cont:
 	; instant switch, -$04 is always > -$06
-	mMvC_NextFrameOnGtYSpeed -$06, ANIMSPEED_NONE
-	jp   nc, .doGravity
-	jp   .doGravity
+	mMvC_ValNextFrameOnGtYSpeed -$06, ANIMSPEED_NONE, .doGravity
+		jp   .doGravity
 ; --------------- frame #2 ---------------
 .obj2:
-	mMvC_NextFrameOnGtYSpeed -$02, ANIMSPEED_NONE
-	jp   nc, .doGravity
-	mMvC_SetDamageNext $08, HITTYPE_LAUNCH_FAST_DB, PF3_HEAVYHIT
-	jp   .doGravity
+	mMvC_ValNextFrameOnGtYSpeed -$02, ANIMSPEED_NONE, .doGravity
+		mMvC_SetDamageNext $08, HITTYPE_LAUNCH_FAST_DB, PF3_HEAVYHIT
+		jp   .doGravity
 ; --------------- frame #3 ---------------
 .obj3:
-	mMvC_NextFrameOnGtYSpeed -$01, ANIMSPEED_NONE
-	jp   nc, .doGravity
-	jp   .doGravity
+	mMvC_ValNextFrameOnGtYSpeed -$01, ANIMSPEED_NONE, .doGravity
+		jp   .doGravity
 ; --------------- frame #4 / common gravity check ---------------
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
@@ -1802,18 +1794,12 @@ MoveC_Terry_PowerGeyserE:
 	
 	; Depending on the visible frame...
 	mMvC_StartChkFrame
-	cp   a, $00*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj0
-	cp   a, $01*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj1
-	cp   a, $02*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj2
-	cp   a, $03*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj3
-	cp   a, $13*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj13
-	cp   a, $14*OBJLSTPTR_ENTRYSIZE
-	jp   z, .chkEnd
+		mMvC_ChkFrame $00, .obj0
+		mMvC_ChkFrame $01, .obj1
+		mMvC_ChkFrame $02, .obj2
+		mMvC_ChkFrame $03, .obj3
+		mMvC_ChkFrame $13, .obj13
+		mMvC_ChkFrame $14, .chkEnd
 	jp   .shake
 ; --------------- frame #0 ---------------
 .obj0:
@@ -1947,9 +1933,7 @@ MoveC_Terry_BurnKnuckle:
 .obj5_chkLoop:
 	; Loop to #4 (until we touch the ground)
 	mMvC_ValFrameEnd .doGravity
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $03*OBJLSTPTR_ENTRYSIZE ; offset by -1
+		mMvC_SetFrameOnEnd $04
 		jp   .doGravity
 ; --------------- frames #3-5 / common gravity check ---------------		
 .doGravity:
@@ -2008,14 +1992,12 @@ MoveC_Terry_CrackShot:
 	.obj1_doGravity:
 		jp   .doGravity
 .obj1_cont:
-	mMvC_NextFrameOnGtYSpeed -$03, ANIMSPEED_NONE
-	jp   nc, .doGravity
+	mMvC_ValNextFrameOnGtYSpeed -$03, ANIMSPEED_NONE, .doGravity
 		mMvC_SetDamageNext $08, HITTYPE_HIT_MID0, PF3_HEAVYHIT
 		jp   .doGravity
 ; --------------- frame #2 ---------------
 .obj2:
-	mMvC_NextFrameOnGtYSpeed -$01, ANIMSPEED_NONE
-	jp   nc, .doGravity
+	mMvC_ValNextFrameOnGtYSpeed -$01, ANIMSPEED_NONE, .doGravity
 		mMvC_SetDamageNext $08, HITTYPE_HIT_MID0, PF3_HEAVYHIT
 		jp   .doGravity
 ; --------------- frame #1-3 / common gravity check ---------------
@@ -2657,8 +2639,7 @@ MoveC_Mai_HishoRyuEnJin:
 .obj3:
 	; Switch to #4 when YSpeed > -$04.
 	; The frame we switch, set a much smaller horz. movement speed. 
-	mMvC_NextFrameOnGtYSpeed -$04, ANIMSPEED_NONE
-	jp   nc, .doGravity	; Did we advance the anim? If not, skip
+	mMvC_ValNextFrameOnGtYSpeed -$04, ANIMSPEED_NONE, .doGravity ; Did we advance the anim? If not, skip
 		mMvC_SetSpeedH +$0040
 		jp   .doGravity
 ; --------------- frames #2-4 / common gravity check ---------------
@@ -3091,9 +3072,7 @@ MoveC_Mai_ChoHissatsuShinobibachiD:
 	mMvC_SetDamage $02, HITTYPE_LAUNCH_HIGH_UB, PF3_FIRE|PF3_CONTHIT|PF3_LIGHTHIT
 	; Loop back to #8 if we didn't touch the ground by the end of the frame
 	mMvC_ValFrameEnd .doGravity
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $07*OBJLSTPTR_ENTRYSIZE ; offset by -1
+		mMvC_SetFrameOnEnd $08
 		jp   .doGravity
 ; --------------- frames #7-9 / common gravity check ---------------
 .doGravity:
@@ -3436,9 +3415,7 @@ ENDC
 	mMvC_ValFrameEnd .doGravity
 		; Loop to #2 if we didn't touch the ground by the end of the frame
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MID0, PF3_CONTHIT
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $01*OBJLSTPTR_ENTRYSIZE ; offset by -1
+		mMvC_SetFrameOnEnd $02
 		jp   .doGravity
 ; --------------- frames #1-3 / common gravity check ---------------
 .doGravity:
@@ -6218,14 +6195,12 @@ MoveC_Andy_KuHaDan:
 	.obj2_setJump:
 		jp   .doGravity
 .obj2_cont:
-	mMvC_NextFrameOnGtYSpeed -$02, ANIMSPEED_NONE
-	jp   nc, .doGravity	; Reached Y Speed > - $02? If not, jump
+	mMvC_ValNextFrameOnGtYSpeed -$02, ANIMSPEED_NONE, .doGravity ; Reached Y Speed > - $02? If not, jump
 		mMvC_SetDamageNext $04, HITTYPE_HIT_MID0, PF3_HEAVYHIT|PF3_CONTHIT
 		jp   .doGravity
 ; --------------- frame #3 ---------------	
 .obj3:
-	mMvC_NextFrameOnGtYSpeed +$00, ANIMSPEED_NONE
-	jp   nc, .doGravity	; Reached Y Speed > 0? If not, jump
+	mMvC_ValNextFrameOnGtYSpeed +$00, ANIMSPEED_NONE, .doGravity ; Reached Y Speed > 0? If not, jump
 		mMvC_SetDamageNext $04, HITTYPE_HIT_MID0, PF3_HEAVYHIT|PF3_CONTHIT
 		jp   .doGravity
 ; --------------- frame #2-4 / common gravity check ---------------	
@@ -6307,10 +6282,8 @@ MoveC_Andy_ShoRyuDan:
 		; If we don't have enough vertical speed, switch to #5
 		mMvC_NextFrameOnGtYSpeed -$03, ANIMSPEED_NONE	; YSpeed > -$03?
 		jp   nc, .chkGravity							; If not, jump
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $04*OBJLSTPTR_ENTRYSIZE ; -1 since .anim will increase it
-		jp   .chkGravity
+			mMvC_SetFrameOnEnd $05
+			jp   .chkGravity
 ; --------------- frame #4 ---------------	
 .obj4:
 	mMvC_SetDamage $02, HITTYPE_LAUNCH_HIGH_UB, PF3_CONTHIT
@@ -6318,10 +6291,8 @@ MoveC_Andy_ShoRyuDan:
 		; As long as we still have enough vertical speed, loop back to #2
 		mMvC_NextFrameOnGtYSpeed -$03, ANIMSPEED_NONE	; YSpeed < -$03?
 		jp   c, .chkGravity								; If not, jump
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $01*OBJLSTPTR_ENTRYSIZE ; -1 since .anim will increase it
-		jp   .chkGravity
+			mMvC_SetFrameOnEnd $02
+			jp   .chkGravity
 ; --------------- frame #5,#6 ---------------	
 .obj5:
 	; This quickly switches to #6 then #7, since $00.40 > $00
@@ -6964,9 +6935,7 @@ MoveC_MrBig_SpinningLancer:
 		add  hl, bc
 		dec  [hl]		; LoopTimer--
 		jp   z, MoveC_MrBig_DrumShot.setDamageHit1	; LoopTimer == 0? If so, jump
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $00*OBJLSTPTR_ENTRYSIZE ; offset by -1
+		mMvC_SetFrameOnEnd $01
 		jp   MoveC_MrBig_DrumShot.setDamageHit1
 ; --------------- frame #5 ---------------
 .obj5:
@@ -7051,9 +7020,7 @@ MoveC_MrBig_CaliforniaRomanceH:
 		dec  [hl]
 		jp   z, .switchToCaliforniaRomance
 		
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $00*OBJLSTPTR_ENTRYSIZE ; offset by -1
+		mMvC_SetFrameOnEnd $01
 		mMvC_PlaySound SFX_STEP
 		jp   MoveC_MrBig_DrumShot.setDamageHit1
 	.switchToCaliforniaRomance:
@@ -7128,9 +7095,7 @@ MoveC_MrBig_DrumShot:
 		dec  [hl]
 		jp   z, .obj6_loopEnd
 	.obj6_loop:
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $00*OBJLSTPTR_ENTRYSIZE ; offset by -1
+		mMvC_SetFrameOnEnd $01
 		jp   .setDamageHit0
 	.obj6_loopEnd:
 		ld   hl, iOBJInfo_FrameTotal
@@ -7660,19 +7625,16 @@ MoveC_Geese_HishouNichirinZan:
 	.obj2_doGravity:
 		jp   .doGravity
 .obj2_cont:
-	mMvC_NextFrameOnGtYSpeed -$06, ANIMSPEED_NONE
-	jp   nc, .doGravity
-	jp   .doGravity
+	mMvC_ValNextFrameOnGtYSpeed -$06, ANIMSPEED_NONE, .doGravity
+		jp   .doGravity
 ; --------------- frame #3 ---------------
 .obj3:
-	mMvC_NextFrameOnGtYSpeed $01, ANIMSPEED_NONE
-	jp   nc, .doGravity
-	jp   .doGravity
+	mMvC_ValNextFrameOnGtYSpeed $01, ANIMSPEED_NONE, .doGravity
+		jp   .doGravity
 ; --------------- frame #4 ---------------
 .obj4:
-	mMvC_NextFrameOnGtYSpeed $02, ANIMSPEED_NONE
-	jp   nc, .doGravity
-	jp   .doGravity
+	mMvC_ValNextFrameOnGtYSpeed $02, ANIMSPEED_NONE, .doGravity
+		jp   .doGravity
 ; --------------- frames #2-5 / common gravity check ---------------
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim

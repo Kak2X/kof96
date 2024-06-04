@@ -219,14 +219,12 @@ MoveC_Krauser_LegTomahawk:
 		jp   .doGravity
 .obj1_cont:
 	; Switch to #2 when YSpeed > -$06 (immediately) and then set its damage
-	mMvC_NextFrameOnGtYSpeed -$06, ANIMSPEED_NONE
-	jp   nc, .doGravity
+	mMvC_ValNextFrameOnGtYSpeed -$06, ANIMSPEED_NONE, .doGravity
 		mMvC_SetDamageNext $08, HITTYPE_HIT_MID0, PF3_HEAVYHIT|PF3_CONTHIT
 		jp   .doGravity
 ; --------------- frame #2 ---------------
 .obj2:
-	mMvC_NextFrameOnGtYSpeed -$02, ANIMSPEED_NONE
-	jp   nc, .doGravity
+	mMvC_ValNextFrameOnGtYSpeed -$02, ANIMSPEED_NONE, .doGravity
 		ld   hl, iPlInfo_Flags1
 		add  hl, bc
 		res  PF1B_INVULN, [hl]
@@ -414,9 +412,8 @@ MoveC_Krauser_KaiserSuplex:
 		mMvC_MoveThrowOpSync
 .obj3_cont:
 	; Switch to next frame as soon as the speed decrements once (it's -$04 at first)
-	mMvC_NextFrameOnGtYSpeed -$04, ANIMSPEED_NONE
-	jp   nc, .doGravityDamage
-	jp   .doGravityDamage
+	mMvC_ValNextFrameOnGtYSpeed -$04, ANIMSPEED_NONE, .doGravityDamage
+		jp   .doGravityDamage
 ; --------------- frame #4 ---------------
 ; Second part of the jump, changing rotation frame.
 ; This lasts until .doGravityDamage switches us to #5.
@@ -441,15 +438,13 @@ MoveC_Krauser_KaiserSuplex:
 		mMvC_SetSpeedH -$0280
 		mMvC_SetSpeedV -$0400
 .obj6_cont:
-	mMvC_NextFrameOnGtYSpeed -$06, ANIMSPEED_NONE
-	jp   nc, .doGravity
-	jp   .doGravity
+	mMvC_ValNextFrameOnGtYSpeed -$06, ANIMSPEED_NONE, .doGravity
+		jp   .doGravity
 ; --------------- frame #7 ---------------
 ; Backjump until peak.
 .obj7:
-	mMvC_NextFrameOnGtYSpeed +$00, ANIMSPEED_NONE
-	jp   nc, .doGravity
-	jp   .doGravity
+	mMvC_ValNextFrameOnGtYSpeed +$00, ANIMSPEED_NONE, .doGravity
+		jp   .doGravity
 ; --------------- frame #8 ---------------
 ; Handles rest of backjump until we land.
 .obj8:

@@ -7376,12 +7376,12 @@ Play_DrawCharIcons_Single:
 	jp   c, .noS1PWin1		; If so, draw the empty box
 .okS1PWin1:
 	ld   hl, vBGBoxWin1P0	; Otherwise, draw the filled box
-	ld   c, TID_BOX_FILL
+	ld   c, PLAY_TID_BOX_FILL
 	call Play_DrawWinBox
 	jp   .chkS1PWin2
 .noS1PWin1:
 	ld   hl, vBGBoxWin1P0
-	ld   c, TID_BOX_BLANK
+	ld   c, PLAY_TID_BOX_BLANK
 	call Play_DrawWinBox
 
 	;
@@ -7395,12 +7395,12 @@ Play_DrawCharIcons_Single:
 	jp   c, .noS1PWin2	; If so, draw the empty box
 .unreachable_okS1PWin2:
 	ld   hl, vBGBoxWin1P1	; Otherwise, draw the filled box
-	ld   c, TID_BOX_FILL
+	ld   c, PLAY_TID_BOX_FILL
 	call Play_DrawWinBox
 	jp   .s2P
 .noS1PWin2:
 	ld   hl, vBGBoxWin1P1
-	ld   c, TID_BOX_BLANK
+	ld   c, PLAY_TID_BOX_BLANK
 	call Play_DrawWinBox
 
 	;
@@ -7421,12 +7421,12 @@ Play_DrawCharIcons_Single:
 	jp   c, .noS2PWin1	; If so, draw the empty box
 .okS2PWin1:
 	ld   hl, vBGBoxWin2P0
-	ld   c, TID_BOX_FILL
+	ld   c, PLAY_TID_BOX_FILL
 	call Play_DrawWinBox
 	jp   .chkS2PWin2
 .noS2PWin1:
 	ld   hl, vBGBoxWin2P0
-	ld   c, TID_BOX_BLANK
+	ld   c, PLAY_TID_BOX_BLANK
 	call Play_DrawWinBox
 
 .chkS2PWin2:
@@ -7436,12 +7436,12 @@ Play_DrawCharIcons_Single:
 	; [TCRF] For the same reason as 1P.
 .unreachable_okS2PWin2:
 	ld   hl, vBGBoxWin2P1
-	ld   c, TID_BOX_FILL
+	ld   c, PLAY_TID_BOX_FILL
 	call Play_DrawWinBox
 	jp   .s1P_ret
 .noS2PWin2:
 	ld   hl, vBGBoxWin2P1
-	ld   c, TID_BOX_BLANK
+	ld   c, PLAY_TID_BOX_BLANK
 	call Play_DrawWinBox
 .s1P_ret:
 	jp   Play_DrawCharIcons_Ret
@@ -8464,10 +8464,10 @@ Play_DoPreRoundText:
 	cp   $01			; Is this the final round?
 	jp   z, .final		; If so, use "FINAL!!"
 .roundX:
-	ld   a, PLAY_PREROUND_OBJ_ROUNDX			; Otherwise, use "ROUND *"
+	ld   a, PLAY_OBJ_PREROUND_ROUNDX			; Otherwise, use "ROUND *"
 	jp   .setRoundTxt
 .final:
-	ld   a, PLAY_PREROUND_OBJ_FINAL
+	ld   a, PLAY_OBJ_PREROUND_FINAL
 .setRoundTxt:
 	ld   hl, wOBJInfo_RoundText+iOBJInfo_OBJLstPtrTblOffset ; Seek to sprite mapping ID
 	ld   [hl], a
@@ -8475,17 +8475,17 @@ Play_DoPreRoundText:
 	call Play_DoIntro
 
 	; "READY"
-	ld   [hl], PLAY_PREROUND_OBJ_READY
+	ld   [hl], PLAY_OBJ_PREROUND_READY
 	ld   b, 60				; 1 sec
 	call Play_DoIntro
 
 	; "GO!!" (small)
-	ld   [hl], PLAY_PREROUND_OBJ_GO_SM
+	ld   [hl], PLAY_OBJ_PREROUND_GO_SM
 	ld   b, $08
 	call Play_DoIntro
 
 	; "GO!!" (large)
-	ld   [hl], PLAY_PREROUND_OBJ_GO_LG
+	ld   [hl], PLAY_OBJ_PREROUND_GO_LG
 	ld   b, $3C
 	call Play_DoIntro
 

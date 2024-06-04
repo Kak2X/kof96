@@ -107,20 +107,12 @@ MoveC_Base_RunF:
 	mMvC_ValFrameEnd .chkEnd
 
 		; Only when starting frame #1
-		ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-		add  hl, de
-		ld   a, [hl]
-		cp   $00*OBJLSTPTR_ENTRYSIZE	; About to display #0?
-		jp   z, .chkEnd					; If so, skip
-		cp   $02*OBJLSTPTR_ENTRYSIZE	; About to display #2?
-		jp   z, .chkEnd					; If so, skip
+		mMvC_StartChkFrame
+			mMvC_ChkFrame $00, .chkEnd ; About to display #0? ; If so, skip
+			mMvC_ChkFrame $02, .chkEnd ; About to display #2? ; If so, skip
 
 		; Daimon uses its own SFX when running.
-		ld   hl, iPlInfo_CharId
-		add  hl, bc
-		ld   a, [hl]
-		cp   CHAR_ID_DAIMON		; iPlInfo_CharId == CHAR_ID_DAIMON?
-		jp   z, .daimon			; If so, jump
+		mMvIn_ValSkipWithChar CHAR_ID_DAIMON, .daimon
 	.norm:
 		ld   a, SFX_STEP		; A = Default step SFX
 		jp   .playSFX
@@ -216,8 +208,8 @@ MoveC_Base_HopB:
 		jp   .moveDown
 .waitUp:
 	mMvC_NextFrameOnGtYSpeed -$03, ANIMSPEED_NONE
-		; Apply gravity
-		jp   .moveDown
+	; Apply gravity
+	jp   .moveDown
 ; --------------- common frames #0-1 ---------------
 .moveDown:
 	; Move down 0.6px/frame
@@ -4600,10 +4592,9 @@ MoveC_Hit_Launch_SwoopUp:
 	bit  7, a				; SpeedY < 0? (MSB set)
 	jp   nz, .doGravity0030	; If so, jump
 .obj0_onDown:	
-	; Immediately switch to #2 and apply $00.60px/frame gravity if we start moving down.
-	ld   hl, iOBJInfo_OBJLstPtrTblOffset
-	add  hl, de
-	ld   [hl], $02*OBJLSTPTR_ENTRYSIZE
+	; Immediately switch to #3 and apply $00.60px/frame gravity if we start moving down.
+	; This skips the looping logic in #1.
+	mMvC_SetFrameOnEnd $03
 	jp   .doGravity0060
 ; --------------- frame #1 ---------------
 ; Upwards movement - frame #1.
@@ -4614,11 +4605,9 @@ MoveC_Hit_Launch_SwoopUp:
 	bit  7, a				; SpeedY < 0? (MSB set)
 	jp   nz, .obj1_onUp		; If so, jump
 .obj1_onDown:
-	; Immediately switch to #2 and apply $00.60px/frame gravity if we start moving down.
+	; Immediately switch to #3 and apply $00.60px/frame gravity if we start moving down.
 	; Like with #0.
-	ld   hl, iOBJInfo_OBJLstPtrTblOffset
-	add  hl, de
-	ld   [hl], $02*OBJLSTPTR_ENTRYSIZE
+	mMvC_SetFrameOnEnd $03
 	jp   .doGravity0060
 .obj1_onUp:
 	mMvC_ValFrameEnd .doGravity0030
@@ -4631,17 +4620,16 @@ MoveC_Hit_Launch_SwoopUp:
 	.obj1_onUpDaimon:
 		; Play SFX
 		mMvC_PlaySound SCT_LIGHT
-		jp   .obj1_switchToChkEnd
+		jp   .obj1_switchTo0
 	.obj1_onUpProj:
 		; Allow next hit to happen.
 		; If the projectile is still active, this will reset the move and continue the upwards movement.
 		ld   hl, iPlInfo_Flags1
 		add  hl, bc
 		res  PF1B_INVULN, [hl]
-	.obj1_switchToChkEnd:
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $06*OBJLSTPTR_ENTRYSIZE
+	.obj1_switchTo0:
+		; Force animation to loop back to #0 regardless, for the non-projectile one.
+		mMvC_SetFrameOnEnd $06+1 ; Force anim code to loop to 0
 		jp   .doGravity0030
 ; --------------- frame #2 ---------------
 ; Downwards movement - loop frame #0.
@@ -4671,9 +4659,7 @@ MoveC_Hit_Launch_SwoopUp:
 .obj3_chkLoop:
 	; Loop back to #2 if we haven't touched the ground by the time this frame ended
 	mMvC_ValFrameEnd .doGravity0060
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $01*OBJLSTPTR_ENTRYSIZE ; offset by -1
+		mMvC_SetFrameOnEnd $02
 		jp   .doGravity0060
 ; --------------- frame #4 ---------------
 ; Ground touched - screen shake effect, speed reset.
@@ -4960,10 +4946,8 @@ MoveC_Hit_GuardBreakA:
 	
 	; Depending on the visible frame...
 	mMvC_StartChkFrame
-	cp   a, $00*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj0
-	cp   a, $01*OBJLSTPTR_ENTRYSIZE
-	jp   z, .chkEnd
+		mMvC_ChkFrame $00, .obj0
+		mMvC_ChkFrame $01, .chkEnd
 ; --------------- frame #0 ---------------
 .obj0:
 	; Slow down at $00.60px/frame.
@@ -6351,9 +6335,7 @@ MoveC_Robert_HienShippuKyaku:
 .obj5:
 	mMvC_ValFrameEnd .doGravity
 		; Loop back to #2 if we didn't touch the ground yet
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $01*OBJLSTPTR_ENTRYSIZE ; offset by -1
+		mMvC_SetFrameOnEnd $02
 		jp   .doGravity
 ; --------------- common gravity check ---------------	
 .doGravity:
@@ -6376,31 +6358,19 @@ MoveC_Robert_HienShippuKyaku:
 ; Move code for Robert's Hien Ryuu Shin Kya (MOVE_ROBERT_HIEN_RYUU_SHIN_KYA_L, MOVE_ROBERT_HIEN_RYUU_SHIN_KYA_H).
 MoveC_Robert_HienRyuuShinKya:
 	call Play_Pl_MoveByColiBoxOverlapX
-	call Play_Pl_IsMoveLoading
-	jp   c, .ret
-	ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-	add  hl, de
-	ld   a, [hl]
-	cp   a, $00*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj0
-	cp   a, $01*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj1
-	cp   a, $02*OBJLSTPTR_ENTRYSIZE
-	jp   z, .chkEnd
-	cp   a, $03*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj3
-	cp   a, $04*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj4
-	cp   a, $05*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj5
-	cp   a, $06*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj6
-	cp   a, $07*OBJLSTPTR_ENTRYSIZE
-	jp   z, .obj7
-	cp   a, $08*OBJLSTPTR_ENTRYSIZE
-	jp   z, .doGravityHit
-	cp   a, $09*OBJLSTPTR_ENTRYSIZE
-	jp   z, .chkEnd
+	mMvC_ValLoaded .ret
+	
+	mMvC_StartChkFrame
+		mMvC_ChkFrame $00, .obj0
+		mMvC_ChkFrame $01, .obj1
+		mMvC_ChkFrame $02, .chkEnd
+		mMvC_ChkFrame $03, .obj3
+		mMvC_ChkFrame $04, .obj4
+		mMvC_ChkFrame $05, .obj5
+		mMvC_ChkFrame $06, .obj6
+		mMvC_ChkFrame $07, .obj7
+		mMvC_ChkFrame $08, .doGravityHit
+		mMvC_ChkFrame $09, .chkEnd
 	jp   .anim ; We never get here
 ; --------------- frame #0 ---------------	
 .obj0:
@@ -6562,10 +6532,8 @@ MoveC_Robert_RyuuGa:
 	.obj2_doGravity:
 		jp   .doGravity
 .obj2_cont:
-	mMvC_NextFrameOnGtYSpeed -$06, ANIMSPEED_NONE
-	; No difference
-	jp   nc, .doGravity
-	jp   .doGravity
+	mMvC_ValNextFrameOnGtYSpeed -$06, ANIMSPEED_NONE, .doGravity
+		jp   .doGravity
 ; --------------- frame #3 ---------------	
 .obj3:
 	mMvC_SetSpeedH $0040
@@ -6653,26 +6621,20 @@ MoveC_Terry_RisingTackle:
 	mMvC_SetDamage $02, HITTYPE_LAUNCH_HIGH_UB, PF3_CONTHIT
 	mMvC_ValFrameEnd .doGravity
 		; Skip to #5 if YSpeed > -$03
-		mMvC_NextFrameOnGtYSpeed -$03, ANIMSPEED_NONE
-		jp   nc, .doGravity
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $04*OBJLSTPTR_ENTRYSIZE ; offset by -1
-		jp   .doGravity
+		mMvC_ValNextFrameOnGtYSpeed -$03, ANIMSPEED_NONE, .doGravity
+			mMvC_SetFrameOnEnd $05
+			jp   .doGravity
 ; --------------- frame #4 ---------------
 ; Attack frames with loop check.
 .obj4:
 	mMvC_SetDamage $02, HITTYPE_LAUNCH_HIGH_UB, PF3_CONTHIT
 	mMvC_ValFrameEnd .doGravity
 		; Continue looping to #2 until YSpeed > -$03
-		mMvC_NextFrameOnGtYSpeed -$03, ANIMSPEED_NONE	; YSpeed > -$03?
-		jp   nc, .obj4_loop								; If not, loop
-		; Otherwise, proceed to #5
-		jp   .doGravity
+		mMvC_ValNextFrameOnGtYSpeed -$03, ANIMSPEED_NONE, .obj4_loop
+			; Otherwise, proceed to #5
+			jp   .doGravity
 	.obj4_loop:
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $01*OBJLSTPTR_ENTRYSIZE ; offset by -1
+		mMvC_SetFrameOnEnd $02
 		jp   .doGravity
 ; --------------- frame #5 ---------------	
 ; Jump arc peak.
@@ -7310,9 +7272,8 @@ MoveC_Leona_BalticLauncherH:
 		mMvC_SetSpeedV -$0400
 		jp   .doGravity
 .obj1_cont:
-	mMvC_NextFrameOnGtYSpeed -$02, ANIMSPEED_NONE
-	jp   nc, .doGravity
-	jp   .doGravity
+	mMvC_ValNextFrameOnGtYSpeed -$02, ANIMSPEED_NONE, .doGravity
+		jp   .doGravity
 ; --------------- frame #1-2 / common gravity check ---------------	
 .doGravity:
 	mMvC_ChkGravityHV $0060, .anim
@@ -7588,9 +7549,7 @@ MoveC_Leona_XCalibur:
 .obj5_cont:
 	mMvC_ValFrameEnd .doGravity
 		; Loop back to #4 if we didn't touch the ground yet
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $03*OBJLSTPTR_ENTRYSIZE ; offset by -1
+		mMvC_SetFrameOnEnd $04
 		jp   .doGravity
 		
 ; --------------- frames #1-5 / common gravity check ---------------	
@@ -7715,9 +7674,7 @@ MoveC_OLeona_StormBringer:
 		jp   z, .obj2_setAnimSpeed	; Did it reach $00? If so, jump
 		
 		; If we get here, we can loop back to #1
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $00*OBJLSTPTR_ENTRYSIZE
+		mMvC_SetFrameOnEnd $01
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_SUPERALT|PF3_LIGHTHIT
 		jp   .restoreHealth
 	.obj2_setAnimSpeed:
@@ -7962,9 +7919,7 @@ MoveC_OLeona_SuperMoonSlasher:
 		jp   z, .obj6_noLoop	; Did it reach 0? If so, jump
 	.obj6_loop:
 		; Loop to #4
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $03*OBJLSTPTR_ENTRYSIZE ; offset by -1
+		mMvC_SetFrameOnEnd $04
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_SUPERALT|PF3_LIGHTHIT
 		jp   .chkOtherEscape
 	.obj6_noLoop:
@@ -8305,11 +8260,9 @@ MoveC_MrKarate_ShouranKyaku:
 	call OBJLstS_ApplyXSpeed
 	; Switch directly to #6 if we didn't hit the opponent by the end of #2
 	mMvC_ValFrameEnd .anim
-		ld   hl, iOBJInfo_OBJLstPtrTblOffsetView
-		add  hl, de
-		ld   a, [hl]
-		cp   $02*OBJLSTPTR_ENTRYSIZE	; FrameId == #2?
-		jp   nz, .anim				; If not, skip
+		mMvC_StartChkFrame
+			cp   $02*OBJLSTPTR_ENTRYSIZE	; FrameId == #2?
+			jp   nz, .anim					; If not, skip
 		mMvC_SetFrame $06, $0A
 		jp   .ret
 ; --------------- frame #3 ---------------
@@ -8335,9 +8288,7 @@ MoveC_MrKarate_ShouranKyaku:
 	dec  [hl]
 	jp   z, .obj5_noLoop
 	mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_CONTHIT
-	ld   hl, iOBJInfo_OBJLstPtrTblOffset
-	add  hl, de
-	ld   [hl], $02*OBJLSTPTR_ENTRYSIZE	; offset by -1
+	mMvC_SetFrameOnEnd $03
 	jp   .chkEscape
 .obj5_noLoop:
 	; If it expired, hyper jump back
@@ -8513,9 +8464,7 @@ MoveC_MrKarate_Zenretsuken:
 		jp   z, .obj2_noLoop
 	.obj2_loop:
 		mMvC_SetDamage $01, HITTYPE_HIT_MULTI0, PF3_CONTHIT
-		ld   hl, iOBJInfo_OBJLstPtrTblOffset
-		add  hl, de
-		ld   [hl], $00*OBJLSTPTR_ENTRYSIZE ; offset by -1
+		mMvC_SetFrameOnEnd $01
 		jp   .anim
 	.obj2_noLoop:
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_CONTHIT

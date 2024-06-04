@@ -981,9 +981,8 @@ MoveC_Goenitz_ShinyaotomeThrowH:
 		mMvC_MoveThrowOp -$0D, -$10
 		mMvC_MoveThrowOpSync
 .rotU4Jump_cont:
-	mMvC_NextFrameOnGtYSpeed -$04, ANIMSPEED_NONE
-	jp   nc, .doGravity
-	jp   .doGravity
+	mMvC_ValNextFrameOnGtYSpeed -$04, ANIMSPEED_NONE, .doGravity
+		jp   .doGravity
 ; --------------- frame #4 ---------------
 .rotDJump:
 	mMvC_ValFrameStart .rotDJump_cont
@@ -1149,8 +1148,7 @@ MoveC_Goenitz_ShinyaotomeMizuchiSL:
 		mMvC_ChkFrame $00, .obj0
 		mMvC_ChkFrame $01, .obj1
 		mMvC_ChkFrame $02, .obj2
-	cp   a, $03*OBJLSTPTR_ENTRYSIZE
-	jp   z, .chkEnd
+		mMvC_ChkFrame $03, .chkEnd
 	jp   .anim ; We never get here
 ; --------------- frame #0 ---------------
 ; Startup.
@@ -1349,8 +1347,7 @@ MoveC_Goenitz_ShinyaotomeMizuchiSH:
 		mMvC_ChkFrame $00, .obj0
 		mMvC_ChkFrame $01, .obj1
 		mMvC_ChkFrame $02, .obj2
-	cp   a, $03*OBJLSTPTR_ENTRYSIZE
-	jp   z, .chkEnd
+		mMvC_ChkFrame $03, .chkEnd
 	jp   .anim ; We never get here
 ; --------------- frame #0 ---------------
 ; Startup.

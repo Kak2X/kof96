@@ -577,6 +577,17 @@ MACRO mMvC_NextFrameOnGtYSpeed
 	call OBJLstS_ReqAnimOnGtYSpeed
 ENDM
 
+; =============== mMvC_ValNextFrameOnGtYSpeed ===============
+; Like mMvC_NextFrameOnGtYSpeed, and jumps to the specified label if we didn't advance the animation yet.
+; IN
+; - 1: Y Speed threshold
+; - 2: Animation speed for next frame
+; - 3: Target if we didn't animate.
+MACRO mMvC_ValNextFrameOnGtYSpeed
+	mMvC_NextFrameOnGtYSpeed \1, \2	; Did we switch to the next frame?
+	jp   nc, \3						; If not, jump
+ENDM
+
 ; =============== mMvC_SetLandFrame ===============
 ; Sets the animation frame used when landing on the ground (typically the last one).
 ; IN
