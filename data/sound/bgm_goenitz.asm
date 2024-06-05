@@ -1,30 +1,30 @@
-SndHeader_BGM_TrashHead:
+SndHeader_BGM_Goenitz:
 	db $04 ; Number of channels
 .ch1:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
-	dw SndData_BGM_TrashHead_Ch1 ; Data ptr
+	dw SndData_BGM_Goenitz_Ch1 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_BGM_TrashHead_Ch2 ; Data ptr
+	dw SndData_BGM_Goenitz_Ch2 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
-	dw SndData_BGM_TrashHead_Ch3 ; Data ptr
+	dw SndData_BGM_Goenitz_Ch3 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch4:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_BGM_TrashHead_Ch4 ; Data ptr
+	dw SndData_BGM_Goenitz_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_BGM_TrashHead_Ch1:
+SndData_BGM_Goenitz_Ch1:
 	sndenv 1, SNDENV_DEC, 1
 	sndenach SNDOUT_CH1R|SNDOUT_CH1L
 	sndnr11 2, 0
@@ -167,7 +167,7 @@ SndData_BGM_TrashHead_Ch1:
 	sndnote $00
 	sndlen 14
 	sndret
-SndData_BGM_TrashHead_Ch2:
+SndData_BGM_Goenitz_Ch2:
 	sndenv 7, SNDENV_INC, 0
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 3, 0
@@ -181,7 +181,7 @@ SndData_BGM_TrashHead_Ch2:
 	sndnr21 2, 0
 	sndnote $00
 	sndlen 10
-	sndcall SndData_BGM_TrashHead_Ch1.call1
+	sndcall SndData_BGM_Goenitz_Ch1.call1
 	sndcall .call2
 	sndcall .call3
 	sndloop .main
@@ -336,7 +336,7 @@ SndData_BGM_TrashHead_Ch2:
 	sndnote $20
 	sndloopcnt $00, 2, .call3
 	sndret
-SndData_BGM_TrashHead_Ch3:
+SndData_BGM_Goenitz_Ch3:
 	sndenvch3 2
 	sndenach SNDOUT_CH3R|SNDOUT_CH3L
 	sndwave $04
@@ -459,7 +459,7 @@ SndData_BGM_TrashHead_Ch3:
 	sndnote $16
 	sndloopcnt $00, 4, .call2d
 	sndret
-SndData_BGM_TrashHead_Ch4:
+SndData_BGM_Goenitz_Ch4:
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndenv 5, SNDENV_DEC, 4
 	sndch4 2, 0, 6

@@ -5544,7 +5544,7 @@ Play_StageHeaderTbl:
 	dw GFXLZ_Play_Stage_Stadium
 	dw BGLZ_Play_Stage_Stadium
 	db SCRPAL_STAGE_STADIUM
-	db BGM_FAIRY
+	db BGM_KAGURA
 	db $00
 
 	; STAGE 5
@@ -5552,7 +5552,7 @@ Play_StageHeaderTbl:
 	dw GFXLZ_Play_Stage_Stadium
 	dw BGLZ_Play_Stage_Stadium
 	db SCRPAL_STAGE_STADIUM
-	db BGM_TRASHHEAD
+	db BGM_GOENITZ
 	db $00
 
 	; STAGE 6

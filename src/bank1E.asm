@@ -663,7 +663,7 @@ Module_CharSel:
 	ld   a, $1B
 	ldh  [rBGP], a
 	; Play character select BGM
-	ld   a, BGM_ROULETTE
+	ld   a, BGM_CHARSELECT
 	call HomeCall_Sound_ReqPlayExId_Stub
 	call Task_PassControl_NoDelay
 	
@@ -3606,7 +3606,7 @@ Module_OrdSel:
 	ldh  [rBGP], a
 	
 	; Reuse character select music
-	ld   a, BGM_ROULETTE
+	ld   a, BGM_CHARSELECT
 	call HomeCall_Sound_ReqPlayExId_Stub
 	call Task_PassControl_Delay1D
 	

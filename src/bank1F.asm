@@ -2086,18 +2086,18 @@ Sound_ChRegAddrTable:
 ;
 ; Unused entries in the table mostly point to code, which is in no way a valid header.
 Sound_SndHeaderPtrTable:
-	dw SndHeader_BGM_Roulette;X         ; SND_NONE
-	dw SndHeader_BGM_Roulette           ; BGM_ROULETTE
+	dw SndHeader_BGM_CharSelect;X       ; SND_NONE
+	dw SndHeader_BGM_CharSelect         ; BGM_CHARSELECT
 	dw SndHeader_BGM_StageClear         ; BGM_STAGECLEAR
 	dw SndHeader_BGM_BigShot            ; BGM_BIGSHOT
 	dw SndHeader_BGM_Esaka              ; BGM_ESAKA
-	dw SndHeader_BGM_RisingRed          ; BGM_RISINGRED
+	dw SndHeader_BGM_Credits            ; BGM_CREDITS
 	dw SndHeader_BGM_Geese              ; BGM_GEESE
 	dw SndHeader_BGM_Arashi             ; BGM_ARASHI
-	dw SndHeader_BGM_Fairy              ; BGM_FAIRY
-	dw SndHeader_BGM_TrashHead          ; BGM_TRASHHEAD
-	dw SndHeader_BGM_Wind               ; BGM_WIND
-	dw SndHeader_BGM_ToTheSky           ; BGM_TOTHESKY
+	dw SndHeader_BGM_Kagura             ; BGM_KAGURA
+	dw SndHeader_BGM_Goenitz            ; BGM_GOENITZ
+	dw SndHeader_BGM_GoenitzCutscene    ; BGM_GOENITZCUTSCENE
+	dw SndHeader_BGM_Ending             ; BGM_ENDING
 	dw SndHeader_Pause                  ; SNC_PAUSE
 	dw SndHeader_Unpause                ; SNC_UNPAUSE
 	dw SndHeader_SFX_CursorMove         ; SFX_CURSORMOVE
@@ -2110,13 +2110,13 @@ Sound_SndHeaderPtrTable:
 	dw SndHeader_SFX_Taunt              ; SFX_TAUNT
 	dw SndHeader_SFX_Hit                ; SFX_HIT
 	dw SndHeader_SFX_MultiHit           ; SFX_MULTIHIT
-	dw SndHeader_BGM_Protector          ; BGM_PROTECTOR
+	dw SndHeader_BGM_KaguraCutscene     ; BGM_KAGURACUTSCENE
 	dw SndHeader_BGM_MrKarate           ; BGM_MRKARATE
 	dw SndHeader_SFX_GroundHit          ; SFX_GROUNDHIT
 	dw SndHeader_SFX_Drop               ; SFX_DROP
 	dw SndHeader_SFX_SuperJump          ; SFX_SUPERJUMP
 	dw SndHeader_SFX_Step               ; SFX_STEP
-	dw SndHeader_BGM_In1996             ; BGM_IN1996
+	dw SndHeader_BGM_Intro              ; BGM_INTRO
 	dw SndHeader_BGM_MrKarateCutscene   ; BGM_MRKARATECUTSCENE
 	dw Sound_StartNothing;X             ; #SND_ID_20
 	dw Sound_StartNothing;X             ; #SND_ID_21
@@ -2274,20 +2274,20 @@ INCLUDE "data/sound/sfx_psycho_teleport.asm"
 INCLUDE "data/sound/sfx_game_over.asm"
 INCLUDE "data/sound/cmd_pause_unpause.asm"
 INCLUDE "data/sound/bgm_geese.asm"
-INCLUDE "data/sound/bgm_fairy.asm"
+INCLUDE "data/sound/bgm_kagura.asm"
 INCLUDE "data/sound/bgm_esaka.asm"
 INCLUDE "data/sound/bgm_mr_karate_cutscene.asm"
-INCLUDE "data/sound/bgm_in1996.asm"
+INCLUDE "data/sound/bgm_intro.asm"
 INCLUDE "data/sound/bgm_mr_karate.asm"
 INCLUDE "data/sound/bgm_big_shot.asm"
-INCLUDE "data/sound/bgm_protector.asm"
-INCLUDE "data/sound/bgm_to_the_sky.asm"
-INCLUDE "data/sound/bgm_wind.asm"
-INCLUDE "data/sound/bgm_trash_head.asm"
+INCLUDE "data/sound/bgm_kagura_cutscene.asm"
+INCLUDE "data/sound/bgm_ending.asm"
+INCLUDE "data/sound/bgm_goenitz_cutscene.asm"
+INCLUDE "data/sound/bgm_goenitz.asm"
 INCLUDE "data/sound/bgm_arashi.asm"
-INCLUDE "data/sound/bgm_rising_red.asm"
+INCLUDE "data/sound/bgm_credits.asm"
 INCLUDE "data/sound/bgm_stage_clear.asm"
-INCLUDE "data/sound/bgm_roulette.asm"
+INCLUDE "data/sound/bgm_char_select.asm"
 
 ; =============== Sound_ReqPlayId ===============
 ; Requests playback for a new sound ID.

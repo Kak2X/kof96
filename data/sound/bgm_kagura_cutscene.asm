@@ -1,36 +1,36 @@
-SndHeader_BGM_Protector:
+SndHeader_BGM_KaguraCutscene:
 	db $04 ; Number of channels
 .ch1:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
-	dw SndData_BGM_Protector_Ch1 ; Data ptr
+	dw SndData_BGM_KaguraCutscene_Ch1 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_BGM_Protector_Ch2 ; Data ptr
+	dw SndData_BGM_KaguraCutscene_Ch2 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
-	dw SndData_BGM_Protector_Ch3 ; Data ptr
+	dw SndData_BGM_KaguraCutscene_Ch3 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch4:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_BGM_Protector_Ch4 ; Data ptr
+	dw SndData_BGM_KaguraCutscene_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_BGM_Protector_Ch1:
+SndData_BGM_KaguraCutscene_Ch1:
 	sndenv 7, SNDENV_DEC, 7
 	sndenach SNDOUT_CH1R|SNDOUT_CH1L
 	sndnr11 2, 0
 	sndcall .call0
 	sndcall .call1
-	sndloop SndData_BGM_Protector_Ch1
+	sndloop SndData_BGM_KaguraCutscene_Ch1
 .call0:
 	sndenv 8, SNDENV_DEC, 4
 	sndnote $1E
@@ -154,7 +154,7 @@ SndData_BGM_Protector_Ch1:
 	sndnote $39
 	sndlen 20
 	sndret
-SndData_BGM_Protector_Ch2:
+SndData_BGM_KaguraCutscene_Ch2:
 	sndenv 3, SNDENV_DEC, 4
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 2, 0
@@ -287,14 +287,14 @@ SndData_BGM_Protector_Ch2:
 	sndnote $39
 	sndlen 20
 	sndret
-SndData_BGM_Protector_Ch3:
+SndData_BGM_KaguraCutscene_Ch3:
 	sndenvch3 2
 	sndenach SNDOUT_CH3R|SNDOUT_CH3L
 	sndwave $02
 	sndch3len $00
 	sndcall .call0
 	sndcall .call1
-	sndloop SndData_BGM_Protector_Ch3
+	sndloop SndData_BGM_KaguraCutscene_Ch3
 .call0:
 	sndnote $12
 	sndlen 80
@@ -341,12 +341,12 @@ SndData_BGM_Protector_Ch3:
 	sndnote $15
 	sndlen 80
 	sndret
-SndData_BGM_Protector_Ch4:
+SndData_BGM_KaguraCutscene_Ch4:
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndcall .call0
 	sndcall .call1
 	sndcall .call2
-	sndloop SndData_BGM_Protector_Ch4
+	sndloop SndData_BGM_KaguraCutscene_Ch4
 .call0:
 	sndenv 6, SNDENV_DEC, 1
 	sndch4 3, 0, 6

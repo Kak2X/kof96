@@ -1085,21 +1085,21 @@ Options_Item_BGMTest:
 ; =============== Options_BGMIdMapTbl ===============
 ; Maps the BGM Ids to the sound IDs used by the sound driver.
 Options_BGMIdMapTbl: 
-	db BGM_IN1996               ; $01
-	db BGM_ESAKA                ; $02
-	db BGM_BIGSHOT              ; $03
-	db BGM_ARASHI               ; $04
-	db BGM_GEESE                ; $05
-	db BGM_FAIRY                ; $06
-	db BGM_TRASHHEAD            ; $07
-	db BGM_MRKARATE             ; $08
-	db BGM_ROULETTE             ; $09
-	db BGM_STAGECLEAR           ; $0A
-	db BGM_WIND                 ; $0B
-	db BGM_TOTHESKY             ; $0C
-	db BGM_PROTECTOR            ; $0D
-	db BGM_MRKARATECUTSCENE     ; $0E
-	db BGM_RISINGRED            ; $0F
+	db BGM_INTRO               ; $01
+	db BGM_ESAKA               ; $02
+	db BGM_BIGSHOT             ; $03
+	db BGM_ARASHI              ; $04
+	db BGM_GEESE               ; $05
+	db BGM_KAGURA              ; $06
+	db BGM_GOENITZ             ; $07
+	db BGM_MRKARATE            ; $08
+	db BGM_CHARSELECT          ; $09
+	db BGM_STAGECLEAR          ; $0A
+	db BGM_GOENITZCUTSCENE     ; $0B
+	db BGM_ENDING              ; $0C
+	db BGM_KAGURACUTSCENE      ; $0D
+	db BGM_MRKARATECUTSCENE    ; $0E
+	db BGM_CREDITS             ; $0F
 .end:
                                 
 ; =============== Options_PrintBGMId ===============
@@ -2776,7 +2776,7 @@ IntroScene_TextPrint:
 	call Intro_Delay
 	
 	; Prepare next scene
-	ld   a, BGM_IN1996
+	ld   a, BGM_INTRO
 	call HomeCall_Sound_ReqPlayExId_Stub
 	call Intro_CharS_LoadVRAM
 	ld   a, GM_INTRO_CHAR

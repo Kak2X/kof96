@@ -1,30 +1,30 @@
-SndHeader_BGM_Roulette:
+SndHeader_BGM_CharSelect:
 	db $04 ; Number of channels
 .ch1:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
-	dw SndData_BGM_Roulette_Ch1 ; Data ptr
+	dw SndData_BGM_CharSelect_Ch1 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR; Sound channel ptr
-	dw SndData_BGM_Roulette_Ch2 ; Data ptr
+	dw SndData_BGM_CharSelect_Ch2 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
-	dw SndData_BGM_Roulette_Ch3 ; Data ptr
+	dw SndData_BGM_CharSelect_Ch3 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch4:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR; Sound channel ptr
-	dw SndData_BGM_Roulette_Ch4 ; Data ptr
+	dw SndData_BGM_CharSelect_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_BGM_Roulette_Ch1:
+SndData_BGM_CharSelect_Ch1:
 	sndenv 1, SNDENV_DEC, 1
 	sndenach SNDOUT_CH1R|SNDOUT_CH1L
 	sndnr11 3, 0
@@ -73,7 +73,7 @@ SndData_BGM_Roulette_Ch1:
 	sndnote $0F
 	sndlen 12
 	sndret
-SndData_BGM_Roulette_Ch2:
+SndData_BGM_CharSelect_Ch2:
 	sndenv 1, SNDENV_DEC, 1
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 2, 0
@@ -109,7 +109,7 @@ SndData_BGM_Roulette_Ch2:
 	sndnote $31
 	sndnote $33
 	sndret
-SndData_BGM_Roulette_Ch3:
+SndData_BGM_CharSelect_Ch3:
 	sndenvch3 0
 	sndenach SNDOUT_CH3R|SNDOUT_CH3L
 	sndwave $04
@@ -186,7 +186,7 @@ SndData_BGM_Roulette_Ch3:
 	sndnote $0F
 	sndlen 12
 	sndret
-SndData_BGM_Roulette_Ch4:
+SndData_BGM_CharSelect_Ch4:
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndenv 6, SNDENV_DEC, 1
 	sndch4 3, 0, 6

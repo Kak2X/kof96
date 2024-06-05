@@ -1,30 +1,30 @@
-SndHeader_BGM_In1996:
+SndHeader_BGM_Intro:
 	db $04 ; Number of channels
 .ch1:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
-	dw SndData_BGM_In1996_Ch1 ; Data ptr
+	dw SndData_BGM_Intro_Ch1 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_BGM_In1996_Ch2 ; Data ptr
+	dw SndData_BGM_Intro_Ch2 ; Data ptr
 	db $18 ; Base freq/note id
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
-	dw SndData_BGM_In1996_Ch3 ; Data ptr
+	dw SndData_BGM_Intro_Ch3 ; Data ptr
 	db $0C ; Base freq/note id
 	db $81 ; Unused
 .ch4:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_BGM_In1996_Ch4 ; Data ptr
+	dw SndData_BGM_Intro_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_BGM_In1996_Ch1:
+SndData_BGM_Intro_Ch1:
 	sndenv 7, SNDENV_DEC, 1
 	sndenach SNDOUT_CH1R|SNDOUT_CH1L
 	sndnr11 2, 0
@@ -127,7 +127,7 @@ SndData_BGM_In1996_Ch1:
 	sndnote $00
 	sndlen 7
 	sndendch
-SndData_BGM_In1996_Ch2:
+SndData_BGM_Intro_Ch2:
 	sndenv 6, SNDENV_INC, 0
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 1, 0
@@ -285,7 +285,7 @@ SndData_BGM_In1996_Ch2:
 	sndlen 7
 	sndnotebase $0C
 	sndendch
-SndData_BGM_In1996_Ch3:
+SndData_BGM_Intro_Ch3:
 	sndenvch3 2
 	sndenach SNDOUT_CH3R|SNDOUT_CH3L
 	sndwave $03
@@ -449,7 +449,7 @@ SndData_BGM_In1996_Ch3:
 	sndnote $05
 	sndlen 35
 	sndendch
-SndData_BGM_In1996_Ch4:
+SndData_BGM_Intro_Ch4:
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndcall .call0
 	sndcall .call1

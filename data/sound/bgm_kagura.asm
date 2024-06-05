@@ -1,30 +1,30 @@
-SndHeader_BGM_Fairy:
+SndHeader_BGM_Kagura:
 	db $04 ; Number of channels
 .ch1:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
-	dw SndData_BGM_Fairy_Ch1 ; Data ptr
+	dw SndData_BGM_Kagura_Ch1 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
-	dw SndData_BGM_Fairy_Ch2 ; Data ptr
+	dw SndData_BGM_Kagura_Ch2 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
-	dw SndData_BGM_Fairy_Ch3 ; Data ptr
+	dw SndData_BGM_Kagura_Ch3 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
 .ch4:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
-	dw SndData_BGM_Fairy_Ch4 ; Data ptr
+	dw SndData_BGM_Kagura_Ch4 ; Data ptr
 	db $00 ; Base freq/note id
 	db $81 ; Unused
-SndData_BGM_Fairy_Ch1:
+SndData_BGM_Kagura_Ch1:
 	sndenv 7, SNDENV_DEC, 7
 	sndenach SNDOUT_CH1R|SNDOUT_CH1L
 	sndnr11 3, 0
@@ -34,7 +34,7 @@ SndData_BGM_Fairy_Ch1:
 	sndcall .call3
 	sndcall .call4
 	sndcall .call5
-	sndloop SndData_BGM_Fairy_Ch1
+	sndloop SndData_BGM_Kagura_Ch1
 .call0:
 	sndenv 1, SNDENV_DEC, 1
 	sndnote $05
@@ -348,7 +348,7 @@ SndData_BGM_Fairy_Ch1:
 	sndlen 80
 	sndnote $20
 	sndret
-SndData_BGM_Fairy_Ch2:
+SndData_BGM_Kagura_Ch2:
 	sndenv 7, SNDENV_DEC, 7
 	sndenach SNDOUT_CH2R|SNDOUT_CH2L
 	sndnr21 3, 0
@@ -365,7 +365,7 @@ SndData_BGM_Fairy_Ch2:
 	sndcall .call6
 	sndcall .call7
 	sndcall .call8
-	sndloop SndData_BGM_Fairy_Ch2
+	sndloop SndData_BGM_Kagura_Ch2
 .call0:
 	sndnote $16
 	sndlen 5
@@ -812,7 +812,7 @@ SndData_BGM_Fairy_Ch2:
 	sndnote $29
 	sndlen 10
 	sndret
-SndData_BGM_Fairy_Ch3:
+SndData_BGM_Kagura_Ch3:
 	sndenvch3 2
 	sndenach SNDOUT_CH3R|SNDOUT_CH3L
 	sndwave $04
@@ -826,7 +826,7 @@ SndData_BGM_Fairy_Ch3:
 	sndcall .call5
 	sndcall .call6
 	sndcall .call7
-	sndloop SndData_BGM_Fairy_Ch3
+	sndloop SndData_BGM_Kagura_Ch3
 .call0:
 	sndnote $14
 	sndlen 5
@@ -1207,7 +1207,7 @@ SndData_BGM_Fairy_Ch3:
 	sndlen 20
 	sndch3len $1E
 	sndret
-SndData_BGM_Fairy_Ch4:
+SndData_BGM_Kagura_Ch4:
 	sndenach SNDOUT_CH4R|SNDOUT_CH4L
 	sndcall .call0
 	sndcall .call1
@@ -1231,7 +1231,7 @@ SndData_BGM_Fairy_Ch4:
 	sndcall .call2
 	sndcall .call9
 	sndcall .call10
-	sndloop SndData_BGM_Fairy_Ch4
+	sndloop SndData_BGM_Kagura_Ch4
 .call0:
 	sndenv 6, SNDENV_DEC, 1
 	sndch4 3, 0, 6

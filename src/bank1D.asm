@@ -1414,7 +1414,7 @@ SubModule_CutsceneKagura:
 	ldh  [hScreenSect2BGP], a
 	
 	; Start cutscene music
-	ld   a, BGM_PROTECTOR
+	ld   a, BGM_KAGURACUTSCENE
 	call HomeCall_Sound_ReqPlayExId_Stub
 	
 	;
@@ -1814,7 +1814,7 @@ SubModule_CutsceneGoenitz:
 	ldh  [hScreenSect2BGP], a
 	
 	; Play cutscene BGM
-	ld   a, BGM_PROTECTOR
+	ld   a, BGM_KAGURACUTSCENE
 	call HomeCall_Sound_ReqPlayExId_Stub
 	
 	;
@@ -1998,7 +1998,7 @@ ENDC
 	;-----------------------------------
 	
 	; Play new music
-	ld   a, BGM_WIND
+	ld   a, BGM_GOENITZCUTSCENE
 	call HomeCall_Sound_ReqPlayExId_Stub
 	
 	; Stop flashing
@@ -2215,7 +2215,7 @@ CutsceneGoenitz_Easy:
 	rst  $18				; Resume LCD
 	;-----------------------------------
 	
-	ld   a, BGM_WIND
+	ld   a, BGM_GOENITZCUTSCENE
 	call HomeCall_Sound_ReqPlayExId_Stub
 	
 	call Task_PassControl_Delay04
@@ -2321,7 +2321,7 @@ IF FIX_BUGS == 1
 ENDC
 
 	; Play ending cutscene music
-	ld   a, BGM_TOTHESKY
+	ld   a, BGM_ENDING
 	call HomeCall_Sound_ReqPlayExId_Stub
 	
 	; Move the characters while printing the text
@@ -2392,7 +2392,7 @@ IF REV_VER_2 == 1
 	; Play the credits music in the English version.
 	; Because it starts here, a check was done later on to not restart it again
 	; when the actual credits show up.
-	ld   a, BGM_RISINGRED
+	ld   a, BGM_CREDITS
 	call HomeCall_Sound_ReqPlayExId_Stub
 	call Task_PassControl_NoDelay
 ENDC
@@ -2784,7 +2784,7 @@ SubModule_Ending_SacredTreasures:
 	
 	
 	; Play ending cutscene music
-	ld   a, BGM_TOTHESKY
+	ld   a, BGM_ENDING
 	call HomeCall_Sound_ReqPlayExId_Stub
 	
 	;
@@ -2949,7 +2949,7 @@ SubModule_Ending_OLeona:
 	
 	
 	; Play ending cutscene music
-	ld   a, BGM_TOTHESKY
+	ld   a, BGM_ENDING
 	call HomeCall_Sound_ReqPlayExId_Stub
 	
 	;
@@ -3910,7 +3910,7 @@ IF REV_VER_2 == 1
 	cp   $00			; D == 0? (music already playing)
 	jp   z, .showText	; If so, skip	
 ENDC
-	ld   a, BGM_RISINGRED
+	ld   a, BGM_CREDITS
 	call HomeCall_Sound_ReqPlayExId_Stub
 	
 .showText:
