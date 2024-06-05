@@ -696,7 +696,7 @@ OAMDMACode:
 .end:
 ; =============== DEFAULT SETTINGS ===============
 DefaultSettings:
-	db $00 ; Dip Switch: None
+	db DEFAULT_DIPS ; Dip Switch: None
 	db DIFFICULTY_NORMAL ; Difficulty: Normal
 IF INF_TIMER == 1
 	db TIMER_INFINITE ; Timer: inf.

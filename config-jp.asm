@@ -7,6 +7,8 @@ FIX_BUGS     EQU 0 ; Self explainatory
 OPTIMIZE     EQU 0 ; Additional optimizations
 NO_CPU_AI    EQU 0 ; Disable CPU Opponent AI (but not the CPU-specific actions inside moves)
 INF_TIMER    EQU 0 ; Default with infinite timer 
+AIRTHROW_CPU EQU 0 ; Enables the player to air-throw the CPU, which is arbitrarily disabled.
+DEFAULT_DIPS EQU $00 ; $E0 ; Default dip switch settings
 
 REV_VER_2    EQU 0 ; If set, use the second revision of the game.
 REV_TAUNT    EQU 0 ; If set, use the ridiculous taunt logic of the English version

@@ -3017,12 +3017,14 @@ Play_Pl_SetHitType:
 			bit  PF0B_AIR, [hl]					; Are we in the air?
 			jp   z, Play_Pl_SetHitType_RetClear	; If not, return
 			
+		IF AIRTHROW_CPU == 0
 			;
 			; [POI] The CPU can't be thrown in the air.
 			;
 			bit  PF0B_CPU, [hl]						; Are we a CPU player?
 			jp   nz, Play_Pl_SetHitType_RetClear	; If so, return
-			
+		ENDC
+		
 		.setThrowFlags:
 			;
 			; When the throw is confirmed, we can't block the hit at all
