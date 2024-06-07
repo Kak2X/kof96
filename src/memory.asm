@@ -90,17 +90,11 @@ wSGBSoundPacket             :ds $10 ; EQU $C02C ; Data for the sound effect pack
 wSerialIntPtr_Low                  :db     ; EQU $C03C
 wSerialIntPtr_High                 :db     ; EQU $C03D
 wSerialDataReceiveBuffer           :ds $80 ; EQU $C03E
-UNION
-wSerialDataReceiveBuffer_End       :db     ; EQU $C0BE
-NEXTU
 wSerialDataSendBuffer              :ds $80 ; EQU $C0BE
-ENDU
-UNION
-wSerialDataSendBuffer_End          :db     ; EQU $C13E
-NEXTU
 wSerialDataReceiveBufferIndex_Head :db     ; EQU $C13E
-ENDU
 wSerialDataReceiveBufferIndex_Tail :db     ; EQU $C13F
+wSerialDataReceiveBuffer_End       EQU wSerialDataSendBuffer
+wSerialDataSendBuffer_End          EQU wSerialDataReceiveBufferIndex_Head
 wSerialDataSendBufferIndex_Head    :db     ; EQU $C140 ; Index of most recent buffer entry
 wSerialDataSendBufferIndex_Tail    :db     ; EQU $C141 ; Index of last buffer entry - used for current player input in VS serial
 ; These mark the balance for increasing the head/tail indexes
@@ -160,7 +154,7 @@ wPlayMaxPowScroll2P         :db ; EQU $C16E ; Scrolls on-screen or off-screen th
 wPlayMaxPowScrollBGOffset2P :db ; EQU $C16F ; Tilemap offset, determines where the 2P MAX Power bar starts (special version of iPlInfo_MaxPowBGPtr)
 wPlayMaxPowScrollTimer2P    :db ; EQU $C170 ; Countdown. When it elapses, the scroll animation ends
 wPlayHitstopSet             :db ; EQU $C171 ; Requests hitstop for the next frame.
-wPlayHitstop                :db ; EQU $C172 ; If set, hitstop is applied. Due to how tasks are carefully managed, this is only applied to 
+wPlayHitstop                :db ; EQU $C172 ; If set, hitstop is applied. Due to how tasks are carefully managed, this is only applied to the player who got hit.
 wPlayPlThrowActId           :db ; EQU $C173 ; Act ID for a throw. This is global since two throws can't be active at once.
 wPlayPlThrowOpMode          :db ; EQU $C174 ; PLAY_THROWOP_*
 wPlayPlThrowDir             :db ; EQU $C175 ; Sets the throw's direction. (PLAY_THROWDIR_*)
