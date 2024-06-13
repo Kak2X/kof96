@@ -658,7 +658,7 @@ Title_Mode_ModeSelect:
 	;
 	; Verify that there's a second player
 	;
-IF REV_VER_2 == 1
+IF REV_VER_2
 	call ModeSelect_CheckEndlessCpuVsCpuMode		; Full watch mode?
 	jp   c, .startSingleVS							; If so, skip the serial checks (no 2P inputs required)
 ENDC
@@ -673,7 +673,7 @@ ENDC
 	call ModeSelect_TrySendVSData
 	cp   MODESELECT_SBCMD_IDLE		; Did the other GB listen to the original request? 
 	jr   z, .startSingleVS			; If so, jump
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	ld   a, SFX_GAMEOVER
 ELSE
 	ld   a, SFX_PSYCTEL
@@ -685,7 +685,7 @@ ENDC
 	jp   ModeSelect_PrepVS
 	
 .teamVS:
-IF REV_VER_2 == 1
+IF REV_VER_2
 	call ModeSelect_CheckEndlessCpuVsCpuMode		; Full watch mode?
 	jp   c, .startTeamVS							; If so, skip the serial checks (no 2P inputs required)
 ENDC
@@ -700,7 +700,7 @@ ENDC
 	cp   MODESELECT_SBCMD_IDLE		; Did the other GB listen to the original request? 
 	jr   z, .startTeamVS			; If so, jump
 	; Otherwise, play an error sound
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	ld   a, SFX_GAMEOVER
 ELSE
 	ld   a, SFX_PSYCTEL
@@ -737,7 +737,7 @@ ModeSelect_PrepSingle:
 	jp   ModeSelect_SwitchToCharSelect
 	
 ModeSelect_PrepVS:
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	; P1: Player, P2: Player
 	; Removed in the English version since it gets done earlier.
 	ld   hl, wPlInfo_Pl1+iPlInfo_Flags0
@@ -750,7 +750,7 @@ ENDC
 	ld   [hl], $00
 	jp   ModeSelect_SwitchToCharSelect
 
-IF REV_VER_2 == 0	
+IF !REV_VER_2	
 ; [TCRF] Unreferenced code.
 ;        Sets up a CPU vs CPU battle in VS mode, which in the Japanese version
 ;        can't be triggered by one player.
@@ -1835,7 +1835,7 @@ ModeSelect_CheckCPUvsCPU:
 .ret:
 	ret
 	
-IF REV_VER_2 == 1
+IF REV_VER_2
 ; =============== ModeSelect_CheckEndlessCpuVsCpuMode ===============
 ; Initializes the CPU/Human player status for VS mode.
 ;
@@ -2506,7 +2506,7 @@ ModeSelect_GetCtrlFromSerial:
 	ld   a, [wSerialPlayerId]		; Restore MODESELECT_ACT_* value
 	ret  
 
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 
 ; Got moved below in the English version for whatever reason.
 
@@ -4460,7 +4460,7 @@ GFXLZ_Intro_IoriRiseOBJ: INCBIN "data/gfx/intro_ioririse_obj.lzc"
 	mIncJunk "L1C6672"
 	
 TextC_Win_Marker:
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 TextC_Win_Kyo:
 	db .end-.start
 .start:
@@ -5250,7 +5250,7 @@ TextC_Ending_GoenitzLeave1:
 
 ENDC
 	
-IF REV_LANG_EN == 1
+IF REV_LANG_EN
 
 ; Got moved from above in the English version for whatever reason.
 
@@ -5334,7 +5334,7 @@ GFXDef_TitleOBJ: mGfxDef "data/gfx/title_obj.bin"
 
 ENDC
 
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 ; Got moved to Bank $02 in the English version
 
 ; =============== MoveC_Base_NormL_2Hit_D06_A03 ===============
@@ -5598,7 +5598,7 @@ MoveC_Goenitz_KickH:
 	ret
 ENDC
 	
-IF REV_VER_2 == 0
+IF !REV_VER_2
 ; =============== END OF BANK ===============
 ; Junk area below.
 ; [TCRF] Contains win screen text from the English version of KOF95.

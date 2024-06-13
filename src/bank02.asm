@@ -762,7 +762,7 @@ MoveC_Base_WakeUp_End:
 	res  PF1B_ALLOWHITCANCEL, [hl] ; In case of a trade
 	res  PF1B_INVULN, [hl] ; Not invulnerable
 
-IF REV_VER_2 == 1
+IF REV_VER_2
 	; Disable the forced dizzy as soon as we get up.
 	; This works because these dizzies are used by moves that automatically knock down.
 	ld   hl, iPlInfo_ForceDizzy
@@ -815,7 +815,7 @@ MoveC_Base_Dizzy:
 ; - DE: Ptr to respective wOBJInfo
 Play_Pl_DecDizzyTime:
 
-IF REV_VER_2 == 1
+IF REV_VER_2
 	; If we're being forced into the dizzy state, there's no escape
 	ld   hl, iPlInfo_ForceDizzy
 	add  hl, bc
@@ -1237,7 +1237,7 @@ Play_HitTypePtrTable:
 	dw HitTypeC_Hit_MultiGS
 	dw HitTypeC_LaunchFastDB
 	dw HitTypeC_LaunchFastDB_Ground
-IF REV_VER_2 == 1
+IF REV_VER_2
 	dw HitTypeC_Dizzy
 ENDC
 	dw HitTypeC_Launch_SwoopUp
@@ -1801,7 +1801,7 @@ HitTypeC_LaunchFastDB_Ground:
 	scf	; C flag set
 	ret
 
-IF REV_VER_2 == 1	
+IF REV_VER_2	
 ; =============== HitTypeC_Dizzy ===============
 ; ID: HITTYPE_DIZZY
 ;
@@ -2133,7 +2133,7 @@ HitTypeC_Sweep:
 	;
 	
 	; [BUG] They forgot to initialize A with the player health!
-IF FIX_BUGS == 1
+IF FIX_BUGS
 	; Ignore this if the player is already dead
 	ld   hl, iPlInfo_Health
 	add  hl, bc
@@ -2589,7 +2589,7 @@ HitTypeC_GrabStart:
 	ld   a, $14
 	ld   [wPlayPlThrowTechTimer], a
 	
-IF REV_VER_2 == 1
+IF REV_VER_2
 	; In case we tech the throw, there's an 80 frame window where we can't be thrown again
 	ld   hl, iPlInfo_NoThrowTimer
 	add  hl, bc
@@ -3017,7 +3017,7 @@ Play_Pl_SetHitType:
 			bit  PF0B_AIR, [hl]					; Are we in the air?
 			jp   z, Play_Pl_SetHitType_RetClear	; If not, return
 			
-		IF AIRTHROW_CPU == 0
+		IF !AIRTHROW_CPU
 			;
 			; [POI] The CPU can't be thrown in the air.
 			;
@@ -3231,7 +3231,7 @@ Play_Pl_SetHitType:
 			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
 			cp   HITTYPE_LAUNCH_SWOOPUP
 			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
-IF REV_VER_2 == 1
+IF REV_VER_2
 			cp   HITTYPE_DIZZY						
 			jp   z, Play_Pl_SetHitTypeC_SetHitTypeId
 ENDC
@@ -4035,7 +4035,7 @@ MoveS_ChkHalfSpeedHit:
 	pop  af
 	ret
 	
-IF REV_VER_2 == 0
+IF !REV_VER_2
 ; =============== Play_Pl_Unused_DecThrowKeyTimer ===============
 ; [TCRF] Weird unreferenced code that decrements a counter related to throws
 ;        when any of these conditions pass:
@@ -5834,7 +5834,7 @@ MoveC_Ryo_RyuKoRanbuS:
 		jp   .doGravity
 .obj1_chkGuard:
 
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	;
 	; Continue the jump until hitting the opponent.
 	;
@@ -5896,7 +5896,7 @@ ENDC
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
-IF REV_VER_2 == 0
+IF !REV_VER_2
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -6004,7 +6004,7 @@ MoveC_Ryo_RyuKoRanbuD:
 		mMvC_SetSpeedV -$0280
 		jp   .doGravity
 .obj1_chkGuard:
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	;
 	; Continue the jump until hitting the opponent.
 	;
@@ -6066,7 +6066,7 @@ ENDC
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
-IF REV_VER_2 == 0
+IF !REV_VER_2
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -6399,7 +6399,7 @@ MoveC_Robert_HienRyuuShinKya:
 		jp   .doGravity
 .obj1_cont:
 
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	;
 	; If the opponent blocks the attack, do an hyper jump backwards.
 	;
@@ -6762,7 +6762,7 @@ MoveC_Robert_RyuKoRanbuS:
 		mMvC_SetSpeedV -$0280
 		jp   .doGravity
 .obj1_chkGuard:
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	;
 	; Continue the jump until hitting the opponent.
 	;
@@ -6824,7 +6824,7 @@ ENDC
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
-IF REV_VER_2 == 0
+IF !REV_VER_2
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -6929,7 +6929,7 @@ MoveC_Robert_RyuKoRanbuD:
 		mMvC_SetSpeedV -$0280
 		jp   .doGravity
 .obj1_chkGuard:
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	;
 	; Continue the jump until hitting the opponent.
 	;
@@ -6991,7 +6991,7 @@ ENDC
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
-IF REV_VER_2 == 0
+IF !REV_VER_2
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -7219,7 +7219,7 @@ MoveC_Leona_BalticLauncherL:
 		call ProjInit_Leona_BalticLauncher
 		; [BUG] With ANIMSPEED_INSTANT, mMvC_ValFrameEnd should be also run the same frame.
 		;       It doesn't make any difference here though, since we'd be setting the same speed.
-		IF FIX_BUGS == 0
+		IF !FIX_BUGS
 			jp   .anim
 		ENDC
 .obj1_cont:
@@ -7934,7 +7934,7 @@ MoveC_OLeona_SuperMoonSlasher:
 		jp   .anim
 ; --------------- frames #4-6 / common escape check ---------------
 	.chkOtherEscape:
-IF REV_VER_2 == 0
+IF !REV_VER_2
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -8098,7 +8098,7 @@ MoveInit_MrKarate_Zenretsuken:
 	call Play_Pl_ClearJoyDirBuffer
 	mMvIn_GetLH MOVE_MRKARATE_ZENRETSUKEN_L, MOVE_MRKARATE_ZENRETSUKEN_H
 	call MoveInputS_SetSpecMove_StopSpeed
-IF REV_VER_2 == 1
+IF REV_VER_2
 	; This can only be enabled by the desperation super
 	ld   hl, iPlInfo_MrKarate_RyukoRanbuD
 	add  hl, bc
@@ -8115,7 +8115,7 @@ MoveInit_MrKarate_KyokukenRyuRenbuKen:
 ; =============== MoveInit_MrKarate_RyukoRanbu ===============
 MoveInit_MrKarate_RyukoRanbu:
 	call Play_Pl_ClearJoyDirBuffer
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	; [TCRF] Suspicious use of mMvIn_GetSD.
 	;        Very likely that that a reference to MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D got
 	;        quickly patched out since it didn't work properly.
@@ -8302,7 +8302,7 @@ MoveC_MrKarate_ShouranKyaku:
 	
 
 
-IF REV_VER_2 == 1
+IF REV_VER_2
 ; --------------- frames #3-#5 / common escape check ---------------
 ; If the opponent somehow escaped, hop back as usual.
 .chkEscape:
@@ -8318,7 +8318,7 @@ ENDC
 	mMvC_ValFrameEnd .anim
 		call Play_Pl_EndMove
 		jr   .ret
-IF REV_VER_2 == 0
+IF !REV_VER_2
 .chkEscape: ; dummy
 ENDC
 .anim:
@@ -8487,7 +8487,7 @@ MoveC_MrKarate_Zenretsuken:
 		mMvC_SetAnimSpeed $1E
 		mMvC_PlaySound SFX_FIREHIT_A
 		mMvC_SetDamageNext $01, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_CONTHIT
-IF REV_VER_2 == 1
+IF REV_VER_2
 		; [POI] If we got here from the desperation version of Ryuko Ranbu, force the opponent into an infinite dizzy.
 		;       This is in preparation of transitioning to MOVE_MRKARATE_RYUKO_RANBU_D3 (see .chkEnd),
 		;       to give enough time for Mr.Karate to jump back, then fire a large projectile.
@@ -8511,7 +8511,7 @@ ENDC
 ; --------------- frame #7 ---------------
 .chkEnd:
 	mMvC_ValFrameEnd .anim
-IF REV_VER_2 == 1
+IF REV_VER_2
 		; [POI] The desperation super of the move transitions to a hop, then fires the large projectile.
 		ld   hl, iPlInfo_MrKarate_RyukoRanbuD
 		add  hl, bc
@@ -8534,7 +8534,7 @@ ENDC
 .ret:
 	ret
 	
-IF REV_VER_2 == 1
+IF REV_VER_2
 ; =============== MoveC_MrKarate_RyukoRanbuD3 ===============
 ; Move code for third part of the desperation version of Haoh Sho Koh Ken. (MOVE_MRKARATE_SPEC_5_L, MOVE_MRKARATE_RYUKO_RANBU_D3)
 ; This triggers a long back hop, long enough to reach the edge of the screen, then transitions to MOVE_MRKARATE_HAOH_SHO_KOH_KEN_D.
@@ -8635,7 +8635,7 @@ MoveC_MrKarate_RyukoRanbuS:
 		mMvC_SetSpeedV -$0280
 		jp   .doGravity
 .obj1_chkGuard:
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	;
 	; Continue the jump until hitting the opponent.
 	;
@@ -8658,7 +8658,7 @@ ELSE
 ENDC
 	.obj1_chkGuard_noGuard:
 		; Otherwise, continue to #2
-IF REV_VER_2 == 0
+IF !REV_VER_2
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_CONTHIT
 ELSE
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_CONTHIT|PF3_LIGHTHIT
@@ -8682,7 +8682,7 @@ ENDC
 .objOdd:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-IF REV_VER_2 == 0
+IF !REV_VER_2
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_CONTHIT
 ELSE
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI1, PF3_CONTHIT|PF3_LIGHTHIT
@@ -8693,7 +8693,7 @@ ENDC
 ; This sets the initial jump speed and doesn't check for block yet.
 .obj2:
 	mMvC_ValFrameStart .anim
-IF REV_VER_2 == 0
+IF !REV_VER_2
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_CONTHIT
 ELSE
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_CONTHIT|PF3_LIGHTHIT
@@ -8705,7 +8705,7 @@ ENDC
 .objEven:
 	call OBJLstS_ApplyXSpeed
 	mMvC_ValFrameStart .anim
-IF REV_VER_2 == 0
+IF !REV_VER_2
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_CONTHIT
 ELSE
 		mMvC_SetDamageNext $01, HITTYPE_HIT_MULTI0, PF3_CONTHIT|PF3_LIGHTHIT
@@ -8713,7 +8713,7 @@ ENDC
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
-IF REV_VER_2 == 0
+IF !REV_VER_2
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -8746,7 +8746,7 @@ ENDC
 		ld   a, MOVE_MRKARATE_ZENRETSUKEN_H
 	.startZenretsuken_setMove:
 		call MoveInputS_SetSpecMove_StopSpeed
-IF REV_VER_2 == 0
+IF !REV_VER_2
 		mMvC_SetDamageNext $06, HITTYPE_LAUNCH_HIGH_UB, PF3_CONTHIT
 ELSE
 		mMvC_SetDamageNext $01, HITTYPE_LAUNCH_HIGH_UB, PF3_CONTHIT|PF3_LIGHTHIT
@@ -8772,7 +8772,7 @@ ENDC
 .ret:
 	ret
 	
-IF REV_VER_2 == 0
+IF !REV_VER_2
 ; =============== MoveC_MrKarate_Unused_RyukoRanbuD ===============
 ; [TCRF] Unused desperation version of Mr.Karate's Ryuko Ranbu (MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D).
 ; Almost identical to MoveC_Ryo_RyuKoRanbuD.
@@ -8829,7 +8829,7 @@ MoveC_MrKarate_Unused_RyukoRanbuD:
 		mMvC_SetSpeedV -$0280
 		jp   .doGravity
 .obj1_chkGuard:
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	;
 	; Continue the jump until hitting the opponent.
 	;
@@ -8891,7 +8891,7 @@ ENDC
 ; --------------- common escape check ---------------
 ; Done at the start of about half of the frames.
 	.chkOtherEscape:
-IF REV_VER_2 == 0
+IF !REV_VER_2
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -9090,7 +9090,7 @@ MoveC_Andy_ThrowG:
 .obj0_waitManCtrl:
 	; [POI] This accidentally points to the .anim from another move code.
 	;       It does the same thing at least.
-IF FIX_BUGS == 1 
+IF FIX_BUGS 
 	mMvC_ValFrameEnd .anim
 	mMvC_SetAnimSpeed ANIMSPEED_INSTANT
 	jp   .anim
@@ -9460,7 +9460,7 @@ MoveC_Base_ThrowA_DirD:
 .obj0_setManCtrl:
 	; When switching to #1, get manual control of the animation
 	; [POI] copy/pasting wins
-IF FIX_BUGS == 1
+IF FIX_BUGS
 	mMvC_ValFrameEnd .anim
 	mMvC_SetAnimSpeed ANIMSPEED_NONE
 	jp   .anim
@@ -9516,7 +9516,7 @@ ENDC
 	; Start backjump when switching to #3.
 	
 	; [POI] copy/pasting won here too
-IF FIX_BUGS == 1
+IF FIX_BUGS
 	mMvC_ValFrameEnd .anim
 ELSE
 	mMvC_ValFrameEnd MoveC_Mai_ThrowG.anim
@@ -9571,7 +9571,7 @@ MoveC_Leona_ThrowG:
 .ret:
 	ret
 	
-IF REV_LANG_EN == 1
+IF REV_LANG_EN
 
 ; This was in Bank $1C in the Japanese version
 
@@ -9840,7 +9840,7 @@ ENDC
 ; =============== END OF BANK ===============
 ; Junk area below.
 ; Contains duplicate move code.
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	mIncJunk "L027EBF"
 ELSE
 	mIncJunk "L027F70"

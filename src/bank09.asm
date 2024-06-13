@@ -1068,7 +1068,7 @@ MoveC_Unused_ThrowG:
 .ret:
 	ret  
 	
-IF REV_LANG_EN == 1
+IF REV_LANG_EN
 TextC_CutsceneGoenitz0E:
 	db .end-.start
 .start:
@@ -1122,7 +1122,7 @@ TextC_CutsceneGoenitz15:
 .end:
 ENDC
 
-IF REV_VER_2 == 0
+IF !REV_VER_2
 ; =============== END OF BANK ===============
 ; Junk area below.
 	mIncJunk "L097EA8"

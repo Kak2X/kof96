@@ -15,7 +15,7 @@ OBJLstHdrA_Title_PushStart:
 	db $00 ; iOBJLstHdrA_XOffset
 	db $00 ; iOBJLstHdrA_YOffset
 .bin:
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 ; "PUSH START"
 	db $09 ; OBJ Count
 	;    Y   X  ID+FLAG

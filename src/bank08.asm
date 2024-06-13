@@ -3,7 +3,7 @@ INCLUDE "data/objlst/char/athena.asm"
 INCLUDE "data/objlst/char/mai.asm"
 INCLUDE "data/objlst/char/goenitz.asm"
 
-IF REV_LANG_EN == 1
+IF REV_LANG_EN
 TextC_Ending_KaguraGeneric0:
 	db .end-.start
 .start:
@@ -44,7 +44,7 @@ TextC_CheatList:
 .end:
 ENDC
 
-IF REV_VER_2 == 0
+IF !REV_VER_2
 ; =============== END OF BANK ===============
 ; Junk area below.
 	mIncJunk "L087EC8"

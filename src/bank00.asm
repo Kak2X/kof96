@@ -269,7 +269,7 @@ EntryPoint:
 	; (-$C35F in the EN version, for the added wOBJCount)
 	;
 	ld   hl, $C000		; HL = Initial address
-IF REV_VER_2 == 0 && FIX_BUGS == 0
+IF !REV_VER_2 && !FIX_BUGS
 	ld   de, $035E		; DE = Bytes to clear
 ELSE
 	ld   de, $035F		; DE = Bytes to clear
@@ -456,7 +456,7 @@ ENDM
 		mSendPkg SGBPacket_SGB1BiosPatch0
 
 
-IF REV_VER_2 == 1
+IF REV_VER_2
 		; The English version clears the existing contents of the tilemap, for whatever reason.
 		call ClearBGMap
 		xor  a
@@ -475,7 +475,7 @@ ENDC
 		; Why isn't this part of SGB_SendBorderData, which tries to do something similar with the GFX?
 		call ClearBGMap
 
-IF REV_VER_2 == 0
+IF !REV_VER_2
 		; Show white palette while this happens
 		xor  a
 		ldh  [rBGP], a
@@ -698,7 +698,7 @@ OAMDMACode:
 DefaultSettings:
 	db DEFAULT_DIPS ; Dip Switch: None
 	db DIFFICULTY_NORMAL ; Difficulty: Normal
-IF INF_TIMER == 1
+IF INF_TIMER
 	db TIMER_INFINITE ; Timer: inf.
 ELSE
 	db $90 ; Timer: 90 secs
@@ -1704,7 +1704,7 @@ VBlank_LastPart:
 	ld   [MBC1RomBank], a
 	ldh  [hROMBank], a
 
-IF REV_VER_2 == 1
+IF REV_VER_2
 	; The English version further randomizes the random timer by incrementing it every frame.
 	ld   hl, wRandLY
 	inc  [hl]
@@ -1733,7 +1733,7 @@ OBJLstS_WriteAll:
 	ld   [wWorkOAMCurPtr_Low], a
 	ld   a, HIGH(wWorkOAM)
 	ld   [wWorkOAMCurPtr_High], a
-IF REV_VER_2 == 1 || FIX_BUGS == 1
+IF REV_VER_2 || FIX_BUGS
 	; Clear the sprite count before starting the writes
 	xor  a
 	ld   [wOBJCount], a
@@ -1932,7 +1932,7 @@ OBJLstS_DoOBJInfoSlot:
 	ld   [wOBJLstTmpROMFlags], a
 	ld   [wOBJLstCurStatus], a	; Copy iOBJInfo_Status here
 
-IF REV_VER_2 == 1 || FIX_BUGS == 1
+IF REV_VER_2 || FIX_BUGS
 	; If there are no more OBJ slots left, return.
 	; This nice safety measure prevents corrupting unrelated memory when the sprite limit is hit.
 	; Doing it here also prevents the GFX buffer loader in VBlank from corrupting memory outside VRAM
@@ -2361,7 +2361,7 @@ OBJLstS_WriteToWorkOAM:
 	ld   a, [wWorkOAMCurPtr_High]
 	ld   d, a
 
-IF REV_VER_2 == 1 || FIX_BUGS == 1
+IF REV_VER_2 || FIX_BUGS
 	; This must be checked here because the sprite limit may trigger when writing Set A.
 	; Set A is executed by "call OBJLstS_DoOBJLstHeaderA", meaning that even though the routine
 	; retuns immediately when incrementing the OBJ count to $29, it will still try to process Set B.
@@ -2458,7 +2458,7 @@ OBJLstS_Draw_NoFlip:
 
 	; Write over the tile ID and flags
 	call OBJLstS_Draw_WriteCommon	; Reached the sprite limit?
-IF REV_VER_2 == 1 || FIX_BUGS == 1
+IF REV_VER_2 || FIX_BUGS
 	jp   nc, OBJLstS_Draw_Abort		; If so, jump
 ENDC
 
@@ -2498,7 +2498,7 @@ OBJLstS_Draw_XFlip:
 
 	; Write over the tile ID and flags
 	call OBJLstS_Draw_WriteCommon	; Reached the sprite limit?
-IF REV_VER_2 == 1 || FIX_BUGS == 1
+IF REV_VER_2 || FIX_BUGS
 	jp   nc, OBJLstS_Draw_Abort		; If so, jump
 ENDC
 
@@ -2542,7 +2542,7 @@ OBJLstS_Draw_YFlip:
 
 	; Write over the tile ID and flags
 	call OBJLstS_Draw_WriteCommon	; Reached the sprite limit?
-IF REV_VER_2 == 1 || FIX_BUGS == 1
+IF REV_VER_2 || FIX_BUGS
 	jp   nc, OBJLstS_Draw_Abort		; If so, jump
 ENDC
 
@@ -2584,7 +2584,7 @@ OBJLstS_Draw_XYFlip:
 
 	; Write over the tile ID and flags
 	call OBJLstS_Draw_WriteCommon	; Reached the sprite limit?
-IF REV_VER_2 == 1 || FIX_BUGS == 1
+IF REV_VER_2 || FIX_BUGS
 	jp   nc, OBJLstS_Draw_Abort		; If so, jump
 ENDC
 
@@ -2593,7 +2593,7 @@ ENDC
 	jr   nz, .loop
 	pop  bc
 
-IF REV_VER_2 == 1 || FIX_BUGS == 1
+IF REV_VER_2 || FIX_BUGS
 	; No more fall-through here
 	jp   OBJLstS_UpdateOAMPos
 
@@ -2725,7 +2725,7 @@ OBJLstS_Draw_WriteCommon:
 	ld   [de], a					; Save the result
 	inc  de
 .incCount:
-IF REV_VER_2 == 1
+IF REV_VER_2
 	; Since we finished writing a new tile to WorkOAM
 	ld   a, [wOBJCount]			; wOBJCount++
 	inc  a
@@ -11537,7 +11537,7 @@ Play_Pl_SetJumpLandAnimFrame:
 		; [BUG] ...BC isn't properly restored so it reads a garbage value instead of the CharId.
 		;       This ends up making the code unreachable.
 		;
-IF FIX_BUGS == 1
+IF FIX_BUGS
 		; The code after this, including HomeCall_Sound_ReqPlayExId, doesn't touch BC,
 		; but there's a check above inside the push...
 	pop  bc
@@ -14156,7 +14156,7 @@ Play_Pl_IsMoveHit:
 	ccf		; C flag clear
 	ret
 
-IF REV_VER_2 == 1
+IF REV_VER_2
 ; =============== Play_Pl_IsMoveEscape ===============
 ; Determines if the opponent somehow isn't in the middle of a multi-hit effect.
 ;
@@ -14389,7 +14389,7 @@ MoveInputS_SetSpecMove_StopSpeed:
 	set  PF1B_XFLIPLOCK, [hl] 		; Lock the player's direction until the move is over
 	set  PF1B_NOSPECSTART, [hl] 	; For consistency (PF0B_SPECMOVE takes care of this already)
 	res  PF1B_GUARD, [hl]			; Receive full damage by default if hit out of the special
-IF REV_VER_2 == 1
+IF REV_VER_2
 	; Not sure if this fixes anything (though it does make sense to reset it)
 	res  PF1B_HITRECV, [hl]			; If we're starting a special move, we definitely aren't in the hit state anymore
 ENDC
@@ -16174,7 +16174,7 @@ Play_Pl_TempPauseOtherAnim:
 .pl2:
 	ld   hl, wOBJInfo_Pl1+iOBJInfo_FrameLeft
 .clear:
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	ld   [hl], ANIMSPEED_NONE
 ELSE
 	ld   [hl], $1E
@@ -16689,7 +16689,7 @@ MoveInput_DU:
 ; =============== END OF BANK ===============
 ; Junk area below.
 ; Contains broken duplicate of the code starting around BasicInput_StartLightKick.
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	mIncJunk "L003EF4"
 ELSE
 	mIncJunk "L003F4E"

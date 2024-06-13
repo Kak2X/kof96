@@ -432,7 +432,7 @@ OBJLstPtrTable_Iori_ScumGaleL:
 		
 
 OBJLstPtrTable_Iori_KinYaOtomeEscapeL:
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	dw OBJLstHdrA_Iori_KinYaOtomeEscapeL0_A, OBJLstHdrB_Iori_KinYaOtomeEscapeL0_B
 	dw OBJLstHdrA_Iori_KinYaOtomeEscapeL0_A, OBJLstHdrB_Iori_KinYaOtomeEscapeL0_B
 ELSE
@@ -2826,7 +2826,7 @@ OBJLstHdrA_Iori_KinYaOtomeEscapeL0_A:
 ; This alternate sprite mapping got inserted in the English version.
 ; It's identical to OBJLstHdrA_Iori_KinYaOtomeEscapeL0_A, except it has no hitbox.
 OBJLstHdrA_Iori_KinYaOtomeEscapeNoHitboxL0_A: ; OBJLstHdrA_Iori_KinYaOtomeEscapeNoHitboxL0_A
-IF REV_VER_2 == 1
+IF REV_VER_2
 	db $00 ; iOBJLstHdrA_Flags
 	db COLIBOX_01 ; iOBJLstHdrA_ColiBoxId
 	db COLIBOX_00 ; iOBJLstHdrA_HitboxId

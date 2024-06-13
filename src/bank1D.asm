@@ -40,7 +40,7 @@ GFX_Play_HUD_Cross_Mask: INCBIN "data/gfx/play_hud_cross_mask.bin"
 ; Note that the actual BGP palette used effectively inverts white/black
 FontDef_Default:
 	dw $9000 	; Destination ptr
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	db $80 		; Tiles to copy
 ELSE
 	db $4E 		; Tiles to copy
@@ -50,7 +50,7 @@ ENDC
 	db COL_BLACK ; Bit1 color map (foreground)
 	; 1bpp font gfx
 .gfx:
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	INCBIN "data/gfx/jp/font.bin"
 ELSE
 	INCBIN "data/gfx/en/font.bin"
@@ -286,7 +286,7 @@ Win_GoenitzCutscene:
 	; Display the credits
 	ld   b, BANK(SubModule_Credits) ; BANK $1D
 	ld   hl, SubModule_Credits
-IF REV_VER_2 == 1
+IF REV_VER_2
 	; Play the credits music, since the Kagura cutscene music is still playing
 	ld   d, $01	
 ENDC
@@ -353,7 +353,7 @@ Win_EndingCutscene:
 	ld   b, BANK(SubModule_Ending_Generic) ; BANK $1D
 	ld   hl, SubModule_Ending_Generic
 	rst  $08
-IF REV_VER_2 == 1
+IF REV_VER_2
 	; The generic ending in the English version starts the credits theme already,
 	; so don't start playing anything alse.
 	ld   d, $00
@@ -423,7 +423,7 @@ ENDC
 ; =============== Win_CreditsStub ===============
 ; Wrapper for Win_Credits called when defeating the bonus opponent.
 Win_CreditsStub:
-IF REV_VER_2 == 1
+IF REV_VER_2
 	; The bonus opponents use their own music, so starts the credits theme
 	ld   d, $01
 ENDC
@@ -1426,7 +1426,7 @@ SubModule_CutsceneKagura:
 	ld   [wTextPrintFrameCodeBank], a
 	
 	; Print out the screens of text one by one
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	ld   hl, TextC_CutsceneKagura0
 	call Cutscene_WriteTextBank1C
 	ld   hl, TextC_CutsceneKagura1
@@ -1521,7 +1521,7 @@ Cutscene_ResumeLCDWithLYC:
 ; The English version has significantly more of them, since text was spread
 ; around multiple banks to fit in the free space.
 	
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 ; =============== Cutscene_WriteTextBank1C ===============
 ; Writes text from BANK $1C.
 ; IN
@@ -1859,7 +1859,7 @@ SubModule_CutsceneGoenitz:
 	
 
 	
-IF REV_VER_2 == 0
+IF !REV_VER_2
 
 	;##
 	;
@@ -1980,7 +1980,7 @@ ENDC
 	;-----------------------------------
 	rst  $10				; Stop LCD
 	
-IF REV_VER_2 == 1
+IF REV_VER_2
 	; Not necessary
 	xor  a
 	ldh  [rBGP], a
@@ -2012,7 +2012,7 @@ ENDC
 	ld   a, -$05
 	ldh  [hScrollY], a
 	
-IF REV_VER_2 == 1
+IF REV_VER_2
 	call Task_PassControl_NoDelay
 ENDC
 	
@@ -2037,7 +2037,7 @@ ENDC
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
 	
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	ld   hl, TextC_CutsceneGoenitz0E
 	call Cutscene_WriteTextBank1C
 	ld   hl, TextC_CutsceneGoenitz0F
@@ -2097,7 +2097,7 @@ ENDC
 	call Cutscene_InitCharMisc
 	
 	; Show one last screen of text to go with the shot of the team
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	ld   hl, TextC_CutsceneGoenitz14
 	call Cutscene_WriteTextBank1C
 ELSE
@@ -2243,7 +2243,7 @@ CutsceneGoenitz_Easy:
 	;
 	
 	; Telling you to play on NORMAL difficulty
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	ld   hl, TextC_CutsceneGoenitz0C_Easy
 	call Cutscene_WriteTextBank1C
 	ld   hl, TextC_CutsceneGoenitz0D_Easy
@@ -2294,7 +2294,7 @@ SubModule_Ending_Generic:
 	ei
 	
 	; [BUG] This needs to be below hScrollY, otherwise Goenitz willl look cut off for a frame.
-IF FIX_BUGS == 0
+IF !FIX_BUGS
 	call Task_PassControl_NoDelay
 ENDC
 	; Move viewport up so Goenitz is aligned to the end of the sector.
@@ -2316,7 +2316,7 @@ ENDC
 	ldh  [hScreenSect0BGP], a
 	ldh  [hScreenSect2BGP], a
 	
-IF FIX_BUGS == 1
+IF FIX_BUGS
 	call Task_PassControl_NoDelay
 ENDC
 
@@ -2336,7 +2336,7 @@ ENDC
 	; TEXT PRINTING
 	;
 	
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	ld   hl, TextC_Ending_Generic0
 	call Cutscene_WriteTextBank1C
 	ld   hl, TextC_Ending_Generic1
@@ -2388,7 +2388,7 @@ ENDC
 	;-----------------------------------
 	call Task_PassControl_NoDelay
 	
-IF REV_VER_2 == 1
+IF REV_VER_2
 	; Play the credits music in the English version.
 	; Because it starts here, a check was done later on to not restart it again
 	; when the actual credits show up.
@@ -2404,7 +2404,7 @@ ENDC
 	ld   [wTextPrintFrameCodeBank], a
 	
 	; Display the last lines of text
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	ld   hl, TextC_Ending_KaguraGeneric0
 	call Cutscene_WriteTextBank1C
 	ld   hl, TextC_Ending_KaguraGeneric1
@@ -2494,7 +2494,7 @@ Ending_GoenitzLeave:
 	;
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	ld   hl, TextC_Ending_GoenitzLeave0
 	call Cutscene_WriteTextBank1C
 ELSE
@@ -2513,7 +2513,7 @@ ENDC
 	
 	; Because Cutscene_WriteTextBank1C calls Cutscene_PostTextWrite, and that subroutine
 	; doesn't call Cutscene_ScrollUp, we have to call Cutscene_WriteText_Custom manually.
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	ld   hl, TextC_Ending_GoenitzLeave1
 	ld   b, BANK(TextC_Ending_GoenitzLeave1) ; BANK $1C
 	call Cutscene_WriteText_Custom
@@ -2545,7 +2545,7 @@ ENDC
 	ldh  [hScrollX], a
 	ldh  [hScrollY], a
 	ld   [wCutFlash2Timer], a
-IF REV_VER_2 == 1
+IF REV_VER_2
 	; Mute the music before starting the flashing
 	ld   a, SND_MUTE
 	call HomeCall_Sound_ReqPlayExId_Stub
@@ -2598,7 +2598,7 @@ ENDC
 	ld   a, $6C
 	ldh  [hScreenSect1BGP], a
 	
-IF REV_VER_2 == 1
+IF REV_VER_2
 	; In the English version, where no music is currently playing, 
 	; plays a sound effect to go with Goenitz leaving
 	call Task_PassControl_NoDelay
@@ -2897,7 +2897,7 @@ SubModule_Ending_SacredTreasures:
 	call Cutscene_WriteTextBank1D
 	ld   hl, TextC_Ending_SacredTreasures0F
 	call Cutscene_WriteTextBank1D
-IF REV_LANG_EN == 1
+IF REV_LANG_EN
 	ld   hl, TextC_Ending_SacredTreasures10
 	call Cutscene_WriteTextBank1D
 	ld   hl, TextC_Ending_SacredTreasures11
@@ -2957,7 +2957,7 @@ SubModule_Ending_OLeona:
 	;
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	ld   hl, TextC_Ending_OLeona0
 	call Cutscene_WriteTextBank1D
 	ld   hl, TextC_Ending_OLeona1
@@ -3044,7 +3044,7 @@ ENDC
 	;
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	ld   hl, TextC_Ending_OLeona8
 	call Cutscene_WriteTextBank1D
 	ld   hl, TextC_Ending_OLeona9
@@ -3088,7 +3088,7 @@ SubModule_EndingPost_FFGeese:
 	ld   [wTextPrintFrameCodeBank], a
 	
 	; Print out the special text
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	ld   hl, TextC_EndingPost_FFGeese0
 	call Cutscene_WriteTextBank1D
 	ld   hl, TextC_EndingPost_FFGeese1
@@ -3131,7 +3131,7 @@ SubModule_EndingPost_AOFMrBig:
 	ld   [wTextPrintFrameCodeBank], a
 	
 	; Print out the special text
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	ld   hl, TextC_EndingPost_AOFMrBig0
 	call Cutscene_WriteTextBank1D
 	ld   hl, TextC_EndingPost_AOFMrBig1
@@ -3174,7 +3174,7 @@ SubModule_EndingPost_KTR:
 	ld   [wTextPrintFrameCodeBank], a
 	
 	; Print out the special text
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	ld   hl, TextC_EndingPost_KTR0
 	call Cutscene_WriteTextBank1D
 ELSE
@@ -3213,7 +3213,7 @@ SubModule_EndingPost_Boss:
 	ld   [wTextPrintFrameCodeBank], a
 	
 	; Print out the special text
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	ld   hl, TextC_EndingPost_Boss0
 	call Cutscene_WriteTextBank1D
 	ld   hl, TextC_EndingPost_Boss1
@@ -3272,7 +3272,7 @@ SubModule_CutsceneCheat:
 	; Print out the instructions, while playing SGB SFX for each letter
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	ld   hl, TextC_CheatList
 	call Cutscene_WriteTextBank1CSFX
 ELSE
@@ -3320,7 +3320,7 @@ SubModule_CutsceneMrKarate:
 	;
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	ld   hl, TextC_CutsceneMrKarate0
 	call Cutscene_WriteTextBank1D
 	ld   hl, TextC_CutsceneMrKarate1
@@ -3735,7 +3735,7 @@ SubModule_CutsceneMrKarateDefeat:
 	;
 	ld   a, TXB_NONE
 	ld   [wTextPrintFrameCodeBank], a
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	ld   hl, TextC_CutsceneMrKarateDefeat0
 	call Cutscene_WriteTextBank1D
 	ld   hl, TextC_CutsceneMrKarateDefeat1
@@ -3829,7 +3829,7 @@ Cutscene_SharedInit:
 	; since while the third sector always starts at $5C, the top/center ones have variable height.
 	ld   a, $5C		; This is the same value
 	ldh  [rWY], a
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	ld   a, $0F
 ELSE
 	ld   a, $07
@@ -3843,7 +3843,7 @@ ENDC
 ; - D: If set, starts playing the credits music. [English-only]
 SubModule_Credits:
 	di
-IF REV_VER_2 == 1
+IF REV_VER_2
 	push de		; Save D
 ENDC
 		;-----------------------------------
@@ -3859,7 +3859,7 @@ ENDC
 		ldh  [rOBP0], a
 		ldh  [rOBP1], a
 		
-IF REV_VER_2 == 0
+IF !REV_VER_2
 		; Not necessary, since only B&W text is being displayed
 		ld   de, SCRPAL_INTRO
 		call HomeCall_SGB_ApplyScreenPalSet
@@ -3875,7 +3875,7 @@ ENDC
 		ld   [wOBJScrollX], a
 		ld   [wOBJScrollY], a
 		
-IF REV_VER_2 == 0		
+IF !REV_VER_2		
 		; Load standard font (not necessary, the cutscene already loaded it)
 		call LoadGFX_1bppFont_Default
 ENDC
@@ -3900,7 +3900,7 @@ ENDC
 		ld   a, $1B
 		ldh  [rBGP], a
 	
-IF REV_VER_2 == 1
+IF REV_VER_2
 	pop  de
 	
 	; The English version of the game can play the credits music during some cutscenes.
@@ -3960,7 +3960,7 @@ ENDC
 	call TextPrinter_Instant
 	ld   hl, TextDef_Credits4_2
 	call TextPrinter_Instant
-IF REV_LANG_EN == 1
+IF REV_LANG_EN
 	; A.TUYUKI got added to ARRANGEMENT, shifting down the 2nd row
 	ld   hl, TextDef_Credits4_3
 	call TextPrinter_Instant
@@ -4067,7 +4067,7 @@ ENDC
 	call TextPrinter_Instant
 	ld   hl, TextDef_CreditsC_1
 	call TextPrinter_Instant
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	; PRESENTED BY TAKARA is in two lines in the English version
 	ld   hl, TextDef_CreditsC_2
 	call TextPrinter_Instant
@@ -4110,7 +4110,7 @@ SubModule_TheEnd:
 	ld   [wOBJScrollX], a
 	ld   [wOBJScrollY], a
 	
-IF REV_VER_2 == 0		
+IF !REV_VER_2		
 	; Load standard font (not necessary, the credits already loaded it)
 	call LoadGFX_1bppFont_Default
 ENDC
@@ -4224,7 +4224,7 @@ Cutscene_IsStartPressed:
 	scf
 	ret
 
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 TextDef_Credits0_0:
 	dw $9906
 	mTxtDef "-STAFF-"
@@ -4888,6 +4888,7 @@ TextDef_CreditsA_E:
 TextDef_TheEnd:
 	dw $9906
 	mTxtDef "THE  END"
+; [TCRF] Unreferenced credits, leftover from the English version of 95
 TextDef_Credits_Unused_Laguna_0:
 	dw $98C3
 	mTxtDef "-LAGUNA STAFF-"
@@ -5122,7 +5123,7 @@ GFXLZ_LagunaLogo: INCBIN "data/gfx/en/lagunalogo.lzc"
 BG_LagunaLogo: INCBIN "data/bg/en/lagunalogo.bin"
 ENDC
 
-IF REV_VER_2 == 0
+IF !REV_VER_2
 ; =============== END OF BANK ===============
 ; Junk area below.
 	mIncJunk "L1D7D66"

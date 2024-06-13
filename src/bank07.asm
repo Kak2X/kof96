@@ -3,7 +3,7 @@ INCLUDE "data/objlst/char/robert.asm"
 INCLUDE "data/objlst/char/geese.asm"
 INCLUDE "data/objlst/char/mrbig.asm"
 
-IF REV_LANG_EN == 1
+IF REV_LANG_EN
 	mIncJunk "L077E43"
 TextC_CutsceneMrKarateDefeat3:
 	db .end-.start
@@ -51,7 +51,7 @@ TextC_CutsceneMrKarateDefeat8:
 .end:
 ENDC
 
-IF REV_VER_2 == 0
+IF !REV_VER_2
 ; =============== END OF BANK ===============
 	mIncJunk "L077E43"
 ELSE

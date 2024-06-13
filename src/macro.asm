@@ -83,11 +83,11 @@ ENDM
 ; - \1: Filename without extension
 MACRO mIncJunk
 
-IF LABEL_JUNK == 1
+IF LABEL_JUNK
 Padding_\@:
 ENDC
-	IF SKIP_JUNK == 0
-		IF REV_VER_2 == 0
+	IF !SKIP_JUNK
+		IF !REV_VER_2
 			INCBIN STRCAT("padding/", \1, ".bin")
 		ELSE
 			INCBIN STRCAT("padding_en/", \1, ".bin")

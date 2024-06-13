@@ -171,8 +171,8 @@ SGB_ApplyScreenPalSet:
 		;
 		; Index the packet ptr table with DE
 		;
-		ld   hl, .setTbl	; HL = Ptr to table start
-		sla  e				; DE * 8 = Offset
+		ld   hl, SGB_ScrPalTbl	; HL = Ptr to table start
+		sla  e					; DE * 8 = Offset
 		rl   d
 		sla  e
 		rl   d
@@ -238,9 +238,9 @@ SGB_ApplyScreenPalSet:
 	ldh  [rIE], a
 	ret 
 
-; =============== .setTbl ===============
+; =============== SGB_ScrPalTbl ===============
 ; Defines the screen palette sets
-.setTbl:
+SGB_ScrPalTbl:
 	;; PAL01                            PAL23                       ATTR                      END
 	dw SGBPacket_Intro_Pal01,           $0000,                      SGBPacket_Pat_AllPal0,    $0000
 	dw SGBPacket_TakaraLogo_Pal01,      $0000,                      SGBPacket_Pat_AllPal0,    $0000
@@ -268,7 +268,7 @@ SGBPacket_Intro_Pal01:
 	dw $0000 ; 1-3
 	db $00
 
-IF REV_VER_2 == 0
+IF !REV_VER_2
 ; Black/White Takara logo
 SGBPacket_TakaraLogo_Pal01:
 	pkg SGB_PACKET_PAL01, $01
@@ -292,7 +292,9 @@ SGBPacket_TakaraLogo_Pal01:
 	dw $0000 ; 1-2
 	dw $0000 ; 1-3
 	db $00
-	
+ENDC	
+
+IF REV_LOGO_EN == 1
 ; LAGUNA PROUDLY PRESENT
 SGBPacket_LagunaLogo_Pal01: 
 	pkg SGB_PACKET_PAL01, $01
@@ -864,7 +866,7 @@ SGB_SendBorderData:
 	ld   bc, $0010
 	call SGB_SendBorderData_WaitAfterSend
 	
-IF FIX_BUGS == 0
+IF !FIX_BUGS
 	;
 	; Attempt to erase the GFX area we've used for the transfers.
 	; [BUG] Not only this is pointless, but it's done while the display is enabled,
@@ -1092,7 +1094,7 @@ BGLZ_Play_Stage_Boss: INCBIN "data/bg/play_stage_boss.lzs"
 GFXLZ_Play_Stage_Stadium: INCBIN "data/gfx/play_stage_stadium.lzc"
 BGLZ_Play_Stage_Stadium: INCBIN "data/bg/play_stage_stadium.lzs"
 
-IF REV_LANG_EN == 1
+IF REV_LANG_EN
 	mIncJunk "L047AA5"
 TextC_CutsceneMrKarateDefeat0:
 	db .end-.start
@@ -1118,7 +1120,7 @@ TextC_CutsceneMrKarateDefeat2:
 .end:
 ENDC
 
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	; =============== END OF BANK ===============
 	mIncJunk "L047E37"
 ELSE

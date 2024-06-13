@@ -2409,7 +2409,7 @@ Sound_ActTbl:
 .act19: db SFX_REFLECT,      SGB_SND_A_JETPROJ_B,  $03            ; SCT_HISHOKEN
 .act1A: db SFX_GRAB,         SGB_SND_A_SELECT_B,   $03            ; SCT_GRAB
 .act1B: db SFX_TAUNT,        SGB_SND_A_PUNCH_B,    $03            ; SCT_BREAK
-IF REV_VER_2 == 0
+IF !REV_VER_2
 .act1C: db SFX_PSYCTEL,      SGB_SND_A_SELECT_C,   $03            ; SCT_PSYCTEL
 ELSE
 .act1C: db SFX_FIREHIT_A,    SGB_SND_A_SELECT_C,   $03            ; SCT_PSYCTEL
@@ -2449,7 +2449,7 @@ TextPrinter_CharsetToTileTbl:
 ;        of the unlockable characters.
 ;        They weren't part of the default fontset though.
 ;          ; $ID ;U ;JP ;EN ; NOTES
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	db $30 ; $00 ;X ; ↑ ; ↓
 	db $31 ; $01 ;X ; → ; ←
 	db $32 ; $02 ;X ; ↓ 
@@ -2497,7 +2497,7 @@ ENDC
 	db $00 ; $25 ;X ;
 	db $00 ; $26 ;X ;
 	db $1E ; $27 ;X ; '	; '
-IF REV_LANG_EN == 0
+IF !REV_LANG_EN
 	db $00 ; $28 ;X ;  	; (
 	db $00 ; $29 ;X ;  	; )
 ELSE

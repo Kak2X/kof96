@@ -529,7 +529,7 @@ OBJLstPtrTable_Leona_ThrowA:
 	dw OBJLstHdrA_Leona_JumpN1, OBJLSTPTR_NONE ;X
 	dw OBJLstHdrA_Leona_Crouch0, OBJLSTPTR_NONE ;X
 	; [BUG] Where's the end separator? (thankfully no bad effect happens because of the move code)
-IF FIX_BUGS == 1
+IF FIX_BUGS
 	dw OBJLSTPTR_NONE
 ENDC
 OBJLstHdrA_Leona_Idle0:

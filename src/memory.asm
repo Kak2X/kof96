@@ -43,7 +43,7 @@ ds $C00E-$C00B
 
 wNoCopyGFXBuf           :db ; EQU $C00E ; If set, disables the GFX copy during VBlank
 wOBJLstCurHeaderFlags   :db ; EQU $C00F ; Raw flags value from the OBJLst header
-IF REV_VER_2 == 1 || FIX_BUGS == 1
+IF REV_VER_2 || FIX_BUGS
 wOBJCount               :db ; EQU $C010 ; Number of OBJ written to the OAM mirror.
 ENDC
 wWorkOAMCurPtr_Low      :db ; EQU $C010 ; Next OBJ will be written at this location
@@ -113,7 +113,7 @@ wFontLoadBit1Col                   :db     ; EQU $C14D ; 2pp color mapped to bit
 wFontLoadBit0Col                   :db     ; EQU $C14E ; 2pp color mapped to bit0 on 1bpp graphics
 wFontLoadTmpGFX                    :ds 2   ; EQU $C14F ; 2 bytes (size of a line)
 
-wTextPrintFlags             :db ; EQU $C151
+wTextPrintFlags             :db ; EQU $C151 ; Text printer modifiers
 wTextPrintFrameCodeBank     :db ; EQU $C152 ; Bank number of the custom code
 wTextPrintFrameCodePtr_Low  :db ; EQU $C153 ; Ptr to the code itself
 wTextPrintFrameCodePtr_High :db ; EQU $C154

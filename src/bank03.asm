@@ -97,7 +97,7 @@ MoveAnimTbl_Kyo:
 	mMvAnDef OBJLstPtrTable_Kyo_Idle, $00, $02, $00, $00, $00 ;X ; BANK $07 ; MOVE_KYO_SPEC_6_H
 	mMvAnDef OBJLstPtrTable_Kyo_UraOrochiNagiS, $18, $00, $18, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ; BANK $07 ; MOVE_KYO_URA_OROCHI_NAGI_S
 	mMvAnDef OBJLstPtrTable_Kyo_UraOrochiNagiD, $18, $00, $01, HITTYPE_HIT_MID0, PF3_FIRE|PF3_CONTHIT ; BANK $07 ; MOVE_KYO_URA_OROCHI_NAGI_D
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	mMvAnDef OBJLstPtrTable_Kyo_Idle, $18, $01, $14, HITTYPE_LAUNCH_HIGH_UB, PF3_HEAVYHIT|PF3_FIRE|PF3_HALFSPEED ;X ; BANK $07 ; MOVE_KYO_SUPER_1_S
 ELSE
 	mMvAnDef OBJLstPtrTable_Kyo_UraOrochiNagiD, $18, $00, $01, HITTYPE_HIT_MID0, PF3_FIRE|PF3_CONTHIT ; BANK $07 ; MOVE_KYO_URA_OROCHI_NAGI_E
@@ -1499,7 +1499,7 @@ MoveAnimTbl_MrKarate:
 	mMvAnDef OBJLstPtrTable_MrKarate_ZenretsukenL, $18, $01, $01, HITTYPE_HIT_MULTI1, PF3_CONTHIT ; BANK $0A ; MOVE_MRKARATE_ZENRETSUKEN_H
 	mMvAnDef OBJLstPtrTable_MrKarate_KyokukenRyuRenbuKenL, $14, $01, $04, HITTYPE_HIT_MID1, PF3_HITLOW|PF3_OVERHEAD|PF3_CONTHIT ; BANK $0A ; MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_L
 	mMvAnDef OBJLstPtrTable_MrKarate_KyokukenRyuRenbuKenL, $14, $01, $04, HITTYPE_HIT_MID1, PF3_HITLOW|PF3_OVERHEAD|PF3_CONTHIT ; BANK $0A ; MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_H
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	mMvAnDef OBJLstPtrTable_MrKarate_Idle, $00, $02, $0A, HITTYPE_DUMMY, $00 ;X ; BANK $0A ; MOVE_MRKARATE_KO_OU_KEN_UNUSED_EL
 	mMvAnDef OBJLstPtrTable_MrKarate_Idle, $00, $02, $0A, HITTYPE_DUMMY, $00 ;X ; BANK $0A ; MOVE_MRKARATE_KO_OU_KEN_UNUSED_EH
 ELSE
@@ -2063,7 +2063,7 @@ MoveCodePtrTbl_MrKarate:
 	mMvCodeDef MoveC_MrKarate_Zenretsuken ; BANK $02 ; MOVE_MRKARATE_ZENRETSUKEN_H
 	mMvCodeDef MoveC_Robert_KyokugenRyuRanbuKyaku ; BANK $02 ; MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_L
 	mMvCodeDef MoveC_Robert_KyokugenRyuRanbuKyaku ; BANK $02 ; MOVE_MRKARATE_KYOKUKEN_RYU_RENBU_KEN_H
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	mMvCodeDef MoveC_Terry_RisingTackle ;X ; BANK $02 ; MOVE_MRKARATE_KO_OU_KEN_UNUSED_EL ; [TCRF] Would be an hidden version of Ko Ou Ken, likely cloned from Ryo's entry. Its respective animation is a placeholder one.
 	mMvCodeDef MoveC_Terry_RisingTackle ;X ; BANK $02 ; MOVE_MRKARATE_KO_OU_KEN_UNUSED_EH
 	mMvCodeDef MoveC_Ryo_KoOuKen ;X ; BANK $02 ; MOVE_MRKARATE_SPEC_6_L ; [POI] This placeholder entry is using the one for Ryo, hinting that at some point Mr. Karate didn't have its own code for KoOuKen.
@@ -2078,7 +2078,7 @@ ELSE
 ENDC
 
 	mMvCodeDef MoveC_MrKarate_RyukoRanbuS ; BANK $02 ; MOVE_MRKARATE_RYUKO_RANBU_S
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	; [TCRF] Mr.Karate's desperation super is unused and broken in the Japanese version.
 	mMvCodeDef MoveC_MrKarate_Unused_RyukoRanbuD ;X ; BANK $02 ; MOVE_MRKARATE_RYUKO_RANBU_UNUSED_D
 ELSE
@@ -2271,7 +2271,7 @@ MoveCodePtrTbl_Iori:
 ; - BC: Ptr to wPlInfo
 ; - DE: Ptr to respective wOBJInfo
 Play_CPU_Do:
-IF NO_CPU_AI == 1
+IF NO_CPU_AI
 	ret
 ELSE
 	;
@@ -2743,16 +2743,14 @@ Play_CPU_SetRandCharInput:
 	jp   Play_CPU_ApplyCharInput
 	
 ; =============== Play_CPU_BlockAttack_ByDifficulty ===============
-; Makes the opponent block the active attack (or, if we got here with no attack, to walk back away from the opponent), with difficulty-specific logic.
-; - EASY and NORMAL have almost identical logic. They randomize between blocking mid and low
-;   back depending on the global timer.
-;   The difference between these are the bits that are checked to determine if the CPU should
-;   do anything and which move should performed. 
-;   - On EASY those are respectively bit 7 and 6.
-;   - On NORMAL those are bit 6 and 5
-;   This means on EASY, the CPU will not do anything for longer and alternate between block stances less.
-; - HARD makes the CPU always do something. The action performed isn't randomized either.
-;   See Play_CPU_BlockAttack for more info.
+; Makes the opponent block the active attack (or, if we got here with no attack,
+; to walk back away from the opponent), with difficulty-specific logic.
+; - EASY and NORMAL have almost identical code, as they alternate between:
+;   - Randomizing blocking mid and low depending on the global timer
+;   - Not blocking at all (early return)
+;   The two difficulties differ in how often they switch between the two phases -- on EASY, 
+;   these phases are longer, making the CPU more open to attack.
+; - HARD makes the CPU always block properly, see Play_CPU_BlockAttack for more info.
 Play_CPU_BlockAttack_ByDifficulty:
 	; Determine which difficulty we're in.
 	ld   a, [wDifficulty]
@@ -2927,12 +2925,12 @@ Play_CPU_CheckProj:
 Play_CPU_StartRoll_D14_C20:
 	ld   a, [wDifficulty]
 	cp   DIFFICULTY_HARD	; Playing on HARD?
-	jp   z, .end			; If so, skip
+	jp   z, .noBlock		; If so, skip
 	; ~20% chance of jumping to Play_CPU_BlockAttack 
 	call Rand
 	cp   $32
 	jp   c, Play_CPU_BlockAttack
-.end:
+.noBlock:
 	; Fall-through
 ; =============== Play_CPU_StartRoll_D14 ===============
 ; Makes the CPU perform a roll in a random direction.
@@ -3575,7 +3573,7 @@ CPU_MoveInputList_Daimon:
 	; FDF+P -> Jirai Shin
 	dw MoveInput_FDF
 	db KEP_B_LIGHT
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	db KEP_B_HEAVY
 ELSE
 	db KEP_B_LIGHT ; Changed to prevent the CPU from using Fake Jirai Shin
@@ -4157,7 +4155,7 @@ ENDC
 ; =============== END OF SUBMODULE Play->CPU ===============
 ;
 
-IF REV_LANG_EN == 1
+IF REV_LANG_EN
 TextC_CutsceneMrKarate0:
 	db .end-.start
 .start:
@@ -4187,7 +4185,7 @@ TextC_CutsceneMrKarate2:
 .end:
 ENDC
 
-IF REV_VER_2 == 0	
+IF !REV_VER_2	
 ; =============== END OF BANK ===============
 ; Junk area below.
 	mIncJunk "L037E3B"

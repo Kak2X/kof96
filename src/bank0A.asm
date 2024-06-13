@@ -137,7 +137,7 @@ TakaraLogo_Do:
 	call ClearWINDOWMap
 	
 	; Reset coords
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	xor  a
 	ldh  [hScrollX], a 
 	ldh  [hScrollY], a 
@@ -158,7 +158,7 @@ ENDC
 	
 	; Copy logo tilemap. The newer logo is shorter.
 	ld   de, BG_TakaraLogo
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	ld   hl, $98C2	; VRAM Destination
 	ld   b, $10		; Width
 	ld   c, $05		; Height
@@ -192,7 +192,7 @@ ENDC
 	ldh  [rOBP1], a
 	
 	; And for the logo itself
-IF REV_VER_2 == 0
+IF !REV_VER_2
 	; Always white text on black background
 	ld   a, $93
 	ldh  [rBGP], a
@@ -241,6 +241,7 @@ ENDC
 	
 	; When pressing START from either controller, skip the delay
 	; This got removed in the English version!
+.chkWait:
 IF REV_LOGO_EN == 0
 	ldh  a, [hJoyNewKeys]
 	ld   d, a
@@ -250,7 +251,6 @@ IF REV_LOGO_EN == 0
 	jp   nz, .end				; If so, jump
 ENDC
 
-.chkWait:	
 	call Task_PassControl_NoDelay	; Pass control
 	dec  bc						; FramesLeft--
 	ld   a, b
@@ -372,7 +372,7 @@ TakaraLogo_CheckCheat:
 	pop  hl
 .end:
 	ret
-IF REV_VER_2 == 0
+IF !REV_VER_2
 GFXLZ_TakaraLogo: INCBIN "data/gfx/jp/takaralogo.lzc"
 BG_TakaraLogo: INCBIN "data/bg/jp/takaralogo.bin"
 ELSE
@@ -634,7 +634,7 @@ MoveC_Goenitz_HyougaL:
 	; #2 already decremented the timer to 0 (and underflowed it), so we never get to
 	; execute the mMvC_ValFrameEnd part (not like it makes much difference).
 	; The timer check here is also bad since it doesn't check for underflow.
-IF FIX_BUGS == 0
+IF !FIX_BUGS
 	ld   hl, iPlInfo_Goenitz_Hyouga_InvulnTimer
 	add  hl, bc
 	dec  [hl]
@@ -1102,7 +1102,7 @@ MoveC_Goenitz_ShinyaotomePart2:
 			jp   .ret
 ; --------------- frames #0-2 / common escape check ---------------
 .chkOtherEscape:
-IF REV_VER_2 == 0
+IF !REV_VER_2
 		;
 		; [POI] If the opponent somehow isn't in one of the hit effects 
 		;       this move sets, hop back instead of continuing.
@@ -1885,7 +1885,7 @@ ProjC_Goenitz_WanpyouTokobuse:
 	call OBJLstS_Hide
 	ret
 	
-IF REV_LANG_EN == 1
+IF REV_LANG_EN
 TextC_EndingPost_Boss0:
 	db .end-.start
 .start:
@@ -1939,7 +1939,7 @@ TextC_EndingPost_Boss6:
 .end:
 ENDC
 
-IF REV_VER_2 == 0
+IF !REV_VER_2
 ; =============== END OF BANK ===============
 ; Junk area below.
 	mIncJunk "L0A7F58"
