@@ -12,15 +12,18 @@ ELIF SKIP_JUNK == 0
 ENDC
 
 ; Include the basics
-IF !REV_LANG_EN
-INCLUDE "src/jis.asm"
-ELSE
-INCLUDE "src/ascii.asm"
-ENDC
+INCLUDE "src/font.asm"
 INCLUDE "src/hardware.asm"
 INCLUDE "src/constants.asm"
 INCLUDE "src/macro.asm"
 INCLUDE "src/memory.asm"
+
+; Pick ascii font
+IF REV_LANG_EN
+	SETCHARMAP eng
+ELSE
+	SETCHARMAP jpn
+ENDC
 
 ; 
 ; BANK $00 - Task system, Sprite mapping (OBJLst) and animation handlers, gameplay code and many helper subroutines.
