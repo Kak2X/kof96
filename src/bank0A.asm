@@ -227,7 +227,7 @@ ENDC
 	ldi  [hl], a
 	ld   a, 20		; wCheatAllCharKeysLeft
 	ldi  [hl], a
-	ld   a, 25		; wCheat_Unused_InfMeterKeysLeft [TCRF] Leftover from 95, when activating DIPB_POWERUP required SELECTx25
+	ld   a, 25		; wCheat_Unused_InfMeterKeysLeft [TCRF] Leftover from 95's infinite MAX Power cheat (DIPB_INFPOW), which required SELECTx25
 	ldi  [hl], a
 	ld   a, 30		; wCheatEasyMovesKeysLeft
 	ldi  [hl], a

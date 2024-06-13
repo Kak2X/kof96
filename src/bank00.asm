@@ -12570,7 +12570,7 @@ Play_Pl_DoBasicMoveInput:
 		BasicInput_StartCrouchLightPunch:
 			; [POI] If the powerup cheat is enabled, crouching lps reflect projectiles.
 			ld   a, [wDipSwitch]
-			bit  DIPB_POWERUP, a	; Is the cheat set?
+			bit  DIPB_POWERUP, a		; Is the cheat set?
 			jp   z, .go					; If not, skip
 			ld   hl, iPlInfo_Flags0
 			add  hl, bc					; Otherwise, make it reflect projectiles
@@ -12600,7 +12600,7 @@ Play_Pl_DoBasicMoveInput:
 
 			; [POI] If the powerup cheat is enabled, crouching hps erase projectiles.
 			ld   a, [wDipSwitch]
-			bit  DIPB_POWERUP, a	; Is the cheat set?
+			bit  DIPB_POWERUP, a		; Is the cheat set?
 			jp   z, .go					; If not, skip
 			ld   hl, iPlInfo_Flags0
 			add  hl, bc					; Otherwise, make it delete projectiles
