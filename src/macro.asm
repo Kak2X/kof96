@@ -135,7 +135,7 @@ ENDM
 ; OUT
 ; - CHL: Calculated result
 MACRO mkhl
-CHL = (LOW(\1) << 8)|LOW(\2)
+DEF CHL = (LOW(\1) << 8)|LOW(\2)
 ENDM
 
 ; =============== Special move list definition macros ===============

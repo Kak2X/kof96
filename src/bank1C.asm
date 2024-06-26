@@ -2549,14 +2549,14 @@ Title_LoadVRAM:
 	call CopyTiles
 	
 	; Tilemap in BG layer for cloud parallax, repeated to fill the tilemap's width
-I = 0
+DEF I = 0
 REPT 8
 	ld   de, BG_Title_Clouds
 	ld   hl, BGMap_Begin+($04*I)
 	ld   b, $04	; 4 tiles width * 8 = $20 (tilemap length)
 	ld   c, $03 ; 3 tiles tall
 	call CopyBGToRect
-I = I + 1
+DEF I = I + 1
 ENDR
 	ret
 	
@@ -5293,14 +5293,14 @@ Title_LoadVRAM:
 	call CopyTiles
 	
 	; Tilemap in BG layer for cloud parallax, repeated to fill the tilemap's width
-I = 0
+DEF I = 0
 REPT 8
 	ld   de, BG_Title_Clouds
 	ld   hl, BGMap_Begin+($04*I)
 	ld   b, $04	; 4 tiles width * 8 = $20 (tilemap length)
 	ld   c, $03 ; 3 tiles tall
 	call CopyBGToRect
-I = I + 1
+DEF I = I + 1
 ENDR
 	ret
 	
