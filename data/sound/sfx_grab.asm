@@ -4,15 +4,15 @@ SndHeader_SFX_Grab:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
 	dw SndData_SFX_Grab_Ch4 ; Data ptr
-	db $00 ; Base freq/note id
+	db 0 ; Initial fine tune
 	db $81 ; Unused
 SndData_SFX_Grab_Ch4:
-	sndenv 15, SNDENV_DEC, 2
-	sndenach SNDOUT_CH4R|SNDOUT_CH4L
-	sndch4 6, 0, 1
-	sndlen 3
-	sndch4 0, 0, 0
-	sndlen 1
-	sndch4 2, 0, 5
-	sndlen 4
-	sndendch
+	envelope $F2
+	panning $88
+	wait 97
+	wait 3
+	wait 0
+	wait 1
+	wait 37
+	wait 4
+	chan_stop

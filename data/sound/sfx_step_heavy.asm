@@ -4,23 +4,23 @@ SndHeader_SFX_StepHeavy:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
 	dw SndData_SFX_StepHeavy_Ch4 ; Data ptr
-	db $00 ; Base freq/note id
+	db 0 ; Initial fine tune
 	db $81 ; Unused
 SndData_SFX_StepHeavy_Ch4:
-	sndenv 10, SNDENV_DEC, 1
-	sndenach SNDOUT_CH4R|SNDOUT_CH4L
-	sndch4 5, 0, 1
-	sndlen 2
-	sndch4 4, 0, 5
-	sndlen 2
-	sndch4 0, 0, 0
-	sndlen 2
-	sndch4 4, 0, 1
-	sndlen 2
-	sndch4 2, 0, 7
-	sndlen 2
-	sndch4 0, 1, 0
-	sndlen 1
-	sndch4 0, 0, 0
-	sndlen 1
-	sndendch
+	envelope $A1
+	panning $88
+	wait 81
+	wait 2
+	wait 69
+	wait 2
+	wait 0
+	wait 2
+	wait 65
+	wait 2
+	wait 39
+	wait 2
+	wait 8
+	wait 1
+	wait 0
+	wait 1
+	chan_stop

@@ -4,80 +4,80 @@ SndHeader_SFX_ProjSm:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
 	dw SndData_SFX_ProjSm_Ch4 ; Data ptr
-	db $00 ; Base freq/note id
+	db 0 ; Initial fine tune
 	db $81 ; Unused
 SndData_SFX_ProjSm_Ch4:
-	sndenv 10, SNDENV_INC, 1
-	sndenach SNDOUT_CH4R|SNDOUT_CH4L
-	sndch4 5, 0, 7
-	sndlen 2
-	sndsetskip
-	sndch4 5, 0, 6
-	sndlen 2
-	sndch4 5, 0, 5
-	sndlen 2
-	sndch4 5, 0, 4
-	sndlen 2
-	sndch4 5, 0, 3
-	sndlen 2
-	sndch4 4, 0, 7
-	sndlen 2
-	sndch4 4, 0, 6
-	sndlen 2
-	sndch4 4, 0, 5
-	sndlen 2
-	sndch4 4, 0, 4
-	sndlen 2
-	sndch4 4, 0, 3
-	sndlen 2
-	sndch4 4, 0, 2
-	sndlen 2
-	sndch4 4, 0, 1
-	sndlen 2
-	sndclrskip
-	sndenv 15, SNDENV_DEC, 1
-	sndch4 2, 0, 7
-	sndlen 1
-	sndch4 2, 0, 6
-	sndlen 1
-	sndch4 2, 0, 5
-	sndlen 1
-	sndch4 2, 0, 4
-	sndlen 1
-	sndch4 2, 0, 3
-	sndlen 1
-	sndch4 2, 0, 2
-	sndlen 1
-	sndch4 2, 0, 1
-	sndlen 1
-	sndch4 2, 0, 0
-	sndlen 1
-	sndch4 2, 0, 1
-	sndlen 1
-	sndch4 2, 0, 2
-	sndlen 1
-	sndch4 2, 0, 3
-	sndlen 1
-	sndch4 2, 0, 4
-	sndlen 1
-	sndch4 2, 0, 5
-	sndlen 1
-	sndch4 2, 0, 6
-	sndlen 1
-	sndch4 2, 0, 7
-	sndlen 1
-	sndch4 3, 0, 1
-	sndlen 1
-	sndch4 3, 0, 2
-	sndlen 1
-	sndch4 3, 0, 3
-	sndlen 1
-	sndch4 3, 0, 4
-	sndlen 1
-	sndch4 3, 0, 5
-	sndlen 1
-	sndch4 3, 0, 6
-	sndlen 1
-	sndch4 3, 0, 7
-	sndlen 1
-	sndendch
+	envelope $A9
+	panning $88
+	wait 87
+	wait 2
+	lock_envelope
+	wait 86
+	wait 2
+	wait 85
+	wait 2
+	wait 84
+	wait 2
+	wait 83
+	wait 2
+	wait 71
+	wait 2
+	wait 70
+	wait 2
+	wait 69
+	wait 2
+	wait 68
+	wait 2
+	wait 67
+	wait 2
+	wait 66
+	wait 2
+	wait 65
+	wait 2
+	unlock_envelope
+	envelope $F1
+	wait 39
+	wait 1
+	wait 38
+	wait 1
+	wait 37
+	wait 1
+	wait 36
+	wait 1
+	wait 35
+	wait 1
+	wait 34
+	wait 1
+	wait 33
+	wait 1
+	wait 32
+	wait 1
+	wait 33
+	wait 1
+	wait 34
+	wait 1
+	wait 35
+	wait 1
+	wait 36
+	wait 1
+	wait 37
+	wait 1
+	wait 38
+	wait 1
+	wait 39
+	wait 1
+	wait 49
+	wait 1
+	wait 50
+	wait 1
+	wait 51
+	wait 1
+	wait 52
+	wait 1
+	wait 53
+	wait 1
+	wait 54
+	wait 1
+	wait 55
+	wait 1
+	chan_stop

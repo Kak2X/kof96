@@ -4,49 +4,45 @@ SndHeader_SFX_CharSelected:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
 	dw SndData_SFX_CharSelected_Ch2 ; Data ptr
-	db $00 ; Base freq/note id
+	db 0 ; Initial fine tune
 	db $81 ; Unused
 SndData_SFX_CharSelected_Ch2:
-	sndenv 15, SNDENV_DEC, 2
-	sndenach SNDOUT_CH2R|SNDOUT_CH2L
-	sndnr21 3, 0
-	sndnote $1D
-	sndlen 2
-	sndnote $25
-	sndnote $20
-	sndnote $29
-	sndnote $25
-	sndnote $2C
-	sndnote $29
-	sndnote $31
-	sndenv 9, SNDENV_DEC, 2
-	sndnote $1D
-	sndlen 2
-	sndnote $25
-	sndnote $20
-	sndnote $29
-	sndnote $25
-	sndnote $2C
-	sndnote $29
-	sndnote $31
-	sndenv 5, SNDENV_DEC, 2
-	sndnote $1D
-	sndlen 2
-	sndnote $25
-	sndnote $20
-	sndnote $29
-	sndnote $25
-	sndnote $2C
-	sndnote $29
-	sndnote $31
-	sndenv 2, SNDENV_DEC, 2
-	sndnote $1D
-	sndlen 2
-	sndnote $25
-	sndnote $20
-	sndnote $29
-	sndnote $25
-	sndnote $2C
-	sndnote $29
-	sndnote $31
-	sndendch
+	envelope $F2
+	panning $22
+	duty_cycle 3
+	note E_,4, 2
+	note C_,5
+	note G_,4
+	note E_,5
+	note C_,5
+	note G_,5
+	note E_,5
+	note C_,6
+	envelope $92
+	note E_,4, 2
+	note C_,5
+	note G_,4
+	note E_,5
+	note C_,5
+	note G_,5
+	note E_,5
+	note C_,6
+	envelope $52
+	note E_,4, 2
+	note C_,5
+	note G_,4
+	note E_,5
+	note C_,5
+	note G_,5
+	note E_,5
+	note C_,6
+	envelope $22
+	note E_,4, 2
+	note C_,5
+	note G_,4
+	note E_,5
+	note C_,5
+	note G_,5
+	note E_,5
+	note C_,6
+	chan_stop

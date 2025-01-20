@@ -4,29 +4,29 @@ SndHeader_SFX_GroundHit:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
 	dw SndData_SFX_GroundHit_Ch4 ; Data ptr
-	db $00 ; Base freq/note id
+	db 0 ; Initial fine tune
 	db $81 ; Unused
 SndData_SFX_GroundHit_Ch4:
-	sndenv 15, SNDENV_DEC, 7
-	sndenach SNDOUT_CH4R|SNDOUT_CH4L
-	sndch4 4, 0, 5
-	sndlen 2
-	sndch4 2, 0, 7
-	sndlen 3
-	sndch4 3, 0, 5
-	sndlen 2
-	sndch4 2, 0, 7
-	sndlen 2
-	sndch4 3, 0, 4
-	sndlen 8
-	sndch4 7, 0, 1
-	sndlen 2
-	sndch4 5, 0, 4
-	sndlen 2
-	sndch4 4, 0, 7
-	sndlen 2
-	sndch4 6, 0, 4
-	sndlen 10
-	sndch4 7, 0, 1
-	sndlen 100
-	sndendch
+	envelope $F7
+	panning $88
+	wait 69
+	wait 2
+	wait 39
+	wait 3
+	wait 53
+	wait 2
+	wait 39
+	wait 2
+	wait 52
+	wait 8
+	wait 113
+	wait 2
+	wait 84
+	wait 2
+	wait 71
+	wait 2
+	wait 100
+	wait 10
+	wait 113
+	wait 100
+	chan_stop

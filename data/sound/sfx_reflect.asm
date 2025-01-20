@@ -4,46 +4,46 @@ SndHeader_SFX_Reflect:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
 	dw SndData_SFX_Reflect_Ch4 ; Data ptr
-	db $00 ; Base freq/note id
+	db 0 ; Initial fine tune
 	db $81 ; Unused
 SndData_SFX_Reflect_Ch4:
-	sndenv 10, SNDENV_DEC, 7
-	sndenach SNDOUT_CH4R|SNDOUT_CH4L
-	sndch4 4, 0, 1
-	sndlen 1
-	sndsetskip
-	sndch4 4, 0, 1
-	sndlen 1
-	sndch4 4, 0, 1
-	sndlen 1
-	sndch4 3, 1, 1
-	sndlen 1
-	sndch4 3, 1, 0
-	sndlen 1
-	sndch4 3, 0, 7
-	sndlen 1
-	sndch4 3, 0, 6
-	sndlen 1
-	sndch4 3, 0, 5
-	sndlen 1
-	sndclrskip
-	sndch4 4, 0, 1
-	sndlen 1
-	sndsetskip
-	sndch4 4, 0, 1
-	sndlen 1
-	sndch4 4, 0, 1
-	sndlen 1
-	sndch4 3, 1, 1
-	sndlen 1
-	sndch4 3, 1, 0
-	sndlen 1
-	sndch4 3, 0, 7
-	sndlen 1
-	sndch4 3, 0, 6
-	sndlen 1
-	sndch4 3, 0, 5
-	sndlen 1
-	sndclrskip
-	sndloopcnt $00, 3, SndData_SFX_Reflect_Ch4
-	sndendch
+	envelope $A7
+	panning $88
+	wait 65
+	wait 1
+	lock_envelope
+	wait 65
+	wait 1
+	wait 65
+	wait 1
+	wait 57
+	wait 1
+	wait 56
+	wait 1
+	wait 55
+	wait 1
+	wait 54
+	wait 1
+	wait 53
+	wait 1
+	unlock_envelope
+	wait 65
+	wait 1
+	lock_envelope
+	wait 65
+	wait 1
+	wait 65
+	wait 1
+	wait 57
+	wait 1
+	wait 56
+	wait 1
+	wait 55
+	wait 1
+	wait 54
+	wait 1
+	wait 53
+	wait 1
+	unlock_envelope
+	snd_loop SndData_SFX_Reflect_Ch4, $00, 3
+	chan_stop

@@ -4,34 +4,34 @@ SndHeader_SFX_FireHitA:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
 	dw SndData_SFX_FireHitA_Ch4 ; Data ptr
-	db $00 ; Base freq/note id
+	db 0 ; Initial fine tune
 	db $81 ; Unused
 SndData_SFX_FireHitA_Ch4:
-	sndenv 15, SNDENV_DEC, 7
-	sndenach SNDOUT_CH4R|SNDOUT_CH4L
-	sndch4 4, 0, 5
-	sndlen 1
-	sndsetskip
-	sndch4 5, 0, 5
-	sndlen 2
-	sndch4 4, 0, 7
-	sndlen 2
-	sndch4 4, 0, 6
-	sndlen 2
-	sndch4 4, 0, 5
-	sndlen 2
-	sndch4 4, 0, 4
-	sndlen 2
-	sndch4 4, 0, 3
-	sndlen 2
-	sndch4 4, 0, 2
-	sndlen 2
-	sndch4 4, 0, 1
-	sndlen 1
-	sndch4 4, 0, 0
-	sndlen 1
-	sndclrskip
-	sndenv 15, SNDENV_DEC, 2
-	sndch4 3, 0, 2
-	sndlen 30
-	sndendch
+	envelope $F7
+	panning $88
+	wait 69
+	wait 1
+	lock_envelope
+	wait 85
+	wait 2
+	wait 71
+	wait 2
+	wait 70
+	wait 2
+	wait 69
+	wait 2
+	wait 68
+	wait 2
+	wait 67
+	wait 2
+	wait 66
+	wait 2
+	wait 65
+	wait 1
+	wait 64
+	wait 1
+	unlock_envelope
+	envelope $F2
+	wait 50
+	wait 30
+	chan_stop

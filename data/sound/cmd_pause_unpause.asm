@@ -4,19 +4,19 @@ SndHeader_Pause:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
 	dw SndData_PauseUnpause_Ch1 ; Data ptr
-	db $00 ; Base freq/note id
+	db 0 ; Initial fine tune
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
 	dw SndData_PauseUnpause_Ch2 ; Data ptr
-	db $00 ; Base freq/note id
+	db 0 ; Initial fine tune
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
 	dw SndData_PauseUnpause_Ch3 ; Data ptr
-	db $00 ; Base freq/note id
+	db 0 ; Initial fine tune
 	db $81 ; Unused
 SndHeader_Unpause:
 	db $03 ; Number of channels
@@ -24,31 +24,31 @@ SndHeader_Unpause:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
 	dw SndData_PauseUnpause_Ch1 ; Data ptr
-	db $00 ; Base freq/note id
+	db 0 ; Initial fine tune
 	db $81 ; Unused
 .ch2:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
 	dw SndData_PauseUnpause_Ch2 ; Data ptr
-	db $00 ; Base freq/note id
+	db 0 ; Initial fine tune
 	db $81 ; Unused
 .ch3:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
 	dw SndData_PauseUnpause_Ch3 ; Data ptr
-	db $00 ; Base freq/note id
+	db 0 ; Initial fine tune
 	db $81 ; Unused
 SndData_PauseUnpause_Ch1:
-	sndenach SNDOUT_CH1R|SNDOUT_CH1L
-	sndnr11 2, 0
-	sndenv 0, SNDENV_DEC, 0
-	sndendch
+	panning $11
+	duty_cycle 2
+	envelope $00
+	chan_stop
 SndData_PauseUnpause_Ch2:
-	sndenach SNDOUT_CH2R|SNDOUT_CH2L
-	sndnr21 2, 0
-	sndenv 0, SNDENV_DEC, 0
-	sndendch
+	panning $22
+	duty_cycle 2
+	envelope $00
+	chan_stop
 SndData_PauseUnpause_Ch3:
-	sndenach SNDOUT_CH3R|SNDOUT_CH3L
-	sndenvch3 0
-	sndendch
+	panning $44
+	wave_vol $00
+	chan_stop

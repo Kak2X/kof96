@@ -4,21 +4,21 @@ SndHeader_SFX_Taunt:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
 	dw SndData_SFX_Taunt_Ch4 ; Data ptr
-	db $00 ; Base freq/note id
+	db 0 ; Initial fine tune
 	db $81 ; Unused
 SndData_SFX_Taunt_Ch4:
-	sndenv 11, SNDENV_DEC, 7
-	sndenach SNDOUT_CH4R|SNDOUT_CH4L
-	sndch4 2, 0, 7
-	sndlen 2
-	sndch4 4, 0, 5
-	sndlen 2
-	sndch4 1, 0, 7
-	sndlen 2
-	sndsetskip
-	sndch4 1, 0, 4
-	sndlen 2
-	sndch4 1, 0, 7
-	sndlen 2
-	sndclrskip
-	sndendch
+	envelope $B7
+	panning $88
+	wait 39
+	wait 2
+	wait 69
+	wait 2
+	wait 23
+	wait 2
+	lock_envelope
+	wait 20
+	wait 2
+	wait 23
+	wait 2
+	unlock_envelope
+	chan_stop

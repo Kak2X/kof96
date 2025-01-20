@@ -4,40 +4,40 @@ SndHeader_SFX_SuperJump:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
 	dw SndData_SFX_SuperJump_Ch4 ; Data ptr
-	db $00 ; Base freq/note id
+	db 0 ; Initial fine tune
 	db $81 ; Unused
 SndData_SFX_SuperJump_Ch4:
-	sndenv 2, SNDENV_INC, 1
-	sndenach SNDOUT_CH4R|SNDOUT_CH4L
-	sndch4 3, 0, 0
-	sndlen 2
-	sndsetskip
-	sndch4 3, 0, 1
-	sndlen 2
-	sndch4 3, 0, 2
-	sndlen 2
-	sndch4 3, 0, 3
-	sndlen 2
-	sndch4 3, 0, 4
-	sndlen 2
-	sndch4 3, 0, 5
-	sndlen 2
-	sndch4 3, 0, 6
-	sndlen 2
-	sndch4 3, 0, 7
-	sndlen 2
-	sndch4 3, 0, 6
-	sndlen 2
-	sndch4 3, 0, 5
-	sndlen 2
-	sndch4 3, 0, 4
-	sndlen 2
-	sndch4 3, 0, 3
-	sndlen 2
-	sndch4 3, 0, 2
-	sndlen 2
-	sndch4 3, 0, 1
-	sndlen 2
-	sndch4 3, 0, 0
-	sndlen 2
-	sndendch
+	envelope $29
+	panning $88
+	wait 48
+	wait 2
+	lock_envelope
+	wait 49
+	wait 2
+	wait 50
+	wait 2
+	wait 51
+	wait 2
+	wait 52
+	wait 2
+	wait 53
+	wait 2
+	wait 54
+	wait 2
+	wait 55
+	wait 2
+	wait 54
+	wait 2
+	wait 53
+	wait 2
+	wait 52
+	wait 2
+	wait 51
+	wait 2
+	wait 50
+	wait 2
+	wait 49
+	wait 2
+	wait 48
+	wait 2
+	chan_stop

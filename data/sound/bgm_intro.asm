@@ -4,679 +4,527 @@ SndHeader_BGM_Intro:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH1_PTR ; Sound channel ptr
 	dw SndData_BGM_Intro_Ch1 ; Data ptr
-	db $00 ; Base freq/note id
+	db 0 ; Initial fine tune
 	db $81 ; Unused
 .ch2:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
 	dw SndData_BGM_Intro_Ch2 ; Data ptr
-	db $18 ; Base freq/note id
+	db 24 ; Initial fine tune
 	db $81 ; Unused
 .ch3:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH3_PTR ; Sound channel ptr
 	dw SndData_BGM_Intro_Ch3 ; Data ptr
-	db $0C ; Base freq/note id
+	db 12 ; Initial fine tune
 	db $81 ; Unused
 .ch4:
 	db SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
 	dw SndData_BGM_Intro_Ch4 ; Data ptr
-	db $00 ; Base freq/note id
+	db 0 ; Initial fine tune
 	db $81 ; Unused
 SndData_BGM_Intro_Ch1:
-	sndenv 7, SNDENV_DEC, 1
-	sndenach SNDOUT_CH1R|SNDOUT_CH1L
-	sndnr11 2, 0
-	sndnote $00
-	sndlen 56
-.main:
-	sndnote $00
-	sndlen 7
-	sndnote $24
-	sndnote $29
-	sndlen 14
-	sndnote $27
-	sndlen 7
-	sndnote $29
-	sndlen 14
-	sndnote $29
-	sndnote $24
-	sndlen 7
-	sndnote $29
-	sndlen 14
-	sndnote $27
-	sndlen 7
-	sndnote $29
-	sndlen 21
-	sndloopcnt $00, 3, .main
-	sndenv 7, SNDENV_DEC, 7
-	sndnr11 3, 0
-	sndnote $00
-	sndlen 7
-	sndnote $11
-	sndnote $00
-	sndlen 14
-	sndnote $11
-	sndlen 7
-	sndnote $11
-	sndnote $00
-	sndnote $0E
-	sndlen 21
-	sndnote $0E
-	sndlen 14
-	sndnote $11
-	sndlen 7
-	sndnote $11
-	sndnote $00
-	sndenv 7, SNDENV_INC, 0
-	sndnote $22
-	sndlen 21
-	sndnote $24
-	sndlen 56
-	sndlenpre $07
-	sndnote $00
-	sndnote $27
-	sndlen 14
-	sndnote $24
-	sndlen 3
-	sndnote $00
-	sndlen 4
-	sndnote $27
-	sndlen 21
-	sndnote $29
-	sndlen 35
-	sndnote $00
-	sndlen 7
-	sndnote $29
-	sndlen 28
-	sndnote $30
-	sndlen 21
-	sndnote $2E
-	sndlen 7
-	sndlenpre $70
-	sndnote $00
-	sndlen 7
-	sndnote $30
-	sndnote $00
-	sndlen 14
-	sndnote $2E
-	sndnote $30
-	sndlen 7
-	sndnote $33
-	sndlen 84
-	sndlenpre $03
-	sndnote $00
-	sndlen 4
-	sndnote $35
-	sndlen 7
-	sndnote $30
-	sndlen 3
-	sndnote $00
-	sndlen 4
-	sndnote $35
-	sndlen 10
-	sndnote $00
-	sndlen 4
-	sndnote $33
-	sndlen 14
-	sndnote $00
-	sndlen 7
-	sndnote $35
-	sndlen 28
-	sndnote $00
-	sndlen 7
-	sndendch
+	envelope $71
+	panning $11
+	duty_cycle 2
+	silence 56
+.loop0:
+	silence 7
+	note B_,4
+	note E_,5, 14
+	note D_,5, 7
+	note E_,5, 14
+	note E_,5
+	note B_,4, 7
+	note E_,5, 14
+	note D_,5, 7
+	note E_,5, 21
+	snd_loop .loop0, $00, 3
+	envelope $77
+	duty_cycle 3
+	silence 7
+	note E_,3
+	silence 14
+	note E_,3, 7
+	note E_,3
+	silence
+	note C#,3, 21
+	note C#,3, 14
+	note E_,3, 7
+	note E_,3
+	silence
+	envelope $78
+	note A_,4, 21
+	note B_,4, 56
+	wait2 7
+	silence
+	note D_,5, 14
+	note B_,4, 3
+	silence 4
+	note D_,5, 21
+	note E_,5, 35
+	silence 7
+	note E_,5, 28
+	note B_,5, 21
+	note A_,5, 7
+	wait2 112
+	silence 7
+	note B_,5
+	silence 14
+	note A_,5
+	note B_,5, 7
+	note D_,6, 84
+	wait2 3
+	silence 4
+	note E_,6, 7
+	note B_,5, 3
+	silence 4
+	note E_,6, 10
+	silence 4
+	note D_,6, 14
+	silence 7
+	note E_,6, 28
+	silence 7
+	chan_stop
 SndData_BGM_Intro_Ch2:
-	sndenv 6, SNDENV_INC, 0
-	sndenach SNDOUT_CH2R|SNDOUT_CH2L
-	sndnr21 1, 0
-	sndnote $00
-	sndlen 28
-	sndnote $08
-	sndlen 14
-	sndnote $0A
-	sndlen 7
-	sndnote $0A
-	sndlen 21
-	sndnote $05
-	sndlen 84
-	sndnote $05
-	sndlen 3
-	sndnote $00
-	sndlen 4
-	sndnote $08
-	sndlen 7
-	sndlenpre $38
-	sndnote $00
-	sndlen 14
-	sndnote $05
-	sndnote $08
-	sndnote $05
-	sndlen 3
-	sndnote $00
-	sndlen 4
-	sndnote $08
-	sndlen 7
-	sndlenpre $0E
-	sndnote $0A
-	sndlen 56
-	sndnote $0A
-	sndlen 14
-	sndnote $08
-	sndnote $0A
-	sndnote $00
-	sndlen 7
-	sndnote $0C
-	sndnote $00
-	sndlen 14
-	sndnote $0A
-	sndlen 7
-	sndnote $0C
-	sndnote $00
-	sndnote $0A
-	sndlen 21
-	sndnote $07
-	sndlen 14
-	sndnote $0A
-	sndlen 7
-	sndnote $0C
-	sndnote $00
-	sndnote $0C
-	sndnotebase $F4
-	sndlenpre $0E
-	sndnote $05
-	sndlen 56
-	sndlenpre $0E
-	sndnote $05
-	sndlen 7
-	sndnote $05
-	sndlen 3
-	sndnote $00
-	sndlen 4
-	sndnote $05
-	sndlen 3
-	sndnote $00
-	sndlen 4
-	sndnote $08
-	sndlen 7
-	sndlenpre $38
-	sndnote $08
-	sndlen 7
-	sndnote $08
-	sndlen 3
-	sndnote $00
-	sndlen 4
-	sndnote $03
-	sndlen 3
-	sndnote $00
-	sndlen 4
-	sndnote $03
-	sndlen 3
-	sndnote $00
-	sndlen 4
-	sndnote $08
-	sndlen 7
-	sndnote $08
-	sndlen 3
-	sndnote $00
-	sndlen 4
-	sndnote $08
-	sndlen 3
-	sndnote $00
-	sndlen 4
-	sndnote $0A
-	sndlen 7
-	sndlenpre $38
-	sndnote $11
-	sndlen 7
-	sndnote $05
-	sndlen 3
-	sndnote $00
-	sndlen 4
-	sndnote $11
-	sndlen 3
-	sndnote $00
-	sndlen 4
-	sndnote $0A
-	sndlen 14
-	sndnote $0A
-	sndlen 3
-	sndnote $00
-	sndlen 4
-	sndnote $08
-	sndlen 7
-	sndnote $0A
-	sndnote $11
-	sndlen 3
-	sndnote $00
-	sndlen 4
-	sndnote $13
-	sndlen 10
-	sndnote $00
-	sndlen 4
-	sndnote $0C
-	sndlen 7
-	sndnote $07
-	sndnote $07
-	sndlen 3
-	sndnote $00
-	sndlen 4
-	sndnote $08
-	sndlen 7
-	sndnote $0A
-	sndlen 84
-	sndnote $00
-	sndlen 7
-	sndnote $13
-	sndnote $0C
-	sndlen 3
-	sndnote $00
-	sndlen 4
-	sndnote $13
-	sndlen 14
-	sndnote $11
-	sndlen 14
-	sndnote $00
-	sndlen 7
-	sndnote $11
-	sndlen 28
-	sndnote $00
-	sndlen 7
-	sndnotebase $0C
-	sndendch
+	envelope $68
+	panning $22
+	duty_cycle 1
+	silence 28
+	note G_,2, 14
+	note A_,2, 7
+	note A_,2, 21
+	note E_,2, 84
+	note E_,2, 3
+	silence 4
+	note G_,2, 7
+	wait2 56
+	silence 14
+	note E_,2
+	note G_,2
+	note E_,2, 3
+	silence 4
+	note G_,2, 7
+	wait2 14
+	note A_,2, 56
+	note A_,2, 14
+	note G_,2
+	note A_,2
+	silence 7
+	note B_,2
+	silence 14
+	note A_,2, 7
+	note B_,2
+	silence
+	note A_,2, 21
+	note F#,2, 14
+	note A_,2, 7
+	note B_,2
+	silence
+	note B_,2
+	fine_tune -12
+	wait2 14
+	note E_,2, 56
+	wait2 14
+	note E_,2, 7
+	note E_,2, 3
+	silence 4
+	note E_,2, 3
+	silence 4
+	note G_,2, 7
+	wait2 56
+	note G_,2, 7
+	note G_,2, 3
+	silence 4
+	note D_,2, 3
+	silence 4
+	note D_,2, 3
+	silence 4
+	note G_,2, 7
+	note G_,2, 3
+	silence 4
+	note G_,2, 3
+	silence 4
+	note A_,2, 7
+	wait2 56
+	note E_,3, 7
+	note E_,2, 3
+	silence 4
+	note E_,3, 3
+	silence 4
+	note A_,2, 14
+	note A_,2, 3
+	silence 4
+	note G_,2, 7
+	note A_,2
+	note E_,3, 3
+	silence 4
+	note F#,3, 10
+	silence 4
+	note B_,2, 7
+	note F#,2
+	note F#,2, 3
+	silence 4
+	note G_,2, 7
+	note A_,2, 84
+	silence 7
+	note F#,3
+	note B_,2, 3
+	silence 4
+	note F#,3, 14
+	note E_,3, 14
+	silence 7
+	note E_,3, 28
+	silence 7
+	fine_tune 12
+	chan_stop
 SndData_BGM_Intro_Ch3:
-	sndenvch3 2
-	sndenach SNDOUT_CH3R|SNDOUT_CH3L
-	sndwave $03
-	sndch3len $1E
-	sndnote $00
-	sndlen 28
-	sndnote $08
-	sndlen 7
-	sndnote $01
-	sndnote $16
-	sndch3len $3C
-	sndnote $0A
-	sndlen 21
-	sndch3len $1E
-	sndnote $05
-	sndlen 7
-	sndnote $11
-	sndnote $18
-	sndnote $11
-	sndnote $05
-	sndnote $0F
-	sndlen 14
-	sndnote $0C
-	sndlen 7
-	sndnote $05
-	sndnote $11
-	sndnote $0C
-	sndnote $04
-	sndnote $05
-	sndch3len $3C
-	sndnote $08
-	sndlen 21
-	sndch3len $1E
-	sndnote $05
-	sndlen 7
-	sndnote $08
-	sndnote $14
-	sndnote $0F
-	sndnote $08
-	sndnote $0C
-	sndlen 14
-	sndnote $0F
-	sndlen 7
-	sndnote $08
-	sndnote $14
-	sndnote $08
-	sndlen 14
-	sndnote $03
-	sndlen 7
-	sndch3len $3C
-	sndnote $08
-	sndlen 21
-	sndch3len $1E
-	sndnote $05
-	sndlen 7
-	sndnote $16
-	sndnote $05
-	sndnote $0A
-	sndnote $11
-	sndnote $0A
-	sndlen 14
-	sndnote $16
-	sndlen 7
-	sndnote $11
-	sndlen 14
-	sndnote $08
-	sndlen 7
-	sndnote $0F
-	sndnote $05
-	sndlen 14
-	sndnote $00
-	sndlen 7
-	sndnote $0F
-	sndlen 21
-	sndnote $0E
-	sndlen 7
-	sndnote $0F
-	sndlen 14
-	sndnote $0E
-	sndlen 21
-	sndnote $0A
-	sndlen 14
-	sndnote $0E
-	sndlen 7
-	sndnote $0F
-	sndlen 14
-	sndnote $0C
-	sndlen 14
-	sndnote $05
-	sndlen 7
-	sndnote $03
-	sndnote $05
-	sndlen 14
-	sndnote $11
-	sndlen 7
-	sndnote $0C
-	sndnote $03
-	sndnote $05
-	sndnote $0C
-	sndnote $03
-	sndnote $05
-	sndnote $0F
-	sndnote $05
-	sndnote $08
-	sndlen 14
-	sndnote $14
-	sndlen 7
-	sndnote $13
-	sndnote $05
-	sndnote $08
-	sndnote $08
-	sndnote $0A
-	sndnote $0F
-	sndlen 14
-	sndnote $14
-	sndlen 7
-	sndnote $0D
-	sndnote $13
-	sndnote $08
-	sndnote $05
-	sndnote $08
-	sndnote $0A
-	sndlen 14
-	sndnote $16
-	sndlen 7
-	sndnote $14
-	sndnote $11
-	sndnote $0F
-	sndnote $0A
-	sndnote $05
-	sndnote $0A
-	sndlen 14
-	sndnote $11
-	sndlen 7
-	sndnote $0A
-	sndnote $16
-	sndnote $0A
-	sndnote $14
-	sndnote $16
-	sndnote $1B
-	sndnote $05
-	sndnote $13
-	sndlen 14
-	sndnote $0C
-	sndlen 7
-	sndnote $06
-	sndnote $05
-	sndnote $07
-	sndch3len $00
-	sndnote $0F
-	sndlen 84
-	sndlenpre $07
-	sndch3len $1E
-	sndnote $13
-	sndlen 7
-	sndnote $0C
-	sndnote $13
-	sndlen 14
-	sndnote $05
-	sndlen 21
-	sndnote $05
-	sndlen 35
-	sndendch
+	wave_vol $80
+	panning $44
+	wave_id $03
+	wave_cutoff 30
+	silence 28
+	note G_,2, 7
+	note C_,2
+	note A_,3
+	wave_cutoff 60
+	note A_,2, 21
+	wave_cutoff 30
+	note E_,2, 7
+	note E_,3
+	note B_,3
+	note E_,3
+	note E_,2
+	note D_,3, 14
+	note B_,2, 7
+	note E_,2
+	note E_,3
+	note B_,2
+	note D#,2
+	note E_,2
+	wave_cutoff 60
+	note G_,2, 21
+	wave_cutoff 30
+	note E_,2, 7
+	note G_,2
+	note G_,3
+	note D_,3
+	note G_,2
+	note B_,2, 14
+	note D_,3, 7
+	note G_,2
+	note G_,3
+	note G_,2, 14
+	note D_,2, 7
+	wave_cutoff 60
+	note G_,2, 21
+	wave_cutoff 30
+	note E_,2, 7
+	note A_,3
+	note E_,2
+	note A_,2
+	note E_,3
+	note A_,2, 14
+	note A_,3, 7
+	note E_,3, 14
+	note G_,2, 7
+	note D_,3
+	note E_,2, 14
+	silence 7
+	note D_,3, 21
+	note C#,3, 7
+	note D_,3, 14
+	note C#,3, 21
+	note A_,2, 14
+	note C#,3, 7
+	note D_,3, 14
+	note B_,2, 14
+	note E_,2, 7
+	note D_,2
+	note E_,2, 14
+	note E_,3, 7
+	note B_,2
+	note D_,2
+	note E_,2
+	note B_,2
+	note D_,2
+	note E_,2
+	note D_,3
+	note E_,2
+	note G_,2, 14
+	note G_,3, 7
+	note F#,3
+	note E_,2
+	note G_,2
+	note G_,2
+	note A_,2
+	note D_,3, 14
+	note G_,3, 7
+	note C_,3
+	note F#,3
+	note G_,2
+	note E_,2
+	note G_,2
+	note A_,2, 14
+	note A_,3, 7
+	note G_,3
+	note E_,3
+	note D_,3
+	note A_,2
+	note E_,2
+	note A_,2, 14
+	note E_,3, 7
+	note A_,2
+	note A_,3
+	note A_,2
+	note G_,3
+	note A_,3
+	note D_,4
+	note E_,2
+	note F#,3, 14
+	note B_,2, 7
+	note F_,2
+	note E_,2
+	note F#,2
+	wave_cutoff 0
+	note D_,3, 84
+	wait2 7
+	wave_cutoff 30
+	note F#,3, 7
+	note B_,2
+	note F#,3, 14
+	note E_,2, 21
+	note E_,2, 35
+	chan_stop
 SndData_BGM_Intro_Ch4:
-	sndenach SNDOUT_CH4R|SNDOUT_CH4L
-	sndcall .call0
-	sndcall .call1
-	sndendch
+	panning $88
+	snd_call .call0
+	snd_call .call1
+	chan_stop
 .call0:
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 7
-	sndch4 2, 0, 4
-	sndlen 7
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 7
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 7
-	sndch4 2, 0, 4
-	sndlen 14
-	sndch4 2, 0, 4
-	sndlen 7
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 21
-	sndch4 3, 0, 6
-	sndlen 14
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 28
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 28
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 21
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 21
-	sndch4 3, 0, 6
-	sndlen 14
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 28
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 14
-	sndch4 3, 0, 6
-	sndlen 14
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 14
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 7
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 21
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 14
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 28
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 14
-	sndch4 3, 0, 6
-	sndlen 14
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 14
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 21
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 21
-	sndenv 3, SNDENV_DEC, 4
-	sndch4 2, 0, 6
-	sndlen 7
-	sndenv 4, SNDENV_DEC, 4
-	sndch4 2, 0, 6
-	sndlen 7
-	sndenv 5, SNDENV_DEC, 4
-	sndch4 2, 0, 6
-	sndlen 7
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 14
-	sndch4 3, 0, 6
-	sndlen 7
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 14
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 14
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 7
-	sndret
+	envelope $62
+	wait 36
+	wait 7
+	wait 36
+	wait 7
+	envelope $61
+	wait 54
+	wait 7
+	envelope $62
+	wait 36
+	wait 7
+	wait 36
+	wait 14
+	wait 36
+	wait 7
+	envelope $61
+	wait 54
+	wait 21
+	wait 54
+	wait 14
+	envelope $62
+	wait 36
+	wait 28
+	envelope $61
+	wait 54
+	wait 28
+	envelope $62
+	wait 36
+	wait 21
+	envelope $61
+	wait 54
+	wait 21
+	wait 54
+	wait 14
+	envelope $62
+	wait 36
+	wait 28
+	envelope $61
+	wait 54
+	wait 14
+	wait 54
+	wait 14
+	envelope $62
+	wait 36
+	wait 14
+	envelope $61
+	wait 54
+	wait 7
+	envelope $62
+	wait 36
+	wait 21
+	envelope $61
+	wait 54
+	wait 14
+	envelope $62
+	wait 36
+	wait 28
+	envelope $61
+	wait 54
+	wait 14
+	wait 54
+	wait 14
+	envelope $62
+	wait 36
+	wait 14
+	envelope $61
+	wait 54
+	wait 21
+	envelope $62
+	wait 36
+	wait 21
+	envelope $34
+	wait 38
+	wait 7
+	envelope $44
+	wait 38
+	wait 7
+	envelope $54
+	wait 38
+	wait 7
+	envelope $61
+	wait 54
+	wait 14
+	wait 54
+	wait 7
+	envelope $62
+	wait 36
+	wait 14
+	envelope $61
+	wait 54
+	wait 14
+	envelope $62
+	wait 36
+	wait 7
+	snd_ret
 .call1:
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 14
-	sndch4 3, 0, 6
-	sndlen 7
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 14
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 14
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 14
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 14
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 14
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 14
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 7
-	sndloopcnt $00, 2, .call1
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 14
-	sndch4 3, 0, 6
-	sndlen 7
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 14
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 14
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 14
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 14
-	sndch4 3, 0, 6
-	sndlen 7
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 14
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 7
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 7
-	sndch4 2, 0, 4
-	sndlen 7
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 7
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 21
-	sndenv 4, SNDENV_DEC, 4
-	sndch4 2, 0, 6
-	sndlen 7
-	sndch4 1, 0, 0
-	sndlen 7
-	sndenv 5, SNDENV_DEC, 4
-	sndch4 2, 0, 6
-	sndlen 7
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 14
-	sndenv 5, SNDENV_DEC, 4
-	sndch4 2, 0, 6
-	sndlen 7
-	sndenv 3, SNDENV_DEC, 4
-	sndch4 2, 0, 6
-	sndlen 7
-	sndch4 2, 0, 6
-	sndlen 7
-	sndenv 4, SNDENV_DEC, 4
-	sndch4 2, 0, 6
-	sndlen 7
-	sndch4 1, 0, 0
-	sndlen 7
-	sndenv 5, SNDENV_DEC, 4
-	sndch4 2, 0, 6
-	sndlen 7
-	sndch4 3, 0, 2
-	sndlen 7
-	sndenv 5, SNDENV_DEC, 4
-	sndch4 2, 0, 6
-	sndlen 7
-	sndenv 4, SNDENV_DEC, 4
-	sndch4 2, 0, 6
-	sndlen 3
-	sndch4 1, 0, 0
-	sndlen 4
-	sndenv 3, SNDENV_DEC, 4
-	sndch4 2, 0, 6
-	sndlen 7
-	sndch4 2, 0, 6
-	sndlen 7
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 7
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 7
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 7
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 7
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 7
-	sndenv 6, SNDENV_DEC, 1
-	sndch4 3, 0, 6
-	sndlen 7
-	sndch4 3, 0, 6
-	sndlen 7
-	sndenv 6, SNDENV_DEC, 2
-	sndch4 2, 0, 4
-	sndlen 35
-	sndret
+	envelope $61
+	wait 54
+	wait 14
+	wait 54
+	wait 7
+	envelope $62
+	wait 36
+	wait 14
+	envelope $61
+	wait 54
+	wait 14
+	envelope $62
+	wait 36
+	wait 14
+	envelope $61
+	wait 54
+	wait 14
+	envelope $62
+	wait 36
+	wait 14
+	envelope $61
+	wait 54
+	wait 14
+	envelope $62
+	wait 36
+	wait 7
+	snd_loop .call1, $00, 2
+	envelope $61
+	wait 54
+	wait 14
+	wait 54
+	wait 7
+	envelope $62
+	wait 36
+	wait 14
+	envelope $61
+	wait 54
+	wait 14
+	envelope $62
+	wait 36
+	wait 14
+	envelope $61
+	wait 54
+	wait 14
+	wait 54
+	wait 7
+	envelope $62
+	wait 36
+	wait 14
+	envelope $61
+	wait 54
+	wait 7
+	envelope $62
+	wait 36
+	wait 7
+	wait 36
+	wait 7
+	envelope $61
+	wait 54
+	wait 7
+	envelope $62
+	wait 36
+	wait 21
+	envelope $44
+	wait 38
+	wait 7
+	wait 16
+	wait 7
+	envelope $54
+	wait 38
+	wait 7
+	envelope $62
+	wait 36
+	wait 14
+	envelope $54
+	wait 38
+	wait 7
+	envelope $34
+	wait 38
+	wait 7
+	wait 38
+	wait 7
+	envelope $44
+	wait 38
+	wait 7
+	wait 16
+	wait 7
+	envelope $54
+	wait 38
+	wait 7
+	wait 50
+	wait 7
+	envelope $54
+	wait 38
+	wait 7
+	envelope $44
+	wait 38
+	wait 3
+	wait 16
+	wait 4
+	envelope $34
+	wait 38
+	wait 7
+	wait 38
+	wait 7
+	envelope $62
+	wait 36
+	wait 7
+	envelope $61
+	wait 54
+	wait 7
+	envelope $62
+	wait 36
+	wait 7
+	envelope $61
+	wait 54
+	wait 7
+	envelope $62
+	wait 36
+	wait 7
+	envelope $61
+	wait 54
+	wait 7
+	wait 54
+	wait 7
+	envelope $62
+	wait 36
+	wait 35
+	snd_ret

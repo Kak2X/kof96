@@ -4,21 +4,21 @@ SndHeader_SFX_MoveJumpB:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
 	dw SndData_SFX_MoveJumpB_Ch4 ; Data ptr
-	db $00 ; Base freq/note id
+	db 0 ; Initial fine tune
 	db $81 ; Unused
 SndData_SFX_MoveJumpB_Ch4:
-	sndenv 15, SNDENV_DEC, 3
-	sndenach SNDOUT_CH4R|SNDOUT_CH4L
-	sndch4 7, 0, 1
-	sndlen 2
-	sndch4 5, 0, 4
-	sndlen 2
-	sndch4 3, 0, 4
-	sndlen 2
-	sndch4 5, 0, 4
-	sndlen 2
-	sndch4 3, 0, 4
-	sndlen 5
-	sndch4 7, 0, 1
-	sndlen 30
-	sndendch
+	envelope $F3
+	panning $88
+	wait 113
+	wait 2
+	wait 84
+	wait 2
+	wait 52
+	wait 2
+	wait 84
+	wait 2
+	wait 52
+	wait 5
+	wait 113
+	wait 30
+	chan_stop

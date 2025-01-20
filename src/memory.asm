@@ -351,9 +351,9 @@ SECTION "Audio RAM", WRAM0[$D480]
 ; SOUND DRIVER
 ;
 wSnd_Unused_Set             :db ; EQU $D480 ; [TCRF] Leftover from 95, where it was set to play new a sound ID.
-wSnd_Unused_ChUsed          :db ; EQU $D481 ; Appears to be a bitmask intended to mark the used sound channels, but it is only set properly in unreachable code.
+wSnd_Unused_SfxPriority     :db ; EQU $D481 ; [TCRF] Keeps track of high priority sound being played.
 wSndEnaChBGM                :db ; EQU $D482 ; Keeps track of the last rNR51 value used modified by a BGM SndInfo.
-wSndCh3StopLength           :db ; EQU $D483 ; This is set to rNR31 sometimes (see logic)
+wSndCh3DelayCut             :db ; EQU $D483 ; Keeps track of the last rNR31 wave cutoff value (wave_cutoff).
 ds 1
 wSndChProcLeft              :db ; EQU $D485 ; Number of remaining wBGMCh*Info/wSFXCh*Info structs to process
 
@@ -834,17 +834,17 @@ DEF iSndInfo_RegPtr                    EQU $01 ; Determines sound channel. Alway
 DEF iSndInfo_DataPtr_Low               EQU $02 ; Pointer to song data (low byte)
 DEF iSndInfo_DataPtr_High              EQU $03 ; Pointer to song data (high byte)
 DEF iSndInfo_FreqDataIdBase            EQU $04 ; Base index/note id to Sound_FreqDataTbl for indexes > 0
-DEF iSndInfo_Unused05                  EQU $05 ; Unused. Always $81 unless audio is interrupted.
+DEF iSndInfo_VibratoId                 EQU $05 ; [TCRF] Unimplemented. In later versions, it's the id of the vibrato set loaded. 
 DEF iSndInfo_DataPtrStackIdx           EQU $06 ; Stack index for data pointers saved and restored by Sound_Cmd_Call and Sound_Cmd_Ret. Initialized to $20 (end of SndInfo) and decremented on pushes.
 DEF iSndInfo_LengthTarget              EQU $07 ; Handles delays -- the current sound register settings are kept until it matches iSndInfo_LengthTarget Set by song data.
 DEF iSndInfo_LengthTimer               EQU $08 ; Increases every time a SndInfo isn't paused/disabled. Once it reaches iSndInfo_LengthTarget it resets.
-DEF iSndInfo_Unknown_Unused_09         EQU $09 ; ???
+DEF iSndInfo_VibratoDataOffset         EQU $09 ; [TCRF] Unimplemented. In later versions, it's an offset to the current vibrato table.
 DEF iSndInfo_RegNRx1Data               EQU $0A ; Last value written to rNR*1 | $FF00+(iSndInfo_RegPtr-2). Only written by Command IDs -- this isn't updated by the standard Sound_UpdateCustomRegs.
-DEF iSndInfo_Unknown_Unused_NR10Data   EQU $0B ; Last value written to NR10 by the unused sound command Sound_Cmd_Unused_WriteToNR10.
+DEF iSndInfo_RegNR10Data               EQU $0B ; [TCRF] Last value written to NR10 by the unused sound command Sound_Cmd_WriteToNR10.
 DEF iSndInfo_VolPredict                EQU $0C ; "Volume timer" which predicts the effective volume level (due to sweeps) at any given frame, used when restoring BGM playback. Low nybble is the timer, upper nybble is the predicted volume.
 DEF iSndInfo_RegNRx2Data               EQU $0D ; Last value written to rNR*2 | $FF00+(iSndInfo_RegPtr-1)
-DEF iSndInfo_RegNRx3Data               EQU $0E  ; Last value written to rNR*3 | $FF00+(iSndInfo_RegPtr)
-DEF iSndInfo_RegNRx4Data               EQU $0F  ; Last value written to rNR*4 | $FF00+(iSndInfo_RegPtr+1)
+DEF iSndInfo_RegNRx3Data               EQU $0E ; Last value written to rNR*3 | $FF00+(iSndInfo_RegPtr)
+DEF iSndInfo_RegNRx4Data               EQU $0F ; Last value written to rNR*4 | $FF00+(iSndInfo_RegPtr+1)
 DEF iSndInfo_ChEnaMask                 EQU $10 ; Default rNR51 bitmask, used when a sound channel is enabled
 DEF iSndInfo_WaveSetId                 EQU $11 ; Id of last wave set loaded
 DEF iSndInfo_LoopTimerTbl              EQU $12 ; Table with timers counting down, used to determine how many times to "jump" the data pointer elsewhere before continuing.

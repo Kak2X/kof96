@@ -4,43 +4,42 @@ SndHeader_SFX_ChargeMeter:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
 	dw SndData_SFX_ChargeMeter_Ch2 ; Data ptr
-	db $0C ; Base freq/note id
+	db 12 ; Initial fine tune
 	db $81 ; Unused
 SndData_SFX_ChargeMeter_Ch2:
-	sndenv 6, SNDENV_INC, 2
-	sndenach SNDOUT_CH2R|SNDOUT_CH2L
-	sndnr21 0, 0
-	sndcall .playSet
-	sndnotebase $01
-	sndcall .playSet
-	sndnotebase $01
-	sndcall .playSet
-	sndnotebase $01
-	sndcall .playSet
-	sndnotebase $01
-	sndcall .playSet
-	sndnotebase $01
-	sndcall .playSet
-	sndnotebase $01
-	sndcall .playSet
-	sndnotebase $01
-	sndcall .playSet
-	sndnotebase $01
-	sndcall .playSet
-	sndnotebase $01
-	sndcall .playSet
-	sndnotebase $01
-	sndcall .playSet
-	sndnotebase $01
-	sndcall .playSet
-	sndnotebase $01
-	sndcall .playSet
-	sndendch
+	envelope $6A
+	panning $22
+	duty_cycle 0
+	snd_call .playSet
+	fine_tune 1
+	snd_call .playSet
+	fine_tune 1
+	snd_call .playSet
+	fine_tune 1
+	snd_call .playSet
+	fine_tune 1
+	snd_call .playSet
+	fine_tune 1
+	snd_call .playSet
+	fine_tune 1
+	snd_call .playSet
+	fine_tune 1
+	snd_call .playSet
+	fine_tune 1
+	snd_call .playSet
+	fine_tune 1
+	snd_call .playSet
+	fine_tune 1
+	snd_call .playSet
+	fine_tune 1
+	snd_call .playSet
+	fine_tune 1
+	snd_call .playSet
+	chan_stop
 .playSet:
-	sndnote $25
-	sndlen 1
-	sndnote $26
-	sndnote $27
-	sndnote $26
-	sndloopcnt $00, 2, .playSet
-	sndret
+	note C_,5, 1
+	note C#,5
+	note D_,5
+	note C#,5
+	snd_loop .playSet, $00, 2
+	snd_ret

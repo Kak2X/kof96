@@ -4,15 +4,15 @@ SndHeader_SFX_Hit:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH4_PTR ; Sound channel ptr
 	dw SndData_SFX_Hit_Ch4 ; Data ptr
-	db $00 ; Base freq/note id
+	db 0 ; Initial fine tune
 	db $81 ; Unused
 SndData_SFX_Hit_Ch4:
-	sndenv 15, SNDENV_DEC, 2
-	sndenach SNDOUT_CH4R|SNDOUT_CH4L
-	sndch4 7, 0, 1
-	sndlen 5
-	sndch4 0, 0, 0
-	sndlen 1
-	sndch4 3, 0, 5
-	sndlen 6
-	sndendch
+	envelope $F2
+	panning $88
+	wait 113
+	wait 5
+	wait 0
+	wait 1
+	wait 53
+	wait 6
+	chan_stop

@@ -4,15 +4,14 @@ SndHeader_SFX_PsychoTeleport:
 	db SIS_SFX|SIS_ENABLED ; Initial playback status
 	db SND_CH2_PTR ; Sound channel ptr
 	dw SndData_SFX_PsychoTeleport_Ch2 ; Data ptr
-	db $0C ; Base freq/note id
+	db 12 ; Initial fine tune
 	db $81 ; Unused
 SndData_SFX_PsychoTeleport_Ch2:
-	sndenv 1, SNDENV_INC, 4
-	sndenach SNDOUT_CH2R|SNDOUT_CH2L
-	sndnr21 3, 0
-	sndnote $2E
-	sndlen 1
-	sndsetskip
-	sndnote $2F
-	sndloopcnt $00, 30, SndData_SFX_PsychoTeleport_Ch2
-	sndendch
+	envelope $1C
+	panning $22
+	duty_cycle 3
+	note A_,5, 1
+	lock_envelope
+	note A#,5
+	snd_loop SndData_SFX_PsychoTeleport_Ch2, $00, 30
+	chan_stop
