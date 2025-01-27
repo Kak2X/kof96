@@ -1177,7 +1177,8 @@ ENDM
 ; IN:
 ; - 1: Note (C_ to B)
 ; - 2: Octave (2-6)
-; - 3: New Length [Optional]
+; - 3: Step width (0: 15-bit LFSR, 1: 7-bit LFSR)
+; - 4: New Length [Optional]
 MACRO note4
 	; Convert the SPN to respective values in the tbm noise frequency table
 	DEF HI_P1 = (6 - \2) * 3
@@ -1190,9 +1191,9 @@ MACRO note4
 		DEF DNOTE = ((HI_P1 + 1) << 4) + LOW_SUB - ($20 - (LOW_BASE * $10))
 	ENDC
 	
-	db DNOTE
-	IF _NARG > 2
-		db \3
+	db DNOTE|(\3 << 3)
+	IF _NARG > 3
+		db \4
 	ENDC
 ENDM
 
