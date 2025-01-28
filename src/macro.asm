@@ -997,10 +997,10 @@ ENDM
 ; Sets the wave channel's volume to NR32.
 ; Code: Sound_Cmd_WriteToNRx2
 ; IN:
-; - 1: Raw NR32 data, shifted left once.
+; - 1: Raw NR32 data, shifted left once and cycled.
 ;      This is to make the volume representation consistent with envelope command.
 MACRO wave_vol
-	db SNDCMD_BASE + $04, (\1 >> 1)
+	db SNDCMD_BASE + $04, (((((\1 >> 6) ^ 3) + 1) & 3) << 5)
 ENDM
 
 ; =============== snd_loop ===============
