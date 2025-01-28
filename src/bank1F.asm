@@ -761,7 +761,7 @@ Sound_DoChSndInfo_Loop:
 	xor  a
 	ld   [hl], a
 
-	; The rest of these actions wouldn't be executed when using the explicit Sound_Cmd_SetLength command.
+	; The rest of these actions wouldn't be executed when using the explicit Sound_Cmd_ExtendNote command.
 	
 	;
 	; Reset the volume prediction timer
@@ -1020,7 +1020,7 @@ Sound_CmdPtrTbl:
 	dw Sound_DecDataPtr;X
 	dw Sound_DecDataPtr;X					; $18
 	dw Sound_DecDataPtr;X
-	dw Sound_Cmd_SetLength
+	dw Sound_Cmd_ExtendNote
 	dw Sound_DecDataPtr;X
 	dw Sound_DecDataPtr;X
 	dw Sound_DecDataPtr;X
@@ -1128,12 +1128,12 @@ Sound_Cmd_LockNRx2:
 	ld   [de], a
 	jp   Sound_DecDataPtr
 
-; =============== Sound_Cmd_SetLength ===============
-; Sets a new channel length target, which also resets the timer.
-; This doesn't return to the sync loop, unlike the other way to set the length.
+; =============== Sound_Cmd_ExtendNote ===============
+; Extends the current note without restarting it.
+; This doesn't return to the sync loop, since it counts as a note.
 ; Command data format:
 ; - 0: Length target
-Sound_Cmd_SetLength:
+Sound_Cmd_ExtendNote:
 
 	; Do not return to Sound_IncDataPtr
 	pop  hl

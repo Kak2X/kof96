@@ -94,13 +94,13 @@ SndData_BGM_MrKarate_Ch1:
 	note A_,4, 10
 	note B_,4
 	note C_,5, 40
-	wait2 10
+	continue 10
 	note D_,4
 	note D_,5
 	note C_,5
 	note B_,4
-	wait2 40
-	wait2 10
+	continue 40
+	continue 10
 	note C_,5
 	note D_,5
 	note D#,5, 40
@@ -153,11 +153,11 @@ SndData_BGM_MrKarate_Ch1:
 	note D_,4
 	silence
 	note B_,4, 30
-	wait2 80
+	continue 80
 	envelope $11
 	note C_,2, 80
-	wait2 60
-	wait2 10
+	continue 60
+	continue 10
 	snd_loop .call3, $00, 2
 	snd_ret
 SndData_BGM_MrKarate_Ch2:
@@ -224,12 +224,12 @@ SndData_BGM_MrKarate_Ch2:
 .call2:
 	envelope $68
 	note E_,4, 10
-	wait2 40
+	continue 40
 	note F#,4
 	note G_,4
 	note A_,4, 30
 	note A#,4, 10
-	wait2 40
+	continue 40
 	note D#,4
 	note G_,4, 60
 	note B_,4, 10
@@ -238,7 +238,7 @@ SndData_BGM_MrKarate_Ch2:
 	note G#,4
 	note D#,4, 10
 	note B_,4
-	wait2 80
+	continue 80
 	envelope $67
 	silence 10
 	note B_,4, 5
@@ -264,7 +264,7 @@ SndData_BGM_MrKarate_Ch3:
 	snd_loop .loop0
 .call0:
 	note A_,3, 10
-	wait2 60
+	continue 60
 	silence 10
 	note C_,4, 30
 	silence 10
@@ -273,7 +273,7 @@ SndData_BGM_MrKarate_Ch3:
 	note G_,3
 	silence
 	note A_,3
-	wait2 60
+	continue 60
 	silence 10
 	note C_,4, 30
 	silence 10

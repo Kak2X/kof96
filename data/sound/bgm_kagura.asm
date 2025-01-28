@@ -82,7 +82,7 @@ SndData_BGM_Kagura_Ch1:
 	duty_cycle 2
 	note A_,3, 30
 	note A_,4, 80
-	wait2 10
+	continue 10
 	note D_,5, 10
 	note B_,4
 	note G_,4
@@ -94,7 +94,7 @@ SndData_BGM_Kagura_Ch1:
 	envelope $68
 	note A_,3, 30
 	note A_,4, 80
-	wait2 10
+	continue 10
 	silence
 	note C_,5
 	note B_,4
@@ -122,7 +122,7 @@ SndData_BGM_Kagura_Ch1:
 	note E_,5, 60
 	envelope $11
 	note E_,2, 20
-	wait2 7
+	continue 7
 	envelope $68
 	note D_,5, 6
 	note E_,5, 7
@@ -134,12 +134,12 @@ SndData_BGM_Kagura_Ch1:
 	note A_,4, 20
 	note D_,5, 10
 	note C_,5
-	wait2 40
+	continue 40
 	silence 20
 	note C_,5, 10
 	note E_,5, 20
 	note D_,5, 20
-	wait2 3
+	continue 3
 	note E_,4, 7
 	note F#,4, 6
 	note A_,4, 7
@@ -200,7 +200,7 @@ SndData_BGM_Kagura_Ch1:
 	duty_cycle 2
 	note A_,3, 30
 	note A_,4, 80
-	wait2 10
+	continue 10
 	note C_,5
 	note B_,4
 	note G_,4
@@ -215,7 +215,7 @@ SndData_BGM_Kagura_Ch1:
 	note G_,3
 	note C_,4
 	note G_,4, 40
-	wait2 10
+	continue 10
 	note F#,3
 	note A_,3
 	note C_,4
@@ -867,12 +867,12 @@ SndData_BGM_Kagura_Ch3:
 	note E_,3, 20
 	note G_,3
 	note A_,3, 40
-	wait2 10
+	continue 10
 	note A_,3, 10
 	note E_,3
 	note C_,3
 	note D_,3, 60
-	wait2 10
+	continue 10
 	note D_,3
 	note F_,3, 30
 	note C_,4

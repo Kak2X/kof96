@@ -57,7 +57,7 @@ SndData_BGM_Intro_Ch1:
 	envelope $78
 	note A_,4, 21
 	note B_,4, 56
-	wait2 7
+	continue 7
 	silence
 	note D_,5, 14
 	note B_,4, 3
@@ -68,14 +68,14 @@ SndData_BGM_Intro_Ch1:
 	note E_,5, 28
 	note B_,5, 21
 	note A_,5, 7
-	wait2 112
+	continue 112
 	silence 7
 	note B_,5
 	silence 14
 	note A_,5
 	note B_,5, 7
 	note D_,6, 84
-	wait2 3
+	continue 3
 	silence 4
 	note E_,6, 7
 	note B_,5, 3
@@ -99,14 +99,14 @@ SndData_BGM_Intro_Ch2:
 	note E_,2, 3
 	silence 4
 	note G_,2, 7
-	wait2 56
+	continue 56
 	silence 14
 	note E_,2
 	note G_,2
 	note E_,2, 3
 	silence 4
 	note G_,2, 7
-	wait2 14
+	continue 14
 	note A_,2, 56
 	note A_,2, 14
 	note G_,2
@@ -124,16 +124,16 @@ SndData_BGM_Intro_Ch2:
 	silence
 	note B_,2
 	fine_tune -12
-	wait2 14
+	continue 14
 	note E_,2, 56
-	wait2 14
+	continue 14
 	note E_,2, 7
 	note E_,2, 3
 	silence 4
 	note E_,2, 3
 	silence 4
 	note G_,2, 7
-	wait2 56
+	continue 56
 	note G_,2, 7
 	note G_,2, 3
 	silence 4
@@ -147,7 +147,7 @@ SndData_BGM_Intro_Ch2:
 	note G_,2, 3
 	silence 4
 	note A_,2, 7
-	wait2 56
+	continue 56
 	note E_,3, 7
 	note E_,2, 3
 	silence 4
@@ -289,7 +289,7 @@ SndData_BGM_Intro_Ch3:
 	note F#,2
 	wave_cutoff 0
 	note D_,3, 84
-	wait2 7
+	continue 7
 	wave_cutoff 30
 	note F#,3, 7
 	note B_,2

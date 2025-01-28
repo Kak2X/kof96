@@ -95,7 +95,7 @@ SndData_BGM_Arashi_Ch1:
 	note D_,4, 7
 	envelope $11
 	note D_,2, 28
-	wait2 21
+	continue 21
 	envelope $78
 	note F_,3, 14
 	note A_,3, 7
@@ -152,7 +152,7 @@ SndData_BGM_Arashi_Ch1:
 	note D_,4, 3
 	note E_,4, 4
 	note G_,4, 35
-	wait2 28
+	continue 28
 	silence 14
 	note G_,4, 28
 	note A_,4
@@ -168,7 +168,7 @@ SndData_BGM_Arashi_Ch1:
 	note G_,3, 7
 	note A_,3
 	note A#,3
-	wait2 21
+	continue 21
 	note A_,3
 	note F_,3, 14
 	silence
@@ -186,7 +186,7 @@ SndData_BGM_Arashi_Ch1:
 	note G_,4, 7
 	note A_,4
 	note A#,4
-	wait2 21
+	continue 21
 	note A_,4
 	note G#,4
 	note E_,4, 10
@@ -587,7 +587,7 @@ SndData_BGM_Arashi_Ch3:
 	note G_,3
 	wave_cutoff 0
 	note A#,3, 56
-	wait2 7
+	continue 7
 	wave_cutoff 50
 	note G_,4
 	note E_,4

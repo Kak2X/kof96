@@ -29,7 +29,7 @@ SndData_BGM_Ending_Ch1:
 	panning $11
 	duty_cycle 3
 	note D_,5, 96
-	wait2 8
+	continue 8
 	silence
 	note D_,5
 	note D_,5
@@ -38,7 +38,7 @@ SndData_BGM_Ending_Ch1:
 	note C#,2, 96
 	envelope $78
 	note D_,5, 96
-	wait2 8
+	continue 8
 	silence
 	note D_,5
 	note D_,5
@@ -57,7 +57,7 @@ SndData_BGM_Ending_Ch1:
 	silence
 	note G#,5, 64
 	note A_,5, 64
-	wait2 64
+	continue 64
 	envelope $11
 	note E_,2, 48
 	envelope $67
@@ -239,7 +239,7 @@ SndData_BGM_Ending_Ch3:
 	note E_,3
 	note F_,3
 	note A_,3, 64
-	wait2 64
+	continue 64
 	snd_ret
 SndData_BGM_Ending_Ch4:
 	panning $88
@@ -249,7 +249,7 @@ SndData_BGM_Ending_Ch4:
 	envelope $61
 	wait 54
 	wait 96
-	wait2 16
+	continue 16
 	wait 54
 	wait 8
 	wait 54
@@ -286,7 +286,7 @@ SndData_BGM_Ending_Ch4:
 	envelope $61
 	wait 54
 	wait 96
-	wait2 16
+	continue 16
 	wait 54
 	wait 8
 	wait 54

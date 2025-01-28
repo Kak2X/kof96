@@ -61,8 +61,8 @@ SndData_BGM_Goenitz_Ch1:
 	note A_,4, 7
 	note G_,4
 	note F#,4, 112
-	wait2 112
-	wait2 112
+	continue 112
+	continue 112
 	snd_ret
 .call1:
 	silence 14
@@ -145,7 +145,7 @@ SndData_BGM_Goenitz_Ch2:
 	snd_loop .loop0
 .call1:
 	note C_,3, 84
-	wait2 14
+	continue 14
 	note C_,3, 7
 	note C_,3
 	note C_,3, 28
@@ -225,19 +225,19 @@ SndData_BGM_Goenitz_Ch2:
 	envelope $78
 	duty_cycle 3
 	note E_,4, 84
-	wait2 14
+	continue 14
 	note E_,4, 7
 	note E_,4
 	note E_,4, 84
-	wait2 14
+	continue 14
 	note E_,4, 7
 	note E_,4
 	note F_,4, 84
-	wait2 14
+	continue 14
 	note F_,4, 7
 	note F_,4
 	note G_,4, 84
-	wait2 14
+	continue 14
 	note G_,4, 7
 	note G_,4
 	snd_loop .call4, $00, 2
@@ -258,7 +258,7 @@ SndData_BGM_Goenitz_Ch3:
 .call0:
 	wave_cutoff 0
 	note A_,3, 84
-	wait2 14
+	continue 14
 	wave_cutoff 25
 	note A_,3, 7
 	note A_,3
@@ -284,14 +284,14 @@ SndData_BGM_Goenitz_Ch3:
 	note G#,3
 	wave_cutoff 0
 	note A_,3, 84
-	wait2 14
+	continue 14
 	wave_cutoff 25
 	note A_,3, 7
 	note A_,3
 	wave_cutoff 0
 	note D_,5, 112
-	wait2 112
-	wait2 112
+	continue 112
+	continue 112
 	snd_ret
 .call1:
 	wave_cutoff 50
@@ -317,7 +317,7 @@ SndData_BGM_Goenitz_Ch3:
 .call2c:
 	wave_cutoff 0
 	note A_,3, 84
-	wait2 14
+	continue 14
 	wave_cutoff 25
 	note A_,3, 7
 	note A_,3

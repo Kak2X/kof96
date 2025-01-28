@@ -179,7 +179,7 @@ SndData_BGM_Esaka_Ch1:
 	note G_,4, 20
 	envelope $11
 	note G_,2, 40
-	wait2 10
+	continue 10
 	snd_ret
 .call6:
 	envelope $11
@@ -211,10 +211,10 @@ SndData_BGM_Esaka_Ch1:
 	note D_,5, 60
 	silence 10
 	note A_,5
-	wait2 60
+	continue 60
 	note F_,5, 10
 	note G_,5
-	wait2 60
+	continue 60
 	silence 10
 	note A_,5, 30
 	note G_,5, 20
@@ -391,7 +391,7 @@ SndData_BGM_Esaka_Ch2:
 	note G_,2, 2
 	silence 8
 	note F_,3, 10
-	wait2 10
+	continue 10
 	note G_,3
 	silence
 	note F_,2, 2
@@ -405,7 +405,7 @@ SndData_BGM_Esaka_Ch2:
 	note A#,2
 	silence
 	note D#,3, 10
-	wait2 10
+	continue 10
 	note A#,2, 5
 	silence
 	note A#,2, 2
@@ -434,7 +434,7 @@ SndData_BGM_Esaka_Ch2:
 	snd_ret
 .call3:
 	note D_,4, 40
-	wait2 10
+	continue 10
 	note D_,3, 5
 	silence
 	note D_,4, 10
@@ -443,7 +443,7 @@ SndData_BGM_Esaka_Ch2:
 	silence 8
 	note C_,4, 10
 	note A#,3
-	wait2 40
+	continue 40
 	note A#,2, 10
 	note A#,2, 5
 	silence
@@ -451,7 +451,7 @@ SndData_BGM_Esaka_Ch2:
 	snd_ret
 .call4:
 	note C_,4, 10
-	wait2 40
+	continue 40
 	note A_,3, 13
 	note F_,3, 14
 	note F_,3, 13

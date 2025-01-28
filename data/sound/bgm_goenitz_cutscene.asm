@@ -30,15 +30,15 @@ SndData_BGM_GoenitzCutscene_Ch1:
 	duty_cycle 2
 	note D_,5, 48
 	note C_,5, 96
-	wait2 24
+	continue 24
 	silence
 	note D#,5, 48
 	note F_,5, 96
-	wait2 24
+	continue 24
 	silence
 	note D_,5, 48
 	note C_,5, 96
-	wait2 24
+	continue 24
 	silence
 	note D#,5, 48
 	note F_,5, 96
@@ -57,25 +57,25 @@ SndData_BGM_GoenitzCutscene_Ch2:
 	note C_,4
 	note D#,4
 	note G_,4, 48
-	wait2 12
-	wait2 96
+	continue 12
+	continue 96
 	note A#,3, 12
 	note C_,4
 	note D_,4
 	note G_,4, 48
-	wait2 12
-	wait2 96
+	continue 12
+	continue 96
 	note G#,3, 12
 	note C_,4
 	note D#,4
 	note G_,4, 48
-	wait2 12
-	wait2 96
+	continue 12
+	continue 96
 	note A#,3, 12
 	note C_,4
 	note D_,4
 	note G_,4, 48
-	wait2 12
+	continue 12
 	note G#,4, 96
 .loop0:
 	note D_,3, 12
@@ -88,11 +88,11 @@ SndData_BGM_GoenitzCutscene_Ch3:
 	wave_cutoff 0
 	note A#,2, 48
 	note G#,2, 96
-	wait2 96
+	continue 96
 	note A#,2, 96
-	wait2 96
+	continue 96
 	note G#,2, 96
-	wait2 96
+	continue 96
 	note F_,2, 96
 	note E_,2
 	wave_cutoff 50

@@ -1136,14 +1136,13 @@ MACRO wave_cutoff
 	db SNDCMD_BASE + $15, \1
 ENDM
 
-; =============== wait2 ===============
-; Standalone command to extend the current note's length. 
-; Compared to wait, it's not restricted to lengths < $80, takes up twice the bytes,
-; and does not perform checks for muting the sound channel.
-; Code: Sound_Cmd_SetLength
+; =============== continue ===============
+; Extends the current note without restarting it.
+; Useful at the start of a subroutine.
+; Code: Sound_Cmd_ExtendNote
 ; IN:
 ; - 1: Length value
-MACRO wait2
+MACRO continue
 	db SNDCMD_BASE + $1A
 	db \1
 ENDM

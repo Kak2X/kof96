@@ -278,12 +278,12 @@ SndData_BGM_KaguraCutscene_Ch3:
 	snd_loop SndData_BGM_KaguraCutscene_Ch3
 .call0:
 	note F_,3, 80
-	wait2 80
+	continue 80
 	wave_cutoff 20
 	note E_,3, 10
 	wave_cutoff 0
 	note E_,3, 120
-	wait2 30
+	continue 30
 	snd_loop .call0, $00, 4
 	snd_ret
 .call1:
@@ -291,23 +291,23 @@ SndData_BGM_KaguraCutscene_Ch3:
 	note F_,3, 30
 	wave_cutoff 0
 	note F_,3, 120
-	wait2 10
+	continue 10
 	wave_cutoff 30
 	note E_,3, 30
 	wave_cutoff 0
 	note E_,3, 120
-	wait2 10
+	continue 10
 	snd_loop .call1, $00, 3
 	wave_cutoff 30
 	note F_,3, 30
 	wave_cutoff 0
 	note F_,3, 120
-	wait2 10
+	continue 10
 	wave_cutoff 30
 	note G_,3, 30
 	wave_cutoff 0
 	note G_,3, 40
-	wait2 10
+	continue 10
 	note G#,3, 80
 	snd_ret
 SndData_BGM_KaguraCutscene_Ch4:
@@ -320,20 +320,20 @@ SndData_BGM_KaguraCutscene_Ch4:
 	envelope $61
 	wait 54
 	wait 80
-	wait2 80
+	continue 80
 	wait 54
 	wait 10
 	wait 54
 	wait 120
-	wait2 30
+	continue 30
 	wait 54
 	wait 80
-	wait2 80
+	continue 80
 	wait 54
 	wait 10
 	wait 54
 	wait 80
-	wait2 30
+	continue 30
 	envelope $31
 	wait 33
 	wait 10
@@ -392,7 +392,7 @@ SndData_BGM_KaguraCutscene_Ch4:
 	wait 30
 	wait 54
 	wait 120
-	wait2 10
+	continue 10
 	snd_loop .call2, $00, 4
 .loop1:
 	envelope $61

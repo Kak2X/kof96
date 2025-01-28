@@ -78,14 +78,14 @@ SndData_BGM_Geese_Ch1:
 	note F_,4, 5
 	silence
 	note D#,4, 40
-	wait2 10
+	continue 10
 	note D#,4
 	note F_,4
 	note G_,4, 20
 	note F_,4, 30
 	note G_,4
 	note D#,4, 20
-	wait2 80
+	continue 80
 	snd_ret
 .call3:
 	note A#,4, 30
@@ -95,17 +95,17 @@ SndData_BGM_Geese_Ch1:
 	note A_,4
 	note F_,4, 10
 	note C_,5
-	wait2 30
+	continue 30
 	note B_,4
 	note G_,4, 20
-	wait2 80
+	continue 80
 	snd_ret
 .call4:
 	note D_,4, 30
 	note D#,4
 	note F_,4, 10
 	note G_,4
-	wait2 20
+	continue 20
 	silence
 	note C_,5, 13
 	note B_,4, 14
@@ -115,7 +115,7 @@ SndData_BGM_Geese_Ch1:
 	note A_,4, 30
 	note F_,4, 10
 	note G_,4
-	wait2 80
+	continue 80
 	snd_ret
 .call5:
 	duty_cycle 2
@@ -142,7 +142,7 @@ SndData_BGM_Geese_Ch1:
 	note B_,4, 80
 	note C_,5, 30
 	note D_,5, 40
-	wait2 10
+	continue 10
 	snd_ret
 .call6:
 	duty_cycle 3
@@ -161,7 +161,7 @@ SndData_BGM_Geese_Ch1:
 	note C_,4
 	note D_,4, 14
 	note G_,4, 13
-	wait2 80
+	continue 80
 	snd_ret
 .call8:
 	note G#,4, 13
@@ -170,7 +170,7 @@ SndData_BGM_Geese_Ch1:
 	note G#,4
 	note D_,5, 14
 	note D#,5, 13
-	wait2 80
+	continue 80
 	note D_,5, 20
 	note G_,4, 5
 	silence
@@ -185,10 +185,10 @@ SndData_BGM_Geese_Ch1:
 	note B_,4, 14
 	note D_,5, 13
 	note D#,5, 80
-	wait2 80
+	continue 80
 	envelope $11
 	note C_,2, 80
-	wait2 80
+	continue 80
 	snd_ret
 SndData_BGM_Geese_Ch2:
 	envelope $77

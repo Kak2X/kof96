@@ -38,13 +38,13 @@ SndData_BGM_BigShot_Ch1:
 .call0:
 	note G_,4, 16
 	note C_,5, 8
-	wait2 72
+	continue 72
 	note G_,4, 16
 	note A#,4, 8
-	wait2 72
+	continue 72
 	note G_,4, 16
 	note F_,4, 8
-	wait2 72
+	continue 72
 	note C_,5, 16
 	note D_,5, 48
 	note C_,5, 8
@@ -53,18 +53,18 @@ SndData_BGM_BigShot_Ch1:
 	envelope $77
 	note F_,5, 16
 	note E_,5, 8
-	wait2 40
+	continue 40
 	snd_ret
 .call1:
 	note G_,5, 8
 	envelope $11
 	note G_,2, 96
-	wait2 16
+	continue 16
 	envelope $77
 	note D_,4, 8
 	note D_,5, 16
 	note C_,5, 8
-	wait2 72
+	continue 72
 	note F_,5, 16
 	note A#,5, 8
 	snd_ret
@@ -77,7 +77,7 @@ SndData_BGM_BigShot_Ch1:
 	note G_,4
 	note F_,4
 	note E_,4, 96
-	wait2 48
+	continue 48
 	envelope $11
 	note E_,2, 40
 	envelope $78
@@ -85,7 +85,7 @@ SndData_BGM_BigShot_Ch1:
 	note F_,4, 48
 	note D_,4, 40
 	note A_,4, 8
-	wait2 72
+	continue 72
 	envelope $11
 	note A_,2, 24
 	envelope $78
@@ -94,13 +94,13 @@ SndData_BGM_BigShot_Ch1:
 	note A_,4, 40
 	silence 8
 	note F_,4
-	wait2 48
+	continue 48
 	envelope $11
 	note F_,2, 24
 	envelope $78
 	note A_,4, 16
 	note G_,4, 8
-	wait2 96
+	continue 96
 	envelope $11
 	duty_cycle 2
 	note G_,2, 16
@@ -128,8 +128,8 @@ SndData_BGM_BigShot_Ch1:
 	note G_,4, 8
 	note F_,4, 16
 	note E_,4, 8
-	wait2 48
-	wait2 8
+	continue 48
+	continue 8
 	envelope $11
 	note E_,2, 16
 	envelope $77
@@ -157,15 +157,15 @@ SndData_BGM_BigShot_Ch1:
 	note A_,4
 	envelope $75
 	note D_,4
-	wait2 72
+	continue 72
 	note E_,4, 24
-	wait2 72
-	wait2 8
+	continue 72
+	continue 8
 	note D#,4, 16
-	wait2 72
+	continue 72
 	note F_,4, 24
-	wait2 48
-	wait2 8
+	continue 48
+	continue 8
 	snd_ret
 SndData_BGM_BigShot_Ch2:
 	envelope $11
@@ -222,8 +222,8 @@ SndData_BGM_BigShot_Ch2:
 	note A#,3, 24
 	snd_ret
 .call2:
-	wait2 72
-	wait2 8
+	continue 72
+	continue 8
 	snd_ret
 .call3:
 	envelope $42
@@ -266,8 +266,8 @@ SndData_BGM_BigShot_Ch2:
 	note C_,5, 32
 	note B_,4, 16
 	note A#,4, 8
-	wait2 96
-	wait2 96
+	continue 96
+	continue 96
 	snd_ret
 .call6:
 	envelope $42
@@ -300,15 +300,15 @@ SndData_BGM_BigShot_Ch2:
 	note E_,4
 	envelope $55
 	note A#,3, 16
-	wait2 72
+	continue 72
 	note C_,4, 24
-	wait2 72
-	wait2 8
+	continue 72
+	continue 8
 	note C_,4, 16
-	wait2 72
+	continue 72
 	note D_,4, 24
-	wait2 72
-	wait2 8
+	continue 72
+	continue 8
 	snd_ret
 SndData_BGM_BigShot_Ch3:
 	wave_vol $00
@@ -354,8 +354,8 @@ SndData_BGM_BigShot_Ch3:
 	note A#,2, 24
 	snd_ret
 .call2:
-	wait2 72
-	wait2 8
+	continue 72
+	continue 8
 	snd_ret
 .call3:
 	note A_,2, 24
@@ -431,18 +431,18 @@ SndData_BGM_BigShot_Ch3:
 	note F_,2, 8
 	note G_,2, 16
 	note A#,2
-	wait2 72
-	wait2 16
+	continue 72
+	continue 16
 	note G_,2
-	wait2 72
+	continue 72
 	note A_,2, 16
-	wait2 72
-	wait2 16
+	continue 72
+	continue 16
 	note G#,2
-	wait2 72
+	continue 72
 	note A#,2, 16
-	wait2 72
-	wait2 8
+	continue 72
+	continue 8
 	note C_,3
 	snd_ret
 SndData_BGM_BigShot_Ch4:
@@ -501,7 +501,7 @@ SndData_BGM_BigShot_Ch4:
 	envelope $61
 	wait 54
 	wait 96
-	wait2 8
+	continue 8
 	snd_ret
 .call1:
 	envelope $61
@@ -783,7 +783,7 @@ SndData_BGM_BigShot_Ch4:
 	envelope $53
 	wait 17
 	wait 8
-	wait2 48
+	continue 48
 	envelope $62
 	wait 36
 	wait 8

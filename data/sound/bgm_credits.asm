@@ -34,13 +34,13 @@ SndData_BGM_Credits_Ch1:
 .call0:
 	note F_,5, 60
 	note E_,5, 80
-	wait2 20
-	wait2 120
-	wait2 20
+	continue 20
+	continue 120
+	continue 20
 	note D_,5, 10
 	note E_,5
 	note F_,5, 120
-	wait2 20
+	continue 20
 	note E_,5, 10
 	note D_,5
 	note E_,5, 20
@@ -48,21 +48,21 @@ SndData_BGM_Credits_Ch1:
 	note D_,5, 10
 	note E_,5
 	note F_,5, 120
-	wait2 20
+	continue 20
 	note A_,5, 10
 	note B_,5
 	note G_,5, 80
-	wait2 80
-	wait2 120
+	continue 80
+	continue 120
 	note E_,5, 13
 	note F_,5, 14
 	note A_,5, 13
 	note G_,5, 80
-	wait2 80
-	wait2 80
-	wait2 80
+	continue 80
+	continue 80
+	continue 80
 	note G_,5, 80
-	wait2 20
+	continue 20
 	note D#,5
 	note F_,5
 	note G_,5
@@ -71,13 +71,13 @@ SndData_BGM_Credits_Ch1:
 	note G#,5
 	note A#,5, 20
 	note F_,5, 120
-	wait2 20
+	continue 20
 	note D_,5, 10
 	note D#,5
 	note D_,5, 80
-	wait2 80
+	continue 80
 	note G_,5, 80
-	wait2 20
+	continue 20
 	note D#,5
 	note F_,5
 	note G_,5
@@ -86,26 +86,26 @@ SndData_BGM_Credits_Ch1:
 	note G#,5
 	note G_,5, 20
 	note F_,5, 80
-	wait2 80
+	continue 80
 	note A#,5, 120
-	wait2 20
+	continue 20
 	note A_,5, 10
 	note A#,5
 	note A_,5, 120
-	wait2 20
+	continue 20
 	note A_,5, 10
 	note A#,5
 	note C_,6, 80
-	wait2 20
+	continue 20
 	note C_,6
 	note A#,5
 	note A_,5
 	note A#,5, 120
-	wait2 20
+	continue 20
 	note G_,5, 10
 	note A#,5
 	note D#,6, 120
-	wait2 20
+	continue 20
 	note D#,6
 	note D_,6
 	note A#,5, 120
@@ -116,25 +116,25 @@ SndData_BGM_Credits_Ch1:
 	note A#,5, 10
 	note A_,5
 	note A#,5, 120
-	wait2 20
+	continue 20
 	note G_,5, 10
 	note A#,5
 	note D#,6, 80
-	wait2 20
+	continue 20
 	note D#,6
 	note D_,6
 	note C_,6
 	note A#,5, 80
-	wait2 80
-	wait2 80
-	wait2 80
+	continue 80
+	continue 80
+	continue 80
 	snd_ret
 SndData_BGM_Credits_Ch2:
 	envelope $11
 	panning $22
 	duty_cycle 2
 	note C_,2, 10
-	wait2 5
+	continue 5
 	envelope $37
 .loop0:
 	snd_call SndData_BGM_Credits_Ch1.call0
@@ -282,7 +282,7 @@ SndData_BGM_Credits_Ch4:
 	envelope $21
 	wait 33
 	wait 80
-	wait2 10
+	continue 10
 	envelope $53
 	wait 17
 	wait 40
