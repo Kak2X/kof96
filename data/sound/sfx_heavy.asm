@@ -9,22 +9,14 @@ SndHeader_SFX_Heavy:
 SndData_SFX_Heavy_Ch4:
 	envelope $39
 	panning $88
-	wait 71
-	wait 2
+	note4 C_,5,0, 2
 	lock_envelope
-	wait 70
-	wait 2
-	wait 69
-	wait 2
-	wait 68
-	wait 2
-	wait 67
-	wait 2
-	wait 66
-	wait 2
-	wait 65
-	wait 2
-	wait 64
-	wait 2
+	note4 C#,5,0, 2
+	note4 D_,5,0, 2
+	note4 D#,5,0, 2
+	note4x $43, 2 ; Nearest: G#,5,0
+	note4x $42, 2 ; Nearest: A_,5,0
+	note4x $41, 2 ; Nearest: A#,5,0
+	note4x $40, 2 ; Nearest: B_,5,0
 	unlock_envelope
 	chan_stop

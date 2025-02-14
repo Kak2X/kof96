@@ -9,30 +9,19 @@ SndHeader_SFX_MoveJumpA:
 SndData_SFX_MoveJumpA_Ch4:
 	envelope $A9
 	panning $88
-	wait 49
-	wait 3
+	note4x $31, 3 ; Nearest: A#,5,0
 	lock_envelope
-	wait 50
-	wait 3
-	wait 51
-	wait 3
-	wait 52
-	wait 3
-	wait 53
-	wait 3
-	wait 54
-	wait 3
-	wait 55
-	wait 3
-	wait 67
-	wait 3
-	wait 68
-	wait 3
-	wait 69
-	wait 3
-	wait 70
-	wait 3
-	wait 71
-	wait 3
+	note4x $32, 3 ; Nearest: A_,5,0
+	note4x $33, 3 ; Nearest: G#,5,0
+	note4 G_,5,0, 3
+	note4 F#,5,0, 3
+	note4 F_,5,0, 3
+	note4 E_,5,0, 3
+	note4x $43, 3 ; Nearest: G#,5,0
+	note4 D#,5,0, 3
+	note4 D_,5,0, 3
+	note4 C#,5,0, 3
+	note4 C_,5,0, 3
 	unlock_envelope
 	chan_stop
+

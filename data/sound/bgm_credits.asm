@@ -271,49 +271,35 @@ SndData_BGM_Credits_Ch4:
 	snd_loop .loop0
 .call0:
 	envelope $51
-	wait 33
-	wait 10
+	note4x $21, 10 ; Nearest: A#,5,0
 	envelope $41
-	wait 33
-	wait 10
+	note4x $21, 10 ; Nearest: A#,5,0
 	envelope $31
-	wait 33
-	wait 10
+	note4x $21, 10 ; Nearest: A#,5,0
 	envelope $21
-	wait 33
-	wait 80
+	note4x $21, 80 ; Nearest: A#,5,0
 	continue 10
 	envelope $53
-	wait 17
-	wait 40
+	note4x $11, 40 ; Nearest: A#,6,0
 	snd_loop .call0, $00, 9
 	snd_ret
 .call1:
 	envelope $61
-	wait 54
-	wait 10
+	note4 F_,5,0, 10
 	envelope $51
-	wait 33
-	wait 10
+	note4x $21, 10 ; Nearest: A#,5,0
 	envelope $41
-	wait 33
-	wait 10
+	note4x $21, 10 ; Nearest: A#,5,0
 	envelope $61
-	wait 54
-	wait 10
+	note4 F_,5,0, 10
 	envelope $41
-	wait 54
-	wait 30
+	note4 F_,5,0, 30
 	envelope $41
-	wait 54
-	wait 10
+	note4 F_,5,0, 10
 	envelope $21
-	wait 54
-	wait 30
+	note4 F_,5,0, 30
 	envelope $21
-	wait 54
-	wait 10
+	note4 F_,5,0, 10
 	envelope $53
-	wait 17
-	wait 40
+	note4x $11, 40 ; Nearest: A#,6,0
 	snd_ret

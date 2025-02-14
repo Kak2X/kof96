@@ -9,35 +9,20 @@ SndHeader_SFX_SuperJump:
 SndData_SFX_SuperJump_Ch4:
 	envelope $29
 	panning $88
-	wait 48
-	wait 2
+	note4x $30, 2 ; Nearest: B_,5,0
 	lock_envelope
-	wait 49
-	wait 2
-	wait 50
-	wait 2
-	wait 51
-	wait 2
-	wait 52
-	wait 2
-	wait 53
-	wait 2
-	wait 54
-	wait 2
-	wait 55
-	wait 2
-	wait 54
-	wait 2
-	wait 53
-	wait 2
-	wait 52
-	wait 2
-	wait 51
-	wait 2
-	wait 50
-	wait 2
-	wait 49
-	wait 2
-	wait 48
-	wait 2
+	note4x $31, 2 ; Nearest: A#,5,0
+	note4x $32, 2 ; Nearest: A_,5,0
+	note4x $33, 2 ; Nearest: G#,5,0
+	note4 G_,5,0, 2
+	note4 F#,5,0, 2
+	note4 F_,5,0, 2
+	note4 E_,5,0, 2
+	note4 F_,5,0, 2
+	note4 F#,5,0, 2
+	note4 G_,5,0, 2
+	note4x $33, 2 ; Nearest: G#,5,0
+	note4x $32, 2 ; Nearest: A_,5,0
+	note4x $31, 2 ; Nearest: A#,5,0
+	note4x $30, 2 ; Nearest: B_,5,0
 	chan_stop

@@ -149,105 +149,66 @@ SndData_BGM_CharSelect_Ch3:
 SndData_BGM_CharSelect_Ch4:
 	panning $88
 	envelope $61
-	wait 54
-	wait 6
+	note4 F_,5,0, 6
 	envelope $62
-	wait 36
-	wait 12
-	wait 36
-	wait 6
-	wait 36
-	wait 12
-	wait 36
-	wait 6
-	wait 36
-	wait 6
+	note4 B_,5,0, 12
+	note4 B_,5,0, 6
+	note4 B_,5,0, 12
+	note4 B_,5,0, 6
+	note4 B_,5,0, 6
 .loop0:
 	snd_call .call0
 	snd_loop .loop0
 .call0:
 	envelope $61
-	wait 54
-	wait 12
-	wait 54
-	wait 12
+	note4 F_,5,0, 12
+	note4 F_,5,0, 12
 	envelope $62
-	wait 36
-	wait 24
+	note4 B_,5,0, 24
 	envelope $61
-	wait 54
-	wait 12
-	wait 54
-	wait 12
+	note4 F_,5,0, 12
+	note4 F_,5,0, 12
 	envelope $62
-	wait 36
-	wait 18
+	note4 B_,5,0, 18
 	envelope $61
-	wait 54
-	wait 6
-	wait 54
-	wait 12
-	wait 54
-	wait 12
+	note4 F_,5,0, 6
+	note4 F_,5,0, 12
+	note4 F_,5,0, 12
 	envelope $62
-	wait 36
-	wait 18
-	wait 36
-	wait 6
+	note4 B_,5,0, 18
+	note4 B_,5,0, 6
 	envelope $61
-	wait 54
-	wait 6
+	note4 F_,5,0, 6
 	envelope $62
-	wait 36
-	wait 6
+	note4 B_,5,0, 6
 	envelope $61
-	wait 54
-	wait 12
+	note4 F_,5,0, 12
 	envelope $62
-	wait 36
-	wait 6
+	note4 B_,5,0, 6
 	envelope $61
-	wait 54
-	wait 12
-	wait 54
-	wait 6
-	wait 97
-	wait 12
-	wait 54
-	wait 12
+	note4 F_,5,0, 12
+	note4 F_,5,0, 6
+	note4x $61, 12 ; Nearest: A#,4,0
+	note4 F_,5,0, 12
 	envelope $62
-	wait 36
-	wait 24
-	wait 97
-	wait 12
-	wait 54
-	wait 12
+	note4 B_,5,0, 24
+	note4x $61, 12 ; Nearest: A#,4,0
+	note4 F_,5,0, 12
 	envelope $62
-	wait 36
-	wait 24
-	wait 54
-	wait 12
-	wait 54
-	wait 12
+	note4 B_,5,0, 24
+	note4 F_,5,0, 12
+	note4 F_,5,0, 12
 	envelope $62
-	wait 36
-	wait 18
-	wait 36
-	wait 6
+	note4 B_,5,0, 18
+	note4 B_,5,0, 6
 	envelope $61
-	wait 54
-	wait 6
+	note4 F_,5,0, 6
 	envelope $62
-	wait 36
-	wait 6
+	note4 B_,5,0, 6
 	envelope $61
-	wait 54
-	wait 12
+	note4 F_,5,0, 12
 	envelope $62
-	wait 36
-	wait 12
-	wait 36
-	wait 6
-	wait 36
-	wait 6
+	note4 B_,5,0, 12
+	note4 B_,5,0, 6
+	note4 B_,5,0, 6
 	snd_ret

@@ -9,17 +9,12 @@ SndHeader_SFX_GameOver:
 SndData_SFX_31_Ch4:
 	envelope $1B
 	panning $88
-	wait 39
-	wait 10
+	note4 G#,5,0, 10
 	lock_envelope
-	wait 38
-	wait 10
-	wait 37
-	wait 10
-	wait 36
-	wait 10
-	wait 35
-	wait 10
-	wait 34
-	wait 10
+	note4 A_,5,0, 10
+	note4 A#,5,0, 10
+	note4 B_,5,0, 10
+	note4x $23, 10 ; Nearest: G#,5,0
+	note4x $22, 10 ; Nearest: A_,5,0
 	chan_stop
+

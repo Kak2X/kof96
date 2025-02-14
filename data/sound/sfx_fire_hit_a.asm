@@ -9,29 +9,18 @@ SndHeader_SFX_FireHitA:
 SndData_SFX_FireHitA_Ch4:
 	envelope $F7
 	panning $88
-	wait 69
-	wait 1
+	note4 D_,5,0, 1
 	lock_envelope
-	wait 85
-	wait 2
-	wait 71
-	wait 2
-	wait 70
-	wait 2
-	wait 69
-	wait 2
-	wait 68
-	wait 2
-	wait 67
-	wait 2
-	wait 66
-	wait 2
-	wait 65
-	wait 1
-	wait 64
-	wait 1
+	note4 A#,4,0, 2
+	note4 C_,5,0, 2
+	note4 C#,5,0, 2
+	note4 D_,5,0, 2
+	note4 D#,5,0, 2
+	note4x $43, 2 ; Nearest: G#,5,0
+	note4x $42, 2 ; Nearest: A_,5,0
+	note4x $41, 1 ; Nearest: A#,5,0
+	note4x $40, 1 ; Nearest: B_,5,0
 	unlock_envelope
 	envelope $F2
-	wait 50
-	wait 30
+	note4x $32, 30 ; Nearest: A_,5,0
 	chan_stop

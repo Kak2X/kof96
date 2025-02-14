@@ -318,114 +318,78 @@ SndData_BGM_KaguraCutscene_Ch4:
 	snd_loop SndData_BGM_KaguraCutscene_Ch4
 .call0:
 	envelope $61
-	wait 54
-	wait 80
+	note4 F_,5,0, 80
 	continue 80
-	wait 54
-	wait 10
-	wait 54
-	wait 120
+	note4 F_,5,0, 10
+	note4 F_,5,0, 120
 	continue 30
-	wait 54
-	wait 80
+	note4 F_,5,0, 80
 	continue 80
-	wait 54
-	wait 10
-	wait 54
-	wait 80
+	note4 F_,5,0, 10
+	note4 F_,5,0, 80
 	continue 30
 	envelope $31
-	wait 33
-	wait 10
+	note4x $21, 10 ; Nearest: A#,5,0
 	envelope $53
-	wait 17
-	wait 30
+	note4x $11, 30 ; Nearest: A#,6,0
 	snd_ret
 .call1:
 	envelope $61
-	wait 54
-	wait 20
+	note4 F_,5,0, 20
 	envelope $31
-	wait 33
-	wait 20
+	note4x $21, 20 ; Nearest: A#,5,0
 	envelope $62
-	wait 36
-	wait 20
+	note4 B_,5,0, 20
 	envelope $31
-	wait 33
-	wait 40
-	wait 33
-	wait 20
+	note4x $21, 40 ; Nearest: A#,5,0
+	note4x $21, 20 ; Nearest: A#,5,0
 	envelope $62
-	wait 36
-	wait 20
+	note4 B_,5,0, 20
 	envelope $31
-	wait 33
-	wait 20
+	note4x $21, 20 ; Nearest: A#,5,0
 	envelope $61
-	wait 54
-	wait 10
-	wait 54
-	wait 10
+	note4 F_,5,0, 10
+	note4 F_,5,0, 10
 	envelope $31
-	wait 33
-	wait 20
+	note4x $21, 20 ; Nearest: A#,5,0
 	envelope $62
-	wait 36
-	wait 20
+	note4 B_,5,0, 20
 	envelope $31
-	wait 33
-	wait 40
-	wait 33
-	wait 20
+	note4x $21, 40 ; Nearest: A#,5,0
+	note4x $21, 20 ; Nearest: A#,5,0
 	envelope $62
-	wait 36
-	wait 10
+	note4 B_,5,0, 10
 	envelope $53
-	wait 17
-	wait 30
+	note4x $11, 30 ; Nearest: A#,6,0
 	snd_loop .call1, $00, 2
 	snd_ret
 .call2:
 	envelope $61
-	wait 54
-	wait 30
-	wait 54
-	wait 120
+	note4 F_,5,0, 30
+	note4 F_,5,0, 120
 	continue 10
 	snd_loop .call2, $00, 4
 .loop1:
 	envelope $61
-	wait 54
-	wait 10
-	wait 54
-	wait 10
+	note4 F_,5,0, 10
+	note4 F_,5,0, 10
 	envelope $31
-	wait 33
-	wait 10
+	note4x $21, 10 ; Nearest: A#,5,0
 	envelope $61
-	wait 54
-	wait 10
+	note4 F_,5,0, 10
 	envelope $62
-	wait 36
-	wait 20
+	note4 B_,5,0, 20
 	envelope $53
-	wait 17
-	wait 10
+	note4x $11, 10 ; Nearest: A#,6,0
 	envelope $61
-	wait 54
-	wait 20
+	note4 F_,5,0, 20
 	envelope $31
-	wait 33
-	wait 10
+	note4x $21, 10 ; Nearest: A#,5,0
 	envelope $61
-	wait 54
-	wait 20
+	note4 F_,5,0, 20
 	envelope $62
-	wait 36
-	wait 20
+	note4 B_,5,0, 20
 	envelope $53
-	wait 17
-	wait 20
+	note4x $11, 20 ; Nearest: A#,6,0
 	snd_loop .loop1, $00, 4
 	snd_ret

@@ -9,10 +9,7 @@ SndHeader_SFX_Grab:
 SndData_SFX_Grab_Ch4:
 	envelope $F2
 	panning $88
-	wait 97
-	wait 3
-	wait 0
-	wait 1
-	wait 37
-	wait 4
+	note4x $61, 3 ; Nearest: A#,4,0
+	note4 B_,6,0, 1
+	note4 A#,5,0, 4
 	chan_stop

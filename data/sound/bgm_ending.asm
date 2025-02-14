@@ -247,66 +247,41 @@ SndData_BGM_Ending_Ch4:
 	snd_loop SndData_BGM_Ending_Ch4
 .call0:
 	envelope $61
-	wait 54
-	wait 96
+	note4 F_,5,0, 96
 	continue 16
-	wait 54
-	wait 8
-	wait 54
-	wait 8
+	note4 F_,5,0, 8
+	note4 F_,5,0, 8
 	envelope $54
-	wait 50
-	wait 48
-	wait 50
-	wait 8
-	wait 50
-	wait 8
-	wait 50
-	wait 16
-	wait 50
-	wait 8
-	wait 50
-	wait 8
-	wait 50
-	wait 16
-	wait 50
-	wait 8
-	wait 50
-	wait 8
+	note4x $32, 48 ; Nearest: A_,5,0
+	note4x $32, 8 ; Nearest: A_,5,0
+	note4x $32, 8 ; Nearest: A_,5,0
+	note4x $32, 16 ; Nearest: A_,5,0
+	note4x $32, 8 ; Nearest: A_,5,0
+	note4x $32, 8 ; Nearest: A_,5,0
+	note4x $32, 16 ; Nearest: A_,5,0
+	note4x $32, 8 ; Nearest: A_,5,0
+	note4x $32, 8 ; Nearest: A_,5,0
 	snd_loop .call0, $00, 2
 .loop1:
 	envelope $44
-	wait 50
-	wait 48
-	wait 16
-	wait 8
-	wait 16
-	wait 8
+	note4x $32, 48 ; Nearest: A_,5,0
+	note4x $10, 8 ; Nearest: B_,6,0
+	note4x $10, 8 ; Nearest: B_,6,0
 	snd_loop .loop1, $00, 4
 	envelope $61
-	wait 54
-	wait 96
+	note4 F_,5,0, 96
 	continue 16
-	wait 54
-	wait 8
-	wait 54
-	wait 8
-	wait 54
-	wait 48
-	wait 54
-	wait 8
-	wait 54
-	wait 8
+	note4 F_,5,0, 8
+	note4 F_,5,0, 8
+	note4 F_,5,0, 48
+	note4 F_,5,0, 8
+	note4 F_,5,0, 8
 	envelope $54
-	wait 50
-	wait 16
+	note4x $32, 16 ; Nearest: A_,5,0
 	envelope $61
-	wait 54
-	wait 16
+	note4 F_,5,0, 16
 	envelope $54
-	wait 50
-	wait 16
+	note4x $32, 16 ; Nearest: A_,5,0
 	envelope $61
-	wait 54
-	wait 16
+	note4 F_,5,0, 16
 	snd_ret

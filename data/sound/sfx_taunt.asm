@@ -9,16 +9,11 @@ SndHeader_SFX_Taunt:
 SndData_SFX_Taunt_Ch4:
 	envelope $B7
 	panning $88
-	wait 39
-	wait 2
-	wait 69
-	wait 2
-	wait 23
-	wait 2
+	note4 G#,5,0, 2
+	note4 D_,5,0, 2
+	note4 C_,6,0, 2
 	lock_envelope
-	wait 20
-	wait 2
-	wait 23
-	wait 2
+	note4 D#,6,0, 2
+	note4 C_,6,0, 2
 	unlock_envelope
 	chan_stop

@@ -9,41 +9,25 @@ SndHeader_SFX_Reflect:
 SndData_SFX_Reflect_Ch4:
 	envelope $A7
 	panning $88
-	wait 65
-	wait 1
+	note4x $41, 1 ; Nearest: A#,5,0
 	lock_envelope
-	wait 65
-	wait 1
-	wait 65
-	wait 1
-	wait 57
-	wait 1
-	wait 56
-	wait 1
-	wait 55
-	wait 1
-	wait 54
-	wait 1
-	wait 53
-	wait 1
+	note4x $41, 1 ; Nearest: A#,5,0
+	note4x $41, 1 ; Nearest: A#,5,0
+	note4x $39, 1 ; Nearest: A#,5,1
+	note4x $38, 1 ; Nearest: B_,5,1
+	note4 E_,5,0, 1
+	note4 F_,5,0, 1
+	note4 F#,5,0, 1
 	unlock_envelope
-	wait 65
-	wait 1
+	note4x $41, 1 ; Nearest: A#,5,0
 	lock_envelope
-	wait 65
-	wait 1
-	wait 65
-	wait 1
-	wait 57
-	wait 1
-	wait 56
-	wait 1
-	wait 55
-	wait 1
-	wait 54
-	wait 1
-	wait 53
-	wait 1
+	note4x $41, 1 ; Nearest: A#,5,0
+	note4x $41, 1 ; Nearest: A#,5,0
+	note4x $39, 1 ; Nearest: A#,5,1
+	note4x $38, 1 ; Nearest: B_,5,1
+	note4 E_,5,0, 1
+	note4 F_,5,0, 1
+	note4 F#,5,0, 1
 	unlock_envelope
 	snd_loop SndData_SFX_Reflect_Ch4, $00, 3
 	chan_stop

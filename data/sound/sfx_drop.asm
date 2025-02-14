@@ -9,12 +9,8 @@ SndHeader_SFX_Drop:
 SndData_SFX_Drop_Ch4:
 	envelope $F3
 	panning $88
-	wait 54
-	wait 2
-	wait 114
-	wait 2
-	wait 54
-	wait 3
-	wait 87
-	wait 10
+	note4 F_,5,0, 2
+	note4x $72, 2 ; Nearest: A_,4,0
+	note4 F_,5,0, 3
+	note4 G#,4,0, 10
 	chan_stop

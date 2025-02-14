@@ -113,104 +113,67 @@ SndData_BGM_StageClear_Ch3:
 SndData_BGM_StageClear_Ch4:
 	panning $88
 	envelope $34
-	wait 38
-	wait 3
+	note4 A_,5,0, 3
 	envelope $44
-	wait 38
-	wait 4
+	note4 A_,5,0, 4
 	envelope $61
-	wait 54
-	wait 7
-	wait 54
-	wait 7
+	note4 F_,5,0, 7
+	note4 F_,5,0, 7
 	envelope $44
-	wait 38
-	wait 3
+	note4 A_,5,0, 3
 	envelope $54
-	wait 38
-	wait 4
+	note4 A_,5,0, 4
 	envelope $61
-	wait 54
-	wait 7
-	wait 54
-	wait 7
+	note4 F_,5,0, 7
+	note4 F_,5,0, 7
 	envelope $62
-	wait 36
-	wait 7
+	note4 B_,5,0, 7
 	envelope $61
-	wait 54
-	wait 14
-	wait 54
-	wait 7
+	note4 F_,5,0, 14
+	note4 F_,5,0, 7
 	envelope $62
-	wait 36
-	wait 5
+	note4 B_,5,0, 5
 	envelope $61
-	wait 54
-	wait 4
-	wait 54
-	wait 5
+	note4 F_,5,0, 4
+	note4 F_,5,0, 5
 	envelope $62
-	wait 36
-	wait 5
-	wait 36
-	wait 4
+	note4 B_,5,0, 5
+	note4 B_,5,0, 4
 	envelope $34
-	wait 38
-	wait 5
+	note4 A_,5,0, 5
 	envelope $34
-	wait 38
-	wait 5
+	note4 A_,5,0, 5
 	envelope $44
-	wait 38
-	wait 4
+	note4 A_,5,0, 4
 	envelope $54
-	wait 38
-	wait 5
+	note4 A_,5,0, 5
 	envelope $61
-	wait 54
-	wait 7
+	note4 F_,5,0, 7
 	envelope $62
-	wait 36
-	wait 7
-	wait 36
-	wait 7
+	note4 B_,5,0, 7
+	note4 B_,5,0, 7
 	envelope $61
-	wait 54
-	wait 7
+	note4 F_,5,0, 7
 	envelope $62
-	wait 36
-	wait 7
-	wait 36
-	wait 7
+	note4 B_,5,0, 7
+	note4 B_,5,0, 7
 	envelope $61
-	wait 54
-	wait 7
+	note4 F_,5,0, 7
 	envelope $62
-	wait 36
-	wait 7
+	note4 B_,5,0, 7
 	envelope $61
-	wait 54
-	wait 7
+	note4 F_,5,0, 7
 	envelope $62
-	wait 36
-	wait 14
+	note4 B_,5,0, 14
 	envelope $61
-	wait 54
-	wait 7
+	note4 F_,5,0, 7
 	envelope $62
-	wait 36
-	wait 7
-	wait 36
-	wait 7
+	note4 B_,5,0, 7
+	note4 B_,5,0, 7
 	envelope $61
-	wait 54
-	wait 7
-	wait 54
-	wait 7
+	note4 F_,5,0, 7
+	note4 F_,5,0, 7
 	envelope $62
-	wait 36
-	wait 14
-	wait 36
-	wait 14
+	note4 B_,5,0, 14
+	note4 B_,5,0, 14
 	chan_stop

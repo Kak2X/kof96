@@ -9,24 +9,14 @@ SndHeader_SFX_GroundHit:
 SndData_SFX_GroundHit_Ch4:
 	envelope $F7
 	panning $88
-	wait 69
-	wait 2
-	wait 39
-	wait 3
-	wait 53
-	wait 2
-	wait 39
-	wait 2
-	wait 52
-	wait 8
-	wait 113
-	wait 2
-	wait 84
-	wait 2
-	wait 71
-	wait 2
-	wait 100
-	wait 10
-	wait 113
-	wait 100
+	note4 D_,5,0, 2
+	note4 G#,5,0, 3
+	note4 F#,5,0, 2
+	note4 G#,5,0, 2
+	note4 G_,5,0, 8
+	note4x $71, 2 ; Nearest: A#,4,0
+	note4 B_,4,0, 2
+	note4 C_,5,0, 2
+	note4 G_,4,0, 10
+	note4x $71, 100 ; Nearest: A#,4,0
 	chan_stop

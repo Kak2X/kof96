@@ -304,227 +304,147 @@ SndData_BGM_Intro_Ch4:
 	chan_stop
 .call0:
 	envelope $62
-	wait 36
-	wait 7
-	wait 36
-	wait 7
+	note4 B_,5,0, 7
+	note4 B_,5,0, 7
 	envelope $61
-	wait 54
-	wait 7
+	note4 F_,5,0, 7
 	envelope $62
-	wait 36
-	wait 7
-	wait 36
-	wait 14
-	wait 36
-	wait 7
+	note4 B_,5,0, 7
+	note4 B_,5,0, 14
+	note4 B_,5,0, 7
 	envelope $61
-	wait 54
-	wait 21
-	wait 54
-	wait 14
+	note4 F_,5,0, 21
+	note4 F_,5,0, 14
 	envelope $62
-	wait 36
-	wait 28
+	note4 B_,5,0, 28
 	envelope $61
-	wait 54
-	wait 28
+	note4 F_,5,0, 28
 	envelope $62
-	wait 36
-	wait 21
+	note4 B_,5,0, 21
 	envelope $61
-	wait 54
-	wait 21
-	wait 54
-	wait 14
+	note4 F_,5,0, 21
+	note4 F_,5,0, 14
 	envelope $62
-	wait 36
-	wait 28
+	note4 B_,5,0, 28
 	envelope $61
-	wait 54
-	wait 14
-	wait 54
-	wait 14
+	note4 F_,5,0, 14
+	note4 F_,5,0, 14
 	envelope $62
-	wait 36
-	wait 14
+	note4 B_,5,0, 14
 	envelope $61
-	wait 54
-	wait 7
+	note4 F_,5,0, 7
 	envelope $62
-	wait 36
-	wait 21
+	note4 B_,5,0, 21
 	envelope $61
-	wait 54
-	wait 14
+	note4 F_,5,0, 14
 	envelope $62
-	wait 36
-	wait 28
+	note4 B_,5,0, 28
 	envelope $61
-	wait 54
-	wait 14
-	wait 54
-	wait 14
+	note4 F_,5,0, 14
+	note4 F_,5,0, 14
 	envelope $62
-	wait 36
-	wait 14
+	note4 B_,5,0, 14
 	envelope $61
-	wait 54
-	wait 21
+	note4 F_,5,0, 21
 	envelope $62
-	wait 36
-	wait 21
+	note4 B_,5,0, 21
 	envelope $34
-	wait 38
-	wait 7
+	note4 A_,5,0, 7
 	envelope $44
-	wait 38
-	wait 7
+	note4 A_,5,0, 7
 	envelope $54
-	wait 38
-	wait 7
+	note4 A_,5,0, 7
 	envelope $61
-	wait 54
-	wait 14
-	wait 54
-	wait 7
+	note4 F_,5,0, 14
+	note4 F_,5,0, 7
 	envelope $62
-	wait 36
-	wait 14
+	note4 B_,5,0, 14
 	envelope $61
-	wait 54
-	wait 14
+	note4 F_,5,0, 14
 	envelope $62
-	wait 36
-	wait 7
+	note4 B_,5,0, 7
 	snd_ret
 .call1:
 	envelope $61
-	wait 54
-	wait 14
-	wait 54
-	wait 7
+	note4 F_,5,0, 14
+	note4 F_,5,0, 7
 	envelope $62
-	wait 36
-	wait 14
+	note4 B_,5,0, 14
 	envelope $61
-	wait 54
-	wait 14
+	note4 F_,5,0, 14
 	envelope $62
-	wait 36
-	wait 14
+	note4 B_,5,0, 14
 	envelope $61
-	wait 54
-	wait 14
+	note4 F_,5,0, 14
 	envelope $62
-	wait 36
-	wait 14
+	note4 B_,5,0, 14
 	envelope $61
-	wait 54
-	wait 14
+	note4 F_,5,0, 14
 	envelope $62
-	wait 36
-	wait 7
+	note4 B_,5,0, 7
 	snd_loop .call1, $00, 2
 	envelope $61
-	wait 54
-	wait 14
-	wait 54
-	wait 7
+	note4 F_,5,0, 14
+	note4 F_,5,0, 7
 	envelope $62
-	wait 36
-	wait 14
+	note4 B_,5,0, 14
 	envelope $61
-	wait 54
-	wait 14
+	note4 F_,5,0, 14
 	envelope $62
-	wait 36
-	wait 14
+	note4 B_,5,0, 14
 	envelope $61
-	wait 54
-	wait 14
-	wait 54
-	wait 7
+	note4 F_,5,0, 14
+	note4 F_,5,0, 7
 	envelope $62
-	wait 36
-	wait 14
+	note4 B_,5,0, 14
 	envelope $61
-	wait 54
-	wait 7
+	note4 F_,5,0, 7
 	envelope $62
-	wait 36
-	wait 7
-	wait 36
-	wait 7
+	note4 B_,5,0, 7
+	note4 B_,5,0, 7
 	envelope $61
-	wait 54
-	wait 7
+	note4 F_,5,0, 7
 	envelope $62
-	wait 36
-	wait 21
+	note4 B_,5,0, 21
 	envelope $44
-	wait 38
-	wait 7
-	wait 16
-	wait 7
+	note4 A_,5,0, 7
+	note4x $10, 7 ; Nearest: B_,6,0
 	envelope $54
-	wait 38
-	wait 7
+	note4 A_,5,0, 7
 	envelope $62
-	wait 36
-	wait 14
+	note4 B_,5,0, 14
 	envelope $54
-	wait 38
-	wait 7
+	note4 A_,5,0, 7
 	envelope $34
-	wait 38
-	wait 7
-	wait 38
-	wait 7
+	note4 A_,5,0, 7
+	note4 A_,5,0, 7
 	envelope $44
-	wait 38
-	wait 7
-	wait 16
-	wait 7
+	note4 A_,5,0, 7
+	note4x $10, 7 ; Nearest: B_,6,0
 	envelope $54
-	wait 38
-	wait 7
-	wait 50
-	wait 7
+	note4 A_,5,0, 7
+	note4x $32, 7 ; Nearest: A_,5,0
 	envelope $54
-	wait 38
-	wait 7
+	note4 A_,5,0, 7
 	envelope $44
-	wait 38
-	wait 3
-	wait 16
-	wait 4
+	note4 A_,5,0, 3
+	note4x $10, 4 ; Nearest: B_,6,0
 	envelope $34
-	wait 38
-	wait 7
-	wait 38
-	wait 7
+	note4 A_,5,0, 7
+	note4 A_,5,0, 7
 	envelope $62
-	wait 36
-	wait 7
+	note4 B_,5,0, 7
 	envelope $61
-	wait 54
-	wait 7
+	note4 F_,5,0, 7
 	envelope $62
-	wait 36
-	wait 7
+	note4 B_,5,0, 7
 	envelope $61
-	wait 54
-	wait 7
+	note4 F_,5,0, 7
 	envelope $62
-	wait 36
-	wait 7
+	note4 B_,5,0, 7
 	envelope $61
-	wait 54
-	wait 7
-	wait 54
-	wait 7
+	note4 F_,5,0, 7
+	note4 F_,5,0, 7
 	envelope $62
-	wait 36
-	wait 35
+	note4 B_,5,0, 35
 	snd_ret

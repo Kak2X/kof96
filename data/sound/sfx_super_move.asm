@@ -44,6 +44,5 @@ SndData_SFX_SuperMove_Ch3:
 SndData_SFX_SuperMove_Ch4:
 	envelope $F2
 	panning $88
-	wait 113
-	wait 6
+	note4x $71, 6 ; Nearest: A#,4,0
 	chan_stop

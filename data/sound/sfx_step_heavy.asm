@@ -9,18 +9,11 @@ SndHeader_SFX_StepHeavy:
 SndData_SFX_StepHeavy_Ch4:
 	envelope $A1
 	panning $88
-	wait 81
-	wait 2
-	wait 69
-	wait 2
-	wait 0
-	wait 2
-	wait 65
-	wait 2
-	wait 39
-	wait 2
-	wait 8
-	wait 1
-	wait 0
-	wait 1
+	note4x $51, 2 ; Nearest: A#,4,0
+	note4 D_,5,0, 2
+	note4 B_,6,0, 2
+	note4x $41, 2 ; Nearest: A#,5,0
+	note4 G#,5,0, 2
+	note4 B_,6,1, 1
+	note4 B_,6,0, 1
 	chan_stop

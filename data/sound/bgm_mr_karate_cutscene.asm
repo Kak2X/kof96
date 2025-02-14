@@ -129,66 +129,44 @@ SndData_BGM_MrKarateCutscene_Ch4:
 	snd_call .call0
 	snd_call .call0
 	envelope $54
-	wait 38
-	wait 12
+	note4 A_,5,0, 12
 	envelope $61
-	wait 54
-	wait 6
+	note4 F_,5,0, 6
 	envelope $62
-	wait 36
-	wait 6
-	wait 36
-	wait 12
+	note4 B_,5,0, 6
+	note4 B_,5,0, 12
 	envelope $54
-	wait 38
-	wait 12
+	note4 A_,5,0, 12
 	envelope $44
-	wait 38
-	wait 12
+	note4 A_,5,0, 12
 	envelope $54
-	wait 38
-	wait 12
+	note4 A_,5,0, 12
 	envelope $61
-	wait 54
-	wait 24
+	note4 F_,5,0, 24
 	snd_loop SndData_BGM_MrKarateCutscene_Ch4
 .call0:
 	envelope $61
-	wait 54
-	wait 12
-	wait 54
-	wait 24
-	wait 54
-	wait 6
-	wait 54
-	wait 6
+	note4 F_,5,0, 12
+	note4 F_,5,0, 24
+	note4 F_,5,0, 6
+	note4 F_,5,0, 6
 	envelope $62
-	wait 36
-	wait 36
+	note4 B_,5,0, 36
 	envelope $61
-	wait 54
-	wait 12
+	note4 F_,5,0, 12
 	snd_loop .call0, $00, 3
 	envelope $62
-	wait 36
-	wait 12
+	note4 B_,5,0, 12
 	envelope $61
-	wait 54
-	wait 12
-	wait 54
-	wait 12
+	note4 F_,5,0, 12
+	note4 F_,5,0, 12
 	envelope $62
-	wait 36
-	wait 12
+	note4 B_,5,0, 12
 	envelope $61
-	wait 54
-	wait 12
-	wait 54
-	wait 12
+	note4 F_,5,0, 12
+	note4 F_,5,0, 12
 	envelope $62
-	wait 36
-	wait 12
+	note4 B_,5,0, 12
 	envelope $61
-	wait 54
-	wait 12
+	note4 F_,5,0, 12
 	snd_ret

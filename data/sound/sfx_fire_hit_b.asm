@@ -9,6 +9,5 @@ SndHeader_SFX_FireHitB:
 SndData_SFX_FireHitB_Ch4:
 	envelope $3B
 	panning $88
-	wait 85
-	wait 70
+	note4 A#,4,0, 70
 	chan_stop

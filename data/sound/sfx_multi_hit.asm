@@ -9,34 +9,21 @@ SndHeader_SFX_MultiHit:
 SndData_SFX_MultiHit_Ch4:
 	envelope $F2
 	panning $88
-	wait 64
-	wait 1
+	note4x $40, 1 ; Nearest: B_,5,0
 	lock_envelope
-	wait 65
-	wait 1
-	wait 66
-	wait 1
-	wait 67
-	wait 1
-	wait 68
-	wait 1
-	wait 69
-	wait 1
-	wait 70
-	wait 1
-	wait 71
-	wait 1
+	note4x $41, 1 ; Nearest: A#,5,0
+	note4x $42, 1 ; Nearest: A_,5,0
+	note4x $43, 1 ; Nearest: G#,5,0
+	note4 D#,5,0, 1
+	note4 D_,5,0, 1
+	note4 C#,5,0, 1
+	note4 C_,5,0, 1
 	unlock_envelope
-	wait 53
-	wait 1
+	note4 F#,5,0, 1
 	lock_envelope
-	wait 52
-	wait 1
-	wait 51
-	wait 1
-	wait 50
-	wait 1
-	wait 49
-	wait 1
-	wait 48
+	note4 G_,5,0, 1
+	note4x $33, 1 ; Nearest: G#,5,0
+	note4x $32, 1 ; Nearest: A_,5,0
+	note4x $31, 1 ; Nearest: A#,5,0
+	note4x $30 ; Nearest: B_,5,0
 	chan_stop

@@ -102,10 +102,8 @@ SndData_BGM_GoenitzCutscene_Ch3:
 SndData_BGM_GoenitzCutscene_Ch4:
 	panning $88
 	envelope $61
-	wait 54
-	wait 24
-	wait 54
-	wait 24
+	note4 F_,5,0, 24
+	note4 F_,5,0, 24
 	snd_call .call0
 .loop0:
 	snd_call .call1
@@ -115,89 +113,60 @@ SndData_BGM_GoenitzCutscene_Ch4:
 	snd_loop .loop0
 .call0:
 	envelope $61
-	wait 54
-	wait 36
-	wait 54
-	wait 6
-	wait 54
-	wait 6
+	note4 F_,5,0, 36
+	note4 F_,5,0, 6
+	note4 F_,5,0, 6
 	envelope $54
-	wait 38
-	wait 12
+	note4 A_,5,0, 12
 	envelope $61
-	wait 54
-	wait 12
+	note4 F_,5,0, 12
 	envelope $54
-	wait 38
-	wait 12
+	note4 A_,5,0, 12
 	envelope $61
-	wait 54
-	wait 12
+	note4 F_,5,0, 12
 	envelope $54
-	wait 38
-	wait 12
+	note4 A_,5,0, 12
 	envelope $61
-	wait 54
-	wait 12
-	wait 54
-	wait 24
+	note4 F_,5,0, 12
+	note4 F_,5,0, 24
 	envelope $54
-	wait 38
-	wait 24
-	wait 50
-	wait 24
+	note4 A_,5,0, 24
+	note4x $32, 24 ; Nearest: A_,5,0
 	snd_loop .call0, $00, 4
 	snd_ret
 .call1:
 	envelope $54
-	wait 38
-	wait 12
+	note4 A_,5,0, 12
 	envelope $61
-	wait 54
-	wait 60
+	note4 F_,5,0, 60
 	envelope $54
-	wait 38
-	wait 12
+	note4 A_,5,0, 12
 	envelope $61
-	wait 54
-	wait 12
+	note4 F_,5,0, 12
 	snd_ret
 .call2:
 	envelope $61
-	wait 54
-	wait 6
-	wait 54
-	wait 6
+	note4 F_,5,0, 6
+	note4 F_,5,0, 6
 	envelope $54
-	wait 38
-	wait 24
+	note4 A_,5,0, 24
 	envelope $53
-	wait 17
-	wait 36
-	wait 17
-	wait 24
+	note4x $11, 36 ; Nearest: A#,6,0
+	note4x $11, 24 ; Nearest: A#,6,0
 	snd_ret
 .call3:
 	envelope $61
-	wait 54
-	wait 6
-	wait 54
-	wait 6
+	note4 F_,5,0, 6
+	note4 F_,5,0, 6
 	envelope $54
-	wait 38
-	wait 24
+	note4 A_,5,0, 24
 	envelope $61
-	wait 54
-	wait 12
+	note4 F_,5,0, 12
 	envelope $54
-	wait 38
-	wait 12
+	note4 A_,5,0, 12
 	envelope $61
-	wait 54
-	wait 12
-	wait 54
-	wait 12
+	note4 F_,5,0, 12
+	note4 F_,5,0, 12
 	envelope $54
-	wait 38
-	wait 12
+	note4 A_,5,0, 12
 	snd_ret
